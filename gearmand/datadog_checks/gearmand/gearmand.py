@@ -7,10 +7,11 @@
 import gearman
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 
 MAX_NUM_TASKS = 200
+
 
 class Gearman(AgentCheck):
     SERVICE_CHECK_NAME = 'gearman.can_connect'
@@ -19,7 +20,7 @@ class Gearman(AgentCheck):
     def get_library_versions(self):
         return {"gearman": gearman.__version__}
 
-    def _get_client(self,host,port):
+    def _get_client(self, host, port):
         if not (host, port) in self.gearman_clients:
             self.log.debug("Connecting to gearman at address %s:%s" % (host, port))
             self.gearman_clients[(host, port)] = gearman.GearmanAdminClient(["%s:%s" % (host, port)])
@@ -44,7 +45,7 @@ class Gearman(AgentCheck):
         self.gauge("gearman.workers", workers, tags=tags)
 
         self.log.debug("running %d, queued %d, unique tasks %d, workers: %d"
-        % (running, queued, unique_tasks, workers))
+                       % (running, queued, unique_tasks, workers))
 
     def _get_per_task_metrics(self, tasks, task_filter, tags):
         if len(task_filter) > MAX_NUM_TASKS:
@@ -57,7 +58,9 @@ class Gearman(AgentCheck):
         if len(tasks) > MAX_NUM_TASKS:
             # Display a warning in the info page
             self.warning(
-                "Too many tasks to fetch. You must choose the tasks you are interested in by editing the gearmand.yaml configuration file or get in touch with Datadog Support")
+                ("Too many tasks to fetch. "
+                 "You must choose the tasks you are interested in by editing the gearmand.yaml configuration file "
+                 "or get in touch with Datadog Support"))
 
         for stat in tasks[:MAX_NUM_TASKS]:
             running = stat['running']
@@ -92,7 +95,7 @@ class Gearman(AgentCheck):
 
         host, port, task_filter, tags = self._get_conf(instance)
         service_check_tags = ["server:{0}".format(host),
-            "port:{0}".format(port)]
+                              "port:{0}".format(port)]
 
         client = self._get_client(host, port)
         self.log.debug("Connected to gearman")
@@ -104,9 +107,9 @@ class Gearman(AgentCheck):
             self._get_aggregate_metrics(tasks, tags)
             self._get_per_task_metrics(tasks, task_filter, tags)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                message="Connection to %s:%s succeeded." % (host, port),
-                tags=tags)
+                               message="Connection to %s:%s succeeded." % (host, port),
+                               tags=tags)
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                message=str(e), tags=tags)
+                               message=str(e), tags=tags)
             raise

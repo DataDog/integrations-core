@@ -4,10 +4,10 @@
 
 Track the performance of your PowerDNS Recursor and monitor strange or worrisome traffic. This Agent check collects a wealth of metrics from your recursors, including those for:
 
-* Query answer times — see how many responses take less than 1ms, 10ms, 100ms, 1s, and greater than 1s
+* Query answer times - see how many responses take less than 1ms, 10ms, 100ms, 1s, and greater than 1s
 * Query timeouts
 * Cache hits and misses
-* Answer rates by type — SRVFAIL, NXDOMAIN, NOERROR
+* Answer rates by type - SRVFAIL, NXDOMAIN, NOERROR
 * Ignored and dropped packets
 
 And many more.

@@ -298,7 +298,7 @@ def test_report_container_spec_metrics(monkeypatch):
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
     attrs = {'is_excluded.return_value': False}
-    check.container_filter = mock.Mock(**attrs)
+    check.pod_list_utils = mock.Mock(**attrs)
 
     pod_list = check.retrieve_pod_list()
 

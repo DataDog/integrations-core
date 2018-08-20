@@ -1,1 +1,1 @@
-pytest
+datadog-checks-dev

@@ -3,7 +3,7 @@
     "data store"
   ],
   "creates_events": true,
-  "display_name": "Tokumx",
+  "display_name": "TokuMX",
   "guid": "7785939b-bfb6-4d3e-acc2-94c1f5fb33e7",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
@@ -11,7 +11,7 @@
   "metric_prefix": "tokumx.",
   "metric_to_check": "tokumx.uptime",
   "name": "tokumx",
-  "public_title": "Datadog-Tokumx Integration",
+  "public_title": "Datadog-TokuMX Integration",
   "short_description": "Track metrics for opcounters, replication lag, cache table size, and more.",
   "support": "core",
   "supported_os": [

@@ -265,7 +265,7 @@ By default, our integration pipeline support the following conversion patterns:
 
   ```
   %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
-  %d [%t] %-5p %c - %m%n
+  %d [%t] %-5p %c - %m%n
   ```
 
 Make sure you clone and edit the [integration pipeline][19] if you have a different format.
@@ -346,5 +346,5 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 [20]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [21]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
 [22]: https://www.datadoghq.com/blog/monitor-tomcat-metrics/
-[23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/yarn/images/yarn_dashboard.png
+[23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
 [24]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

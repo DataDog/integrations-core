@@ -1,10 +1,10 @@
-# Wmi_check Integration
+# Windows Performance Counters Integration
 
 ## Overview
 
 Get metrics from Windows performance counters in real time to:
 
-* Visualize and monitor windows performance counters
+* Visualize and monitor windows performance counters through the pdh api
 
 ## Setup
 ### Installation

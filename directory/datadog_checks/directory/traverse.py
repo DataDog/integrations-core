@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import platform
 import sys
-from os.path import join
 
 import six
 from scandir import scandir
@@ -39,14 +38,14 @@ def _walk(top):
             is_dir = False
 
         if is_dir:
-            dirs.append(entry.name)
+            dirs.append(entry)
         else:
             nondirs.append(entry)
 
     yield top, dirs, nondirs
 
-    for name in dirs:
-        for entry in walk(join(top, name)):
+    for dir_entry in dirs:
+        for entry in walk(dir_entry.path):
             yield entry
 
 

@@ -62,7 +62,8 @@ def session_mock():
 
 def test_cisco(aggregator, session_mock):
     cisco_aci_check = CiscoACICheck(conftest.CHECK_NAME, {}, {})
-    api = Api(conftest.ACI_URLS, conftest.USERNAME, conftest.PASSWORD, log=cisco_aci_check.log, sessions=[session_mock])
+    api = Api(conftest.ACI_URLS, conftest.USERNAME,
+              password=conftest.PASSWORD, log=cisco_aci_check.log, sessions=[session_mock])
     api._refresh_sessions = False
     cisco_aci_check._api_cache[hash_mutable(conftest.CONFIG)] = api
 

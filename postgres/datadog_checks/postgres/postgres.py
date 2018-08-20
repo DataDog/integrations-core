@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
+import threading
+import re
 
 try:
     import psycopg2
@@ -309,6 +311,10 @@ SELECT s.schemaname,
         'relation': False
     }
 
+    # keep track of host/port present in any configured instance
+    _known_servers = set()
+    _known_servers_lock = threading.RLock()
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.dbs = {}
@@ -316,11 +322,24 @@ SELECT s.schemaname,
         self.instance_metrics = {}
         self.bgw_metrics = {}
         self.archiver_metrics = {}
-        self.db_instance_metrics = []
         self.db_bgw_metrics = []
         self.db_archiver_metrics = []
         self.replication_metrics = {}
         self.custom_metrics = {}
+
+    def _server_known(self, host, port):
+        """
+        Return whether the hostname and port combination was already seen
+        """
+        with PostgreSql._known_servers_lock:
+            return (host, port) in PostgreSql._known_servers
+
+    def _set_server_known(self, host, port):
+        """
+        Store the host/port combination for this server
+        """
+        with PostgreSql._known_servers_lock:
+            PostgreSql._known_servers.add((host, port))
 
     def _get_pg_attrs(self, instance):
         if _is_affirmative(instance.get('use_psycopg2', False)):
@@ -340,7 +359,17 @@ SELECT s.schemaname,
             try:
                 version = map(int, result[0].split(' ')[0].split('.'))
             except Exception:
-                version = result[0]
+                # Postgres might be in beta, with format \d+beta\d+
+                version = list(re.match('(\d+)(beta)(\d+)', result[0]).groups())
+
+                # We found a valid beta version
+                if len(version) == 3:
+                    # Replace beta with a negative number to properly compare versions
+                    version[1] = -1
+                    version = map(int, version)
+                else:
+                    version = result[0]
+
             self.versions[key] = version
 
         self.service_metadata('version', self.versions[key])
@@ -365,37 +394,47 @@ SELECT s.schemaname,
     def _is_10_or_above(self, key, db):
         return self._is_above(key, db, [10, 0, 0])
 
-    def _get_instance_metrics(self, key, db, database_size_metrics, with_default):
-        """Use either COMMON_METRICS or COMMON_METRICS + NEWER_92_METRICS
-        depending on the postgres version.
-        Uses a dictionnary to save the result for each instance
+    def _get_instance_metrics(self, key, db, database_size_metrics, collect_default_db):
         """
-        # Extended 9.2+ metrics if needed
+        Add NEWER_92_METRICS to the default set of COMMON_METRICS when server
+        version is 9.2 or later.
+
+        Store the list of metrics in the check instance to avoid rebuilding it at
+        every collection cycle.
+
+        In case we have multiple instances pointing to the same postgres server
+        monitoring different databases, we want to collect server metrics
+        only once. See https://github.com/DataDog/dd-agent/issues/1211
+        """
         metrics = self.instance_metrics.get(key)
 
         if metrics is None:
-            # Hack to make sure that if we have multiple instances that connect to
-            # the same host, port, we don't collect metrics twice
-            # as it will result in https://github.com/DataDog/dd-agent/issues/1211
-            sub_key = key[:2]
-            if sub_key in self.db_instance_metrics:
-                self.instance_metrics[key] = None
-                self.log.debug("Not collecting instance metrics for key: {0} as "
+            host, port, dbname = key
+            # check whether we already collected server-wide metrics for this
+            # postgres instance
+            if self._server_known(host, port):
+                # explicitly set instance metrics for this key to an empty list
+                # so we don't get here more than once
+                self.instance_metrics[key] = []
+                self.log.debug("Not collecting instance metrics for key: {} as "
                                "they are already collected by another instance".format(key))
                 return None
+            self._set_server_known(host, port)
 
-            self.db_instance_metrics.append(sub_key)
-
+            # select the right set of metrics to collect depending on postgres version
             if self._is_9_2_or_above(key, db):
                 self.instance_metrics[key] = dict(self.COMMON_METRICS, **self.NEWER_92_METRICS)
             else:
                 self.instance_metrics[key] = dict(self.COMMON_METRICS)
 
+            # add size metrics if needed
             if database_size_metrics:
                 self.instance_metrics[key] = dict(self.instance_metrics[key], **self.DATABASE_SIZE_METRICS)
 
             metrics = self.instance_metrics.get(key)
 
+        # this will happen when the current key contains a postgres server that
+        # we already know, let's avoid to collect duplicates
         if not metrics:
             return None
 
@@ -408,8 +447,10 @@ SELECT s.schemaname,
             "  AND datname not ilike 'rdsadmin' ",
             'relation': False,
         }
-        if not with_default:
+
+        if not collect_default_db:
             res["query"] += "  AND datname not ilike 'postgres'"
+
         return res
 
     def _get_bgw_metrics(self, key, db):
@@ -648,22 +689,15 @@ SELECT s.schemaname,
 
         try:
             cursor = db.cursor()
-
-            # server wide metrics aren't tagged anymore with instance tags, starting from Agent 6.0
-            if add_instance_tags_to_server_metrics():
-                server_metric_tags = instance_tags
-            else:
-                server_metric_tags = []
-
-            results_len = self._query_scope(cursor, db_instance_metrics, key, db, server_metric_tags, relations,
+            results_len = self._query_scope(cursor, db_instance_metrics, key, db, instance_tags, relations,
                                             False, programming_error, relations_config)
             if results_len is not None:
                 self.gauge("postgresql.db.count", results_len,
-                           tags=[t for t in server_metric_tags if not t.startswith("db:")])
+                           tags=[t for t in instance_tags if not t.startswith("db:")])
 
-            self._query_scope(cursor, bgw_instance_metrics, key, db, server_metric_tags, relations,
+            self._query_scope(cursor, bgw_instance_metrics, key, db, instance_tags, relations,
                               False, programming_error, relations_config)
-            self._query_scope(cursor, archiver_instance_metrics, key, db, server_metric_tags, relations,
+            self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, relations,
                               False, programming_error, relations_config)
 
             for scope in list(metric_scope) + custom_metrics:

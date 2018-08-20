@@ -4,18 +4,36 @@
 
 import random
 from requests import Request, Session
+import base64
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.backends import default_backend
+from six.moves.urllib.parse import unquote
 
-from . import exceptions
+from .exceptions import APIParsingException, ConfigurationException, APIConnectionException
 
 
 class SessionWrapper:
-    def __init__(self, aci_url, session, apic_cookie, verify=None, timeout=None, log=None):
+    def __init__(self, aci_url, session,
+                 apic_cookie=None, username=None, cert_name=None,
+                 cert_key=None, verify=None, timeout=None, log=None, appcenter=False,
+                 cert_key_password=None):
         self.session = session
-        self.apic_cookie = apic_cookie
         self.aci_url = aci_url
         self.verify = verify
         self.timeout = timeout
         self.log = log
+        self.apic_cookie = apic_cookie
+        self.appcenter = appcenter
+
+        if self.appcenter:
+            self.certDn = 'uni/userext/appuser-{}/usercert-{}'.format(username, cert_name)
+        else:
+            self.certDn = 'uni/userext/user-{}/usercert-{}'.format(username, cert_name)
+
+        self.cert_key = cert_key
+        if cert_key:
+            self.cert_key = serialization.load_pem_private_key(cert_key, password=cert_key_password, backend=default_backend())
 
     def send(self, req):
         req.headers['Cookie'] = self.apic_cookie
@@ -26,30 +44,52 @@ class SessionWrapper:
 
     def make_request(self, path):
         url = "{}{}".format(self.aci_url, path)
-        req = Request('get', url)
-        prepped = req.prepare()
-        prepped.headers['Cookie'] = self.apic_cookie
-        response = self.session.send(prepped, verify=self.verify, timeout=self.timeout)
+        req = Request('GET', url)
+
+        payload = '{}{}'.format(req.method, req.url.replace(self.aci_url, ''))
+        payload = unquote(payload)
+
+        signature = self.cert_key.sign(payload,
+                                       padding.PKCS1v15(),
+                                       hashes.SHA256())
+
+        signature = base64.b64encode(signature)
+
+        prepped_request = req.prepare()
+        if self.apic_cookie:
+            prepped_request.headers['Cookie'] = self.apic_cookie
+        else:
+            cookie = ('APIC-Request-Signature={}; '
+                      'APIC-Certificate-Algorithm=v1.0; '
+                      'APIC-Certificate-Fingerprint=fingerprint; '
+                      'APIC-Certificate-DN={}').format(signature, self.certDn)
+            prepped_request.headers['Cookie'] = cookie
+
+        response = self.session.send(prepped_request, verify=self.verify, timeout=self.timeout)
         try:
             response.raise_for_status()
         except Exception as e:
             self.log.warning("Error making request: {}".format(e))
-            raise exceptions.APIConnectionException("Error making request: {}".format(e))
+            raise APIConnectionException("Error making request: {}".format(e))
         try:
             return response.json()
         except Exception as e:
-            self.log.warning("Exception in json parsing: {}".format(e))
-            raise exceptions.APIParsingException("Exception in json parsing: {}".format(e))
+            self.log.warning("Exception in json parsing, returning nothing: {}".format(e))
+            raise APIParsingException("Error parsing request: {}".format(e))
 
 
 class Api:
-    def __init__(self, aci_urls, username, password, verify=False, timeout=10, log=None, sessions=None):
+    def __init__(self, aci_urls, username,
+                 cert_name=None, cert_key=None, password=None,
+                 verify=False, timeout=10, log=None, sessions=None,
+                 cert_key_password=None, appcenter=False):
         self.aci_urls = aci_urls
         self.username = username
-        self.password = password
         self.timeout = timeout
         self.verify = verify
         self.sessions = sessions
+        self.cert_key_password = cert_key_password
+        self.appcenter = False
         if sessions is None:
             self.sessions = []
         if log:
@@ -60,11 +100,49 @@ class Api:
         # This is used in testing
         self._refresh_sessions = True
 
+        self.password = password
+
+        self.cert_key_password = cert_key_password
+
+        self.cert_name = None
+        self.cert_key = None
+        if cert_name and cert_key:
+            self.cert_name = cert_name
+            self.cert_key = cert_key
+        elif not password:
+            msg = "You need to have either a password or a cert"
+            raise ConfigurationException(msg)
+
     def close(self):
         for session in self.sessions:
             session.close()
 
-    def login(self):
+    def setup_cert_login(self):
+        if self._refresh_sessions:
+            # ensure sessions are an empty array
+            self.sessions = []
+        for aci_url in self.aci_urls:
+            if not self._refresh_sessions:
+                for session_wrapper in self.sessions:
+                    if session_wrapper.aci_url == aci_url:
+                        session = session_wrapper.session
+                        break
+            else:
+                session = Session()
+
+            if self._refresh_sessions:
+                session_wrapper = SessionWrapper(aci_url, session,
+                                                 cert_name=self.cert_name,
+                                                 cert_key=self.cert_key,
+                                                 verify=self.verify,
+                                                 timeout=self.timeout,
+                                                 appcenter=self.appcenter,
+                                                 username=self.username,
+                                                 cert_key_password=self.cert_key_password,
+                                                 log=self.log)
+                self.sessions.append(session_wrapper)
+
+    def password_login(self):
         # this is a path for testing, allowing the object to be patched with fake request responses
         if self._refresh_sessions:
             # ensure sessions are an empty array
@@ -86,13 +164,20 @@ class Api:
             response.raise_for_status()
             apic_cookie = 'APIC-Cookie={}'.format(response.cookies.get('APIC-cookie'))
             if self._refresh_sessions:
-                session_wrapper = SessionWrapper(aci_url, session, apic_cookie,
+                session_wrapper = SessionWrapper(aci_url, session,
+                                                 apic_cookie=apic_cookie,
                                                  verify=self.verify,
                                                  timeout=self.timeout,
                                                  log=self.log)
                 self.sessions.append(session_wrapper)
             else:
                 session_wrapper.apic_cookie = apic_cookie
+
+    def login(self):
+        if self.password:
+            self.password_login()
+        elif self.cert_key:
+            self.setup_cert_login()
 
     def make_request(self, path):
         # allow for multiple APICs in a cluster to be included in one check so that the check
@@ -256,4 +341,4 @@ class Api:
             return response.get('imdata')
         except Exception as e:
             self.log.warning("Exception in fetching response data: {}".format(e))
-            raise exceptions.APIParsingException("Exception in fetching response data: {}".format(e))
+            raise APIParsingException("Exception in fetching response data: {}".format(e))

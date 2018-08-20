@@ -7,7 +7,7 @@
     "log collection"
   ],
   "creates_events": false,
-  "display_name": "PostgreSQL",
+  "display_name": "Postgres",
   "guid": "e9ca29d5-5b4f-4478-8989-20d89afda0c9",
   "is_public": true,
   "maintainer": "help@datadoghq.com",

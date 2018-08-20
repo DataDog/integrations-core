@@ -10,7 +10,7 @@ from datadog_checks.utils.containers import hash_mutable
 
 from datadog_checks.config import _is_affirmative
 
-from . import metrics as aci_metrics
+import aci_metrics
 from .capacity import Capacity
 from .tenant import Tenant
 from .fabric import Fabric
@@ -52,8 +52,21 @@ class CiscoACICheck(AgentCheck):
             raise Exception("The Cisco ACI check requires at least one url")
 
         username = instance['username']
-        pwd = instance['pwd']
+        pwd = instance.get('pwd')
         instance_hash = hash_mutable(instance)
+
+        appcenter = _is_affirmative(instance.get('appcenter'))
+
+        cert_key = instance.get('cert_key')
+        if not cert_key and instance.get('cert_key_path'):
+            with open(instance.get('cert_key_path'), 'rb') as f:
+                cert_key = f.read()
+
+        cert_name = instance.get('cert_name')
+        if not cert_name:
+            cert_name = username
+
+        cert_key_password = instance.get('cert_key_password')
 
         timeout = instance.get('timeout', 15)
         ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
@@ -61,7 +74,10 @@ class CiscoACICheck(AgentCheck):
         if instance_hash in self._api_cache:
             api = self._api_cache.get(instance_hash)
         else:
-            api = Api(aci_urls, username, pwd, verify=ssl_verify, timeout=timeout, log=self.log)
+            api = Api(aci_urls, username,
+                      password=pwd, cert_name=cert_name, cert_key=cert_key,
+                      verify=ssl_verify, timeout=timeout, log=self.log,
+                      appcenter=appcenter, cert_key_password=cert_key_password)
             self._api_cache[instance_hash] = api
 
         service_check_tags = []
