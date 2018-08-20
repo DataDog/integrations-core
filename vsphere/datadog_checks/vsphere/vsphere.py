@@ -374,7 +374,7 @@ class VSphereCheck(AgentCheck):
         for resource in resources:
             property_spec = vmodl.query.PropertyCollector.PropertySpec()
             property_spec.type = resource
-            property_spec.pathSet = ["name", "parent"]
+            property_spec.pathSet = ["name", "parent", "customValue"]
             if resource == vim.VirtualMachine:
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
@@ -436,7 +436,10 @@ class VSphereCheck(AgentCheck):
 
         for obj, properties in all_objects.items():
             instance_tags = []
-            if not self._is_excluded(obj, regexes, include_only_marked) and type(obj) in RESOURCE_TYPE_METRICS:
+            if (
+                not self._is_excluded(obj, properties, regexes, include_only_marked) and
+                type(obj) in RESOURCE_TYPE_METRICS
+            ):
                 hostname = properties["name"]
                 if properties["parent"]:
                     instance_tags += self._get_parent_tags(obj, all_objects)
@@ -485,7 +488,7 @@ class VSphereCheck(AgentCheck):
         self.morlist_raw[i_key] = {resource: objs for resource, objs in all_objs.items()}
 
     @staticmethod
-    def _is_excluded(obj, regexes, include_only_marked):
+    def _is_excluded(obj, properties, regexes, include_only_marked):
         """
         Return `True` if the given host or virtual machine is excluded by the user configuration,
         i.e. violates any of the following rules:
@@ -496,7 +499,7 @@ class VSphereCheck(AgentCheck):
         if isinstance(obj, vim.HostSystem):
             # Based on `host_include_only_regex`
             if regexes and regexes.get('host_include') is not None:
-                match = re.search(regexes['host_include'], obj.name, re.IGNORECASE)
+                match = re.search(regexes['host_include'], properties["name"], re.IGNORECASE)
                 if not match:
                     return True
 
@@ -504,14 +507,14 @@ class VSphereCheck(AgentCheck):
         elif isinstance(obj, vim.VirtualMachine):
             # Based on `vm_include_only_regex`
             if regexes and regexes.get('vm_include') is not None:
-                match = re.search(regexes['vm_include'], obj.name, re.IGNORECASE)
+                match = re.search(regexes['vm_include'], properties["name"], re.IGNORECASE)
                 if not match:
                     return True
 
             # Based on `include_only_marked`
             if include_only_marked:
                 monitored = False
-                for field in obj.customValue:
+                for field in properties["customValue"]:
                     if field.value == VM_MONITORING_FLAG:
                         monitored = True
                         break  # we shall monitor
