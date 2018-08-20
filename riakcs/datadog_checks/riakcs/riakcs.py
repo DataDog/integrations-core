@@ -11,8 +11,8 @@ from boto.s3.connection import S3Connection
 import simplejson as json
 
 # project
-from checks import AgentCheck
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 
 def multidict(ordered_pairs):
@@ -40,7 +40,7 @@ class RiakCs(AgentCheck):
         stats = self._get_stats(s3, aggregation_key, tags)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-          tags=["aggregation_key:{0}".format(aggregation_key)] + tags)
+                           tags=["aggregation_key:{0}".format(aggregation_key)] + tags)
 
         self.process_stats(stats, tags, metrics)
 

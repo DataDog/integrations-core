@@ -37,10 +37,10 @@ class AggregatorStub(object):
         self._events = []
 
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
-        self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
+        self._metrics[name].append(MetricStub(name, mtype, value, set(tags), hostname))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
-        self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
+        self._service_checks[name].append(ServiceCheckStub(check_id, name, status, set(tags), hostname, message))
 
     def submit_event(self, check, check_id, event):
         self._events.append(event)
