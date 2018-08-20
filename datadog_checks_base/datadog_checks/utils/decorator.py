@@ -5,6 +5,8 @@
 from datadog_checks.config import is_affirmative
 from ddtrace import tracer
 
+patch(requests=True)
+
 def trace_func(func):
     def function_wrapper(*args, **kwargs):
         if is_affirmative(args[1].get('trace_check', False)):
