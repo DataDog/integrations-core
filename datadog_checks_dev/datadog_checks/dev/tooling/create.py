@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 from datetime import datetime
 from uuid import uuid4
 
+from .utils import normalize_package_name
 from ..utils import (
     create_file,
     dir_exists,
@@ -18,6 +20,7 @@ from ..utils import (
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 BINARY_EXTENSIONS = ('.png', )
+SIMPLE_NAME = r'^\w+$'
 
 
 def get_valid_templates():
@@ -25,7 +28,12 @@ def get_valid_templates():
 
 
 def construct_template_fields(integration_name, repo_choice, **kwargs):
-    check_name_cap = integration_name if integration_name.count('_') else integration_name.capitalize()
+    normalized_integration_name = normalize_package_name(integration_name)
+    check_name_cap = (
+        integration_name.capitalize()
+        if re.match(SIMPLE_NAME, integration_name)
+        else integration_name
+    )
 
     if repo_choice == 'core':
         author = 'Datadog'
@@ -56,8 +64,10 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
 
     config = {
         'author': author,
-        'check_class': '{}Check'.format(''.join(part.capitalize() for part in integration_name.split('_'))),
-        'check_name': integration_name,
+        'check_class': '{}Check'.format(
+            ''.join(part.capitalize() for part in normalized_integration_name.split('_'))
+        ),
+        'check_name': normalized_integration_name,
         'check_name_cap': check_name_cap,
         'email': email,
         'email_packages': email_packages,

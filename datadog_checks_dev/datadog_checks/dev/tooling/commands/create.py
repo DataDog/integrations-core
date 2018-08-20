@@ -101,11 +101,10 @@ def display_path_tree(path_tree):
 def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
     """Create scaffolding for a new integration."""
     repo_choice = ctx.obj['repo_choice']
-    integration_name = normalize_package_name(name)
     root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep
 
-    integration_dir = os.path.join(root, integration_name)
+    integration_dir = os.path.join(root, normalize_package_name(name))
     if os.path.exists(integration_dir):
         abort('Path `{}` already exists!'.format(integration_dir))
 
@@ -116,7 +115,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         template_fields['email_packages'] = template_fields['email']
         click.echo()
 
-    config = construct_template_fields(integration_name, repo_choice, **template_fields)
+    config = construct_template_fields(name, repo_choice, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)
     file_paths = [file.file_path.replace('{}{}'.format(root, path_sep), '', 1) for file in files]
