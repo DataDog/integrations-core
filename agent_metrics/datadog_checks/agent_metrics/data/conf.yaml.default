@@ -6,16 +6,16 @@ init_config:
     process_metrics:
         - name: memory_info
           type: gauge
-          active: yes
+          active: true
         - name: io_counters
           type: rate
-          active: yes
+          active: true
         - name: num_threads
           type: gauge
-          active: yes
+          active: true
         - name: connections
           type: gauge
-          active: no
+          active: false
 
 instances:
   - tags:

@@ -24,26 +24,26 @@ instances:
       # acl_token: 'token'
 
       # Whether to perform checks against the Consul service Catalog
-      catalog_checks: yes
+      catalog_checks: true
 
       # Whether to enable self leader checks. Each instance with this enabled will
       # watch for itself to become the leader and will emit an event when that
       # happens. It is safe/expected to enable this on all nodes in a consul
       # cluster since only the new leader will emit the (single) event. This
       # flag takes precedence over new_leader_checks.
-      self_leader_check: yes
+      self_leader_check: true
 
       # Whether to enable new leader checks from this instance
       # Note: if this is set on multiple instances/agents in the same cluster
       # you will receive one event per leader change per instance. See
       # self_leader_check for a more robust option.
-      new_leader_checks: yes
+      new_leader_checks: true
 
       # Whether to enable network latency metrics collection. When enabled
       # consul network coordinates will be retrieved and latency calculated for
       # each node and between data centers.
       # See https://www.consul.io/docs/internals/coordinates.html
-      network_latency_checks: yes
+      network_latency_checks: true
 
       # Services to restrict catalog querying to
       # The default settings query up to 50 services. So if you have more than
@@ -74,7 +74,7 @@ instances:
     #   source : (mandatory) attribute that defines which integration is sending the logs
     #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
     #   tags: (optional) add tags to each logs collected
-    
+
     # - type: file
     #   path: /var/log/consul_server.log
     #   source: consul
