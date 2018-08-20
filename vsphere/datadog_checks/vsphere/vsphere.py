@@ -17,6 +17,7 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 
 from datadog_checks.config import _is_affirmative
 from datadog_checks.checks import AgentCheck
+from datadog_checks.errors import CheckException
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
@@ -70,6 +71,10 @@ MORLIST = 'morlist'
 METRICS_METADATA = 'metrics_metadata'
 LAST = 'last'
 INTERVAL = 'interval'
+
+
+class BadConfigError(CheckException):
+    pass
 
 
 def atomic_method(method):
@@ -211,7 +216,7 @@ class VSphereCheck(AgentCheck):
     def _instance_key(self, instance):
         i_key = instance.get('name')
         if i_key is None:
-            raise Exception("Must define a unique 'name' per vCenter instance")
+            raise BadConfigError("Must define a unique 'name' per vCenter instance")
         return i_key
 
     def _should_cache(self, instance, entity):
@@ -438,7 +443,7 @@ class VSphereCheck(AgentCheck):
             instance_tags = []
             if (
                 not self._is_excluded(obj, properties, regexes, include_only_marked) and
-                type(obj) in RESOURCE_TYPE_METRICS
+                any(isinstance(obj, vimtype) for vimtype in RESOURCE_TYPE_METRICS)
             ):
                 hostname = properties["name"]
                 if properties["parent"]:
@@ -447,34 +452,40 @@ class VSphereCheck(AgentCheck):
                 vsphere_type = None
                 if isinstance(obj, vim.VirtualMachine):
                     vsphere_type = u'vsphere_type:vm'
-                    vimtype = "vm"
+                    vimtype = vim.VirtualMachine
+                    mor_type = "vm"
                     if properties["runtime.powerState"] == vim.VirtualMachinePowerState.poweredOff:
                         continue
                     host = all_objects[properties["runtime.host"]]["name"]
                     instance_tags.append(u'vsphere_host:{}'.format(host))
                 elif isinstance(obj, vim.HostSystem):
                     vsphere_type = u'vsphere_type:host'
-                    vimtype = "host"
+                    vimtype = vim.HostSystem
+                    mor_type = "host"
                 elif isinstance(obj, vim.Datastore):
                     vsphere_type = u'vsphere_type:datastore'
                     vimtype = "datastore"
                     instance_tags.append(u'vsphere_datastore:{}'.format(properties["name"]))
                     hostname = None
+                    vimtype = vim.Datastore
+                    mor_type = "datastore"
                 elif isinstance(obj, vim.Datacenter):
                     vsphere_type = u'vsphere_type:datacenter'
                     vimtype = "datacenter"
                     hostname = None
+                    vimtype = vim.Datacenter
+                    mor_type = "datacenter"
 
                 if vsphere_type:
                     instance_tags.append(vsphere_type)
-                obj_list[type(obj)].append({
-                    "mor_type": vimtype,
+                obj_list[vimtype].append({
+                    "mor_type": mor_type,
                     "mor": obj,
                     "hostname": hostname,
                     "tags": tags + instance_tags
                 })
 
-            self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
+        self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
         return obj_list
 
     @atomic_method
