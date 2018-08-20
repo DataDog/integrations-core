@@ -41,8 +41,11 @@ DEFAULT_SIZE_POOL = 4
 REFRESH_MORLIST_INTERVAL = 3 * 60
 # The interval in seconds between two refresh of metrics metadata (id<->name)
 REFRESH_METRICS_METADATA_INTERVAL = 10 * 60
-# The amount of jobs batched at the same time in the queue to query available metrics
+# The amount of objects batched at the same time in the QueryPerf method to query available metrics
 BATCH_MORLIST_SIZE = 50
+# Maximum number of objects to collect at once by the propertyCollector. The size of the response returned by the query
+# is significantly lower than the size of the queryPerf response, so allow specifying a different value.
+BATCH_COLLECTOR_SIZE = 500
 
 REALTIME_RESOURCES = {'vm', 'host'}
 
@@ -100,7 +103,8 @@ class VSphereCheck(AgentCheck):
         self.jobs_status = {}
         self.exceptionq = Queue()
 
-        self.batch_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
+        self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
+        self.batch_collector_size = max(init_config.get("batch_property_collector_size", BATCH_COLLECTOR_SIZE), 0)
 
         # Connections open to vCenter instances
         self.server_instances = {}
@@ -343,7 +347,7 @@ class VSphereCheck(AgentCheck):
 
         return tags
 
-    def _collect_mors_and_attributes(self, server_instance, max_objects):
+    def _collect_mors_and_attributes(self, server_instance):
         resources = RESOURCE_TYPE_METRICS + RESOURCE_TYPE_NO_METRIC
 
         content = server_instance.content
@@ -382,8 +386,9 @@ class VSphereCheck(AgentCheck):
         filter_spec.propSet = property_specs
 
         retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-        # To limit the number of objects retrieved per call
-        retr_opts.maxObjects = max_objects
+        # To limit the number of objects retrieved per call.
+        # If batch_collector_size is 0, collect maximum number of objects.
+        retr_opts.maxObjects = self.batch_collector_size or None
 
         # Collect the objects and their properties
         res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
@@ -395,7 +400,7 @@ class VSphereCheck(AgentCheck):
 
         return {obj.obj: {prop.name: prop.val for prop in obj.propSet} for obj in objects}
 
-    def _get_all_objs(self, server_instance, max_objects, regexes=None, include_only_marked=False, tags=None):
+    def _get_all_objs(self, server_instance, regexes=None, include_only_marked=False, tags=None):
         """
         Explore vCenter infrastructure to discover hosts, virtual machines, etc. and compute their associated tags.
         Start at the vCenter `rootFolder`, so as to collect every objet.
@@ -423,7 +428,7 @@ class VSphereCheck(AgentCheck):
         obj_list = defaultdict(list)
 
         # Collect objects and their attributes
-        all_objects = self._collect_mors_and_attributes(server_instance, max_objects)
+        all_objects = self._collect_mors_and_attributes(server_instance)
 
         # Add rootFolder since it is not explored by the propertyCollector
         rootFolder = server_instance.content.rootFolder
@@ -473,11 +478,10 @@ class VSphereCheck(AgentCheck):
     def _cache_morlist_raw_atomic(self, instance, tags, regexes=None, include_only_marked=False):
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
-        max_objects = instance.get("max_objects", None)
         if i_key not in self.morlist_raw:
             self.morlist_raw[i_key] = {}
 
-        all_objs = self._get_all_objs(server_instance, max_objects, regexes, include_only_marked, tags)
+        all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags)
         self.morlist_raw[i_key] = {resource: objs for resource, objs in all_objs.items()}
 
     @staticmethod
@@ -593,7 +597,7 @@ class VSphereCheck(AgentCheck):
             query_specs = []
             # Batch size can prevent querying large payloads at once if the environment is too large
             # If batch size is set to 0, process everything at once
-            batch_size = self.batch_size or len(self.morlist_raw[i_key][resource_type])
+            batch_size = self.batch_morlist_size or len(self.morlist_raw[i_key][resource_type])
             for _ in xrange(batch_size):
                 try:
                     mor = self.morlist_raw[i_key][resource_type].pop()
@@ -743,7 +747,7 @@ class VSphereCheck(AgentCheck):
 
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
         # If batch_size is 0, process everything at once
-        batch_size = self.batch_size or n_mors
+        batch_size = self.batch_morlist_size or n_mors
         query_specs = []
         if n_mors:
             for i in xrange(n_mors / batch_size + 1):
