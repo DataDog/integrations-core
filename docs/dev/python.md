@@ -39,8 +39,6 @@ Each integration has its own set of dependencies that must be added to Python in
 
 We recommend using [Virtualenv][8] to manage Python virtual environments, and [virtualenvwrapper][9] to make the process smoother. There's a [comprehensive guide][10] in the Hitchhiker's Guide to Python describing how to set up these two tools.
 
-Since these tools are native to Python, it is possible to use them in 
-
 ### Miniconda
 
 If you're using Miniconda, a tool to manage virtual environments is included. Refer to the [official guide][11] for more information.
