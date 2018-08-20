@@ -36,6 +36,16 @@ else:
             f.writelines(text_type(line) for line in lines)
 
 
+def write_file_binary(file, contents):
+    with open(file, 'wb') as f:
+        f.write(contents)
+
+
+def read_file_binary(file):
+    with open(file, 'rb') as f:
+        return f.read()
+
+
 def read_file(file, encoding='utf-8'):
     with open(file, 'r', encoding=encoding) as f:
         return f.read()
@@ -63,6 +73,10 @@ def dir_exists(d):
 
 def path_exists(p):
     return os.path.exists(p)
+
+
+def path_join(path, *paths):
+    return os.path.join(path, *paths)
 
 
 def ensure_dir_exists(d):

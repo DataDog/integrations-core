@@ -25,6 +25,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Set](#set)
       - [Show](#show)
       - [Update](#update)
+    - [Create](#create)
     - [Dep](#dep)
       - [Freeze](#freeze)
       - [Pin](#pin)
@@ -88,6 +89,7 @@ Options:
 Commands:
   clean     Remove a project's build artifacts
   config    Manage the config file
+  create    Create scaffolding for a new integration
   dep       Manage dependencies
   manifest  Manage manifest files
   release   Manage the release of checks
@@ -215,6 +217,23 @@ Usage: ddev config update [OPTIONS]
 
 Options:
   -h, --help  Show this message and exit.
+```
+
+#### Create
+
+```console
+$ ddev create -h
+Usage: ddev create [OPTIONS] NAME
+
+  Create scaffolding for a new integration.
+
+Options:
+  -t, --type [check]      The type of integration to create
+  -l, --location TEXT     The directory where files will be written
+  -ni, --non-interactive  Disable prompting for fields
+  -q, --quiet             Show less output
+  -n, --dry-run           Only show what would be created
+  -h, --help              Show this message and exit.
 ```
 
 #### Dep
