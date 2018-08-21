@@ -246,7 +246,7 @@ class VSphereCheck(AgentCheck):
             server_instance.CurrentTime()
         except Exception as e:
             err_msg = (
-                "A connection to {} can be made, but it appears the user {} doesn't have enough permissions: {}"
+                "A connection to {} can be established, but performing operations on the server fails: {}"
             ).format(instance.get('host'), instance.get('username'), e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=service_check_tags, message=err_msg)
