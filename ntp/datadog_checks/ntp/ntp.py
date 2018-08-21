@@ -66,7 +66,7 @@ class NtpCheck(AgentCheck):
                 # Anything over 15 is considered an unsynced source, or problematic
                 # and should not be relied on.
                 self.log.debug("Stratum ({}) too high for sync checking, Host: {}".format(ntp_stats.stratum,
-                    req_args['host']))
+                                                                                          req_args['host']))
                 status = AgentCheck.UNKNOWN
                 ntp_ts = None
 
