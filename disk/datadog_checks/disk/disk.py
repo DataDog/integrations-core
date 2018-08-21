@@ -60,6 +60,8 @@ class Disk(AgentCheck):
             instance.get('all_partitions', False))
         self._device_tag_re = instance.get('device_tag_re', {})
         self._custom_tags = instance.get('tags', [])
+        self._service_check_rw = _is_affirmative(
+            instance.get('service_check_rw', False))
 
         # Force exclusion of CDROM (iso9660) from disk check
         self._excluded_filesystems.append('iso9660')
@@ -126,6 +128,16 @@ class Disk(AgentCheck):
             for metric_name, metric_value in self._collect_part_metrics(part, disk_usage).iteritems():
                 self.gauge(metric_name, metric_value,
                            tags=tags, device_name=device_name)
+
+            # Add in a disk read write or read only check
+            if self.instances[0].get('service_check_rw', False):
+                rwro = list(set(['rw', 'ro']) & set(part.opts.split(',')))
+                if len(rwro) == 1:
+                    self.service_check(
+                        'disk.read_write',
+                        AgentCheck.OK if rwro[0] == 'rw' else AgentCheck.CRITICAL,
+                        tags=tags+['device_name:%s' % (device_name)]
+                    )
 
         self.collect_latency_metrics()
 

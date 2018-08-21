@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 1.3.0 / 2018-08-21
+
+* [FEATURE] Adds optional read-only filesystem check
+
 ## 1.2.0 / 2018-03-23
 
 * [FEATURE] Adds custom tag support
