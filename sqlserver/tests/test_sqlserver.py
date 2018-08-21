@@ -49,7 +49,7 @@ def test_granularity(aggregator, instance_docker, sqlserver):
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, {}, [instance_docker])
     sqlserver_check.check(instance_docker)
 
-    aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], at_least=2)
+    aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
 
 
 @pytest.mark.local

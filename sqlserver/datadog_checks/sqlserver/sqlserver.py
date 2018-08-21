@@ -784,12 +784,8 @@ class SqlFractionMetric(SqlServerMetric):
                 continue
 
             if (
-                self.instance != ALL_INSTANCES
-                and inst != self.instance
-                and (
-                    not self.object_name
-                    or object_name != self.object_name
-                )
+                (self.instance != ALL_INSTANCES and inst != self.instance)
+                or (self.object_name and object_name != self.object_name)
             ):
                 done_instances.append(inst)
                 continue
