@@ -183,6 +183,8 @@ jobs:
     - stage: test
       env: CHECK=riak
     - stage: test
+      env: CHECK=riakcs
+    - stage: test
       env: CHECK=spark
     - stage: test
       env: CHECK=sqlserver
