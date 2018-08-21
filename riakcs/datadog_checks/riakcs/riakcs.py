@@ -40,7 +40,7 @@ class RiakCs(AgentCheck):
         stats = self._get_stats(s3, aggregation_key, tags)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                           tags=["aggregation_key:{0}".format(aggregation_key)] + tags)
+                           tags=tags)
 
         self.process_stats(stats, tags, metrics)
 
@@ -91,17 +91,17 @@ class RiakCs(AgentCheck):
         tags = instance.get("tags", [])
         if tags is None:
             tags = []
+        tags.append("aggregation_key:{0}".format(aggregation_key))
+
         try:
             s3 = S3Connection(**s3_settings)
         except Exception as e:
             self.log.error("Error connecting to {0}: {1}".format(aggregation_key, e))
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=["aggregation_key:{0}".format(aggregation_key)] + tags,
+                tags=tags,
                 message=str(e))
             raise
-
-        tags.append("aggregation_key:{0}".format(aggregation_key))
 
         metrics = instance.get("metrics", [])
 
@@ -118,7 +118,7 @@ class RiakCs(AgentCheck):
             self.log.error("Error retrieving stats from {0}: {1}".format(aggregation_key, e))
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=["aggregation_key:{0}".format(aggregation_key)] + tags,
+                tags=tags,
                 message=str(e))
             raise
 
