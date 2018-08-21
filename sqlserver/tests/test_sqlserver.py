@@ -33,7 +33,7 @@ def test_check_docker(aggregator, init_config, instance_docker, sqlserver):
 
 
 @pytest.mark.docker
-def test_granularity(aggregator, instance_docker, sqlserver):
+def test_object_name(aggregator, instance_docker, sqlserver):
     init_config_object_name = {
         'custom_metrics': [{
             'name': 'sqlserver.cache.hit_ratio',
