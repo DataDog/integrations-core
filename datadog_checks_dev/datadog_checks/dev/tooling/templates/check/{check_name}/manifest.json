@@ -1,4 +1,4 @@
-{{
+{
   "display_name": "{check_name_cap}",
   "maintainer": "{email}",
   "manifest_version": "1.0.0",
@@ -20,4 +20,4 @@
   ],
   "type": "check",
   "is_public": true
-}}
+}
