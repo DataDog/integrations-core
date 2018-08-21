@@ -1,7 +1,9 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from __future__ import unicode_literals
+from collections import defaultdict
 from datetime import timedelta
 from Queue import Empty, Queue
 import re
@@ -11,9 +13,11 @@ import traceback
 
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
+from pyVmomi import vmodl  # pylint: disable=E0611
 
 from datadog_checks.config import _is_affirmative
 from datadog_checks.checks import AgentCheck
+from datadog_checks.errors import CheckException
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
@@ -38,17 +42,27 @@ DEFAULT_SIZE_POOL = 4
 REFRESH_MORLIST_INTERVAL = 3 * 60
 # The interval in seconds between two refresh of metrics metadata (id<->name)
 REFRESH_METRICS_METADATA_INTERVAL = 10 * 60
-# The amount of jobs batched at the same time in the queue to query available metrics
+# The amount of objects batched at the same time in the QueryPerf method to query available metrics
 BATCH_MORLIST_SIZE = 50
+# Maximum number of objects to collect at once by the propertyCollector. The size of the response returned by the query
+# is significantly lower than the size of the queryPerf response, so allow specifying a different value.
+BATCH_COLLECTOR_SIZE = 500
 
 REALTIME_RESOURCES = {'vm', 'host'}
 
-RESOURCE_TYPE_MAP = {
-    'vm': vim.VirtualMachine,
-    'datacenter': vim.Datacenter,
-    'host': vim.HostSystem,
-    'datastore': vim.Datastore
-}
+RESOURCE_TYPE_METRICS = [
+    vim.VirtualMachine,
+    vim.Datacenter,
+    vim.HostSystem,
+    vim.Datastore
+]
+
+RESOURCE_TYPE_NO_METRIC = [
+    vim.Datacenter,
+    vim.ComputeResource,
+    vim.Folder
+]
+
 
 # Time after which we reap the jobs that clog the queue
 # TODO: use it
@@ -57,6 +71,10 @@ MORLIST = 'morlist'
 METRICS_METADATA = 'metrics_metadata'
 LAST = 'last'
 INTERVAL = 'interval'
+
+
+class BadConfigError(CheckException):
+    pass
 
 
 def atomic_method(method):
@@ -93,6 +111,9 @@ class VSphereCheck(AgentCheck):
         self.pool_started = False
         self.jobs_status = {}
         self.exceptionq = Queue()
+
+        self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
+        self.batch_collector_size = max(init_config.get("batch_property_collector_size", BATCH_COLLECTOR_SIZE), 0)
 
         # Connections open to vCenter instances
         self.server_instances = {}
@@ -199,7 +220,7 @@ class VSphereCheck(AgentCheck):
     def _instance_key(self, instance):
         i_key = instance.get('name')
         if i_key is None:
-            raise Exception("Must define a unique 'name' per vCenter instance")
+            raise BadConfigError("Must define a unique 'name' per vCenter instance")
         return i_key
 
     def _should_cache(self, instance, entity):
@@ -290,8 +311,7 @@ class VSphereCheck(AgentCheck):
         # Get only the basic metrics
         for metric in available_metrics:
             # No cache yet, skip it for now
-            if (i_key not in self.metrics_metadata
-                    or metric.counterId not in self.metrics_metadata[i_key]):
+            if i_key not in self.metrics_metadata or metric.counterId not in self.metrics_metadata[i_key]:
                 continue
             if self.metrics_metadata[i_key][metric.counterId]['name'] in BASIC_METRICS:
                 wanted_metrics.append(metric)
@@ -313,7 +333,7 @@ class VSphereCheck(AgentCheck):
 
             if not mor_by_mor_name:
                 self.log.warning(
-                    u"Unable to extract hosts' tags for vSphere instance named %s"
+                    u"Unable to extract hosts' tags for vSphere instance named %s. "
                     u"Is the check failing on this instance?", i_key
                 )
                 continue
@@ -324,14 +344,87 @@ class VSphereCheck(AgentCheck):
 
         return external_host_tags
 
-    def _discover_mor(self, instance, tags, regexes=None, include_only_marked=False):
+    def _get_parent_tags(self, mor, all_objects):
+        tags = []
+        properties = all_objects[mor]
+        parent = properties["parent"]
+        if parent:
+            parent_name = all_objects[parent]["name"]
+            tag = []
+            if isinstance(parent, vim.HostSystem):
+                tag.append(u'vsphere_host:{}'.format(parent_name))
+            elif isinstance(parent, vim.Folder):
+                tag.append(u'vsphere_folder:{}'.format(parent_name))
+            elif isinstance(parent, vim.ComputeResource):
+                if isinstance(parent, vim.ClusterComputeResource):
+                    tag.append(u'vsphere_cluster:{}'.format(parent_name))
+                tag.append(u'vsphere_compute:{}'.format(parent_name))
+            elif isinstance(parent, vim.Datacenter):
+                tag.append(u'vsphere_datacenter:{}'.format(parent_name))
+
+            tags = self._get_parent_tags(parent, all_objects)
+            if tag:
+                tags.extend(tag)
+
+        return tags
+
+    def _collect_mors_and_attributes(self, server_instance):
+        resources = RESOURCE_TYPE_METRICS + RESOURCE_TYPE_NO_METRIC
+
+        content = server_instance.content
+        view_ref = content.viewManager.CreateContainerView(content.rootFolder, resources, True)
+
+        # Object used to query MORs as well as the attributes we require in one API call
+        # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
+        collector = content.propertyCollector
+
+        # Specify the root object from where we collect the rest of the objects
+        obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
+        obj_spec.obj = view_ref
+        obj_spec.skip = True
+
+        # Specify the attribute of the root object to traverse to obtain all the attributes
+        traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
+        traversal_spec.path = "view"
+        traversal_spec.skip = False
+        traversal_spec.type = view_ref.__class__
+        obj_spec.selectSet = [traversal_spec]
+
+        property_specs = []
+        # Specify which attributes we want to retrieve per object
+        for resource in resources:
+            property_spec = vmodl.query.PropertyCollector.PropertySpec()
+            property_spec.type = resource
+            property_spec.pathSet = ["name", "parent", "customValue"]
+            if resource == vim.VirtualMachine:
+                property_spec.pathSet.append("runtime.powerState")
+                property_spec.pathSet.append("runtime.host")
+            property_specs.append(property_spec)
+
+        # Create our filter spec from the above specs
+        filter_spec = vmodl.query.PropertyCollector.FilterSpec()
+        filter_spec.objectSet = [obj_spec]
+        filter_spec.propSet = property_specs
+
+        retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+        # To limit the number of objects retrieved per call.
+        # If batch_collector_size is 0, collect maximum number of objects.
+        retr_opts.maxObjects = self.batch_collector_size or None
+
+        # Collect the objects and their properties
+        res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+        objects = res.objects
+        # Results can be paginated
+        while res.token is not None:
+            res = collector.ContinueRetrievePropertiesEx(res.token)
+            objects.extend(res.objects)
+
+        return {obj.obj: {prop.name: prop.val for prop in obj.propSet} for obj in objects}
+
+    def _get_all_objs(self, server_instance, regexes=None, include_only_marked=False, tags=None):
         """
-        Explore vCenter infrastructure to discover hosts, virtual machines
-        and compute their associated tags.
-
-
-        Start with the vCenter `rootFolder` and proceed recursively,
-        queueing other such jobs for children nodes.
+        Explore vCenter infrastructure to discover hosts, virtual machines, etc. and compute their associated tags.
+        Start at the vCenter `rootFolder`, so as to collect every objet.
 
         Example topology:
             ```
@@ -347,96 +440,82 @@ class VSphereCheck(AgentCheck):
                             - vm2
             ```
 
-        If it's a node we want to query metric for, queue it in `self.morlist_raw` that
+        If it's a node we want to query metric for, it will be queued in `self.morlist_raw` that
         will be processed by another job.
         """
-        def _get_parent_tags(mor):
+        start = time.time()
+        if tags is None:
             tags = []
-            if mor.parent:
-                tag = []
-                if isinstance(mor.parent, vim.HostSystem):
-                    tag.append(u'vsphere_host:{}'.format(mor.parent.name))
-                elif isinstance(mor.parent, vim.Folder):
-                    tag.append(u'vsphere_folder:{}'.format(mor.parent.name))
-                elif isinstance(mor.parent, vim.ComputeResource):
-                    if isinstance(mor.parent, vim.ClusterComputeResource):
-                        tag.append(u'vsphere_cluster:{}'.format(mor.parent.name))
-                    tag.append(u'vsphere_compute:{}'.format(mor.parent.name))
-                elif isinstance(mor.parent, vim.Datacenter):
-                    tag.append(u'vsphere_datacenter:{}'.format(mor.parent.name))
+        obj_list = defaultdict(list)
 
-                tags = _get_parent_tags(mor.parent)
-                if tag:
-                    tags.extend(tag)
+        # Collect objects and their attributes
+        all_objects = self._collect_mors_and_attributes(server_instance)
 
-            return tags
+        # Add rootFolder since it is not explored by the propertyCollector
+        rootFolder = server_instance.content.rootFolder
+        all_objects[rootFolder] = {"name": rootFolder.name, "parent": None}
 
-        def _get_all_objs(content, vimtype, regexes=None, include_only_marked=False, tags=None):
-            """
-            Get all the vsphere objects associated with a given type
-            """
-            if tags is None:
-                tags = []
-            obj_list = []
-            container = content.viewManager.CreateContainerView(
-                content.rootFolder,
-                [RESOURCE_TYPE_MAP[vimtype]],
-                True)
+        for obj, properties in all_objects.items():
+            instance_tags = []
+            if (
+                not self._is_excluded(obj, properties, regexes, include_only_marked) and
+                any(isinstance(obj, vimtype) for vimtype in RESOURCE_TYPE_METRICS)
+            ):
+                hostname = properties["name"]
+                if properties["parent"]:
+                    instance_tags += self._get_parent_tags(obj, all_objects)
 
-            for c in container.view:
-                instance_tags = []
-                if not self._is_excluded(c, regexes, include_only_marked):
-                    hostname = c.name
-                    if c.parent:
-                        instance_tags += _get_parent_tags(c)
+                vsphere_type = None
+                if isinstance(obj, vim.VirtualMachine):
+                    vsphere_type = u'vsphere_type:vm'
+                    vimtype = vim.VirtualMachine
+                    mor_type = "vm"
+                    if properties["runtime.powerState"] == vim.VirtualMachinePowerState.poweredOff:
+                        continue
+                    host = all_objects[properties["runtime.host"]]["name"]
+                    instance_tags.append(u'vsphere_host:{}'.format(host))
+                elif isinstance(obj, vim.HostSystem):
+                    vsphere_type = u'vsphere_type:host'
+                    vimtype = vim.HostSystem
+                    mor_type = "host"
+                elif isinstance(obj, vim.Datastore):
+                    vsphere_type = u'vsphere_type:datastore'
+                    vimtype = "datastore"
+                    instance_tags.append(u'vsphere_datastore:{}'.format(properties["name"]))
+                    hostname = None
+                    vimtype = vim.Datastore
+                    mor_type = "datastore"
+                elif isinstance(obj, vim.Datacenter):
+                    vsphere_type = u'vsphere_type:datacenter'
+                    vimtype = "datacenter"
+                    hostname = None
+                    vimtype = vim.Datacenter
+                    mor_type = "datacenter"
 
-                    vsphere_type = None
-                    if isinstance(c, vim.VirtualMachine):
-                        vsphere_type = u'vsphere_type:vm'
-                        if c.runtime.powerState == vim.VirtualMachinePowerState.poweredOff:
-                            continue
-                        host = c.runtime.host.name
-                        instance_tags.append(u'vsphere_host:{}'.format(host))
-                    elif isinstance(c, vim.HostSystem):
-                        vsphere_type = u'vsphere_type:host'
-                    elif isinstance(c, vim.Datastore):
-                        vsphere_type = u'vsphere_type:datastore'
-                        instance_tags.append(u'vsphere_datastore:{}'.format(c.name))
-                        hostname = None
-                    elif isinstance(c, vim.Datacenter):
-                        vsphere_type = u'vsphere_type:datacenter'
-                        hostname = None
+                if vsphere_type:
+                    instance_tags.append(vsphere_type)
+                obj_list[vimtype].append({
+                    "mor_type": mor_type,
+                    "mor": obj,
+                    "hostname": hostname,
+                    "tags": tags + instance_tags
+                })
 
-                    if vsphere_type:
-                        instance_tags.append(vsphere_type)
-                    obj_list.append(dict(mor_type=vimtype, mor=c, hostname=hostname, tags=tags+instance_tags))
+        self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
+        return obj_list
 
-            return obj_list
+    @atomic_method
+    def _cache_morlist_raw_atomic(self, instance, tags, regexes=None, include_only_marked=False):
+        i_key = self._instance_key(instance)
+        server_instance = self._get_server_instance(instance)
+        if i_key not in self.morlist_raw:
+            self.morlist_raw[i_key] = {}
 
-        # @atomic_method
-        def build_resource_registry(instance, tags, regexes=None, include_only_marked=False):
-            i_key = self._instance_key(instance)
-            server_instance = self._get_server_instance(instance)
-            if i_key not in self.morlist_raw:
-                self.morlist_raw[i_key] = {}
-
-            for resource in sorted(RESOURCE_TYPE_MAP):
-                self.morlist_raw[i_key][resource] = _get_all_objs(
-                    server_instance.RetrieveContent(),
-                    resource,
-                    regexes,
-                    include_only_marked,
-                    tags
-                )
-
-        # collect...
-        self.pool.apply_async(
-            build_resource_registry,
-            args=(instance, tags, regexes, include_only_marked)
-        )
+        all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags)
+        self.morlist_raw[i_key] = {resource: objs for resource, objs in all_objs.items()}
 
     @staticmethod
-    def _is_excluded(obj, regexes, include_only_marked):
+    def _is_excluded(obj, properties, regexes, include_only_marked):
         """
         Return `True` if the given host or virtual machine is excluded by the user configuration,
         i.e. violates any of the following rules:
@@ -447,7 +526,7 @@ class VSphereCheck(AgentCheck):
         if isinstance(obj, vim.HostSystem):
             # Based on `host_include_only_regex`
             if regexes and regexes.get('host_include') is not None:
-                match = re.search(regexes['host_include'], obj.name, re.IGNORECASE)
+                match = re.search(regexes['host_include'], properties["name"], re.IGNORECASE)
                 if not match:
                     return True
 
@@ -455,14 +534,14 @@ class VSphereCheck(AgentCheck):
         elif isinstance(obj, vim.VirtualMachine):
             # Based on `vm_include_only_regex`
             if regexes and regexes.get('vm_include') is not None:
-                match = re.search(regexes['vm_include'], obj.name, re.IGNORECASE)
+                match = re.search(regexes['vm_include'], properties["name"], re.IGNORECASE)
                 if not match:
                     return True
 
             # Based on `include_only_marked`
             if include_only_marked:
                 monitored = False
-                for field in obj.customValue:
+                for field in properties["customValue"]:
                     if field.value == VM_MONITORING_FLAG:
                         monitored = True
                         break  # we shall monitor
@@ -481,7 +560,7 @@ class VSphereCheck(AgentCheck):
 
         i_key = self._instance_key(instance)
         self.log.debug("Caching the morlist for vcenter instance %s" % i_key)
-        for resource_type in RESOURCE_TYPE_MAP:
+        for resource_type in RESOURCE_TYPE_METRICS:
             if i_key in self.morlist_raw and len(self.morlist_raw[i_key].get(resource_type, [])) > 0:
                 self.log.debug(
                     "Skipping morlist collection now, RAW results "
@@ -499,46 +578,40 @@ class VSphereCheck(AgentCheck):
         include_only_marked = _is_affirmative(instance.get('include_only_marked', False))
 
         # Discover hosts and virtual machines
-        self._discover_mor(instance, [instance_tag], regexes, include_only_marked)
+        self.pool.apply_async(
+            self._cache_morlist_raw_atomic,
+            args=(instance, [instance_tag], regexes, include_only_marked)
+        )
 
         self.cache_times[i_key][MORLIST][LAST] = time.time()
 
     @atomic_method
-    def _cache_morlist_process_atomic(self, instance, mor):
+    def _cache_morlist_process_atomic(self, instance, query_specs):
         """ Process one item of the self.morlist_raw list by querying the available
         metrics for this MOR and then putting it in self.morlist
         """
         # ## <TEST-INSTRUMENTATION>
         t = Timer()
         # ## </TEST-INSTRUMENTATION>
+
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
-        custom_tags = instance.get('tags', [])
 
-        self.log.debug(
-            "job_atomic: Querying available metrics"
-            " for MOR {0} (type={1})".format(mor['mor'], mor['mor_type'])
-        )
-
-        mor['interval'] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
-
-        available_metrics = perfManager.QueryAvailablePerfMetric(
-            mor['mor'], intervalId=mor['interval'])
-
-        mor['metrics'] = self._compute_needed_metrics(instance, available_metrics)
-
-        mor_name = str(mor['mor'])
-        if mor_name in self.morlist[i_key]:
-            # Was already here last iteration
-            self.morlist[i_key][mor_name]['metrics'] = mor['metrics']
-        else:
-            self.morlist[i_key][mor_name] = mor
-
-        self.morlist[i_key][mor_name]['last_seen'] = time.time()
+        # With QueryPerf, we can get metric information about several MORs at once. Let's use it
+        # to avoid making one API call per object, even if we also get metrics values that are useless for now.
+        # See https://code.vmware.com/apis/358/vsphere#/doc/vim.PerformanceManager.html#queryStats
+        # query_specs is a list of QuerySpec objects.
+        # See https://code.vmware.com/apis/358/vsphere#/doc/vim.PerformanceManager.QuerySpec.html
+        res = perfManager.QueryPerf(query_specs)
+        for mor_perfs in res:
+            mor_name = str(mor_perfs.entity)
+            available_metrics = [value.id for value in mor_perfs.value]
+            self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
+            self.morlist[i_key][mor_name]['last_seen'] = time.time()
 
         # ## <TEST-INSTRUMENTATION>
-        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total(), tags=custom_tags)
+        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total(), tags=instance.get('tags', []))
         # ## </TEST-INSTRUMENTATION>
 
     def _cache_morlist_process(self, instance):
@@ -550,25 +623,32 @@ class VSphereCheck(AgentCheck):
         if i_key not in self.morlist:
             self.morlist[i_key] = {}
 
-        batch_size = self.init_config.get('batch_morlist_size', BATCH_MORLIST_SIZE)
-
-        processed = 0
-        for resource_type in RESOURCE_TYPE_MAP:
-            for i in xrange(batch_size):
+        for resource_type in RESOURCE_TYPE_METRICS:
+            query_specs = []
+            # Batch size can prevent querying large payloads at once if the environment is too large
+            # If batch size is set to 0, process everything at once
+            batch_size = self.batch_morlist_size or len(self.morlist_raw[i_key][resource_type])
+            for _ in xrange(batch_size):
                 try:
                     mor = self.morlist_raw[i_key][resource_type].pop()
-                    self.pool.apply_async(self._cache_morlist_process_atomic, args=(instance, mor))
+                    mor_name = str(mor["mor"])
+                    mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
+                    if mor_name not in self.morlist[i_key]:
+                        self.morlist[i_key][mor_name] = mor
+                        self.morlist[i_key][mor_name]["last_seen"] = time.time()
 
-                    processed += 1
-                    if processed == batch_size:
-                        break
+                    query_spec = vim.PerformanceManager.QuerySpec()
+                    query_spec.entity = mor["mor"]
+                    query_spec.intervalId = mor["interval"]
+                    query_spec.maxSample = 1
+                    query_specs.append(query_spec)
+
                 except (IndexError, KeyError):
                     self.log.debug("No more work to process in morlist_raw")
                     break
 
-            if processed == batch_size:
-                break
-        return
+            if query_specs:
+                self.pool.apply_async(self._cache_morlist_process_atomic, args=(instance, query_specs))
 
     def _vacuum_morlist(self, instance):
         """ Check if self.morlist doesn't have some old MORs that are gone, ie
@@ -591,7 +671,7 @@ class VSphereCheck(AgentCheck):
         # ## </TEST-INSTRUMENTATION>
 
         i_key = self._instance_key(instance)
-        self.log.info("Warming metrics metadata cache for instance {0}".format(i_key))
+        self.log.info("Warming metrics metadata cache for instance {}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
         custom_tags = instance.get('tags', [])
@@ -606,7 +686,7 @@ class VSphereCheck(AgentCheck):
             new_metadata[counter.key] = d
         self.cache_times[i_key][METRICS_METADATA][LAST] = time.time()
 
-        self.log.info("Finished metadata collection for instance {0}".format(i_key))
+        self.log.info("Finished metadata collection for instance {}".format(i_key))
         # Reset metadata
         self.metrics_metadata[i_key] = new_metadata
 
@@ -628,59 +708,52 @@ class VSphereCheck(AgentCheck):
         return value
 
     @atomic_method
-    def _collect_metrics_atomic(self, instance, mor):
+    def _collect_metrics_atomic(self, instance, query_specs):
         """ Task that collects the metrics listed in the morlist for one MOR
         """
         # ## <TEST-INSTRUMENTATION>
         t = Timer()
         # ## </TEST-INSTRUMENTATION>
-
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
         custom_tags = instance.get('tags', [])
-
-        query = vim.PerformanceManager.QuerySpec(maxSample=1,
-                                                 entity=mor['mor'],
-                                                 metricId=mor['metrics'],
-                                                 intervalId=mor['interval'],
-                                                 format='normal')
-        results = perfManager.QueryPerf(querySpec=[query])
+        results = perfManager.QueryPerf(query_specs)
         if results:
-            for result in results[0].value:
-                if result.id.counterId not in self.metrics_metadata[i_key]:
-                    self.log.debug("Skipping this metric value, because there is no metadata about it")
-                    continue
+            for mor_perfs in results:
+                mor_name = str(mor_perfs.entity)
+                mor = self.morlist[i_key][mor_name]
+                for result in mor_perfs.value:
+                    if result.id.counterId not in self.metrics_metadata[i_key]:
+                        self.log.debug("Skipping this metric value, because there is no metadata about it")
+                        continue
 
-                # Metric types are absolute, delta, and rate
-                try:
-                    metric_name = self.metrics_metadata[i_key][result.id.counterId]['name']
-                except KeyError:
-                    metric_name = None
+                    # Metric types are absolute, delta, and rate
+                    metric_name = self.metrics_metadata[i_key].get(result.id.counterId, {}).get('name')
 
-                if metric_name not in ALL_METRICS:
-                    self.log.debug(u"Skipping unknown `%s` metric.", metric_name)
-                    continue
+                    if metric_name not in ALL_METRICS:
+                        self.log.debug(u"Skipping unknown `%s` metric.", metric_name)
+                        continue
 
-                if not result.value:
-                    self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
-                    continue
+                    if not result.value:
+                        self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
+                        continue
 
-                instance_name = result.id.instance or "none"
-                value = self._transform_value(instance, result.id.counterId, result.value[0])
+                    instance_name = result.id.instance or "none"
+                    value = self._transform_value(instance, result.id.counterId, result.value[0])
 
-                tags = ['instance:%s' % instance_name]
-                if not mor['hostname']:  # no host tags available
-                    tags.extend(mor['tags'])
+                    tags = ['instance:{}'.format(instance_name)]
+                    if not mor['hostname']:  # no host tags available
+                        tags.extend(mor['tags'])
 
-                # vsphere "rates" should be submitted as gauges (rate is
-                # precomputed).
-                self.gauge(
-                    "vsphere.%s" % metric_name,
-                    value,
-                    hostname=mor['hostname'],
-                    tags=['instance:%s' % instance_name] + custom_tags
-                )
+                    # vsphere "rates" should be submitted as gauges (rate is
+                    # precomputed).
+                    self.gauge(
+                        "vsphere.{}".format(metric_name),
+                        value,
+                        hostname=mor['hostname'],
+                        tags=['instance:{}'.format(instance_name)] + custom_tags
+                    )
 
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.metric_colection.time', t.total(), tags=custom_tags)
@@ -692,25 +765,39 @@ class VSphereCheck(AgentCheck):
         """
         i_key = self._instance_key(instance)
         if i_key not in self.morlist:
-            self.log.debug("Not collecting metrics for this instance, nothing to do yet: {0}".format(i_key))
+            self.log.debug("Not collecting metrics for this instance, nothing to do yet: {}".format(i_key))
             return
 
         mors = self.morlist[i_key].items()
-        self.log.debug("Collecting metrics of %d mors" % len(mors))
-
-        vm_count = 0
+        n_mors = len(mors)
+        self.log.debug("Collecting metrics of %d mors", n_mors)
 
         custom_tags = instance.get('tags', [])
+        vm_count = 0
 
-        for mor_name, mor in mors:
-            if mor['mor_type'] == 'vm':
-                vm_count += 1
-            if 'metrics' not in mor or not mor['metrics']:
-                continue
+        # Request metrics for several objects at once. We can limit the number of objects with batch_size
+        # If batch_size is 0, process everything at once
+        batch_size = self.batch_morlist_size or n_mors
+        query_specs = []
+        if n_mors:
+            for i in xrange(n_mors / batch_size + 1):
+                for mor_name, mor in mors[i * batch_size:(i + 1) * batch_size]:
+                    if mor['mor_type'] == 'vm':
+                        vm_count += 1
+                    if 'metrics' not in mor or not mor['metrics']:
+                        continue
 
-            self.pool.apply_async(self._collect_metrics_atomic, args=(instance, mor))
+                    query_spec = vim.PerformanceManager.QuerySpec()
+                    query_spec.entity = mor["mor"]
+                    query_spec.intervalId = mor["interval"]
+                    query_spec.metricId = mor["metrics"]
+                    query_spec.maxSample = 1
+                    query_specs.append(query_spec)
 
-        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
+                if query_specs:
+                    self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs))
+
+        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:{}".format(instance.get('name'))] + custom_tags)
 
     def check(self, instance):
         if not self.pool_started:
