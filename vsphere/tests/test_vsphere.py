@@ -8,10 +8,12 @@ import mock
 from mock import MagicMock
 
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.vsphere import MORLIST, INTERVAL, METRICS_METADATA
+from datadog_checks.vsphere.vsphere import MORLIST, INTERVAL, METRICS_METADATA, ConnectionError
 from datadog_checks.vsphere.common import SOURCE_TYPE
 from .utils import assertMOR, MockedMOR
 from .utils import disable_thread_pool, get_mocked_server
+
+SERVICE_CHECK_TAGS = ["vcenter_server:vsphere_mock", "vcenter_host:None", "foo:bar"]
 
 
 @pytest.fixture
@@ -222,33 +224,33 @@ def test_service_check_ko(aggregator, instance):
         # SmartConnect fails
         SmartConnect.side_effect = Exception()
 
-        with pytest.raises(Exception) as e:
+        with pytest.raises(ConnectionError):
             check.check(instance)
 
-        # FIXME: the check should raise a more meaningful exception so we don't
-        # need to check the message
-        assert "Connection to None failed:" in str(e.value)
-        assert len(aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)) == 1
-        sc = aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)[0]
-        assert sc.status == check.CRITICAL
-        assert 'foo:bar' in sc.tags
+        aggregator.assert_service_check(
+            VSphereCheck.SERVICE_CHECK_NAME,
+            status=VSphereCheck.CRITICAL,
+            count=1,
+            tags=SERVICE_CHECK_TAGS
+        )
 
         aggregator.reset()
 
-        # SmartConnect succeeds, RetrieveContent fails
+        # SmartConnect succeeds, CurrentTime fails
         server = MagicMock()
-        server.RetrieveContent.side_effect = Exception()
+        server.CurrentTime.side_effect = Exception()
         SmartConnect.side_effect = None
         SmartConnect.return_value = server
 
-        with pytest.raises(Exception) as e:
+        with pytest.raises(ConnectionError):
             check.check(instance)
 
-        assert "Connection to None died unexpectedly:" in str(e.value)
-        assert len(aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)) == 1
-        sc = aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)[0]
-        assert sc.status == check.CRITICAL
-        assert 'foo:bar' in sc.tags
+        aggregator.assert_service_check(
+            VSphereCheck.SERVICE_CHECK_NAME,
+            status=VSphereCheck.CRITICAL,
+            count=1,
+            tags=SERVICE_CHECK_TAGS
+        )
 
 
 def test_service_check_ok(aggregator, instance):
@@ -257,7 +259,9 @@ def test_service_check_ok(aggregator, instance):
     with mock.patch('datadog_checks.vsphere.vsphere.connect.SmartConnect') as SmartConnect:
         SmartConnect.return_value = get_mocked_server()
         check.check(instance)
-        assert len(aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)) > 0
-        sc = aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)[0]
-        assert sc.status == check.OK
-        assert 'foo:bar' in sc.tags
+
+        aggregator.assert_service_check(
+            VSphereCheck.SERVICE_CHECK_NAME,
+            status=VSphereCheck.OK,
+            tags=SERVICE_CHECK_TAGS
+        )
