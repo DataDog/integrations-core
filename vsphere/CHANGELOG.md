@@ -1,5 +1,12 @@
 # CHANGELOG - vsphere
 
+## 2.3.0 / 2018-08-21
+
+* [Fixed] Drastically improve check performance by reducing number of calls to vSphere API. See [#2039](https://github.com/DataDog/integrations-core/pull/2039).
+* [Fixed] Retry connection once on failure, and correctly send CRITICAL service check if the connection still cannot be made. See [#2060](https://github.com/DataDog/integrations-core/pull/2060).
+* [Fixed] fix race condition and keyerror. See [#1893](https://github.com/DataDog/integrations-core/pull/1893).
+* [Changed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 2.2.0 / 2018-06-20
 
 * [Changed] Bump requests to 2.19.1. See [#1743](https://github.com/DataDog/integrations-core/pull/1743).
