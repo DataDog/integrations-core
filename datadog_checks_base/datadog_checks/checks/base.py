@@ -26,6 +26,15 @@ except ImportError:
 from ..config import is_affirmative
 from ..utils.common import ensure_bytes
 from ..utils.proxy import config_proxy_skip
+from ..utils.limiter import Limiter
+
+
+# Metric types for which it's only useful to submit once per context
+ONE_PER_CONTEXT_METRIC_TYPES = [
+    aggregator.GAUGE,
+    aggregator.RATE,
+    aggregator.MONOTONIC_COUNT,
+]
 
 
 class AgentCheck(object):
@@ -33,6 +42,7 @@ class AgentCheck(object):
     The base class for any Agent based integrations
     """
     OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, *args, **kwargs):
         """
@@ -45,6 +55,7 @@ class AgentCheck(object):
         self.init_config = kwargs.get('init_config', {})
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
+        self.metric_limiter = None
 
         if len(args) > 0:
             self.name = args[0]
@@ -98,6 +109,10 @@ class AgentCheck(object):
             ],
         }
 
+        if self.DEFAULT_METRIC_LIMIT > 0:
+            self.metric_limiter = Limiter("metrics", self.DEFAULT_METRIC_LIMIT, self.warning)
+
+
     @property
     def in_developer_mode(self):
         self._log_deprecation('in_developer_mode')
@@ -117,6 +132,9 @@ class AgentCheck(object):
 
         return config_proxy_skip(proxies, uri, skip)
 
+    def _hash_context(mtype, name, value, tags=None, hostname=None):
+        return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
+
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
             # ignore metric sample
@@ -125,6 +143,17 @@ class AgentCheck(object):
         tags = self._normalize_tags(tags, device_name)
         if hostname is None:
             hostname = b''
+
+        if self.metric_limiter:
+            if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
+                # Fast path for gauges, rates, monotonic counters, assume one context per call
+                if self.metric_limiter.is_reached():
+                    return
+            else:
+                # Other metric types have a legit use case for several calls per context, track unique contexts
+                context = self._hash_context(mtype, name, tags, hostname)
+                if self.metric_limiter.is_reached(context):
+                    return
 
         aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), float(value), tags, hostname)
 
@@ -302,7 +331,6 @@ class AgentCheck(object):
         try:
             self.check(copy.deepcopy(self.instances[0]))
             result = b''
-
         except Exception as e:
             result = json.dumps([
                 {
@@ -310,6 +338,9 @@ class AgentCheck(object):
                     "traceback": traceback.format_exc(),
                 }
             ])
+        finally:
+            if self.metric_limiter:
+                self.metric_limiter.reset()
 
         return result
 
