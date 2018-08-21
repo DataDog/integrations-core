@@ -121,9 +121,6 @@ process_resident_memory_bytes 3.4304e+07
 # HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
 # TYPE process_start_time_seconds gauge
 process_start_time_seconds 1.49340832351e+09
-# HELP process_virtual_memory_bytes Virtual memory size in bytes.
-# TYPE process_virtual_memory_bytes gauge
-process_virtual_memory_bytes 5.492736e+07
 # HELP skydns_skydns_dns_cachemiss_count_total Counter of DNS requests that result in a cache miss.
 # TYPE skydns_skydns_dns_cachemiss_count_total counter
 skydns_skydns_dns_cachemiss_count_total{cache="response"} 1.359194e+06
@@ -213,3 +210,6 @@ skydns_skydns_dns_response_size_bytes_bucket{system="reverse",le="2048"} 67648
 skydns_skydns_dns_response_size_bytes_bucket{system="reverse",le="+Inf"} 67648
 skydns_skydns_dns_response_size_bytes_sum{system="reverse"} 6.075182e+06
 skydns_skydns_dns_response_size_bytes_count{system="reverse"} 67648
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 5.492736e+07
