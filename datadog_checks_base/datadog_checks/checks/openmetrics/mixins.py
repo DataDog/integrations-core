@@ -74,7 +74,7 @@ class OpenMetricsScraperMixin(object):
                 raise CheckException("You have to define a namespace for each prometheus check")
             namespace = self.default_namespace
 
-        config['NAMESPACE'] = namespace
+        config['namespace'] = namespace
 
         # Retrieve potential default instance settings for the namespace
         default_instance = self.default_instances.get(namespace, {})
@@ -97,8 +97,8 @@ class OpenMetricsScraperMixin(object):
         config['metrics_mapper'] = metrics_mapper
 
         # `rate_metrics` contains the metrics that should be sent as rates
-        config['rate_metrics'] = self._extract_rate_metrics(default_instance.get('type_overrides', []))
-        config['rate_metrics'].extend(self._extract_rate_metrics(instance.get('type_overrides', [])))
+        config['rate_metrics'] = self._extract_rate_metrics(default_instance.get('type_overrides', {}))
+        config['rate_metrics'].extend(self._extract_rate_metrics(instance.get('type_overrides', {})))
 
         # `_metrics_wildcards` holds the potential wildcards to match for metrics
         config['_metrics_wildcards'] = None
@@ -319,11 +319,17 @@ class OpenMetricsScraperMixin(object):
         :return: value of the metric_name matched by the labels
         """
         metric_name = '{}_{}'.format(_m, metric_suffix)
-        expected_labels = set([(k, v) for k, v in iteritems(_metric["labels"])
-                               if k not in OpenMetricsScraperMixin.UNWANTED_LABELS])
+        expected_labels = set(
+            (k, v) for k, v in iteritems(_metric["labels"])
+            if k not in OpenMetricsScraperMixin.UNWANTED_LABELS
+        )
+
         for elt in messages[metric_name]:
-            current_labels = set([(k, v) for k, v in iteritems(elt["labels"])
-                                  if k not in OpenMetricsScraperMixin.UNWANTED_LABELS])
+            current_labels = set(
+                (k, v) for k, v in iteritems(elt["labels"])
+                if k not in OpenMetricsScraperMixin.UNWANTED_LABELS
+            )
+
             # As we have two hashable objects we can compare them without any side effects
             if current_labels == expected_labels:
                 return float(elt['value'])
@@ -332,8 +338,8 @@ class OpenMetricsScraperMixin(object):
 
     def _extract_rate_metrics(self, type_overrides):
         rate_metrics = []
-        for metric in type_overrides:
-            if type_overrides[metric] == 'rate':
+        for metric, value in iteritems(type_overrides):
+            if value == 'rate':
                 rate_metrics.append(metric)
                 type_overrides[metric] = 'gauge'
         return rate_metrics
@@ -433,7 +439,7 @@ class OpenMetricsScraperMixin(object):
             # Set dry run off
             scraper_config['_dry_run'] = False
             # Garbage collect unused mapping and reset active labels
-            for metric, mapping in scraper_config['_label_mapping'].items():
+            for metric, mapping in list(iteritems(scraper_config['_label_mapping'])):
                 for key, val in list(iteritems(mapping)):
                     if key not in scraper_config['_active_label_mapping'][metric]:
                         del scraper_config['_label_mapping'][metric][key]
@@ -526,7 +532,7 @@ class OpenMetricsScraperMixin(object):
             else:
                 # build the wildcard list if first pass
                 if scraper_config['_metrics_wildcards'] is None:
-                    scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'].keys() if '*' in x]
+                    scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'] if '*' in x]
 
                 # try matching wildcard (generic check)
                 for wildcard in scraper_config['_metrics_wildcards']:
@@ -554,7 +560,7 @@ class OpenMetricsScraperMixin(object):
 
         # Should we send a service check for when we make a request
         health_service_check = scraper_config['health_service_check']
-        service_check_name = '{}{}'.format(scraper_config['NAMESPACE'], '.prometheus.health')
+        service_check_name = '{}{}'.format(scraper_config['namespace'], '.prometheus.health')
         service_check_tags = scraper_config['custom_tags'] + ['endpoint:' + endpoint]
         try:
             response = self.send_request(endpoint, scraper_config, pFormat, headers)
@@ -643,7 +649,7 @@ class OpenMetricsScraperMixin(object):
                     if self._is_value_valid(val):
                         # Determine the tags to send
                         tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=custom_hostname)
-                        metric_name_with_namespace = '{}.{}'.format(scraper_config['NAMESPACE'], metric_name)
+                        metric_name_with_namespace = '{}.{}'.format(scraper_config['namespace'], metric_name)
                         if scraper_config['send_monotonic_counter']:
                             self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
                         else:
@@ -658,7 +664,7 @@ class OpenMetricsScraperMixin(object):
                     val = getattr(metric, self.METRIC_TYPES[message.type]).value
                     if self._is_value_valid(val):
                         tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=custom_hostname)
-                        metric_name_with_namespace = '{}.{}'.format(scraper_config['NAMESPACE'], metric_name)
+                        metric_name_with_namespace = '{}.{}'.format(scraper_config['namespace'], metric_name)
                         if message.name in scraper_config['rate_metrics']:
                             self.rate(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
                         else:
@@ -687,13 +693,13 @@ class OpenMetricsScraperMixin(object):
         val = getattr(metric, self.METRIC_TYPES[2]).sample_count
         if self._is_value_valid(val):
             tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname)
-            self.gauge('{}.{}.count'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
+            self.gauge('{}.{}.count'.format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=hostname)
         else:
             self.log.debug("Metric value is not supported for metric {}.count.".format(metric_name))
         val = getattr(metric, self.METRIC_TYPES[2]).sample_sum
         if self._is_value_valid(val):
             tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname)
-            self.gauge('{}.{}.sum'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
+            self.gauge('{}.{}.sum'.format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=hostname)
         else:
             self.log.debug("Metric value is not supported for metric {}.sum.".format(metric_name))
         for quantile in getattr(metric, self.METRIC_TYPES[2]).quantile:
@@ -701,7 +707,7 @@ class OpenMetricsScraperMixin(object):
             limit = quantile.quantile
             if self._is_value_valid(val):
                 tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname) + ['quantile:{}'.format(limit)]
-                self.gauge('{}.{}.quantile'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
+                self.gauge('{}.{}.quantile'.format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=hostname)
             else:
                 self.log.debug("Metric value is not supported for metric {}.quantile.".format(metric_name))
 
@@ -713,13 +719,13 @@ class OpenMetricsScraperMixin(object):
         val = getattr(metric, self.METRIC_TYPES[4]).sample_count
         if self._is_value_valid(val):
             tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname)
-            self.gauge('{}.{}.count'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
+            self.gauge('{}.{}.count'.format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=hostname)
         else:
             self.log.debug("Metric value is not supported for metric {}.count.".format(metric_name))
         val = getattr(metric, self.METRIC_TYPES[4]).sample_sum
         if self._is_value_valid(val):
             tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname)
-            self.gauge('{}.{}.sum'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
+            self.gauge('{}.{}.sum'.format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=hostname)
         else:
             self.log.debug("Metric value is not supported for metric {}.sum.".format(metric_name))
         if scraper_config['send_histograms_buckets']:
@@ -728,7 +734,7 @@ class OpenMetricsScraperMixin(object):
                 limit = bucket.upper_bound
                 if self._is_value_valid(val):
                     tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname) + ['upper_bound:{}'.format(limit)]
-                    self.gauge('{}.{}.count'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
+                    self.gauge('{}.{}.count'.format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=hostname)
                 else:
                     self.log.debug("Metric value is not supported for metric {}.count.".format(metric_name))
 

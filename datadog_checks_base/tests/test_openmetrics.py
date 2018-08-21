@@ -106,15 +106,13 @@ def mock_get():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_get = mock.patch(
+    with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),
-    )
-    mock_get.start()
-    yield text_data
-    mock_get.stop()
+    ):
+        yield text_data
 
 
 def test_parse_metric_family():

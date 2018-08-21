@@ -17,6 +17,12 @@ LONG_DESC = ""
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     LONG_DESC = f.read()
 
+
+def get_requirements(fpath):
+    with open(path.join(HERE, fpath), encoding='utf-8') as f:
+        return f.readlines()
+
+
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
