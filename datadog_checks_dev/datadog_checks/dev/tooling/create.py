@@ -95,7 +95,7 @@ def create_template_files(template_name, new_root, config, read=False):
             template_path = path_join(root, template_file)
 
             file_path = template_path.replace(template_root, '')
-            file_path = '{}{}'.format(new_root, file_path.format(**config))
+            file_path = '{}{}'.format(new_root, file_path.format(**config)).rstrip('.template')
 
             files.append(
                 File(
