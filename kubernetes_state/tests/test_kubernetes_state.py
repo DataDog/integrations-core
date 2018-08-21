@@ -315,3 +315,16 @@ def test_disabling_hostname_override(instance):
     instance["hostname_override"] = False
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
     assert check.label_to_hostname is None
+
+
+def test_removing_pod_phase_service_checks(aggregator, instance, check):
+    check.send_pod_phase_service_checks = False
+    for _ in range(2):
+        check.check(instance)
+    # We should still send gauges
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Running', 'optional:tag1'], value=3)
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2)
+    # the service checks should not be sent
+    assert NAMESPACE + '.pod.status_phase' not in aggregator._service_checks
