@@ -10,6 +10,10 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "teamcity.",
   "name": "teamcity",
+  "process_signatures": [
+    "runnAll.sh start",
+    "teamcity-server"
+  ],
   "public_title": "Datadog-Teamcity Integration",
   "short_description": "Track builds and understand the performance impact of every deploy.",
   "support": "core",

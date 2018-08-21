@@ -11,6 +11,10 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "nagios.",
   "name": "nagios",
+  "process_signatures": [
+    "service snmpd restart",
+    "systemctl restart snmpd.service"
+  ],
   "public_title": "Datadog-Nagios Integration",
   "short_description": "Send Nagios service flaps, host alerts, and more to your Datadog event stream.",
   "support": "core",

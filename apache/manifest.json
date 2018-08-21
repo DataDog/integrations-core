@@ -13,6 +13,11 @@
   "metric_prefix": "apache.",
   "metric_to_check": "apache.performance.busy_workers",
   "name": "Apache",
+  "process_signatures": [
+    "httpd",
+    "apache",
+    "apache2"
+  ],
   "public_title": "Datadog-Apache Integration",
   "short_description": "Track requests per second, bytes served, worker threads, uptime, and more.",
   "support": "core",

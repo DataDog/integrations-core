@@ -14,6 +14,16 @@
   "metric_prefix": "php_fpm.",
   "metric_to_check": "php_fpm.processes.total",
   "name": "php_fpm",
+  "process_signatures": [
+    "php-fpm",
+    "php7.0-fpm",
+    "php7.0-fpm start",
+    "service php-fpm",
+    "php7.0-fpm restart",
+    "restart php-fpm",
+    "systemctl restart php-fpm.service",
+    "php7.0-fpm.service"
+  ],
   "public_title": "Datadog-PHP FPM Integration",
   "short_description": "Monitor process states, slow requests, and accepted requests.",
   "support": "core",

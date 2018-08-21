@@ -11,6 +11,9 @@
   "metric_prefix": "couchbase.",
   "metric_to_check": "couchbase.ram.used",
   "name": "couchbase",
+  "process_signatures": [
+    "beam.smp"
+  ],
   "public_title": "Datadog-CouchBase Integration",
   "short_description": "Track and graph your Couchbase activity and performance metrics.",
   "support": "core",

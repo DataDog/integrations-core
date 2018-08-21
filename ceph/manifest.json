@@ -12,6 +12,9 @@
   "metric_prefix": "ceph.",
   "metric_to_check": "ceph.write_bytes_sec",
   "name": "ceph",
+  "process_signatures": [
+    "ceph-*"
+  ],
   "public_title": "Datadog-Ceph Integration",
   "short_description": "Collect per-pool performance metrics and monitor overall cluster status.",
   "support": "core",

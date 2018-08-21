@@ -15,6 +15,9 @@
   "metric_prefix": "couch.",
   "metric_to_check": "couchdb.couchdb.request_time",
   "name": "couch",
+  "process_signatures": [
+    "couchjs"
+  ],
   "public_title": "Datadog-CouchDB Integration",
   "short_description": "Track and graph your CouchDB activity and performance metrics.",
   "support": "core",
