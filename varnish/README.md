@@ -89,7 +89,7 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
        path: /var/log/varnish/varnishncsa.log
       source: varnish
       sourcecategory: http_web_access
-      service: varnish
+      service: varnish
   ```
   Change the `path` and `service` parameter value and configure them for your environment.
   See the [sample varnish.yaml][2] for all available configuration options.

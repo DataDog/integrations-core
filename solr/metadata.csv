@@ -1,14 +1,26 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+solr.cache.evictions,gauge,10,eviction,second,The total number of cache evictions per second.,-1,solr,cache evictions
+solr.cache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,cache hits
+solr.cache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,cache sets
+solr.cache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,cache gets
+solr.document_cache.evictions,gauge,10,eviction,second,The total number of cache evictions per second.,-1,solr,doc cache evictions
+solr.document_cache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,doc cache hits
+solr.document_cache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,doc cache sets
+solr.document_cache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,doc cache gets
+solr.filter_cache.evictions,gauge,10,eviction,second,The total number of cache evictions per second.,-1,solr,filter cache evictions
+solr.filter_cache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,filter cache hits
+solr.filter_cache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,filter cache sets
+solr.filter_cache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,filter cache gets
+solr.query_result_cache.evictions,gauge,10,eviction,second,The total number of cache evictions per second.,-1,solr,query result cache evictions
+solr.query_result_cache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,query result cache hits
+solr.query_result_cache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,query result cache sets
+solr.query_result_cache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,query result cache gets
+solr.search_handler.avg_requests_per_sec,gauge,10,request,second,The average number of requests per second.,1,solr,search reqs per sec
+solr.search_handler.avg_time_per_req,gauge,10,millisecond,request,The average time per request.,-1,solr,search time per req
+solr.search_handler.errors,gauge,10,error,second,Number of errors per second encountered by the handler.,-1,solr,search errors
+solr.search_handler.requests,gauge,10,request,second,Number of requests per second processed by the handler.,0,solr,search requests
+solr.search_handler.time,gauge,10,,,The sum of all request processing times (in milliseconds) per second.,0,solr,search time
+solr.search_handler.timeouts,gauge,10,timeout,second,Number of responses per second received with partial results.,-1,solr,search timeouts
 solr.searcher.maxdoc,gauge,10,document,,One greater than the largest possible document number.,0,solr,max doc id
 solr.searcher.numdocs,gauge,10,document,,The total number of indexed documents.,0,solr,num docs
 solr.searcher.warmup,gauge,10,millisecond,,The time spent warming up.,-1,solr,warmup time
-solr.cache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,cache hits
-solr.cache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,cache gets
-solr.cache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,cache sets
-solr.cache.evictions,gauge,10,eviction,second,The total number of cache evictions per second.,-1,solr,cache evictions
-solr.search_handler.errors,gauge,10,error,second,Number of errors per second encountered by the handler.,-1,solr,search errors
-solr.search_handler.requests,gauge,10,request,second,Number of requests per second processed by the handler.,0,solr,search requests
-solr.search_handler.timeouts,gauge,10,timeout,second,Number of responses per second received with partial results.,-1,solr,search timeouts
-solr.search_handler.time,gauge,10,,,The sum of all request processing times (in milliseconds) per second.,0,solr,search time
-solr.search_handler.avg_time_per_req,gauge,10,millisecond,request,The average time per request.,-1,solr,search time per req
-solr.search_handler.avg_requests_per_sec,gauge,10,request,second,The average number of requests per second.,1,solr,search reqs per sec

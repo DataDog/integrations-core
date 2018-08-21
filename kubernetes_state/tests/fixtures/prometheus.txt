@@ -127,6 +127,15 @@ kube_deployment_status_replicas_updated{deployment="failingtest",namespace="defa
 kube_deployment_status_replicas_updated{deployment="jaundiced-numbat-kube-state-metrics",namespace="default"} 1
 kube_deployment_status_replicas_updated{deployment="kube-dns",namespace="kube-system"} 1
 kube_deployment_status_replicas_updated{deployment="tiller-deploy",namespace="kube-system"} 1
+# HELP kube_endpoint_address_available Number of addresses available in endpoint.
+# TYPE kube_endpoint_address_available gauge
+kube_endpoint_address_available{endpoint="test",namespace="default"} 0
+# HELP kube_endpoint_address_not_ready Number of addresses not ready in endpoint
+# TYPE kube_endpoint_address_not_ready gauge
+kube_endpoint_address_not_ready{endpoint="test",namespace="default"} 0
+# HELP kube_endpoint_created Unix creation timestamp
+# TYPE kube_endpoint_created gauge
+kube_endpoint_created{endpoint="test",namespace="default"} 1.513861395e+09
 # HELP kube_job_complete The job has completed its execution.
 # TYPE kube_job_complete gauge
 kube_job_complete{condition="false",job="hello-1509998340",namespace="default"} 0
@@ -258,6 +267,21 @@ kube_node_status_condition{condition="Ready",node="minikube",status="unknown"} 0
 # HELP kube_node_status_network_unavailable Whether the network is correctly configured for the node.
 # TYPE kube_node_status_network_unavailable gauge
 kube_node_status_network_unavailable{node="127.0.0.1",condition="false"} 1
+# TYPE kube_persistentvolume_status_phase gauge
+kube_persistentvolume_status_phase{persistentvolume="local-pv-103fef5d",phase="Available"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-103fef5d",phase="Bound"} 1
+kube_persistentvolume_status_phase{persistentvolume="local-pv-103fef5d",phase="Failed"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-103fef5d",phase="Pending"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-103fef5d",phase="Released"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Available"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Bound"} 1
+kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Failed"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Pending"} 0
+kube_persistentvolume_status_phase{persistentvolume="local-pv-15d0a3a3",phase="Released"} 0
+# HELP kube_persistentvolume_info Information about persistentvolume.
+# TYPE kube_persistentvolume_info gauge
+kube_persistentvolume_info{persistentvolume="local-pv-103fef5d",storageclass="local-data"} 1
+kube_persistentvolume_info{persistentvolume="local-pv-15d0a3a3",storageclass="local-data"} 1
 # HELP kube_persistentvolumeclaim_info Information about persistent volume claim.
 # TYPE kube_persistentvolumeclaim_info gauge
 kube_persistentvolumeclaim_info{namespace="default",persistentvolumeclaim="task-pv-claim",storageclass="manual"} 1

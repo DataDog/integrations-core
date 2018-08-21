@@ -15,7 +15,7 @@ To consider an Agent-based Integration complete, and thus ready to be included i
 * A complete `manifest.json` file
 * If the Integration collects Service Checks, the `service_checks.json` must be complete as well
 
-These requirements are used during the code review process as a checklist. This *howto* shows you how to implement all of the requirements for a brand new Integration.
+These requirements are used during the code review process as a checklist. This documentation covers the requirements and implementation details for a brand new Integration.
 
 ## Prerequisites
 
@@ -25,13 +25,13 @@ You'll also need `docker-compose` in order to run the test harness.
 
 ## Setup
 
-Clone the [integrations extras repository][7] and point your shell at the root:
+Clone the [integrations-extras repository][7] and point your shell at the base directory:
 
 ```
 git clone https://github.com/DataDog/integrations-extras.git && cd integrations-extras
 ```
 
-Install the Python packages needed to work on Agent integrations:
+Install the Python packages needed to work on Agent Integrations:
 
 ```
 pip install -r requirements-dev.txt
@@ -43,7 +43,7 @@ pip install -r requirements-dev.txt
 cookiecutter https://github.com/DataDog/cookiecutter-datadog-check.git
 ```
 
-Answer the questions when prompted. Once done, you should end up with something like this:
+Answer the questions when prompted. Once completed succesfully, you will end up with something like this:
 
 ```
     my_check
@@ -51,19 +51,19 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── MANIFEST.in
     ├── README.md
     ├── datadog_checks
-    │   ├── __init__.py
-    │   └── foo_check
-    │       └── data
-    │           └── conf.yaml.example
-    │       ├── __about__.py
-    │       ├── __init__.py
-    │       └── foo_check.py
+    │   ├── __init__.py
+    │   └── foo_check
+    │       └── data
+    │           └── conf.yaml.example
+    │       ├── __about__.py
+    │       ├── __init__.py
+    │       └── foo_check.py
     ├── images
-    │   └── snapshot.png
+    │   └── snapshot.png
     ├── logos
-    │   ├── avatars-bot.png
-    │   ├── saas_logos-bot.png
-    │   └── saas_logos-small.png
+    │   ├── avatars-bot.png
+    │   ├── saas_logos-bot.png
+    │   └── saas_logos-small.png
     ├── manifest.json
     ├── metadata.csv
     ├── requirements-dev.txt
@@ -72,9 +72,9 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── service_checks.json
     ├── setup.py
     ├── tests
-    │   ├── __init__.py
-    │   ├── conftest.py
-    │   └── test_check.py
+    │   ├── __init__.py
+    │   ├── conftest.py
+    │   └── test_check.py
     └── tox.ini
 ```
 
@@ -91,9 +91,9 @@ Checks are organized in regular Python packages under the `datadog_checks` names
 
 ### Implement check logic
 
-Let's say we want to collect a Service Check named `my_check` that sends `OK` when we are able to find a certain string in the body of a web page, `WARNING` if we can access the page but can't find the string, and `CRITICAL` if we can't reach the page at all.
+Let's say we want to create a Service Check named `my_check` that checks for a string on a web page. It will result in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible.
 
-The code would look like this:
+The code would look something like this:
 
 ```python
 import requests
@@ -102,11 +102,15 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.errors import CheckException
 
 
+# MyCheck derives from AgentCheck, and provides the required check method.
 class MyCheck(AgentCheck):
     def check(self, instance):
         url = instance.get('url')
         search_string = instance.get('search_string')
 
+        # It's a good idea to do some basic sanity checking. Try to be as
+        # specific as possible, with the exceptions; you can fall back to
+        # CheckException when in doubt though.
         if not url or not search_string:
             raise CheckException("Configuration error, please fix my_check.yaml")
 
@@ -114,14 +118,17 @@ class MyCheck(AgentCheck):
             r = requests.get(url)
             r.raise_for_status()
             if search_string in r.text:
+                # Page is accessible and the string is present.
                 self.service_check('my_check.all_good', self.OK)
             else:
+                # Page is accessible but the string was not found.
                 self.service_check('my_check.all_good', self.WARNING)
         except Exception as e:
+            # Something went horribly wrong. Ideally we'd be more specific…
             self.service_check('my_check.all_good', self.CRITICAL, e)
 ```
 
-To learn more about the base Python class, see the [Python API documentation][2]. Now let's write some tests and see if that works.
+To learn more about the base Python class, see the [Python API documentation][2]. Moving along, let's dive into tests, which are an important part of any project (and *required* for inclusion in `integrations-extras`).
 
 ### Writing tests
 
@@ -131,6 +138,8 @@ The first part of the `check` method below retrieves two pieces of information w
 
 ```python
 import pytest
+
+# Don't forget to import your Integration!
 from datadog_checks.my_check import MyCheck
 from datadog_checks.errors import CheckException
 
@@ -214,6 +223,7 @@ Add the integration test to our `my_check/tests/test_check.py` module:
 import subprocess
 import os
 import time
+
 from datadog_checks.utils.common import get_docker_hostname
 
 
@@ -270,6 +280,7 @@ The `README.md` file provided by our cookiecutter template already has the corre
 
 The directory structure for images and logos:
 
+```
     my_check/
     ├── images
     │   └── an_awesome_image.png
@@ -277,8 +288,12 @@ The directory structure for images and logos:
         ├── avatars-bot.png
         ├── saas_logos-bot.png
         └── saas_logos-small.png
+```
 
-The `images` folder contains all images that are used in the Integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`.
+The `images` folder contains all images that are used in the Integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
+```markdown
+![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/MyCheck/images/snapshot.png)
+```
 
 The `logos` folder must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
 
@@ -361,7 +376,7 @@ Our check sends a Service Check, so we need to add it to the `service_checks.jso
 ]
 ```
 
-Find below the description for each attributes—each one of them is mandatory—of your `service_checks.json` file:
+Find below the description for each attributes-each one of them is mandatory-of your `service_checks.json` file:
 
 | Attribute       | Description                                                                                                              |
 | ----            | ----                                                                                                                     |

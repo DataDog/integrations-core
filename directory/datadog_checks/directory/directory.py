@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from fnmatch import fnmatch
 from os.path import abspath, exists, join, relpath
+from re import compile as re_compile
 from time import time
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
+from datadog_checks.config import is_affirmative
 from .traverse import walk
 
 
@@ -41,12 +42,15 @@ class DirectoryCheck(AgentCheck):
         abs_directory = abspath(directory)
         name = instance.get('name', directory)
         pattern = instance.get('pattern')
-        recursive = _is_affirmative(instance.get('recursive', False))
+        exclude_dirs = instance.get('exclude_dirs', [])
+        exclude_dirs_pattern = re_compile('|'.join(exclude_dirs)) if exclude_dirs else None
+        dirs_patterns_full = is_affirmative(instance.get('dirs_patterns_full', False))
+        recursive = is_affirmative(instance.get('recursive', False))
         dirtagname = instance.get('dirtagname', 'name')
         filetagname = instance.get('filetagname', 'filename')
-        filegauges = _is_affirmative(instance.get('filegauges', False))
-        countonly = _is_affirmative(instance.get('countonly', False))
-        ignore_missing = _is_affirmative(instance.get('ignore_missing', False))
+        filegauges = is_affirmative(instance.get('filegauges', False))
+        countonly = is_affirmative(instance.get('countonly', False))
+        ignore_missing = is_affirmative(instance.get('ignore_missing', False))
         custom_tags = instance.get('tags', [])
 
         if not exists(abs_directory):
@@ -60,12 +64,34 @@ class DirectoryCheck(AgentCheck):
                 'DirectoryCheck: the directory `{}` does not exist. Skipping.'.format(abs_directory)
             )
 
-        self._get_stats(abs_directory, name, dirtagname,
-                        filetagname, filegauges, pattern,
-                        recursive, countonly, custom_tags)
+        self._get_stats(
+            abs_directory,
+            name,
+            dirtagname,
+            filetagname,
+            filegauges,
+            pattern,
+            exclude_dirs_pattern,
+            dirs_patterns_full,
+            recursive,
+            countonly,
+            custom_tags
+        )
 
-    def _get_stats(self, directory, name, dirtagname, filetagname,
-                   filegauges, pattern, recursive, countonly, tags):
+    def _get_stats(
+        self,
+        directory,
+        name,
+        dirtagname,
+        filetagname,
+        filegauges,
+        pattern,
+        exclude_dirs_pattern,
+        dirs_patterns_full,
+        recursive,
+        countonly,
+        tags
+    ):
         dirtags = ['{}:{}'.format(dirtagname, name)]
         dirtags.extend(tags)
         directory_bytes = 0
@@ -79,6 +105,12 @@ class DirectoryCheck(AgentCheck):
 
         for root, dirs, files in walker:
             directory_files += get_length(files)
+
+            if exclude_dirs_pattern is not None:
+                if dirs_patterns_full:
+                    dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.path)]
+                else:
+                    dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.name)]
 
             for file_entry in files:
                 if pattern:

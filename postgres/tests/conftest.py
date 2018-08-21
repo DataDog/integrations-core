@@ -6,11 +6,21 @@ import os
 import time
 
 import pytest
+import mock
+from datadog_checks.postgres import PostgreSql
 
 from .common import HOST, PORT, USER, PASSWORD, DB_NAME
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+@pytest.fixture
+def check():
+    check = PostgreSql('postgres', {}, {})
+    check._is_9_2_or_above = mock.MagicMock()
+    PostgreSql._known_servers = set()  # reset the global state
+    return check
 
 
 @pytest.fixture(scope="session")

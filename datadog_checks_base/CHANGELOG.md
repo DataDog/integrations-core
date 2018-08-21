@@ -1,5 +1,13 @@
 # CHANGELOG - datadog_checks
 
+## 1.5.0 / 2018-08-19
+
+* [Added] Allow installation of base dependencies. See [#2067](https://github.com/DataDog/integrations-core/pull/2067).
+* [Fixed] Retrieve no_proxy directly from the Datadog Agent's configuration. See [#2004](https://github.com/DataDog/integrations-core/pull/2004).
+* [Added] Support Python 3 for datadog_checks_base. See [#1957](https://github.com/DataDog/integrations-core/pull/1957).
+* [Fixed] Properly skip proxy environment variables. See [#1935](https://github.com/DataDog/integrations-core/pull/1935).
+* [Fixed] Update cryptography to 2.3. See [#1927](https://github.com/DataDog/integrations-core/pull/1927).
+
 ## 1.4.0 / 2018-07-18
 
 * [Fixed] fix packaging of agent requirements. See [#1911](https://github.com/DataDog/integrations-core/pull/1911).

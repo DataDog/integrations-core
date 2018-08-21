@@ -4,6 +4,10 @@ services:
 language: python
 python:
   - '2.7.15'
+addons:
+  apt:
+    packages:
+      - tdsodbc
 cache:
   directories:
     - "$HOME/.cache/pip"
@@ -57,6 +61,8 @@ jobs:
     - stage: test
       env: CHECK=activemq_xml
     - stage: test
+      env: CHECK=agent_metrics
+    - stage: test
       env: CHECK=apache
     - stage: test
       env: CHECK=aspdotnet
@@ -77,7 +83,7 @@ jobs:
     - stage: test
       env: CHECK=couchbase
     - stage: test
-      env: CHECK=directory
+      env: CHECK=directory PYTHON3=true
     - stage: test
       env: CHECK=disk
     - stage: test
@@ -89,9 +95,17 @@ jobs:
     - stage: test
       env: CHECK=envoy PYTHON3=true
     - stage: test
+      env: CHECK=etcd PYTHON3=true
+    - stage: test
       env: CHECK=exchange_server
     - stage: test
+      env: CHECK=fluentd
+    - stage: test
+      env: CHECK=gearmand
+    - stage: test
       env: CHECK=gitlab
+    - stage: test
+      env: CHECK=gunicorn
     - stage: test
       env: CHECK=haproxy
     - stage: test
@@ -153,7 +167,7 @@ jobs:
     - stage: test
       env: CHECK=pgbouncer
     - stage: test
-      env: CHECK=php_fpm
+      env: CHECK=php_fpm PYTHON3=true
     - stage: test
       env: CHECK=postgres
     - stage: test
@@ -163,11 +177,15 @@ jobs:
     - stage: test
       env: CHECK=prometheus
     - stage: test
+      env: CHECK=rabbitmq
+    - stage: test
       env: CHECK=redisdb
     - stage: test
       env: CHECK=riak
     - stage: test
       env: CHECK=spark
+    - stage: test
+      env: CHECK=sqlserver
     - stage: test
       env: CHECK=ssh_check
     - stage: test
@@ -180,6 +198,8 @@ jobs:
       env: CHECK=tcp_check
     - stage: test
       env: CHECK=teamcity
+    - stage: test
+      env: CHECK=twemproxy
     - stage: test
       env: CHECK=varnish
     - stage: test

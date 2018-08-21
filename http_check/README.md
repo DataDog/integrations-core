@@ -30,7 +30,7 @@ instances:
     url: http://staging.example.com/
 ```
 
-The HTTP check has more configuration options than many checks — many more than are shown above. Most options are opt-in, e.g. the Agent will not check SSL validation unless you configure the requisite options. Notably, the Agent _will_ check for soon-to-expire SSL certificates by default.
+The HTTP check has more configuration options than many checks - many more than are shown above. Most options are opt-in, e.g. the Agent will not check SSL validation unless you configure the requisite options. Notably, the Agent _will_ check for soon-to-expire SSL certificates by default.
 
 See the [sample http_check.d/conf.yaml][2] for a full list and description of available options, here is a list of them:
 

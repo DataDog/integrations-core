@@ -33,12 +33,41 @@ Configuration Options:
 
 * `status_url` (Required) - URL for the PHP FPM status page defined in the fpm pool config file (pm.status_path)
 * `ping_url` (Required) - URL for the PHP FPM ping page defined in the fpm pool config file (ping.path)
+* `use_fastcgi` (Optional) - Communicate directly with PHP-FPM using FastCGI
 * `ping_reply` (Required) - Reply from the ping_url. Unless you define a reply, it is `pong`
 * `user` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `password` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
 
 [Restart the Agent][3] to start sending PHP-FPM metrics to Datadog.
+
+#### Multiple pools
+
+It is also possible to monitor multiple PHP-FPM pools using the same proxy server, a common scenario when running on Kubernetes.
+
+To do so, you can modify your server's routes to point to different PHP-FPM instances. Here is an example Nginx configuration:
+
+```
+server {
+    ...
+
+    location ~ ^/(status1|ping1)$ {
+        access_log off;
+        fastcgi_pass instance1_ip:instance1_port;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~ ^/(status2|ping2)$ {
+        access_log off;
+        fastcgi_pass instance2_ip:instance2_port;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+```
+
+If you find this approach too tedious at scale, setting `use_fastcgi` to `true` instructs the check to bypass any proxy servers and communicate directly with PHP-FPM using FastCGI. The default port is `9000` for when omitted from `status_url` or `ping_url`.
 
 ### Validation
 

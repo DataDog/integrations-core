@@ -110,7 +110,7 @@ class AggregatorStub(object):
             if tag in metric.tags:
                 candidates.append(metric)
 
-        if count:
+        if count is not None:
             assert len(candidates) == count
         else:
             assert len(candidates) >= at_least
@@ -200,6 +200,21 @@ class AggregatorStub(object):
             if mname not in self._asserted:
                 not_asserted.append(metric)
         return not_asserted
+
+    def assert_metric_has_tag_prefix(self, metric_name, tag_prefix, count=None, at_least=1):
+        candidates = []
+        self._asserted.add(metric_name)
+
+        for metric in self.metrics(metric_name):
+            tags = metric.tags
+            gtags = [t for t in tags if t.startswith(tag_prefix)]
+            if len(gtags) > 0:
+                candidates.append(metric)
+
+        if count is not None:
+            assert len(candidates) == count
+        else:
+            assert len(candidates) >= at_least
 
     @property
     def metrics_asserted_pct(self):

@@ -84,7 +84,7 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
 }
 ```
 
-Unless you want to configure a custom `mesos_slave.d/conf.yaml`—perhaps you need to set `disable_ssl_validation: true`—you don't need to do anything after installing the Agent.
+Unless you want to configure a custom `mesos_slave.d/conf.yaml`-perhaps you need to set `disable_ssl_validation: true`-you don't need to do anything after installing the Agent.
 
 ### Validation
 #### DC/OS

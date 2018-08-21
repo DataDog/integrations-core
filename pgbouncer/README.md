@@ -21,18 +21,18 @@ instances:
     port: 15433
     username: <YOUR_USERNAME>
     password: <YOUR_PASSWORD>
-#   tags:
-#     - env:prod
+    # tags:
+    #   - env:prod
   - database_url: postgresql://<DB_USER>:<DB_PASS>@<DB_HOST>:<DB_PORT>/dbname?sslmode=require
-#   tags:
-#     - role:main
+    # tags:
+    #   - role:main
 ```
 
 **Note**: `database_url` parameter value should point to PgBouncer stats database.
 
 In your PgBouncer userlist.txt file add
 ```
-  "datadog" "<your_pass>"
+"datadog" "<your_pass>"
 ```
 
 Next, in your PgBouncer pgbouncer.ini file add

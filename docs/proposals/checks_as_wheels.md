@@ -12,13 +12,13 @@ coincide with the name of the module) and the path to the folder containing the
 source file. See https://github.com/DataDog/dd-agent/blob/5.14.x/config.py#L830.
 
 When checks were moved in a separate repo to implement the concept of
-“Integrations SDK”, to minimize the work on the Agent while still support this
+"Integrations SDK", to minimize the work on the Agent while still support this
 new way of distributing checks, the same logic was kept and now such Python
 modules are allowed to live in a different directory.
 
 ## Problem
 
-At the moment, the Agent package contains all the checks marked as “core” and
+At the moment, the Agent package contains all the checks marked as "core" and
 officially maintained by Datadog, available at https://github.com/DataDog/integrations-core.
 After being decoupled from the Agent, a check can now be installed as a separate
 package and picked up by the Agent at runtime, taking precedence over the one
@@ -33,7 +33,7 @@ installer).
 The current implementation of Integrations SDK exposes the Agent to a set of
 different problems, part of them are legacy and were already present in the
 Agent before moving out the checks but part of them were introduced in the
-process of implementing the SDK, let’s see few examples.
+process of implementing the SDK, let's see few examples.
 
 
 ### Building
@@ -41,7 +41,7 @@ process of implementing the SDK, let’s see few examples.
 At this moment, if contributors want to build a patched version of a check to
 use within their infrastructure, they have to either replicate our own build
 pipeline or create their own. The latter is way simpler than the former but when
-choosing this path you’re basically alone, being able to reuse very little code
+choosing this path you're basically alone, being able to reuse very little code
 and tools from the agent codebase which is strongly focused on supporting our
 own build pipeline. This also affects the development process: since a check is
 not meant to live without an agent, the only way you have to test a modified
@@ -51,10 +51,10 @@ agent - both strategies carry on a long list of issues.
 ### Versioning
 
 Despite having separated the checks from the agent, the two codebases are still
-strongly coupled when it comes to versioning. Checks are supposed to be released in standalone mode, without a corresponding agent release, and in a manual fashion: we decide when a new release for a check is needed and we trigger the release process. This means we might have changes piling up on `master` between one release and another which is fine but doesn’t play well when an agent
+strongly coupled when it comes to versioning. Checks are supposed to be released in standalone mode, without a corresponding agent release, and in a manual fashion: we decide when a new release for a check is needed and we trigger the release process. This means we might have changes piling up on `master` between one release and another which is fine but doesn't play well when an agent
 release falls in the middle: when we release the agent, we embed all the checks
 we find on `master` in `integrations-core`, leaving the check in an inconsistent
-state: “not released as standalone but released with an agent”. A workaround to
+state: "not released as standalone but released with an agent". A workaround to
 this would be forcing a standalone release for all the checks in `integrations-core`
 when we release an agent, (a fix is in place starting with 5.15) but the
 process is time consuming and not straightforward.
@@ -70,7 +70,7 @@ dependencies but we implement the logic elsewhere.
 ### User experience: final user
 
 At the moment we are exposed to weird corner cases when it comes to the point of
-installing checks in standalone mode, let’s see an example:
+installing checks in standalone mode, let's see an example:
 
  * User installs agent 5.0.0 shipping ntp check 1.0.0
  * Agent 5.1.0 gets released, shipping ntp check 1.1.0
@@ -93,7 +93,7 @@ Most if not all the checks are not supposed to run outside the agent lifecycle,
 working on a brand new check or trying to change an existing one heavily rely on
 this, making things more complicated than they could be.
 
-A couple of related, minor issues it would be nice to fix: at the moment it’s not
+A couple of related, minor issues it would be nice to fix: at the moment it's not
 possible to split the code of a check across multiple Python modules, same
 happens for the tests.
 
@@ -125,9 +125,9 @@ The ability of the agent to progammatically import and run a single Python
 module from a well known path in the filesystem will be preserved, so that
 we don't break any custom check in the wild.
 
-Moving to wheels wouldn’t solve any possible problem we’re facing in building
+Moving to wheels wouldn't solve any possible problem we're facing in building
 and shipping `integrations-core` and `integrations-extra` but overall it might
-work better, let’s see few examples.
+work better, let's see few examples.
 
 #### Building
 
@@ -148,7 +148,7 @@ each agent release we would pick and include in the package the desired version
 of each check in integrations-core by invoking `pip install -r` on a special
 requirements.txt file that would be part of the agent repository. That file
 would likely contain the most recent version of each check wheel package but
-this wouldn’t be enforced, what it counts is that the requirements file would be
+this wouldn't be enforced, what it counts is that the requirements file would be
 the unique source of truth stating which checks are shipped with which agent.
 
 #### Dependencies
@@ -188,7 +188,7 @@ from pypi.org directly, without forcing contributors to install the full
 agent package on their laptop.
 
 #### Upgrade path
-_Note: this will affect the “end user” experience._
+_Note: this will affect the "end user" experience._
 
 ##### Recommended solution: nuke core dependencies, keep custom checks
 
@@ -202,15 +202,15 @@ Pros:
  pip.
 
 Cons:
- * Users wouldn’t be able to pin specific check versions (this could be a non
+ * Users wouldn't be able to pin specific check versions (this could be a non
  requirement)
 
 Errors might still happen at runtime if a custom check relies on a dependency
-that was updated along with the agent upgrade (not sure there’s a fix for this).
+that was updated along with the agent upgrade (not sure there's a fix for this).
 
 ##### Alternative solution 1: nuke allthethings
 
-We consider the core checks as “part of the embedded Python standard library”.
+We consider the core checks as "part of the embedded Python standard library".
 At every Agent upgrade, the list of Python packages installed in the embedded
 interpreter would be reset.
 
@@ -220,7 +220,7 @@ Pros:
 
 Cons:
  * Custom checks implemented as wheels would be wiped and users should add them
- back (this doesn’t affect custom checks installed with the old method)
+ back (this doesn't affect custom checks installed with the old method)
  * Pinned versions of core checks would be overwritten by newer ones (again, this
  might be a non requirement)
 
@@ -258,7 +258,7 @@ or even:
 #### User experience: developer
 
 Eventually the developer user experience would be really Pythonic, in the sense
-that working on a check wouldn’t be that different from working on any other
+that working on a check wouldn't be that different from working on any other
 python project: same tools, same concepts. Along with the new packaging it would
 come the opportunity to split the code across multiple files in the same package,
 easily run unit tests locally, the ability to build and install a custom version
@@ -278,7 +278,7 @@ package installed, then tests will work as the agent was there.
 
 This is not applicable to Agent6, since the `aggregator` Python module only
 exists in memory when the Go agent is running the embedded Python. We can
-provide a mocked `aggregator` but tests wouldn’t be reliable with the current
+provide a mocked `aggregator` but tests wouldn't be reliable with the current
 testing approach. The solution to this would be to slightly change our tests so
 that instead of simulating a complete collection cycle and see what arrives
 to the forwarder, we invoke the `check` method and look what arrives to the the

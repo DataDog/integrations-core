@@ -78,10 +78,10 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
                             # can be absolute or relative to PGDATA
   log_filename = 'pg.log'   #log file name, can include pattern
   log_statement = 'all'     #log all queries
-  log_line_prefix= ‘%m [%p] %d %a %u %h %c ‘
+  log_line_prefix= '%m [%p] %d %a %u %h %c '
   log_file_mode = 0644
   ## For Windows
-  #log_destination = ‘eventlog’
+  #log_destination = 'eventlog'
   ```
 
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:

@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 1.2.0 / 2018-08-15
+
+* [Added] Add is_leader metric. See [#2057](https://github.com/DataDog/integrations-core/pull/2057).
+
 ## 1.1.0 / 2018-08-08
 
 * [Added] Add option to disable urllib3 warnings. See [#2009](https://github.com/DataDog/integrations-core/pull/2009).

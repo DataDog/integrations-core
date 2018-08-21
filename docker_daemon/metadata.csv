@@ -1,11 +1,11 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-docker.cpu.system,gauge,,percent,,The percent of time the CPU is executing system calls on behalf of processes of this container,0,docker,cpu system
+docker.cpu.system,gauge,,percent,,"The percent of time the CPU is executing system calls on behalf of processes of this container, unnormalized",0,docker,cpu system
 docker.cpu.system.95percentile,gauge,,percent,,95th percentile of docker.cpu.system,0,docker,cpu system 95%
 docker.cpu.system.avg,gauge,,percent,,Average value of docker.cpu.system,0,docker,cpu system avg
 docker.cpu.system.count,rate,,sample,second,The rate that the value of docker.cpu.system was sampled,0,docker,cpu system count
 docker.cpu.system.max,gauge,,percent,,Max value of docker.cpu.system,0,docker,cpu system max
 docker.cpu.system.median,gauge,,percent,,Median value of docker.cpu.system,0,docker,cpu system median
-docker.cpu.user,gauge,,percent,,The percent of time the CPU is under direct control of processes of this container,0,docker,cpu user
+docker.cpu.user,gauge,,percent,,"The percent of time the CPU is under direct control of processes of this container, unnormalized",0,docker,cpu user
 docker.cpu.user.95percentile,gauge,,percent,,95th percentile of docker.cpu.user,0,docker,cpu user 95%
 docker.cpu.user.avg,gauge,,percent,,Average value of docker.cpu.user,0,docker,cpu user avg
 docker.cpu.user.count,rate,,sample,second,The rate that the value of docker.cpu.user was sampled,0,docker,cpu user count

@@ -7,7 +7,7 @@
     "network"
   ],
   "creates_events": false,
-  "display_name": "PowerDNS",
+  "display_name": "PowerDNS Recursor",
   "guid": "ae533b67-a2af-45ce-8e23-235acb3a3893",
   "is_public": true,
   "maintainer": "help@datadoghq.com",

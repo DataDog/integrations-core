@@ -281,3 +281,51 @@ class TestVault:
         assert event['source_type_name'] == Vault.CHECK_NAME
         assert event['host'] == c.hostname
         assert 'is_leader:true' in event['tags']
+
+    def test_is_leader_metric_true(self, aggregator):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+
+        config = c.get_config(instance)
+
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == config['api_url'] + '/sys/leader':
+                return MockResponse({
+                    'ha_enabled': False,
+                    'is_self': True,
+                    'leader_address': 'bar',
+                    'leader_cluster_address': ''
+                })
+            return requests_get(url, *args, **kwargs)
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            c.check(instance)
+
+        aggregator.assert_metric('vault.is_leader', 1)
+
+    def test_is_leader_metric_false(self, aggregator):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+
+        config = c.get_config(instance)
+
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == config['api_url'] + '/sys/leader':
+                return MockResponse({
+                    'ha_enabled': False,
+                    'is_self': False,
+                    'leader_address': 'bar',
+                    'leader_cluster_address': ''
+                })
+            return requests_get(url, *args, **kwargs)
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            c.check(instance)
+
+        aggregator.assert_metric('vault.is_leader', 0)

@@ -12,6 +12,8 @@ import requests
 import simplejson as json
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
+
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -218,7 +220,7 @@ class OpenStackScope(object):
         if not keystone_server_url:
             raise IncompleteConfig()
 
-        ssl_verify = init_config.get("ssl_verify", False)
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
 
         auth_scope = cls.get_auth_scope(instance_config)
         identity = cls.get_user_identity(instance_config)
@@ -274,7 +276,7 @@ class OpenStackUnscoped(OpenStackScope):
         if not keystone_server_url:
             raise IncompleteConfig()
 
-        ssl_verify = init_config.get("ssl_verify", True)
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
 
         _, auth_token, _ = cls.get_auth_response_from_config(init_config, instance_config, proxy_config)
@@ -394,7 +396,7 @@ class OpenStackProjectScope(OpenStackScope):
         # e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<tenant_id>
         # It is still unclear when this happens, but for now the user can configure
         # `append_tenant_id` to manually add this suffix for downstream requests
-        if instance_config.get("append_tenant_id", False):
+        if is_affirmative(instance_config.get("append_tenant_id", False)):
             t_id = auth_scope["project"].get("id")
 
             assert (
@@ -529,7 +531,7 @@ class OpenStackCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        self._ssl_verify = init_config.get("ssl_verify", True)
+        self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         self.keystone_server_url = init_config.get("keystone_server_url")
         self._hypervisor_name_cache = {}
 
@@ -553,7 +555,7 @@ class OpenStackCheck(AgentCheck):
 
         self.exclude_server_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_server_ids', [])])
 
-        skip_proxy = not init_config.get('use_agent_proxy', True)
+        skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies
 
         self.backoff = {}
@@ -688,7 +690,7 @@ class OpenStackCheck(AgentCheck):
 
         # FIXME: (aaditya) Check all networks defaults to true
         # until we can reliably assign agents to networks to monitor
-        if self.init_config.get('check_all_networks', True):
+        if is_affirmative(self.init_config.get('check_all_networks', True)):
             all_network_ids = set(self.get_all_network_ids())
 
             # Filter out excluded networks
@@ -1185,7 +1187,7 @@ class OpenStackCheck(AgentCheck):
             custom_tags = []
         try:
             instance_scope = self.ensure_auth_scope(instance)
-            split_hostname_on_first_period = instance.get('split_hostname_on_first_period', False)
+            split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
             if not instance_scope:
                 # Fast fail in the absence of an instance_scope
                 return
@@ -1209,8 +1211,8 @@ class OpenStackCheck(AgentCheck):
 
                 self._send_api_service_checks(scope, custom_tags)
 
-                collect_all_projects = instance.get("collect_all_projects", False)
-                collect_all_tenants = instance.get('collect_all_tenants', False)
+                collect_all_projects = is_affirmative(instance.get("collect_all_projects", False))
+                collect_all_tenants = is_affirmative(instance.get('collect_all_tenants', False))
 
                 self.log.debug("Running check with credentials: \n")
                 self.log.debug("Nova Url: %s", self.get_nova_endpoint())
@@ -1219,7 +1221,7 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to this (host, hypervisor, project)
                 # and it's guest servers
 
-                hyp = self.get_local_hypervisor(split_hostname_on_first_period)
+                hyp = self.get_local_hypervisor()
 
                 project = self.get_scoped_project(scope)
 
@@ -1233,10 +1235,10 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
                 servers = self.get_servers_managed_by_hypervisor(
-                    i_key, split_hostname_on_first_period, collect_all_tenants
+                    i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
                 )
 
-                host_tags = self._get_tags_for_host(split_hostname_on_first_period)
+                host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
 
                 # Deep copy the cache so we can remove things from the Original during the iteration
                 server_cache_copy = copy.deepcopy(self.server_details_by_id)
@@ -1256,7 +1258,7 @@ class OpenStackCheck(AgentCheck):
                 else:
                     self.warning(
                         "Couldn't get hypervisor to monitor for host: %s"
-                        % self.get_my_hostname(split_hostname_on_first_period)
+                        % self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
                     )
 
             if projects:
@@ -1268,10 +1270,6 @@ class OpenStackCheck(AgentCheck):
 
             if set_external_tags is not None:
                 set_external_tags(self.get_external_host_tags())
-
-            if projects:
-                # Ensure projects list and scoped project exists
-                self.get_stats_for_all_projects(projects)
 
         except IncompleteConfig as e:
             if isinstance(e, IncompleteAuthScope):
@@ -1310,12 +1308,12 @@ class OpenStackCheck(AgentCheck):
         self.reset_backoff(instance)
 
     # Local Info accessors
-    def get_local_hypervisor(self, split_hostname_on_first_period):
+    def get_local_hypervisor(self):
         """
         Returns the hypervisor running on this host, and assumes a 1-1 between host and hypervisor
         """
         # Look up hypervisors available filtered by my hostname
-        host = self.get_my_hostname(split_hostname_on_first_period)
+        host = self.get_my_hostname()
         hyp = self.get_all_hypervisor_ids(filter_by_host=host)
         if hyp:
             return hyp[0]
@@ -1371,7 +1369,7 @@ class OpenStackCheck(AgentCheck):
 
         return None
 
-    def get_my_hostname(self, split_hostname_on_first_period):
+    def get_my_hostname(self, split_hostname_on_first_period=False):
         """
         Returns a best guess for the hostname registered with OpenStack for this host
         """
@@ -1382,9 +1380,10 @@ class OpenStackCheck(AgentCheck):
 
         return hostname
 
-    def get_servers_managed_by_hypervisor(self, i_key, split_hostname_on_first_period, collect_all_tenants):
+    def get_servers_managed_by_hypervisor(self, i_key, collect_all_tenants, split_hostname_on_first_period=False):
         servers = self.get_all_servers(
-            i_key, collect_all_tenants, filter_by_host=self.get_my_hostname(split_hostname_on_first_period)
+            i_key, collect_all_tenants,
+            filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
         )
         if self.exclude_server_id_rules:
             # Filter out excluded servers
@@ -1395,8 +1394,8 @@ class OpenStackCheck(AgentCheck):
 
         return self.server_details_by_id
 
-    def _get_tags_for_host(self, split_hostname_on_first_period):
-        hostname = self.get_my_hostname(split_hostname_on_first_period)
+    def _get_tags_for_host(self, split_hostname_on_first_period=False):
+        hostname = self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
         tags = []
         if hostname in self._get_and_set_aggregate_list():
             tags.append('aggregate:{0}'.format(self._aggregate_list[hostname]['aggregate']))

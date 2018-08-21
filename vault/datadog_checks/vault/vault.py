@@ -56,6 +56,8 @@ class Vault(AgentCheck):
         is_leader = is_affirmative(leader_data.get('is_self'))
         tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
 
+        self.gauge('vault.is_leader', int(is_leader), tags=tags)
+
         current_leader = leader_data.get('leader_address')
         previous_leader = config['leader']
         if config['detect_leader'] and current_leader:
