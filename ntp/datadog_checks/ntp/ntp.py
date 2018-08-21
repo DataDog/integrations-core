@@ -62,18 +62,27 @@ class NtpCheck(AgentCheck):
             status = AgentCheck.UNKNOWN
             ntp_ts = None
         else:
-            ntp_offset = ntp_stats.offset
+            if ntp_stats.stratum > 15:
+                # Anything over 15 is considered an unsynced source, or problematic
+                # and should not be relied on.
+                self.log.debug("Stratum ({}) too high for sync checking, Host: {}".format(ntp_stats.stratum,
+                    req_args['host']))
+                status = AgentCheck.UNKNOWN
+                ntp_ts = None
 
-            # Use the ntp server's timestamp for the time of the result in
-            # case the agent host's clock is messed up.
-            ntp_ts = ntp_stats.recv_time
-            self.gauge('ntp.offset', ntp_offset, timestamp=ntp_ts, tags=custom_tags)
-
-            if abs(ntp_offset) > offset_threshold:
-                status = AgentCheck.CRITICAL
-                service_check_msg = "Offset {} secs higher than offset threshold ({} secs)".format(ntp_offset,
-                                                                                                   offset_threshold)
             else:
-                status = AgentCheck.OK
+                ntp_offset = ntp_stats.offset
+
+                # Use the ntp server's timestamp for the time of the result in
+                # case the agent host's clock is messed up.
+                ntp_ts = ntp_stats.recv_time
+                self.gauge('ntp.offset', ntp_offset, timestamp=ntp_ts, tags=custom_tags)
+
+                if abs(ntp_offset) > offset_threshold:
+                    status = AgentCheck.CRITICAL
+                    service_check_msg = "Offset {} secs higher than offset threshold ({} secs)".format(ntp_offset,
+                                                                                                       offset_threshold)
+                else:
+                    status = AgentCheck.OK
 
         self.service_check('ntp.in_sync', status, timestamp=ntp_ts, message=service_check_msg, tags=custom_tags)
