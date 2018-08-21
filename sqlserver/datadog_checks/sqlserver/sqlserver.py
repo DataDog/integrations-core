@@ -720,11 +720,14 @@ class SqlSimpleMetric(SqlServerMetric):
                 matched = False
                 metric_tags = list(tags)
 
-                if self.instance == ALL_INSTANCES and instance_name != "_Total":
+                if (
+                    (self.instance == ALL_INSTANCES and instance_name != "_Total")
+                    or (
+                        instance_name == self.instance
+                        and (not self.object_name or object_name == self.object_name)
+                    )
+                ):
                     matched = True
-                elif instance_name == self.instance:
-                    if not self.object_name or object_name == self.object_name:
-                        matched = True
 
                 if matched:
                     if self.instance == ALL_INSTANCES:
