@@ -414,4 +414,4 @@ python setup.py bdist_wheel
 [12]: https://docs.datadoghq.com/integrations/
 [13]: https://www.uuidgenerator.net/
 [14]: https://docs.datadoghq.com/getting_started/tagging/
-[15]: https://github.com/DataDog/integrations-core/tree/e4f5ba647ba0d6d81e0598763dffefe5a4464af2/datadog_checks_dev#development
+[15]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
