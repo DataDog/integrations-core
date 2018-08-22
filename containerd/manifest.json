@@ -1,0 +1,20 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "containerd",
+  "short_description": "collect containerd metrics",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "guid": "000-000",
+  "public_title": "containerd Integration",
+  "categories":[],
+  "type":"check",
+  "doc_link": "",
+  "aliases":[],
+  "is_public": true,
+  "has_logo": true
+}

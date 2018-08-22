@@ -1,0 +1,12 @@
+init_config:
+  # Leave empty
+
+instances:
+  #   A typical instance configuration might include a hostname and port
+  #   a set of customizable tags and other parameters we might need to
+  #   configure the behavior of our check.
+  #
+  # - prometheus_url: http://127.0.0.1:1338/v1/metrics
+
+  # Set a timeout for the prometheus query, defaults to 10
+  # prometheus_timeout: 10
