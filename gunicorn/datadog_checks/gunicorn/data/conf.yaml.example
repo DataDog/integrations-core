@@ -5,16 +5,18 @@ init_config:
 
 instances:
   
-  ## @param proc_name - mandatory - string 
-  ## The name of the gunicorn process. For the following gunicorn server
+  ## @param proc_name - mandatory
+  ## @type  string 
+  ## @desc  The name of the gunicorn process. For the following gunicorn server
   ##
   ##   gunicorn --name <WEB_APP> <WEB_APP>_config.ini
   #
   # - proc_name: <WEB_APP>
   
-  ## @param tags - optional - list of key:value element
-  ## List of tags to attach to every metrics, events and service checks emitted by this integration.
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  ## @param tags - optional
+  ## @type  list of key:value element
+  ## @desc  List of tags to attach to every metrics, events and service checks emitted by this integration.
+  ##        Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   # tags:
   #   - <KEY>:<VALUE>
@@ -22,44 +24,13 @@ instances:
 ## Log section (Available for Agent >=6.0)
 #
 #logs:
-
-    ## @param type - mandatory - string
-    ## Type of log input source, to choose between tcp / udp / file / journald / docker
-    #   
-    # - type: file
-
-    ## @param path - mandatory - string
-    ## If type is file, enter the file path to gather logs from
-    #
-    #   path: <FILE_PATH>
-
-    ## @param port - mandatory -  integer
-    ## If type is udp/tcp, enter the port to listen to
-    #
-    #   port: <PORT_NUMBER>
-
-    ## @param service - mandatory - string
-    ## Name of the service owning the log, allows binding logs and Traces 
-    ## coming from the same <SERVICE>. 
-    #
-    #   service: <SERVICE>
-
-    ## @param source - mandatory - string
-    ## Attribute that defines which integration is sending the logs
-    #
-    #   source: <SOURCE_NAME>
     
-    ## @param sourcecategory - optional - coma separated list of strings 
-    ## Multiple value attribute. Can be used to refine the source attribtue
-    #
-    #   sourcecategory: <SOURCE_CATEGORY>
-
-    ## @param tags - optional - list of key:value element
-    ## List of tags to attach to every logs gathered by this integration.
-    #
-    #   tags:
-    #   - <KEY>:<VALUE>
-
+    ##   type - mandatory - type of log input source (tcp / udp / file)
+    ##   port / path - mandatory - Set port if type is tcp or udp. Set path if type is file
+    ##   service - mandatory - name of the service owning the log
+    ##   source - mandatory - attribute that defines which integration is sending the logs
+    ##   sourcecategory - optional -  Multiple value attribute. Can be used to refine the source attribtue
+    ##   tags - optional - add tags to each logs collected
 
     ## Gathering Access logs from your Gunicorn server
     #

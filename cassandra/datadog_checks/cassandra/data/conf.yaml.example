@@ -1,70 +1,83 @@
 instances:
 
-    ## @param host - mandatory - string
-    ## Cassandra hostname to connect to.
+    ## @param host - required
+    ## @type  string
+    ## @desc  Cassandra hostname to connect to.
     #
   - host: localhost
 
-    ## @param port - mandatory - integer
-    ## Cassandra port to connect to.
+    ## @param port - required 
+    ## @type  integer
+    ## @desc  Cassandra port to connect to.
     #
     port: 7199
 
-    ## @param cassandra_aliasing - mandatory - boolean
-    ## Description of this parameter
+    ## @param cassandra_aliasing - required
+    ## @type  boolean
+    ## @desc  Description of this parameter
     #
     cassandra_aliasing: true
 
-    ## @param tags - optional - list of key:value element
-    ## List of tags to attach to every metrics, events and service checks emitted by this integration.
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## @param tags - optional
+    ## @type  list of key:value element
+    ## @desc  List of tags to attach to every metrics, events and service checks emitted by this integration.
+    ##        Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
     # tags:
     #   - <KEY>:<VALUE>
     
-    ## @param user - optional - string
-    ## <USERNAME> for the Cassandra status endpoint authentication.
+    ## @param user - optional
+    ## @type  string
+    ## @desc  <USERNAME> for the Cassandra status endpoint authentication.
     #
     # user: <USERNAME>
 
-    ## @param password - optional - string
-    ## <PASSWORD> for the Cassandra status endpoint authentication.
+    ## @param password - optional
+    ## @type  string
+    ## @desc  <PASSWORD> for the Cassandra status endpoint authentication.
     #
     # password: <PASSWORD>
 
-    ## @param process_name_regex - optional - string
-    ## Instead of specifying a host, and port. The agent can connect using the attach api.
-    ## This requires the JDK to be installed and the path to tools.jar to be set below.
+    ## @param process_name_regex - optional
+    ## @type  string
+    ## @desc  Instead of specifying a host, and port. The agent can connect using the attach api.
+    ##        This requires the JDK to be installed and the path to tools.jar to be set below.
     #
     # process_name_regex: .*<PROCESS_NAME>.* 
 
-    ## @param tools_jar_path - optional - string
-    ## Needs to be set when process_name_regex is set
+    ## @param tools_jar_path - optional
+    ## @type  string
+    ## @desc  Needs to be set when process_name_regex is set
     #
     # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar 
     
-    ## @param name - optional - string 
-    ## Description of the parameter 
+    ## @param name - optional
+    ## @type  string 
+    ## @desc  Description of the parameter 
     #
     # name: cassandra_instance
 
-    ## @param java_bin_path - optional - string
-    ## Should be set if the agent cannot find your java executable
+    ## @param java_bin_path - optional
+    ## @type  string
+    ## @desc  Should be set if the agent cannot find your java executable
     #
     # java_bin_path: <JAVA_PATH>
 
-    ## @param java_options - optional - string
-    ## Java JVM options
+    ## @param java_options - optional
+    ## @type  string
+    ## @desc  Java JVM options
     #
     # java_options: "-Xmx200m -Xms50m"
     
-    ## @param trust_store_path - optional - string
-    ## If ssl is enabled, set the path to your trustStore
+    ## @param trust_store_path - optional
+    ## @type  string
+    ## @desc  If ssl is enabled, set the path to your trustStore
     #
     # trust_store_path: <TRUSTSTORE_PATH>.jks
 
-    ## @param trust_store_password - optional - string
-    ## If ssl is enabled, set your <PASSWORD> here.
+    ## @param trust_store_password - optional
+    ## @type  string
+    ## @desc  If ssl is enabled, set your <PASSWORD> here.
     #
     # trust_store_password: <PASSWORD>
 
@@ -72,42 +85,12 @@ instances:
 #
 #logs:
 
-    ## @param type - mandatory - string
-    ## Type of log input source, to choose between tcp / udp / file / journald / docker
-    #   
-    # - type: file
-
-    ## @param path - mandatory - string
-    ## If type is file, enter the file path to gather logs from
-    #
-    #   path: <FILE_PATH>
-
-    ## @param port - mandatory -  integer
-    ## If type is udp/tcp, enter the port to listen to
-    #
-    #   port: <PORT_NUMBER>
-
-    ## @param service - mandatory - string
-    ## Name of the service owning the log, allows binding logs and Traces 
-    ## coming from the same <SERVICE>. 
-    #
-    #   service: <SERVICE>
-
-    ## @param source - mandatory - string
-    ## Attribute that defines which integration is sending the logs
-    #
-    #   source: <SOURCE_NAME>
-    
-    ## @param sourcecategory - optional - coma separated list of strings 
-    ## Multiple value attribute. Can be used to refine the source attribtue
-    #
-    #   sourcecategory: <SOURCE_CATEGORY>
-
-    ## @param tags - optional - list of key:value element
-    ## List of tags to attach to every logs gathered by this integration.
-    #
-    #   tags:
-    #   - <KEY>:<VALUE>
+    ##   type - mandatory - type of log input source (tcp / udp / file)
+    ##   port / path - mandatory - Set port if type is tcp or udp. Set path if type is file
+    ##   service - mandatory - name of the service owning the log
+    ##   source - mandatory - attribute that defines which integration is sending the logs
+    ##   sourcecategory - optional -  Multiple value attribute. Can be used to refine the source attribtue
+    ##   tags - optional - add tags to each logs collected
 
     ## Gathering all your Cassandra logs
     #
@@ -120,13 +103,15 @@ instances:
     
 init_config:
 
-  ## @param is_jmx - optional - boolean
-  ## Specify if this configuration file is for a JMX integration
+  ## @param is_jmx - optional
+  ## @type  boolean
+  ## @desc  Specify if this configuration file is for a JMX integration
   #
   is_jmx: true
   
-  ## @param collect_default_metrics - mandatory - boolean
-  ## Whether or not this check should collect all default metrics
+  ## @param collect_default_metrics - required
+  ## @type  boolean
+  ## @desc  Whether or not this check should collect all default metrics
   #
   collect_default_metrics: true
 
