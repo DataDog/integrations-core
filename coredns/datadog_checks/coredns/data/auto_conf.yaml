@@ -1,0 +1,11 @@
+ad_identifiers:
+  - coredns/coredns
+
+init_config:
+
+instances:
+  # To enable CoreDNS metrics you must specify the prometheus url and enable the plugin within coredns
+  # See: https://coredns.io/plugins/metrics/
+  - prometheus_endpoint: "http://%%host%%:9153/metrics"
+    tags:
+      - "dns-pod:%%host%%"

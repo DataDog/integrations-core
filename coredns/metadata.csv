@@ -1,0 +1,21 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+coredns.response_code_count,gauge,,response code,,number of responses per zone and rcode,1,coredns,response code
+coredns.response_code_count.count,count,,response code,,instant number of responses per zone and rcode,1,coredns,response code
+coredns.proxy_request_count,gauge,,request,,query count per upstream.,1,coredns,proxy request count
+coredns.proxy_request_count.count,count,,request,,query count per upstream at a moment,1,coredns,proxy request count
+coredns.cache_hits_count,gauge,,hits,,Counter of cache hits by cache type,1,coredns,cache hit
+coredns.cache_hits_count.count,count,,hits,,Counter of cache hits by cache type at a moment,1,coredns,cache hit
+coredns.cache_misses_count,gauge,,misses,,Counter of cache misses.,1,coredns,cache miss
+coredns.cache_misses_count.count,count,,misses,,Counter of cache misses at a moment.,1,coredns,cache miss
+coredns.request_count,gauge,,request,,total query count.,1,coredns,request count
+coredns.request_count.count,count,,request,,total query count at a moment,1,coredns,request count
+coredns.request_type_count,gauge,,request type,,counter of queries per zone and type,1,coredns,request type
+coredns.request_type_count.count,count,,request type,,counter of queries per zone and type,1,coredns,request type
+coredns.request_duration.seconds.sum,gauge,,seconds,,duration to process each query,-1,coredns,proxy request duration
+coredns.request_duration.seconds.count,count,,seconds,,duration to process each query,-1,coredns,request duration
+coredns.proxy_request_duration.seconds.sum,gauge,,seconds,,duration per upstream interaction,-1,coredns,proxy request duration
+coredns.proxy_request_duration.seconds.count,count,,seconds,,duration per upstream interaction,-1,coredns,proxy request duration
+coredns.request_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,coredns,request size
+coredns.request_size.bytes.count,count,,byte,,size of the request in bytes,0,coredns,request size
+coredns.cache_size.count,count,,size,,,1,coredns,cache size
+

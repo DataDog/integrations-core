@@ -1,0 +1,21 @@
+{
+  "maintainer": "shray@namely.com",
+  "manifest_version": "1.0.0",
+  "name": "coredns",
+  "short_description": "CoreDNS collects DNS metrics in Kubernetes.",
+  "support": "contrib",
+  "supported_os": [
+    "linux"
+  ],
+  "guid": "000-000",
+  "public_title": "CoreDNS Integration",
+  "categories":[
+    "containers",
+    "network"
+  ],
+  "type":"check",
+  "doc_link": "",
+  "aliases":[],
+  "is_public": true,
+  "has_logo": true
+}
