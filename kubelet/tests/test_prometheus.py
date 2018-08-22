@@ -7,8 +7,9 @@ import sys
 from collections import namedtuple
 
 import pytest
+import mock
 from datadog_checks.kubelet import KubeletCheck
-from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
+from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraperMixin
 from datadog_checks.kubelet.common import PodListUtils
 
 # Skip the whole tests module on Windows
@@ -39,21 +40,21 @@ def check():
 
 @pytest.fixture
 def cadvisor_scraper(check):
-    scraper = CadvisorPrometheusScraper(check)
-    pod_list = json.loads(mock_from_file('podlist_containerd.json'))
-    scraper.pod_list = pod_list
-    scraper.pod_list_utils = PodListUtils(pod_list)
-
-    return scraper
+    with mock.patch('datadog_checks.kubelet.kubelet.KubeletCheck.retrieve_pod_list',
+                    return_value=json.loads(mock_from_file('podlist_containerd.json'))):
+        check.pod_list = check.retrieve_pod_list()
+        check.pod_list_utils = PodListUtils(check.pod_list)
+        return check
 
 
 def test_cadvisor_default_options():
     check = KubeletCheck('kubelet', None, {}, [{}])
-    scraper = CadvisorPrometheusScraper(check)
-    assert scraper.NAMESPACE == 'kubernetes'
-    assert scraper.fs_usage_bytes == {}
-    assert scraper.mem_usage_bytes == {}
-    assert scraper.metrics_mapper == {}
+    cadvisor_scraper_config = check.cadvisor_scraper_config
+    assert check.fs_usage_bytes == {}
+    assert check.mem_usage_bytes == {}
+
+    assert cadvisor_scraper_config['namespace'] == 'kubernetes'
+    assert cadvisor_scraper_config['metrics_mapper'] == {}
 
 
 def test_is_container_metric():
@@ -82,7 +83,7 @@ def test_is_container_metric():
         ),
     ]
     for metric in false_metrics:
-        assert CadvisorPrometheusScraper._is_container_metric(metric.label) is False
+        assert CadvisorPrometheusScraperMixin._is_container_metric(metric.label) is False
 
     true_metric = MockMetric(
         'foo',
@@ -95,7 +96,7 @@ def test_is_container_metric():
             Label(name='id', value='deadbeef'),
         ]
     )
-    assert CadvisorPrometheusScraper._is_container_metric(true_metric.label) is True
+    assert CadvisorPrometheusScraperMixin._is_container_metric(true_metric.label) is True
 
 
 def test_is_pod_metric():
@@ -114,10 +115,10 @@ def test_is_pod_metric():
     ]
 
     for metric in false_metrics:
-        assert CadvisorPrometheusScraper._is_pod_metric(metric.label) is False
+        assert CadvisorPrometheusScraperMixin._is_pod_metric(metric.label) is False
 
     for metric in true_metrics:
-        assert CadvisorPrometheusScraper._is_pod_metric(metric.label) is True
+        assert CadvisorPrometheusScraperMixin._is_pod_metric(metric.label) is True
 
 
 def test_get_container_label():
@@ -125,8 +126,8 @@ def test_get_container_label():
         Label("container_name", value="POD"),
         Label("id", value="/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb"),
     ]
-    assert CadvisorPrometheusScraper._get_container_label(labels, "container_name") == "POD"
-    assert CadvisorPrometheusScraper._get_container_label([], "not-in") is None
+    assert CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name") == "POD"
+    assert CadvisorPrometheusScraperMixin._get_container_label([], "not-in") is None
 
 
 def test_get_container_id(cadvisor_scraper):
@@ -175,7 +176,7 @@ def test_get_pod_by_metric_label(cadvisor_scraper):
 
 
 def test_get_kube_container_name():
-    tags = CadvisorPrometheusScraper._get_kube_container_name([
+    tags = CadvisorPrometheusScraperMixin._get_kube_container_name([
         Label("container_name", value="datadog-agent"),
         Label("id",
               value="/kubepods/burstable/"
@@ -189,5 +190,5 @@ def test_get_kube_container_name():
     ])
     assert tags == ["kube_container_name:datadog-agent"]
 
-    tags = CadvisorPrometheusScraper._get_kube_container_name([])
+    tags = CadvisorPrometheusScraperMixin._get_kube_container_name([])
     assert tags == []
