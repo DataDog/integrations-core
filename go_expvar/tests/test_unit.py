@@ -169,7 +169,6 @@ def test_max_metrics(go_expvar_mock, check, aggregator):
 
     # Default metrics
     for gauge in CHECK_GAUGES_DEFAULT:
-        log.warning(aggregator.metrics(gauge.format(common.CHECK_NAME)))
         aggregator.assert_metric(gauge.format(common.CHECK_NAME),
                                  count=2, tags=shared_tags)
 

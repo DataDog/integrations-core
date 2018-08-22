@@ -110,7 +110,6 @@ class GoExpvar(AgentCheck):
             url = parsed_url._replace(path=GO_EXPVAR_URL_PATH).geturl()
 
         tags = instance.get('tags', [])
-        self.log.warning(tags)
         expvar_url_tag = "expvar_url:%s" % url
         if expvar_url_tag not in tags:
             tags.append(expvar_url_tag)

@@ -23,9 +23,8 @@ def go_expvar_mock():
     with open(filepath, 'r') as f:
         data = f.read()
     json_data = json.loads(data)
-    p = mock.patch('datadog_checks.go_expvar.GoExpvar._get_data', return_value=json_data)
-    yield p.start()
-    p.stop()
+    with mock.patch('datadog_checks.go_expvar.GoExpvar._get_data', return_value=json_data):
+        yield
 
 
 @pytest.fixture(scope="session")
@@ -38,9 +37,8 @@ def spin_up_go_expvar():
         os.path.join(common.HERE, 'compose', 'docker-compose.yaml'),
         endpoints=[common.URL]
     ):
-        for _ in range(0, 9):
+        for _ in range(9):
             requests.get(common.URL + "?user=123456")
-
         yield
 
 
