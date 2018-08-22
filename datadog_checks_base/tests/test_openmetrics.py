@@ -1239,7 +1239,7 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join on text format """
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['NAMESPACE'] = 'ksm'
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
         'kube_deployment_labels': {
@@ -1401,7 +1401,7 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
 def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join GC on text format """
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['NAMESPACE'] = 'ksm'
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}
     }
@@ -1451,7 +1451,7 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
 def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join missconfigured label is ignored """
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['NAMESPACE'] = 'ksm'
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'not_existing']}
     }
@@ -1490,7 +1490,7 @@ def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_
 def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join on non existing matching label is ignored """
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['NAMESPACE'] = 'ksm'
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'not_existing', 'labels_to_get': ['node', 'pod_ip']}
     }
@@ -1510,7 +1510,7 @@ def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_pro
 def test_label_join_metric_not_existing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join on non existing metric is ignored """
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['NAMESPACE'] = 'ksm'
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'not_existing': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']}
     }
@@ -1531,7 +1531,7 @@ def test_label_join_metric_not_existing(aggregator, mocked_prometheus_check, moc
 def test_label_join_with_hostname(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join and hostname override on a metric """
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['NAMESPACE'] = 'ksm'
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']}
     }
@@ -1572,7 +1572,7 @@ def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, 
     """ Tests endpoint health service check OK """
     check = mocked_prometheus_check
 
-    mocked_prometheus_scraper_config['NAMESPACE'] = 'ksm'
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
     check.process(mocked_prometheus_scraper_config)
 
     aggregator.assert_service_check(
@@ -1584,7 +1584,7 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
     """ Tests endpoint health service check failing """
     check = mocked_prometheus_check
 
-    mocked_prometheus_scraper_config['NAMESPACE'] = 'ksm'
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
     with pytest.raises(requests.ConnectionError):
         check.process(mocked_prometheus_scraper_config)
     aggregator.assert_service_check(
