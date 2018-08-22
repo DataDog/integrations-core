@@ -105,6 +105,8 @@ jobs:
     - stage: test
       env: CHECK=gitlab
     - stage: test
+      env: CHECK=go_expvar
+    - stage: test
       env: CHECK=gunicorn
     - stage: test
       env: CHECK=haproxy
