@@ -156,7 +156,7 @@ class OpenMetricsScraperMixin(object):
         # If you want to send `counter` metrics as monotonic counts, set this value to True.
         # Set to False if you want to instead send those metrics as `gauge`.
         config['send_monotonic_counter'] = is_affirmative(instance.get('send_monotonic_counter',
-                                                          default_instance.get('send_monotonic_counter', False)))
+                                                          default_instance.get('send_monotonic_counter', True)))
 
         # If the `labels_mapper` dictionary is provided, the metrics labels names
         # in the `labels_mapper` will use the corresponding value as tag name
