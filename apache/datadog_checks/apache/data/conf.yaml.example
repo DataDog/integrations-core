@@ -54,60 +54,19 @@ instances:
 #
 #logs:
 
-    ## @param type - required
-    ## @type  string
-    ## @desc  Type of log input source, to choose between tcp / udp / file / journald / docker
-    #    
-    # - type: file
-
-    ## @param path - required
-    ## @type  string
-    ## @desc  If type is file, enter the file path to gather logs from
-    #
-    #   path: <FILE_PATH>
-
-    ## @param port - required  
-    ## @type  integer
-    ## @desc  If type is udp/tcp, enter the port to listen to
-    #
-    #   port: <PORT_NUMBER>
-
-    ## @param service - required
-    ## @type  string
-    ## @desc  Name of the service owning the log, allows binding logs and Traces 
-    ##        coming from the same <SERVICE>. 
-    #
-    #   service: <SERVICE>
-
-    ## @param source - required
-    ## @type  string
-    ## @desc  Attribute that defines which integration is sending the logs
-    #
-    #   source: <SOURCE_NAME>
+    ##   type - mandatory - type of log input source (tcp / udp / file)
+    ##   port / path - mandatory - Set port if type is tcp or udp. Set path if type is file
+    ##   service - mandatory - name of the service owning the log
+    ##   source - mandatory - attribute that defines which integration is sending the logs
+    ##   sourcecategory - optional -  Multiple value attribute. Can be used to refine the source attribtue
+    ##   tags - optional - add tags to each logs collected
     
-    ## @param sourcecategory - optional
-    ## @type  coma separated list of strings 
-    ## @desc  Multiple value attribute. Can be used to refine the source attribtue
-    #
-    #   sourcecategory: <SOURCE_CATEGORY>
-
-    ## @param tags - optional
-    ## @type  list of key:value element
-    ## @desc  List of tags to attach to every logs gathered by this integration.
-    #
-    #   tags:
-    #   - <KEY>:<VALUE>
-
-    ## Gathering your Apache Access logs
-    #
     # - type: file
     #   path: /var/log/apache2/access.log
     #   source: apache
     #   sourcecategory: http_web_access
     #   service: apache
-    
-    ## Gathering your Apache Error logs
-    #
+       
     # - type: file
     #   path: /var/log/apache2/error.log
     #   source: apache
