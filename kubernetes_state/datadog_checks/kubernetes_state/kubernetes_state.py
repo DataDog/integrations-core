@@ -395,6 +395,7 @@ class KubernetesState(PrometheusCheck):
             skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
+                    # Filtering according to the reason here is paramount to limit cardinality
                     if label.value.lower() in whitelisted_status_reasons:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
