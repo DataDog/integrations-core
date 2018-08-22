@@ -762,7 +762,7 @@ class OpenStackCheck(AgentCheck):
 
         return {'loads': map(float, load_averages), 'uptime_sec': uptime_sec}
 
-    def get_all_hypervisor_ids(self, filter_by_host=None):
+    def get_all_hypervisor_ids(self, filter_by_host=None, collect_all_hypervisors=False):
         nova_version = self.init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
         if nova_version >= V21_NOVA_API_VERSION:
             url = '{0}/os-hypervisors'.format(self.get_nova_endpoint())
@@ -772,7 +772,8 @@ class OpenStackCheck(AgentCheck):
             try:
                 hv_list = self._make_request_with_auth_fallback(url, headers)
                 for hv in hv_list['hypervisors']:
-                    if filter_by_host and hv['hypervisor_hostname'] == filter_by_host:
+                    if filter_by_host and hv['hypervisor_hostname'] == filter_by_host \
+                       and not collect_all_hypervisors:
                         # Assume one-one relationship between hypervisor and host, return the 1st found
                         return [hv['id']]
 
@@ -876,6 +877,7 @@ class OpenStackCheck(AgentCheck):
     # After the first run, we will only get servers that have changed state since the last collection run
     def get_all_servers(self, i_key, collect_all_tenants, filter_by_host=None):
         query_params = {}
+        filter_by_host=False
         if filter_by_host:
             query_params["host"] = filter_by_host
 
@@ -945,6 +947,7 @@ class OpenStackCheck(AgentCheck):
                 except KeyError as e:
                     self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
 
+        
         return self.server_details_by_id
 
     def get_project_name_from_id(self, tenant_id):
@@ -1221,7 +1224,8 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to this (host, hypervisor, project)
                 # and it's guest servers
 
-                hyp = self.get_local_hypervisor()
+                # [TODO] Change name to reflect all hypervisors
+                hyp = self.get_local_hypervisor(True)
 
                 project = self.get_scoped_project(scope)
 
@@ -1234,12 +1238,15 @@ class OpenStackCheck(AgentCheck):
 
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
-                servers = self.get_servers_managed_by_hypervisor(
-                    i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
-                )
+                servers = {}
+                hypervisors = copy.deepcopy(hyp)
+                for hyp in hypervisors:
+                    servers.extend(self.get_servers_managed_by_hypervisor(
+                        i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
+                    ))
 
-                host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
-
+                # host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
+                host_tags = []
                 # Deep copy the cache so we can remove things from the Original during the iteration
                 server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
@@ -1251,15 +1258,10 @@ class OpenStackCheck(AgentCheck):
                         server_tags.append("tenant_id:%s" % scope.tenant_id)
 
                     self.external_host_tags[server] = host_tags
-                    self.get_stats_for_single_server(servers[server], tags=server_tags)
+                    self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags)
 
-                if hyp:
+                for hyp in hypervisors:
                     self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
-                else:
-                    self.warning(
-                        "Couldn't get hypervisor to monitor for host: %s"
-                        % self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
-                    )
 
             if projects:
                 # Ensure projects list and scoped project exists
@@ -1308,15 +1310,17 @@ class OpenStackCheck(AgentCheck):
         self.reset_backoff(instance)
 
     # Local Info accessors
-    def get_local_hypervisor(self):
+    def get_local_hypervisor(self, collect_all_hypervisors=False):
         """
         Returns the hypervisor running on this host, and assumes a 1-1 between host and hypervisor
         """
         # Look up hypervisors available filtered by my hostname
         host = self.get_my_hostname()
         hyp = self.get_all_hypervisor_ids(filter_by_host=host)
-        if hyp:
+        if hyp and not collect_all_hypervisors:
             return hyp[0]
+        elif hyp and collect_all_hypervisors:
+            return hyp
 
     def get_all_projects(self, scope):
         """
