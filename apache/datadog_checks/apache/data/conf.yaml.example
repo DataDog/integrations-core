@@ -38,7 +38,7 @@ instances:
     ## @param connect_timeout - optional
     ## @type  integer 
     ## @desc  Overrides the default connection timeout value, and fails the check if the time to establish the (TCP) connection 
-    ##              exceeds the connect_timeout value (in seconds)
+    ##        exceeds the connect_timeout value (in seconds)
     #
     # connect_timeout: <VALUE_IN_SECOND>
     
