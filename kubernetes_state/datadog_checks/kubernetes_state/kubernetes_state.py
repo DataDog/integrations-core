@@ -388,41 +388,34 @@ class KubernetesState(PrometheusCheck):
         for tags, count in status_phase_counter.iteritems():
             self.gauge(metric_name, count, tags=list(tags))
 
-    def kube_pod_container_status_waiting_reason(self, message, **kwargs):
-        metric_name = self.NAMESPACE + '.container.status_report.count.waiting'
+    def _submit_metric_kube_pod_container_status_reason(self, message, metric_suffix, whitelisted_status_reasons):
+        metric_name = self.NAMESPACE + metric_suffix
         for metric in message.metric:
             tags = []
             skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value.lower() in WHITELISTED_WAITING_REASONS:
+                    # Filtering according to the reason here is paramount to limit cardinality
+                    if label.value.lower() in whitelisted_status_reasons:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
                         skip_metric = True
                 elif label.name == "container":
                     tags.append(self._format_tag("kube_container_name", label.value))
                 elif label.name == "namespace":
+                    tags.append(self._format_tag(label.name, label.value))
+                elif label.name == "pod":
                     tags.append(self._format_tag(label.name, label.value))
             if not skip_metric:
                 self.count(metric_name, metric.gauge.value, tags + self.custom_tags)
 
+    def kube_pod_container_status_waiting_reason(self, message, **kwargs):
+        self._submit_metric_kube_pod_container_status_reason(message, '.container.status_report.count.waiting',
+                                                             WHITELISTED_WAITING_REASONS)
+
     def kube_pod_container_status_terminated_reason(self, message, **kwargs):
-        metric_name = self.NAMESPACE + '.container.status_report.count.terminated'
-        for metric in message.metric:
-            tags = []
-            skip_metric = False
-            for label in metric.label:
-                if label.name == "reason":
-                    if label.value.lower() in WHITELISTED_TERMINATED_REASONS:
-                        tags.append(self._format_tag(label.name, label.value))
-                    else:
-                        skip_metric = True
-                elif label.name == "container":
-                    tags.append(self._format_tag("kube_container_name", label.value))
-                elif label.name == "namespace":
-                    tags.append(self._format_tag(label.name, label.value))
-            if not skip_metric:
-                self.count(metric_name, metric.gauge.value, tags + self.custom_tags)
+        self._submit_metric_kube_pod_container_status_reason(message, '.container.status_report.count.terminated',
+                                                             WHITELISTED_TERMINATED_REASONS)
 
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
         """ Time until the next schedule """
