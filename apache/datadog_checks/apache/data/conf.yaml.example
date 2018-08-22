@@ -2,57 +2,50 @@ init_config:
 
 instances:
     
-    ## @param apache_status_url string  
-    ## @required
-    ## @type string
-    ## @description: Status url of your Apache server.
+    ## @param apache_status_url string - required
+    ## @type  string
+    ## @desc  Status url of your Apache server.
     #
   - apache_status_url: http://localhost/server-status?auto
 
-    ## @param apache_user
-    ## @optional 
-    ## @type string
-    ## @description: <USERNAME> for the Apache status endpoint authentication.
+    ## @param apache_user - optional 
+    ## @type  string
+    ## @desc  <USERNAME> for the Apache status endpoint authentication.
     #
     # apache_user: <USERNAME>
 
-    ## @param apache_password
-    ## @optional
-    ## @type string
-    ## @description <PASSWORD> for the Apache status endpoint authentication.
+    ## @param apache_password - optional
+    ## @type  string
+    ## @desc  <PASSWORD> for the Apache status endpoint authentication.
     #
     # apache_password: <PASSWORD>
 
-    ## @param tags 
-    ## @optional 
-    ## @type list of key:value element
-    ## @description List of tags to attach to every metrics, events and service checks emitted by this integration.
-    ##              Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## @param tags  - optional 
+    ## @type  list of key:value element
+    ## @desc  List of tags to attach to every metrics, events and service checks emitted by this integration.
+    ##        Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
     # tags:
     #   - <KEY>:<VALUE>
 
-    ## @param disable_ssl_validation
-    ## @optional
-    ## @type boolean - default: false
-    ## @description Instructs the check to skip the validation of the SSL certificate of the URL being tested.
-    ##              Defaults to false, set to true if you want to disable SSL certificate validation.
+    ## @param disable_ssl_validation - optional
+    ## @type  boolean - default: false
+    ## @desc  Instructs the check to skip the validation of the SSL certificate of the URL being tested.
+    ##        Defaults to false, set to true if you want to disable SSL certificate validation.
     #
     # disable_ssl_validation: false
 
-    ## @param connect_timeout
-    ## @optional
-    ## @type integer 
-    ## @description Overrides the default connection timeout value, and fails the check if the time to establish the (TCP) connection 
+    ## @param connect_timeout - optional
+    ## @type  integer 
+    ## @desc  Overrides the default connection timeout value, and fails the check if the time to establish the (TCP) connection 
     ##              exceeds the connect_timeout value (in seconds)
     #
     # connect_timeout: <VALUE_IN_SECOND>
     
-    ## @param receive_timeout
-    ## @optional
-    ## @type integer 
-    ## @description Overrides the default received timeout value, and fails the check if the time to receive 
-    ##              the server status from the Apache server exceeds the receive_timeout value (in seconds)
+    ## @param receive_timeout - optional
+    ## @type  integer 
+    ## @desc  Overrides the default received timeout value, and fails the check if the time to receive 
+    ##        the server status from the Apache server exceeds the receive_timeout value (in seconds)
     #
     # receive_timeout: <VALUE_IN_SECOND>
     
@@ -61,51 +54,46 @@ instances:
 #
 #logs:
 
-    ## @param type
-    ## @mandatory
-    ## @type string
-    ## @descrption Type of log input source, to choose between tcp / udp / file / journald / docker
+    ## @param type - required
+    ## @type  string
+    ## @desc  Type of log input source, to choose between tcp / udp / file / journald / docker
     #    
     # - type: file
 
-    ## @param path
-    ## @mandatory
-    ## @type string
-    ## @description If type is file, enter the file path to gather logs from
+    ## @param path - required
+    ## @type  string
+    ## @desc  If type is file, enter the file path to gather logs from
     #
     #   path: <FILE_PATH>
 
-    ## @param port - mandatory -  integer
-    ## If type is udp/tcp, enter the port to listen to
+    ## @param port - required  
+    ## @type  integer
+    ## @desc  If type is udp/tcp, enter the port to listen to
     #
     #   port: <PORT_NUMBER>
 
-    ## @param service
-    ## @mandatory
-    ## @type string
-    ## @decription Name of the service owning the log, allows binding logs and Traces 
-    ##             coming from the same <SERVICE>. 
+    ## @param service - required
+    ## @type  string
+    ## @desc  Name of the service owning the log, allows binding logs and Traces 
+    ##        coming from the same <SERVICE>. 
     #
     #   service: <SERVICE>
 
-    ## @param source
-    ## @mandatory
-    ## @type string
-    ## @description Attribute that defines which integration is sending the logs
+    ## @param source - required
+    ## @type  string
+    ## @desc  Attribute that defines which integration is sending the logs
     #
     #   source: <SOURCE_NAME>
     
-    ## @param sourcecategory
-    ## @optional
-    ## @type coma separated list of strings 
-    ## @description Multiple value attribute. Can be used to refine the source attribtue
+    ## @param sourcecategory - optional
+    ## @type  coma separated list of strings 
+    ## @desc  Multiple value attribute. Can be used to refine the source attribtue
     #
     #   sourcecategory: <SOURCE_CATEGORY>
 
-    ## @param tags
-    ## @optional
-    ## @type list of key:value element
-    ## @description List of tags to attach to every logs gathered by this integration.
+    ## @param tags - optional
+    ## @type  list of key:value element
+    ## @desc  List of tags to attach to every logs gathered by this integration.
     #
     #   tags:
     #   - <KEY>:<VALUE>
