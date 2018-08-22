@@ -109,7 +109,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         abort('Path `{}` already exists!'.format(integration_dir))
 
     template_fields = {}
-    if repo_choice != 'core' and not non_interactive:
+    if repo_choice != 'core' and not non_interactive and not dry_run:
         template_fields['author'] = click.prompt('Your name')
         template_fields['email'] = click.prompt('Your email')
         template_fields['email_packages'] = template_fields['email']
