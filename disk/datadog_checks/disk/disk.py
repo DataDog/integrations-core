@@ -151,7 +151,7 @@ class Disk(AgentCheck):
 
         name_empty = not name or name == 'none'
 
-        # allow empty names if `all_partitions` is `yes` so we can evaluate mountpoints
+        # allow empty names if `all_partitions` is `true` so we can evaluate mountpoints
         if name_empty and not self._all_partitions:
             return True
         # device is listed in `excluded_disks`

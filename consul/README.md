@@ -46,12 +46,12 @@ See the [sample consul.d/conf.yaml][2] for all available configuration options.
           # client_cert_file: '/path/to/client.concatenated.pem'
 
           # submit per-service node status and per-node service status?
-          catalog_checks: yes
+          catalog_checks: true
 
           # emit leader election events
-          self_leader_check: yes
+          self_leader_check: true
 
-          network_latency_checks: yes
+          network_latency_checks: true
     ```
 
     See the [sample consul.d/conf.yaml][2] for all available configuration options.

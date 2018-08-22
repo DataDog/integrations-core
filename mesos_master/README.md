@@ -23,7 +23,7 @@ docker run -d --name datadog-agent \
   -v /proc/:/host/proc/:ro \
   -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
   -e DD_API_KEY=<YOUR_DATADOG_API_KEY> \
-  -e MESOS_MASTER=yes \
+  -e MESOS_MASTER=true \
   -e MARATHON_URL=http://leader.mesos:8080 \
   datadog/agent:latest
 ```
@@ -43,7 +43,7 @@ Datadog Agent version 6 and greater can collect logs from containers. You can ei
 Add those extra variables to the Datadog Agent run command to start collecting logs:
 
 * `-e DD_LOGS_ENABLED=true`: this enables the log collection when set to `true`. The Agent now looks for log instructions in configuration files or container labels
-* `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers 
+* `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers
 * `-v /opt/datadog-agent/run:/opt/datadog-agent/run:rw`: this mounts the directory the Agent uses to store pointers on each container logs to track what have been sent to Datadog or not.
 
 This gives the following command:
@@ -55,7 +55,7 @@ docker run -d --name datadog-agent \
   -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
   -v /opt/datadog-agent/run:/opt/datadog-agent/run:rw \
   -e DD_API_KEY=<YOUR_DATADOG_API_KEY> \
-  -e MESOS_MASTER=yes \
+  -e MESOS_MASTER=true \
   -e MARATHON_URL=http://leader.mesos:8080 \
   -e DD_LOGS_ENABLED=true \
   -e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true \
