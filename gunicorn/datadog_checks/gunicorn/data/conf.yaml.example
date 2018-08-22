@@ -5,7 +5,7 @@ init_config:
 
 instances:
   
-  ## @param proc_name - mandatory
+  ## @param proc_name - required
   ## @type  string 
   ## @desc  The name of the gunicorn process. For the following gunicorn server
   ##
@@ -25,10 +25,10 @@ instances:
 #
 #logs:
     
-    ##   type - mandatory - type of log input source (tcp / udp / file)
-    ##   port / path - mandatory - Set port if type is tcp or udp. Set path if type is file
-    ##   service - mandatory - name of the service owning the log
-    ##   source - mandatory - attribute that defines which integration is sending the logs
+    ##   type - required - type of log input source (tcp / udp / file)
+    ##   port / path - required - Set port if type is tcp or udp. Set path if type is file
+    ##   service - required - name of the service owning the log
+    ##   source - required - attribute that defines which integration is sending the logs
     ##   sourcecategory - optional -  Multiple value attribute. Can be used to refine the source attribtue
     ##   tags - optional - add tags to each logs collected
 
