@@ -5,7 +5,7 @@
     "issue tracking"
   ],
   "creates_events": false,
-  "display_name": "Gitlab Runners",
+  "display_name": "Gitlab Runner",
   "guid": "08318775-7b40-4bc5-bb3d-36ad9111db37",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
