@@ -7,6 +7,7 @@
 from collections import defaultdict
 import time
 import os
+import re
 import subprocess
 
 # 3p
@@ -145,10 +146,10 @@ class ProcessCheck(AgentCheck):
                         cmdline = proc.cmdline()
                         if os.name == 'nt':
                             lstring = string.lower()
-                            if lstring in ' '.join(cmdline).lower():
+                            if re.search(lstring, ' '.join(cmdline).lower()):
                                 found = True
                         else:
-                            if string in ' '.join(cmdline):
+                            if re.search(string, ' '.join(cmdline)):
                                 found = True
                 except psutil.NoSuchProcess:
                     self.log.warning('Process disappeared while scanning')
