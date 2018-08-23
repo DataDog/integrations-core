@@ -161,7 +161,7 @@ instances:
   #   - filesystem.*
   #
   # Prefix to use when converting pod labels to metric tags, can be made empty with ""
-  # label_to_tag_prefix: "kube_"
+  # kubernetes_pod_labels_as_tags: "kube_"
   #
   # Custom tags that should be applied to kubernetes metrics and events
   # tags:
