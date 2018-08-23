@@ -173,6 +173,8 @@ jobs:
     - stage: test
       env: CHECK=postgres
     - stage: test
+      env: CHECK=postfix
+    - stage: test
       env: CHECK=powerdns_recursor
     - stage: test
       env: CHECK=process
