@@ -1,35 +1,47 @@
-# NB: This check requires the python environment on which gunicorn runs to
-# have the `setproctitle` module installed (https://pypi.python.org/pypi/setproctitle/)
+## NB: This check requires the python environment on which gunicorn runs to
+## have the `setproctitle` module installed (https://pypi.python.org/pypi/setproctitle/)
 
 init_config:
 
 instances:
-  # The name of the gunicorn process. For the following gunicorn server ...
+  
+  ## @param proc_name - required
+  ## @type  string 
+  ## @desc  The name of the gunicorn process. For the following gunicorn server
+  ##
+  ##   gunicorn --name <WEB_APP> <WEB_APP>_config.ini
   #
-  #    gunicorn --name my_web_app my_web_app_config.ini
+  # - proc_name: <WEB_APP>
+  
+  ## @param tags - optional
+  ## @type  list of key:value element
+  ## @desc  List of tags to attach to every metrics, events and service checks emitted by this integration.
+  ##        Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
-  #  ... we'd use the name `my_web_app`.
-  #
-  # - proc_name: my_web_app
-  #   tags:
-  #     - optional:tag1
+  # tags:
+  #   - <KEY>:<VALUE>
   
 ## Log section (Available for Agent >=6.0)
+#
 #logs:
-
-    # - type : (mandatory) type of log input source (tcp / udp / file / journald / docker)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
-    #   tags: (optional) add tags to each logs collected
     
+    ##   type - required - type of log input source (tcp / udp / file)
+    ##   port / path - required - Set port if type is tcp or udp. Set path if type is file
+    ##   service - required - name of the service owning the log
+    ##   source - required - attribute that defines which integration is sending the logs
+    ##   sourcecategory - optional -  Multiple value attribute. Can be used to refine the source attribtue
+    ##   tags - optional - add tags to each logs collected
+
+    ## Gathering Access logs from your Gunicorn server
+    #
     # - type: file
     #   path: /var/log/gunicorn/access.log
     #   service: <MY_SERVICE>
     #   source: gunicorn
     #   sourcecategory: http_web_access
 
+    ## Gathering Error logs from your Gunicorn server 
+    #
     # - type: file
     #   path: /var/log/gunicorn/error.log
     #   service: <MY_SERVICE>

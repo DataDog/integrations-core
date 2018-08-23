@@ -1,39 +1,65 @@
 init_config:
 
 instances:
+    
+    ## @param apache_status_url string - required
+    ## @type  string
+    ## @desc  Status url of your Apache server.
+    #
   - apache_status_url: http://localhost/server-status?auto
-    # apache_user: example_user
-    # apache_password: example_password
-    # tags:
-    #   - optional_tag
 
-    # The (optional) disable_ssl_validation will instruct the check
-    # to skip the validation of the SSL certificate of the URL being tested.
-    # Defaults to false, set to true if you want to disable SSL certificate validation.
+    ## @param apache_user - optional 
+    ## @type  string
+    ## @desc  <USERNAME> for the Apache status endpoint authentication.
+    #
+    # apache_user: <USERNAME>
+
+    ## @param apache_password - optional
+    ## @type  string
+    ## @desc  <PASSWORD> for the Apache status endpoint authentication.
+    #
+    # apache_password: <PASSWORD>
+
+    ## @param tags  - optional 
+    ## @type  list of key:value element
+    ## @desc  List of tags to attach to every metrics, events and service checks emitted by this integration.
+    ##        Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY>:<VALUE>
+
+    ## @param disable_ssl_validation - optional
+    ## @type  boolean - default: false
+    ## @desc  Instructs the check to skip the validation of the SSL certificate of the URL being tested.
+    ##        Defaults to false, set to true if you want to disable SSL certificate validation.
     #
     # disable_ssl_validation: false
 
-    # The (optional) connect_timeout will override the default value, and fail
-    # the check if the time to establish the (TCP) connection exceeds the
-    # connect_timeout value (in seconds)
-    # connect_timeout: 5
+    ## @param connect_timeout - optional
+    ## @type  integer 
+    ## @desc  Overrides the default connection timeout value, and fails the check if the time to establish the (TCP) connection 
+    ##        exceeds the connect_timeout value (in seconds)
+    #
+    # connect_timeout: <VALUE_IN_SECOND>
     
-    # The (optional) receive_timeout will override the default value, and fail
-    # the check if the time to receive the server status from the Apache server
-    # exceeds the receive_timeout value (in seconds)
-    # receive_timeout: 15
+    ## @param receive_timeout - optional
+    ## @type  integer 
+    ## @desc  Overrides the default received timeout value, and fails the check if the time to receive 
+    ##        the server status from the Apache server exceeds the receive_timeout value (in seconds)
+    #
+    # receive_timeout: <VALUE_IN_SECOND>
     
 
 ## Log Section (Available for Agent >=6.0)
-
+#
 #logs:
 
-    # - type : (mandatory) type of log input source (tcp / udp / file)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
-    #   tags: (optional) add tags to each logs collected
+    ##   type - required - type of log input source (tcp / udp / file)
+    ##   port / path - required - Set port if type is tcp or udp. Set path if type is file
+    ##   service - required - name of the service owning the log
+    ##   source - required - attribute that defines which integration is sending the logs
+    ##   sourcecategory - optional -  Multiple value attribute. Can be used to refine the source attribtue
+    ##   tags - optional - add tags to each logs collected
     
     # - type: file
     #   path: /var/log/apache2/access.log
