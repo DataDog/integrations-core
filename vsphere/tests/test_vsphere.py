@@ -52,7 +52,8 @@ def test_init():
         VSphereCheck('vsphere', {}, {}, [{'': ''}])
 
     init_config = {
-        'refresh_morlist_interval': -99,
+        'refresh_morlist_interval': 100,
+        'clean_morlist_interval': 50,
         'refresh_metrics_metadata_interval': -99,
         'batch_property_collector_size': -1,
     }
@@ -63,8 +64,9 @@ def test_init():
     assert len(check.server_instances) == 0
     assert len(check.cache_times) == 1
     assert 'vsphere_foo' in check.cache_times
-    assert check.cache_times['vsphere_foo'][MORLIST][INTERVAL] == -99
+    assert check.cache_times['vsphere_foo'][MORLIST][INTERVAL] == 100
     assert check.cache_times['vsphere_foo'][METRICS_METADATA][INTERVAL] == -99
+    assert check.clean_morlist_interval == check.refresh_morlist_interval
     assert len(check.event_config) == 1
     assert 'vsphere_foo' in check.event_config
     assert len(check.registry) == 0
@@ -186,8 +188,6 @@ def test_check(vsphere, instance):
             vsphere.check(instance)
             set_external_tags.assert_called_once()
             all_the_tags = set_external_tags.call_args[0][0]
-
-            print(all_the_tags)
 
             assert ('vm4', {SOURCE_TYPE: [
                                         'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
