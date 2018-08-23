@@ -134,6 +134,8 @@ To learn more about the base Python class, see the [Python API documentation][2]
 
 There are two basic types of tests: unit tests for specific elements, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][3] and [tox][4] are used to run the tests. 
 
+For more information, see the [Datadog Checks Dev documentation][15].
+
 The first part of the `check` method below retrieves two pieces of information we need from the configuration file. This is a good candidate for a unit test. Open the file at `my_check/tests/test_check.py` and replace the contents with something like this:
 
 ```python
@@ -412,3 +414,4 @@ python setup.py bdist_wheel
 [12]: https://docs.datadoghq.com/integrations/
 [13]: https://www.uuidgenerator.net/
 [14]: https://docs.datadoghq.com/getting_started/tagging/
+[15]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
