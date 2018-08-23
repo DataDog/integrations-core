@@ -234,7 +234,7 @@ def test_psutil_rw(aggregator, psutil_mocks):
     c = Disk('disk', None, {}, instances)
     c.check(instances[0])
 
-    aggregator.assert_service_check('disk.read_write', status=2)
+    aggregator.assert_service_check('disk.read_write', status=Disk.CRITICAL)
 
 def mock_df_output(fname):
     """

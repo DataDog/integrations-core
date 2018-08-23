@@ -130,14 +130,20 @@ class Disk(AgentCheck):
                            tags=tags, device_name=device_name)
 
             # Add in a disk read write or read only check
-            if self.instances[0].get('service_check_rw', False):
+            if self._service_check_rw:
                 rwro = list(set(['rw', 'ro']) & set(part.opts.split(',')))
                 if len(rwro) == 1:
                     self.service_check(
                         'disk.read_write',
                         AgentCheck.OK if rwro[0] == 'rw' else AgentCheck.CRITICAL,
-                        tags=tags+['device_name:%s' % (device_name)]
+                        tags=tags+['device:%s' % (device_name)]
                     )
+                else:
+                    self.service_check(
+                        'disk.read_write', AgentCheck.UNKNOWN,
+                        tags=tags+['device:%s' % (device_name)]
+                    )
+
 
         self.collect_latency_metrics()
 

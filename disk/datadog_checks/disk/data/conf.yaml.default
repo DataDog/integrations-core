@@ -58,4 +58,4 @@ instances:
     #
     # The (optional) service_check_rw parameter notifies when one of the partitions is in
     # read-only mode
-    # service_check_rw: no
+    # service_check_rw: false
