@@ -8,8 +8,7 @@ import getpass
 import pytest
 
 from datadog_checks.postfix import PostfixCheck
-from datadog_checks.dev.utils import temp_dir
-
+from datadog_checks.dev.utils import temp_dir, create_file
 
 log = logging.getLogger()
 
@@ -48,12 +47,12 @@ def setup_postfix():
 
 
 def add_messages(queue_root, queues, in_count):
-    for _ in xrange(1, 10000):
+    for _ in range(10000):
         shuffle(queues)
         rand_queue = sample(queues, 1)[0]
         queue_file = binascii.b2a_hex(os.urandom(7))
 
-        open(os.path.join(queue_root, rand_queue, queue_file), 'w')
+        create_file(os.path.join(queue_root, rand_queue, queue_file))
 
         # keep track of what we put in
         in_count[rand_queue][0] += 1
