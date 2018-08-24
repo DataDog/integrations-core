@@ -274,6 +274,72 @@ The check is almost done. Let's add the final touches.
 
 ## Final touches
 
+### Enhance the configuration file
+
+Add a set of special words to the check `conf.yaml.example` configuration file in form of YAML comment strings. 
+Such words are referred to as *commands* and take the form `@command`. A command is valid only when the comment line containing it starts with a double `#` char:
+
+```
+## @command this is valid
+
+# @command this is not valid and will be ignored
+```
+
+Parameters in a configuration file follow these rules:
+
+* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]: 
+* All required parameters are **not** commented by default but can contain placeholders
+* All optional parameters are commented by default and can contain placeholders
+* If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of just a canva  placeholder.
+
+#### Available commands
+##### Param
+
+```
+@param <name> - <type> - <required> - default:<defval> \n (description)
+```
+
+Arguments:
+
+* `name`: the name of the parameter, e.g. `apache_status_url`
+* `type`: the data type for the parameter value. Possible values:
+  * integer 
+  * double 
+  * string 
+  * comma separated list of <integer|double|string>
+* `required`: whether the parameter is required or not. Possible values: 
+    * required
+    * optional
+* `defval`: default value for the parameter, can be empty.
+* `description`: description of the parameter, can span across multiple lines in a special comment block.
+
+##### Resulting layout example
+
+The comments always have the same layout:
+
+```
+## @param <name> - <type> - <required> - default:<defval>
+## Description of the param that is really long
+## So it’s a multi-line comment
+#
+# <PARAM_NAME>:<PLACEHOLDER>
+```
+
+##### Example 
+
+For instance, for the Apache integration `apache_status_url` parameter the command has the following layout:
+
+```
+init_config:
+
+instances:
+
+    ## @param apache_status_url - string - required
+    ## Status url of your Apache server.
+    #
+  - apache_status_url: http://localhost/server-status?auto
+```
+
 ### Populate the README
 
 The `README.md` file provided by our cookiecutter template already has the correct format. You must fill out the relevant sections - look for the ellipses `[...]`.
@@ -415,3 +481,4 @@ python setup.py bdist_wheel
 [13]: https://www.uuidgenerator.net/
 [14]: https://docs.datadoghq.com/getting_started/tagging/
 [15]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
+[16]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
