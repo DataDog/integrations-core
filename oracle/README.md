@@ -61,6 +61,7 @@ CREATE USER datadog IDENTIFIED BY <password>;
 
 -- Grant access to the datadog user.
 GRANT CONNECT TO datadog;
+GRANT SELECT ON GV$PROCESS TO datadog;
 GRANT SELECT ON gv_$sysmetric TO datadog;
 GRANT SELECT ON sys.dba_data_files TO datadog;
 ```
