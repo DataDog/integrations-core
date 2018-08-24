@@ -796,6 +796,7 @@ SELECT s.schemaname,
                     db.rollback()
 
                 if not row:
+                    self.log.debug("query result for metric_prefix {}: returned an empty result".format(metric_prefix))
                     continue
 
                 if len(columns) != len(row):

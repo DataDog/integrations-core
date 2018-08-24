@@ -172,6 +172,13 @@ def test_malformed_get_custom_queries(check):
                                             len(malformed_custom_query['columns']), len(query_return)))
     check.log.reset_mock()
 
+    # Make sure the query does not return an empty result
+    db.cursor().fetchone.return_value = []
+    check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
+    check.log.debug.assert_called_with("query result for metric_prefix {}: returned an empty result".format(
+                                        malformed_custom_query['metric_prefix']))
+    check.log.reset_mock()
+    
     # Make sure 'name' is defined in each column
     malformed_custom_query_column['some_key'] = 'some value'
     db.cursor().fetchone.return_value = [1337]
