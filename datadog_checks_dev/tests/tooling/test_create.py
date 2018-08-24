@@ -26,7 +26,14 @@ def test_new_check_test():
             capture=True,
             check=True
         )
+
         with chdir(check_path):
             run_command([sys.executable, '-m', 'pytest'], capture=True, check=True)
+
+        run_command(
+            [sys.executable, '-m', 'pip', 'uninstall', '-y', 'my-check'],
+            capture=True,
+            check=True
+        )
     finally:
         remove_path(check_path)

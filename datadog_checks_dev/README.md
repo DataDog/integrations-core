@@ -538,9 +538,12 @@ Usage: ddev test [OPTIONS] [CHECKS]...
   compared to the master branch.
 
 Options:
-  -b, --bench  Run only benchmarks
-  --every      Run every kind of test
-  -h, --help   Show this message and exit.
+  -b, --bench        Run only benchmarks
+  -c, --cov          Measure code coverage
+  -m, --cov-missing  Show line numbers of statements that were not executed
+  --cov-keep         Keep coverage reports
+  -v, --verbose      Increase verbosity (can be used additively)
+  -h, --help         Show this message and exit.
 ```
 
 ## Development

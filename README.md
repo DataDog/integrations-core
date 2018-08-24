@@ -1,7 +1,8 @@
 # Datadog Agent Integrations - Core
 
-[![Build Status][1]][2]
+[![Build status][1]][2]
 [![Build status][3]][4]
+[![Coverage status][17]][18]
 
 This repository contains the Agent Integrations (also known as checks) that Datadog
 officially develops and supports. To add a new integration, please see the [Integrations Extras][5]
@@ -79,3 +80,5 @@ and [knowledge base][12]. You can also visit our
 [14]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15
 [15]: https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt
 [16]: https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt
+[17]: https://codecov.io/github/DataDog/integrations-core/coverage.svg?branch=master
+[18]: https://codecov.io/github/DataDog/integrations-core?branch=master

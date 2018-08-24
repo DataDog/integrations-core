@@ -1,5 +1,5 @@
 version: '{branch}.{build}'
-shallow_clone: true
+clone_depth: 3
 environment:
   TRAVIS_BUILD_DIR: c:\projects\integrations-core
   INTEGRATIONS_DIR: c:\projects\integrations-core\embedded
@@ -38,7 +38,7 @@ install:
   - "%PYTHON%/Scripts/easy_install.exe %PYWIN_PATH%"
   - ps: mkdir -p $(python -m site --user-site)
   - ps: echo "C:\projects\dd-agent" | out-file "$(python -m site --user-site)/datadog-agent.pth" -encoding ASCII
-  - ps: (& "$env:PYTHON/python.exe" -m pip install --upgrade pip)
+  - ps: (& "$env:PYTHON/python.exe" -m pip install --upgrade pip codecov)
   - ps: '& "$env:PYTHON/Scripts/pip.exe" install -r c:\projects\dd-agent\requirements.txt'
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
@@ -61,7 +61,7 @@ install:
   - cd ..
 build: off
 test_script:
-  - ddev test datadog_checks_base datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check sqlserver windows_service
+  - ddev test datadog_checks_base active_directory aspdotnet dotnetclr exchange_server iis pdh_check sqlserver windows_service
   - bundle exec rake ci:run[wmi_check]
 
 # Uncomment the following to enable RDP connection into the builder and debug a build
