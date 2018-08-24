@@ -23,7 +23,7 @@ The Gearman check is included in the [Datadog Agent][1] package, so you don't ne
 
     instances:
         - server: localhost
-        port: 4730
+          port: 4730
     ```
 
 2. [Restart the Agent][3]
