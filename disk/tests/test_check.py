@@ -49,10 +49,11 @@ RATES_VALUES = {
 
 
 class MockPart(object):
-    def __init__(self, device=DEFAULT_DEVICE_NAME, fstype='ext4', mountpoint='/'):
+    def __init__(self, device=DEFAULT_DEVICE_NAME, fstype='ext4', mountpoint='/', opts='ro'):
         self.device = device
         self.fstype = fstype
         self.mountpoint = mountpoint
+        self.opts = opts
 
 
 class MockDiskMetrics(object):
@@ -121,6 +122,7 @@ def test_default_options():
     assert check._all_partitions is False
     assert check._excluded_disk_re == re.compile('^$')
     assert check._device_tag_re == []
+    assert check._service_check_rw is False
 
 def test_disk_check(aggregator):
     """
@@ -223,6 +225,16 @@ def test_use_mount(aggregator, psutil_mocks):
         aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
 
     assert aggregator.metrics_asserted_pct == 100.0
+
+def test_psutil_rw(aggregator, psutil_mocks):
+    """
+    Check for 'ro' option in the mounts
+    """
+    instances = [{'service_check_rw': 'yes'}]
+    c = Disk('disk', None, {}, instances)
+    c.check(instances[0])
+
+    aggregator.assert_service_check('disk.read_write', status=Disk.CRITICAL)
 
 def mock_df_output(fname):
     """
