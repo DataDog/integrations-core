@@ -272,8 +272,8 @@ tox -e integration
 
 The check is almost done. Let's add the final touches by adding the integration configurations.
 
-## Integration configuration
-### Integration Check configuration file
+## Configuration
+### Configuration file
 #### Parameters
 
 Parameters in a configuration file follow these rules:
@@ -281,11 +281,11 @@ Parameters in a configuration file follow these rules:
 * Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]: 
 * All required parameters are **not** commented by default.
 * All optional parameters are commented by default.
-* If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of just a canva  placeholder.
+* If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
 
 #### Parameters documentation
 
-Each parameter in your integration check `conf.yaml.example` configuration file, must have a paragraph in form of YAML comment strings with the following format:
+Each parameter in a configuration file must have a special comment block with the following format:
 
 ```
 ## @<COMMAND_1> <ARG_COMMAND_1>
@@ -295,7 +295,7 @@ Each parameter in your integration check `conf.yaml.example` configuration file,
 <YAML_PARAM>: <PLACEHOLDER>
 ```
 
-This paragraph contains **commands** which take the form `@command`. A command is valid only when the comment line containing it starts with a double `#` char:
+This paragraph contains **commands** which are a special string in the form `@command`. A command is valid only when the comment line containing it starts with a double `#` char:
 
 ```
 ## @command this is valid
@@ -318,24 +318,14 @@ Arguments:
 
 * `name`: the name of the parameter, e.g. `apache_status_url`
 * `type`: the data type for the parameter value. Possible values:
-  * integer 
-  * double 
-  * string 
-  * comma separated list of <integer|double|string>
+  * *integer* 
+  * *double* 
+  * *string* 
+  * comma separated list of <*integer*|*double*|*string*>
 * `required`: whether the parameter is required or not. Possible values: 
-    * required
-    * optional
+    * *required*
+    * *optional*
 * `defval`: default value for the parameter, can be empty.
-
-The final layout looks like this:
-
-```
-## @param <name> - <type> - <required/optional> - default:<defval>
-## Description of the param that is really long
-## So it’s a multi-line comment
-#
-# <PARAM_NAME>:<PLACEHOLDER>
-```
 
 For instance, here is the `@param` *command* for the Apache integration check`apache_status_url` parameter:
 
