@@ -1,14 +1,15 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 import os
-from mock import MagicMock
-from nose.plugins.attrib import attr
+import mock
+
+import pytest
 
 # project
-from tests.checks.common import AgentCheckTest
+from datadog_checks.kube_dns import KubeDNSCheck
 
 
 instance = {
@@ -29,12 +30,33 @@ class MockResponse:
         for elt in self.content.split("\n"):
             yield elt
 
+    def raise_for_status(self):
+        pass
+
     def close(self):
         pass
 
 
-@attr(requires='kube_dns')
-class TestKubeDNS(AgentCheckTest):
+@pytest.fixture
+def aggregator():
+    from datadog_checks.stubs import aggregator
+
+    aggregator.reset()
+    return aggregator
+
+
+@pytest.fixture
+def mock_get():
+    mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
+    text_data = None
+    with open(mesh_file_path, 'rb') as f:
+        text_data = f.read()
+
+    with mock.patch('requests.get', return_value=MockResponse(text_data, 'text/plain; version=0.0.4'), __name__='get'):
+        yield
+
+
+class TestKubeDNS:
     """Basic Test for kube_dns integration."""
     CHECK_NAME = 'kube_dns'
     NAMESPACE = 'kubedns'
@@ -53,29 +75,17 @@ class TestKubeDNS(AgentCheckTest):
         NAMESPACE + '.cachemiss_count.count',
     ]
 
-    def test_check(self):
+    def test_check(self, aggregator, mock_get):
         """
         Testing kube_dns check.
         """
-        content_type = 'text/plain; version=0.0.4'
-        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'metrics.txt')
-        with open(f_name, 'r') as f:
-            bin_data = f.read()
 
-        mocks = {
-            'poll': MagicMock(return_value=MockResponse(bin_data, content_type))
-        }
-
-        self.run_check({'instances': [instance]}, mocks=mocks)
-        # check that we have gauge metrics, and NOT rate metrics (as we should then only have one point for them)
-        # (Can happen if some labels are not picked up as tags when reading up the prometheus output)
-        for metric in self.METRICS:
-            self.assertMetric(metric)
-        self.coverage_report()
+        check = KubeDNSCheck('kube_dns', {}, {}, [instance])
+        check.check(instance)
 
         # check that we then get the count metrics also
-        self.run_check({'instances': [instance]}, mocks=mocks)
+        check.check(instance)
         for metric in self.METRICS + self.COUNT_METRICS:
-            self.assertMetric(metric)
+            aggregator.assert_metric(metric)
 
-        self.coverage_report()
+        aggregator.assert_all_metrics_covered()
