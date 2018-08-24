@@ -78,7 +78,7 @@ Answer the questions when prompted. Once completed succesfully, you will end up 
     └── tox.ini
 ```
 
-## Write the Integration check
+## Write the check
 
 ### Intro
 
