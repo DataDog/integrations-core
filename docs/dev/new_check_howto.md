@@ -270,17 +270,48 @@ Run only the integration tests for faster iterations:
 tox -e integration
 ```
 
-The check is almost done. Let's add the final touches.
+The check is almost done. Let's add the final touches by adding the integration configurations.
 
 ## Integration configuration
+### Integration Check configuration file
+#### Parameters
 
-## Integration Check configuration file
+Parameters in a configuration file follow these rules:
 
-For each parameter in your integration check `conf.yaml.example` configuration file, add a paragraph in form of YAML comment strings with double `#`. 
-Such words are referred to as *command* and take the form:
+* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]: 
+* All required parameters are **not** commented by default.
+* All optional parameters are commented by default.
+* If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of just a canva  placeholder.
+
+#### Parameters documentation
+
+Each parameter in your integration check `conf.yaml.example` configuration file, must have a paragraph in form of YAML comment strings with the following format:
 
 ```
-## @param <name> - <type> - <required> - default:<defval> \n (description)
+## @<COMMAND_1> <ARG_COMMAND_1>
+## @<COMMAND_2> <ARG_COMMAND_2>
+## <description>
+#
+<YAML_PARAM>: <PLACEHOLDER>
+```
+
+This paragraph contains **commands** which take the form `@command`. A command is valid only when the comment line containing it starts with a double `#` char:
+
+```
+## @command this is valid
+
+# @command this is not valid and will be ignored
+```
+
+`description` is the description of the parameter. It can span across multiple lines in a special comment block.
+
+##### Available commands
+###### Param
+
+The `@param` command aims to describe the parameter for documentation purposes.
+
+```
+@param <name> - <type> - <required> - default:<defval>
 ```
 
 Arguments:
@@ -295,7 +326,6 @@ Arguments:
     * required
     * optional
 * `defval`: default value for the parameter, can be empty.
-* `description`: description of the parameter, can span across multiple lines in a special comment block.
 
 The final layout looks like this:
 
@@ -307,7 +337,7 @@ The final layout looks like this:
 # <PARAM_NAME>:<PLACEHOLDER>
 ```
 
-For instance, here is the *command* for the Apache integration check`apache_status_url` parameter:
+For instance, here is the `@param` *command* for the Apache integration check`apache_status_url` parameter:
 
 ```
 init_config:
@@ -319,13 +349,6 @@ instances:
   #
   - apache_status_url: http://localhost/server-status?auto
 ```
-
-Parameters in a configuration file follow these rules:
-
-* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]: 
-* All required parameters are **not** commented by default.
-* All optional parameters are commented by default.
-* If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of just a canva  placeholder.
 
 ### Integration README
 
