@@ -94,6 +94,18 @@ class ConnectionError(Exception):
     pass
 
 
+class Mor:
+    def __init__(self, mor, metrics=None, last_seen=0, interval=None, mor_type=None, tags=None, hostname=None):
+        self.mor = mor
+        self.name = str(mor)
+        self.metrics = metrics
+        self.last_seen = last_seen
+        self.interval = interval
+        self.mor_type = mor_type
+        self.tags = tags
+        self.hostname = hostname
+
+
 class VSphereCheck(AgentCheck):
     """ Get performance metrics from a vCenter server and upload them to Datadog
     References:
@@ -347,8 +359,8 @@ class VSphereCheck(AgentCheck):
                 mors = list(mor_by_mor_name.values())
 
             for mor in mors:
-                if mor.get('hostname'):  # some mor's have a None hostname
-                    external_host_tags.append((mor['hostname'], {SOURCE_TYPE: mor['tags']}))
+                if mor.hostname:  # some mor's have a None hostname
+                    external_host_tags.append((mor.hostname, {SOURCE_TYPE: mor.tags}))
 
         return external_host_tags
 
@@ -502,12 +514,7 @@ class VSphereCheck(AgentCheck):
 
                 if vsphere_type:
                     instance_tags.append(vsphere_type)
-                obj_list[vimtype].append({
-                    "mor_type": mor_type,
-                    "mor": obj,
-                    "hostname": hostname,
-                    "tags": tags + instance_tags
-                })
+                obj_list[vimtype].append(Mor(obj, mor_type=mor_type, hostname=hostname, tags=tags + instance_tags))
 
         self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
         return obj_list
@@ -614,8 +621,9 @@ class VSphereCheck(AgentCheck):
             available_metrics = [value.id for value in mor_perfs.value]
             with self.morlist_lock:
                 try:
-                    self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
-                    self.morlist[i_key][mor_name]['last_seen'] = time.time()
+                    mor = self.morlist[i_key][mor_name]
+                    mor.metrics = self._compute_needed_metrics(instance, available_metrics)
+                    mor.last_seen = time.time()
                 except KeyError:
                     self.log.error("Trying to compute needed metrics from object %s deleted from the cache, skipping. "
                                    "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
@@ -634,7 +642,7 @@ class VSphereCheck(AgentCheck):
         if i_key not in self.morlist:
             self.morlist[i_key] = {}
 
-        for resource_type in RESOURCE_TYPE_METRICS:
+        for resource_type in self.morlist_raw[i_key]:
             query_specs = []
             # Batch size can prevent querying large payloads at once if the environment is too large
             # If batch size is set to 0, process everything at once
@@ -642,16 +650,15 @@ class VSphereCheck(AgentCheck):
             for _ in xrange(batch_size):
                 try:
                     mor = self.morlist_raw[i_key][resource_type].pop()
-                    mor_name = str(mor["mor"])
-                    mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
+                    mor.interval = REAL_TIME_INTERVAL if mor.mor_type in REALTIME_RESOURCES else None
                     with self.morlist_lock:
-                        if mor_name not in self.morlist[i_key]:
-                            self.morlist[i_key][mor_name] = mor
-                            self.morlist[i_key][mor_name]["last_seen"] = time.time()
+                        if mor.name not in self.morlist[i_key]:
+                            mor.last_seen = time.time()
+                            self.morlist[i_key][mor.name] = mor
 
                     query_spec = vim.PerformanceManager.QuerySpec()
-                    query_spec.entity = mor["mor"]
-                    query_spec.intervalId = mor["interval"]
+                    query_spec.entity = mor.mor
+                    query_spec.intervalId = mor.interval
                     query_spec.maxSample = 1
                     query_specs.append(query_spec)
 
@@ -668,10 +675,8 @@ class VSphereCheck(AgentCheck):
         """
         i_key = self._instance_key(instance)
         with self.morlist_lock:
-            morlist = self.morlist[i_key].items()
-            for mor_name, mor in morlist:
-                last_seen = mor['last_seen']
-                if (time.time() - last_seen) > self.clean_morlist_interval:
+            for mor_name, mor in self.morlist[i_key].items():
+                if (time.time() - mor.last_seen) > self.clean_morlist_interval:
                     self.log.debug("Deleting %s from the cache", mor_name)
                     del self.morlist[i_key][mor_name]
 
@@ -764,15 +769,15 @@ class VSphereCheck(AgentCheck):
                     value = self._transform_value(instance, result.id.counterId, result.value[0])
 
                     tags = ['instance:{}'.format(instance_name)]
-                    if not mor['hostname']:  # no host tags available
-                        tags.extend(mor['tags'])
+                    if not mor.hostname:  # no host tags available
+                        tags.extend(mor.tags)
 
                     # vsphere "rates" should be submitted as gauges (rate is
                     # precomputed).
                     self.gauge(
                         "vsphere.{}".format(metric_name),
                         value,
-                        hostname=mor['hostname'],
+                        hostname=mor.hostname,
                         tags=['instance:{}'.format(instance_name)] + custom_tags
                     )
 
@@ -803,15 +808,15 @@ class VSphereCheck(AgentCheck):
         if n_mors:
             for i in xrange(n_mors / batch_size + 1):
                 for mor_name, mor in mors[i * batch_size:(i + 1) * batch_size]:
-                    if mor['mor_type'] == 'vm':
+                    if mor.mor_type == 'vm':
                         vm_count += 1
-                    if 'metrics' not in mor or not mor['metrics']:
+                    if not mor.metrics:
                         continue
 
                     query_spec = vim.PerformanceManager.QuerySpec()
-                    query_spec.entity = mor["mor"]
-                    query_spec.intervalId = mor["interval"]
-                    query_spec.metricId = mor["metrics"]
+                    query_spec.entity = mor.mor
+                    query_spec.intervalId = mor.interval
+                    query_spec.metricId = mor.metrics
                     query_spec.maxSample = 1
                     query_specs.append(query_spec)
 
