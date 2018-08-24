@@ -87,17 +87,17 @@ def assertMOR(check, instance, name=None, spec=None, tags=None, count=None, subs
     mor_list = [mor for _, mors in check.morlist_raw[instance_name].iteritems() for mor in mors]
 
     for mor in mor_list:
-        if name is not None and name != mor['hostname']:
+        if name is not None and name != mor.hostname:
             continue
 
-        if spec is not None and spec != mor['mor_type']:
+        if spec is not None and spec != mor.mor_type:
             continue
 
         if tags is not None:
             if subset:
-                if not set(tags).issubset(set(mor['tags'])):
+                if not set(tags).issubset(set(mor.tags)):
                     continue
-            elif set(tags) != set(mor['tags']):
+            elif set(tags) != set(mor.tags):
                 continue
 
         candidates.append(mor)
