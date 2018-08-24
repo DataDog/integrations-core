@@ -290,7 +290,7 @@ Each parameter in your integration check `conf.yaml.example` configuration file,
 ```
 ## @<COMMAND_1> <ARG_COMMAND_1>
 ## @<COMMAND_2> <ARG_COMMAND_2>
-## <description>
+## <DESCRIPTION>
 #
 <YAML_PARAM>: <PLACEHOLDER>
 ```
@@ -303,7 +303,7 @@ This paragraph contains **commands** which take the form `@command`. A command i
 # @command this is not valid and will be ignored
 ```
 
-`description` is the description of the parameter. It can span across multiple lines in a special comment block.
+`<DESCRIPTION>` is the description of the parameter. It can span across multiple lines in a special comment block.
 
 ##### Available commands
 ###### Param
