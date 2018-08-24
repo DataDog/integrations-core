@@ -23,7 +23,7 @@ Python 2.7 needs to be available on your system. It is strongly recommended to c
 
 You'll also need `docker-compose` in order to run the test harness. 
 
-## Integration Setup
+## Setup
 
 Clone the [integrations-extras repository][7] and point your shell at the base directory:
 
