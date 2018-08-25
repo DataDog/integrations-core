@@ -54,7 +54,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    packages=['datadog_checks.consul'],
+    packages=['datadog_checks', 'datadog_checks.consul'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

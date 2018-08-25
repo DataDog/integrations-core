@@ -56,7 +56,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.couch'],
+    packages=['datadog_checks', 'datadog_checks.couch'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

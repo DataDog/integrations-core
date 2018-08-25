@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.agent_metrics'],
+    packages=['datadog_checks', 'datadog_checks.agent_metrics'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

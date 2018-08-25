@@ -48,7 +48,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    packages=['datadog_checks.kafka_consumer'],
+    packages=['datadog_checks', 'datadog_checks.kafka_consumer'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

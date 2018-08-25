@@ -43,7 +43,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-    packages=['datadog_checks.pgbouncer'],
+    packages=['datadog_checks', 'datadog_checks.pgbouncer'],
     install_requires=[CHECKS_BASE_REQ],
     tests_require=get_requirements("requirements-dev.txt"),
     # Extra files to ship with the wheel package

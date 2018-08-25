@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.aspdotnet'],
+    packages=['datadog_checks', 'datadog_checks.aspdotnet'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

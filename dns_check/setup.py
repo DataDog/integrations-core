@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.dns_check'],
+    packages=['datadog_checks', 'datadog_checks.dns_check'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

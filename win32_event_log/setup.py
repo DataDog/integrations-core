@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.win32_event_log'],
+    packages=['datadog_checks', 'datadog_checks.win32_event_log'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

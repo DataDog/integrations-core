@@ -52,7 +52,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.btrfs'],
+    packages=['datadog_checks', 'datadog_checks.btrfs'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

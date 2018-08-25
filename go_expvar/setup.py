@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.go_expvar'],
+    packages=['datadog_checks', 'datadog_checks.go_expvar'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

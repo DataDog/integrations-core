@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.gearmand'],
+    packages=['datadog_checks', 'datadog_checks.gearmand'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

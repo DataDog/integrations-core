@@ -52,7 +52,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    packages=['datadog_checks.marathon'],
+    packages=['datadog_checks', 'datadog_checks.marathon'],
 
     install_requires=[CHECKS_BASE_REQ],
     tests_require=get_requirements("requirements-dev.txt"),

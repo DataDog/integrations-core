@@ -47,7 +47,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    packages=['datadog_checks.cisco_aci'],
+    packages=['datadog_checks', 'datadog_checks.cisco_aci'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
