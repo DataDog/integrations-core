@@ -29,7 +29,7 @@ After you have installed the Instant Client libraries, on linux you may have to 
     # Put the library location in an ld configuration file.
 
 sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
-/etc/ld.so.conf.d/oracle-instantclient.conf"
+    /etc/ld.so.conf.d/oracle-instantclient.conf"
 
     # Update the bindings.
 
