@@ -27,23 +27,26 @@ After you have installed the Instant Client libraries, on linux you may have to 
 
 ```
     # Put the library location in an ld configuration file.
-    sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
-    /etc/ld.so.conf.d/oracle-instantclient.conf"
+
+sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
+/etc/ld.so.conf.d/oracle-instantclient.conf"
 
     # Update the bindings.
-    sudo ldconfig
+
+sudo ldconfig
 ```
 
 Alternately, update your `LD_LIBRARY_PATH` to include the location of the Instant Client libraries. For example:
 
 ```
-    mkdir -p /opt/oracle/ && cd /opt/oracle/
+mkdir -p /opt/oracle/ && cd /opt/oracle/
 
     # Download Oracle Instant Client (example dir: /opt/oracle).
-    unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
-    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
 
-    export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
+unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
+unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
+
+export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 ```
 
 **Note:** Agent 6 uses upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.service` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][4] or [systemd][5] for more information on how to configured these settings.
