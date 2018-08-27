@@ -9,7 +9,6 @@ from Queue import Empty, Queue
 import re
 import ssl
 import time
-import threading
 import traceback
 
 from pyVim import connect
@@ -150,7 +149,6 @@ class VSphereCheck(AgentCheck):
         self.morlist_raw = {}
         # Second layer, processed from the first one
         self.morlist = {}
-        self.morlist_lock = threading.RLock()
         # Metrics metadata, basically perfCounterId -> {name, group, description}
         self.metrics_metadata = {}
         self.latest_event_query = {}
@@ -335,18 +333,16 @@ class VSphereCheck(AgentCheck):
         external_host_tags = []
         for instance in self.instances:
             i_key = self._instance_key(instance)
-            with self.morlist_lock:
-                mor_by_mor_name = self.morlist.get(i_key)
+            mor_by_mor_name = self.morlist.get(i_key)
 
-                if not mor_by_mor_name:
-                    self.log.warning(
-                        u"Unable to extract hosts' tags for vSphere instance named %s. "
-                        u"Is the check failing on this instance?", i_key
-                    )
-                    continue
-                mors = list(mor_by_mor_name.values())
+            if not mor_by_mor_name:
+                self.log.warning(
+                    u"Unable to extract hosts' tags for vSphere instance named %s. "
+                    u"Is the check failing on this instance?", i_key
+                )
+                continue
 
-            for mor in mors:
+            for mor in list(mor_by_mor_name.values()):
                 if mor.get('hostname'):  # some mor's have a None hostname
                     external_host_tags.append((mor['hostname'], {SOURCE_TYPE: mor['tags']}))
 
@@ -516,6 +512,9 @@ class VSphereCheck(AgentCheck):
     def _cache_morlist_raw_atomic(self, instance, tags, regexes=None, include_only_marked=False):
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
+        if i_key not in self.morlist_raw:
+            self.morlist_raw[i_key] = {}
+
         all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags)
         self.morlist_raw[i_key] = {resource: objs for resource, objs in all_objs.items()}
 
@@ -566,7 +565,7 @@ class VSphereCheck(AgentCheck):
         i_key = self._instance_key(instance)
         self.log.debug("Caching the morlist for vcenter instance %s" % i_key)
         for resource_type in RESOURCE_TYPE_METRICS:
-            if len(self.morlist_raw.get(i_key, {}).get(resource_type, [])) > 0:
+            if i_key in self.morlist_raw and len(self.morlist_raw[i_key].get(resource_type, [])) > 0:
                 self.log.debug(
                     "Skipping morlist collection now, RAW results "
                     "processing not over (latest refresh was {0}s ago)".format(
@@ -612,14 +611,13 @@ class VSphereCheck(AgentCheck):
         for mor_perfs in res:
             mor_name = str(mor_perfs.entity)
             available_metrics = [value.id for value in mor_perfs.value]
-            with self.morlist_lock:
-                try:
-                    self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
-                    self.morlist[i_key][mor_name]['last_seen'] = time.time()
-                except KeyError:
-                    self.log.error("Trying to compute needed metrics from object %s deleted from the cache, skipping. "
-                                   "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
-                    continue
+            try:
+                self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
+                self.morlist[i_key][mor_name]['last_seen'] = time.time()
+            except KeyError:
+                self.log.error("Trying to compute needed metrics from object %s deleted from the cache, skipping. "
+                               "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
+                continue
 
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total(), tags=instance.get('tags', []))
@@ -644,10 +642,9 @@ class VSphereCheck(AgentCheck):
                     mor = self.morlist_raw[i_key][resource_type].pop()
                     mor_name = str(mor["mor"])
                     mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
-                    with self.morlist_lock:
-                        if mor_name not in self.morlist[i_key]:
-                            self.morlist[i_key][mor_name] = mor
-                            self.morlist[i_key][mor_name]["last_seen"] = time.time()
+                    if mor_name not in self.morlist[i_key]:
+                        self.morlist[i_key][mor_name] = mor
+                        self.morlist[i_key][mor_name]["last_seen"] = time.time()
 
                     query_spec = vim.PerformanceManager.QuerySpec()
                     query_spec.entity = mor["mor"]
@@ -667,13 +664,13 @@ class VSphereCheck(AgentCheck):
         we cannot get any metrics from them anyway (or =0)
         """
         i_key = self._instance_key(instance)
-        with self.morlist_lock:
-            morlist = self.morlist[i_key].items()
-            for mor_name, mor in morlist:
-                last_seen = mor['last_seen']
-                if (time.time() - last_seen) > self.clean_morlist_interval:
-                    self.log.debug("Deleting %s from the cache", mor_name)
-                    del self.morlist[i_key][mor_name]
+        morlist = self.morlist[i_key].items()
+
+        for mor_name, mor in morlist:
+            last_seen = mor['last_seen']
+            if (time.time() - last_seen) > self.clean_morlist_interval:
+                self.log.debug("Deleting %s from the cache", mor_name)
+                del self.morlist[i_key][mor_name]
 
     def _cache_metrics_metadata(self, instance):
         """ Get from the server instance, all the performance counters metadata
@@ -735,15 +732,12 @@ class VSphereCheck(AgentCheck):
         if results:
             for mor_perfs in results:
                 mor_name = str(mor_perfs.entity)
-                with self.morlist_lock:
-                    try:
-                        mor = self.morlist[i_key][mor_name]
-                    except KeyError:
-                        self.log.error(
-                            "Trying to get metrics from object %s deleted from the cache, skipping. "
-                            "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name
-                        )
-                        continue
+                try:
+                    mor = self.morlist[i_key][mor_name]
+                except KeyError:
+                    self.log.error("Trying to get metrics from object %s deleted from the cache, skipping. "
+                                   "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
+                    continue
                 for result in mor_perfs.value:
                     if result.id.counterId not in self.metrics_metadata[i_key]:
                         self.log.debug("Skipping this metric value, because there is no metadata about it")
@@ -785,11 +779,11 @@ class VSphereCheck(AgentCheck):
         job queue is processed the Aggregator will receive the metrics.
         """
         i_key = self._instance_key(instance)
-        with self.morlist_lock:
-            if i_key not in self.morlist:
-                self.log.debug("Not collecting metrics for this instance, nothing to do yet: {}".format(i_key))
-                return
-            mors = self.morlist[i_key].items()
+        if i_key not in self.morlist:
+            self.log.debug("Not collecting metrics for this instance, nothing to do yet: {}".format(i_key))
+            return
+
+        mors = self.morlist[i_key].items()
         n_mors = len(mors)
         self.log.debug("Collecting metrics of %d mors", n_mors)
 
