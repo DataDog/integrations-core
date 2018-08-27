@@ -270,9 +270,75 @@ Run only the integration tests for faster iterations:
 tox -e integration
 ```
 
-The check is almost done. Let's add the final touches.
+The check is almost done. Let's add the final touches by adding the integration configurations.
 
-## Final touches
+## Configuration
+### Configuration file
+#### Parameters
+
+Parameters in a configuration file follow these rules:
+
+* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]: 
+* All required parameters are **not** commented by default.
+* All optional parameters are commented by default.
+* If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
+
+#### Parameters documentation
+
+Each parameter in a configuration file must have a special comment block with the following format:
+
+```
+## @<COMMAND_1> <ARG_COMMAND_1>
+## @<COMMAND_2> <ARG_COMMAND_2>
+## <DESCRIPTION>
+#
+<YAML_PARAM>: <PLACEHOLDER>
+```
+
+This paragraph contains **commands** which are a special string in the form `@command`. A command is valid only when the comment line containing it starts with a double `#` char:
+
+```
+## @command this is valid
+
+# @command this is not valid and will be ignored
+```
+
+`<DESCRIPTION>` is the description of the parameter. It can span across multiple lines in a special comment block.
+
+##### Available commands
+###### Param
+
+The `@param` command aims to describe the parameter for documentation purposes.
+
+```
+@param <name> - <type> - <required> - default:<defval>
+```
+
+Arguments:
+
+* `name`: the name of the parameter, e.g. `apache_status_url`
+* `type`: the data type for the parameter value. Possible values:
+  * *integer* 
+  * *double* 
+  * *string* 
+  * comma separated list of <*integer*|*double*|*string*>
+* `required`: whether the parameter is required or not. Possible values: 
+    * *required*
+    * *optional*
+* `defval`: default value for the parameter, can be empty.
+
+For instance, here is the `@param` *command* for the Apache integration check `apache_status_url` parameter:
+
+```
+init_config:
+
+instances:
+
+  ## @param apache_status_url - string - required
+  ## Status url of your Apache server.
+  #
+  - apache_status_url: http://localhost/server-status?auto
+```
 
 ### Populate the README
 
@@ -415,3 +481,4 @@ python setup.py bdist_wheel
 [13]: https://www.uuidgenerator.net/
 [14]: https://docs.datadoghq.com/getting_started/tagging/
 [15]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
+[16]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
