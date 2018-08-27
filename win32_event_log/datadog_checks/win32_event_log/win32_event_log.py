@@ -72,7 +72,7 @@ class Win32EventLogWMI(WinWMICheck):
         # Store the last timestamp by instance
         if instance_key not in self.last_ts:
             # If system boot was withing 600s of dd agent start then use boottime as last_ts
-            if uptime() <= 600
+            if uptime() <= 600:
                 self.last_ts[instance_key] = datetime.utcnow() - timedelta(seconds=uptime())
             else:
                 self.last_ts[instance_key] = datetime.utcnow()
