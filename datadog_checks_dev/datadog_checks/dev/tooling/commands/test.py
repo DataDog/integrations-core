@@ -11,7 +11,7 @@ from ..git import files_changed
 from ..utils import get_testable_checks
 from ...structures import EnvVars
 from ...subprocess import run_command
-from ...utils import chdir, remove_path, running_on_ci
+from ...utils import chdir, file_exists, remove_path, running_on_ci
 
 
 def coverage_sources(check):
@@ -135,7 +135,7 @@ def test(checks, bench, coverage, cov_missing, cov_keep, verbose):
                         if result.code:
                             abort('\nFailed!', code=result.code)
 
-                if coverage:
+                if coverage and file_exists('.coverage'):
                     if not cov_keep:
                         echo_info('\n---------- Coverage report ----------\n')
 
