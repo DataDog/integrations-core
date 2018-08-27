@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict, namedtuple
+from itertools import product
 
 from six import binary_type, iteritems
 
@@ -114,6 +115,34 @@ class AggregatorStub(object):
             assert len(candidates) == count
         else:
             assert len(candidates) >= at_least
+
+    # Potential kwargs: aggregation_key, alert_type, event_type,
+    # msg_title, source_type_name
+    def assert_event(self, msg_text, count=None, at_least=1, exact_match=True,
+                     tags=None, **kwargs):
+        candidates = []
+        for e in self.events:
+            if exact_match and msg_text != e['msg_text'] or \
+                    not exact_match and msg_text not in e['msg_text']:
+                continue
+            if tags and set(tags) != set(e['tags']):
+                continue
+            for name, value in kwargs.iteritems():
+                if e[name] != value:
+                    break
+            else:
+                candidates.append(e)
+
+        msg = ("Candidates size assertion for {0}, count: {1}, "
+               "at_least: {2}) failed").format(msg_text, count, at_least)
+        if count is not None:
+            assert len(candidates) == count, msg
+        else:
+            assert len(candidates) >= at_least, msg
+
+        for ev, ec in product(self.events, candidates):
+            if ec == ev:
+                ev['tested'] = True
 
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
                       hostname=None, metric_type=None):
