@@ -54,6 +54,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
     - [Utilities](#utilities)
       - [Subprocess commands](#subprocess-commands)
       - [Temporary directories](#temporary-directories)
+  - [Practices](#practices)
 
 ## Management
 
@@ -643,6 +644,11 @@ Some examples:
 >>> assert origin == os.getcwd()
 >>>
 ```
+
+### Practices
+
+- If you see branches or functions that are unlikely to be executed or would be nearly impossible to
+  test, exclude them from code coverage consideration by adding 2 spaces followed by `# no cov`.
 
 [1]: https://github.com/DataDog/datadog-agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/stubs/aggregator.py
