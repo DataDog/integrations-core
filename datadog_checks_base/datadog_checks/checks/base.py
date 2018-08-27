@@ -135,7 +135,7 @@ class AgentCheck(object):
 
         return config_proxy_skip(proxies, uri, skip)
 
-    def _hash_context(mtype, name, value, tags=None, hostname=None):
+    def _context_uid(mtype, name, value, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
@@ -154,7 +154,7 @@ class AgentCheck(object):
                     return
             else:
                 # Other metric types have a legit use case for several calls per context, track unique contexts
-                context = self._hash_context(mtype, name, tags, hostname)
+                context = self._context_uid(mtype, name, tags, hostname)
                 if self.metric_limiter.is_reached(context):
                     return
 
