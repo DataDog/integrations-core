@@ -1,7 +1,6 @@
 comment:
-  layout: "sunburst, files"
+  layout: "reach"
   behavior: default
-  require_changes: true
   branches: null
 
 
