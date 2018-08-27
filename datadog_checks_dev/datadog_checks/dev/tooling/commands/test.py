@@ -138,10 +138,7 @@ def test(checks, bench, coverage, cov_missing, cov_keep, verbose):
                 if coverage:
                     if not cov_keep:
                         echo_info('\n---------- Coverage report ----------\n')
-
-                        result = run_command('coverage report --rcfile=../.coveragerc')
-                        if result.code:
-                            abort('\nFailed!', code=result.code)
+                        run_command('coverage report --rcfile=../.coveragerc')
 
                     if testing_on_ci:
                         result = run_command('coverage xml -i --rcfile=../.coveragerc')
