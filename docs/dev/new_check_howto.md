@@ -340,7 +340,7 @@ instances:
   - apache_status_url: http://localhost/server-status?auto
 ```
 
-### README
+### Populate the README
 
 The `README.md` file provided by our cookiecutter template already has the correct format. You must fill out the relevant sections - look for the ellipses `[...]`.
 
