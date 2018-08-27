@@ -88,3 +88,21 @@ class TestLimits(unittest.TestCase):
             check.count("metric", 0, hostname="host-{}".format(i))
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 29
+
+    def test_metric_limit_instance_config(self):
+        instances = [
+            {
+                "max_returned_metrics": 42,
+            }
+        ]
+        check = AgentCheck("test", {}, instances)
+        assert check.get_warnings() == []
+
+        for i in range(0, 42):
+            check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 0
+        assert len(aggregator.metrics("metric")) == 42
+
+        check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics("metric")) == 42

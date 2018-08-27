@@ -109,9 +109,12 @@ class AgentCheck(object):
             ],
         }
 
-        if self.DEFAULT_METRIC_LIMIT > 0:
-            self.metric_limiter = Limiter("metrics", self.DEFAULT_METRIC_LIMIT, self.warning)
-
+        # Setup metric limits
+        metric_limit = self.DEFAULT_METRIC_LIMIT
+        if len(self.instances) and isinstance(self.instances[0], dict):
+            metric_limit = self.instances[0].get("max_returned_metrics", self.DEFAULT_METRIC_LIMIT)
+        if metric_limit > 0:
+            self.metric_limiter = Limiter("metrics", metric_limit, self.warning)
 
     @property
     def in_developer_mode(self):
