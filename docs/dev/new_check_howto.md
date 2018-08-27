@@ -327,7 +327,7 @@ Arguments:
     * *optional*
 * `defval`: default value for the parameter, can be empty.
 
-For instance, here is the `@param` *command* for the Apache integration check`apache_status_url` parameter:
+For instance, here is the `@param` *command* for the Apache integration check `apache_status_url` parameter:
 
 ```
 init_config:
