@@ -1,10 +1,16 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import unittest
+import pytest
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.stubs import aggregator
+
+
+@pytest.fixture
+def aggregator():
+    from datadog_checks.stubs import aggregator
+    aggregator.reset()
+    return aggregator
 
 
 def test_instance():
@@ -54,11 +60,8 @@ class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
 
 
-class TestLimits(unittest.TestCase):
-    def tearDown(self):
-        aggregator.reset()
-
-    def test_metric_limit_gauges(self):
+class TestLimits():
+    def test_metric_limit_gauges(self, aggregator):
         check = LimitedCheck()
         assert check.get_warnings() == []
 
@@ -72,7 +75,7 @@ class TestLimits(unittest.TestCase):
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 10
 
-    def test_metric_limit_count(self):
+    def test_metric_limit_count(self, aggregator):
         check = LimitedCheck()
         assert check.get_warnings() == []
 
@@ -89,7 +92,7 @@ class TestLimits(unittest.TestCase):
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 29
 
-    def test_metric_limit_instance_config(self):
+    def test_metric_limit_instance_config(self, aggregator):
         instances = [
             {
                 "max_returned_metrics": 42,
@@ -107,7 +110,7 @@ class TestLimits(unittest.TestCase):
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 42
 
-    def test_metric_limit_instance_config_zero(self):
+    def test_metric_limit_instance_config_zero(self, aggregator):
         instances = [
             {
                 "max_returned_metrics": 0,
