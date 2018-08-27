@@ -58,9 +58,6 @@ setup(
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
 
-    # Testing setup and dependencies
-    tests_require=get_requirements(path.join('tests', 'requirements.txt')),
-
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
