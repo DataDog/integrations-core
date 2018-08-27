@@ -84,7 +84,6 @@ class GenericPrometheusCheck(AgentCheck):
         - bar
         - foo
     """
-
     DEFAULT_METRIC_LIMIT = 350
 
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=""):

@@ -82,5 +82,9 @@ instances:
   # The path to the trusted CA used for generating custom certificates
   # ssl_ca_cert: "/path/to/cacert"
 
+  # The check limits itself to 350 metric contexts (different metric name or different tags)
+  # by default. You can increase this limit, if needed:
+  # max_returned_metrics: 350
+
   # Set a timeout for the prometheus query, defaults to 10
   # prometheus_timeout: 10
