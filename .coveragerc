@@ -1,0 +1,31 @@
+[run]
+branch = True
+
+disable_warnings =
+    module-not-measured
+
+# All paths are relative to each tox.ini
+omit =
+    */test_bench.py
+
+    # These are things that are simply stored in the base package
+    ../datadog_checks_base/datadog_checks/checks/libs/*
+    ../datadog_checks_base/datadog_checks/checks/win/*
+
+    # We will test repo tooling eventually
+    ../datadog_checks_dev/datadog_checks/dev/tooling/*
+
+[report]
+show_missing = ${DDEV_COV_MISSING}
+ignore_errors = True
+
+exclude_lines =
+    no cov
+    no qa
+
+    # Ignore missing debug-only code
+    def __repr__
+    if self\.debug
+
+    # Ignore non-runnable code
+    if __name__ == .__main__.:
