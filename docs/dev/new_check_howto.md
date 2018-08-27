@@ -340,11 +340,11 @@ instances:
   - apache_status_url: http://localhost/server-status?auto
 ```
 
-### Integration README
+### README
 
 The `README.md` file provided by our cookiecutter template already has the correct format. You must fill out the relevant sections - look for the ellipses `[...]`.
 
-### Integration images and logos
+### Add images and logos
 
 The directory structure for images and logos:
 
@@ -381,7 +381,7 @@ The `logos` folder must contain **three** images with filenames and sizes that m
 * Event stream at `/event/stream`
 * Notification icons at `/report/monitor`
 
-### Integration Metadata
+### Metadata
 
 Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog is not currently automatically generated, so filling it out manually is a crucial part of the release process. 
 
