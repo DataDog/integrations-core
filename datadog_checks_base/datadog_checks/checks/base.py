@@ -42,6 +42,17 @@ class AgentCheck(object):
     The base class for any Agent based integrations
     """
     OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
+
+    """
+    DEFAULT_METRIC_LIMIT allows to set a limit on metric contexts this check can send
+    per run. This is useful for check that have an unbounded number of contexts,
+    depending on the input payload.
+    The logic counts one context per gauge/rate/monotonic_count call, and deduplicates
+    contexts for other metric types. The first N contexts in submission order will
+    be sent to the aggregator, the rest are dropped. The state is reset after each run.
+
+    See https://github.com/DataDog/integrations-core/pull/2093 for more information
+    """
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, *args, **kwargs):
