@@ -110,9 +110,10 @@ class AgentCheck(object):
         }
 
         # Setup metric limits
-        metric_limit = self.DEFAULT_METRIC_LIMIT
-        if len(self.instances) and isinstance(self.instances[0], dict):
+        try:
             metric_limit = self.instances[0].get("max_returned_metrics", self.DEFAULT_METRIC_LIMIT)
+        except Exception:
+            metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
             self.metric_limiter = Limiter("metrics", metric_limit, self.warning)
 
