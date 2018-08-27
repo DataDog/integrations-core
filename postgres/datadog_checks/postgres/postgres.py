@@ -4,6 +4,7 @@
 import socket
 import threading
 import re
+from contextlib import closing
 
 try:
     import psycopg2
@@ -32,10 +33,6 @@ def psycopg2_connect(*args, **kwargs):
         kwargs['host'] = kwargs['unix_sock']
         del kwargs['unix_sock']
     return psycopg2.connect(*args, **kwargs)
-
-
-def add_instance_tags_to_server_metrics():
-    return datadog_agent is None
 
 
 class ShouldRestartException(Exception):
@@ -326,6 +323,11 @@ SELECT s.schemaname,
         self.db_archiver_metrics = []
         self.replication_metrics = {}
         self.custom_metrics = {}
+
+        # Deprecate custom_metrics in favor of custom_queries
+        if instances is not None and any(['custom_metrics' in instance for instance in instances]):
+            self.warning("DEPRECATION NOTICE: Please use the new custom_queries option "
+                         "rather than the now deprecated custom_metrics")
 
     def _server_known(self, host, port):
         """
@@ -757,6 +759,106 @@ SELECT s.schemaname,
         self.dbs[key] = connection
         return connection
 
+    def _get_custom_queries(self, db, tags, custom_queries, programming_error):
+        """
+        Given a list of custom_queries, execute each query and parse the result for metrics
+        """
+        cursor = db.cursor()
+
+        for custom_query in custom_queries:
+            metric_prefix = custom_query.get('metric_prefix')
+            if not metric_prefix:
+                self.log.error("custom query field `metric_prefix` is required")
+                continue
+            metric_prefix = metric_prefix.rstrip('.')
+
+            query = custom_query.get('query')
+            if not query:
+                self.log.error(
+                    "custom query field `query` is required for metric_prefix `{}`".format(metric_prefix)
+                )
+                continue
+
+            columns = custom_query.get('columns')
+            if not columns:
+                self.log.error(
+                    "custom query field `columns` is required for metric_prefix `{}`".format(metric_prefix)
+                )
+                continue
+
+            with closing(cursor) as cursor:
+                try:
+                    self.log.debug("Running query: {}".format(query))
+                    cursor.execute(query)
+                    row = cursor.fetchone()
+                except programming_error as e:
+                    self.log.warning("Not all metrics may be available: {}".format(str(e)))
+                    db.rollback()
+
+                if not row:
+                    self.log.debug("query result for metric_prefix {}: returned an empty result".format(metric_prefix))
+                    continue
+
+                if len(columns) != len(row):
+                    self.log.error(
+                        "query result for metric_prefix {}: expected {} columns, got {}".format(
+                            metric_prefix, len(columns), len(row)
+                        )
+                    )
+                    continue
+
+                metric_info = []
+                query_tags = custom_query.get('tags', [])
+                query_tags.extend(tags)
+
+                for column, value in zip(columns, row):
+                    # Columns can be ignored via configuration.
+                    if not column:
+                        continue
+
+                    name = column.get('name')
+                    if not name:
+                        self.log.error(
+                            "column field `name` is required for metric_prefix `{}`".format(metric_prefix)
+                        )
+                        break
+
+                    column_type = column.get('type')
+                    if not column_type:
+                        self.log.error(
+                            "column field `type` is required for column `{}` "
+                            "of metric_prefix `{}`".format(name, metric_prefix)
+                        )
+                        break
+
+                    if column_type == 'tag':
+                        query_tags.append('{}:{}'.format(name, value))
+                    else:
+                        if not hasattr(self, column_type):
+                            self.log.error(
+                                "invalid submission method `{}` for column `{}` of "
+                                "metric_prefix `{}`".format(column_type, name, metric_prefix)
+                            )
+                            break
+                        try:
+                            metric_info.append((
+                                '{}.{}'.format(metric_prefix, name),
+                                float(value),
+                                column_type
+                            ))
+                        except (ValueError, TypeError):
+                            self.log.error(
+                                "non-numeric value `{}` for metric column `{}` of "
+                                "metric_prefix `{}`".format(value, name, metric_prefix)
+                            )
+                            break
+
+                # Only submit metrics if there were absolutely no errors - all or nothing.
+                else:
+                    for info in metric_info:
+                        metric, value, method = info
+                        getattr(self, method)(metric, value, tags=query_tags)
+
     def _get_custom_metrics(self, custom_metrics, key):
         # Pre-processed cached custom_metrics
         if key in self.custom_metrics:
@@ -813,6 +915,7 @@ SELECT s.schemaname,
         key = (host, port, dbname)
 
         custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []), key)
+        custom_queries = instance.get('custom_queries', [])
 
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
@@ -839,11 +942,13 @@ SELECT s.schemaname,
             self.log.debug("Running check against version %s" % version)
             self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics,
                                 database_size_metrics, collect_default_db, interface_error, programming_error)
+            self._get_custom_queries(db, tags, custom_queries, programming_error)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=False)
             self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics,
                                 database_size_metrics, collect_default_db, interface_error, programming_error)
+            self._get_custom_queries(db, tags, custom_queries, programming_error)
 
         if db is not None:
             service_check_tags = self._get_service_check_tags(host, port, tags)
