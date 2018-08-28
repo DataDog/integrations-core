@@ -3,9 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # project
-from checks.winwmi_check import WinWMICheck
-from utils.containers import hash_mutable
-from utils.timeout import TimeoutException
+from datadog_checks.checks.win.wmi import WinWMICheck
+from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.utils.timeout import TimeoutException
 
 
 class WMICheck(WinWMICheck):
@@ -64,6 +64,7 @@ class WMICheck(WinWMICheck):
         try:
             wmi_sampler.sample()
             metrics = self._extract_metrics(wmi_sampler, tag_by, tag_queries, constant_tags)
+            self.log.debug(metrics)
         except TimeoutException:
             self.log.warning(
                 u"WMI query timed out."
