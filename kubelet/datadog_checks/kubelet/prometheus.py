@@ -49,11 +49,11 @@ class CadvisorPrometheusScraperMixin(object):
             'container_spec_memory_limit_bytes': self.container_spec_memory_limit_bytes
         }
 
-    def _create_cadvisor_prometheus_scraper(self, instance):
+    def _create_cadvisor_prometheus_instance(self, instance):
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update({
             'namespace': self.NAMESPACE,
-            'prometheus_url': "dummy_url",
+            'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
             'ignore_metrics': [
                 'container_cpu_cfs_periods_total',
                 'container_cpu_cfs_throttled_periods_total',
@@ -80,8 +80,7 @@ class CadvisorPrometheusScraperMixin(object):
                 'container_scrape_error'
             ]
         })
-        scraper_config = self.create_scraper_configuration(cadvisor_instance)
-        return scraper_config
+        return cadvisor_instance
 
     @staticmethod
     def _is_container_metric(labels):

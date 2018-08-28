@@ -60,24 +60,26 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         self.NAMESPACE = 'kubernetes'
-
-        super(KubeletCheck, self).__init__(name, init_config, agentConfig, None)
-
         if instances is not None and len(instances) > 1:
             raise Exception('Kubelet check only supports one configured instance.')
         inst = instances[0] if instances else None
 
+        cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
+        kubelet_instance = self._create_kubelet_prometheus_instance(inst)
+        generic_instances = [cadvisor_instance, kubelet_instance]
+        super(KubeletCheck, self).__init__(name, init_config, agentConfig, generic_instances)
+
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
         self.cadvisor_legacy_url = None
 
-        self.cadvisor_scraper_config = self._create_cadvisor_prometheus_scraper(inst)
-        self.kubelet_scraper_config = self._create_kubelet_prometheus_scraper(inst)
+        self.cadvisor_scraper_config = self.get_scraper_config(cadvisor_instance)
+        self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
-    def _create_kubelet_prometheus_scraper(self, instance):
+    def _create_kubelet_prometheus_instance(self, instance):
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update({
             'namespace': self.NAMESPACE,
-            'prometheus_url': 'dummy_url',
+            'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
             'metrics': [{
                 'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
                 'rest_client_requests_total': 'rest.client.requests',
@@ -85,8 +87,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
             }]
         })
-        scraper_config = self.create_scraper_configuration(kubelet_instance)
-        return scraper_config
+        return kubelet_instance
 
     def check(self, instance):
         kubelet_conn_info = get_connection_info()
