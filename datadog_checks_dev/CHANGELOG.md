@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.4.0 / 2018-08-28
+
+* [Added] Add code coverage. See [#2105](https://github.com/DataDog/integrations-core/pull/2105).
+* [Added] Add command to create new integrations. See [#2037](https://github.com/DataDog/integrations-core/pull/2037).
+
 ## 0.3.1 / 2018-08-03
 
 * [Fixed] Fix clean command. See [#1992](https://github.com/DataDog/integrations-core/pull/1992).
