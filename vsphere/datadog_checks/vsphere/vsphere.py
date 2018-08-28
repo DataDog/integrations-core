@@ -17,13 +17,13 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 
 from datadog_checks.config import _is_affirmative
 from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
 from datadog_checks.checks.libs.timer import Timer
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
+from .errors import BadConfigError, ConnectionError
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -65,16 +65,11 @@ RESOURCE_TYPE_NO_METRIC = [
 
 
 # Time after which we reap the jobs that clog the queue
-# TODO: use it
 JOB_TIMEOUT = 10
 MORLIST = 'morlist'
 METRICS_METADATA = 'metrics_metadata'
 LAST = 'last'
 INTERVAL = 'interval'
-
-
-class BadConfigError(CheckException):
-    pass
 
 
 def atomic_method(method):
@@ -87,10 +82,6 @@ def atomic_method(method):
         except Exception:
             args[0].exceptionq.put("A worker thread crashed:\n" + traceback.format_exc())
     return wrapper
-
-
-class ConnectionError(Exception):
-    pass
 
 
 class VSphereCheck(AgentCheck):
@@ -109,7 +100,6 @@ class VSphereCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.time_started = time.time()
         self.pool_started = False
-        self.jobs_status = {}
         self.exceptionq = Queue()
 
         self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
@@ -162,30 +152,18 @@ class VSphereCheck(AgentCheck):
 
         self.pool = Pool(self.pool_size)
         self.pool_started = True
-        self.jobs_status = {}
 
     def stop_pool(self):
         self.log.info("Stopping Thread Pool")
         if self.pool_started:
             self.pool.terminate()
             self.pool.join()
-            self.jobs_status.clear()
             assert self.pool.get_nworkers() == 0
             self.pool_started = False
 
     def restart_pool(self):
         self.stop_pool()
         self.start_pool()
-
-    def _clean(self):
-        now = time.time()
-        # TODO: use that
-        for name in self.jobs_status.keys():
-            start_time = self.jobs_status[name]
-            if now - start_time > JOB_TIMEOUT:
-                self.log.critical("Restarting Pool. One check is stuck.")
-                self.restart_pool()
-                break
 
     def _query_event(self, instance):
         i_key = self._instance_key(instance)
@@ -836,9 +814,6 @@ class VSphereCheck(AgentCheck):
         # Second part: do the job
         self.collect_metrics(instance)
         self._query_event(instance)
-
-        # For our own sanity
-        self._clean()
 
         thread_crashed = False
         try:

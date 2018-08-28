@@ -2,13 +2,18 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import unicode_literals
+import time
 
 import pytest
 import mock
 from mock import MagicMock
 
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.vsphere import MORLIST, INTERVAL, METRICS_METADATA, BadConfigError, ConnectionError
+from datadog_checks.vsphere.errors import BadConfigError, ConnectionError
+from datadog_checks.vsphere.vsphere import (
+    MORLIST, INTERVAL, METRICS_METADATA, REFRESH_MORLIST_INTERVAL,
+    REFRESH_METRICS_METADATA_INTERVAL, LAST
+)
 from datadog_checks.vsphere.common import SOURCE_TYPE
 from .utils import assertMOR, MockedMOR
 from .utils import disable_thread_pool, get_mocked_server
@@ -16,37 +21,7 @@ from .utils import disable_thread_pool, get_mocked_server
 SERVICE_CHECK_TAGS = ["vcenter_server:vsphere_mock", "vcenter_host:None", "foo:bar"]
 
 
-@pytest.fixture
-def instance():
-    """
-    Return a default instance
-    """
-    return {'name': 'vsphere_mock', 'tags': ['foo:bar']}
-
-
-@pytest.fixture
-def vsphere():
-    """
-    Provide a check instance with mocked parts
-    """
-    # mock the server
-    server_mock = get_mocked_server()
-    # create a check instance
-    check = VSphereCheck('disk', {}, {}, [instance()])
-    # patch the check instance
-    check._get_server_instance = MagicMock(return_value=server_mock)
-    # return the check after disabling the thread pool
-    return disable_thread_pool(check)
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
-def test_init():
+def test__init__():
     with pytest.raises(BadConfigError):
         # Must define a unique 'name' per vCenter instance
         VSphereCheck('vsphere', {}, {}, [{'': ''}])
@@ -60,7 +35,6 @@ def test_init():
     check = VSphereCheck('vsphere', init_config, {}, [{'name': 'vsphere_foo'}])
     assert check.time_started > 0
     assert check.pool_started is False
-    assert len(check.jobs_status) == 0
     assert len(check.server_instances) == 0
     assert len(check.cache_times) == 1
     assert 'vsphere_foo' in check.cache_times
@@ -273,3 +247,37 @@ def test_service_check_ok(aggregator, instance):
                 status=VSphereCheck.OK,
                 tags=SERVICE_CHECK_TAGS
             )
+
+
+def test__instance_key(vsphere, instance):
+    assert vsphere._instance_key(instance) == "vsphere_mock"
+    del instance['name']
+    with pytest.raises(BadConfigError):
+        vsphere._instance_key(instance)
+
+
+def test__should_cache(instance):
+    now = time.time()
+    # do not use fixtures for the check instance, some params are set at
+    # __init__ time and we need to instantiate the check multiple times
+    check = VSphereCheck('vsphere', {}, {}, [instance])
+    i_key = check._instance_key(instance)
+
+    # first run should always cache
+    assert check._should_cache(instance, MORLIST) is True
+    assert check._should_cache(instance, METRICS_METADATA) is True
+
+    # explicitly set cache expiration times, don't use defaults so we also test
+    # configuration is properly propagated
+    init_config = {
+        'refresh_morlist_interval': 2 * REFRESH_MORLIST_INTERVAL,
+        'refresh_metrics_metadata_interval': 2 * REFRESH_METRICS_METADATA_INTERVAL,
+    }
+    check = VSphereCheck('vsphere', init_config, {}, [instance])
+    # simulate previous runs, set the last execution time in the past
+    check.cache_times[i_key][MORLIST][LAST] = now - (2 * REFRESH_MORLIST_INTERVAL)
+    check.cache_times[i_key][METRICS_METADATA][LAST] = now - (2 * REFRESH_METRICS_METADATA_INTERVAL)
+
+    with mock.patch("time.time", return_value=now):
+        assert check._should_cache(instance, MORLIST) is False
+        assert check._should_cache(instance, METRICS_METADATA) is False
