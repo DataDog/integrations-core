@@ -17,13 +17,13 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 
 from datadog_checks.config import _is_affirmative
 from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
 from datadog_checks.checks.libs.timer import Timer
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
+from .errors import BadConfigError, ConnectionError
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -65,16 +65,11 @@ RESOURCE_TYPE_NO_METRIC = [
 
 
 # Time after which we reap the jobs that clog the queue
-# TODO: use it
 JOB_TIMEOUT = 10
 MORLIST = 'morlist'
 METRICS_METADATA = 'metrics_metadata'
 LAST = 'last'
 INTERVAL = 'interval'
-
-
-class BadConfigError(CheckException):
-    pass
 
 
 def atomic_method(method):
@@ -87,10 +82,6 @@ def atomic_method(method):
         except Exception:
             args[0].exceptionq.put("A worker thread crashed:\n" + traceback.format_exc())
     return wrapper
-
-
-class ConnectionError(Exception):
-    pass
 
 
 class VSphereCheck(AgentCheck):
