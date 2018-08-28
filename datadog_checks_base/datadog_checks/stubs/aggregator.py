@@ -122,11 +122,11 @@ class AggregatorStub(object):
         candidates = []
         for e in self.events:
             if exact_match and msg_text != e['msg_text'] or \
-                    not exact_match and msg_text not in e['msg_text']:
+                    msg_text not in e['msg_text']:
                 continue
             if tags and set(tags) != set(e['tags']):
                 continue
-            for name, value in kwargs.iteritems():
+            for name, value in iteritems(kwargs):
                 if e[name] != value:
                     break
             else:

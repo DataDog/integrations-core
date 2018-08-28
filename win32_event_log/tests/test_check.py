@@ -93,7 +93,7 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
     check.check(instance)
     check.check(instance)
 
-    aggregator.assert_event(u'SomeMessage', count=1,
+    aggregator.assert_event('SomeMessage', count=1,
                             tags=instance['tags'],
                             msg_title='Application/MSQLSERVER',
                             event_type='win32_log_event', alert_type='error',
