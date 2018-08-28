@@ -16,7 +16,7 @@ from ...constants import get_root
 from ....utils import dir_exists, ensure_unicode, path_join, write_file_lines
 
 METRIC_SEPARATORS = ('.', '_')
-METRIC_MAP = {
+TYPE_MAP = {
     'gauge': 'gauge',
     'counter': 'count',
     'histogram': 'gauge',
@@ -50,6 +50,18 @@ def parse_metrics(endpoint):
                 metrics[metric]['type'] = info_value
 
     return metrics
+
+
+def get_options_text(options):
+    return (
+        '\n{}\n'
+        'q - Quit'
+        .format(
+            '\n'.join(
+                '{} - {}'.format(n, option) for n, option in enumerate(options, 1)
+            )
+        )
+    )
 
 
 @click.group(
@@ -116,8 +128,6 @@ def info(endpoint):
 @click.pass_context
 def parse(ctx, endpoint, check, here):
     """Interactively parse metric info from a Prometheus endpoint."""
-    endpoint = sanitize_endpoint(endpoint)
-
     if here:
         output_dir = os.getcwd()
     else:
@@ -130,8 +140,16 @@ def parse(ctx, endpoint, check, here):
                 )
             )
 
+    endpoint = sanitize_endpoint(endpoint)
+
+    echo_waiting('Scraping `{}`...'.format(endpoint))
     metrics = parse_metrics(endpoint)
     num_metrics = len(metrics)
+
+    echo_success('\nGlobally available options:')
+    echo_info('    t - Append .total to the available options')
+    echo_info('    s - Skip')
+    echo_info('    q - Quit')
 
     for i, (metric, data) in enumerate(sorted(iteritems(metrics)), 1):
         metric_parts = metric.split('_')
@@ -146,16 +164,7 @@ def parse(ctx, endpoint, check, here):
 
         default_option = num_options
         options_prompt = 'Choose an option (default {}, as-is): '.format(default_option)
-        options_text = (
-            '\n{}\n'
-            's - Skip\n'
-            'q - Quit'
-            .format(
-                '\n'.join(
-                    '{} - {}'.format(n, option) for n, option in enumerate(metric_options, 1)
-                )
-            )
-        )
+        options_text = get_options_text(metric_options)
 
         finished = False
         choice_error = ''
@@ -193,7 +202,13 @@ def parse(ctx, endpoint, check, here):
             if not choice:
                 choice = default_option
 
-            if choice == 's':
+            if choice == 't':
+                echo_info('Append .total')
+                for n in range(num_options):
+                    metric_options[n] += '.total'
+                options_text = get_options_text(metric_options)
+                continue
+            elif choice == 's':
                 echo_info('Skip')
                 echo_info('Skipped {}'.format(metric))
                 break
@@ -230,13 +245,13 @@ def parse(ctx, endpoint, check, here):
     ]
     for metric, data in metric_items:
         metric_name = data['dd_name']
-        metric_type = METRIC_MAP.get(data.get('type'), '')
+        metric_type = TYPE_MAP.get(data.get('type'), '')
         metric_description = data.get('description', '')
         if ',' in metric_description:
             metric_description = '"{}"'.format(metric_description)
 
         output_lines.append(
-            '{check}.{metric_name},{metric_type},,,,{metric_description},0,{check},,\n'.format(
+            '{check}.{metric_name},{metric_type},,,,{metric_description},0,{check},\n'.format(
                 check=check,
                 metric_name=metric_name,
                 metric_type=metric_type,
