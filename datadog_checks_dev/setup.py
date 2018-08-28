@@ -73,6 +73,7 @@ setup(
             'colorama',
             'docker-compose>=1.21.2',
             'pip-tools',
+            'pyperclip>=1.6.4',
             'requests<2.19.0',
             'semver',
             'setuptools>=38.6.0',
