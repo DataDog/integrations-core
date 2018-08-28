@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 2.3.1 / 2018-08-28
+
+* [Fixed]  Fix `KeyError` due to race condition on the cache. See [#2099](https://github.com/DataDog/integrations-core/pull/2099).
+
 ## 2.3.0 / 2018-08-21
 
 * [Fixed] Drastically improve check performance by reducing number of calls to vSphere API. See [#2039](https://github.com/DataDog/integrations-core/pull/2039).
