@@ -63,7 +63,7 @@ This is the layer that provides the developer CLI.
 ### Installation
 
 ```console
-$ pip install datadog-checks-dev[cli]
+$ pip install "datadog-checks-dev[cli]"
 ```
 
 At this point there should be a working executable, `ddev`, in your PATH. The
