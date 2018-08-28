@@ -32,6 +32,13 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
+For mySQL 8.0+ create the `datadog` user with the native password hashing method:
+
+```
+mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
+Query OK, 0 rows affected (0.00 sec)
+```
+
 Please note that `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][14].
 
 
@@ -53,6 +60,13 @@ mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CO
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 
 mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
+Query OK, 0 rows affected (0.00 sec)
+```
+
+For mySQL 8.0+ set `max_user_connections` with:
+
+```
+mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
