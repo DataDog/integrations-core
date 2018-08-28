@@ -601,11 +601,11 @@ GROUP BY datid, datname
             metrics_query = None
             if self._is_9_2_or_above(key, db):
                 metrics_query = self.ACTIVITY_METRICS_9_2
-            elif self._is_8_3_or_above(key,db):
+            elif self._is_8_3_or_above(key, db):
                 metrics_query = self.ACTIVITY_METRICS_8_3
             else:
                 metrics_query = self.ACTIVITY_METRICS_LT_8_3
-            
+
             metrics = {k: v for k, v in zip(metrics_query, self.ACTIVITY_DD_METRICS)}
             self.activity_metrics[key] = (metrics, query)
         else:
@@ -780,7 +780,7 @@ GROUP BY datid, datname
                               False, programming_error, relations_config)
             self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, relations,
                               False, programming_error, relations_config)
-            
+
             if collect_activity_metrics:
                 activity_metrics = self._get_activity_metrics(key, db)
                 self._query_scope(cursor, activity_metrics, key, db, instance_tags, relations,
