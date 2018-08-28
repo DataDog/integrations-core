@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict, namedtuple
-from itertools import product
 
 from six import binary_type, iteritems
 
@@ -139,10 +138,6 @@ class AggregatorStub(object):
             assert len(candidates) == count, msg
         else:
             assert len(candidates) >= at_least, msg
-
-        for ev, ec in product(self.events, candidates):
-            if ec == ev:
-                ev['tested'] = True
 
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
                       hostname=None, metric_type=None):
