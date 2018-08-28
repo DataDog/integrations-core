@@ -25,58 +25,61 @@ You'll also need `docker-compose` in order to run the test harness.
 
 ## Setup
 
-Clone the [integrations-extras repository][7] and point your shell at the base directory:
+Clone both the [integrations-extras repository][7] *and* the [integrations-core repository][8]. The Extras repository is where you'll be working, but you'll need tooling from the Core repository to get yourself up and running. By default, that tooling expects you to be working in the `$HOME/dd/` directory — this is optional and can be adjusted via configuration later.
 
-```
-git clone https://github.com/DataDog/integrations-extras.git && cd integrations-extras
-```
-
-Install the Python packages needed to work on Agent Integrations:
-
-```
-pip install -r requirements-dev.txt
+```shell
+mkdir $HOME/dd && cd $HOME/dd       # optional
+git clone https://github.com/DataDog/integrations-extras.git
+git clone https://github.com/DataDog/integrations-core.git
 ```
 
-[cookiecutter][1] is used to create the skeleton for a new integration:
+### Developer toolkit
+
+The [developer toolkit][17] is comprehensive and includes a lot of functionality. Here's what you need to get started:
 
 ```
-cookiecutter https://github.com/DataDog/cookiecutter-datadog-check.git
+cd integrations-core
+pip install "datadog-checks-dev[cli]"
 ```
 
-Answer the questions when prompted. Once completed succesfully, you will end up with something like this:
+If you chose to clone these repositories to somewhere other than `$HOME/dd/`, you'll need to adjust the configuration file. The location of the file is dependent on your platform:
 
 ```
-    my_check
-    ├── CHANGELOG.md
-    ├── MANIFEST.in
-    ├── README.md
-    ├── datadog_checks
-    │   ├── __init__.py
-    │   └── foo_check
-    │       └── data
-    │           └── conf.yaml.example
-    │       ├── __about__.py
-    │       ├── __init__.py
-    │       └── foo_check.py
-    ├── images
-    │   └── snapshot.png
-    ├── logos
-    │   ├── avatars-bot.png
-    │   ├── saas_logos-bot.png
-    │   └── saas_logos-small.png
-    ├── manifest.json
-    ├── metadata.csv
-    ├── requirements-dev.txt
-    ├── requirements.in
-    ├── requirements.txt
-    ├── service_checks.json
-    ├── setup.py
-    ├── tests
-    │   ├── __init__.py
-    │   ├── conftest.py
-    │   └── test_check.py
-    └── tox.ini
+ddev config find
 ```
+
+Alter the `core` and `extras` options to point to the appropriate directories (don't worry about the other stuff for now).
+
+```ini
+core = "/path/to/integrations-core"
+extras = "/path/to/integrations-extras"
+```
+
+## Scaffolding
+
+One of the developer toolkit features is the `create` command, which creates the basic file and path structure (or "scaffolding") necessary for a new Integration.
+
+### Dry-run
+
+Let's try a dry-run, which won't write anything to disk. There are two important elements to note in the following command:
+1. `-e`, which ensures that the scaffolding is created in the Extras repository.
+2. `-n`, which is a dry-run (nothing gets written).
+
+```
+ddev -e create -n my_check
+```
+
+This will display the path where the files would have been written, as well as the structure itself. For now, just make sure that the path in the *first line* of output matches your Extras repository.
+
+### Interactive mode
+
+The interactive mode is a wizard for creating new Integrations. By answering a handful of questions, the scaffolding will be set up and lightly pre-configured for you.
+
+```
+ddev -e create my_check
+```
+
+After answering the questions, the output will match that of the dry-run above, except in this case the scaffolding for your new Integration will actually exist!
 
 ## Write the check
 
@@ -166,7 +169,7 @@ def test_config():
     c.check({'url': 'http://foobar', 'search_string': 'foo'})
 ```
 
-The cookiecutter template has already setup `tox` to run tests located at `my_check/tests`. Run the test:
+The scaffolding has already set up `tox` to run tests located at `my_check/tests`. Run the test:
 
 ```
 cd my_check && tox
@@ -273,7 +276,9 @@ tox -e integration
 The check is almost done. Let's add the final touches by adding the integration configurations.
 
 ## Configuration
+
 ### Configuration file
+
 #### Parameters
 
 Parameters in a configuration file follow these rules:
@@ -306,6 +311,7 @@ This paragraph contains **commands** which are a special string in the form `@co
 `<DESCRIPTION>` is the description of the parameter. It can span across multiple lines in a special comment block.
 
 ##### Available commands
+
 ###### Param
 
 The `@param` command aims to describe the parameter for documentation purposes.
@@ -342,7 +348,7 @@ instances:
 
 ### Populate the README
 
-The `README.md` file provided by our cookiecutter template already has the correct format. You must fill out the relevant sections - look for the ellipses `[...]`.
+The `README.md` file provided by our scaffolding already has the correct format. You must fill out the document with the relevant information.
 
 ### Add images and logos
 
@@ -359,6 +365,7 @@ The directory structure for images and logos:
 ```
 
 The `images` folder contains all images that are used in the Integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
+
 ```markdown
 ![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/MyCheck/images/snapshot.png)
 ```
@@ -474,6 +481,7 @@ python setup.py bdist_wheel
 [5]: https://virtualenv.pypa.io/en/stable/
 [6]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [7]: https://github.com/DataDog/integrations-extras
+[8]: https://github.com/DataDog/integrations-core
 [9]: https://packaging.python.org/tutorials/distributing-packages/
 [10]: https://docs.datadoghq.com/developers/metrics/#metric-types
 [11]: https://docs.datadoghq.com/developers/metrics/#units
@@ -482,3 +490,4 @@ python setup.py bdist_wheel
 [14]: https://docs.datadoghq.com/getting_started/tagging/
 [15]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
 [16]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
+[17]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev
