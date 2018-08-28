@@ -32,7 +32,7 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-For mySQL 8.0+ create the datadog user with native password:
+For mySQL 8.0+ create the `datadog` user with the native password hashing method:
 
 ```
 mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
@@ -63,7 +63,7 @@ mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-For mySQL 8.0+ set max_user_connections with:
+For mySQL 8.0+ set `max_user_connections` with:
 
 ```
 mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
