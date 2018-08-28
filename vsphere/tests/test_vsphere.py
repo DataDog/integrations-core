@@ -267,14 +267,16 @@ def test__should_cache(instance):
     assert check._should_cache(instance, MORLIST) is True
     assert check._should_cache(instance, METRICS_METADATA) is True
 
-    # simulate previous runs, set the last execution time in the past
+    # explicitly set cache expiration times, don't use defaults so we also test
+    # configuration is properly propagated
     init_config = {
-        'refresh_morlist_interval': REFRESH_MORLIST_INTERVAL + 1,
-        'refresh_metrics_metadata_interval': REFRESH_METRICS_METADATA_INTERVAL + 1,
+        'refresh_morlist_interval': 2 * REFRESH_MORLIST_INTERVAL,
+        'refresh_metrics_metadata_interval': 2 * REFRESH_METRICS_METADATA_INTERVAL,
     }
     check = VSphereCheck('vsphere', init_config, {}, [instance])
-    check.cache_times[i_key][MORLIST][LAST] = now - (REFRESH_MORLIST_INTERVAL + 1)
-    check.cache_times[i_key][METRICS_METADATA][LAST] = now - (REFRESH_METRICS_METADATA_INTERVAL + 1)
+    # simulate previous runs, set the last execution time in the past
+    check.cache_times[i_key][MORLIST][LAST] = now - (2 * REFRESH_MORLIST_INTERVAL)
+    check.cache_times[i_key][METRICS_METADATA][LAST] = now - (2 * REFRESH_METRICS_METADATA_INTERVAL)
 
     with mock.patch("time.time", return_value=now):
         assert check._should_cache(instance, MORLIST) is False
