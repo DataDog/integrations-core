@@ -115,6 +115,12 @@ class VSphereCheck(AgentCheck):
         self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
         self.batch_collector_size = max(init_config.get("batch_property_collector_size", BATCH_COLLECTOR_SIZE), 0)
 
+        self.refresh_morlist_interval = init_config.get('refresh_morlist_interval', REFRESH_MORLIST_INTERVAL)
+        self.clean_morlist_interval = max(init_config.get('clean_morlist_interval', 2 * self.refresh_morlist_interval),
+                                          self.refresh_morlist_interval)
+        self.refresh_metrics_metadata_interval = init_config.get('refresh_metrics_metadata_interval',
+                                                                 REFRESH_METRICS_METADATA_INTERVAL)
+
         # Connections open to vCenter instances
         self.server_instances = {}
 
@@ -127,13 +133,11 @@ class VSphereCheck(AgentCheck):
             self.cache_times[i_key] = {
                 MORLIST: {
                     LAST: 0,
-                    INTERVAL: init_config.get('refresh_morlist_interval',
-                                              REFRESH_MORLIST_INTERVAL)
+                    INTERVAL: self.refresh_morlist_interval
                 },
                 METRICS_METADATA: {
                     LAST: 0,
-                    INTERVAL: init_config.get('refresh_metrics_metadata_interval',
-                                              REFRESH_METRICS_METADATA_INTERVAL)
+                    INTERVAL: self.refresh_metrics_metadata_interval
                 }
             }
 
@@ -607,8 +611,13 @@ class VSphereCheck(AgentCheck):
         for mor_perfs in res:
             mor_name = str(mor_perfs.entity)
             available_metrics = [value.id for value in mor_perfs.value]
-            self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
-            self.morlist[i_key][mor_name]['last_seen'] = time.time()
+            try:
+                self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
+                self.morlist[i_key][mor_name]['last_seen'] = time.time()
+            except KeyError:
+                self.log.error("Trying to compute needed metrics from object %s deleted from the cache, skipping. "
+                               "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
+                continue
 
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total(), tags=instance.get('tags', []))
@@ -659,7 +668,8 @@ class VSphereCheck(AgentCheck):
 
         for mor_name, mor in morlist:
             last_seen = mor['last_seen']
-            if (time.time() - last_seen) > 2 * REFRESH_MORLIST_INTERVAL:
+            if (time.time() - last_seen) > self.clean_morlist_interval:
+                self.log.debug("Deleting %s from the cache", mor_name)
                 del self.morlist[i_key][mor_name]
 
     def _cache_metrics_metadata(self, instance):
@@ -722,7 +732,12 @@ class VSphereCheck(AgentCheck):
         if results:
             for mor_perfs in results:
                 mor_name = str(mor_perfs.entity)
-                mor = self.morlist[i_key][mor_name]
+                try:
+                    mor = self.morlist[i_key][mor_name]
+                except KeyError:
+                    self.log.error("Trying to get metrics from object %s deleted from the cache, skipping. "
+                                   "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
+                    continue
                 for result in mor_perfs.value:
                     if result.id.counterId not in self.metrics_metadata[i_key]:
                         self.log.debug("Skipping this metric value, because there is no metadata about it")
