@@ -82,7 +82,7 @@ def test_get_instance_metrics_instance(check):
     assert check.instance_metrics[another] == []
 
 
-def test__get_version(check):
+def test_get_version(check):
     """
     Test _get_version() to make sure the check is properly parsing Postgres versions
     """
@@ -101,7 +101,7 @@ def test__get_version(check):
     assert check._get_version('beta_version', db) == [11, -1, 3]
 
 
-def test__is_above(check):
+def test_is_above(check):
     """
     Test _is_above() to make sure the check is properly determining order of versions
     """
