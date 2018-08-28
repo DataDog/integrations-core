@@ -49,6 +49,11 @@ CONNECTION_METRICS = [
     'postgresql.percent_usage_connections',
 ]
 
+ACTIVITY_METRICS = [
+    'postgresql.transactions.open',
+    'postgresql.transactions.idle_in_transaction',
+]
+
 
 def check_common_metrics(aggregator, expected_tags):
     for name in COMMON_METRICS:
@@ -107,3 +112,12 @@ def test_connections_metrics(aggregator, check, postgres_standalone, pg_instance
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=pg_instance['tags'])
     aggregator.assert_metric('postgresql.connections', count=1, tags=pg_instance['tags']+['db:datadog_test'])
+
+
+@pytest.mark.integration
+def test_activity_metrics(aggregator, check, postgres_standalone, pg_instance):
+    pg_instance['collect_activity_metrics'] = True
+    check.check(pg_instance)
+
+    for name in ACTIVITY_METRICS:
+        aggregator.assert_metric(name, count=1, tags=pg_instance['tags'] + ['db:datadog_test'])
