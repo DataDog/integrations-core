@@ -100,7 +100,6 @@ class VSphereCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.time_started = time.time()
         self.pool_started = False
-        self.jobs_status = {}
         self.exceptionq = Queue()
 
         self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
@@ -153,30 +152,18 @@ class VSphereCheck(AgentCheck):
 
         self.pool = Pool(self.pool_size)
         self.pool_started = True
-        self.jobs_status = {}
 
     def stop_pool(self):
         self.log.info("Stopping Thread Pool")
         if self.pool_started:
             self.pool.terminate()
             self.pool.join()
-            self.jobs_status.clear()
             assert self.pool.get_nworkers() == 0
             self.pool_started = False
 
     def restart_pool(self):
         self.stop_pool()
         self.start_pool()
-
-    def _clean(self):
-        now = time.time()
-        # TODO: use that
-        for name in self.jobs_status.keys():
-            start_time = self.jobs_status[name]
-            if now - start_time > JOB_TIMEOUT:
-                self.log.critical("Restarting Pool. One check is stuck.")
-                self.restart_pool()
-                break
 
     def _query_event(self, instance):
         i_key = self._instance_key(instance)
@@ -827,9 +814,6 @@ class VSphereCheck(AgentCheck):
         # Second part: do the job
         self.collect_metrics(instance)
         self._query_event(instance)
-
-        # For our own sanity
-        self._clean()
 
         thread_crashed = False
         try:

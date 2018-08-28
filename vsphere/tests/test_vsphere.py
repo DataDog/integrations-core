@@ -35,7 +35,6 @@ def test__init__():
     check = VSphereCheck('vsphere', init_config, {}, [{'name': 'vsphere_foo'}])
     assert check.time_started > 0
     assert check.pool_started is False
-    assert len(check.jobs_status) == 0
     assert len(check.server_instances) == 0
     assert len(check.cache_times) == 1
     assert 'vsphere_foo' in check.cache_times
