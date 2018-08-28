@@ -118,8 +118,6 @@ def test_connections_metrics(aggregator, check, postgres_standalone, pg_instance
 def test_activity_metrics(aggregator, check, postgres_standalone, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check.check(pg_instance)
-    for m in aggregator._metrics.items():
-        print m
 
     for name in ACTIVITY_METRICS:
         aggregator.assert_metric(name, count=1, tags=pg_instance['tags'] + ['db:datadog_test'])
