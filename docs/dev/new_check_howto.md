@@ -25,12 +25,11 @@ You'll also need `docker-compose` in order to run the test harness.
 
 ## Setup
 
-Clone both the [integrations-extras repository][7] *and* the [integrations-core repository][8]. The Extras repository is where you'll be working, but you'll need tooling from the Core repository to get yourself up and running. By default, that tooling expects you to be working in the `$HOME/dd/` directory — this is optional and can be adjusted via configuration later.
+Clone the [integrations-extras repository][7]. By default, that tooling expects you to be working in the `$HOME/dd/` directory — this is optional and can be adjusted via configuration later.
 
 ```shell
 mkdir $HOME/dd && cd $HOME/dd       # optional
 git clone https://github.com/DataDog/integrations-extras.git
-git clone https://github.com/DataDog/integrations-core.git
 ```
 
 ### Developer toolkit
@@ -38,21 +37,14 @@ git clone https://github.com/DataDog/integrations-core.git
 The [developer toolkit][17] is comprehensive and includes a lot of functionality. Here's what you need to get started:
 
 ```
-cd integrations-core
+cd integrations-extras
 pip install "datadog-checks-dev[cli]"
 ```
 
-If you chose to clone these repositories to somewhere other than `$HOME/dd/`, you'll need to adjust the configuration file. The location of the file is dependent on your platform:
+If you chose to clone these repositories to somewhere other than `$HOME/dd/`, you'll need to adjust the configuration file:
 
 ```
-ddev config find
-```
-
-Alter the `core` and `extras` options to point to the appropriate directories (don't worry about the other stuff for now).
-
-```ini
-core = "/path/to/integrations-core"
-extras = "/path/to/integrations-extras"
+ddev config set extras "/path/to/integrations-extras"
 ```
 
 ## Scaffolding
@@ -172,7 +164,7 @@ def test_config():
 The scaffolding has already set up `tox` to run tests located at `my_check/tests`. Run the test:
 
 ```
-cd my_check && tox
+ddev -e test my_check
 ```
 
 The test we just wrote doesn't check our collection _logic_ though, so let's add an integration test. We will use `docker-compose` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `my_check/tests/docker-compose.yml` with the following contents:
@@ -292,7 +284,7 @@ Parameters in a configuration file follow these rules:
 
 Each parameter in a configuration file must have a special comment block with the following format:
 
-```
+```yaml
 ## @<COMMAND_1> <ARG_COMMAND_1>
 ## @<COMMAND_2> <ARG_COMMAND_2>
 ## <DESCRIPTION>
@@ -302,7 +294,7 @@ Each parameter in a configuration file must have a special comment block with th
 
 This paragraph contains **commands** which are a special string in the form `@command`. A command is valid only when the comment line containing it starts with a double `#` char:
 
-```
+```yaml
 ## @command this is valid
 
 # @command this is not valid and will be ignored
@@ -335,7 +327,7 @@ Arguments:
 
 For instance, here is the `@param` *command* for the Apache integration check `apache_status_url` parameter:
 
-```
+```yaml
 init_config:
 
 instances:
@@ -481,7 +473,6 @@ python setup.py bdist_wheel
 [5]: https://virtualenv.pypa.io/en/stable/
 [6]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [7]: https://github.com/DataDog/integrations-extras
-[8]: https://github.com/DataDog/integrations-core
 [9]: https://packaging.python.org/tutorials/distributing-packages/
 [10]: https://docs.datadoghq.com/developers/metrics/#metric-types
 [11]: https://docs.datadoghq.com/developers/metrics/#units
