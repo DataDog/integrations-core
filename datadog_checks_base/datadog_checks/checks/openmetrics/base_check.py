@@ -43,7 +43,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.process(scraper_config)
 
     def get_scraper_config(self, instance):
-        endpoint = instance.get('prometheus_url', None)
+        endpoint = instance.get('prometheus_url')
 
         if endpoint is None:
             raise CheckException("Unable to find prometheus URL in config file.")
@@ -53,7 +53,10 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             return self.config_map[endpoint]
 
         # Otherwise, we create the scraper configuration
-        config = self.create_scraper_configuration(instance)
+        #   To get the same behaviour for GenericPrometheusCheck-based checks porting to this class,
+        #   we must set the proper default values (which are different than the ones in mixins.py) by setting
+        #   created_by_base_class to True
+        config = self.create_scraper_configuration(instance, created_by_base_class=True)
 
         # Add this configuration to the config_map
         self.config_map[endpoint] = config
