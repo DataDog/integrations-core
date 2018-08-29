@@ -1,11 +1,22 @@
 init_config:
-  # Any global configurable parameters should be added here
 
 instances:
-  #   A typical instance configuration might include a hostname and port
-  #   a set of customizable tags and other parameters we might need to
-  #   configure the behavior of our check.
+
+  ## @param host - string - required
+  ## XXXXXXXXXXX
   #
-  # - host: localhost
-  #   port: 26379
-  #   tags: ['custom:tag']
+  - host: localhost
+  
+  ## @param port - integer - required
+  ## XXXXXXXXXXX 
+  #
+    port: 26379
+
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metrics, events and service checks emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
