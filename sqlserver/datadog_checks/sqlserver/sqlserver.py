@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from collections import defaultdict
 
 # 3rd party
+import json
 import adodbapi
 try:
     import pyodbc
@@ -531,8 +532,15 @@ class SQLServer(AgentCheck):
             cursor = self.get_cursor(instance, self.DEFAULT_DB_KEY)
 
             try:
+                self.log.debug("Calling Stored Procedure : {}".format(proc))
                 cursor.callproc(proc)
                 rows = cursor.fetchall()
+                self.log.debug("Row count ({}) : {}".format(proc, cursor.rowcount))
+
+                log_rows = 5
+                items = [dict(zip([key[0] for key in cursor.description], row)) for row in rows]
+                self.log.debug("First {} rows : {}".format(log_rows, json.dumps({'rows': items[:log_rows]})))
+
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
 
