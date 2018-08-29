@@ -37,10 +37,10 @@ metadata:
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The CoreDNS check does not include any event at this time.
+The CoreDNS check does not include any events.
 
 ### Service Checks
-The CoreDNS check does not include any service checks at this time.
+The CoreDNS check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][7].
