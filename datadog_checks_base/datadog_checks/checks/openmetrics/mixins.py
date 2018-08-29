@@ -496,12 +496,15 @@ class OpenMetricsScraperMixin(object):
                 self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
-            tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
             if sample[self.SAMPLE_NAME].endswith("_sum"):
+                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self.gauge("{}.{}.sum".format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=custom_hostname)
-            if sample[self.SAMPLE_NAME].endswith("_count"):
+            elif sample[self.SAMPLE_NAME].endswith("_count"):
+                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self.gauge("{}.{}.count".format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=custom_hostname)
             else:
+                sample[self.SAMPLE_LABELS]["quantile"] = float(sample[self.SAMPLE_LABELS]["quantile"])
+                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self.gauge("{}.{}.quantile".format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=custom_hostname)
 
     def _submit_gauges_from_histogram(self, metric_name, metric, scraper_config, hostname=None):
@@ -514,10 +517,16 @@ class OpenMetricsScraperMixin(object):
                 self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
-            tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
             if sample[self.SAMPLE_NAME].endswith("_sum"):
+                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                 self.gauge("{}.{}.sum".format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=custom_hostname)
-            elif sample[self.SAMPLE_NAME].endswith("_count") or (sample[self.SAMPLE_NAME].endswith("_bucket") and scraper_config['send_histograms_buckets']):
+            elif sample[self.SAMPLE_NAME].endswith("_count"):
+                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
+                self.gauge("{}.{}.count".format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=custom_hostname)
+            elif (scraper_config['send_histograms_buckets'] and sample[self.SAMPLE_NAME].endswith("_bucket") and
+                    "Inf" not in sample[self.SAMPLE_LABELS]["le"]):
+                sample[self.SAMPLE_LABELS]["le"] = float(sample[self.SAMPLE_LABELS]["le"])
+                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                 self.gauge("{}.{}.count".format(scraper_config['namespace'], metric_name), val, tags=tags, hostname=custom_hostname)
 
     def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):
