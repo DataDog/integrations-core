@@ -5,12 +5,15 @@
 # stdlib
 import os
 import mock
+import sys
 import pytest
 import requests
 import subprocess
+import time
 
 # project
 from datadog_checks.coredns import CoreDNSCheck
+from datadog_checks.dev import docker_run, RetryError
 from datadog_checks.utils.common import get_docker_hostname
 
 instance = {
@@ -18,14 +21,10 @@ instance = {
 }
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-
-COREDNS_HOST = get_docker_hostname()
-COREDNS_PORT = '9153'
-
-DOCKER_COMPOSE_ARGS = [
-    "docker-compose",
-    "-f", os.path.join(HERE, 'docker', 'docker-compose.yaml')
-]
+CONFIG_FOLDER = os.path.join(HERE, 'docker', 'coredns')
+HOST = get_docker_hostname()
+PORT = '9153'
+URL = "http://{}:{}/metrics".format(HOST, PORT)
 
 DIG_ARGS = [
     "dig",
@@ -54,36 +53,33 @@ class MockResponse:
     def close(self):
         pass
 
-@pytest.fixture
-def coredns():
+
+@pytest.fixture(scope="session")
+def spin_up_coredns():
+    def condition():
+
+        sys.stderr.write("Waiting for CoreDNS to boot...")
+        booted = False
+        for _ in xrange(10):
+            try:
+                res = requests.get(URL)
+                # create some metrics by using dig
+                subprocess.check_call(DIG_ARGS, env=env)
+                res.raise_for_status
+                booted = True
+                break
+            except Exception:
+                time.sleep(1)
+
+        if not booted:
+            raise RetryError("CoreDNS failed to boot!")
+        sys.stderr.write("CoreDNS boot complete.\n")
+
+    compose_file = os.path.join(HERE, 'docker', 'docker-compose.yml')
     env = os.environ
-    env['COREDNS_CONFIG_FOLDER'] = os.path.join(HERE, 'docker', 'coredns')
-
-    start_coredns(env)
-    yield
-    subprocess.check_call(DOCKER_COMPOSE_ARGS + ["down"], env=env)
-
-def start_coredns(env):
-    subprocess.check_call(DOCKER_COMPOSE_ARGS + ["up", "-d"], env=env)
-
-    sys.stderr.write("Waiting for CoreDNS to boot...")
-
-    attempts = 1
-    while True:
-        if attempts >= 10:
-            subprocess.check_call(DOCKER_COMPOSE_ARGS + ["down"], env=env)
-            raise Exception("CoreDNS failed to boot...")
-
-        try:
-            res = requests.get('http://{}:{}/metrics'.format(COREDNS_HOST, COREDNS_PORT))
-            # create some metrics by using dig
-            subprocess.check_call(DIG_ARGS, env=env)
-            res.raise_for_status
-            break
-        except Exception:
-            attempts += 1
-            time.sleep(1)
-
+    env['COREDNS_CONFIG_FOLDER'] = CONFIG_FOLDER
+    with docker_run(compose_file, conditions=[condition], env_vars=env):
+        yield
 
 @pytest.fixture
 def dockercheck():
@@ -92,16 +88,8 @@ def dockercheck():
 @pytest.fixture
 def dockerinstance():
     return {
-        'prometheus_endpoint': 'http://{}:{}/metrics'.format(COREDNS_HOST, COREDNS_PORT),
+        'prometheus_endpoint': URL,
     }
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
 
 @pytest.fixture
 def mock_get():
@@ -160,11 +148,22 @@ class TestCoreDNS:
 
         aggregator.assert_all_metrics_covered()
 
-    def test_connect(dockercheck, dockerinstance, aggregator, coredns):
+    def test_connect(self, aggregator, spin_up_coredns, dockerinstance):
         """
         Testing that connection will work with instance
         """
+        check = CoreDNSCheck('coredns', {}, {}, [dockerinstance])
         check.check(dockerinstance)
-        aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
-        extra_tags = ['host:{}'.format(NGINX_HOST), 'port:{}'.format(NGINX_PORT)]
-        aggregator.assert_service_check('nginx.can_connect', tags=TAGS+extra_tags)
+
+        # include_metrics that can be reproduced in a docker based test environment
+        include_metrics = [
+            'coredns.proxy_request_duration.seconds.count',
+            'coredns.request_duration.seconds.sum',
+            'coredns.request_size.bytes.count',
+            'coredns.cache_size.count',
+            'coredns.request_size.bytes.sum',
+            'coredns.request_duration.seconds.count',
+            'coredns.proxy_request_duration.seconds.sum',
+        ]
+        for metric in include_metrics:
+            aggregator.assert_metric(metric)
