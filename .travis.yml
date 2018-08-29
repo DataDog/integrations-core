@@ -28,7 +28,8 @@ stages:
     if: (branch = master) AND (type != pull_request)
 
 before_install:
-  - echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+  - (echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled || true)
+  - (echo never | sudo tee /sys/kernel/mm/transparent_hugepage/defrag || true)
 
 script:
   - travis_retry ddev test --cov ${CHECK}
