@@ -578,7 +578,6 @@ class VSphereCheck(AgentCheck):
             available_metrics = [value.id for value in mor_perfs.value]
             try:
                 self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
-                self.morlist[i_key][mor_name]['last_seen'] = time.time()
             except KeyError:
                 self.log.error("Trying to compute needed metrics from object %s deleted from the cache, skipping. "
                                "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
@@ -609,7 +608,7 @@ class VSphereCheck(AgentCheck):
                     mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
                     if mor_name not in self.morlist[i_key]:
                         self.morlist[i_key][mor_name] = mor
-                        self.morlist[i_key][mor_name]["last_seen"] = time.time()
+                    self.morlist[i_key][mor_name]["last_seen"] = time.time()
 
                     query_spec = vim.PerformanceManager.QuerySpec()
                     query_spec.entity = mor["mor"]
