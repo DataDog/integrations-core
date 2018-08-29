@@ -5,6 +5,7 @@
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
+
 class CoreDNSCheck(OpenMetricsBaseCheck):
     """
     Collect CoreDNS metrics from its Prometheus endpoint

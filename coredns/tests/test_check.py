@@ -34,6 +34,7 @@ DIG_ARGS = [
     "54"
 ]
 
+
 class MockResponse:
     """
     MockResponse is used to simulate the object requests.Response commonly returned by requests.get
@@ -81,15 +82,18 @@ def spin_up_coredns():
     with docker_run(compose_file, conditions=[condition], env_vars=env):
         yield
 
+
 @pytest.fixture
 def dockercheck():
     return CoreDNSCheck('coredns', {}, {}, [])
+
 
 @pytest.fixture
 def dockerinstance():
     return {
         'prometheus_endpoint': URL,
     }
+
 
 @pytest.fixture
 def mock_get():
@@ -130,7 +134,6 @@ class TestCoreDNS:
         # NAMESPACE + '.request_count.count',
         # NAMESPACE + '.request_type_count.count',
     ]
-
 
     def test_check(self, aggregator, mock_get):
         """
