@@ -211,6 +211,8 @@ jobs:
     - stage: test
       env: CHECK=teamcity
     - stage: test
+      env: CHECK=tokumx
+    - stage: test
       env: CHECK=twemproxy
     - stage: test
       env: CHECK=varnish
