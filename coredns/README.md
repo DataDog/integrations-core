@@ -4,7 +4,7 @@
 Get metrics from CoreDNS in real time to visualize and monitor DNS failures and cache hits/misses
 ## Setup
 ### Installation
-The CoreDNS check is included in the [Datadog Agent](https://app.datadoghq.com/account/settings#agent) package, so you don't need to install anything else on your servers.
+The CoreDNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
 ### Configuration
 Edit the `coredns.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6], to point to your server and port, set the masters to monitor. See the [sample coredns.d/conf.yaml][2] for all available configuration options.
@@ -50,7 +50,7 @@ Need help? Contact [Datadog Support][7].
 Please refer to the [main documentation][6]
 for more details about how to test and develop Agent based integrations.
 
-[1]: https://raw.githubusercontent.com/DataDog/cookiecutter-datadog-check/master/%7B%7Bcookiecutter.check_name%7D%7D/images/snapshot.png
+[1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
