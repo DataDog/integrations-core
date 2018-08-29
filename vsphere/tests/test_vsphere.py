@@ -10,39 +10,37 @@ from mock import MagicMock
 
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.errors import BadConfigError, ConnectionError
-from datadog_checks.vsphere.vsphere import (
-    MORLIST, INTERVAL, METRICS_METADATA, REFRESH_MORLIST_INTERVAL,
-    REFRESH_METRICS_METADATA_INTERVAL, LAST
-)
+from datadog_checks.vsphere.cache_config import CacheConfig
 from datadog_checks.vsphere.common import SOURCE_TYPE
+from datadog_checks.vsphere.vsphere import REFRESH_MORLIST_INTERVAL, REFRESH_METRICS_METADATA_INTERVAL
 from .utils import assertMOR, MockedMOR
 from .utils import disable_thread_pool, get_mocked_server
 
 SERVICE_CHECK_TAGS = ["vcenter_server:vsphere_mock", "vcenter_host:None", "foo:bar"]
 
 
-def test__init__():
+def test__init__(instance):
     with pytest.raises(BadConfigError):
         # Must define a unique 'name' per vCenter instance
         VSphereCheck('vsphere', {}, {}, [{'': ''}])
 
     init_config = {
-        'refresh_morlist_interval': 100,
         'clean_morlist_interval': 50,
-        'refresh_metrics_metadata_interval': -99,
+        'refresh_morlist_interval': 42,
+        'refresh_metrics_metadata_interval': -42,
         'batch_property_collector_size': -1,
     }
-    check = VSphereCheck('vsphere', init_config, {}, [{'name': 'vsphere_foo'}])
+    check = VSphereCheck('vsphere', init_config, {}, [instance])
+    i_key = check._instance_key(instance)
+
     assert check.time_started > 0
     assert check.pool_started is False
     assert len(check.server_instances) == 0
-    assert len(check.cache_times) == 1
-    assert 'vsphere_foo' in check.cache_times
-    assert check.cache_times['vsphere_foo'][MORLIST][INTERVAL] == 100
-    assert check.cache_times['vsphere_foo'][METRICS_METADATA][INTERVAL] == -99
-    assert check.clean_morlist_interval == check.refresh_morlist_interval
+    assert check.cache_config.get_interval(CacheConfig.Morlist, i_key) == 42
+    assert check.cache_config.get_interval(CacheConfig.Metadata, i_key) == -42
+    assert check.clean_morlist_interval == 50
     assert len(check.event_config) == 1
-    assert 'vsphere_foo' in check.event_config
+    assert 'vsphere_mock' in check.event_config
     assert len(check.registry) == 0
     assert len(check.morlist_raw) == 0
     assert len(check.morlist) == 0
@@ -264,8 +262,8 @@ def test__should_cache(instance):
     i_key = check._instance_key(instance)
 
     # first run should always cache
-    assert check._should_cache(instance, MORLIST) is True
-    assert check._should_cache(instance, METRICS_METADATA) is True
+    assert check._should_cache(instance, CacheConfig.Morlist) is True
+    assert check._should_cache(instance, CacheConfig.Metadata) is True
 
     # explicitly set cache expiration times, don't use defaults so we also test
     # configuration is properly propagated
@@ -275,9 +273,9 @@ def test__should_cache(instance):
     }
     check = VSphereCheck('vsphere', init_config, {}, [instance])
     # simulate previous runs, set the last execution time in the past
-    check.cache_times[i_key][MORLIST][LAST] = now - (2 * REFRESH_MORLIST_INTERVAL)
-    check.cache_times[i_key][METRICS_METADATA][LAST] = now - (2 * REFRESH_METRICS_METADATA_INTERVAL)
+    check.cache_config.set_last(CacheConfig.Morlist, i_key, now - (2 * REFRESH_MORLIST_INTERVAL))
+    check.cache_config.set_last(CacheConfig.Metadata, i_key, now - (2 * REFRESH_METRICS_METADATA_INTERVAL))
 
     with mock.patch("time.time", return_value=now):
-        assert check._should_cache(instance, MORLIST) is False
-        assert check._should_cache(instance, METRICS_METADATA) is False
+        assert check._should_cache(instance, CacheConfig.Morlist) is False
+        assert check._should_cache(instance, CacheConfig.Metadata) is False

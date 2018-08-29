@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from __future__ import unicode_literals
 from collections import defaultdict
 from datetime import timedelta
@@ -24,6 +23,7 @@ from datadog_checks.checks.libs.timer import Timer
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .errors import BadConfigError, ConnectionError
+from .cache_config import CacheConfig
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -62,14 +62,6 @@ RESOURCE_TYPE_NO_METRIC = [
     vim.ComputeResource,
     vim.Folder
 ]
-
-
-# Time after which we reap the jobs that clog the queue
-JOB_TIMEOUT = 10
-MORLIST = 'morlist'
-METRICS_METADATA = 'metrics_metadata'
-LAST = 'last'
-INTERVAL = 'interval'
 
 
 def atomic_method(method):
@@ -116,21 +108,17 @@ class VSphereCheck(AgentCheck):
 
         # Event configuration
         self.event_config = {}
-        # Caching resources, timeouts
-        self.cache_times = {}
-        for instance in self.instances:
-            i_key = self._instance_key(instance)
-            self.cache_times[i_key] = {
-                MORLIST: {
-                    LAST: 0,
-                    INTERVAL: self.refresh_morlist_interval
-                },
-                METRICS_METADATA: {
-                    LAST: 0,
-                    INTERVAL: self.refresh_metrics_metadata_interval
-                }
-            }
 
+        # Caching configuration
+        self.cache_config = CacheConfig()
+
+        # build up configurations
+        for instance in instances:
+            i_key = self._instance_key(instance)
+            # caches
+            self.cache_config.set_interval(CacheConfig.Morlist, i_key, self.refresh_morlist_interval)
+            self.cache_config.set_interval(CacheConfig.Metadata, i_key, self.refresh_metrics_metadata_interval)
+            # events
             self.event_config[i_key] = instance.get('event_config')
 
         # managed entity raw view
@@ -207,8 +195,9 @@ class VSphereCheck(AgentCheck):
 
     def _should_cache(self, instance, entity):
         i_key = self._instance_key(instance)
-        now = time.time()
-        return now - self.cache_times[i_key][entity][LAST] > self.cache_times[i_key][entity][INTERVAL]
+        elapsed = time.time() - self.cache_config.get_last(entity, i_key)
+        interval = self.cache_config.get_interval(entity, i_key)
+        return elapsed > interval
 
     def _smart_connect(self, instance, service_check_tags):
         # Check for ssl configs and generate an appropriate ssl context object
@@ -544,11 +533,9 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Caching the morlist for vcenter instance %s" % i_key)
         for resource_type in RESOURCE_TYPE_METRICS:
             if i_key in self.morlist_raw and len(self.morlist_raw[i_key].get(resource_type, [])) > 0:
-                self.log.debug(
-                    "Skipping morlist collection now, RAW results "
-                    "processing not over (latest refresh was {0}s ago)".format(
-                        time.time() - self.cache_times[i_key][MORLIST][LAST])
-                )
+                last = self.cache_config.get_last(CacheConfig.Morlist, i_key)
+                self.log.debug("Skipping morlist collection now, RAW results "
+                               "processing not over (latest refresh was {}s ago)".format(time.time() - last))
                 return
         self.morlist_raw[i_key] = {}
 
@@ -565,7 +552,7 @@ class VSphereCheck(AgentCheck):
             args=(instance, [instance_tag], regexes, include_only_marked)
         )
 
-        self.cache_times[i_key][MORLIST][LAST] = time.time()
+        self.cache_config.set_last(CacheConfig.Morlist, i_key, time.time())
 
     @atomic_method
     def _cache_morlist_process_atomic(self, instance, query_specs):
@@ -672,7 +659,7 @@ class VSphereCheck(AgentCheck):
                 instance_tag='instance'  # FIXME: replace by what we want to tag!
             )
             new_metadata[counter.key] = d
-        self.cache_times[i_key][METRICS_METADATA][LAST] = time.time()
+        self.cache_config.set_last(CacheConfig.Metadata, i_key, time.time())
 
         self.log.info("Finished metadata collection for instance {}".format(i_key))
         # Reset metadata
@@ -803,11 +790,12 @@ class VSphereCheck(AgentCheck):
         # ## </TEST-INSTRUMENTATION>
 
         # First part: make sure our object repository is neat & clean
-        if self._should_cache(instance, METRICS_METADATA):
+        if self._should_cache(instance, CacheConfig.Metadata):
             self._cache_metrics_metadata(instance)
 
-        if self._should_cache(instance, MORLIST):
+        if self._should_cache(instance, CacheConfig.Morlist):
             self._cache_morlist_raw(instance)
+
         self._cache_morlist_process(instance)
         self._vacuum_morlist(instance)
 
