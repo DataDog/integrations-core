@@ -4,14 +4,13 @@
 
 import pytest
 import os
-import pytest
-import requests
-import subprocess
+import pymongo
 
 from datadog_checks.dev import docker_run
 from datadog_checks.tokumx import TokuMX
 
 from . import common
+
 
 @pytest.fixture(scope="session")
 def spin_up_tokumx(request):
@@ -26,21 +25,51 @@ def spin_up_tokumx(request):
 
     with docker_run(compose_file,
                     log_patterns='admin web console waiting for connections'):
-        # cmd = [
-        #     'docker-compose',
-        #     '-f',
-        #     compose_file,
-        #     'exec',
-        #     'tokumx',
-        #     'mongo',
-        #     '{}:{}'.format(common.HOST, common.PORT),
-        #     '--eval',
-        #     '"printjson(db.serverStatus());"'
-        # ]
-        # subprocess.check_call(cmd)
         yield
 
 
 @pytest.fixture
 def check():
     return TokuMX('tokumx', {}, {})
+
+
+@pytest.fixture(scope="session")
+def set_up_tokumx():
+    cli = pymongo.mongo_client.MongoClient(
+        common.TOKUMX_SERVER,
+        socketTimeoutMS=30000,
+        read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)
+
+    foos = []
+    for _ in range(70):
+        foos.append({'1': []})
+        foos.append({'1': []})
+        foos.append({})
+
+    bars = []
+    for _ in range(50):
+        bars.append({'1': []})
+        bars.append({})
+
+    db = cli['test']
+    db.foo.insert_many(foos)
+    db.bar.insert_many(bars)
+
+    # authDB = cli['authDB']
+    # authDB.command("createUser", 'testUser', pwd='testPass', roles=[{'role': 'read', 'db': 'test'}])
+    #
+    # db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': 'test'}])
+
+    yield
+    tear_down_tokumx()
+
+
+def tear_down_tokumx():
+    cli = pymongo.mongo_client.MongoClient(
+        common.TOKUMX_SERVER,
+        socketTimeoutMS=30000,
+        read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)
+
+    db = cli['test']
+    db.drop_collection("foo")
+    db.drop_collection("bar")

@@ -8,9 +8,9 @@ from datadog_checks.dev import get_docker_hostname
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 PORT = '37017'
-MONGO_SERVER = 'mongodb://{}:{}'.format(HOST, PORT)
+TOKUMX_SERVER = 'mongodb://{}:{}'.format(HOST, PORT)
 
 INSTANCE = {
-    'server': MONGO_SERVER,
+    'server': TOKUMX_SERVER,
     'tags': ["optional:tag1"]
 }

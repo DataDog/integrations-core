@@ -138,11 +138,6 @@ IDX_HISTS = [
     'storageSize',
 ]
 
-
-# LocalRates are computed as rates but sent as histograms
-IDX_LCL_RATES = ['queries', 'nscanned', 'nscannedObjects', 'inserts', 'deletes']
-
-
 COLL_HISTS = [
     'totalIndexSize',
     'nindexes',
@@ -164,6 +159,3 @@ DB_STATS = [
     'objects',
     'storageSize'
 ]
-
-
-HIST_SUFFIXES = ['avg', 'max', 'count', '95percentile', 'median']
