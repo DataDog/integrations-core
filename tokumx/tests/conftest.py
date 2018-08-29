@@ -22,9 +22,14 @@ def spin_up_tokumx(request):
     """
 
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+    compose_dir = os.path.join(common.HERE, 'compose')
+    env = {
+        'COMPOSE_DIR': compose_dir
+    }
 
     with docker_run(compose_file,
-                    log_patterns='admin web console waiting for connections'):
+                    log_patterns='admin web console waiting for connections',
+                    env_vars=env):
         yield
 
 
