@@ -6,9 +6,7 @@ METRIC_MAP = {
     'addsstable_copies': 'addsstable.copies',
     'addsstable_proposals': 'addsstable.proposals',
     'build_timestamp': 'build.timestamp',
-    'capacity_available': 'capacity.available',
     'capacity_reserved': 'capacity.reserved',
-    'capacity': 'capacity.total',
     'capacity_used': 'capacity.used',
     'clock_offset_meannanos': 'clock.offset.meannanos',
     'clock_offset_stddevnanos': 'clock.offset.stddevnanos',
@@ -262,4 +260,9 @@ METRIC_MAP = {
     'txn_restarts_writetooold': 'txn.restarts.writetooold',
     'valbytes': 'valbytes',
     'valcount': 'valcount',
+}
+
+TRACKED_METRICS = {
+    'capacity': 'capacity.total',
+    'capacity_available': 'capacity.available',
 }
