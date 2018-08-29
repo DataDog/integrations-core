@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import division
+
 from collections import defaultdict, namedtuple
 
 from six import binary_type, iteritems
@@ -247,7 +249,7 @@ class AggregatorStub(object):
         """
         if len(self._metrics) == 0:
             return 100.0
-        return len(self._asserted) // float(len(self._metrics)) * 100.0
+        return len(self._asserted) / len(self._metrics) * 100.0
 
     @property
     def metric_names(self):
