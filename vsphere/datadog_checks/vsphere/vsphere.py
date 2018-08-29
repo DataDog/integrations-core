@@ -789,18 +789,21 @@ class VSphereCheck(AgentCheck):
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'] + custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
-        # First part: make sure our object repository is neat & clean
-        if self._should_cache(instance, CacheConfig.Metadata):
-            self._cache_metrics_metadata(instance)
+        # Only schedule more jobs on the queue if the jobs from the previous check runs are finished
+        # It's no good to keep piling up jobs
+        if self.pool._workq.qsize() == 0:
+            # First part: make sure our object repository is neat & clean
+            if self._should_cache(instance, CacheConfig.Metadata):
+                self._cache_metrics_metadata(instance)
 
-        if self._should_cache(instance, CacheConfig.Morlist):
-            self._cache_morlist_raw(instance)
+            if self._should_cache(instance, CacheConfig.Morlist):
+                self._cache_morlist_raw(instance)
 
-        self._cache_morlist_process(instance)
-        self._vacuum_morlist(instance)
+            self._cache_morlist_process(instance)
+            self._vacuum_morlist(instance)
 
-        # Second part: do the job
-        self.collect_metrics(instance)
+            # Second part: do the job
+            self.collect_metrics(instance)
         self._query_event(instance)
 
         thread_crashed = False
