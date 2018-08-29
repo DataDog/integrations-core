@@ -27,6 +27,9 @@ stages:
   - name: test
     if: (branch = master) AND (type != pull_request)
 
+before_install:
+  - echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+
 script:
   - travis_retry ddev test --cov ${CHECK}
   - ddev test ${CHECK} --bench || true
