@@ -804,6 +804,8 @@ class VSphereCheck(AgentCheck):
 
             # Second part: do the job
             self.collect_metrics(instance)
+        else:
+            self.log.debug("Thread pool is still processing jobs from previous run. Not scheduling anything.")
         self._query_event(instance)
 
         thread_crashed = False
