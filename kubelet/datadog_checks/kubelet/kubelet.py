@@ -55,8 +55,7 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
     """
     Collect metrics from Kubelet.
     """
-
-    DEFAULT_METRIC_LIMIT = 6000
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(KubeletCheck, self).__init__(name, init_config, agentConfig, instances)

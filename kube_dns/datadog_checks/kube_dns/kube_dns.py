@@ -12,6 +12,8 @@ class KubeDNSCheck(PrometheusCheck):
     """
     Collect kube-dns metrics from Prometheus
     """
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(KubeDNSCheck, self).__init__(name, init_config, agentConfig, instances)
         self.NAMESPACE = 'kubedns'

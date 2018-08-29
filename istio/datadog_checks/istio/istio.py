@@ -8,6 +8,7 @@ from datadog_checks.checks.prometheus import PrometheusScraper, PrometheusCheck
 class Istio(PrometheusCheck):
     MIXER_NAMESPACE = 'istio.mixer'
     MESH_NAMESPACE = 'istio.mesh'
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(Istio, self).__init__(name, init_config, agentConfig, instances)
