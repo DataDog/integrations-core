@@ -7,6 +7,7 @@ from codecs import open
 from os import path
 
 HERE = path.abspath(path.dirname(__file__))
+CHECKS_BASE_REQ = 'datadog-checks-base'
 
 # Get version info
 ABOUT = {}
@@ -24,8 +25,8 @@ setup(
     long_description=long_description,
     keywords='datadog agent check',
     url='https://github.com/DataDog/integrations-core',
-    author='CoreDNS',
-    author_email='shray@namely.com',
+    author='Datadog',
+    author_email='packages@datadoghq.com',
     license='BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -39,11 +40,13 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    packages=['datadog_checks.coredns'],
 
     # Run-time dependencies
-    install_requires=['datadog-checks-base', ],
+    install_requires=['CHECKS_BASE_REQ', ],
     setup_requires=['pytest-runner', ],
+
+    # The package we're going to ship
+    packages=['datadog_checks', 'datadog_checks.vault'],
 
     # Extra files to ship with the wheel package
     package_data={'datadog_checks.coredns': ['conf.yaml.example']},

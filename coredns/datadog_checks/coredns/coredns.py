@@ -20,12 +20,12 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
             # Primarily, metrics are emitted by the prometheus plugin: https://coredns.io/plugins/metrics/
             # Note: the count metrics were moved to specific functions
             # below to be submitted as both gauges and monotonic_counts
-            # 'coredns_dns_response_rcode_count_total': self.coredns_dns_response_rcode_count_total,
-            # 'coredns_proxy_request_count_total': self.coredns_proxy_request_count_total,
-            # 'coredns_cache_hits_total': self.coredns_cache_hits_total,
-            # 'coredns_cache_misses_total': self.coredns_cache_misses_total,
-            # 'coredns_dns_request_count_total': self.coredns_dns_request_count_total,
-            # 'coredns_dns_request_type_count_total': self.coredns_dns_request_type_count_total,
+            'coredns_dns_response_rcode_count_total': self.coredns_dns_response_rcode_count_total,
+            'coredns_proxy_request_count_total': self.coredns_proxy_request_count_total,
+            'coredns_cache_hits_total': self.coredns_cache_hits_total,
+            'coredns_cache_misses_total': self.coredns_cache_misses_total,
+            'coredns_dns_request_count_total': self.coredns_dns_request_count_total,
+            'coredns_dns_request_type_count_total': self.coredns_dns_request_type_count_total,
         }
 
         # Create instances we can use in OpenMetricsBaseCheck

@@ -55,57 +55,6 @@ class MockResponse:
         pass
 
 
-@pytest.fixture(scope="session")
-def spin_up_coredns():
-    def condition():
-
-        sys.stderr.write("Waiting for CoreDNS to boot...")
-        booted = False
-        for _ in xrange(10):
-            try:
-                res = requests.get(URL)
-                # create some metrics by using dig
-                subprocess.check_call(DIG_ARGS, env=env)
-                res.raise_for_status
-                booted = True
-                break
-            except Exception:
-                time.sleep(1)
-
-        if not booted:
-            raise RetryError("CoreDNS failed to boot!")
-        sys.stderr.write("CoreDNS boot complete.\n")
-
-    compose_file = os.path.join(HERE, 'docker', 'docker-compose.yml')
-    env = os.environ
-    env['COREDNS_CONFIG_FOLDER'] = CONFIG_FOLDER
-    with docker_run(compose_file, conditions=[condition], env_vars=env):
-        yield
-
-
-@pytest.fixture
-def dockercheck():
-    return CoreDNSCheck('coredns', {}, {}, [])
-
-
-@pytest.fixture
-def dockerinstance():
-    return {
-        'prometheus_endpoint': URL,
-    }
-
-
-@pytest.fixture
-def mock_get():
-    mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    text_data = None
-    with open(mesh_file_path, 'rb') as f:
-        text_data = f.read()
-
-    p = mock.patch('requests.get', return_value=MockResponse(text_data, 'text/plain; version=0.0.4'), __name__='get')
-    yield p.start()
-    p.stop()
-
 
 class TestCoreDNS:
     """Basic Test for coredns integration."""
