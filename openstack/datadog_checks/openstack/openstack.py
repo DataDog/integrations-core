@@ -820,11 +820,14 @@ class OpenStackCheck(AgentCheck):
         uptime = resp['hypervisor']['uptime']
         return self._parse_uptime_string(uptime)
 
-    def get_stats_for_single_hypervisor(self, hyp_id, instance, host_tags=None, custom_tags=None):
-        url = '{0}/os-hypervisors/{1}'.format(self.get_nova_endpoint(), hyp_id)
+    def get_stats_for_all_hypervisors(self, instance, host_tags=None, custom_tags=None):
+        url = '{0}/os-hypervisors/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
-        hyp = resp['hypervisor']
+        for hyp in resp.get('hypervisors'):
+            self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
+
+    def get_stats_for_single_hypervisor(self, hyp, instance, host_tags=None, custom_tags=None):
         host_tags = host_tags or []
         self._hypervisor_name_cache[self._instance_key(instance)] = hyp['hypervisor_hostname']
         custom_tags = custom_tags or []
@@ -1224,9 +1227,6 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to this (host, hypervisor, project)
                 # and it's guest servers
 
-                # [TODO] Change name to reflect all hypervisors
-                hyp = self.get_local_hypervisor(True)
-
                 project = self.get_scoped_project(scope)
 
                 if collect_all_projects or project is None:
@@ -1238,12 +1238,10 @@ class OpenStackCheck(AgentCheck):
 
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
-                servers = {}
-                hypervisors = copy.deepcopy(hyp)
-                for hyp in hypervisors:
-                    servers.extend(self.get_servers_managed_by_hypervisor(
-                        i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
-                    ))
+                servers = []
+
+                # Note Instead of doing this per hypervisor, lets just batch get all servers!
+                servers.extend(self.get_all_servers(i_key, collect_all_tenants,filter_by_host=None))
 
                 # host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
                 host_tags = []
@@ -1260,8 +1258,8 @@ class OpenStackCheck(AgentCheck):
                     self.external_host_tags[server] = host_tags
                     self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags)
 
-                for hyp in hypervisors:
-                    self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
+                self.(instance, host_tags=host_tags,custom_tags=custom_tags)
+                # self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
 
             if projects:
                 # Ensure projects list and scoped project exists
