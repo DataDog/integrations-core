@@ -51,10 +51,23 @@ GENERIC_PROMETHEUS_INSTANCE = {
 
 @pytest.fixture
 def mocked_prometheus_check():
-    check = OpenMetricsBaseCheck('prometheus_check', {}, {})
-    check.log = logging.getLogger('datadog-prometheus.test')
-    check.log.debug = mock.MagicMock()
-    return check
+    # We make sure the defaults used in OpenMetricsScraperMixin are the same defaults used in PrometheusScraperMixin
+    orig_create_scraper_configuration = OpenMetricsBaseCheck.create_scraper_configuration
+
+    def remove_created_by_base_class(self, *args, **kwargs):
+        if 'created_by_base_class' in kwargs:
+            del kwargs['created_by_base_class']
+        elif len(args) > 1:
+            del args[1]
+
+        return orig_create_scraper_configuration(self, *args, **kwargs)
+
+    with mock.patch('datadog_checks.checks.openmetrics.OpenMetricsBaseCheck.create_scraper_configuration',
+                    side_effect=remove_created_by_base_class, autospec=True):
+        check = OpenMetricsBaseCheck('prometheus_check', {}, {})
+        check.log = logging.getLogger('datadog-prometheus.test')
+        check.log.debug = mock.MagicMock()
+        yield check
 
 
 @pytest.fixture
