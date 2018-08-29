@@ -4,6 +4,6 @@ services:
 
   tokumx:
     image: datadog/tokumx
-    entrypoint: mongod --bind_ip 0.0.0.0 --port 37017
+    entrypoint: (echo never > /sys/kernel/mm/transparent_hugepage/enabled || true) && mongod --bind_ip 0.0.0.0 --port 37017
     ports:
       - 37017:37017
