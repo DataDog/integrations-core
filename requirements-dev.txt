@@ -1,8 +1,0 @@
-invoke
-pip-tools
-packaging
-tox
-twine
-cookiecutter
-colorama
-requests
