@@ -12,10 +12,15 @@ chardet==3.0.4 \
     --hash=sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae \
     --hash=sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691 \
     # via requests
+ddtrace==0.12.1 \
+    --hash=sha256:f77a7367c43e3d58cb106519a61b3a137d774835f37f768979726a47e18ba11c
 idna==2.7 \
     --hash=sha256:156a6814fb5ac1fc6850fb002e0852d56c0c8d2531923a51032d1b70760e186e \
     --hash=sha256:684a38a6f903c1d71d6d5fac066b58d7768af4de2b832e426ec79c30daa94a16 \
     # via requests
+msgpack-python==0.5.6 \
+    --hash=sha256:378cc8a6d3545b532dfd149da715abae4fda2a3adb6d74e525d0d5e51f46909b \
+    # via ddtrace
 prometheus-client==0.3.0 \
     --hash=sha256:69494dc1ac967c0f626c8193e439755c2b95dd4ed22ef31c277601778a50c7ff
 protobuf==3.5.1 \
@@ -42,3 +47,6 @@ urllib3==1.23 \
     # via requests
 uuid==1.30 \
     --hash=sha256:1f87cc004ac5120466f36c5beae48b4c48cc411968eed0eaecd3da82aa96193f
+wrapt==1.10.11 \
+    --hash=sha256:d4d560d479f2c21e1b5443bbd15fe7ec4b37fe7e53d335d3b9b0a7b1226fe3c6 \
+    # via ddtrace
