@@ -1,5 +1,11 @@
 # CHANGELOG - vsphere
 
+## 2.4.0 / 2018-08-30
+
+* [Fixed] Control size of the thread pool job queue. See [#2131](https://github.com/DataDog/integrations-core/pull/2131).
+* [Changed] Make the cache configuration thread safe. See [#2125](https://github.com/DataDog/integrations-core/pull/2125).
+* [Changed] Removed unused `_clean` method, added more unit tests. See [#2120](https://github.com/DataDog/integrations-core/pull/2120).
+
 ## 2.3.1 / 2018-08-28
 
 * [Fixed]  Fix `KeyError` due to race condition on the cache. See [#2099](https://github.com/DataDog/integrations-core/pull/2099).
