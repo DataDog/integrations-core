@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from ddtrace import tracer, patch
+from ddtrace import patch
 
 patch(requests=True)
 
