@@ -72,36 +72,36 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
 
         return instance
 
-    def submit_as_gauge_and_monotonic_count(self, metric_suffix, message, scraper_config):
+    def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):
         """
         submit a kube_dns metric both as a gauge (for compatibility) and as a monotonic_count
         """
         metric_name = scraper_config['namespace'] + metric_suffix
-        for metric in message.metric:
+        for sample in metric.samples:
             _tags = []
-            for label in metric.label:
-                _tags.append('{}:{}'.format(label.name, label.value))
+            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+                _tags.append('{}:{}'.format(label_name, label_value))
             # submit raw metric
-            self.gauge(metric_name, metric.counter.value, _tags)
+            self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)
             # submit rate metric
-            self.monotonic_count(metric_name + '.count', metric.counter.value, _tags)
+            self.monotonic_count(metric_name + '.count', sample[self.SAMPLE_VALUE], _tags)
 
     # metrics names for kubernetes >= 1.6.0
-    def kubedns_kubedns_dns_request_count_total(self, message, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.request_count', message, scraper_config)
+    def kubedns_kubedns_dns_request_count_total(self, metric, scraper_config):
+        self.submit_as_gauge_and_monotonic_count('.request_count', metric, scraper_config)
 
-    def kubedns_kubedns_dns_error_count_total(self, message, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.error_count', message, scraper_config)
+    def kubedns_kubedns_dns_error_count_total(self, metric, scraper_config):
+        self.submit_as_gauge_and_monotonic_count('.error_count', metric, scraper_config)
 
-    def kubedns_kubedns_dns_cachemiss_count_total(self, message, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.cachemiss_count', message, scraper_config)
+    def kubedns_kubedns_dns_cachemiss_count_total(self, metric, scraper_config):
+        self.submit_as_gauge_and_monotonic_count('.cachemiss_count', metric, scraper_config)
 
     # metrics names for kubernetes < 1.6.0
-    def skydns_skydns_dns_request_count_total(self, message, scraper_config):
-        self.kubedns_kubedns_dns_request_count_total(message, scraper_config)
+    def skydns_skydns_dns_request_count_total(self, metric, scraper_config):
+        self.kubedns_kubedns_dns_request_count_total(metric, scraper_config)
 
-    def skydns_skydns_dns_error_count_total(self, message, scraper_config):
-        self.kubedns_kubedns_dns_error_count_total(message, scraper_config)
+    def skydns_skydns_dns_error_count_total(self, metric, scraper_config):
+        self.kubedns_kubedns_dns_error_count_total(metric, scraper_config)
 
-    def skydns_skydns_dns_cachemiss_count_total(self, message, scraper_config):
-        self.kubedns_kubedns_dns_cachemiss_count_total(message, scraper_config)
+    def skydns_skydns_dns_cachemiss_count_total(self, metric, scraper_config):
+        self.kubedns_kubedns_dns_cachemiss_count_total(metric, scraper_config)
