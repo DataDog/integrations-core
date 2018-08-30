@@ -74,7 +74,7 @@ instances:
 
 init_config:
 
-  ## @param is_jmx - boolean - required - default: true
+  ## @param is_jmx - boolean - required
   ## Whether or not this file is a configuration for a JMX integration
   #
   is_jmx: true
