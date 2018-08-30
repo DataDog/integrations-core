@@ -66,8 +66,9 @@ Add the `ddsource` attribute with [the name of the log integration][16] in your 
 Setup Example:
 
 ```
-# Match events tagged with "datadog.**" and
-# send them to Datadog
+  # Match events tagged with "datadog.**" and
+  # send them to Datadog
+
 <match datadog.**>
 
   @type datadog
