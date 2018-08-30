@@ -216,7 +216,7 @@ class WinWMICheck(AgentCheck):
         """
         for metric in metrics:
             if metric.name not in metric_name_and_type_by_property \
-                and metric.name.lower() not in metric_name_and_type_by_property:
+                    and metric.name.lower() not in metric_name_and_type_by_property:
                 # Only report the metrics that were specified in the configration
                 # Ignore added properties like 'Timestamp_Sys100NS', `Frequency_Sys100NS`, etc ...
                 continue
