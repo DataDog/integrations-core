@@ -8,12 +8,12 @@ instances:
   - apache_status_url: http://localhost/server-status?auto
 
   ## @param apache_user - string - optional
-  ## <USERNAME> for the Apache status endpoint authentication.
+  ## Username for the Apache status endpoint authentication.
   #
   #  apache_user: <USERNAME>
 
   ## @param apache_password - string - optional
-  ## <PASSWORD> for the Apache status endpoint authentication.
+  ## Password for the Apache status endpoint authentication.
   #
   #  apache_password: <PASSWORD>
 

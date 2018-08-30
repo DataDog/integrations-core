@@ -6,34 +6,33 @@
 instances:
   
   ## @param host - string - required
-  ## 
+  ## ActiveMQ host to connect to.
   #
   - host: localhost
 
   ## @param port - integer - required
-  ##
+  ## ActiveMQ port to connect to.
   #
     port: 1099
 
   ## @param user - string - optional
-  ##
+  ## Username from the credentials needed to connect to the host. 
   #
   #  user: <USERNAME>
   
   ## @param password - string - optional
-  ## XXXXXXXXXXX
+  ## Password from the credentials needed to connect to the host. 
   #
   #  password: <PASSWORD>
 
   ## @param process_name_regex - string - optional
-  ## XXXXXXXXXXX
+  ## Instead of specifying a host, and port. The agent can connect using the attach api.
+  ## This requires the JDK to be installed and the path to tools.jar to be set below in tools_jar_path parameter.
   #
   #  process_name_regex: .*process_name.* 
 
   ## @param tools_jar_path - string - optional
-  ## Instead of specifying a host, and port. The agent can connect using the attach api.
-  ## This requires the JDK to be installed and the path to tools.jar to be set below.
-  ## Note: It needs to be set when process_name_regex parameter is set
+  ## Needs to be set when process_name_regex parameter is set.
   #
   #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
   
@@ -62,7 +61,7 @@ instances:
     ## trust_store_password should be set if ssl is enabled
     ## password for your TrustStore.jks file
     #
-    #  trust_store_password: password
+    #  trust_store_password: <PASSWORD>
   
   ## @param tags  - list of key:value element - optional 
   ## List of tags to attach to every metric, event and service check emitted by this integration.
@@ -80,7 +79,7 @@ init_config:
   #
   is_jmx: true
   
-  ## @param collect_default_metrics - boolean - required - default: true
+  ## @param collect_default_metrics - boolean - required
   ## Whether or not the check should collect all default metrics for this integration.
   #
   collect_default_metrics: true

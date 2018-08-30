@@ -3,41 +3,41 @@ init_config:
 instances:
 
   ## @param host - string - required
-  ## host to connect to.
+  ## Host that the Datadog active directory check connects to.
   ## "." means the current host 
   # 
   - host: .
 
   ## @param username - string - optional
-  ## XXXXXXXXXXX
+  ## Username from the credentials needed to connect to the host. 
   #
   #  username: <USER_NAME>
 
   ## @param password - string optional
-  ## XXXXXXXXXXX
+  ## Password from the credentials needed to connect to the host.
   #
   #  password: <PASSWORD>
 
-  ## @param additional_metrics - array - optional
-  ## The additional metrics is a list of additional counters to collect.  The
-  ## list is formatted as follows:
+  ## @param additional_metrics - list of lists - optional
+  ## The additional metrics is a list of items that represent additional counters to collect. 
+  ## Each item is a list of strings, formatted as follows: 
   ##  
-  ## ['<counterset name>', <counter instance name>, '<counter name>', <metric name>, <metric type>]
+  ## ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
   ##
-  ## <counterset name> is the name of the PDH Counter Set (the name of the counter)
-  ## <counter instance name> is the specific counter instance to collect, for example 
+  ## <COUNTERSET_NAME> is the name of the PDH Counter Set (the name of the counter)
+  ## <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example 
   ##                          "Default Web Site".  Specify 'none' For all instances of 
   ##                          the counter.
-  ## <counter name> is the individual counter to report
-  ## <metric name> is the name you want to show up in Datadog
-  ## <metric type> is from the standard choices for all agent checks, such as gauge,
+  ## <COUNTER_NAME> is the individual counter to report
+  ## <METRIC_NAME> is the name you want to show up in Datadog
+  ## <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge,
   ##                rate, histogram or counter
   #   
   #  additional_metrics:
   #    - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
   
 
-  ## @param counter_data_types - comma separated list of string - optional
+  ## @param counter_data_types - list of strings - optional
   ## counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> element that
   ## allows the precision with which counters are queried on a per metric basis
   ## <METRIC_NAME>: Name of your metric 

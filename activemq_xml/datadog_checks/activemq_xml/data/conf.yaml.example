@@ -10,12 +10,12 @@ instances:
   - url: http://localhost:8161
 
   ## @param username - string - optional
-  ## XXXXXXXXXXX
+  ## Username from the credentials needed to connect to the url. 
   #
   #  username: <USERNAME>
   
   ## @param password - string - optional
-  ## XXXXXXXXXXX
+  ## Password from the credentials needed to connect to the host. 
   #
   #  password: <PASSWORD>
   
@@ -41,6 +41,6 @@ instances:
   ## @param detailed_subscribers - list of string - optional
   ## If you have more than 300 subscribers you need to list the ones you want to track.
   #
-  #  detailed_subscribers: # Optional. 
+  #  detailed_subscribers:
   #   - <SUBSCRIBER_1>
   #   - <SUBSCRIBER_2>
