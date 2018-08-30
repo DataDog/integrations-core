@@ -578,7 +578,6 @@ class VSphereCheck(AgentCheck):
             available_metrics = [value.id for value in mor_perfs.value]
             try:
                 self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
-                self.morlist[i_key][mor_name]['last_seen'] = time.time()
             except KeyError:
                 self.log.error("Trying to compute needed metrics from object %s deleted from the cache, skipping. "
                                "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
@@ -609,7 +608,7 @@ class VSphereCheck(AgentCheck):
                     mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
                     if mor_name not in self.morlist[i_key]:
                         self.morlist[i_key][mor_name] = mor
-                        self.morlist[i_key][mor_name]["last_seen"] = time.time()
+                    self.morlist[i_key][mor_name]["last_seen"] = time.time()
 
                     query_spec = vim.PerformanceManager.QuerySpec()
                     query_spec.entity = mor["mor"]
@@ -789,18 +788,23 @@ class VSphereCheck(AgentCheck):
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'] + custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
-        # First part: make sure our object repository is neat & clean
-        if self._should_cache(instance, CacheConfig.Metadata):
-            self._cache_metrics_metadata(instance)
+        # Only schedule more jobs on the queue if the jobs from the previous check runs are finished
+        # It's no good to keep piling up jobs
+        if self.pool._workq.qsize() == 0:
+            # First part: make sure our object repository is neat & clean
+            if self._should_cache(instance, CacheConfig.Metadata):
+                self._cache_metrics_metadata(instance)
 
-        if self._should_cache(instance, CacheConfig.Morlist):
-            self._cache_morlist_raw(instance)
+            if self._should_cache(instance, CacheConfig.Morlist):
+                self._cache_morlist_raw(instance)
 
-        self._cache_morlist_process(instance)
-        self._vacuum_morlist(instance)
+            self._cache_morlist_process(instance)
+            self._vacuum_morlist(instance)
 
-        # Second part: do the job
-        self.collect_metrics(instance)
+            # Second part: do the job
+            self.collect_metrics(instance)
+        else:
+            self.log.debug("Thread pool is still processing jobs from previous run. Not scheduling anything.")
         self._query_event(instance)
 
         thread_crashed = False
