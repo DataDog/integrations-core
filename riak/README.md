@@ -17,10 +17,10 @@ The Riak check is included in the [Datadog Agent][1] package, so you don't need 
 	See the [sample riak.yaml][2] for all available configuration options:
 
     ```yaml
-    	init_config:
+    init_config:
 
-    	instances:
-      		- url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
+    instances:
+      	- url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
     ```
 
 2. [Restart the Agent][3] to start sending Riak metrics to Datadog.
