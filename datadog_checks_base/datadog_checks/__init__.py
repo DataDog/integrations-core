@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
+from ddtrace import tracer, patch
+
+patch(requests=True)
 
 __all__ = [
     '__version__'
