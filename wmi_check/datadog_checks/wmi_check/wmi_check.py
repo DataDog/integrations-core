@@ -64,7 +64,6 @@ class WMICheck(WinWMICheck):
         try:
             wmi_sampler.sample()
             metrics = self._extract_metrics(wmi_sampler, tag_by, tag_queries, constant_tags)
-            self.log.debug(metrics)
         except TimeoutException:
             self.log.warning(
                 u"WMI query timed out."
