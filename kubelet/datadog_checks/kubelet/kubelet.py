@@ -85,7 +85,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 'rest_client_requests_total': 'rest.client.requests',
                 'kubelet_runtime_operations': 'kubelet.runtime.operations',
                 'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
-            }]
+            }],
+            # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
+            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+            'health_service_check': instance.get('health_service_check', False)
         })
         return kubelet_instance
 

@@ -78,7 +78,10 @@ class CadvisorPrometheusScraperMixin(object):
                 'container_start_time_seconds',
                 'container_spec_memory_swap_limit_bytes',
                 'container_scrape_error'
-            ]
+            ],
+            # Defaults that were set when CadvisorPrometheusScraper was based on PrometheusScraper
+            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+            'health_service_check': instance.get('health_service_check', False)
         })
         return cadvisor_instance
 
