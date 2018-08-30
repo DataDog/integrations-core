@@ -4,7 +4,7 @@
   ],
   "creates_events": false,
   "display_name": "OpenMetrics",
-  "guid": "58e75868-0933-407b-aaa5-469c252bdb2b",
+  "guid": "3f67af75-6987-468c-99b3-5001ba5ab414",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
