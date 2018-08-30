@@ -1,24 +1,9 @@
-# (C) Datadog, Inc. 2014-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# 3p
-from nose.plugins.attrib import attr
-
-# project
-from checks import AgentCheck
-from tests.checks.common import AgentCheckTest
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 
 GAUGES = [
-    # FIXME: For some reason these metrics are not always available
-    #    'tokumx.indexCounters.btree.missRatio',
-    #    'tokumx.globalLock.ratio',
-    #    'tokumx.mem.mapped',
-    #    'tokumx.replSet.health',
-    #    'tokumx.replSet.state',
-    #    'tokumx.replSet.replicationLag',
-    #    'tokumx.metrics.repl.buffer.maxSizeBytes',
     'tokumx.connections.available',
     'tokumx.connections.current',
     'tokumx.cursors.timedOut',
@@ -48,13 +33,6 @@ GAUGES = [
 
 
 RATES = [
-    # FIXME: For some reason these metrics are not available
-    #    'tokumx.indexCounters.btree.missRatio',
-    #    'tokumx.indexCounters.btree.accessesps',
-    #    'tokumx.indexCounters.btree.hitsps',
-    #    'tokumx.indexCounters.btree.missesps',
-    #    'tokumx.metrics.operation.fastmodps',
-    #    'tokumx.metrics.record.movesps',
     'tokumx.asserts.msgps',
     'tokumx.asserts.regularps',
     'tokumx.asserts.rolloversps',
@@ -160,11 +138,6 @@ IDX_HISTS = [
     'storageSize',
 ]
 
-
-# LocalRates are computed as rates but sent as histograms
-IDX_LCL_RATES = ['queries', 'nscanned', 'nscannedObjects', 'inserts', 'deletes']
-
-
 COLL_HISTS = [
     'totalIndexSize',
     'nindexes',
@@ -186,47 +159,3 @@ DB_STATS = [
     'objects',
     'storageSize'
 ]
-
-
-HIST_SUFFIXES = ['avg', 'max', 'count', '95percentile', 'median']
-
-
-@attr(requires='tokumx')
-class TestTokuMXTest(AgentCheckTest):
-    CHECK_NAME = 'tokumx'
-
-    def testTokuMXCheck(self):
-        mongo_server = 'mongodb://localhost:37017/test'
-        config = {
-            'instances': [{
-                'server': mongo_server,
-                'tags': ["optional:tag1"]
-            }]
-        }
-
-        server_tag = 'server:%s' % mongo_server
-
-        self.run_check_twice(config)
-
-        # TODO: assert more tags
-        for mname in GAUGES:
-            self.assertMetric(mname, count=1, tags=[server_tag, "optional:tag1"])
-        for mname in RATES:
-            self.assertMetric(mname, count=1)
-        for msuff in IDX_HISTS:
-            for hsuff in HIST_SUFFIXES:
-                self.assertMetric('tokumx.stats.idx.%s.%s' % (msuff, hsuff), count=1)
-        for msuff in IDX_LCL_RATES:
-            for hsuff in HIST_SUFFIXES:
-                self.assertMetric('tokumx.statsd.idx.%s.%s' % (msuff, hsuff), count=1)
-        for msuff in COLL_HISTS:
-            for hsuff in HIST_SUFFIXES:
-                self.assertMetric('tokumx.stats.coll.%s.%s' % (msuff, hsuff), count=1)
-        for msuff in DB_STATS:
-            for dbname in ('admin', 'local', 'test'):
-                self.assertMetric('tokumx.stats.db.%s' % (msuff), count=1, tags=[server_tag, 'db:%s' % dbname, "optional:tag1"])
-
-        self.assertServiceCheck('tokumx.can_connect', count=1, status=AgentCheck.OK,
-            tags=['db:test', 'host:localhost', 'port:37017', "optional:tag1"])
-
-        self.coverage_report()
