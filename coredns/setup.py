@@ -46,7 +46,7 @@ setup(
     setup_requires=['pytest-runner', ],
 
     # The package we're going to ship
-    packages=['datadog_checks', 'datadog_checks.vault'],
+    packages=['datadog_checks', 'datadog_checks.coredns'],
 
     # Extra files to ship with the wheel package
     package_data={'datadog_checks.coredns': ['conf.yaml.example']},

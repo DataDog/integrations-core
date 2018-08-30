@@ -2,91 +2,37 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
-import os
-import mock
-import sys
-import pytest
-import requests
-import subprocess
-import time
-
 # project
 from datadog_checks.coredns import CoreDNSCheck
-from datadog_checks.dev import docker_run, RetryError
-from datadog_checks.utils.common import get_docker_hostname
 
-instance = {
-    'prometheus_endpoint': 'http://localhost:9153/metrics',
-}
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FOLDER = os.path.join(HERE, 'docker', 'coredns')
-HOST = get_docker_hostname()
-PORT = '9153'
-URL = "http://{}:{}/metrics".format(HOST, PORT)
-
-DIG_ARGS = [
-    "dig",
-    "google.com",
-    "@127.0.0.1",
-    "-p",
-    "54"
-]
-
-
-class MockResponse:
-    """
-    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
-    """
-
-    def __init__(self, content, content_type):
-        self.content = content
-        self.headers = {'Content-Type': content_type}
-
-    def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
-            yield elt
-
-    def raise_for_status(self):
-        pass
-
-    def close(self):
-        pass
-
+CHECK_NAME = 'coredns'
+NAMESPACE = 'coredns'
 
 
 class TestCoreDNS:
-    """Basic Test for coredns integration."""
-    CHECK_NAME = 'coredns'
-    NAMESPACE = 'coredns'
+    """Basic Test for CoreDNS integration."""
+
     METRICS = [
-        NAMESPACE + '.request_duration.seconds.sum',
-        NAMESPACE + '.request_duration.seconds.count',
+        NAMESPACE + '.request_count',
+        NAMESPACE + '.cache_size.count',
+        NAMESPACE + '.request_type_count',
+        NAMESPACE + '.cache_misses_count',
+        NAMESPACE + '.response_code_count',
+        NAMESPACE + '.proxy_request_count',
+        NAMESPACE + '.response_size.bytes.sum',
+        NAMESPACE + '.response_size.bytes.count',
         NAMESPACE + '.request_size.bytes.sum',
         NAMESPACE + '.request_size.bytes.count',
-        NAMESPACE + '.proxy_request_duration.seconds.count',
         NAMESPACE + '.proxy_request_duration.seconds.sum',
-        NAMESPACE + '.cache_size.count',
-    ]
-    COUNT_METRICS = [
-        # NAMESPACE + '.response_code_count',
-        # NAMESPACE + '.proxy_request_count',
-        # NAMESPACE + '.cache_hits_count',
-        # NAMESPACE + '.cache_misses_count',
-        # NAMESPACE + '.request_count',
-        # NAMESPACE + '.request_type_count',
-        # NAMESPACE + '.response_code_count.count',
-        # NAMESPACE + '.proxy_request_count.count',
-        # NAMESPACE + '.cache_hits_count.count',
-        # NAMESPACE + '.cache_misses_count.count',
-        # NAMESPACE + '.request_count.count',
-        # NAMESPACE + '.request_type_count.count',
+        NAMESPACE + '.proxy_request_duration.seconds.count',
+        NAMESPACE + '.request_duration.seconds.sum',
+        NAMESPACE + '.request_duration.seconds.count',
+        NAMESPACE + '.cache_hits_count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_check(self, aggregator, mock_get, instance):
         """
-        Testing coredns check.
+        Testing CoreDNS check.
         """
 
         check = CoreDNSCheck('coredns', {}, {}, [instance])
@@ -94,28 +40,36 @@ class TestCoreDNS:
 
         # check that we then get the count metrics also
         check.check(instance)
-
-        for metric in self.METRICS + self.COUNT_METRICS:
+        for m in aggregator.metric_names:
+            print(m)
+        for metric in self.METRICS:
             aggregator.assert_metric(metric)
 
-        aggregator.assert_all_metrics_covered()
 
-    def test_connect(self, aggregator, spin_up_coredns, dockerinstance):
+    def test_docker(self, aggregator, spin_up_coredns, dockerinstance):
         """
-        Testing that connection will work with instance
+        Testing metrics emitted from docker container
         """
         check = CoreDNSCheck('coredns', {}, {}, [dockerinstance])
         check.check(dockerinstance)
 
         # include_metrics that can be reproduced in a docker based test environment
         include_metrics = [
-            'coredns.proxy_request_duration.seconds.count',
-            'coredns.request_duration.seconds.sum',
-            'coredns.request_size.bytes.count',
-            'coredns.cache_size.count',
-            'coredns.request_size.bytes.sum',
-            'coredns.request_duration.seconds.count',
-            'coredns.proxy_request_duration.seconds.sum',
+            NAMESPACE + '.request_count',
+            NAMESPACE + '.cache_size.count',
+            NAMESPACE + '.request_type_count',
+            NAMESPACE + '.cache_misses_count',
+            NAMESPACE + '.response_code_count',
+            NAMESPACE + '.proxy_request_count',
+            NAMESPACE + '.response_size.bytes.sum',
+            NAMESPACE + '.response_size.bytes.count',
+            NAMESPACE + '.request_size.bytes.sum',
+            NAMESPACE + '.request_size.bytes.count',
+            NAMESPACE + '.proxy_request_duration.seconds.sum',
+            NAMESPACE + '.proxy_request_duration.seconds.count',
+            NAMESPACE + '.request_duration.seconds.sum',
+            NAMESPACE + '.request_duration.seconds.count',
         ]
+
         for metric in include_metrics:
             aggregator.assert_metric(metric)

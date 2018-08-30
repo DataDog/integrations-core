@@ -3,7 +3,7 @@ init_config:
 
 instances:
     # url of the metrics endpoint of prometheus
-  - prometheus_endpoint: http://localhost:9153/metrics
+  - prometheus_url: http://localhost:9153/metrics
     # The histogram buckets can be noisy and generate a lot of tags.
     # send_histograms_buckets controls whether or not you want to pull them.
     #
