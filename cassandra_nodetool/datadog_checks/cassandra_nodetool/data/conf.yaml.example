@@ -1,23 +1,48 @@
 init_config:
-  # command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
-  # can be overwritten on an instance
-  # nodetool: /usr/bin/nodetool
+
+  ## @param nodetool - string - required
+  ## command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool) 
+  ## can be overwritten on an instance
+  #
+  #  nodetool: /usr/bin/nodetool
 
 instances:
 
-  # the list of keyspaces to monitor, an empty list will result in no metrics being sent
-  - keyspaces: []
+  ## @param keyspaces - list of string - required
+  ## The list of keyspaces to monitor.
+  ## An empty list results in no metrics being sent.
+  #
+  - keyspaces:
+      - <KEYSPACE_1>
+      - <KEYSPACE_2>
 
-    # host that nodetool will connect to.
-    # host: localhost
+  ## @param host - string - optional 
+  ## Host that the Datadog Cassandra Nodetool check connects to.
+  #
+  #  host: localhost
 
-    # the port JMX is listening to for connections.
-    # port: 7199
+  ## @param port - integer - optional
+  ## The port JMX is listening to for connections.
+  #
+  #  port: 7199
 
-    # a set of credentials to connect to the host. These are the credentials for the JMX server.
-    # For the check to work, this user must have a read/write access so that nodetool can execute the `status` command
-    # username:
-    # password:
+  ## @param username - string - optional
+  ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
+  ## For the check to work, this user must have a read/write access so that the Datadog Cassandra nodetool check can execute the `status` command
+  #
+  #  username: <USERNAME>
 
-    # a list of additional tags to be sent with the metrics
-    # tags: []
+  ## @param password - string - optional
+  ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
+  ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool check can execute the `status` command 
+  #
+  #  password: <PASSWORD>
+
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
