@@ -2,9 +2,32 @@ init_config:
   # Leave empty
 
 instances:
-    # url of the metrics endpoint of prometheus
-  - prometheus_url: http://localhost:9153/metrics
-    # The histogram buckets can be noisy and generate a lot of tags.
-    # send_histograms_buckets controls whether or not you want to pull them.
-    #
+  # To enable CoreDNS metrics you must specify the prometheus url and enable the plugin within coredns
+  # See: https://coredns.io/plugins/metrics/
+  - prometheus_url: "http://%%host%%:9153/metrics"
+    tags:
+      - "dns-pod:%%host%%"
+
+    # To send the histograms bucket
     # send_histograms_buckets: True
+
+    # To send counters as monotonic counter
+    # send_monotonic_counter: True
+
+    metrics:
+      # metrics are being emitted from the below plugins
+      # to map metrics from other plugins use the format below
+      # https://coredns.io/plugins/metrics/
+      # https://coredns.io/plugins/proxy/
+      # https://coredns.io/plugins/cache/
+      - coredns_dns_response_size_bytes: response_size.bytes
+      - coredns_cache_hits_total: cache_hits_count
+      - coredns_cache_misses_total: cache_misses_count
+      - coredns_dns_request_count_total: request_count
+      - coredns_dns_request_duration_seconds: request_duration.seconds
+      - coredns_dns_request_size_bytes: request_size.bytes
+      - coredns_dns_request_type_count_total: request_type_count
+      - coredns_dns_response_rcode_count_total: response_code_count
+      - coredns_proxy_request_count_total: proxy_request_count
+      - coredns_proxy_request_duration_seconds: proxy_request_duration.seconds
+      - coredns_cache_size: cache_size.count

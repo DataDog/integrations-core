@@ -17,7 +17,8 @@ instances:
     send_monotonic_counter: True
 
     metrics:
-      # Metrics are being emitted from the below plugins
+      # metrics are being emitted from the below plugins
+      # to map metrics from other plugins use the format below
       # https://coredns.io/plugins/metrics/
       # https://coredns.io/plugins/proxy/
       # https://coredns.io/plugins/cache/

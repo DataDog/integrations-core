@@ -5,6 +5,22 @@
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
+
+DEFAULT_METRICS = {
+    'coredns_dns_response_size_bytes': 'response_size.bytes',
+    'coredns_cache_hits_total': 'cache_hits_count',
+    'coredns_cache_misses_total': 'cache_misses_count',
+    'coredns_dns_request_count_total': 'request_count',
+    'coredns_dns_request_duration_seconds': 'request_duration.seconds',
+    'coredns_dns_request_size_bytes': 'request_size.bytes',
+    'coredns_dns_request_type_count_total': 'request_type_count',
+    'coredns_dns_response_rcode_count_total': 'response_code_count',
+    'coredns_proxy_request_count_total': 'proxy_request_count',
+    'coredns_proxy_request_duration_seconds': 'proxy_request_duration.seconds',
+    'coredns_cache_size': 'cache_size.count',
+}
+
+
 GO_METRICS = {
     'go_gc_duration_seconds': 'go.gc_duration_seconds',
     'go_goroutines': 'go.goroutines',
@@ -94,7 +110,12 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
         else:
             send_monotonic = True
 
-        metrics = instance.get('metrics', []) + [GO_METRICS]
+        metrics = instance.get('metrics', [])
+        if metrics is None:
+            metrics = metrics + [GO_METRICS]
+        else:
+            metrics = [DEFAULT_METRICS, GO_METRICS]
+
         instance.update({
             'namespace': 'coredns',
             'prometheus_url': endpoint,
