@@ -223,13 +223,16 @@ class KubeletCredentials(object):
         """
         return self._ssl_verify
 
-    def configure_scraper(self, scraper, endpoint):
+    def configure_scraper(self, scraper_config):
         """
         Configures a PrometheusScaper object with query credentials
         :param scraper: valid PrometheusScaper object
         :param endpoint: url that will be scraped
         """
-        scraper.ssl_ca_cert = self._ssl_verify
-        scraper.ssl_cert = self._ssl_cert
-        scraper.ssl_private_key = self._ssl_private_key
-        scraper.extra_headers = self.headers(endpoint) or {}
+        endpoint = scraper_config['prometheus_url']
+        scraper_config.update({
+            'ssl_ca_cert': self._ssl_verify,
+            'ssl_cert': self._ssl_cert,
+            'ssl_private_key': self._ssl_private_key,
+            'extra_headers': self.headers(endpoint) or {}
+        })

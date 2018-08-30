@@ -9,12 +9,12 @@ import urlparse
 import requests
 
 from datadog_checks.errors import CheckException
-from datadog_checks.checks.prometheus import PrometheusCheck
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers
 
 
-class GitlabCheck(PrometheusCheck):
+class GitlabCheck(OpenMetricsBaseCheck):
     """
     Collect Gitlab metrics from Prometheus and validates that the connectivity with Gitlab
     """
@@ -28,17 +28,13 @@ class GitlabCheck(PrometheusCheck):
     PROMETHEUS_SERVICE_CHECK_NAME = 'gitlab.prometheus_endpoint_up'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        super(GitlabCheck, self).__init__(name, init_config, agentConfig, instances)
-        # Mapping from Prometheus metrics names to Datadog ones
-        # For now it's a 1:1 mapping
-        # TODO: mark some metrics as rate
-        allowed_metrics = init_config.get('allowed_metrics')
 
-        if not allowed_metrics:
-            raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
+        generic_instances = []
+        if instances is not None:
+            for instance in instances:
+                generic_instances.append(self._create_gitlab_prometheus_instance(instance, init_config))
 
-        self.metrics_mapper = dict(zip(allowed_metrics, allowed_metrics))
-        self.NAMESPACE = 'gitlab'
+        super(GitlabCheck, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
     def check(self, instance):
         # Metrics collection
@@ -46,18 +42,17 @@ class GitlabCheck(PrometheusCheck):
         if endpoint is None:
             raise CheckException("Unable to find prometheus_endpoint in config file.")
 
-        # By default we send the buckets
-        send_buckets = _is_affirmative(instance.get('send_histograms_buckets', True))
+        scraper_config = self.config_map[endpoint]
         custom_tags = instance.get('tags', [])
 
         try:
-            self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
-            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.OK, tags=custom_tags)
+            self.process(scraper_config)
+            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, tags=custom_tags)
         except requests.exceptions.ConnectionError as e:
             # Unable to connect to the metrics endpoint
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
-                PrometheusCheck.CRITICAL,
+                OpenMetricsBaseCheck.CRITICAL,
                 message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(endpoint, e.message),
                 tags=custom_tags,
             )
@@ -65,6 +60,27 @@ class GitlabCheck(PrometheusCheck):
         # Service check to check Gitlab's health endpoints
         for check_type in self.ALLOWED_SERVICE_CHECKS:
             self._check_health_endpoint(instance, check_type, custom_tags)
+
+    def _create_gitlab_prometheus_instance(self, instance, init_config):
+        """
+        Set up the gitlab instance so it can be used in OpenMetricsBaseCheck
+        """
+        # Mapping from Prometheus metrics names to Datadog ones
+        # For now it's a 1:1 mapping
+        # TODO: mark some metrics as rate
+        allowed_metrics = init_config.get('allowed_metrics')
+        if allowed_metrics is None:
+            raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
+
+        # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
+        instance['prometheus_url'] = instance.get('prometheus_endpoint')
+
+        instance.update({
+            'namespace': 'gitlab',
+            'metrics': allowed_metrics
+        })
+
+        return instance
 
     def _verify_ssl(self, instance):
         # Load the ssl configuration
@@ -125,7 +141,7 @@ class GitlabCheck(PrometheusCheck):
             if r.status_code != 200:
                 self.service_check(
                     service_check_name,
-                    PrometheusCheck.CRITICAL,
+                    OpenMetricsBaseCheck.CRITICAL,
                     message="Got {} when hitting {}".format(r.status_code, check_url),
                     tags=service_check_tags,
                 )
@@ -137,7 +153,7 @@ class GitlabCheck(PrometheusCheck):
             # If there's a timeout
             self.service_check(
                 service_check_name,
-                PrometheusCheck.CRITICAL,
+                OpenMetricsBaseCheck.CRITICAL,
                 message="Timeout when hitting {}".format(check_url),
                 tags=service_check_tags,
             )
@@ -145,11 +161,11 @@ class GitlabCheck(PrometheusCheck):
         except Exception as e:
             self.service_check(
                 service_check_name,
-                PrometheusCheck.CRITICAL,
+                OpenMetricsBaseCheck.CRITICAL,
                 message="Error hitting {}. Error: {}".format(check_url, e.message),
                 tags=service_check_tags,
             )
             raise
         else:
-            self.service_check(service_check_name, PrometheusCheck.OK, tags=service_check_tags)
+            self.service_check(service_check_name, OpenMetricsBaseCheck.OK, tags=service_check_tags)
         self.log.debug("gitlab check {} succeeded".format(check_type))
