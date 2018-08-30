@@ -41,11 +41,11 @@ GO_METRICS = {
     'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
 }
 
+
 class CoreDNSCheck(OpenMetricsBaseCheck):
     """
     Collect CoreDNS metrics from its Prometheus endpoint
     """
-
 
     def __init__(self, name, init_config, agentConfig, instances=None):
 
@@ -104,4 +104,3 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
         })
 
         return instance
-

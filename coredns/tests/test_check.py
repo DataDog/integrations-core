@@ -45,11 +45,11 @@ class TestCoreDNS:
         for metric in self.METRICS:
             aggregator.assert_metric(metric)
 
-
     def test_docker(self, aggregator, spin_up_coredns, dockerinstance):
         """
-        Testing metrics emitted from docker container
+        Testing metrics emitted from docker container.
         """
+
         check = CoreDNSCheck('coredns', {}, {}, [dockerinstance])
         check.check(dockerinstance)
 

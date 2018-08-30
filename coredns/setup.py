@@ -42,7 +42,7 @@ setup(
 
 
     # Run-time dependencies
-    install_requires=['CHECKS_BASE_REQ', ],
+    install_requires=[CHECKS_BASE_REQ, ],
     setup_requires=['pytest-runner', ],
 
     # The package we're going to ship
