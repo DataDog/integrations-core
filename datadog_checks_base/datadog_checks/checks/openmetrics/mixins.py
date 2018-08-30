@@ -36,7 +36,7 @@ class OpenMetricsScraperMixin(object):
         # Initialize AgentCheck's base class
         super(OpenMetricsScraperMixin, self).__init__(*args, **kwargs)
 
-    def create_scraper_configuration(self, instance=None, created_by_base_class=False):
+    def create_scraper_configuration(self, instance=None):
 
         # We can choose to create a default mixin configuration for an empty instance
         if instance is None:
@@ -138,12 +138,9 @@ class OpenMetricsScraperMixin(object):
                                                            default_instance.get('send_histograms_buckets', True)))
 
         # If you want to send `counter` metrics as monotonic counts, set this value to True.
-        # Set to False if you want to instead send those metrics as `gauge`. This is True by default, unless otherwise
-        # specified by the instance configuration or if it's created by the OpenMetricsBaseCheck class. This is to ensure
-        # backwards compatibility for checks that want to easily use OpenMetricsBaseCheck instead of GenericPrometheusCheck.
+        # Set to False if you want to instead send those metrics as `gauge`.
         config['send_monotonic_counter'] = is_affirmative(instance.get('send_monotonic_counter',
-                                                          default_instance.get('send_monotonic_counter',
-                                                          not created_by_base_class)))
+                                                          default_instance.get('send_monotonic_counter', True)))
 
         # If the `labels_mapper` dictionary is provided, the metrics labels names
         # in the `labels_mapper` will use the corresponding value as tag name
@@ -169,12 +166,9 @@ class OpenMetricsScraperMixin(object):
         # a label can hold this information, this transfers it to the hostname
         config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
 
-        # Add a 'health' service check for the prometheus endpoint, this is True by default, unless otherwise specified
-        # by the instance configuration or if it's created by the OpenMetricsBaseCheck class. This is to ensure backwards
-        # compatibility for checks that want to easily use OpenMetricsBaseCheck instead of GenericPrometheusCheck.
+        # Add a 'health' service check for the prometheus endpoint
         config['health_service_check'] = is_affirmative(instance.get('health_service_check',
-                                                        default_instance.get('health_service_check',
-                                                        not created_by_base_class)))
+                                                        default_instance.get('health_service_check', True)))
 
         # Can either be only the path to the certificate and thus you should specify the private key
         # or it can be the path to a file containing both the certificate & the private key
