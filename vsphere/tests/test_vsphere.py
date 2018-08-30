@@ -42,7 +42,6 @@ def test__init__(instance):
     assert len(check.event_config) == 1
     assert 'vsphere_mock' in check.event_config
     assert len(check.registry) == 0
-    assert len(check.morlist_raw) == 0
     assert len(check.morlist) == 0
     assert len(check.metrics_metadata) == 0
     assert len(check.latest_event_query) == 0
