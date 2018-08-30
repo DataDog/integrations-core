@@ -436,7 +436,6 @@ class VSphereCheck(AgentCheck):
                 if properties["parent"]:
                     instance_tags += self._get_parent_tags(obj, all_objects)
 
-                vsphere_type = None
                 if isinstance(obj, vim.VirtualMachine):
                     vsphere_type = u'vsphere_type:vm'
                     vimtype = vim.VirtualMachine
@@ -451,20 +450,21 @@ class VSphereCheck(AgentCheck):
                     mor_type = "host"
                 elif isinstance(obj, vim.Datastore):
                     vsphere_type = u'vsphere_type:datastore'
-                    vimtype = "datastore"
                     instance_tags.append(u'vsphere_datastore:{}'.format(properties["name"]))
                     hostname = None
                     vimtype = vim.Datastore
                     mor_type = "datastore"
                 elif isinstance(obj, vim.Datacenter):
                     vsphere_type = u'vsphere_type:datacenter'
-                    vimtype = "datacenter"
                     hostname = None
                     vimtype = vim.Datacenter
                     mor_type = "datacenter"
+                else:
+                    vsphere_type = None
 
                 if vsphere_type:
                     instance_tags.append(vsphere_type)
+
                 obj_list[vimtype].append({
                     "mor_type": mor_type,
                     "mor": obj,
