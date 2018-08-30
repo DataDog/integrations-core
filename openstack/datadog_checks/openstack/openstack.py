@@ -878,11 +878,8 @@ class OpenStackCheck(AgentCheck):
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
-    def get_all_servers(self, i_key, collect_all_tenants, filter_by_host=None):
+    def get_all_servers(self, i_key):
         query_params = {}
-        filter_by_host=False
-        if filter_by_host:
-            query_params["host"] = filter_by_host
 
         # If we don't have a timestamp for this instance, default to None
         if i_key in self.changes_since_time:
@@ -891,8 +888,7 @@ class OpenStackCheck(AgentCheck):
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
 
-        if collect_all_tenants:
-            query_params["all_tenants"] = True
+        query_params["all_tenants"] = True
         servers = []
 
         try:
@@ -926,7 +922,6 @@ class OpenStackCheck(AgentCheck):
 
         for server in servers:
             new_server = {}
-
             new_server['server_id'] = server.get('id')
             new_server['state'] = server.get('status')
             new_server['server_name'] = server.get('name')
@@ -1211,55 +1206,52 @@ class OpenStackCheck(AgentCheck):
             #  The scopes we iterate over should all be OpenStackProjectScope
             #  instances
             projects = []
+
+            collect_all_projects = is_affirmative(instance.get("collect_all_projects", False))
+
             for _, scope in scope_map.iteritems():
                 # Store the scope on the object so we don't have to keep passing it around
                 self._current_scope = scope
 
                 self._send_api_service_checks(scope, custom_tags)
 
-                collect_all_projects = is_affirmative(instance.get("collect_all_projects", False))
-                collect_all_tenants = is_affirmative(instance.get('collect_all_tenants', False))
-
                 self.log.debug("Running check with credentials: \n")
                 self.log.debug("Nova Url: %s", self.get_nova_endpoint())
                 self.log.debug("Neutron Url: %s", self.get_neutron_endpoint())
 
-                # Restrict monitoring to this (host, hypervisor, project)
-                # and it's guest servers
-
                 project = self.get_scoped_project(scope)
-
+                
                 if collect_all_projects or project is None:
                     scope_projects = self.get_all_projects(scope)
-                    if scope_projects:
-                        projects.extend(scope_projects)
+                    project_ids = set()
+                    for scope_project in scope_projects:
+                        scope_project_id = scope_project.get('id')
+                        if scope_project_id not in project_ids:
+                            project_ids.add(scope_project_id)
+                            projects.append(scope_project)
                 else:
                     projects.append(project)
 
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
-                servers = []
 
                 # Note Instead of doing this per hypervisor, lets just batch get all servers!
-                servers.extend(self.get_all_servers(i_key, collect_all_tenants,filter_by_host=None))
+                self.get_all_servers(i_key)
 
                 # host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
                 host_tags = []
-                # Deep copy the cache so we can remove things from the Original during the iteration
-                server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
-                for server in server_cache_copy:
-                    server_tags = copy.deepcopy(custom_tags)
-                    server_tags.append("nova_managed_server")
+            self.get_stats_for_all_hypervisors(instance, host_tags=host_tags, custom_tags=custom_tags)
 
-                    if scope.tenant_id:
-                        server_tags.append("tenant_id:%s" % scope.tenant_id)
+            # Deep copy the cache so we can remove things from the Original during the iteration
+            server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
-                    self.external_host_tags[server] = host_tags
-                    self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags)
+            for server in server_cache_copy:
+                server_tags = copy.deepcopy(custom_tags)
+                server_tags.append("nova_managed_server")
 
-                self.(instance, host_tags=host_tags,custom_tags=custom_tags)
-                # self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
+                self.external_host_tags[server] = host_tags
+                self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags)
 
             if projects:
                 # Ensure projects list and scoped project exists
@@ -1306,19 +1298,6 @@ class OpenStackCheck(AgentCheck):
             return
 
         self.reset_backoff(instance)
-
-    # Local Info accessors
-    def get_local_hypervisor(self, collect_all_hypervisors=False):
-        """
-        Returns the hypervisor running on this host, and assumes a 1-1 between host and hypervisor
-        """
-        # Look up hypervisors available filtered by my hostname
-        host = self.get_my_hostname()
-        hyp = self.get_all_hypervisor_ids(filter_by_host=host)
-        if hyp and not collect_all_hypervisors:
-            return hyp[0]
-        elif hyp and collect_all_hypervisors:
-            return hyp
 
     def get_all_projects(self, scope):
         """
@@ -1381,20 +1360,6 @@ class OpenStackCheck(AgentCheck):
             hostname = hostname.split('.')[0]
 
         return hostname
-
-    def get_servers_managed_by_hypervisor(self, i_key, collect_all_tenants, split_hostname_on_first_period=False):
-        servers = self.get_all_servers(
-            i_key, collect_all_tenants,
-            filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
-        )
-        if self.exclude_server_id_rules:
-            # Filter out excluded servers
-            for exclude_id_rule in self.exclude_server_id_rules:
-                for server_id in servers.keys():
-                    if re.match(exclude_id_rule, server_id):
-                        del self.server_details_by_id[server_id]
-
-        return self.server_details_by_id
 
     def _get_tags_for_host(self, split_hostname_on_first_period=False):
         hostname = self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
