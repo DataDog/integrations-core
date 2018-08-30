@@ -53,10 +53,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             return self.config_map[endpoint]
 
         # Otherwise, we create the scraper configuration
-        #   To get the same behaviour for GenericPrometheusCheck-based checks porting to this class,
-        #   we must set the proper default values (which are different than the ones in mixins.py) by setting
-        #   created_by_base_class to True
-        config = self.create_scraper_configuration(instance, created_by_base_class=True)
+        config = self.create_scraper_configuration(instance)
 
         # Add this configuration to the config_map
         self.config_map[endpoint] = config
