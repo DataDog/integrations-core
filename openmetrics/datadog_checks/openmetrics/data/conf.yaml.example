@@ -1,0 +1,86 @@
+init_config:
+  # Leave empty
+
+instances:
+  # The prometheus endpoint to query
+  #
+  # - prometheus_url: http://service/prometheus
+
+  #   The namespace to be appended before all metrics namespace
+  #
+  #   namespace: "service"
+
+  #  List of metrics to be fetched from the prometheus endpoint, if there's a value it'll be renamed
+  #  This list should contain at least one metric
+  #
+  #   metrics:
+  #     - processor: cpu
+  #     - memory: mem
+  #     - io
+
+  # Prefix for exposed Prometheus metrics
+  #
+  # prometheus_metrics_prefix: prefix_
+
+  #   Send a service check reporting about the health of the prometheus endpoint
+  #   It will be named <namespace>.prometheus.health (true by default)
+  #
+  #   health_service_check: True
+
+  #   Override the hostname with the value of one label
+  #
+  #   label_to_hostname: node
+
+  #   The label join allows to target a metric and retrieve it's label via a 1:1 mapping
+  #
+  #   label_joins:
+  #     target_metric:
+  #       label_to_match: matched_label
+  #       labels_to_get:
+  #         - extra_label_1
+  #         - extra_label_2
+
+  #   The label mapper allows you to rename some labels
+  #
+  #   labels_mapper:
+  #     flavor: origin
+
+  #   Type override allows you to override a type in the prometheus the payload
+  #   or type an untyped metrics (they're ignored by default)
+  #   type_overrides:
+  #     metric_name: gauge
+
+  #   Tags to be added to all metrics
+  #
+  #   tags:
+  #     - foo:bar
+
+  #   To send the histograms bucket
+  #
+  #   send_histograms_buckets: True
+
+  #   To send counters as monotonic counter
+  #
+  #   send_monotonic_counter: True
+
+  #   List of label to be excluded
+  #
+  #   exclude_labels:
+  #     - timestamp
+
+  # If your prometheus endpoint is secured, here are the settings to configure it
+  #
+  # Can either be only the path to the certificate and thus you should specify the private key
+  # or it can be the path to a file containing both the certificate & the private key
+  # ssl_cert: "/path/to/cert"
+  #
+  # Needed if the certificate does not include the private key
+  #
+  # /!\ The private key to your local certificate must be unencrypted.
+  # ssl_private_key: "/path/to/key"
+  #
+  # The path to the trusted CA used for generating custom certificates
+  # ssl_ca_cert: "/path/to/cacert"
+
+  # Set a timeout for the prometheus query, defaults to 10
+  # prometheus_timeout: 10
