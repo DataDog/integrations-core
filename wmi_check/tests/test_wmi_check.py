@@ -56,9 +56,6 @@ def test_invalid_metrics(aggregator, check):
 def test_check(mock_disk_sampler, aggregator, check):
     check.check(common.WMI_CONFIG)
 
-    for metric, value in aggregator._metrics.iteritems():
-        log.warning('{} {}'.format(metric, value))
-
     for _, mname, _ in common.WMI_CONFIG['metrics']:
         aggregator.assert_metric(mname, tags=["foobar"], count=1)
         aggregator.assert_metric(mname, tags=["foobar"], count=1)
