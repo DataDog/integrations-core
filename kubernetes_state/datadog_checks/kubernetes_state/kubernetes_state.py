@@ -22,6 +22,8 @@ class KubernetesState(PrometheusCheck):
     Collect kube-state-metrics metrics in the Prometheus format
     See https://github.com/kubernetes/kube-state-metrics
     """
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(KubernetesState, self).__init__(name, init_config, agentConfig, instances)
         self.NAMESPACE = 'kubernetes_state'
