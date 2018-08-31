@@ -2,34 +2,36 @@ init_config:
 
 instances:
   ## @param prometheus_url - string - required
+  ## The Prometheus endpoint to query.
   #
   - prometheus_url: http://localhost:8080/_status/vars
 
   ## @param prometheus_timeout - integer - optional - default: 10
   ## The timeout for connecting to the prometheus_url.
   #
-  # prometheus_timeout: 10
+  #  prometheus_timeout: 10
 
   ## @param send_histograms_buckets - boolean - optional - default: true
-  ## Histogram buckets can be noisy and generate many tags. This controls whether or not to pull them.
+  ## Histogram buckets can be noisy and generate many tags. 
+  ## Set send_histograms_buckets to true to pull them.
   #
-  # send_histograms_buckets: true
+  #  send_histograms_buckets: true
 
   ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event, and service check emitted by this integration.
   ##
   ## Learn more about tagging at https://docs.datadoghq.com/tagging
   #
-  # tags:
-  #   - <KEY_1>:<VALUE_1>
-  #   - <KEY_2>:<VALUE_2>
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
   ## @param disk_space_warning - integer - optional - default: 15
   ## The percentage to begin emitting the service check `cockroachdb.disk_space` as `warning`.
   #
-  # disk_space_warning: 15
+  #  disk_space_warning: 15
 
   ## @param disk_space_critical - integer - optional - default: 5
   ## The percentage to begin emitting the service check `cockroachdb.disk_space` as `critical`.
   #
-  # disk_space_critical: 5
+  #  disk_space_critical: 5
