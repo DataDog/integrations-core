@@ -3,7 +3,7 @@ version: '3'
 services:
   cockroachdb:
     container_name: cockroachdb
-    image: cockroachdb/cockroach:v2.0.5
+    image: cockroachdb/cockroach:latest
     command: start --insecure --store=attrs=ssd,path=/var/lib/cockroach/
     restart: always
     expose:
