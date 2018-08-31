@@ -66,8 +66,8 @@ def mock_proc_sampler():
 @pytest.fixture
 def mock_disk_sampler():
     WMI_Mock = [{
-        "AvgDiskBytesPerWrite", 1536,
-        "FreeMegabytes", 19742,
+        "AvgDiskBytesPerWrite": 1536,
+        "FreeMegabytes": 19742,
     }]
     property_names = [
         "AvgDiskBytesPerWrite",

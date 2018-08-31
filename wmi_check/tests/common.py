@@ -21,9 +21,11 @@ INSTANCE_METRICS = [
 ]
 
 WMI_CONFIG = {
-    'class': "Win32_PerfFormattedData_PerfDisk_LogicalDisk",
-    'metrics': [["AvgDiskBytesPerWrite", "winsys.disk.avgdiskbytesperwrite", "gauge"],
-                ["FreeMegabytes", "winsys.disk.freemegabytes", "gauge"]],
-    'tag_by': "Name",
-    'constant_tags': ["foobar"],
+    'class': 'Win32_PerfFormattedData_PerfDisk_LogicalDisk',
+    'metrics': [
+        ['AvgDiskBytesPerWrite', 'winsys.disk.avgdiskbytesperwrite', 'gauge'],
+        ['FreeMegabytes', 'winsys.disk.freemegabytes', 'gauge']
+    ],
+    'tag_by': 'Name',
+    'constant_tags': ['foobar'],
 }
