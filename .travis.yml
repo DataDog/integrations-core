@@ -77,6 +77,8 @@ jobs:
     - stage: test
       env: CHECK=cisco_aci
     - stage: test
+      env: CHECK=cockroachdb
+    - stage: test
       env: CHECK=consul
     - stage: test
       env: CHECK=couch

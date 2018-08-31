@@ -1,6 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+TRACKED_METRICS = {
+    'capacity': 'capacity.total',
+    'capacity_available': 'capacity.available',
+    'sql_conns': 'sql.conns',
+    'sql_query_count': 'sql.query.count',
+}
+
 METRIC_MAP = {
     'addsstable_applications': 'addsstable.applications',
     'addsstable_copies': 'addsstable.copies',
@@ -173,7 +180,6 @@ METRIC_MAP = {
     'round_trip_latency': 'round_trip.latency',
     'sql_bytesin': 'sql.bytesin',
     'sql_bytesout': 'sql.bytesout',
-    'sql_conns': 'sql.conns',
     'sql_ddl_count': 'sql.ddl.count',
     'sql_delete_count': 'sql.delete.count',
     'sql_distsql_exec_latency': 'sql.distsql.exec.latency',
@@ -212,7 +218,6 @@ METRIC_MAP = {
     'sql_mem_internal_txn_current': 'sql.mem.internal.txn.current',
     'sql_mem_internal_txn_max': 'sql.mem.internal.txn.max',
     'sql_misc_count': 'sql.misc.count',
-    'sql_query_count': 'sql.query.count',
     'sql_select_count': 'sql.select.count',
     'sql_service_latency': 'sql.service.latency',
     'sql_txn_abort_count': 'sql.txn.abort.count',
@@ -260,9 +265,4 @@ METRIC_MAP = {
     'txn_restarts_writetooold': 'txn.restarts.writetooold',
     'valbytes': 'valbytes',
     'valcount': 'valcount',
-}
-
-TRACKED_METRICS = {
-    'capacity': 'capacity.total',
-    'capacity_available': 'capacity.available',
 }

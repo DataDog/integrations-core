@@ -12,6 +12,7 @@ from .metrics import METRIC_MAP, TRACKED_METRICS
 
 class CockroachdbCheck(OpenMetricsBaseCheck):
     SERVICE_CHECK_DISK_SPACE = 'cockroachdb.disk_space'
+    SERVICE_CHECK_SQL_EXECUTE = 'cockroachdb.sql_execute'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(CockroachdbCheck, self).__init__(
@@ -47,17 +48,21 @@ class CockroachdbCheck(OpenMetricsBaseCheck):
 
         tracked_metrics = scraper_config.get('_tracked_metrics')
         if tracked_metrics is None:
-            tracked_metrics = scraper_config['_tracked_metrics'] = defaultdict(list)
+            tracked_metrics = scraper_config['_tracked_metrics'] = defaultdict(dict)
         else:
             tracked_metrics.clear()
 
         self.process(
             scraper_config,
-            metric_transformers={metric: self.track_metric for metric in TRACKED_METRICS}
+            metric_transformers={
+                metric: self.track_metric
+                for metric in TRACKED_METRICS
+            }
         )
 
         tags = instance.get('tags', [])
         self.check_disk_space(tracked_metrics, instance, tags)
+        self.check_sql_execute(tracked_metrics, tags)
 
     def check_disk_space(self, tracked_metrics, instance, tags):
         capacity_total = tracked_metrics.get('capacity')
@@ -65,25 +70,41 @@ class CockroachdbCheck(OpenMetricsBaseCheck):
 
         if capacity_total is None or capacity_available is None:
             self.log.info(
-                'Missing `capacity` and `capacity_available` metrics, skipping disk space check...'
+                'Missing `capacity` and/or `capacity_available` metrics, skipping disk space check...'
             )
             return
 
-        percent_remaining = capacity_available[0] / capacity_total[0] * 100
+        percent_remaining = capacity_available / capacity_total * 100
 
         disk_space_critical = int(instance.get('disk_space_critical', 5))
-        if disk_space_critical <= percent_remaining:
+        if percent_remaining <= disk_space_critical:
             self.service_check(self.SERVICE_CHECK_DISK_SPACE, self.CRITICAL, tags=tags)
             return
 
         disk_space_warning = int(instance.get('disk_space_warning', 15))
-        if disk_space_warning <= percent_remaining:
+        if percent_remaining <= disk_space_warning:
             self.service_check(self.SERVICE_CHECK_DISK_SPACE, self.WARNING, tags=tags)
             return
 
         self.service_check(self.SERVICE_CHECK_DISK_SPACE, self.OK, tags=tags)
 
+    def check_sql_execute(self, tracked_metrics, tags):
+        active_connections = tracked_metrics.get('sql_conns')
+        active_queries = tracked_metrics.get('sql_query_count')
+
+        if active_connections is None or active_queries is None:
+            self.log.info(
+                'Missing `sql_conns` and/or `sql_query_count` metrics, skipping sql execution check...'
+            )
+            return
+
+        if active_connections > 0 and active_queries == 0:
+            self.service_check(self.SERVICE_CHECK_SQL_EXECUTE, self.CRITICAL, tags=tags)
+            return
+
+        self.service_check(self.SERVICE_CHECK_SQL_EXECUTE, self.OK, tags=tags)
+
     def track_metric(self, metric, scraper_config):
-        scraper_config['_tracked_metrics'][metric.name].append(metric.samples[0][self.SAMPLE_VALUE])
+        scraper_config['_tracked_metrics'][metric.name] = metric.samples[0][self.SAMPLE_VALUE]
 
         self._submit(TRACKED_METRICS[metric.name], metric, scraper_config)
