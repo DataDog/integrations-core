@@ -83,7 +83,10 @@ class Istio(OpenMetricsBaseCheck):
                 'istio_request_duration': 'request.duration',
                 'istio_request_size': 'request.size',
                 'istio_response_size': 'response.size',
-            }]
+            }],
+            # Defaults that were set when istio was based on PrometheusCheck
+            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+            'health_service_check': instance.get('health_service_check', False)
         })
 
         return istio_mesh_instance
@@ -149,7 +152,10 @@ class Istio(OpenMetricsBaseCheck):
                 'process_resident_memory_bytes': 'process.resident_memory_bytes',
                 'process_start_time_seconds': 'process.start_time_seconds',
                 'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
-            }]
+            }],
+            # Defaults that were set when istio was based on PrometheusCheck
+            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+            'health_service_check': instance.get('health_service_check', False)
         })
 
         return process_mixer_instance
