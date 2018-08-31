@@ -40,8 +40,7 @@ class TestCoreDNS:
 
         # check that we then get the count metrics also
         check.check(instance)
-        for m in aggregator.metric_names:
-            print(m)
+
         for metric in self.METRICS:
             aggregator.assert_metric(metric)
 

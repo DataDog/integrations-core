@@ -60,43 +60,6 @@ def spin_up_coredns():
 def dockerinstance():
     return {
       'prometheus_url': URL,
-      'send_histograms_buckets': True,
-      'send_monotonic_counter': True,
-      "metrics": [
-          {
-            "coredns_dns_response_size_bytes": "response_size.bytes"
-          },
-          {
-            "coredns_cache_hits_total": "cache_hits_count"
-          },
-          {
-            "coredns_cache_misses_total": "cache_misses_count"
-          },
-          {
-            "coredns_dns_request_count_total": "request_count"
-          },
-          {
-            "coredns_dns_request_duration_seconds": "request_duration.seconds"
-          },
-          {
-            "coredns_dns_request_size_bytes": "request_size.bytes"
-          },
-          {
-            "coredns_dns_request_type_count_total": "request_type_count"
-          },
-          {
-            "coredns_dns_response_rcode_count_total": "response_code_count"
-          },
-          {
-            "coredns_proxy_request_count_total": "proxy_request_count"
-          },
-          {
-            "coredns_proxy_request_duration_seconds": "proxy_request_duration.seconds"
-          },
-          {
-            "coredns_cache_size": "cache_size.count"
-          },
-        ],
     }
 
 
@@ -104,43 +67,6 @@ def dockerinstance():
 def instance():
     return {
       'prometheus_url': 'http://localhost:9153/metrics',
-      'send_histograms_buckets': True,
-      'send_monotonic_counter': True,
-      "metrics": [
-          {
-            "coredns_dns_response_size_bytes": "response_size.bytes"
-          },
-          {
-            "coredns_cache_hits_total": "cache_hits_count"
-          },
-          {
-            "coredns_cache_misses_total": "cache_misses_count"
-          },
-          {
-            "coredns_dns_request_count_total": "request_count"
-          },
-          {
-            "coredns_dns_request_duration_seconds": "request_duration.seconds"
-          },
-          {
-            "coredns_dns_request_size_bytes": "request_size.bytes"
-          },
-          {
-            "coredns_dns_request_type_count_total": "request_type_count"
-          },
-          {
-            "coredns_dns_response_rcode_count_total": "response_code_count"
-          },
-          {
-            "coredns_proxy_request_count_total": "proxy_request_count"
-          },
-          {
-            "coredns_proxy_request_duration_seconds": "proxy_request_duration.seconds"
-          },
-          {
-            "coredns_cache_size": "cache_size.count"
-          },
-        ],
     }
 
 

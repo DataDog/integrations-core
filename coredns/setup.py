@@ -43,12 +43,9 @@ setup(
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ, ],
-    setup_requires=['pytest-runner', ],
 
     # The package we're going to ship
     packages=['datadog_checks', 'datadog_checks.coredns'],
 
-    # Extra files to ship with the wheel package
-    package_data={'datadog_checks.coredns': ['conf.yaml.example']},
     include_package_data=True,
 )

@@ -72,11 +72,6 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
 
         super(CoreDNSCheck, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
-    def check(self, instance):
-        endpoint = instance.get('prometheus_url')
-        scraper_config = self.config_map[endpoint]
-        self.process(scraper_config)
-
     def create_generic_instances(self, instances):
         """
         Transform each CoreDNS instance into a OpenMetricsBaseCheck instance
@@ -96,32 +91,13 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
         if endpoint is None:
             raise CheckException("Unable to find prometheus endpoint in config file.")
 
-        send_buckets = instance.get('send_histograms_buckets', True)
-        # By default we send the buckets.
-        if send_buckets is not None and str(send_buckets).lower() == 'false':
-            send_buckets = False
-        else:
-            send_buckets = True
-
-        send_monotonic = instance.get('send_monotonic_counter', True)
-        # By default we send the buckets.
-        if send_monotonic is not None and str(send_monotonic).lower() == 'false':
-            send_monotonic = False
-        else:
-            send_monotonic = True
-
-        metrics = instance.get('metrics', [])
-        if metrics is None:
-            metrics = metrics + [GO_METRICS]
-        else:
-            metrics = [DEFAULT_METRICS, GO_METRICS]
+        metrics = [DEFAULT_METRICS, GO_METRICS]
+        metrics.extend(instance.get('metrics', []))
 
         instance.update({
-            'namespace': 'coredns',
             'prometheus_url': endpoint,
+            'namespace': 'coredns',
             'metrics': metrics,
-            'send_histograms_buckets': send_buckets,
-            'send_monotonic_counter': send_monotonic,
         })
 
         return instance
