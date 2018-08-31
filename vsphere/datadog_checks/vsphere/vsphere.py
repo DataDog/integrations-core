@@ -24,6 +24,7 @@ from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .errors import BadConfigError, ConnectionError
 from .cache_config import CacheConfig
+from .objects_queue import ObjectsQueue
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -121,10 +122,11 @@ class VSphereCheck(AgentCheck):
             # events
             self.event_config[i_key] = instance.get('event_config')
 
+        # Mor objects queue
+        self.mor_objects_queue = ObjectsQueue()
+
         # managed entity raw view
         self.registry = {}
-        # First layer of cache (get entities from the tree)
-        self.morlist_raw = {}
         # Second layer, processed from the first one
         self.morlist = {}
         # Metrics metadata, basically perfCounterId -> {name, group, description}
@@ -394,7 +396,8 @@ class VSphereCheck(AgentCheck):
 
     def _get_all_objs(self, server_instance, regexes=None, include_only_marked=False, tags=None):
         """
-        Explore vCenter infrastructure to discover hosts, virtual machines, etc. and compute their associated tags.
+        Explore vCenter infrastructure to discover hosts, virtual machines, etc.
+        and compute their associated tags.
         Start at the vCenter `rootFolder`, so as to collect every objet.
 
         Example topology:
@@ -411,8 +414,8 @@ class VSphereCheck(AgentCheck):
                             - vm2
             ```
 
-        If it's a node we want to query metric for, it will be queued in `self.morlist_raw` that
-        will be processed by another job.
+        If it's a node we want to query metric for, it will be enqueued at the
+        instance level and will be processed by a subsequent job.
         """
         start = time.time()
         if tags is None:
@@ -479,11 +482,8 @@ class VSphereCheck(AgentCheck):
     def _cache_morlist_raw_atomic(self, instance, tags, regexes=None, include_only_marked=False):
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
-        if i_key not in self.morlist_raw:
-            self.morlist_raw[i_key] = {}
-
         all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags)
-        self.morlist_raw[i_key] = {resource: objs for resource, objs in all_objs.items()}
+        self.mor_objects_queue.fill(i_key, dict(all_objs))
 
     @staticmethod
     def _is_excluded(obj, properties, regexes, include_only_marked):
@@ -524,20 +524,20 @@ class VSphereCheck(AgentCheck):
     def _cache_morlist_raw(self, instance):
         """
         Initiate the first layer to refresh the list of MORs (`self.morlist`).
-
-        Resolve the vCenter `rootFolder` and initiate hosts and virtual machines discovery.
-
+        Resolve the vCenter `rootFolder` and initiate hosts and virtual machines
+        discovery.
         """
-
         i_key = self._instance_key(instance)
         self.log.debug("Caching the morlist for vcenter instance %s" % i_key)
+
+        # If the queue is not completely empty, don't do anything
         for resource_type in RESOURCE_TYPE_METRICS:
-            if i_key in self.morlist_raw and len(self.morlist_raw[i_key].get(resource_type, [])) > 0:
+            if self.mor_objects_queue.contains(i_key) and self.mor_objects_queue.size(i_key, resource_type):
                 last = self.cache_config.get_last(CacheConfig.Morlist, i_key)
-                self.log.debug("Skipping morlist collection now, RAW results "
-                               "processing not over (latest refresh was {}s ago)".format(time.time() - last))
+                self.log.debug("Skipping morlist collection: the objects queue for the "
+                               "resource type '{}' is still being processed "
+                               "(latest refresh was {}s ago)".format(resource_type, time.time() - last))
                 return
-        self.morlist_raw[i_key] = {}
 
         instance_tag = "vcenter_server:%s" % instance.get('name')
         regexes = {
@@ -556,7 +556,7 @@ class VSphereCheck(AgentCheck):
 
     @atomic_method
     def _cache_morlist_process_atomic(self, instance, query_specs):
-        """ Process one item of the self.morlist_raw list by querying the available
+        """ Process one item from the mor objects cache by querying the available
         metrics for this MOR and then putting it in self.morlist
         """
         # ## <TEST-INSTRUMENTATION>
@@ -588,7 +588,8 @@ class VSphereCheck(AgentCheck):
         # ## </TEST-INSTRUMENTATION>
 
     def _cache_morlist_process(self, instance):
-        """ Empties the self.morlist_raw by popping items and running asynchronously
+        """
+        Pos items from the mor objects queue and run asynchronously
         the _cache_morlist_process_atomic operation that will get the available
         metrics for this MOR and put it in self.morlist
         """
@@ -600,25 +601,24 @@ class VSphereCheck(AgentCheck):
             query_specs = []
             # Batch size can prevent querying large payloads at once if the environment is too large
             # If batch size is set to 0, process everything at once
-            batch_size = self.batch_morlist_size or len(self.morlist_raw[i_key][resource_type])
+            batch_size = self.batch_morlist_size or self.mor_objects_queue.size(i_key, resource_type)
             for _ in xrange(batch_size):
-                try:
-                    mor = self.morlist_raw[i_key][resource_type].pop()
-                    mor_name = str(mor["mor"])
-                    mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
-                    if mor_name not in self.morlist[i_key]:
-                        self.morlist[i_key][mor_name] = mor
-                    self.morlist[i_key][mor_name]["last_seen"] = time.time()
-
-                    query_spec = vim.PerformanceManager.QuerySpec()
-                    query_spec.entity = mor["mor"]
-                    query_spec.intervalId = mor["interval"]
-                    query_spec.maxSample = 1
-                    query_specs.append(query_spec)
-
-                except (IndexError, KeyError):
-                    self.log.debug("No more work to process in morlist_raw")
+                mor = self.mor_objects_queue.pop(i_key, resource_type)
+                if mor is None:
+                    self.log.debug("No more objects of type '{}' left in the queue".format(resource_type))
                     break
+
+                mor_name = str(mor["mor"])
+                mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
+                if mor_name not in self.morlist[i_key]:
+                    self.morlist[i_key][mor_name] = mor
+                self.morlist[i_key][mor_name]["last_seen"] = time.time()
+
+                query_spec = vim.PerformanceManager.QuerySpec()
+                query_spec.entity = mor["mor"]
+                query_spec.intervalId = mor["interval"]
+                query_spec.maxSample = 1
+                query_specs.append(query_spec)
 
             if query_specs:
                 self.pool.apply_async(self._cache_morlist_process_atomic, args=(instance, query_specs))
