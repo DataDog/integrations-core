@@ -151,8 +151,7 @@ class SnmpCheck(NetworkCheck):
 
             # See http://pysnmp.sourceforge.net/docs/current/security-configuration.html
             if int(instance.get("snmp_version", 2)) == 1:
-                return cmdgen.CommunityData(instance['community_string'],
-                                            mpModel=0)
+                return cmdgen.CommunityData(instance['community_string'], mpModel=0)
             return cmdgen.CommunityData(instance['community_string'], mpModel=1)
 
         elif "user" in instance:

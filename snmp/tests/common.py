@@ -187,11 +187,13 @@ def generate_v3_instance_config(metrics, name=None, user=None,
 
 
 def wait_for_async(check, aggregator):
+    found = False
     for i in range(30):
-        time.sleep(1)
-        log.warning(aggregator._service_checks)
-        # check.get_service_checks()
         if len(aggregator.service_checks("snmp.can_check")) >= 1:
+            found = True
             break
         else:
-            time.sleep(1)
+            time.sleep(2)
+
+    if not found:
+        log.warning("No service checks found!")

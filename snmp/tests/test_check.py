@@ -2,13 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import logging
-
 from . import common
 
 from datadog_checks.snmp import SnmpCheck
-
-log = logging.getLogger(__name__)
 
 
 def test_command_generator(aggregator):
