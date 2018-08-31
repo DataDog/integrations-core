@@ -176,6 +176,8 @@ class WinWMICheck(AgentCheck):
                 except TagQueryUniquenessFailure:
                     continue
 
+            self.log.warning(wmi_obj)
+
             for wmi_property, wmi_value in iteritems(wmi_obj):
                 # skips any property not in arguments since SWbemServices.ExecQuery will return key prop properties
                 # https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
