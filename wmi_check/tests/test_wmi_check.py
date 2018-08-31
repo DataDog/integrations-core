@@ -20,6 +20,8 @@ def test_basic_check(mock_proc_sampler, aggregator, check):
 
     aggregator.assert_all_metrics_covered()
 
+    assert False
+
 
 def test_tags(mock_proc_sampler, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
