@@ -67,7 +67,11 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
                 # metrics names for kubernetes < 1.6.0
                 'skydns_skydns_dns_response_size_bytes': 'response_size.bytes',
                 'skydns_skydns_dns_request_duration_seconds': 'request_duration.seconds',
-            }]
+            }],
+
+            # Defaults that were set when kube_dns was based on PrometheusCheck
+            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+            'health_service_check': instance.get('health_service_check', False)
         })
 
         return instance
