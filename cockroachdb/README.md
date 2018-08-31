@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [CockroachDB][1].
+This check monitors the overall health and performance of a [CockroachDB][1] cluster.
 
 ## Setup
 
@@ -27,11 +27,21 @@ need to install anything else on your server.
 
 ### Metrics
 
-CockroachDB does not include any metrics.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-CockroachDB does not include any service checks.
+`cockroachdb.disk_space`:
+
+The status is based on the percentage of disk space remaining.
+
+- WARNING if below `disk_space_warning` option (default 15)
+- CRITICAL if below `disk_space_critical` option (default 5)
+- OK otherwise
+
+`cockroachdb.sql_execute`:
+
+Returns CRITICAL if there are active connections but no queries running, otherwise OK.
 
 ### Events
 
@@ -39,11 +49,12 @@ CockroachDB does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][7].
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: https://www.cockroachlabs.com/product/cockroachdb/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/help/
+[6]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/metadata.csv
+[7]: https://docs.datadoghq.com/help/
