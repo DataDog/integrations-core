@@ -26,10 +26,10 @@ There is also a couple of more advanced settings (ssl, labels joining, custom ta
 
 If you are monitoring an off-the-shelf software and you think it would deserve an official integration, have a look at `kube-proxy` for an example, and don't hesitate to contribute.
 
-Due to the nature of this integration, it is possible to submit an extremely high number of metrics
-directly to Datadog. To avoid billing issues on configuration errors or input changes, the check
-limits itself to 2000 metric contexts (different metric name or different tags). You can increase
-this limit, if needed, by setting the `max_returned_metrics` option.
+Due to the nature of this integration, it is possible to submit a high number of custom metrics
+to Datadog. To prevent overage charges on configuration errors or input changes, the check
+limits itself to 2000 metric contexts (different metric name or different tags). You can
+increase this limit, if needed, by setting the `max_returned_metrics` option.
 
 ### Validation
 
