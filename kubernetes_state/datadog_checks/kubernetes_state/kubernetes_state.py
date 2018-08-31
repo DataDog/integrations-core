@@ -9,6 +9,13 @@ from collections import defaultdict, Counter
 from datadog_checks.errors import CheckException
 from datadog_checks.checks.prometheus import PrometheusCheck
 
+try:
+    # this module is only available in agent 6
+    from datadog_agent import get_clustername
+except ImportError:
+    def get_clustername():
+        return ""
+
 
 METRIC_TYPES = ['counter', 'gauge']
 
@@ -184,6 +191,9 @@ class KubernetesState(PrometheusCheck):
         hostname_override = instances[0].get('hostname_override', True)
         if hostname_override:
             self.label_to_hostname = 'node'
+            clustername = get_clustername()
+            if clustername != "":
+                self.label_to_hostname_suffix = "-" + clustername
 
         self.send_pod_phase_service_checks = instances[0].get("send_pod_phase_service_checks", True)
         self._deprecations["send_pod_phase_service_checks"] = [
