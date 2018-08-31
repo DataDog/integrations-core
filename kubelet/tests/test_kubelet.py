@@ -8,8 +8,6 @@ import sys
 import mock
 import pytest
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
-from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
-from datadog_checks.checks.prometheus import PrometheusScraper
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -86,21 +84,29 @@ def mock_kubelet_check(monkeypatch, instances):
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
 
-    # Mock response for "/metrics/cadvisor"
-    attrs = {
-        'close.return_value': True,
-        'iter_lines.return_value': mock_from_file('cadvisor_metrics.txt').split('\n')
-    }
-    mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
-    monkeypatch.setattr(check.cadvisor_scraper, 'poll', mock.Mock(return_value=mock_resp))
+    def mocked_poll(*args, **kwargs):
+        scraper_config = args[0]
+        prometheus_url = scraper_config['prometheus_url']
 
-    # Mock response for "/metrics"
-    attrs = {
-        'close.return_value': True,
-        'iter_lines.return_value': mock_from_file('kubelet_metrics.txt').split('\n')
-    }
-    mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
-    monkeypatch.setattr(check.kubelet_scraper, 'poll', mock.Mock(return_value=mock_resp))
+        attrs = None
+        if prometheus_url.endswith('/metrics/cadvisor'):
+            # Mock response for "/metrics/cadvisor"
+            attrs = {
+                'close.return_value': True,
+                'iter_lines.return_value': mock_from_file('cadvisor_metrics.txt').split('\n')
+            }
+        elif prometheus_url.endswith('/metrics'):
+            # Mock response for "/metrics"
+            attrs = {
+                'close.return_value': True,
+                'iter_lines.return_value': mock_from_file('kubelet_metrics.txt').split('\n')
+            }
+        else:
+            raise Exception("Must be a valid endpoint")
+
+        return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+
+    monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll))
 
     return check
 
@@ -122,12 +128,11 @@ def test_parse_quantity():
 
 def test_kubelet_default_options():
     check = KubeletCheck('kubelet', None, {}, [{}])
-    check.NAMESPACE = 'kubernetes'
-    assert check.cadvisor_scraper.NAMESPACE == 'kubernetes'
-    assert check.kubelet_scraper.NAMESPACE == 'kubernetes'
+    assert check.cadvisor_scraper_config['namespace'] == 'kubernetes'
+    assert check.kubelet_scraper_config['namespace'] == 'kubernetes'
 
-    assert isinstance(check.cadvisor_scraper, CadvisorPrometheusScraper)
-    assert isinstance(check.kubelet_scraper, PrometheusScraper)
+    assert isinstance(check.cadvisor_scraper_config, dict)
+    assert isinstance(check.kubelet_scraper_config, dict)
 
 
 def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator):
@@ -147,13 +152,10 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, instance_tags):
     monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
 
     check.check(instance)
-
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
-    check.cadvisor_scraper.poll.assert_called_once()
-    check.kubelet_scraper.poll.assert_called_once()
     check.process_cadvisor.assert_not_called()
 
     # called twice so pct metrics are guaranteed to be there
@@ -176,7 +178,7 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
     monkeypatch.setattr(check, 'rate', mock.Mock())
 
     with mock.patch("datadog_checks.kubelet.prometheus.get_tags", side_effect=mocked_get_tags):
-        check.check({"cadvisor_metrics_endpoint": "http://dummy", "kubelet_metrics_endpoint": ""})
+        check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
     # Make sure we submit the summed rates correctly for containers:
     # - fluentd-gcp-v2.0.10-9q9t4 uses two cpus, we need to sum (1228.32 + 825.32) * 10**9 = 2053640000000
@@ -202,7 +204,7 @@ def test_prometheus_net_summed(monkeypatch, aggregator):
     monkeypatch.setattr(check, 'rate', mock.Mock())
 
     with mock.patch("datadog_checks.kubelet.prometheus.get_tags", side_effect=mocked_get_tags):
-        check.check({"cadvisor_metrics_endpoint": "http://dummy", "kubelet_metrics_endpoint": ""})
+        check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
     # Make sure we submit the summed rates correctly for pods:
     # - dd-agent-q6hpw has two interfaces, we need to sum (1.2638051777 + 2.2638051777) * 10**10 = 35276103554
@@ -234,8 +236,7 @@ def test_kubelet_check_instance_config(monkeypatch):
     def mock_kubelet_check_no_prom():
         check = mock_kubelet_check(monkeypatch, [{}])
 
-        monkeypatch.setattr(check.cadvisor_scraper, 'process', mock.Mock(return_value=None))
-        monkeypatch.setattr(check.kubelet_scraper, 'process', mock.Mock(return_value=None))
+        monkeypatch.setattr(check, 'process', mock.Mock(return_value=None))
         monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
 
         return check
@@ -248,14 +249,9 @@ def test_kubelet_check_instance_config(monkeypatch):
     check._retrieve_node_spec.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
     check.process_cadvisor.assert_not_called()
-    check.cadvisor_scraper.process.assert_not_called()
-    check.kubelet_scraper.process.assert_not_called()
 
     check = mock_kubelet_check_no_prom()
     check.check({"cadvisor_port": 0, "metrics_endpoint": "", "kubelet_metrics_endpoint": "http://dummy"})
-
-    check.cadvisor_scraper.process.assert_not_called()
-    check.kubelet_scraper.process.assert_called()
 
 
 def mocked_get_tags(entity, _):
