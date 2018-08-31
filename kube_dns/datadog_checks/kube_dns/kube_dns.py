@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from copy import deepcopy
+
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 
@@ -52,10 +54,12 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
         """
         Set up kube_dns instance so it can be used in OpenMetricsBaseCheck
         """
-        # kube_dns uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
-        instance['prometheus_url'] = instance.get('prometheus_endpoint', None)
+        kube_dns_instance = deepcopy(instance)
 
-        instance.update({
+        # kube_dns uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
+        kube_dns_instance['prometheus_url'] = instance.get('prometheus_endpoint', None)
+
+        kube_dns_instance.update({
             'namespace': 'kubedns',
 
             # Note: the count metrics were moved to specific functions list below to be submitted
@@ -74,7 +78,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
             'health_service_check': instance.get('health_service_check', False)
         })
 
-        return instance
+        return kube_dns_instance
 
     def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):
         """
