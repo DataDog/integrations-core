@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.vsphere.common import ObjectsQueue
+from datadog_checks.vsphere.objects_queue import ObjectsQueue
 
 
 @pytest.fixture

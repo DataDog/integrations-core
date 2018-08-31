@@ -20,10 +20,11 @@ from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
 from datadog_checks.checks.libs.timer import Timer
-from .common import SOURCE_TYPE, ObjectsQueue
+from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .errors import BadConfigError, ConnectionError
 from .cache_config import CacheConfig
+from .objects_queue import ObjectsQueue
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -121,7 +122,7 @@ class VSphereCheck(AgentCheck):
             # events
             self.event_config[i_key] = instance.get('event_config')
 
-        # Mor objects cache
+        # Mor objects queue
         self.mor_objects_queue = ObjectsQueue()
 
         # managed entity raw view
@@ -413,8 +414,8 @@ class VSphereCheck(AgentCheck):
                             - vm2
             ```
 
-        If it's a node we want to query metric for, it will be stored in a
-        cache at the instance level and will be processed by a subsequent job.
+        If it's a node we want to query metric for, it will be enqueued at the
+        instance level and will be processed by a subsequent job.
         """
         start = time.time()
         if tags is None:
