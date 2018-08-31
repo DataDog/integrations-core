@@ -76,9 +76,17 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
     def _create_kubelet_prometheus_instance(self, instance):
+        """
+        Create a copy of the instance and set default values.
+        This is so the base class can create a scraper_config with the proper values.
+        """
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update({
             'namespace': self.NAMESPACE,
+
+            # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
+            # we specify a dummy url that will be replaced in the `check()` function. We append it with "kubelet"
+            # so the key is different than the cadvisor scraper.
             'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
             'metrics': [{
                 'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',

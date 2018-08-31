@@ -52,9 +52,17 @@ class CadvisorPrometheusScraperMixin(object):
         }
 
     def _create_cadvisor_prometheus_instance(self, instance):
+        """
+        Create a copy of the instance and set default values.
+        This is so the base class can create a scraper_config with the proper values.
+        """
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update({
             'namespace': self.NAMESPACE,
+
+            # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
+            # we specify a dummy url that will be replaced in the `check()` function. We append it with "cadvisor"
+            # so the key is different than the kubelet scraper.
             'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
             'ignore_metrics': [
                 'container_cpu_cfs_periods_total',
