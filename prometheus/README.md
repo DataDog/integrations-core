@@ -28,7 +28,7 @@ If you are monitoring an off-the-shelf software and you think it would deserve a
 
 Due to the nature of this integration, it is possible to submit an extremely high number of metrics
 directly to Datadog. To avoid billing issues on configuration errors or input changes, the check
-limits itself to 350 metric contexts (different metric name or different tags). You can increase
+limits itself to 2000 metric contexts (different metric name or different tags). You can increase
 this limit, if needed, by setting the `max_returned_metrics` option.
 
 ### Validation
