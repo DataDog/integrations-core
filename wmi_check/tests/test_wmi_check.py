@@ -60,7 +60,7 @@ def test_check(mock_disk_sampler, aggregator, check):
         log.warning('{} {}'.format(metric, value))
 
     for _, mname, _ in common.WMI_CONFIG['metrics']:
-        aggregator.assert_metric(mname, tags=["foobar", "name:c:"], count=1)
-        aggregator.assert_metric(mname, tags=["foobar", "name:d:"], count=1)
+        aggregator.assert_metric(mname, tags=["foobar"], count=1)
+        aggregator.assert_metric(mname, tags=["foobar"], count=1)
 
     aggregator.assert_all_metrics_covered()
