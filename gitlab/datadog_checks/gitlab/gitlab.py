@@ -4,6 +4,7 @@
 
 # stdlib
 import urlparse
+from copy import deepcopy
 
 # 3rd party
 import requests
@@ -73,15 +74,19 @@ class GitlabCheck(OpenMetricsBaseCheck):
         if allowed_metrics is None:
             raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
 
+        gitlab_instance = deepcopy(instance)
         # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
-        instance['prometheus_url'] = instance.get('prometheus_endpoint')
+        gitlab_instance['prometheus_url'] = instance.get('prometheus_endpoint')
 
-        instance.update({
+        gitlab_instance.update({
             'namespace': 'gitlab',
-            'metrics': allowed_metrics
+            'metrics': allowed_metrics,
+            # Defaults that were set when gitlab was based on PrometheusCheck
+            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+            'health_service_check': instance.get('health_service_check', False)
         })
 
-        return instance
+        return gitlab_instance
 
     def _verify_ssl(self, instance):
         # Load the ssl configuration
