@@ -192,7 +192,6 @@ def wait_for_async(check, aggregator):
         if len(aggregator.service_checks("snmp.can_check")) >= 1:
             found = True
             break
-        else:
             time.sleep(2)
 
     if not found:
