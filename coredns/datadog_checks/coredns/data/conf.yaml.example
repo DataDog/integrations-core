@@ -8,8 +8,8 @@ instances:
   ## See: https://coredns.io/plugins/metrics/
   #
   - prometheus_url: "http://%%host%%:9153/metrics"
-      tags:
-        - "dns-pod:%%host%%"
+    tags:
+      - "dns-pod:%%host%%"
 
   ## @param send_histogram_buckets - boolean - optional - default:True
   ## Set send_histograms_buckets to true to send the histograms bucket.
