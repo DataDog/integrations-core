@@ -20,7 +20,7 @@ instances:
     #
     # send_monotonic_counter: True
 
-
+    ## @param metrics - list of strings - optional
     ## Metrics from the CoreDNS plugins for 'metrics', 'proxy' and 'cache'
     ## are enabled by default, however in order to scrape metrics for optional
     ## plugins, enable the plugin in the CoreDNS corefile and then add the metric below.
