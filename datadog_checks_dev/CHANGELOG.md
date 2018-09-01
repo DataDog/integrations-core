@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.4.1 / 2018-08-31
+
+* [Fixed] Fix trello command for other repos. See [#2155](https://github.com/DataDog/integrations-core/pull/2155).
+
 ## 0.4.0 / 2018-08-28
 
 * [Added] Add code coverage. See [#2105](https://github.com/DataDog/integrations-core/pull/2105).
