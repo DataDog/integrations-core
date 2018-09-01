@@ -125,6 +125,8 @@ jobs:
     - stage: test
       env: CHECK=kong
     - stage: test
+      env: CHECK=kube_dns
+    - stage: test
       env: CHECK=kube_proxy
     - stage: test
       env: CHECK=kubelet
