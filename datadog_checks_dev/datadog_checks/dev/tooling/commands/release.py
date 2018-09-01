@@ -287,7 +287,7 @@ def testable(ctx, start_id, agent_version, dry_run):
     for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id:
-            pr_data = get_pr(commit_id, user_config)
+            pr_data = get_pr(commit_id, user_config, repo=repo)
         else:
             try:
                 pr_data = get_pr_from_hash(commit_hash, repo, user_config).get('items', [{}])[0]
