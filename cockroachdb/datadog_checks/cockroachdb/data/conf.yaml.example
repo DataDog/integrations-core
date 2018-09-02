@@ -12,7 +12,7 @@ instances:
   #  prometheus_timeout: 10
 
   ## @param send_histograms_buckets - boolean - optional - default: true
-  ## Histogram buckets can be noisy and generate many tags. 
+  ## Histogram buckets can be noisy and generate many tags.
   ## Set send_histograms_buckets to true to pull them.
   #
   #  send_histograms_buckets: true
@@ -25,13 +25,3 @@ instances:
   #  tags:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
-
-  ## @param disk_space_warning - integer - optional - default: 15
-  ## The percentage to begin emitting the service check `cockroachdb.disk_space` as `warning`.
-  #
-  #  disk_space_warning: 15
-
-  ## @param disk_space_critical - integer - optional - default: 5
-  ## The percentage to begin emitting the service check `cockroachdb.disk_space` as `critical`.
-  #
-  #  disk_space_critical: 5

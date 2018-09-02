@@ -31,17 +31,7 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-`cockroachdb.disk_space`:
-
-The status is based on the percentage of disk space remaining.
-
-- `WARNING` if below `disk_space_warning` option (default 15)
-- `CRITICAL` if below `disk_space_critical` option (default 5)
-- `OK` otherwise
-
-`cockroachdb.sql_execute`:
-
-Returns `CRITICAL`if there are active connections but no queries running, otherwise `OK`.
+The CockroachDB check does not include any service checks.
 
 ### Events
 
