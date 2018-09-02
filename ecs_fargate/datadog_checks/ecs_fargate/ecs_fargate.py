@@ -12,6 +12,7 @@ API_ENDPOINT = 'http://169.254.170.2/v2'
 METADATA_ROUTE = '/metadata'
 STATS_ROUTE = '/stats'
 DEFAULT_TIMEOUT = 5
+TARGET_CONTAINER_TYPE = 'NORMAL'
 
 # Default value is maxed out for some cgroup metrics
 CGROUP_NO_VALUE = 0x7ffffffffffff000
@@ -76,6 +77,8 @@ class FargateCheck(AgentCheck):
 
         container_tags = {}
         for container in metadata['Containers']:
+            if container['Type'] != TARGET_CONTAINER_TYPE:
+                continue
             c_id = container['DockerId']
             container_tags[c_id] = []
             container_tags[c_id].extend(common_tags)
@@ -119,6 +122,8 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in stats.iteritems():
+            if container_id not in container_tags:
+                continue
             tags = container_tags[container_id]
 
             # CPU metrics
