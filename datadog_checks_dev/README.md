@@ -543,6 +543,7 @@ Options:
   -c, --cov          Measure code coverage
   -m, --cov-missing  Show line numbers of statements that were not executed
   --cov-keep         Keep coverage reports
+  --changed          Only test changed checks
   -v, --verbose      Increase verbosity (can be used additively)
   -h, --help         Show this message and exit.
 ```
