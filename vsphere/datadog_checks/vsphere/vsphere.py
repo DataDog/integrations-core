@@ -133,9 +133,6 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata = {}
         self.latest_event_query = {}
 
-    def stop(self):
-        self.stop_pool()
-
     def start_pool(self):
         self.log.info("Starting Thread Pool")
         self.pool_size = int(self.init_config.get('threads_count', DEFAULT_SIZE_POOL))
@@ -150,10 +147,6 @@ class VSphereCheck(AgentCheck):
             self.pool.join()
             assert self.pool.get_nworkers() == 0
             self.pool_started = False
-
-    def restart_pool(self):
-        self.stop_pool()
-        self.start_pool()
 
     def _query_event(self, instance):
         i_key = self._instance_key(instance)
@@ -805,6 +798,7 @@ class VSphereCheck(AgentCheck):
             self.collect_metrics(instance)
         else:
             self.log.debug("Thread pool is still processing jobs from previous run. Not scheduling anything.")
+
         self._query_event(instance)
 
         thread_crashed = False
