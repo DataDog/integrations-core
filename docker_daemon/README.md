@@ -146,9 +146,7 @@ Returns `OK` otherwise.
 
 **docker.container_health**:
 
-Returns `CRITICAL` if a container is unhealthy.
-Returns `UNKNOWN` if the health is unknown.
-Returns `OK` otherwise.
+This Service Check is only available for Agent v5. It Returns `CRITICAL` if a container is unhealthy, `UNKNOWN` if the health is unknown, `OK` otherwise.
 
 **docker.exit**:
 
