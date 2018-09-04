@@ -33,7 +33,7 @@ http_check==2.3.0
 iis==2.1.1; sys_platform == 'win32'
 istio==2.0.0
 kafka_consumer==1.4.1; sys_platform != 'win32'
-kong==1.2.0
+kong==1.2.1
 kube_dns==1.4.0
 kube_proxy==1.1.0
 kubelet==1.4.0; sys_platform == 'linux2'
