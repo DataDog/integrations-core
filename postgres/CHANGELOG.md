@@ -1,5 +1,15 @@
 # CHANGELOG - postgres
 
+## 3.0.0 / 2018-09-04
+
+* [Added] Add number of "idle in transaction" transactions and open transactions. See [#2118](https://github.com/DataDog/integrations-core/pull/2118).
+* [Added] Implement custom_queries and start deprecating custom_metrics. See [#2043](https://github.com/DataDog/integrations-core/pull/2043).
+* [Fixed] Fix Postgres version parsing for beta versions. See [#2064](https://github.com/DataDog/integrations-core/pull/2064).
+* [Added] Re-enable instance tags for server metrics on Agent version 6. See [#2049](https://github.com/DataDog/integrations-core/pull/2049).
+* [Changed] Rename dependency psycopg2 to pyscopg2-binary. See [#1842](https://github.com/DataDog/integrations-core/pull/1842).
+* [Added] Correcting duplicate metric name, add index_rows_fetched. See [#1762](https://github.com/DataDog/integrations-core/pull/1762).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 2.1.3 / 2018-06-20
 
 * [Fixed] Fixed postgres verification script. See [#1764](https://github.com/DataDog/integrations-core/pull/1764).
