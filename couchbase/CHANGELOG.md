@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.5.1 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.5.0 / 2018-06-20
 
 * [Added] Add Couchbase health and cluster membership service checks and alerts. See [#1593](https://github.com/DataDog/integrations-core/pull/1593).
