@@ -13,7 +13,7 @@ couchbase==1.5.1
 datadog_checks_base==2.0.0
 directory==2.0.0
 disk==1.3.0
-dns_check==1.1.1
+dns_check==1.1.2
 dotnetclr==1.0.0; sys_platform == 'win32'
 ecs_fargate==1.2.0
 elastic==1.7.0
