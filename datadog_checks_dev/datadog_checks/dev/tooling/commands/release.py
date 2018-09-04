@@ -27,7 +27,8 @@ from ..release import (
 )
 from ..trello import TrelloClient
 from ..utils import (
-    get_current_agent_version, get_valid_checks, get_version_string, format_commit_id, parse_pr_number
+    get_bump_function, get_current_agent_version, get_valid_checks,
+    get_version_string, format_commit_id, parse_pr_number
 )
 from ...structures import EnvVars
 from ...subprocess import run_command
@@ -143,10 +144,11 @@ def ready(ctx, quiet):
     short_help='Show all the pending PRs for a given check'
 )
 @click.argument('check')
+@click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def changes(ctx, check):
+def changes(ctx, check, dry_run):
     """Show all the pending PRs for a given check."""
-    if check not in get_valid_checks():
+    if not dry_run and check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # get the name of the current release tag
@@ -158,28 +160,43 @@ def changes(ctx, check):
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
-    echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
+    if not dry_run:
+        echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
 
     user_config = ctx.obj
-    for pr_num in pr_numbers:
-        try:
-            payload = get_pr(pr_num, user_config)
-        except Exception as e:
-            echo_failure('Unable to fetch info for PR #{}: {}'.format(pr_num, e))
-            continue
+    if dry_run:
+        changelog_types = []
+        for pr_num in pr_numbers:
+            try:
+                payload = get_pr(pr_num, user_config)
+            except Exception as e:
+                echo_failure('Unable to fetch info for PR #{}: {}'.format(pr_num, e))
+                continue
 
-        changelog_types = get_changelog_types(payload)
+            changelog_types.extend(
+                label for label in get_changelog_types(payload) if label != 'no-changelog'
+            )
+        return cur_version, changelog_types
+    else:
+        for pr_num in pr_numbers:
+            try:
+                payload = get_pr(pr_num, user_config)
+            except Exception as e:
+                echo_failure('Unable to fetch info for PR #{}: {}'.format(pr_num, e))
+                continue
 
-        echo_success(payload.get('title'))
-        echo_info(' * Url: {}'.format(payload.get('html_url')))
+            changelog_types = get_changelog_types(payload)
 
-        echo_info(' * Changelog status: ', nl=False)
-        if not changelog_types:
-            echo_warning('WARNING! No changelog labels attached.\n')
-        elif len(changelog_types) > 1:
-            echo_warning('WARNING! Too many changelog labels attached: {}\n'.format(', '.join(changelog_types)))
-        else:
-            echo_success('{}\n'.format(changelog_types[0]))
+            echo_success(payload.get('title'))
+            echo_info(' * Url: {}'.format(payload.get('html_url')))
+
+            echo_info(' * Changelog status: ', nl=False)
+            if not changelog_types:
+                echo_warning('WARNING! No changelog labels attached.\n')
+            elif len(changelog_types) > 1:
+                echo_warning('WARNING! Too many changelog labels attached: {}\n'.format(', '.join(changelog_types)))
+            else:
+                echo_success('{}\n'.format(changelog_types[0]))
 
 
 @release.command(
@@ -443,7 +460,7 @@ def tag(check, version, push, dry_run):
     short_help='Release a single check'
 )
 @click.argument('check')
-@click.argument('version')
+@click.argument('version', required=False)
 @click.pass_context
 def make(ctx, check, version):
     """Perform a set of operations needed to release a single check:
@@ -454,41 +471,61 @@ def make(ctx, check, version):
         * update the requirements-agent-release.txt file
         * commit the above changes
     """
-    if check not in get_valid_checks():
+    valid_checks = get_valid_checks()
+    if check != 'all' and check not in valid_checks:
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # don't run the task on the master branch
     if get_current_branch() == 'master':
-        abort('This task will add a commit, you do not want to add it on master directly')
+        abort('This task will commit, you do not want to add commits to master directly')
 
-    # sanity check on the version provided
-    cur_version = get_version_string(check)
-    p_version = parse_version_info(version)
-    p_current = parse_version_info(cur_version)
-    if p_version <= p_current:
-        abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
-
-    # update the version number
-    echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
-    update_version_module(check, cur_version, version)
-
-    # update the CHANGELOG
-    echo_waiting('Updating the changelog...')
-    ctx.invoke(changelog, check=check, version=version, old_version=cur_version, dry_run=False)
-
-    if check == 'datadog_checks_dev':
-        commit_targets = [check]
-    # update the global requirements file
+    if check == 'all':
+        if version:
+            abort('You cannot bump every check to the same version')
+        checks = sorted(valid_checks)
     else:
-        commit_targets = [check, AGENT_REQ_FILE]
-        req_file = os.path.join(get_root(), AGENT_REQ_FILE)
-        echo_waiting('Updating the requirements file {}...'.format(req_file))
-        update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+        checks = [check]
 
-    # commit the changes.
-    # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
-    msg = '[Release] Bumped {} version to {}'.format(check, version)
-    git_commit(commit_targets, msg)
+    for check in checks:
+        if version:
+            # sanity check on the version provided
+            cur_version = get_version_string(check)
+            p_version = parse_version_info(version)
+            p_current = parse_version_info(cur_version)
+            if p_version <= p_current:
+                abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
+        else:
+            cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
+            if not changelog_types:
+                echo_info('No changes for {}, skipping...'.format(check))
+                continue
+            bump_function = get_bump_function(changelog_types)
+            version = bump_function(cur_version)
+
+        # update the version number
+        echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
+        update_version_module(check, cur_version, version)
+
+        # update the CHANGELOG
+        echo_waiting('Updating the changelog...')
+        ctx.invoke(changelog, check=check, version=version, old_version=cur_version, dry_run=False)
+
+        if check == 'datadog_checks_dev':
+            commit_targets = [check]
+        # update the global requirements file
+        else:
+            commit_targets = [check, AGENT_REQ_FILE]
+            req_file = os.path.join(get_root(), AGENT_REQ_FILE)
+            echo_waiting('Updating the requirements file {}...'.format(req_file))
+            update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+
+        # commit the changes.
+        # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
+        msg = '[Release] Bumped {} version to {}'.format(check, version)
+        git_commit(commit_targets, msg)
+
+        # Reset version
+        version = None
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
