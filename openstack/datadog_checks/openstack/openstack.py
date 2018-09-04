@@ -1098,7 +1098,7 @@ class OpenStackCheck(AgentCheck):
 
     def check(self, instance):
         # have we been backed off
-        if not self.should_run(instance):
+        if not self.backoff.should_run(instance):
             self.log.info('Skipping run due to exponential backoff in effect')
             return
 
@@ -1213,7 +1213,7 @@ class OpenStackCheck(AgentCheck):
         except requests.exceptions.HTTPError as e:
             if e.response.status_code >= 500:
                 # exponential backoff
-                self.do_backoff(instance)
+                self.backoff.do_backoff(instance)
                 self.warning("There were some problems reaching the nova API - applying exponential backoff")
             else:
                 self.warning("Error reaching nova API")
@@ -1221,11 +1221,11 @@ class OpenStackCheck(AgentCheck):
             return
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             # exponential backoff
-            self.do_backoff(instance)
+            self.backoff.do_backoff(instance)
             self.warning("There were some problems reaching the nova API - applying exponential backoff")
             return
 
-        self.reset_backoff(instance)
+        self.backoff.reset_backoff(instance)
 
     # Local Info accessors
     def get_local_hypervisor(self):
@@ -1251,8 +1251,6 @@ class OpenStackCheck(AgentCheck):
         except Exception as e:
             self.warning('Unable to get projects: {0}'.format(str(e)))
             raise e
-
-        return None
 
     def get_scoped_project(self, project_auth_scope):
         """
@@ -1286,8 +1284,6 @@ class OpenStackCheck(AgentCheck):
         except Exception as e:
             self.warning('Unable to get the project details: {0}'.format(str(e)))
             raise e
-
-        return None
 
     def get_my_hostname(self, split_hostname_on_first_period=False):
         """
