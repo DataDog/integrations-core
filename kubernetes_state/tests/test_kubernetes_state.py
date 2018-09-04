@@ -78,6 +78,19 @@ METRICS = [
     NAMESPACE + '.statefulset.replicas_current',
     NAMESPACE + '.statefulset.replicas_ready',
     NAMESPACE + '.statefulset.replicas_updated',
+    # resourcequotas
+    NAMESPACE + '.resourcequota.cpu.used',
+    NAMESPACE + '.resourcequota.cpu.limit',
+    NAMESPACE + '.resourcequota.memory.used',
+    NAMESPACE + '.resourcequota.memory.limit',
+    NAMESPACE + '.resourcequota.pods.used',
+    NAMESPACE + '.resourcequota.pods.limit',
+    NAMESPACE + '.resourcequota.limits.cpu.used',
+    NAMESPACE + '.resourcequota.limits.cpu.limit',
+    NAMESPACE + '.resourcequota.limits.memory.used',
+    NAMESPACE + '.resourcequota.limits.memory.limit',
+    # limitrange
+    NAMESPACE + '.limitrange.cpu.default_request',
 ]
 
 TAGS = {
