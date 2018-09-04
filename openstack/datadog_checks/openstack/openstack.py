@@ -634,12 +634,6 @@ class OpenStackCheck(AgentCheck):
                     tags=server_tags,
                 )
 
-    def get_stats_for_all_projects(self, projects, tags=None):
-        if tags is None:
-            tags = []
-        for project in projects:
-            self.get_stats_for_single_project(project, tags)
-
     # Cache util
     def _is_expired(self, entry):
         assert entry in ["aggregates", "physical_hosts", "hypervisors"]
@@ -775,6 +769,25 @@ class OpenStackCheck(AgentCheck):
 
         return instance_scope
 
+    def get_scope_map(self, instance):
+        instance_scope = self.ensure_auth_scope(instance)
+
+        if not instance_scope:
+            # Fast fail in the absence of an instance_scope
+            raise IncompleteConfig()
+
+        scope_map = {}
+        if isinstance(instance_scope, OpenStackProjectScope):
+            #  Key could be anything but same format for consistency
+            scope_key = (instance_scope.project_name, instance_scope.tenant_id)
+            scope_map[scope_key] = instance_scope
+            self._parent_scope = None
+        elif isinstance(instance_scope, OpenStackUnscoped):
+            scope_map.update(instance_scope.project_scope_map)
+            self._parent_scope = instance_scope
+
+        return scope_map
+
     def check(self, instance):
         # have we been backed off
         if not self.should_run(instance):
@@ -785,21 +798,8 @@ class OpenStackCheck(AgentCheck):
         if custom_tags is None:
             custom_tags = []
         try:
-            instance_scope = self.ensure_auth_scope(instance)
             split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
-            if not instance_scope:
-                # Fast fail in the absence of an instance_scope
-                return
-
-            scope_map = {}
-            if isinstance(instance_scope, OpenStackProjectScope):
-                #  Key could be anything but same format for consistency
-                scope_key = (instance_scope.project_name, instance_scope.tenant_id)
-                scope_map[scope_key] = instance_scope
-                self._parent_scope = None
-            elif isinstance(instance_scope, OpenStackUnscoped):
-                scope_map.update(instance_scope.project_scope_map)
-                self._parent_scope = instance_scope
+            scope_map = self.get_scope_map(instance)
 
             #  The scopes we iterate over should all be OpenStackProjectScope
             #  instances
@@ -860,9 +860,9 @@ class OpenStackCheck(AgentCheck):
                         % self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
                     )
 
-            if projects:
-                # Ensure projects list and scoped project exists
-                self.get_stats_for_all_projects(projects, custom_tags)
+            # get stats from all projects
+            for project in projects:
+                self.get_stats_for_single_project(project, custom_tags)
 
             # For now, monitor all networks
             self.get_network_stats(custom_tags)

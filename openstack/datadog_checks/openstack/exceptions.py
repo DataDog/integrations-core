@@ -33,3 +33,7 @@ class MissingNeutronEndpoint(MissingEndpoint):
 
 class KeystoneUnreachable(Exception):
     pass
+
+
+class KeystoneScope(Exception):
+    pass
