@@ -1,5 +1,10 @@
 # CHANGELOG - consul
 
+## 1.5.1 / 2018-09-04
+
+* [Fixed] Accept more standard boolean values for instance config options. See [#1954](https://github.com/DataDog/integrations-core/pull/1954).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.5.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).

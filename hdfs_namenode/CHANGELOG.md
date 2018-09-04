@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.3.1 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.3.0 / 2018-06-07
 
 * [Added] Add support for HTTP authentication. See [#1677](https://github.com/DataDog/integrations-core/pull/1677).

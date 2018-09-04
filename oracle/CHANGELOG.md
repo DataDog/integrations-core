@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 1.4.0 / 2018-09-04
+
+* [Added] Add process metrics. See [#1856](https://github.com/DataDog/integrations-core/pull/1856).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.3.0 / 2018-06-07
 
 * [Added] Support custom queries. See [#1528](https://github.com/DataDog/integrations-core/pull/1528).
