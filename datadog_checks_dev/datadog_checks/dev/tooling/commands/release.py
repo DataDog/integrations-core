@@ -378,7 +378,7 @@ def testable(ctx, start_id, agent_version, dry_run):
                     rate_limited, error, response = trello.create_card(
                         value,
                         pr_title,
-                        'Pull request: {}\n\n{}'.format(pr_url, pr_body)
+                        u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
                     )
                     if rate_limited:
                         wait_time = 10
