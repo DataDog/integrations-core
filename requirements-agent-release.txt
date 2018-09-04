@@ -72,7 +72,7 @@ spark==1.4.1
 sqlserver==1.6.0; sys_platform == 'win32'
 squid==1.0.2
 ssh_check==1.3.1
-supervisord==1.1.2
+supervisord==1.1.3
 system_core==1.0.0
 system_swap==1.1.0
 tcp_check==2.0.1
