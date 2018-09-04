@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
 from datetime import datetime, timedelta
 from urlparse import urljoin
 import re
-import time
-import random
 import copy
 
 import requests
@@ -14,6 +13,10 @@ import simplejson as json
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 
+from .utils import get_instance_key
+from .retry_backoff import BackOffRetry
+from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteAuthScope, IncompleteIdentity,
+                         MissingNovaEndpoint, MissingNeutronEndpoint, KeystoneUnreachable)
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -99,45 +102,6 @@ DIAGNOSTICABLE_STATES = ['ACTIVE']
 REMOVED_STATES = ['DELETED', 'SHUTOFF']
 
 UNSCOPED_AUTH = 'unscoped'
-
-BASE_BACKOFF_SECS = 15
-MAX_BACKOFF_SECS = 300
-
-
-class OpenStackAuthFailure(Exception):
-    pass
-
-
-class InstancePowerOffFailure(Exception):
-    pass
-
-
-class IncompleteConfig(Exception):
-    pass
-
-
-class IncompleteAuthScope(IncompleteConfig):
-    pass
-
-
-class IncompleteIdentity(IncompleteConfig):
-    pass
-
-
-class MissingEndpoint(Exception):
-    pass
-
-
-class MissingNovaEndpoint(MissingEndpoint):
-    pass
-
-
-class MissingNeutronEndpoint(MissingEndpoint):
-    pass
-
-
-class KeystoneUnreachable(Exception):
-    pass
 
 
 class OpenStackScope(object):
@@ -533,7 +497,7 @@ class OpenStackCheck(AgentCheck):
 
         self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         self.keystone_server_url = init_config.get("keystone_server_url")
-        self._hypervisor_name_cache = {}
+        self.hypervisor_name_cache = {}
 
         if not self.keystone_server_url:
             raise IncompleteConfig()
@@ -558,8 +522,7 @@ class OpenStackCheck(AgentCheck):
         skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies
 
-        self.backoff = {}
-        random.seed()
+        self.backoff = BackOffRetry(self)
 
         # ISO8601 date time: used to filter the call to get the list of nova servers
         self.changes_since_time = {}
@@ -603,13 +566,6 @@ class OpenStackCheck(AgentCheck):
 
         return resp.json()
 
-    def _instance_key(self, instance):
-        i_key = instance.get('name')
-        if not i_key:
-            # We need a name to identify this instance
-            raise IncompleteConfig()
-        return i_key
-
     def delete_current_scope(self):
         scope_to_delete = self._parent_scope if self._parent_scope else self._current_scope
         for i_key, scope in self.instance_map.items():
@@ -617,54 +573,18 @@ class OpenStackCheck(AgentCheck):
                 self.log.debug("Deleting current scope: %s", i_key)
                 del self.instance_map[i_key]
 
-    def should_run(self, instance):
-        i_key = self._instance_key(instance)
-        if i_key not in self.backoff:
-            self.backoff[i_key] = {'retries': 0, 'scheduled': time.time()}
-
-        if self.backoff[i_key]['scheduled'] <= time.time():
-            return True
-
-        return False
-
-    def do_backoff(self, instance):
-        i_key = self._instance_key(instance)
-        tracker = self.backoff[i_key]
-
-        self.backoff[i_key]['retries'] += 1
-        jitter = min(MAX_BACKOFF_SECS, BASE_BACKOFF_SECS * 2 ** self.backoff[i_key]['retries'])
-
-        # let's add some jitter  (half jitter)
-        backoff_interval = jitter / 2
-        backoff_interval += random.randint(0, backoff_interval)
-
-        tags = instance.get('tags', [])
-        hypervisor_name = self._hypervisor_name_cache.get(i_key)
-        if hypervisor_name:
-            tags.extend("hypervisor:{}".format(hypervisor_name))
-
-        self.gauge("openstack.backoff.interval", backoff_interval, tags=tags)
-        self.gauge("openstack.backoff.retries", self.backoff[i_key]['retries'], tags=tags)
-
-        tracker['scheduled'] = time.time() + backoff_interval
-
-    def reset_backoff(self, instance):
-        i_key = self._instance_key(instance)
-        self.backoff[i_key]['retries'] = 0
-        self.backoff[i_key]['scheduled'] = time.time()
-
     def get_scope_for_instance(self, instance):
-        i_key = self._instance_key(instance)
+        i_key = get_instance_key(instance)
         self.log.debug("Getting scope for instance %s", i_key)
         return self.instance_map[i_key]
 
     def set_scope_for_instance(self, instance, scope):
-        i_key = self._instance_key(instance)
+        i_key = get_instance_key(instance)
         self.log.debug("Setting scope for instance %s", i_key)
         self.instance_map[i_key] = scope
 
     def delete_scope_for_instance(self, instance):
-        i_key = self._instance_key(instance)
+        i_key = get_instance_key(instance)
         self.log.debug("Deleting scope for instance %s", i_key)
         del self.instance_map[i_key]
 
@@ -825,7 +745,7 @@ class OpenStackCheck(AgentCheck):
         resp = self._make_request_with_auth_fallback(url, headers)
         hyp = resp['hypervisor']
         host_tags = host_tags or []
-        self._hypervisor_name_cache[self._instance_key(instance)] = hyp['hypervisor_hostname']
+        self.hypervisor_name_cache[get_instance_key(instance)] = hyp['hypervisor_hostname']
         custom_tags = custom_tags or []
         tags = [
             'hypervisor:{0}'.format(hyp['hypervisor_hostname']),
@@ -1233,7 +1153,7 @@ class OpenStackCheck(AgentCheck):
                     projects.append(project)
 
                 # Restrict monitoring to non-excluded servers
-                i_key = self._instance_key(instance)
+                i_key = get_instance_key(instance)
                 servers = self.get_servers_managed_by_hypervisor(
                     i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
                 )
