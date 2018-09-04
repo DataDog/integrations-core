@@ -79,7 +79,7 @@ tcp_check==2.0.2
 teamcity==1.1.1
 tokumx==1.2.1
 twemproxy==1.2.1
-varnish==1.2.0
+varnish==1.2.1
 vsphere==2.4.0
 win32_event_log==1.1.1; sys_platform == 'win32'
 win32_service==1.2.0; sys_platform == 'win32'
