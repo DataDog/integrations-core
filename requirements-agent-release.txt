@@ -76,7 +76,7 @@ supervisord==1.1.3
 system_core==1.0.2
 system_swap==1.1.1
 tcp_check==2.0.2
-teamcity==1.1.0
+teamcity==1.1.1
 tokumx==1.2.0
 twemproxy==1.2.0
 varnish==1.2.0
