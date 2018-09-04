@@ -49,7 +49,7 @@ mesos_master==1.2.1; sys_platform != 'win32'
 mesos_slave==1.2.1; sys_platform != 'win32'
 mongo==1.6.1
 mysql==1.4.0
-nagios==1.1.0
+nagios==1.1.1
 network==1.6.0
 nfsstat==0.2.0; sys_platform == 'linux2'
 nginx==2.2.0
