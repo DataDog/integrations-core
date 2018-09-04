@@ -1,5 +1,10 @@
 # CHANGELOG - vsphere
 
+## 3.0.0 / 2018-09-04
+
+* [Changed] Upgrade pyvmomi to 6.7.0. See [#2153](https://github.com/DataDog/integrations-core/pull/2153).
+* [Changed] Make first level cache thread safe. See [#2146](https://github.com/DataDog/integrations-core/pull/2146).
+
 ## 2.4.0 / 2018-08-30
 
 * [Fixed] Control size of the thread pool job queue. See [#2131](https://github.com/DataDog/integrations-core/pull/2131).
