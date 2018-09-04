@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.5.0 / 2018-09-04
+
+* [Added] Allow automated releasing by looking at github labels. See [#2169](https://github.com/DataDog/integrations-core/pull/2169).
+* [Fixed] Handle character limit for Trello card descriptions. See [#2162](https://github.com/DataDog/integrations-core/pull/2162).
+
 ## 0.4.1 / 2018-08-31
 
 * [Fixed] Fix trello command for other repos. See [#2155](https://github.com/DataDog/integrations-core/pull/2155).

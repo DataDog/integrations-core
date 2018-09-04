@@ -1,5 +1,11 @@
 # CHANGELOG - win32_event_log
 
+## 1.2.0 / 2018-09-04
+
+* [Fixed] Fix syntax. See [#2115](https://github.com/DataDog/integrations-core/pull/2115).
+* [Added] Check events between system boot and DataDog agent start. See [#1929](https://github.com/DataDog/integrations-core/pull/1929). Thanks [jvanlieshout](https://github.com/jvanlieshout).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.1.1 / 2018-01-10
 
 * [FEATURE] Add parameters to set priority in event stream for all events or per instance See [#971][]
