@@ -1,5 +1,10 @@
 # CHANGELOG - redisdb
 
+## 1.7.0 / 2018-09-04
+
+* [Added] Support finding key lengths on any db. See [#1948](https://github.com/DataDog/integrations-core/pull/1948).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.6.0 / 2018-06-06
 
 * [Added] Add a config option to disable connection cache. See [#1668](https://github.com/DataDog/integrations-core/pull/1668).
