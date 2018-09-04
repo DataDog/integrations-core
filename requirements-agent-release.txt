@@ -11,7 +11,7 @@ consul==1.5.1
 couch==2.6.1
 couchbase==1.5.1
 datadog_checks_base==2.0.0
-directory==1.2.0
+directory==2.0.0
 disk==1.2.0
 dns_check==1.1.1
 dotnetclr==1.0.0; sys_platform == 'win32'
