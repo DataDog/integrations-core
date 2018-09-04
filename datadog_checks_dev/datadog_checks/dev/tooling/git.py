@@ -56,7 +56,7 @@ def get_diff(check_name, target_tag):
     command = 'git log --pretty=%s {}... {}'.format(target_tag, target_path)
 
     with chdir(root):
-        return run_command(command, capture='out').stdout.splitlines()
+        return run_command(command, capture=True).stdout.splitlines()
 
 
 def git_commit(targets, message):

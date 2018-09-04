@@ -166,6 +166,7 @@ def changes(ctx, check, dry_run):
     user_config = ctx.obj
     if dry_run:
         changelog_types = []
+
         for pr_num in pr_numbers:
             try:
                 payload = get_pr(pr_num, user_config)
@@ -173,9 +174,16 @@ def changes(ctx, check, dry_run):
                 echo_failure('Unable to fetch info for PR #{}: {}'.format(pr_num, e))
                 continue
 
-            changelog_types.extend(
-                label for label in get_changelog_types(payload) if label != 'no-changelog'
-            )
+            current_changelog_types = get_changelog_types(payload)
+            if not current_changelog_types:
+                abort('No valid changelog labels found attached to PR #{}, please add one!'.format(pr_num))
+            elif len(current_changelog_types) > 1:
+                abort('Multiple changelog labels found attached to PR #{}, please only use one!'.format(pr_num))
+
+            current_changelog_type = current_changelog_types[0]
+            if current_changelog_type != 'no-changelog':
+                changelog_types.append(current_changelog_type)
+
         return cur_version, changelog_types
     else:
         for pr_num in pr_numbers:
@@ -515,7 +523,7 @@ def make(ctx, check, version):
         else:
             cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
             if not changelog_types:
-                echo_info('No changes for {}, skipping...'.format(check))
+                echo_warning('No changes for {}, skipping...'.format(check))
                 continue
             bump_function = get_bump_function(changelog_types)
             version = bump_function(cur_version)

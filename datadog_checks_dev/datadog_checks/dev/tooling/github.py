@@ -65,4 +65,7 @@ def from_contributor(pr_payload):
     If the PR comes from a fork, we can safely assumed it's from an
     external contributor.
     """
-    return pr_payload.get('head', {}).get('repo', {}).get('fork') is True
+    try:
+        return pr_payload.get('head', {}).get('repo', {}).get('fork') is True
+    except Exception:
+        return False
