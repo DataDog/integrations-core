@@ -1,5 +1,2 @@
-# CHANGELOG - coredns
+# CHANGELOG - CoreDNS
 
-## 0.1.0
-
-* [FEATURE] Initial Implementation
