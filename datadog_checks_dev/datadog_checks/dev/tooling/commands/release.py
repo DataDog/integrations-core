@@ -15,7 +15,7 @@ from .utils import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 )
 from ..constants import (
-    AGENT_BASED_INTEGRATIONS, AGENT_REQ_FILE, AGENT_V5_ONLY, CHANGELOG_TYPE_NONE, get_root
+    AGENT_REQ_FILE, AGENT_V5_ONLY, CHANGELOG_TYPE_NONE, get_root
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
@@ -27,7 +27,7 @@ from ..release import (
 )
 from ..trello import TrelloClient
 from ..utils import (
-    get_current_agent_version, get_version_string, format_commit_id, parse_pr_number
+    get_current_agent_version, get_valid_checks, get_version_string, format_commit_id, parse_pr_number
 )
 from ...structures import EnvVars
 from ...subprocess import run_command
@@ -84,7 +84,7 @@ def ready(ctx, quiet):
     user_config = ctx.obj
     cached_prs = {}
 
-    for target in AGENT_BASED_INTEGRATIONS:
+    for target in sorted(get_valid_checks()):
         # get the name of the current release tag
         cur_version = get_version_string(target)
         target_tag = get_release_tag_string(target, cur_version)
@@ -146,7 +146,7 @@ def ready(ctx, quiet):
 @click.pass_context
 def changes(ctx, check):
     """Show all the pending PRs for a given check."""
-    if check not in AGENT_BASED_INTEGRATIONS:
+    if check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # get the name of the current release tag
@@ -454,7 +454,7 @@ def make(ctx, check, version):
         * update the requirements-agent-release.txt file
         * commit the above changes
     """
-    if check not in AGENT_BASED_INTEGRATIONS:
+    if check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # don't run the task on the master branch
@@ -508,7 +508,7 @@ def changelog(ctx, check, version, old_version, dry_run):
 
     This method is supposed to be used by other tasks and not directly.
     """
-    if check not in AGENT_BASED_INTEGRATIONS:
+    if check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # sanity check on the version provided
@@ -611,7 +611,7 @@ def changelog(ctx, check, version, old_version, dry_run):
 @click.pass_context
 def upload(ctx, check, dry_run):
     """Release a specific check to PyPI as it is on the repo HEAD."""
-    if check not in AGENT_BASED_INTEGRATIONS:
+    if check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # retrieve credentials
@@ -654,7 +654,7 @@ def freeze(ctx, no_deps):
     have in HEAD. Also by default will create the Agent's static dependency file.
     """
     echo_info('Freezing check releases')
-    checks = set(AGENT_BASED_INTEGRATIONS)
+    checks = get_valid_checks()
     checks.remove('datadog_checks_dev')
 
     entries = []
