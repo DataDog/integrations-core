@@ -439,20 +439,38 @@ def tag(check, version, push, dry_run):
     a maintenance task that should be run under very specific circumstances
     (e.g. re-align an old release performed on the wrong commit).
     """
-    # get the current version
-    if not version:
-        version = get_version_string(check)
+    tagging_all = check == 'all'
 
-    # get the tag name
-    release_tag = get_release_tag_string(check, version)
-    echo_info('Tagging HEAD with {}'.format(release_tag))
+    valid_checks = get_valid_checks()
+    if not tagging_all and check not in valid_checks:
+        abort('Check `{}` is not an Agent-based Integration'.format(check))
 
-    if dry_run:
-        return
+    if tagging_all:
+        if version:
+            abort('You cannot tag every check with the same version')
+        checks = sorted(valid_checks)
+    else:
+        checks = [check]
 
-    result = git_tag(release_tag, push)
-    if result.code != 0:
-        abort(code=result.code)
+    for check in checks:
+        # get the current version
+        if not version:
+            version = get_version_string(check)
+
+        # get the tag name
+        release_tag = get_release_tag_string(check, version)
+        echo_info('Tagging HEAD with {}'.format(release_tag))
+
+        if dry_run:
+            version = None
+            continue
+
+        result = git_tag(release_tag, push)
+        if result.code != 0:
+            abort(code=result.code)
+
+        # Reset version
+        version = None
 
 
 @release.command(
