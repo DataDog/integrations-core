@@ -326,7 +326,6 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.log.debug("Unable to handle {} - unknown condition {}".format(service_check_name, label_value))
         else:
             self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
-            self.log.debug("{} {} {}".format(service_check_name, mapping[label_value], tags))
 
     def _get_metric_condition_map(self, base_sc_name, labels):
         if base_sc_name == 'kubernetes_state.node':
@@ -598,8 +597,8 @@ class KubernetesState(OpenMetricsBaseCheck):
         suffixes = {'used': 'used', 'hard': 'limit'}
         if metric.type in METRIC_TYPES:
             for sample in metric.samples:
-                mtype = self._extract_label_value("type", sample[self.SAMPLE_LABELS])
-                resource = self._extract_label_value("resource", sample[self.SAMPLE_LABELS])
+                mtype = sample[self.SAMPLE_LABELS].get("type")
+                resource = sample[self.SAMPLE_LABELS].get("resource")
                 tags = [
                     self._label_to_tag("namespace", sample[self.SAMPLE_LABELS], scraper_config),
                     self._label_to_tag("resourcequota", sample[self.SAMPLE_LABELS], scraper_config)
@@ -630,7 +629,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 else:
                     self.error("Constraint %s unsupported for metric %s" % (constraint, metric.name))
                     continue
-                resource = self._extract_label_value("resource", sample[self.SAMPLE_LABELS])
+                resource = sample[self.SAMPLE_LABELS].get("resource")
                 tags = [
                     self._label_to_tag("namespace", sample[self.SAMPLE_LABELS], scraper_config),
                     self._label_to_tag("limitrange", sample[self.SAMPLE_LABELS], scraper_config),
