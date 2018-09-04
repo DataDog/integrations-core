@@ -77,7 +77,7 @@ system_core==1.0.2
 system_swap==1.1.1
 tcp_check==2.0.2
 teamcity==1.1.1
-tokumx==1.2.0
+tokumx==1.2.1
 twemproxy==1.2.0
 varnish==1.2.0
 vsphere==2.4.0
