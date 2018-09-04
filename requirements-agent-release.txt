@@ -63,7 +63,7 @@ postgres==3.0.0
 powerdns_recursor==1.1.1
 process==1.4.0
 prometheus==2.0.0
-rabbitmq==1.5.1
+rabbitmq==1.5.2
 redisdb==1.6.0
 riak==1.3.0
 riakcs==1.1.0
