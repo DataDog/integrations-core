@@ -526,7 +526,10 @@ def make(ctx, check, version):
 
         # update the CHANGELOG
         echo_waiting('Updating the changelog...')
-        ctx.invoke(changelog, check=check, version=version, old_version=cur_version, dry_run=False)
+        # TODO: Avoid double GitHub API calls when bumping all checks at once
+        ctx.invoke(
+            changelog, check=check, version=version, old_version=cur_version, quiet=True, dry_run=False
+        )
 
         if check == 'datadog_checks_dev':
             commit_targets = [check]
@@ -556,9 +559,10 @@ def make(ctx, check, version):
 @click.argument('check')
 @click.argument('version')
 @click.argument('old_version', required=False)
+@click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, dry_run):
+def changelog(ctx, check, version, old_version, quiet, dry_run):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -571,7 +575,8 @@ def changelog(ctx, check, version, old_version, dry_run):
     if parse_version_info(version) <= parse_version_info(cur_version):
         abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
 
-    echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
+    if not quiet:
+        echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
 
     # get the name of the current release tag
     target_tag = get_release_tag_string(check, cur_version)
@@ -581,7 +586,8 @@ def changelog(ctx, check, version, old_version, dry_run):
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
-    echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
+    if not quiet:
+        echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
 
     user_config = ctx.obj
     entries = []
@@ -601,8 +607,9 @@ def changelog(ctx, check, version, old_version, dry_run):
 
         changelog_type = changelog_labels[0]
         if changelog_type == CHANGELOG_TYPE_NONE:
-            # No changelog entry for this PR
-            echo_info('Skipping PR #{} from changelog due to label'.format(pr_num))
+            if not quiet:
+                # No changelog entry for this PR
+                echo_info('Skipping PR #{} from changelog due to label'.format(pr_num))
             continue
 
         author = payload.get('user', {}).get('login')
