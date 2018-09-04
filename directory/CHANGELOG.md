@@ -1,9 +1,9 @@
 # CHANGELOG - directory
 
-## 2.0.0 / 2018-09-04
+## 1.3.0 / 2018-09-04
 
 * [Added] Add option to pattern-match full directory path. See [#2026](https://github.com/DataDog/integrations-core/pull/2026).
-* [Changed] Upgrade scandir to latest version. See [#2024](https://github.com/DataDog/integrations-core/pull/2024).
+* [Added] Upgrade scandir to latest version. See [#2024](https://github.com/DataDog/integrations-core/pull/2024).
 * [Added] Add option to exclude certain directories. See [#2018](https://github.com/DataDog/integrations-core/pull/2018).
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
