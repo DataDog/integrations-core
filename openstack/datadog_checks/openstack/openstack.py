@@ -825,7 +825,8 @@ class OpenStackCheck(AgentCheck):
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
         for hyp in resp.get('hypervisors'):
-            self.get_stats_for_single_hypervisor(hyp, instance, custom_tags=custom_tags, split_hostname_on_first_period=split_hostname_on_first_period)
+            self.get_stats_for_single_hypervisor(hyp, instance, custom_tags=custom_tags,
+                                                 split_hostname_on_first_period=split_hostname_on_first_period)
 
     def get_stats_for_single_hypervisor(self, hyp, instance, custom_tags=None, split_hostname_on_first_period=False):
         self._hypervisor_name_cache[self._instance_key(instance)] = hyp['hypervisor_hostname']
@@ -835,7 +836,8 @@ class OpenStackCheck(AgentCheck):
             'hypervisor_id:{0}'.format(hyp['id']),
             'virt_type:{0}'.format(hyp['hypervisor_type']),
         ]
-        host_tags = self._get_host_aggregate_tag(hyp['hypervisor_hostname'], split_hostname_on_first_period=split_hostname_on_first_period)
+        host_tags = self._get_host_aggregate_tag(hyp['hypervisor_hostname'],
+                                                 split_hostname_on_first_period=split_hostname_on_first_period)
         tags.extend(host_tags)
         tags.extend(custom_tags)
         service_check_tags = list(custom_tags)
@@ -946,8 +948,13 @@ class OpenStackCheck(AgentCheck):
                 except KeyError as e:
                     self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
 
-        
-        return self.server_details_by_id
+    def filter_excluded_servers(self):
+        if self.exclude_server_id_rules:
+            # Filter out excluded servers
+            for exclude_id_rule in self.exclude_server_id_rules:
+                for server_id in self.server_details_by_id.keys():
+                    if re.match(exclude_id_rule, server_id):
+                        del self.server_details_by_id[server_id]
 
     def get_project_name_from_id(self, tenant_id):
         url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
@@ -964,7 +971,7 @@ class OpenStackCheck(AgentCheck):
     def get_stats_for_single_server(self, server_details, tags=None, split_hostname_on_first_period=False):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
-        
+
         hypervisor_hostname = server_details.get('hypervisor_hostname')
         host_tags = self._get_host_aggregate_tag(split_hostname_on_first_period)
         host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
@@ -1216,13 +1223,14 @@ class OpenStackCheck(AgentCheck):
                 project = self.get_scoped_project(scope)
                 self.get_stats_for_single_project(project, custom_tags)
 
-                # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
 
-            self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags, split_hostname_on_first_period=split_hostname_on_first_period)
+            self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
+                                               split_hostname_on_first_period=split_hostname_on_first_period)
 
-            # This updates the server cache directly 
+            # This updates the server cache directly
             self.get_all_servers(i_key)
+            self.filter_excluded_servers()
 
             # Deep copy the cache so we can remove things from the Original during the iteration
             # Allows us to remove bad servers from the cache if needbe
@@ -1232,7 +1240,8 @@ class OpenStackCheck(AgentCheck):
                 server_tags = copy.deepcopy(custom_tags)
                 server_tags.append("nova_managed_server")
 
-                self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags, split_hostname_on_first_period=split_hostname_on_first_period)
+                self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags,
+                                                 split_hostname_on_first_period=split_hostname_on_first_period)
 
             # For now, monitor all networks
             self.get_network_stats(custom_tags)
@@ -1327,17 +1336,19 @@ class OpenStackCheck(AgentCheck):
 
         return None
 
-    def _get_host_aggregate_tag(self, hypervisor_hostname, split_hostname_on_first_period=False):
+    def _get_host_aggregate_tag(self, hyp_hostname, split_hostname_on_first_period=False):
         tags = []
-        hypervisor_hostname = hypervisor_hostname.split('.')[0] if split_hostname_on_first_period else hypervisor_hostname
-        if hypervisor_hostname in self._get_and_set_aggregate_list():
-            tags.append('aggregate:{0}'.format(self._aggregate_list[hypervisor_hostname]['aggregate']))
+        hyp_hostname = hyp_hostname.split('.')[0] if split_hostname_on_first_period else hyp_hostname
+        if hyp_hostname in self._get_and_set_aggregate_list():
+            tags.append('aggregate:{0}'.format(self._aggregate_list[hyp_hostname]['aggregate']))
             # Need to check if there is a value for availability_zone
             # because it is possible to have an aggregate without an AZ
-            if self._aggregate_list[hypervisor_hostname]['availability_zone']:
-                tags.append('availability_zone:{0}'.format(self._aggregate_list[hypervisor_hostname]['availability_zone']))
+            if self._aggregate_list[hyp_hostname]['availability_zone']:
+                tags.append('availability_zone:{0}'
+                            .format(self._aggregate_list[hyp_hostname]['availability_zone']))
         else:
-            self.log.info('Unable to find hostname %s in aggregate list. Assuming this host is unaggregated', hypervisor_hostname)
+            self.log.info('Unable to find hostname %s in aggregate list. Assuming this host is unaggregated',
+                          hyp_hostname)
 
         return tags
 

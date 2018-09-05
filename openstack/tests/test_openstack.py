@@ -234,9 +234,8 @@ def test_server_exclusion(*args):
 
     # Retrieve servers
     openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
-    i_key = "test_instance"
-    server_ids = openstackCheck.get_servers_managed_by_hypervisor(i_key, False, False)
-
+    openstackCheck.filter_excluded_servers()
+    server_ids = openstackCheck.server_details_by_id
     # Assert
     # .. 1 out of 4 server ids filtered
     assert len(server_ids) == 1
@@ -291,7 +290,8 @@ def test_cache_between_runs(self, *args):
     i_key = "test_instance"
 
     # Update the cached list of servers based on what the endpoint returns
-    cached_servers = openstackCheck.get_all_servers(i_key, False)
+    openstackCheck.get_all_servers(i_key)
 
+    cached_servers = openstackCheck.server_details_by_id
     assert 'server-1' not in cached_servers
     assert 'server_newly_added' in cached_servers
