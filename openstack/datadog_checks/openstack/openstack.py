@@ -1036,12 +1036,6 @@ class OpenStackCheck(AgentCheck):
                     tags=server_tags,
                 )
 
-    def get_stats_for_all_projects(self, projects, tags=None):
-        if tags is None:
-            tags = []
-        for project in projects:
-            self.get_stats_for_single_project(project, tags)
-
     # Cache util
     def _is_expired(self, entry):
         assert entry in ["aggregates", "physical_hosts", "hypervisors"]
@@ -1184,8 +1178,7 @@ class OpenStackCheck(AgentCheck):
             return
 
         custom_tags = instance.get("tags", [])
-        if custom_tags is None:
-            custom_tags = []
+
         try:
             instance_scope = self.ensure_auth_scope(instance)
             split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
@@ -1205,10 +1198,6 @@ class OpenStackCheck(AgentCheck):
 
             #  The scopes we iterate over should all be OpenStackProjectScope
             #  instances
-            projects = []
-
-            collect_all_projects = is_affirmative(instance.get("collect_all_projects", False))
-
             for _, scope in scope_map.iteritems():
                 # Store the scope on the object so we don't have to keep passing it around
                 self._current_scope = scope
@@ -1220,27 +1209,15 @@ class OpenStackCheck(AgentCheck):
                 self.log.debug("Neutron Url: %s", self.get_neutron_endpoint())
 
                 project = self.get_scoped_project(scope)
-                
-                if collect_all_projects or project is None:
-                    scope_projects = self.get_all_projects(scope)
-                    project_ids = set()
-                    for scope_project in scope_projects:
-                        scope_project_id = scope_project.get('id')
-                        if scope_project_id not in project_ids:
-                            project_ids.add(scope_project_id)
-                            projects.append(scope_project)
-                else:
-                    projects.append(project)
+                self.get_stats_for_single_project(project, custom_tags)
 
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
 
-                # Note Instead of doing this per hypervisor, lets just batch get all servers!
-                self.get_all_servers(i_key)
-
                 # host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
                 host_tags = []
 
+            self.get_all_servers(i_key)
             self.get_stats_for_all_hypervisors(instance, host_tags=host_tags, custom_tags=custom_tags)
 
             # Deep copy the cache so we can remove things from the Original during the iteration
@@ -1252,10 +1229,6 @@ class OpenStackCheck(AgentCheck):
 
                 self.external_host_tags[server] = host_tags
                 self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags)
-
-            if projects:
-                # Ensure projects list and scoped project exists
-                self.get_stats_for_all_projects(projects, custom_tags)
 
             # For now, monitor all networks
             self.get_network_stats(custom_tags)
