@@ -21,7 +21,7 @@ init_config:
   ## Set to true to enable TLS encryption while communicating 
   ## with the Docker API
   #
-  #  tls: False
+  #  tls: false
 
   ## @param tls_client_cert - string - optional
   ## Path to to the client certificate file (client-cert.pem).
@@ -41,7 +41,7 @@ init_config:
   ## @param tls_verify - boolean - optional - default: true
   ## 
   #
-  #  tls_verify: True
+  #  tls_verify: true
   
   ## @param init_retry_interval - integer - optional - default: 0
   ## Initialization retries if the agent is expected to start before Docker,
