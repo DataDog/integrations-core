@@ -3,6 +3,7 @@ init_config:
 instances:
   ## @param timeout - integer - required
   ## Time to wait on the Fargate metadata API before timeout in second
+  #
   - timeout: 5
 
   ## @param tags  - list of key:value element - optional 
