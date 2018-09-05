@@ -38,12 +38,12 @@ class TestPatternFilter:
 
         assert pattern_filter(items, blacklist=blacklist) == ['ghi']
 
-    def test_whitelist_override(self):
+    def test_whitelist_blacklist(self):
         items = ['abc', 'def', 'abcdef', 'ghi']
         whitelist = ['def']
-        blacklist = ['abc', 'def']
+        blacklist = ['abc']
 
-        assert pattern_filter(items, whitelist=whitelist, blacklist=blacklist) == ['def', 'abcdef', 'ghi']
+        assert pattern_filter(items, whitelist=whitelist, blacklist=blacklist) == ['def']
 
     def test_key_function(self):
         items = [Item('abc'), Item('def'), Item('abcdef'), Item('ghi')]

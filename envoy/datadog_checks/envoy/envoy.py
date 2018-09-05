@@ -129,7 +129,7 @@ class Envoy(AgentCheck):
         if self.whitelist:
             whitelisted = any(pattern.search(metric) for pattern in self.whitelist)
             if self.blacklist:
-                whitelisted = whitelisted or not any(pattern.search(metric) for pattern in self.blacklist)
+                whitelisted = whitelisted and not any(pattern.search(metric) for pattern in self.blacklist)
 
             if self.caching_metrics and whitelisted:
                 self.whitelisted_metrics.add(metric)

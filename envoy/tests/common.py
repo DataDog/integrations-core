@@ -30,10 +30,10 @@ INSTANCES = {
     'whitelist_blacklist': {
         'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
         'metric_whitelist': [
-            r'envoy\.cluster\.(in|out)\..*',
+            r'envoy\.cluster\.',
         ],
         'metric_blacklist': [
-            r'envoy\..*',
+            r'envoy\.cluster\.out',
         ],
     },
 }
