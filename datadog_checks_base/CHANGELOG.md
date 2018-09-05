@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks
 
+## 2.1.0 / 2018-09-05
+
+* [Changed] Change order of precedence of whitelist and blacklist for pattern filtering. See [#2174](https://github.com/DataDog/integrations-core/pull/2174).
+
 ## 2.0.0 / 2018-09-04
 
 * [Added] Add cluster-name suffix to node-names in kubernetes state. See [#2069](https://github.com/DataDog/integrations-core/pull/2069).
