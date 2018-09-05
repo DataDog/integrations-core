@@ -24,6 +24,7 @@ class GitlabCheck(PrometheusCheck):
     EVENT_TYPE = SOURCE_TYPE_NAME = 'gitlab'
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
+    DEFAULT_METRIC_LIMIT = 0
 
     PROMETHEUS_SERVICE_CHECK_NAME = 'gitlab.prometheus_endpoint_up'
 

@@ -61,8 +61,7 @@ install:
   - cd ..
 build: off
 test_script:
-  - ddev test datadog_checks_base active_directory aspdotnet dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service
-  - bundle exec rake ci:run[wmi_check]
+  - ddev test datadog_checks_base active_directory aspdotnet dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
 
 # Uncomment the following to enable RDP connection into the builder and debug a build
 # on_finish:

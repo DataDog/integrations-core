@@ -22,13 +22,13 @@ The PowerDNS Recursor check is included in the [Datadog Agent][1] package, so yo
 
 This check collects performance statistics via pdns_recursor's statistics API. Versions of pdns_recursor before 4.1 do not enable the stats API by default. If you're running an older version, enable it by adding the following to your recursor config file (e.g. `/etc/powerdns/recursor.conf`):
 
-```
-webserver=yes
-api-key=changeme            # only available since ver 4.0
-webserver-readonly=yes      # default no
-# webserver-port=8081       # default 8082
-# webserver-address=0.0.0.0 # default 127.0.0.1
-```
+   ```
+   webserver=yes
+   api-key=changeme             # only available since ver 4.0
+   webserver-readonly=yes       # default no
+   #webserver-port=8081         # default 8082
+   #webserver-address=0.0.0.0   # default 127.0.0.1
+   ```
 
 If you're running pdns_recursor 3.x, prepend `experimental-` to these option names, e.g. `experimental-webserver=yes`.
 

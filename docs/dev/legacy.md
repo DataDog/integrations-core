@@ -286,7 +286,7 @@ In our experience building integrations, we've also faced a number of challenges
 [9]: https://github.com/DataDog/dd-agent/tree/master/utils
 [10]: https://github.com/DataDog/integrations-core/blob/5.19.x/mysql/ci/mysql.rake
 [12]: https://github.com/DataDog/integrations-extras/compare
-[13]: https://github.com/DataDog/integrations-core/tree/master/mongo/test/ci
+[13]: https://github.com/DataDog/integrations-core/tree/5.22.x/mongo/test/ci
 [14]: https://github.com/DataDog/integrations-core/blob/master/mysql/check.py#L1169
 [15]: https://virtualenv.pypa.io/en/stable/
 [16]: https://www.ruby-lang.org

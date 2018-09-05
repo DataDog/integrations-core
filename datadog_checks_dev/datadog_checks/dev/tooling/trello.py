@@ -27,7 +27,8 @@ class TrelloClient:
         params = {
             'idList': self.team_list_map[team],
             'name': name,
-            'desc': body,
+            # It appears the character limit for descriptions is ~5000
+            'desc': body[:5000],
         }
         params.update(self.auth)
 

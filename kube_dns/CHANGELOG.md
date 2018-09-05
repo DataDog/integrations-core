@@ -1,5 +1,12 @@
 # CHANGELOG - Kube-dns
 
+## 2.0.0 / 2018-09-04
+
+* [Changed] Update kube_dns to use the new OpenMetricsBaseCheck. See [#1980](https://github.com/DataDog/integrations-core/pull/1980).
+* [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093](https://github.com/DataDog/integrations-core/pull/2093).
+* [Added] Make HTTP request timeout configurable in prometheus checks. See [#1790](https://github.com/DataDog/integrations-core/pull/1790).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.4.0 / 2018-06-13
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).

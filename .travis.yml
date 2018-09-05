@@ -125,6 +125,8 @@ jobs:
     - stage: test
       env: CHECK=kong
     - stage: test
+      env: CHECK=kube_dns
+    - stage: test
       env: CHECK=kube_proxy
     - stage: test
       env: CHECK=kubelet
@@ -193,6 +195,8 @@ jobs:
     - stage: test
       env: CHECK=riakcs
     - stage: test
+      env: CHECK=snmp
+    - stage: test
       env: CHECK=spark
     - stage: test
       env: CHECK=sqlserver
@@ -210,6 +214,8 @@ jobs:
       env: CHECK=tcp_check
     - stage: test
       env: CHECK=teamcity
+    - stage: test
+      env: CHECK=tokumx
     - stage: test
       env: CHECK=twemproxy
     - stage: test

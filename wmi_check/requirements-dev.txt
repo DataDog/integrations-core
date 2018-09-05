@@ -1,1 +1,2 @@
 datadog-checks-dev
+pywin32

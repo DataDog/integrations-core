@@ -42,37 +42,28 @@ def aggregator():
     return aggregator
 
 
-GENERIC_PROMETHEUS_INSTANCE = {
+PROMETHEUS_CHECK_INSTANCE = {
     'prometheus_url': 'http://fake.endpoint:10055/metrics',
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
     'namespace': 'prometheus',
+
+    # Defaults for checks that were based on PrometheusCheck
+    'send_monotonic_counter': False,
+    'health_service_check': True
 }
 
 
 @pytest.fixture
 def mocked_prometheus_check():
-    # We make sure the defaults used in OpenMetricsScraperMixin are the same defaults used in PrometheusScraperMixin
-    orig_create_scraper_configuration = OpenMetricsBaseCheck.create_scraper_configuration
-
-    def remove_created_by_base_class(self, *args, **kwargs):
-        if 'created_by_base_class' in kwargs:
-            del kwargs['created_by_base_class']
-        elif len(args) > 1:
-            del args[1]
-
-        return orig_create_scraper_configuration(self, *args, **kwargs)
-
-    with mock.patch('datadog_checks.checks.openmetrics.OpenMetricsBaseCheck.create_scraper_configuration',
-                    side_effect=remove_created_by_base_class, autospec=True):
-        check = OpenMetricsBaseCheck('prometheus_check', {}, {})
-        check.log = logging.getLogger('datadog-prometheus.test')
-        check.log.debug = mock.MagicMock()
-        yield check
+    check = OpenMetricsBaseCheck('prometheus_check', {}, {})
+    check.log = logging.getLogger('datadog-prometheus.test')
+    check.log.debug = mock.MagicMock()
+    return check
 
 
 @pytest.fixture
 def mocked_prometheus_scraper_config(mocked_prometheus_check):
-    yield mocked_prometheus_check.get_scraper_config(GENERIC_PROMETHEUS_INSTANCE)
+    yield mocked_prometheus_check.get_scraper_config(PROMETHEUS_CHECK_INSTANCE)
 
 
 @pytest.fixture
@@ -193,6 +184,20 @@ def test_submit_gauge_with_labels_and_hostname_override(
         54927360.0,
         tags=['my_1st_label:my_1st_label_value', 'node:foo'],
         hostname="foo",
+        count=1,
+    )
+
+    # also test with a hostname suffix
+    check2 = mocked_prometheus_check
+    mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
+    mocked_prometheus_scraper_config['label_to_hostname_suffix'] = '-cluster-blue'
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check2._submit(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes',
+        54927360.0,
+        tags=['my_1st_label:my_1st_label_value', 'node:foo'],
+        hostname="foo-cluster-blue",
         count=1,
     )
 

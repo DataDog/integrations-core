@@ -78,6 +78,19 @@ METRICS = [
     NAMESPACE + '.statefulset.replicas_current',
     NAMESPACE + '.statefulset.replicas_ready',
     NAMESPACE + '.statefulset.replicas_updated',
+    # resourcequotas
+    NAMESPACE + '.resourcequota.cpu.used',
+    NAMESPACE + '.resourcequota.cpu.limit',
+    NAMESPACE + '.resourcequota.memory.used',
+    NAMESPACE + '.resourcequota.memory.limit',
+    NAMESPACE + '.resourcequota.pods.used',
+    NAMESPACE + '.resourcequota.pods.limit',
+    NAMESPACE + '.resourcequota.limits.cpu.used',
+    NAMESPACE + '.resourcequota.limits.cpu.limit',
+    NAMESPACE + '.resourcequota.limits.memory.used',
+    NAMESPACE + '.resourcequota.limits.memory.limit',
+    # limitrange
+    NAMESPACE + '.limitrange.cpu.default_request',
 ]
 
 TAGS = {
@@ -183,8 +196,8 @@ def instance():
 
 
 @pytest.fixture
-def check():
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance()])
+def check(instance):
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
     with open(os.path.join(HERE, 'fixtures', 'prometheus.txt'), 'rb') as f:
         check.poll = mock.MagicMock(return_value=MockResponse(f.read(), 'text/plain'))
 
@@ -299,8 +312,11 @@ def test_join_custom_labels(aggregator, instance, check):
         }
     }
 
+    endpoint = instance['kube_state_url']
+    scraper_config = check.config_map[endpoint]
+
     # this would be normally done in the __init__ function of the check
-    check.label_joins.update(instance['label_joins'])
+    scraper_config['label_joins'].update(instance['label_joins'])
 
     # run check twice to have pod/node mapping
     for _ in range(2):
@@ -315,11 +331,15 @@ def test_join_custom_labels(aggregator, instance, check):
 
 
 def test_disabling_hostname_override(instance):
+    endpoint = instance['kube_state_url']
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    assert check.label_to_hostname == "node"
+    scraper_config = check.config_map[endpoint]
+    assert scraper_config['label_to_hostname'] == "node"
+
     instance["hostname_override"] = False
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    assert check.label_to_hostname is None
+    scraper_config = check.config_map[endpoint]
+    assert scraper_config['label_to_hostname'] is None
 
 
 def test_removing_pod_phase_service_checks(aggregator, instance, check):

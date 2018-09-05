@@ -22,6 +22,8 @@ from ..base import AgentCheck
 #
 
 class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
+    DEFAULT_METRIC_LIMIT = 2000
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
 
