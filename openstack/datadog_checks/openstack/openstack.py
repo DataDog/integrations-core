@@ -820,15 +820,14 @@ class OpenStackCheck(AgentCheck):
         uptime = resp['hypervisor']['uptime']
         return self._parse_uptime_string(uptime)
 
-    def get_stats_for_all_hypervisors(self, instance, host_tags=None, custom_tags=None):
+    def get_stats_for_all_hypervisors(self, instance, custom_tags=None, split_hostname_on_first_period=False):
         url = '{0}/os-hypervisors/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
         for hyp in resp.get('hypervisors'):
-            self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
+            self.get_stats_for_single_hypervisor(hyp, instance, custom_tags=custom_tags, split_hostname_on_first_period=split_hostname_on_first_period)
 
-    def get_stats_for_single_hypervisor(self, hyp, instance, host_tags=None, custom_tags=None):
-        host_tags = host_tags or []
+    def get_stats_for_single_hypervisor(self, hyp, instance, custom_tags=None, split_hostname_on_first_period=False):
         self._hypervisor_name_cache[self._instance_key(instance)] = hyp['hypervisor_hostname']
         custom_tags = custom_tags or []
         tags = [
@@ -836,6 +835,7 @@ class OpenStackCheck(AgentCheck):
             'hypervisor_id:{0}'.format(hyp['id']),
             'virt_type:{0}'.format(hyp['hypervisor_type']),
         ]
+        host_tags = self._get_host_aggregate_tag(hyp['hypervisor_hostname'], split_hostname_on_first_period=split_hostname_on_first_period)
         tags.extend(host_tags)
         tags.extend(custom_tags)
         service_check_tags = list(custom_tags)
@@ -888,6 +888,7 @@ class OpenStackCheck(AgentCheck):
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
 
+        # Note this query param specifically requires admin user rights
         query_params["all_tenants"] = True
         servers = []
 
@@ -927,7 +928,7 @@ class OpenStackCheck(AgentCheck):
             new_server['server_name'] = server.get('name')
             new_server['hypervisor_hostname'] = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
             new_server['tenant_id'] = server.get('tenant_id')
-
+            new_server['availability_zone'] = server.get('OS-EXT-AZ:availability_zone')
             # Update our cached list of servers
             if (
                 new_server['server_id'] not in self.server_details_by_id
@@ -960,9 +961,13 @@ class OpenStackCheck(AgentCheck):
             self.warning('Unable to get project name: {0}'.format(str(e)))
             raise e
 
-    def get_stats_for_single_server(self, server_details, tags=None):
+    def get_stats_for_single_server(self, server_details, tags=None, split_hostname_on_first_period=False):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
+        
+        hypervisor_hostname = server_details.get('hypervisor_hostname')
+        host_tags = self._get_host_aggregate_tag(split_hostname_on_first_period)
+        host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
 
         server_id = server_details.get('server_id')
         server_name = server_details.get('server_name')
@@ -1001,7 +1006,7 @@ class OpenStackCheck(AgentCheck):
                     self.gauge(
                         "openstack.nova.server.{0}".format(st.replace("-", "_")),
                         server_stats[st],
-                        tags=tags,
+                        tags=tags+host_tags,
                         hostname=server_id,
                     )
 
@@ -1178,10 +1183,10 @@ class OpenStackCheck(AgentCheck):
             return
 
         custom_tags = instance.get("tags", [])
+        split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
 
         try:
             instance_scope = self.ensure_auth_scope(instance)
-            split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
             if not instance_scope:
                 # Fast fail in the absence of an instance_scope
                 return
@@ -1214,21 +1219,20 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
 
-                # host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
-                host_tags = []
+            self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags, split_hostname_on_first_period=split_hostname_on_first_period)
 
+            # This updates the server cache directly 
             self.get_all_servers(i_key)
-            self.get_stats_for_all_hypervisors(instance, host_tags=host_tags, custom_tags=custom_tags)
 
             # Deep copy the cache so we can remove things from the Original during the iteration
+            # Allows us to remove bad servers from the cache if needbe
             server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
             for server in server_cache_copy:
                 server_tags = copy.deepcopy(custom_tags)
                 server_tags.append("nova_managed_server")
 
-                self.external_host_tags[server] = host_tags
-                self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags)
+                self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags, split_hostname_on_first_period=split_hostname_on_first_period)
 
             # For now, monitor all networks
             self.get_network_stats(custom_tags)
@@ -1323,28 +1327,17 @@ class OpenStackCheck(AgentCheck):
 
         return None
 
-    def get_my_hostname(self, split_hostname_on_first_period=False):
-        """
-        Returns a best guess for the hostname registered with OpenStack for this host
-        """
-
-        hostname = self.init_config.get("os_host") or self.hostname
-        if split_hostname_on_first_period:
-            hostname = hostname.split('.')[0]
-
-        return hostname
-
-    def _get_tags_for_host(self, split_hostname_on_first_period=False):
-        hostname = self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
+    def _get_host_aggregate_tag(self, hypervisor_hostname, split_hostname_on_first_period=False):
         tags = []
-        if hostname in self._get_and_set_aggregate_list():
-            tags.append('aggregate:{0}'.format(self._aggregate_list[hostname]['aggregate']))
+        hypervisor_hostname = hypervisor_hostname.split('.')[0] if split_hostname_on_first_period else hypervisor_hostname
+        if hypervisor_hostname in self._get_and_set_aggregate_list():
+            tags.append('aggregate:{0}'.format(self._aggregate_list[hypervisor_hostname]['aggregate']))
             # Need to check if there is a value for availability_zone
             # because it is possible to have an aggregate without an AZ
-            if self._aggregate_list[hostname]['availability_zone']:
-                tags.append('availability_zone:{0}'.format(self._aggregate_list[hostname]['availability_zone']))
+            if self._aggregate_list[hypervisor_hostname]['availability_zone']:
+                tags.append('availability_zone:{0}'.format(self._aggregate_list[hypervisor_hostname]['availability_zone']))
         else:
-            self.log.info('Unable to find hostname %s in aggregate list. Assuming this host is unaggregated', hostname)
+            self.log.info('Unable to find hostname %s in aggregate list. Assuming this host is unaggregated', hypervisor_hostname)
 
         return tags
 
