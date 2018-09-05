@@ -17,7 +17,7 @@ dns_check==1.1.2
 dotnetclr==1.0.1; sys_platform == 'win32'
 ecs_fargate==1.2.1
 elastic==1.7.1
-envoy==1.3.0
+envoy==1.4.0
 etcd==1.5.1
 exchange_server==1.1.1; sys_platform == 'win32'
 fluentd==1.0.1
