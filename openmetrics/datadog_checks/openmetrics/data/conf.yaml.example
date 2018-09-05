@@ -1,86 +1,109 @@
 init_config:
-  # Leave empty
 
 instances:
-  # The prometheus endpoint to query
+  ## @param prometheus_url - string -required
+  ## The Prometheus endpoint to query.
   #
-  # - prometheus_url: http://service/prometheus
+  - prometheus_url: http://service/prometheus
 
-  #   The namespace to be appended before all metrics namespace
+  ## @param namespace - string - required
+  ## The namespace to be prepended to all metrics.
   #
-  #   namespace: "service"
+    namespace: "service"
 
-  #  List of metrics to be fetched from the prometheus endpoint, if there's a value it'll be renamed
-  #  This list should contain at least one metric
+  ## @param metrics - list of strings - required
+  ## List of metrics to be fetched from the prometheus endpoint, if there's a 
+  ## value it'll be renamed. This list should contain at least one metric
   #
-  #   metrics:
-  #     - processor: cpu
-  #     - memory: mem
-  #     - io
+    metrics:
+      - processor: cpu
+      - memory: mem
+      - io
 
-  # Prefix for exposed Prometheus metrics
+  ## @param prometheus_metrics_prefix - string - optional
+  ## Prefix for exposed Prometheus metrics.
   #
-  # prometheus_metrics_prefix: prefix_
+  #  prometheus_metrics_prefix: prefix_
 
-  #   Send a service check reporting about the health of the prometheus endpoint
-  #   It will be named <namespace>.prometheus.health (true by default)
+  ## @param health_service_check - boolean - optional - default: true
+  ## Send a service check reporting about the health of the prometheus endpoint
+  ## It's named <NAMESPACE>.prometheus.health
   #
-  #   health_service_check: True
+  #  health_service_check: True
 
-  #   Override the hostname with the value of one label
+  ## @param label_to_hostname - string - optional  
+  ## Override the hostname with the value of one label.
   #
-  #   label_to_hostname: node
+  #  label_to_hostname: node
 
-  #   The label join allows to target a metric and retrieve it's label via a 1:1 mapping
+  ## @param label_joins - custom - optional
+  ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping
   #
-  #   label_joins:
-  #     target_metric:
-  #       label_to_match: matched_label
-  #       labels_to_get:
-  #         - extra_label_1
-  #         - extra_label_2
+  #  label_joins:
+  #    target_metric:
+  #      label_to_match: <MATCHED_LABEL>
+  #      labels_to_get:
+  #        - <EXTRA_LABEL_1>
+  #        - <EXTRA_LABEL_2>
 
-  #   The label mapper allows you to rename some labels
+  ## @param labels_mapper - list of key:value elements - optional 
+  ## The label mapper allows you to rename labels.
   #
-  #   labels_mapper:
-  #     flavor: origin
+  #  labels_mapper:
+  #    flavor: origin
 
-  #   Type override allows you to override a type in the prometheus the payload
-  #   or type an untyped metrics (they're ignored by default)
-  #   type_overrides:
-  #     metric_name: gauge
+  ## @param type_overrides - list of key:value elements - optional
+  ## Type override allows you to override a type in the prometheus the payload
+  ## or type an untyped metrics (they're ignored by default)
+  ## Supported <METRIC_TYPE> are `gauge`, `count`, `rate`
+  #
+  #  type_overrides:
+  #    <METRIC_NAME>: <METRIC_TYPE>
 
-  #   Tags to be added to all metrics
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
-  #   tags:
-  #     - foo:bar
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
-  #   To send the histograms bucket
+  ## @param send_histograms_buckets - boolean - optional - default: false
+  ## Set send_histograms_buckets to true to send the histograms bucket.
   #
-  #   send_histograms_buckets: True
+  #  send_histograms_buckets: True
 
-  #   To send counters as monotonic counter
+  ## @param send_monotonic_counter - boolean - optional - default: false
+  ## Set send_monotonic_counter to true to send counters as monotonic counter.
   #
-  #   send_monotonic_counter: True
+  #  send_monotonic_counter: True
 
-  #   List of label to be excluded
+  ## @param exclude_labels - list of strings - optional
+  ## List of label to be excluded
   #
-  #   exclude_labels:
-  #     - timestamp
+  #  exclude_labels:
+  #    - timestamp
 
-  # If your prometheus endpoint is secured, here are the settings to configure it
+  ## @param prometheus_timeout - integer - optional - default: 10
+  ## Set a timeout for the prometheus query.
   #
-  # Can either be only the path to the certificate and thus you should specify the private key
-  # or it can be the path to a file containing both the certificate & the private key
-  # ssl_cert: "/path/to/cert"
-  #
-  # Needed if the certificate does not include the private key
-  #
-  # /!\ The private key to your local certificate must be unencrypted.
-  # ssl_private_key: "/path/to/key"
-  #
-  # The path to the trusted CA used for generating custom certificates
-  # ssl_ca_cert: "/path/to/cacert"
+  #  prometheus_timeout: 10
 
-  # Set a timeout for the prometheus query, defaults to 10
-  # prometheus_timeout: 10
+  ## @param ssl_cert - string - optional
+  ## If your prometheus endpoint is secured, enter the path to the certificate and 
+  ## you should specify the private key in ssl_private_key parameter
+  ## or it can be the path to a file containing both the certificate & the private key
+  #
+  #  ssl_cert: "<CERT_PATH>"
+
+  ## @param ssl_private_key - string - optional
+  ## Needed if the certificate linked in ssl_cert does not include the private key.
+  ## Note: The private key to your local certificate must be unencrypted.
+  # 
+  #  ssl_private_key: "<KEY_PATH>"
+
+  ## @param ssl_ca_cert - string - optional 
+  ## The path to the trusted CA used for generating custom certificates.
+  #
+  #  ssl_ca_cert: "<CA_CERT_PATH>"
