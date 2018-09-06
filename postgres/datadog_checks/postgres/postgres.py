@@ -869,8 +869,9 @@ GROUP BY datid, datname
                     cursor.execute(query)
                     row = cursor.fetchone()
                 except programming_error as e:
-                    self.log.warning("Not all metrics may be available: {}".format(str(e)))
+                    self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
                     db.rollback()
+                    continue
 
                 if not row:
                     self.log.debug("query result for metric_prefix {}: returned an empty result".format(metric_prefix))
