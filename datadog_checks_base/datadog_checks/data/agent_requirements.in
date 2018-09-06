@@ -37,7 +37,7 @@ pysmi==0.2.2
 pysnmp==4.4.3
 pysnmp-mibs==0.1.6
 python-binary-memcached==0.26.1; sys_platform != 'win32'
-pyvmomi==6.7.0
+pyvmomi==v6.5.0.2017.5-1
 redis==2.10.5
 requests==2.19.1
 requests_ntlm==1.1.0
