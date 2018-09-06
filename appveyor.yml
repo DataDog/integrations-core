@@ -29,13 +29,7 @@ init:
   - set PATH=%PYTHON2%;%PYTHON2%\Scripts;%PATH%
   - python -c "import sys; print(sys.version)"
 
-  - SETLOCAL ENABLEEXTENSIONS
-  - |
-    if defined APPVEYOR_PULL_REQUEST_NUMBER (
-      set "CHANGED_ONLY_FLAG= --changed"
-    ) else (
-      set "CHANGED_ONLY_FLAG= "
-    )
+  - if defined APPVEYOR_PULL_REQUEST_NUMBER ( set "CHANGED_ONLY_FLAG= --changed" ) else ( set "CHANGED_ONLY_FLAG= " )
 
 install:
   - python -m pip install --upgrade --disable-pip-version-check pip virtualenv codecov
