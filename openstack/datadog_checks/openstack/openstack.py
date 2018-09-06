@@ -1182,7 +1182,9 @@ class OpenStackCheck(AgentCheck):
             self.log.info('Skipping run due to exponential backoff in effect')
             return
 
+        projects = {}
         custom_tags = instance.get("tags", [])
+        collect_limits_from_all_projects = is_affirmative(instance.get('collect_limits_from_all_projects', False))
         split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
 
         try:
@@ -1201,19 +1203,6 @@ class OpenStackCheck(AgentCheck):
                 scope_map.update(instance_scope.project_scope_map)
                 self._parent_scope = instance_scope
 
-            # Filter out the scopes/projects from the configured whitelist/blacklist
-            proj_list = [scope.project_name for _, scope in scope_map.iteritems()]
-            scope_map_filtered = pattern_filter(proj_list,
-                                                whitelist=self.include_project_name_rules,
-                                                blacklist=self.exclude_project_name_rules
-                                                )
-            scope_map_copy = copy.deepcopy(scope_map)
-            for scope in scope_map_copy.iteritems():
-                if scope[0][0] not in scope_map_filtered:
-                    del scope_map[scope[0]]
-
-            #  The scopes we iterate over should all be OpenStackProjectScope
-            #  instances
             for _, scope in scope_map.iteritems():
                 # Store the scope on the object so we don't have to keep passing it around
                 self._current_scope = scope
@@ -1225,9 +1214,30 @@ class OpenStackCheck(AgentCheck):
                 self.log.debug("Neutron Url: %s", self.get_neutron_endpoint())
 
                 project = self.get_scoped_project(scope)
-                self.get_stats_for_single_project(project, custom_tags)
+                projects[project['name']] = project
+
+                # self.get_stats_for_single_project(project, custom_tags)
 
                 i_key = self._instance_key(instance)
+
+            if collect_limits_from_all_projects:
+                scope_projects = self.get_all_projects(scope)
+                if scope_projects:
+                    for proj in scope_projects:
+                        projects[proj['name']] = proj
+
+            proj_filtered = pattern_filter(
+                                           [p for p in projects],
+                                           whitelist=self.include_project_name_rules,
+                                           blacklist=self.exclude_project_name_rules
+                                           )
+            proj_copy = copy.deepcopy(projects)
+            for proj in proj_copy:
+                if proj not in proj_filtered:
+                    del projects[proj]
+
+            for proj in projects:
+                self.get_stats_for_single_project(projects[proj], custom_tags)
 
             self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
                                                split_hostname_on_first_period=split_hostname_on_first_period)
