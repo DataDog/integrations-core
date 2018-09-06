@@ -178,6 +178,7 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
     query_return = ['num', 1337]
+    db.cursor().execute.side_effect = None
     db.cursor().fetchone.return_value = query_return
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.error.assert_called_once_with("query result for metric_prefix {}: expected {} columns, got {}".format(
