@@ -1,5 +1,5 @@
 comment:
-  layout: "changes, diff, tree"
+  layout: "changes"
   behavior: default
   branches: null
 
