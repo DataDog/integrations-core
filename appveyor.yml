@@ -29,6 +29,7 @@ init:
   - set PATH=%PYTHON2%;%PYTHON2%\Scripts;%PATH%
   - python -c "import sys; print(sys.version)"
 
+  - SETLOCAL ENABLEEXTENSIONS
   - |
     if defined APPVEYOR_PULL_REQUEST_NUMBER (
       set "CHANGED_ONLY_FLAG= --changed"
