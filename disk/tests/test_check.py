@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import sys
 import os
-import re
 
 import pytest
 import mock
