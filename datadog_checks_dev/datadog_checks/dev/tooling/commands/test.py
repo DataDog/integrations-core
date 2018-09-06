@@ -42,6 +42,16 @@ def testable_files(files):
     return [f for f in files if f.endswith(TESTABLE_FILE_EXTENSIONS)]
 
 
+def get_changed_checks():
+    # Get files that changed compared to `master`
+    changed_files = files_changed()
+
+    # Filter by files that can influence the testing of a check
+    changed_files[:] = testable_files(changed_files)
+
+    return {line.split('/')[0] for line in changed_files}
+
+
 @click.command(
     context_settings=CONTEXT_SETTINGS,
     short_help='Run tests'
@@ -51,8 +61,9 @@ def testable_files(files):
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-m', is_flag=True, help='Show line numbers of statements that were not executed')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
+@click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
-def test(checks, bench, coverage, cov_missing, cov_keep, verbose):
+def test(checks, bench, coverage, cov_missing, cov_keep, changed, verbose):
     """Run tests for Agent-based checks.
 
     If no checks are specified, this will only test checks that
@@ -60,19 +71,19 @@ def test(checks, bench, coverage, cov_missing, cov_keep, verbose):
     """
     root = get_root()
 
-    if not checks:
-        # get the list of the files that changed compared to `master`
-        changed_files = files_changed()
-
-        # get the list of files that can change the implementation of a check
-        files_requiring_tests = testable_files(changed_files)
-
-        # get the integrations associated with changed files
-        changed_checks = {line.split('/')[0] for line in files_requiring_tests}
-
-        checks = sorted(changed_checks & get_testable_checks())
+    if checks:
+        checks_to_test = get_testable_checks() & set(checks)
+        if changed:
+            checks_to_test = checks_to_test & get_changed_checks()
+        # Retain order
+        final_checks = []
+        for check in checks:
+            if check in checks_to_test:
+                final_checks.append(check)
+                checks_to_test.remove(check)
+        checks = final_checks
     else:
-        checks = sorted(set(checks) & get_testable_checks())
+        checks = sorted(get_testable_checks() & get_changed_checks())
 
     if not checks:
         echo_info('No checks to test!')
