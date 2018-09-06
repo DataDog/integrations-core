@@ -2,6 +2,7 @@ version: '{branch}.{build}'
 clone_depth: 3
 build: off
 test: off
+skip_branch_with_pr: true
 cache:
   - '%LOCALAPPDATA%\pip\Cache'
 services:
@@ -11,22 +12,13 @@ services:
   # a time. See https://www.appveyor.com/docs/services-databases/ for details.
   - mssql2008r2sp2
 
+branches:
+  only:
+    - master
+
 environment:
   PYTHON2: C:\Python27-x64
   PYTHON3: C:\Python36-x64
-
-  matrix:
-    - CHECK: datadog_checks_base
-    - CHECK: active_directory
-    - CHECK: aspdotnet
-    - CHECK: dotnetclr
-    - CHECK: exchange_server
-    - CHECK: iis
-    - CHECK: pdh_check
-    - CHECK: sqlserver
-    - CHECK: win32_event_log
-    - CHECK: windows_service
-    - CHECK: wmi_check
 
 init:
   # Add Python 3 to PATH
@@ -37,6 +29,13 @@ init:
   - set PATH=%PYTHON2%;%PYTHON2%\Scripts;%PATH%
   - python -c "import sys; print(sys.version)"
 
+  - |
+    if defined APPVEYOR_PULL_REQUEST_NUMBER (
+      set "CHANGED_ONLY_FLAG= --changed"
+    ) else (
+      set "CHANGED_ONLY_FLAG= "
+    )
+
 install:
   - python -m pip install --upgrade --disable-pip-version-check pip virtualenv codecov
   - pip uninstall -y docker-py
@@ -44,22 +43,9 @@ install:
   - ddev config set core .
 
 test_script:
-  - ddev test %CHECK%
+  # Only test any of these that have changed for pull requests
+  - ddev test%CHANGED_ONLY_FLAG% datadog_checks_base active_directory aspdotnet dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
 
 # Uncomment the following to enable RDP connection into the builder and debug a build
 # on_finish:
 #   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-for:
-  -
-    branches:
-      only:
-        - head
-
-    environment:
-      PYTHON2: C:\Python27-x64
-      PYTHON3: C:\Python36-x64
-
-    test_script:
-      # Only test any of these that have changed for pull requests
-      - ddev test --changed datadog_checks_base active_directory aspdotnet dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
