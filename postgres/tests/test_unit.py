@@ -165,6 +165,14 @@ def test_malformed_get_custom_queries(check):
                                             malformed_custom_query['metric_prefix']))
     check.log.reset_mock()
 
+    # Make sure we gracefully handle an error while performing custom queries
+    malformed_custom_query_column = {}
+    malformed_custom_query['columns'] = [malformed_custom_query_column]
+    db.cursor().execute.side_effect = programming_error
+    check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
+    check.log.error.assert_called_once_with("Error executing query for metric_prefix {}: ".format(
+                                            malformed_custom_query['metric_prefix']))
+
     # Make sure the number of columns defined is the same as the number of columns return by the query
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
@@ -180,7 +188,7 @@ def test_malformed_get_custom_queries(check):
     db.cursor().fetchone.return_value = []
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.debug.assert_called_with("query result for metric_prefix {}: returned an empty result".format(
-                                        malformed_custom_query['metric_prefix']))
+                                       malformed_custom_query['metric_prefix']))
     check.log.reset_mock()
 
     # Make sure 'name' is defined in each column
