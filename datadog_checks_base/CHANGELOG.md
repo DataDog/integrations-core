@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks
 
+## 2.2.0 / 2018-09-06
+
+* [Changed] Freeze pyVmomi dep in base check. See [#2181](https://github.com/DataDog/integrations-core/pull/2181).
+
 ## 2.1.0 / 2018-09-05
 
 * [Changed] Change order of precedence of whitelist and blacklist for pattern filtering. See [#2174](https://github.com/DataDog/integrations-core/pull/2174).
