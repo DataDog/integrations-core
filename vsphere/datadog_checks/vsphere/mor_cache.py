@@ -34,14 +34,6 @@ class MorCache:
         with self._mor_lock:
             return key in self._mor
 
-    def instance_has_mor(self, key, name):
-        """
-        Return whether the given Mor name is present for the given instance.
-        If the key is not in the cache, raises a KeyError.
-        """
-        with self._mor_lock:
-            return name in self._mor[key]
-
     def instance_size(self, key):
         """
         Return how many Mor objects are stored for the given instance.
@@ -52,12 +44,12 @@ class MorCache:
 
     def set_mor(self, key, name, mor):
         """
-        Store the given more in the cache.
+        Store a Mor object in the cache with the given name.
         If the key is not in the cache, raises a KeyError.
         """
         with self._mor_lock:
             self._mor[key][name] = mor
-            self._mor[key][name]['last_seen'] = time.time()
+            self._mor[key][name]['creation_time'] = time.time()
 
     def get_mor(self, key, name):
         """
@@ -119,8 +111,8 @@ class MorCache:
             # Don't change the dict during iteration!
             # First collect the names of the Mors to remove...
             for name, mor in self._mor[key].iteritems():
-                lifetime = now - mor['last_seen']
-                if lifetime > ttl:
+                age = now - mor['creation_time']
+                if age > ttl:
                     mors_to_purge.append(name)
 
             # ...then actually remove the Mors from the cache.

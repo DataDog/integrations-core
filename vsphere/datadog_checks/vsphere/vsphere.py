@@ -602,8 +602,9 @@ class VSphereCheck(AgentCheck):
 
                 mor_name = str(mor['mor'])
                 mor['interval'] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
-                if not self.mor_cache.instance_has_mor(i_key, mor_name):
-                    self.mor_cache.set_mor(i_key, mor_name, mor)
+                # Always update the cache to account for Mors that might have changed parent
+                # in the meantime (e.g. a migrated VM).
+                self.mor_cache.set_mor(i_key, mor_name, mor)
 
                 query_spec = vim.PerformanceManager.QuerySpec()
                 query_spec.entity = mor["mor"]

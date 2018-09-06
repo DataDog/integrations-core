@@ -18,17 +18,6 @@ def test_contains(cache):
     assert cache.contains('foo') is False
 
 
-def test_instance_has_mor(cache):
-    cache._mor['foo_instance'] = {
-        'my_mor_name': None
-    }
-
-    assert cache.instance_has_mor('foo_instance', 'my_mor_name') is True
-    assert cache.instance_has_mor('foo_instance', 'another') is False
-    with pytest.raises(KeyError):
-        cache.instance_has_mor('foo', 'bar')
-
-
 def test_instance_size(cache):
     cache._mor['foo_instance'] = {}
     assert cache.instance_size('foo_instance') == 0
