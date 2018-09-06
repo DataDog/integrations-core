@@ -25,6 +25,7 @@ from .event import VSphereEvent
 from .errors import BadConfigError, ConnectionError
 from .cache_config import CacheConfig
 from .objects_queue import ObjectsQueue
+from .mor_cache import MorCache, MorNotFoundError
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -65,9 +66,10 @@ RESOURCE_TYPE_NO_METRIC = [
 ]
 
 
-def atomic_method(method):
-    """ Decorator to catch the exceptions that happen in detached thread atomic tasks
-    and display them in the logs.
+def trace_method(method):
+    """
+    Decorator to catch and print the exceptions that happen within async tasks.
+    Note: this should be applied to methods of VSphereCheck only!
     """
     def wrapper(*args, **kwargs):
         try:
@@ -122,19 +124,18 @@ class VSphereCheck(AgentCheck):
             # events
             self.event_config[i_key] = instance.get('event_config')
 
-        # Mor objects queue
+        # Queue of raw Mor objects to process
         self.mor_objects_queue = ObjectsQueue()
+
+        # Cache of processed Mor objects
+        self.mor_cache = MorCache()
 
         # managed entity raw view
         self.registry = {}
-        # Second layer, processed from the first one
-        self.morlist = {}
-        # Metrics metadata, basically perfCounterId -> {name, group, description}
+
+        # Metrics metadata, for each instance keeps the mapping: perfCounterKey -> {name, group, description}
         self.metrics_metadata = {}
         self.latest_event_query = {}
-
-    def stop(self):
-        self.stop_pool()
 
     def start_pool(self):
         self.log.info("Starting Thread Pool")
@@ -150,10 +151,6 @@ class VSphereCheck(AgentCheck):
             self.pool.join()
             assert self.pool.get_nworkers() == 0
             self.pool_started = False
-
-    def restart_pool(self):
-        self.stop_pool()
-        self.start_pool()
 
     def _query_event(self, instance):
         i_key = self._instance_key(instance)
@@ -298,22 +295,19 @@ class VSphereCheck(AgentCheck):
 
         Returns a list of pairs (hostname, {'SOURCE_TYPE: list_of_tags},)
         """
-        self.log.debug(u"Sending external_host_tags now")
+        self.log.debug("Sending external_host_tags now")
         external_host_tags = []
         for instance in self.instances:
             i_key = self._instance_key(instance)
-            mor_by_mor_name = self.morlist.get(i_key)
-
-            if not mor_by_mor_name:
-                self.log.warning(
-                    u"Unable to extract hosts' tags for vSphere instance named %s. "
-                    u"Is the check failing on this instance?", i_key
-                )
+            if not self.mor_cache.contains(i_key):
+                self.log.warning("Unable to extract host tags for vSphere instance: {}".format(i_key))
                 continue
 
-            for mor in list(mor_by_mor_name.values()):
-                if mor.get('hostname'):  # some mor's have a None hostname
-                    external_host_tags.append((mor['hostname'], {SOURCE_TYPE: mor['tags']}))
+            for name, mor in self.mor_cache.mors(i_key):
+                # Note: some mors have a None hostname
+                hostname = mor.get('hostname')
+                if hostname:
+                    external_host_tags.append((hostname, {SOURCE_TYPE: mor.get('tags')}))
 
         return external_host_tags
 
@@ -478,8 +472,11 @@ class VSphereCheck(AgentCheck):
         self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
         return obj_list
 
-    @atomic_method
-    def _cache_morlist_raw_atomic(self, instance, tags, regexes=None, include_only_marked=False):
+    @trace_method
+    def _cache_morlist_raw_async(self, instance, tags, regexes=None, include_only_marked=False):
+        """
+        Fills the queue in a separate thread
+        """
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags)
@@ -523,7 +520,7 @@ class VSphereCheck(AgentCheck):
 
     def _cache_morlist_raw(self, instance):
         """
-        Initiate the first layer to refresh the list of MORs (`self.morlist`).
+        Fill the Mor objects queue that will be asynchronously processed later.
         Resolve the vCenter `rootFolder` and initiate hosts and virtual machines
         discovery.
         """
@@ -548,21 +545,19 @@ class VSphereCheck(AgentCheck):
 
         # Discover hosts and virtual machines
         self.pool.apply_async(
-            self._cache_morlist_raw_atomic,
+            self._cache_morlist_raw_async,
             args=(instance, [instance_tag], regexes, include_only_marked)
         )
 
         self.cache_config.set_last(CacheConfig.Morlist, i_key, time.time())
 
-    @atomic_method
-    def _cache_morlist_process_atomic(self, instance, query_specs):
-        """ Process one item from the mor objects cache by querying the available
-        metrics for this MOR and then putting it in self.morlist
+    @trace_method
+    def _process_mor_objects_queue_async(self, instance, query_specs):
         """
-        # ## <TEST-INSTRUMENTATION>
-        t = Timer()
-        # ## </TEST-INSTRUMENTATION>
-
+        Process a batch of items popped from the objects queue by querying the available
+        metrics for these MORs and then putting them in the Mor cache
+        """
+        t = time.time()
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
@@ -577,25 +572,22 @@ class VSphereCheck(AgentCheck):
             mor_name = str(mor_perfs.entity)
             available_metrics = [value.id for value in mor_perfs.value]
             try:
-                self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
-            except KeyError:
-                self.log.error("Trying to compute needed metrics from object %s deleted from the cache, skipping. "
-                               "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
+                self.mor_cache.set_metrics(i_key, mor_name, self._compute_needed_metrics(instance, available_metrics))
+            except MorNotFoundError:
+                self.log.error("Object '{}' is missing from the cache, skipping. ".format(mor_name))
                 continue
 
-        # ## <TEST-INSTRUMENTATION>
-        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total(), tags=instance.get('tags', []))
-        # ## </TEST-INSTRUMENTATION>
+        # TEST-INSTRUMENTATION
+        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', time.time()-t,
+                       tags=instance.get('tags', []))
 
-    def _cache_morlist_process(self, instance):
+    def _process_mor_objects_queue(self, instance):
         """
-        Pos items from the mor objects queue and run asynchronously
-        the _cache_morlist_process_atomic operation that will get the available
-        metrics for this MOR and put it in self.morlist
+        Pops `batch_morlist_size` items from the mor objects queue and run asynchronously
+        the _process_mor_objects_queue_async method to fill the Mor cache.
         """
         i_key = self._instance_key(instance)
-        if i_key not in self.morlist:
-            self.morlist[i_key] = {}
+        self.mor_cache.init_instance(i_key)
 
         for resource_type in RESOURCE_TYPE_METRICS:
             query_specs = []
@@ -608,11 +600,11 @@ class VSphereCheck(AgentCheck):
                     self.log.debug("No more objects of type '{}' left in the queue".format(resource_type))
                     break
 
-                mor_name = str(mor["mor"])
-                mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
-                if mor_name not in self.morlist[i_key]:
-                    self.morlist[i_key][mor_name] = mor
-                self.morlist[i_key][mor_name]["last_seen"] = time.time()
+                mor_name = str(mor['mor'])
+                mor['interval'] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
+                # Always update the cache to account for Mors that might have changed parent
+                # in the meantime (e.g. a migrated VM).
+                self.mor_cache.set_mor(i_key, mor_name, mor)
 
                 query_spec = vim.PerformanceManager.QuerySpec()
                 query_spec.entity = mor["mor"]
@@ -621,24 +613,12 @@ class VSphereCheck(AgentCheck):
                 query_specs.append(query_spec)
 
             if query_specs:
-                self.pool.apply_async(self._cache_morlist_process_atomic, args=(instance, query_specs))
-
-    def _vacuum_morlist(self, instance):
-        """ Check if self.morlist doesn't have some old MORs that are gone, ie
-        we cannot get any metrics from them anyway (or =0)
-        """
-        i_key = self._instance_key(instance)
-        morlist = self.morlist[i_key].items()
-
-        for mor_name, mor in morlist:
-            last_seen = mor['last_seen']
-            if (time.time() - last_seen) > self.clean_morlist_interval:
-                self.log.debug("Deleting %s from the cache", mor_name)
-                del self.morlist[i_key][mor_name]
+                self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, query_specs))
 
     def _cache_metrics_metadata(self, instance):
-        """ Get from the server instance, all the performance counters metadata
-        meaning name/group/description... attached with the corresponding ID
+        """
+        Get all the performance counters metadata meaning name/group/description...
+        from the server instance, attached with the corresponding ID
         """
         # ## <TEST-INSTRUMENTATION>
         t = Timer()
@@ -652,12 +632,11 @@ class VSphereCheck(AgentCheck):
 
         new_metadata = {}
         for counter in perfManager.perfCounter:
-            d = dict(
-                name="%s.%s" % (counter.groupInfo.key, counter.nameInfo.key),
-                unit=counter.unitInfo.key,
-                instance_tag='instance'  # FIXME: replace by what we want to tag!
-            )
-            new_metadata[counter.key] = d
+            new_metadata[counter.key] = {
+                'name': "{}.{}".format(counter.groupInfo.key, counter.nameInfo.key),
+                'unit': counter.unitInfo.key,
+                'instance_tag': 'instance',  # FIXME: replace by what we want to tag!
+            }
         self.cache_config.set_last(CacheConfig.Metadata, i_key, time.time())
 
         self.log.info("Finished metadata collection for instance {}".format(i_key))
@@ -681,8 +660,8 @@ class VSphereCheck(AgentCheck):
         # Defaults to return the value without transformation
         return value
 
-    @atomic_method
-    def _collect_metrics_atomic(self, instance, query_specs):
+    @trace_method
+    def _collect_metrics_async(self, instance, query_specs):
         """ Task that collects the metrics listed in the morlist for one MOR
         """
         # ## <TEST-INSTRUMENTATION>
@@ -697,8 +676,8 @@ class VSphereCheck(AgentCheck):
             for mor_perfs in results:
                 mor_name = str(mor_perfs.entity)
                 try:
-                    mor = self.morlist[i_key][mor_name]
-                except KeyError:
+                    mor = self.mor_cache.get_mor(i_key, mor_name)
+                except MorNotFoundError:
                     self.log.error("Trying to get metrics from object %s deleted from the cache, skipping. "
                                    "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
                     continue
@@ -739,44 +718,49 @@ class VSphereCheck(AgentCheck):
         # ## </TEST-INSTRUMENTATION>
 
     def collect_metrics(self, instance):
-        """ Calls asynchronously _collect_metrics_atomic on all MORs, as the
+        """
+        Calls asynchronously _collect_metrics_async on all MORs, as the
         job queue is processed the Aggregator will receive the metrics.
         """
         i_key = self._instance_key(instance)
-        if i_key not in self.morlist:
-            self.log.debug("Not collecting metrics for this instance, nothing to do yet: {}".format(i_key))
+        if not self.mor_cache.contains(i_key):
+            self.log.debug("Not collecting metrics for instance '{}', nothing to do yet.".format(i_key))
             return
 
-        mors = self.morlist[i_key].items()
-        n_mors = len(mors)
-        self.log.debug("Collecting metrics of %d mors", n_mors)
-
-        custom_tags = instance.get('tags', [])
         vm_count = 0
+        custom_tags = instance.get('tags', [])
+        tags = ["vcenter_server:{}".format(instance.get('name'))] + custom_tags
+
+        n_mors = self.mor_cache.instance_size(i_key)
+        if not n_mors:
+            self.gauge('vsphere.vm.count', vm_count, tags=tags)
+            self.log.debug("No Mor objects to process for instance '{}', skip...".format(i_key))
+            return
+
+        self.log.debug("Collecting metrics for {} mors".format(n_mors))
 
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
         # If batch_size is 0, process everything at once
         batch_size = self.batch_morlist_size or n_mors
         query_specs = []
-        if n_mors:
-            for i in xrange(n_mors / batch_size + 1):
-                for mor_name, mor in mors[i * batch_size:(i + 1) * batch_size]:
-                    if mor['mor_type'] == 'vm':
-                        vm_count += 1
-                    if 'metrics' not in mor or not mor['metrics']:
-                        continue
+        for batch in self.mor_cache.mors_batch(i_key, batch_size):
+            for mor_name, mor in batch.iteritems():
+                if mor['mor_type'] == 'vm':
+                    vm_count += 1
+                if 'metrics' not in mor or not mor['metrics']:
+                    continue
 
-                    query_spec = vim.PerformanceManager.QuerySpec()
-                    query_spec.entity = mor["mor"]
-                    query_spec.intervalId = mor["interval"]
-                    query_spec.metricId = mor["metrics"]
-                    query_spec.maxSample = 1
-                    query_specs.append(query_spec)
+                query_spec = vim.PerformanceManager.QuerySpec()
+                query_spec.entity = mor["mor"]
+                query_spec.intervalId = mor["interval"]
+                query_spec.metricId = mor["metrics"]
+                query_spec.maxSample = 1
+                query_specs.append(query_spec)
 
-                if query_specs:
-                    self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs))
+            if query_specs:
+                self.pool.apply_async(self._collect_metrics_async, args=(instance, query_specs))
 
-        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:{}".format(instance.get('name'))] + custom_tags)
+        self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
         if not self.pool_started:
@@ -798,13 +782,16 @@ class VSphereCheck(AgentCheck):
             if self._should_cache(instance, CacheConfig.Morlist):
                 self._cache_morlist_raw(instance)
 
-            self._cache_morlist_process(instance)
-            self._vacuum_morlist(instance)
+            self._process_mor_objects_queue(instance)
+
+            # Remove old objects that might be gone from the Mor cache
+            self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval)
 
             # Second part: do the job
             self.collect_metrics(instance)
         else:
             self.log.debug("Thread pool is still processing jobs from previous run. Not scheduling anything.")
+
         self._query_event(instance)
 
         thread_crashed = False

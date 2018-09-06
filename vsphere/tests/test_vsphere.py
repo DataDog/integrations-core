@@ -42,7 +42,6 @@ def test__init__(instance):
     assert len(check.event_config) == 1
     assert 'vsphere_mock' in check.event_config
     assert len(check.registry) == 0
-    assert len(check.morlist) == 0
     assert len(check.metrics_metadata) == 0
     assert len(check.latest_event_query) == 0
     assert check.batch_collector_size == 0
@@ -120,7 +119,7 @@ def test__cache_morlist_raw_atomic(vsphere, instance):
         instance["tags"] = ["optional:tag1"]
 
         # Discover hosts and virtual machines
-        vsphere._cache_morlist_raw_atomic(instance, tags, include_regexes, include_only_marked)
+        vsphere._cache_morlist_raw_async(instance, tags, include_regexes, include_only_marked)
 
         # Assertions: 1 labeled+monitored VM + 2 hosts + 2 datacenters.
         assertMOR(vsphere, instance, count=5)
