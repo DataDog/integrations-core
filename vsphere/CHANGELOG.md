@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 3.1.0 / 2018-09-06
+
+* [Changed] Downgrade pyvmomi to v6.5.0.2017.5-1. See [#2180](https://github.com/DataDog/integrations-core/pull/2180).
+
 ## 3.0.0 / 2018-09-04
 
 * [Changed] Upgrade pyvmomi to 6.7.0. See [#2153](https://github.com/DataDog/integrations-core/pull/2153).
