@@ -172,6 +172,7 @@ def test_malformed_get_custom_queries(check):
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.error.assert_called_once_with("Error executing query for metric_prefix {}: ".format(
                                             malformed_custom_query['metric_prefix']))
+    check.log.reset_mock()
 
     # Make sure the number of columns defined is the same as the number of columns return by the query
     malformed_custom_query_column = {}
