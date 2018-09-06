@@ -245,6 +245,49 @@ def test_server_exclusion(*args):
         assert server_id in common.FILTERED_SERVER_ID
 
 
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_all_servers', return_value=common.ALL_SERVER_DETAILS)
+def test_server_exclusion_by_project(*args):
+    """
+    Exclude servers using regular expressions.
+    """
+    openstackCheck = OpenStackCheck("test", {
+        'keystone_server_url': 'http://10.0.2.15:5000',
+        'ssl_verify': False,
+        'blacklist_project_names': ["blacklist*"]
+    }, {}, instances=common.MOCK_CONFIG)
+
+    # Retrieve servers
+    openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
+    openstackCheck.filter_excluded_servers()
+    server_ids = openstackCheck.server_details_by_id
+    # Assert
+    # .. 2 out of 4 server ids filtered
+    assert len(server_ids) == 2
+
+    # Ensure the server IDs filtered are the ones expected
+    for server_id in server_ids:
+        assert server_id in common.FILTERED_BY_PROJ_SERVER_ID
+
+
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_all_servers', return_value=common.ALL_SERVER_DETAILS)
+def test_server_include_all_by_default(*args):
+    """
+    Exclude servers using regular expressions.
+    """
+    openstackCheck = OpenStackCheck("test", {
+        'keystone_server_url': 'http://10.0.2.15:5000',
+        'ssl_verify': False
+    }, {}, instances=common.MOCK_CONFIG)
+
+    # Retrieve servers
+    openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
+    openstackCheck.filter_excluded_servers()
+    server_ids = openstackCheck.server_details_by_id
+    # Assert
+    # .. 2 out of 4 server ids filtered
+    assert len(server_ids) == 4
+
+
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_all_network_ids', return_value=common.ALL_IDS)
 def test_network_exclusion(*args):
     """

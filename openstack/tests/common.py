@@ -7,6 +7,7 @@ EXCLUDED_NETWORK_IDS = ['server-1', 'other-.*']
 EXCLUDED_SERVER_IDS = ['server-2', 'other-.*']
 FILTERED_NETWORK_ID = 'server-2'
 FILTERED_SERVER_ID = 'server-1'
+FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
 
 EXAMPLE_AUTH_RESPONSE = {
     u'token': {
@@ -187,10 +188,10 @@ GOOD_USERS = [
 
 # .. server/network
 ALL_SERVER_DETAILS = {
-    "server-1": {"id": "server-1", "name": "server-name-1", "status": "ACTIVE"},
-    "server-2": {"id": "server-2", "name": "server-name-2", "status": "ACTIVE"},
-    "other-1": {"id": "other-1", "name": "server-name-other-1", "status": "ACTIVE"},
-    "other-2": {"id": "other-2", "name": "server-name-other-2", "status": "ACTIVE"}
+    "server-1": {"id": "server-1", "name": "server-name-1", "status": "ACTIVE", "project_name": "testproj"},
+    "server-2": {"id": "server-2", "name": "server-name-2", "status": "ACTIVE", "project_name": "testproj"},
+    "other-1": {"id": "other-1", "name": "server-name-other-1", "status": "ACTIVE", "project_name": "blacklist_1"},
+    "other-2": {"id": "other-2", "name": "server-name-other-2", "status": "ACTIVE", "project_name": "blacklist_2"}
 }
 
 # Example response from - https://developer.openstack.org/api-ref/compute/#list-servers-detailed

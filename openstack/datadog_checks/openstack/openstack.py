@@ -920,6 +920,8 @@ class OpenStackCheck(AgentCheck):
                     self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
 
     def filter_excluded_servers(self):
+        proj_list = set([])
+        servers_copy = copy.deepcopy(self.server_details_by_id)
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             for exclude_id_rule in self.exclude_server_id_rules:
@@ -927,7 +929,27 @@ class OpenStackCheck(AgentCheck):
                     if re.match(exclude_id_rule, server_id):
                         del self.server_details_by_id[server_id]
 
+        for server in self.server_details_by_id.iteritems():
+            proj_list.add(server[1].get('project_name'))
+
+        projects_filtered = pattern_filter(proj_list,
+                                           whitelist=self.include_project_name_rules,
+                                           blacklist=self.exclude_project_name_rules
+                                           )
+        for server in servers_copy.iteritems():
+            if server[1].get('project_name') not in projects_filtered:
+                # This may have already been deleted if the server belongs to both
+                # the project blacklist AND the excluded server id list
+                try:
+                    del self.server_details_by_id[server[0]]
+                except KeyError:
+                    self.log.debug("Server %s was already removed from the list", server[0])
+
     def get_project_name_from_id(self, tenant_id):
+        # [TODO]
+        # As we are dealing with a lot of servers/projects now, we should cache this mapping
+        # The overhead isn't large after the first check run because after the first run we only get
+        # the list of servers that changed state.
         url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
         self.log.debug("Project URL is %s", url)
         headers = {'X-Auth-Token': self.get_auth_token()}
@@ -1181,7 +1203,10 @@ class OpenStackCheck(AgentCheck):
 
             # Filter out the scopes/projects from the configured whitelist/blacklist
             proj_list = [scope.project_name for _, scope in scope_map.iteritems()]
-            scope_map_filtered = pattern_filter(proj_list, whitelist=self.include_project_name_rules, blacklist=self.exclude_project_name_rules)
+            scope_map_filtered = pattern_filter(proj_list,
+                                                whitelist=self.include_project_name_rules,
+                                                blacklist=self.exclude_project_name_rules
+                                                )
             scope_map_copy = copy.deepcopy(scope_map)
             for scope in scope_map_copy.iteritems():
                 if scope[0][0] not in scope_map_filtered:
