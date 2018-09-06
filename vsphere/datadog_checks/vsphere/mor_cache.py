@@ -87,6 +87,13 @@ class MorCache:
 
     def mors_batch(self, key, batch_size):
         """
+        Generator returning as many dictionaries containing `batch_size` Mor
+        objects as needed to iterate all the content of the cache. This has
+        to be iterated twice, like:
+
+            for batch in cache.mors_batch('key', 100):
+                for name, mor in batch:
+                    # use the Mor object here
         """
         with self._mor_lock:
             mors_dict = self._mor.get(key)

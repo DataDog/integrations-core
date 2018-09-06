@@ -737,7 +737,7 @@ class VSphereCheck(AgentCheck):
             self.log.debug("No Mor objects to process for instance '{}', skip...".format(i_key))
             return
 
-        self.log.debug("Collecting metrics for {} mors", n_mors)
+        self.log.debug("Collecting metrics for {} mors".format(n_mors))
 
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
         # If batch_size is 0, process everything at once
@@ -760,7 +760,7 @@ class VSphereCheck(AgentCheck):
             if query_specs:
                 self.pool.apply_async(self._collect_metrics_async, args=(instance, query_specs))
 
-        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:{}".format(instance.get('name'))] + custom_tags)
+        self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
         if not self.pool_started:
