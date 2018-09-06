@@ -8,9 +8,6 @@ init_config:
       # Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
       # os_host: my_hostname
 
-      # Nova API version to use - this check supports v2 and v2.1 (default)
-      # nova_api_version: 'v2.1'
-
       # IDs of projects to whitelist for monitoring (by default the agent will collect limit metrics from all projects)
       # Regex expressions for the project names are supported.
       # whitelist_project_names:
@@ -35,6 +32,9 @@ init_config:
       #    - network_1
       #    - other_.*
 
+      # Nova API version to use - this check supports v2 and v2.1 (default)
+      # nova_api_version: 'v2.1'
+
       # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
       # need to set to false when using self-signed certs
       # ssl_verify: true
@@ -55,6 +55,7 @@ instances:
           name: datadog
           domain:
               id: default
+
 
       # In some cases, the nova url is returned without the tenant id suffixed
       # e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<tenant_id>

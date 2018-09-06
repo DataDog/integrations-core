@@ -13,7 +13,7 @@ import simplejson as json
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
-
+from datadog_checks.utils.common import pattern_filter
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -552,8 +552,9 @@ class OpenStackCheck(AgentCheck):
         self.external_host_tags = {}
 
         self.exclude_network_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_network_ids', [])])
-
         self.exclude_server_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_server_ids', [])])
+        self.include_project_name_rules = set([re.compile(ex) for ex in init_config.get('whitelist_project_names', [])])
+        self.exclude_project_name_rules = set([re.compile(ex) for ex in init_config.get('blacklist_project_names', [])])
 
         skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies
@@ -761,36 +762,6 @@ class OpenStackCheck(AgentCheck):
         uptime_sec = uptime.split(',')[0]
 
         return {'loads': map(float, load_averages), 'uptime_sec': uptime_sec}
-
-    def get_all_hypervisor_ids(self, filter_by_host=None, collect_all_hypervisors=False):
-        nova_version = self.init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
-        if nova_version >= V21_NOVA_API_VERSION:
-            url = '{0}/os-hypervisors'.format(self.get_nova_endpoint())
-            headers = {'X-Auth-Token': self.get_auth_token()}
-
-            hypervisor_ids = []
-            try:
-                hv_list = self._make_request_with_auth_fallback(url, headers)
-                for hv in hv_list['hypervisors']:
-                    if filter_by_host and hv['hypervisor_hostname'] == filter_by_host \
-                       and not collect_all_hypervisors:
-                        # Assume one-one relationship between hypervisor and host, return the 1st found
-                        return [hv['id']]
-
-                    hypervisor_ids.append(hv['id'])
-            except Exception as e:
-                self.warning('Unable to get the list of all hypervisors: {0}'.format(str(e)))
-                raise e
-
-            return hypervisor_ids
-        else:
-            if not self.init_config.get("hypervisor_ids"):
-                self.warning(
-                    "Nova API v2 requires admin privileges to index hypervisors. "
-                    + "Please specify the hypervisor you wish to monitor under the `hypervisor_ids` section"
-                )
-                return []
-            return self.init_config.get("hypervisor_ids")
 
     def get_all_aggregate_hypervisors(self):
         url = '{0}/os-aggregates'.format(self.get_nova_endpoint())
@@ -1207,6 +1178,14 @@ class OpenStackCheck(AgentCheck):
             elif isinstance(instance_scope, OpenStackUnscoped):
                 scope_map.update(instance_scope.project_scope_map)
                 self._parent_scope = instance_scope
+
+            # Filter out the scopes/projects from the configured whitelist/blacklist
+            proj_list = [scope.project_name for _, scope in scope_map.iteritems()]
+            scope_map_filtered = pattern_filter(proj_list, whitelist=self.include_project_name_rules, blacklist=self.exclude_project_name_rules)
+            scope_map_copy = copy.deepcopy(scope_map)
+            for scope in scope_map_copy.iteritems():
+                if scope[0][0] not in scope_map_filtered:
+                    del scope_map[scope[0]]
 
             #  The scopes we iterate over should all be OpenStackProjectScope
             #  instances
