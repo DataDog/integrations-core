@@ -100,6 +100,10 @@ def test_get_version(check):
     db.cursor().fetchone.return_value = ['11beta3']
     assert check._get_version('beta_version', db) == [11, -1, 3]
 
+    # Test #unknown# style versions
+    db.cursor().fetchone.return_value = ['11nightly3']
+    assert check._get_version('unknown_version', db) == '11nightly3'
+
 
 def test_is_above(check):
     """
