@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 2.2.1 / 2018-09-06
+
+* [Fixed]  Gracefully handle errors when performing custom_queries. See [#2184](https://github.com/DataDog/integrations-core/pull/2184).
+* [Fixed] Gracefully handle failed version regex match. See [#2178](https://github.com/DataDog/integrations-core/pull/2178).
+
 ## 2.2.0 / 2018-09-04
 
 * [Added] Add number of "idle in transaction" transactions and open transactions. See [#2118](https://github.com/DataDog/integrations-core/pull/2118).
