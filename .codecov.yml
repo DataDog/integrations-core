@@ -1,5 +1,5 @@
 comment:
-  layout: "changes, files"
+  layout: "diff"
   behavior: default
   branches: null
 
