@@ -32,11 +32,11 @@ def test_set_mor(cache):
     cache.set_mor('foo_instance', 'mor_name', {'foo': 'bar'})
     assert 'foo' in cache._mor['foo_instance']['mor_name']
     # check the timestamp is set
-    last_seen = cache._mor['foo_instance']['mor_name']['last_seen']
-    assert last_seen > 0
+    creation_time = cache._mor['foo_instance']['mor_name']['creation_time']
+    assert creation_time > 0
     cache.set_mor('foo_instance', 'mor_name', {})
     time.sleep(.1)  # be sure timestamp is different
-    assert cache._mor['foo_instance']['mor_name']['last_seen'] > last_seen
+    assert cache._mor['foo_instance']['mor_name']['creation_time'] > creation_time
 
     with pytest.raises(KeyError):
         cache.set_mor('foo', 'mor', {})
@@ -115,9 +115,9 @@ def test_purge(cache):
     cache._mor['foo_instance'] = {}
     for i in xrange(3):
         # set last access to 0, these will be purged
-        cache._mor['foo_instance'][i] = {'last_seen': 0}
+        cache._mor['foo_instance'][i] = {'creation_time': 0}
     # this entry should stay
-    cache._mor['foo_instance']['hero'] = {'last_seen': time.time()}
+    cache._mor['foo_instance']['hero'] = {'creation_time': time.time()}
     # purge items older than 60 seconds
     cache.purge('foo_instance', 60)
     assert len(cache._mor['foo_instance']) == 1

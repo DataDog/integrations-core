@@ -82,7 +82,8 @@ class MorCache:
         Generator returning all the mors in the cache for the given instance key.
         """
         with self._mor_lock:
-            return self._mor.get(key, {}).iteritems()
+            for k, v in self._mor.get(key, {}).iteritems():
+                yield k, v
 
     def mors_batch(self, key, batch_size):
         """
