@@ -590,7 +590,7 @@ class VSphereCheck(AgentCheck):
         self.mor_cache.init_instance(i_key)
 
         if not self.mor_objects_queue.contains(i_key):
-            self.log.debug("Objects queue is not initialized yet for instance {}, skipping for this run".format(i_key))
+            self.log.debug("Objects queue is not initialized yet for instance {}, skipping processing".format(i_key))
             return
 
         for resource_type in RESOURCE_TYPE_METRICS:
