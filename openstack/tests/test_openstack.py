@@ -188,7 +188,7 @@ def test_ensure_auth_scope(aggregator):
         openstack_check._send_api_service_checks(scope, ['optional:tag1'])
         aggregator.assert_service_check(
             OpenStackCheck.IDENTITY_API_SC, status=AgentCheck.OK, tags=[
-                'optional:tag1', 'server:http://10.0.2.15:5000'])
+                'optional:tag1', 'keystone_server:http://10.0.2.15:5000'])
 
         # URLs are nonexistant, so return CRITICAL
         aggregator.assert_service_check(OpenStackCheck.COMPUTE_API_SC, status=AgentCheck.CRITICAL)
