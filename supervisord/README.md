@@ -50,7 +50,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
+Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -60,10 +60,10 @@ instances:
     host: localhost
     port: 9001
 
-# To collect from the socket instead
-# - name: supervisord0
-#   host: http://127.0.0.1
-#   socket: unix:///var/run//supervisor.sock
+ #To collect from the socket instead
+ #- name: supervisord0
+ #  host: http://127.0.0.1
+ #  socket: unix:///var/run//supervisor.sock
 ```
 
 Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
@@ -134,4 +134,5 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/supervisor/supervisorevent.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

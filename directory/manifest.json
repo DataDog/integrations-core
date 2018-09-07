@@ -1,21 +1,23 @@
 {
+  "categories": [
+    "os & system"
+  ],
+  "creates_events": false,
+  "display_name": "Directory",
+  "guid": "0c38c4ef-5266-4667-9fb1-de8f2b73708a",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "system.",
+  "metric_to_check": "system.disk.directory.file.bytes",
   "name": "directory",
-  "short_description": "The Directory integration helps monitoring and reporting metrics on files for a provided directory.",
+  "public_title": "Datadog-Directory Integration",
+  "short_description": "The Directory integration reports metrics on files for a provided directory",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "guid": "0c38c4ef-5266-4667-9fb1-de8f2b73708a",
-  "public_title": "Datadog-Directory Integration",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/directory/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

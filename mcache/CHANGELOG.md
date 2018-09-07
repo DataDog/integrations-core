@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 1.3.2 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.3.1 / 2018-06-20
 
 * [Fixed] Fix connection to unix socket for new binary. See [#1755](https://github.com/DataDog/integrations-core/pull/1755).

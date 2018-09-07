@@ -18,6 +18,7 @@ DELETE_IN_ROOT = {
     'build',
     'dist',
     '*.egg-info',
+    '.benchmarks'
 }
 DELETE_EVERYWHERE = {
     '__pycache__',
@@ -62,13 +63,18 @@ def find_globs(walker, patterns, matches):
         matches.update(sub_files)
 
 
-def clean_package(d, detect_project=True):
+def clean_package(d, detect_project=True, force_clean_root=False):
     removed = set()
     patterns = ALL_PATTERNS.copy()
+
+    removed_root_dirs = set()
     if detect_project:
         patterns.remove('*.egg-info')
 
-    removed_root_dirs = set()
+    patterns_to_remove = DELETE_EVERYWHERE
+    if force_clean_root:
+        patterns_to_remove = ALL_PATTERNS
+
     for pattern in patterns:
         for path in iglob(join(d, pattern)):
             removed.add(path)
@@ -76,7 +82,7 @@ def clean_package(d, detect_project=True):
                 removed_root_dirs.add(path)
                 find_globs(os.walk(path), DELETE_EVERYWHERE, removed)
 
-    find_globs(generate_walker(d, detect_project, removed_root_dirs), DELETE_EVERYWHERE, removed)
+    find_globs(generate_walker(d, detect_project, removed_root_dirs), patterns_to_remove, removed)
 
     removed = sorted(removed)
 

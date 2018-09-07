@@ -16,7 +16,7 @@ The Fluentd check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][18] to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample fluentd.d/conf.yaml][2] for all available configuration options.
 
 #### Prepare Fluentd
@@ -52,7 +52,7 @@ In your fluentd configuration file, add a `monitor_agent` source:
 
 #### Log Collection
 
-As long as you can forward your FluentD logs over tcp/udp to a specific port, you can use that approach to forward your FluentD logs to your Datadog agent. But another option is to use the [Datadog FluentD plugin][10] to forward the logs directly from FluentD to your Datadog account. 
+As long as you can forward your FluentD logs over tcp/udp to a specific port, you can use that approach to forward your FluentD logs to your Datadog agent. But another option is to use the [Datadog FluentD plugin][10] to forward the logs directly from FluentD to your Datadog account. 
 
 ##### Add metadata to your logs
 
@@ -66,8 +66,9 @@ Add the `ddsource` attribute with [the name of the log integration][16] in your 
 Setup Example:
 
 ```
-# Match events tagged with "datadog.**" and
-# send them to Datadog
+  # Match events tagged with "datadog.**" and
+  # send them to Datadog
+
 <match datadog.**>
 
   @type datadog
@@ -142,7 +143,7 @@ Need help? Contact [Datadog Support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/monitor-fluentd-datadog/
-[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/fluentd/snapshot-fluentd.png
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
 [10]: http://www.rubydoc.info/gems/fluent-plugin-datadog/
 [11]: https://docs.datadoghq.com/logs/#edit-reserved-attributes
 [13]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
@@ -150,3 +151,4 @@ Need help? Contact [Datadog Support][7].
 [15]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/
 [16]: https://docs.datadoghq.com/integrations/#cat-log-collection
 [17]: https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter
+[18]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

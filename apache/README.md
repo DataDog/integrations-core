@@ -1,6 +1,6 @@
 # Agent Check: Apache Web Server
 
-![Apache Graph][12]
+![Apache Dashboard][12]
 
 ## Overview
 
@@ -17,7 +17,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 ### Configuration
 
-1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][13] to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample apache.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -50,7 +50,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `apache.yaml` file to start collecting your Apache Logs:
+2. Add this configuration block to your `apache.d/conf.yaml` file to start collecting your Apache Logs:
 
     ```yaml
       logs:
@@ -115,4 +115,5 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 [9]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/
 [10]: https://www.datadoghq.com/blog/collect-apache-performance-metrics/
 [11]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/
-[12]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/apache/apachegraph.png
+[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
+[13]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

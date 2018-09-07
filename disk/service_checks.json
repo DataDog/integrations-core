@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "6.5.0",
+        "integration":"disk",
+        "check": "disk.service_check_rw",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["device"],
+        "name": "Disk read_write",
+        "description": "Returns `CRITICAL` if filesystem is in read-only mode."
+    }
+]

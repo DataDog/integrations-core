@@ -1,5 +1,34 @@
 # Section used for global vsphere check config
 init_config:
+  # This value is used to determine the number of MORs the check will retrieve metrics for in the same API call
+  # If too many API calls are made by the check, consider increasing this value
+  # If payloads are too large, consider decreasing this value
+  # A value <= 0 means unlimited: it will make one query for all the monitored objects
+  # Optional, default to 50
+  # batch_morlist_size: 50
+
+  # This value is used to determine the maximum number of MORs returned by vCenter in the same API call,
+  # when exploring the infrastructure
+  # If too many API calls are made by the check, consider increasing this value
+  # If payloads are too large, consider decreasing this value
+  # A value <= 0 means unlimited: it will query for the maximum number of objects at once
+  # Optional, default to 500
+  # batch_property_collector_size: 500
+
+  # Number of seconds between each discovering and caching of your vSphere environment
+  # Consider increasing this value if your environment is large, as caching can take some time to complete
+  # Optional, default to 180 seconds
+  # refresh_morlist_interval: 180
+
+  # Number of seconds to wait before an object is considered deleted from your vSphere environment and removed from the cache
+  # This value should be higher than refresh_morlist_interval.
+  # Optional, default to 2 * refresh_morlist_interval
+  # clean_morlist_interval: 360
+
+  # Number of seconds between each refresh of the metrics metadata cache
+  # Optional, default to 600 seconds
+  # refresh_metrics_metadata_interval: 600
+
 
 # Define your list of instances here
 # each item is a vCenter instance you want to connect to and

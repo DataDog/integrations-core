@@ -1,5 +1,10 @@
 # CHANGELOG - disk
 
+## 1.3.0 / 2018-09-04
+
+* [Added] Adding optional service_check_rw parameter to check for read-only filesystem. See [#2086](https://github.com/DataDog/integrations-core/pull/2086). Thanks [bberezov](https://github.com/bberezov).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.2.0 / 2018-03-23
 
 * [FEATURE] Adds custom tag support

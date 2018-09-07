@@ -4,7 +4,7 @@
 
 This check watches for build-related events and sends them to Datadog.
 
-Unlike most Agent checks, this one doesn't collect any metrics—just events.
+Unlike most Agent checks, this one doesn't collect any metrics-just events.
 
 ## Setup
 ### Installation
@@ -16,7 +16,7 @@ The Teamcity check is included in the [Datadog Agent][1] package, so you don't n
 
 Follow [Teamcity's documentation][2] to enable Guest Login.
 
-Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample teamcity.d/conf.yaml][3] for all available configuration options:
+Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][8]. See the [sample teamcity.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -24,14 +24,14 @@ init_config:
 instances:
   - name: My Website
     server: teamcity.mycompany.com
-#   server: user:password@teamcity.mycompany.com # if you set basic_http_authentication to true
-#   basic_http_authentication: true # default is false
+ #  server: user:password@teamcity.mycompany.com # if you set basic_http_authentication to true
+ #  basic_http_authentication: true # default is false
     build_configuration: MyWebsite_Deploy # the internal build ID of the build configuration you wish to track
-#   host_affected: msicalweb6 # defaults to hostname of the Agent's host
-#   is_deployment: true       # causes events to use the word 'deployment' in their messaging
-#   ssl_validation: false     # default is true
-#   tags:                     # add custom tags to events
-#   - test
+ #  host_affected: msicalweb6 # defaults to hostname of the Agent's host
+ #  is_deployment: true       # causes events to use the word 'deployment' in their messaging
+ #  ssl_validation: false     # default is true
+ #  tags:                     # add custom tags to events
+ #    - test
 ```
 
 Add an item like the above to `instances` for each build configuration you want to track.
@@ -67,3 +67,4 @@ Need help? Contact [Datadog Support][6].
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/
+[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

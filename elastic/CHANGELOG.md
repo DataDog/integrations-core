@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 1.7.1 / 2018-09-04
+
+* [Fixed] Add thread write queue to fix Elasticsearch 6.3.x compatibility. See [#1943](https://github.com/DataDog/integrations-core/pull/1943).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.7.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).

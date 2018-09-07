@@ -1,11 +1,21 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "creates_events": "true",
-  "manifest_version": "1.0.0",
-  "name": "mongo",
-  "display_name": "Mongo",
+  "aliases": [
+    "/integrations/mongodb"
+  ],
+  "categories": [
+    "data store",
+    "log collection"
+  ],
   "creates_events": true,
+  "display_name": "MongoDB",
+  "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "mongodb.",
   "metric_to_check": "mongodb.connections.available",
+  "name": "mongo",
+  "public_title": "Datadog-MongoDB Integration",
   "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
   "support": "core",
   "supported_os": [
@@ -13,17 +23,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c",
-  "public_title": "Datadog-MongoDB Integration",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mongo/",
-  "is_public": true,
-  "has_logo": true,
-  "aliases": [
-    "/integrations/mongodb"
-  ]
+  "type": "check"
 }

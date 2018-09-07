@@ -17,6 +17,15 @@ __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 
+CI_IDENTIFIERS = (
+    'APPVEYOR_',
+    'TRAVIS_',
+)
+
+
+def running_on_ci():
+    return any(ev.startswith(CI_IDENTIFIERS) for ev in os.environ)
+
 
 if PY3:
     def write_file(file, contents, encoding='utf-8'):
@@ -34,6 +43,16 @@ else:
     def write_file_lines(file, lines, encoding='utf-8'):
         with open(file, 'w', encoding=encoding) as f:
             f.writelines(text_type(line) for line in lines)
+
+
+def write_file_binary(file, contents):
+    with open(file, 'wb') as f:
+        f.write(contents)
+
+
+def read_file_binary(file):
+    with open(file, 'rb') as f:
+        return f.read()
 
 
 def read_file(file, encoding='utf-8'):
@@ -65,6 +84,10 @@ def path_exists(p):
     return os.path.exists(p)
 
 
+def path_join(path, *paths):
+    return os.path.join(path, *paths)
+
+
 def ensure_dir_exists(d):
     if not dir_exists(d):
         os.makedirs(d)
@@ -78,6 +101,18 @@ def create_file(fname):
     ensure_parent_dir_exists(fname)
     with open(fname, 'a'):
         os.utime(fname, None)
+
+
+def ensure_bytes(s):
+    if not isinstance(s, bytes):
+        s = s.encode('utf-8')
+    return s
+
+
+def ensure_unicode(s):
+    if isinstance(s, bytes):
+        s = s.decode('utf-8')
+    return s
 
 
 def download_file(url, fname):
@@ -100,7 +135,7 @@ def copy_path(path, d):
 
 def remove_path(path):
     try:
-        shutil.rmtree(path, ignore_errors=True)
+        shutil.rmtree(path, ignore_errors=False)
     except (FileNotFoundError, OSError):
         try:
             os.remove(path)

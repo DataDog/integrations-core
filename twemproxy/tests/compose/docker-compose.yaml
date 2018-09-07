@@ -1,0 +1,47 @@
+version: '2'
+services:
+
+  redis1:
+    image: redis
+    ports:
+      - "6101:6379"
+
+  redis2:
+    image: redis
+    ports:
+      - "6102:6379"
+
+
+  etcd0:
+    image: quay.io/coreos/etcd:v2.2.0
+    volumes:
+      - /usr/share/ca-certificates/:/etc/ssl/certs
+    ports:
+       - 4001:4001
+       - 2380:2380
+       - 2379:2379
+    command: |
+            -name etcd0
+            -advertise-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001,http://etcd0:2379,http://etcd0:4001
+            -listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001
+            -initial-advertise-peer-urls http://0.0.0.0:2380
+            -listen-peer-urls http://0.0.0.0:2380
+            -initial-cluster-token etcd-cluster-1
+            -initial-cluster etcd0=http://0.0.0.0:2380
+            -initial-cluster-state new
+
+  twemproxy:
+    image: jgoodall/twemproxy
+    ports:
+      - 6100:6100
+      - 6222:6222
+    volumes:
+      - ${WAIT_FOR_IT_SCRIPT_PATH}:/wait-for-it.sh
+      - ${SETUP_SCRIPT_PATH}:/setup.sh
+    command: ["bash", "-c", "chmod +x /wait-for-it.sh && /wait-for-it.sh etcd0:4001 -t 120 -- bash /setup.sh"]
+    environment:
+      - ETCD_HOST=etcd0:4001
+    depends_on:
+      - redis1
+      - redis2
+      - etcd0

@@ -23,6 +23,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 
 
 REQUIRES = [
+    'coverage>=4.5.1',
     'mock',
     'pytest',
     'pytest-benchmark',
@@ -83,7 +84,7 @@ setup(
     },
 
     entry_points={
-        'pytest11': ['datadog_checks = datadog_checks.dev.fixtures.plugin'],
+        'pytest11': ['datadog_checks = datadog_checks.dev.plugin.plugin'],
         'console_scripts': [
             'ddev = datadog_checks.dev.tooling.cli:ddev',
         ],

@@ -11,7 +11,7 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
 
 ### Configuration
 
-1. Edit the `kyototycoon.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `kyototycoon.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][8].
     See the [sample kyototycoon.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -61,3 +61,4 @@ Need help? Contact [Datadog Support][5].
 [4]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv
 [5]: https://docs.datadoghq.com/help/
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

@@ -7,29 +7,34 @@ init_config:
 instances:
   - api_url: http://localhost:8200/v1
 
-  #   The default configuration does not require a client token.
-  #   client_token: TOKEN
+  # The default configuration does not require a client token.
+  # client_token: TOKEN
 
-  #   Whether or not this instance should report cluster leader change events.
-  #   detect_leader: false
+  # Whether or not this instance should report cluster leader change events.
+  # detect_leader: false
 
-  #   tags:
-  #     - instance:foo
+  # tags:
+  #   - instance:foo
 
-  #   If the API endpoint is behind basic auth:
-  #   username: USERNAME
-  #   password: PASSWORD
+  # If the API endpoint is behind basic auth:
+  # username: USERNAME
+  # password: PASSWORD
 
-  #   The (optional) ssl_verify parameter will instruct the check to validate SSL
-  #   certificates when connecting to Vault. Defaulting to true, set to false if
-  #   you want to disable SSL certificate validation.
+  # The (optional) ssl_verify parameter will instruct the check to validate SSL
+  # certificates when connecting to Vault. Defaulting to true, set to false if
+  # you want to disable SSL certificate validation.
   #
-  #   ssl_verify: true
-
-  #   The (optional) skip_proxy parameter will bypass any proxy
-  #   settings enabled and attempt to reach Vault directly.
+  # ssl_verify: true
   #
-  #   skip_proxy: false
+  # If you disable the ssl_verify above, you will still receive security
+  # warnings in logs. You can disable those too using the flag below.
+  #
+  # ssl_ignore_warning: false
 
-  #   If you need to specify a custom timeout in seconds for API access (default is 20):
-  #   timeout: 20
+  # The (optional) skip_proxy parameter will bypass any proxy
+  # settings enabled and attempt to reach Vault directly.
+  #
+  # skip_proxy: false
+
+  # If you need to specify a custom timeout in seconds for API access (default is 20):
+  # timeout: 20

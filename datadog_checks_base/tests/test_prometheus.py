@@ -4,9 +4,11 @@
 import logging
 import os
 
-import pytest
 import mock
+import pytest
 import requests
+from six import iteritems, iterkeys
+from six.moves import range
 
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import parse_metric_family, metrics_pb2
@@ -216,11 +218,11 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
         _h = _histo.metric.add()
         _h.histogram.sample_count = _data['ct']
         _h.histogram.sample_sum = _data['sum']
-        for k, v in _data['lbl'].items():
+        for k, v in list(iteritems(_data['lbl'])):
             _lh = _h.label.add()
             _lh.name = k
             _lh.value = v
-        for _b in sorted(_data['buckets'].iterkeys()):
+        for _b in sorted(iterkeys(_data['buckets'])):
             _subh = _h.histogram.bucket.add()
             _subh.upper_bound = _b
             _subh.cumulative_count = _data['buckets'][_b]
@@ -313,13 +315,11 @@ def test_poll_protobuf(mocked_prometheus_check, bin_data):
         status_code=200,
         content=bin_data,
         headers={'Content-Type': protobuf_content_type})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    response = check.poll("http://fake.endpoint:10055/metrics")
-    messages = list(check.parse_metric_family(response))
-    assert len(messages) == 61
-    assert messages[-1].name == 'process_virtual_memory_bytes'
-    p.stop()
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        response = check.poll("http://fake.endpoint:10055/metrics")
+        messages = list(check.parse_metric_family(response))
+        assert len(messages) == 61
+        assert messages[-1].name == 'process_virtual_memory_bytes'
 
 
 def test_poll_text_plain(mocked_prometheus_check, text_data):
@@ -329,14 +329,12 @@ def test_poll_text_plain(mocked_prometheus_check, text_data):
         status_code=200,
         iter_lines=lambda **kwargs: text_data.split("\n"),
         headers={'Content-Type': "text/plain"})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    response = check.poll("http://fake.endpoint:10055/metrics")
-    messages = list(check.parse_metric_family(response))
-    messages.sort(key=lambda x: x.name)
-    assert len(messages) == 40
-    assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
-    p.stop()
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        response = check.poll("http://fake.endpoint:10055/metrics")
+        messages = list(check.parse_metric_family(response))
+        messages.sort(key=lambda x: x.name)
+        assert len(messages) == 40
+        assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
 
 
 def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
@@ -368,7 +366,14 @@ def test_submit_gauge_with_labels_and_hostname_override(mocked_prometheus_check,
     check.gauge.assert_called_with('prometheus.process.vm.bytes', 39211008.0,
                                    ['my_1st_label:my_1st_label_value', 'node:foo'],
                                    hostname="foo")
-
+    # also test with a hostname suffix
+    check2 = mocked_prometheus_check
+    check2.label_to_hostname = 'node'
+    check2.label_to_hostname_suffix = '-cluster-blue'
+    check2._submit(check2.metrics_mapper[ref_gauge.name], ref_gauge)
+    check2.gauge.assert_called_with('prometheus.process.vm.bytes', 39211008.0,
+                                   ['my_1st_label:my_1st_label_value', 'node:foo'],
+                                   hostname="foo-cluster-blue")
 
 def test_submit_gauge_with_labels_and_hostname_already_overridden(mocked_prometheus_check, ref_gauge):
     """ submitting metrics that contain labels should result in tags on the gauge call """
@@ -977,7 +982,7 @@ def test_parse_two_histograms_with_label(p_check):
     assert expected_etcd_metric.help == current_metric.help
     assert expected_etcd_metric.name == current_metric.name
     assert expected_etcd_metric.type == current_metric.type
-    for idx in xrange(len(expected_etcd_metric.metric)):
+    for idx in range(len(expected_etcd_metric.metric)):
         assert expected_etcd_metric.metric[idx].summary == current_metric.metric[idx].summary
         for label in expected_etcd_metric.metric[idx].label:
             assert label in current_metric.metric[idx].label
@@ -1147,7 +1152,7 @@ def test_parse_two_summaries_with_labels(p_check):
     assert expected_etcd_metric.help == current_metric.help
     assert expected_etcd_metric.name == current_metric.name
     assert expected_etcd_metric.type == current_metric.type
-    for idx in xrange(len(expected_etcd_metric.metric)):
+    for idx in range(len(expected_etcd_metric.metric)):
         assert expected_etcd_metric.metric[idx].summary == current_metric.metric[idx].summary
         for label in expected_etcd_metric.metric[idx].label:
             assert label in current_metric.metric[idx].label
@@ -1212,167 +1217,165 @@ def test_label_joins(sorted_tags_check):
         status_code=200,
         iter_lines=lambda **kwargs: text_data.split("\n"),
         headers={'Content-Type': "text/plain"})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    check = sorted_tags_check
-    check.NAMESPACE = 'ksm'
-    check.label_joins = {
-        'kube_pod_info': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['node', 'pod_ip']
-        },
-        'kube_deployment_labels': {
-            'label_to_match': 'deployment',
-            'labels_to_get': ['label_addonmanager_kubernetes_io_mode', 'label_k8s_app', 'label_kubernetes_io_cluster_service']
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check = sorted_tags_check
+        check.NAMESPACE = 'ksm'
+        check.label_joins = {
+            'kube_pod_info': {
+                'label_to_match': 'pod',
+                'labels_to_get': ['node', 'pod_ip']
+            },
+            'kube_deployment_labels': {
+                'label_to_match': 'deployment',
+                'labels_to_get': ['label_addonmanager_kubernetes_io_mode', 'label_k8s_app', 'label_kubernetes_io_cluster_service']
+            }
         }
-    }
 
-    check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready',
-                            'kube_pod_status_scheduled': 'pod.scheduled',
-                            'kube_deployment_status_replicas': 'deploy.replicas.available'}
+        check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready',
+                                'kube_pod_status_scheduled': 'pod.scheduled',
+                                'kube_deployment_status_replicas': 'deploy.replicas.available'}
 
-    check.gauge = mock.MagicMock()
-    # dry run to build mapping
-    check.process("http://fake.endpoint:10055/metrics")
-    # run with submit
-    check.process("http://fake.endpoint:10055/metrics")
+        check.gauge = mock.MagicMock()
+        # dry run to build mapping
+        check.process("http://fake.endpoint:10055/metrics")
+        # run with submit
+        check.process("http://fake.endpoint:10055/metrics")
 
-    # check a bunch of metrics
-    check.gauge.assert_has_calls([
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:event-exporter-v0.1.7-958884745-qgnbw',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'pod_ip:11.32.3.14']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
+        # check a bunch of metrics
+        check.gauge.assert_has_calls([
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:event-exporter-v0.1.7-958884745-qgnbw',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.32.3.14']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.132.0.7']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-z348z',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
+                    'pod_ip:11.132.0.14']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:heapster-v1.4.3-2027615481-lmjm5',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
+                    'pod_ip:11.32.5.7']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:kube-dns-3092422022-lvrmx',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.32.3.10']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:kube-dns-3092422022-x0tjx',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.32.3.9']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:kube-dns-autoscaler-97162954-mf6d3',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
+                    'pod_ip:11.32.5.6']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:kube-proxy-gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.132.0.7']), hostname=None),
+            mock.call('ksm.pod.scheduled', 1.0,
+                sorted(['pod:ungaged-panther-kube-state-metrics-3918010230-64xwc',
+                    'namespace:default',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
+                    'pod_ip:11.32.5.45']), hostname=None),
+            mock.call('ksm.pod.scheduled', 1.0,
+                sorted(['pod:event-exporter-v0.1.7-958884745-qgnbw',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.32.3.14']), hostname=None),
+            mock.call('ksm.pod.scheduled', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
                 'namespace:kube-system',
                 'condition:true',
                 'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
                 'pod_ip:11.132.0.7']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-z348z',
+            mock.call('ksm.pod.scheduled', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-z348z',
                 'namespace:kube-system',
                 'condition:true',
                 'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
                 'pod_ip:11.132.0.14']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:heapster-v1.4.3-2027615481-lmjm5',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-                'pod_ip:11.32.5.7']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:kube-dns-3092422022-lvrmx',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'pod_ip:11.32.3.10']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:kube-dns-3092422022-x0tjx',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'pod_ip:11.32.3.9']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:kube-dns-autoscaler-97162954-mf6d3',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-                'pod_ip:11.32.5.6']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:kube-proxy-gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'pod_ip:11.132.0.7']), hostname=None),
-        mock.call('ksm.pod.scheduled', 1.0,
-            sorted(['pod:ungaged-panther-kube-state-metrics-3918010230-64xwc',
-                'namespace:default',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-                'pod_ip:11.32.5.45']), hostname=None),
-        mock.call('ksm.pod.scheduled', 1.0,
-            sorted(['pod:event-exporter-v0.1.7-958884745-qgnbw',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'pod_ip:11.32.3.14']), hostname=None),
-        mock.call('ksm.pod.scheduled', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
-            'namespace:kube-system',
-            'condition:true',
-            'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.132.0.7']), hostname=None),
-        mock.call('ksm.pod.scheduled', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-z348z',
-            'namespace:kube-system',
-            'condition:true',
-            'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-            'pod_ip:11.132.0.14']), hostname=None),
-        mock.call('ksm.pod.scheduled', 1.0,
-            sorted(['pod:heapster-v1.4.3-2027615481-lmjm5',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-                'pod_ip:11.32.5.7']), hostname=None),
-        mock.call('ksm.pod.scheduled', 1.0,
-            sorted(['pod:kube-dns-3092422022-lvrmx',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'pod_ip:11.32.3.10']), hostname=None),
-        mock.call('ksm.pod.scheduled', 1.0,
-            sorted(['pod:kube-dns-3092422022-x0tjx',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'pod_ip:11.32.3.9']), hostname=None),
-        mock.call('ksm.deploy.replicas.available', 1.0,
-            sorted(['namespace:kube-system',
-                'deployment:event-exporter-v0.1.7',
-                'label_k8s_app:event-exporter',
-                'label_addonmanager_kubernetes_io_mode:Reconcile',
-                'label_kubernetes_io_cluster_service:true']), hostname=None),
-        mock.call('ksm.deploy.replicas.available', 1.0,
-            sorted(['namespace:kube-system',
-                'deployment:heapster-v1.4.3',
-                'label_k8s_app:heapster',
-                'label_addonmanager_kubernetes_io_mode:Reconcile',
-                'label_kubernetes_io_cluster_service:true']), hostname=None),
-        mock.call('ksm.deploy.replicas.available', 2.0,
-            sorted(['namespace:kube-system',
-                'deployment:kube-dns',
-                'label_kubernetes_io_cluster_service:true',
-                'label_addonmanager_kubernetes_io_mode:Reconcile',
-                'label_k8s_app:kube-dns']), hostname=None),
-        mock.call('ksm.deploy.replicas.available', 1.0,
-            sorted(['namespace:kube-system',
-                'deployment:kube-dns-autoscaler',
-                'label_kubernetes_io_cluster_service:true',
-                'label_addonmanager_kubernetes_io_mode:Reconcile',
-                'label_k8s_app:kube-dns-autoscaler']), hostname=None),
-        mock.call('ksm.deploy.replicas.available', 1.0,
-            sorted(['namespace:kube-system',
-                'deployment:kubernetes-dashboard',
-                'label_kubernetes_io_cluster_service:true',
-                'label_addonmanager_kubernetes_io_mode:Reconcile',
-                'label_k8s_app:kubernetes-dashboard']), hostname=None),
-        mock.call('ksm.deploy.replicas.available', 1.0,
-            sorted(['namespace:kube-system',
-                'deployment:l7-default-backend',
-                'label_k8s_app:glbc',
-                'label_addonmanager_kubernetes_io_mode:Reconcile',
-                'label_kubernetes_io_cluster_service:true']), hostname=None),
-        mock.call('ksm.deploy.replicas.available', 1.0,
-            sorted(['namespace:kube-system',
-                'deployment:tiller-deploy']), hostname=None),
-        mock.call('ksm.deploy.replicas.available', 1.0,
-            sorted(['namespace:default',
-                'deployment:ungaged-panther-kube-state-metrics']), hostname=None)
-    ], any_order=True)
-    p.stop()
+            mock.call('ksm.pod.scheduled', 1.0,
+                sorted(['pod:heapster-v1.4.3-2027615481-lmjm5',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
+                    'pod_ip:11.32.5.7']), hostname=None),
+            mock.call('ksm.pod.scheduled', 1.0,
+                sorted(['pod:kube-dns-3092422022-lvrmx',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.32.3.10']), hostname=None),
+            mock.call('ksm.pod.scheduled', 1.0,
+                sorted(['pod:kube-dns-3092422022-x0tjx',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.32.3.9']), hostname=None),
+            mock.call('ksm.deploy.replicas.available', 1.0,
+                sorted(['namespace:kube-system',
+                    'deployment:event-exporter-v0.1.7',
+                    'label_k8s_app:event-exporter',
+                    'label_addonmanager_kubernetes_io_mode:Reconcile',
+                    'label_kubernetes_io_cluster_service:true']), hostname=None),
+            mock.call('ksm.deploy.replicas.available', 1.0,
+                sorted(['namespace:kube-system',
+                    'deployment:heapster-v1.4.3',
+                    'label_k8s_app:heapster',
+                    'label_addonmanager_kubernetes_io_mode:Reconcile',
+                    'label_kubernetes_io_cluster_service:true']), hostname=None),
+            mock.call('ksm.deploy.replicas.available', 2.0,
+                sorted(['namespace:kube-system',
+                    'deployment:kube-dns',
+                    'label_kubernetes_io_cluster_service:true',
+                    'label_addonmanager_kubernetes_io_mode:Reconcile',
+                    'label_k8s_app:kube-dns']), hostname=None),
+            mock.call('ksm.deploy.replicas.available', 1.0,
+                sorted(['namespace:kube-system',
+                    'deployment:kube-dns-autoscaler',
+                    'label_kubernetes_io_cluster_service:true',
+                    'label_addonmanager_kubernetes_io_mode:Reconcile',
+                    'label_k8s_app:kube-dns-autoscaler']), hostname=None),
+            mock.call('ksm.deploy.replicas.available', 1.0,
+                sorted(['namespace:kube-system',
+                    'deployment:kubernetes-dashboard',
+                    'label_kubernetes_io_cluster_service:true',
+                    'label_addonmanager_kubernetes_io_mode:Reconcile',
+                    'label_k8s_app:kubernetes-dashboard']), hostname=None),
+            mock.call('ksm.deploy.replicas.available', 1.0,
+                sorted(['namespace:kube-system',
+                    'deployment:l7-default-backend',
+                    'label_k8s_app:glbc',
+                    'label_addonmanager_kubernetes_io_mode:Reconcile',
+                    'label_kubernetes_io_cluster_service:true']), hostname=None),
+            mock.call('ksm.deploy.replicas.available', 1.0,
+                sorted(['namespace:kube-system',
+                    'deployment:tiller-deploy']), hostname=None),
+            mock.call('ksm.deploy.replicas.available', 1.0,
+                sorted(['namespace:default',
+                    'deployment:ungaged-panther-kube-state-metrics']), hostname=None)
+        ], any_order=True)
 
 
 def test_label_joins_gc(sorted_tags_check):
@@ -1385,51 +1388,48 @@ def test_label_joins_gc(sorted_tags_check):
         status_code=200,
         iter_lines=lambda **kwargs: text_data.split("\n"),
         headers={'Content-Type': "text/plain"})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    check = sorted_tags_check
-    check.NAMESPACE = 'ksm'
-    check.label_joins = {
-        'kube_pod_info': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['node', 'pod_ip']
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check = sorted_tags_check
+        check.NAMESPACE = 'ksm'
+        check.label_joins = {
+            'kube_pod_info': {
+                'label_to_match': 'pod',
+                'labels_to_get': ['node', 'pod_ip']
+            }
         }
-    }
-    check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
-    check.gauge = mock.MagicMock()
-    # dry run to build mapping
-    check.process("http://fake.endpoint:10055/metrics")
-    # run with submit
-    check.process("http://fake.endpoint:10055/metrics")
-    # check a bunch of metrics
-    check.gauge.assert_has_calls([
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-                'pod_ip:11.132.0.7']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-z348z',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-                'pod_ip:11.132.0.14']), hostname=None),
-    ], any_order=True)
-    assert 15 == len(check._label_mapping['pod'])
-    text_data = text_data.replace('dd-agent-62bgh', 'dd-agent-1337')
-    p.stop()
+        check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
+        check.gauge = mock.MagicMock()
+        # dry run to build mapping
+        check.process("http://fake.endpoint:10055/metrics")
+        # run with submit
+        check.process("http://fake.endpoint:10055/metrics")
+        # check a bunch of metrics
+        check.gauge.assert_has_calls([
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+                    'pod_ip:11.132.0.7']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-z348z',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
+                    'pod_ip:11.132.0.14']), hostname=None),
+        ], any_order=True)
+        assert 15 == len(check._label_mapping['pod'])
+        text_data = text_data.replace('dd-agent-62bgh', 'dd-agent-1337')
+
     mock_response = mock.MagicMock(
         status_code=200,
         iter_lines=lambda **kwargs: text_data.split("\n"),
         headers={'Content-Type': "text/plain"})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    check.process("http://fake.endpoint:10055/metrics")
-    assert 'dd-agent-1337' in check._label_mapping['pod']
-    assert 'dd-agent-62bgh' not in check._label_mapping['pod']
-    assert 15 == len(check._label_mapping['pod'])
-    p.stop()
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check.process("http://fake.endpoint:10055/metrics")
+        assert 'dd-agent-1337' in check._label_mapping['pod']
+        assert 'dd-agent-62bgh' not in check._label_mapping['pod']
+        assert 15 == len(check._label_mapping['pod'])
 
 
 def test_label_joins_missconfigured(sorted_tags_check):
@@ -1442,36 +1442,34 @@ def test_label_joins_missconfigured(sorted_tags_check):
         status_code=200,
         iter_lines=lambda **kwargs: text_data.split("\n"),
         headers={'Content-Type': "text/plain"})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    check = sorted_tags_check
-    check.NAMESPACE = 'ksm'
-    check.label_joins = {
-        'kube_pod_info': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['node', 'not_existing']
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check = sorted_tags_check
+        check.NAMESPACE = 'ksm'
+        check.label_joins = {
+            'kube_pod_info': {
+                'label_to_match': 'pod',
+                'labels_to_get': ['node', 'not_existing']
+            }
         }
-    }
-    check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
-    check.gauge = mock.MagicMock()
-    # dry run to build mapping
-    check.process("http://fake.endpoint:10055/metrics")
-    # run with submit
-    check.process("http://fake.endpoint:10055/metrics")
-    # check a bunch of metrics
-    check.gauge.assert_has_calls([
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-z348z',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z']), hostname=None),
-    ], any_order=True)
-    p.stop()
+        check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
+        check.gauge = mock.MagicMock()
+        # dry run to build mapping
+        check.process("http://fake.endpoint:10055/metrics")
+        # run with submit
+        check.process("http://fake.endpoint:10055/metrics")
+        # check a bunch of metrics
+        check.gauge.assert_has_calls([
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-z348z',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z']), hostname=None),
+        ], any_order=True)
 
 
 def test_label_join_not_existing(sorted_tags_check):
@@ -1484,34 +1482,32 @@ def test_label_join_not_existing(sorted_tags_check):
         status_code=200,
         iter_lines=lambda **kwargs: text_data.split("\n"),
         headers={'Content-Type': "text/plain"})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    check = sorted_tags_check
-    check.NAMESPACE = 'ksm'
-    check.label_joins = {
-        'kube_pod_info': {
-            'label_to_match': 'not_existing',
-            'labels_to_get': ['node', 'pod_ip']
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check = sorted_tags_check
+        check.NAMESPACE = 'ksm'
+        check.label_joins = {
+            'kube_pod_info': {
+                'label_to_match': 'not_existing',
+                'labels_to_get': ['node', 'pod_ip']
+            }
         }
-    }
-    check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
-    check.gauge = mock.MagicMock()
-    # dry run to build mapping
-    check.process("http://fake.endpoint:10055/metrics")
-    # run with submit
-    check.process("http://fake.endpoint:10055/metrics")
-    # check a bunch of metrics
-    check.gauge.assert_has_calls([
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
-                'namespace:kube-system',
-                'condition:true']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-z348z',
-                'namespace:kube-system',
-                'condition:true']), hostname=None),
-    ], any_order=True)
-    p.stop()
+        check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
+        check.gauge = mock.MagicMock()
+        # dry run to build mapping
+        check.process("http://fake.endpoint:10055/metrics")
+        # run with submit
+        check.process("http://fake.endpoint:10055/metrics")
+        # check a bunch of metrics
+        check.gauge.assert_has_calls([
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
+                    'namespace:kube-system',
+                    'condition:true']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-z348z',
+                    'namespace:kube-system',
+                    'condition:true']), hostname=None),
+        ], any_order=True)
 
 
 def test_label_join_metric_not_existing(sorted_tags_check):
@@ -1524,34 +1520,32 @@ def test_label_join_metric_not_existing(sorted_tags_check):
         status_code=200,
         iter_lines=lambda **kwargs: text_data.split("\n"),
         headers={'Content-Type': "text/plain"})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    check = sorted_tags_check
-    check.NAMESPACE = 'ksm'
-    check.label_joins = {
-        'not_existing': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['node', 'pod_ip']
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check = sorted_tags_check
+        check.NAMESPACE = 'ksm'
+        check.label_joins = {
+            'not_existing': {
+                'label_to_match': 'pod',
+                'labels_to_get': ['node', 'pod_ip']
+            }
         }
-    }
-    check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
-    check.gauge = mock.MagicMock()
-    # dry run to build mapping
-    check.process("http://fake.endpoint:10055/metrics")
-    # run with submit
-    check.process("http://fake.endpoint:10055/metrics")
-    # check a bunch of metrics
-    check.gauge.assert_has_calls([
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
-                'namespace:kube-system',
-                'condition:true']), hostname=None),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-z348z',
-                'namespace:kube-system',
-                'condition:true']), hostname=None),
-    ], any_order=True)
-    p.stop()
+        check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
+        check.gauge = mock.MagicMock()
+        # dry run to build mapping
+        check.process("http://fake.endpoint:10055/metrics")
+        # run with submit
+        check.process("http://fake.endpoint:10055/metrics")
+        # check a bunch of metrics
+        check.gauge.assert_has_calls([
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
+                    'namespace:kube-system',
+                    'condition:true']), hostname=None),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-z348z',
+                    'namespace:kube-system',
+                    'condition:true']), hostname=None),
+        ], any_order=True)
 
 
 def test_label_join_with_hostname(sorted_tags_check):
@@ -1564,37 +1558,35 @@ def test_label_join_with_hostname(sorted_tags_check):
         status_code=200,
         iter_lines=lambda **kwargs: text_data.split("\n"),
         headers={'Content-Type': "text/plain"})
-    p = mock.patch('requests.get', return_value=mock_response, __name__="get")
-    p.start()
-    check = sorted_tags_check
-    check.NAMESPACE = 'ksm'
-    check.label_joins = {
-        'kube_pod_info': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['node']
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check = sorted_tags_check
+        check.NAMESPACE = 'ksm'
+        check.label_joins = {
+            'kube_pod_info': {
+                'label_to_match': 'pod',
+                'labels_to_get': ['node']
+            }
         }
-    }
-    check.label_to_hostname = 'node'
-    check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
-    check.gauge = mock.MagicMock()
-    # dry run to build mapping
-    check.process("http://fake.endpoint:10055/metrics")
-    # run with submit
-    check.process("http://fake.endpoint:10055/metrics")
-    # check a bunch of metrics
-    check.gauge.assert_has_calls([
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch']), hostname='gke-foobar-test-kube-default-pool-9b4ff111-0kch'),
-        mock.call('ksm.pod.ready', 1.0,
-            sorted(['pod:fluentd-gcp-v2.0.9-z348z',
-                'namespace:kube-system',
-                'condition:true',
-                'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z']), hostname='gke-foobar-test-kube-default-pool-9b4ff111-j75z'),
-    ], any_order=True)
-    p.stop()
+        check.label_to_hostname = 'node'
+        check.metrics_mapper = {'kube_pod_status_ready': 'pod.ready'}
+        check.gauge = mock.MagicMock()
+        # dry run to build mapping
+        check.process("http://fake.endpoint:10055/metrics")
+        # run with submit
+        check.process("http://fake.endpoint:10055/metrics")
+        # check a bunch of metrics
+        check.gauge.assert_has_calls([
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-6dj58',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch']), hostname='gke-foobar-test-kube-default-pool-9b4ff111-0kch'),
+            mock.call('ksm.pod.ready', 1.0,
+                sorted(['pod:fluentd-gcp-v2.0.9-z348z',
+                    'namespace:kube-system',
+                    'condition:true',
+                    'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z']), hostname='gke-foobar-test-kube-default-pool-9b4ff111-j75z'),
+        ], any_order=True)
 
 @pytest.fixture()
 def mock_get():
@@ -1611,9 +1603,10 @@ def mock_get():
         )
     )
 
-    yield mock_get.start()
-
-    mock_get.stop()
+    try:
+        yield mock_get.start()
+    finally:
+        mock_get.stop()
 
 
 def test_health_service_check_ok(mock_get):

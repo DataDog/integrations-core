@@ -12,7 +12,7 @@ The disk check is included in the [Datadog Agent][1] package, so you don't need 
 ### Configuration
 
 The disk check is enabled by default, and the Agent collects metrics on all local partitions.
-If you want to configure the check with custom options, Edit the `disk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample disk.d/conf.yaml][2] for all available configuration options.
+If you want to configure the check with custom options, Edit the `disk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6]. See the [sample disk.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 
@@ -27,7 +27,9 @@ See [metadata.csv][4] for a list of metrics provided by this integration.
 The Disk check does not include any events at this time.
 
 ### Service Checks
-The Disk check does not include any service checks at this time.
+
+**`disk.service_check_rw`**:
+Returns `CRITICAL` if filesystem is in read-only mode.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].
@@ -37,3 +39,4 @@ Need help? Contact [Datadog Support][5].
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv
 [5]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

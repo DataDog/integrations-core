@@ -17,7 +17,7 @@ The Kube-dns check is included in the [Datadog Agent][1] package, so you don't n
 
 ### Configuration
 
-Edit the `kube_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to your server and port, set the masters to monitor. See the [sample kube_dns.d/conf.yaml][2] for all available configuration options.
+Edit the `kube_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6], to point to your server and port, set the masters to monitor. See the [sample kube_dns.d/conf.yaml][2] for all available configuration options.
 
 #### Using with service discovery
 
@@ -66,3 +66,4 @@ Need help? Contact [Datadog Support][5].
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/kube_dns/metadata.csv
 [5]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

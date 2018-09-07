@@ -1,5 +1,10 @@
 # CHANGELOG - ssh_check
 
+## 1.3.1 / 2018-09-04
+
+* [Fixed] Update cryptography to 2.3. See [#1927](https://github.com/DataDog/integrations-core/pull/1927).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.3.0 / 2018-06-20
 
 * [Changed] Bump requests to 2.19.1. See [#1743](https://github.com/DataDog/integrations-core/pull/1743).

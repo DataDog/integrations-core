@@ -6,10 +6,45 @@ import os
 import re
 from ast import literal_eval
 
-from .constants import get_root
+import requests
+import semver
+
+from .constants import VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
 
+# match something like `(#1234)` and return `1234` in a group
+PR_PATTERN = re.compile(r'\(#(\d+)\)')
+
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
+
+
+def format_commit_id(commit_id):
+    if commit_id:
+        if commit_id.isdigit():
+            return 'PR #{}'.format(commit_id)
+        else:
+            return 'commit hash `{}`'.format(commit_id)
+    return commit_id
+
+
+def parse_pr_number(log_line):
+    match = re.search(PR_PATTERN, log_line)
+    if match:
+        return match.group(1)
+
+
+def get_current_agent_version():
+    release_data = requests.get(
+        'https://raw.githubusercontent.com/DataDog/datadog-agent/master/release.json'
+    ).json()
+    versions = set()
+
+    for version in release_data:
+        parts = version.split('.')
+        if len(parts) > 1:
+            versions.add((parts[0], parts[1]))
+
+    return '.'.join(sorted(versions)[-1][:2])
 
 
 def is_package(d):
@@ -34,7 +69,7 @@ def string_to_toml_type(s):
 
 
 def get_version_file(check_name):
-    if check_name in ('datadog_checks_base', 'datadog_checks_test_helper'):
+    if check_name == 'datadog_checks_base':
         return os.path.join(get_root(), check_name, 'datadog_checks', '__about__.py')
     elif check_name == 'datadog_checks_dev':
         return os.path.join(get_root(), check_name, 'datadog_checks', 'dev', '__about__.py')
@@ -75,3 +110,16 @@ def load_manifest(check_name):
     if file_exists(manifest_path):
         return json.loads(read_file(manifest_path))
     return {}
+
+
+def get_bump_function(changelog_types):
+    minor_bump = False
+
+    for changelog_type in changelog_types:
+        bump_function = VERSION_BUMP.get(changelog_type)
+        if bump_function is semver.bump_major:
+            return bump_function
+        elif bump_function is semver.bump_minor:
+            minor_bump = True
+
+    return semver.bump_minor if minor_bump else semver.bump_patch

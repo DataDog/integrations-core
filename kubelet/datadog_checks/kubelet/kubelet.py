@@ -6,25 +6,26 @@
 import logging
 import re
 from urlparse import urljoin
+from copy import deepcopy
 
 # 3p
 import requests
 
 # project
 from datadog_checks.checks import AgentCheck
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
-from datadog_checks.checks.prometheus import PrometheusScraper
 from kubeutil import get_connection_info
 from tagger import get_tags
 
 # check
-from .common import CADVISOR_DEFAULT_PORT, ContainerFilter, KubeletCredentials
+from .common import CADVISOR_DEFAULT_PORT, PodListUtils, KubeletCredentials
 from .cadvisor import CadvisorScraper
-from .prometheus import CadvisorPrometheusScraper
+from .prometheus import CadvisorPrometheusScraperMixin
 
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
-POD_LIST_PATH = '/pods/'
+POD_LIST_PATH = '/pods'
 CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
 
@@ -51,33 +52,53 @@ FACTORS = {
 log = logging.getLogger('collector')
 
 
-class KubeletCheck(AgentCheck, CadvisorScraper):
+class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, CadvisorScraper):
     """
     Collect metrics from Kubelet.
     """
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        super(KubeletCheck, self).__init__(name, init_config, agentConfig, instances)
-
         self.NAMESPACE = 'kubernetes'
-
         if instances is not None and len(instances) > 1:
             raise Exception('Kubelet check only supports one configured instance.')
         inst = instances[0] if instances else None
 
+        cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
+        kubelet_instance = self._create_kubelet_prometheus_instance(inst)
+        generic_instances = [cadvisor_instance, kubelet_instance]
+        super(KubeletCheck, self).__init__(name, init_config, agentConfig, generic_instances)
+
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
         self.cadvisor_legacy_url = None
 
-        self.cadvisor_scraper = CadvisorPrometheusScraper(self)
+        self.cadvisor_scraper_config = self.get_scraper_config(cadvisor_instance)
+        self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
-        self.kubelet_scraper = PrometheusScraper(self)
-        self.kubelet_scraper.NAMESPACE = 'kubernetes'
-        self.kubelet_scraper.metrics_mapper = {
-            'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
-            'rest_client_requests_total': 'rest.client.requests',
-            'kubelet_runtime_operations': 'kubelet.runtime.operations',
-            'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
-        }
+    def _create_kubelet_prometheus_instance(self, instance):
+        """
+        Create a copy of the instance and set default values.
+        This is so the base class can create a scraper_config with the proper values.
+        """
+        kubelet_instance = deepcopy(instance)
+        kubelet_instance.update({
+            'namespace': self.NAMESPACE,
+
+            # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
+            # we specify a dummy url that will be replaced in the `check()` function. We append it with "kubelet"
+            # so the key is different than the cadvisor scraper.
+            'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
+            'metrics': [{
+                'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
+                'rest_client_requests_total': 'rest.client.requests',
+                'kubelet_runtime_operations': 'kubelet.runtime.operations',
+                'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+            }],
+            # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
+            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+            'health_service_check': instance.get('health_service_check', False)
+        })
+        return kubelet_instance
 
     def check(self, instance):
         kubelet_conn_info = get_connection_info()
@@ -86,15 +107,17 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
             raise CheckException("Unable to detect the kubelet URL automatically.")
 
         if 'cadvisor_metrics_endpoint' in instance:
-            self.cadvisor_metrics_url = \
+            self.cadvisor_scraper_config['prometheus_url'] = \
                 instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
         else:
-            self.cadvisor_metrics_url = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+            self.cadvisor_scraper_config['prometheus_url'] = instance.get('metrics_endpoint',
+                                                                          urljoin(endpoint, CADVISOR_METRICS_PATH))
 
         if 'metrics_endpoint' in instance:
             self.log.warning('metrics_endpoint is deprecated, please specify cadvisor_metrics_endpoint instead.')
 
-        self.kubelet_metrics_url = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH))
+        self.kubelet_scraper_config['prometheus_url'] = instance.get('kubelet_metrics_endpoint',
+                                                                     urljoin(endpoint, KUBELET_METRICS_PATH))
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
@@ -103,12 +126,10 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         # Kubelet credentials handling
         self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
         self.kubelet_credentials.configure_scraper(
-            self.cadvisor_scraper,
-            self.cadvisor_metrics_url
+            self.cadvisor_scraper_config
         )
         self.kubelet_credentials.configure_scraper(
-            self.kubelet_scraper,
-            self.kubelet_metrics_url
+            self.kubelet_scraper_config
         )
 
         # Legacy cadvisor support
@@ -117,16 +138,8 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         except Exception as e:
             self.log.debug('cAdvisor not found, running in prometheus mode: %s' % str(e))
 
-        # By default we send the buckets.
-        send_buckets = instance.get('send_histograms_buckets', True)
-        if send_buckets is not None and str(send_buckets).lower() == 'false':
-            send_buckets = False
-        else:
-            send_buckets = True
-
         self.pod_list = self.retrieve_pod_list()
-
-        self.container_filter = ContainerFilter(self.pod_list)
+        self.pod_list_utils = PodListUtils(self.pod_list)
 
         self.instance_tags = instance.get('tags', [])
         self._perform_kubelet_check(self.instance_tags)
@@ -140,30 +153,24 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
                 instance,
                 self.cadvisor_legacy_url,
                 self.pod_list,
-                self.container_filter
+                self.pod_list_utils
             )
-        elif self.cadvisor_metrics_url:  # Prometheus
+        elif self.cadvisor_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing cadvisor metrics')
-            self.cadvisor_scraper.process(
-                self.cadvisor_metrics_url,
-                send_histograms_buckets=send_buckets,
-                instance=instance,
-                pod_list=self.pod_list,
-                container_filter=self.container_filter
+            self.process(
+                self.cadvisor_scraper_config,
+                metric_transformers=self.CADVISOR_METRIC_TRANSFORMERS
             )
 
-        if self.kubelet_metrics_url:  # Prometheus
+        if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            self.kubelet_scraper.process(
-                self.kubelet_metrics_url,
-                send_histograms_buckets=send_buckets,
-                instance=instance,
-                ignore_unmapped=True
+            self.process(
+                self.kubelet_scraper_config
             )
 
         # Free up memory
         self.pod_list = None
-        self.container_filter = None
+        self.pod_list_utils = None
 
     def perform_kubelet_query(self, url, verbose=True, timeout=10):
         """
@@ -282,14 +289,14 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
 
                 for ctr_status in pod['status'].get('containerStatuses', []):
                     if ctr_status.get('name') == c_name:
-                        # it is already prefixed with 'docker://'
+                        # it is already prefixed with 'runtime://'
                         cid = ctr_status.get('containerID')
                         break
                 if not cid:
                     continue
 
                 pod_uid = pod.get('metadata', {}).get('uid')
-                if self.container_filter.is_excluded(cid, pod_uid):
+                if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
                 tags = get_tags('%s' % cid, True) + instance_tags

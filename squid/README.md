@@ -12,7 +12,7 @@ The Agent's Squid check is included in the [Datadog Agent][1] package, so you do
 
 ### Configuration
 
-1. Edit the `squid.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `squid.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][11].
     See the [sample squid.d/conf.yaml][2] for all available configuration options:
 
 ```
@@ -50,7 +50,7 @@ Returns CRITICAL if the Agent cannot connect to Squid to collect metrics, otherw
 
 ## Troubleshooting
 
-If you have any questions about Datadog or a use case our [Docs][5] didn’t mention, we’d love to help! Here’s how you can reach out to us:
+If you have any questions about Datadog or a use case our [Docs][5] didn't mention, we'd love to help! Here's how you can reach out to us:
 
 ### Visit the Knowledge Base
 
@@ -79,3 +79,4 @@ Reach out to our team and other Datadog users on [Slack][9].
 [8]: mailto:support@datadoghq.com
 [9]: https://chat.datadoghq.com/
 [10]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

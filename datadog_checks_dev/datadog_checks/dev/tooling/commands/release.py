@@ -2,36 +2,56 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import namedtuple
+import time
+from collections import OrderedDict, namedtuple
 from datetime import datetime
 
 import click
 from semver import parse_version_info
-from six import StringIO
+from six import StringIO, iteritems
 
 from .dep import freeze as dep_freeze
 from .utils import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 )
 from ..constants import (
-    AGENT_BASED_INTEGRATIONS, AGENT_REQ_FILE, AGENT_V5_ONLY, CHANGELOG_TYPE_NONE, get_root
+    AGENT_REQ_FILE, AGENT_V5_ONLY, CHANGELOG_TYPE_NONE, get_root
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
 )
-from ..github import from_contributor, get_changelog_types, get_pr
+from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
     update_version_module
 )
-from ..utils import get_version_string
+from ..trello import TrelloClient
+from ..utils import (
+    get_bump_function, get_current_agent_version, get_valid_checks,
+    get_version_string, format_commit_id, parse_pr_number
+)
 from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
-    chdir, remove_path, stream_file_lines, write_file, write_file_lines
+    basepath, chdir, ensure_unicode, get_next, remove_path, stream_file_lines,
+    write_file, write_file_lines
 )
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
+
+
+def validate_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+
+    try:
+        parts = value.split('.')
+        if len(parts) == 2:
+            parts.append('0')
+        version_info = parse_version_info('.'.join(parts))
+        return '{}.{}'.format(version_info.major, version_info.minor)
+    except ValueError:
+        raise click.BadParameter('needs to be in semver format x.y[.z]')
 
 
 @click.group(
@@ -65,7 +85,7 @@ def ready(ctx, quiet):
     user_config = ctx.obj
     cached_prs = {}
 
-    for target in AGENT_BASED_INTEGRATIONS:
+    for target in sorted(get_valid_checks()):
         # get the name of the current release tag
         cur_version = get_version_string(target)
         target_tag = get_release_tag_string(target, cur_version)
@@ -124,10 +144,11 @@ def ready(ctx, quiet):
     short_help='Show all the pending PRs for a given check'
 )
 @click.argument('check')
+@click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def changes(ctx, check):
+def changes(ctx, check, dry_run):
     """Show all the pending PRs for a given check."""
-    if check not in AGENT_BASED_INTEGRATIONS:
+    if not dry_run and check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # get the name of the current release tag
@@ -139,28 +160,275 @@ def changes(ctx, check):
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
-    echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
+    if not dry_run:
+        echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
 
     user_config = ctx.obj
-    for pr_num in pr_numbers:
-        try:
-            payload = get_pr(pr_num, user_config)
-        except Exception as e:
-            echo_failure('Unable to fetch info for PR #{}: {}'.format(pr_num, e))
-            continue
+    if dry_run:
+        changelog_types = []
 
-        changelog_types = get_changelog_types(payload)
+        for pr_num in pr_numbers:
+            try:
+                payload = get_pr(pr_num, user_config)
+            except Exception as e:
+                echo_failure('Unable to fetch info for PR #{}: {}'.format(pr_num, e))
+                continue
 
-        echo_success(payload.get('title'))
-        echo_info(' * Url: {}'.format(payload.get('html_url')))
+            current_changelog_types = get_changelog_types(payload)
+            if not current_changelog_types:
+                abort('No valid changelog labels found attached to PR #{}, please add one!'.format(pr_num))
+            elif len(current_changelog_types) > 1:
+                abort('Multiple changelog labels found attached to PR #{}, please only use one!'.format(pr_num))
 
-        echo_info(' * Changelog status: ', nl=False)
-        if not changelog_types:
-            echo_warning('WARNING! No changelog labels attached.\n')
-        elif len(changelog_types) > 1:
-            echo_warning('WARNING! Too many changelog labels attached: {}\n'.format(', '.join(changelog_types)))
+            current_changelog_type = current_changelog_types[0]
+            if current_changelog_type != 'no-changelog':
+                changelog_types.append(current_changelog_type)
+
+        return cur_version, changelog_types
+    else:
+        for pr_num in pr_numbers:
+            try:
+                payload = get_pr(pr_num, user_config)
+            except Exception as e:
+                echo_failure('Unable to fetch info for PR #{}: {}'.format(pr_num, e))
+                continue
+
+            changelog_types = get_changelog_types(payload)
+
+            echo_success(payload.get('title'))
+            echo_info(' * Url: {}'.format(payload.get('html_url')))
+
+            echo_info(' * Changelog status: ', nl=False)
+            if not changelog_types:
+                echo_warning('WARNING! No changelog labels attached.\n')
+            elif len(changelog_types) > 1:
+                echo_warning('WARNING! Too many changelog labels attached: {}\n'.format(', '.join(changelog_types)))
+            else:
+                echo_success('{}\n'.format(changelog_types[0]))
+
+
+@release.command(
+    context_settings=CONTEXT_SETTINGS,
+    short_help='Create a Trello card for each change that needs to be tested'
+)
+@click.option('--start', 'start_id', help='The PR number or commit hash to start at')
+@click.option('--since', 'agent_version', callback=validate_version, help='The version of the Agent to compare')
+@click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
+@click.pass_context
+def testable(ctx, start_id, agent_version, dry_run):
+    """Create a Trello card for each change that needs to be tested for
+    the next release. Run via `ddev -x release testable` to force the use
+    of the current directory.
+
+    To avoid GitHub's public API rate limits, you need to set
+    `github.user`/`github.token` in your config file or use the
+    `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
+
+    \b
+    To use Trello:
+    1. Go to `https://trello.com/app-key` and copy your API key.
+    2. Run `ddev config set trello.key` and paste your API key.
+    3. Go to `https://trello.com/1/authorize?key=key&name=name&scope=read,write&expiration=never&response_type=token`,
+       where `key` is your API key and `name` is the name to give your token, e.g. ReleaseTestingYourName.
+       Authorize access and copy your token.
+    4. Run `ddev config set trello.token` and paste your token.
+    """
+    root = get_root()
+    repo = basepath(root)
+    if repo not in ('integrations-core', 'datadog-agent'):
+        abort('Repo `{}` is unsupported.'.format(repo))
+
+    if agent_version:
+        current_agent_version = agent_version
+    else:
+        echo_waiting('Finding the current minor release of the Agent... ', nl=False)
+        current_agent_version = get_current_agent_version()
+        echo_success(current_agent_version)
+
+    current_release_branch = '{}.x'.format(current_agent_version)
+    echo_info(
+        'Branch `{}` will be compared to `master`.'.format(current_release_branch)
+    )
+
+    echo_waiting('Getting diff... ', nl=False)
+    diif_command = 'git --no-pager log "--pretty=format:%H %s" {}..master'
+
+    with chdir(root):
+        result = run_command(diif_command.format(current_release_branch), capture=True)
+        if result.code:
+            origin_release_branch = 'origin/{}'.format(current_release_branch)
+            echo_failure('failed!')
+            echo_waiting(
+                'Local branch `{}` might not exist, trying `{}`... '.format(
+                    current_release_branch, origin_release_branch
+                ),
+                nl=False
+            )
+
+            result = run_command(diif_command.format(origin_release_branch), capture=True)
+            if result.code:
+                abort('Unable to get the diif.')
+            else:
+                echo_success('success!')
         else:
-            echo_success('{}\n'.format(changelog_types[0]))
+            echo_success('success!')
+
+    # [(commit_hash, commit_subject), ...]
+    diff_data = [
+        tuple(line.split(None, 1)) for line in reversed(result.stdout.splitlines())
+    ]
+    num_changes = len(diff_data)
+
+    if dry_run:
+        for _, commit_subject in diff_data:
+            echo_info(commit_subject)
+        return
+
+    if repo == 'integrations-core':
+        options = OrderedDict((
+            ('1', 'Integrations'),
+            ('2', 'Containers'),
+            ('s', 'Skip'),
+            ('q', 'Quit'),
+        ))
+    else:
+        options = OrderedDict((
+            ('1', 'Agent'),
+            ('2', 'Containers'),
+            ('s', 'Skip'),
+            ('q', 'Quit'),
+        ))
+    default_option = get_next(options)
+    options_prompt = 'Choose an option (default {}): '.format(options[default_option])
+    options_text = '\n' + '\n'.join(
+        '{} - {}'.format(key, value) for key, value in iteritems(options)
+    )
+
+    commit_ids = set()
+    user_config = ctx.obj
+    trello = TrelloClient(user_config)
+    found_start_id = False
+
+    for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
+        commit_id = parse_pr_number(commit_subject)
+        if commit_id:
+            pr_data = get_pr(commit_id, user_config, repo=repo)
+        else:
+            try:
+                pr_data = get_pr_from_hash(commit_hash, repo, user_config).get('items', [{}])[0]
+            # Commit to master
+            except IndexError:
+                pr_data = {
+                    'number': commit_hash,
+                    'html_url': 'https://github.com/DataDog/{}/commit/{}'.format(repo, commit_hash),
+                }
+            commit_id = str(pr_data.get('number', ''))
+
+        if commit_id and commit_id in commit_ids:
+            echo_info('Already seen PR #{}, skipping it.'.format(commit_id))
+            continue
+        commit_ids.add(commit_id)
+
+        if start_id and not found_start_id:
+            if start_id == commit_id or start_id == commit_hash:
+                found_start_id = True
+            else:
+                echo_info(
+                    'Looking for {}, skipping {}.'.format(
+                        format_commit_id(start_id), format_commit_id(commit_id)
+                    )
+                )
+                continue
+
+        pr_url = pr_data.get('html_url', 'https://github.com/DataDog/{}/pull/{}'.format(repo, commit_id))
+        pr_title = pr_data.get('title', commit_subject)
+        pr_author = pr_data.get('user', {}).get('login', '')
+        pr_body = pr_data.get('body', '')
+
+        finished = False
+        choice_error = ''
+        progress_status = '({} of {}) '.format(i, num_changes)
+        indent = ' ' * len(progress_status)
+
+        while not finished:
+            echo_success('\n{}{}'.format(progress_status, pr_title))
+
+            echo_success('Url: ', nl=False, indent=indent)
+            echo_info(pr_url)
+
+            echo_success('Author: ', nl=False, indent=indent)
+            echo_info(pr_author)
+
+            # Ensure Unix lines feeds just in case
+            echo_info(pr_body.strip('\r'), indent=indent)
+
+            echo_info(options_text)
+
+            if choice_error:
+                echo_warning(choice_error)
+
+            echo_waiting(options_prompt, nl=False)
+
+            # Terminals are odd and sometimes produce an erroneous null byte
+            choice = '\x00'
+            while choice == '\x00':
+                choice = click.getchar().strip()
+                try:
+                    choice = ensure_unicode(choice)
+                except UnicodeDecodeError:
+                    choice = repr(choice)
+
+            if not choice:
+                choice = default_option
+
+            if choice not in options:
+                echo_info(choice)
+                choice_error = u'`{}` is not a valid option.'.format(choice)
+                continue
+            else:
+                choice_error = ''
+
+            value = options[choice]
+            echo_info(value)
+
+            if value == 'Skip':
+                echo_info('Skipped {}'.format(format_commit_id(commit_id)))
+                break
+            elif value == 'Quit':
+                echo_warning('Exited at {}'.format(format_commit_id(commit_id)))
+                return
+            else:
+                creation_attempts = 3
+                for attempt in range(3):
+                    rate_limited, error, response = trello.create_card(
+                        value,
+                        pr_title,
+                        u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
+                    )
+                    if rate_limited:
+                        wait_time = 10
+                        echo_warning(
+                            'Attempt {} of {}: A rate limit in effect, retrying in {} '
+                            'seconds...'.format(attempt + 1, creation_attempts, wait_time)
+                        )
+                        time.sleep(wait_time)
+                    elif error:
+                        if attempt + 1 == creation_attempts:
+                            echo_failure('Error: {}'.format(error))
+                            break
+
+                        wait_time = 2
+                        echo_warning(
+                            'Attempt {} of {}: An error has occurred, retrying in {} '
+                            'seconds...'.format(attempt + 1, creation_attempts, wait_time)
+                        )
+                        time.sleep(wait_time)
+                    else:
+                        echo_success('Created card: ', nl=False)
+                        echo_info(response.json().get('url'))
+                        break
+
+            finished = True
 
 
 @release.command(
@@ -179,20 +447,38 @@ def tag(check, version, push, dry_run):
     a maintenance task that should be run under very specific circumstances
     (e.g. re-align an old release performed on the wrong commit).
     """
-    # get the current version
-    if not version:
-        version = get_version_string(check)
+    tagging_all = check == 'all'
 
-    # get the tag name
-    release_tag = get_release_tag_string(check, version)
-    echo_info('Tagging HEAD with {}'.format(release_tag))
+    valid_checks = get_valid_checks()
+    if not tagging_all and check not in valid_checks:
+        abort('Check `{}` is not an Agent-based Integration'.format(check))
 
-    if dry_run:
-        return
+    if tagging_all:
+        if version:
+            abort('You cannot tag every check with the same version')
+        checks = sorted(valid_checks)
+    else:
+        checks = [check]
 
-    result = git_tag(release_tag, push)
-    if result.code != 0:
-        abort(code=result.code)
+    for check in checks:
+        # get the current version
+        if not version:
+            version = get_version_string(check)
+
+        # get the tag name
+        release_tag = get_release_tag_string(check, version)
+        echo_info('Tagging HEAD with {}'.format(release_tag))
+
+        if dry_run:
+            version = None
+            continue
+
+        result = git_tag(release_tag, push)
+        if result.code != 0:
+            abort(code=result.code)
+
+        # Reset version
+        version = None
 
 
 @release.command(
@@ -200,7 +486,7 @@ def tag(check, version, push, dry_run):
     short_help='Release a single check'
 )
 @click.argument('check')
-@click.argument('version')
+@click.argument('version', required=False)
 @click.pass_context
 def make(ctx, check, version):
     """Perform a set of operations needed to release a single check:
@@ -211,40 +497,64 @@ def make(ctx, check, version):
         * update the requirements-agent-release.txt file
         * commit the above changes
     """
-    if check not in AGENT_BASED_INTEGRATIONS:
+    valid_checks = get_valid_checks()
+    if check != 'all' and check not in valid_checks:
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # don't run the task on the master branch
     if get_current_branch() == 'master':
-        abort('This task will add a commit, you do not want to add it on master directly')
+        abort('This task will commit, you do not want to add commits to master directly')
 
-    # sanity check on the version provided
-    cur_version = get_version_string(check)
-    p_version = parse_version_info(version)
-    p_current = parse_version_info(cur_version)
-    if p_version <= p_current:
-        abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
-
-    # update the version number
-    echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
-    update_version_module(check, cur_version, version)
-
-    # update the CHANGELOG
-    echo_waiting('Updating the changelog...')
-    ctx.invoke(changelog, check=check, version=version, old_version=cur_version, dry_run=False)
-
-    if check == 'datadog_checks_dev':
-        commit_targets = [check]
-    # update the global requirements file
+    if check == 'all':
+        if version:
+            abort('You cannot bump every check to the same version')
+        checks = sorted(valid_checks)
     else:
-        commit_targets = [check, AGENT_REQ_FILE]
-        req_file = os.path.join(get_root(), AGENT_REQ_FILE)
-        echo_waiting('Updating the requirements file {}...'.format(req_file))
-        update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+        checks = [check]
 
-    # commit the changes
-    msg = '[ci skip] Bumped {} version to {}'.format(check, version)
-    git_commit(commit_targets, msg)
+    for check in checks:
+        if version:
+            # sanity check on the version provided
+            cur_version = get_version_string(check)
+            p_version = parse_version_info(version)
+            p_current = parse_version_info(cur_version)
+            if p_version <= p_current:
+                abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
+        else:
+            cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
+            if not changelog_types:
+                echo_warning('No changes for {}, skipping...'.format(check))
+                continue
+            bump_function = get_bump_function(changelog_types)
+            version = bump_function(cur_version)
+
+        # update the version number
+        echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
+        update_version_module(check, cur_version, version)
+
+        # update the CHANGELOG
+        echo_waiting('Updating the changelog...')
+        # TODO: Avoid double GitHub API calls when bumping all checks at once
+        ctx.invoke(
+            changelog, check=check, version=version, old_version=cur_version, quiet=True, dry_run=False
+        )
+
+        if check == 'datadog_checks_dev':
+            commit_targets = [check]
+        # update the global requirements file
+        else:
+            commit_targets = [check, AGENT_REQ_FILE]
+            req_file = os.path.join(get_root(), AGENT_REQ_FILE)
+            echo_waiting('Updating the requirements file {}...'.format(req_file))
+            update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+
+        # commit the changes.
+        # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
+        msg = '[Release] Bumped {} version to {}'.format(check, version)
+        git_commit(commit_targets, msg)
+
+        # Reset version
+        version = None
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
@@ -257,14 +567,15 @@ def make(ctx, check, version):
 @click.argument('check')
 @click.argument('version')
 @click.argument('old_version', required=False)
+@click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, dry_run):
+def changelog(ctx, check, version, old_version, quiet, dry_run):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
     """
-    if check not in AGENT_BASED_INTEGRATIONS:
+    if check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # sanity check on the version provided
@@ -272,7 +583,8 @@ def changelog(ctx, check, version, old_version, dry_run):
     if parse_version_info(version) <= parse_version_info(cur_version):
         abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
 
-    echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
+    if not quiet:
+        echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
 
     # get the name of the current release tag
     target_tag = get_release_tag_string(check, cur_version)
@@ -282,7 +594,8 @@ def changelog(ctx, check, version, old_version, dry_run):
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
-    echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
+    if not quiet:
+        echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
 
     user_config = ctx.obj
     entries = []
@@ -302,8 +615,9 @@ def changelog(ctx, check, version, old_version, dry_run):
 
         changelog_type = changelog_labels[0]
         if changelog_type == CHANGELOG_TYPE_NONE:
-            # No changelog entry for this PR
-            echo_info('Skipping PR #{} from changelog due to label'.format(pr_num))
+            if not quiet:
+                # No changelog entry for this PR
+                echo_info('Skipping PR #{} from changelog due to label'.format(pr_num))
             continue
 
         author = payload.get('user', {}).get('login')
@@ -367,7 +681,7 @@ def changelog(ctx, check, version, old_version, dry_run):
 @click.pass_context
 def upload(ctx, check, dry_run):
     """Release a specific check to PyPI as it is on the repo HEAD."""
-    if check not in AGENT_BASED_INTEGRATIONS:
+    if check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # retrieve credentials
@@ -410,18 +724,18 @@ def freeze(ctx, no_deps):
     have in HEAD. Also by default will create the Agent's static dependency file.
     """
     echo_info('Freezing check releases')
-    checks = set(AGENT_BASED_INTEGRATIONS)
+    checks = get_valid_checks()
     checks.remove('datadog_checks_dev')
 
     entries = []
     for check in checks:
         if check in AGENT_V5_ONLY:
-            echo_info('Check `{}` is only shipped with Agent 5, skipping')
+            echo_info('Check `{}` is only shipped with Agent 5, skipping'.format(check))
             continue
 
         try:
             version = get_version_string(check)
-            entries.append(get_agent_requirement_line(check, version))
+            entries.append('{}\n'.format(get_agent_requirement_line(check, version)))
         except Exception as e:
             echo_failure('Error generating line: {}'.format(e))
             continue
@@ -433,4 +747,4 @@ def freeze(ctx, no_deps):
     echo_success('Successfully wrote to `{}`!'.format(req_file))
 
     if not no_deps:
-        ctx.invoke(dep_freeze, lazy=False)
+        ctx.invoke(dep_freeze)

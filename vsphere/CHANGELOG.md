@@ -1,5 +1,31 @@
 # CHANGELOG - vsphere
 
+## 3.1.0 / 2018-09-06
+
+* [Changed] Downgrade pyvmomi to v6.5.0.2017.5-1. See [#2180](https://github.com/DataDog/integrations-core/pull/2180).
+
+## 3.0.0 / 2018-09-04
+
+* [Changed] Upgrade pyvmomi to 6.7.0. See [#2153](https://github.com/DataDog/integrations-core/pull/2153).
+* [Changed] Make first level cache thread safe. See [#2146](https://github.com/DataDog/integrations-core/pull/2146).
+
+## 2.4.0 / 2018-08-30
+
+* [Fixed] Control size of the thread pool job queue. See [#2131](https://github.com/DataDog/integrations-core/pull/2131).
+* [Changed] Make the cache configuration thread safe. See [#2125](https://github.com/DataDog/integrations-core/pull/2125).
+* [Changed] Removed unused `_clean` method, added more unit tests. See [#2120](https://github.com/DataDog/integrations-core/pull/2120).
+
+## 2.3.1 / 2018-08-28
+
+* [Fixed]  Fix `KeyError` due to race condition on the cache. See [#2099](https://github.com/DataDog/integrations-core/pull/2099).
+
+## 2.3.0 / 2018-08-21
+
+* [Fixed] Drastically improve check performance by reducing number of calls to vSphere API. See [#2039](https://github.com/DataDog/integrations-core/pull/2039).
+* [Fixed] Retry connection once on failure, and correctly send CRITICAL service check if the connection still cannot be made. See [#2060](https://github.com/DataDog/integrations-core/pull/2060).
+* [Fixed] fix race condition and keyerror. See [#1893](https://github.com/DataDog/integrations-core/pull/1893).
+* [Changed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 2.2.0 / 2018-06-20
 
 * [Changed] Bump requests to 2.19.1. See [#1743](https://github.com/DataDog/integrations-core/pull/1743).

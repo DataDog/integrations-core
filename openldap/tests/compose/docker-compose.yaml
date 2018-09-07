@@ -1,0 +1,12 @@
+version: "3.5"
+
+services:
+  openldap:
+    image: "datadog/docker-library:openldap_2_4_44"
+    ports:
+      - "3890:389"
+      - "6360:636"
+    environment:
+      - LDAP_TLS_VERIFY_CLIENT=never
+    volumes:
+      - ${HOST_SOCKET_DIR}:/var/run/slapd/

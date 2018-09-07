@@ -20,7 +20,7 @@ The Varnish check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][12] to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample varnish.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -89,7 +89,7 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
        path: /var/log/varnish/varnishncsa.log
       source: varnish
       sourcecategory: http_web_access
-      service: varnish
+      service: varnish
   ```
   Change the `path` and `service` parameter value and configure them for your environment.
   See the [sample varnish.yaml][2] for all available configuration options.
@@ -134,4 +134,5 @@ Need help? Contact [Datadog Support][7].
 [8]: https://www.datadoghq.com/blog/top-varnish-performance-metrics/
 [9]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog/
-[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/varnish/varnish.png
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png
+[12]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

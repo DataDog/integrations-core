@@ -1,0 +1,23 @@
+{{
+  "display_name": "{check_name_cap}",
+  "maintainer": "{email}",
+  "manifest_version": "1.0.0",
+  "name": "{check_name}",
+  "metric_prefix": "{check_name}.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "{guid}",
+  "support": "{support_type}",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-{check_name_cap} Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": true
+}}

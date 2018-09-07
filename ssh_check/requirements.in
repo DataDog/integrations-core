@@ -1,4 +1,4 @@
-cryptography==2.2.2
+cryptography==2.3
 paramiko==2.1.5
 pyasn1==0.4.2
 cffi==1.11.5

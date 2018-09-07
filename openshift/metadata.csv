@@ -1,0 +1,43 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+openshift.clusterquota.cpu.used,gauge,,cpu,,Observed cpu usage by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.cpu.limit,gauge,,cpu,,Hard limit for cpu by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.cpu.remaining,gauge,,cpu,,Remaining available cpu by cluster resource quota for all namespaces,1,openshift
+openshift.clusterquota.memory.used,gauge,,byte,,Observed memory usage by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.memory.limit,gauge,,byte,,Hard limit for memory by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.memory.remaining,gauge,,byte,,Remaining available memory by cluster resource quota for all namespaces,1,openshift
+openshift.clusterquota.pods.used,gauge,,,,Observed pods usage by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.pods.limit,gauge,,,,Hard limit for pods by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.pods.remaining,gauge,,,,Remaining available pods by cluster resource quota for all namespaces,1,openshift
+openshift.clusterquota.services.used,gauge,,,,Observed services usage by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.services.limit,gauge,,,,Hard limit for services by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.services.remaining,gauge,,,,Remaining available services by cluster resource quota for all namespaces,1,openshift
+openshift.clusterquota.persistentvolumeclaims.used,gauge,,,,Observed persistent volume claims usage by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.persistentvolumeclaims.limit,gauge,,,,Hard limit for persistent volume claims by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.persistentvolumeclaims.remaining,gauge,,,,Remaining available persistent volume claims by cluster resource quota for all namespaces,1,openshift
+openshift.clusterquota.services.nodeports.used,gauge,,,,Observed service node ports usage by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.services.nodeports.limit,gauge,,,,Hard limit for service node ports by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.services.nodeports.remaining,gauge,,,,Remaining available service node ports by cluster resource quota for all namespaces,1,openshift
+openshift.clusterquota.services.loadbalancers.used,gauge,,,,Observed service load balancers usage by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.services.loadbalancers.limit,gauge,,,,Hard limit for service load balancers by cluster resource quota for all namespaces,0,openshift
+openshift.clusterquota.services.loadbalancers.remaining,gauge,,,,Remaining available service load balancers by cluster resource quota for all namespaces,1,openshift
+openshift.appliedclusterquota.cpu.used,gauge,,cpu,,Observed cpu usage by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.cpu.limit,gauge,,cpu,,Hard limit for cpu by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.cpu.remaining,gauge,,cpu,,Remaining available cpu by cluster resource quota and namespace,1,openshift
+openshift.appliedclusterquota.memory.used,gauge,,byte,,Observed memory usage by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.memory.limit,gauge,,byte,,Hard limit for memory by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.memory.remaining,gauge,,byte,,Remaining available memory by cluster resource quota and namespace,1,openshift
+openshift.appliedclusterquota.pods.used,gauge,,,,Observed pods usage by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.pods.limit,gauge,,,,Hard limit for pods by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.pods.remaining,gauge,,,,Remaining available pods by cluster resource quota and namespace,1,openshift
+openshift.appliedclusterquota.services.used,gauge,,,,Observed services usage by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.services.limit,gauge,,,,Hard limit for services by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.services.remaining,gauge,,,,Remaining available services by cluster resource quota and namespace,1,openshift
+openshift.appliedclusterquota.persistentvolumeclaims.used,gauge,,,,Observed persistent volume claims usage by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.persistentvolumeclaims.limit,gauge,,,,Hard limit for persistent volume claims by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.persistentvolumeclaims.remaining,gauge,,,,Remaining available persistent volume claims by cluster resource quota and namespace,1,openshift
+openshift.appliedclusterquota.services.nodeports.used,gauge,,,,Observed service node ports usage by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.services.nodeports.limit,gauge,,,,Hard limit for service node ports by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.services.nodeports.remaining,gauge,,,,Remaining available service node ports by cluster resource quota and namespace,1,openshift
+openshift.appliedclusterquota.services.loadbalancers.used,gauge,,,,Observed service load balancers usage by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.services.loadbalancers.limit,gauge,,,,Hard limit for service load balancers by cluster resource quota and namespace,0,openshift
+openshift.appliedclusterquota.services.loadbalancers.remaining,gauge,,,,Remaining available service load balancers by cluster resource quota and namespace,1,openshift

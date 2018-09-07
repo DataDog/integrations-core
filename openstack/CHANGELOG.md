@@ -1,5 +1,15 @@
 # CHANGELOG - openstack
 
+## 1.5.0 / 2018-08-29
+
+* [Fixed] Remove duplicate project call and reword os_host config option. See [#2066](https://github.com/DataDog/integrations-core/pull/2066).
+* [Fixed] Use is_affirmative on boolean options. See [#2071](https://github.com/DataDog/integrations-core/pull/2071).
+
+## 1.4.0 / 2018-08-17
+
+* [Fixed] Only use the short hostname when making "host" queries to Nova. See [#2070](https://github.com/DataDog/integrations-core/pull/2070).
+* [Changed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.3.0 / 2018-06-06
 
 * [Added]  Added support for unscoped access, implemented caching mechanism to reduce API calls to Nova. See [#1276](https://github.com/DataDog/integrations-core/pull/1276).

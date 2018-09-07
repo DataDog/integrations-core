@@ -16,14 +16,14 @@ The Gearman check is included in the [Datadog Agent][1] package, so you don't ne
 ### Configuration
 
 
-1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Gearman performance data.
+1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your Gearman performance data.
     See the [sample gearmand.d/conf.yaml][2] for all available configuration options.
     ```yaml
     init_config:
 
     instances:
         - server: localhost
-        port: 4730
+          port: 4730
     ```
 
 2. [Restart the Agent][3]
@@ -55,3 +55,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/gearmand/metadata.csv
 [6]: https://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

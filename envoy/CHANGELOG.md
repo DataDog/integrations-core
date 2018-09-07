@@ -1,5 +1,14 @@
 # CHANGELOG - Envoy
 
+## 1.4.0 / 2018-09-05
+
+* [Changed] Change order of precedence of whitelist and blacklist for pattern filtering. See [#2174](https://github.com/DataDog/integrations-core/pull/2174).
+
+## 1.3.0 / 2018-08-06
+
+* [Added] Add ability to whitelist/blacklist metrics. See [#1975](https://github.com/DataDog/integrations-core/pull/1975).
+* [Changed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.2.1 / 2018-06-14
 
 * [Fixed] properly send tags for histograms. See [#1741](https://github.com/DataDog/integrations-core/pull/1741).

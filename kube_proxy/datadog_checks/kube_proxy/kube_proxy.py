@@ -4,6 +4,7 @@
 from datadog_checks.checks.prometheus import GenericPrometheusCheck
 
 class KubeProxyCheck(GenericPrometheusCheck):
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(KubeProxyCheck, self).__init__(

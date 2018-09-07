@@ -154,7 +154,7 @@ The agent assumes that the kubelet API is available at the default gateway of th
 See [this PR][11]
 
 ###  Why is there a container in each Kubernetes pod with 0% CPU and minimal disk/ram?
-These are pause containers (docker_image:gcr.io/google_containers/pause.*) that K8s injects into every pod to keep it populated even if the "real” container is restarting/stopped.
+These are pause containers (docker_image:gcr.io/google_containers/pause.*) that K8s injects into every pod to keep it populated even if the "real" container is restarting/stopped.
 
 The docker_daemon check ignores them through a default exclusion list, but they will show up for K8s metrics like *kubernetes.cpu.usage.total* and *kubernetes.filesystem.usage*.
 
@@ -181,4 +181,4 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 [12]: https://www.datadoghq.com/blog/monitoring-kubernetes-era/
 [13]: https://docs.datadoghq.com/agent/faq/how-to-get-more-out-of-your-kubernetes-integration
 [14]: https://docs.datadoghq.com/agent/faq/how-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container
-[15]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/kubernetes/k8sdashboard.png
+[15]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kubernetes/images/kubernetes_dashboard.png

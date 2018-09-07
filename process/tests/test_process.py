@@ -1,14 +1,14 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-import contextlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from mock import patch, MagicMock
+
 import psutil
-from datadog_checks.process import ProcessCheck
-import common
 import pytest
+from mock import patch
+
+from datadog_checks.process import ProcessCheck
+from . import common
 
 # cross-platform switches
 _PSUTIL_IO_COUNTERS = True
@@ -21,7 +21,7 @@ except Exception:
 _PSUTIL_MEM_SHARED = True
 try:
     p = psutil.Process(os.getpid())
-    p.memory_info_ex().shared
+    p.memory_info().shared
 except Exception:
     _PSUTIL_MEM_SHARED = False
 
@@ -39,13 +39,6 @@ class MockProcess(object):
 
 def get_psutil_proc():
     return psutil.Process(os.getpid())
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 def noop_get_pagefault_stats(pid):
@@ -260,13 +253,48 @@ def test_check_real_process(aggregator):
     aggregator.assert_metric('system.processes.cpu.normalized_pct', count=1, tags=expected_tags)
 
 
-def test_relocated_procfs(aggregator):
+def test_check_real_process_regex(aggregator):
+    "Check to specifically find this python pytest running process using regex."
     from datadog_checks.utils.platform import Platform
+
+    instance = {
+        'name': 'py',
+        'search_string': ['.*python.*pytest'],
+        'exact_match': False,
+        'ignored_denied_access': True,
+        'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
+    }
+    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    expected_tags = generate_expected_tags(instance)
+    process.check(instance)
+    for mname in common.PROCESS_METRIC:
+        # cases where we don't actually expect some metrics here:
+        #  - if io_counters() is not available
+        #  - if memory_info_ex() is not available
+        #  - first run so no `cpu.pct`
+        if (not _PSUTIL_IO_COUNTERS and '.io' in mname) or (not _PSUTIL_MEM_SHARED and 'mem.real' in mname) \
+                or mname == 'system.processes.cpu.pct':
+            continue
+
+        if Platform.is_windows():
+            metric = common.UNIX_TO_WINDOWS_MAP.get(mname, mname)
+        else:
+            metric = mname
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:py'])
+
+    # this requires another run
+    process.check(instance)
+    aggregator.assert_metric('system.processes.cpu.pct', count=1, tags=expected_tags)
+    aggregator.assert_metric('system.processes.cpu.normalized_pct', count=1, tags=expected_tags)
+
+
+def test_relocated_procfs(aggregator):
     import tempfile
     import shutil
     import uuid
 
-    already_linux = Platform.is_linux()
     unique_process_name = str(uuid.uuid4())
     my_procfs = tempfile.mkdtemp()
 
@@ -287,7 +315,18 @@ def test_relocated_procfs(aggregator):
             'stat': (
                 '1 ({}) S 0 1 1 ' + ' 0' * 46
             ).format(unique_process_name),
+            'statm': '10970 3014 2404 77 0 2242 0',
             'cmdline': unique_process_name,
+            'fd': {},
+            'io': (
+                'rchar: 397865373\n'
+                'wchar: 32186\n'
+                'syscr: 2695852\n'
+                'syscw: 202\n'
+                'read_bytes: 1208320\n'
+                'write_bytes: 0\n'
+                'cancelled_write_bytes: 0\n'
+            ),
         },
         'stat': (
             "cpu  13034 0 18596 380856797 2013 2 2962 0 0 0\n"
@@ -307,47 +346,17 @@ def test_relocated_procfs(aggregator):
             'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
         }]
     }
-    version = int(psutil.__version__.replace(".", ""))
     process = ProcessCheck(common.CHECK_NAME, config['init_config'], {}, config['instances'])
 
     try:
-        def import_mock(name, i_globals={}, i_locals={}, fromlist=[],
-                        level=-1, orig_import=__import__):
-            # _psutil_linux and _psutil_posix are the
-            #  C bindings; use a mock for those
-            if name in ('_psutil_linux', '_psutil_posix') or level >= 1 and\
-               ('_psutil_linux' in fromlist or '_psutil_posix' in fromlist):
-                m = MagicMock()
-                # the import system will ask us for our own name
-                m._psutil_linux = m
-                m._psutil_posix = m
-                # there's a version safety check in psutil/__init__.py;
-                # this skips it
-                m.version = version
-                return m
-            return orig_import(name, i_globals, i_locals, fromlist, level)
-        # contextlib.nested is deprecated in favor of with MGR1, MGR2, ... etc
-        # but we have too many mocks to fit on one line and apparently \ line
-        # continuation is not flake8 compliant, even when semantically
-        # required (as here). Patch is unlikely to throw errors that are
-        # suppressed, so the main downside of contextlib is avoided.
-        with contextlib.nested(patch('sys.platform', 'linux'),
-                               patch('socket.AF_PACKET', create=True),
-                               patch('__builtin__.__import__',
-                               side_effect=import_mock)):
-            if not already_linux:
-                # Reloading psutil fails on linux, but we only
-                # need to do so if we didn't start out on a linux platform
-                reload(psutil)
-            assert Platform.is_linux()
+        with patch('socket.AF_PACKET', create=True), \
+                patch('sys.platform', 'linux'), \
+                patch('psutil._psutil_linux'), \
+                patch('psutil._psutil_posix'):
             process.check(config["instances"][0])
     finally:
         shutil.rmtree(my_procfs)
-        if not already_linux:
-            # restore the original psutil that doesn't have our mocks
-            reload(psutil)
-        else:
-            psutil.PROCFS_PATH = '/proc'
+        psutil.PROCFS_PATH = '/proc'
 
     expected_tags = generate_expected_tags(config['instances'][0])
     expected_tags += ['process:moved_procfs']

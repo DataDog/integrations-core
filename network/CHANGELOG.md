@@ -1,5 +1,10 @@
 # CHANGELOG - network
 
+## 1.6.1 / 2018-09-04
+
+* [Fixed] Retrieve no_proxy directly from the Datadog Agent's configuration. See [#2004](https://github.com/DataDog/integrations-core/pull/2004).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.6.0 / 2018-06-07
 
 * [Added] Add monotonic counts for some metrics. See [#1551](https://github.com/DataDog/integrations-core/pull/1551). Thanks [jalaziz](https://github.com/jalaziz).

@@ -1,0 +1,11 @@
+version: '2'
+services:
+
+  fluentd:
+    image: fluent/fluentd:${FLUENTD_VERSION}
+    ports:
+      - 24220:24220
+    volumes:
+      - ${TD_AGENT_CONF_PATH}:/fluentd/etc/td-agent.conf
+    environment:
+      - FLUENTD_CONF=td-agent.conf

@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from .mixins import PrometheusScraperMixin
-
-from .. import AgentCheck
+from ..base import AgentCheck
 from ...errors import CheckException
+
+from six import string_types
 
 
 class PrometheusScraper(PrometheusScraperMixin):
@@ -28,7 +28,6 @@ class PrometheusScraper(PrometheusScraperMixin):
         """
         _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
         self.check.rate('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
-
 
     def _submit_gauge(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """
@@ -63,7 +62,9 @@ class PrometheusScraper(PrometheusScraperMixin):
                 if self.labels_mapper is not None and label.name in self.labels_mapper:
                     tag_name = self.labels_mapper[label.name]
                 _tags.append('{}:{}'.format(tag_name, label.value))
-        return self._finalize_tags_to_submit(_tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname)
+        return self._finalize_tags_to_submit(
+            _tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname
+        )
 
     def _submit_service_check(self, *args, **kwargs):
         self.check.service_check(*args, **kwargs)
@@ -83,10 +84,12 @@ class GenericPrometheusCheck(AgentCheck):
         - bar
         - foo
     """
-    def __init__(self, name, init_config, agentConfig, instances=None, default_instances={}, default_namespace=""):
+    DEFAULT_METRIC_LIMIT = 2000
+
+    def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=""):
         super(GenericPrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
         self.scrapers_map = {}
-        self.default_instances = default_instances
+        self.default_instances = default_instances if default_instances is not None else {}
         self.default_namespace = default_namespace
         for instance in instances:
             self.get_scraper(instance)
@@ -112,7 +115,6 @@ class GenericPrometheusCheck(AgentCheck):
                 rate_metrics.append(metric)
                 type_overrides[metric] = "gauge"
         return rate_metrics
-
 
     def get_scraper(self, instance):
         namespace = instance.get("namespace", "")
@@ -140,7 +142,7 @@ class GenericPrometheusCheck(AgentCheck):
         # We merge list and dictionnaries from optional defaults & instance settings
         metrics = default_instance.get("metrics", []) + instance.get("metrics", [])
         for metric in metrics:
-            if isinstance(metric, basestring):
+            if isinstance(metric, string_types):
                 metrics_mapper[metric] = metric
             else:
                 metrics_mapper.update(metric)

@@ -10,6 +10,8 @@ class LinkerdCheck(GenericPrometheusCheck):
     """
     Collect linkerd metrics from Prometheus
     """
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         labels_mapper = {
             'rt' : 'linkerd_router',

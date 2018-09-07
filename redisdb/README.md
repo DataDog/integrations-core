@@ -12,7 +12,7 @@ The Redis check is included in the [Datadog Agent][1] package, so you don't need
 
 ### Configuration
 
-Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9] to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample redis.d/conf.yaml][2] for all available configuration options.
 
 #### Metric Collection
@@ -25,8 +25,8 @@ init_config:
 instances:
   - host: localhost
     port: 6379 # or wherever your Redis listens
-#   unix_socket_path: /var/run/redis/redis.sock # if your Redis uses a socket instead of TCP
-#   password: myredispassword                   # if your Redis requires auth
+  # unix_socket_path: /var/run/redis/redis.sock # if your Redis uses a socket instead of TCP
+  # password: myredispassword                   # if your Redis requires auth
 ```
 
 Configuration Options:
@@ -231,3 +231,4 @@ Read our [series of blog posts][8] about how to monitor your Redis servers with 
 [6]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
 [7]: https://docs.datadoghq.com/developers/integrations/
 [8]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

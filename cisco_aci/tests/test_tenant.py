@@ -110,14 +110,14 @@ def session_mock():
 
 def test_tenant_end_to_end(aggregator, session_mock):
     check = CiscoACICheck(conftest.CHECK_NAME, {}, {})
-    api = Api(conftest.ACI_URLS, conftest.USERNAME, conftest.PASSWORD, log=check.log, sessions=[session_mock])
+    api = Api(conftest.ACI_URLS, conftest.USERNAME,
+              password=conftest.PASSWORD, log=check.log, sessions=[session_mock])
     api._refresh_sessions = False
     check._api_cache[hash_mutable(conftest.CONFIG_WITH_TAGS)] = api
 
     check.check(conftest.CONFIG_WITH_TAGS)
 
     tags = ['project:cisco_aci', 'tenant:DataDog']
-    # TODO pretty much everything is 0 and without hostname??
     metric_name = 'cisco_aci.tenant.ingress_bytes.multicast.rate'
     aggregator.assert_metric(metric_name, value=0.0, tags=['endpoint_group:DtDg-Pay',
                                                            'application:DtDg-AP1-EcommerceApp'] + tags, hostname='')

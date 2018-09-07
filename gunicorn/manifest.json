@@ -1,24 +1,23 @@
 {
+  "categories": [
+    "web",
+    "log collection"
+  ],
+  "creates_events": false,
+  "display_name": "Gunicorn",
+  "guid": "5347bfe1-2e9b-4c92-9410-48b8659ce10f",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "gunicorn.",
+  "metric_to_check": "gunicorn.workers",
   "name": "gunicorn",
-  "display_name": "Gunicorn",
-  "creates_events": true,
-  "metric_to_check": "gunicorn.request.duration.avg",
+  "public_title": "Datadog-Gunicorn Integration",
   "short_description": "Monitor request rates and durations, log-message rates, and worker processes.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "guid": "5347bfe1-2e9b-4c92-9410-48b8659ce10f",
-  "public_title": "Datadog-Gunicorn Integration",
-  "categories": [
-    "web",
-    "log collection"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/gunicorn/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

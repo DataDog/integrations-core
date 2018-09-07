@@ -1,4 +1,5 @@
 # Haproxy Integration
+
 ![HAProxy Out of the box Dashboard][1]
 
 ## Overview
@@ -20,7 +21,7 @@ The HAProxy check is packaged with the Agent. To start gathering your HAProxy me
 
 ### Configuration
 
-Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HAProxy [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][18] to start collecting your HAProxy [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample haproxy.d/conf.yaml][6] for all available configuration options.
 
 #### Prepare HAProxy
@@ -126,3 +127,4 @@ Need help? Contact [Datadog Support][14].
 [15]: https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/
 [16]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/
 [17]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/
+[18]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

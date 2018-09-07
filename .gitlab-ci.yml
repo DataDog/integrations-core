@@ -1,25 +1,5 @@
-stages:
-  - ci-image
-  - wheels
-
-variables:
-  CURRENT_CI_IMAGE: 1
-
-ci-image:
-  stage: ci-image
-  when: manual
-  except: [ tags, schedules ]
+test:
+  only:
+    - master
+  script: if [ -n "$DD_TEST_CMD" ] ; then eval "$DD_TEST_CMD" ; else echo "skipping, DD_TEST_CMD is not set" ; fi
   tags: [ "runner:main", "size:large" ]
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  services:
-    - 486234852809.dkr.ecr.us-east-1.amazonaws.com/remote-docker:latest
-  script:
-    - docker build --tag 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:$CURRENT_CI_IMAGE .
-    - docker push 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:$CURRENT_CI_IMAGE
-
-wheels:
-  stage: wheels
-  tags: [ "runner:main", "size:large" ]
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:latest
-  script:
-    - echo $(git describe --abbrev=0 --tags)

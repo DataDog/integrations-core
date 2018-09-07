@@ -1,5 +1,7 @@
 # MySQL check
 
+![MySQL Dashboard][30]
+
 ## Overview
 
 The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
@@ -19,7 +21,7 @@ The MySQL check is included in the [Datadog Agent][13] package, so you don't nee
 
 ### Configuration
 
-Edit `conf.d/mysql.d/conf.yaml` in the root of your Agent's configuration directory in order to connect the Agent to your MySQL server. You will begin collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection) right away. See the [sample configuration file][16] for all available configuration options.
+Edit `conf.d/mysql.d/conf.yaml` in the root of your [Agent's configuration directory][31] in order to connect the Agent to your MySQL server. You will begin collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection) right away. See the [sample configuration file][16] for all available configuration options.
 
 #### Prepare MySQL
 
@@ -27,6 +29,13 @@ On each MySQL server, create a database user for the Datadog Agent:
 
 ```
 mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
+Query OK, 0 rows affected (0.00 sec)
+```
+
+For mySQL 8.0+ create the `datadog` user with the native password hashing method:
+
+```
+mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -51,6 +60,13 @@ mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CO
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 
 mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
+Query OK, 0 rows affected (0.00 sec)
+```
+
+For mySQL 8.0+ set `max_user_connections` with:
+
+```
+mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -168,7 +184,7 @@ See our [sample mysql.yaml][16] for all available configuration options, includi
           # log_processing_rules:
           #   - type: multi_line
           #     name: new_log_start_with_date
-          #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+          #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
     ```
     See our [sample mysql.yaml][16] for all available configuration options, including those for custom metrics.
 
@@ -352,7 +368,7 @@ Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherw
 * [How to collect metrics from custom MySQL queries][25]
 * [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][26]
 * [How can I collect more metrics from my SQL Server integration?][27]
-* [Database user lacks privileges][28]
+* [Database user lacks privileges][28]
 
 ## Further Reading
 Read our [series of blog posts][29] about monitoring MySQL with Datadog.
@@ -375,3 +391,5 @@ Read our [series of blog posts][29] about monitoring MySQL with Datadog.
 [27]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration
 [28]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges
 [29]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/
+[30]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png
+[31]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

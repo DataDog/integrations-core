@@ -10,16 +10,13 @@ init_config:
   #
   # custom_metrics:
 
-    # This is a basic custom metric. There is not instance associated with
-    # this counter.
+    # This is a basic custom metric. There is no instance associated with
+    # this counter. You can specify optional tags to be sent.
     #
     # - name: sqlserver.clr.execution
     #   counter_name: CLR Execution
-    #
-    # You can also use the object_name.
-    #
-    # - name: sqlserver.cache.hit_ratio
-    #   object_name: Cache Hit Ratio
+    #   tags:
+    #     - tag_name:value
 
     # The counter_name field uses the counter name of SQL server database objects
     # https://docs.microsoft.com/en-us/sql/relational-databases/performance-monitor/sql-server-databases-object
@@ -30,6 +27,13 @@ init_config:
     # - name: sqlserver.exec.in_progress
     #   counter_name: OLEDB calls
     #   instance_name: Cumulative execution time (ms) per second
+
+    # You can also query by the object_name for finer granularity.
+    #
+    # - name: sqlserver.cache.hit_ratio
+    #   counter_name: Cache Hit Ratio
+    #   instance_name: SQL Plans
+    #   object_name: SQLServer:Plan Cache
 
     # This counter has multiple instances associated with it and we want
     # every instance available. We'll use the special case ALL instance
@@ -99,6 +103,15 @@ instances:
    # All '%' characters must be escaped as '%%'.
 
   - host: HOST,PORT
+
+    # Optional. Choose the ADO provider.  Note that the (default) provider
+    # SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
+    # provider, set the adoprovider to "MSOLEDBSQL" below.  You will also need
+    # to download the new provider from
+    # https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
+
+    # adoprovider: MSOLEDBSQL
+
     # Optional, change the connection method from adodbapi (the default) to
     # odbc (valid connector names are 'odbc' and 'adodbapi')
     # odbc is only available on Windows

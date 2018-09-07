@@ -13,7 +13,7 @@ The StatsD check is included in the [Datadog Agent][1] package, so you don't nee
 
 ### Configuration
 
-1. Edit the `statsd.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample statsd.d/conf.yaml][2] for all available configuration options:
+1. Edit the `statsd.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample statsd.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
         init_config:
@@ -70,3 +70,4 @@ To get a better idea of how (or why) to visualize StatsD metrics with Counts Gra
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/statsd/
 [8]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing/
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

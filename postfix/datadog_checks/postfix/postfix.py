@@ -7,8 +7,9 @@
 import os
 
 # project
-from checks import AgentCheck
-from utils.subprocess_output import get_subprocess_output
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.subprocess_output import get_subprocess_output
+
 
 class PostfixCheck(AgentCheck):
     """
@@ -156,9 +157,12 @@ class PostfixCheck(AgentCheck):
 
         self.log.debug('Postfix Version: %s' % postfix_version)
 
-        self.gauge('postfix.queue.size', active_count, tags=tags + ['queue:active', 'instance:{}'.format(postfix_config_dir)])
-        self.gauge('postfix.queue.size', hold_count, tags=tags + ['queue:hold', 'instance:{}'.format(postfix_config_dir)])
-        self.gauge('postfix.queue.size', deferred_count, tags=tags + ['queue:deferred', 'instance:{}'.format(postfix_config_dir)])
+        self.gauge('postfix.queue.size', active_count,
+                   tags=tags + ['queue:active', 'instance:{}'.format(postfix_config_dir)])
+        self.gauge('postfix.queue.size', hold_count,
+                   tags=tags + ['queue:hold', 'instance:{}'.format(postfix_config_dir)])
+        self.gauge('postfix.queue.size', deferred_count,
+                   tags=tags + ['queue:deferred', 'instance:{}'.format(postfix_config_dir)])
 
     def _get_queue_count(self, directory, queues, tags):
         for queue in queues:
@@ -176,13 +180,15 @@ class PostfixCheck(AgentCheck):
                 if test_sudo == 0:
                     # default to `root` for backward compatibility
                     postfix_user = self.init_config.get('postfix_user', 'root')
-                    output, _, _ = get_subprocess_output(['sudo', '-u', postfix_user, 'find', queue_path, '-type', 'f'], self.log, False)
+                    cmd = ['sudo', '-u', postfix_user, 'find', queue_path, '-type', 'f']
+                    output, _, _ = get_subprocess_output(cmd, self.log, False)
                     count = len(output.splitlines())
                 else:
                     raise Exception('The dd-agent user does not have sudo access')
 
             # emit an individually tagged metric
-            self.gauge('postfix.queue.size', count, tags=tags + ['queue:{}'.format(queue), 'instance:{}'.format(os.path.basename(directory))])
+            self.gauge('postfix.queue.size', count,
+                       tags=tags + ['queue:{}'.format(queue), 'instance:{}'.format(os.path.basename(directory))])
             # these can be retrieved in a single graph statement
             # for example:
             #     sum:postfix.queue.size{instance:postfix-2,queue:incoming,host:hostname.domain.tld}

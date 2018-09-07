@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import warnings
 from time import time as timestamp
 
 import requests
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
+from datadog_checks.config import is_affirmative
 from datadog_checks.utils.containers import hash_mutable
 from .errors import ApiUnreachable
 
@@ -51,8 +53,10 @@ class Vault(AgentCheck):
         url = config['api_url'] + '/sys/leader'
         leader_data = self.access_api(url, config, tags).json()
 
-        is_leader = _is_affirmative(leader_data.get('is_self'))
+        is_leader = is_affirmative(leader_data.get('is_self'))
         tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
+
+        self.gauge('vault.is_leader', int(is_leader), tags=tags)
 
         current_leader = leader_data.get('leader_address')
         previous_leader = config['leader']
@@ -82,13 +86,13 @@ class Vault(AgentCheck):
         if vault_version:
             tags.append('vault_version:{}'.format(vault_version))
 
-        unsealed = not _is_affirmative(health_data.get('sealed'))
+        unsealed = not is_affirmative(health_data.get('sealed'))
         if unsealed:
             self.service_check(self.SERVICE_CHECK_UNSEALED, AgentCheck.OK, tags=tags)
         else:
             self.service_check(self.SERVICE_CHECK_UNSEALED, AgentCheck.CRITICAL, tags=tags)
 
-        initialized = _is_affirmative(health_data.get('initialized'))
+        initialized = is_affirmative(health_data.get('initialized'))
         if initialized:
             self.service_check(self.SERVICE_CHECK_INITIALIZED, AgentCheck.OK, tags=tags)
         else:
@@ -122,14 +126,15 @@ class Vault(AgentCheck):
             password = instance.get('password')
             config['auth'] = (username, password) if username and password else None
 
-            config['ssl_verify'] = _is_affirmative(instance.get('ssl_verify', True))
+            config['ssl_verify'] = is_affirmative(instance.get('ssl_verify', True))
+            config['ssl_ignore_warning'] = is_affirmative(instance.get('ssl_ignore_warning', False))
             config['proxies'] = self.get_instance_proxy(instance, config['api_url'])
             config['timeout'] = int(instance.get('timeout', 20))
             config['tags'] = instance.get('tags', [])
 
             # Keep track of the previous cluster leader to detect changes.
             config['leader'] = None
-            config['detect_leader'] = _is_affirmative(instance.get('detect_leader'))
+            config['detect_leader'] = is_affirmative(instance.get('detect_leader'))
 
             self.config[instance_id] = config
 
@@ -137,14 +142,18 @@ class Vault(AgentCheck):
 
     def access_api(self, url, config, tags):
         try:
-            response = requests.get(
-                url,
-                auth=config['auth'],
-                verify=config['ssl_verify'],
-                proxies=config['proxies'],
-                timeout=config['timeout'],
-                headers=config['headers']
-            )
+            with warnings.catch_warnings():
+                if config['ssl_ignore_warning']:
+                    warnings.simplefilter('ignore', InsecureRequestWarning)
+
+                response = requests.get(
+                    url,
+                    auth=config['auth'],
+                    verify=config['ssl_verify'],
+                    proxies=config['proxies'],
+                    timeout=config['timeout'],
+                    headers=config['headers']
+                )
         except requests.exceptions.Timeout:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, config['timeout'])
             self.service_check(

@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  sqlserver:
+    # https://hub.docker.com/r/microsoft/mssql-server-linux
+    # https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-linux-2017
+    image: microsoft/mssql-server-linux:2017-CU9
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123
+    ports:
+      - "1433:1433"

@@ -26,8 +26,8 @@ The NGINX check is included in the [Datadog Agent][1] package, so you don't need
 
 The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
 
-* [stub status module][2] – for open source NGINX
-* [http status module][3] – only for NGINX Plus
+* [stub status module][2] - for open source NGINX
+* [http status module][3] - only for NGINX Plus
 
 NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to **Configuration** now.
 For NGINX Plus release 13 and above, the status module is deprecated and you should use the new Plus API instead. See [the announcement][4] for more information.
@@ -39,11 +39,11 @@ $ nginx -V 2>&1| grep -o http_stub_status_module
 http_stub_status_module
 ```
 
-If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX—enabling the module as you compile it—but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
+If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX-enabling the module as you compile it-but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
 ### Configuration
 
-Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][15] to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample nginx.d/conf.yaml][5] for all available configuration options.
 
 #### Prepare NGINX
@@ -223,4 +223,5 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 [11]: https://www.datadoghq.com/blog/how-to-monitor-nginx/
 [12]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
 [13]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
-[14]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/nginx/nginx.jpg
+[14]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
+[15]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

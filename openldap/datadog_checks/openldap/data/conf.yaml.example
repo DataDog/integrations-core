@@ -1,0 +1,26 @@
+init_config:
+
+# List of instances describing your OpenLDAP servers to monitor.
+instances:
+  - url: ldaps://localhost:636  # Mandatory: full URL of your ldap server. Use `ldaps` or `ldap` as the scheme to use TLS or not, or `ldapi` to connect to a UNIX socket.
+  	#
+    # username: dc=monitor,dc=yourdomain  # Optional: the DN of the user that can read the monitor database.
+    # password: pass  # Optional: the password of the above user.
+    #
+    # ssl_key: /path/to/client/key.pem  # Optional: Path to the client private key file, in PEM format.
+    # ssl_cert: /path/to/client/cert.pem  # Optional: Path to the client certificate file. If you don't specify key, it will be taken from the certificate file, in PEM format.
+    # ssl_ca_certs: /path/to/ca/certs  # Optional: Path to a directory containing CA certificates, or a file containing a bundle of certificates, in PEM format.
+    # ssl_verify: true  # Optional: Whether or not to perform server certificate validation. Default to true.
+    #
+    # custom_queries:  # Optional: With this parameter, you can specify custom search queries that will be run by the check, which will send metrics for the duration of the query, and the number of results.
+    #   - name: foo  # Mandatory: A name to identify your query. It will be used to tag the metrics for this query.
+    #     search_base: dc=yourdomain  # Mandatory: the search base for the query
+    #     search_filter: (objectClass=*)  # Mandatory: the search filter for your query
+    #     search_scope: subtree  # Optional: one of `base`, `level`, `subtree`. Default to `subtree`.
+    #     attributes: # Optional: list of attributes to query
+    #       - *
+    #     username: dc=user,dc=yourdomain  # Optional: The user you want to bind to perform the query. Don't specify the option if you want to use the same user as for the monitor backend. Set to empty string `""` for an anonymous bind.
+    #     password: foobar  # Optional: The password of the above user.
+    #
+    # tags:  # Optional: additional list of tags to attach to the metrics sent by the integration to better identify the instance
+    #   - key:value

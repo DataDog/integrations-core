@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 import logging
-import os
 import re
 import json
 import copy
 import traceback
 import unicodedata
+
+from six import iteritems, text_type
 
 try:
     import datadog_agent
@@ -25,6 +26,15 @@ except ImportError:
 from ..config import is_affirmative
 from ..utils.common import ensure_bytes
 from ..utils.proxy import config_proxy_skip
+from ..utils.limiter import Limiter
+
+
+# Metric types for which it's only useful to submit once per context
+ONE_PER_CONTEXT_METRIC_TYPES = [
+    aggregator.GAUGE,
+    aggregator.RATE,
+    aggregator.MONOTONIC_COUNT,
+]
 
 
 class AgentCheck(object):
@@ -33,17 +43,30 @@ class AgentCheck(object):
     """
     OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
 
+    """
+    DEFAULT_METRIC_LIMIT allows to set a limit on metric contexts this check can send
+    per run. This is useful for check that have an unbounded number of contexts,
+    depending on the input payload.
+    The logic counts one context per gauge/rate/monotonic_count call, and deduplicates
+    contexts for other metric types. The first N contexts in submission order will
+    be sent to the aggregator, the rest are dropped. The state is reset after each run.
+
+    See https://github.com/DataDog/integrations-core/pull/2093 for more information
+    """
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, *args, **kwargs):
         """
         args: `name`, `init_config`, `agentConfig` (deprecated), `instances`
         """
         self.metrics = defaultdict(list)
-        self.check_id = ''
+        self.check_id = b''
         self.instances = kwargs.get('instances', [])
         self.name = kwargs.get('name', '')
         self.init_config = kwargs.get('init_config', {})
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
+        self.metric_limiter = None
 
         if len(args) > 0:
             self.name = args[0]
@@ -78,7 +101,7 @@ class AgentCheck(object):
         self._deprecations = {
             'increment': [
                 False,
-                "DEPRECATION NOTICE: `AgentCheck.increment`/`AgentCheck.decrement` are deprecated, please use " +
+                "DEPRECATION NOTICE: `AgentCheck.increment`/`AgentCheck.decrement` are deprecated, please use "
                 "`AgentCheck.gauge` or `AgentCheck.count` instead, with a different metric name",
             ],
             'device_name': [
@@ -97,6 +120,19 @@ class AgentCheck(object):
             ],
         }
 
+        # Setup metric limits
+        try:
+            metric_limit = self.instances[0].get("max_returned_metrics", self.DEFAULT_METRIC_LIMIT)
+            # Do not allow to disable limiting if the class has set a non-zero default value
+            if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
+                metric_limit = self.DEFAULT_METRIC_LIMIT
+                self.warning("Setting max_returned_metrics to zero is not allowed," +
+                             "reverting to the default of {} metrics".format(self.DEFAULT_METRIC_LIMIT))
+        except Exception:
+            metric_limit = self.DEFAULT_METRIC_LIMIT
+        if metric_limit > 0:
+            self.metric_limiter = Limiter("metrics", metric_limit, self.warning)
+
     @property
     def in_developer_mode(self):
         self._log_deprecation('in_developer_mode')
@@ -104,7 +140,6 @@ class AgentCheck(object):
 
     def get_instance_proxy(self, instance, uri, proxies=None):
         proxies = proxies if proxies is not None else self.proxies.copy()
-        proxies['no'] = os.getenv('no_proxy', os.getenv('NO_PROXY', None))
 
         deprecated_skip = instance.get('no_proxy', None)
         skip = (
@@ -117,6 +152,9 @@ class AgentCheck(object):
 
         return config_proxy_skip(proxies, uri, skip)
 
+    def _context_uid(mtype, name, value, tags=None, hostname=None):
+        return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
+
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
             # ignore metric sample
@@ -124,9 +162,20 @@ class AgentCheck(object):
 
         tags = self._normalize_tags(tags, device_name)
         if hostname is None:
-            hostname = ""
+            hostname = b''
 
-        aggregator.submit_metric(self, self.check_id, mtype, name, float(value), tags, hostname)
+        if self.metric_limiter:
+            if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
+                # Fast path for gauges, rates, monotonic counters, assume one context per call
+                if self.metric_limiter.is_reached():
+                    return
+            else:
+                # Other metric types have a legit use case for several calls per context, track unique contexts
+                context = self._context_uid(mtype, name, tags, hostname)
+                if self.metric_limiter.is_reached(context):
+                    return
+
+        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), float(value), tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -176,9 +225,9 @@ class AgentCheck(object):
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in event.items():
+        for key, value in list(iteritems(event)):
             # transform the unicode objects to plain strings with utf-8 encoding
-            if isinstance(value, unicode):
+            if isinstance(value, text_type):
                 try:
                     event[key] = event[key].encode('utf-8')
                 except UnicodeError:
@@ -190,7 +239,7 @@ class AgentCheck(object):
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
-            event['aggregation_key'] = str(event['aggregation_key'])
+            event['aggregation_key'] = ensure_bytes(event['aggregation_key'])
         aggregator.submit_event(self, self.check_id, event)
 
     # TODO(olivier): implement service_metadata if it's worth it
@@ -209,7 +258,7 @@ class AgentCheck(object):
         :param fix_case A boolean, indicating whether to make sure that
                         the metric name returned is in underscore_case
         """
-        if isinstance(metric, unicode):
+        if isinstance(metric, text_type):
             metric_name = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
         else:
             metric_name = metric
@@ -301,8 +350,7 @@ class AgentCheck(object):
     def run(self):
         try:
             self.check(copy.deepcopy(self.instances[0]))
-            result = ''
-
+            result = b''
         except Exception as e:
             result = json.dumps([
                 {
@@ -310,6 +358,9 @@ class AgentCheck(object):
                     "traceback": traceback.format_exc(),
                 }
             ])
+        finally:
+            if self.metric_limiter:
+                self.metric_limiter.reset()
 
         return result
 

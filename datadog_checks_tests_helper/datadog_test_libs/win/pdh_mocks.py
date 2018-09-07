@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import os
-import pytest
-import mock
-import string
-import _winreg
 from collections import defaultdict
+
+import mock
+import pytest
+
+from six import PY3
+from six.moves import winreg
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,7 +20,11 @@ counters_index = defaultdict(list)
 
 @pytest.fixture
 def pdh_mocks_fixture():
-    regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueEx)
+    if PY3:
+        regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueEx)
+    else:
+        regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueEx)
+
     pdhlookupbyindex = mock.patch('win32pdh.LookupPerfNameByIndex', mock_LookupPerfNameByIndex)
     pdhenumobjectitems = mock.patch('win32pdh.EnumObjectItems', mock_EnumObjectItems)
     pdhmakecounterpath = mock.patch('win32pdh.MakeCounterPath', mock_MakeCounterPath)
@@ -42,7 +47,11 @@ def pdh_mocks_fixture():
 
 @pytest.fixture
 def pdh_mocks_fixture_bad_perf_strings():
-    regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueExWithRaise)
+    if PY3:
+        regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueExWithRaise)
+    else:
+        regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueExWithRaise)
+
     pdhlookupbyindex = mock.patch('win32pdh.LookupPerfNameByIndex', mock_LookupPerfNameByIndex)
     pdhenumobjectitems = mock.patch('win32pdh.EnumObjectItems', mock_EnumObjectItems)
     pdhmakecounterpath = mock.patch('win32pdh.MakeCounterPath', mock_MakeCounterPath)
@@ -118,7 +127,7 @@ def read_available_counters(fname):
                 inst = inst.strip()
                 counter = counter.strip()
             except ValueError:
-                print line
+                print(line)
                 raise
 
             counters_by_class[clss].add(counter)
@@ -133,7 +142,7 @@ def load_registry_values(fname):
     with open(fname) as f:
         linecount = 0
         for line in f:
-            line = string.strip(line)
+            line = line.strip()
             if not line or len(line) == 0:
                 if linecount % 2 == 0:
                     break
@@ -202,7 +211,7 @@ def mock_LookupPerfNameByIndex(machine_name, ndx):
 
 
 def mock_QueryValueEx(*args, **kwargs):
-    return (index_array, _winreg.REG_SZ)
+    return (index_array, winreg.REG_SZ)
 
 
 def mock_QueryValueExWithRaise(*args, **kwargs):

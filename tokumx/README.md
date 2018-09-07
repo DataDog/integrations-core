@@ -50,7 +50,7 @@ For more details about creating and managing users in MongoDB, refer to [the Mon
 
 #### Connect the Agent
 
-1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][9].
     See the [sample tokumx.d/conf.yaml][3] for all available configuration options:
 
     ```yaml
@@ -97,3 +97,4 @@ Need help? Contact [Datadog Support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications/
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

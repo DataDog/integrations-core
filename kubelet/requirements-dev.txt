@@ -1,0 +1,2 @@
+datadog-checks-dev
+requests-mock==1.4.0

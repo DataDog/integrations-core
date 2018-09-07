@@ -19,7 +19,7 @@ Optionally, you can configure the agent to use a built in `postqueue -p` command
 **WARNING**: Using `postqueue` to monitor the mail queues will not report a count of messages for the `incoming` queue.
 
 ### Using sudo
-Edit the file `postfix.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample postfix.d/conf.yaml][2] for all available configuration options:
+Edit the file `postfix.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample postfix.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -48,7 +48,7 @@ dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type 
 ```
 
 ### Using postqueue
-Edit the `postfix.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory:
+Edit the `postfix.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9]:
 
 ```
 init_config:
@@ -107,4 +107,5 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-postfix-queues/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/postfix/postfixgraph.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postfix/images/postfixgraph.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
