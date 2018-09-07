@@ -16,7 +16,7 @@ def trace_func(func):
         except ValueError:
             return func(*args, **kwargs)
         if is_affirmative(args[instance_index].get('trace_check', False)):
-            with tracer.trace('integration.check', service='IntegrationsTracing', resource=args[0].name):
+            with tracer.trace('integration.check', service='integrations-tracing', resource=args[0].name):
                 return func(*args, **kwargs)
         return func(*args, **kwargs)
     return function_wrapper
