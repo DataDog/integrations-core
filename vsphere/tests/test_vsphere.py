@@ -12,7 +12,9 @@ from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.errors import BadConfigError, ConnectionError
 from datadog_checks.vsphere.cache_config import CacheConfig
 from datadog_checks.vsphere.common import SOURCE_TYPE
-from datadog_checks.vsphere.vsphere import REFRESH_MORLIST_INTERVAL, REFRESH_METRICS_METADATA_INTERVAL
+from datadog_checks.vsphere.vsphere import (
+    REFRESH_MORLIST_INTERVAL, REFRESH_METRICS_METADATA_INTERVAL, RESOURCE_TYPE_METRICS
+)
 from .utils import assertMOR, MockedMOR
 from .utils import disable_thread_pool, get_mocked_server
 
@@ -87,7 +89,7 @@ def test__is_excluded():
     assert VSphereCheck._is_excluded(included_vm, {"customValue": []}, include_regexes, include_only_marked) is True
 
 
-def test__cache_morlist_raw_atomic(vsphere, instance):
+def test__cache_morlist_raw_async(vsphere, instance):
     """
     Explore the vCenter infrastructure to discover hosts, virtual machines.
 
@@ -149,6 +151,25 @@ def test__cache_morlist_raw_atomic(vsphere, instance):
         assertMOR(vsphere, instance, name="vm4", spec="vm", subset=True, tags=tags)
 
 
+def test__process_mor_objects_queue(vsphere, instance):
+    vsphere.log = MagicMock()
+    vsphere._process_mor_objects_queue(instance)
+    # Queue hasn't been initialized
+    vsphere.log.debug.assert_called_once_with(
+        "Objects queue is not initialized yet for instance {}, skipping processing"
+        .format(vsphere._instance_key(instance))
+    )
+
+    vsphere.batch_morlist_size = 1
+    i_key = vsphere._instance_key(instance)
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        vsphere._cache_morlist_raw(instance)
+        assert sum(vsphere.mor_objects_queue.size(i_key, resource_type) for resource_type in RESOURCE_TYPE_METRICS) == 8
+        vsphere._process_mor_objects_queue(instance)
+        # Object queue should be empty after processing
+        assert sum(vsphere.mor_objects_queue.size(i_key, resource_type) for resource_type in RESOURCE_TYPE_METRICS) == 0
+
+
 def test_check(vsphere, instance):
     """
     Test the check() method
@@ -159,40 +180,52 @@ def test_check(vsphere, instance):
             set_external_tags.assert_called_once()
             all_the_tags = set_external_tags.call_args[0][0]
 
-            assert ('vm4', {SOURCE_TYPE: [
-                                        'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
-                                        'vsphere_folder:folder1', 'vsphere_datacenter:datacenter2',
-                                        'vsphere_cluster:compute_resource2', 'vsphere_compute:compute_resource2',
-                                        'vsphere_host:host3', 'vsphere_host:host3', 'vsphere_type:vm'
-                            ]}) in all_the_tags
-            assert ('host1', {SOURCE_TYPE: [
-                                        'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
-                                        'vsphere_datacenter:datacenter1', 'vsphere_cluster:compute_resource1',
-                                        'vsphere_compute:compute_resource1', 'vsphere_type:host'
-                              ]}) in all_the_tags
-            assert ('host3', {SOURCE_TYPE: [
-                                        'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
-                                        'vsphere_folder:folder1', 'vsphere_datacenter:datacenter2',
-                                        'vsphere_cluster:compute_resource2', 'vsphere_compute:compute_resource2',
-                                        'vsphere_type:host'
-                              ]}) in all_the_tags
-            assert ('vm2', {SOURCE_TYPE: [
-                                        'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
-                                        'vsphere_folder:folder1', 'vsphere_datacenter:datacenter2',
-                                        'vsphere_cluster:compute_resource2', 'vsphere_compute:compute_resource2',
-                                        'vsphere_host:host3', 'vsphere_host:host3', 'vsphere_type:vm'
-                            ]}) in all_the_tags
-            assert ('vm1', {SOURCE_TYPE: [
-                                        'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
-                                        'vsphere_folder:folder1', 'vsphere_datacenter:datacenter2',
-                                        'vsphere_cluster:compute_resource2', 'vsphere_compute:compute_resource2',
-                                        'vsphere_host:host3', 'vsphere_host:host3', 'vsphere_type:vm'
-                            ]}) in all_the_tags
-            assert ('host2', {SOURCE_TYPE: [
-                                        'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
-                                        'vsphere_datacenter:datacenter1', 'vsphere_cluster:compute_resource1',
-                                        'vsphere_compute:compute_resource1', 'vsphere_type:host'
-                             ]}) in all_the_tags
+            assert ('vm4', {
+                SOURCE_TYPE: [
+                    'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
+                    'vsphere_folder:folder1', 'vsphere_datacenter:datacenter2',
+                    'vsphere_cluster:compute_resource2', 'vsphere_compute:compute_resource2',
+                    'vsphere_host:host3', 'vsphere_host:host3', 'vsphere_type:vm'
+                ]
+            }) in all_the_tags
+            assert ('host1', {
+                SOURCE_TYPE: [
+                    'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
+                    'vsphere_datacenter:datacenter1', 'vsphere_cluster:compute_resource1',
+                    'vsphere_compute:compute_resource1', 'vsphere_type:host'
+                ]
+            }) in all_the_tags
+            assert ('host3', {
+                SOURCE_TYPE: [
+                    'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
+                    'vsphere_folder:folder1', 'vsphere_datacenter:datacenter2',
+                    'vsphere_cluster:compute_resource2', 'vsphere_compute:compute_resource2',
+                    'vsphere_type:host'
+                ]
+            }) in all_the_tags
+            assert ('vm2', {
+                SOURCE_TYPE: [
+                    'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
+                    'vsphere_folder:folder1', 'vsphere_datacenter:datacenter2',
+                    'vsphere_cluster:compute_resource2', 'vsphere_compute:compute_resource2',
+                    'vsphere_host:host3', 'vsphere_host:host3', 'vsphere_type:vm'
+                ]
+            }) in all_the_tags
+            assert ('vm1', {
+                SOURCE_TYPE: [
+                    'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
+                    'vsphere_folder:folder1', 'vsphere_datacenter:datacenter2',
+                    'vsphere_cluster:compute_resource2', 'vsphere_compute:compute_resource2',
+                    'vsphere_host:host3', 'vsphere_host:host3', 'vsphere_type:vm'
+                ]
+            }) in all_the_tags
+            assert ('host2', {
+                SOURCE_TYPE: [
+                    'vcenter_server:vsphere_mock', 'vsphere_folder:rootFolder',
+                    'vsphere_datacenter:datacenter1', 'vsphere_cluster:compute_resource1',
+                    'vsphere_compute:compute_resource1', 'vsphere_type:host'
+                ]
+            }) in all_the_tags
 
 
 def test_service_check_ko(aggregator, instance):
