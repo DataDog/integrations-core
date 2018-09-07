@@ -7,7 +7,7 @@ from collections import defaultdict
 from copy import deepcopy
 
 import redis
-import six
+from six import iteritems
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
@@ -306,8 +306,7 @@ class Redis(AgentCheck):
                         lengths[key] += 0
 
         # send the metrics
-        print(lengths)
-        for key, total in six.iteritems(lengths):
+        for key, total in iteritems(lengths):
             self.gauge('redis.key.length', total, tags=tags + ['key:' + key])
             if total == 0 and instance.get("warn_on_missing_keys", True):
                 self.warning("{0} key not found in redis".format(key))
