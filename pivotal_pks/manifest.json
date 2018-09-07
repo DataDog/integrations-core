@@ -1,0 +1,23 @@
+{
+  "display_name": "Pivotal_pks",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "pivotal_pks",
+  "metric_prefix": "pivotal_pks.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "b0090603-01c8-4ad9-8f9a-4f3700bf065b",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Pivotal_pks Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": true
+}
