@@ -730,12 +730,12 @@ def freeze(ctx, no_deps):
     entries = []
     for check in checks:
         if check in AGENT_V5_ONLY:
-            echo_info('Check `{}` is only shipped with Agent 5, skipping')
+            echo_info('Check `{}` is only shipped with Agent 5, skipping'.format(check))
             continue
 
         try:
             version = get_version_string(check)
-            entries.append(get_agent_requirement_line(check, version))
+            entries.append('{}\n'.format(get_agent_requirement_line(check, version)))
         except Exception as e:
             echo_failure('Error generating line: {}'.format(e))
             continue
@@ -747,4 +747,4 @@ def freeze(ctx, no_deps):
     echo_success('Successfully wrote to `{}`!'.format(req_file))
 
     if not no_deps:
-        ctx.invoke(dep_freeze, lazy=False)
+        ctx.invoke(dep_freeze)
