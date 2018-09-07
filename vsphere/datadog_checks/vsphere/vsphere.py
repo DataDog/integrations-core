@@ -578,7 +578,7 @@ class VSphereCheck(AgentCheck):
                 continue
 
         # TEST-INSTRUMENTATION
-        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', time.time()-t,
+        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', time.time() - t,
                        tags=instance.get('tags', []))
 
     def _process_mor_objects_queue(self, instance):
@@ -589,31 +589,36 @@ class VSphereCheck(AgentCheck):
         i_key = self._instance_key(instance)
         self.mor_cache.init_instance(i_key)
 
+        if not self.mor_objects_queue.contains(i_key):
+            self.log.debug("Objects queue is not initialized yet for instance {}, skipping processing".format(i_key))
+            return
+
         for resource_type in RESOURCE_TYPE_METRICS:
             query_specs = []
             # Batch size can prevent querying large payloads at once if the environment is too large
             # If batch size is set to 0, process everything at once
             batch_size = self.batch_morlist_size or self.mor_objects_queue.size(i_key, resource_type)
-            for _ in xrange(batch_size):
-                mor = self.mor_objects_queue.pop(i_key, resource_type)
-                if mor is None:
-                    self.log.debug("No more objects of type '{}' left in the queue".format(resource_type))
-                    break
+            while self.mor_objects_queue.size(i_key, resource_type):
+                for _ in xrange(batch_size):
+                    mor = self.mor_objects_queue.pop(i_key, resource_type)
+                    if mor is None:
+                        self.log.debug("No more objects of type '{}' left in the queue".format(resource_type))
+                        break
 
-                mor_name = str(mor['mor'])
-                mor['interval'] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
-                # Always update the cache to account for Mors that might have changed parent
-                # in the meantime (e.g. a migrated VM).
-                self.mor_cache.set_mor(i_key, mor_name, mor)
+                    mor_name = str(mor['mor'])
+                    mor['interval'] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
+                    # Always update the cache to account for Mors that might have changed parent
+                    # in the meantime (e.g. a migrated VM).
+                    self.mor_cache.set_mor(i_key, mor_name, mor)
 
-                query_spec = vim.PerformanceManager.QuerySpec()
-                query_spec.entity = mor["mor"]
-                query_spec.intervalId = mor["interval"]
-                query_spec.maxSample = 1
-                query_specs.append(query_spec)
+                    query_spec = vim.PerformanceManager.QuerySpec()
+                    query_spec.entity = mor["mor"]
+                    query_spec.intervalId = mor["interval"]
+                    query_spec.maxSample = 1
+                    query_specs.append(query_spec)
 
-            if query_specs:
-                self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, query_specs))
+                if query_specs:
+                    self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, query_specs))
 
     def _cache_metrics_metadata(self, instance):
         """
