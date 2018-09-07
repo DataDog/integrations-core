@@ -25,7 +25,9 @@ LINK_DIR=.links
 STEP_NAME=tag
 
 # Record the (Yubikey-)signed hashes of all source files in this git repo.
-in-toto-run -n $STEP_NAME -p . -g $KEYID -x
+# NOTE: Exclude anything that looks like: (1) in-toto link metadata, (2) a git
+# object, (3) compiled Python bytecode, or (3) a vim swap file.
+in-toto-run -n $STEP_NAME -p . -g $KEYID -x --exclude "*.link*" ".git" "*.pyc" "*~" "*.*.swp"
 
 # Find this latest signed link metadata file on disk.
 LATEST_TAG_LINK=$(ls -At $STEP_NAME.*.link | head -n 1)
