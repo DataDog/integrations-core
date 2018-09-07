@@ -801,19 +801,23 @@ class OpenStackCheck(AgentCheck):
                                                  collect_hypervisor_load=collect_hypervisor_load)
 
     def get_stats_for_single_hypervisor(self, hyp, instance, custom_tags=None, split_hostname_on_first_period=False, collect_hypervisor_load=False):
-        self._hypervisor_name_cache[self._instance_key(instance)] = hyp['hypervisor_hostname']
+        hyp_hostname = hyp['hypervisor_hostname']
+        self._hypervisor_name_cache[self._instance_key(instance)] = hyp_hostname
         custom_tags = custom_tags or []
         tags = [
-            'hypervisor:{0}'.format(hyp['hypervisor_hostname']),
+            'hypervisor:{0}'.format(hyp_hostname),
             'hypervisor_id:{0}'.format(hyp['id']),
             'virt_type:{0}'.format(hyp['hypervisor_type']),
         ]
-        host_tags = self._get_host_aggregate_tag(hyp['hypervisor_hostname'],
+        host_tags = self._get_host_aggregate_tag(hyp_hostname,
                                                  split_hostname_on_first_period=split_hostname_on_first_period)
         tags.extend(host_tags)
         tags.extend(custom_tags)
         service_check_tags = list(custom_tags)
 
+        # This makes a request per hypervisor and only sends hypervisor_load 1/5/15
+        # Disable this by default for higher performance in a large environment
+        # If the Agent is installed on the hypervisors, system.load.1/5/15 is available
         if collect_hypervisor_load:
             try:
                 uptime = self.get_uptime_for_single_hypervisor(hyp['id'])
@@ -830,11 +834,11 @@ class OpenStackCheck(AgentCheck):
         hyp_state = hyp.get('state', None)
 
         if hyp_state is None:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN, hostname=hyp_hostname, tags=service_check_tags)
         elif hyp_state != self.HYPERVISOR_STATE_UP:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.CRITICAL, hostname=hyp_hostname, tags=service_check_tags)
         else:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, hostname=hyp_hostname, tags=service_check_tags)
 
         for label, val in hyp.iteritems():
             if label in NOVA_HYPERVISOR_METRICS:
