@@ -3,8 +3,20 @@
 # Bail on failure.
 set -e -x
 
+# Determine which gpg to call depending on OS.
+KERNEL=$(uname -s)
+if [ $KERNEL == "Linux" ]
+then
+  # If on Linux, assume we have gpg2.
+  GPG=$(which gpg2)
+else
+  # Otherwise, assume we are on macOS, and have gpg2 installed via Homebrew.
+  test $KERNEL == "Darwin"
+  GPG=$(which gpg)
+fi
+
 # Get the keyid of the GPG key on Yubikey.
-KEYID=$(gpg --card-status | grep 'sec>' | awk '{print $2}' | cut -f2 -d/)
+KEYID=$($GPG --card-status | grep -E 'sec(>|#)' | awk '{print $2}' | cut -f2 -d/)
 
 # The fixed, hidden directory in the git repo where link metadata are kept.
 LINK_DIR=.links
