@@ -936,20 +936,17 @@ class OpenStackCheck(AgentCheck):
                                            whitelist=self.include_project_name_rules,
                                            blacklist=self.exclude_project_name_rules
                                            )
-        for server in servers_copy.iteritems():
-            if server[1].get('project_name') not in projects_filtered:
+
+        for server in servers_copy:
+            if servers_copy[server].get('project_name') not in projects_filtered:
                 # This may have already been deleted if the server belongs to both
                 # the project blacklist AND the excluded server id list
                 try:
-                    del self.server_details_by_id[server[0]]
+                    del self.server_details_by_id[server]
                 except KeyError:
-                    self.log.debug("Server %s was already removed from the list", server[0])
+                    self.log.debug("Server %s was already removed from the list", server)
 
     def get_project_name_from_id(self, tenant_id):
-        # [TODO]
-        # As we are dealing with a lot of servers/projects now, we should cache this mapping
-        # The overhead isn't large after the first check run because after the first run we only get
-        # the list of servers that changed state.
         url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
         self.log.debug("Project URL is %s", url)
         headers = {'X-Auth-Token': self.get_auth_token()}
