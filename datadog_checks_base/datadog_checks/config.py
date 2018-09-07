@@ -18,3 +18,6 @@ def is_affirmative(value):
 
 # Compatibility layer for Agent5
 _is_affirmative = is_affirmative
+
+def noop():
+    pass
