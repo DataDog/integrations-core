@@ -1127,7 +1127,7 @@ class OpenStackCheck(AgentCheck):
                 self.service_check(
                     self.IDENTITY_API_SC,
                     AgentCheck.OK,
-                    tags=["server:%s" % self.init_config.get("keystone_server_url")] + custom_tags,
+                    tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + custom_tags,
                 )
             except KeystoneUnreachable as e:
                 self.warning(
