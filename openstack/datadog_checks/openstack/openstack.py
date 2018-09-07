@@ -791,15 +791,16 @@ class OpenStackCheck(AgentCheck):
         uptime = resp['hypervisor']['uptime']
         return self._parse_uptime_string(uptime)
 
-    def get_stats_for_all_hypervisors(self, instance, custom_tags=None, split_hostname_on_first_period=False):
+    def get_stats_for_all_hypervisors(self, instance, custom_tags=None, split_hostname_on_first_period=False, collect_hypervisor_load=False):
         url = '{0}/os-hypervisors/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
         for hyp in resp.get('hypervisors'):
             self.get_stats_for_single_hypervisor(hyp, instance, custom_tags=custom_tags,
-                                                 split_hostname_on_first_period=split_hostname_on_first_period)
+                                                 split_hostname_on_first_period=split_hostname_on_first_period,
+                                                 collect_hypervisor_load=collect_hypervisor_load)
 
-    def get_stats_for_single_hypervisor(self, hyp, instance, custom_tags=None, split_hostname_on_first_period=False):
+    def get_stats_for_single_hypervisor(self, hyp, instance, custom_tags=None, split_hostname_on_first_period=False, collect_hypervisor_load=False):
         self._hypervisor_name_cache[self._instance_key(instance)] = hyp['hypervisor_hostname']
         custom_tags = custom_tags or []
         tags = [
@@ -813,23 +814,20 @@ class OpenStackCheck(AgentCheck):
         tags.extend(custom_tags)
         service_check_tags = list(custom_tags)
 
-        try:
-            uptime = self.get_uptime_for_single_hypervisor(hyp['id'])
-        except Exception as e:
-            self.warning('Unable to get uptime for hypervisor {0}: {1}'.format(hyp['id'], str(e)))
-            uptime = {}
+        if collect_hypervisor_load:
+            try:
+                uptime = self.get_uptime_for_single_hypervisor(hyp['id'])
+            except Exception as e:
+                self.warning('Unable to get uptime for hypervisor {0}: {1}'.format(hyp['id'], str(e)))
+                uptime = {}
+
+            load_averages = uptime.get("loads")
+            if load_averages is not None:
+                assert len(load_averages) == 3
+                for i, avg in enumerate([1, 5, 15]):
+                    self.gauge('openstack.nova.hypervisor_load.{0}'.format(avg), load_averages[i], tags=tags)
 
         hyp_state = hyp.get('state', None)
-        if hyp_state is None:
-            try:
-                # Fall back for pre Nova v2.1 to the uptime response
-                if uptime.get('uptime_sec', 0) > 0:
-                    hyp_state = self.HYPERVISOR_STATE_UP
-                else:
-                    hyp_state = self.HYPERVISOR_STATE_DOWN
-            except Exception:
-                # This creates the AgentCheck.UNKNOWN state
-                pass
 
         if hyp_state is None:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN, tags=service_check_tags)
@@ -842,12 +840,6 @@ class OpenStackCheck(AgentCheck):
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{0}".format(label)
                 self.gauge(metric_label, val, tags=tags)
-
-        load_averages = uptime.get("loads")
-        if load_averages is not None:
-            assert len(load_averages) == 3
-            for i, avg in enumerate([1, 5, 15]):
-                self.gauge('openstack.nova.hypervisor_load.{0}'.format(avg), load_averages[i], tags=tags)
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
@@ -1184,7 +1176,8 @@ class OpenStackCheck(AgentCheck):
 
         projects = {}
         custom_tags = instance.get("tags", [])
-        collect_limits_from_all_projects = is_affirmative(instance.get('collect_limits_from_all_projects', False))
+        collect_limits_from_all_projects = is_affirmative(instance.get('collect_limits_from_all_projects', True))
+        collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
         split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
 
         try:
@@ -1240,7 +1233,8 @@ class OpenStackCheck(AgentCheck):
                 self.get_stats_for_single_project(projects[proj], custom_tags)
 
             self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
-                                               split_hostname_on_first_period=split_hostname_on_first_period)
+                                               split_hostname_on_first_period=split_hostname_on_first_period,
+                                               collect_hypervisor_load=collect_hypervisor_load)
 
             # This updates the server cache directly
             self.get_all_servers(i_key)
