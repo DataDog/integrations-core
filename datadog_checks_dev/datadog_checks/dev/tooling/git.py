@@ -81,7 +81,7 @@ def git_tag(tag_name, push=False):
     Tag the repo using an annotated tag.
     """
     with chdir(get_root()):
-        result = run_command('git tag -a {} -m "{}"'.format(tag_name, tag_name))
+        result = run_command('git tag -a {} -m "{}"'.format(tag_name, tag_name), capture=True)
 
         if push:
             if result.code != 0:

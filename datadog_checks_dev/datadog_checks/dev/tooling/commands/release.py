@@ -461,20 +461,26 @@ def tag(check, version, push, dry_run):
         checks = [check]
 
     for check in checks:
+        echo_success('Check `{}`'.format(check))
+
         # get the current version
         if not version:
             version = get_version_string(check)
 
         # get the tag name
         release_tag = get_release_tag_string(check, version)
-        echo_info('Tagging HEAD with {}'.format(release_tag))
+        echo_waiting('Tagging HEAD with {}'.format(release_tag))
 
         if dry_run:
             version = None
             continue
 
         result = git_tag(release_tag, push)
-        if result.code != 0:
+
+        # For automation we may want to cause failures for extant tags
+        if result.code == 128 or 'already exists' in result.stderr:
+            echo_warning('Tag `{}` already exists, skipping...'.format(release_tag))
+        elif result.code != 0:
             abort(code=result.code)
 
         # Reset version
@@ -513,6 +519,8 @@ def make(ctx, check, version):
         checks = [check]
 
     for check in checks:
+        echo_success('Check `{}`'.format(check))
+
         if version:
             # sanity check on the version provided
             cur_version = get_version_string(check)
