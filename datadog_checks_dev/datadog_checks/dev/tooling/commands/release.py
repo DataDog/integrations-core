@@ -477,6 +477,7 @@ def tag(check, version, push, dry_run):
 
         result = git_tag(release_tag, push)
 
+        # For automation we may we to cause failures for extant tags
         if result.code == 128 or 'already exists' in result.stderr:
             echo_warning('Tag `{}` already exists, skipping...'.format(release_tag))
         elif result.code != 0:
