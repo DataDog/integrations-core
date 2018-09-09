@@ -542,9 +542,11 @@ Options:
   -b, --bench        Run only benchmarks
   -c, --cov          Measure code coverage
   -m, --cov-missing  Show line numbers of statements that were not executed
-  --cov-keep         Keep coverage reports
-  --changed          Only test changed checks
+  --pdb              Drop to PDB on first failure, then end test session
+  -d, --debug        Set the log level to debug
   -v, --verbose      Increase verbosity (can be used additively)
+  --changed          Only test changed checks
+  --cov-keep         Keep coverage reports
   -h, --help         Show this message and exit.
 ```
 
