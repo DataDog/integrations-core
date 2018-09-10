@@ -9,6 +9,7 @@ import re
 import ssl
 import time
 import traceback
+import threading
 
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
@@ -108,6 +109,7 @@ class VSphereCheck(AgentCheck):
 
         # Connections open to vCenter instances
         self.server_instances = {}
+        self.server_instances_lock = threading.RLock()
 
         # Event configuration
         self.event_config = {}
@@ -255,19 +257,20 @@ class VSphereCheck(AgentCheck):
         ] + tags
         service_check_tags = list(set(service_check_tags))
 
-        if i_key not in self.server_instances:
-            self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
+        with self.server_instances_lock:
+            if i_key not in self.server_instances:
+                self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
 
-        # Test if the connection is working
-        try:
-            self.server_instances[i_key].CurrentTime()
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=service_check_tags)
-        except Exception:
-            # Try to reconnect. If the connection is definitely broken, this will send CRITICAL service check and raise
-            self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
+            # Test if the connection is working
+            try:
+                self.server_instances[i_key].CurrentTime()
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+            except Exception:
+                # Try to reconnect. If the connection is definitely broken,
+                # this will send CRITICAL service check and raise
+                self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
 
-        return self.server_instances[i_key]
+            return self.server_instances[i_key]
 
     def _compute_needed_metrics(self, instance, available_metrics):
         """ Compare the available metrics for one MOR we have computed and intersect them
