@@ -5,6 +5,7 @@
 # stdlib
 import logging
 import re
+from collections import defaultdict
 from urlparse import urljoin
 from copy import deepcopy
 
@@ -258,8 +259,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         :param pods: pod list object
         :param instance_tags: list of tags
         """
-        pods_tag_counter = {}
-        containers_tag_counter = {}
+        pods_tag_counter = defaultdict(int)
+        containers_tag_counter = defaultdict(int)
         for pod in pods['items']:
             # Pod reporting
             pod_id = pod.get('metadata', {}).get('uid')
@@ -268,10 +269,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 continue
             tags += instance_tags
             hash_tags = tuple(sorted(tags))
-            if hash_tags in pods_tag_counter.keys():
-                pods_tag_counter[hash_tags] += 1
-            else:
-                pods_tag_counter[hash_tags] = 1
+            pods_tag_counter[hash_tags] += 1
             # Containers reporting
             containers = pod.get('status', {}).get('containerStatuses', [])
             for container in containers:
@@ -281,10 +279,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     continue
                 tags += instance_tags
                 hash_tags = tuple(sorted(tags))
-                if hash_tags in containers_tag_counter.keys():
-                    containers_tag_counter[hash_tags] += 1
-                else:
-                    containers_tag_counter[hash_tags] = 1
+                containers_tag_counter[hash_tags] += 1
         for tags, count in pods_tag_counter.iteritems():
             self.gauge(self.NAMESPACE + '.pods.running', count, list(tags))
         for tags, count in containers_tag_counter.iteritems():
