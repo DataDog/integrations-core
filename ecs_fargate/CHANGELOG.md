@@ -1,9 +1,5 @@
 # CHANGELOG - ECS Fargate
 
-## 1.2.2 / 2018-09-11
-
-* [Fixed] Properly compute percentage of cpu used per container.
-
 ## 1.2.1 / 2018-09-04
 
 * [Fixed] Fix key errors. See [#1959](https://github.com/DataDog/integrations-core/pull/1959).

@@ -125,23 +125,28 @@ class FargateCheck(AgentCheck):
 
             tags = container_tags[container_id]
 
-            #CPU metrics
+            # CPU metrics
             cpu_stats = container_stats.get('cpu_stats', {})
+            prev_cpu_stats = container_stats.get('precpu_stats', {})
 
             value_system = cpu_stats.get('system_cpu_usage')
-            if value is not None:
+            if value_system is not None:
                 self.rate('ecs.fargate.cpu.system', value_system, tags)
 
             value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
-            if value is not None:
+            if value_total is not None:
                 self.rate('ecs.fargate.cpu.user', value_total, tags)
             
-            cpu_percent = 0.0
+            prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
+            prevalue_system = prev_cpu_stats.get('system_cpu_usage')
 
-            cpu_delta = float(value_total) - float(container_stats['precpu_stats']['cpu_usage']['total_usage'])
-            system_delta = float(value_system) - float(container_stats['precpu_stats']['system_cpu_usage'])
-            active_cpus = float(cpu_stats['online_cpus'])
+            if prevalue_system is not None and prevalue_total is not None:
+                cpu_delta = float(value_total) - float(prevalue_total)
+                system_delta = float(value_system) - float(prevalue_system)
             
+            active_cpus = float(cpu_stats['online_cpus'])
+
+            cpu_percent = 0.0
             if system_delta > 0 and cpu_delta > 0:
                 cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
                 cpu_percent = round(cpu_percent, 2)
