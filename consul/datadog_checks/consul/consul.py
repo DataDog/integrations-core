@@ -190,7 +190,7 @@ class ConsulCheck(AgentCheck):
                     instance_state.last_known_leader, leader))
 
                 self.event({
-                    "timestamp": int(datetime.now().strftime("%s")),
+                    "timestamp": int(datetime.now().timestamp()),
                     "event_type": "consul.new_leader",
                     "source_type_name": self.SOURCE_TYPE_NAME,
                     "msg_title": "New Consul Leader Elected in consul_datacenter:{0}".format(agent_dc),
