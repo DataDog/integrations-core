@@ -119,6 +119,10 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in stats.iteritems():
+            if container_stats is None:
+                self.log.debug("Could not collect stats from {}".format(container_id))
+                continue
+
             tags = container_tags[container_id]
 
             # CPU metrics
