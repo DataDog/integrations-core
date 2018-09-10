@@ -390,12 +390,17 @@ class VSphereCheck(AgentCheck):
             objects.extend(res.objects)
 
         mor_attrs = {}
+        error_counter = 0
         for obj in objects:
-            if obj.missingSet:
+            if obj.missingSet and error_counter < 10:
                 for prop in obj.missingSet:
+                    error_counter += 1
                     self.log.error(
                         "Unable to retrieve property {} for object {}: {}".format(prop.path, obj.obj, prop.fault)
                     )
+                    if error_counter == 10:
+                        self.log.error("More errors of like this, stop logging")
+                        break
             mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
 
         return mor_attrs
