@@ -7,6 +7,7 @@ import time
 import pytest
 import mock
 from mock import MagicMock
+from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.errors import BadConfigError, ConnectionError
@@ -87,6 +88,86 @@ def test__is_excluded():
     # Not OK
     included_vm = MockedMOR(spec="VirtualMachine", name="foo")
     assert VSphereCheck._is_excluded(included_vm, {"customValue": []}, include_regexes, include_only_marked) is True
+
+
+def test__get_all_objs(vsphere, instance):
+    """
+    Test that we don't raise KeyError if the property collector failed to collect some attributes
+    and that we handle the case were there are missing attributes
+    """
+    server_instance = vsphere._get_server_instance(instance)
+
+    vm_no_parent = MockedMOR(spec="VirtualMachine")
+    vm_no_powerstate = MockedMOR(spec="VirtualMachine")
+    vm_host_parent = MockedMOR(spec="VirtualMachine")
+    mocked_host = MockedMOR(spec="HostSystem")
+    mocked_datastore = MockedMOR(spec="Datastore")
+    mocked_datacenter = MockedMOR(spec="Datacenter")
+    mocked_mors_attrs = {
+        vm_no_parent: {"name": "vm_no_parent", "runtime.powerState": vim.VirtualMachinePowerState.poweredOn},
+        vm_no_powerstate: {"name": "vm_no_powerstate"},
+        vm_host_parent: {"parent": mocked_host, "runtime.powerState": vim.VirtualMachinePowerState.poweredOn},
+        mocked_host: {"name": "mocked_host", "parent": None},
+        mocked_datastore: {},
+        mocked_datacenter: {"parent": MockedMOR(spec="Folder", name="unknown folder")}
+    }
+    with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
+        obj_list = vsphere._get_all_objs(server_instance)
+        assert len(obj_list[vim.VirtualMachine]) == 2
+        assert {
+            "mor_type": "vm",
+            "mor": vm_no_parent,
+            "hostname": "vm_no_parent",
+            "tags": ["vsphere_host:unknown", "vsphere_type:vm"]
+        } in obj_list[vim.VirtualMachine]
+        assert {
+            "mor_type": "vm",
+            "mor": vm_host_parent,
+            "hostname": "unknown",
+            "tags": ["vsphere_host:mocked_host", "vsphere_host:unknown", "vsphere_type:vm"]
+        } in obj_list[vim.VirtualMachine]
+        assert len(obj_list[vim.HostSystem]) == 1
+        assert {
+            "mor_type": "host",
+            "mor": mocked_host,
+            "hostname": "mocked_host",
+            "tags": ["vsphere_type:host"]
+        } in obj_list[vim.HostSystem]
+        assert len(obj_list[vim.Datastore]) == 1
+        assert {
+            "mor_type": "datastore",
+            "mor": mocked_datastore,
+            "hostname": None,
+            "tags": ["vsphere_datastore:unknown", "vsphere_type:datastore"]
+        } in obj_list[vim.Datastore]
+        assert len(obj_list[vim.Datacenter]) == 1
+        assert {
+            "mor_type": "datacenter",
+            "mor": mocked_datacenter,
+            "hostname": None,
+            "tags": ["vsphere_folder:unknown", "vsphere_type:datacenter"]
+        } in obj_list[vim.Datacenter]
+
+
+def test__collect_mors_and_attributes(vsphere, instance):
+    """
+    Test that we check for errors when collecting properties with property collector
+    """
+    server_instance = vsphere._get_server_instance(instance)
+    with mock.patch("datadog_checks.vsphere.vsphere.vmodl"):
+        obj = MagicMock(missingSet=None, obj="obj")
+        result = MagicMock(token=None, objects=[obj])
+        server_instance.content.propertyCollector.RetrievePropertiesEx.return_value = result
+        log = MagicMock()
+        vsphere.log = log
+        mor_attrs = vsphere._collect_mors_and_attributes(server_instance)
+        log.error.assert_not_called()
+        assert len(mor_attrs) == 1
+
+        obj.missingSet = [MagicMock(path="prop", fault="fault")]
+        mor_attrs = vsphere._collect_mors_and_attributes(server_instance)
+        log.error.assert_called_once_with("Unable to retrieve property prop for object obj: fault")
+        assert len(mor_attrs) == 1
 
 
 def test__cache_morlist_raw_async(vsphere, instance):
