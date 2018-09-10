@@ -34,3 +34,6 @@ instances:
     #  tags:
     #    - optional_tag1
     #    - optional_tag2
+
+    # Set a timeout for the prometheus query, defaults to 10
+    # prometheus_timeout: 10
