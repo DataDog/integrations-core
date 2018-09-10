@@ -60,10 +60,12 @@ def get_changed_checks():
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-m', is_flag=True, help='Show line numbers of statements that were not executed')
-@click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
-@click.option('--changed', is_flag=True, help='Only test changed checks')
+@click.option('--pdb', 'enter_pdb', is_flag=True, help='Drop to PDB on first failure, then end test session')
+@click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
 @click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
-def test(checks, bench, coverage, cov_missing, cov_keep, changed, verbose):
+@click.option('--changed', is_flag=True, help='Only test changed checks')
+@click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
+def test(checks, bench, coverage, cov_missing, enter_pdb, debug, verbose, changed, cov_keep):
     """Run tests for Agent-based checks.
 
     If no checks are specified, this will only test checks that
@@ -92,10 +94,19 @@ def test(checks, bench, coverage, cov_missing, cov_keep, changed, verbose):
     num_checks = len(checks)
     testing_on_ci = running_on_ci()
 
+    # Start building pytest command line args
+    pytest_options = '--verbosity={}'.format(verbose or 1)
+
+    if enter_pdb:
+        pytest_options = '--pdb -x {}'.format(pytest_options)
+
+    if debug:
+        pytest_options = '{} --log-level=debug'.format(pytest_options)
+
     if bench:
-        pytest_options = '--verbosity={} --benchmark-only --benchmark-cprofile=tottime'.format(verbose or 1)
+        pytest_options = '{} --benchmark-only --benchmark-cprofile=tottime'.format(pytest_options)
     else:
-        pytest_options = '--verbosity={} --benchmark-skip'.format(verbose or 1)
+        pytest_options = '{} --benchmark-skip'.format(pytest_options)
 
     if coverage:
         pytest_options = '{} {}'.format(
