@@ -170,7 +170,7 @@ def test(checks, bench, coverage, cov_missing, enter_pdb, debug, verbose, change
                         if result.code:
                             abort('\nFailed!', code=result.code)
 
-                        run_command('codecov -X gcov -f coverage.xml')
+                        run_command('codecov -X gcov -F {} -f coverage.xml'.format(check))
                     else:
                         if not cov_keep:
                             remove_path('.coverage')
