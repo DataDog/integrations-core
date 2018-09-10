@@ -150,7 +150,7 @@ class OpenStackScope(object):
             auth_scope = UNSCOPED_AUTH
 
         payload = {'auth': {'identity': identity, 'scope': auth_scope}}
-        auth_url = urljoin(keystone_server_url, "{0}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
+        auth_url = urljoin(keystone_server_url, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'Content-Type': 'application/json'}
 
         resp = requests.post(
@@ -331,7 +331,7 @@ class OpenStackUnscoped(OpenStackScope):
         scope = {'project': {'id': project['id']}}
         payload = {'auth': {'identity': identity, 'scope': scope}}
         headers = {'Content-Type': 'application/json'}
-        auth_url = urljoin(keystone_server_url, "{0}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
+        auth_url = urljoin(keystone_server_url, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
 
         resp = requests.post(
             auth_url,
@@ -347,7 +347,7 @@ class OpenStackUnscoped(OpenStackScope):
 
     @classmethod
     def request_project_list(cls, auth_token, keystone_server_url, ssl_verify, proxy=None):
-        auth_url = urljoin(keystone_server_url, "{0}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
+        auth_url = urljoin(keystone_server_url, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'X-Auth-Token': auth_token}
 
         resp = requests.get(
@@ -434,7 +434,7 @@ class KeystoneCatalog(object):
 
     @classmethod
     def from_unscoped_token(cls, keystone_server_url, auth_token, nova_api_version, ssl_verify=True, proxy=None):
-        catalog_url = urljoin(keystone_server_url, "{0}/auth/catalog".format(DEFAULT_KEYSTONE_API_VERSION))
+        catalog_url = urljoin(keystone_server_url, "{}/auth/catalog".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'X-Auth-Token': auth_token}
 
         resp = requests.get(
@@ -713,7 +713,7 @@ class OpenStackCheck(AgentCheck):
             self.get_stats_for_single_network(nid, tags)
 
     def get_all_network_ids(self):
-        url = '{0}/{1}/networks'.format(self.get_neutron_endpoint(), DEFAULT_NEUTRON_API_VERSION)
+        url = '{}/{}/networks'.format(self.get_neutron_endpoint(), DEFAULT_NEUTRON_API_VERSION)
         headers = {'X-Auth-Token': self.get_auth_token()}
 
         network_ids = []
@@ -722,25 +722,25 @@ class OpenStackCheck(AgentCheck):
             for network in net_details['networks']:
                 network_ids.append(network['id'])
         except Exception as e:
-            self.warning('Unable to get the list of all network ids: {0}'.format(str(e)))
+            self.warning('Unable to get the list of all network ids: {}'.format(str(e)))
             raise e
 
         return network_ids
 
     def get_stats_for_single_network(self, network_id, tags):
-        url = '{0}/{1}/networks/{2}'.format(self.get_neutron_endpoint(), DEFAULT_NEUTRON_API_VERSION, network_id)
+        url = '{}/{}/networks/{}'.format(self.get_neutron_endpoint(), DEFAULT_NEUTRON_API_VERSION, network_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
         net_details = self._make_request_with_auth_fallback(url, headers)
 
-        service_check_tags = ['network:{0}'.format(network_id)] + tags
+        service_check_tags = ['network:{}'.format(network_id)] + tags
 
         network_name = net_details.get('network', {}).get('name')
         if network_name is not None:
-            service_check_tags.append('network_name:{0}'.format(network_name))
+            service_check_tags.append('network_name:{}'.format(network_name))
 
         tenant_id = net_details.get('network', {}).get('tenant_id')
         if tenant_id is not None:
-            service_check_tags.append('tenant_id:{0}'.format(tenant_id))
+            service_check_tags.append('tenant_id:{}'.format(tenant_id))
 
         if net_details.get('network', {}).get('admin_state_up'):
             self.service_check(self.NETWORK_SC, AgentCheck.OK, tags=service_check_tags)
@@ -764,7 +764,7 @@ class OpenStackCheck(AgentCheck):
         return {'loads': map(float, load_averages), 'uptime_sec': uptime_sec}
 
     def get_all_aggregate_hypervisors(self):
-        url = '{0}/os-aggregates'.format(self.get_nova_endpoint())
+        url = '{}/os-aggregates'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
 
         hypervisor_aggregate_map = {}
@@ -778,13 +778,13 @@ class OpenStackCheck(AgentCheck):
                     }
 
         except Exception as e:
-            self.warning('Unable to get the list of aggregates: {0}'.format(str(e)))
+            self.warning('Unable to get the list of aggregates: {}'.format(str(e)))
             raise e
 
         return hypervisor_aggregate_map
 
     def get_uptime_for_single_hypervisor(self, hyp_id):
-        url = '{0}/os-hypervisors/{1}/uptime'.format(self.get_nova_endpoint(), hyp_id)
+        url = '{}/os-hypervisors/{}/uptime'.format(self.get_nova_endpoint(), hyp_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
 
         resp = self._make_request_with_auth_fallback(url, headers)
@@ -794,24 +794,32 @@ class OpenStackCheck(AgentCheck):
     def get_stats_for_all_hypervisors(self, instance, custom_tags=None,
                                       use_shortname=False,
                                       collect_hypervisor_load=False):
-        url = '{0}/os-hypervisors/detail'.format(self.get_nova_endpoint())
+        """
+        Submits stats for all hypervisors registered to this control plane
+        Raises specific exceptions based on response code
+        """
+        url = '{}/os-hypervisors/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
-        for hyp in resp.get('hypervisors'):
+        hypervisors = resp.get('hypervisors', [])
+        for hyp in hypervisors:
             self.get_stats_for_single_hypervisor(hyp, instance, custom_tags=custom_tags,
                                                  use_shortname=use_shortname,
                                                  collect_hypervisor_load=collect_hypervisor_load)
 
+        if not hypervisors:
+            self.log.warn("Unable to collect any hypervisors from Nova response: {}".format(resp))
+
     def get_stats_for_single_hypervisor(self, hyp, instance, custom_tags=None,
                                         use_shortname=False,
                                         collect_hypervisor_load=False):
-        hyp_hostname = hyp['hypervisor_hostname']
+        hyp_hostname = hyp.get('hypervisor_hostname')
         self._hypervisor_name_cache[self._instance_key(instance)] = hyp_hostname
         custom_tags = custom_tags or []
         tags = [
-            'hypervisor:{0}'.format(hyp_hostname),
-            'hypervisor_id:{0}'.format(hyp['id']),
-            'virt_type:{0}'.format(hyp['hypervisor_type']),
+            'hypervisor:{}'.format(hyp_hostname),
+            'hypervisor_id:{}'.format(hyp['id']),
+            'virt_type:{}'.format(hyp['hypervisor_type']),
         ]
         host_tags = self._get_host_aggregate_tag(hyp_hostname,
                                                  use_shortname=use_shortname)
@@ -826,14 +834,15 @@ class OpenStackCheck(AgentCheck):
             try:
                 uptime = self.get_uptime_for_single_hypervisor(hyp['id'])
             except Exception as e:
-                self.warning('Unable to get uptime for hypervisor {0}: {1}'.format(hyp['id'], str(e)))
+                self.warning('Unable to get uptime for hypervisor {}: {}'.format(hyp['id'], str(e)))
                 uptime = {}
 
             load_averages = uptime.get("loads")
-            if load_averages is not None:
-                assert len(load_averages) == 3
+            if load_averages is not None and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):
-                    self.gauge('openstack.nova.hypervisor_load.{0}'.format(avg), load_averages[i], tags=tags)
+                    self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
+            else:
+                self.log.debug("Load Averages didn't return expected values: {}".format(load_averages))
 
         hyp_state = hyp.get('state', None)
 
@@ -846,7 +855,7 @@ class OpenStackCheck(AgentCheck):
 
         for label, val in hyp.iteritems():
             if label in NOVA_HYPERVISOR_METRICS:
-                metric_label = "openstack.nova.{0}".format(label)
+                metric_label = "openstack.nova.{}".format(label)
                 self.gauge(metric_label, val, tags=tags)
 
     # Get all of the server IDs and their metadata and cache them
@@ -858,7 +867,7 @@ class OpenStackCheck(AgentCheck):
         if i_key in self.changes_since_time:
             query_params['changes-since'] = self.changes_since_time.get(i_key)
 
-        url = '{0}/servers/detail'.format(self.get_nova_endpoint())
+        url = '{}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
 
         # Note this query param specifically requires admin user rights
@@ -891,7 +900,7 @@ class OpenStackCheck(AgentCheck):
             self.changes_since_time[i_key] = datetime.utcnow().isoformat()
 
         except Exception as e:
-            self.warning('Unable to get the list of all servers: {0}'.format(str(e)))
+            self.warning('Unable to get the list of all servers: {}'.format(str(e)))
             raise e
 
         for server in servers:
@@ -921,7 +930,6 @@ class OpenStackCheck(AgentCheck):
 
     def filter_excluded_servers(self):
         proj_list = set([])
-        servers_copy = copy.deepcopy(self.server_details_by_id)
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             for exclude_id_rule in self.exclude_server_id_rules:
@@ -932,22 +940,21 @@ class OpenStackCheck(AgentCheck):
         for server in self.server_details_by_id.iteritems():
             proj_list.add(server[1].get('project_name'))
 
-        projects_filtered = pattern_filter(proj_list,
-                                           whitelist=self.include_project_name_rules,
-                                           blacklist=self.exclude_project_name_rules
-                                           )
+        projects_filtered = pattern_filter(
+            proj_list,
+            whitelist=self.include_project_name_rules,
+            blacklist=self.exclude_project_name_rules
+        )
 
-        for server in servers_copy:
-            if servers_copy[server].get('project_name') not in projects_filtered:
-                # This may have already been deleted if the server belongs to both
-                # the project blacklist AND the excluded server id list
-                try:
-                    del self.server_details_by_id[server]
-                except KeyError:
-                    self.log.debug("Server %s was already removed from the list", server)
+        self.server_details_by_id = \
+            {
+                sid: server for (sid, server)
+                in self.server_details_by_id.iteritems()
+                if server.get('project_name') in projects_filtered
+            }
 
     def get_project_name_from_id(self, tenant_id):
-        url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
+        url = "{}/{}/{}/{}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
         self.log.debug("Project URL is %s", url)
         headers = {'X-Auth-Token': self.get_auth_token()}
         try:
@@ -955,7 +962,7 @@ class OpenStackCheck(AgentCheck):
             return r['project']['name']
 
         except Exception as e:
-            self.warning('Unable to get project name: {0}'.format(str(e)))
+            self.warning('Unable to get project name: {}'.format(str(e)))
             raise e
 
     def get_stats_for_single_server(self, server_details, tags=None, use_shortname=False):
@@ -973,7 +980,7 @@ class OpenStackCheck(AgentCheck):
 
         server_stats = {}
         headers = {'X-Auth-Token': self.get_auth_token()}
-        url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
+        url = '{}/servers/{}/diagnostics'.format(self.get_nova_endpoint(), server_id)
         try:
             server_stats = self._make_request_with_auth_fallback(url, headers)
         except InstancePowerOffFailure:  # 409 response code came back fro nova
@@ -995,13 +1002,13 @@ class OpenStackCheck(AgentCheck):
             if project_name:
                 tags.append("project_name:{}".format(project_name))
             if hypervisor_hostname:
-                tags.append("hypervisor:{0}".format(hypervisor_hostname))
+                tags.append("hypervisor:{}".format(hypervisor_hostname))
             if server_name:
-                tags.append("server_name:{0}".format(server_name))
+                tags.append("server_name:{}".format(server_name))
             for st in server_stats:
                 if _is_valid_metric(st):
                     self.gauge(
-                        "openstack.nova.server.{0}".format(st.replace("-", "_")),
+                        "openstack.nova.server.{}".format(st.replace("-", "_")),
                         server_stats[st],
                         tags=tags+host_tags,
                         hostname=server_id,
@@ -1018,22 +1025,22 @@ class OpenStackCheck(AgentCheck):
 
         project_name = project.get('name')
 
-        self.log.debug("Collecting metrics for project. name: {0} id: {1}".format(project_name, project['id']))
+        self.log.debug("Collecting metrics for project. name: {} id: {}".format(project_name, project['id']))
 
-        url = '{0}/limits'.format(self.get_nova_endpoint())
+        url = '{}/limits'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
         server_stats = self._make_request_with_auth_fallback(url, headers, params={"tenant_id": project['id']})
 
-        server_tags.append('tenant_id:{0}'.format(project['id']))
+        server_tags.append('tenant_id:{}'.format(project['id']))
 
         if project_name:
-            server_tags.append('project_name:{0}'.format(project['name']))
+            server_tags.append('project_name:{}'.format(project['name']))
 
         for st in server_stats['limits']['absolute']:
             if _is_valid_metric(st):
                 metric_key = PROJECT_METRICS[st]
                 self.gauge(
-                    "openstack.nova.limits.{0}".format(metric_key),
+                    "openstack.nova.limits.{}".format(metric_key),
                     server_stats['limits']['absolute'][st],
                     tags=server_tags,
                 )
@@ -1213,8 +1220,8 @@ class OpenStackCheck(AgentCheck):
 
                 project = self.get_scoped_project(scope)
                 projects[project['name']] = project
-
-                # self.get_stats_for_single_project(project, custom_tags)
+                if project and project.get('name'):
+                    projects[project.get('name')] = project
 
                 i_key = self._instance_key(instance)
 
@@ -1225,17 +1232,16 @@ class OpenStackCheck(AgentCheck):
                         projects[proj['name']] = proj
 
             proj_filtered = pattern_filter(
-                                           [p for p in projects],
-                                           whitelist=self.include_project_name_rules,
-                                           blacklist=self.exclude_project_name_rules
-                                           )
-            proj_copy = copy.deepcopy(projects)
-            for proj in proj_copy:
-                if proj not in proj_filtered:
-                    del projects[proj]
+                [p for p in projects],
+                whitelist=self.include_project_name_rules,
+                blacklist=self.exclude_project_name_rules
+            )
 
-            for proj in projects:
-                self.get_stats_for_single_project(projects[proj], custom_tags)
+            projects = \
+                {name: v for (name, v) in projects.iteritems() if name in proj_filtered}
+
+            for name, project in projects.iteritems():
+                self.get_stats_for_single_project(project, custom_tags)
 
             self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
                                                use_shortname=use_shortname,
@@ -1302,14 +1308,14 @@ class OpenStackCheck(AgentCheck):
         """
         Returns all projects in the domain
         """
-        url = "{0}/{1}/{2}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects")
+        url = "{}/{}/{}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects")
         headers = {'X-Auth-Token': scope.auth_token}
         try:
             r = self._make_request_with_auth_fallback(url, headers)
             return r['projects']
 
         except Exception as e:
-            self.warning('Unable to get projects: {0}'.format(str(e)))
+            self.warning('Unable to get projects: {}}'.format(str(e)))
             raise e
 
         return None
@@ -1320,7 +1326,7 @@ class OpenStackCheck(AgentCheck):
         """
 
         filter_params = {}
-        url = "{0}/{1}/{2}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects")
+        url = "{}/{}/{}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects")
         if project_auth_scope.tenant_id:
             if project_auth_scope.project_name:
                 return {"id": project_auth_scope.tenant_id, "name": project_auth_scope.project_name}
@@ -1344,7 +1350,7 @@ class OpenStackCheck(AgentCheck):
                 return project_details["project"]
 
         except Exception as e:
-            self.warning('Unable to get the project details: {0}'.format(str(e)))
+            self.warning('Unable to get the project details: {}'.format(str(e)))
             raise e
 
         return None
@@ -1353,12 +1359,15 @@ class OpenStackCheck(AgentCheck):
         tags = []
         hyp_hostname = hyp_hostname.split('.')[0] if use_shortname else hyp_hostname
         if hyp_hostname in self._get_and_set_aggregate_list():
-            tags.append('aggregate:{0}'.format(self._aggregate_list[hyp_hostname]['aggregate']))
+            tags.append('aggregate:{}'.format(self._aggregate_list[hyp_hostname]['aggregate']))
             # Need to check if there is a value for availability_zone
             # because it is possible to have an aggregate without an AZ
-            if self._aggregate_list[hyp_hostname]['availability_zone']:
-                tags.append('availability_zone:{0}'
-                            .format(self._aggregate_list[hyp_hostname]['availability_zone']))
+            try:
+                if self._aggregate_list[hyp_hostname]['availability_zone']:
+                    tags.append('availability_zone:{}'
+                                .format(self._aggregate_list[hyp_hostname]['availability_zone']))
+            except KeyError:
+                self.log.debug('Unable to get the availability_zone for hypervisor: {}'.format(hyp_hostname))
         else:
             self.log.info('Unable to find hostname %s in aggregate list. Assuming this host is unaggregated',
                           hyp_hostname)
@@ -1366,7 +1375,6 @@ class OpenStackCheck(AgentCheck):
         return tags
 
     # For attaching tags to hosts that are not the host running the agent
-
     def get_external_host_tags(self):
         """ Returns a list of tags for every guest server that is detected by the OpenStack
         integration.

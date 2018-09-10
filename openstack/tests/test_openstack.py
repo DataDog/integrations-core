@@ -284,7 +284,7 @@ def test_server_include_all_by_default(*args):
     openstackCheck.filter_excluded_servers()
     server_ids = openstackCheck.server_details_by_id
     # Assert
-    # .. 2 out of 4 server ids filtered
+    # All 4 servers should still be monitored
     assert len(server_ids) == 4
 
 
