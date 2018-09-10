@@ -125,16 +125,27 @@ class FargateCheck(AgentCheck):
 
             tags = container_tags[container_id]
 
-            # CPU metrics
+            #CPU metrics
             cpu_stats = container_stats.get('cpu_stats', {})
 
-            value = cpu_stats.get('system_cpu_usage')
+            value_system = cpu_stats.get('system_cpu_usage')
             if value is not None:
-                self.rate('ecs.fargate.cpu.system', value, tags)
+                self.rate('ecs.fargate.cpu.system', value_system, tags)
 
-            value = cpu_stats.get('cpu_usage', {}).get('total_usage')
+            value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
             if value is not None:
-                self.rate('ecs.fargate.cpu.user', value, tags)
+                self.rate('ecs.fargate.cpu.user', value_total, tags)
+            
+            cpu_percent = 0.0
+
+            cpu_delta = float(value_total) - float(container_stats['precpu_stats']['cpu_usage']['total_usage'])
+            system_delta = float(value_system) - float(container_stats['precpu_stats']['system_cpu_usage'])
+            active_cpus = float(cpu_stats['online_cpus'])
+            
+            if system_delta > 0 and cpu_delta > 0:
+                cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
+                cpu_percent = round(cpu_percent, 2)
+                self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
 
             # Memory metrics
             memory_stats = container_stats.get('memory_stats', {})
