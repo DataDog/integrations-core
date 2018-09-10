@@ -4,7 +4,7 @@
 
 # stdlib
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from itertools import islice
 from math import ceil, floor, sqrt
 from urlparse import urljoin
@@ -190,7 +190,7 @@ class ConsulCheck(AgentCheck):
                     instance_state.last_known_leader, leader))
 
                 self.event({
-                    "timestamp": int(datetime.now().timestamp()),
+                    "timestamp": int(time.mktime(datetime.now())),
                     "event_type": "consul.new_leader",
                     "source_type_name": self.SOURCE_TYPE_NAME,
                     "msg_title": "New Consul Leader Elected in consul_datacenter:{0}".format(agent_dc),
