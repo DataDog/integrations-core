@@ -419,15 +419,15 @@ GROUP BY datid, datname
     def _is_above(self, key, db, version_to_compare):
         version = self._get_version(key, db)
         if type(version) == list:
-            all_equal = True
+            # iterate from major down to bugfix
             for v, vc in zip_longest(version, version_to_compare, fillvalue=0):
-                # iterate from major down to bugfix
-                if v > vc:
-                    return True
-                all_equal &= (v==vc)
+                if v == vc:
+                    continue
+
+                return v > vc
 
         # return True if version is the same
-        return all_equal or False
+        return True
 
     def _is_8_3_or_above(self, key, db):
         return self._is_above(key, db, [8, 3, 0])
