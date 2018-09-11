@@ -27,6 +27,7 @@ from .errors import BadConfigError, ConnectionError
 from .cache_config import CacheConfig
 from .objects_queue import ObjectsQueue
 from .mor_cache import MorCache, MorNotFoundError
+from .metadata_cache import MetadataCache, MetadataNotFoundError
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -136,7 +137,7 @@ class VSphereCheck(AgentCheck):
         self.registry = {}
 
         # Metrics metadata, for each instance keeps the mapping: perfCounterKey -> {name, group, description}
-        self.metrics_metadata = {}
+        self.metadata_cache = MetadataCache()
         self.latest_event_query = {}
 
     def start_pool(self):
@@ -283,10 +284,13 @@ class VSphereCheck(AgentCheck):
         wanted_metrics = []
         # Get only the basic metrics
         for metric in available_metrics:
+            counter_id = metric.counterId
             # No cache yet, skip it for now
-            if i_key not in self.metrics_metadata or metric.counterId not in self.metrics_metadata[i_key]:
+            if not self.metadata_cache.contains(i_key, counter_id):
+                self.log.debug("No metadata found for counter {}, will not collect it".format(counter_id))
                 continue
-            if self.metrics_metadata[i_key][metric.counterId]['name'] in BASIC_METRICS:
+            metadata = self.metadata_cache.get_metadata(i_key, counter_id)
+            if metadata.get('name') in BASIC_METRICS:
                 wanted_metrics.append(metric)
 
         return wanted_metrics
@@ -633,6 +637,7 @@ class VSphereCheck(AgentCheck):
         # ## </TEST-INSTRUMENTATION>
 
         i_key = self._instance_key(instance)
+        self.metadata_cache.init_instance(i_key)
         self.log.info("Warming metrics metadata cache for instance {}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
@@ -649,7 +654,7 @@ class VSphereCheck(AgentCheck):
 
         self.log.info("Finished metadata collection for instance {}".format(i_key))
         # Reset metadata
-        self.metrics_metadata[i_key] = new_metadata
+        self.metadata_cache.set_metadata(i_key, new_metadata)
 
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
@@ -660,10 +665,12 @@ class VSphereCheck(AgentCheck):
         type of the counter and apply pre-reporting transformation if needed.
         """
         i_key = self._instance_key(instance)
-        if counter_id in self.metrics_metadata[i_key]:
-            unit = self.metrics_metadata[i_key][counter_id]['unit']
-            if unit == 'percent':
+        try:
+            metadata = self.metadata_cache.get_metadata(i_key, counter_id)
+            if metadata["unit"] == "percent":
                 return float(value) / 100
+        except MetadataNotFoundError:
+            pass
 
         # Defaults to return the value without transformation
         return value
@@ -690,12 +697,15 @@ class VSphereCheck(AgentCheck):
                                    "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
                     continue
                 for result in mor_perfs.value:
-                    if result.id.counterId not in self.metrics_metadata[i_key]:
-                        self.log.debug("Skipping this metric value, because there is no metadata about it")
+                    counter_id = result.id.counterId
+                    if not self.metadata_cache.contains(i_key, counter_id):
+                        self.log.debug(
+                            "Skipping value for counter {}, because there is no metadata about it".format(counter_id)
+                        )
                         continue
 
                     # Metric types are absolute, delta, and rate
-                    metric_name = self.metrics_metadata[i_key].get(result.id.counterId, {}).get('name')
+                    metric_name = self.metadata_cache.get_metadata(i_key, result.id.counterId).get('name')
 
                     if metric_name not in ALL_METRICS:
                         self.log.debug(u"Skipping unknown `%s` metric.", metric_name)
