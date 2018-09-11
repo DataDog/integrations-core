@@ -119,18 +119,38 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in stats.iteritems():
+            if container_stats is None:
+                self.log.debug("Could not collect stats from {}".format(container_id))
+                continue
+
             tags = container_tags[container_id]
 
             # CPU metrics
             cpu_stats = container_stats.get('cpu_stats', {})
+            prev_cpu_stats = container_stats.get('precpu_stats', {})
 
-            value = cpu_stats.get('system_cpu_usage')
-            if value is not None:
-                self.rate('ecs.fargate.cpu.system', value, tags)
+            value_system = cpu_stats.get('system_cpu_usage')
+            if value_system is not None:
+                self.rate('ecs.fargate.cpu.system', value_system, tags)
 
-            value = cpu_stats.get('cpu_usage', {}).get('total_usage')
-            if value is not None:
-                self.rate('ecs.fargate.cpu.user', value, tags)
+            value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
+            if value_total is not None:
+                self.rate('ecs.fargate.cpu.user', value_total, tags)
+            
+            prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
+            prevalue_system = prev_cpu_stats.get('system_cpu_usage')
+
+            if prevalue_system is not None and prevalue_total is not None:
+                cpu_delta = float(value_total) - float(prevalue_total)
+                system_delta = float(value_system) - float(prevalue_system)
+            
+            active_cpus = float(cpu_stats['online_cpus'])
+
+            cpu_percent = 0.0
+            if system_delta > 0 and cpu_delta > 0:
+                cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
+                cpu_percent = round(cpu_percent, 2)
+                self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
 
             # Memory metrics
             memory_stats = container_stats.get('memory_stats', {})
