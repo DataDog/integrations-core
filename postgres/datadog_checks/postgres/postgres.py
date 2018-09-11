@@ -426,8 +426,10 @@ GROUP BY datid, datname
 
                 return v > vc
 
-        # return True if version is the same
-        return True
+            # return True if version is the same
+            return True
+
+        return False
 
     def _is_8_3_or_above(self, key, db):
         return self._is_above(key, db, [8, 3, 0])
