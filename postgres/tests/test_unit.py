@@ -135,6 +135,10 @@ def test_is_above(check):
     db.cursor().fetchone.return_value = ['11.0.0']
     assert check._is_above('official_release', db, [11, -1, 3])
 
+    # Test versions of unequal length
+    db.cursor().fetchone.return_value = ['10.0']
+    assert check._is_above('unequal_length', db, [10, 0, 0])
+
 
 def test_malformed_get_custom_queries(check):
     """

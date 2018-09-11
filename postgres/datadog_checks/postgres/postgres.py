@@ -6,11 +6,12 @@ import threading
 import re
 from contextlib import closing
 
+import pg8000
+from six.moves import zip_longest
 try:
     import psycopg2
 except ImportError:
     psycopg2 = None
-import pg8000
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.errors import CheckException
@@ -418,7 +419,9 @@ GROUP BY datid, datname
     def _is_above(self, key, db, version_to_compare):
         version = self._get_version(key, db)
         if type(version) == list:
-            return version >= version_to_compare
+            return all(
+                v >= vc for v, vc in zip_longest(version, version_to_compare, fillvalue=0)
+            )
 
         return False
 
@@ -569,8 +572,9 @@ GROUP BY datid, datname
         }
 
     def _get_replication_metrics(self, key, db):
-        """ Use either REPLICATION_METRICS_9_1 or REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2
-        depending on the postgres version.
+        """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
+        REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
+        postgres version.
         Uses a dictionnary to save the result for each instance
         """
         metrics = self.replication_metrics.get(key)
