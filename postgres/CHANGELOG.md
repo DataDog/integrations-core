@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 2.2.2 / 2018-09-11
+
+* [Fixed] Fix version detection for Postgres v10+. See [#2208](https://github.com/DataDog/integrations-core/pull/2208).
+
 ## 2.2.1 / 2018-09-06
 
 * [Fixed]  Gracefully handle errors when performing custom_queries. See [#2184](https://github.com/DataDog/integrations-core/pull/2184).
