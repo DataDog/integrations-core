@@ -144,6 +144,10 @@ def test_is_above(check):
     assert check._is_above('unequal_length', db, [10, 0, 0])
     assert check._is_above('unequal_length', db, [10, 0, 1]) is False
 
+    # Test return value is not a list
+    db.cursor().fetchone.return_value = "foo"
+    assert check._is_above('smth not a list', db, [10, 0]) is False
+
 
 def test_malformed_get_custom_queries(check):
     """
