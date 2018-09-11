@@ -111,17 +111,20 @@ def test_is_above(check):
     """
     db = MagicMock()
 
-    # Test larger major versions
+    # Test major versions
     db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above('larger major', db, [9, 5, 4])
+    assert check._is_above('smaller major', db, [9, 5, 4])
+    assert check._is_above('larger major', db, [11, 0, 0]) is False
 
-    # Test minor version larger
+    # Test minor versions
     db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above('larger_minor', db, [9, 8, 4])
+    assert check._is_above('smaller minor', db, [10, 4, 4])
+    assert check._is_above('larger minor', db, [10, 6, 4]) is False
 
-    # Test patch version larger
+    # Test patch versions
     db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above('larger_patch', db, [9, 5, 8])
+    assert check._is_above('smaller patch', db, [10, 5, 3])
+    assert check._is_above('larger patch', db, [10, 5, 5]) is False
 
     # Test same version, _is_above() returns True for greater than or equal to
     db.cursor().fetchone.return_value = ['10.5.4']
@@ -134,6 +137,12 @@ def test_is_above(check):
     # Test beta version against official version
     db.cursor().fetchone.return_value = ['11.0.0']
     assert check._is_above('official_release', db, [11, -1, 3])
+
+    # Test versions of unequal length
+    db.cursor().fetchone.return_value = ['10.0']
+    assert check._is_above('unequal_length', db, [10, 0])
+    assert check._is_above('unequal_length', db, [10, 0, 0])
+    assert check._is_above('unequal_length', db, [10, 0, 1]) is False
 
 
 def test_malformed_get_custom_queries(check):
