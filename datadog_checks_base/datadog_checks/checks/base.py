@@ -29,7 +29,7 @@ from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
 
 
-# Metric types for which it's only useful to submit once per context
+# Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [
     aggregator.GAUGE,
     aggregator.RATE,
@@ -44,11 +44,11 @@ class AgentCheck(object):
     OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
 
     """
-    DEFAULT_METRIC_LIMIT allows to set a limit on metric contexts this check can send
-    per run. This is useful for check that have an unbounded number of contexts,
-    depending on the input payload.
-    The logic counts one context per gauge/rate/monotonic_count call, and deduplicates
-    contexts for other metric types. The first N contexts in submission order will
+    DEFAULT_METRIC_LIMIT allows to set a limit on the number of metric name and tags combination
+    this check can send per run. This is useful for checks that have an unbounded
+    number of tag values that depend on the input payload.
+    The logic counts one set of tags per gauge/rate/monotonic_count call, and deduplicates
+    sets of tags for other metric types. The first N sets of tags in submission order will
     be sent to the aggregator, the rest are dropped. The state is reset after each run.
 
     See https://github.com/DataDog/integrations-core/pull/2093 for more information
@@ -166,11 +166,11 @@ class AgentCheck(object):
 
         if self.metric_limiter:
             if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
-                # Fast path for gauges, rates, monotonic counters, assume one context per call
+                # Fast path for gauges, rates, monotonic counters, assume one set of tags per call
                 if self.metric_limiter.is_reached():
                     return
             else:
-                # Other metric types have a legit use case for several calls per context, track unique contexts
+                # Other metric types have a legit use case for several calls per set of tags, track unique sets of tags
                 context = self._context_uid(mtype, name, tags, hostname)
                 if self.metric_limiter.is_reached(context):
                     return

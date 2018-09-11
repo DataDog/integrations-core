@@ -6,7 +6,7 @@
 class Limiter(object):
     """
     Limiter implements a simple cut-off capping logic for object count.
-    It is used by the AgentCheck class to limit the number of metric contexts
+    It is used by the AgentCheck class to limit the number of sets of tags
     that can be set by an instance.
     """
     def __init__(self, object_name, object_limit, warning_func=None):
