@@ -22,11 +22,11 @@ system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped becaus
 system.net.tcp.backlog_drops.count,count,,packet,,Total number of packets dropped because there wasn't room in the TCP backlog.,-1,system,tcp backlog drops
 system.net.tcp.failed_retransmits.count,count,,packet,,Total number of packets that failed to be retransmitted.,-1,system,tcp failed retrans
 system.net.tcp4.closing,gauge,,connection,second,The number of TCP IPv4 closing connections. ,0,system,tcp4 closing
-system.net.tcp4.established,gauge,,connection,second,The number of TCP IPv4 closing connections. ,0,system,tcp4 established
+system.net.tcp4.established,gauge,,connection,second,The number of TCP IPv4 established connections. ,0,system,tcp4 established
 system.net.tcp4.listening,gauge,,connection,second,The number of TCP IPv4 listening connections. ,0,system,tcp4 listening
 system.net.tcp4.opening,gauge,,connection,second,The number of TCP IPv4 opening connections. ,0,system,tcp4 opening
 system.net.tcp6.closing,gauge,,connection,second,The number of TCP IPv6 closing connections. ,0,system,tcp6 closing
-system.net.tcp6.established,gauge,,connection,second,The number of TCP IPv6 closing connections. ,0,system,tcp6 established
+system.net.tcp6.established,gauge,,connection,second,The number of TCP IPv6 established connections. ,0,system,tcp6 established
 system.net.tcp6.listening,gauge,,connection,second,The number of TCP IPv6 listening connections. ,0,system,tcp6 listening
 system.net.tcp6.opening,gauge,,connection,second,The number of TCP IPv6 opening connections. ,0,system,tcp6 opening
 system.net.udp.in_datagrams,gauge,,datagram,second,The rate of UDP datagrams delivered to UDP users.,0,system,udp in datagrams
