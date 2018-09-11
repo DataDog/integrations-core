@@ -59,13 +59,11 @@ def runInToto(keyId):
         return exclude_patterns
 
 
-    # NOTE: Exclude anything that looks like: (1) in-toto link metadata, (2) a
-    # git object, (3) compiled Python bytecode, or (3) a vim swap file.
-    # TODO: Read from local .gitignore.
+    # NOTE: Exclude anything that looks like the following patterns.
     exclude_patterns = list(set(in_toto.settings.ARTIFACT_EXCLUDE_PATTERNS + \
                                 load_gitignore()))
 
-    # TODO: Would be nice to pass the GPG executable to in-toto.
+    # TODO: Would be nice to pass to in-toto the GPG executable to call.
     inTotoCmd = runlib.in_toto_run(
         # Do NOT record files matching these patters.
         exclude_patterns = exclude_patterns,
