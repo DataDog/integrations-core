@@ -118,10 +118,12 @@ def test_is_above(check):
     # Test minor version larger
     db.cursor().fetchone.return_value = ['10.5.4']
     assert check._is_above('larger_minor', db, [9, 8, 4])
+    assert check._is_above('larger_minor', db, [10, 8, 4]) is False
 
     # Test patch version larger
     db.cursor().fetchone.return_value = ['10.5.4']
     assert check._is_above('larger_patch', db, [9, 5, 8])
+    assert check._is_above('larger_patch', db, [10, 5, 8]) is False
 
     # Test same version, _is_above() returns True for greater than or equal to
     db.cursor().fetchone.return_value = ['10.5.4']
@@ -137,7 +139,9 @@ def test_is_above(check):
 
     # Test versions of unequal length
     db.cursor().fetchone.return_value = ['10.0']
+    assert check._is_above('unequal_length', db, [10, 0])
     assert check._is_above('unequal_length', db, [10, 0, 0])
+    assert check._is_above('unequal_length', db, [10, 0, 1]) is False
 
 
 def test_malformed_get_custom_queries(check):
