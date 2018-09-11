@@ -82,7 +82,7 @@ instances:
   # The path to the trusted CA used for generating custom certificates
   # ssl_ca_cert: "/path/to/cacert"
 
-  # The check limits itself to 2000 metrics by default, you can increase this limit if needed
+  # The check limits itself to 2000 metrics (250,000 in 6.5.0) by default, you can increase this limit if needed
   # max_returned_metrics: 2000
 
   # Set a timeout for the prometheus query, defaults to 10

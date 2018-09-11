@@ -79,14 +79,14 @@ class TestLimits():
         check = LimitedCheck()
         assert check.get_warnings() == []
 
-        # Multiple calls for a single context should not trigger
+        # Multiple calls for a single set of (metric_name, tags) should not trigger
         for i in range(0, 20):
             check.count("metric", 0, hostname="host-single")
         assert len(check.get_warnings()) == 0
         assert len(aggregator.metrics("metric")) == 20
 
-        # Multiple contexts should trigger
-        # Only 9 new contexts should pass through
+        # Multiple sets of tags should trigger
+        # Only 9 new sets of tags should pass through
         for i in range(0, 20):
             check.count("metric", 0, hostname="host-{}".format(i))
         assert len(check.get_warnings()) == 1
