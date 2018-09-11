@@ -399,7 +399,7 @@ class VSphereCheck(AgentCheck):
                         "Unable to retrieve property {} for object {}: {}".format(prop.path, obj.obj, prop.fault)
                     )
                     if error_counter == 10:
-                        self.log.error("More errors of like this, stop logging")
+                        self.log.error("Too many errors during object collection, stop logging")
                         break
             mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
 
