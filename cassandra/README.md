@@ -41,16 +41,16 @@ See the [sample  cassandra.d/conf.yaml][103] for all available configuration opt
 * Add this configuration block to your `cassandra.d/conf.yaml` file to start collecting your Cassandra logs:
 
   ```yaml
-    logs:
-        - type: file
-          path: /var/log/cassandra/*.log
-          source: cassandra
-          sourcecategory: database
-          service: myapplication
+  logs:
+    - type: file
+      path: /var/log/cassandra/*.log
+      source: cassandra
+      sourcecategory: database
+      service: myapplication
   ```
 
-    Change the `path` and `service` parameter values and configure them for your environment.
-    See the [sample  cassandra.d/conf.yaml][103] for all available configuration options.
+  Change the `path` and `service` parameter values and configure them for your environment.
+  See the [sample  cassandra.d/conf.yaml][103] for all available configuration options.
 
 * [Restart the Agent][104].
 
