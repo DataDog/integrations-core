@@ -320,10 +320,10 @@ class VSphereCheck(AgentCheck):
 
     def _get_parent_tags(self, mor, all_objects):
         tags = []
-        properties = all_objects[mor]
-        parent = properties["parent"]
+        properties = all_objects.get(mor, {})
+        parent = properties.get("parent")
         if parent:
-            parent_name = all_objects[parent]["name"]
+            parent_name = all_objects.get(parent, {}).get("name", "unknown")
             tag = []
             if isinstance(parent, vim.HostSystem):
                 tag.append(u'vsphere_host:{}'.format(parent_name))
@@ -393,7 +393,21 @@ class VSphereCheck(AgentCheck):
             res = collector.ContinueRetrievePropertiesEx(res.token)
             objects.extend(res.objects)
 
-        return {obj.obj: {prop.name: prop.val for prop in obj.propSet} for obj in objects}
+        mor_attrs = {}
+        error_counter = 0
+        for obj in objects:
+            if obj.missingSet and error_counter < 10:
+                for prop in obj.missingSet:
+                    error_counter += 1
+                    self.log.error(
+                        "Unable to retrieve property {} for object {}: {}".format(prop.path, obj.obj, prop.fault)
+                    )
+                    if error_counter == 10:
+                        self.log.error("Too many errors during object collection, stop logging")
+                        break
+            mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
+
+        return mor_attrs
 
     def _get_all_objs(self, server_instance, regexes=None, include_only_marked=False, tags=None):
         """
@@ -436,17 +450,22 @@ class VSphereCheck(AgentCheck):
                 not self._is_excluded(obj, properties, regexes, include_only_marked) and
                 any(isinstance(obj, vimtype) for vimtype in RESOURCE_TYPE_METRICS)
             ):
-                hostname = properties["name"]
-                if properties["parent"]:
+                hostname = properties.get("name", "unknown")
+                if properties.get("parent"):
                     instance_tags += self._get_parent_tags(obj, all_objects)
 
                 if isinstance(obj, vim.VirtualMachine):
                     vsphere_type = u'vsphere_type:vm'
                     vimtype = vim.VirtualMachine
                     mor_type = "vm"
-                    if properties["runtime.powerState"] == vim.VirtualMachinePowerState.poweredOff:
+                    power_state = properties.get("runtime.powerState")
+                    if power_state != vim.VirtualMachinePowerState.poweredOn:
+                        self.log.debug("Skipping VM in state {}".format(power_state))
                         continue
-                    host = all_objects[properties["runtime.host"]]["name"]
+                    host_mor = properties.get("runtime.host")
+                    host = "unknown"
+                    if host_mor:
+                        host = all_objects.get(host_mor, {}).get("name", "unknown")
                     instance_tags.append(u'vsphere_host:{}'.format(host))
                 elif isinstance(obj, vim.HostSystem):
                     vsphere_type = u'vsphere_type:host'
@@ -454,7 +473,7 @@ class VSphereCheck(AgentCheck):
                     mor_type = "host"
                 elif isinstance(obj, vim.Datastore):
                     vsphere_type = u'vsphere_type:datastore'
-                    instance_tags.append(u'vsphere_datastore:{}'.format(properties["name"]))
+                    instance_tags.append(u'vsphere_datastore:{}'.format(properties.get("name", "unknown")))
                     hostname = None
                     vimtype = vim.Datastore
                     mor_type = "datastore"
@@ -501,7 +520,7 @@ class VSphereCheck(AgentCheck):
         if isinstance(obj, vim.HostSystem):
             # Based on `host_include_only_regex`
             if regexes and regexes.get('host_include') is not None:
-                match = re.search(regexes['host_include'], properties["name"], re.IGNORECASE)
+                match = re.search(regexes['host_include'], properties.get("name", ""), re.IGNORECASE)
                 if not match:
                     return True
 
@@ -509,14 +528,14 @@ class VSphereCheck(AgentCheck):
         elif isinstance(obj, vim.VirtualMachine):
             # Based on `vm_include_only_regex`
             if regexes and regexes.get('vm_include') is not None:
-                match = re.search(regexes['vm_include'], properties["name"], re.IGNORECASE)
+                match = re.search(regexes['vm_include'], properties.get("name", ""), re.IGNORECASE)
                 if not match:
                     return True
 
             # Based on `include_only_marked`
             if include_only_marked:
                 monitored = False
-                for field in properties["customValue"]:
+                for field in properties.get("customValue", ""):
                     if field.value == VM_MONITORING_FLAG:
                         monitored = True
                         break  # we shall monitor
