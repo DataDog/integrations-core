@@ -28,7 +28,7 @@ def getKeyId():
         elif sysname == "Darwin":
             gpg = "gpg"
         else:
-            raise Exception("{kernelinfo} not supported!".format(kernelInfo))
+            raise Exception("{} not supported!".format(sysname))
 
         cmd = shlex.split("which {}".format(gpg))
         gpg = subprocess.check_output(cmd)
