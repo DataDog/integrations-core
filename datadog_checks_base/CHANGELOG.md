@@ -1,4 +1,8 @@
-# CHANGELOG - datadog_checks
+# CHANGELOG - datadog_checks_base
+
+## 2.2.1 / 2018-09-11
+
+* [Fixed] Temporarily increase the limit of prometheus metrics sent for 6.5. See [#2214](https://github.com/DataDog/integrations-core/pull/2214).
 
 ## 2.2.0 / 2018-09-06
 
