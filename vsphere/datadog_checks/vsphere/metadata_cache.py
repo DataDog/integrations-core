@@ -15,6 +15,7 @@ class MetadataCache:
     """
     def __init__(self):
         self._metadata = {}
+        self._metric_ids = {}
         self._metadata_lock = threading.RLock()
 
     def init_instance(self, key):
@@ -25,6 +26,7 @@ class MetadataCache:
         with self._metadata_lock:
             if key not in self._metadata:
                 self._metadata[key] = {}
+                self._metric_ids[key] = []
 
     def contains(self, key, counter_id):
         """
@@ -40,6 +42,21 @@ class MetadataCache:
         """
         with self._metadata_lock:
             self._metadata[key] = metadata
+
+    def set_metric_ids(self, key, metric_ids):
+        """
+        Store the list of metric IDs we will want to collect for the given instance key
+        """
+        with self._metadata_lock:
+            self._metric_ids[key] = metric_ids
+
+    def get_metric_ids(self, key):
+        """
+        Return the list of metric IDs to collect for the given instance key
+        If the key is not in the cache, raises a KeyError.
+        """
+        with self._metadata_lock:
+            return self._metric_ids[key]
 
     def get_metadata(self, key, counter_id):
         """

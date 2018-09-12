@@ -637,12 +637,16 @@ class VSphereCheck(AgentCheck):
                     # in the meantime (e.g. a migrated VM).
                     self.mor_cache.set_mor(i_key, mor_name, mor)
 
-                    query_spec = vim.PerformanceManager.QuerySpec()
-                    query_spec.entity = mor["mor"]
-                    query_spec.intervalId = mor["interval"]
-                    query_spec.maxSample = 1
-                    query_specs.append(query_spec)
+                    # Only do this for non real-time resources i.e. datacenter and datastores
+                    # For hosts and VMs, we can rely on a precomputed list of metrics
+                    if mor["mor_type"] not in REALTIME_RESOURCES and not instance.get("collect_realtime_only", False):
+                        query_spec = vim.PerformanceManager.QuerySpec()
+                        query_spec.entity = mor["mor"]
+                        query_spec.intervalId = mor["interval"]
+                        query_spec.maxSample = 1
+                        query_specs.append(query_spec)
 
+                # We will actually schedule jobs for non realtime resources only.
                 if query_specs:
                     self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, query_specs))
 
@@ -663,17 +667,23 @@ class VSphereCheck(AgentCheck):
         custom_tags = instance.get('tags', [])
 
         new_metadata = {}
+        metric_ids = []
         for counter in perfManager.perfCounter:
+            metric_name = "{}.{}".format(counter.groupInfo.key, counter.nameInfo.key)
             new_metadata[counter.key] = {
-                'name': "{}.{}".format(counter.groupInfo.key, counter.nameInfo.key),
+                'name': metric_name,
                 'unit': counter.unitInfo.key,
-                'instance_tag': 'instance',  # FIXME: replace by what we want to tag!
             }
+            # Build the list of metrics we will want to collect
+            if instance.get("all_metrics") or metric_name in BASIC_METRICS:
+                metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter.key, instance="*"))
+
         self.cache_config.set_last(CacheConfig.Metadata, i_key, time.time())
 
         self.log.info("Finished metadata collection for instance {}".format(i_key))
         # Reset metadata
         self.metadata_cache.set_metadata(i_key, new_metadata)
+        self.metadata_cache.set_metric_ids(i_key, metric_ids)
 
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
@@ -784,14 +794,15 @@ class VSphereCheck(AgentCheck):
             for mor_name, mor in batch.iteritems():
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
-                if 'metrics' not in mor or not mor['metrics']:
-                    continue
 
                 query_spec = vim.PerformanceManager.QuerySpec()
                 query_spec.entity = mor["mor"]
                 query_spec.intervalId = mor["interval"]
-                query_spec.metricId = mor["metrics"]
                 query_spec.maxSample = 1
+                if mor['mor_type'] in REALTIME_RESOURCES:
+                    query_spec.metricId = self.metadata_cache.get_metric_ids(i_key)
+                else:
+                    query_spec.metricId = mor.get("metrics")
                 query_specs.append(query_spec)
 
             if query_specs:
