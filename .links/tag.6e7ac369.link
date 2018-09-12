@@ -2,8 +2,8 @@
  "signatures": [
   {
    "keyid": "6e7ac369f3fd6b74d89f3ea5b4af1c9c73518187",
-   "other_headers": "04000108001d1621046e7ac369f3fd6b74d89f3ea5b4af1c9c7351818705025b9949f2",
-   "signature": "7aca3eff88dee6cb17b7600fa340c4028ec05fd96458228af606f5bf67231fca25f1ed9ab9c8161c32f2012df3ba7c542b1368c7105849c2182db3e972dd4571f76ecd1deef9090d33eea29cdbe974327c06b60cc786be9ff5c1ae670babdeb1a76524500133cb2737436df675b791eb7deac6cce07b74366025c185da0c117ade6b34d2473803555bfb697b0a708a2b2705b484b7f7793b6f942ae76f3ad7a161b196a5cbd4de5010cf9c38591391ad3f5a586c1c15956ddd805a1422ace926a6976320cb99c088d84e5067754054e642cb8a4cd8825318041616ddd44dbeac1fae851cba08ac4a5d5abf69f44e39297ae7cc8eb07486cd628c1e233760bcf97d0e107d0e863258705a99f652aee0f78214135fd6a86731dc20e658d5e3b442026a2808a95db15acb91fdfb8dac69436c828d75b63d6266cfd64904ccc93619e5cad3bbb93c234d50af01ad2184e800ee0b092062ce8b9e0ca7362091527013de1b00971c99175f3856f7fcab7e0dfafbcac55f5a96a2345fd9726f26cae3fa89701707bd79bbaab3268cdeeb5c1ebe9e6f6a94d0612a616f7f8246436a9d117a0374ce03a8a988608ac86bd3d0c9fefc7455afdf13b540fd4cbc5b6d1286d45a4c48a7d9e5ae66df7c700b40aa9afc83d7abdac9195e4580e76528e02f1b2a7211bddf24620d0c95786f8d729594101cca1775819d93e7addb51d2246cb6f2"
+   "other_headers": "04000108001d1621046e7ac369f3fd6b74d89f3ea5b4af1c9c7351818705025b994a46",
+   "signature": "bac4a25dfadd24e1dc44fc3415c5a85a842b04f016fb8e9c7d13a74094b24e14a7bc6b6c533624021356ad5eeef44454f1ce1105c391369db313395045a277294098779e9770fd9ffcd3dde1ae547a8321837bc79f9832f4fdb566b30153c75363784d943654f5429111430aec56d057c12f03eddf25fe58d65c5a4e6591c1de16d3a09909747673ee587e1fc9f128aaf1a1fd64a0b0d4e53c9c9afec95d94da6fa0c6970761aaacf1419dcaa123531885a2fd8431c30d5c1b394e99d83a8a7f603a8802bc1179f0a117d8de5c5d044a74e74a8afdbac325fb23873b100f621cc2a0776b40e698e306d10e0cba26b8e5891b3dc90f6bbabd15e05a691094b739ee1683e7eede2ab2a2f3960eebe49fa42c37586b24663a5988ed401ed591216af5091ca119a72b55eae6f3aa0ab7f979658565f8d5e8443c3565a6905c7984661451d4ce189184602352e7a74311c74385ce3af8b05a3d41950dbbffc773fa1c7072a380ca4a0e4f1607fb7c12f4241da5d84b2c0bffbc9619c1067e838ac8caadf38da87158ef961419c6ee189f5ecb572cfc4e0514abec960624699719a329164beba094d170cf84f3e7e0c021789f6f263f145a77c4cde1a85b06a345c5b37eb7e386138134ad6642c4e5010cf450dce7d3a792c33b1dd42062b4f2ef64ce4da2487e4a0d8b088d69c14a89556d5d213757d121a3f68b2d3334f62422e38c"
   }
  ],
  "signed": {
@@ -56,7 +56,7 @@
     "sha256": "aae89e65a55fad6583b0127beb1d9f8eb4ce79b7ce4e725bdf838a44917110a5"
    },
    ".travis.yml": {
-    "sha256": "9f12b249d673fa5d30d9ca6a93aafb883f44017efaf1d9e2ce8ae310f12fc0c0"
+    "sha256": "c2ee072ddf0ad5767f0e7f17d62364e5917d5a9d648405f340bbaff81d955b35"
    },
    ".travis/prepare.sh": {
     "sha256": "c8da2a170bab27cd7353157c98411d9a68174a59e08b2cdb2d64f2de63a3142a"
@@ -578,7 +578,7 @@
     "sha256": "b63e7c72470ab4ea861a025e2c4d545604386676709dbb6996238bd5e6deab9c"
    },
    "cassandra/README.md": {
-    "sha256": "c69ae580b92f656d0bd24f79d5c3bcca1556f3a562c81c7485d7b7e5a93f6179"
+    "sha256": "8104ba63b747f0bfbd7ad4d157f4faa7fd2793935f1dd716a8fb1529347f1130"
    },
    "cassandra/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
@@ -1744,6 +1744,72 @@
    "cisco_aci/tox.ini": {
     "sha256": "dc94eb8e9e6fd68a4862b7291f702b111e7b185d08345a7ff8fb27d7fa6d5fbd"
    },
+   "cockroachdb/CHANGELOG.md": {
+    "sha256": "7157ddfd07cb218437182ff63e47e9c8b583c86efc9dbb97139b973dde25a959"
+   },
+   "cockroachdb/MANIFEST.in": {
+    "sha256": "1e2a8e50946faff36317de4a5add4103a99c87a88605361c162d7a63e4ca5646"
+   },
+   "cockroachdb/README.md": {
+    "sha256": "2cbd865436ddc0d7a494041b4c7ea3ac4707f304eef9e22d7049828af4480707"
+   },
+   "cockroachdb/datadog_checks/__init__.py": {
+    "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
+   },
+   "cockroachdb/datadog_checks/cockroachdb/__about__.py": {
+    "sha256": "47da9d37981506e9fa60e7aa250b3e5e19ea7d25b91696fcab64eab47c518818"
+   },
+   "cockroachdb/datadog_checks/cockroachdb/__init__.py": {
+    "sha256": "825ab95d443f67a93d94c95ff06f43d6734235ede3fa78576f5104d2ff25be76"
+   },
+   "cockroachdb/datadog_checks/cockroachdb/cockroachdb.py": {
+    "sha256": "9dfd6a80cb422370209451d3428e0970950edc717bf5b9d9ed48aa114b78f0aa"
+   },
+   "cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example": {
+    "sha256": "8c52582e5282cd71caf723f5aeb4bfe85e361d1703f361c40730c0b2e4a307f9"
+   },
+   "cockroachdb/datadog_checks/cockroachdb/metrics.py": {
+    "sha256": "2147b717b0d13b3f716b177a58f58fe614d4af8782207b13234b6459d9f72828"
+   },
+   "cockroachdb/manifest.json": {
+    "sha256": "29b5123d6e7c9d6aeb8d55d11bbbe11bd21065f2106869dcf5a4539d4101470e"
+   },
+   "cockroachdb/metadata.csv": {
+    "sha256": "578103ef297d889682deb90fa425757513895e267127cc7d8047ab4586841b79"
+   },
+   "cockroachdb/requirements-dev.txt": {
+    "sha256": "7905ba3beaf75f5d0aa471a131166c92bd5d073815c8165c661cfd0ba8b95536"
+   },
+   "cockroachdb/requirements.in": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "cockroachdb/requirements.txt": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "cockroachdb/setup.py": {
+    "sha256": "434c0fe42fe864d5277be5fec4d5a3029d51436b74cf7530860cc5e92ddc53ee"
+   },
+   "cockroachdb/tests/__init__.py": {
+    "sha256": "53975c32879c16739edd4d2509d91fc7e385a02ff69f9d23878e86dae96bca9c"
+   },
+   "cockroachdb/tests/common.py": {
+    "sha256": "35891e5ef2ed8b6cfddd2cdcc0bcafbeb3f9fdb15193fe8022fea8506282541a"
+   },
+   "cockroachdb/tests/conftest.py": {
+    "sha256": "5c7f4684a4543e6204fe07e4f8e8f60b854fe6bb22a76f422ed24c7a5ed462d0"
+   },
+   "cockroachdb/tests/docker/docker-compose.yaml": {
+    "sha256": "b774e81a08a1e37652d0a870086637f344a18aaa4323938468b1a2aaa3c0a6af"
+   },
+   "cockroachdb/tests/test_bench.py": {
+    "sha256": "3c4eb3bc98887c6d552f24cbaa63d97ac6f3bceb61cafe4cff7c5d2dcbea61ab"
+   },
+   "cockroachdb/tests/test_cockroachdb.py": {
+    "sha256": "af70ad14a5ae53d20110abf0b0b30fc67698b4b4c8c0ef1e9d17b2519fc79173"
+   },
+   "cockroachdb/tox.ini": {
+    "sha256": "874efd09ab63461998fb9630a6cd1d02ac456a51fb23c944780ccea743a4adb0"
+   },
    "consul/CHANGELOG.md": {
     "sha256": "e600031cbbc0d258ad5c51e39cfbb277929de7298fd46e42430d6be192e04867"
    },
@@ -1843,6 +1909,69 @@
    "consul/tox.ini": {
     "sha256": "d13e1b1278e843a49eb56fce072e9d9c2fe38936a5a4393645745072320ef43f"
    },
+   "coredns/CHANGELOG.md": {
+    "sha256": "4be4652b066c3b9398f236d4757147221784def318184e15db025337b9c70706"
+   },
+   "coredns/MANIFEST.in": {
+    "sha256": "0bc6a14637831cef99ec6ed492bad1fe40d66d0e073f889487a5fa3c1f98cdac"
+   },
+   "coredns/README.md": {
+    "sha256": "183972c496725612d3d8392059c02c974064cea6883c75d58ddb794958dacd9c"
+   },
+   "coredns/datadog_checks/__init__.py": {
+    "sha256": "ceb7ef4839dd1117027b74c0b4fe8a9873b71bedd04e8a27feb98fa2da66f092"
+   },
+   "coredns/datadog_checks/coredns/__about__.py": {
+    "sha256": "530aefec719a2183c65055a5dc1def97c103eb5186c4eb4700ea58adbc117b43"
+   },
+   "coredns/datadog_checks/coredns/__init__.py": {
+    "sha256": "a3538cc781fbe05d977472d1cc9359bd3736790d2a47b0ee2657647ba2189e52"
+   },
+   "coredns/datadog_checks/coredns/coredns.py": {
+    "sha256": "42df4217cb2cd81b78afd7547da3c81d9155c8ad641b5faab45ceac445e32a49"
+   },
+   "coredns/datadog_checks/coredns/data/auto_conf.yaml": {
+    "sha256": "e2710c31348192ee47c5737bb99eb0c98c22b43dfb62ac11cd60e49c3545a33c"
+   },
+   "coredns/datadog_checks/coredns/data/conf.yaml.example": {
+    "sha256": "38de13d42903ed49e0974a549d845d177a6e46024c7930aabeeceb627c8fb586"
+   },
+   "coredns/manifest.json": {
+    "sha256": "afc9db554c57f08a292eb07fc0e50e5f18bfff140542ef876fda01dcef137279"
+   },
+   "coredns/metadata.csv": {
+    "sha256": "770dd7950dc4eb074803e962e1e7c556013a8a60f75098eef2fe43eba2336041"
+   },
+   "coredns/requirements-dev.txt": {
+    "sha256": "b4c94790f347b295b27119d08038ddc2c33b8167f3ad3d9e70f39a47fc222cd7"
+   },
+   "coredns/requirements.txt": {
+    "sha256": "5836228800a08929ddc159e28dc5a75c90ec9de41adc5d600ea0fba150d7305d"
+   },
+   "coredns/setup.py": {
+    "sha256": "cdb12499c65e11ce219da858bc74d48794d3afd591fa04e9aaf183bb33b475ab"
+   },
+   "coredns/tests/__init__.py": {
+    "sha256": "53975c32879c16739edd4d2509d91fc7e385a02ff69f9d23878e86dae96bca9c"
+   },
+   "coredns/tests/conftest.py": {
+    "sha256": "33179ed2f3f218a22b3c9f1a40ac0eae723d9e7f6410a067d070a6fed48be385"
+   },
+   "coredns/tests/docker/coredns/Corefile": {
+    "sha256": "1bfef24e8477cacfdc63c6892b854c2077318ca119246eb7a500a30b06a8d120"
+   },
+   "coredns/tests/docker/docker-compose.yml": {
+    "sha256": "c37417e564cd21b7db57a3cf1dcd453634760191388c442edcfe8956a974af07"
+   },
+   "coredns/tests/fixtures/metrics.txt": {
+    "sha256": "04f9ab111fdc21e9f750cff2a8739bf2aca79114d33c388401e14a8bde5cb6f3"
+   },
+   "coredns/tests/test_check.py": {
+    "sha256": "c280e68f6f64e6ae6cfe9be6b4b83bb65a4d25a07db6a20579f2e46d958670cf"
+   },
+   "coredns/tox.ini": {
+    "sha256": "e2214335f7631c1b6a60eb14c4f7fc3e7832fa6ed90e4e979eb43c06d6ba09c5"
+   },
    "couch/CHANGELOG.md": {
     "sha256": "19cac147771a2814167c6d3555c29a75edec7da5b3fc75ffb461a3e99d8c3554"
    },
@@ -1850,7 +1979,7 @@
     "sha256": "1e2a8e50946faff36317de4a5add4103a99c87a88605361c162d7a63e4ca5646"
    },
    "couch/README.md": {
-    "sha256": "96ba7c8a26c96c42b639ea506da3c326790be45c32e26f278e7d630e9ee2a741"
+    "sha256": "d7056548e75ced1a97bbeb7b922370cb79b6fdcb775060ee6c9e31ddbd28bfe1"
    },
    "couch/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
@@ -1868,7 +1997,7 @@
     "sha256": "5e2ee5f66e22abbfa527e35162cd03b6553f8af3ce587d94d92ecaf5408298ba"
    },
    "couch/datadog_checks/couch/data/conf.yaml.example": {
-    "sha256": "d56d7bb0c32f5883c42170f59588ac8708b1081867f5f0a940c4e1b17fbc8812"
+    "sha256": "4c940aeaca78e17a93c35b26206e816177591820aea30f63b90d1ea0ced2ddb5"
    },
    "couch/datadog_checks/couch/errors.py": {
     "sha256": "5aabd476040e15e2012cea144b272546a17825c856041fc1885c7984020e8529"
@@ -1877,16 +2006,16 @@
     "sha256": "c820848dad64b06566e72f9926a9cbccf585640121f44d6a545f532df1d645d3"
    },
    "couch/logos/avatars-bot.png": {
-    "sha256": "1124dd1f696da57f140273f5bbe7ab38a23bf28f7d293dd97c6ff3cddeedf8af"
+    "sha256": "8a037c91a77ee7bc04e11480dc7ec08d9a15f908f29fd705b2b639ee6aac0474"
    },
    "couch/logos/saas_logos-bot.png": {
-    "sha256": "f274a78babdec9f8cd3ec561bd28a057532e4c4aaeef4d5a21f2e44d366fa7c8"
+    "sha256": "c1aa88d2428a414566c6c4bc877345a851e00ea8ef00a5b0252ce66cbad05895"
    },
    "couch/logos/saas_logos-small.png": {
-    "sha256": "524029721ddb9ef92d3bfdf2477cb642e8657db77dd1cbba5c95ca3bc9048f16"
+    "sha256": "bb406d50cf37ca51ba8e1fb94936f91bf4e60dd3620ea5776826b85668a275bb"
    },
    "couch/manifest.json": {
-    "sha256": "23247639b7ab1e8db62ab9846f47aff24767b817ac7eafea3ea3b86b1588390c"
+    "sha256": "a42442cf80d8d1d2e2623bf756db0fbdf1fd1cb00f909b6346b9aad5b18d611b"
    },
    "couch/metadata.csv": {
     "sha256": "2f7a933e0f322e1ca25499af816a6de261fdf045b0577fc6b0ed2ea0b74bdb93"
@@ -2015,7 +2144,7 @@
     "sha256": "beac4abb8b286e7fb7cdba5ebd7ef4b2a4df3f6b4b0527f41bc976047984e121"
    },
    "datadog_checks_base/CHANGELOG.md": {
-    "sha256": "36810653d58dfff68dca3c6ce9a39fd7cee9762c6cf684a94cbe3e942ddba044"
+    "sha256": "06c958d3bd5bac7900686e2779f1da9c28261c304d16c5e1609aaef524a52503"
    },
    "datadog_checks_base/MANIFEST.in": {
     "sha256": "e43d60694918fd50e407776b2fe9991e01ee338dd5b3b3cabf83b486a8a539ab"
@@ -2024,7 +2153,7 @@
     "sha256": "df33c4eababf76de8506c0ed0de13d839bfa9f817735ec68cc7df5c4371f3863"
    },
    "datadog_checks_base/datadog_checks/__about__.py": {
-    "sha256": "1f8d55780982edc04e5855b88c8aacb7cc44476722639188f0c3e9291e8b9cc7"
+    "sha256": "485527f33c14730ad2b4161c185228d75b9368b60ccdd25b684b6f309a44b3f1"
    },
    "datadog_checks_base/datadog_checks/__init__.py": {
     "sha256": "29ec4013b04ea2676c49cf3c972f20a2baca909fd52f62970534a476bc701122"
@@ -2033,7 +2162,7 @@
     "sha256": "f917af1935bce2ad26ea544c5345a5ae710987177e7dc0701bbb6d4b20c40ea2"
    },
    "datadog_checks_base/datadog_checks/checks/base.py": {
-    "sha256": "01a8c02cee9039d8edfc3de6ed036d997958829cff53ca4852e21cf0d7fe9f3a"
+    "sha256": "9c5d7400895bf4f5daf90f80ce020f4331f7151fc19b8b96c1803d2580a7c9bb"
    },
    "datadog_checks_base/datadog_checks/checks/libs/__init__.py": {
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -2060,7 +2189,7 @@
     "sha256": "88a9e9d328f1e5fdbddd0b1c687992c1f3fc9e6a0d72310c8561acaa4496463f"
    },
    "datadog_checks_base/datadog_checks/checks/openmetrics/base_check.py": {
-    "sha256": "f34c94f5632bcdab7df35fdaf85239fb36195008effde5a05e2fdb3ae7f08178"
+    "sha256": "250d6c35713697f68de6af36a0c3beb109edb96cdb5df038a581fedb2315d03f"
    },
    "datadog_checks_base/datadog_checks/checks/openmetrics/mixins.py": {
     "sha256": "c956dd43f39c1e5aca88b3740c37d866ff8a992e31f7fe8026cf638381660609"
@@ -2069,13 +2198,13 @@
     "sha256": "c6da17853de44dd8f8ce391649e8b12e3d7e1038b92056d564ada20fbd12285c"
    },
    "datadog_checks_base/datadog_checks/checks/prometheus/base_check.py": {
-    "sha256": "61ee54964f112b86b7cafec9bf6e08adbe903f9ce877afd02a69d8567b87cc57"
+    "sha256": "4d2beb8454937fa698f55e6a7cab7ba658c706ef7630d1363d468ff02e3660a5"
    },
    "datadog_checks_base/datadog_checks/checks/prometheus/mixins.py": {
     "sha256": "c0f87bdbb4d33d0f13c0c67c527e210a90bb41583e02d3f0d6392c28bde749f8"
    },
    "datadog_checks_base/datadog_checks/checks/prometheus/prometheus_base.py": {
-    "sha256": "208fe71e2a2cfd5bfb4c4ef2290db74fdb329c6996d332bb19f7e4c9ed1afc58"
+    "sha256": "fda81efd707cb06576534495bef7733f78500f0bf61cd9afcdbf4e8b56ecbedb"
    },
    "datadog_checks_base/datadog_checks/checks/win/__init__.py": {
     "sha256": "75b66b151c0da47e807aa9d435ff94a9219499d65a8582bc94960c9ac53642ea"
@@ -2117,7 +2246,7 @@
     "sha256": "3f8dccf3944b4d84fe172af646822dbea6185b8fcd0e4432686215ebd04b1868"
    },
    "datadog_checks_base/datadog_checks/stubs/aggregator.py": {
-    "sha256": "da51806d0ea37077cdfe927731fa819c917f20b6907712cd8e42a4b25ba89dc3"
+    "sha256": "4e6c8282c959a18fb6c78eea235d65a737e651d180a9b13d42f54a448f06bf06"
    },
    "datadog_checks_base/datadog_checks/stubs/datadog_agent.py": {
     "sha256": "53dde189e4de5597943cfe3aa2aae2aaf5d8cdbb38555572b8de2f65049cfc47"
@@ -2135,7 +2264,7 @@
     "sha256": "0038574a947809b0964a1e283f84c7cbcccf02205e0c5d5ddcbcf838f136597f"
    },
    "datadog_checks_base/datadog_checks/utils/limiter.py": {
-    "sha256": "dc9e6d2ef6a59814621980ad3ecb7d3e7a18122cc2722975ee9ea7305af8b368"
+    "sha256": "7b400f94ddb814500b056bd995218a4230f9c05e7edb3ea5732782645d8fb73f"
    },
    "datadog_checks_base/datadog_checks/utils/platform.py": {
     "sha256": "26f9fefe2f599f6b13e6e1cf920796c9eea528623931a522a5c2d31aa1a3d8fc"
@@ -2189,7 +2318,7 @@
     "sha256": "31cc5352234767cb12aa3e478f51548d351521a67fdad8e744feccd01c4d283a"
    },
    "datadog_checks_base/tests/test_agent_check.py": {
-    "sha256": "029724125403d4b76641dfb74c6fc3e2b7babda37267666e68376dbb137e8ad2"
+    "sha256": "032dafbb51456c4c36250b42c6f2a4c49e2f016c1efd958ed6a8e364f46a408c"
    },
    "datadog_checks_base/tests/test_config.py": {
     "sha256": "111aefa823a598667de5a66d2d2091c213a913bd58ba9a2bed5a675404565e41"
@@ -2231,7 +2360,7 @@
     "sha256": "d1ff44380274e236f32d5ef48a658986ab2f2dbe0fdb6371fc4627ab7f2197eb"
    },
    "datadog_checks_dev/README.md": {
-    "sha256": "c60c1a6a409750a5abae618509dd23d6a3a4dfee5599f7c4fc53230cbdda3ec6"
+    "sha256": "dd0d0885280728d0c3b233f25e08023b49367b84d6b2c669a715e0286008787d"
    },
    "datadog_checks_dev/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
@@ -2255,7 +2384,7 @@
     "sha256": "c47c52f902d104ea55302d530b8dfda68ce9d1cd44d4ae692adfe2114eb95ae6"
    },
    "datadog_checks_dev/datadog_checks/dev/docker.py": {
-    "sha256": "323f548742d30424cd5a528d5deff140243157afacbf13eb35c03f75e5ab9fd0"
+    "sha256": "880d9c4673680ae394afbdb8dc4191828bfc7359eac47936889b09b485352bc5"
    },
    "datadog_checks_dev/datadog_checks/dev/errors.py": {
     "sha256": "986250938bc050017552a3bd44c9c6302989048adf0b65acab617da10b749302"
@@ -2303,10 +2432,10 @@
     "sha256": "1f0fefdd290b0b45c92de6ced893720596af2f3cc5381a04de83bb71726bab6c"
    },
    "datadog_checks_dev/datadog_checks/dev/tooling/commands/release.py": {
-    "sha256": "9058b66781bb716922295b54c16194721159288f545378962e307862c57b9469"
+    "sha256": "7c516cb651e950b2509aa033fafb7ab76b90029e00fde6dd0428ec8bffe56e93"
    },
    "datadog_checks_dev/datadog_checks/dev/tooling/commands/test.py": {
-    "sha256": "4e263fa746164fc9bd5bf1d3f0a37cf460cdb1b64beae15625063b34a56196ff"
+    "sha256": "2580dbb460aca35f8155d57e3639018609836acf9fbb89fd9d334e745caae68b"
    },
    "datadog_checks_dev/datadog_checks/dev/tooling/commands/utils.py": {
     "sha256": "d85002bdda31729dfd8d637bfd5d96b06618196dda7c1877a2f4e81bd616616a"
@@ -2324,7 +2453,7 @@
     "sha256": "f11b5171e20d1f317f6228e87b807327a78eb780fc54ffbe0669ed3d76fd573d"
    },
    "datadog_checks_dev/datadog_checks/dev/tooling/git.py": {
-    "sha256": "195195591e2c980641a13c60ecf5f57b9f9ca37eabf720678f42be6ddabe7e5a"
+    "sha256": "903453a80029f5035f6b5232728e3bb6b1159d3d515dcd3003eb2b46ed249785"
    },
    "datadog_checks_dev/datadog_checks/dev/tooling/github.py": {
     "sha256": "6d79ee7f5db68a704e8188e92ddcc59ea423fb8e2deecc29d6c7e0e04ddbeaad"
@@ -2669,7 +2798,7 @@
     "sha256": "f0e94d25c8b8e53b75e69f3557e277ff47fe46f22559aa5baa9854037f11187e"
    },
    "docker_daemon/README.md": {
-    "sha256": "845a3984770bd714ffc5b886d450f9199ce962b67d7e81c9077b83561a211d99"
+    "sha256": "884899c75e8ac84bf492fd0d24179243c4b04e51fb97593df2ff68e4d458845a"
    },
    "docker_daemon/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
@@ -2801,19 +2930,19 @@
     "sha256": "e26865b71cf3d59bac643976215111897ec71c300589badfe004b35da5492a5b"
    },
    "ecs_fargate/CHANGELOG.md": {
-    "sha256": "4fcf41ba2c78230b1fcdd8d92919979eb64dbd9efd7c610d5290e03b13668742"
+    "sha256": "74a97c4b3c33ddd9d1be730d73bb7387963ae049670dd71b16f431aa42b97943"
    },
    "ecs_fargate/MANIFEST.in": {
     "sha256": "f0e94d25c8b8e53b75e69f3557e277ff47fe46f22559aa5baa9854037f11187e"
    },
    "ecs_fargate/README.md": {
-    "sha256": "20e4b6f118ae6a7f74efc2aa1964c0b2ea41af1238bdafcadf0dace12bab0467"
+    "sha256": "7e8af3d29364c29452176fd96061a817bd16ed03d98f73c1481ac15e22da692c"
    },
    "ecs_fargate/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
    },
    "ecs_fargate/datadog_checks/ecs_fargate/__about__.py": {
-    "sha256": "ffb3c0a29c522d226634ab125bc20222a83b1570277ccf91fea9cb396fbf58c4"
+    "sha256": "e8b250278e1aa5ed0c3a0312712649cadb56a3d1cfcdc7b6e2dcaba55858e3a4"
    },
    "ecs_fargate/datadog_checks/ecs_fargate/__init__.py": {
     "sha256": "042e0905d3c64bbd2c8cb64bdef6c605ec408f26d8f81a7d53cc98fbf100979c"
@@ -2822,7 +2951,7 @@
     "sha256": "20e4bafade96ab7f5caf9872675526e3929f54c7e94450ed1ccccd1c64a987b1"
    },
    "ecs_fargate/datadog_checks/ecs_fargate/ecs_fargate.py": {
-    "sha256": "441746f874207aa20a36bad06721fcbb2919e91757d1fb39d983d91f106e8ab3"
+    "sha256": "a98767f4417784b37edd9fde1574d36d1cbcfb41f8daca5a8091097717e2b687"
    },
    "ecs_fargate/logos/avatars-bot.png": {
     "sha256": "d2f4368a356e7becc3ec535a370fc0e9701d27fe0fb660bca125174eadae8dc5"
@@ -2837,7 +2966,7 @@
     "sha256": "2af3adf68df9bd5182934cfa82970db6067768570039a75ab133c2b9e5a11103"
    },
    "ecs_fargate/metadata.csv": {
-    "sha256": "f1f2f6b354802155248f447a81d9f0f64eee732377cc72b8fbcbd63d025f1488"
+    "sha256": "dad1ba239d2182f621edc0728158dfff744de73b5c0c83bae9d4017a6d8fb348"
    },
    "ecs_fargate/requirements-dev.txt": {
     "sha256": "7905ba3beaf75f5d0aa471a131166c92bd5d073815c8165c661cfd0ba8b95536"
@@ -2864,7 +2993,7 @@
     "sha256": "c332f9922950e137c83229bf361625608063ca49aaed5a540dfb255b0e0f1239"
    },
    "ecs_fargate/test/test_ecs_fargate.py": {
-    "sha256": "e245dd6bc99a368b7ea2156422cb486a94265394aa45e099a25ddbf2cb9dfcc1"
+    "sha256": "1b6d7fd3efb8016e6c9f2af62ece3aa624014c1830ad63f8d93bc1da5b595ad8"
    },
    "elastic/CHANGELOG.md": {
     "sha256": "7ff95ba2922bc00395afe93a3a9058b8b1656ada87f3f57bd9298c4fb555532e"
@@ -4028,7 +4157,7 @@
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
    },
    "http_check/tests/common.py": {
-    "sha256": "fdc5fdf566fbef801bb9a9da82b63027142a2dac98c05e9627d133fbb0ce8bdc"
+    "sha256": "db1546f5cb7bd4620e2aa5c61a24ff281a727476f4e5941aa1b3b31be4218fc7"
    },
    "http_check/tests/conftest.py": {
     "sha256": "5e51ceb967dfca22297e0578ff56b0661aa10dc78dc40e189611fb4950942b6a"
@@ -4538,7 +4667,7 @@
     "sha256": "d828dc4774fa4abd2eac2609f0e2be8918396d5b92bf19fdd6236c49ab5d005e"
    },
    "kubelet/datadog_checks/kubelet/kubelet.py": {
-    "sha256": "3587869528c50fba523d7a38cbf83cccfdbc24b45a8de0924867745ae0c8d8cd"
+    "sha256": "2ab02a64d56cf7c3498c85b4435b56a5645460f03b90f348dce7a781bab0a17f"
    },
    "kubelet/datadog_checks/kubelet/prometheus.py": {
     "sha256": "7f614e927c445030e265b2edbaf2a7fffc3f9e0c0094f3ffe99fea97c77d7e63"
@@ -4589,7 +4718,7 @@
     "sha256": "7673a7bda65716729504be7f0cf1d34c4cadd0df8c28bc24d4006fb5f56c35ff"
    },
    "kubelet/tests/fixtures/pods.json": {
-    "sha256": "98f9c9880e61c7ab05e807e763bf7b831f96244ca97ae5405f5ed5a76f55f409"
+    "sha256": "700f9f2363bcea189db02f54c37b9e926c727b8fbb3e5630e0891c915ff83aad"
    },
    "kubelet/tests/fixtures/pods_list_1.2.json": {
     "sha256": "43f0adece9b7b2855cac93407a21ee0fd71be0a66146d96ada38f7bfd3457f8b"
@@ -4598,10 +4727,10 @@
     "sha256": "49e9d26e0a14d65131468164e16ea9ca140ec5dea3edf54b028aa0eab960dcd6"
    },
    "kubelet/tests/test_common.py": {
-    "sha256": "421a2cc22fc6d1be3510311eb922e07dc8358edee1749231192b26f6539137d5"
+    "sha256": "0c8f1d9e6a2d0510fead0fa3eb73e27d255e195f7639c0df3a3b740746420b55"
    },
    "kubelet/tests/test_kubelet.py": {
-    "sha256": "a6255f99eb1604ffeceaaa028d8820764f6be81c0f498cb19ce57d60c830a02d"
+    "sha256": "e0866de6a816c7df59cfae908303502bc89b12391ab666d1c64540aa3a04ae43"
    },
    "kubelet/tests/test_prometheus.py": {
     "sha256": "88da4f1abc1d3645d48f3c6b1f8470074d7df9887a6ee61fb202d7bf29b33e4c"
@@ -6548,7 +6677,7 @@
     "sha256": "6916fe269936aabd192de24c2940f24c2c1e07c1d94415de75bd31a1aeb1929a"
    },
    "postgres/CHANGELOG.md": {
-    "sha256": "bb5f84e4315855daa2e3faaa0817dc465a1e99dd8b06078d228a465e607abe4e"
+    "sha256": "f802b3abc3e422a5a4406e3c145f75df3b3ca9aed4a3717f5310913ffacfd71f"
    },
    "postgres/MANIFEST.in": {
     "sha256": "1e2a8e50946faff36317de4a5add4103a99c87a88605361c162d7a63e4ca5646"
@@ -6560,7 +6689,7 @@
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
    },
    "postgres/datadog_checks/postgres/__about__.py": {
-    "sha256": "485527f33c14730ad2b4161c185228d75b9368b60ccdd25b684b6f309a44b3f1"
+    "sha256": "bc78f6b993d9e9cb14222c85fb9cb8360a7da9a4b044e9aa605b95b5f37cec83"
    },
    "postgres/datadog_checks/postgres/__init__.py": {
     "sha256": "11df750a2268d8d9624288adc1c0eabc16dfc007436552856a296460f4ea1124"
@@ -6569,7 +6698,7 @@
     "sha256": "7d6cbc00190ab1ea169645b3736c6b54747d0b42fd7de0ede4c301d728b10912"
    },
    "postgres/datadog_checks/postgres/postgres.py": {
-    "sha256": "1871d39651fbb6910d8a9e7d615ac60519d19ebcd4d82e183093038d6c132aba"
+    "sha256": "c6e5d5566af7466cd333021c576e4d514f8a73ead53246247adaa1b5e2a194e9"
    },
    "postgres/images/postgresql_dashboard.png": {
     "sha256": "9e334a1bafed25aeba609a5b3e2cf60a8218b14d22bf8ea8bc85f6e71388258b"
@@ -6635,7 +6764,7 @@
     "sha256": "69e859a89ee7f25c6db72cb78427c6f4233ee2968048550c2546803619d265f3"
    },
    "postgres/tests/test_unit.py": {
-    "sha256": "eb848830d57f58ae18b12be54f68d8d6c0bb3be9aaca1354ba63667ce68b9a5f"
+    "sha256": "9788d60006008d73858f48399cdcb5d6cf231d740ce5139c38e4aeb14d1600b9"
    },
    "postgres/tox.ini": {
     "sha256": "71835ba555a3149086da3923a7282ebec9957ec9b7855dd83807ea97caef57c7"
@@ -6779,7 +6908,7 @@
     "sha256": "1e2a8e50946faff36317de4a5add4103a99c87a88605361c162d7a63e4ca5646"
    },
    "prometheus/README.md": {
-    "sha256": "e4f73cfd08df63c39def1cb2a197167c72a2857603e26f6a33554e15e5aaa0bf"
+    "sha256": "69a5b9e4fcb743cd1067ac6943293ad2671a667707a57e62854301e6fd25a6b0"
    },
    "prometheus/datadog_checks/__init__.py": {
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -6791,7 +6920,7 @@
     "sha256": "9ddd5a448e97dd3473c02da2c506f127b474c211eef6df60bd19ae57fc5dfc07"
    },
    "prometheus/datadog_checks/prometheus/data/conf.yaml.example": {
-    "sha256": "ade0feb2655caee21fe8d38a2219c889dc1d61e110e45e9538598b253db70938"
+    "sha256": "e4d47af0af47cc72a9e05767961674781ea016e496c22cb9147a651e43ddf404"
    },
    "prometheus/datadog_checks/prometheus/prometheus.py": {
     "sha256": "6fdb0789cc41740b804f30307c0fc295d4ddea4242cdf49c70e002a57419061a"
@@ -6878,7 +7007,7 @@
     "sha256": "345f9f36026bd1f231435e087a442ae29cc63e5f6ba3b62618888a063342c908"
    },
    "rabbitmq/metadata.csv": {
-    "sha256": "0e399799079e1e393eeb80c2d1b82a59c3c65fd5b44dfddccd70e7d363de2c74"
+    "sha256": "01b31effb0c4a63f25ad810668ccaa803c548d2e518431dbe9e76ce122a79a84"
    },
    "rabbitmq/requirements-dev.txt": {
     "sha256": "6ab14679fcf55f346461af759ee7b37f502099c4f39b3dc52bb87c7d3670cfbf"
@@ -7016,7 +7145,7 @@
     "sha256": "a7f7367d0c47d038954f6af7b3d42a5caaebf62915ebe90670cd135c46237c12"
    },
    "requirements-agent-release.txt": {
-    "sha256": "79635da15881116106476a1813682a075967beed0b32523bf9b24df49ca2b234"
+    "sha256": "e8ca602125146c07c7c0f746a25f34e02948ae18355da28b7146c5d3bc114729"
    },
    "riak/CHANGELOG.md": {
     "sha256": "bdd030a271a8b03cea7e15ca97aeb57bd049a4b2bd8ba28cbef55fb0931e9986"
@@ -8348,7 +8477,7 @@
     "sha256": "f309774831a362517bd6981a05dbdc5cf54866532ce5faf3c521e1f7ae363390"
    },
    "vsphere/CHANGELOG.md": {
-    "sha256": "6a44d6b9842c54cb377c86ce34691c9f47cb87f7e66b3c3e8373aefd80825e0d"
+    "sha256": "eeb7f26e9a624c421ad37dc7b3e5e433f429c362e4b4b1c0a790c45fa4195935"
    },
    "vsphere/MANIFEST.in": {
     "sha256": "1e2a8e50946faff36317de4a5add4103a99c87a88605361c162d7a63e4ca5646"
@@ -8360,7 +8489,7 @@
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
    },
    "vsphere/datadog_checks/vsphere/__about__.py": {
-    "sha256": "726de7fd43282e62ffc8eae54613db628f9945df455a9aa15cf5d08284b07a4e"
+    "sha256": "0f8a9f2c44ae7ef890f4caf302cb201b21de845af6be5151afbe1e9383202ad6"
    },
    "vsphere/datadog_checks/vsphere/__init__.py": {
     "sha256": "00777954b3fcd7992d7d6d56bc7420d55fc7aa1f329fc01befc48e4374c55374"
@@ -8380,6 +8509,9 @@
    "vsphere/datadog_checks/vsphere/event.py": {
     "sha256": "eee926756bf0ad76b1534e772568d2e382de1653fb24c15bb1171f851f57a87d"
    },
+   "vsphere/datadog_checks/vsphere/metadata_cache.py": {
+    "sha256": "6ac4bbe79010ba1546941480d8639972250645e09f31c5df1b6d0cd6b156d80d"
+   },
    "vsphere/datadog_checks/vsphere/mor_cache.py": {
     "sha256": "fa1a8f197d7e21cdef1ede56676d03563b0ad256866d3780382c5c91786b4c31"
    },
@@ -8387,7 +8519,7 @@
     "sha256": "6ad161f7ef987e07693340d7b0f98bb0c85c7d879190964f3bbb497ed1b9c0d4"
    },
    "vsphere/datadog_checks/vsphere/vsphere.py": {
-    "sha256": "1131efc6140ba2d6b657c6776b549cae81eeaadcbbc5225a83fdc1cb1083cac7"
+    "sha256": "e4e7c5d920b79e883080bcd30670052e1b38fc6a1f14413e0a58a0af223d6db0"
    },
    "vsphere/images/vsphere_graph.png": {
     "sha256": "23351923957fee9345459e33a46f51e3e8ee3c8ad207e5f0fb3d81415fb0543e"
@@ -8434,6 +8566,9 @@
    "vsphere/tests/test_cache_config.py": {
     "sha256": "daee3bdf2bdaf104281dfe0bc78338da7e47c0d7773bef10a03238305cdd4aec"
    },
+   "vsphere/tests/test_metadata_cache.py": {
+    "sha256": "6036879a1b7cfb1ce85a55bf24a7b7958a2091f6be8494c8847deceba4e74ad4"
+   },
    "vsphere/tests/test_mor_cache.py": {
     "sha256": "74d744e20bcf10378e110b0f2cfa7606a1d95431af56c7ddd5719683ea7f43dc"
    },
@@ -8441,7 +8576,7 @@
     "sha256": "520aee3b980cb7f66c3a9a1182248f3787ca75099a28a08ec2f68a81b7abc037"
    },
    "vsphere/tests/test_vsphere.py": {
-    "sha256": "dd72e24b720d56ef335860e10fd580f9540581d1315a6287715115792a347114"
+    "sha256": "f304f27e4d6b4267156714c449eff37228779282d277595a082a8aaa6675ef32"
    },
    "vsphere/tests/utils.py": {
     "sha256": "75b4cb24531f5e93e5acf16f4bb1970f0ea3f3d1736fb5c76bf9f5b740f83f8e"
