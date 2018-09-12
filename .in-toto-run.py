@@ -5,7 +5,7 @@ import shlex
 import shutil
 import subprocess
 
-# pip3 install in-toto>=0.2.dev3
+# pip3 install in-toto==0.2.dev3
 import in_toto.gpg
 import in_toto.runlib as runlib
 import in_toto.settings
