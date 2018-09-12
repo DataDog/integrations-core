@@ -79,8 +79,16 @@ instances:
     # from vCenter, which means a LOT of metrics you probably
     # do not care about. We have selected a set of metrics
     # that are interesting to monitor for you if false
-    # optional
+    # optional. This parameter will be deprecated in favor of `collection_level`
     # all_metrics: false # /!\ will generate a lot of metrics
+
+    # A number between 1 and 4 to specify which metrics will be sent
+    # 1: Only basic metrics - 4: every metric available.
+    # /!\ The higher the level, the more metrics will be collectied.
+    # Depending on the size of the vSphere environment, that can be a lot
+    # and can slow down the collection process as well as put pressure on the vCenter Server
+    # Optional, default to 1
+    # collection_level: 1
 
     # Event config is a dictionary
     # For now the only switch you can flip is collect_vcenter_alarms
