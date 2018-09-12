@@ -22,6 +22,7 @@ def getKeyId():
     # Determine which gpg to call depending on OS.
     def getGPGExec():
         sysname = os.uname().sysname
+
         # If on Linux, assume we have gpg2.
         if sysname == "Linux":
             gpg = "gpg2"
@@ -30,9 +31,7 @@ def getKeyId():
         else:
             raise Exception("{} not supported!".format(sysname))
 
-        cmd = shlex.split("which {}".format(gpg))
-        gpg = subprocess.check_output(cmd)
-        return gpg.strip().decode("utf-8")
+        return gpg
 
 
     cmd = shlex.split("{} --card-status".format(getGPGExec()))
