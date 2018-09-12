@@ -9,6 +9,7 @@ import re
 import ssl
 import time
 import traceback
+import threading
 
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
@@ -26,6 +27,7 @@ from .errors import BadConfigError, ConnectionError
 from .cache_config import CacheConfig
 from .objects_queue import ObjectsQueue
 from .mor_cache import MorCache, MorNotFoundError
+from .metadata_cache import MetadataCache, MetadataNotFoundError
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -108,6 +110,7 @@ class VSphereCheck(AgentCheck):
 
         # Connections open to vCenter instances
         self.server_instances = {}
+        self.server_instances_lock = threading.RLock()
 
         # Event configuration
         self.event_config = {}
@@ -134,7 +137,7 @@ class VSphereCheck(AgentCheck):
         self.registry = {}
 
         # Metrics metadata, for each instance keeps the mapping: perfCounterKey -> {name, group, description}
-        self.metrics_metadata = {}
+        self.metadata_cache = MetadataCache()
         self.latest_event_query = {}
 
     def start_pool(self):
@@ -255,19 +258,20 @@ class VSphereCheck(AgentCheck):
         ] + tags
         service_check_tags = list(set(service_check_tags))
 
-        if i_key not in self.server_instances:
-            self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
+        with self.server_instances_lock:
+            if i_key not in self.server_instances:
+                self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
 
-        # Test if the connection is working
-        try:
-            self.server_instances[i_key].CurrentTime()
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=service_check_tags)
-        except Exception:
-            # Try to reconnect. If the connection is definitely broken, this will send CRITICAL service check and raise
-            self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
+            # Test if the connection is working
+            try:
+                self.server_instances[i_key].CurrentTime()
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+            except Exception:
+                # Try to reconnect. If the connection is definitely broken,
+                # this will send CRITICAL service check and raise
+                self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
 
-        return self.server_instances[i_key]
+            return self.server_instances[i_key]
 
     def _compute_needed_metrics(self, instance, available_metrics):
         """ Compare the available metrics for one MOR we have computed and intersect them
@@ -280,10 +284,13 @@ class VSphereCheck(AgentCheck):
         wanted_metrics = []
         # Get only the basic metrics
         for metric in available_metrics:
+            counter_id = metric.counterId
             # No cache yet, skip it for now
-            if i_key not in self.metrics_metadata or metric.counterId not in self.metrics_metadata[i_key]:
+            if not self.metadata_cache.contains(i_key, counter_id):
+                self.log.debug("No metadata found for counter {}, will not collect it".format(counter_id))
                 continue
-            if self.metrics_metadata[i_key][metric.counterId]['name'] in BASIC_METRICS:
+            metadata = self.metadata_cache.get_metadata(i_key, counter_id)
+            if metadata.get('name') in BASIC_METRICS:
                 wanted_metrics.append(metric)
 
         return wanted_metrics
@@ -313,10 +320,10 @@ class VSphereCheck(AgentCheck):
 
     def _get_parent_tags(self, mor, all_objects):
         tags = []
-        properties = all_objects[mor]
-        parent = properties["parent"]
+        properties = all_objects.get(mor, {})
+        parent = properties.get("parent")
         if parent:
-            parent_name = all_objects[parent]["name"]
+            parent_name = all_objects.get(parent, {}).get("name", "unknown")
             tag = []
             if isinstance(parent, vim.HostSystem):
                 tag.append(u'vsphere_host:{}'.format(parent_name))
@@ -386,7 +393,21 @@ class VSphereCheck(AgentCheck):
             res = collector.ContinueRetrievePropertiesEx(res.token)
             objects.extend(res.objects)
 
-        return {obj.obj: {prop.name: prop.val for prop in obj.propSet} for obj in objects}
+        mor_attrs = {}
+        error_counter = 0
+        for obj in objects:
+            if obj.missingSet and error_counter < 10:
+                for prop in obj.missingSet:
+                    error_counter += 1
+                    self.log.error(
+                        "Unable to retrieve property {} for object {}: {}".format(prop.path, obj.obj, prop.fault)
+                    )
+                    if error_counter == 10:
+                        self.log.error("Too many errors during object collection, stop logging")
+                        break
+            mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
+
+        return mor_attrs
 
     def _get_all_objs(self, server_instance, regexes=None, include_only_marked=False, tags=None):
         """
@@ -429,17 +450,22 @@ class VSphereCheck(AgentCheck):
                 not self._is_excluded(obj, properties, regexes, include_only_marked) and
                 any(isinstance(obj, vimtype) for vimtype in RESOURCE_TYPE_METRICS)
             ):
-                hostname = properties["name"]
-                if properties["parent"]:
+                hostname = properties.get("name", "unknown")
+                if properties.get("parent"):
                     instance_tags += self._get_parent_tags(obj, all_objects)
 
                 if isinstance(obj, vim.VirtualMachine):
                     vsphere_type = u'vsphere_type:vm'
                     vimtype = vim.VirtualMachine
                     mor_type = "vm"
-                    if properties["runtime.powerState"] == vim.VirtualMachinePowerState.poweredOff:
+                    power_state = properties.get("runtime.powerState")
+                    if power_state != vim.VirtualMachinePowerState.poweredOn:
+                        self.log.debug("Skipping VM in state {}".format(power_state))
                         continue
-                    host = all_objects[properties["runtime.host"]]["name"]
+                    host_mor = properties.get("runtime.host")
+                    host = "unknown"
+                    if host_mor:
+                        host = all_objects.get(host_mor, {}).get("name", "unknown")
                     instance_tags.append(u'vsphere_host:{}'.format(host))
                 elif isinstance(obj, vim.HostSystem):
                     vsphere_type = u'vsphere_type:host'
@@ -447,7 +473,7 @@ class VSphereCheck(AgentCheck):
                     mor_type = "host"
                 elif isinstance(obj, vim.Datastore):
                     vsphere_type = u'vsphere_type:datastore'
-                    instance_tags.append(u'vsphere_datastore:{}'.format(properties["name"]))
+                    instance_tags.append(u'vsphere_datastore:{}'.format(properties.get("name", "unknown")))
                     hostname = None
                     vimtype = vim.Datastore
                     mor_type = "datastore"
@@ -494,7 +520,7 @@ class VSphereCheck(AgentCheck):
         if isinstance(obj, vim.HostSystem):
             # Based on `host_include_only_regex`
             if regexes and regexes.get('host_include') is not None:
-                match = re.search(regexes['host_include'], properties["name"], re.IGNORECASE)
+                match = re.search(regexes['host_include'], properties.get("name", ""), re.IGNORECASE)
                 if not match:
                     return True
 
@@ -502,14 +528,14 @@ class VSphereCheck(AgentCheck):
         elif isinstance(obj, vim.VirtualMachine):
             # Based on `vm_include_only_regex`
             if regexes and regexes.get('vm_include') is not None:
-                match = re.search(regexes['vm_include'], properties["name"], re.IGNORECASE)
+                match = re.search(regexes['vm_include'], properties.get("name", ""), re.IGNORECASE)
                 if not match:
                     return True
 
             # Based on `include_only_marked`
             if include_only_marked:
                 monitored = False
-                for field in properties["customValue"]:
+                for field in properties.get("customValue", ""):
                     if field.value == VM_MONITORING_FLAG:
                         monitored = True
                         break  # we shall monitor
@@ -630,6 +656,7 @@ class VSphereCheck(AgentCheck):
         # ## </TEST-INSTRUMENTATION>
 
         i_key = self._instance_key(instance)
+        self.metadata_cache.init_instance(i_key)
         self.log.info("Warming metrics metadata cache for instance {}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
@@ -646,7 +673,7 @@ class VSphereCheck(AgentCheck):
 
         self.log.info("Finished metadata collection for instance {}".format(i_key))
         # Reset metadata
-        self.metrics_metadata[i_key] = new_metadata
+        self.metadata_cache.set_metadata(i_key, new_metadata)
 
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
@@ -657,10 +684,12 @@ class VSphereCheck(AgentCheck):
         type of the counter and apply pre-reporting transformation if needed.
         """
         i_key = self._instance_key(instance)
-        if counter_id in self.metrics_metadata[i_key]:
-            unit = self.metrics_metadata[i_key][counter_id]['unit']
-            if unit == 'percent':
+        try:
+            metadata = self.metadata_cache.get_metadata(i_key, counter_id)
+            if metadata["unit"] == "percent":
                 return float(value) / 100
+        except MetadataNotFoundError:
+            pass
 
         # Defaults to return the value without transformation
         return value
@@ -687,12 +716,15 @@ class VSphereCheck(AgentCheck):
                                    "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
                     continue
                 for result in mor_perfs.value:
-                    if result.id.counterId not in self.metrics_metadata[i_key]:
-                        self.log.debug("Skipping this metric value, because there is no metadata about it")
+                    counter_id = result.id.counterId
+                    if not self.metadata_cache.contains(i_key, counter_id):
+                        self.log.debug(
+                            "Skipping value for counter {}, because there is no metadata about it".format(counter_id)
+                        )
                         continue
 
                     # Metric types are absolute, delta, and rate
-                    metric_name = self.metrics_metadata[i_key].get(result.id.counterId, {}).get('name')
+                    metric_name = self.metadata_cache.get_metadata(i_key, result.id.counterId).get('name')
 
                     if metric_name not in ALL_METRICS:
                         self.log.debug(u"Skipping unknown `%s` metric.", metric_name)

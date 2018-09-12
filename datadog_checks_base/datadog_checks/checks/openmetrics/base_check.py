@@ -20,7 +20,9 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         - bar
         - foo
     """
-    DEFAULT_METRIC_LIMIT = 2000
+    # This limit is set artificially high for v6.5, it will be reduced to 2000 in 6.6
+    # If you need more than 2000, determine your needed limit by then.
+    DEFAULT_METRIC_LIMIT = 250000
 
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=None):
         super(OpenMetricsBaseCheck, self).__init__(name, init_config, agentConfig, instances=instances)

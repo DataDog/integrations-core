@@ -5,6 +5,7 @@
 # stdlib
 import logging
 import re
+from collections import defaultdict
 from urlparse import urljoin
 from copy import deepcopy
 
@@ -252,26 +253,37 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     def _report_pods_running(self, pods, instance_tags):
         """
-        Reports the number of running pods on this node
-        tagged by service and creator.
+        Reports the number of running pods on this node and the running
+        containers in pods, tagged by service and creator.
 
         :param pods: pod list object
         :param instance_tags: list of tags
         """
-        tag_counter = {}
+        pods_tag_counter = defaultdict(int)
+        containers_tag_counter = defaultdict(int)
         for pod in pods['items']:
+            # Pod reporting
             pod_id = pod.get('metadata', {}).get('uid')
             tags = get_tags('kubernetes_pod://%s' % pod_id, False) or None
             if not tags:
                 continue
             tags += instance_tags
             hash_tags = tuple(sorted(tags))
-            if hash_tags in tag_counter.keys():
-                tag_counter[hash_tags] += 1
-            else:
-                tag_counter[hash_tags] = 1
-        for tags, count in tag_counter.iteritems():
+            pods_tag_counter[hash_tags] += 1
+            # Containers reporting
+            containers = pod.get('status', {}).get('containerStatuses', [])
+            for container in containers:
+                container_id = container.get('containerID')
+                tags = get_tags(container_id, False) or None
+                if not tags:
+                    continue
+                tags += instance_tags
+                hash_tags = tuple(sorted(tags))
+                containers_tag_counter[hash_tags] += 1
+        for tags, count in pods_tag_counter.iteritems():
             self.gauge(self.NAMESPACE + '.pods.running', count, list(tags))
+        for tags, count in containers_tag_counter.iteritems():
+            self.gauge(self.NAMESPACE + '.containers.running', count, list(tags))
 
     def _report_container_spec_metrics(self, pod_list, instance_tags):
         """Reports pod requests & limits by looking at pod specs."""

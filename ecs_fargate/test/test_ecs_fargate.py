@@ -82,7 +82,7 @@ class TestFargate(AgentCheckTest):
             ['docker_image:amazon/amazon-ecs-pause:0.1.0','image_name:amazon/amazon-ecs-pause','image_tag:0.1.0','com.amazonaws.ecs.container-name:~internal~ecs~pause', 'docker_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01']
         ]
         expected_container_metrics = ['ecs.fargate.io.ops.write','ecs.fargate.io.bytes.write','ecs.fargate.io.ops.read','ecs.fargate.io.bytes.read',
-                                      'ecs.fargate.cpu.user','ecs.fargate.cpu.system','ecs.fargate.mem.cache','ecs.fargate.mem.active_file',
+                                      'ecs.fargate.cpu.user','ecs.fargate.cpu.system','ecs.fargate.cpu.percent','ecs.fargate.mem.cache','ecs.fargate.mem.active_file',
                                       'ecs.fargate.mem.inactive_file','ecs.fargate.mem.pgpgout','ecs.fargate.mem.limit','ecs.fargate.mem.pgfault',
                                       'ecs.fargate.mem.active_anon','ecs.fargate.mem.usage','ecs.fargate.mem.rss','ecs.fargate.mem.pgpgin',
                                       'ecs.fargate.mem.pgmajfault','ecs.fargate.mem.mapped_file','ecs.fargate.mem.max_usage']
