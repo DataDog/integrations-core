@@ -1,0 +1,97 @@
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import shutil
+
+from in_toto import runlib
+from in_toto.settings import ARTIFACT_EXCLUDE_PATTERNS
+
+from .constants import get_root
+from ..compat import which
+from ..structures import EnvVars
+from ..subprocess import run_command
+from ..utils import (
+    ON_MACOS, ON_WINDOWS, chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
+)
+
+LINK_DIR = '.links'
+STEP_NAME = 'tag'
+
+
+def read_gitignore_patterns():
+    exclude_patterns = []
+
+    for line in stream_file_lines('.gitignore'):
+        line = line.strip()
+        if line and not line.startswith('#'):
+            exclude_patterns.append(line)
+
+    return exclude_patterns
+
+
+def get_gpg_exe():
+    if not (ON_MACOS or ON_WINDOWS) and which('gpg2'):
+        return 'gpg2'
+
+    return 'gpg'
+
+
+def get_key_id(gpg_exe):
+    result = run_command('{} --card-status'.format(gpg_exe), capture='out', check=True)
+    lines = result.stdout.splitlines()
+    for line in lines:
+        if line.startswith('Signature key ....:'):
+            return line.split(':')[1].replace(' ', '')
+    else:
+        raise Exception('Could not find private signing key on Yubikey!')
+
+
+def run_in_toto(key_id, gpg_exe):
+    exclude_patterns = list(
+        set(ARTIFACT_EXCLUDE_PATTERNS + read_gitignore_patterns())
+    )
+
+    with EnvVars({'IN_TOTO_GPG_EXECUTABLE': gpg_exe}):
+        runlib.in_toto_run(
+            # Do not record files matching these patterns.
+            exclude_patterns=exclude_patterns,
+            # Use this GPG key.
+            gpg_keyid=key_id,
+            # Do not execute any other command.
+            link_cmd_args=[],
+            # Do not record anything as input.
+            material_list=None,
+            # Use this step name.
+            name=STEP_NAME,
+            # Record every source file, except for exclude_patterns, as output.
+            product_list='.'
+        )
+
+
+def update_link_metadata():
+    ensure_dir_exists(LINK_DIR)
+
+    gpg_exe = get_gpg_exe()
+    key_id = get_key_id(gpg_exe)
+
+    # Find this latest signed link metadata file on disk.
+    # NOTE: in-toto currently uses the first 8 characters of the signing keyId.
+    key_id_prefix = key_id[:8].lower()
+    tag_link = '{}.{}.link'.format(STEP_NAME, key_id_prefix)
+
+    # Final location of metadata file.
+    metadata_file = path_join(LINK_DIR, tag_link)
+
+    # File used to tell the pipeline where to find the latest metadata file.
+    metadata_file_tracker = path_join(LINK_DIR, 'LATEST')
+
+    with chdir(get_root()):
+        run_in_toto(key_id, gpg_exe)
+
+        # Tell pipeline which tag link metadata to use.
+        write_file(metadata_file_tracker, tag_link)
+
+        # Move it to the expected location.
+        shutil.move(tag_link, metadata_file)
+
+    return metadata_file, metadata_file_tracker

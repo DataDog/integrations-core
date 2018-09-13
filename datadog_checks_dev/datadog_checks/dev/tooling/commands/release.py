@@ -25,6 +25,7 @@ from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
     update_version_module
 )
+from ..signing import update_link_metadata
 from ..trello import TrelloClient
 from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
@@ -556,10 +557,13 @@ def make(ctx, check, version):
             echo_waiting('Updating the requirements file {}...'.format(req_file))
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
 
+        metadata_files = update_link_metadata()
+        commit_targets.extend(metadata_files)
+
         # commit the changes.
         # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
         msg = '[Release] Bumped {} version to {}'.format(check, version)
-        git_commit(commit_targets, msg)
+        git_commit(commit_targets, msg, force=True, sign=True)
 
         # Reset version
         version = None

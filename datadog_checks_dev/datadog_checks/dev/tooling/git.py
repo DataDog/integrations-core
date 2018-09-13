@@ -59,7 +59,7 @@ def get_diff(check_name, target_tag):
         return run_command(command, capture=True).stdout.splitlines()
 
 
-def git_commit(targets, message):
+def git_commit(targets, message, force=False, sign=False):
     """
     Commit the changes for the given targets.
     """
@@ -69,11 +69,21 @@ def git_commit(targets, message):
         target_paths.append(os.path.join(root, t))
 
     with chdir(root):
-        result = run_command('git add {}'.format(' '.join(target_paths)))
+        result = run_command(
+            'git add{} {}'.format(
+                ' -f' if force else '',
+                ' '.join(target_paths)
+            )
+        )
         if result.code != 0:
             return result
 
-        return run_command('git commit -m "{}"'.format(message))
+        return run_command(
+            'git commit{} -m "{}"'.format(
+                ' -S' if sign else '',
+                message
+            )
+        )
 
 
 def git_tag(tag_name, push=False):
