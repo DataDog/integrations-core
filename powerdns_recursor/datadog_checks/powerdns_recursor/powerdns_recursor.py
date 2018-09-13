@@ -6,7 +6,7 @@
 from collections import namedtuple
 
 # Datadog
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 # 3p
 import requests

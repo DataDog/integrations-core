@@ -4,7 +4,7 @@
 
 import pytest
 import re
-from datadog_checks.stubs import aggregator
+from datadog_checks.base.stubs import aggregator
 from datadog_checks.iis import IIS
 from datadog_checks.iis.iis import DEFAULT_COUNTERS
 # for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though

@@ -4,7 +4,7 @@
 
 # datadog
 try:
-    from datadog_checks.checks.win import PDHBaseCheck
+    from datadog_checks.base.checks.win import PDHBaseCheck
 except ImportError:
     class PDHBaseCheck:
         pass

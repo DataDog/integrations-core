@@ -6,7 +6,7 @@ import copy
 import time
 import logging
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 log = logging.getLogger(__name__)
 

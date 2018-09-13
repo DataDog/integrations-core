@@ -8,8 +8,8 @@ import re
 from inspect import getargspec
 
 # project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.tailfile import TailFile
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.tailfile import TailFile
 
 # fields order for each event type, as named tuples
 EVENT_FIELDS = {

@@ -10,8 +10,8 @@ import requests
 from six import iteritems, iterkeys
 from six.moves import range
 
-from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
-from datadog_checks.utils.prometheus import parse_metric_family, metrics_pb2
+from datadog_checks.base.checks.prometheus import PrometheusCheck, UnknownFormatError
+from datadog_checks.base.utils.prometheus import parse_metric_family, metrics_pb2
 
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'

@@ -5,7 +5,7 @@ import os
 
 import mock
 import pytest
-from datadog_checks.stubs import aggregator
+from datadog_checks.base.stubs import aggregator
 
 from datadog_checks.nfsstat import NfsStatCheck
 

@@ -10,7 +10,7 @@ import mock
 import pytest
 import psutil
 from datadog_checks.mysql import MySql
-from datadog_checks.utils.platform import Platform
+from datadog_checks.base.utils.platform import Platform
 
 from . import common, variables, tags, common_config
 

@@ -12,7 +12,7 @@ from httplib2 import Http, HttpLib2Error
 import simplejson as json
 
 # project
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 
 class Riak(AgentCheck):

@@ -5,7 +5,7 @@ from collections import namedtuple
 
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 from .sampler import WMISampler
 
 WMIMetric = namedtuple('WMIMetric', ['name', 'value', 'tags'])

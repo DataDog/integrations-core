@@ -10,8 +10,8 @@ import urlparse
 import requests
 
 # project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.headers import headers
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.headers import headers
 
 VERSION_REGEX = re.compile(r".*/(\d)")
 

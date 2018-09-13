@@ -33,7 +33,7 @@ class TestGaugeWrapper:
             assert device_name is None
 
         # This should call 'gauge_v6' with all the same arguments that we passed in, except for the 'timestamp' argument
-        with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v6):
+        with patch('datadog_checks.base.checks.AgentCheck.gauge', new=gauge_v6):
             nagios = Nagios(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)
 
@@ -55,6 +55,6 @@ class TestGaugeWrapper:
             assert timestamp == METRIC_TIMESTAMP
 
         # This should call 'gauge_v5' with all the same arguments that we passed in
-        with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v5):
+        with patch('datadog_checks.base.checks.AgentCheck.gauge', new=gauge_v5):
             nagios = Nagios(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)

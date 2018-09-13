@@ -10,7 +10,7 @@ import socket
 import time
 import logging
 from datadog_checks.riak import Riak
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 log = logging.getLogger('test_riak')
 
@@ -391,7 +391,7 @@ def spin_up_riak():
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.stubs import aggregator
+    from datadog_checks.base.stubs import aggregator
     aggregator.reset()
     return aggregator
 

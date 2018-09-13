@@ -3,7 +3,7 @@ import psutil
 import pytest
 
 from datadog_checks.system_core import SystemCore
-from datadog_checks.utils.platform import Platform
+from datadog_checks.base.utils.platform import Platform
 
 if Platform.is_mac():
     CHECK_RATES = [
@@ -67,7 +67,7 @@ else:  # windows
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.stubs import aggregator
+    from datadog_checks.base.stubs import aggregator
     aggregator.reset()
     return aggregator
 

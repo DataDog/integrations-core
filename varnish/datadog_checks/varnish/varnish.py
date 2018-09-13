@@ -12,8 +12,8 @@ import shlex
 import xml.parsers.expat  # python 2.4 compatible
 
 # project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class BackendStatus(object):
