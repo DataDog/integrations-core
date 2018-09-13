@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 from contextlib import contextmanager
 
 from six import string_types
@@ -49,6 +50,7 @@ def docker_run(
     service_name=None,
     up=None,
     down=None,
+    sleep=None,
     endpoints=None,
     log_patterns=None,
     conditions=None,
@@ -68,6 +70,8 @@ def docker_run(
     :type up: ``callable``
     :param down: A custom tear down callable. This is required when using a custom spin up.
     :type down: ``callable``
+    :param sleep: Number of seconds to wait before yielding.
+    :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
                       ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
     :type endpoints: ``list`` of ``str``, or a single ``str``
@@ -125,8 +129,13 @@ def docker_run(
     with env_vars, wrapper:
         try:
             result = spin_up()
+
             for condition in conditions:
                 condition()
+
+            if sleep:
+                time.sleep(sleep)
+
             yield result
         finally:
             if tear_down_env():

@@ -1,5 +1,9 @@
 # CHANGELOG - btrfs
 
+## 1.2.1 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.2.0 / 2018-06-07
 
 * [Added] Support for RAID 5 and 6 and GlobalReserve types. See [#1570](https://github.com/DataDog/integrations-core/pull/1570).

@@ -1,5 +1,9 @@
 # CHANGELOG - postfix
 
+## 1.2.2 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.2.1 / 2018-06-20
 
 * [Tooling] Bump check to be in sync with new release tooling.

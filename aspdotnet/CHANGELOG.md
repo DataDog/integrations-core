@@ -1,5 +1,9 @@
 # CHANGELOG - Aspdotnet
 
+## 0.1.3 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 0.1.2 / 2018-05-11
 
 * [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. [#1183][]
