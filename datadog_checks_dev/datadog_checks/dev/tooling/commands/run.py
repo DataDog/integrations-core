@@ -30,7 +30,8 @@ SC_NAMES = {
 )
 @click.argument('check')
 @click.argument('config_file')
-def run(check, config_file):
+@click.option('--pdb', '-b', is_flag=True, help='Break execution right after collection and show pdb prompt')
+def run(check, config_file, pdb):
     """Run a check by invoking the `check()` method of the class."""
     root = get_root()
 
@@ -86,6 +87,10 @@ def run(check, config_file):
         check_instance.check(instance)
         print_report(aggregator)
         echo_success("Check run done in {:.3f} seconds.".format(time.time() - t0))
+
+        if pdb:
+            import pdb
+            pdb.set_trace()
 
 
 def print_report(aggregator):
