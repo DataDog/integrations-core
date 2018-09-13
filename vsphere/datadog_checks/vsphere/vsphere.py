@@ -794,6 +794,8 @@ class VSphereCheck(AgentCheck):
             for mor_name, mor in batch.iteritems():
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
+                if mor['mor_type'] not in REALTIME_RESOURCES and ('metrics' not in mor or not mor['metrics']):
+                    continue
 
                 query_spec = vim.PerformanceManager.QuerySpec()
                 query_spec.entity = mor["mor"]
@@ -802,7 +804,7 @@ class VSphereCheck(AgentCheck):
                 if mor['mor_type'] in REALTIME_RESOURCES:
                     query_spec.metricId = self.metadata_cache.get_metric_ids(i_key)
                 else:
-                    query_spec.metricId = mor.get("metrics")
+                    query_spec.metricId = mor["metrics"]
                 query_specs.append(query_spec)
 
             if query_specs:
