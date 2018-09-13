@@ -61,7 +61,7 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
 
-    packages=['datadog_checks', 'datadog_checks.dev'],
+    packages=['datadog_checks.dev'],
     install_requires=REQUIRES,
     include_package_data=True,
 
