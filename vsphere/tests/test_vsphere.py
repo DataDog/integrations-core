@@ -14,7 +14,7 @@ from datadog_checks.vsphere.errors import BadConfigError, ConnectionError
 from datadog_checks.vsphere.cache_config import CacheConfig
 from datadog_checks.vsphere.common import SOURCE_TYPE
 from datadog_checks.vsphere.vsphere import (
-    REFRESH_MORLIST_INTERVAL, REFRESH_METRICS_METADATA_INTERVAL, RESOURCE_TYPE_METRICS
+    REFRESH_MORLIST_INTERVAL, REFRESH_METRICS_METADATA_INTERVAL, RESOURCE_TYPE_METRICS, SHORT_ROLLUP
 )
 from .utils import assertMOR, MockedMOR
 from .utils import disable_thread_pool, get_mocked_server
@@ -277,6 +277,89 @@ def test__cache_metrics_metadata(vsphere, instance):
     vsphere.metadata_cache.init_instance.assert_called_once_with(vsphere._instance_key(instance))
     vsphere.metadata_cache.set_metadata.assert_called_once()
     vsphere.metadata_cache.set_metric_ids.assert_called_once()
+
+
+def test__cache_metrics_metadata_compatibility(vsphere, instance):
+    server_instance = vsphere._get_server_instance(instance)
+    i_key = vsphere._instance_key(instance)
+    counter = MagicMock()
+    counter.rollupType = "average"
+    counter.key = 1
+    vsphere.format_metric_name = MagicMock()
+
+    # New way
+    instance["collection_level"] = 3
+    server_instance.content.perfManager.QueryPerfCounterByLevel.return_value = [counter]
+    vsphere._cache_metrics_metadata(instance)
+
+    server_instance.content.perfManager.QueryPerfCounterByLevel.assert_called_once_with(3)
+    assert len(vsphere.metadata_cache._metric_ids[i_key]) == 1
+    assert len(vsphere.metadata_cache._metadata[i_key]) == 1
+    vsphere.format_metric_name.assert_called_once_with(counter)
+
+    # Compatibility mode
+    instance["all_metrics"] = False
+    del instance["collection_level"]
+    vsphere.format_metric_name.reset_mock()
+    server_instance.content.perfManager.perfCounter = [counter]
+    vsphere._cache_metrics_metadata(instance)
+
+    assert len(vsphere.metadata_cache._metric_ids[i_key]) == 0
+    assert len(vsphere.metadata_cache._metadata[i_key]) == 1
+    vsphere.format_metric_name.assert_called_once_with(counter, compatibility=True)
+
+
+def test_in_compatibility_mode(vsphere, instance):
+    vsphere.log = MagicMock()
+
+    instance["collection_level"] = 2
+    assert vsphere.in_compatibility_mode(instance) is False
+
+    instance["all_metrics"] = True
+    assert vsphere.in_compatibility_mode(instance) is False
+    vsphere.log.warning.assert_not_called()
+
+    assert vsphere.in_compatibility_mode(instance, log_warning=True) is False
+    vsphere.log.warning.assert_called_once()
+
+    del instance["collection_level"]
+    vsphere.log.reset_mock()
+    assert vsphere.in_compatibility_mode(instance) is True
+    vsphere.log.warning.assert_not_called()
+
+    assert vsphere.in_compatibility_mode(instance, log_warning=True) is True
+    vsphere.log.warning.assert_called_once()
+
+
+def test_format_metric_name(vsphere):
+    counter = MagicMock()
+    counter.groupInfo.key = "group"
+    counter.nameInfo.key = "name"
+    counter.rollupType = "rollup"
+    assert vsphere.format_metric_name(counter, compatibility=True) == "group.name"
+
+    for rollup, short_rollup in SHORT_ROLLUP.items():
+        counter.rollupType = rollup
+        assert vsphere.format_metric_name(counter) == "group.name.{}".format(short_rollup)
+
+
+def test__collect_metrics_async_compatibility(vsphere, instance):
+    server_instance = vsphere._get_server_instance(instance)
+    server_instance.content.perfManager.QueryPerf.return_value = [MagicMock(value=[MagicMock()])]
+    vsphere.mor_cache = MagicMock()
+    vsphere.metadata_cache = MagicMock()
+    vsphere.metadata_cache.get_metadata.return_value = {"name": "unknown"}
+    vsphere.in_compatibility_mode = MagicMock()
+    vsphere.log = MagicMock()
+
+    vsphere.in_compatibility_mode.return_value = True
+    vsphere._collect_metrics_async(instance, [])
+    vsphere.log.debug.assert_called_with("Skipping unknown `unknown` metric.")
+
+    vsphere.log.reset_mock()
+    vsphere.in_compatibility_mode.return_value = False
+    vsphere._collect_metrics_async(instance, [])
+    vsphere.log.debug.assert_not_called()
 
 
 def test_check(vsphere, instance):

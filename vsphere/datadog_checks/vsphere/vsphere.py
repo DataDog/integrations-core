@@ -766,6 +766,7 @@ class VSphereCheck(AgentCheck):
                     self.log.error("Trying to get metrics from object %s deleted from the cache, skipping. "
                                    "Consider increasing the parameter `clean_morlist_interval` to avoid that", mor_name)
                     continue
+
                 for result in mor_perfs.value:
                     counter_id = result.id.counterId
                     if not self.metadata_cache.contains(i_key, counter_id):
@@ -779,11 +780,11 @@ class VSphereCheck(AgentCheck):
 
                     if self.in_compatibility_mode(instance):
                         if metric_name not in ALL_METRICS:
-                            self.log.debug(u"Skipping unknown `%s` metric.", metric_name)
+                            self.log.debug("Skipping unknown `{}` metric.".format(metric_name))
                             continue
 
                     if not result.value:
-                        self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
+                        self.log.debug("Skipping `{}` metric because the value is empty".format(metric_name))
                         continue
 
                     instance_name = result.id.instance or "none"
