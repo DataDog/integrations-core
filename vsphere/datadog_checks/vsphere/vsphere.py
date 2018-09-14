@@ -693,7 +693,7 @@ class VSphereCheck(AgentCheck):
             for counter in perfManager.QueryPerfCounterByLevel(collection_level):
                 new_metadata[counter.key] = {
                     "name": self.format_metric_name(counter),
-                    "unit": counter.unitInfo
+                    "unit": counter.unitInfo.key
                 }
                 # Build the list of metrics we will want to collect
                 metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter.key, instance="*"))
