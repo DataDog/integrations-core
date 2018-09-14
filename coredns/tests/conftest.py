@@ -12,7 +12,7 @@ import sys
 import time
 
 from datadog_checks.dev import docker_run, RetryError
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FOLDER = os.path.join(HERE, 'docker', 'coredns')

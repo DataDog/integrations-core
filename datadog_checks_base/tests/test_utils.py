@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.utils.common import pattern_filter
-from datadog_checks.utils.limiter import Limiter
+from datadog_checks.base.utils.common import pattern_filter
+from datadog_checks.base.utils.limiter import Limiter
 
 
 class Item:

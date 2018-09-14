@@ -6,8 +6,8 @@ from urllib import quote
 import math
 
 import requests
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.headers import headers
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.headers import headers
 
 from . import errors
 

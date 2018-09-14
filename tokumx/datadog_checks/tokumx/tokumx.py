@@ -18,7 +18,7 @@ from pymongo import (
 )
 
 # project
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 DEFAULT_TIMEOUT = 10
 

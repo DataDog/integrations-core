@@ -65,7 +65,7 @@ import socket
 import struct
 
 # project
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 
 class ZKConnectionFailure(Exception):

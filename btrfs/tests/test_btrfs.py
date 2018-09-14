@@ -14,7 +14,7 @@ btrfs_check = BTRFS('btrfs', {}, {})
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.stubs import aggregator
+    from datadog_checks.base.stubs import aggregator
     aggregator.reset()
     return aggregator
 

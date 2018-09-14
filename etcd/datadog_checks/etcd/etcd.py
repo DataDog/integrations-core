@@ -4,9 +4,9 @@
 import requests
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.utils.headers import headers
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.headers import headers
 
 
 class Etcd(AgentCheck):

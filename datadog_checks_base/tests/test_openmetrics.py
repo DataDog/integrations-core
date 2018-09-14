@@ -11,7 +11,7 @@ import requests
 
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, SummaryMetricFamily, HistogramMetricFamily
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 
 
 text_content_type = 'text/plain; version=0.0.4'
@@ -36,7 +36,7 @@ class MockResponse:
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.stubs import aggregator
+    from datadog_checks.base.stubs import aggregator
 
     aggregator.reset()
     return aggregator

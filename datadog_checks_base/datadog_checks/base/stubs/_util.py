@@ -13,7 +13,7 @@ class SubprocessOutputEmptyError(Exception):
 def subprocess_output(command, raise_on_empty_output):
     """
     This is a stub to allow a check requiring `Popen` to run without an Agent (e.g. during tests or development),
-    it's not supposed to be used anywhere outside the `datadog_checks.utils` package.
+    it's not supposed to be used anywhere outside the `datadog_checks.base.utils` package.
     """
 
     # Use tempfile, allowing a larger amount of memory. The subprocess.Popen

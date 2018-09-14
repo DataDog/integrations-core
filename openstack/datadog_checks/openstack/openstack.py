@@ -11,8 +11,8 @@ import copy
 import requests
 import simplejson as json
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
 
 
 try:

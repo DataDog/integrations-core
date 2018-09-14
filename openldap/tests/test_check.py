@@ -6,7 +6,7 @@ import ldap3
 import pytest
 
 from datadog_checks.dev.docker import get_docker_hostname
-from datadog_checks.utils.platform import Platform
+from datadog_checks.base.utils.platform import Platform
 
 pytestmark = pytest.mark.integration
 

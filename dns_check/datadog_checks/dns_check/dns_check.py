@@ -7,8 +7,8 @@ from __future__ import unicode_literals
 import time
 import dns.resolver
 
-from datadog_checks.utils.platform import Platform
-from datadog_checks.checks import NetworkCheck, Status
+from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.checks import NetworkCheck, Status
 
 # These imports are necessary because otherwise dynamic type
 # resolution will fail on windows without it.

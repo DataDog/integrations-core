@@ -6,7 +6,7 @@ import pytest
 import os
 import copy
 
-from datadog_checks.utils.platform import Platform
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.haproxy import HAProxy
 
 import common

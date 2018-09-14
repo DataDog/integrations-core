@@ -4,8 +4,8 @@
 import bmemcached
 import pkg_resources
 
-from datadog_checks.errors import CheckException
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.checks import AgentCheck
 
 
 class BadResponseError(CheckException):

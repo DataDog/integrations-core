@@ -1,4 +1,4 @@
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 
 def test_rate_override():
     endpoint = "none"
