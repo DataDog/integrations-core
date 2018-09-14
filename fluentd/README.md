@@ -56,7 +56,7 @@ As long as you can forward your FluentD logs over tcp/udp to a specific port, yo
 
 ##### Add metadata to your logs
 
-Proper metadata (including hostname and source) is the key to unlocking the full potential of your logs in Datadog. By default, the hostname and timestamp fields should be properly remapped via the [remapping for reserved attributes][12].
+Proper metadata (including hostname and source) is the key to unlocking the full potential of your logs in Datadog. By default, the hostname and timestamp fields should be properly remapped via the [remapping for reserved attributes][11].
 
 ##### Source and Custom tags
 
