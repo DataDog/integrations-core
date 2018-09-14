@@ -2,7 +2,7 @@
 
 ## 0.7.0 / 2018-09-14
 
-* [Added] Update base package paths. See [#2235](https://github.com/DataDog/integrations-core/pull/2235).
+* [Fixed] Revert "Update base package paths (#2235)". See [#2240](https://github.com/DataDog/integrations-core/pull/2240).
 
 ## 0.6.1 / 2018-09-14
 
