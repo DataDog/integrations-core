@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.6.2 / 2018-09-14
+
+* [Fixed] Revert "Update base package paths (#2235)". See [#2240](https://github.com/DataDog/integrations-core/pull/2240).
+
 ## 0.6.1 / 2018-09-14
 
 * [Fixed] Move datadog_checks_base code into sub base package. See [#2167](https://github.com/DataDog/integrations-core/pull/2167).
