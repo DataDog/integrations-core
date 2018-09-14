@@ -8,7 +8,6 @@ from in_toto.gpg.constants import GPG_COMMAND
 from in_toto.settings import ARTIFACT_EXCLUDE_PATTERNS
 
 from .constants import get_root
-from ..structures import EnvVars
 from ..subprocess import run_command
 from ..utils import (
     chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
@@ -44,21 +43,20 @@ def run_in_toto(key_id, gpg_exe):
         set(ARTIFACT_EXCLUDE_PATTERNS + read_gitignore_patterns())
     )
 
-    with EnvVars({'IN_TOTO_GPG_EXECUTABLE': gpg_exe}):
-        runlib.in_toto_run(
-            # Do not record files matching these patterns.
-            exclude_patterns=exclude_patterns,
-            # Use this GPG key.
-            gpg_keyid=key_id,
-            # Do not execute any other command.
-            link_cmd_args=[],
-            # Do not record anything as input.
-            material_list=None,
-            # Use this step name.
-            name=STEP_NAME,
-            # Record every source file, except for exclude_patterns, as output.
-            product_list='.'
-        )
+    runlib.in_toto_run(
+        # Do not record files matching these patterns.
+        exclude_patterns=exclude_patterns,
+        # Use this GPG key.
+        gpg_keyid=key_id,
+        # Do not execute any other command.
+        link_cmd_args=[],
+        # Do not record anything as input.
+        material_list=None,
+        # Use this step name.
+        name=STEP_NAME,
+        # Record every source file, except for exclude_patterns, as output.
+        product_list='.'
+    )
 
 
 def update_link_metadata():
