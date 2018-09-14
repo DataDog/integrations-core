@@ -9,7 +9,7 @@ try:
 except ImportError:
     from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 
-from ..base import AgentCheck
+from .. import AgentCheck
 from ...utils.containers import hash_mutable
 
 int_types = [
