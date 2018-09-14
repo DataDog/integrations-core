@@ -25,6 +25,13 @@ def test_set_metadata(cache):
     assert "foo_id" in cache._metadata["foo_instance"]
 
 
+def test_set_metrics(cache):
+    cache._metric_ids["foo_instance"] = []
+    cache.set_metric_ids("foo_instance", ["foo"])
+    assert "foo" in cache._metric_ids["foo_instance"]
+    assert len(cache._metric_ids["foo_instance"]) == 1
+
+
 def test_get_metadata(cache):
     with pytest.raises(KeyError):
         cache.get_metadata("instance", "id")
@@ -37,3 +44,12 @@ def test_get_metadata(cache):
 
     with pytest.raises(MetadataNotFoundError):
         cache.get_metadata("foo_instance", "bar_id")
+
+
+def test_get_metrics(cache):
+    with pytest.raises(KeyError):
+        cache.get_metric_ids("instance")
+
+    cache._metric_ids["foo_instance"] = ["foo"]
+
+    assert cache.get_metric_ids("foo_instance") == ["foo"]

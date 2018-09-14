@@ -1,5 +1,14 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.6.0 / 2018-09-14
+
+* [Added] Update base package paths. See [#2235](https://github.com/DataDog/integrations-core/pull/2235).
+* [Added] Add ability to add wait time in docker_run. See [#2196](https://github.com/DataDog/integrations-core/pull/2196).
+* [Added] Add better debugging to test command. See [#2194](https://github.com/DataDog/integrations-core/pull/2194).
+* [Fixed] Gracefully handle tags that already exist. See [#2172](https://github.com/DataDog/integrations-core/pull/2172).
+* [Fixed] Fix release freeze command. See [#2188](https://github.com/DataDog/integrations-core/pull/2188).
+* [Added] Add ability to filter checks to test by changes. See [#2163](https://github.com/DataDog/integrations-core/pull/2163).
+
 ## 0.5.0 / 2018-09-04
 
 * [Added] Allow automated releasing by looking at github labels. See [#2169](https://github.com/DataDog/integrations-core/pull/2169).
