@@ -250,6 +250,35 @@ def test__process_mor_objects_queue(vsphere, instance):
         assert sum(vsphere.mor_objects_queue.size(i_key, resource_type) for resource_type in RESOURCE_TYPE_METRICS) == 0
 
 
+def test_collect_realtime_only(vsphere, instance):
+    """
+    Test the collect_realtime_only parameter acts as expected
+    """
+    vsphere._process_mor_objects_queue_async = MagicMock()
+    instance["collect_realtime_only"] = False
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        vsphere._cache_morlist_raw(instance)
+        vsphere._process_mor_objects_queue(instance)
+        # Called once to process the 2 datacenters
+        assert vsphere._process_mor_objects_queue_async.call_count == 1
+
+    instance["collect_realtime_only"] = True
+    vsphere._process_mor_objects_queue_async.reset_mock()
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        vsphere._cache_morlist_raw(instance)
+        vsphere._process_mor_objects_queue(instance)
+        assert vsphere._process_mor_objects_queue_async.call_count == 0
+
+
+def test__cache_metrics_metadata(vsphere, instance):
+    vsphere.metadata_cache = MagicMock()
+    vsphere._cache_metrics_metadata(instance)
+
+    vsphere.metadata_cache.init_instance.assert_called_once_with(vsphere._instance_key(instance))
+    vsphere.metadata_cache.set_metadata.assert_called_once()
+    vsphere.metadata_cache.set_metric_ids.assert_called_once()
+
+
 def test_check(vsphere, instance):
     """
     Test the check() method
