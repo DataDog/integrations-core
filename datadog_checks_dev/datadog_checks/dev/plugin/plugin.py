@@ -4,7 +4,7 @@
 import pytest
 
 try:
-    from datadog_checks.stubs import aggregator as __aggregator
+    from datadog_checks.base.stubs import aggregator as __aggregator
 
     @pytest.fixture
     def aggregator():
