@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from .mixins import PrometheusScraperMixin
-from ..base import AgentCheck
+from .. import AgentCheck
 
 # Prometheus check is a parent class providing a structure and some helpers
 # to collect metrics, events and service checks exposed via Prometheus.
