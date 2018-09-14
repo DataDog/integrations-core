@@ -50,7 +50,7 @@ instances:
   ## @param host - string - required
   ## the host used to resolve the vCenter IP
   #
-    host: vcenter.domain.com
+    host: <HOSTNAME>
 
   ## @param username - string - required 
   ## Enter the username of the read-only credentials 
@@ -82,13 +82,13 @@ instances:
   ## to fetch metrics for these ESXi hosts and the VMs
   ## running on it
   #
-  #  host_include_only_regex: .*\.prod.datadoghq.com
+  #  host_include_only_regex: <REGEX>
 
   ## @param vm_include_only_regex - string - optional
   ## Use a regex to include only the VMs that are
   ## matching this pattern.
   #
-  #  vm_include_only_regex: .*\.sql\.datadoghq\.com
+  #  vm_include_only_regex: <REGEX>
 
   ## @param include_only_marked - boolean - optional - default: false
   ## Set to true if you'd like to only collect metrics on vSphere VMs which
@@ -99,24 +99,22 @@ instances:
   #  include_only_marked: false
 
   ## @param all_metrics - boolean - optional - default: false
-  ## When set to true, this check collects EVERY metric
-  ## from vCenter, which means a LOT of metrics you probably
-  ## do not care about. We have selected a set of metrics
-  ## that are interesting to monitor for you if false
-  ## This parameter will be deprecated in favor of `collection_level`
+  ## This parameter has been deprecated in favor of `collection_level`
+  ## Please set `collection_level: 4` if you want to collect all the metrics
+  ## available on your system.
   #
   #  all_metrics: false
 
   ## @param collection_level - integer - optional - default: 1
   ## A number between 1 and 4 to specify which metrics will be sent
   ## 1: Only basic metrics - 4: every metric available.
-  ## /!\ The higher the level, the more metrics will be collectied.
+  ## Warning: the higher the level, the more metrics will be collectied.
   ## Depending on the size of the vSphere environment, that can be a lot
   ## and can slow down the collection process as well as put pressure on the vCenter Server
   # 
   #  collection_level: 1
 
-  ## @param event_config - list of key:value elements - optional 
+  ## @param event_config - dictionary - optional 
   ## Event config is a dictionary
   ## For now the only switch you can flip is collect_vcenter_alarms
   ## which will send as events the alarms set in vCenter
