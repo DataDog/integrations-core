@@ -1,0 +1,24 @@
+{
+  "categories": [
+    "web",
+    "network"
+  ],
+  "creates_events": false,
+  "display_name": "CRI-o",
+  "guid": "6eb96c6a-3e2d-4236-9387-fa3b0c455336",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "crio.",
+  "metric_to_check": "crio.operations.count",
+  "name": "crio",
+  "public_title": "Datadog-Crio Integration",
+  "short_description": "Track all your CRI-o metrics with Datadog",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "type": "check"
+}
