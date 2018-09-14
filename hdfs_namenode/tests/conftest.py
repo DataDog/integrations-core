@@ -14,7 +14,7 @@ from .common import HERE, NAME_SYSTEM_STATE_URL, NAME_SYSTEM_URL, TEST_USERNAME,
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.base.stubs import aggregator
+    from datadog_checks.stubs import aggregator
 
     aggregator.reset()
     return aggregator

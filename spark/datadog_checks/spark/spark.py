@@ -9,8 +9,8 @@ from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
 from simplejson import JSONDecodeError
 from bs4 import BeautifulSoup
 
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.config import is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
 
 # Identifier for cluster master address in `spark.yaml`
 MASTER_ADDRESS = 'spark_url'

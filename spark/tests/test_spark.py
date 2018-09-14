@@ -17,7 +17,7 @@ import requests
 import mock
 import pytest
 
-from datadog_checks.base.stubs import aggregator as _aggregator
+from datadog_checks.stubs import aggregator as _aggregator
 from datadog_checks.spark import SparkCheck
 
 # IDs

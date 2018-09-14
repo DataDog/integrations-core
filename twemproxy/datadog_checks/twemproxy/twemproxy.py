@@ -9,7 +9,7 @@ import socket
 import simplejson as json
 
 # project
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 GLOBAL_STATS = set([
     'curr_connections',

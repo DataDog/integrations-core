@@ -6,7 +6,7 @@ import time
 
 import paramiko
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 
 class CheckSSH(AgentCheck):

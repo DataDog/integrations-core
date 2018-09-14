@@ -59,7 +59,7 @@ def from_time(year=0, month=0, day=0, hours=0, minutes=0,
 
 @pytest.fixture
 def mock_from_time():
-    with patch('datadog_checks.base.checks.win.wmi.to_time', side_effect=from_time):
+    with patch('datadog_checks.checks.win.wmi.to_time', side_effect=from_time):
         yield
 
 
@@ -70,7 +70,7 @@ def to_time(wmi_ts):
 
 @pytest.fixture
 def mock_to_time():
-    with patch('datadog_checks.base.checks.win.wmi.to_time', side_effect=to_time):
+    with patch('datadog_checks.checks.win.wmi.to_time', side_effect=to_time):
         yield
 
 

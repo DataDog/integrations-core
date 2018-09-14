@@ -9,7 +9,7 @@ import socket
 import time
 import requests
 
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.dev import docker_run
 from datadog_checks.twemproxy import Twemproxy
 

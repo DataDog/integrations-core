@@ -25,9 +25,9 @@ from requests.packages.urllib3.packages.ssl_match_hostname import match_hostname
 from requests_ntlm import HttpNtlmAuth
 
 # project
-from datadog_checks.base.checks import NetworkCheck, Status
-from datadog_checks.base.config import _is_affirmative
-from datadog_checks.base.utils.headers import headers as agent_headers
+from datadog_checks.checks import NetworkCheck, Status
+from datadog_checks.config import _is_affirmative
+from datadog_checks.utils.headers import headers as agent_headers
 
 DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
 CONTENT_LENGTH = 200

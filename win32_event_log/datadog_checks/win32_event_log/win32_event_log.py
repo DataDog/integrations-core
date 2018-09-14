@@ -11,9 +11,9 @@ from datetime import datetime, timedelta
 from uptime import uptime
 
 # project
-from datadog_checks.base.checks.win.wmi import WinWMICheck, to_time, from_time
-from datadog_checks.base.utils.containers import hash_mutable
-from datadog_checks.base.utils.timeout import TimeoutException
+from datadog_checks.checks.win.wmi import WinWMICheck, to_time, from_time
+from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.utils.timeout import TimeoutException
 
 SOURCE_TYPE_NAME = 'event viewer'
 EVENT_TYPE = 'win32_log_event'

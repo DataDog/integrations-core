@@ -15,12 +15,12 @@ from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
 from pyVmomi import vmodl  # pylint: disable=E0611
 
-from datadog_checks.base.config import _is_affirmative
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.checks.libs.vmware.basic_metrics import BASIC_METRICS
-from datadog_checks.base.checks.libs.vmware.all_metrics import ALL_METRICS
-from datadog_checks.base.checks.libs.thread_pool import Pool
-from datadog_checks.base.checks.libs.timer import Timer
+from datadog_checks.config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
+from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
+from datadog_checks.checks.libs.thread_pool import Pool
+from datadog_checks.checks.libs.timer import Timer
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .errors import BadConfigError, ConnectionError

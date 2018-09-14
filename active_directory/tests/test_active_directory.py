@@ -4,7 +4,7 @@
 
 import os
 import pytest
-from datadog_checks.base.stubs import aggregator
+from datadog_checks.stubs import aggregator
 from datadog_checks.active_directory import ActiveDirectoryCheck
 from datadog_checks.active_directory.active_directory import DEFAULT_COUNTERS
 

@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # datadog
-from datadog_checks.base.checks.win import PDHBaseCheck
+from datadog_checks.checks.win import PDHBaseCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'dotnetclr'
 

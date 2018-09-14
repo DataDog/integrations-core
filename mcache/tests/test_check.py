@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.base.errors import CheckException
+from datadog_checks.errors import CheckException
 from datadog_checks.mcache.mcache import InvalidConfigError
 
 from common import (PORT, SERVICE_CHECK, HOST)

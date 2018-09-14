@@ -11,9 +11,9 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.base.stubs import aggregator as _aggregator
+from datadog_checks.stubs import aggregator as _aggregator
 from datadog_checks.nginx import Nginx, VTS_METRIC_MAP
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.utils.common import get_docker_hostname
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))

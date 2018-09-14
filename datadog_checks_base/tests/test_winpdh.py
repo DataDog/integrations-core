@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-import datadog_checks.base.stubs.datadog_agent as logger
+import datadog_checks.stubs.datadog_agent as logger
 from collections import defaultdict
-from datadog_checks.base.stubs import aggregator
+from datadog_checks.stubs import aggregator
 try:
-    from datadog_checks.base.checks.win.winpdh import WinPDHCounter, SINGLE_INSTANCE_KEY
+    from datadog_checks.checks.win.winpdh import WinPDHCounter, SINGLE_INSTANCE_KEY
     # for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though
     # it's used below.  noqa to suppress that error.
     from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
