@@ -30,11 +30,13 @@ from ..utils.limiter import Limiter
 
 
 # Metric types for which it's only useful to submit once per set of tags
-ONE_PER_CONTEXT_METRIC_TYPES = [
-    aggregator.GAUGE,
-    aggregator.RATE,
-    aggregator.MONOTONIC_COUNT,
-]
+ONE_PER_CONTEXT_METRIC_TYPES = set()
+
+# Agent 5 doesn't have these
+for __metric_type in ('GAUGE', 'RATE', 'MONOTONIC_COUNT'):
+    __metric_type_value = getattr(aggregator, __metric_type, None)
+    if __metric_type_value is not None:
+        ONE_PER_CONTEXT_METRIC_TYPES.add(__metric_type_value)
 
 
 class AgentCheck(object):
