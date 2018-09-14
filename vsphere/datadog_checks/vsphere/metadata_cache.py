@@ -15,31 +15,48 @@ class MetadataCache:
     """
     def __init__(self):
         self._metadata = {}
-        self._metadata_lock = threading.RLock()
+        self._metric_ids = {}
+        self._lock = threading.RLock()
 
     def init_instance(self, key):
         """
         Create an empty instance if it doesn't exist.
         If the instance already exists, this is a noop.
         """
-        with self._metadata_lock:
+        with self._lock:
             if key not in self._metadata:
                 self._metadata[key] = {}
+                self._metric_ids[key] = []
 
     def contains(self, key, counter_id):
         """
         Return whether a counter_id is present for a given instance key.
         If the key is not in the cache, raises a KeyError.
         """
-        with self._metadata_lock:
+        with self._lock:
             return counter_id in self._metadata[key]
 
     def set_metadata(self, key, metadata):
         """
         Store the metadata for the given instance key.
         """
-        with self._metadata_lock:
+        with self._lock:
             self._metadata[key] = metadata
+
+    def set_metric_ids(self, key, metric_ids):
+        """
+        Store the list of metric IDs we will want to collect for the given instance key
+        """
+        with self._lock:
+            self._metric_ids[key] = metric_ids
+
+    def get_metric_ids(self, key):
+        """
+        Return the list of metric IDs to collect for the given instance key
+        If the key is not in the cache, raises a KeyError.
+        """
+        with self._lock:
+            return self._metric_ids[key]
 
     def get_metadata(self, key, counter_id):
         """
@@ -47,7 +64,7 @@ class MetadataCache:
         If the key is not in the cache, raises a KeyError.
         If there's no metric with the given counter_id, raises a MetadataNotFoundError.
         """
-        with self._metadata_lock:
+        with self._lock:
             metadata = self._metadata[key]
             try:
                 return metadata[counter_id]
