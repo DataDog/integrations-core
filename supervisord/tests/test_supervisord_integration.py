@@ -13,6 +13,9 @@ from datadog_checks.checks.base import AgentCheck
 from datadog_checks.dev import docker_run, get_docker_hostname
 
 
+# Mark all tests in this file as integration tests
+pytestmark = pytest.mark.integration
+
 CHECK_NAME = 'supervisord'
 HOST = get_docker_hostname()
 PORT = 19001
