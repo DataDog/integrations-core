@@ -14,7 +14,7 @@ import struct
 import psutil
 
 # project
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 MIXED = "mixed"
 DATA = "data"

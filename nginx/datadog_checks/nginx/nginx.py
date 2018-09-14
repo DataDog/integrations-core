@@ -11,8 +11,8 @@ from datetime import datetime
 import requests
 import simplejson as json
 
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.utils.headers import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
 from datadog_checks.nginx.metrics import VTS_METRIC_MAP, METRICS_SEND_AS_COUNT
 
 PLUS_API_ENDPOINTS = {

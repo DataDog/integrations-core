@@ -5,7 +5,7 @@
 import requests
 
 # project
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 

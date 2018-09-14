@@ -4,7 +4,7 @@
 
 from copy import deepcopy
 
-from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 
 class KubeDNSCheck(OpenMetricsBaseCheck):

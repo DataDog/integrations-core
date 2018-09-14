@@ -17,8 +17,8 @@ from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 
 # project
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 # Kafka Errors
 KAFKA_NO_ERROR = KafkaErrors.NoError.errno

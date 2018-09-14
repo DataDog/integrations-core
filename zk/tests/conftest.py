@@ -6,7 +6,7 @@ import sys
 import time
 import pytest
 from datadog_checks.dev import docker_run, RetryError
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.zk import ZookeeperCheck
 from datadog_checks.zk.zk import ZKConnectionFailure
 
@@ -94,7 +94,7 @@ def get_conn_failure_config():
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.base.stubs import aggregator
+    from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
 

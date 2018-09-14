@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.base import config
+from datadog_checks import config
 
 
 def test_alias():

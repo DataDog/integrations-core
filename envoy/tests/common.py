@@ -4,7 +4,7 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')

@@ -4,7 +4,7 @@
 
 import re
 
-from datadog_checks.base.utils.containers import hash_mutable
+from datadog_checks.utils.containers import hash_mutable
 
 from . import helpers
 from . import exceptions

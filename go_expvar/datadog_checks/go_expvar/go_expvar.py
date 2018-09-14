@@ -12,7 +12,7 @@ import re
 import requests
 
 # project
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 DEFAULT_MAX_METRICS = 350
 PATH = "path"

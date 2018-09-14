@@ -10,9 +10,9 @@ from math import ceil, floor, sqrt
 from urlparse import urljoin
 
 # project
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.utils.containers import hash_mutable
-from datadog_checks.base.config import is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.config import is_affirmative
 
 # 3p
 import requests

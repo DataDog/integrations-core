@@ -15,8 +15,8 @@ from pysnmp.error import PySnmpError
 from pyasn1.type.univ import OctetString
 
 # project
-from datadog_checks.base.checks.network import NetworkCheck, Status
-from datadog_checks.base.config import _is_affirmative
+from datadog_checks.checks.network import NetworkCheck, Status
+from datadog_checks.config import _is_affirmative
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 (CounterBasedGauge64, ZeroBasedCounter64) = builder.MibBuilder().importSymbols(

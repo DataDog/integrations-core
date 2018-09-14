@@ -7,9 +7,9 @@ import time
 from collections import defaultdict, Counter
 from copy import deepcopy
 
-from datadog_checks.base.errors import CheckException
-from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.config import is_affirmative
+from datadog_checks.errors import CheckException
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.config import is_affirmative
 
 try:
     # this module is only available in agent 6

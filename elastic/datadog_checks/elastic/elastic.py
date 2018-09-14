@@ -7,9 +7,9 @@ from collections import defaultdict, namedtuple
 import time
 import urlparse
 import requests
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.config import _is_affirmative
-from datadog_checks.base.utils.headers import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
+from datadog_checks.utils.headers import headers
 
 
 class NodeNotFound(Exception):

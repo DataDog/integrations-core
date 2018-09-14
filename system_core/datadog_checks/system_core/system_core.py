@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psutil
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 
 class SystemCore(AgentCheck):
