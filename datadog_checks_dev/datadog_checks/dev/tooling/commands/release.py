@@ -25,7 +25,6 @@ from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
     update_version_module
 )
-from ..signing import update_link_metadata
 from ..trello import TrelloClient
 from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
@@ -504,6 +503,9 @@ def make(ctx, check, version):
         * update the requirements-agent-release.txt file
         * commit the above changes
     """
+    # Import lazily since in-toto runs a subprocess to check for git on load
+    from ..signing import update_link_metadata
+
     valid_checks = get_valid_checks()
     if check != 'all' and check not in valid_checks:
         abort('Check `{}` is not an Agent-based Integration'.format(check))
