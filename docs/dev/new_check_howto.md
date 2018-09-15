@@ -21,7 +21,7 @@ These requirements are used during the code review process as a checklist. This 
 
 Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][5] in order to isolate the development environment. See the [Python Environment documentation][6] for more information.
 
-You'll also need `docker-compose` in order to run the test harness. 
+You'll also need `docker-compose` in order to run the test harness.
 
 ## Setup
 
@@ -41,10 +41,16 @@ cd integrations-extras
 pip install "datadog-checks-dev[cli]"
 ```
 
-If you chose to clone these repositories to somewhere other than `$HOME/dd/`, you'll need to adjust the configuration file:
+If you chose to clone this repository to somewhere other than `$HOME/dd/`, you'll need to adjust the configuration file:
 
 ```
 ddev config set extras "/path/to/integrations-extras"
+```
+
+If you wish to set `integrations-extras` as your default repository to avoid requiring the `-e` flag for every invocation:
+
+```
+ddev config set repo extras
 ```
 
 ## Scaffolding
@@ -127,7 +133,7 @@ To learn more about the base Python class, see the [Python API documentation][2]
 
 ### Writing tests
 
-There are two basic types of tests: unit tests for specific elements, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][3] and [tox][4] are used to run the tests. 
+There are two basic types of tests: unit tests for specific elements, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][3] and [tox][4] are used to run the tests.
 
 For more information, see the [Datadog Checks Dev documentation][15].
 
@@ -275,7 +281,7 @@ The check is almost done. Let's add the final touches by adding the integration 
 
 Parameters in a configuration file follow these rules:
 
-* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]: 
+* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]:
 * All required parameters are **not** commented by default.
 * All optional parameters are commented by default.
 * If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
@@ -316,11 +322,11 @@ Arguments:
 
 * `name`: the name of the parameter, e.g. `apache_status_url`
 * `type`: the data type for the parameter value. Possible values:
-  * *integer* 
-  * *double* 
-  * *string* 
+  * *integer*
+  * *double*
+  * *string*
   * comma separated list of <*integer*|*double*|*string*>
-* `required`: whether the parameter is required or not. Possible values: 
+* `required`: whether the parameter is required or not. Possible values:
     * *required*
     * *optional*
 * `defval`: default value for the parameter, can be empty.
@@ -382,7 +388,7 @@ The `logos` folder must contain **three** images with filenames and sizes that m
 
 ### Metadata
 
-Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog is not currently automatically generated, so filling it out manually is a crucial part of the release process. 
+Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog is not currently automatically generated, so filling it out manually is a crucial part of the release process.
 
 #### manifest.json
 
