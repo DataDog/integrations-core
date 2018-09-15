@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.config import is_affirmative
+from ..config import is_affirmative
 from ddtrace import tracer
 from functools import wraps
 from inspect import getargspec
@@ -11,7 +11,7 @@ try:
     import datadog_agent
 except ImportError:
     # Integration Tracing is only available with Agent 6
-    pass
+    datadog_agent = None
 
 def trace_func(func):
     @wraps(func)
@@ -24,7 +24,10 @@ def trace_func(func):
             instance_index = getargspec(func).args.index('instance')
         except ValueError:
             return func(*args, **kwargs)
-        if is_affirmative(args[instance_index].get('trace_check', False)) and datadog_agent.get_config('integration_tracing', False):
+        if (
+            is_affirmative(args[instance_index].get('trace_check', False))
+            and is_affirmative(datadog_agent.get_config('integration_tracing', False))
+        ):
             with tracer.trace('integration.check', service='integrations-tracing', resource=args[0].name):
                 return func(*args, **kwargs)
         return func(*args, **kwargs)
