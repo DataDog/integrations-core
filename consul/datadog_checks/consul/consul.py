@@ -17,6 +17,8 @@ from datadog_checks.config import is_affirmative
 # 3p
 import requests
 
+EPOCH = datetime(1970, 1, 1)
+
 
 # More information in https://www.consul.io/docs/internals/coordinates.html,
 # code is based on the snippet there.
@@ -190,7 +192,7 @@ class ConsulCheck(AgentCheck):
                     instance_state.last_known_leader, leader))
 
                 self.event({
-                    "timestamp": int(datetime.now().strftime("%s")),
+                    "timestamp": int((datetime.now() - EPOCH).total_seconds()),
                     "event_type": "consul.new_leader",
                     "source_type_name": self.SOURCE_TYPE_NAME,
                     "msg_title": "New Consul Leader Elected in consul_datacenter:{0}".format(agent_dc),
