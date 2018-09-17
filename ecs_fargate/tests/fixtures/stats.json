@@ -90,13 +90,14 @@
 				"total_usage": 22386676
 			},
 			"system_cpu_usage": 60519620000000,
-			"throttling_data": {}
+			"throttling_data": {},
+			"online_cpus": 4
 		},
 		"precpu_stats": {
 			"cpu_usage": {
 				"percpu_usage": [22386676, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 				"usage_in_usermode": 20000000,
-				"total_usage": 22386676
+				"total_usage": 22386675
 			},
 			"system_cpu_usage": 60518620000000,
 			"throttling_data": {}
@@ -333,7 +334,8 @@
 				"usage_in_kernelmode": 400000000
 			},
 			"system_cpu_usage": 60519620000000,
-			"throttling_data": {}
+			"throttling_data": {},
+			"online_cpus": 4
 		},
 		"precpu_stats": {
 			"cpu_usage": {
@@ -586,7 +588,8 @@
 				"usage_in_kernelmode": 56520000000
 			},
 			"system_cpu_usage": 60519620000000,
-			"throttling_data": {}
+			"throttling_data": {},
+			"online_cpus": 4
 		},
 		"precpu_stats": {
 			"cpu_usage": {
