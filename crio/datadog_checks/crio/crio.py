@@ -6,7 +6,7 @@ from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 class CrioCheck(OpenMetricsBaseCheck):
     """
-    Collect CRI-o runtime metrics in OpenMetrics format
+    Collect CRI-O runtime metrics in OpenMetrics format
     """
     DEFAULT_METRIC_LIMIT = 0
 

@@ -5,7 +5,7 @@
         "check": "crio.prometheus.health",
         "statuses": ["ok", "critical"],
         "groups": ["endpoint"],
-        "name": "CRI-o prometheus health",
+        "name": "CRI-O prometheus health",
         "description": "Returns `CRITICAL` if the check can't access the metrics endpoint."
     }
 ]

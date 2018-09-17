@@ -21,13 +21,6 @@ CHECK_NAME = 'crio'
 NAMESPACE = 'crio'
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
 @pytest.fixture()
 def mock_data():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
