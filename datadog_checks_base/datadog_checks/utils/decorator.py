@@ -13,7 +13,7 @@ except ImportError:
     # Integration Tracing is only available with Agent 6
     datadog_agent = None
 
-def trace_func(func):
+def add_tracing(func):
     @wraps(func)
     def function_wrapper(*args, **kwargs):
         if datadog_agent is None:

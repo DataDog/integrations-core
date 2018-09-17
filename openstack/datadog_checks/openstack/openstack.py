@@ -13,7 +13,7 @@ import simplejson as json
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
-from datadog_checks.utils.decorator import trace_func
+from datadog_checks.utils.decorator import add_tracing
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -1176,7 +1176,7 @@ class OpenStackCheck(AgentCheck):
 
         return instance_scope
 
-    @trace_func
+    @add_tracing
     def check(self, instance):
         # have we been backed off
         if not self.should_run(instance):
