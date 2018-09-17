@@ -28,7 +28,7 @@ If you are monitoring an off-the-shelf software and you think it would deserve a
 
 Due to the nature of this integration, it is possible to submit a high number of custom metrics
 to Datadog. To provide users control over the maximum number of metrics sent in the case of
-configuration errors or input changes, the check has a default limit of 2000 (note: this limit was increased to 250,000 for 6.5 to leave users enough time to upgrade, it will go back to 2000 in 6.6) metrics.
+configuration errors or input changes, the check has a default limit of 2000 metrics.
 You can increase this limit, if needed, by setting the `max_returned_metrics` option.
 
 ### Validation
