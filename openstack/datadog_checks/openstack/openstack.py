@@ -735,11 +735,11 @@ class OpenStackCheck(AgentCheck):
         service_check_tags = ['network:{}'.format(network_id)] + tags
 
         network_name = net_details.get('network', {}).get('name')
-        if network_name is not None:
+        if network_name:
             service_check_tags.append('network_name:{}'.format(network_name))
 
         tenant_id = net_details.get('network', {}).get('tenant_id')
-        if tenant_id is not None:
+        if tenant_id:
             service_check_tags.append('tenant_id:{}'.format(tenant_id))
 
         if net_details.get('network', {}).get('admin_state_up'):
@@ -838,7 +838,7 @@ class OpenStackCheck(AgentCheck):
                 uptime = {}
 
             load_averages = uptime.get("loads")
-            if load_averages is not None and len(load_averages) == 3:
+            if load_averages and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):
                     self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
             else:
@@ -846,7 +846,7 @@ class OpenStackCheck(AgentCheck):
 
         hyp_state = hyp.get('state', None)
 
-        if hyp_state is None:
+        if not hyp_state:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN, hostname=hyp_hostname, tags=service_check_tags)
         elif hyp_state != self.HYPERVISOR_STATE_UP:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.CRITICAL, hostname=hyp_hostname, tags=service_check_tags)
@@ -1021,8 +1021,8 @@ class OpenStackCheck(AgentCheck):
             tags = []
 
         server_tags = copy.deepcopy(tags)
-
         project_name = project.get('name')
+        project_id = project.get('id')
 
         self.log.debug("Collecting metrics for project. name: {} id: {}".format(project_name, project['id']))
 
@@ -1030,10 +1030,10 @@ class OpenStackCheck(AgentCheck):
         headers = {'X-Auth-Token': self.get_auth_token()}
         server_stats = self._make_request_with_auth_fallback(url, headers, params={"tenant_id": project['id']})
 
-        server_tags.append('tenant_id:{}'.format(project['id']))
+        server_tags.append('tenant_id:{}'.format(project_id))
 
         if project_name:
-            server_tags.append('project_name:{}'.format(project['name']))
+            server_tags.append('project_name:{}'.format(project_name))
 
         for st in server_stats['limits']['absolute']:
             if _is_valid_metric(st):
@@ -1357,11 +1357,11 @@ class OpenStackCheck(AgentCheck):
         tags = []
         hyp_hostname = hyp_hostname.split('.')[0] if use_shortname else hyp_hostname
         if hyp_hostname in self._get_and_set_aggregate_list():
-            tags.append('aggregate:{}'.format(self._aggregate_list[hyp_hostname]['aggregate']))
+            tags.append('aggregate:{}'.format(self._aggregate_list[hyp_hostname].get('aggregate', "unknown")))
             # Need to check if there is a value for availability_zone
             # because it is possible to have an aggregate without an AZ
             try:
-                if self._aggregate_list[hyp_hostname]['availability_zone']:
+                if self._aggregate_list[hyp_hostname].get('availability_zone'):
                     tags.append('availability_zone:{}'
                                 .format(self._aggregate_list[hyp_hostname]['availability_zone']))
             except KeyError:
