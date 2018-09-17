@@ -89,7 +89,7 @@ tomcat==1.1.1
 twemproxy==1.2.1
 varnish==1.2.1
 vault==1.2.0
-vsphere==3.2.0
+vsphere==3.3.0
 win32_event_log==1.2.0; sys_platform == 'win32'
 windows_service==1.2.1; sys_platform == 'win32'
 wmi_check==1.1.2; sys_platform == 'win32'
