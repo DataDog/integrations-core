@@ -169,6 +169,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_replicationcontroller_status_fully_labeled_replicas': 'replicationcontroller.fully_labeled_replicas',  # noqa: E501
                 'kube_replicationcontroller_status_ready_replicas': 'replicationcontroller.replicas_ready',
                 'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
+                'kube_service_spec_type': 'service.count',
                 'kube_statefulset_replicas': 'statefulset.replicas_desired',
                 'kube_statefulset_status_replicas': 'statefulset.replicas',
                 'kube_statefulset_status_replicas_current': 'statefulset.replicas_current',
