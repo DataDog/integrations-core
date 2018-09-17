@@ -16,6 +16,6 @@
   ],
   "type":"check",
   "aliases":[],
-  "is_public": true,
+  "is_public": false,
   "creates_events": false
 }
