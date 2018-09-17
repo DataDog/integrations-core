@@ -946,12 +946,11 @@ class OpenStackCheck(AgentCheck):
             blacklist=self.exclude_project_name_rules
         )
 
-        self.server_details_by_id = \
-            {
+        self.server_details_by_id = {
                 sid: server for (sid, server)
                 in self.server_details_by_id.iteritems()
                 if server.get('project_name') in projects_filtered
-            }
+        }
 
     def get_project_name_from_id(self, tenant_id):
         url = "{}/{}/{}/{}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
@@ -1219,7 +1218,6 @@ class OpenStackCheck(AgentCheck):
                 self.log.debug("Neutron Url: %s", self.get_neutron_endpoint())
 
                 project = self.get_scoped_project(scope)
-                projects[project['name']] = project
                 if project and project.get('name'):
                     projects[project.get('name')] = project
 
