@@ -62,8 +62,13 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.apiserver.certificate.expiration.count',
     'kubernetes.apiserver.certificate.expiration.sum',
     'kubernetes.rest.client.requests',
+    'kubernetes.rest.client.latency.count',
+    'kubernetes.rest.client.latency.sum',
     'kubernetes.kubelet.runtime.operations',
-    'kubernetes.kubelet.runtime.errors'
+    'kubernetes.kubelet.runtime.errors',
+    'kubernetes.kubelet.network_plugin.latency.sum',
+    'kubernetes.kubelet.network_plugin.latency.count',
+    'kubernetes.kubelet.network_plugin.latency.quantile',
 ]
 
 

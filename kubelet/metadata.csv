@@ -22,5 +22,10 @@ kubernetes.diskio.io_service_bytes.stats.total,gauge,,byte,,The amount of disk s
 kubernetes.apiserver.certificate.expiration.count,gauge,,second,,The count of remaining lifetime on the certificate used to authenticate a request,1,kubelet,k8s.cert.exp.count
 kubernetes.apiserver.certificate.expiration.sum,gauge,,second,,The sum of remaining lifetime on the certificate used to authenticate a request,1,kubelet,k8s.cert.exp.count
 kubernetes.rest.client.requests,gauge,,operation,,The number of HTTP requests,0,kubelet,k8s.rest.req
+kubernetes.rest.client.latency.count,gauge,,,,The count of request latency in seconds broken down by verb and URL,1,kubelet,k8s.rest.lat.count
+kubernetes.rest.client.latency.sum,gauge,,second,,The sum of request latency in seconds broken down by verb and URL,1,kubelet,k8s.rest.lat.sum
 kubernetes.kubelet.runtime.operations,gauge,,operation,,The number of runtime operations,0,kubelet,k8s.runtime.ops
 kubernetes.kubelet.runtime.errors,gauge,,operation,,The number of runtime operations errors,-1,kubelet,k8s.runtime.err
+kubernetes.kubelet.network_plugin.latency.sum,gauge,,microsecond,,The sum of latency in microseconds of network plugin operations,1,kubelet,k8s.net_plug.lat.sum
+kubernetes.kubelet.network_plugin.latency.count,gauge,,,,The count of network plugin operations by latency,1,kubelet,k8s.net_plug.lat.count
+kubernetes.kubelet.network_plugin.latency.quantile,gauge,,,,The quantiles of network plugin operations by latency,1,kubelet,k8s.net_plug.lat.quant
