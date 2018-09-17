@@ -18,7 +18,6 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 from datadog_checks.config import _is_affirmative
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
-from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
 from datadog_checks.checks.libs.timer import Timer
 from .common import SOURCE_TYPE
@@ -735,10 +734,6 @@ class VSphereCheck(AgentCheck):
 
                     # Metric types are absolute, delta, and rate
                     metric_name = self.metadata_cache.get_metadata(i_key, result.id.counterId).get('name')
-
-                    if metric_name not in ALL_METRICS:
-                        self.log.debug(u"Skipping unknown `%s` metric.", metric_name)
-                        continue
 
                     if not result.value:
                         self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
