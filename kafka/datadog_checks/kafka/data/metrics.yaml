@@ -118,7 +118,7 @@ jmx_metrics:
               metric_type: rate
               alias: kafka.producer.record_retry_rate
           - record-error-rate:
-              metric_type: rate
+              metric_type: gauge
               alias: kafka.producer.record_error_rate
           - record-size-max:
               metric_type: gauge
