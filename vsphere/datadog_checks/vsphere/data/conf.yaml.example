@@ -106,11 +106,10 @@ instances:
   #  all_metrics: false
 
   ## @param collection_level - integer - optional - default: 1
-  ## A number between 1 and 4 to specify which metrics will be sent
+  ## A number between 1 and 4 to specify how many metrics will be sent
   ## 1: Only basic metrics - 4: every metric available.
-  ## Warning: the higher the level, the more metrics will be collectied.
-  ## Depending on the size of the vSphere environment, that can be a lot
-  ## and can slow down the collection process as well as put pressure on the vCenter Server
+  ## Warning: Depending on the size of the vSphere environment, metric collection can be slow,
+  ## very CPU intensive and put pressure on the vCenter Server
   # 
   #  collection_level: 1
 
