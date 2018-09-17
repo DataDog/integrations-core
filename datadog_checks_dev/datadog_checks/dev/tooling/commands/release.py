@@ -503,7 +503,7 @@ def make(ctx, check, version):
         * update the requirements-agent-release.txt file
         * commit the above changes
     """
-    # Import lazily since in-toto runs a subprocess to check for git on load
+    # Import lazily since in-toto runs a subprocess to check for gpg2 on load
     from ..signing import update_link_metadata
 
     valid_checks = get_valid_checks()
