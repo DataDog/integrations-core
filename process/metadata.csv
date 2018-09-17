@@ -15,7 +15,7 @@ system.processes.mem.real,gauge,,byte,,The non-swapped physical memory a process
 system.processes.mem.rss,gauge,,byte,,"The non-swapped physical memory a process has used. aka ""Resident Set Size"".",0,system,processes mem rss
 system.processes.mem.vms,gauge,,byte,,"The total amount of virtual memory used by the process. aka ""Virtual Memory Size"".",0,system,processes mem vms
 system.processes.number,gauge,,process,,The number of processes.,0,system,processes number
-system.processes.open_file_descriptors,gauge,,,,"The number of file descriptors used by this process (only available for processes run as the dd-agent user)",0,system,processes open fds
+system.processes.open_file_descriptors,gauge,,,,The number of file descriptors used by this process (only available for processes run as the dd-agent user),0,system,processes open fds
 system.processes.open_handles,gauge,,,,The number of handles used by this process.,0,system,processes open handles
 system.processes.threads,gauge,,thread,,The number of threads used by this process.,0,system,processes threads
 system.processes.voluntary_ctx_switches,gauge,,event,,The number of voluntary context switches performed by this process.,0,system,processes vol ctx switches
