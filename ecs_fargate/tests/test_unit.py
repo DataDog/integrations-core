@@ -12,21 +12,14 @@ from datadog_checks.ecs_fargate import FargateCheck
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
+INSTANCE_TAGS = ['foo:bar']
 
 
 @pytest.fixture
 def instance():
     return {
         'timeout': '2',
-        'tags': ['foo:bar'],
+        'tags': INSTANCE_TAGS,
         'label_whitelist': ['com.amazonaws.ecs.container-name'],
     }
 
@@ -64,7 +57,7 @@ def test_failing_check(check, instance, aggregator):
     with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse("{}", 500)):
         check.check(instance)
 
-    aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=['foo:bar'], count=1)
+    aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
 
 
 def test_invalid_response_check(check, instance, aggregator):
@@ -74,7 +67,7 @@ def test_invalid_response_check(check, instance, aggregator):
     with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse("{}", 200)):
         check.check(instance)
 
-    aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=['foo:bar'], count=1)
+    aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
 
 
 def test_successful_check(check, instance, aggregator):
@@ -84,10 +77,10 @@ def test_successful_check(check, instance, aggregator):
     with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get):
         check.check(instance)
 
-    aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=['foo:bar'], count=1)
+    aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)
 
-    common_tags = [
-        'foo:bar', 'ecs_cluster:pierrem-test-fargate', 'ecs_task_family:redis-datadog', 'ecs_task_version:1'
+    common_tags = INSTANCE_TAGS + [
+        'ecs_cluster:pierrem-test-fargate', 'ecs_task_family:redis-datadog', 'ecs_task_version:1'
     ]
 
     container_tags = [
@@ -138,10 +131,6 @@ def test_successful_check(check, instance, aggregator):
     for i in range(3):
         tags = common_tags + container_tags[i]
         for metric in expected_container_metrics:
-            if i == 2 and metric == 'ecs.fargate.cpu.percent':
-                print(sorted(tags))
-                for m in aggregator.metrics(metric):
-                    print(sorted(m.tags))
             aggregator.assert_metric(metric, count=1, tags=tags)
         for metric in extra_expected_metrics_for_container[i]:
             aggregator.assert_metric(metric, count=1, tags=tags)
