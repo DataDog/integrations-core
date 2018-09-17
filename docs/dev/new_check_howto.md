@@ -47,7 +47,7 @@ If you chose to clone this repository to somewhere other than `$HOME/dd/`, you'l
 ddev config set extras "/path/to/integrations-extras"
 ```
 
-If you wish to set `integrations-extras` as your default repository to avoid requiring the `-e` flag for every invocation:
+If you intend to work primarily on `integrations-extras`, set it as the default working repository:
 
 ```
 ddev config set repo extras
@@ -281,7 +281,7 @@ The check is almost done. Let's add the final touches by adding the integration 
 
 Parameters in a configuration file follow these rules:
 
-* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]:
+* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>` according to the documentation [contributing guidelines][16]:
 * All required parameters are **not** commented by default.
 * All optional parameters are commented by default.
 * If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
