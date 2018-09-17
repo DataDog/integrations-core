@@ -26,6 +26,7 @@ SECRET_KEYS = {
 DEFAULT_CONFIG = OrderedDict([
     ('core', os.path.join('~', 'dd', 'integrations-core')),
     ('extras', os.path.join('~', 'dd', 'integrations-extras')),
+    ('repo', 'core'),
     ('github', OrderedDict((
         ('user', ''),
         ('token', ''),
