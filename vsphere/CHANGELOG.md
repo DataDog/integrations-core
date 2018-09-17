@@ -1,5 +1,10 @@
 # CHANGELOG - vsphere
 
+## 3.3.0 / 2018-09-17
+
+* [Added]  Add ability to filter metrics by collection level. See [#2226](https://github.com/DataDog/integrations-core/pull/2226).
+* [Changed] Precompute list of metric IDs to improve performance. See [#2221](https://github.com/DataDog/integrations-core/pull/2221).
+
 ## 3.2.0 / 2018-09-11
 
 * [Fixed] Handle missing attributes in property collector result. See [#2205](https://github.com/DataDog/integrations-core/pull/2205).
