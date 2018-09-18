@@ -45,7 +45,7 @@ def poll_mock():
         'requests.get',
         return_value=mock.MagicMock(
             status_code=200,
-            iter_lines=lambda **kwargs: generate_latest(registry).split("\n"),
+            iter_lines=lambda **kwargs: generate_latest(registry).decode().split("\n"),
             headers={'Content-Type': "text/plain"}
         )
     )
