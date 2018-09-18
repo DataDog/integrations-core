@@ -9,8 +9,8 @@ import simplejson as json
 from datadog_checks.config import is_affirmative
 
 from .settings import DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION
-from .exceptions import (IncompleteConfig, IncompleteAuthScope,
-                         IncompleteIdentity, MissingNovaEndpoint, MissingNeutronEndpoint, KeystoneUnreachable)
+from .exceptions import (IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
+                         MissingNeutronEndpoint, KeystoneUnreachable)
 
 
 UNSCOPED_AUTH = 'unscoped'
@@ -96,11 +96,8 @@ class OpenStackScope(object):
         self.auth_token = auth_token
 
     @classmethod
-    def _request_auth_token(cls, auth_scope, identity, keystone_server_url, ssl_verify, proxy=None):
-        if not auth_scope:
-            auth_scope = UNSCOPED_AUTH
-
-        payload = {'auth': {'identity': identity, 'scope': auth_scope}}
+    def _request_auth_token(cls, identity, keystone_server_url, ssl_verify, proxy=None):
+        payload = {'auth': {'identity': identity, 'scope': UNSCOPED_AUTH}}
         auth_url = urljoin(keystone_server_url, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'Content-Type': 'application/json'}
 
@@ -138,65 +135,28 @@ class OpenStackScope(object):
         return identity
 
     @classmethod
-    def _get_auth_scope(cls, instance_config):
-        """
-        Parse authorization scope out of init_config
-
-        To guarantee a uniquely identifiable scope, expects either:
-        {'project': {'name': 'my_project', 'domain': {'id': 'my_domain_id'}}}
-        OR
-        {'project': {'id': 'my_project_id'}}
-        """
-        auth_scope = instance_config.get('auth_scope')
-        if not auth_scope:
-            return None
-
-        if not auth_scope.get('project'):
-            raise IncompleteAuthScope()
-
-        if auth_scope['project'].get('name'):
-            # We need to add a domain scope to avoid name clashes. Search for one. If not raise IncompleteAuthScope
-            if not auth_scope['project'].get('domain', {}).get('id'):
-                raise IncompleteAuthScope()
-        else:
-            # Assume a unique project id has been given
-            if not auth_scope['project'].get('id'):
-                raise IncompleteAuthScope()
-
-        return auth_scope
-
-    @classmethod
     def _get_auth_response_from_config(cls, init_config, instance_config, proxy_config=None):
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
 
         ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
-
-        auth_scope = cls._get_auth_scope(instance_config)
         identity = cls._get_user_identity(instance_config)
 
         exception_msg = None
         try:
-            auth_resp = cls._request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
+            auth_resp = cls._request_auth_token(identity, keystone_server_url, ssl_verify, proxy_config)
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             exception_msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
                 user=identity['password']['user']['name'],
                 domain=identity['password']['user']['domain']['id'],
-                scope=auth_scope,
+                scope=UNSCOPED_AUTH,
                 url=keystone_server_url,
             )
-
         if exception_msg:
             try:
                 identity['password']['user']['domain']['name'] = identity['password']['user']['domain'].pop('id')
-
-                if auth_scope:
-                    if 'domain' in auth_scope['project']:
-                        auth_scope['project']['domain']['name'] = auth_scope['project']['domain'].pop('id')
-                    else:
-                        auth_scope['project']['name'] = auth_scope['project'].pop('id')
-                auth_resp = cls._request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
+                auth_resp = cls._request_auth_token(identity, keystone_server_url, ssl_verify, proxy_config)
             except (
                 requests.exceptions.HTTPError,
                 requests.exceptions.Timeout,
@@ -207,13 +167,12 @@ class OpenStackScope(object):
                     msg=exception_msg,
                     user=identity['password']['user']['name'],
                     domain=identity['password']['user']['domain']['name'],
-                    scope=auth_scope,
+                    scope=UNSCOPED_AUTH,
                     url=keystone_server_url,
                     ex=e,
                 )
                 raise KeystoneUnreachable(exception_msg)
-
-        return auth_scope, auth_resp.headers.get('X-Subject-Token'), auth_resp
+        return auth_resp.headers.get('X-Subject-Token'), auth_resp
 
 
 class OpenStackUnscoped(OpenStackScope):
@@ -229,8 +188,7 @@ class OpenStackUnscoped(OpenStackScope):
 
         ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
-
-        _, auth_token, _ = cls._get_auth_response_from_config(init_config, instance_config, proxy_config)
+        auth_token, _ = cls._get_auth_response_from_config(init_config, instance_config, proxy_config)
 
         try:
             project_resp = cls._request_project_list(auth_token, keystone_server_url, ssl_verify, proxy_config)
@@ -240,7 +198,6 @@ class OpenStackUnscoped(OpenStackScope):
                 url=keystone_server_url, ex=e
             )
             raise KeystoneUnreachable(exception_msg)
-
         project_scope_map = {}
         for project in projects:
             try:
@@ -270,7 +227,6 @@ class OpenStackUnscoped(OpenStackScope):
             }
             project_scope = OpenStackProjectScope(project_auth_token, project_auth_scope, service_catalog)
             project_scope_map[project_key] = project_scope
-
         return cls(auth_token, project_scope_map)
 
     @classmethod
@@ -321,34 +277,3 @@ class OpenStackProjectScope(OpenStackScope):
         self.domain_id = auth_scope["project"].get("domain", {}).get("id")
         self.tenant_id = auth_scope["project"].get("id")
         self.service_catalog = service_catalog
-
-    @classmethod
-    def from_config(cls, init_config, instance_config, proxy_config=None):
-        keystone_server_url = init_config.get("keystone_server_url")
-        if not keystone_server_url:
-            raise IncompleteConfig()
-
-        nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
-
-        auth_scope, auth_token, auth_resp = cls._get_auth_response_from_config(
-            init_config, instance_config, proxy_config
-        )
-
-        service_catalog = KeystoneCatalog.from_auth_response(auth_resp.json(), nova_api_version)
-
-        # (NOTE): aaditya
-        # In some cases, the nova url is returned without the tenant id suffixed
-        # e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<tenant_id>
-        # It is still unclear when this happens, but for now the user can configure
-        # `append_tenant_id` to manually add this suffix for downstream requests
-        if is_affirmative(instance_config.get("append_tenant_id", False)):
-            t_id = auth_scope["project"].get("id")
-
-            assert (
-                t_id and t_id not in service_catalog.nova_endpoint
-            ), """Incorrect use of append_tenant_id, please inspect the service catalog response of your Identity server.
-                   You may need to disable this flag if your Nova service url contains the tenant_id already"""
-
-            service_catalog.nova_endpoint = urljoin(service_catalog.nova_endpoint, t_id)
-
-        return cls(auth_token, auth_scope, service_catalog)

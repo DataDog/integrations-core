@@ -13,9 +13,9 @@ from datadog_checks.utils.common import pattern_filter
 
 from .utils import get_instance_key
 from .retry_backoff import BackOffRetry
-from .scopes import OpenStackProjectScope, OpenStackUnscoped
+from .scopes import OpenStackUnscoped
 from .settings import DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION
-from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteAuthScope,
+from .exceptions import (InstancePowerOffFailure, IncompleteConfig,
                          IncompleteIdentity, MissingNovaEndpoint, MissingNeutronEndpoint, KeystoneUnreachable)
 
 try:
@@ -216,20 +216,12 @@ class OpenStackCheck(AgentCheck):
         self.log.debug("Deleting scope for instance %s", i_key)
         del self.instance_map[i_key]
 
-    def get_auth_token(self, instance=None):
-        if not instance:
-            # Assume instance scope is populated on self
-            return self._current_scope.auth_token
-
-        return self.get_scope_for_instance(instance).auth_token
+    def get_auth_token(self):
+        return self._current_scope.auth_token
 
     # Network
-    def get_neutron_endpoint(self, instance=None):
-        if not instance:
-            # Assume instance scope is populated on self
-            return self._current_scope.service_catalog.neutron_endpoint
-
-        return self.get_scope_for_instance(instance).service_catalog.neutron_endpoint
+    def get_neutron_endpoint(self):
+        return self._current_scope.service_catalog.neutron_endpoint
 
     def get_network_stats(self, tags):
         """
@@ -295,12 +287,8 @@ class OpenStackCheck(AgentCheck):
             self.service_check(self.NETWORK_SC, AgentCheck.CRITICAL, tags=service_check_tags)
 
     # Compute
-    def get_nova_endpoint(self, instance=None):
-        if not instance:
-            # Assume instance scope is populated on self
-            return self._current_scope.service_catalog.nova_endpoint
-
-        return self.get_scope_for_instance(instance).service_catalog.nova_endpoint
+    def get_nova_endpoint(self):
+        return self._current_scope.service_catalog.nova_endpoint
 
     def _parse_uptime_string(self, uptime):
         """ Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n' """
@@ -657,14 +645,8 @@ class OpenStackCheck(AgentCheck):
             raise IncompleteConfig()
 
         scope_map = {}
-        if isinstance(instance_scope, OpenStackProjectScope):
-            #  Key could be anything but same format for consistency
-            scope_key = (instance_scope.project_name, instance_scope.tenant_id)
-            scope_map[scope_key] = instance_scope
-            self._parent_scope = None
-        elif isinstance(instance_scope, OpenStackUnscoped):
-            scope_map.update(instance_scope.project_scope_map)
-            self._parent_scope = instance_scope
+        scope_map.update(instance_scope.project_scope_map)
+        self._parent_scope = instance_scope
         return scope_map
 
     def ensure_auth_scope(self, instance):
@@ -686,10 +668,7 @@ class OpenStackCheck(AgentCheck):
             # We're missing a project scope for this instance
             # Let's populate it now
             try:
-                if 'auth_scope' in instance:
-                    instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.proxy_config)
-                else:
-                    instance_scope = OpenStackUnscoped.from_config(self.init_config, instance, self.proxy_config)
+                instance_scope = OpenStackUnscoped.from_config(self.init_config, instance, self.proxy_config)
 
                 self.service_check(
                     self.IDENTITY_API_SC,
@@ -817,16 +796,7 @@ class OpenStackCheck(AgentCheck):
                 set_external_tags(self.get_external_host_tags())
 
         except IncompleteConfig as e:
-            if isinstance(e, IncompleteAuthScope):
-                self.warning(
-                    """Please specify the auth scope via the `auth_scope` variable in your init_config.\n
-                             The auth_scope should look like: \n
-                            {'project': {'name': 'my_project', 'domain': {'id': 'my_domain_id'}}}\n
-                            OR\n
-                            {'project': {'id': 'my_project_id'}}
-                             """
-                )
-            elif isinstance(e, IncompleteIdentity):
+            if isinstance(e, IncompleteIdentity):
                 self.warning(
                     "Please specify the user via the `user` variable in your init_config.\n"
                     + "This is the user you would use to authenticate with Keystone v3 via password auth.\n"
