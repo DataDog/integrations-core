@@ -8,19 +8,21 @@ init_config:
       # Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
       # os_host: my_hostname
 
-      # Nova API version to use - this check supports v2 and v2.1 (default)
-      # nova_api_version: 'v2.1'
+      # IDs of projects to whitelist for monitoring (by default the agent will collect limit metrics from all projects)
+      # Regex expressions for the project names are supported.
+      # Whitlist takes precedence over blacklist in case of overlap
+      # whitelist_project_names:
+      #    - proj1
+      #    - prod_*
 
-      # IDs of Nova Hypervisors to monitor
-      # Required for OpenStack Kilo or `nova_api_version` v2 -indexing hypervisors is restricted
-      # to `admin`s in Compute API v2-.
-      # On more recent versions, the check automatically discovers the locally running hypervisor,
-      # based on the `hypervisor_hostname`.
+      # IDs of projects to blacklist for monitoring (by default the agent will collect limit metrics from all projects)
+      # Regex expressions for the project names are supported.
+      # Whitelist takes precedence over blacklist in case of overlap
+      # blacklist_project_names:
+      #    - proj2
+      #    - test_*
 
-      # hypervisor_ids:
-      #    - 1
-
-      # IDs of servers to exclude from monitoring. (by default the agent will collect metrics from all guest servers that are running on the host)
+      # IDs of servers to exclude from monitoring. (by default the agent will collect metrics from all guest servers)
       # Regex expressions for the server IDs are supported.
       # exclude_server_ids:
       #    - server_1
@@ -32,6 +34,9 @@ init_config:
       #    - network_1
       #    - other_.*
 
+      # Nova API version to use - this check supports v2 and v2.1 (default)
+      # nova_api_version: 'v2.1'
+
       # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
       # need to set to false when using self-signed certs
       # ssl_verify: true
@@ -42,44 +47,38 @@ init_config:
 instances:
     - name: instance_1 # A required unique identifier for this instance
 
-      # The authorization scope that will be used to request a token from Identity API v3
-      # The auth scope must resolve to 1 of the following structures:
-      # {'project': {'name': 'my_project', 'domain': 'my_domain} OR {'project': {'id': 'my_project_id'}}
-      #
-      # ALPHA: DO NOT ADD an auth_scope if you wish to have unscoped access
-      #        Simply add the relevant user credentials.
-      #
-      auth_scope:
-          project:
-              id: my_project_id
-
-          # Alternately
-
-          # project:
-          #     name: my_project_name
-          #     domain:
-          #         id: default
-
-      # All projects in a domain can be collected by enabling collect_all_projects 
-      # Note: `domain` field must be set in project
-      #
-      # collect_all_projects: true
-
-
       # User credentials
-      # Password authentication is the only auth method supported right now
+      # Password authentication is the only auth method supported
       # User expects username, password, and user domain id
       # `user` should resolve to a structure like {'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}
+      # The check will use the Unscoped token method to collect information about all available projects to the user
       user:
           password: my_password
           name: datadog
           domain:
               id: default
 
+
       # In some cases, the nova url is returned without the tenant id suffixed
       # e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<tenant_id>
       # Setting append_tenant_id to true manually adds this suffix for downstream requests
       # append_tenant_id: false
+
+      # Collects hypervisor_load.1/5/15 for each hypervisor
+      # Disabled by default to increase performance of the check.
+      # With this enabled there is an extra N requests per check run (N = # of hypervisors)
+      # If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
+      # collect_hypervisor_load: False
+
+      # In some OpenStack environments, the hostname registered to Nova is the shortname. 
+      # Enabling this will enforce the check to split the hostname up to the first period when
+      # comparing against nova responses. Only affects aggregate tagging. 
+      # use_shortname: False
+
+      # The admin user defined for Datadog will start with a "default" project. 
+      # If this option is disabled, project limits metrics will only be collected from projects the
+      # datadog defined user has access to view. 
+      # collect_limits_from_all_projects: True
 
       # Please note that server metrics override the host tag and thus do not get
       # the host-level tags specified in datadog.(conf/yaml)

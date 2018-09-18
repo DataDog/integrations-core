@@ -188,7 +188,7 @@ def test_ensure_auth_scope(aggregator):
         openstack_check._send_api_service_checks(scope, ['optional:tag1'])
         aggregator.assert_service_check(
             OpenStackCheck.IDENTITY_API_SC, status=AgentCheck.OK, tags=[
-                'optional:tag1', 'server:http://10.0.2.15:5000'])
+                'optional:tag1', 'keystone_server:http://10.0.2.15:5000'])
 
         # URLs are nonexistant, so return CRITICAL
         aggregator.assert_service_check(OpenStackCheck.COMPUTE_API_SC, status=AgentCheck.CRITICAL)
@@ -234,9 +234,8 @@ def test_server_exclusion(*args):
 
     # Retrieve servers
     openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
-    i_key = "test_instance"
-    server_ids = openstackCheck.get_servers_managed_by_hypervisor(i_key, False, False)
-
+    openstackCheck.filter_excluded_servers()
+    server_ids = openstackCheck.server_details_by_id
     # Assert
     # .. 1 out of 4 server ids filtered
     assert len(server_ids) == 1
@@ -244,6 +243,49 @@ def test_server_exclusion(*args):
     # Ensure the server IDs filtered are the ones expected
     for server_id in server_ids:
         assert server_id in common.FILTERED_SERVER_ID
+
+
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_all_servers', return_value=common.ALL_SERVER_DETAILS)
+def test_server_exclusion_by_project(*args):
+    """
+    Exclude servers using regular expressions.
+    """
+    openstackCheck = OpenStackCheck("test", {
+        'keystone_server_url': 'http://10.0.2.15:5000',
+        'ssl_verify': False,
+        'blacklist_project_names': ["blacklist*"]
+    }, {}, instances=common.MOCK_CONFIG)
+
+    # Retrieve servers
+    openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
+    openstackCheck.filter_excluded_servers()
+    server_ids = openstackCheck.server_details_by_id
+    # Assert
+    # .. 2 out of 4 server ids filtered
+    assert len(server_ids) == 2
+
+    # Ensure the server IDs filtered are the ones expected
+    for server_id in server_ids:
+        assert server_id in common.FILTERED_BY_PROJ_SERVER_ID
+
+
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_all_servers', return_value=common.ALL_SERVER_DETAILS)
+def test_server_include_all_by_default(*args):
+    """
+    Exclude servers using regular expressions.
+    """
+    openstackCheck = OpenStackCheck("test", {
+        'keystone_server_url': 'http://10.0.2.15:5000',
+        'ssl_verify': False
+    }, {}, instances=common.MOCK_CONFIG)
+
+    # Retrieve servers
+    openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
+    openstackCheck.filter_excluded_servers()
+    server_ids = openstackCheck.server_details_by_id
+    # Assert
+    # All 4 servers should still be monitored
+    assert len(server_ids) == 4
 
 
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_all_network_ids', return_value=common.ALL_IDS)
@@ -291,7 +333,8 @@ def test_cache_between_runs(self, *args):
     i_key = "test_instance"
 
     # Update the cached list of servers based on what the endpoint returns
-    cached_servers = openstackCheck.get_all_servers(i_key, False)
+    openstackCheck.get_all_servers(i_key)
 
+    cached_servers = openstackCheck.server_details_by_id
     assert 'server-1' not in cached_servers
     assert 'server_newly_added' in cached_servers
