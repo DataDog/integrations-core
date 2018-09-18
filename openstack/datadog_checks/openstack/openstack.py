@@ -15,6 +15,8 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
 
+from .utils import get_instance_key
+from .retry_backoff import BackOffRetry
 from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteAuthScope,
                          IncompleteIdentity, MissingNovaEndpoint, MissingNeutronEndpoint, KeystoneUnreachable)
 
@@ -102,9 +104,6 @@ DIAGNOSTICABLE_STATES = ['ACTIVE']
 REMOVED_STATES = ['DELETED', 'SHUTOFF']
 
 UNSCOPED_AUTH = 'unscoped'
-
-BASE_BACKOFF_SECS = 15
-MAX_BACKOFF_SECS = 300
 
 
 class OpenStackScope(object):
@@ -526,7 +525,7 @@ class OpenStackCheck(AgentCheck):
         skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies
 
-        self.backoff = {}
+        self.backoff = BackOffRetry(self)
         random.seed()
 
         # ISO8601 date time: used to filter the call to get the list of nova servers
@@ -571,13 +570,6 @@ class OpenStackCheck(AgentCheck):
 
         return resp.json()
 
-    def _instance_key(self, instance):
-        i_key = instance.get('name')
-        if not i_key:
-            # We need a name to identify this instance
-            raise IncompleteConfig()
-        return i_key
-
     def delete_current_scope(self):
         scope_to_delete = self._parent_scope if self._parent_scope else self._current_scope
         for i_key, scope in self.instance_map.items():
@@ -585,54 +577,18 @@ class OpenStackCheck(AgentCheck):
                 self.log.debug("Deleting current scope: %s", i_key)
                 del self.instance_map[i_key]
 
-    def should_run(self, instance):
-        i_key = self._instance_key(instance)
-        if i_key not in self.backoff:
-            self.backoff[i_key] = {'retries': 0, 'scheduled': time.time()}
-
-        if self.backoff[i_key]['scheduled'] <= time.time():
-            return True
-
-        return False
-
-    def do_backoff(self, instance):
-        i_key = self._instance_key(instance)
-        tracker = self.backoff[i_key]
-
-        self.backoff[i_key]['retries'] += 1
-        jitter = min(MAX_BACKOFF_SECS, BASE_BACKOFF_SECS * 2 ** self.backoff[i_key]['retries'])
-
-        # let's add some jitter  (half jitter)
-        backoff_interval = jitter / 2
-        backoff_interval += random.randint(0, backoff_interval)
-
-        tags = instance.get('tags', [])
-        hypervisor_name = self._hypervisor_name_cache.get(i_key)
-        if hypervisor_name:
-            tags.extend("hypervisor:{}".format(hypervisor_name))
-
-        self.gauge("openstack.backoff.interval", backoff_interval, tags=tags)
-        self.gauge("openstack.backoff.retries", self.backoff[i_key]['retries'], tags=tags)
-
-        tracker['scheduled'] = time.time() + backoff_interval
-
-    def reset_backoff(self, instance):
-        i_key = self._instance_key(instance)
-        self.backoff[i_key]['retries'] = 0
-        self.backoff[i_key]['scheduled'] = time.time()
-
     def get_scope_for_instance(self, instance):
-        i_key = self._instance_key(instance)
+        i_key = get_instance_key(instance)
         self.log.debug("Getting scope for instance %s", i_key)
         return self.instance_map[i_key]
 
     def set_scope_for_instance(self, instance, scope):
-        i_key = self._instance_key(instance)
+        i_key = get_instance_key(instance)
         self.log.debug("Setting scope for instance %s", i_key)
         self.instance_map[i_key] = scope
 
     def delete_scope_for_instance(self, instance):
-        i_key = self._instance_key(instance)
+        i_key = get_instance_key(instance)
         self.log.debug("Deleting scope for instance %s", i_key)
         del self.instance_map[i_key]
 
@@ -781,7 +737,7 @@ class OpenStackCheck(AgentCheck):
                                         use_shortname=False,
                                         collect_hypervisor_load=False):
         hyp_hostname = hyp.get('hypervisor_hostname')
-        self._hypervisor_name_cache[self._instance_key(instance)] = hyp_hostname
+        self._hypervisor_name_cache[get_instance_key(instance)] = hyp_hostname
         custom_tags = custom_tags or []
         tags = [
             'hypervisor:{}'.format(hyp_hostname),
@@ -1148,7 +1104,7 @@ class OpenStackCheck(AgentCheck):
 
     def check(self, instance):
         # have we been backed off
-        if not self.should_run(instance):
+        if not self.backoff.should_run(instance):
             self.log.info('Skipping run due to exponential backoff in effect')
             return
 
@@ -1188,7 +1144,7 @@ class OpenStackCheck(AgentCheck):
                 if project and project.get('name'):
                     projects[project.get('name')] = project
 
-                i_key = self._instance_key(instance)
+                i_key = get_instance_key(instance)
 
             if collect_limits_from_all_projects:
                 scope_projects = self.get_all_projects(scope)
@@ -1255,7 +1211,7 @@ class OpenStackCheck(AgentCheck):
         except requests.exceptions.HTTPError as e:
             if e.response.status_code >= 500:
                 # exponential backoff
-                self.do_backoff(instance)
+                self.backoff.do_backoff(instance)
                 self.warning("There were some problems reaching the nova API - applying exponential backoff")
             else:
                 self.warning("Error reaching nova API")
@@ -1263,11 +1219,11 @@ class OpenStackCheck(AgentCheck):
             return
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             # exponential backoff
-            self.do_backoff(instance)
+            self.backoff.do_backoff(instance)
             self.warning("There were some problems reaching the nova API - applying exponential backoff")
             return
 
-        self.reset_backoff(instance)
+        self.backoff.reset_backoff(instance)
 
     def get_all_projects(self, scope):
         """
@@ -1282,8 +1238,6 @@ class OpenStackCheck(AgentCheck):
         except Exception as e:
             self.warning('Unable to get projects: {}}'.format(str(e)))
             raise e
-
-        return None
 
     def get_scoped_project(self, project_auth_scope):
         """
@@ -1317,8 +1271,6 @@ class OpenStackCheck(AgentCheck):
         except Exception as e:
             self.warning('Unable to get the project details: {}'.format(str(e)))
             raise e
-
-        return None
 
     def _get_host_aggregate_tag(self, hyp_hostname, use_shortname=False):
         tags = []
