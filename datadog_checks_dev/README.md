@@ -551,6 +551,21 @@ Options:
   -h, --help         Show this message and exit.
 ```
 
+#### Validate
+
+```console
+$ ddev validate -h                                                                                                                                                                                                                                                                      [16:56:07]
+Usage: ddev validate [OPTIONS] [CHECK]
+
+  Validates metadata.csv files
+
+  If `check` is specified, only the check will be validated, otherwise all
+  matching files in directory.
+
+Options:
+  -h, --help  Show this message and exit.
+```
+
 ## Development
 
 This is the layer intended to be used directly for testing.
