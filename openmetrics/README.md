@@ -4,7 +4,7 @@
 
 Extract custom metrics from any OpenMetrics endpoints.
 
-**Note:** All the metrics retrieved by this integration are considered as custom metrics.
+**Note:** All the metrics retrieved by this integration are considered as [custom metrics][9].
 
 ## Setup
 
@@ -57,3 +57,4 @@ Need help? Contact [Datadog Support][3].
 [6]: https://docs.datadoghq.com/developers/openmetrics/
 [7]: https://app.datadoghq.com/account/settings#agent
 [8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[9]: https://docs.datadoghq.com/developers/metrics/custom_metrics/

@@ -21,15 +21,15 @@ instances:
       - io
 
   ## @param prometheus_metrics_prefix - string - optional
-  ## Prefix for exposed Prometheus metrics.
+  ## <PREFIX> for exposed Prometheus metrics.
   #
-  #  prometheus_metrics_prefix: prefix_
+  #  prometheus_metrics_prefix: <PREFIX>_
 
   ## @param health_service_check - boolean - optional - default: true
   ## Send a service check reporting about the health of the prometheus endpoint
   ## It's named <NAMESPACE>.prometheus.health
   #
-  #  health_service_check: True
+  #  health_service_check: true
 
   ## @param label_to_hostname - string - optional  
   ## Override the hostname with the value of one label.
@@ -72,12 +72,12 @@ instances:
   ## @param send_histograms_buckets - boolean - optional - default: false
   ## Set send_histograms_buckets to true to send the histograms bucket.
   #
-  #  send_histograms_buckets: True
+  #  send_histograms_buckets: false
 
   ## @param send_monotonic_counter - boolean - optional - default: false
   ## Set send_monotonic_counter to true to send counters as monotonic counter.
   #
-  #  send_monotonic_counter: True
+  #  send_monotonic_counter: false
 
   ## @param exclude_labels - list of strings - optional
   ## List of label to be excluded
