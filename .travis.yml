@@ -93,6 +93,8 @@ jobs:
     - stage: test
       env: CHECK=dotnetclr
     - stage: test
+      env: CHECK=ecs_fargate
+    - stage: test
       env: CHECK=elastic
     - stage: test
       env: CHECK=envoy PYTHON3=true
