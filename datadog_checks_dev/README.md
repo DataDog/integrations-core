@@ -407,14 +407,20 @@ Options:
 
 ```console
 $ ddev release make -h
-Usage: ddev release make [OPTIONS] CHECK VERSION
+Usage: ddev release make [OPTIONS] CHECK [VERSION]
 
   Perform a set of operations needed to release a single check:
 
-  * update the version in __about__.py
-  * update the changelog
-  * update the requirements-agent-release.txt file
-  * commit the above changes
+    * update the version in __about__.py
+    * update the changelog
+    * update the requirements-agent-release.txt file
+    * update in-toto metadata
+    * commit the above changes
+
+  If you run into issues signing commits:
+
+    - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
+    - Using only unix path separators, try `git config --local gpg.program "path/to/gpg"`
 
 Options:
   -h, --help  Show this message and exit.

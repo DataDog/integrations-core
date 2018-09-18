@@ -497,11 +497,18 @@ def tag(check, version, push, dry_run):
 def make(ctx, check, version):
     """Perform a set of operations needed to release a single check:
 
-        \b
-        * update the version in __about__.py
-        * update the changelog
-        * update the requirements-agent-release.txt file
-        * commit the above changes
+    \b
+      * update the version in __about__.py
+      * update the changelog
+      * update the requirements-agent-release.txt file
+      * update in-toto metadata
+      * commit the above changes
+
+    \b
+    If you run into issues signing commits:
+    \b
+      - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
+      - Using only unix path separators, try `git config --local gpg.program "path/to/gpg"`
     """
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
     from ..signing import update_link_metadata
