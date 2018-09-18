@@ -10,7 +10,7 @@ Extract custom metrics from any OpenMetrics endpoints.
 
 ### Installation
 
-The OpenMetrics check is packaged with the [Datadog Agent starting version 6.5.0][7].
+The OpenMetrics check is packaged with the [Datadog Agent starting version 6.6.0][7].
 
 ### Configuration
 
