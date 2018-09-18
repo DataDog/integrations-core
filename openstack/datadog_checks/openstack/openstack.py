@@ -937,8 +937,8 @@ class OpenStackCheck(AgentCheck):
                     if re.match(exclude_id_rule, server_id):
                         del self.server_details_by_id[server_id]
 
-        for server in self.server_details_by_id.iteritems():
-            proj_list.add(server[1].get('project_name'))
+        for _, server in self.server_details_by_id.iteritems():
+            proj_list.add(server.get('project_name'))
 
         projects_filtered = pattern_filter(
             proj_list,
@@ -1035,14 +1035,17 @@ class OpenStackCheck(AgentCheck):
         if project_name:
             server_tags.append('project_name:{}'.format(project_name))
 
-        for st in server_stats['limits']['absolute']:
-            if _is_valid_metric(st):
-                metric_key = PROJECT_METRICS[st]
-                self.gauge(
-                    "openstack.nova.limits.{}".format(metric_key),
-                    server_stats['limits']['absolute'][st],
-                    tags=server_tags,
-                )
+        try:
+            for st in server_stats['limits']['absolute']:
+                if _is_valid_metric(st):
+                    metric_key = PROJECT_METRICS[st]
+                    self.gauge(
+                        "openstack.nova.limits.{}".format(metric_key),
+                        server_stats['limits']['absolute'][st],
+                        tags=server_tags,
+                    )
+        except KeyError:
+            self.log.warn("{} returned unexpected response, not submitting limits metrics".format(url))
 
     # Cache util
     def _is_expired(self, entry):
