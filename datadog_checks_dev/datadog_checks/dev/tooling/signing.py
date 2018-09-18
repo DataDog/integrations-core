@@ -60,7 +60,8 @@ def run_in_toto(key_id):
 
 
 def update_link_metadata():
-    ensure_dir_exists(LINK_DIR)
+    root = get_root()
+    ensure_dir_exists(path_join(root, LINK_DIR))
 
     key_id = get_key_id(GPG_COMMAND)
 
@@ -75,7 +76,7 @@ def update_link_metadata():
     # File used to tell the pipeline where to find the latest metadata file.
     metadata_file_tracker = path_join(LINK_DIR, 'LATEST')
 
-    with chdir(get_root()):
+    with chdir(root):
         run_in_toto(key_id)
 
         # Tell pipeline which tag link metadata to use.
