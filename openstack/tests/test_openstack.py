@@ -14,15 +14,9 @@ import pytest
 # project
 import common
 
-from datadog_checks.openstack.openstack import (
-    OpenStackCheck,
-    OpenStackProjectScope,
-    OpenStackUnscoped,
-    KeystoneCatalog,
-    IncompleteConfig,
-    IncompleteAuthScope,
-    IncompleteIdentity
-)
+from datadog_checks.openstack.exceptions import (IncompleteConfig, IncompleteAuthScope, IncompleteIdentity)
+from datadog_checks.openstack.openstack import OpenStackCheck
+from datadog_checks.openstack.scopes import (OpenStackProjectScope, OpenStackUnscoped, KeystoneCatalog)
 
 from datadog_checks.checks import AgentCheck
 
