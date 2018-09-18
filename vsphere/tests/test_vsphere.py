@@ -233,6 +233,7 @@ def test__cache_morlist_raw_async(vsphere, instance):
 
 def test__process_mor_objects_queue(vsphere, instance):
     vsphere.log = MagicMock()
+    vsphere._process_mor_objects_queue_async = MagicMock()
     vsphere._process_mor_objects_queue(instance)
     # Queue hasn't been initialized
     vsphere.log.debug.assert_called_once_with(
@@ -248,6 +249,10 @@ def test__process_mor_objects_queue(vsphere, instance):
         vsphere._process_mor_objects_queue(instance)
         # Object queue should be empty after processing
         assert sum(vsphere.mor_objects_queue.size(i_key, resource_type) for resource_type in RESOURCE_TYPE_METRICS) == 0
+        assert vsphere._process_mor_objects_queue_async.call_count == 2  # Once for each datacenter
+        for call_args in vsphere._process_mor_objects_queue_async.call_args_list:
+            # query_specs parameter should be a list of size 1 since the batch size is 1
+            assert len(call_args[0][1]) == 1
 
 
 def test_collect_realtime_only(vsphere, instance):
@@ -353,6 +358,7 @@ def test_collect_metrics(vsphere, instance):
         vsphere.collect_metrics(instance)
         assert vsphere._collect_metrics_async.call_count == 6  # One for each VM/host, datacenters are not collected
         for call_args in vsphere._collect_metrics_async.call_args_list:
+            # query_specs parameter should be a list of size 1 since the batch size is 1
             assert len(call_args[0][1]) == 1
 
 
