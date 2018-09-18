@@ -13,7 +13,7 @@ from datadog_checks.utils.common import pattern_filter
 
 from .utils import get_instance_key
 from .retry_backoff import BackOffRetry
-from .scopes import OpenStackUnscoped
+from .scopes import OpenStackScope
 from .settings import DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION
 from .exceptions import (InstancePowerOffFailure, IncompleteConfig,
                          IncompleteIdentity, MissingNovaEndpoint, MissingNeutronEndpoint, KeystoneUnreachable)
@@ -221,7 +221,7 @@ class OpenStackCheck(AgentCheck):
 
     # Network
     def get_neutron_endpoint(self):
-        return self._current_scope.service_catalog.neutron_endpoint
+        return self._current_scope.neutron_endpoint
 
     def get_network_stats(self, tags):
         """
@@ -288,7 +288,7 @@ class OpenStackCheck(AgentCheck):
 
     # Compute
     def get_nova_endpoint(self):
-        return self._current_scope.service_catalog.nova_endpoint
+        return self._current_scope.nova_endpoint
 
     def _parse_uptime_string(self, uptime):
         """ Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n' """
@@ -599,7 +599,7 @@ class OpenStackCheck(AgentCheck):
 
         try:
             requests.get(
-                scope.service_catalog.nova_endpoint,
+                scope.nova_endpoint,
                 headers=headers,
                 verify=self._ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
@@ -620,7 +620,7 @@ class OpenStackCheck(AgentCheck):
         # Neutron
         try:
             requests.get(
-                scope.service_catalog.neutron_endpoint,
+                scope.neutron_endpoint,
                 headers=headers,
                 verify=self._ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
@@ -668,7 +668,7 @@ class OpenStackCheck(AgentCheck):
             # We're missing a project scope for this instance
             # Let's populate it now
             try:
-                instance_scope = OpenStackUnscoped.from_config(self.init_config, instance, self.proxy_config)
+                instance_scope = OpenStackScope.from_config(self.init_config, instance, self.proxy_config)
 
                 self.service_check(
                     self.IDENTITY_API_SC,
