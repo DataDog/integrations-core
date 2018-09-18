@@ -16,7 +16,6 @@ from .exceptions import (IncompleteConfig, IncompleteAuthScope,
 UNSCOPED_AUTH = 'unscoped'
 V21_NOVA_API_VERSION = 'v2.1'
 DEFAULT_NOVA_API_VERSION = V21_NOVA_API_VERSION
-FALLBACK_NOVA_API_VERSION = 'v2'
 
 
 class KeystoneCatalog(object):
@@ -30,33 +29,10 @@ class KeystoneCatalog(object):
         self.neutron_endpoint = neutron_endpoint
 
     @classmethod
-    def from_auth_response(cls, json_response, nova_api_version, keystone_server_url=None, auth_token=None, proxy=None):
-        try:
-            return cls(
-                nova_endpoint=cls._get_nova_endpoint(json_response, nova_api_version),
-                neutron_endpoint=cls._get_neutron_endpoint(json_response),
-            )
-        except (MissingNeutronEndpoint, MissingNovaEndpoint) as e:
-            if keystone_server_url and auth_token:
-                return cls.from_unscoped_token(keystone_server_url, auth_token, nova_api_version, proxy)
-            else:
-                raise e
-
-    @classmethod
-    def from_unscoped_token(cls, keystone_server_url, auth_token, nova_api_version, ssl_verify=True, proxy=None):
-        catalog_url = urljoin(keystone_server_url, "{}/auth/catalog".format(DEFAULT_KEYSTONE_API_VERSION))
-        headers = {'X-Auth-Token': auth_token}
-
-        resp = requests.get(
-            catalog_url, headers=headers, verify=ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=proxy
-        )
-        resp.raise_for_status()
-        json_resp = resp.json()
-        json_resp = {'token': json_resp}
-
+    def from_auth_response(cls, json_response, nova_api_version):
         return cls(
-            nova_endpoint=cls._get_nova_endpoint(json_resp, nova_api_version),
-            neutron_endpoint=cls._get_neutron_endpoint(json_resp),
+            nova_endpoint=cls._get_nova_endpoint(json_response, nova_api_version),
+            neutron_endpoint=cls._get_neutron_endpoint(json_response),
         )
 
     @classmethod
@@ -283,10 +259,7 @@ class OpenStackUnscoped(OpenStackScope):
                 )
                 raise KeystoneUnreachable(exception_msg)
 
-            try:
-                service_catalog = KeystoneCatalog.from_auth_response(token_resp.json(), nova_api_version)
-            except MissingNovaEndpoint:
-                service_catalog = KeystoneCatalog.from_auth_response(token_resp.json(), FALLBACK_NOVA_API_VERSION)
+            service_catalog = KeystoneCatalog.from_auth_response(token_resp.json(), nova_api_version)
 
             project_auth_scope = {
                 'project': {
@@ -361,10 +334,7 @@ class OpenStackProjectScope(OpenStackScope):
             init_config, instance_config, proxy_config
         )
 
-        try:
-            service_catalog = KeystoneCatalog.from_auth_response(auth_resp.json(), nova_api_version)
-        except MissingNovaEndpoint:
-            service_catalog = KeystoneCatalog.from_auth_response(auth_resp.json(), FALLBACK_NOVA_API_VERSION)
+        service_catalog = KeystoneCatalog.from_auth_response(auth_resp.json(), nova_api_version)
 
         # (NOTE): aaditya
         # In some cases, the nova url is returned without the tenant id suffixed
