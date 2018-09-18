@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 1.3.0 / 2018-09-11
+
+* [Added] Add cpu percent metric and fix container stopped behaviour. See [#2206](https://github.com/DataDog/integrations-core/pull/2206).
+
 ## 1.2.1 / 2018-09-04
 
 * [Fixed] Fix key errors. See [#1959](https://github.com/DataDog/integrations-core/pull/1959).

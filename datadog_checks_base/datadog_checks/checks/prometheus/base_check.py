@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .mixins import PrometheusScraperMixin
-from ..base import AgentCheck
+from .. import AgentCheck
 from ...errors import CheckException
 
 from six import string_types
