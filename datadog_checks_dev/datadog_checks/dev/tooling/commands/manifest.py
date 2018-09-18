@@ -350,19 +350,6 @@ def verify(fix, include_extras):
                         failed -= 1
                     else:
                         display_queue.append((echo_failure, output))
-                elif is_public != correct_is_public:
-                    failed += 1
-                    output = '  invalid `is_public`: {}'.format(is_public)
-
-                    if fix:
-                        decoded['is_public'] = correct_is_public
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `is_public`: {}'.format(correct_is_public)))
-
-                        failed -= 1
-                    else:
-                        display_queue.append((echo_failure, output))
 
             # See if anything happened
             if len(display_queue) > 1:
