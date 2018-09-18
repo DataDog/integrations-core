@@ -1,5 +1,5 @@
 {
-  "display_name": "Pivotal Container Service",
+  "display_name": "Pivotal PKS",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "pivotal_pks",
