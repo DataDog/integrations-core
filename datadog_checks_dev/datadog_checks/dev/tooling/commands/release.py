@@ -512,15 +512,17 @@ def make(ctx, check, version):
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
     from ..signing import update_link_metadata
 
+    releasing_all = check == 'all'
+
     valid_checks = get_valid_checks()
-    if check != 'all' and check not in valid_checks:
+    if releasing_all and check not in valid_checks:
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # don't run the task on the master branch
     if get_current_branch() == 'master':
         abort('This task will commit, you do not want to add commits to master directly')
 
-    if check == 'all':
+    if releasing_all:
         if version:
             abort('You cannot bump every check to the same version')
         checks = sorted(valid_checks)
@@ -569,11 +571,12 @@ def make(ctx, check, version):
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
             echo_success('success!')
 
-        echo_waiting('Updating release metadata...')
-        echo_info('Please touch your Yubikey immediately after entering your PIN!')
-        metadata_files = update_link_metadata()
+        if not releasing_all:
+            echo_waiting('Updating release metadata...')
+            echo_info('Please touch your Yubikey immediately after entering your PIN!')
+            metadata_files = update_link_metadata(check)
 
-        commit_targets.extend(metadata_files)
+            commit_targets.extend(metadata_files)
 
         # commit the changes.
         # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
@@ -582,6 +585,13 @@ def make(ctx, check, version):
 
         # Reset version
         version = None
+
+    if releasing_all:
+        echo_waiting('Updating release metadata...')
+        echo_info('Please touch your Yubikey immediately after entering your PIN!')
+        commit_targets = update_link_metadata()
+
+        git_commit(commit_targets, 'Update release metadata', force=True)
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
