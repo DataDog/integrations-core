@@ -15,6 +15,9 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
 
+from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteAuthScope,
+                         IncompleteIdentity, MissingNovaEndpoint, MissingNeutronEndpoint, KeystoneUnreachable)
+
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -102,42 +105,6 @@ UNSCOPED_AUTH = 'unscoped'
 
 BASE_BACKOFF_SECS = 15
 MAX_BACKOFF_SECS = 300
-
-
-class OpenStackAuthFailure(Exception):
-    pass
-
-
-class InstancePowerOffFailure(Exception):
-    pass
-
-
-class IncompleteConfig(Exception):
-    pass
-
-
-class IncompleteAuthScope(IncompleteConfig):
-    pass
-
-
-class IncompleteIdentity(IncompleteConfig):
-    pass
-
-
-class MissingEndpoint(Exception):
-    pass
-
-
-class MissingNovaEndpoint(MissingEndpoint):
-    pass
-
-
-class MissingNeutronEndpoint(MissingEndpoint):
-    pass
-
-
-class KeystoneUnreachable(Exception):
-    pass
 
 
 class OpenStackScope(object):
