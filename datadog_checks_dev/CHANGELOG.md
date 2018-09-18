@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.7.0 / 2018-09-18
+
+* [Added] Fix manifest validation policy. See [#2258](https://github.com/DataDog/integrations-core/pull/2258).
+* [Added] Add config option to select the default repository. See [#2243](https://github.com/DataDog/integrations-core/pull/2243).
+
 ## 0.6.2 / 2018-09-14
 
 * [Fixed] Revert "Update base package paths (#2235)". See [#2240](https://github.com/DataDog/integrations-core/pull/2240).
