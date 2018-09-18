@@ -49,21 +49,22 @@ class SessionWrapper:
         payload = '{}{}'.format(req.method, req.url.replace(self.aci_url, ''))
         payload = unquote(payload)
 
-        signature = self.cert_key.sign(payload,
-                                       padding.PKCS1v15(),
-                                       hashes.SHA256())
-
-        signature = base64.b64encode(signature)
-
         prepped_request = req.prepare()
         if self.apic_cookie:
             prepped_request.headers['Cookie'] = self.apic_cookie
-        else:
+        elif self.cert_key:
+            signature = self.cert_key.sign(payload,
+                                           padding.PKCS1v15(),
+                                           hashes.SHA256())
+
+            signature = base64.b64encode(signature)
             cookie = ('APIC-Request-Signature={}; '
                       'APIC-Certificate-Algorithm=v1.0; '
                       'APIC-Certificate-Fingerprint=fingerprint; '
                       'APIC-Certificate-DN={}').format(signature, self.certDn)
             prepped_request.headers['Cookie'] = cookie
+        else:
+            self.log.warning("The Cisco ACI Integration requires either a cert or a username and password")
 
         response = self.session.send(prepped_request, verify=self.verify, timeout=self.timeout)
         try:
