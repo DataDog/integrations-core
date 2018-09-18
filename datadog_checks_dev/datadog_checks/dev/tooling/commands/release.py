@@ -505,10 +505,9 @@ def make(ctx, check, version):
       * commit the above changes
 
     \b
-    If you run into issues signing commits:
+    If you run into issues signing:
     \b
       - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
-      - Using only unix path separators, try `git config --local gpg.program "path/to/gpg"`
     """
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
     from ..signing import update_link_metadata
@@ -547,15 +546,18 @@ def make(ctx, check, version):
             version = bump_function(cur_version)
 
         # update the version number
-        echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
+        echo_info('Current version of check {}: {}'.format(check, cur_version))
+        echo_waiting('Bumping to {}... '.format(version), nl=False)
         update_version_module(check, cur_version, version)
+        echo_success('success!')
 
         # update the CHANGELOG
-        echo_waiting('Updating the changelog...')
+        echo_waiting('Updating the changelog... ', nl=False)
         # TODO: Avoid double GitHub API calls when bumping all checks at once
         ctx.invoke(
             changelog, check=check, version=version, old_version=cur_version, quiet=True, dry_run=False
         )
+        echo_success('success!')
 
         if check == 'datadog_checks_dev':
             commit_targets = [check]
@@ -563,16 +565,20 @@ def make(ctx, check, version):
         else:
             commit_targets = [check, AGENT_REQ_FILE]
             req_file = os.path.join(get_root(), AGENT_REQ_FILE)
-            echo_waiting('Updating the requirements file {}...'.format(req_file))
+            echo_waiting('Updating the requirements file {}... '.format(req_file), nl=False)
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+            echo_success('success!')
 
+        echo_waiting('Updating release metadata...')
+        echo_info('Please touch your Yubikey immediately after entering your PIN!')
         metadata_files = update_link_metadata()
+
         commit_targets.extend(metadata_files)
 
         # commit the changes.
         # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
         msg = '[Release] Bumped {} version to {}'.format(check, version)
-        git_commit(commit_targets, msg, force=True, sign=True)
+        git_commit(commit_targets, msg, force=True)
 
         # Reset version
         version = None

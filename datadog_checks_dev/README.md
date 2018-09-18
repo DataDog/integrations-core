@@ -417,10 +417,9 @@ Usage: ddev release make [OPTIONS] CHECK [VERSION]
     * update in-toto metadata
     * commit the above changes
 
-  If you run into issues signing commits:
+  If you run into issues signing:
 
     - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
-    - Using only unix path separators, try `git config --local gpg.program "path/to/gpg"`
 
 Options:
   -h, --help  Show this message and exit.
