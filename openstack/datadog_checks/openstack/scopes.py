@@ -33,8 +33,8 @@ class KeystoneCatalog(object):
     def from_auth_response(cls, json_response, nova_api_version, keystone_server_url=None, auth_token=None, proxy=None):
         try:
             return cls(
-                nova_endpoint=cls.get_nova_endpoint(json_response, nova_api_version),
-                neutron_endpoint=cls.get_neutron_endpoint(json_response),
+                nova_endpoint=cls._get_nova_endpoint(json_response, nova_api_version),
+                neutron_endpoint=cls._get_neutron_endpoint(json_response),
             )
         except (MissingNeutronEndpoint, MissingNovaEndpoint) as e:
             if keystone_server_url and auth_token:
@@ -55,12 +55,12 @@ class KeystoneCatalog(object):
         json_resp = {'token': json_resp}
 
         return cls(
-            nova_endpoint=cls.get_nova_endpoint(json_resp, nova_api_version),
-            neutron_endpoint=cls.get_neutron_endpoint(json_resp),
+            nova_endpoint=cls._get_nova_endpoint(json_resp, nova_api_version),
+            neutron_endpoint=cls._get_neutron_endpoint(json_resp),
         )
 
     @classmethod
-    def get_neutron_endpoint(cls, json_resp):
+    def _get_neutron_endpoint(cls, json_resp):
         """
         Parse the service catalog returned by the Identity API for an endpoint matching the Neutron service
         Sends a CRITICAL service check when none are found registered in the Catalog
@@ -87,7 +87,7 @@ class KeystoneCatalog(object):
         return neutron_endpoint
 
     @classmethod
-    def get_nova_endpoint(cls, json_resp, nova_api_version=None):
+    def _get_nova_endpoint(cls, json_resp, nova_api_version=None):
         """
         Parse the service catalog returned by the Identity API for an endpoint matching
         the Nova service with the requested version
@@ -120,7 +120,7 @@ class OpenStackScope(object):
         self.auth_token = auth_token
 
     @classmethod
-    def request_auth_token(cls, auth_scope, identity, keystone_server_url, ssl_verify, proxy=None):
+    def _request_auth_token(cls, auth_scope, identity, keystone_server_url, ssl_verify, proxy=None):
         if not auth_scope:
             auth_scope = UNSCOPED_AUTH
 
@@ -141,7 +141,7 @@ class OpenStackScope(object):
         return resp
 
     @classmethod
-    def get_user_identity(cls, instance_config):
+    def _get_user_identity(cls, instance_config):
         """
         Parse user identity out of init_config
 
@@ -162,7 +162,7 @@ class OpenStackScope(object):
         return identity
 
     @classmethod
-    def get_auth_scope(cls, instance_config):
+    def _get_auth_scope(cls, instance_config):
         """
         Parse authorization scope out of init_config
 
@@ -190,19 +190,19 @@ class OpenStackScope(object):
         return auth_scope
 
     @classmethod
-    def get_auth_response_from_config(cls, init_config, instance_config, proxy_config=None):
+    def _get_auth_response_from_config(cls, init_config, instance_config, proxy_config=None):
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
 
         ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
 
-        auth_scope = cls.get_auth_scope(instance_config)
-        identity = cls.get_user_identity(instance_config)
+        auth_scope = cls._get_auth_scope(instance_config)
+        identity = cls._get_user_identity(instance_config)
 
         exception_msg = None
         try:
-            auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
+            auth_resp = cls._request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             exception_msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
                 user=identity['password']['user']['name'],
@@ -220,7 +220,7 @@ class OpenStackScope(object):
                         auth_scope['project']['domain']['name'] = auth_scope['project']['domain'].pop('id')
                     else:
                         auth_scope['project']['name'] = auth_scope['project'].pop('id')
-                auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
+                auth_resp = cls._request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
             except (
                 requests.exceptions.HTTPError,
                 requests.exceptions.Timeout,
@@ -254,10 +254,10 @@ class OpenStackUnscoped(OpenStackScope):
         ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
 
-        _, auth_token, _ = cls.get_auth_response_from_config(init_config, instance_config, proxy_config)
+        _, auth_token, _ = cls._get_auth_response_from_config(init_config, instance_config, proxy_config)
 
         try:
-            project_resp = cls.request_project_list(auth_token, keystone_server_url, ssl_verify, proxy_config)
+            project_resp = cls._request_project_list(auth_token, keystone_server_url, ssl_verify, proxy_config)
             projects = project_resp.json().get('projects')
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             exception_msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
@@ -269,7 +269,7 @@ class OpenStackUnscoped(OpenStackScope):
         for project in projects:
             try:
                 project_key = project['name'], project['id']
-                token_resp = cls.get_token_for_project(
+                token_resp = cls._get_token_for_project(
                     auth_token, project, keystone_server_url, ssl_verify, proxy_config
                 )
                 project_auth_token = token_resp.headers.get('X-Subject-Token')
@@ -301,7 +301,7 @@ class OpenStackUnscoped(OpenStackScope):
         return cls(auth_token, project_scope_map)
 
     @classmethod
-    def get_token_for_project(cls, auth_token, project, keystone_server_url, ssl_verify, proxy=None):
+    def _get_token_for_project(cls, auth_token, project, keystone_server_url, ssl_verify, proxy=None):
         identity = {"methods": ['token'], "token": {"id": auth_token}}
         scope = {'project': {'id': project['id']}}
         payload = {'auth': {'identity': identity, 'scope': scope}}
@@ -321,7 +321,7 @@ class OpenStackUnscoped(OpenStackScope):
         return resp
 
     @classmethod
-    def request_project_list(cls, auth_token, keystone_server_url, ssl_verify, proxy=None):
+    def _request_project_list(cls, auth_token, keystone_server_url, ssl_verify, proxy=None):
         auth_url = urljoin(keystone_server_url, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'X-Auth-Token': auth_token}
 
@@ -357,7 +357,7 @@ class OpenStackProjectScope(OpenStackScope):
 
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
 
-        auth_scope, auth_token, auth_resp = cls.get_auth_response_from_config(
+        auth_scope, auth_token, auth_resp = cls._get_auth_response_from_config(
             init_config, instance_config, proxy_config
         )
 

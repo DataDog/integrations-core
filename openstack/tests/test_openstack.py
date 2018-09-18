@@ -50,7 +50,7 @@ MOCK_HTTP_PROJECTS_RESPONSE = MockHTTPResponse(response_dict=common.EXAMPLE_PROJ
 
 def _test_bad_auth_scope(scope):
     with pytest.raises(IncompleteAuthScope):
-        OpenStackProjectScope.get_auth_scope(scope)
+        OpenStackProjectScope._get_auth_scope(scope)
 
 
 def _test_bad_user(user):
@@ -63,14 +63,14 @@ def test_get_auth_scope():
         _test_bad_auth_scope(scope)
 
     for scope in common.GOOD_UNSCOPED_AUTH_SCOPES:
-        auth_scope = OpenStackProjectScope.get_auth_scope(scope)
+        auth_scope = OpenStackProjectScope._get_auth_scope(scope)
         assert auth_scope is None
-        auth_scope = OpenStackUnscoped.get_auth_scope(scope)
+        auth_scope = OpenStackUnscoped._get_auth_scope(scope)
 
         assert auth_scope is None
 
     for scope in common.GOOD_AUTH_SCOPES:
-        auth_scope = OpenStackProjectScope.get_auth_scope(scope)
+        auth_scope = OpenStackProjectScope._get_auth_scope(scope)
 
         # Should pass through unchanged
         assert auth_scope == scope.get('auth_scope')
@@ -81,7 +81,7 @@ def test_get_user_identity():
         _test_bad_user(user)
 
     for user in common.GOOD_USERS:
-        parsed_user = OpenStackProjectScope.get_user_identity(user)
+        parsed_user = OpenStackProjectScope._get_user_identity(user)
         assert parsed_user == {'methods': ['password'], 'password': user}
 
 
@@ -96,7 +96,7 @@ def test_from_config():
         OpenStackProjectScope.from_config(init_config, bad_instance_config)
 
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token',
+        'datadog_checks.openstack.openstack.OpenStackProjectScope._request_auth_token',
         return_value=MOCK_HTTP_RESPONSE
     ):
         append_config = good_instance_config.copy()
@@ -122,15 +122,15 @@ def test_unscoped_from_config():
     mock_http_response['token'].pop('project')
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackUnscoped.request_auth_token',
+        'datadog_checks.openstack.openstack.OpenStackUnscoped._request_auth_token',
         return_value=mock_response
     ):
         with mock.patch(
-            'datadog_checks.openstack.openstack.OpenStackUnscoped.request_project_list',
+            'datadog_checks.openstack.openstack.OpenStackUnscoped._request_project_list',
             return_value=MOCK_HTTP_PROJECTS_RESPONSE
         ):
             with mock.patch(
-                'datadog_checks.openstack.openstack.OpenStackUnscoped.get_token_for_project',
+                'datadog_checks.openstack.openstack.OpenStackUnscoped._get_token_for_project',
                 return_value=MOCK_HTTP_RESPONSE
             ):
                 append_config = good_instance_config.copy()
@@ -147,15 +147,15 @@ def test_unscoped_from_config():
 
 
 def test_get_nova_endpoint():
-    assert KeystoneCatalog.get_nova_endpoint(
+    assert KeystoneCatalog._get_nova_endpoint(
         common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
-    assert KeystoneCatalog.get_nova_endpoint(
+    assert KeystoneCatalog._get_nova_endpoint(
         common.EXAMPLE_AUTH_RESPONSE,
         nova_api_version='v2') == u'http://10.0.2.15:8773/'
 
 
 def test_get_neutron_endpoint():
-    assert KeystoneCatalog.get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
+    assert KeystoneCatalog._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
 
 
 def test_from_auth_response():
@@ -173,7 +173,7 @@ def test_ensure_auth_scope(aggregator):
         openstack_check.get_scope_for_instance(instance)
 
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token',
+        'datadog_checks.openstack.openstack.OpenStackProjectScope._request_auth_token',
         return_value=MOCK_HTTP_RESPONSE
     ):
         scope = openstack_check.ensure_auth_scope(instance)
@@ -307,7 +307,7 @@ def test_network_exclusion(*args):
 @mock.patch(
     'datadog_checks.openstack.OpenStackCheck._make_request_with_auth_fallback',
     return_value=common.MOCK_NOVA_SERVERS)
-@mock.patch('datadog_checks.openstack.OpenStackCheck.get_nova_endpoint',
+@mock.patch('datadog_checks.openstack.OpenStackCheck._get_nova_endpoint',
             return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_auth_token', return_value="test_auth_token")
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_project_name_from_id', return_value="tenant-1")
