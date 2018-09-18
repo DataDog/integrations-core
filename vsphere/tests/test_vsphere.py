@@ -343,6 +343,19 @@ def test_format_metric_name(vsphere):
         assert vsphere.format_metric_name(counter) == "group.name.{}".format(short_rollup)
 
 
+def test_collect_metrics(vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        vsphere.batch_morlist_size = 1
+        vsphere._collect_metrics_async = MagicMock()
+        vsphere._cache_metrics_metadata(instance)
+        vsphere._cache_morlist_raw(instance)
+        vsphere._process_mor_objects_queue(instance)
+        vsphere.collect_metrics(instance)
+        assert vsphere._collect_metrics_async.call_count == 6  # One for each VM/host, datacenters are not collected
+        for call_args in vsphere._collect_metrics_async.call_args_list:
+            assert len(call_args[0][1]) == 1
+
+
 def test__collect_metrics_async_compatibility(vsphere, instance):
     server_instance = vsphere._get_server_instance(instance)
     server_instance.content.perfManager.QueryPerf.return_value = [MagicMock(value=[MagicMock()])]

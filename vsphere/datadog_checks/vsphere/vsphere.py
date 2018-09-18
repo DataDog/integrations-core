@@ -832,8 +832,8 @@ class VSphereCheck(AgentCheck):
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
         # If batch_size is 0, process everything at once
         batch_size = self.batch_morlist_size or n_mors
-        query_specs = []
         for batch in self.mor_cache.mors_batch(i_key, batch_size):
+            query_specs = []
             for mor_name, mor in batch.iteritems():
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
