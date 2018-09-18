@@ -69,7 +69,6 @@ class GitlabCheck(OpenMetricsBaseCheck):
         """
         # Mapping from Prometheus metrics names to Datadog ones
         # For now it's a 1:1 mapping
-        # TODO: mark some metrics as rate
         allowed_metrics = init_config.get('allowed_metrics')
         if allowed_metrics is None:
             raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
