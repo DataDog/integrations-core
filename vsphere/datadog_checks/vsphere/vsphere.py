@@ -629,11 +629,11 @@ class VSphereCheck(AgentCheck):
             return
 
         for resource_type in RESOURCE_TYPE_METRICS:
-            query_specs = []
             # Batch size can prevent querying large payloads at once if the environment is too large
             # If batch size is set to 0, process everything at once
             batch_size = self.batch_morlist_size or self.mor_objects_queue.size(i_key, resource_type)
             while self.mor_objects_queue.size(i_key, resource_type):
+                query_specs = []
                 for _ in xrange(batch_size):
                     mor = self.mor_objects_queue.pop(i_key, resource_type)
                     if mor is None:
@@ -832,8 +832,8 @@ class VSphereCheck(AgentCheck):
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
         # If batch_size is 0, process everything at once
         batch_size = self.batch_morlist_size or n_mors
-        query_specs = []
         for batch in self.mor_cache.mors_batch(i_key, batch_size):
+            query_specs = []
             for mor_name, mor in batch.iteritems():
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
