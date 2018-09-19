@@ -1,16 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.checks import AgentCheck
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 def test_instance():
@@ -19,6 +10,13 @@ def test_instance():
     """
     AgentCheck()
 
+
+class TestMetrics:
+    def test_non_float_metric(self, aggregator):
+        check = AgentCheck()
+        metric_name = 'test_metric'
+        check.gauge(metric_name, '85k')
+        aggregator.assert_metric(metric_name, count=0)
 
 class TestTags:
     def test_default_string(self):

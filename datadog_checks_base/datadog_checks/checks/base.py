@@ -175,7 +175,13 @@ class AgentCheck(object):
                 if self.metric_limiter.is_reached(context):
                     return
 
-        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), float(value), tags, hostname)
+        try:
+            value = float(value)
+        except ValueError:
+            self.log.debug("Metric {} has non float value {}. Only float values can be submitted as metrics".format(name, value))
+            return
+
+        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
