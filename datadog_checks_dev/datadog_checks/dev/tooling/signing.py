@@ -5,7 +5,6 @@ import shutil
 
 from in_toto import runlib
 from in_toto.gpg.constants import GPG_COMMAND
-from in_toto.settings import ARTIFACT_EXCLUDE_PATTERNS
 
 from .constants import get_root
 from ..subprocess import run_command
@@ -38,10 +37,8 @@ def get_key_id(gpg_exe):
         raise Exception('Could not find private signing key on Yubikey!')
 
 
-def run_in_toto(key_id, checks):
-    exclude_patterns = list(
-        set(ARTIFACT_EXCLUDE_PATTERNS + read_gitignore_patterns())
-    )
+def run_in_toto(key_id, products):
+    exclude_patterns = read_gitignore_patterns()
 
     runlib.in_toto_run(
         # Do not record files matching these patterns.
@@ -55,13 +52,19 @@ def run_in_toto(key_id, checks):
         # Use this step name.
         name=STEP_NAME,
         # Record every source file, except for exclude_patterns, as output.
-        product_list=checks
+        product_list=products
     )
 
 
 def update_link_metadata(checks):
     root = get_root()
     ensure_dir_exists(path_join(root, LINK_DIR))
+
+    # Sign only what affects each wheel
+    products = []
+    for check in checks:
+        products.append(path_join(check, 'datadog_checks'))
+        products.append(path_join(check, 'setup.py'))
 
     key_id = get_key_id(GPG_COMMAND)
 
@@ -77,7 +80,7 @@ def update_link_metadata(checks):
     metadata_file_tracker = path_join(LINK_DIR, 'LATEST')
 
     with chdir(root):
-        run_in_toto(key_id, checks)
+        run_in_toto(key_id, products)
 
         # Tell pipeline which tag link metadata to use.
         write_file(metadata_file_tracker, tag_link)
