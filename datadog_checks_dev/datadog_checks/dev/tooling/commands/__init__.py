@@ -9,7 +9,7 @@ from .manifest import manifest
 from .meta import meta
 from .release import release
 from .test import test
-from .validate import validate
+from .metadata import metadata
 
 ALL_COMMANDS = (
     clean,
@@ -20,5 +20,5 @@ ALL_COMMANDS = (
     meta,
     release,
     test,
-    validate,
+    metadata,
 )
