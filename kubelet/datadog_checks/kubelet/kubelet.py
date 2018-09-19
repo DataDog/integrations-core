@@ -96,6 +96,12 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 'kubelet_runtime_operations': 'kubelet.runtime.operations',
                 'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
                 'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+                'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
+                'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
+                'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
+                'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
+                'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
+                'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
             }],
             # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
             'send_monotonic_counter': instance.get('send_monotonic_counter', False),
