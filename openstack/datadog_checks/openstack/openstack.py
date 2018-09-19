@@ -1316,7 +1316,7 @@ class OpenStackCheck(AgentCheck):
             return r['projects']
 
         except Exception as e:
-            self.warning('Unable to get projects: {}}'.format(str(e)))
+            self.warning('Unable to get projects: {}'.format(str(e)))
             raise e
 
         return None
