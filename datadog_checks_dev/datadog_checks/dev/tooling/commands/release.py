@@ -12,13 +12,15 @@ from six import StringIO, iteritems
 
 from .dep import freeze as dep_freeze
 from .utils import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting,
+    echo_warning
 )
 from ..constants import (
     AGENT_REQ_FILE, AGENT_V5_ONLY, CHANGELOG_TYPE_NONE, get_root
 )
 from ..git import (
-    get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
+    get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
+    git_show_file
 )
 from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash
 from ..release import (
@@ -28,7 +30,7 @@ from ..release import (
 from ..trello import TrelloClient
 from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
-    get_version_string, format_commit_id, parse_pr_number
+    get_version_string, format_commit_id, parse_pr_number, parse_agent_req_file
 )
 from ...structures import EnvVars
 from ...subprocess import run_command
@@ -91,7 +93,7 @@ def ready(ctx, quiet):
         target_tag = get_release_tag_string(target, cur_version)
 
         # get the diff from HEAD
-        diff_lines = get_diff(target, target_tag)
+        diff_lines = get_commits_since(target, target_tag)
 
         # get the number of PRs that could be potentially released
         # Only show the ones that have a changelog label that isn't no-changelog
@@ -156,7 +158,7 @@ def changes(ctx, check, dry_run):
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_diff(check, target_tag)
+    diff_lines = get_commits_since(check, target_tag)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
@@ -598,7 +600,7 @@ def changelog(ctx, check, version, old_version, quiet, dry_run):
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_diff(check, target_tag)
+    diff_lines = get_commits_since(check, target_tag)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
@@ -756,3 +758,27 @@ def freeze(ctx, no_deps):
 
     if not no_deps:
         ctx.invoke(dep_freeze)
+
+
+@release.command(
+    context_settings=CONTEXT_SETTINGS,
+    short_help="Provide a global changelog for a given an agent version"
+)
+@click.argument('tag_from')
+@click.argument('tag_to', required=False)
+@click.option('--quiet', '-q', is_flag=True)
+@click.option('--dry-run', '-n', is_flag=True)
+@click.pass_context
+def agent_changelog(ctx, tag_from, tag_to, quiet, dry_run):
+    """FIXME"""
+    # req_file = AGENT_REQ_FILE
+    contents_from = git_show_file(AGENT_REQ_FILE, tag_from)
+    catalog_from = parse_agent_req_file(contents_from)
+
+    contents_to = git_show_file(AGENT_REQ_FILE, tag_to or 'HEAD')
+    catalog_to = parse_agent_req_file(contents_to)
+
+    for name, ver in catalog_to.iteritems():
+        old_ver = catalog_from.get(name)
+        if old_ver != ver:
+            print("Check:{}, cur:{}, was:{}".format(name, ver, old_ver))

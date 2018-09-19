@@ -6,7 +6,7 @@ from .config import config
 from .create import create
 from .dep import dep
 from .manifest import manifest
-from .release import release
+from .release import release, agent_changelog
 from .test import test
 
 ALL_COMMANDS = (
@@ -17,4 +17,5 @@ ALL_COMMANDS = (
     manifest,
     release,
     test,
+    agent_changelog,
 )
