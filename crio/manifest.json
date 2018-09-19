@@ -6,7 +6,7 @@
   "creates_events": false,
   "display_name": "CRI-O",
   "guid": "6eb96c6a-3e2d-4236-9387-fa3b0c455336",
-  "is_public": true,
+  "is_public": false,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "crio.",
