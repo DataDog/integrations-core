@@ -3,23 +3,22 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Integrations Core's API docs
-============================
+Integrations Core API docs
+==========================
 
-.. warning:: For more general developer docs, how-to guides and examples, please see the
-             `Official Documentation website <https://docs.datadoghq.com/developers/>`_.
+.. warning:: For more general developer docs, how-to guides, and examples, please see the
+             `official Datadog documentation website <https://docs.datadoghq.com/developers/>`_.
 
 
 The Datadog Check Toolkit
 -------------------------
 
-The :ref:`datadog_checks` toolkit provides a set of functionalities used by any Agent based Integration.
-In particular it provides:
+The :ref:`datadog_checks` toolkit provides a set of functionalities used by any Agent based Integration:
 
-* :meth:`datadog_checks.checks.base.AgentCheck`, the base class every Agent based Integration derives from.
+* :meth:`datadog_checks.checks.base.AgentCheck`, the base class that every Agent-based Integration is derived from.
 * :ref:`Prometheus <prometheus>` and :ref:`OpenMetrics <openmetrics>` facilities.
 * Boilerplate code implementing common operations.
-* A testing framework used to run tests without the need of a running Agent.
+* A testing framework that can be used independently of the Agent.
 
 
 Table of Contents
