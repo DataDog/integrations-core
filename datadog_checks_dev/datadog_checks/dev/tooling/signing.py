@@ -38,7 +38,7 @@ def get_key_id(gpg_exe):
         raise Exception('Could not find private signing key on Yubikey!')
 
 
-def run_in_toto(key_id, check=None):
+def run_in_toto(key_id, checks):
     exclude_patterns = list(
         set(ARTIFACT_EXCLUDE_PATTERNS + read_gitignore_patterns())
     )
@@ -55,11 +55,11 @@ def run_in_toto(key_id, check=None):
         # Use this step name.
         name=STEP_NAME,
         # Record every source file, except for exclude_patterns, as output.
-        product_list=[check or '.']
+        product_list=checks
     )
 
 
-def update_link_metadata(check=None):
+def update_link_metadata(checks):
     root = get_root()
     ensure_dir_exists(path_join(root, LINK_DIR))
 
@@ -77,7 +77,7 @@ def update_link_metadata(check=None):
     metadata_file_tracker = path_join(LINK_DIR, 'LATEST')
 
     with chdir(root):
-        run_in_toto(key_id, check)
+        run_in_toto(key_id, checks)
 
         # Tell pipeline which tag link metadata to use.
         write_file(metadata_file_tracker, tag_link)

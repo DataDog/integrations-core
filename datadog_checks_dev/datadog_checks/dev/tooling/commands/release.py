@@ -574,7 +574,7 @@ def make(ctx, check, version):
         if not releasing_all:
             echo_waiting('Updating release metadata...')
             echo_info('Please touch your Yubikey immediately after entering your PIN!')
-            metadata_files = update_link_metadata(check)
+            metadata_files = update_link_metadata(checks)
 
             commit_targets.extend(metadata_files)
 
@@ -589,7 +589,7 @@ def make(ctx, check, version):
     if releasing_all:
         echo_waiting('Updating release metadata...')
         echo_info('Please touch your Yubikey immediately after entering your PIN!')
-        commit_targets = update_link_metadata()
+        commit_targets = update_link_metadata(checks)
 
         git_commit(commit_targets, 'Update release metadata', force=True)
 
