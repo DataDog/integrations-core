@@ -1,15 +1,6 @@
 datadog\_checks.utils
 =====================
 
-Subpackages
------------
-
-.. toctree::
-    :maxdepth: 3
-
-    datadog_checks.utils.prometheus
-
-
 datadog\_checks.utils.common
 ----------------------------
 

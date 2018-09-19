@@ -16,6 +16,16 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../datadog_checks_base'))
 
+autodoc_mock_imports = [
+    'prometheus_client',
+    'six.moves',
+    'winreg',
+    'win32wnet',
+    'win32pdh',
+    'win32com',
+    'pythoncom',
+    'pywintypes',
+]
 
 # -- Project information -----------------------------------------------------
 

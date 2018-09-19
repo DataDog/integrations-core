@@ -1,3 +1,5 @@
+.. _prometheus:
+
 datadog\_checks.checks.prometheus
 =================================
 

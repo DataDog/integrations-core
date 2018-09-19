@@ -16,9 +16,10 @@ The Datadog Check Toolkit
 The :ref:`datadog_checks` toolkit provides a set of functionalities used by any Agent based Integration.
 In particular it provides:
 
-* a set of base classes every Agent based Integration derives from
-* boilerplate code implementing common operations
-* a testing framework used to run tests without the need of a running Agent
+* :meth:`datadog_checks.checks.base.AgentCheck`, the base class every Agent based Integration derives from.
+* :ref:`Prometheus <prometheus>` and :ref:`OpenMetrics <openmetrics>` facilities.
+* Boilerplate code implementing common operations.
+* A testing framework used to run tests without the need of a running Agent.
 
 
 Table of Contents
