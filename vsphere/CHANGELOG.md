@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 3.3.1 / 2018-09-19
+
+* [Fixed] Fix batch implementation logic. See [#2265](https://github.com/DataDog/integrations-core/pull/2265).
+
 ## 3.3.0 / 2018-09-17
 
 * [Added]  Add ability to filter metrics by collection level. See [#2226](https://github.com/DataDog/integrations-core/pull/2226).
