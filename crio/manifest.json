@@ -1,7 +1,6 @@
 {
   "categories": [
-    "web",
-    "network"
+    "containers"
   ],
   "creates_events": false,
   "display_name": "CRI-O",
