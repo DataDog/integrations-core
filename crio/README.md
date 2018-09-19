@@ -27,7 +27,7 @@ The integration relies on the `--enable-metrics` option of CRI-O that is disable
 ### Metrics
 
 CRI-O collect metrics about the count and latency of operations that are done by the runtime.
-We're also collecting
+We're also collecting CPU and memory usage of CRI-O golang binary itself.
 
 ### Service Checks
 
