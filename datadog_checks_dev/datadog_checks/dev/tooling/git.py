@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 from .constants import get_root
 from .utils import parse_pr_number
@@ -100,3 +101,16 @@ def git_tag(tag_name, push=False):
             return run_command('git push origin {}'.format(tag_name))
 
         return result
+
+
+def git_tag_list(pattern=None):
+    with chdir(get_root()):
+        result = run_command('git tag', capture=True).stdout
+        result = result.splitlines()
+
+    if not pattern:
+        return result
+
+    regex = re.compile(pattern)
+    return filter(regex.search, result)
+

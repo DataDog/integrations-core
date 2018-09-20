@@ -20,7 +20,7 @@ from ..constants import (
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
-    git_show_file
+    git_show_file, git_tag_list
 )
 from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash
 from ..release import (
@@ -762,23 +762,80 @@ def freeze(ctx, no_deps):
 
 @release.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help="Provide a global changelog for a given an agent version"
+    short_help="Provide a list of the updated checks on a given agent version, in changelog form"
 )
-@click.argument('tag_from')
-@click.argument('tag_to', required=False)
-@click.option('--quiet', '-q', is_flag=True)
-@click.option('--dry-run', '-n', is_flag=True)
+@click.option('--since', help="Initial Agent version", default='6.3.0')
+@click.option('--to', help="Final Agent version")
+@click.option('--output', '-o', help="Path to the changelog file, if omitted contents will be printed to stdout")
+@click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
 @click.pass_context
-def agent_changelog(ctx, tag_from, tag_to, quiet, dry_run):
-    """FIXME"""
-    # req_file = AGENT_REQ_FILE
-    contents_from = git_show_file(AGENT_REQ_FILE, tag_from)
-    catalog_from = parse_agent_req_file(contents_from)
+def agent_changelog(ctx, since, to, output, force):
+    """
+    FIXME
+    """
+    agent_tags = git_tag_list(r'^\d+\.\d+\.\d+$')
 
-    contents_to = git_show_file(AGENT_REQ_FILE, tag_to or 'HEAD')
-    catalog_to = parse_agent_req_file(contents_to)
+    # default value for --to is the latest tag
+    if not to:
+        to = agent_tags[-1]
 
-    for name, ver in catalog_to.iteritems():
-        old_ver = catalog_from.get(name)
-        if old_ver != ver:
-            print("Check:{}, cur:{}, was:{}".format(name, ver, old_ver))
+    # filter out versions according to the interval [since, to]
+    agent_tags = [t for t in agent_tags if t >= since and t <= to]
+
+    # reverse so we have descendent order
+    agent_tags = agent_tags[::-1]
+
+    # store the changes in a mapping {agent_version --> {check_name --> current_version}}
+    changes_per_agent = OrderedDict()
+
+    for i in range(1, len(agent_tags)):
+        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i-1])
+        catalog_from = parse_agent_req_file(contents_from)
+
+        contents_to = git_show_file(AGENT_REQ_FILE, agent_tags[i])
+        catalog_to = parse_agent_req_file(contents_to)
+
+        changes = OrderedDict()
+        changes_per_agent[agent_tags[i]] = changes
+
+        for name, ver in catalog_to.iteritems():
+            old_ver = catalog_from.get(name, "")
+            if old_ver != ver:
+                # determine whether major version changed
+                breaking = old_ver.split('.')[0] < ver.split('.')[0]
+                changes[name] = (ver, breaking)
+
+    # store the changelog in memory
+    changelog = StringIO()
+
+    # prepare the links
+    agent_changelog_url = 'https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#{}'
+    check_changelog_url = 'https://github.com/DataDog/integrations-core/blob/master/{}/CHANGELOG.md'
+
+    # go through all the agent releases
+    for agent, changes in changes_per_agent.iteritems():
+        url = agent_changelog_url.format(agent)
+        changelog.write('## Datadog Agent [{}]({})\n\n'.format(agent, url))
+
+        if not changes:
+            changelog.write('* There were no check updates for this version of the Agent.\n\n')
+        else:
+            for name, ver in changes.iteritems():
+                breaking_notice = "This is a breaking change." if ver[1] else ""
+                changelog_url = check_changelog_url.format(name)
+                changelog.write('* {} [{}]({}). {}\n'.format(name, ver[0], changelog_url, breaking_notice))
+            # add an extra line to separate the release block
+            changelog.write('\n')
+
+    # save the changelog on disk if --output was passed
+    if output:
+        # don't overwrite an existing file
+        if os.path.exists(output) and not force:
+            msg = "Output file {} already exists, run the command again with --force to overwrite"
+            echo_failure(msg.format(output))
+            abort()
+
+        with open(output, 'w') as f:
+            f.write(changelog.getvalue())
+    else:
+        echo_info(changelog.getvalue())

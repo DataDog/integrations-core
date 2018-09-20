@@ -136,7 +136,13 @@ def parse_agent_req_file(contents):
     """
     catalog = OrderedDict()
     for line in contents.splitlines():
-        name, other = line.split('==', 1)
+        toks = line.split('==', 1)
+        if len(toks) != 2 or not toks[0] or not toks[1]:
+            # if we get here, the requirements file is garbled but let's stay
+            # resilient
+            continue
+
+        name, other = toks
         version = other.split(';')
         catalog[name] = version[0]
 
