@@ -422,7 +422,8 @@ Usage: ddev release make [OPTIONS] CHECK [VERSION]
     - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
 
 Options:
-  -h, --help  Show this message and exit.
+  --skip-sign  Skip the signing of release metadata
+  -h, --help   Show this message and exit.
 ```
 
 ##### Show

@@ -493,8 +493,9 @@ def tag(check, version, push, dry_run):
 )
 @click.argument('check')
 @click.argument('version', required=False)
+@click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.pass_context
-def make(ctx, check, version):
+def make(ctx, check, version, skip_sign):
     """Perform a set of operations needed to release a single check:
 
     \b
@@ -571,7 +572,7 @@ def make(ctx, check, version):
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
             echo_success('success!')
 
-        if not releasing_all:
+        if not skip_sign and not releasing_all:
             echo_waiting('Updating release metadata...')
             echo_info('Please touch your Yubikey immediately after entering your PIN!')
             metadata_files = update_link_metadata(checks)
@@ -586,7 +587,7 @@ def make(ctx, check, version):
         # Reset version
         version = None
 
-    if releasing_all:
+    if not skip_sign and releasing_all:
         echo_waiting('Updating release metadata...')
         echo_info('Please touch your Yubikey immediately after entering your PIN!')
         commit_targets = update_link_metadata(checks)
