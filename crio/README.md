@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Crio][1].
+This check monitors [CRI-O][1].
 
 ## Setup
 
@@ -13,7 +13,7 @@ The integration relies on the `--enable-metrics` option of CRI-O that is disable
 ### Configuration
 
 1. Edit the `crio.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your crio performance data.
+   Agent's configuration directory to start collecting your CRI-O performance data.
    See the [sample crio.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -35,13 +35,13 @@ CRI-O includes a service check about the reachability of the metrics endpoint.
 
 ### Events
 
-Crio does not include any events.
+CRI-O does not include any events.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog Support][6].
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: http://cri-o.io/
 [3]: https://github.com/DataDog/integrations-core/blob/master/crio/datadog_checks/crio/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
