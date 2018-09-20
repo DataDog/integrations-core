@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import time
+import json
 from collections import OrderedDict, namedtuple
 from datetime import datetime
 
@@ -36,7 +37,7 @@ from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
     basepath, chdir, ensure_unicode, get_next, remove_path, stream_file_lines,
-    write_file, write_file_lines
+    write_file, write_file_lines, read_file
 )
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
@@ -771,7 +772,14 @@ def freeze(ctx, no_deps):
 @click.pass_context
 def agent_changelog(ctx, since, to, output, force):
     """
-    FIXME
+    Generates a markdown file containing the list of checks that changed for a
+    given Agent release. Agent version numbers are derived inspecting tags on
+    `integrations-core` so running this tool might provide unexpected results
+    if the repo is not up to date with the Agent release process.
+
+    If neither `--since` or `--to` are passed (the most common use case), the
+    tool will generate the whole changelog since Agent version 6.3.0
+    (before that point we don't have enough informations to build the log).
     """
     agent_tags = git_tag_list(r'^\d+\.\d+\.\d+$')
 
@@ -818,12 +826,20 @@ def agent_changelog(ctx, since, to, output, force):
         changelog.write('## Datadog Agent version [{}]({})\n\n'.format(agent, url))
 
         if not changes:
-            changelog.write('* There were no check updates for this version of the Agent.\n\n')
+            changelog.write('* There were no integration updates for this version of the Agent.\n\n')
         else:
             for name, ver in changes.iteritems():
+                # get the "display name" for the check
+                manifest_file = os.path.join(get_root(), name, 'manifest.json')
+                if os.path.exists(manifest_file):
+                    decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
+                    display_name = decoded.get('display_name')
+                else:
+                    display_name = name
+
                 breaking_notice = " **BREAKING CHANGE** " if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)
-                changelog.write('* {} [{}]({}){}\n'.format(name, ver[0], changelog_url, breaking_notice))
+                changelog.write('* {} [{}]({}){}\n'.format(display_name, ver[0], changelog_url, breaking_notice))
             # add an extra line to separate the release block
             changelog.write('\n')
 
@@ -835,7 +851,6 @@ def agent_changelog(ctx, since, to, output, force):
             echo_failure(msg.format(output))
             abort()
 
-        with open(output, 'w') as f:
-            f.write(changelog.getvalue())
+        write_file(output, changelog.getvalue())
     else:
         echo_info(changelog.getvalue())
