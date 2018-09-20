@@ -33,7 +33,7 @@ embedded into the Datadog Agent. This presents a paradigm change in the way we w
 be delivering standalone integration upgrades, moving away from OS-specific packages
 to idiomatic Python package delivery.
 
-## Quick Start
+## Contributing
 
 Working with integrations is easy, the main page of the [development docs][6]
 contains all the info you need to get your dev enviroment up and running in minutes
