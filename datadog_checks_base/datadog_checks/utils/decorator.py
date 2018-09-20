@@ -4,8 +4,9 @@
 
 from ..config import is_affirmative
 from ddtrace import tracer
-from functools import wraps
-from inspect import getargspec
+
+import wrapt
+
 
 try:
     import datadog_agent
@@ -13,22 +14,16 @@ except ImportError:
     # Integration Tracing is only available with Agent 6
     datadog_agent = None
 
-def add_tracing(func):
-    @wraps(func)
-    def function_wrapper(*args, **kwargs):
-        if datadog_agent is None:
-            return func(*args, **kwargs)
+@wrapt.decorator
+def traced(wrapped, instance, args, kwargs):
+    if datadog_agent is None:
+        return wrapped(*args, **kwargs)
 
-        # Get instance config to see if tracing is enabled
-        try:
-            instance_index = getargspec(func).args.index('instance')
-        except ValueError:
-            return func(*args, **kwargs)
-        if (
-            is_affirmative(args[instance_index].get('trace_check', False))
-            and is_affirmative(datadog_agent.get_config('integration_tracing', False))
-        ):
-            with tracer.trace('integration.check', service='integrations-tracing', resource=args[0].name):
-                return func(*args, **kwargs)
-        return func(*args, **kwargs)
-    return function_wrapper
+    trace_check = any(t.get('trace_check') for t in args)
+    integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
+
+    if integration_tracing and trace_check:
+        with tracer.trace('integration.check', service='integrations-tracing', resource=instance.name):
+            return wrapped(*args, **kwargs)
+
+    return wrapped(*args, **kwargs)
