@@ -1,11 +1,11 @@
-## Datadog Agent [6.5.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#650)
+## Datadog Agent version [6.5.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#650)
 
 * datadog_checks_base [2.2.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 * ecs_fargate [1.2.1](https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/CHANGELOG.md)
 * postgres [2.2.1](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
 * vsphere [3.1.0](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
 
-## Datadog Agent [6.4.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#642)
+## Datadog Agent version [6.4.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#642)
 
 * active_directory [1.1.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
 * activemq_xml [1.0.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
@@ -96,15 +96,15 @@
 * yarn [1.3.0](https://github.com/DataDog/integrations-core/blob/master/yarn/CHANGELOG.md)
 * zk [1.2.0](https://github.com/DataDog/integrations-core/blob/master/zk/CHANGELOG.md)
 
-## Datadog Agent [6.4.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#641)
+## Datadog Agent version [6.4.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#641)
 
 * There were no check updates for this version of the Agent.
 
-## Datadog Agent [6.4.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#640)
+## Datadog Agent version [6.4.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#640)
 
 * There were no check updates for this version of the Agent.
 
-## Datadog Agent [6.3.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#633)
+## Datadog Agent version [6.3.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#633)
 
 * cacti [1.1.0](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
 * cassandra_nodetool [0.1.1](https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/CHANGELOG.md)
@@ -125,15 +125,15 @@
 * tcp_check [2.0.0](https://github.com/DataDog/integrations-core/blob/master/tcp_check/CHANGELOG.md)
 * vsphere [2.1.0](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
 
-## Datadog Agent [6.3.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#632)
+## Datadog Agent version [6.3.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#632)
 
 * There were no check updates for this version of the Agent.
 
-## Datadog Agent [6.3.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#631)
+## Datadog Agent version [6.3.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#631)
 
 * There were no check updates for this version of the Agent.
 
-## Datadog Agent [6.3.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#630)
+## Datadog Agent version [6.3.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#630)
 
 * http_check [2.1.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * kubelet [1.3.1](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md)
