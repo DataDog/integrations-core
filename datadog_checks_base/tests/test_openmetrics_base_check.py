@@ -7,13 +7,12 @@ def test_rate_override():
         'metrics': [{"test_rate": "test.rate"}],
         'type_overrides': {"test_rate": "rate"}
     }
-    expected_type_overrides = {"test_rate": "gauge"}
+    expected_type_overrides = {"test_rate": "rate"}
 
     check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance], default_namespace="foo")
 
     processed_type_overrides = check.config_map[endpoint]['type_overrides']
     assert expected_type_overrides == processed_type_overrides
-    assert ["test_rate"] == check.config_map[endpoint]['rate_metrics']
 
 
 def test_timeout_override():

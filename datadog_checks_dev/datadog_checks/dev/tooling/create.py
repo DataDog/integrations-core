@@ -92,19 +92,20 @@ def create_template_files(template_name, new_root, config, read=False):
 
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
-            template_path = path_join(root, template_file)
+            if not template_file.endswith(('.pyc', '.pyo')):
+                template_path = path_join(root, template_file)
 
-            file_path = template_path.replace(template_root, '')
-            file_path = '{}{}'.format(new_root, file_path.format(**config))
+                file_path = template_path.replace(template_root, '')
+                file_path = '{}{}'.format(new_root, file_path.format(**config))
 
-            files.append(
-                File(
-                    file_path,
-                    template_path,
-                    config,
-                    read=read
+                files.append(
+                    File(
+                        file_path,
+                        template_path,
+                        config,
+                        read=read
+                    )
                 )
-            )
 
     return files
 

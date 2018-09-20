@@ -1,0 +1,50 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+coredns.response_code_count,gauge,,,,number of responses per zone and rcode,1,coredns,response code
+coredns.proxy_request_count,gauge,,request,,query count per upstream.,1,coredns,proxy request count
+coredns.cache_hits_count,gauge,,hit,,Counter of cache hits by cache type,1,coredns,cache hit
+coredns.cache_misses_count,gauge,,miss,,Counter of cache misses.,1,coredns,cache miss
+coredns.request_count,gauge,,request,,total query count.,1,coredns,request count
+coredns.request_type_count,gauge,,,,counter of queries per zone and type,1,coredns,request type
+coredns.request_duration.seconds.sum,gauge,,second,,duration to process each query,-1,coredns,proxy request duration
+coredns.request_duration.seconds.count,count,,second,,duration to process each query,-1,coredns,request duration
+coredns.proxy_request_duration.seconds.sum,gauge,,second,,duration per upstream interaction,-1,coredns,proxy request duration
+coredns.proxy_request_duration.seconds.count,count,,second,,duration per upstream interaction,-1,coredns,proxy request duration
+coredns.request_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,coredns,request size
+coredns.request_size.bytes.count,count,,byte,,size of the request in bytes,0,coredns,request size
+coredns.response_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,coredns,response size
+coredns.response_size.bytes.count,count,,byte,,size of the request in bytes,0,coredns,response size
+coredns.cache_size.count,count,,entry,,,1,coredns,cache size
+coredns.go.gc_duration_seconds.count,gauge,,second,,Count of the GC invocation durations.,0,coredns,
+coredns.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation durations.,0,coredns,
+coredns.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,coredns,
+coredns.go.info,gauge,,,,Information about the Go environment.,0,coredns,
+coredns.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,coredns,
+coredns.go.memstats.alloc_bytes_total,gauge,,byte,,Total number of bytes allocated even if freed.,0,coredns,
+coredns.go.memstats.buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table.,0,coredns,bytes used by profiling
+coredns.go.memstats.frees_total,gauge,,,,Total number of frees.,0,coredns,
+coredns.go.memstats.gc_cpu_fraction,gauge,,percent,,CPU taken up by GC,0,coredns,CPU taken up by gc
+coredns.go.memstats.gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata.,0,coredns,
+coredns.go.memstats.heap_alloc_bytes,gauge,,byte,,Bytes allocated to the heap,0,coredns,
+coredns.go.memstats.heap_idle_bytes,gauge,,byte,,Number of idle bytes in the heap,0,coredns,
+coredns.go.memstats.heap_inuse_bytes,gauge,,byte,,Number of Bytes in the heap,0,coredns,
+coredns.go.memstats.heap_objects,gauge,,object,,Number of objects in the heap,0,coredns,
+coredns.go.memstats.heap_released_bytes,gauge,,byte,,Number of bytes released to the system in the last gc,0,coredns,
+coredns.go.memstats.heap_sys_bytes,gauge,,byte,,Number of bytes used by the heap,0,coredns,
+coredns.go.memstats.last_gc_time_seconds,gauge,,second,,Length of last GC,0,coredns,gc time
+coredns.go.memstats.lookups_total,gauge,,operation,,Number of lookups,0,coredns,lookups total
+coredns.go.memstats.mallocs_total,gauge,,operation,,Number of mallocs,0,coredns,mallocs total
+coredns.go.memstats.mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures.,0,coredns,
+coredns.go.memstats.mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system.,0,coredns,
+coredns.go.memstats.mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures.,0,coredns,
+coredns.go.memstats.mspan_sys_bytes,gauge,,byte,,Number of bytes used for mspan structures obtained from system.,0,coredns,
+coredns.go.memstats.next_gc_bytes,gauge,,byte,,Number of heap bytes when next garbage collection will take place,0,coredns,
+coredns.go.memstats.other_sys_bytes,gauge,,byte,,Number of bytes used for other system allocations,0,coredns,
+coredns.go.memstats.stack_inuse_bytes,gauge,,byte,,Number of bytes in use by the stack allocator,0,coredns,
+coredns.go.memstats.stack_sys_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,coredns,
+coredns.go.memstats.sys_bytes,gauge,,byte,,Number of bytes obtained from system,0,coredns,
+coredns.go.threads,gauge,,thread,,Number of OS threads created.,0,coredns,
+coredns.process.max_fds,gauge,,file,,Maximum number of open file descriptors.,0,coredns,
+coredns.process.open_fds,gauge,,file,,Number of open file descriptors.,0,coredns,
+coredns.process.resident_memory_bytes,gauge,,byte,,Resident memory size in bytes.,0,coredns,
+coredns.process.start_time_seconds,gauge,,second,,Start time of the process since unix epoch in seconds.,0,coredns,
+coredns.process.virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes.,0,coredns,

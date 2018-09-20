@@ -1,5 +1,14 @@
 # CHANGELOG - sqlserver
 
+## 1.6.0 / 2018-09-04
+
+* [Added] Support higher query granularity. See [#2017](https://github.com/DataDog/integrations-core/pull/2017).
+* [Added] Add ability to support (via configuration flag) the newer ADO provider. See [#1673](https://github.com/DataDog/integrations-core/pull/1673).
+* [Fixed] Stop leaking db password when a connection is not in the pool. See [#2031](https://github.com/DataDog/integrations-core/pull/2031).
+* [Fixed] Bump pyro4 and serpent dependencies. See [#2007](https://github.com/DataDog/integrations-core/pull/2007).
+* [Fixed] Fix for case sensitivity in the `proc_type_mapping` dict.. See [#1860](https://github.com/DataDog/integrations-core/pull/1860).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.5.0 / 2018-06-20
 
 * [Added] support object_name metric identifiers. See [#1679](https://github.com/DataDog/integrations-core/pull/1679).

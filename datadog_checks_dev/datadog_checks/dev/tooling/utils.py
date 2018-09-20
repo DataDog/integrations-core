@@ -5,10 +5,12 @@ import json
 import os
 import re
 from ast import literal_eval
+from collections import OrderedDict
 
 import requests
+import semver
 
-from .constants import get_root
+from .constants import VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
 
 # match something like `(#1234)` and return `1234` in a group
@@ -68,7 +70,7 @@ def string_to_toml_type(s):
 
 
 def get_version_file(check_name):
-    if check_name in ('datadog_checks_base', 'datadog_checks_test_helper'):
+    if check_name == 'datadog_checks_base':
         return os.path.join(get_root(), check_name, 'datadog_checks', '__about__.py')
     elif check_name == 'datadog_checks_dev':
         return os.path.join(get_root(), check_name, 'datadog_checks', 'dev', '__about__.py')
@@ -109,3 +111,39 @@ def load_manifest(check_name):
     if file_exists(manifest_path):
         return json.loads(read_file(manifest_path))
     return {}
+
+
+def get_bump_function(changelog_types):
+    minor_bump = False
+
+    for changelog_type in changelog_types:
+        bump_function = VERSION_BUMP.get(changelog_type)
+        if bump_function is semver.bump_major:
+            return bump_function
+        elif bump_function is semver.bump_minor:
+            minor_bump = True
+
+    return semver.bump_minor if minor_bump else semver.bump_patch
+
+
+def parse_agent_req_file(contents):
+    """
+    Returns a dictionary mapping {check_name --> pinned_version} from the
+    given file contents. We can assume lines are in the form:
+
+        active_directory==1.1.1; sys_platform == 'win32'
+
+    """
+    catalog = OrderedDict()
+    for line in contents.splitlines():
+        toks = line.split('==', 1)
+        if len(toks) != 2 or not toks[0] or not toks[1]:
+            # if we get here, the requirements file is garbled but let's stay
+            # resilient
+            continue
+
+        name, other = toks
+        version = other.split(';')
+        catalog[name] = version[0]
+
+    return catalog

@@ -4,9 +4,9 @@
 #
 #    pip-compile --generate-hashes --output-file requirements.txt requirements.in
 #
-certifi==2018.4.16 \
-    --hash=sha256:13e698f54293db9f89122b0581843a782ad0934a4fe0172d2a980ba77fc61bb7 \
-    --hash=sha256:9fa520c1bacfb634fa7af20a76bcbd3d5fb390481724c597da32c719a7dca4b0 \
+certifi==2018.8.24 \
+    --hash=sha256:376690d6f16d32f9d1fe8932551d80b23e9d393a8578c5633a2ed39a64861638 \
+    --hash=sha256:456048c7e371c089d0a77a5212fb37a2c2dce1e24146e3b7e0261736aaeaa22a \
     # via requests
 chardet==3.0.4 \
     --hash=sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae \
@@ -16,8 +16,8 @@ idna==2.7 \
     --hash=sha256:156a6814fb5ac1fc6850fb002e0852d56c0c8d2531923a51032d1b70760e186e \
     --hash=sha256:684a38a6f903c1d71d6d5fac066b58d7768af4de2b832e426ec79c30daa94a16 \
     # via requests
-pyvmomi==6.0.0 \
-    --hash=sha256:bc87e4d38584d0c1ace212486e100d6d70707697e4a427002725fd4f34d45cdc
+pyvmomi==v6.5.0.2017.5-1 \
+    --hash=sha256:c28292594281901e894c39a0c06b4126a9c019b3d804c47fb116472299dbb42d
 requests==2.19.1 \
     --hash=sha256:63b52e3c866428a224f97cab011de738c36aec0185aa91cfacd418b5d58911d1 \
     --hash=sha256:ec22d826a36ed72a7358ff3fe56cbd4ba69dd7a6718ffd450ff0e9df7a47ce6a \

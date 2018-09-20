@@ -1,5 +1,11 @@
 # CHANGELOG - process
 
+## 1.4.0 / 2018-09-04
+
+* [Added] Added regex support to process check when exact_match is False.. See [#2055](https://github.com/DataDog/integrations-core/pull/2055). Thanks [asandeep](https://github.com/asandeep).
+* [Added] [Add] Add cpu.normalized_pct metric. See [#1729](https://github.com/DataDog/integrations-core/pull/1729).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.3.0 / 2018-02-13
 
 * [FEATURE] Add option to use sudo for privileged process checks on file descriptors. See [#1530][], thanks [@pdecat][].

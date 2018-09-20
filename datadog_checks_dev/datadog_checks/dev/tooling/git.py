@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 from .constants import get_root
 from .utils import parse_pr_number
@@ -47,16 +48,27 @@ def parse_pr_numbers(git_log_lines):
     return prs
 
 
-def get_diff(check_name, target_tag):
+def get_commits_since(check_name, target_tag):
     """
-    Get the git diff from HEAD for the given check
+    Get the list of commits from `target_tag` to `HEAD` for the given check
     """
     root = get_root()
     target_path = os.path.join(root, check_name)
     command = 'git log --pretty=%s {}... {}'.format(target_tag, target_path)
 
     with chdir(root):
-        return run_command(command, capture='out').stdout.splitlines()
+        return run_command(command, capture=True).stdout.splitlines()
+
+
+def git_show_file(path, ref):
+    """
+    Return the contents of a file at a given tag
+    """
+    root = get_root()
+    command = 'git show {}:{}'.format(ref, path)
+
+    with chdir(root):
+        return run_command(command, capture=True).stdout
 
 
 def git_commit(targets, message):
@@ -81,7 +93,7 @@ def git_tag(tag_name, push=False):
     Tag the repo using an annotated tag.
     """
     with chdir(get_root()):
-        result = run_command('git tag -a {} -m "{}"'.format(tag_name, tag_name))
+        result = run_command('git tag -a {} -m "{}"'.format(tag_name, tag_name), capture=True)
 
         if push:
             if result.code != 0:
@@ -89,3 +101,19 @@ def git_tag(tag_name, push=False):
             return run_command('git push origin {}'.format(tag_name))
 
         return result
+
+
+def git_tag_list(pattern=None):
+    """
+    Return a list of all the tags in the git repo matching a regex passed in
+    `pattern`. If `pattern` is None, return all the tags.
+    """
+    with chdir(get_root()):
+        result = run_command('git tag', capture=True).stdout
+        result = result.splitlines()
+
+    if not pattern:
+        return result
+
+    regex = re.compile(pattern)
+    return filter(regex.search, result)

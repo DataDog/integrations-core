@@ -5,12 +5,15 @@
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 from .common import HOST, CONFIG, BAD_CONFIG, GITLAB_RUNNER_TAGS, CUSTOM_TAGS, ALLOWED_METRICS
 
+import pytest
+from requests.exceptions import ConnectionError
+
 
 def test_check(aggregator):
     """
     Basic Test for gitlab integration.
     """
-    gitlab_runner = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], {})
+    gitlab_runner = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], {}, instances=CONFIG['instances'])
 
     gitlab_runner.check(CONFIG['instances'][0])
 
@@ -40,14 +43,10 @@ def test_connection_failure(aggregator):
     Make sure we're failing when the URL isn't right
     """
 
-    gitlab_runner = GitlabRunnerCheck('gitlab', BAD_CONFIG['init_config'], {})
+    gitlab_runner = GitlabRunnerCheck('gitlab', BAD_CONFIG['init_config'], {}, instances=BAD_CONFIG['instances'])
 
-    try:
+    with pytest.raises(ConnectionError):
         gitlab_runner.check(BAD_CONFIG['instances'][0])
-    except Exception:
-        pass
-    else:
-        assert False, "Gitlab Check should not be able to connect to this URL"
 
     # We should get two failed service checks
     aggregator.assert_service_check(

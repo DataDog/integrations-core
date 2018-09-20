@@ -63,7 +63,7 @@ This is the layer that provides the developer CLI.
 ### Installation
 
 ```console
-$ pip install datadog-checks-dev[cli]
+$ pip install "datadog-checks-dev[cli]"
 ```
 
 At this point there should be a working executable, `ddev`, in your PATH. The
@@ -81,6 +81,7 @@ $ ddev
 Usage: ddev [OPTIONS] COMMAND [ARGS]...
 
 Options:
+  -c, --core    Work on `integrations-core`.
   -e, --extras  Work on `integrations-extras`.
   -x, --here    Work on the current location.
   -q, --quiet
@@ -542,8 +543,11 @@ Options:
   -b, --bench        Run only benchmarks
   -c, --cov          Measure code coverage
   -m, --cov-missing  Show line numbers of statements that were not executed
-  --cov-keep         Keep coverage reports
+  --pdb              Drop to PDB on first failure, then end test session
+  -d, --debug        Set the log level to debug
   -v, --verbose      Increase verbosity (can be used additively)
+  --changed          Only test changed checks
+  --cov-keep         Keep coverage reports
   -h, --help         Show this message and exit.
 ```
 

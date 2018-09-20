@@ -48,7 +48,7 @@ def gitlab_service(request):
     subprocess.check_call(args + ['up', '-d'], env=env)
 
     # wait for gitlab to be up
-    if not wait_for(GITLAB_URL, timeout=170):
+    if not wait_for(GITLAB_URL, timeout=200):
         raise Exception("gitlab container timed out!")
 
     # wait for prometheus endpoint to be up

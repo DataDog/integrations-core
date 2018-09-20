@@ -1,5 +1,10 @@
 # CHANGELOG - kubernetes
 
+## 1.5.1 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+* [Fixed] Only calculate filesystem usage when capacity is greater than 0. See [#1606](https://github.com/DataDog/integrations-core/pull/1606). Thanks [aaronbbrown](https://github.com/aaronbbrown).
+
 ## 1.5.0 / 2017-10-10
 
 * [IMPROVEMENT] remove namespace from pod_name tag. See [#770][]

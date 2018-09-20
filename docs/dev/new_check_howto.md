@@ -21,62 +21,63 @@ These requirements are used during the code review process as a checklist. This 
 
 Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][5] in order to isolate the development environment. See the [Python Environment documentation][6] for more information.
 
-You'll also need `docker-compose` in order to run the test harness. 
+You'll also need `docker-compose` in order to run the test harness.
 
 ## Setup
 
-Clone the [integrations-extras repository][7] and point your shell at the base directory:
+Clone the [integrations-extras repository][7]. By default, that tooling expects you to be working in the `$HOME/dd/` directory — this is optional and can be adjusted via configuration later.
 
-```
-git clone https://github.com/DataDog/integrations-extras.git && cd integrations-extras
-```
-
-Install the Python packages needed to work on Agent Integrations:
-
-```
-pip install -r requirements-dev.txt
+```shell
+mkdir $HOME/dd && cd $HOME/dd       # optional
+git clone https://github.com/DataDog/integrations-extras.git
 ```
 
-[cookiecutter][1] is used to create the skeleton for a new integration:
+### Developer toolkit
+
+The [developer toolkit][17] is comprehensive and includes a lot of functionality. Here's what you need to get started:
 
 ```
-cookiecutter https://github.com/DataDog/cookiecutter-datadog-check.git
+cd integrations-extras
+pip install "datadog-checks-dev[cli]"
 ```
 
-Answer the questions when prompted. Once completed succesfully, you will end up with something like this:
+If you chose to clone this repository to somewhere other than `$HOME/dd/`, you'll need to adjust the configuration file:
 
 ```
-    my_check
-    ├── CHANGELOG.md
-    ├── MANIFEST.in
-    ├── README.md
-    ├── datadog_checks
-    │   ├── __init__.py
-    │   └── foo_check
-    │       └── data
-    │           └── conf.yaml.example
-    │       ├── __about__.py
-    │       ├── __init__.py
-    │       └── foo_check.py
-    ├── images
-    │   └── snapshot.png
-    ├── logos
-    │   ├── avatars-bot.png
-    │   ├── saas_logos-bot.png
-    │   └── saas_logos-small.png
-    ├── manifest.json
-    ├── metadata.csv
-    ├── requirements-dev.txt
-    ├── requirements.in
-    ├── requirements.txt
-    ├── service_checks.json
-    ├── setup.py
-    ├── tests
-    │   ├── __init__.py
-    │   ├── conftest.py
-    │   └── test_check.py
-    └── tox.ini
+ddev config set extras "/path/to/integrations-extras"
 ```
+
+If you intend to work primarily on `integrations-extras`, set it as the default working repository:
+
+```
+ddev config set repo extras
+```
+
+## Scaffolding
+
+One of the developer toolkit features is the `create` command, which creates the basic file and path structure (or "scaffolding") necessary for a new Integration.
+
+### Dry-run
+
+Let's try a dry-run, which won't write anything to disk. There are two important elements to note in the following command:
+1. `-e`, which ensures that the scaffolding is created in the Extras repository.
+2. `-n`, which is a dry-run (nothing gets written).
+
+```
+ddev -e create -n my_check
+```
+
+This will display the path where the files would have been written, as well as the structure itself. For now, just make sure that the path in the *first line* of output matches your Extras repository.
+
+### Interactive mode
+
+The interactive mode is a wizard for creating new Integrations. By answering a handful of questions, the scaffolding will be set up and lightly pre-configured for you.
+
+```
+ddev -e create my_check
+```
+
+After answering the questions, the output will match that of the dry-run above, except in this case the scaffolding for your new Integration will actually exist!
 
 ## Write the check
 
@@ -132,7 +133,7 @@ To learn more about the base Python class, see the [Python API documentation][2]
 
 ### Writing tests
 
-There are two basic types of tests: unit tests for specific elements, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][3] and [tox][4] are used to run the tests. 
+There are two basic types of tests: unit tests for specific elements, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][3] and [tox][4] are used to run the tests.
 
 For more information, see the [Datadog Checks Dev documentation][15].
 
@@ -166,10 +167,10 @@ def test_config():
     c.check({'url': 'http://foobar', 'search_string': 'foo'})
 ```
 
-The cookiecutter template has already setup `tox` to run tests located at `my_check/tests`. Run the test:
+The scaffolding has already set up `tox` to run tests located at `my_check/tests`. Run the test:
 
 ```
-cd my_check && tox
+ddev -e test my_check
 ```
 
 The test we just wrote doesn't check our collection _logic_ though, so let's add an integration test. We will use `docker-compose` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `my_check/tests/docker-compose.yml` with the following contents:
@@ -273,12 +274,14 @@ tox -e integration
 The check is almost done. Let's add the final touches by adding the integration configurations.
 
 ## Configuration
+
 ### Configuration file
+
 #### Parameters
 
 Parameters in a configuration file follow these rules:
 
-* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`according to the documentation [contributing guidelines][16]: 
+* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>` according to the documentation [contributing guidelines][16]:
 * All required parameters are **not** commented by default.
 * All optional parameters are commented by default.
 * If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
@@ -287,7 +290,7 @@ Parameters in a configuration file follow these rules:
 
 Each parameter in a configuration file must have a special comment block with the following format:
 
-```
+```yaml
 ## @<COMMAND_1> <ARG_COMMAND_1>
 ## @<COMMAND_2> <ARG_COMMAND_2>
 ## <DESCRIPTION>
@@ -297,7 +300,7 @@ Each parameter in a configuration file must have a special comment block with th
 
 This paragraph contains **commands** which are a special string in the form `@command`. A command is valid only when the comment line containing it starts with a double `#` char:
 
-```
+```yaml
 ## @command this is valid
 
 # @command this is not valid and will be ignored
@@ -306,6 +309,7 @@ This paragraph contains **commands** which are a special string in the form `@co
 `<DESCRIPTION>` is the description of the parameter. It can span across multiple lines in a special comment block.
 
 ##### Available commands
+
 ###### Param
 
 The `@param` command aims to describe the parameter for documentation purposes.
@@ -318,18 +322,18 @@ Arguments:
 
 * `name`: the name of the parameter, e.g. `apache_status_url`
 * `type`: the data type for the parameter value. Possible values:
-  * *integer* 
-  * *double* 
-  * *string* 
+  * *integer*
+  * *double*
+  * *string*
   * comma separated list of <*integer*|*double*|*string*>
-* `required`: whether the parameter is required or not. Possible values: 
+* `required`: whether the parameter is required or not. Possible values:
     * *required*
     * *optional*
 * `defval`: default value for the parameter, can be empty.
 
 For instance, here is the `@param` *command* for the Apache integration check `apache_status_url` parameter:
 
-```
+```yaml
 init_config:
 
 instances:
@@ -342,7 +346,7 @@ instances:
 
 ### Populate the README
 
-The `README.md` file provided by our cookiecutter template already has the correct format. You must fill out the relevant sections - look for the ellipses `[...]`.
+The `README.md` file provided by our scaffolding already has the correct format. You must fill out the document with the relevant information.
 
 ### Add images and logos
 
@@ -359,6 +363,7 @@ The directory structure for images and logos:
 ```
 
 The `images` folder contains all images that are used in the Integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
+
 ```markdown
 ![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/MyCheck/images/snapshot.png)
 ```
@@ -383,7 +388,7 @@ The `logos` folder must contain **three** images with filenames and sizes that m
 
 ### Metadata
 
-Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog is not currently automatically generated, so filling it out manually is a crucial part of the release process. 
+Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog is not currently automatically generated, so filling it out manually is a crucial part of the release process.
 
 #### manifest.json
 
@@ -482,3 +487,4 @@ python setup.py bdist_wheel
 [14]: https://docs.datadoghq.com/getting_started/tagging/
 [15]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
 [16]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
+[17]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev

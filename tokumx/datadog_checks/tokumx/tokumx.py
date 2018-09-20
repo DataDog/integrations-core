@@ -18,7 +18,7 @@ from pymongo import (
 )
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 DEFAULT_TIMEOUT = 10
 
@@ -328,7 +328,10 @@ class TokuMX(AgentCheck):
         if do_auth:
             if not db.authenticate(username, password):
                 message = "TokuMX: cannot connect with config %s" % server
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message)
+                self.service_check(self.SERVICE_CHECK_NAME,
+                                   AgentCheck.CRITICAL,
+                                   tags=service_check_tags,
+                                   message=message)
                 raise Exception(message)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
@@ -355,7 +358,7 @@ class TokuMX(AgentCheck):
                 if current is not None and primary is not None:
                     lag = primary['optimeDate'] - current['optimeDate']
                     # Python 2.7 has this built in, python < 2.7 don't...
-                    if hasattr(lag,'total_seconds'):
+                    if hasattr(lag, 'total_seconds'):
                         data['replicationLag'] = lag.total_seconds()
                     else:
                         data['replicationLag'] = (
@@ -381,7 +384,8 @@ class TokuMX(AgentCheck):
                 self.check_last_state(data['state'], server, self.agentConfig)
                 status['replSet'] = data
         except Exception as e:
-            if "OperationFailure" in repr(e) and ("replSetGetStatus" in str(e) or "not running with --replSet" in str(e)):
+            if "OperationFailure" in repr(e) and \
+                    ("replSetGetStatus" in str(e) or "not running with --replSet" in str(e)):
                 pass
             else:
                 raise e
@@ -400,7 +404,8 @@ class TokuMX(AgentCheck):
     def collect_mongos(self, server, conn, db, tags):
         tags.append('role:mongos')
         config = conn['config']
-        agg_result = config['chunks'].aggregate([{'$group': {'_id': {'ns': '$ns', 'shard': '$shard'}, 'count': {'$sum': 1}}}])
+        query = [{'$group': {'_id': {'ns': '$ns', 'shard': '$shard'}, 'count': {'$sum': 1}}}]
+        agg_result = config['chunks'].aggregate(query)
         if agg_result['ok']:
             for doc in agg_result['result']:
                 chunk_tags = list(tags)
@@ -413,7 +418,6 @@ class TokuMX(AgentCheck):
                 if len(host_parts) == 2:
                     chunk_tags.append('replset:%s' % host_parts[0])
                 self.gauge('tokumx.sharding.chunks', doc['count'], tags=chunk_tags)
-
 
     def collect_metrics(self, instance, server, conn, db, tags):
             status = db["$cmd"].find_one({"serverStatus": 1})
@@ -452,7 +456,10 @@ class TokuMX(AgentCheck):
                                         self.histogram('tokumx.stats.idx.%s' % k, idx_stats[k], tags=db_tags)
                                 for k in ['queries', 'nscanned', 'nscannedObjects', 'inserts', 'deletes']:
                                     key = (dbname, collname, idx_stats['name'], k)
-                                    self.submit_idx_rate('tokumx.statsd.idx.%s' % k, idx_stats[k], tags=db_tags, key=key)
+                                    self.submit_idx_rate('tokumx.statsd.idx.%s' % k,
+                                                         idx_stats[k],
+                                                         tags=db_tags,
+                                                         key=key)
                         # FIXME: here tokumx.stats.coll.* are potentially unbounded
                         elif type(v) in (types.IntType, types.LongType, types.FloatType):
                             self.histogram('tokumx.stats.coll.%s' % m, v, db_tags)
@@ -491,7 +498,6 @@ class TokuMX(AgentCheck):
 
                 if m in self.RATES:
                     self.rate('tokumx.%sps' % m, value, tags=tags)
-
 
     def check(self, instance):
         server, conn, db, tags = self._get_connection(instance)

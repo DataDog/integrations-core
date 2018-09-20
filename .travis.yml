@@ -77,6 +77,8 @@ jobs:
     - stage: test
       env: CHECK=cisco_aci
     - stage: test
+      env: CHECK=cockroachdb
+    - stage: test
       env: CHECK=consul
     - stage: test
       env: CHECK=couch
@@ -90,6 +92,8 @@ jobs:
       env: CHECK=dns_check
     - stage: test
       env: CHECK=dotnetclr
+    - stage: test
+      env: CHECK=ecs_fargate
     - stage: test
       env: CHECK=elastic
     - stage: test
@@ -124,6 +128,8 @@ jobs:
       env: CHECK=kafka_consumer
     - stage: test
       env: CHECK=kong
+    - stage: test
+      env: CHECK=kube_dns
     - stage: test
       env: CHECK=kube_proxy
     - stage: test
@@ -193,6 +199,8 @@ jobs:
     - stage: test
       env: CHECK=riakcs
     - stage: test
+      env: CHECK=snmp
+    - stage: test
       env: CHECK=spark
     - stage: test
       env: CHECK=sqlserver
@@ -200,6 +208,8 @@ jobs:
       env: CHECK=ssh_check
     - stage: test
       env: CHECK=statsd
+    - stage: test
+      env: CHECK=supervisord
     - stage: test
       env: CHECK=squid
     - stage: test
@@ -210,6 +220,8 @@ jobs:
       env: CHECK=tcp_check
     - stage: test
       env: CHECK=teamcity
+    - stage: test
+      env: CHECK=tokumx
     - stage: test
       env: CHECK=twemproxy
     - stage: test

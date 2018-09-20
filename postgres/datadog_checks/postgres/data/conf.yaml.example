@@ -104,6 +104,11 @@ instances:
 #    collect_count_metrics: False
 #
 
+#    Collect metrics regarding transactions from pg_stat_activity, default value is False. Please make sure the user
+#    has sufficient privileges to read from pg_stat_activity before enabling this option.
+#    collect_activity_metrics: False
+#
+
 #    Collect database size metrics. Default value is True but they might be slow with large databases
 #    collect_database_size_metrics: False
 #

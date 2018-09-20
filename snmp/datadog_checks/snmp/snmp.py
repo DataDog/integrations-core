@@ -15,10 +15,8 @@ from pysnmp.error import PySnmpError
 from pyasn1.type.univ import OctetString
 
 # project
-from checks.network_checks import NetworkCheck, Status
-from config import _is_affirmative
-
-
+from datadog_checks.checks.network import NetworkCheck, Status
+from datadog_checks.config import _is_affirmative
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 (CounterBasedGauge64, ZeroBasedCounter64) = builder.MibBuilder().importSymbols(
@@ -141,7 +139,6 @@ class SnmpCheck(NetworkCheck):
 
         return cmd_generator
 
-
     @classmethod
     def get_auth_data(cls, instance):
         '''
@@ -154,8 +151,7 @@ class SnmpCheck(NetworkCheck):
 
             # See http://pysnmp.sourceforge.net/docs/current/security-configuration.html
             if int(instance.get("snmp_version", 2)) == 1:
-                return cmdgen.CommunityData(instance['community_string'],
-                    mpModel=0)
+                return cmdgen.CommunityData(instance['community_string'], mpModel=0)
             return cmdgen.CommunityData(instance['community_string'], mpModel=1)
 
         elif "user" in instance:
@@ -184,7 +180,6 @@ class SnmpCheck(NetworkCheck):
         else:
             raise Exception("An authentication method needs to be provided")
 
-
     @classmethod
     def get_context_data(cls, instance):
         '''
@@ -205,7 +200,6 @@ class SnmpCheck(NetworkCheck):
 
         return context_engine_id, context_name
 
-
     @classmethod
     def get_transport_target(cls, instance, timeout, retries):
         '''
@@ -214,7 +208,7 @@ class SnmpCheck(NetworkCheck):
         if "ip_address" not in instance:
             raise Exception("An IP address needs to be specified")
         ip_address = instance["ip_address"]
-        port = int(instance.get("port", 161)) # Default SNMP port
+        port = int(instance.get("port", 161))  # Default SNMP port
         return cmdgen.UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
 
     def raise_on_error_indication(self, error_indication, instance):
@@ -477,7 +471,7 @@ class SnmpCheck(NetworkCheck):
                     metric_tags = metric_tags + metric.get('metric_tags')
                 self.submit_metric(name, val, forced_type, metric_tags)
             elif 'OID' in metric:
-                pass # This one is already handled by the other batch of requests
+                pass  # This one is already handled by the other batch of requests
             else:
                 raise Exception('Unsupported metric in config file: %s' % metric)
 

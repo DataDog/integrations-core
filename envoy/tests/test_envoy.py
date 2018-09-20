@@ -65,10 +65,7 @@ class TestEnvoy:
             c.check(instance)
 
         for metric in aggregator.metric_names:
-            metric_stubs = aggregator.metrics(metric)
-            for metric_stub in metric_stubs:
-                for tag in metric_stub.tags:
-                    assert tag.split(':', 1)[1].startswith(('in', 'out'))
+            assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out")
 
     def test_service_check(self, aggregator):
         instance = INSTANCES['main']
