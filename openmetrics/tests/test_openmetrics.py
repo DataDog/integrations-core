@@ -1,15 +1,14 @@
-# (C) Datadog, Inc. 2010-2018
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-import pytest
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
-
-# 3p
+import pytest
 from prometheus_client import generate_latest, CollectorRegistry, Gauge, Counter
 
-# project
 from datadog_checks.openmetrics import OpenMetricsCheck
+
+CHECK_NAME = 'openmetrics'
+NAMESPACE = 'openmetrics'
 
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
@@ -23,41 +22,31 @@ instance = {
     'send_monotonic_counter': True
 }
 
-# Constants
-CHECK_NAME = 'openmetrics'
-NAMESPACE = 'openmetrics'
 
-
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module', autouse=True)
 def poll_mock():
     registry = CollectorRegistry()
-    # pylint: disable=E1123,E1101
     g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
-    g1.labels(matched_label="foobar", node="host1", flavor="test").set(99.9)
+    g1.labels(matched_label='foobar', node='host1', flavor='test').set(99.9)
     g2 = Gauge('metric2', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g2.labels(matched_label="foobar", node="host2", timestamp="123").set(12.2)
+    g2.labels(matched_label='foobar', node='host2', timestamp='123').set(12.2)
     c1 = Counter('counter1', 'hits', ['node'], registry=registry)
-    c1.labels(node="host2").inc(42)
+    c1.labels(node='host2').inc(42)
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
+    g3.labels(matched_label='foobar', node='host2', timestamp='456').set(float('inf'))
 
-    poll_mock = mock.patch(
+    with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
             status_code=200,
-            iter_lines=lambda **kwargs: generate_latest(registry).decode().split("\n"),
-            headers={'Content-Type': "text/plain"}
+            iter_lines=lambda **kwargs: generate_latest(registry).decode().split('\n'),
+            headers={'Content-Type': 'text/plain'}
         )
-    )
-    yield poll_mock.start()
-    poll_mock.stop()
+    ):
+        yield
 
 
-def test_openmetrics_check(aggregator, poll_mock):
-    """
-    Testing openmetrics check.
-    """
-
+def test_openmetrics_check(aggregator):
     c = OpenMetricsCheck('openmetrics', None, {}, [instance])
     c.check(instance)
     aggregator.assert_metric(
@@ -78,12 +67,8 @@ def test_openmetrics_check(aggregator, poll_mock):
     aggregator.assert_all_metrics_covered()
 
 
-def test_openmetrics_check_counter_gauge(aggregator, poll_mock):
-    """
-    Testing openmetrics check.
-    """
-
-    instance["send_monotonic_counter"] = False
+def test_openmetrics_check_counter_gauge(aggregator):
+    instance['send_monotonic_counter'] = False
     c = OpenMetricsCheck('openmetrics', None, {}, [instance])
     c.check(instance)
     aggregator.assert_metric(
@@ -104,7 +89,7 @@ def test_openmetrics_check_counter_gauge(aggregator, poll_mock):
     aggregator.assert_all_metrics_covered()
 
 
-def test_invalid_metric(aggregator, poll_mock):
+def test_invalid_metric(aggregator):
     """
     Testing that invalid values of metrics are discarded
     """
@@ -123,7 +108,7 @@ def test_invalid_metric(aggregator, poll_mock):
     assert aggregator.metrics('metric3') == []
 
 
-def test_openmetrics_wildcard(aggregator, poll_mock):
+def test_openmetrics_wildcard(aggregator):
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
         'namespace': 'openmetrics',
@@ -145,7 +130,7 @@ def test_openmetrics_wildcard(aggregator, poll_mock):
     aggregator.assert_all_metrics_covered()
 
 
-def test_openmetrics_default_instance(aggregator, poll_mock):
+def test_openmetrics_default_instance(aggregator):
     """
     Testing openmetrics with default instance
     """
@@ -176,11 +161,7 @@ def test_openmetrics_default_instance(aggregator, poll_mock):
     aggregator.assert_all_metrics_covered()
 
 
-def test_openmetrics_mixed_instance(aggregator, poll_mock):
-    """
-    Testing openmetrics with default instance
-    """
-
+def test_openmetrics_mixed_instance(aggregator):
     c = OpenMetricsCheck(CHECK_NAME, None, {}, [], default_instances={
         'foobar': {
             'prometheus_url': 'http://localhost:10249/metrics',
@@ -224,13 +205,13 @@ def test_openmetrics_mixed_instance(aggregator, poll_mock):
 
     aggregator.assert_metric(
         CHECK_NAME + '.renamed.metric1',
-        hostname="host1",
+        hostname='host1',
         tags=['node:host1', 'flavor:test', 'matched_label:foobar', 'timestamp:123', 'extra:foo'],
         metric_type=aggregator.GAUGE
     )
     aggregator.assert_metric(
         CHECK_NAME + '.metric2',
-        hostname="host2",
+        hostname='host2',
         tags=['timestamp:123', 'node:host2', 'matched_label:foobar', 'extra:foo'],
         metric_type=aggregator.GAUGE
     )
