@@ -769,8 +769,7 @@ def freeze(ctx, no_deps):
 @click.option('--to', help="Final Agent version")
 @click.option('--output', '-o', help="Path to the changelog file, if omitted contents will be printed to stdout")
 @click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
-@click.pass_context
-def agent_changelog(ctx, since, to, output, force):
+def agent_changelog(since, to, output, force):
     """
     Generates a markdown file containing the list of checks that changed for a
     given Agent release. Agent version numbers are derived inspecting tags on
@@ -779,7 +778,7 @@ def agent_changelog(ctx, since, to, output, force):
 
     If neither `--since` or `--to` are passed (the most common use case), the
     tool will generate the whole changelog since Agent version 6.3.0
-    (before that point we don't have enough informations to build the log).
+    (before that point we don't have enough information to build the log).
     """
     agent_tags = git_tag_list(r'^\d+\.\d+\.\d+$')
 
@@ -788,9 +787,9 @@ def agent_changelog(ctx, since, to, output, force):
         to = agent_tags[-1]
 
     # filter out versions according to the interval [since, to]
-    agent_tags = [t for t in agent_tags if t >= since and t <= to]
+    agent_tags = [t for t in agent_tags if since <= t <= to]
 
-    # reverse so we have descendent order
+    # reverse so we have descendant order
     agent_tags = agent_tags[::-1]
 
     # store the changes in a mapping {agent_version --> {check_name --> current_version}}
@@ -803,32 +802,32 @@ def agent_changelog(ctx, since, to, output, force):
         contents_to = git_show_file(AGENT_REQ_FILE, agent_tags[i])
         catalog_to = parse_agent_req_file(contents_to)
 
-        changes = OrderedDict()
-        changes_per_agent[agent_tags[i]] = changes
+        version_changes = OrderedDict()
+        changes_per_agent[agent_tags[i]] = version_changes
 
         for name, ver in catalog_to.iteritems():
             old_ver = catalog_from.get(name, "")
             if old_ver != ver:
                 # determine whether major version changed
                 breaking = old_ver.split('.')[0] < ver.split('.')[0]
-                changes[name] = (ver, breaking)
+                version_changes[name] = (ver, breaking)
 
     # store the changelog in memory
-    changelog = StringIO()
+    changelog_contents = StringIO()
 
     # prepare the links
     agent_changelog_url = 'https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#{}'
     check_changelog_url = 'https://github.com/DataDog/integrations-core/blob/master/{}/CHANGELOG.md'
 
     # go through all the agent releases
-    for agent, changes in changes_per_agent.iteritems():
+    for agent, version_changes in iteritems(changes_per_agent):
         url = agent_changelog_url.format(agent.replace('.', ''))  # Github removes dots from the anchor
-        changelog.write('## Datadog Agent version [{}]({})\n\n'.format(agent, url))
+        changelog_contents.write('## Datadog Agent version [{}]({})\n\n'.format(agent, url))
 
-        if not changes:
-            changelog.write('* There were no integration updates for this version of the Agent.\n\n')
+        if not version_changes:
+            changelog_contents.write('* There were no integration updates for this version of the Agent.\n\n')
         else:
-            for name, ver in changes.iteritems():
+            for name, ver in iteritems(version_changes):
                 # get the "display name" for the check
                 manifest_file = os.path.join(get_root(), name, 'manifest.json')
                 if os.path.exists(manifest_file):
@@ -839,18 +838,19 @@ def agent_changelog(ctx, since, to, output, force):
 
                 breaking_notice = " **BREAKING CHANGE** " if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)
-                changelog.write('* {} [{}]({}){}\n'.format(display_name, ver[0], changelog_url, breaking_notice))
+                changelog_contents.write(
+                    '* {} [{}]({}){}\n'.format(display_name, ver[0], changelog_url, breaking_notice)
+                )
             # add an extra line to separate the release block
-            changelog.write('\n')
+            changelog_contents.write('\n')
 
     # save the changelog on disk if --output was passed
     if output:
         # don't overwrite an existing file
         if os.path.exists(output) and not force:
             msg = "Output file {} already exists, run the command again with --force to overwrite"
-            echo_failure(msg.format(output))
-            abort()
+            abort(msg.format(output))
 
-        write_file(output, changelog.getvalue())
+        write_file(output, changelog_contents.getvalue())
     else:
-        echo_info(changelog.getvalue())
+        echo_info(changelog_contents.getvalue())
