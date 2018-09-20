@@ -1,0 +1,21 @@
+{
+  "categories": [
+    "monitoring"
+  ],
+  "creates_events": false,
+  "display_name": "OpenMetrics",
+  "guid": "3f67af75-6987-468c-99b3-5001ba5ab414",
+  "is_public": false,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "openmetrics",
+  "public_title": "Datadog-OpenMetrics Integration",
+  "short_description": "OpenMetrics is an open standard for exposing metric data",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "type": "check"
+}
