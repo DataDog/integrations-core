@@ -521,6 +521,7 @@ def make(ctx, check, version, skip_sign, sign_only):
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
     from ..signing import update_link_metadata
 
+    root = get_root()
     releasing_all = check == 'all'
 
     valid_checks = get_valid_checks()
@@ -578,10 +579,12 @@ def make(ctx, check, version, skip_sign, sign_only):
         # update the global requirements file
         if check != 'datadog_checks_dev':
             commit_targets.append(AGENT_REQ_FILE)
-            req_file = os.path.join(get_root(), AGENT_REQ_FILE)
-            echo_waiting('Updating the requirements file {}... '.format(req_file), nl=False)
+            req_file = os.path.join(root, AGENT_REQ_FILE)
+            echo_waiting('Updating the Agent requirements file... ', nl=False)
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
             echo_success('success!')
+
+        echo_waiting('Committing files...')
 
         # commit the changes.
         # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
