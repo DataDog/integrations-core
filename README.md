@@ -3,7 +3,7 @@
 [![Build status][1]][2]
 [![Build status][3]][4]
 [![Coverage status][17]][18]
-[![Documentation Status](19)][20]
+[![Documentation Status][19]][20]
 
 This repository contains the Agent Integrations (also known as checks) that Datadog
 officially develops and supports. To add a new integration, please see the [Integrations Extras][5]
