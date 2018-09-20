@@ -37,28 +37,28 @@ yarn.node.avail_memory_mb,gauge,,mebibyte,,The total amount of memory currently 
 yarn.node.used_virtual_cores,gauge,,core,,The total number of vCores currently used on the node,0,yarn,nd cor usd
 yarn.node.available_virtual_cores,gauge,,core,,The total number of vCores available on the node,0,yarn,nd cor avail
 yarn.node.num_containers,gauge,,,,The total number of containers currently running on the node,0,yarn,nd ctrs tot
-yarn.queue.root.maxCapacity,gauge,,percentage,,The configured maximum queue capacity in percentage for root queue,0,yarn,q root max cap
-yarn.queue.root.usedCapacity,gauge,,percentage,,The used queue capacity in percentage for root queue,0,yarn,q root usd cap
-yarn.queue.root.capacity,gauge,,percentage,,The configured queue capacity in percentage for root queue,0,yarn,q root cap
+yarn.queue.root.maxCapacity,gauge,,percent,,The configured maximum queue capacity in percentage for root queue,0,yarn,q root max cap
+yarn.queue.root.usedCapacity,gauge,,percent,,The used queue capacity in percentage for root queue,0,yarn,q root usd cap
+yarn.queue.root.capacity,gauge,,percent,,The configured queue capacity in percentage for root queue,0,yarn,q root cap
 yarn.queue.numPendingApplications,gauge,,task,,The number of pending applications in this queue,0,yarn,q pnd apps
 yarn.queue.userAMResourceLimit.memory,gauge,,mebibyte,,The maximum memory resources a user can use for Application Masters (in MB),0,yarn,q usr am res lm m
 yarn.queue.userAMResourceLimit.vCores,gauge,,core,,The maximum vCpus a user can use for Application Masters,0,yarn,q usr am res lm c
-yarn.queue.absoluteCapacity,gauge,,percentage,,The absolute capacity percentage this queue can use of entire cluster,0,yarn,q abs cap
+yarn.queue.absoluteCapacity,gauge,,percent,,The absolute capacity percentage this queue can use of entire cluster,0,yarn,q abs cap
 yarn.queue.userLimitFactor,gauge,,,,The minimum user limit percent set in the configuration,0,yarn,q usr lm fac
 yarn.queue.userLimit,gauge,,,,The user limit factor set in the configuration,0,yarn,q usr lm
 yarn.queue.numApplications,gauge,,task,,The number of applications currently in the queue,0,yarn,q num app
 yarn.queue.usedAMResource.memory,gauge,,mebibyte,,The memory resources used for Application Masters (in MB),0,yarn,q usd am res m
 yarn.queue.usedAMResource.vCores,gauge,,core,,The vCpus used for Application Masters,0,yarn,q usd am res c
-yarn.queue.absoluteUsedCapacity,gauge,,percentage,,The absolute used capacity percentage this queue is using of the entire cluster,0,yarn,q abs used cap
+yarn.queue.absoluteUsedCapacity,gauge,,percent,,The absolute used capacity percentage this queue is using of the entire cluster,0,yarn,q abs used cap
 yarn.queue.resourcesUsed.memory,gauge,,mebibyte,,The total memory resources this queue is using (in MB),0,yarn,q res usd m
 yarn.queue.resourcesUsed.vCores,gauge,,core,,The total vCpus this queue is using,0,yarn,q res usd c
 yarn.queue.AMResourceLimit.vCores,gauge,,core,,The maximum vCpus this queue can use for Application Masters,0,yarn,q am res lim c
 yarn.queue.AMResourceLimit.memory,gauge,,mebibyte,,The maximum memory resources this queue can use for Application Masters (in MB),0,yarn,q am res lim m
-yarn.queue.capacity,gauge,,percentage,,The configured queue capacity in percentage relative to its parent queue,0,yarn,q cap
+yarn.queue.capacity,gauge,,percent,,The configured queue capacity in percentage relative to its parent queue,0,yarn,q cap
 yarn.queue.numActiveApplications,gauge,,task,,The number of active applications in this queue,0,yarn,q num act apps
-yarn.queue.absoluteMaxCapacity,gauge,,percentage,,The absolute maximum capacity percentage this queue can use of the entire cluster,0,yarn,q abs max cap
-yarn.queue.usedCapacity,gauge,,percentage,,The used queue capacity in percentage,0,yarn,q usd cap
+yarn.queue.absoluteMaxCapacity,gauge,,percent,,The absolute maximum capacity percentage this queue can use of the entire cluster,0,yarn,q abs max cap
+yarn.queue.usedCapacity,gauge,,percent,,The used queue capacity in percentage,0,yarn,q usd cap
 yarn.queue.numContainers,gauge,,,,The number of containers being used,0,yarn,q num cont
-yarn.queue.maxCapacity,gauge,,percentage,,The configured maximum queue capacity in percentage relative to its parent queue,0,yarn,q max cap
+yarn.queue.maxCapacity,gauge,,percent,,The configured maximum queue capacity in percentage relative to its parent queue,0,yarn,q max cap
 yarn.queue.maxApplications,gauge,,task,,The maximum number of applications this queue can have,0,yarn,q max app
 yarn.queue.maxApplicationsPerUser,gauge,,task,,The maximum number of active applications per user this queue can have,0,yarn,q max app usr

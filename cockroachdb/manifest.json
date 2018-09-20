@@ -20,5 +20,5 @@
     "data store"
   ],
   "type": "check",
-  "is_public": true
+  "is_public": false
 }

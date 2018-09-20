@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import time
+import json
 from collections import OrderedDict, namedtuple
 from datetime import datetime
 
@@ -12,13 +13,15 @@ from six import StringIO, iteritems
 
 from .dep import freeze as dep_freeze
 from .utils import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting,
+    echo_warning
 )
 from ..constants import (
     AGENT_REQ_FILE, AGENT_V5_ONLY, CHANGELOG_TYPE_NONE, get_root
 )
 from ..git import (
-    get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
+    get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
+    git_show_file, git_tag_list
 )
 from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash
 from ..release import (
@@ -28,13 +31,13 @@ from ..release import (
 from ..trello import TrelloClient
 from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
-    get_version_string, format_commit_id, parse_pr_number
+    get_version_string, format_commit_id, parse_pr_number, parse_agent_req_file
 )
 from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
     basepath, chdir, ensure_unicode, get_next, remove_path, stream_file_lines,
-    write_file, write_file_lines
+    write_file, write_file_lines, read_file
 )
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
@@ -91,7 +94,7 @@ def ready(ctx, quiet):
         target_tag = get_release_tag_string(target, cur_version)
 
         # get the diff from HEAD
-        diff_lines = get_diff(target, target_tag)
+        diff_lines = get_commits_since(target, target_tag)
 
         # get the number of PRs that could be potentially released
         # Only show the ones that have a changelog label that isn't no-changelog
@@ -156,7 +159,7 @@ def changes(ctx, check, dry_run):
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_diff(check, target_tag)
+    diff_lines = get_commits_since(check, target_tag)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
@@ -443,6 +446,8 @@ def tag(check, version, push, dry_run):
     """Tag the HEAD of the git repo with the current release number for a
     specific check. The tag is pushed to origin by default.
 
+    You can tag everything at once by setting the check to `all`.
+
     Notice: specifying a different version than the one in __about__.py is
     a maintenance task that should be run under very specific circumstances
     (e.g. re-align an old release performed on the wrong commit).
@@ -493,25 +498,40 @@ def tag(check, version, push, dry_run):
 )
 @click.argument('check')
 @click.argument('version', required=False)
+@click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
+@click.option('--sign-only', is_flag=True, help='Only sign release metadata')
 @click.pass_context
-def make(ctx, check, version):
+def make(ctx, check, version, skip_sign, sign_only):
     """Perform a set of operations needed to release a single check:
 
-        \b
-        * update the version in __about__.py
-        * update the changelog
-        * update the requirements-agent-release.txt file
-        * commit the above changes
+    \b
+      * update the version in __about__.py
+      * update the changelog
+      * update the requirements-agent-release.txt file
+      * update in-toto metadata
+      * commit the above changes
+
+    You can release everything at once by setting the check to `all`.
+
+    \b
+    If you run into issues signing:
+    \b
+      - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
     """
+    # Import lazily since in-toto runs a subprocess to check for gpg2 on load
+    from ..signing import update_link_metadata
+
+    releasing_all = check == 'all'
+
     valid_checks = get_valid_checks()
-    if check != 'all' and check not in valid_checks:
+    if not releasing_all and check not in valid_checks:
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # don't run the task on the master branch
     if get_current_branch() == 'master':
         abort('This task will commit, you do not want to add commits to master directly')
 
-    if check == 'all':
+    if releasing_all:
         if version:
             abort('You cannot bump every check to the same version')
         checks = sorted(valid_checks)
@@ -519,6 +539,9 @@ def make(ctx, check, version):
         checks = [check]
 
     for check in checks:
+        if sign_only:
+            break
+
         echo_success('Check `{}`'.format(check))
 
         if version:
@@ -537,24 +560,28 @@ def make(ctx, check, version):
             version = bump_function(cur_version)
 
         # update the version number
-        echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
+        echo_info('Current version of check {}: {}'.format(check, cur_version))
+        echo_waiting('Bumping to {}... '.format(version), nl=False)
         update_version_module(check, cur_version, version)
+        echo_success('success!')
 
         # update the CHANGELOG
-        echo_waiting('Updating the changelog...')
+        echo_waiting('Updating the changelog... ', nl=False)
         # TODO: Avoid double GitHub API calls when bumping all checks at once
         ctx.invoke(
             changelog, check=check, version=version, old_version=cur_version, quiet=True, dry_run=False
         )
+        echo_success('success!')
 
-        if check == 'datadog_checks_dev':
-            commit_targets = [check]
+        commit_targets = [check]
+
         # update the global requirements file
-        else:
-            commit_targets = [check, AGENT_REQ_FILE]
+        if check != 'datadog_checks_dev':
+            commit_targets.append(AGENT_REQ_FILE)
             req_file = os.path.join(get_root(), AGENT_REQ_FILE)
-            echo_waiting('Updating the requirements file {}...'.format(req_file))
+            echo_waiting('Updating the requirements file {}... '.format(req_file), nl=False)
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+            echo_success('success!')
 
         # commit the changes.
         # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
@@ -563,6 +590,13 @@ def make(ctx, check, version):
 
         # Reset version
         version = None
+
+    if sign_only or not skip_sign:
+        echo_waiting('Updating release metadata...')
+        echo_info('Please touch your Yubikey immediately after entering your PIN!')
+        commit_targets = update_link_metadata(checks)
+
+        git_commit(commit_targets, '[Release] Update metadata', force=True)
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
@@ -598,7 +632,7 @@ def changelog(ctx, check, version, old_version, quiet, dry_run):
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_diff(check, target_tag)
+    diff_lines = get_commits_since(check, target_tag)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
@@ -756,3 +790,98 @@ def freeze(ctx, no_deps):
 
     if not no_deps:
         ctx.invoke(dep_freeze)
+
+
+@release.command(
+    context_settings=CONTEXT_SETTINGS,
+    short_help="Provide a list of the updated checks on a given agent version, in changelog form"
+)
+@click.option('--since', help="Initial Agent version", default='6.3.0')
+@click.option('--to', help="Final Agent version")
+@click.option('--output', '-o', help="Path to the changelog file, if omitted contents will be printed to stdout")
+@click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
+@click.pass_context
+def agent_changelog(ctx, since, to, output, force):
+    """
+    Generates a markdown file containing the list of checks that changed for a
+    given Agent release. Agent version numbers are derived inspecting tags on
+    `integrations-core` so running this tool might provide unexpected results
+    if the repo is not up to date with the Agent release process.
+
+    If neither `--since` or `--to` are passed (the most common use case), the
+    tool will generate the whole changelog since Agent version 6.3.0
+    (before that point we don't have enough informations to build the log).
+    """
+    agent_tags = git_tag_list(r'^\d+\.\d+\.\d+$')
+
+    # default value for --to is the latest tag
+    if not to:
+        to = agent_tags[-1]
+
+    # filter out versions according to the interval [since, to]
+    agent_tags = [t for t in agent_tags if t >= since and t <= to]
+
+    # reverse so we have descendent order
+    agent_tags = agent_tags[::-1]
+
+    # store the changes in a mapping {agent_version --> {check_name --> current_version}}
+    changes_per_agent = OrderedDict()
+
+    for i in range(1, len(agent_tags)):
+        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i-1])
+        catalog_from = parse_agent_req_file(contents_from)
+
+        contents_to = git_show_file(AGENT_REQ_FILE, agent_tags[i])
+        catalog_to = parse_agent_req_file(contents_to)
+
+        changes = OrderedDict()
+        changes_per_agent[agent_tags[i]] = changes
+
+        for name, ver in catalog_to.iteritems():
+            old_ver = catalog_from.get(name, "")
+            if old_ver != ver:
+                # determine whether major version changed
+                breaking = old_ver.split('.')[0] < ver.split('.')[0]
+                changes[name] = (ver, breaking)
+
+    # store the changelog in memory
+    changelog = StringIO()
+
+    # prepare the links
+    agent_changelog_url = 'https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#{}'
+    check_changelog_url = 'https://github.com/DataDog/integrations-core/blob/master/{}/CHANGELOG.md'
+
+    # go through all the agent releases
+    for agent, changes in changes_per_agent.iteritems():
+        url = agent_changelog_url.format(agent.replace('.', ''))  # Github removes dots from the anchor
+        changelog.write('## Datadog Agent version [{}]({})\n\n'.format(agent, url))
+
+        if not changes:
+            changelog.write('* There were no integration updates for this version of the Agent.\n\n')
+        else:
+            for name, ver in changes.iteritems():
+                # get the "display name" for the check
+                manifest_file = os.path.join(get_root(), name, 'manifest.json')
+                if os.path.exists(manifest_file):
+                    decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
+                    display_name = decoded.get('display_name')
+                else:
+                    display_name = name
+
+                breaking_notice = " **BREAKING CHANGE** " if ver[1] else ""
+                changelog_url = check_changelog_url.format(name)
+                changelog.write('* {} [{}]({}){}\n'.format(display_name, ver[0], changelog_url, breaking_notice))
+            # add an extra line to separate the release block
+            changelog.write('\n')
+
+    # save the changelog on disk if --output was passed
+    if output:
+        # don't overwrite an existing file
+        if os.path.exists(output) and not force:
+            msg = "Output file {} already exists, run the command again with --force to overwrite"
+            echo_failure(msg.format(output))
+            abort()
+
+        write_file(output, changelog.getvalue())
+    else:
+        echo_info(changelog.getvalue())

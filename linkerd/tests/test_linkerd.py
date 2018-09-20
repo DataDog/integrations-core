@@ -514,38 +514,17 @@ LINKERD_FIXTURE_VALUES = {
     'linkerd.rt.bindcache.client.oneshots': 0,
 }
 
-class MockResponse:
-    """
-    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
-    """
-
-    def __init__(self, content, content_type):
-        if isinstance(content, list):
-            self.content = content
-        else:
-            self.content = [content]
-        self.headers = {'Content-Type': content_type}
-
-    def iter_lines(self, **_):
-        content = self.content.pop(0)
-        for elt in content.split("\n"):
-            yield elt
-
-    def close(self):
-        pass
 
 @pytest.fixture
 def linkerd_fixture():
     metrics_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'linkerd.txt')
-    responses = []
+    responses = None
     with open(metrics_file_path, 'rb') as f:
-        responses.append(f.read())
+        responses = f.read()
 
-    p = mock.patch('datadog_checks.checks.prometheus.PrometheusScraper.poll',
-                   return_value=MockResponse(responses, 'text/plain'),
-                   __name__="poll")
-    yield p.start()
-    p.stop()
+    with mock.patch('requests.get', return_value=mock.MagicMock(status_code=200,
+                    iter_lines=lambda **kwargs: responses.split("\n"), headers={'Content-Type': "text/plain"})) as p:
+        yield p
 
 @pytest.fixture
 def aggregator():

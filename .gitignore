@@ -51,6 +51,7 @@ coverage.xml
 *,cover
 .hypothesis/
 .pytest_cache/
+.benchmarks/
 
 # Translations
 *.mo
@@ -103,5 +104,5 @@ wheelhouse/
 .pytest_cache
 
 # by default, ignore in-toto metadata from the command line
-.links
+.links/
 *.link

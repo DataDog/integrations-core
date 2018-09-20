@@ -5,6 +5,7 @@ import json
 import os
 import re
 from ast import literal_eval
+from collections import OrderedDict
 
 import requests
 import semver
@@ -123,3 +124,26 @@ def get_bump_function(changelog_types):
             minor_bump = True
 
     return semver.bump_minor if minor_bump else semver.bump_patch
+
+
+def parse_agent_req_file(contents):
+    """
+    Returns a dictionary mapping {check_name --> pinned_version} from the
+    given file contents. We can assume lines are in the form:
+
+        active_directory==1.1.1; sys_platform == 'win32'
+
+    """
+    catalog = OrderedDict()
+    for line in contents.splitlines():
+        toks = line.split('==', 1)
+        if len(toks) != 2 or not toks[0] or not toks[1]:
+            # if we get here, the requirements file is garbled but let's stay
+            # resilient
+            continue
+
+        name, other = toks
+        version = other.split(';')
+        catalog[name] = version[0]
+
+    return catalog
