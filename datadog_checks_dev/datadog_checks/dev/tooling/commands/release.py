@@ -821,9 +821,9 @@ def agent_changelog(ctx, since, to, output, force):
             changelog.write('* There were no check updates for this version of the Agent.\n\n')
         else:
             for name, ver in changes.iteritems():
-                breaking_notice = "This is a breaking change." if ver[1] else ""
+                breaking_notice = " **BREAKING CHANGE** " if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)
-                changelog.write('* {} [{}]({}). {}\n'.format(name, ver[0], changelog_url, breaking_notice))
+                changelog.write('* {} [{}]({}){}\n'.format(name, ver[0], changelog_url, breaking_notice))
             # add an extra line to separate the release block
             changelog.write('\n')
 
