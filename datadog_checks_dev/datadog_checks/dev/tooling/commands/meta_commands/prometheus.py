@@ -21,6 +21,9 @@ TYPE_MAP = {
     'counter': 'count',
     'histogram': 'gauge',
 }
+METADATA_CSV_HEADER = (
+    'metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name'
+)
 
 
 def sanitize_endpoint(endpoint):
@@ -38,6 +41,10 @@ def parse_metrics(endpoint):
     response = requests.get(endpoint, stream=True)
 
     for line in response.iter_lines(decode_unicode=True):
+        # Example:
+        #
+        # # HELP sql_insert_count Number of SQL INSERT statements
+        # # TYPE sql_insert_count counter
         if line.startswith('#'):
             try:
                 _, info_type, metric, info_value = line.split(' ', 3)
@@ -240,9 +247,7 @@ def parse(ctx, endpoint, check, here):
     echo_waiting('\nWriting `{}`... '.format(metadata_file), nl=False)
 
     metric_items = sorted(iteritems(metrics), key=lambda item: item[1]['dd_name'])
-    output_lines = [
-        'metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name\n'
-    ]
+    output_lines = ['{}\n'.format(METADATA_CSV_HEADER)]
     for metric, data in metric_items:
         metric_name = data['dd_name']
         metric_type = TYPE_MAP.get(data.get('type'), '')
