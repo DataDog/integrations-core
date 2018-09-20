@@ -1,5 +1,27 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.7.0 / 2018-09-18
+
+* [Added] Fix manifest validation policy. See [#2258](https://github.com/DataDog/integrations-core/pull/2258).
+* [Added] Add config option to select the default repository. See [#2243](https://github.com/DataDog/integrations-core/pull/2243).
+
+## 0.6.2 / 2018-09-14
+
+* [Fixed] Revert "Update base package paths (#2235)". See [#2240](https://github.com/DataDog/integrations-core/pull/2240).
+
+## 0.6.1 / 2018-09-14
+
+* [Fixed] Move datadog_checks_base code into sub base package. See [#2167](https://github.com/DataDog/integrations-core/pull/2167).
+
+## 0.6.0 / 2018-09-14
+
+* [Added] Update base package paths. See [#2235](https://github.com/DataDog/integrations-core/pull/2235).
+* [Added] Add ability to add wait time in docker_run. See [#2196](https://github.com/DataDog/integrations-core/pull/2196).
+* [Added] Add better debugging to test command. See [#2194](https://github.com/DataDog/integrations-core/pull/2194).
+* [Fixed] Gracefully handle tags that already exist. See [#2172](https://github.com/DataDog/integrations-core/pull/2172).
+* [Fixed] Fix release freeze command. See [#2188](https://github.com/DataDog/integrations-core/pull/2188).
+* [Added] Add ability to filter checks to test by changes. See [#2163](https://github.com/DataDog/integrations-core/pull/2163).
+
 ## 0.5.0 / 2018-09-04
 
 * [Added] Allow automated releasing by looking at github labels. See [#2169](https://github.com/DataDog/integrations-core/pull/2169).

@@ -10,11 +10,11 @@ couchbase.ram.quota_total,gauge,,byte,,RAM quota,0,couchbase,ram quota
 couchbase.ram.used_by_data,gauge,,byte,,RAM used for data,0,couchbase,ram data used
 couchbase.by_bucket.avg_bg_wait_time,gauge,,second,,Average background wait time,-1,couchbase,avg bg wait
 couchbase.by_bucket.avg_disk_commit_time,gauge,,second,,Average disk commit time,-1,couchbase,avg commit time
-couchbase.by_bucket.avg_disk_update_time,gauge,,microseconds,,Average disk update time ,-1,couch base,avg update time
+couchbase.by_bucket.avg_disk_update_time,gauge,,microsecond,,Average disk update time ,-1,couch base,avg update time
 couchbase.by_bucket.bg_wait_total,gauge,,byte,,Bytes read,0,couchbase,read
 couchbase.by_bucket.bytes_read,gauge,,byte,,Bytes read,0,couchbase,read
 couchbase.by_bucket.bytes_written,gauge,,byte,,Bytes written,0,couchbase,written
-couchbase.by_bucket.cas_badval,gauge,,badval,,Compare and Swap bad values,-1,couchbase,cas badval
+couchbase.by_bucket.cas_badval,gauge,,,,Compare and Swap bad values,-1,couchbase,cas badval
 couchbase.by_bucket.cas_hits,gauge,,hit,,Compare and Swap hits,1,couchbase,cas hits
 couchbase.by_bucket.cas_misses,gauge,,miss,,Compare and Swap misses,-1,couchbase,cas misses
 couchbase.by_bucket.cmd_get,gauge,,get,,Compare and Swap gets,0,couchbase,cas gets
@@ -46,41 +46,41 @@ couchbase.by_bucket.disk_write_queue,gauge,,operation,,Disk write queue depth,-1
 couchbase.by_bucket.ep_bg_fetched,gauge,,fetch,second,Disk reads per second,0,couchbase,reads
 couchbase.by_bucket.ep_cache_miss_rate,gauge,,miss,,Cache miss rate,-1,couchbase,miss rate
 couchbase.by_bucket.ep_cache_miss_ratio,gauge,,percent,,Cache miss ratio,-1,couchbase,miss ratio
-couchbase.by_bucket.ep_dcp_fts_backoff,gauge,,backoff,,Number of backoffs for fts DCP connections,-1,couchbase,dcp fts backoff
+couchbase.by_bucket.ep_dcp_fts_backoff,gauge,,,,Number of backoffs for fts DCP connections,-1,couchbase,dcp fts backoff
 couchbase.by_bucket.ep_dcp_fts_count,gauge,,connection,,Number of fts DCP connections,0,couchbase,dcp fts count
 couchbase.by_bucket.ep_dcp_fts_items_remaining,gauge,,item,,Number of fts items remaining to be sent,0,couchbase,dcp fts items remaining
 couchbase.by_bucket.ep_dcp_fts_items_sent,gauge,,item,,Number of fts items sent,0,couchbase,dcp fts items sent
-couchbase.by_bucket.ep_dcp_fts_producer_count,gauge,,producer,,Number of fts producers,0,couchbase,dcp fts producer
+couchbase.by_bucket.ep_dcp_fts_producer_count,gauge,,,,Number of fts producers,0,couchbase,dcp fts producer
 couchbase.by_bucket.ep_dcp_fts_total_bytes,gauge,,byte,second,Number bytes per second being sent for fts DCP connections,0,couchbase,dcp fts total bytes
-couchbase.by_bucket.ep_dcp_2i_backoff,gauge,,backoff,,Number of backoffs for indexes DCP connections,-1,couchbase,dcp indexes backoff
+couchbase.by_bucket.ep_dcp_2i_backoff,gauge,,,,Number of backoffs for indexes DCP connections,-1,couchbase,dcp indexes backoff
 couchbase.by_bucket.ep_dcp_2i_count,gauge,,connection,,Number of indexes DCP connections,0,couchbase,dcp indexes count
 couchbase.by_bucket.ep_dcp_2i_items_remaining,gauge,,item,,Number of indexes items remaining to be sent,0,couchbase,dcp indexes items remaining
 couchbase.by_bucket.ep_dcp_2i_items_sent,gauge,,item,,Number of indexes items sent,0,couchbase,dcp indexes items sent
-couchbase.by_bucket.ep_dcp_2i_producer_count,gauge,,producer,,Number of indexes producers,0,couchbase,dcp indexes producer
+couchbase.by_bucket.ep_dcp_2i_producer_count,gauge,,,,Number of indexes producers,0,couchbase,dcp indexes producer
 couchbase.by_bucket.ep_dcp_2i_total_bytes,gauge,,byte,second,Number bytes per second being sent for indexes DCP connections,0,couchbase,dcp indexes total bytes
-couchbase.by_bucket.ep_dcp_other_backoff,gauge,,backoff,,Number of backoffs for other DCP connections,-1,couchbase,dcp other backoff
+couchbase.by_bucket.ep_dcp_other_backoff,gauge,,,,Number of backoffs for other DCP connections,-1,couchbase,dcp other backoff
 couchbase.by_bucket.ep_dcp_other_count,gauge,,connection,,Number of other DCP connections,0,couchbase,dcp other count
 couchbase.by_bucket.ep_dcp_other_items_remaining,gauge,,item,,Number of other items remaining to be sent,0,couchbase,dcp other items remaining
 couchbase.by_bucket.ep_dcp_other_items_sent,gauge,,item,,Number of other items sent,0,couchbase,dcp other items sent
-couchbase.by_bucket.ep_dcp_other_producer_count,gauge,,producer,,Number of other producers,0,couchbase,dcp other producer
+couchbase.by_bucket.ep_dcp_other_producer_count,gauge,,,,Number of other producers,0,couchbase,dcp other producer
 couchbase.by_bucket.ep_dcp_other_total_bytes,gauge,,byte,second,Number bytes per second being sent for other DCP connections,0,couchbase,dcp other total bytes
-couchbase.by_bucket.ep_dcp_replica_backoff,gauge,,backoff,,Number of backoffs for replica DCP connections,-1,couchbase,dcp replica backoff
+couchbase.by_bucket.ep_dcp_replica_backoff,gauge,,,,Number of backoffs for replica DCP connections,-1,couchbase,dcp replica backoff
 couchbase.by_bucket.ep_dcp_replica_count,gauge,,connection,,Number of replica DCP connections,0,couchbase,dcp replica count
 couchbase.by_bucket.ep_dcp_replica_items_remaining,gauge,,item,,Number of replica items remaining to be sent,0,couchbase,dcp replica items remaining
 couchbase.by_bucket.ep_dcp_replica_items_sent,gauge,,item,,Number of replica items sent,0,couchbase,dcp replica items sent
-couchbase.by_bucket.ep_dcp_replica_producer_count,gauge,,producer,,Number of replica producers,0,couchbase,dcp replica producer
+couchbase.by_bucket.ep_dcp_replica_producer_count,gauge,,,,Number of replica producers,0,couchbase,dcp replica producer
 couchbase.by_bucket.ep_dcp_replica_total_bytes,gauge,,byte,second,Number bytes per second being sent for replica DCP connections,0,couchbase,dcp replica total bytes
-couchbase.by_bucket.ep_dcp_views_backoff,gauge,,backoff,,Number of backoffs for views DCP connections,-1,couchbase,dcp views backoff
+couchbase.by_bucket.ep_dcp_views_backoff,gauge,,,,Number of backoffs for views DCP connections,-1,couchbase,dcp views backoff
 couchbase.by_bucket.ep_dcp_views_count,gauge,,connection,,Number of views DCP connections,0,couchbase,dcp views count
 couchbase.by_bucket.ep_dcp_views_items_remaining,gauge,,item,,Number of views items remaining to be sent,0,couchbase,dcp views items remaining
 couchbase.by_bucket.ep_dcp_views_items_sent,gauge,,item,,Number of views items sent,0,couchbase,dcp views items sent
-couchbase.by_bucket.ep_dcp_views_producer_count,gauge,,producer,,Number of views producers,0,couchbase,dcp views producer
+couchbase.by_bucket.ep_dcp_views_producer_count,gauge,,,,Number of views producers,0,couchbase,dcp views producer
 couchbase.by_bucket.ep_dcp_views_total_bytes,gauge,,byte,second,Number bytes per second being sent for views DCP connections,0,couchbase,dcp views total bytes
-couchbase.by_bucket.ep_dcp_xdcr_backoff,gauge,,backoff,,Number of backoffs for xdcr DCP connections,-1,couchbase,dcp xdcr backoff
+couchbase.by_bucket.ep_dcp_xdcr_backoff,gauge,,,,Number of backoffs for xdcr DCP connections,-1,couchbase,dcp xdcr backoff
 couchbase.by_bucket.ep_dcp_xdcr_count,gauge,,connection,,Number of xdcr DCP connections,0,couchbase,dcp xdcr count
 couchbase.by_bucket.ep_dcp_xdcr_items_remaining,gauge,,item,,Number of xdcr items remaining to be sent,0,couchbase,dcp xdcr items remaining
 couchbase.by_bucket.ep_dcp_xdcr_items_sent,gauge,,item,,Number of xdcr items sent,0,couchbase,dcp xdcr items sent
-couchbase.by_bucket.ep_dcp_xdcr_producer_count,gauge,,producer,,Number of xdcr producers,0,couchbase,dcp xdcr producer
+couchbase.by_bucket.ep_dcp_xdcr_producer_count,gauge,,,,Number of xdcr producers,0,couchbase,dcp xdcr producer
 couchbase.by_bucket.ep_dcp_xdcr_total_bytes,gauge,,byte,second,Number bytes per second being sent for xdcr DCP connections,0,couchbase,dcp xdcr total bytes
 couchbase.by_bucket.ep_diskqueue_drain,gauge,,item,,Total Drained items on disk queue,0,couchbase,queue drained
 couchbase.by_bucket.ep_diskqueue_fill,gauge,,item,,Total enqueued items on disk queue,0,couchbase,queued

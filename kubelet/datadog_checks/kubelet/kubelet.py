@@ -92,8 +92,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             'metrics': [{
                 'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
                 'rest_client_requests_total': 'rest.client.requests',
+                'rest_client_request_latency_seconds': 'rest.client.latency',
                 'kubelet_runtime_operations': 'kubelet.runtime.operations',
                 'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+                'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
             }],
             # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
             'send_monotonic_counter': instance.get('send_monotonic_counter', False),

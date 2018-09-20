@@ -6,6 +6,7 @@ from .config import config
 from .create import create
 from .dep import dep
 from .manifest import manifest
+from .meta import meta
 from .release import release
 from .test import test
 
@@ -15,6 +16,7 @@ ALL_COMMANDS = (
     create,
     dep,
     manifest,
+    meta,
     release,
     test,
 )

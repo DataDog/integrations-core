@@ -74,6 +74,7 @@ setup(
             'docker-compose>=1.21.2',
             'in-toto>=0.2.3.dev3',
             'pip-tools',
+            'pyperclip>=1.6.4',
             'requests<2.19.0',
             'semver',
             'setuptools>=38.6.0',

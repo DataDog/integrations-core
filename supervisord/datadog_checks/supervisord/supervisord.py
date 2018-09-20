@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
 from collections import defaultdict
 import itertools
 import re
@@ -10,11 +9,9 @@ import socket
 import time
 import xmlrpclib
 
-# 3p
 import supervisor.xmlrpc
 
-# project
-from checks import AgentCheck
+from datadog_checks.checks.base import AgentCheck
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'
@@ -41,7 +38,7 @@ SERVER_TAG = 'supervisord_server'
 
 PROCESS_TAG = 'supervisord_process'
 
-FORMAT_TIME = lambda x: time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x))
+FORMAT_TIME = lambda x: time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x)) # noqa E731
 
 SERVER_SERVICE_CHECK = 'supervisord.can_connect'
 PROCESS_SERVICE_CHECK = 'supervisord.process.status'

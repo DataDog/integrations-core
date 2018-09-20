@@ -22,7 +22,7 @@ except ImportError:
 METRIC_TYPES = ['counter', 'gauge']
 
 # As case can vary depending on Kubernetes versions, we match the lowercase string
-WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff']
+WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
 WHITELISTED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 

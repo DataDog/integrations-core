@@ -14,7 +14,7 @@ from datadog_checks.vsphere.errors import BadConfigError, ConnectionError
 from datadog_checks.vsphere.cache_config import CacheConfig
 from datadog_checks.vsphere.common import SOURCE_TYPE
 from datadog_checks.vsphere.vsphere import (
-    REFRESH_MORLIST_INTERVAL, REFRESH_METRICS_METADATA_INTERVAL, RESOURCE_TYPE_METRICS
+    REFRESH_MORLIST_INTERVAL, REFRESH_METRICS_METADATA_INTERVAL, RESOURCE_TYPE_METRICS, SHORT_ROLLUP
 )
 from .utils import assertMOR, MockedMOR
 from .utils import disable_thread_pool, get_mocked_server
@@ -233,6 +233,7 @@ def test__cache_morlist_raw_async(vsphere, instance):
 
 def test__process_mor_objects_queue(vsphere, instance):
     vsphere.log = MagicMock()
+    vsphere._process_mor_objects_queue_async = MagicMock()
     vsphere._process_mor_objects_queue(instance)
     # Queue hasn't been initialized
     vsphere.log.debug.assert_called_once_with(
@@ -248,6 +249,136 @@ def test__process_mor_objects_queue(vsphere, instance):
         vsphere._process_mor_objects_queue(instance)
         # Object queue should be empty after processing
         assert sum(vsphere.mor_objects_queue.size(i_key, resource_type) for resource_type in RESOURCE_TYPE_METRICS) == 0
+        assert vsphere._process_mor_objects_queue_async.call_count == 2  # Once for each datacenter
+        for call_args in vsphere._process_mor_objects_queue_async.call_args_list:
+            # query_specs parameter should be a list of size 1 since the batch size is 1
+            assert len(call_args[0][1]) == 1
+
+
+def test_collect_realtime_only(vsphere, instance):
+    """
+    Test the collect_realtime_only parameter acts as expected
+    """
+    vsphere._process_mor_objects_queue_async = MagicMock()
+    instance["collect_realtime_only"] = False
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        vsphere._cache_morlist_raw(instance)
+        vsphere._process_mor_objects_queue(instance)
+        # Called once to process the 2 datacenters
+        assert vsphere._process_mor_objects_queue_async.call_count == 1
+
+    instance["collect_realtime_only"] = True
+    vsphere._process_mor_objects_queue_async.reset_mock()
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        vsphere._cache_morlist_raw(instance)
+        vsphere._process_mor_objects_queue(instance)
+        assert vsphere._process_mor_objects_queue_async.call_count == 0
+
+
+def test__cache_metrics_metadata(vsphere, instance):
+    vsphere.metadata_cache = MagicMock()
+    vsphere._cache_metrics_metadata(instance)
+
+    vsphere.metadata_cache.init_instance.assert_called_once_with(vsphere._instance_key(instance))
+    vsphere.metadata_cache.set_metadata.assert_called_once()
+    vsphere.metadata_cache.set_metric_ids.assert_called_once()
+
+
+def test__cache_metrics_metadata_compatibility(vsphere, instance):
+    server_instance = vsphere._get_server_instance(instance)
+    i_key = vsphere._instance_key(instance)
+    counter = MagicMock()
+    counter.rollupType = "average"
+    counter.key = 1
+    vsphere.format_metric_name = MagicMock()
+
+    # New way
+    instance["collection_level"] = 3
+    server_instance.content.perfManager.QueryPerfCounterByLevel.return_value = [counter]
+    vsphere._cache_metrics_metadata(instance)
+
+    server_instance.content.perfManager.QueryPerfCounterByLevel.assert_called_once_with(3)
+    assert len(vsphere.metadata_cache._metric_ids[i_key]) == 1
+    assert len(vsphere.metadata_cache._metadata[i_key]) == 1
+    vsphere.format_metric_name.assert_called_once_with(counter)
+
+    # Compatibility mode
+    instance["all_metrics"] = False
+    del instance["collection_level"]
+    vsphere.format_metric_name.reset_mock()
+    server_instance.content.perfManager.perfCounter = [counter]
+    vsphere._cache_metrics_metadata(instance)
+
+    assert len(vsphere.metadata_cache._metric_ids[i_key]) == 0
+    assert len(vsphere.metadata_cache._metadata[i_key]) == 1
+    vsphere.format_metric_name.assert_called_once_with(counter, compatibility=True)
+
+
+def test_in_compatibility_mode(vsphere, instance):
+    vsphere.log = MagicMock()
+
+    instance["collection_level"] = 2
+    assert vsphere.in_compatibility_mode(instance) is False
+
+    instance["all_metrics"] = True
+    assert vsphere.in_compatibility_mode(instance) is False
+    vsphere.log.warning.assert_not_called()
+
+    assert vsphere.in_compatibility_mode(instance, log_warning=True) is False
+    vsphere.log.warning.assert_called_once()
+
+    del instance["collection_level"]
+    vsphere.log.reset_mock()
+    assert vsphere.in_compatibility_mode(instance) is True
+    vsphere.log.warning.assert_not_called()
+
+    assert vsphere.in_compatibility_mode(instance, log_warning=True) is True
+    vsphere.log.warning.assert_called_once()
+
+
+def test_format_metric_name(vsphere):
+    counter = MagicMock()
+    counter.groupInfo.key = "group"
+    counter.nameInfo.key = "name"
+    counter.rollupType = "rollup"
+    assert vsphere.format_metric_name(counter, compatibility=True) == "group.name"
+
+    for rollup, short_rollup in SHORT_ROLLUP.items():
+        counter.rollupType = rollup
+        assert vsphere.format_metric_name(counter) == "group.name.{}".format(short_rollup)
+
+
+def test_collect_metrics(vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        vsphere.batch_morlist_size = 1
+        vsphere._collect_metrics_async = MagicMock()
+        vsphere._cache_metrics_metadata(instance)
+        vsphere._cache_morlist_raw(instance)
+        vsphere._process_mor_objects_queue(instance)
+        vsphere.collect_metrics(instance)
+        assert vsphere._collect_metrics_async.call_count == 6  # One for each VM/host, datacenters are not collected
+        for call_args in vsphere._collect_metrics_async.call_args_list:
+            # query_specs parameter should be a list of size 1 since the batch size is 1
+            assert len(call_args[0][1]) == 1
+
+
+def test__collect_metrics_async_compatibility(vsphere, instance):
+    server_instance = vsphere._get_server_instance(instance)
+    server_instance.content.perfManager.QueryPerf.return_value = [MagicMock(value=[MagicMock()])]
+    vsphere.mor_cache = MagicMock()
+    vsphere.metadata_cache = MagicMock()
+    vsphere.metadata_cache.get_metadata.return_value = {"name": "unknown"}
+    vsphere.in_compatibility_mode = MagicMock()
+    vsphere.log = MagicMock()
+
+    vsphere.in_compatibility_mode.return_value = True
+    vsphere._collect_metrics_async(instance, [])
+    vsphere.log.debug.assert_called_with("Skipping unknown `unknown` metric.")
+
+    vsphere.log.reset_mock()
+    vsphere.in_compatibility_mode.return_value = False
+    vsphere._collect_metrics_async(instance, [])
+    vsphere.log.debug.assert_not_called()
 
 
 def test_check(vsphere, instance):

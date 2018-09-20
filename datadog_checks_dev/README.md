@@ -81,6 +81,7 @@ $ ddev
 Usage: ddev [OPTIONS] COMMAND [ARGS]...
 
 Options:
+  -c, --core    Work on `integrations-core`.
   -e, --extras  Work on `integrations-extras`.
   -x, --here    Work on the current location.
   -q, --quiet
