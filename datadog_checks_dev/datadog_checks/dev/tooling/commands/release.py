@@ -814,7 +814,7 @@ def agent_changelog(ctx, since, to, output, force):
 
     # go through all the agent releases
     for agent, changes in changes_per_agent.iteritems():
-        url = agent_changelog_url.format(agent)
+        url = agent_changelog_url.format(agent.replace('.', ''))  # Github removes dots from the anchor
         changelog.write('## Datadog Agent [{}]({})\n\n'.format(agent, url))
 
         if not changes:
