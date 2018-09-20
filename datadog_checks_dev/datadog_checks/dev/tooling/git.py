@@ -113,4 +113,3 @@ def git_tag_list(pattern=None):
 
     regex = re.compile(pattern)
     return filter(regex.search, result)
-
