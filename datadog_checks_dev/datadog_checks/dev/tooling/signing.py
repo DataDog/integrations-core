@@ -52,7 +52,9 @@ def run_in_toto(key_id, products):
         # Use this step name.
         name=STEP_NAME,
         # Record every source file, except for exclude_patterns, as output.
-        product_list=products
+        product_list=products,
+        # Keep file size down
+        compact_json=True,
     )
 
 

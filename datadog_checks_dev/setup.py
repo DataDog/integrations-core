@@ -72,7 +72,7 @@ setup(
             'click',
             'colorama',
             'docker-compose>=1.21.2',
-            'in-toto>=0.2.3.dev2',
+            'in-toto>=0.2.3.dev3',
             'pip-tools',
             'requests<2.19.0',
             'semver',
