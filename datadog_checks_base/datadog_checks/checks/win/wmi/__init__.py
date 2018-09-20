@@ -179,7 +179,7 @@ class WinWMICheck(AgentCheck):
             for wmi_property, wmi_value in iteritems(wmi_obj):
                 # skips any property not in arguments since SWbemServices.ExecQuery will return key prop properties
                 # https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
-                if wmi_property not in (map(str.lower,wmi_sampler.property_names)):
+                if wmi_property.lower() not in (s.lower() for s in wmi_sampler.property_names):
                     continue
                 # Tag with `tag_by` parameter
                 if wmi_property == tag_by:
@@ -215,12 +215,19 @@ class WinWMICheck(AgentCheck):
         Resolve metric names and types and submit it.
         """
         for metric in metrics:
-            if metric.name not in metric_name_and_type_by_property:
+            if metric.name not in metric_name_and_type_by_property \
+                    and metric.name.lower() not in metric_name_and_type_by_property:
                 # Only report the metrics that were specified in the configration
                 # Ignore added properties like 'Timestamp_Sys100NS', `Frequency_Sys100NS`, etc ...
                 continue
 
-            metric_name, metric_type = metric_name_and_type_by_property[metric.name]
+            if metric_name_and_type_by_property.get(metric.name):
+                metric_name, metric_type = metric_name_and_type_by_property[metric.name]
+            elif metric_name_and_type_by_property.get(metric.name.lower()):
+                metric_name, metric_type = metric_name_and_type_by_property[metric.name.lower()]
+            else:
+                continue
+
             try:
                 func = getattr(self, metric_type.lower())
             except AttributeError:

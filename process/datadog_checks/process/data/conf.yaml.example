@@ -21,6 +21,7 @@ instances:
 #    exact_match: (optional) Boolean. Default value of True matches your search_string on proc.name().
 #                 If you want to match on a substring within proc.cmdline(), set this to False
 #                 https://docs.datadoghq.com/integrations/process/#configuration
+#                 Regex is also supported when this flag is set to False.
 #    ignore_denied_access: (optional) Boolean. Default to True, when getting the number of files descriptors, dd-agent user might
 #    get a denied access. Set this to true to not issue a warning if that happens.
 #    thresholds: (optional) Two ranges: critical and warning
@@ -49,6 +50,10 @@ instances:
 #      warning: [3, 5]
 #      ok if 3, 4, 5 processes are running
 #    try_sudo: False
+#
+#  - name: django_management_commands
+#    search_string: ['python manage\.py \w+']
+#    exact_match: False
 #
 #  - name: postgres
 #    search_string: ['postgres']

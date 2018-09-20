@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import unicode_literals
 from distutils.version import StrictVersion
+from copy import deepcopy
 
 from datadog_checks.redisdb import Redis
 import pytest
@@ -66,6 +67,7 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     if StrictVersion(version) >= StrictVersion('2.6.0'):
         # instantaneous_ops_per_sec info is only available on redis>=2.6
         assert 'redis.net.instantaneous_ops_per_sec' in aggregator.metric_names
+    db.flushdb()
 
 
 @pytest.mark.integration
@@ -116,3 +118,95 @@ def test_redis_command_stats(aggregator, redis_instance):
         found = False
 
     assert found
+
+
+@pytest.mark.integration
+def test__check_key_lengths_misconfig(aggregator, redis_instance):
+    """
+    The check shouldn't send anything if misconfigured
+    """
+    redis_check = Redis('redisdb', {}, {})
+    c = redis_check._get_conn(redis_instance)
+
+    # `keys` param is missing
+    del redis_instance['keys']
+    redis_check._check_key_lengths(c, redis_instance, [])
+    assert len(list(aggregator.metrics('redis.key.length'))) == 0
+
+    # `keys` is not a list
+    redis_instance['keys'] = 'FOO'
+    redis_check._check_key_lengths(c, redis_instance, [])
+    assert len(list(aggregator.metrics('redis.key.length'))) == 0
+
+    # `keys` is an empty list
+    redis_instance['keys'] = []
+    redis_check._check_key_lengths(c, redis_instance, [])
+    assert len(list(aggregator.metrics('redis.key.length'))) == 0
+
+
+@pytest.mark.integration
+def test__check_key_lengths_single_db(aggregator, redis_instance):
+    """
+    Keys are stored in multiple databases but we collect data from
+    one database only
+    """
+    redis_check = Redis('redisdb', {}, {})
+    tmp = deepcopy(redis_instance)
+
+    # fill db 0
+    tmp['db'] = 0
+    conn = redis_check._get_conn(tmp)
+    conn.flushdb()
+    conn.lpush('test_foo', 'value1')
+    conn.lpush('test_foo', 'value2')
+
+    # fill db 3
+    tmp['db'] = 3
+    conn = redis_check._get_conn(tmp)
+    conn.flushdb()
+    conn.lpush('test_foo', 'value3')
+    conn.lpush('test_foo', 'value4')
+
+    # collect only from 3
+    redis_instance['db'] = 3
+    redis_check._check_key_lengths(conn, redis_instance, [])
+
+    # metric should be only one, not regarding the number of databases
+    aggregator.assert_metric('redis.key.length', count=1)
+
+    # that single metric should have value=2
+    aggregator.assert_metric('redis.key.length', value=2)
+
+
+@pytest.mark.integration
+def test__check_key_lengths_multi_db(aggregator, redis_instance):
+    """
+    Keys are stored across different databases
+    """
+    redis_check = Redis('redisdb', {}, {})
+    c = redis_check._get_conn(redis_instance)
+    tmp = deepcopy(redis_instance)
+
+    # also add a specific key to the instance
+    redis_instance['keys'].append('missing_key')
+
+    # fill db 0
+    tmp['db'] = 0
+    conn = redis_check._get_conn(tmp)
+    conn.flushdb()
+    conn.lpush('test_foo', 'value1')
+    conn.lpush('test_foo', 'value2')
+    conn.lpush('test_bar', 'value1')
+
+    # fill db 3
+    tmp['db'] = 3
+    conn = redis_check._get_conn(tmp)
+    conn.flushdb()
+    conn.lpush('test_foo', 'value3')
+    conn.lpush('test_foo', 'value4')
+
+    redis_check._check_key_lengths(c, redis_instance, [])
+    aggregator.assert_metric('redis.key.length', count=3)
+    aggregator.assert_metric('redis.key.length', value=4, tags=['key:test_foo'])
+    aggregator.assert_metric('redis.key.length', value=1, tags=['key:test_bar'])
+    aggregator.assert_metric('redis.key.length', value=0, tags=['key:missing_key'])

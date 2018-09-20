@@ -1,5 +1,16 @@
 # CHANGELOG - kubelet
 
+## 2.0.0 / 2018-09-04
+
+* [Changed] Update kubelet to use the new OpenMetricsBaseCheck. See [#1982](https://github.com/DataDog/integrations-core/pull/1982).
+* [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093](https://github.com/DataDog/integrations-core/pull/2093).
+* [Changed] Get pod & container IDs from the pod list for reliability. See [#1996](https://github.com/DataDog/integrations-core/pull/1996).
+* [Fixed] Fixing typo in the pod list path used in the kubelet integration . See [#1847](https://github.com/DataDog/integrations-core/pull/1847).
+* [Fixed] Fix network and disk metric collection when multiple devices are used by a container. See [#1894](https://github.com/DataDog/integrations-core/pull/1894).
+* [Fixed] Improve check performance by filtering it's input before parsing. See [#1875](https://github.com/DataDog/integrations-core/pull/1875).
+* [Fixed] Reduce log spam on kubernetes tagging. See [#1830](https://github.com/DataDog/integrations-core/pull/1830).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.4.0 / 2018-06-14
 
 * [Changed] Kubelet check: better encapsulate the pod list retrieval. See [#1648](https://github.com/DataDog/integrations-core/pull/1648).

@@ -10,6 +10,7 @@ instances:
     # them to other tags, you can use the labels_mapper dictionary
     # labels_mapper:
     #   namespace: kube_namespace
+    #
     # Add the tags to join from the KSM.
     # Example: Joining for deployment metrics. Based on: kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile"}
     # Use the following config to add the value of label_addonmanager_kubernetes_io_mode as a tag to your KSM deployment metrics.
@@ -18,3 +19,12 @@ instances:
     #    label_to_match: deployment
     #    labels_to_get:
     #      - label_addonmanager_kubernetes_io_mode
+    #
+    # By default the hostname for metrics containing the node label will be
+    # overriden by the value of the label, this can be deactivated (all metrics
+    # will be attached to the host running KSM)
+    # hostname_override: true
+    #
+    # Send (deprecated) pod.phase service checks (default true, will be turned off in future versions)
+    # We recommend using the corresponding gauges instead, which benefit from historical data unlike service checks
+    # send_pod_phase_service_checks: false

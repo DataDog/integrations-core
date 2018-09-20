@@ -14,12 +14,13 @@ from ..utils import dir_exists
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, invoke_without_command=True)
+@click.option('--core', '-c', is_flag=True, help='Work on `integrations-core`.')
 @click.option('--extras', '-e', is_flag=True, help='Work on `integrations-extras`.')
 @click.option('--here', '-x', is_flag=True, help='Work on the current location.')
 @click.option('--quiet', '-q', is_flag=True)
 @click.version_option()
 @click.pass_context
-def ddev(ctx, extras, here, quiet):
+def ddev(ctx, core, extras, here, quiet):
     if not quiet and not config_file_exists():
         echo_waiting(
             'No config file found, creating one with default settings now...'
@@ -34,10 +35,15 @@ def ddev(ctx, extras, here, quiet):
                 'Please check your permissions.'.format(CONFIG_FILE)
             )
 
-    repo_choice = 'extras' if extras else 'core'
-
     # Load and store configuration for sub-commands.
     config = load_config()
+
+    repo_choice = (
+        'core' if core
+        else 'extras' if extras
+        else config.get('repo', 'core')
+    )
+
     config['repo_choice'] = repo_choice
     ctx.obj = config
 

@@ -50,3 +50,5 @@ postgresql.toast_blocks_read,gauge,,block,second,The number of disk blocks read 
 postgresql.toast_blocks_hit,gauge,,hit,second,The number of buffer hits in this table's TOAST table.,0,postgres,toast blks hit
 postgresql.toast_index_blocks_read,gauge,,block,second,The number of disk blocks read from this table's TOAST table index.,0,postgres,toast idx blks read
 postgresql.toast_index_blocks_hit,gauge,,block,second,The number of buffer hits in this table's TOAST table index.,0,postgres,toast idx blks hit
+postgresql.transactions.open,gauge,,transaction,,The number of open transactions in this database.,0,postgres,transactions open
+postgresql.transactions.idle_in_transaction,gauge,,transaction,,The number of 'idle in transaction' transactions in this database.,0,postgres,transactions idle_in_transaction

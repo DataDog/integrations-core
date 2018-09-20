@@ -9,8 +9,7 @@ import pytest
 import json
 
 from datadog_checks.kubelet import PodListUtils, KubeletCredentials, get_pod_by_uid, is_static_pending_pod
-from datadog_checks.checks.prometheus import PrometheusScraper
-
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from .test_kubelet import mock_from_file
 
 # Skip the whole tests module on Windows
@@ -32,7 +31,7 @@ def test_container_filter(monkeypatch):
     pod_list_utils = PodListUtils(pods)
 
     assert pod_list_utils is not None
-    assert len(pod_list_utils.containers) == 5
+    assert len(pod_list_utils.containers) == 7
     assert long_cid in pod_list_utils.containers
     is_excluded.assert_not_called()
 
@@ -115,12 +114,14 @@ def test_credentials_empty():
     assert creds.cert_pair() is None
     assert creds.headers("https://dummy") is None
 
-    scraper = PrometheusScraper(None)
-    creds.configure_scraper(scraper, "https://dummy")
-    assert scraper.ssl_ca_cert is None
-    assert scraper.ssl_cert is None
-    assert scraper.ssl_private_key is None
-    assert scraper.extra_headers == {}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
+    scraper_config = scraper.create_scraper_configuration()
+    scraper_config['prometheus_url'] = "https://dummy"
+    creds.configure_scraper(scraper_config)
+    assert scraper_config['ssl_ca_cert'] is None
+    assert scraper_config['ssl_cert'] is None
+    assert scraper_config['ssl_private_key'] is None
+    assert scraper_config['extra_headers'] == {}
 
 
 def test_credentials_certificates():
@@ -135,12 +136,14 @@ def test_credentials_certificates():
     assert creds.cert_pair() == ("crt", "key")
     assert creds.headers("https://dummy") is None
 
-    scraper = PrometheusScraper(None)
-    creds.configure_scraper(scraper, "https://dummy")
-    assert scraper.ssl_ca_cert == "ca_cert"
-    assert scraper.ssl_cert == "crt"
-    assert scraper.ssl_private_key == "key"
-    assert scraper.extra_headers == {}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
+    scraper_config = scraper.create_scraper_configuration({})
+    scraper_config['prometheus_url'] = "https://dummy"
+    creds.configure_scraper(scraper_config)
+    assert scraper_config['ssl_ca_cert'] == "ca_cert"
+    assert scraper_config['ssl_cert'] == "crt"
+    assert scraper_config['ssl_private_key'] == "key"
+    assert scraper_config['extra_headers'] == {}
 
 
 def test_credentials_token_noverify():
@@ -157,16 +160,19 @@ def test_credentials_token_noverify():
     # Make sure we don't leak the token over http
     assert creds.headers("http://dummy") is None
 
-    scraper = PrometheusScraper(None)
-    creds.configure_scraper(scraper, "https://dummy")
-    assert scraper.ssl_ca_cert is False
-    assert scraper.ssl_cert is None
-    assert scraper.ssl_private_key is None
-    assert scraper.extra_headers == expected_headers
+    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
+    scraper_config = scraper.create_scraper_configuration()
+    scraper_config['prometheus_url'] = 'https://dummy'
+    creds.configure_scraper(scraper_config)
+    assert scraper_config['ssl_ca_cert'] is False
+    assert scraper_config['ssl_cert'] is None
+    assert scraper_config['ssl_private_key'] is None
+    assert scraper_config['extra_headers'] == expected_headers
 
     # Make sure we don't leak the token over http
-    creds.configure_scraper(scraper, "http://dummy")
-    assert scraper.ssl_ca_cert is False
-    assert scraper.ssl_cert is None
-    assert scraper.ssl_private_key is None
-    assert scraper.extra_headers == {}
+    scraper_config['prometheus_url'] = "http://dummy"
+    creds.configure_scraper(scraper_config)
+    assert scraper_config['ssl_ca_cert'] is False
+    assert scraper_config['ssl_cert'] is None
+    assert scraper_config['ssl_private_key'] is None
+    assert scraper_config['extra_headers'] == {}

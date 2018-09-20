@@ -1,0 +1,8 @@
+version: '3.5'
+
+services:
+  go_expvar:
+    build:
+      context: .
+    ports:
+      - "8079:8079"

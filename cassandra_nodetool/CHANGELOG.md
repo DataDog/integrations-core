@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 0.1.3 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 0.1.2 / 2018-06-13
 
 * [Fixed] Convert port to a string before calling get_subprocess_output. See [#1549](https://github.com/DataDog/integrations-core/pull/1549). Thanks [jalaziz](https://github.com/jalaziz).

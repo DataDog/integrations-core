@@ -11,9 +11,9 @@ from datetime import datetime, timedelta
 from uptime import uptime
 
 # project
-from checks.winwmi_check import WinWMICheck, to_time, from_time
-from utils.containers import hash_mutable
-from utils.timeout import TimeoutException
+from datadog_checks.checks.win.wmi import WinWMICheck, to_time, from_time
+from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.utils.timeout import TimeoutException
 
 SOURCE_TYPE_NAME = 'event viewer'
 EVENT_TYPE = 'win32_log_event'
@@ -72,7 +72,7 @@ class Win32EventLogWMI(WinWMICheck):
         # Store the last timestamp by instance
         if instance_key not in self.last_ts:
             # If system boot was withing 600s of dd agent start then use boottime as last_ts
-            if uptime() <= 600
+            if uptime() <= 600:
                 self.last_ts[instance_key] = datetime.utcnow() - timedelta(seconds=uptime())
             else:
                 self.last_ts[instance_key] = datetime.utcnow()

@@ -56,7 +56,7 @@ def get_diff(check_name, target_tag):
     command = 'git log --pretty=%s {}... {}'.format(target_tag, target_path)
 
     with chdir(root):
-        return run_command(command, capture='out').stdout.splitlines()
+        return run_command(command, capture=True).stdout.splitlines()
 
 
 def git_commit(targets, message):
@@ -81,7 +81,7 @@ def git_tag(tag_name, push=False):
     Tag the repo using an annotated tag.
     """
     with chdir(get_root()):
-        result = run_command('git tag -a {} -m "{}"'.format(tag_name, tag_name))
+        result = run_command('git tag -a {} -m "{}"'.format(tag_name, tag_name), capture=True)
 
         if push:
             if result.code != 0:

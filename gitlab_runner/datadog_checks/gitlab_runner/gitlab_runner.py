@@ -25,6 +25,7 @@ class GitlabRunnerCheck(PrometheusCheck):
 
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(GitlabRunnerCheck, self).__init__(name, init_config, agentConfig, instances)

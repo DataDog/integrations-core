@@ -18,8 +18,11 @@ The CouchDB check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-1. Edit the `couch.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9] to start collecting your CouchDB performance data.
-  See the [sample couch.d/conf.yaml][2] for all available configuration options.
+#### Metric Collection
+
+1. Edit the `couch.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9] to start collecting your CouchDB performance data. See the [sample couch.d/conf.yaml][2] for all available configuration options.
+
+2. Add this configuration block to your `couch.d/conf.yaml` file to start gathering your [CouchDB Metrics](#metrics):
 
       ```yaml
       init_config:
@@ -36,7 +39,32 @@ The CouchDB check is included in the [Datadog Agent][1] package, so you don't ne
 
     Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
 
-2. [Restart the Agent][3] to begin sending CouchDB metrics to Datadog.
+3. [Restart the Agent][3] to begin sending CouchDB metrics to Datadog.
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `couch.d/conf.yaml` file to start collecting your CouchDB Logs:
+
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/couchdb/couch.log
+            source: couchdb
+            sourcecategory: database
+            service: couch
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample couch.d/conf.yaml][2] for all available configuration options.
+
+3. [Restart the Agent][3].
 
 ### Validation
 

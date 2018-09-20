@@ -27,7 +27,9 @@ See [metadata.csv][4] for a list of metrics provided by this integration.
 The Disk check does not include any events at this time.
 
 ### Service Checks
-The Disk check does not include any service checks at this time.
+
+**`disk.service_check_rw`**:
+Returns `CRITICAL` if filesystem is in read-only mode.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].

@@ -47,7 +47,7 @@ INSTANCES_QUERY = '''select instance_name
                      from sys.dm_os_performance_counters
                      where counter_name=? and instance_name!='_Total';'''
 
-VALUE_AND_BASE_QUERY = '''select counter_name, cntr_type, cntr_value, instance_name
+VALUE_AND_BASE_QUERY = '''select counter_name, cntr_type, cntr_value, instance_name, object_name
                           from sys.dm_os_performance_counters
                           where counter_name in (%s)
                           order by cntr_type;'''
@@ -681,6 +681,8 @@ class SqlServerMetric(object):
         self.base_name = base_name
         self.report_function = report_function
         self.instance = cfg_instance.get('instance_name', '')
+        self.object_name = cfg_instance.get('object_name', '')
+        self.tags = cfg_instance.get('tags', [])
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
@@ -698,7 +700,7 @@ class SqlSimpleMetric(SqlServerMetric):
         placeholder = '?'
         placeholders = ', '.join(placeholder for unused in counters_list)
         query_base = '''
-            select counter_name, instance_name, cntr_value
+            select counter_name, instance_name, object_name, cntr_value
             from sys.dm_os_performance_counters where counter_name in (%s)
             ''' % placeholders
 
@@ -708,22 +710,29 @@ class SqlSimpleMetric(SqlServerMetric):
         return rows
 
     def fetch_metric(self, cursor, rows, tags):
-        for counter_name_long, instance_name_long, cntr_value in rows:
+        tags = tags + self.tags
+
+        for counter_name_long, instance_name_long, object_name, cntr_value in rows:
             counter_name = counter_name_long.strip()
             instance_name = instance_name_long.strip()
+            object_name = object_name.strip()
             if counter_name.strip() == self.sql_name:
                 matched = False
-                if self.instance == ALL_INSTANCES and instance_name != "_Total":
+                metric_tags = list(tags)
+
+                if (
+                    (self.instance == ALL_INSTANCES and instance_name != "_Total")
+                    or (
+                        instance_name == self.instance
+                        and (not self.object_name or object_name == self.object_name)
+                    )
+                ):
                     matched = True
-                else:
-                    if instance_name == self.instance:
-                        matched = True
+
                 if matched:
-                    metric_tags = tags
                     if self.instance == ALL_INSTANCES:
-                        metric_tags = metric_tags + ['{}:{}'.format(self.tag_by, instance_name.strip())]
-                    self.report_function(self.datadog_name, cntr_value,
-                                         tags=metric_tags)
+                        metric_tags.append('{}:{}'.format(self.tag_by, instance_name.strip()))
+                    self.report_function(self.datadog_name, cntr_value, tags=metric_tags)
                     if self.instance != ALL_INSTANCES:
                         break
 
@@ -740,8 +749,8 @@ class SqlFractionMetric(SqlServerMetric):
         cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
         results = defaultdict(list)
-        for counter_name, cntr_type, cntr_value, instance_name in rows:
-            rowlist = [cntr_type, cntr_value, instance_name.strip()]
+        for counter_name, cntr_type, cntr_value, instance_name, object_name in rows:
+            rowlist = [cntr_type, cntr_value, instance_name.strip(), object_name.strip()]
             logger.debug("Adding new rowlist %s", str(rowlist))
             results[counter_name.strip()].append(rowlist)
         return results
@@ -764,17 +773,23 @@ class SqlFractionMetric(SqlServerMetric):
             self.log.warning("Couldn't find {} in results".format(self.sql_name))
             return
 
+        tags = tags + self.tags
+
         results_list = results[self.sql_name]
         done_instances = []
         for ndx, row in enumerate(results_list):
             ctype = row[0]
             cval = row[1]
             inst = row[2]
+            object_name = row[3]
 
             if inst in done_instances:
                 continue
 
-            if self.instance != ALL_INSTANCES and inst != self.instance:
+            if (
+                (self.instance != ALL_INSTANCES and inst != self.instance)
+                or (self.object_name and object_name != self.object_name)
+            ):
                 done_instances.append(inst)
                 continue
 
@@ -797,9 +812,9 @@ class SqlFractionMetric(SqlServerMetric):
                 value = cval2
                 base = cval
 
-            metric_tags = tags
+            metric_tags = list(tags)
             if self.instance == ALL_INSTANCES:
-                metric_tags = metric_tags + ['{}:{}'.format(self.tag_by, inst.strip())]
+                metric_tags.append('{}:{}'.format(self.tag_by, inst.strip()))
             self.report_fraction(value, base, metric_tags)
 
     def report_fraction(self, value, base, metric_tags):
@@ -858,9 +873,8 @@ class SqlOsWaitStat(SqlServerMetric):
             return
 
         self.log.debug("Value for {} {} is {}".format(self.sql_name, self.column, value))
-        metric_tags = tags
         metric_name = '{}.{}'.format(self.datadog_name, self.column)
-        self.report_function(metric_name, value, tags=metric_tags)
+        self.report_function(metric_name, value, tags=tags + self.tags)
 
 
 class SqlIoVirtualFileStat(SqlServerMetric):
@@ -884,6 +898,7 @@ class SqlIoVirtualFileStat(SqlServerMetric):
         self.pvs_vals = defaultdict(lambda: None)
 
     def fetch_metric(self, cursor, rows, columns, tags):
+        tags = tags + self.tags
         dbid_ndx = columns.index("database_id")
         fileid_ndx = columns.index("file_id")
         column_ndx = columns.index(self.column)
@@ -902,12 +917,10 @@ class SqlIoVirtualFileStat(SqlServerMetric):
 
             report_value = value - self.pvs_vals[dbid, fid]
             self.pvs_vals[dbid, fid] = value
-            metric_tags = tags
-            metric_tags = metric_tags + ['database_id:{}'.format(str(dbid).strip())]
-            metric_tags = metric_tags + ['file_id:{}'.format(str(fid).strip())]
+            metric_tags = ['database_id:{}'.format(str(dbid).strip()), 'file_id:{}'.format(str(fid).strip())]
+            metric_tags.extend(tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
-            self.report_function(metric_name, report_value,
-                                 tags=metric_tags)
+            self.report_function(metric_name, report_value, tags=metric_tags)
 
 
 class SqlOsMemoryClerksStat(SqlServerMetric):
@@ -928,6 +941,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
         return rows, columns
 
     def fetch_metric(self, cursor, rows, columns, tags):
+        tags = tags + self.tags
         type_column_index = columns.index("type")
         value_column_index = columns.index(self.column)
         memnode_index = columns.index("memory_node_id")
@@ -939,8 +953,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             if met_type != self.sql_name:
                 continue
 
-            metric_tags = tags
-            metric_tags = metric_tags + ['memory_node_id:{}'.format(str(node_id))]
+            metric_tags = ['memory_node_id:{}'.format(str(node_id))]
+            metric_tags.extend(tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
-            self.report_function(metric_name, column_val,
-                                 tags=metric_tags)
+            self.report_function(metric_name, column_val, tags=metric_tags)

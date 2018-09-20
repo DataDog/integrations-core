@@ -45,7 +45,7 @@ instances:
 Zookeeper uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
 
 ```
-# Set root logger level to INFO and its only appender to R
+ # Set root logger level to INFO and its only appender to R
 log4j.rootLogger=INFO, R
 log4j.appender.R.File=/var/log/zookeeper.log
 log4j.appender.R.layout=org.apache.log4j.PatternLayout

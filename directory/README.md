@@ -32,6 +32,8 @@ The directory check is included in the [Datadog Agent][1] package, so you don't 
 
     Ensure that the user running the Agent process (usually `datadog-agent`) has read access to the directories, subdirectories, and files you configure.
 
+    **Note**: On Windows when you add your directory, use double-backslashes `C:\\path\\to\\directory` instead of single-backslashes `C:\path\to\directory` for the check to run. Otherwise, the directory check fails with traceback ending in the error: `found unknown escape character in "<string>"`.
+
 2. [Restart the Agent][3].
 
 ### Validation

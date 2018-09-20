@@ -1,5 +1,20 @@
 # CHANGELOG - kubernetes_state
 
+## 3.0.0 / 2018-09-04
+
+* [Changed] Update kubernetes_state to use the new OpenMetricsBaseCheck. See [#1983](https://github.com/DataDog/integrations-core/pull/1983).
+* [Added] Add cluster-name suffix to node-names in kubernetes state. See [#2069](https://github.com/DataDog/integrations-core/pull/2069).
+* [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093](https://github.com/DataDog/integrations-core/pull/2093).
+* [Added] Add `pod:` tags to kubernetes_state status reason metrics. See [#1884](https://github.com/DataDog/integrations-core/pull/1884).
+* [Deprecated] [KSM] Deprecate sending pod phase service checks. See [#2029](https://github.com/DataDog/integrations-core/pull/2029).
+* [Added] Add kubernetes persistentvolume metrics. See [#1932](https://github.com/DataDog/integrations-core/pull/1932). Thanks [Devatoria](https://github.com/Devatoria).
+* [Added] Map kube_endpoint metrics. See [#2001](https://github.com/DataDog/integrations-core/pull/2001). Thanks [mariuscoto](https://github.com/mariuscoto).
+* [Fixed] Lower case reasons before matching container.status_report.count.* metrics. See [#1949](https://github.com/DataDog/integrations-core/pull/1949).
+* [Fixed] Submit k_state.nodes.by_condition as gauge instead of counter. See [#1840](https://github.com/DataDog/integrations-core/pull/1840).
+* [Changed] Add sister gauge metrics to kubernetes_state pod service checks. See [#1578](https://github.com/DataDog/integrations-core/pull/1578). Thanks [mwhittington21](https://github.com/mwhittington21).
+* [Changed] kubernetes_state: plumb more container waiting reasons. See [#1763](https://github.com/DataDog/integrations-core/pull/1763). Thanks [stevvooe](https://github.com/stevvooe).
+* [Added] Make HTTP request timeout configurable in prometheus checks. See [#1790](https://github.com/DataDog/integrations-core/pull/1790).
+
 ## 2.7.0 / 2018-06-26
 
 * [Added] Add an option to disable hostname override. See [#1800](https://github.com/DataDog/integrations-core/pull/1800).

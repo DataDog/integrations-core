@@ -59,10 +59,8 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator):
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, '_retrieve_cadvisor_metrics',
                         mock.Mock(return_value=json.loads(mock_from_file('cadvisor_1.2.json'))))
-    monkeypatch.setattr(check.cadvisor_scraper, 'process', mock.Mock(return_value=None))
-    monkeypatch.setattr(check.kubelet_scraper, 'process', mock.Mock(return_value=None))
     monkeypatch.setattr(check, 'detect_cadvisor', mock.Mock(return_value=cadvisor_url))
-
+    monkeypatch.setattr(check, 'process', mock.Mock(return_value=None))
     # We filter out slices unknown by the tagger, mock a non-empty taglist
     monkeypatch.setattr('datadog_checks.kubelet.cadvisor.get_tags',
                         mock.Mock(return_value=["foo:bar"]))
@@ -75,8 +73,6 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator):
     check._retrieve_node_spec.assert_called_once()
     check._retrieve_cadvisor_metrics.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
-    check.cadvisor_scraper.process.assert_not_called()
-    check.kubelet_scraper.process.assert_called_once()
 
     # called twice so pct metrics are guaranteed to be there
     check.check(instance_with_tag)

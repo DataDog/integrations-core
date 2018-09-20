@@ -7,3 +7,5 @@
 boto==2.46.1 \
     --hash=sha256:d24a68d97276445d1b5baee6537bc565ab7070afcd449a72f2541b1da1328ed4 \
     --hash=sha256:d6c7046a1a199fad87ae95edeecb8e5a900b70c854199d3949d1dbb9f3385fcb
+google-compute-engine==2.8.3 \
+    --hash=sha256:14947a0cfc20e1d64d1184bbd137b9f3b66d7c94efcbe1b73e21c090e7002af4

@@ -1,5 +1,10 @@
 # CHANGELOG - solr
 
+## 1.1.0 / 2018-09-04
+
+* [Added] Add metrics for Solr 7. See [#2042](https://github.com/DataDog/integrations-core/pull/2042).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.0.1 / 2017-11-21
 
 * [IMPROVEMENT] Added `metrics.yaml` file. See [#863][]

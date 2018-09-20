@@ -1,5 +1,9 @@
 # CHANGELOG - php_fpm
 
+## 1.3.0 / 2018-09-04
+
+* [Added] Support fastcgi requests. See [#1997](https://github.com/DataDog/integrations-core/pull/1997).
+
 ## 1.2.0 / 2018-07-06
 
 * [Added] Add exponential backoff when status returns 503. See [#1851](https://github.com/DataDog/integrations-core/pull/1851).

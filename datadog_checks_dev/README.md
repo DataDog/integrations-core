@@ -25,6 +25,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Set](#set)
       - [Show](#show)
       - [Update](#update)
+    - [Create](#create)
     - [Dep](#dep)
       - [Freeze](#freeze)
       - [Pin](#pin)
@@ -53,6 +54,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
     - [Utilities](#utilities)
       - [Subprocess commands](#subprocess-commands)
       - [Temporary directories](#temporary-directories)
+  - [Practices](#practices)
 
 ## Management
 
@@ -61,7 +63,7 @@ This is the layer that provides the developer CLI.
 ### Installation
 
 ```console
-$ pip install datadog-checks-dev[cli]
+$ pip install "datadog-checks-dev[cli]"
 ```
 
 At this point there should be a working executable, `ddev`, in your PATH. The
@@ -79,6 +81,7 @@ $ ddev
 Usage: ddev [OPTIONS] COMMAND [ARGS]...
 
 Options:
+  -c, --core    Work on `integrations-core`.
   -e, --extras  Work on `integrations-extras`.
   -x, --here    Work on the current location.
   -q, --quiet
@@ -88,6 +91,7 @@ Options:
 Commands:
   clean     Remove a project's build artifacts
   config    Manage the config file
+  create    Create scaffolding for a new integration
   dep       Manage dependencies
   manifest  Manage manifest files
   release   Manage the release of checks
@@ -215,6 +219,23 @@ Usage: ddev config update [OPTIONS]
 
 Options:
   -h, --help  Show this message and exit.
+```
+
+#### Create
+
+```console
+$ ddev create -h
+Usage: ddev create [OPTIONS] NAME
+
+  Create scaffolding for a new integration.
+
+Options:
+  -t, --type [check]      The type of integration to create
+  -l, --location TEXT     The directory where files will be written
+  -ni, --non-interactive  Disable prompting for fields
+  -q, --quiet             Show less output
+  -n, --dry-run           Only show what would be created
+  -h, --help              Show this message and exit.
 ```
 
 #### Dep
@@ -519,9 +540,15 @@ Usage: ddev test [OPTIONS] [CHECKS]...
   compared to the master branch.
 
 Options:
-  -b, --bench  Run only benchmarks
-  --every      Run every kind of test
-  -h, --help   Show this message and exit.
+  -b, --bench        Run only benchmarks
+  -c, --cov          Measure code coverage
+  -m, --cov-missing  Show line numbers of statements that were not executed
+  --pdb              Drop to PDB on first failure, then end test session
+  -d, --debug        Set the log level to debug
+  -v, --verbose      Increase verbosity (can be used additively)
+  --changed          Only test changed checks
+  --cov-keep         Keep coverage reports
+  -h, --help         Show this message and exit.
 ```
 
 ## Development
@@ -621,6 +648,11 @@ Some examples:
 >>> assert origin == os.getcwd()
 >>>
 ```
+
+### Practices
+
+- If you see branches or functions that are unlikely to be executed or would be nearly impossible to
+  test, exclude them from code coverage consideration by adding 2 spaces followed by `# no cov`.
 
 [1]: https://github.com/DataDog/datadog-agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/stubs/aggregator.py

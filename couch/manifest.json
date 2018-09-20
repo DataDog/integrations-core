@@ -3,7 +3,8 @@
     "/integrations/couchdb"
   ],
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "creates_events": false,
   "description": "Apache CouchDB is a document-oriented database that can be queried and indexed using JavaScript in a MapReduce fashion.",

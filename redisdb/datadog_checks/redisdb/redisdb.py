@@ -7,6 +7,7 @@ from collections import defaultdict
 from copy import deepcopy
 
 import redis
+from six import iteritems
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
@@ -166,7 +167,6 @@ class Redis(AgentCheck):
 
     def _check_db(self, instance, custom_tags=None):
         conn = self._get_conn(instance)
-
         tags = self._get_tags(custom_tags, instance)
 
         # Ping the database for info, and track the latency.
@@ -231,55 +231,87 @@ class Redis(AgentCheck):
                        tags=tags)
 
         # Check some key lengths if asked
-        key_list = instance.get('keys')
-        if key_list is not None:
-            if not isinstance(key_list, list) or len(key_list) == 0:
-                self.warning("keys in redis configuration is either not a list or empty")
-            else:
-                l_tags = list(tags)
+        self._check_key_lengths(conn, instance, list(tags))
 
-                num_databases = int(conn.config_get('databases').get('databases', 1))
-                new_instance = deepcopy(instance)
-
-                for i in range(num_databases):
-                    new_instance['db'] = i
-                    db_conn = self._get_conn(new_instance)
-
-                    for key_pattern in key_list:
-                        if re.search(r"(?<!\\)[*?[]", key_pattern):
-                            keys = db_conn.scan_iter(match=key_pattern)
-                        else:
-                            keys = [key_pattern, ]
-
-                        for key in keys:
-                            try:
-                                key_type = db_conn.type(key)
-                            except redis.ResponseError:
-                                self.log.info("key {} on remote server; skipping".format(key))
-                                continue
-                            key_tags = l_tags + ['key:' + key]
-
-                            if key_type == 'list':
-                                self.gauge('redis.key.length', db_conn.llen(key), tags=key_tags)
-                            elif key_type == 'set':
-                                self.gauge('redis.key.length', db_conn.scard(key), tags=key_tags)
-                            elif key_type == 'zset':
-                                self.gauge('redis.key.length', db_conn.zcard(key), tags=key_tags)
-                            elif key_type == 'hash':
-                                self.gauge('redis.key.length', db_conn.hlen(key), tags=key_tags)
-                            else:
-                                # If the type is unknown, it might be because the key doesn't exist,
-                                # which can be because the list is empty. So always send 0 in that case.
-                                if instance.get("warn_on_missing_keys", True):
-                                    self.warning("{0} key not found in redis".format(key))
-                                self.gauge('redis.key.length', 0, tags=key_tags)
-
+        # Check replication
         self._check_replication(info, tags)
         if instance.get("command_stats", False):
             self._check_command_stats(conn, tags)
 
-    def _check_replication(self, info, tags):
+    def _check_key_lengths(self, conn, instance, tags):
+        """
+        Compute the length of the configured keys across all the databases
+        """
+        key_list = instance.get('keys')
 
+        if key_list is None:
+            return
+
+        if not isinstance(key_list, list) or len(key_list) == 0:
+            self.warning("keys in redis configuration is either not a list or empty")
+            return
+
+        # get all the available databases
+        databases = conn.info('keyspace').keys()
+        if not databases:
+            self.warning("Redis database is empty")
+            return
+
+        # convert to integer the output of `keyspace`, from `db0` to `0`
+        # and store items in a set
+        databases = [int(dbstring[2:]) for dbstring in databases]
+
+        # user might have configured the instance to target one specific db
+        if 'db' in instance:
+            db = instance['db']
+            if db not in databases:
+                self.warning("Cannot find database {}".format(instance['db']))
+                return
+            databases = [db, ]
+
+        # maps a key to the total length across databases
+        lengths = defaultdict(int)
+
+        # don't overwrite the configured instance, use a copy
+        tmp_instance = deepcopy(instance)
+
+        for db in databases:
+            tmp_instance['db'] = db
+            db_conn = self._get_conn(tmp_instance)
+
+            for key_pattern in key_list:
+                if re.search(r"(?<!\\)[*?[]", key_pattern):
+                    keys = db_conn.scan_iter(match=key_pattern)
+                else:
+                    keys = [key_pattern, ]
+
+                for key in keys:
+                    try:
+                        key_type = db_conn.type(key)
+                    except redis.ResponseError:
+                        self.log.info("key {} on remote server; skipping".format(key))
+                        continue
+
+                    if key_type == 'list':
+                        lengths[key] += db_conn.llen(key)
+                    elif key_type == 'set':
+                        lengths[key] += db_conn.scard(key)
+                    elif key_type == 'zset':
+                        lengths[key] += db_conn.zcard(key)
+                    elif key_type == 'hash':
+                        lengths[key] += db_conn.hlen(key)
+                    else:
+                        # If the type is unknown, it might be because the key doesn't exist,
+                        # which can be because the list is empty. So always send 0 in that case.
+                        lengths[key] += 0
+
+        # send the metrics
+        for key, total in iteritems(lengths):
+            self.gauge('redis.key.length', total, tags=tags + ['key:' + key])
+            if total == 0 and instance.get("warn_on_missing_keys", True):
+                self.warning("{0} key not found in redis".format(key))
+
+    def _check_replication(self, info, tags):
         # Save the replication delay for each slave
         for key in info:
             if self.slave_key_pattern.match(key) and isinstance(info[key], dict):

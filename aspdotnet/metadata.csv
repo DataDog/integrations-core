@@ -1,1 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+aspdotnet.application_restarts,gauge,,,,Shows the number of times the application has been restarted during the Web server's lifetime.,-1,ASP.NET,app restarts
+aspdotnet.worker_process_restarts,gauge,,,,Shows the number of times a worker process has restarted on the computer.,-1,ASP.NET,worker restarts
+aspdotnet.request.wait_time,gauge,,millisecond,,Shows the number of ms the most recent request was waiting in the queue.,-1,ASP.NET,req wait time
+aspdotnet.applications.requests.in_queue,gauge,,request,,Shows the number of requests in the application request queue.,-1,ASP.NET,app req in queue
+aspdotnet.applications.requests.executing,gauge,,request,,Shows the number of requests currently executing.,0,ASP.NET,app req executing
+aspdotnet.applications.requests.persec,gauge,,request,second,Shows the number of requests executed per second.,0,ASP.NET,app req/s
+aspdotnet.applications.forms_authentication.failure,gauge,,request,,Number of failed access requests made,-1,ASP.NET,form auth fail
+aspdotnet.applications.forms_authentication.successes,gauge,,request,,Number of successful access requests made,1,ASP.NET, form auth success

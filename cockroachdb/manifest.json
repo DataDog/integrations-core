@@ -1,0 +1,24 @@
+{
+  "display_name": "CockroachDB",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "cockroachdb",
+  "metric_prefix": "cockroachdb.",
+  "metric_to_check": "cockroachdb.sys.uptime",
+  "creates_events": false,
+  "short_description": "Monitor the overall health and performance of CockroachDB clusters.",
+  "guid": "d66151ed-2e98-4037-ad89-bf4400e45f34",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-CockroachDB Integration",
+  "categories": [
+    "cloud",
+    "data store"
+  ],
+  "type": "check",
+  "is_public": false
+}
