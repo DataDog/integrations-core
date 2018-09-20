@@ -72,7 +72,7 @@ setup(
             'click',
             'colorama',
             'docker-compose>=1.21.2',
-            'in-toto>=0.2.3.dev3',
+            'in-toto>=0.2.3.dev4',
             'pip-tools',
             'pyperclip>=1.6.4',
             'requests<2.19.0',
