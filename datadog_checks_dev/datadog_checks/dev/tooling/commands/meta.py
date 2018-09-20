@@ -12,6 +12,11 @@ from .utils import CONTEXT_SETTINGS
     short_help='Collection of useful utilities'
 )
 def meta():
+    """Anything here should be considered experimental.
+
+    This `meta` namespace can be used for an arbitrary number of
+    niche or beta features without bloating the root namespace.
+    """
     pass
 
 
