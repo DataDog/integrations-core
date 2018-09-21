@@ -16,8 +16,10 @@ This check monitors [{check_name_cap}][1].
    Agent's configuration directory to start collecting your {check_name} performance data.
    See the [sample {check_name}.d/conf.yaml][3] for all available configuration options.
 
-   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. 
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][7] for more detailed instructions. If you need to monitor more metrics, please send us an email at support@datadoghq.com
+   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
+   You can specify the metrics you are interested in by editing the configuration below. 
+   To learn how to customize the metrics to collect visit the [JMX Checks documentation][7] for more detailed instructions.
+   If you need to monitor more metrics, please send us an email at support@datadoghq.com
 
 2. [Restart the Agent][4]
 
