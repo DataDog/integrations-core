@@ -24,7 +24,7 @@ def traced(wrapped, instance, args, kwargs):
     if datadog_agent is None:
         return wrapped(*args, **kwargs)
 
-    trace_check = instance in _tracing_config 
+    trace_check = instance in _tracing_config
     integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
 
     if integration_tracing and trace_check:
