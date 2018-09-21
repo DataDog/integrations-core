@@ -22,28 +22,28 @@ def check():
 @pytest.fixture
 def instance():
     return {
-        'status_url': 'http://{}:8080/status'.format(HOST),
-        'ping_url': 'http://{}:8080/ping'.format(HOST),
+        'status_url': 'http://{}:8080/some_status'.format(HOST),
+        'ping_url': 'http://{}:8080/some_ping'.format(HOST),
     }
 
 
 @pytest.fixture
 def instance_fastcgi():
     return {
-        'status_url': 'http://{}:9000/status'.format(HOST),
-        'ping_url': 'http://{}:9000/ping'.format(HOST),
+        'status_url': 'http://{}:9000/some_status'.format(HOST),
+        'ping_url': 'http://{}:9000/some_ping'.format(HOST),
         'use_fastcgi': True,
     }
 
 
 @pytest.fixture
 def ping_url_tag():
-    return 'ping_url:http://{}:8080/ping'.format(HOST)
+    return 'ping_url:http://{}:8080/some_ping'.format(HOST)
 
 
 @pytest.fixture
 def ping_url_tag_fastcgi():
-    return 'ping_url:http://{}:9000/ping'.format(HOST)
+    return 'ping_url:http://{}:9000/some_ping'.format(HOST)
 
 
 @pytest.fixture(scope='session')
