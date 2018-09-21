@@ -446,6 +446,8 @@ def tag(check, version, push, dry_run):
     """Tag the HEAD of the git repo with the current release number for a
     specific check. The tag is pushed to origin by default.
 
+    You can tag everything at once by setting the check to `all`.
+
     Notice: specifying a different version than the one in __about__.py is
     a maintenance task that should be run under very specific circumstances
     (e.g. re-align an old release performed on the wrong commit).
@@ -496,25 +498,41 @@ def tag(check, version, push, dry_run):
 )
 @click.argument('check')
 @click.argument('version', required=False)
+@click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
+@click.option('--sign-only', is_flag=True, help='Only sign release metadata')
 @click.pass_context
-def make(ctx, check, version):
+def make(ctx, check, version, skip_sign, sign_only):
     """Perform a set of operations needed to release a single check:
 
-        \b
-        * update the version in __about__.py
-        * update the changelog
-        * update the requirements-agent-release.txt file
-        * commit the above changes
+    \b
+      * update the version in __about__.py
+      * update the changelog
+      * update the requirements-agent-release.txt file
+      * update in-toto metadata
+      * commit the above changes
+
+    You can release everything at once by setting the check to `all`.
+
+    \b
+    If you run into issues signing:
+    \b
+      - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
     """
+    # Import lazily since in-toto runs a subprocess to check for gpg2 on load
+    from ..signing import update_link_metadata
+
+    root = get_root()
+    releasing_all = check == 'all'
+
     valid_checks = get_valid_checks()
-    if check != 'all' and check not in valid_checks:
+    if not releasing_all and check not in valid_checks:
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # don't run the task on the master branch
     if get_current_branch() == 'master':
         abort('This task will commit, you do not want to add commits to master directly')
 
-    if check == 'all':
+    if releasing_all:
         if version:
             abort('You cannot bump every check to the same version')
         checks = sorted(valid_checks)
@@ -522,6 +540,9 @@ def make(ctx, check, version):
         checks = [check]
 
     for check in checks:
+        if sign_only:
+            break
+
         echo_success('Check `{}`'.format(check))
 
         if version:
@@ -540,24 +561,30 @@ def make(ctx, check, version):
             version = bump_function(cur_version)
 
         # update the version number
-        echo_info('Current version of check {}: {}, bumping to: {}'.format(check, cur_version, version))
+        echo_info('Current version of check {}: {}'.format(check, cur_version))
+        echo_waiting('Bumping to {}... '.format(version), nl=False)
         update_version_module(check, cur_version, version)
+        echo_success('success!')
 
         # update the CHANGELOG
-        echo_waiting('Updating the changelog...')
+        echo_waiting('Updating the changelog... ', nl=False)
         # TODO: Avoid double GitHub API calls when bumping all checks at once
         ctx.invoke(
             changelog, check=check, version=version, old_version=cur_version, quiet=True, dry_run=False
         )
+        echo_success('success!')
 
-        if check == 'datadog_checks_dev':
-            commit_targets = [check]
+        commit_targets = [check]
+
         # update the global requirements file
-        else:
-            commit_targets = [check, AGENT_REQ_FILE]
-            req_file = os.path.join(get_root(), AGENT_REQ_FILE)
-            echo_waiting('Updating the requirements file {}...'.format(req_file))
+        if check != 'datadog_checks_dev':
+            commit_targets.append(AGENT_REQ_FILE)
+            req_file = os.path.join(root, AGENT_REQ_FILE)
+            echo_waiting('Updating the Agent requirements file... ', nl=False)
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+            echo_success('success!')
+
+        echo_waiting('Committing files...')
 
         # commit the changes.
         # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
@@ -566,6 +593,13 @@ def make(ctx, check, version):
 
         # Reset version
         version = None
+
+    if sign_only or not skip_sign:
+        echo_waiting('Updating release metadata...')
+        echo_info('Please touch your Yubikey immediately after entering your PIN!')
+        commit_targets = update_link_metadata(checks)
+
+        git_commit(commit_targets, '[Release] Update metadata', force=True)
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')

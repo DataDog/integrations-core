@@ -408,17 +408,26 @@ Options:
 
 ```console
 $ ddev release make -h
-Usage: ddev release make [OPTIONS] CHECK VERSION
+Usage: ddev release make [OPTIONS] CHECK [VERSION]
 
   Perform a set of operations needed to release a single check:
 
-  * update the version in __about__.py
-  * update the changelog
-  * update the requirements-agent-release.txt file
-  * commit the above changes
+    * update the version in __about__.py
+    * update the changelog
+    * update the requirements-agent-release.txt file
+    * update in-toto metadata
+    * commit the above changes
+
+  You can release everything at once by setting the check to `all`.
+
+  If you run into issues signing:
+
+    - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
 
 Options:
-  -h, --help  Show this message and exit.
+  --skip-sign  Skip the signing of release metadata
+  --sign-only  Only sign release metadata
+  -h, --help   Show this message and exit.
 ```
 
 ##### Show
@@ -475,6 +484,8 @@ Usage: ddev release tag [OPTIONS] CHECK [VERSION]
 
   Tag the HEAD of the git repo with the current release number for a
   specific check. The tag is pushed to origin by default.
+
+  You can tag everything at once by setting the check to `all`.
 
   Notice: specifying a different version than the one in __about__.py is a
   maintenance task that should be run under very specific circumstances
