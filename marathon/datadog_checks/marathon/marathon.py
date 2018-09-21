@@ -242,10 +242,10 @@ class Marathon(AgentCheck):
             except KeyError:
                 pass
 
-        tags.extend(basic_tags)
-        tags.extend(label_tag_values)
+        basic_tags.extend(tags)
+        basic_tags.extend(label_tag_values)
 
-        return tags
+        return basic_tags
 
     def ensure_queue_count(self, queued, url, timeout, auth, acs_url, ssl_verify,
                            tags=None, label_tags=None, group=None):
