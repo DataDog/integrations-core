@@ -7,7 +7,7 @@ import csv
 import click
 
 from .utils import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_warning
 )
 from ..constants import get_root
 
@@ -32,6 +32,20 @@ OPTIONAL_HEADERS = {
 }
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
+
+VALID_METRIC_TYPE = {
+    'count',
+    'counter',
+    'distribution',
+    'gauge',
+    'rate'
+}
+
+VALID_ORIENTATION = {
+    '0',
+    '1',
+    '-1'
+}
 
 
 @click.group(
@@ -83,56 +97,54 @@ def verify(ctx, check):
 
         path = resolve_path(os.path.join(root, current_check, METADATA_FILE))
         if not file_exists(path):
-            echo_failure('Missing metadata file at: {}'.format(path))
-        else:
-            # To make logging less verbose, common errors are counted for current check
-            metric_prefix_count = dict()
-            empty_count = dict()
-            duplicate_set = set()
+            abort('Missing metadata file at: {}'.format(path))
 
-            with open(path) as f:
-                reader = csv.DictReader(f, delimiter=',')
+        # To make logging less verbose, common errors are counted for current check
+        metric_prefix_count = dict()
+        empty_count = dict()
+        duplicate_set = set()
 
-                for row in reader:
-                    # duplicates
-                    if str(row) not in duplicate_set:
-                        duplicate_set.add(str(row))
-                    else:
-                        raw_row = ','.join([y for x, y in row.items()])
-                        echo_warning("{}: `{}` is a duplicate row".format(current_check, raw_row))
+        with open(path) as f:
+            reader = csv.DictReader(f, delimiter=',')
 
-                    # all headers exist, no invalid headers
-                    if set(row.keys()) != ALL_HEADERS:
-                        invalid_headers = set(row.keys()).difference(ALL_HEADERS)
-                        if invalid_headers:
-                            echo_failure('{}: Invalid column {}'.format(current_check, invalid_headers))
-                        missing_headers = ALL_HEADERS.difference(set(row.keys()))
-                        if missing_headers:
-                            echo_failure('{}: Missing columns {}'.format(current_check, missing_headers))
-                        continue
+            for row in reader:
+                # all headers exist, no invalid headers
+                if set(row.keys()) != ALL_HEADERS:
+                    invalid_headers = set(row.keys()).difference(ALL_HEADERS)
+                    if invalid_headers:
+                        echo_failure('{}: Invalid column {}'.format(current_check, invalid_headers))
+                    missing_headers = ALL_HEADERS.difference(set(row.keys()))
+                    if missing_headers:
+                        echo_failure('{}: Missing columns {}'.format(current_check, missing_headers))
+                    continue
 
-                    # metric_name header
-                    if metric_prefix and not row['metric_name'].startswith(metric_prefix):
-                        prefix = row['metric_name'].rsplit(".")[0]
-                        metric_prefix_count[prefix] = metric_prefix_count.get(prefix, 0) + 1
+                # duplicate metric_name
+                if row['metric_name'] and row['metric_name'] not in duplicate_set:
+                    duplicate_set.add(row['metric_name'])
+                else:
+                    echo_warning("{}: `{}` is a duplicate metric_name".format(current_check, row['metric_name']))
 
-                    # metric_type header
-                    valid = {'', 'count', 'counter', 'distribution', 'gauge', 'rate'}
-                    if row['metric_type'] not in valid:
-                        echo_warning("{}: {} is an invalid metric_type.".format(current_check, row['metric_type']))
+                # metric_name header
+                if metric_prefix and not row['metric_name'].startswith(metric_prefix):
+                    prefix = row['metric_name'].rsplit(".")[0]
+                    metric_prefix_count[prefix] = metric_prefix_count.get(prefix, 0) + 1
 
-                    # orientation header
-                    valid = {'', '0', '1', '-1'}
-                    if row['orientation'] not in valid:
-                        echo_warning("{}: {} is an invalid orientation.".format(current_check, row['orientation']))
+                # metric_type header
+                if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
+                    echo_warning("{}: `{}` is an invalid metric_type.".format(current_check, row['metric_type']))
 
-                    # empty required fields
-                    for header in REQUIRED_HEADERS:
-                        if not row[header]:
-                            empty_count[header] = empty_count.get(header, 0) + 1
+                # orientation header
+                if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
+                    echo_warning("{}: `{}` is an invalid orientation.".format(current_check, row['orientation']))
 
-            for header, count in empty_count.items():
-                echo_warning("{}: {} is empty in {} rows.".format(current_check, header, count))
-            for prefix, count in metric_prefix_count.items():
-                echo_warning('{}: {} does not match metric_prefix defined in the manifest'.format(current_check, prefix))
+                # empty required fields
+                for header in REQUIRED_HEADERS:
+                    if not row[header]:
+                        empty_count[header] = empty_count.get(header, 0) + 1
 
+        for header, count in empty_count.items():
+            echo_warning("{}: {} is empty in {} rows.".format(current_check, header, count))
+        for prefix, count in metric_prefix_count.items():
+            echo_warning(
+                '{}: `{}` appears {} time(s) and does not match metric_prefix defined in the manifest'.format(
+                    current_check, prefix, count))

@@ -45,6 +45,7 @@ jobs:
       script:
         - ddev dep verify
         - ddev manifest verify --include-extras
+        - ddev metadata verify
         - ddev test --cov
         - ddev test --bench || true
     - stage: test
@@ -52,6 +53,7 @@ jobs:
       script:
         - ddev dep verify
         - ddev manifest verify --include-extras
+        - ddev metadata verify
         - travis_retry ddev test --cov ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
