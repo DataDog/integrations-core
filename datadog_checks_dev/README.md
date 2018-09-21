@@ -230,7 +230,7 @@ Usage: ddev create [OPTIONS] NAME
   Create scaffolding for a new integration.
 
 Options:
-  -t, --type [check]      The type of integration to create
+  -t, --type [check|jmx|tile]  The type of integration to create
   -l, --location TEXT     The directory where files will be written
   -ni, --non-interactive  Disable prompting for fields
   -q, --quiet             Show less output
