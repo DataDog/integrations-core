@@ -6,13 +6,10 @@ import six
 
 if six.PY3:
     from json import JSONDecodeError
-    from shutil import which
 
     FileNotFoundError = FileNotFoundError
     PermissionError = PermissionError
 else:
-    from distutils.spawn import find_executable as which
-
     JSONDecodeError = ValueError
     FileNotFoundError = IOError
     PermissionError = IOError
