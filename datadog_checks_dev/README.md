@@ -231,11 +231,11 @@ Usage: ddev create [OPTIONS] NAME
 
 Options:
   -t, --type [check|jmx|tile]  The type of integration to create
-  -l, --location TEXT     The directory where files will be written
-  -ni, --non-interactive  Disable prompting for fields
-  -q, --quiet             Show less output
-  -n, --dry-run           Only show what would be created
-  -h, --help              Show this message and exit.
+  -l, --location TEXT          The directory where files will be written
+  -ni, --non-interactive       Disable prompting for fields
+  -q, --quiet                  Show less output
+  -n, --dry-run                Only show what would be created
+  -h, --help                   Show this message and exit.
 ```
 
 #### Dep
