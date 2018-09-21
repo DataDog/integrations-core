@@ -7,19 +7,24 @@ from ddtrace import tracer
 
 import wrapt
 
-
 try:
     import datadog_agent
 except ImportError:
     # Integration Tracing is only available with Agent 6
     datadog_agent = None
 
+
+_tracing_config = set()
+
+def add_trace_check(check_object):
+    _tracing_config.add(check_object)
+
 @wrapt.decorator
 def traced(wrapped, instance, args, kwargs):
     if datadog_agent is None:
         return wrapped(*args, **kwargs)
 
-    trace_check = any(t.get('trace_check') for t in args)
+    trace_check = instance in _tracing_config 
     integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
 
     if integration_tracing and trace_check:
