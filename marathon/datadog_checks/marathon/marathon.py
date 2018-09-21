@@ -227,20 +227,25 @@ class Marathon(AgentCheck):
         self.ensure_queue_count(queued, url, timeout, auth, acs_url, ssl_verify, tags, label_tags, group)
 
     def get_app_tags(self, app, tags=None, label_tags=None):
-        if label_tags is None:
+        if tags is None:
             tags = []
         if label_tags is None:
             label_tags = []
 
-        basic_tags = ['app_id:' + app['id'], 'version:' + app['version']]
+        basic_tags = ['app_id:{}'.format(app['id']), 'version:{}'.format(app['version'])]
+
         label_tag_values = []
         for label_name in label_tags:
             try:
                 label_value = app['labels'][label_name]
-                label_tag_values.append(label_name + ':' + label_value)
+                label_tag_values.append('{}:{}'.format(label_name, label_value))
             except KeyError:
                 pass
-        return basic_tags + label_tag_values + tags
+
+        tags.extend(basic_tags)
+        tags.extend(label_tag_values)
+
+        return tags
 
     def ensure_queue_count(self, queued, url, timeout, auth, acs_url, ssl_verify,
                            tags=None, label_tags=None, group=None):
