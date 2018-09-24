@@ -22,6 +22,7 @@ try:
     import aggregator
 except ImportError:
     from ..stubs import aggregator
+    using_stub_aggregator = True
 
 from ..config import is_affirmative
 from ..utils.common import ensure_bytes
@@ -178,7 +179,10 @@ class AgentCheck(object):
         try:
             value = float(value)
         except ValueError:
-            self.warning("Metric: {} has non float value: {}. Only float values can be submitted as metrics".format(name, value))
+            err_msg = "Metric: {} has non float value: {}. Only float values can be submitted as metrics".format(name, value)
+            if using_stub_aggregator:
+                raise ValueError(err_msg)
+            self.warning(err_msg)
             return
 
         aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), value, tags, hostname)

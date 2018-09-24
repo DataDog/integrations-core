@@ -24,7 +24,8 @@ class TestMetrics:
     def test_non_float_metric(self, aggregator):
         check = AgentCheck()
         metric_name = 'test_metric'
-        check.gauge(metric_name, '85k')
+        with pytest.raises(ValueError):
+            check.gauge(metric_name, '85k')
         aggregator.assert_metric(metric_name, count=0)
 
 
