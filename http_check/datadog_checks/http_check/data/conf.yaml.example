@@ -102,6 +102,12 @@ instances:
     # ssl certificate. Allow for a warning to occur when x days are
     # left in the certificate, and alternatively raise a critical
     # warning if the certificate is y days from the expiration date.
+    #
+    # If "days" doesn't provide enough granularity (e.g. when a certificate is
+    # expected to expire in less than 24h) "seconds" can be used. Please note
+    # that configuration parameters expressed in seconds take precedence over
+    # the corresponding one expressed in days.
+    #
     # The SSL certificate will always be validated for this additional
     # service check regardless of the value of disable_ssl_validation.
     # By default, for the expiration check, the Agent validates the SSL certificate
@@ -111,8 +117,15 @@ instances:
     # setting check_hostname to false.
     #
     # check_certificate_expiration: true
+    #
+    # Express thresholds in days
     # days_warning: 14
     # days_critical: 7
+    #
+    # Alternatively, express the thresholds in seconds
+    # seconds_warning: 1209600
+    # seconds_critical: 604800
+    #
     # check_hostname: true
     # ssl_server_name: hostname
 

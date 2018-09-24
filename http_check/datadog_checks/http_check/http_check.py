@@ -30,6 +30,10 @@ from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers as agent_headers
 
 DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
+DEFAULT_EXPIRE_DAYS_WARNING = 14
+DEFAULT_EXPIRE_DAYS_CRITICAL = 7
+DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
+DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 CONTENT_LENGTH = 200
 
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
@@ -420,8 +424,14 @@ class HTTPCheck(NetworkCheck):
     def check_cert_expiration(self, instance, timeout, instance_ca_certs, check_hostname,
                               client_cert=None, client_key=None):
         # thresholds expressed in seconds take precendence over those expressed in days
-        seconds_warning = int(instance.get('seconds_warning', 0)) or int(instance.get('days_warning', 14)) * 24 * 3600
-        seconds_critical = int(instance.get('seconds_critical', 0)) or int(instance.get('days_critical', 7)) * 24 * 3600
+        seconds_warning = \
+            int(instance.get('seconds_warning', 0)) or \
+            int(instance.get('days_warning', 0)) * 24 * 3600 or \
+            DEFAULT_EXPIRE_WARNING
+        seconds_critical = \
+            int(instance.get('seconds_critical', 0)) or \
+            int(instance.get('days_critical', 0)) * 24 * 3600 or \
+            DEFAULT_EXPIRE_CRITICAL
         url = instance.get('url')
 
         o = urlparse(url)
