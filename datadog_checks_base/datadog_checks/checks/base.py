@@ -20,6 +20,7 @@ except ImportError:
 
 try:
     import aggregator
+    using_stub_aggregator = False
 except ImportError:
     from ..stubs import aggregator
     using_stub_aggregator = True
