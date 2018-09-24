@@ -34,6 +34,8 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
     - [Manifest](#manifest)
       - [Set](#set-1)
       - [Verify](#verify-1)
+    - [Metadata](#metadata)
+      - [Verify](#verify-2)
     - [Release](#release)
       - [Changelog](#changelog)
       - [Freeze](#freeze-1)
@@ -579,13 +581,19 @@ Usage: ddev test [OPTIONS] [CHECKS]...
   If no checks are specified, this will only test checks that were changed
   compared to the master branch.
 
+  You can also select specific comma-separated environments to test like so:
+
+  $ ddev test mysql:mysql57,maria10130
+
 Options:
+  -s, --style        Run only style checks
   -b, --bench        Run only benchmarks
   -c, --cov          Measure code coverage
   -m, --cov-missing  Show line numbers of statements that were not executed
   --pdb              Drop to PDB on first failure, then end test session
   -d, --debug        Set the log level to debug
   -v, --verbose      Increase verbosity (can be used additively)
+  -l, --list         List available test environments
   --changed          Only test changed checks
   --cov-keep         Keep coverage reports
   -h, --help         Show this message and exit.
