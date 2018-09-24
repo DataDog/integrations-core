@@ -47,7 +47,7 @@ Add an item like the above to `instances` for each build configuration you want 
 The Teamcity check does not include any metrics at this time.
 
 ### Events
-All Teamcity events are forwared to your Datadog application.
+Teamcity events representing succesful builds are forwarded to your Datadog application.
 
 ### Service Checks
 The Teamcity check does not include any service checks at this time.
