@@ -1,23 +1,23 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.checks import AgentCheck
 
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
+import pytest
 
 def test_instance():
     """
     Simply assert the class can be insantiated
     """
     AgentCheck()
+
+
+class TestMetrics:
+    def test_non_float_metric(self, aggregator):
+        check = AgentCheck()
+        metric_name = 'test_metric'
+        with pytest.raises(ValueError):
+            check.gauge(metric_name, '85k')
 
 
 class TestTags:
