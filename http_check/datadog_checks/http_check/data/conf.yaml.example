@@ -103,10 +103,10 @@ instances:
     # left in the certificate, and alternatively raise a critical
     # warning if the certificate is y days from the expiration date.
     #
-    # If "days" doesn't provide enough granularity (e.g. when a certificate is
+    # When "days" doesn't provide enough granularity (e.g. when a certificate is
     # expected to expire in less than 24h) "seconds" can be used. Please note
     # that configuration parameters expressed in seconds take precedence over
-    # the corresponding one expressed in days.
+    # the corresponding ones expressed in days.
     #
     # The SSL certificate will always be validated for this additional
     # service check regardless of the value of disable_ssl_validation.
