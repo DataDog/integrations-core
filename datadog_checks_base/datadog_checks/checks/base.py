@@ -178,8 +178,7 @@ class AgentCheck(object):
         try:
             value = float(value)
         except ValueError:
-            self.warning("Metric: {} has non float value: {}. Only float values can be submitted as metrics".format(name, value))
-            return
+            raise ValueError("Metric: {} has non float value: {}. Only float values can be submitted as metrics".format(name, value))
 
         aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), value, tags, hostname)
 

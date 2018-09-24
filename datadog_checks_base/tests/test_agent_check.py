@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.checks import AgentCheck
 
+import pytest
 
 def test_instance():
     """
@@ -15,8 +16,9 @@ class TestMetrics:
     def test_non_float_metric(self, aggregator):
         check = AgentCheck()
         metric_name = 'test_metric'
-        check.gauge(metric_name, '85k')
-        aggregator.assert_metric(metric_name, count=0)
+        with pytest.raises(ValueError):
+            check.gauge(metric_name, '85k')
+
 
 class TestTags:
     def test_default_string(self):
