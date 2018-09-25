@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "coredns",
+  "metric_prefix": "coredns.",
   "display_name": "CoreDNS",
   "short_description": "CoreDNS collects DNS metrics in Kubernetes.",
   "support": "core",

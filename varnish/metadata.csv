@@ -297,12 +297,12 @@ varnish.sess_conn,gauge,,connection,second,Client connections accepted. This met
 varnish.sess_drop,gauge,,connection,second,Client connections dropped due to lack of worker thread. This metric is only provided by varnish 4.x.,-1,varnish,sess drop
 varnish.sess_dropped,gauge,,connection,second,Client connections dropped due to a full queue. This metric is only provided by varnish 4.x.,-1,varnish,sess dropped
 varnish.sess_fail,gauge,,connection,second,"Failures to accept a TCP connection. Either the client changed its mind, or the kernel ran out of some resource like file descriptors. This metric is only provided by varnish 4.x.",-1,varnish,sess fail
-varnish.sess_herd,gauge,,connection,second,,0,varnish,sess herd
+varnish.sess_herd,gauge,,connection,second,Client Connections herd,0,varnish,sess herd
 varnish.sess_linger,gauge,,connection,second,This metric is only provided by varnish 3.x.,0,varnish,sess linger
 varnish.sess_pipe_overflow,gauge,,connection,second,This metric is only provided by varnish 4.x.,0,varnish,sess pipe overflow
-varnish.sess_pipeline,gauge,,connection,second,,0,varnish,sess pipeline
+varnish.sess_pipeline,gauge,,connection,second,Client Connections pipeline,0,varnish,sess pipeline
 varnish.sess_queued,gauge,,connection,second,Client connections queued to wait for a thread. This metric is only provided by varnish 4.x.,-1,varnish,sess queued
-varnish.sess_readahead,gauge,,connection,second,,0,varnish,sess readahead
+varnish.sess_readahead,gauge,,connection,second,Client connections readahead,0,varnish,sess readahead
 varnish.shm_cont,gauge,,event,second,SHM MTX contention.,0,varnish,shm cont
 varnish.shm_cycles,gauge,,event,second,SHM cycles through buffer.,0,varnish,shm cycles
 varnish.shm_flushes,gauge,,event,second,SHM flushes due to overflow.,0,varnish,shm flushes
@@ -333,7 +333,7 @@ varnish.threads_created,gauge,,thread,second,Threads created. This metric is onl
 varnish.threads_destroyed,gauge,,thread,second,Threads destroyed. This metric is only provided by varnish 4.x.,0,varnish,threads destroyed
 varnish.threads_failed,gauge,,thread,second,Threads that failed to get created. This metric is only provided by varnish 4.x.,-1,varnish,threads failed
 varnish.threads_limited,gauge,,thread,second,Threads that were needed but couldn't be created because of a thread pool limit. This metric is only provided by varnish 4.x.,-1,varnish,threads limited
-varnish.uptime,gauge,,,,,0,varnish,uptime
+varnish.uptime,gauge,,,,Uptime,0,varnish,uptime
 varnish.vmods,gauge,,object,,Loaded VMODs. This metric is only provided by varnish 4.x.,0,varnish,vmods
 varnish.vsm_cooling,gauge,,byte,,"Space which will soon (max 1 minute) be freed in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm cooling
 varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm free

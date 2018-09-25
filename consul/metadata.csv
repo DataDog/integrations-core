@@ -23,7 +23,7 @@ consul.runtime.heap_objects,gauge,10,object,,Number of objects allocated on the 
 consul.runtime.sys_bytes,gauge,10,byte,,Total size of the virtual address space reserved by the Go runtime,0,consul,
 consul.runtime.malloc_count,gauge,10,object,,Cumulative count of heap objects allocated,0,consul,
 consul.runtime.free_count,gauge,10,object,,Cumulative count of heap objects freed,0,consul,
-consul.runtime.heap_objects,gauge,10,byte,,Bytes of allocated heap objects,0,consul,heap alloc
+consul.runtime.heap_bytes,gauge,10,byte,,Bytes of allocated heap objects,0,consul,heap alloc
 consul.runtime.total_gc_pause_ns,gauge,10,nanosecond,,Cumulative nanoseconds in GC stop-the-world pauses since Consul started,0,consul,
 consul.runtime.total_gc_runs,gauge,10,,,Number of completed GC cycles,0,consul,
 consul.raft.state.leader,rate,10,event,,Number of completed leader elections,-1,consul,leader elecs
