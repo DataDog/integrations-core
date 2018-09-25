@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 import _strptime # noqa
-import os.path
 import re
 import socket
 import ssl
@@ -22,6 +21,7 @@ from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers as agent_headers
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
+from .utils import get_ca_certs_path
 
 
 DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
@@ -32,47 +32,6 @@ DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 CONTENT_LENGTH = 200
 
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
-
-
-def get_ca_certs_path():
-    """
-    Get a path to the trusted certificates of the system
-    """
-    """
-    check is installed via pip to:
-    Windows: embedded/lib/site-packages/datadog_checks/http_check
-    Linux: embedded/lib/python2.7/site-packages/datadog_checks/http_check
-    certificate is installed to   embedded/ssl/certs/cacert.pem
-
-    walk up to embedded, and back down to ssl/certs to find the certificate file
-    """
-
-    ca_certs = []
-
-    embedded_root = os.path.dirname(os.path.abspath(__file__))
-    for _ in range(10):
-        if os.path.basename(embedded_root) == 'embedded':
-            ca_certs.append(os.path.join(embedded_root, 'ssl', 'certs', 'cacert.pem'))
-            break
-        embedded_root = os.path.dirname(embedded_root)
-    else:
-        raise OSError('Unable to locate `embedded` directory. '
-                      'Please specify ca_certs in your http yaml configuration file.')
-
-    try:
-        import tornado
-    except ImportError:
-        # if `tornado` is not present, simply ignore its certificates
-        pass
-    else:
-        ca_certs.append(os.path.join(os.path.dirname(tornado.__file__), 'ca-certificates.crt'))
-
-    ca_certs.append('/etc/ssl/certs/ca-certificates.crt')
-
-    for f in ca_certs:
-        if os.path.exists(f):
-            return f
-    return None
 
 
 class HTTPCheck(NetworkCheck):
