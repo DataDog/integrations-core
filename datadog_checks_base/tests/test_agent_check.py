@@ -29,6 +29,34 @@ class TestMetrics:
         aggregator.assert_metric(metric_name, count=0)
 
 
+class TestEvents:
+    def test_valid_event(self, aggregator):
+        check = AgentCheck()
+        event = {
+            "event_type": "new.event",
+            "msg_title": "new test event",
+            "aggregation_key": "test.event",
+            "msg_text": "test event test event",
+            "tags": None
+        }
+        check.event(event)
+        aggregator.assert_event(event['msg_text'])
+
+
+class TestServiceChecks:
+    def test_valid_sc(self, aggregator):
+        check = AgentCheck()
+
+        check.service_check("testservicecheck", AgentCheck.OK, tags=None, message="")
+        aggregator.assert_service_check("testservicecheck", status=AgentCheck.OK)
+
+        check.service_check("testservicecheckwithhostname", AgentCheck.OK, tags=["foo", "bar"], hostname="testhostname", message="a message")
+        aggregator.assert_service_check("testservicecheckwithhostname", status=AgentCheck.OK, tags=["foo", "bar"], hostname="testhostname", message="a message")
+
+        check.service_check("testservicecheckwithnonemessage", AgentCheck.OK, message=None)
+        aggregator.assert_service_check("testservicecheckwithnonemessage", status=AgentCheck.OK, )
+
+
 class TestTags:
     def test_default_string(self):
         check = AgentCheck()
