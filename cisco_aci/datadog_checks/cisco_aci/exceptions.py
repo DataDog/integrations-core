@@ -7,7 +7,7 @@ class APIException(Exception):
     pass
 
 
-class APIAuthException(Exception)
+class APIAuthException(Exception):
     pass
 
 
