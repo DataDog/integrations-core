@@ -17,13 +17,13 @@ REQUIRED_HEADERS = {
     'description',
     'orientation',
     'integration',
-    'short_name',
 }
 
 OPTIONAL_HEADERS = {
     'interval',
     'unit_name',
     'per_unit_name',
+    'short_name',
 }
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
