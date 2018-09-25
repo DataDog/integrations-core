@@ -40,7 +40,7 @@ class TestEvents:
             "tags": None
         }
         check.event(event)
-        aggregator.assert_event(event['msg_text'])
+        aggregator.assert_event('test event test event')
 
 
 class TestServiceChecks:
