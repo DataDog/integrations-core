@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check watches for build-related events and sends them to Datadog.
+This check watches for successful build-related events and sends them to Datadog.
 
 Unlike most Agent checks, this one doesn't collect any metrics-just events.
 
@@ -47,7 +47,7 @@ Add an item like the above to `instances` for each build configuration you want 
 The Teamcity check does not include any metrics at this time.
 
 ### Events
-All Teamcity events are forwared to your Datadog application.
+Teamcity events representing successful builds are forwarded to your Datadog application.
 
 ### Service Checks
 The Teamcity check does not include any service checks at this time.

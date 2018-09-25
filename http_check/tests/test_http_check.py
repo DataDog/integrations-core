@@ -108,10 +108,21 @@ def test_check_ssl(aggregator, http_check):
 @mock.patch('ssl.SSLSocket.getpeercert', **{'return_value.raiseError.side_effect': Exception()})
 def test_check_ssl_expire_error(getpeercert_func, aggregator, http_check):
 
-    # Run the check for the one instance
+    # Run the check for the one instance configured with days left
     http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
 
     expired_cert_tags = ['url:https://github.com', 'instance:expired_cert']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1)
+
+
+@mock.patch('ssl.SSLSocket.getpeercert', **{'return_value.raiseError.side_effect': Exception()})
+def test_check_ssl_expire_error_secs(getpeercert_func, aggregator, http_check):
+
+    # Run the check for the one instance configured with seconds left
+    http_check.check(CONFIG_EXPIRED_SSL['instances'][1])
+
+    expired_cert_tags = ['url:https://github.com', 'instance:expired_cert_seconds']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1)
 

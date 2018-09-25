@@ -20,6 +20,15 @@ def test_instance():
     AgentCheck()
 
 
+class TestMetrics:
+    def test_non_float_metric(self, aggregator):
+        check = AgentCheck()
+        metric_name = 'test_metric'
+        with pytest.raises(ValueError):
+            check.gauge(metric_name, '85k')
+        aggregator.assert_metric(metric_name, count=0)
+
+
 class TestTags:
     def test_default_string(self):
         check = AgentCheck()

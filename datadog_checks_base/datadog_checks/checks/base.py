@@ -20,8 +20,10 @@ except ImportError:
 
 try:
     import aggregator
+    using_stub_aggregator = False
 except ImportError:
     from ..stubs import aggregator
+    using_stub_aggregator = True
 
 from ..config import is_affirmative
 from ..utils.common import ensure_bytes
@@ -175,7 +177,16 @@ class AgentCheck(object):
                 if self.metric_limiter.is_reached(context):
                     return
 
-        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), float(value), tags, hostname)
+        try:
+            value = float(value)
+        except ValueError:
+            err_msg = "Metric: {} has non float value: {}. Only float values can be submitted as metrics".format(name, value)
+            if using_stub_aggregator:
+                raise ValueError(err_msg)
+            self.warning(err_msg)
+            return
+
+        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
