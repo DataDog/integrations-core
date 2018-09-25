@@ -139,6 +139,14 @@ CONFIG_EXPIRED_SSL = {
             'check_certificate_expiration': True,
             'days_warning': 14,
             'days_critical': 7,
+        },
+        {
+            'name': 'expired_cert_seconds',
+            'url': 'https://github.com',
+            'timeout': 1,
+            'check_certificate_expiration': True,
+            'seconds_warning': 3600,
+            'seconds_critical': 60,
         }
     ]
 }
