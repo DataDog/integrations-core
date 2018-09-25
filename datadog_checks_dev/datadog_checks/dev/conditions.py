@@ -101,7 +101,7 @@ class CheckCommandOutput(LazyFunction):
             time.sleep(self.wait)
         else:
             raise RetryError(
-                'Command: {}\n'
+                u'Command: {}\n'
                 'Exit code: {}\n'
                 'Captured Output: {}'.format(
                     self.command,
