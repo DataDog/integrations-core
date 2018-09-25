@@ -12,8 +12,11 @@ import pytest
 from datadog_checks.kube_dns import KubeDNSCheck
 
 
+customtag = "custom:tag"
+
 instance = {
     'prometheus_endpoint': 'http://localhost:10055/metrics',
+    'tags': [customtag]
 }
 
 
@@ -87,5 +90,6 @@ class TestKubeDNS:
         check.check(instance)
         for metric in self.METRICS + self.COUNT_METRICS:
             aggregator.assert_metric(metric)
+            aggregator.assert_metric_has_tag(metric, customtag)
 
         aggregator.assert_all_metrics_covered()
