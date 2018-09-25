@@ -197,17 +197,6 @@ CONFIG_DONT_CHECK_EXP = {
     ]
 }
 
-CONFIG_HTTP_HEADERS = {
-    'instances': [
-        {
-            'url': 'https://google.com',
-            'name': 'UpService',
-            'timeout': 1,
-            'headers': {"X-Auth-Token": "SOME-AUTH-TOKEN"}
-        }
-    ]
-}
-
 CONFIG_HTTP_REDIRECTS = {
     'instances': [
         {
