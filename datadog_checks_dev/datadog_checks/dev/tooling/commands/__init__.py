@@ -18,7 +18,7 @@ ALL_COMMANDS = (
     dep,
     manifest,
     meta,
+    metadata,
     release,
     test,
-    metadata,
 )
