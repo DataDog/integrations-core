@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.8.1 / 2018-09-25
+
+* [Fixed] Fix Python 2 unicode handling for log pattern error message. See [#2303](https://github.com/DataDog/integrations-core/pull/2303).
+
 ## 0.8.0 / 2018-09-25
 
 * [Added] Add new templates for other integration types. See [#2285](https://github.com/DataDog/integrations-core/pull/2285).
