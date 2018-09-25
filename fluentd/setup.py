@@ -30,6 +30,7 @@ setup(
     version=ABOUT['__version__'],
     description='The Fluentd check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent fluentd check',
 
     # The project's main homepage.

@@ -30,6 +30,7 @@ setup(
     version=ABOUT["__version__"],
     description='The vSphere check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent vSphere check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',

@@ -31,6 +31,7 @@ setup(
     version=ABOUT["__version__"],
     description='The Varnish check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent varnish check',
 
     # The project's main homepage.
