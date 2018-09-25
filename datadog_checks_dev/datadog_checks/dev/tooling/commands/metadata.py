@@ -8,7 +8,7 @@ from io import open
 import click
 from six import PY2, iteritems
 
-from .utils import CONTEXT_SETTINGS, abort, echo_failure
+from .utils import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
 from ..utils import get_metadata_file, get_metric_sources, load_manifest
 
 REQUIRED_HEADERS = {
@@ -311,11 +311,12 @@ def verify(check):
             echo_failure('{}: {} is empty in {} rows.'.format(current_check, header, count))
 
         for prefix, count in iteritems(metric_prefix_count):
-            errors = True
-            echo_failure(
-                '{}: `{}` appears {} time(s) and does not match metric_prefix '
-                'defined in the manifest'.format(current_check, prefix, count)
-            )
+            # Don't spam this warning when we're validating everything
+            if check:
+                echo_warning(
+                    '{}: `{}` appears {} time(s) and does not match metric_prefix '
+                    'defined in the manifest.'.format(current_check, prefix, count)
+                )
 
     if errors:
         abort()
