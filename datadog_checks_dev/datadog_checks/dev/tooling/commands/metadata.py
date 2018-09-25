@@ -2,14 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import csv
+from collections import defaultdict
 from io import open
 
 import click
 from six import PY2, iteritems
 
-from .utils import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_warning
-)
+from .utils import CONTEXT_SETTINGS, abort, echo_failure
 from ..utils import get_metadata_file, get_metric_sources, load_manifest
 
 REQUIRED_HEADERS = {
@@ -79,6 +78,8 @@ def verify(check):
     else:
         metric_sources = sorted(metric_sources)
 
+    errors = False
+
     for current_check in metric_sources:
         if current_check.startswith('datadog_checks_'):
             continue
@@ -86,18 +87,17 @@ def verify(check):
         # get any manifest info needed for validation
         manifest = load_manifest(current_check)
         try:
-            metric_prefix = manifest['metric_prefix']
+            metric_prefix = manifest['metric_prefix'].rstrip('.')
         except KeyError:
-            if current_check not in PROVIDER_INTEGRATIONS:
-                echo_warning('{}: metric_prefix does not exist in manifest'.format(current_check))
             metric_prefix = None
 
         metadata_file = get_metadata_file(current_check)
 
         # To make logging less verbose, common errors are counted for current check
-        metric_prefix_count = {}
-        empty_count = {}
+        metric_prefix_count = defaultdict(int)
+        empty_count = defaultdict(int)
         duplicate_set = set()
+        metric_prefix_error_shown = False
 
         # Python 2 csv module does not support unicode
         with open(
@@ -107,8 +107,11 @@ def verify(check):
         ) as f:
             reader = csv.DictReader(f, delimiter=',')
 
+            # Read header
             if PY2:
-                reader.fieldnames = [key.decode('utf-8') for key in reader.fieldnames]
+                reader._fieldnames = [key.decode('utf-8') for key in reader.fieldnames]
+            else:
+                reader._fieldnames = reader.fieldnames
 
             for row in reader:
                 if PY2:
@@ -117,13 +120,16 @@ def verify(check):
                             row[key] = value.decode('utf-8')
 
                 # all headers exist, no invalid headers
-                if set(row.keys()) != ALL_HEADERS:
-                    invalid_headers = set(row.keys()).difference(ALL_HEADERS)
+                all_keys = set(row)
+                if all_keys != ALL_HEADERS:
+                    invalid_headers = all_keys.difference(ALL_HEADERS)
                     if invalid_headers:
+                        errors = True
                         echo_failure('{}: Invalid column {}'.format(current_check, invalid_headers))
 
-                    missing_headers = ALL_HEADERS.difference(set(row.keys()))
+                    missing_headers = ALL_HEADERS.difference(all_keys)
                     if missing_headers:
+                        errors = True
                         echo_failure('{}: Missing columns {}'.format(current_check, missing_headers))
 
                     continue
@@ -132,29 +138,45 @@ def verify(check):
                 if row['metric_name'] and row['metric_name'] not in duplicate_set:
                     duplicate_set.add(row['metric_name'])
                 else:
-                    echo_warning('{}: `{}` is a duplicate metric_name'.format(current_check, row['metric_name']))
+                    errors = True
+                    echo_failure('{}: `{}` is a duplicate metric_name'.format(current_check, row['metric_name']))
 
                 # metric_name header
-                if metric_prefix and not row['metric_name'].startswith(metric_prefix):
-                    prefix = row['metric_name'].rsplit('.')[0]
-                    metric_prefix_count[prefix] = metric_prefix_count.get(prefix, 0) + 1
+                if metric_prefix:
+                    if not row['metric_name'].startswith(metric_prefix):
+                        prefix = row['metric_name'].split('.')[0]
+                        metric_prefix_count[prefix] += 1
+                else:
+                    errors = True
+                    if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
+                        metric_prefix_error_shown = True
+                        echo_failure('{}: metric_prefix does not exist in manifest'.format(current_check))
 
                 # metric_type header
                 if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
-                    echo_warning('{}: `{}` is an invalid metric_type.'.format(current_check, row['metric_type']))
+                    errors = True
+                    echo_failure('{}: `{}` is an invalid metric_type.'.format(current_check, row['metric_type']))
 
                 # orientation header
                 if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
-                    echo_warning('{}: `{}` is an invalid orientation.'.format(current_check, row['orientation']))
+                    errors = True
+                    echo_failure('{}: `{}` is an invalid orientation.'.format(current_check, row['orientation']))
 
                 # empty required fields
                 for header in REQUIRED_HEADERS:
                     if not row[header]:
-                        empty_count[header] = empty_count.get(header, 0) + 1
+                        empty_count[header] += 1
 
-        for header, count in empty_count.items():
-            echo_warning('{}: {} is empty in {} rows.'.format(current_check, header, count))
-        for prefix, count in metric_prefix_count.items():
-            echo_warning(
-                '{}: `{}` appears {} time(s) and does not match metric_prefix defined in the manifest'.format(
-                    current_check, prefix, count))
+        for header, count in iteritems(empty_count):
+            errors = True
+            echo_failure('{}: {} is empty in {} rows.'.format(current_check, header, count))
+
+        for prefix, count in iteritems(metric_prefix_count):
+            errors = True
+            echo_failure(
+                '{}: `{}` appears {} time(s) and does not match metric_prefix '
+                'defined in the manifest'.format(current_check, prefix, count)
+            )
+
+    if errors:
+        abort()
