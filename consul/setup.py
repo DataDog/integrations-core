@@ -31,6 +31,7 @@ setup(
     version=ABOUT['__version__'],
     description='The Consul Check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent consul check',
 
     # The project's main homepage.

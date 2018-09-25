@@ -23,6 +23,7 @@ setup(
     version=ABOUT["__version__"],
     description='CoreDNS collects DNS metrics in Kubernetes.',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',

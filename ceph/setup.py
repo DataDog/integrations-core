@@ -29,6 +29,7 @@ setup(
     version=ABOUT["__version__"],
     description='The Ceph check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent ceph check',
 
     # The project's main homepage.

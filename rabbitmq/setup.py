@@ -30,6 +30,7 @@ setup(
     version=ABOUT['__version__'],
     description='The RabbitMQ check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent rabbitmq check',
 
     # The project's main homepage.

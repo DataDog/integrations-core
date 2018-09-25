@@ -32,6 +32,7 @@ setup(
     version=ABOUT["__version__"],
     description='The Oracle Database check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent oracle check',
 
     # The project's main homepage.
