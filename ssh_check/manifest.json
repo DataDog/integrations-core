@@ -13,6 +13,12 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "ssh.",
   "name": "ssh_check",
+  "process_signatures": [
+    "ssh",
+    "sftp",
+    "sshd",
+    "sshd:"
+  ],
   "public_title": "Datadog-SSH Check Integration",
   "short_description": "Monitor SSH connectivity and SFTP latency.",
   "support": "core",

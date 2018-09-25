@@ -11,6 +11,9 @@
   "metric_prefix": "riakcs.",
   "metric_to_check": "riakcs.bucket_list_pool.workers",
   "name": "riakcs",
+  "process_signatures": [
+    "riak-cs start"
+  ],
   "public_title": "Datadog-Riak CS Integration",
   "short_description": "Track the rate and mean latency of GETs, PUTs, DELETEs, and other operations.",
   "support": "core",
