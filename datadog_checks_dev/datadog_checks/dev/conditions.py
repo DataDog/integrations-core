@@ -102,8 +102,8 @@ class CheckCommandOutput(LazyFunction):
         else:
             raise RetryError(
                 u'Command: {}\n'
-                'Exit code: {}\n'
-                'Captured Output: {}'.format(
+                u'Exit code: {}\n'
+                u'Captured Output: {}'.format(
                     self.command,
                     exit_code,
                     log_output
