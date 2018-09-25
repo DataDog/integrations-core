@@ -8,15 +8,25 @@ def get_ca_certs_path():
     """
     Get a path to the trusted certificates of the system
     """
-    """
-    check is installed via pip to:
-    Windows: embedded/lib/site-packages/datadog_checks/http_check
-    Linux: embedded/lib/python2.7/site-packages/datadog_checks/http_check
-    certificate is installed to   embedded/ssl/certs/cacert.pem
+    for f in _get_ca_certs_paths():
+        if os.path.exists(f):
+            return f
+    return None
 
-    walk up to embedded, and back down to ssl/certs to find the certificate file
-    """
 
+def _get_ca_certs_paths():
+    """
+    Get a list of possible paths containing certificates
+
+    Check is installed via pip to:
+     * Windows: embedded/lib/site-packages/datadog_checks/http_check
+     * Linux: embedded/lib/python2.7/site-packages/datadog_checks/http_check
+
+    Certificate is installed to:
+     * embedded/ssl/certs/cacert.pem
+
+    walk up to `embedded`, and back down to ssl/certs to find the certificate file
+    """
     ca_certs = []
 
     embedded_root = os.path.dirname(os.path.abspath(__file__))
@@ -39,7 +49,4 @@ def get_ca_certs_path():
 
     ca_certs.append('/etc/ssl/certs/ca-certificates.crt')
 
-    for f in ca_certs:
-        if os.path.exists(f):
-            return f
-    return None
+    return ca_certs
