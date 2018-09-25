@@ -5,6 +5,7 @@ from .clean import clean
 from .config import config
 from .create import create
 from .dep import dep
+from .git import git
 from .manifest import manifest
 from .meta import meta
 from .release import release
@@ -15,6 +16,7 @@ ALL_COMMANDS = (
     config,
     create,
     dep,
+    git,
     manifest,
     meta,
     release,
