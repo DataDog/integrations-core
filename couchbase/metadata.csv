@@ -128,8 +128,8 @@ couchbase.by_bucket.mem_used_sys,gauge,,byte,,System memory usage,0,couchbase,us
 couchbase.by_bucket.misses,gauge,,miss,,Total number of misses,-1,couchbase,misses
 couchbase.by_bucket.ops,gauge,,operation,,Total number of operations,0,couchbase,ops
 couchbase.by_bucket.page_faults,gauge,,page,,Number of page faults,-1,couchbase,faults
-couchbase.by_bucket.replication_docs_rep_queue,gauge,,item,,Number of replication docs rep queue,0,couchbase,repl docs queue
-couchbase.by_bucket.replication_meta_latency_aggr,gauge,,second,,Number of aggregated replication meta latency,0,couchbase,repl meta latency aggr
+couchbase.by_bucket.replication_docs_rep_queue,gauge,,item,,,0,couchbase,repl docs queue
+couchbase.by_bucket.replication_meta_latency_aggr,gauge,,second,,,0,couchbase,repl meta latency aggr
 couchbase.by_bucket.rest_requests,gauge,,request,second,Number of HTTP requests,0,couchbase,rest requests
 couchbase.by_bucket.swap_total,gauge,,byte,,Total amount of swap available,0,couchbase,swap total
 couchbase.by_bucket.swap_used,gauge,,byte,,Amount of swap used ,0,couchbase,swap used
@@ -184,24 +184,24 @@ couchbase.by_node.couch_docs_actual_disk_size,gauge,,byte,,Couch docs total size
 couchbase.by_node.couch_views_data_size,gauge,,byte,,Couch views data size on disk in bytes,0,couchbase,views size
 couchbase.by_node.couch_views_actual_disk_size,gauge,,byte,,Couch views total size on disk in bytes,0,couchbase,views disk size
 couchbase.by_node.vb_replica_curr_items,gauge,,item,,Number of in memory items,0,couchbase,vb replica curr items
-couchbase.query.cores,gauge,,core,,Number of cores,0,couchbase,cores
-couchbase.query.cpu_sys_percent,gauge,,percent,,System cpu percent,0,couchbase,cpu sys
-couchbase.query.cpu_user_percent,gauge,,percent,,User cpu percent,0,couchbase,cpu user
-couchbase.query.gc_num,gauge,,,,Number of GC,0,couchbase,gc num
-couchbase.query.gc_pause_percent,gauge,,percent,,GC pause percent,0,couchbase,gc pause percent
-couchbase.query.gc_pause_time,gauge,,second,,GC pause time,0,couchbase,gc pause time
-couchbase.query.memory_system,gauge,,byte,,Memory system,0,couchbase,mem sys
-couchbase.query.memory_total,gauge,,byte,,Memory total,0,couchbase,mem total
-couchbase.query.memory_usage,gauge,,byte,,Memory usage,0,couchbase,mem usage
-couchbase.query.request_active_count,gauge,,request,,Request active count,0,couchbase,request active
-couchbase.query.request_completed_count,gauge,,request,,Request completed count,0,couchbase,request completed
-couchbase.query.request_per_sec_15min,gauge,,request,,Request per sec 15min,0,couchbase,request per sec 15min
-couchbase.query.request_per_sec_1min,gauge,,request,,Request per sec 1min,0,couchbase,request per sec 1min
-couchbase.query.request_per_sec_5min,gauge,,request,,Request per sec 5min,0,couchbase,request per sec 5min
-couchbase.query.request_prepared_percent,gauge,,request,,Request prepared percent,0,couchbase,request prepared percent
-couchbase.query.request_time_80percentile,gauge,,second,,Request time 80 percentile,0,couchbase,request time 80p
-couchbase.query.request_time_95percentile,gauge,,second,,Request time 95 percentile,0,couchbase,request time 95p
-couchbase.query.request_time_99percentile,gauge,,second,,Request time 99 percentile,0,couchbase,request time 99p
-couchbase.query.request_time_mean,gauge,,second,,Request time mean,0,couchbase,request time mean
-couchbase.query.request_time_median,gauge,,second,,Request time median,0,couchbase,request time median
-couchbase.query.total_threads,gauge,,thread,,Total number of threads,0,couchbase,total threads
+couchbase.query.cores,gauge,,core,,,0,couchbase,cores
+couchbase.query.cpu_sys_percent,gauge,,percent,,,0,couchbase,cpu sys
+couchbase.query.cpu_user_percent,gauge,,percent,,,0,couchbase,cpu user
+couchbase.query.gc_num,gauge,,,,,0,couchbase,gc num
+couchbase.query.gc_pause_percent,gauge,,percent,,,0,couchbase,gc pause percent
+couchbase.query.gc_pause_time,gauge,,second,,,0,couchbase,gc pause time
+couchbase.query.memory_system,gauge,,byte,,,0,couchbase,mem sys
+couchbase.query.memory_total,gauge,,byte,,,0,couchbase,mem total
+couchbase.query.memory_usage,gauge,,byte,,,0,couchbase,mem usage
+couchbase.query.request_active_count,gauge,,request,,,0,couchbase,request active
+couchbase.query.request_completed_count,gauge,,request,,,0,couchbase,request completed
+couchbase.query.request_per_sec_15min,gauge,,request,,,0,couchbase,request per sec 15min
+couchbase.query.request_per_sec_1min,gauge,,request,,,0,couchbase,request per sec 1min
+couchbase.query.request_per_sec_5min,gauge,,request,,,0,couchbase,request per sec 5min
+couchbase.query.request_prepared_percent,gauge,,request,,,0,couchbase,request prepared percent
+couchbase.query.request_time_80percentile,gauge,,second,,,0,couchbase,request time 80p
+couchbase.query.request_time_95percentile,gauge,,second,,,0,couchbase,request time 95p
+couchbase.query.request_time_99percentile,gauge,,second,,,0,couchbase,request time 99p
+couchbase.query.request_time_mean,gauge,,second,,,0,couchbase,request time mean
+couchbase.query.request_time_median,gauge,,second,,,0,couchbase,request time median
+couchbase.query.total_threads,gauge,,thread,,,0,couchbase,total threads

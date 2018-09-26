@@ -14,12 +14,12 @@ from ..utils import get_metadata_file, get_metric_sources, load_manifest
 REQUIRED_HEADERS = {
     'metric_name',
     'metric_type',
-    'description',
     'orientation',
     'integration',
 }
 
 OPTIONAL_HEADERS = {
+    'description',
     'interval',
     'unit_name',
     'per_unit_name',
@@ -230,6 +230,7 @@ def verify(check):
         # To make logging less verbose, common errors are counted for current check
         metric_prefix_count = defaultdict(int)
         empty_count = defaultdict(int)
+        empty_warning_count = defaultdict(int)
         duplicate_set = set()
         metric_prefix_error_shown = False
 
@@ -306,9 +307,16 @@ def verify(check):
                     if not row[header]:
                         empty_count[header] += 1
 
+                # empty description field, description is recommended
+                if not row['description']:
+                    empty_warning_count['description'] += 1
+
         for header, count in iteritems(empty_count):
             errors = True
             echo_failure('{}: {} is empty in {} rows.'.format(current_check, header, count))
+
+        for header, count in iteritems(empty_warning_count):
+            echo_warning('{}: {} is empty in {} rows.'.format(current_check, header, count))
 
         for prefix, count in iteritems(metric_prefix_count):
             # Don't spam this warning when we're validating everything

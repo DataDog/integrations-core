@@ -19,12 +19,12 @@ zookeeper.znode_count,gauge,,node,,The number of znodes in the ZooKeeper namespa
 zookeeper.nodes,gauge,,node,,The number of znodes in the ZooKeeper namespace (the data).,0,zookeeper,nodes
 zookeeper.outstanding_requests,gauge,,request,,The number of queued requests when the server is under load and is receiving more sustained requests than it can process.,-1,zookeeper,reqs
 zookeeper.timeouts,rate,,occurrence,,The rate of timeouts the Datadog Agent received when trying to collect stats.,-1,zookeeper,timeouts
-zookeeper.zxid.count,gauge,,,,zxid count,0,zookeeper,
-zookeeper.zxid.epoch,gauge,,,,zxid epoch,0,zookeeper,
-zookeeper.instances,gauge,,,,Number of instances,0,zookeeper,instances
-zookeeper.server_state,gauge,,,,Number of server state,0,zookeeper,server state
-zookeeper.watch_count,gauge,,,,Watch count,0,zookeeper,watch count
-zookeeper.ephemerals_count,gauge,,,,Ephemerals count,0,zookeeper,ephemerals count
-zookeeper.approximate_data_size,gauge,,,,Approximate data_size,0,zookeeper,approx data size
-zookeeper.open_file_descriptor_count,gauge,,,,Number of open file descriptor count,0,zookeeper,open fd
-zookeeper.max_file_descriptor_count,gauge,,,,Number of max file descriptor count,0,zookeeper,max fd
+zookeeper.zxid.count,gauge,,,,,0,zookeeper,
+zookeeper.zxid.epoch,gauge,,,,,0,zookeeper,
+zookeeper.instances,gauge,,,,,0,zookeeper,instances
+zookeeper.server_state,gauge,,,,,0,zookeeper,server state
+zookeeper.watch_count,gauge,,,,,0,zookeeper,watch count
+zookeeper.ephemerals_count,gauge,,,,,0,zookeeper,ephemerals count
+zookeeper.approximate_data_size,gauge,,,,,0,zookeeper,approx data size
+zookeeper.open_file_descriptor_count,gauge,,,,,0,zookeeper,open fd
+zookeeper.max_file_descriptor_count,gauge,,,,,0,zookeeper,max fd
