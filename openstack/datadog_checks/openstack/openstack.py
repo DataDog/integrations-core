@@ -597,10 +597,8 @@ class OpenStackCheck(AgentCheck):
                 self.delete_current_scope()
             elif resp.status_code == 409:
                 raise InstancePowerOffFailure()
-            elif resp.status_code == 404:
-                raise e
             else:
-                raise
+                raise e
 
         return resp.json()
 
@@ -962,7 +960,7 @@ class OpenStackCheck(AgentCheck):
 
         except Exception as e:
             self.warning('Unable to get project name: {}'.format(str(e)))
-            raise e
+            return "unknown_project"
 
     def get_stats_for_single_server(self, server_details, tags=None, use_shortname=False):
         def _is_valid_metric(label):
@@ -991,10 +989,10 @@ class OpenStackCheck(AgentCheck):
                 del self.server_details_by_id[server_id]
             else:
                 self.log.debug("Received HTTP Error when reaching the nova endpoint")
-                raise e
+                return
         except Exception as e:
             self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
-            raise e
+            return
 
         if server_stats:
             tags = tags or []
