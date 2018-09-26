@@ -3,6 +3,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import pytest
 import mock
 
@@ -10,8 +12,9 @@ from datadog_checks.http_check import HTTPCheck
 from datadog_checks.http_check.http_check import DEFAULT_EXPECTED_CODE
 from datadog_checks.utils.headers import headers as agent_headers
 from .common import (
-    FAKE_CERT, CONFIG, CONFIG_SSL_ONLY, CONFIG_EXPIRED_SSL, CONFIG_CUSTOM_NAME, CONFIG_DATA_METHOD,
-    CONFIG_HTTP_REDIRECTS, CONFIG_UNORMALIZED_INSTANCE_NAME, CONFIG_DONT_CHECK_EXP
+    HERE, FAKE_CERT, CONFIG, CONFIG_SSL_ONLY, CONFIG_EXPIRED_SSL, CONFIG_CUSTOM_NAME,
+    CONFIG_DATA_METHOD, CONFIG_HTTP_REDIRECTS, CONFIG_UNORMALIZED_INSTANCE_NAME,
+    CONFIG_DONT_CHECK_EXP
 )
 
 
@@ -108,6 +111,92 @@ def test__load_conf(http_check):
         'skip_proxy': True,
     })
     assert params[22] is True
+
+
+@pytest.mark.unit
+def test_check_cert_expiration(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    check_hostname = True
+
+    # up
+    instance = {
+        'url': 'https://sha256.badssl.com/'
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'UP'
+    assert days_left > 0
+    assert seconds_left > 0
+
+    # bad hostname
+    instance = {
+        'url': 'https://wrong.host.badssl.com/'
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'CRITICAL'
+    assert days_left == 0
+    assert seconds_left == 0
+    assert msg == "hostname 'wrong.host.badssl.com' doesn't match either of '*.badssl.com', 'badssl.com'"
+
+    # site is down
+    instance = {
+        'url': 'https://this.does.not.exist.foo'
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'DOWN'
+    assert days_left == 0
+    assert seconds_left == 0
+    assert msg == '[Errno 8] nodename nor servname provided, or not known'
+
+    # cert expired
+    instance = {
+        'url': 'https://expired.badssl.com/'
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'DOWN'
+    assert days_left == 0
+    assert seconds_left == 0
+
+    # critical in days
+    days_critical = 1000
+    instance = {
+        'url': 'https://sha256.badssl.com/',
+        'days_critical': days_critical,
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'CRITICAL'
+    assert 0 < days_left < days_critical
+
+    # critical in seconds (ensure seconds take precedence over days config)
+    seconds_critical = days_critical * 24 * 3600
+    instance = {
+        'url': 'https://sha256.badssl.com/',
+        'days_critical': 0,
+        'seconds_critical': seconds_critical,
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'CRITICAL'
+    assert 0 < seconds_left < seconds_critical
+
+    # warning in days
+    days_warning = 1000
+    instance = {
+        'url': 'https://sha256.badssl.com/',
+        'days_warning': days_warning,
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'WARNING'
+    assert 0 < days_left < days_warning
+
+    # warning in seconds (ensure seconds take precedence over days config)
+    seconds_warning = days_warning * 24 * 3600
+    instance = {
+        'url': 'https://sha256.badssl.com/',
+        'days_warning': 0,
+        'seconds_warning': seconds_warning,
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'WARNING'
+    assert 0 < seconds_left < seconds_warning
 
 
 def test_check(aggregator, http_check):
