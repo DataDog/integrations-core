@@ -531,7 +531,7 @@ class OpenStackCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        if init_config.get('trace_check', False):
+        if is_affirmative(init_config.get('trace_check', False)):
             add_trace_check(self)
 
         self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
