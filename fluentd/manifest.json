@@ -14,6 +14,11 @@
   "metric_prefix": "fluentd.",
   "metric_to_check": "fluentd.buffer_queue_length",
   "name": "fluentd",
+  "process_signatures": [
+    "td-agent",
+    "fluentd",
+    "ruby td-agent"
+  ],
   "public_title": "Datadog-FluentD Integration",
   "short_description": "Monitor buffer queues and retry counts for each Fluentd plugin you've enabled.",
   "support": "core",

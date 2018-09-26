@@ -31,6 +31,7 @@ setup(
     version=ABOUT['__version__'],
     description='The Linux Proc Extras check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent linux_proc_extras check',
 
     # The project's main homepage.

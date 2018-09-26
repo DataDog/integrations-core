@@ -15,6 +15,9 @@
   "metric_prefix": "mongodb.",
   "metric_to_check": "mongodb.connections.available",
   "name": "mongo",
+  "process_signatures": [
+    "mongod"
+  ],
   "public_title": "Datadog-MongoDB Integration",
   "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
   "support": "core",

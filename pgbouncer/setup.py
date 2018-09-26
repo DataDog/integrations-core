@@ -28,6 +28,7 @@ setup(
     version=ABOUT["__version__"],
     description='The PGbouncer check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent pgbouncer check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',

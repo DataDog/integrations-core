@@ -11,6 +11,9 @@
   "metric_prefix": "openstack.",
   "metric_to_check": "openstack.nova.hypervisor_load.1",
   "name": "openstack",
+  "process_signatures": [
+    "stack.sh"
+  ],
   "public_title": "Datadog-OpenStack Integration",
   "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
   "support": "core",

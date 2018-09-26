@@ -30,6 +30,7 @@ setup(
     version=ABOUT['__version__'],
     description='The Docker Daemon check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent docker_daemon check',
 
     # The project's main homepage.

@@ -126,4 +126,4 @@ def git_tag_list(pattern=None):
         return result
 
     regex = re.compile(pattern)
-    return filter(regex.search, result)
+    return list(filter(regex.search, result))

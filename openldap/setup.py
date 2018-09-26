@@ -31,6 +31,7 @@ setup(
     version=ABOUT["__version__"],
     description='The OpenLDAP integration collect metrics from your OpenLDAP server using the monitor backend',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',

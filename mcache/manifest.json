@@ -15,6 +15,9 @@
   "metric_prefix": "memcache.",
   "metric_to_check": "memcache.uptime",
   "name": "mcache",
+  "process_signatures": [
+    "memcached"
+  ],
   "public_title": "Datadog-Memcache Integration",
   "short_description": "Track memory use, hits, misses, evictions, fill percent, and more.",
   "support": "core",

@@ -1,7 +1,5 @@
 {
-  "categories": [
-    "configuration & deployment"
-  ],
+  "categories": ["configuration & deployment"],
   "creates_events": true,
   "display_name": "Teamcity",
   "guid": "b390dd3f-47d5-4555-976a-36722833f000",
@@ -10,13 +8,10 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "teamcity.",
   "name": "teamcity",
+  "process_signatures": ["teamcity-server.sh", "teamcity-server"],
   "public_title": "Datadog-Teamcity Integration",
   "short_description": "Track builds and understand the performance impact of every deploy.",
   "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
+  "supported_os": ["linux", "mac_os", "windows"],
   "type": "check"
 }

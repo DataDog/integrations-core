@@ -30,6 +30,10 @@ from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers as agent_headers
 
 DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
+DEFAULT_EXPIRE_DAYS_WARNING = 14
+DEFAULT_EXPIRE_DAYS_CRITICAL = 7
+DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
+DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 CONTENT_LENGTH = 200
 
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
@@ -382,12 +386,12 @@ class HTTPCheck(NetworkCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs, check_hostname,
-                                                                client_cert, client_key)
-
+            status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs,
+                                                                              check_hostname, client_cert, client_key)
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
             self.gauge('http.ssl.days_left', days_left, tags=tags_list)
+            self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
 
             service_checks.append((self.SC_SSL_CERT, status, msg))
 
@@ -419,14 +423,20 @@ class HTTPCheck(NetworkCheck):
 
     def check_cert_expiration(self, instance, timeout, instance_ca_certs, check_hostname,
                               client_cert=None, client_key=None):
-        warning_days = int(instance.get('days_warning', 14))
-        critical_days = int(instance.get('days_critical', 7))
+        # thresholds expressed in seconds take precendence over those expressed in days
+        seconds_warning = \
+            int(instance.get('seconds_warning', 0)) or \
+            int(instance.get('days_warning', 0)) * 24 * 3600 or \
+            DEFAULT_EXPIRE_WARNING
+        seconds_critical = \
+            int(instance.get('seconds_critical', 0)) or \
+            int(instance.get('days_critical', 0)) * 24 * 3600 or \
+            DEFAULT_EXPIRE_CRITICAL
         url = instance.get('url')
 
         o = urlparse(url)
         host = o.hostname
         server_name = instance.get('ssl_server_name', o.hostname)
-
         port = o.port or 443
 
         try:
@@ -446,27 +456,29 @@ class HTTPCheck(NetworkCheck):
 
         except ssl.CertificateError as e:
             self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
-            return (Status.CRITICAL, 0, str(e))
+            return (Status.CRITICAL, 0, 0, str(e))
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
-            return (Status.DOWN, 0, str(e))
+            return (Status.DOWN, 0, 0, str(e))
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
-        days_left = exp_date - datetime.utcnow()
+        time_left = exp_date - datetime.utcnow()
+        days_left = time_left.days
+        seconds_left = time_left.total_seconds()
 
         self.log.debug("Exp_date: {}".format(exp_date))
-        self.log.debug("days_left: {}".format(days_left))
+        self.log.debug("seconds_left: {}".format(seconds_left))
 
-        if days_left.days < 0:
-            return (Status.DOWN, days_left.days, "Expired by {} days".format(days_left.days))
+        if seconds_left < 0:
+            return (Status.DOWN, days_left, seconds_left, "Expired by {} days".format(days_left))
 
-        elif days_left.days < critical_days:
-            return (Status.CRITICAL, days_left.days, "This cert TTL is critical: only {} days before it expires"
-                    .format(days_left.days))
+        elif seconds_left < seconds_critical:
+            return (Status.CRITICAL, days_left, seconds_left,
+                    "This cert TTL is critical: only {} days before it expires".format(days_left))
 
-        elif days_left.days < warning_days:
-            return (Status.WARNING, days_left.days, "This cert is almost expired, only {} days left"
-                    .format(days_left.days))
+        elif seconds_left < seconds_warning:
+            return (Status.WARNING, days_left, seconds_left,
+                    "This cert is almost expired, only {} days left".format(days_left))
 
         else:
-            return (Status.UP, days_left.days, "Days left: {}".format(days_left.days))
+            return (Status.UP, days_left, seconds_left, "Days left: {}".format(days_left))

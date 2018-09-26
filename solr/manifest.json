@@ -12,6 +12,9 @@
   "metric_prefix": "solr.",
   "metric_to_check": "solr.cache.hits",
   "name": "solr",
+  "process_signatures": [
+    "solr start"
+  ],
   "public_title": "Datadog-Solr Integration",
   "short_description": "Monitor request rate, handler errors, cache misses and evictions, and more.",
   "support": "core",

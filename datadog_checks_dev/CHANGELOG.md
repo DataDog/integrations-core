@@ -1,5 +1,16 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.8.1 / 2018-09-25
+
+* [Fixed] Fix Python 2 unicode handling for log pattern error message. See [#2303](https://github.com/DataDog/integrations-core/pull/2303).
+
+## 0.8.0 / 2018-09-25
+
+* [Added] Add new templates for other integration types. See [#2285](https://github.com/DataDog/integrations-core/pull/2285).
+* [Added] Add release signing via in-toto. See [#2224](https://github.com/DataDog/integrations-core/pull/2224).
+* [Added] Add prometheus metadata.csv and metric map auto-generation. See [#2117](https://github.com/DataDog/integrations-core/pull/2117).
+* [Added] Keep track of the checks changed at every Datadog Agent release. See [#2277](https://github.com/DataDog/integrations-core/pull/2277).
+
 ## 0.7.0 / 2018-09-18
 
 * [Added] Fix manifest validation policy. See [#2258](https://github.com/DataDog/integrations-core/pull/2258).
