@@ -75,7 +75,7 @@ def run(check, config_file, pdb):
     # Create the check
     init_config = config.get('init_config') or {}
     instances = config.get('instances', [])
-    check_instance = check_class('vsphere', init_config, {}, instances)
+    check_instance = check_class(check, init_config, {}, instances)
 
     # Run the check
     from datadog_checks.stubs import aggregator
