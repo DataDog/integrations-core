@@ -9,6 +9,7 @@ from .manifest import manifest
 from .meta import meta
 from .release import release
 from .test import test
+from .metadata import metadata
 
 ALL_COMMANDS = (
     clean,
@@ -17,6 +18,7 @@ ALL_COMMANDS = (
     dep,
     manifest,
     meta,
+    metadata,
     release,
     test,
 )

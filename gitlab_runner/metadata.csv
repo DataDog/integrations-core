@@ -34,7 +34,7 @@ gitlab_runner.go_memstats_mspan_sys_bytes,gauge,,byte,,Number of bytes used for 
 gitlab_runner.go_memstats_next_gc_bytes,gauge,,byte,,Number of heap bytes when next garbage collection will take place,0,gitlab_runner,heap bytes next gc
 gitlab_runner.go_memstats_other_sys_bytes,gauge,,byte,,Number of bytes used for other system allocations,0,gitlab_runner,other bytes used
 gitlab_runner.go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes in use by the stack allocator,0,gitlab_runner,bytes stack allocator
-gitlab_runner.go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,gitlab_runner,bytes stack allocator from sys
+gitlab_runner.go_memstats_stack_sys_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,gitlab_runner,bytes stack allocator from sys
 gitlab_runner.go_memstats_sys_bytes,gauge,,byte,,Number of bytes obtained by system. Sum of all system allocations,0,gitlab_runner,sum system allocations
 gitlab_runner.process_cpu_seconds_total,counter,,request,second,Total user and system CPU time spent in seconds,0,gitlab_runner,user and system cpu time
 gitlab_runner.process_max_fds,gauge,,request,,Maximum number of open file descriptors,0,gitlab_runner,max fds

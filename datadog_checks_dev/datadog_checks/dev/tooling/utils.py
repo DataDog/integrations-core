@@ -82,12 +82,20 @@ def get_tox_file(check_name):
     return os.path.join(get_root(), check_name, 'tox.ini')
 
 
+def get_metadata_file(check_name):
+    return os.path.join(get_root(), check_name, 'metadata.csv')
+
+
 def get_valid_checks():
     return {path for path in os.listdir(get_root()) if file_exists(get_version_file(path))}
 
 
 def get_testable_checks():
     return {path for path in os.listdir(get_root()) if file_exists(get_tox_file(path))}
+
+
+def get_metric_sources():
+    return {path for path in os.listdir(get_root()) if file_exists(get_metadata_file(path))}
 
 
 def read_version_file(check_name):

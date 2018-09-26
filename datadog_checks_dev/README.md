@@ -94,6 +94,7 @@ Commands:
   create    Create scaffolding for a new integration
   dep       Manage dependencies
   manifest  Manage manifest files
+  metadata  Manage metadata files
   release   Manage the release of checks
   test      Run tests
 ```
@@ -352,6 +353,34 @@ Options:
   --fix                 Attempt to fix errors
   -i, --include-extras  Include optional fields
   -h, --help            Show this message and exit.
+```
+
+#### Metadata
+
+```console
+$ ddev metadata -h
+Usage: ddev metadata [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  verify  Validate `metadata.csv` files, takes optional `check` argument
+```
+
+##### Verify
+
+```console
+$ ddev metadata verify -h
+Usage: ddev metadata verify [OPTIONS] [CHECK]
+
+  Validates metadata.csv files
+
+  If `check` is specified, only the check will be validated, otherwise all
+  matching files in directory.
+
+Options:
+  -h, --help  Show this message and exit.
 ```
 
 #### Release
