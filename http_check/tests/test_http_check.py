@@ -145,7 +145,6 @@ def test_check_cert_expiration(http_check):
     assert status == 'DOWN'
     assert days_left == 0
     assert seconds_left == 0
-    assert msg == '[Errno 8] nodename nor servname provided, or not known'
 
     # cert expired
     instance = {
