@@ -37,8 +37,6 @@ def test_type_support(spin_up_snmp, aggregator, check):
 
     check.check(instance)
 
-    common.wait_for_async(check, aggregator)
-
     # Test metrics
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
@@ -67,14 +65,11 @@ def test_snmpget(spin_up_snmp, aggregator, check):
 
     check.check(instance)
 
-    common.wait_for_async(check, aggregator)
-
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK,
                                     tags=common.CHECK_TAGS, at_least=1)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for metric in common.PLAY_WITH_GET_NEXT_METRICS:
@@ -95,7 +90,6 @@ def test_scalar(spin_up_snmp, aggregator, check):
     instance = common.generate_instance_config(common.SCALAR_OBJECTS)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for metric in common.SCALAR_OBJECTS:
@@ -118,7 +112,6 @@ def test_table(spin_up_snmp, aggregator, check):
     instance = common.generate_instance_config(common.TABULAR_OBJECTS)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -159,7 +152,6 @@ def test_table_v3_MD5_DES(spin_up_snmp, aggregator, check):
     )
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -200,7 +192,6 @@ def test_table_v3_MD5_AES(spin_up_snmp, aggregator, check):
     )
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -240,7 +231,6 @@ def test_table_v3_SHA_DES(spin_up_snmp, aggregator, check):
     )
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -280,7 +270,6 @@ def test_table_v3_SHA_AES(spin_up_snmp, aggregator, check):
     )
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -309,8 +298,6 @@ def test_invalid_metric(spin_up_snmp, aggregator, check):
     instance = common.generate_instance_config(common.INVALID_METRICS)
     check.check(instance)
 
-    common.wait_for_async(check, aggregator)
-
     # Test service check
     aggregator.assert_service_check("snmp.can_check",
                                     status=SnmpCheck.CRITICAL,
@@ -324,7 +311,6 @@ def test_forcedtype_metric(spin_up_snmp, aggregator, check):
     """
     instance = common.generate_instance_config(common.FORCED_METRICS)
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     for metric in common.FORCED_METRICS:
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
@@ -353,7 +339,6 @@ def test_invalid_forcedtype_metric(spin_up_snmp, aggregator, check):
     instance = common.generate_instance_config(common.INVALID_FORCED_METRICS)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check",
@@ -369,7 +354,6 @@ def test_scalar_with_tags(spin_up_snmp, aggregator, check):
     instance = common.generate_instance_config(common.SCALAR_OBJECTS_WITH_TAGS)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for metric in common.SCALAR_OBJECTS_WITH_TAGS:

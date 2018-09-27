@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
-import time
 import logging
 
 from datadog_checks.utils.common import get_docker_hostname
@@ -184,15 +183,3 @@ def generate_v3_instance_config(metrics, name=None, user=None,
         instance_config['privKey'] = priv_key
 
     return instance_config
-
-
-def wait_for_async(check, aggregator):
-    found = False
-    for i in range(30):
-        if len(aggregator.service_checks("snmp.can_check")) >= 1:
-            found = True
-            break
-        time.sleep(2)
-
-    if not found:
-        log.warning("No service checks found!")
