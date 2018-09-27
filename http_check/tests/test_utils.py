@@ -13,8 +13,22 @@ from datadog_checks.http_check.utils import get_ca_certs_path, _get_ca_certs_pat
 
 @pytest.mark.unit
 def test_get_ca_certs_path():
+    with mock.patch('datadog_checks.http_check.utils._get_ca_certs_paths') as gp:
+        # no certs found
+        gp.return_value = []
+        assert get_ca_certs_path() is None
+        # one existing file was found
+        gp.return_value = [__file__]
+        assert get_ca_certs_path() == __file__
+
+
+@pytest.mark.unit
+def test__get_ca_certs_paths_ko():
+    """
+    When `embedded` folder is not found, it should raise OSError
+    """
     with pytest.raises(OSError):
-        get_ca_certs_path()
+        _get_ca_certs_paths()
 
 
 @pytest.mark.unit

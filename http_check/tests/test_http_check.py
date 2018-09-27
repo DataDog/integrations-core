@@ -19,6 +19,16 @@ from .common import (
 
 
 @pytest.mark.unit
+def test__init__():
+    init_config = {
+        'ca_certs': 'foo'
+    }
+    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path'):
+        http_check = HTTPCheck('http_check', init_config, {})
+        assert http_check.ca_certs == 'foo'
+
+
+@pytest.mark.unit
 def test__load_conf(http_check):
     """
     Test the defaults and the pieces of _load_conf that actually perform some logic
@@ -26,7 +36,7 @@ def test__load_conf(http_check):
     # misconfiguration
     with pytest.raises(Exception) as e:
         http_check._load_conf({})
-        assert str(e).contains('Bad configuration')
+        assert 'Bad configuration' in str(e)
 
     # defaults
     params = http_check._load_conf({
