@@ -917,8 +917,10 @@ class OpenStackCheck(AgentCheck):
                 self.log.debug("Adding server to cache: %s", new_server)
                 # The project may not exist if the server isn't in an active state
                 # Query for the project name here to avoid 404s
+                # If the project name conversion fails, we won't add this server
                 new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
-                self.server_details_by_id[new_server['server_id']] = new_server
+                if new_server['project_name']:
+                    self.server_details_by_id[new_server['server_id']] = new_server
             elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
                 self.log.debug("Removing server from cache: %s", new_server)
                 try:
@@ -960,7 +962,7 @@ class OpenStackCheck(AgentCheck):
 
         except Exception as e:
             self.warning('Unable to get project name: {}'.format(str(e)))
-            return "unknown_project"
+            return None
 
     def get_stats_for_single_server(self, server_details, tags=None, use_shortname=False):
         def _is_valid_metric(label):
