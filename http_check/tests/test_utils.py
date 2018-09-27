@@ -17,7 +17,9 @@ def test_get_ca_certs_path():
         # no certs found
         gp.return_value = []
         assert get_ca_certs_path() is None
-        # one existing file was found
+        # one cert file was found
+        # let's avoid creating a real file just for the sake of mocking a cert
+        # and use __file__ instead
         gp.return_value = [__file__]
         assert get_ca_certs_path() == __file__
 
