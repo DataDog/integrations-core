@@ -496,7 +496,8 @@ GROUP BY datid, datname
             'query': "SELECT datname, %s "
             "FROM pg_stat_database "
             "WHERE datname not ilike 'template%%' "
-            "  AND datname not ilike 'rdsadmin' ",
+            "  AND datname not ilike 'rdsadmin' "
+            "  AND datname not ilike 'azure_maintenance' ",
             'relation': False,
         }
 
