@@ -8,6 +8,7 @@ from .dep import dep
 from .manifest import manifest
 from .meta import meta
 from .release import release
+from .run import run
 from .test import test
 from .metadata import metadata
 from .changed import changed
@@ -21,6 +22,7 @@ ALL_COMMANDS = (
     meta,
     metadata,
     release,
+    run,
     test,
     changed,
 )
