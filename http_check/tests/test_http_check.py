@@ -20,14 +20,22 @@ from .common import (
 
 @pytest.mark.unit
 def test__init__():
+    # empty values should be ignored
+    init_config = {
+        'ca_certs': ''
+    }
+    # `get_ca_certs_path` needs to be mocked because it's used as fallback when
+    # init_config doesn't contain `ca_certs`
+    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', return_value='bar'):
+        http_check = HTTPCheck('http_check', init_config, {})
+        assert http_check.ca_certs == 'bar'
+
+    # normal case
     init_config = {
         'ca_certs': 'foo'
     }
-    # `get_ca_certs_path` needs to be mocked because it's used as the default
-    # value for `init_config.get('ca_certs')`
-    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path'):
-        http_check = HTTPCheck('http_check', init_config, {})
-        assert http_check.ca_certs == 'foo'
+    http_check = HTTPCheck('http_check', init_config, {})
+    assert http_check.ca_certs == 'foo'
 
 
 @pytest.mark.unit
