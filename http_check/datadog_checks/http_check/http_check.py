@@ -42,7 +42,9 @@ class HTTPCheck(NetworkCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         NetworkCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        self.ca_certs = init_config.get('ca_certs', get_ca_certs_path())
+        self.ca_certs = init_config.get('ca_certs')
+        if not self.ca_certs:
+            self.ca_certs = get_ca_certs_path()
 
     def _load_conf(self, instance):
         # Fetches the conf
