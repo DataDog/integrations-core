@@ -42,11 +42,9 @@ class KubernetesState(OpenMetricsBaseCheck):
         super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
         self.send_pod_phase_service_checks = is_affirmative(instance.get('send_pod_phase_service_checks', True))
-        self._deprecations['send_pod_phase_service_checks'] = [
-            False,
-            "DEPRECATION NOTICE: pod phase service checks are deprecated. Please set "
-            "`send_pod_phase_service_checks` to false and rely on corresponding gauges instead",
-        ]
+        if self.send_pod_phase_service_checks:
+            self.warning("DEPRECATION NOTICE: pod phase service checks are deprecated. Please set "
+                         "`send_pod_phase_service_checks` to false and rely on corresponding gauges instead")
 
         self.pod_phase_to_status = {
             'Pending':   self.WARNING,
@@ -400,7 +398,6 @@ class KubernetesState(OpenMetricsBaseCheck):
             if self.send_pod_phase_service_checks:
                 pod_tag = self._label_to_tag('pod', sample[self.SAMPLE_LABELS], scraper_config)
                 namespace_tag = self._label_to_tag('namespace', sample[self.SAMPLE_LABELS], scraper_config)
-                self._log_deprecation('send_pod_phase_service_checks')
                 self._condition_to_tag_check(sample, check_basename, self.pod_phase_to_status, scraper_config,
                                              tags=[pod_tag, namespace_tag] + scraper_config['custom_tags'])
 
