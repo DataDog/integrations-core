@@ -46,7 +46,7 @@ setup(
     install_requires=[CHECKS_BASE_REQ, ],
 
     # The package we're going to ship
-    packages=['datadog_checks', 'datadog_checks.coredns'],
+    packages=['datadog_checks.coredns'],
 
     include_package_data=True,
 )
