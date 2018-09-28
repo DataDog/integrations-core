@@ -14,6 +14,7 @@ STYLE_ENVS = {
 
 def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only=False, sort=False):
     testable_checks = get_testable_checks()
+    # Call `get_changed_checks` at most once because git calls are costly
     changed_checks = get_changed_checks() if changed_only else None
 
     if not checks:
@@ -56,7 +57,7 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
                 available = set(envs_selected) & set(envs_available)
                 selected = []
 
-                # Retain order
+                # Retain order and remove duplicates
                 for e in envs_selected:
                     # TODO: support globs or regex
                     if e in available:
