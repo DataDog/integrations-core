@@ -14,15 +14,11 @@ STYLE_ENVS = {
 
 def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only=False, sort=False):
     testable_checks = get_testable_checks()
-    # Call `get_changed_checks` at most once because git calls are costly
-    changed_checks = get_changed_checks() if changed_only else None
+    # Run `get_changed_checks` at most once because git calls are costly
+    changed_checks = get_changed_checks() if not checks or changed_only else None
 
     if not checks:
-        checks = sorted(
-            testable_checks & (
-                get_changed_checks() if changed_checks is None else changed_checks
-            )
-        )
+        checks = sorted(testable_checks & changed_checks)
 
     checks_seen = set()
     for check in checks:
