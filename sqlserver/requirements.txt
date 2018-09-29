@@ -35,6 +35,3 @@ pywin32==224 ; sys_platform == "win32" \
 serpent==1.27 ; sys_platform == "win32" \
     --hash=sha256:6f8dc4317fb5b5a9629b5e518846bc9fee374b8171533726dc68df52b36ee912 \
     --hash=sha256:eb489aeb85333f6ee5ab2f4bc666a5731d870a562b26b6e63c6b9384befd3186
-testfixtures==4.14.3 ; sys_platform == "win32" \
-    --hash=sha256:c505e92d3c679ce4001a990327e99275ce657a16cd40b54423c7e24c6fdf0b2f \
-    --hash=sha256:f9ab6face00b0b3284ced1e46acf0d715d1c5988f3826dc49e71d5fa522a2f7f
