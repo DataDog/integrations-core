@@ -1,1 +1,2 @@
+pywin32==224; sys_platform == 'win32'
 uptime==3.0.1
