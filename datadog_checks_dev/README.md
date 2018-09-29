@@ -34,6 +34,8 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
     - [Manifest](#manifest)
       - [Set](#set-1)
       - [Verify](#verify-1)
+    - [Metadata](#metadata)
+      - [Verify](#verify-2)
     - [Release](#release)
       - [Changelog](#changelog)
       - [Freeze](#freeze-1)
@@ -44,6 +46,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Tag](#tag)
       - [Testable](#testable)
       - [Upload](#upload)
+    - [Run](#run)
     - [Test](#test)
 - [Development](#development)
   - [Installation](#installation-1)
@@ -566,6 +569,15 @@ Usage: ddev release upload [OPTIONS] CHECK
 Options:
   -n, --dry-run
   -h, --help     Show this message and exit.
+```
+
+#### Run
+
+```console
+$ pwd
+C:\Users\ofek.lev\Desktop
+$ ddev run pwd
+C:\Users\ofek.lev\Desktop\code\integrations-core
 ```
 
 #### Test

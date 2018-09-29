@@ -18,7 +18,7 @@ CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
 }
 UNKNOWN_OPTIONS = {
-    'help_option_names': ['-h', '--help'],
+    'help_option_names': [],
     'ignore_unknown_options': True,
 }
 
