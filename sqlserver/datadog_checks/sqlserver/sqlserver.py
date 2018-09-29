@@ -12,11 +12,17 @@ from contextlib import contextmanager
 from collections import defaultdict
 
 # 3rd party
-import adodbapi
+try:
+    import adodbapi
+except ImportError:
+    adodbapi = None
 try:
     import pyodbc
 except ImportError:
     pyodbc = None
+
+if adodbapi is None and pyodbc is None:
+    raise ImportError('adodbapi or pyodbc must be installed to use this check.')
 
 # project
 from datadog_checks.checks import AgentCheck
@@ -90,9 +96,11 @@ class SQLServer(AgentCheck):
         ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', '')  # BULK_COUNT
     ]
-    valid_connectors = ['adodbapi']
+    valid_connectors = []
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL']
     default_adoprovider = 'SQLOLEDB'
+    if adodbapi is not None:
+        valid_connectors.append('adodbapi')
     if pyodbc is not None:
         valid_connectors.append('odbc')
     valid_tables = [
