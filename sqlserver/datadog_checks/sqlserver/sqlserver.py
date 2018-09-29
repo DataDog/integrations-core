@@ -16,17 +16,18 @@ try:
     import adodbapi
 except ImportError:
     adodbapi = None
+
 try:
     import pyodbc
 except ImportError:
     pyodbc = None
 
-if adodbapi is None and pyodbc is None:
-    raise ImportError('adodbapi or pyodbc must be installed to use this check.')
-
 # project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
+
+if adodbapi is None and pyodbc is None:
+    raise ImportError('adodbapi or pyodbc must be installed to use this check.')
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'
