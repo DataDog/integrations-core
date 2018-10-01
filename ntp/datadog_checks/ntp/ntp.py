@@ -5,7 +5,7 @@ import random
 import socket
 
 import ntplib
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 
 DEFAULT_OFFSET_THRESHOLD = 60  # in seconds

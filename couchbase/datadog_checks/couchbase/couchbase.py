@@ -12,9 +12,9 @@ from collections import defaultdict
 import requests
 
 # project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.headers import headers
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.headers import headers
+from datadog_checks.base.utils.containers import hash_mutable
 
 # Constants
 COUCHBASE_STATS_PATH = '/pools/default'

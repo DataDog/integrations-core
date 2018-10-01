@@ -9,9 +9,9 @@ import subprocess
 
 import psutil
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
-from datadog_checks.utils.platform import Platform
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import _is_affirmative
+from datadog_checks.base.utils.platform import Platform
 
 
 DEFAULT_AD_CACHE_DURATION = 120

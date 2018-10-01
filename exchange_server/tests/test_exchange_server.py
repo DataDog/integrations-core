@@ -4,7 +4,7 @@
 
 import os
 import pytest
-from datadog_checks.stubs import aggregator
+from datadog_checks.base.stubs import aggregator
 from datadog_checks.exchange_server import ExchangeCheck
 from datadog_checks.exchange_server.exchange_server import DEFAULT_COUNTERS
 

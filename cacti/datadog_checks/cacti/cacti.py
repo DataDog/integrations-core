@@ -16,7 +16,7 @@ except ImportError:
 import pymysql
 
 # project
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 CFUNC_TO_AGGR = {'AVERAGE': 'avg', 'MAXIMUM': 'max', 'MINIMUM': 'min'}
 

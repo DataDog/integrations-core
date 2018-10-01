@@ -9,7 +9,7 @@ import pytest
 import xmlrpclib
 
 from .common import PROCESSES, STATUSES, SUPERVISORD_CONFIG, BAD_SUPERVISORD_CONFIG, supervisor_check
-from datadog_checks.checks.base import AgentCheck
+from datadog_checks.base.checks.base import AgentCheck
 from datadog_checks.dev import docker_run, get_docker_hostname
 
 

@@ -8,7 +8,7 @@ import common
 import consul_mocks
 
 from datadog_checks.consul import ConsulCheck
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.base.utils.containers import hash_mutable
 
 log = logging.getLogger(__file__)
 

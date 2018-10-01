@@ -11,9 +11,9 @@ import copy
 import requests
 import simplejson as json
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.utils.tracing import traced, add_trace_check
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.tracing import traced, add_trace_check
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`

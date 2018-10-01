@@ -9,8 +9,8 @@ from xml.etree import ElementTree
 import requests
 
 # project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import _is_affirmative
 
 QUEUE_URL = "/admin/xml/queues.jsp"
 TOPIC_URL = "/admin/xml/topics.jsp"

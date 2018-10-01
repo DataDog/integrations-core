@@ -10,7 +10,7 @@ import time
 import logging
 
 from datadog_checks.apache import Apache
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 log = logging.getLogger('test_apache')
 
@@ -90,7 +90,7 @@ def spin_up_apache():
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.stubs import aggregator
+    from datadog_checks.base.stubs import aggregator
     aggregator.reset()
     return aggregator
 

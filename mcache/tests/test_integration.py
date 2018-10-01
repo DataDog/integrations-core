@@ -6,7 +6,7 @@ import pytest
 import subprocess
 import os
 
-from datadog_checks.utils.platform import Platform
+from datadog_checks.base.utils.platform import Platform
 
 from common import (PORT, SERVICE_CHECK, HOST, GAUGES, RATES, ITEMS_RATES, ITEMS_GAUGES, SLABS_RATES, SLABS_GAUGES,
                     SLABS_AGGREGATES)

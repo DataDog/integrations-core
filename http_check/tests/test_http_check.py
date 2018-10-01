@@ -10,7 +10,7 @@ import mock
 
 from datadog_checks.http_check import HTTPCheck
 from datadog_checks.http_check.http_check import DEFAULT_EXPECTED_CODE
-from datadog_checks.utils.headers import headers as agent_headers
+from datadog_checks.base.utils.headers import headers as agent_headers
 from .common import (
     HERE, FAKE_CERT, CONFIG, CONFIG_SSL_ONLY, CONFIG_EXPIRED_SSL, CONFIG_CUSTOM_NAME,
     CONFIG_DATA_METHOD, CONFIG_HTTP_REDIRECTS, CONFIG_UNORMALIZED_INSTANCE_NAME,

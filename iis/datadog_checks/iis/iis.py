@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.checks import AgentCheck
-from datadog_checks.checks.win import PDHBaseCheck
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.win import PDHBaseCheck
+from datadog_checks.base.utils.containers import hash_mutable
 
 
 DEFAULT_COUNTERS = [

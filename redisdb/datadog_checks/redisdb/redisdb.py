@@ -9,8 +9,8 @@ from copy import deepcopy
 import redis
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
 
 DEFAULT_MAX_SLOW_ENTRIES = 128
 MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"

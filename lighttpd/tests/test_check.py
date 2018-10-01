@@ -10,7 +10,7 @@ import time
 import pytest
 
 from datadog_checks.lighttpd import Lighttpd
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -28,7 +28,7 @@ CHECK_GAUGES = [
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.stubs import aggregator
+    from datadog_checks.base.stubs import aggregator
     aggregator.reset()
     return aggregator
 

@@ -23,8 +23,8 @@ except ImportError:
     pyodbc = None
 
 # project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
 
 if adodbapi is None and pyodbc is None:
     raise ImportError('adodbapi or pyodbc must be installed to use this check.')

@@ -8,7 +8,7 @@ import pytest
 import requests
 from requests.exceptions import ConnectTimeout, ProxyError
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 PROXY_SETTINGS = {
     'http': 'http(s)://user:password@proxy_for_http:port',
@@ -32,19 +32,19 @@ BAD_PROXY_SETTINGS = {
 
 
 def test_use_proxy():
-    with mock.patch('datadog_checks.checks.AgentCheck._get_requests_proxy', return_value=PROXY_SETTINGS):
+    with mock.patch('datadog_checks.base.checks.AgentCheck._get_requests_proxy', return_value=PROXY_SETTINGS):
         check = AgentCheck()
         assert check.get_instance_proxy({}, 'uri/health') == PROXY_SETTINGS
 
 
 def test_skip_proxy():
-    with mock.patch('datadog_checks.checks.AgentCheck._get_requests_proxy', return_value=PROXY_SETTINGS):
+    with mock.patch('datadog_checks.base.checks.AgentCheck._get_requests_proxy', return_value=PROXY_SETTINGS):
         check = AgentCheck()
         assert check.get_instance_proxy({'skip_proxy': True}, 'uri/health') == SKIP_PROXY_SETTINGS
 
 
 def test_deprecated_no_proxy():
-    with mock.patch('datadog_checks.checks.AgentCheck._get_requests_proxy', return_value=PROXY_SETTINGS):
+    with mock.patch('datadog_checks.base.checks.AgentCheck._get_requests_proxy', return_value=PROXY_SETTINGS):
         check = AgentCheck()
         assert check.get_instance_proxy({'no_proxy': True}, 'uri/health') == SKIP_PROXY_SETTINGS
 
@@ -68,7 +68,7 @@ def test_http_proxy_fail():
     os.environ['HTTP_PROXY'] = BAD_PROXY_SETTINGS['http']
 
     try:
-        with mock.patch('datadog_checks.checks.AgentCheck._get_requests_proxy', return_value={}):
+        with mock.patch('datadog_checks.base.checks.AgentCheck._get_requests_proxy', return_value={}):
             check = AgentCheck()
             proxies = check.get_instance_proxy({}, 'uri/health')
         with pytest.raises((ConnectTimeout, ProxyError)):
@@ -97,7 +97,7 @@ def test_https_proxy_fail():
     os.environ['HTTPS_PROXY'] = BAD_PROXY_SETTINGS['https']
 
     try:
-        with mock.patch('datadog_checks.checks.AgentCheck._get_requests_proxy', return_value={}):
+        with mock.patch('datadog_checks.base.checks.AgentCheck._get_requests_proxy', return_value={}):
             check = AgentCheck()
             proxies = check.get_instance_proxy({}, 'uri/health')
         with pytest.raises((ConnectTimeout, ProxyError)):
@@ -107,7 +107,7 @@ def test_https_proxy_fail():
         os.environ.update(old_env)
 
 def test_config_no_proxy():
-    with mock.patch('datadog_checks.checks.AgentCheck._get_requests_proxy', return_value=NO_PROXY_DD_CONFIG_SETTINGS):
+    with mock.patch('datadog_checks.base.checks.AgentCheck._get_requests_proxy', return_value=NO_PROXY_DD_CONFIG_SETTINGS):
         check = AgentCheck()
         proxy_results = check.get_instance_proxy({}, 'uri/health')
         assert 'localhost' in proxy_results['no']
