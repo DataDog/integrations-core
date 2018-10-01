@@ -1,5 +1,10 @@
 # CHANGELOG - http_check
 
+## 2.4.0 / 2018-10-01
+
+* [Fixed] Fix fetching ca_certs from init_config. See [#2318](https://github.com/DataDog/integrations-core/pull/2318).
+* [Added] Allow configuring cert expiration time in seconds. See [#2290](https://github.com/DataDog/integrations-core/pull/2290).
+
 ## 2.3.0 / 2018-09-04
 
 * [Fixed] Update cryptography to 2.3. See [#1927](https://github.com/DataDog/integrations-core/pull/1927).
