@@ -9,6 +9,7 @@ import pytest
 import mock
 
 from datadog_checks.http_check import HTTPCheck
+
 from .common import (
     HERE, FAKE_CERT, CONFIG, CONFIG_SSL_ONLY, CONFIG_EXPIRED_SSL, CONFIG_CUSTOM_NAME,
     CONFIG_DATA_METHOD, CONFIG_HTTP_REDIRECTS, CONFIG_UNORMALIZED_INSTANCE_NAME,

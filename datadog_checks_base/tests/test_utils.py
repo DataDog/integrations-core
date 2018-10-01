@@ -50,11 +50,13 @@ class TestPatternFilter:
         whitelist = ['abc', 'def']
 
         assert pattern_filter(items, whitelist=whitelist, key=lambda item: item.name) == [
-            Item('abc'), Item('def'), Item('abcdef')
+            Item('abc'),
+            Item('def'),
+            Item('abcdef'),
         ]
 
 
-class TestLimiter():
+class TestLimiter:
     def test_no_uid(self):
         warnings = []
         limiter = Limiter("names", 10, warning_func=warnings.append)

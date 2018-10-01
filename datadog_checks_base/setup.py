@@ -9,7 +9,7 @@ from os import path
 HERE = path.abspath(path.dirname(__file__))
 
 ABOUT = {}
-with open(path.join(HERE, "datadog_checks", "__about__.py")) as f:
+with open(path.join(HERE, "datadog_checks", "base", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -26,7 +26,6 @@ def get_requirements(fpath):
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
-
     name='datadog_checks_base',
     description='The Datadog Check Toolkit',
     long_description=LONG_DESC,
@@ -36,7 +35,6 @@ setup(
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
-
     # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -46,11 +44,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-
     packages=['datadog_checks'],
     include_package_data=True,
-
-    extras_require={
-        'deps': get_requirements('requirements.in'),
-    },
+    extras_require={'deps': get_requirements('requirements.in')},
 )

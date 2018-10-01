@@ -15,6 +15,7 @@ from urlparse import urlparse
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests_ntlm import HttpNtlmAuth
+
 from datadog_checks.checks import NetworkCheck, Status
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
