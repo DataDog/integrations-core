@@ -17,14 +17,12 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests_ntlm import HttpNtlmAuth
 
 from datadog_checks.base.checks import NetworkCheck, Status
-from datadog_checks.base.config import _is_affirmative
-from datadog_checks.base.utils.headers import headers as agent_headers
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .utils import get_ca_certs_path
+from .config import from_instance, DEFAULT_EXPECTED_CODE
 
 
-DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
 DEFAULT_EXPIRE_DAYS_WARNING = 14
 DEFAULT_EXPIRE_DAYS_CRITICAL = 7
 DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
@@ -46,52 +44,11 @@ class HTTPCheck(NetworkCheck):
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
 
-    def _load_conf(self, instance):
-        # Fetches the conf
-        method = instance.get('method', 'get')
-        data = instance.get('data', {})
-        tags = instance.get('tags', [])
-        ntlm_domain = instance.get('ntlm_domain')
-        username = instance.get('username')
-        password = instance.get('password')
-        client_cert = instance.get('client_cert')
-        client_key = instance.get('client_key')
-        http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
-        timeout = int(instance.get('timeout', 10))
-        config_headers = instance.get('headers', {})
-        default_headers = _is_affirmative(instance.get("include_default_headers", True))
-        if default_headers:
-            headers = agent_headers(self.agentConfig)
-        else:
-            headers = {}
-        headers.update(config_headers)
-        url = instance.get('url')
-        content_match = instance.get('content_match')
-        reverse_content_match = _is_affirmative(instance.get('reverse_content_match', False))
-        response_time = _is_affirmative(instance.get('collect_response_time', True))
-        if not url:
-            raise Exception("Bad configuration. You must specify a url")
-        include_content = _is_affirmative(instance.get('include_content', False))
-        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', True))
-        ssl_expire = _is_affirmative(instance.get('check_certificate_expiration', True))
-        instance_ca_certs = instance.get('ca_certs', self.ca_certs)
-        weakcipher = _is_affirmative(instance.get('weakciphers', False))
-        ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
-        check_hostname = _is_affirmative(instance.get('check_hostname', True))
-        skip_proxy = _is_affirmative(
-            instance.get('skip_proxy', instance.get('no_proxy', False)))
-        allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
-
-        return url, ntlm_domain, username, password, client_cert, client_key, method, data, http_response_status_code, \
-            timeout, include_content, headers, response_time, content_match, reverse_content_match, tags, \
-            disable_ssl_validation, ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, \
-            skip_proxy, allow_redirects
-
     def _check(self, instance):
         addr, ntlm_domain, username, password, client_cert, client_key, method, data, http_response_status_code, \
             timeout, include_content, headers, response_time, content_match, reverse_content_match, tags, \
             disable_ssl_validation, ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, \
-            skip_proxy, allow_redirects = self._load_conf(instance)
+            skip_proxy, allow_redirects = from_instance(instance, self.ca_certs)
 
         start = time.time()
 
