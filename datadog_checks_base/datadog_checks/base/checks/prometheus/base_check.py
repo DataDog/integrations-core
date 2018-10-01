@@ -84,6 +84,7 @@ class GenericPrometheusCheck(AgentCheck):
         - bar
         - foo
     """
+
     # This limit is set artificially high for v6.5, it will be reduced to 2000 in 6.6
     # If you need more than 2000, determine your needed limit by then.
     DEFAULT_METRIC_LIMIT = 250000
@@ -107,7 +108,7 @@ class GenericPrometheusCheck(AgentCheck):
             send_histograms_buckets=instance.get('send_histograms_buckets', True),
             send_monotonic_counter=instance.get('send_monotonic_counter', True),
             instance=instance,
-            ignore_unmapped=True
+            ignore_unmapped=True,
         )
 
     def _extract_rate_metrics(self, type_overrides):
@@ -162,9 +163,13 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.extra_headers = default_instance.get("extra_headers", {})
         scraper.extra_headers.update(instance.get("extra_headers", {}))
         # For simple values instance settings overrides optional defaults
-        scraper.prometheus_metrics_prefix = instance.get("prometheus_metrics_prefix", default_instance.get("prometheus_metrics_prefix", ''))
+        scraper.prometheus_metrics_prefix = instance.get(
+            "prometheus_metrics_prefix", default_instance.get("prometheus_metrics_prefix", '')
+        )
         scraper.label_to_hostname = instance.get("label_to_hostname", default_instance.get("label_to_hostname", None))
-        scraper.health_service_check = instance.get("health_service_check", default_instance.get("health_service_check", True))
+        scraper.health_service_check = instance.get(
+            "health_service_check", default_instance.get("health_service_check", True)
+        )
         scraper.ssl_cert = instance.get("ssl_cert", default_instance.get("ssl_cert", None))
         scraper.ssl_private_key = instance.get("ssl_private_key", default_instance.get("ssl_private_key", None))
         scraper.ssl_ca_cert = instance.get("ssl_ca_cert", default_instance.get("ssl_ca_cert", None))

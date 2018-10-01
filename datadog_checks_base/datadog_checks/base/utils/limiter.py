@@ -9,6 +9,7 @@ class Limiter(object):
     It is used by the AgentCheck class to limit the number of sets of tags
     that can be set by an instance.
     """
+
     def __init__(self, object_name, object_limit, warning_func=None):
         """
         :param object_name: (plural) name of counted objects for warning wording

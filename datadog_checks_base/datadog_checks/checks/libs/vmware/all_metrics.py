@@ -16,5 +16,5 @@ from datadog_checks.base.checks.libs.vmware import (
     STORAGEPATH_METRICS,
     SYSTEM_METRICS,
     VIRTUALDISK_METRICS,
-    ALL_METRICS
+    ALL_METRICS,
 )

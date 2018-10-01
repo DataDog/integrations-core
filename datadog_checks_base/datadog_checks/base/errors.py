@@ -7,4 +7,5 @@ class CheckException(Exception):
     """
     Generic base class for errors coming from checks
     """
+
     pass

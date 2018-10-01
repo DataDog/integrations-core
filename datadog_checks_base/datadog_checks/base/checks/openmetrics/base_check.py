@@ -20,6 +20,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         - bar
         - foo
     """
+
     # This limit is set artificially high for v6.5, it will be reduced to 2000 in 6.6
     # If you need more than 2000, determine your needed limit by then.
     DEFAULT_METRIC_LIMIT = 250000
@@ -41,8 +42,9 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         # We should be specifying metrics for checks that are vanilla OpenMetricsBaseCheck-based
         if not scraper_config['metrics_mapper']:
-            raise CheckException("You have to collect at least one metric from the endpoint: {}".format(
-                                 scraper_config['prometheus_url']))
+            raise CheckException(
+                "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
+            )
 
         self.process(scraper_config)
 

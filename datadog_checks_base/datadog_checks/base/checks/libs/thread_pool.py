@@ -41,11 +41,13 @@ def is_sentinel(obj):
 
 class TimeoutError(Exception):
     """Raised when a result is not available within the given timeout"""
+
     pass
 
 
 class PoolWorker(threading.Thread):
     """Thread that consumes WorkUnits from a queue to process them"""
+
     def __init__(self, workq, *args, **kwds):
         """\param workq: Queue object to consume the work units from"""
         threading.Thread.__init__(self, *args, **kwds)
@@ -146,7 +148,7 @@ class Pool(object):
         callback is applied to it (unless the call failed). callback
         should complete immediately since otherwise the thread which
         handles the results will get blocked."""
-        assert not self._closed # No lock here. We assume it's atomic...
+        assert not self._closed  # No lock here. We assume it's atomic...
         apply_result = ApplyResult(callback=callback)
         job = Job(func, args, kwds, apply_result)
         self._workq.put(job)
@@ -181,8 +183,7 @@ class Pool(object):
         self._create_sequences(func, iterable, chunksize, collector)
         return apply_result
 
-    def imap_unordered_async(self, func, iterable, chunksize=None,
-                             callback=None):
+    def imap_unordered_async(self, func, iterable, chunksize=None, callback=None):
         """A variant of the imap_unordered() method which returns an
         ApplyResult object that provides an iterator (next
         method(timeout) available).
@@ -267,6 +268,7 @@ class Pool(object):
 class WorkUnit(object):
     """ABC for a unit of work submitted to the worker threads. It's
     basically just an object equipped with a process() method"""
+
     def process(self):
         """Do the work. Shouldn't raise any exception"""
         raise NotImplementedError("Children must override Process")
@@ -274,6 +276,7 @@ class WorkUnit(object):
 
 class Job(WorkUnit):
     """A work unit that corresponds to the execution of a single function"""
+
     def __init__(self, func, args, kwds, apply_result):
         """
         \param func/args/kwds used to call the function
@@ -303,6 +306,7 @@ class Job(WorkUnit):
 class JobSequence(WorkUnit):
     """A work unit that corresponds to the processing of a continuous
     sequence of Job objects"""
+
     def __init__(self, jobs):
         WorkUnit.__init__(self)
         self._jobs = jobs
@@ -323,6 +327,7 @@ class ApplyResult(object):
 
     The result objects returns by the Pool::*_async() methods are of
     this type"""
+
     def __init__(self, collector=None, callback=None):
         """
         \param collector when not None, the notify_ready() method of
@@ -455,6 +460,7 @@ class CollectorIterator(object):
     available in the given collector object. Equipped with an extended
     next() method accepting a timeout argument. Created by the
     AbstractResultCollector::__iter__() method"""
+
     def __init__(self, collector):
         """\param AbstractResultCollector instance"""
         self._collector = collector
@@ -545,7 +551,7 @@ class UnorderedResultCollector(AbstractResultCollector):
         self._cond.acquire()
         try:
             self._collection.append(apply_result)
-            first_item = (len(self._collection) == 1)
+            first_item = len(self._collection) == 1
 
             self._cond.notifyAll()
         finally:
@@ -611,9 +617,9 @@ class OrderedResultCollector(AbstractResultCollector):
         self._lock.acquire()
         try:
             assert self._remaining > 0
-            got_first = (len(self._results) == self._remaining)
+            got_first = len(self._results) == self._remaining
             self._remaining -= 1
-            got_last = (self._remaining == 0)
+            got_last = self._remaining == 0
         finally:
             self._lock.release()
 
@@ -627,5 +633,6 @@ class OrderedResultCollector(AbstractResultCollector):
                     self._to_notify._set_exception()
                 else:
                     self._to_notify._set_value(lst)
+
 
 ## end of http://code.activestate.com/recipes/576519/ }}}

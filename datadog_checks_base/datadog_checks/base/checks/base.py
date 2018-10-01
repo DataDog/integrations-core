@@ -14,6 +14,7 @@ from six import iteritems, text_type
 try:
     import datadog_agent
     from ..log import init_logging
+
     init_logging()
 except ImportError:
     from ..stubs import datadog_agent
@@ -30,17 +31,14 @@ from ..utils.limiter import Limiter
 
 
 # Metric types for which it's only useful to submit once per set of tags
-ONE_PER_CONTEXT_METRIC_TYPES = [
-    aggregator.GAUGE,
-    aggregator.RATE,
-    aggregator.MONOTONIC_COUNT,
-]
+ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 
 
 class AgentCheck(object):
     """
     The base class for any Agent based integrations
     """
+
     OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
 
     """
@@ -93,8 +91,7 @@ class AgentCheck(object):
         if not self.init_config:
             self._use_agent_proxy = True
         else:
-            self._use_agent_proxy = is_affirmative(
-                self.init_config.get("use_agent_proxy", True))
+            self._use_agent_proxy = is_affirmative(self.init_config.get("use_agent_proxy", True))
 
         self.default_integration_http_timeout = float(self.agentConfig.get('default_integration_http_timeout', 9))
 
@@ -126,8 +123,10 @@ class AgentCheck(object):
             # Do not allow to disable limiting if the class has set a non-zero default value
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
-                self.warning("Setting max_returned_metrics to zero is not allowed," +
-                             "reverting to the default of {} metrics".format(self.DEFAULT_METRIC_LIMIT))
+                self.warning(
+                    "Setting max_returned_metrics to zero is not allowed," +
+                    "reverting to the default of {} metrics".format(self.DEFAULT_METRIC_LIMIT)
+                )
         except Exception:
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
@@ -142,10 +141,7 @@ class AgentCheck(object):
         proxies = proxies if proxies is not None else self.proxies.copy()
 
         deprecated_skip = instance.get('no_proxy', None)
-        skip = (
-            is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or
-            is_affirmative(deprecated_skip)
-        )
+        skip = is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or is_affirmative(deprecated_skip)
 
         if deprecated_skip is not None:
             self._log_deprecation('no_proxy')
@@ -184,8 +180,9 @@ class AgentCheck(object):
         self._submit_metric(aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None):
-        self._submit_metric(aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname,
-                            device_name=device_name)
+        self._submit_metric(
+            aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name
+        )
 
     def rate(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -231,8 +228,9 @@ class AgentCheck(object):
                 try:
                     event[key] = event[key].encode('utf-8')
                 except UnicodeError:
-                    self.log.warning("Error encoding unicode field '%s' to utf-8 encoded string, can't submit event",
-                                     key)
+                    self.log.warning(
+                        "Error encoding unicode field '%s' to utf-8 encoded string, can't submit event", key
+                    )
                     return
         if event.get('tags'):
             event['tags'] = self._normalize_tags_type(event['tags'])
@@ -352,12 +350,7 @@ class AgentCheck(object):
             self.check(copy.deepcopy(self.instances[0]))
             result = b''
         except Exception as e:
-            result = json.dumps([
-                {
-                    "message": str(e),
-                    "traceback": traceback.format_exc(),
-                }
-            ])
+            result = json.dumps([{"message": str(e), "traceback": traceback.format_exc()}])
         finally:
             if self.metric_limiter:
                 self.metric_limiter.reset()
@@ -365,11 +358,7 @@ class AgentCheck(object):
         return result
 
     def _get_requests_proxy(self):
-        no_proxy_settings = {
-            "http": None,
-            "https": None,
-            "no": [],
-        }
+        no_proxy_settings = {"http": None, "https": None, "no": []}
 
         # First we read the proxy configuration from datadog.conf
         proxies = self.agentConfig.get('proxy', datadog_agent.get_config('proxy'))

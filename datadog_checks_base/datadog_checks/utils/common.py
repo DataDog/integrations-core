@@ -7,5 +7,5 @@ from datadog_checks.base.utils.common import (
     ensure_unicode,
     get_docker_hostname,
     pattern_filter,
-    __return_self
+    __return_self,
 )

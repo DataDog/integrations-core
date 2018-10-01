@@ -9,6 +9,7 @@ from datadog_checks.base.checks import AgentCheck
 @pytest.fixture
 def aggregator():
     from datadog_checks.base.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -60,7 +61,7 @@ class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
 
 
-class TestLimits():
+class TestLimits:
     def test_metric_limit_gauges(self, aggregator):
         check = LimitedCheck()
         assert check.get_warnings() == []
@@ -93,11 +94,7 @@ class TestLimits():
         assert len(aggregator.metrics("metric")) == 29
 
     def test_metric_limit_instance_config(self, aggregator):
-        instances = [
-            {
-                "max_returned_metrics": 42,
-            }
-        ]
+        instances = [{"max_returned_metrics": 42}]
         check = AgentCheck("test", {}, instances)
         assert check.get_warnings() == []
 
@@ -111,11 +108,7 @@ class TestLimits():
         assert len(aggregator.metrics("metric")) == 42
 
     def test_metric_limit_instance_config_zero(self, aggregator):
-        instances = [
-            {
-                "max_returned_metrics": 0,
-            }
-        ]
+        instances = [{"max_returned_metrics": 0}]
         check = LimitedCheck("test", {}, instances)
         assert len(check.get_warnings()) == 1
 
