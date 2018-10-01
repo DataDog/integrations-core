@@ -10,14 +10,14 @@ from datadog_checks.utils.common import get_docker_hostname
 log = logging.getLogger(__name__)
 
 HOST = get_docker_hostname()
-PORT = 11111
+PORT = 1161
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
 AUTH_KEY = 'doggiepass'
 PRIV_KEY = 'doggiePRIVkey'
 
-CHECK_TAGS = ['snmp_device:localhost']
+CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
 
 SNMP_CONF = {
@@ -36,6 +36,7 @@ SNMP_V3_CONF = {
     'privKey': None,
     'authProtocol': None,
     'privProtocol': None,
+    'context_name': 'public',
 }
 
 MIBS_FOLDER = {
