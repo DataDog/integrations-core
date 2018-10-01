@@ -14,6 +14,7 @@ class AgentLogHandler(logging.Handler):
     This handler forwards every log to the Go backend allowing python checks to
     log message within the main agent logging system.
     """
+
     def emit(self, record):
         msg = "({}:{}) | {}".format(record.filename, record.lineno, self.format(record))
         datadog_agent.log(msg, record.levelno)
@@ -22,8 +23,8 @@ class AgentLogHandler(logging.Handler):
 LOG_LEVEL_MAP = {
     'CRIT': logging.CRITICAL,
     'CRITICAL': logging.CRITICAL,
-    'ERR':  logging.ERROR,
-    'ERROR':  logging.ERROR,
+    'ERR': logging.ERROR,
+    'ERROR': logging.ERROR,
     'WARN': logging.WARNING,
     'WARNING': logging.WARNING,
     'INFO': logging.INFO,

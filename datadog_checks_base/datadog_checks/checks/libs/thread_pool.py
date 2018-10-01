@@ -15,5 +15,5 @@ from datadog_checks.base.checks.thread_pool import (
     AbstractResultCollector,
     CollectorIterator,
     UnorderedResultCollector,
-    OrderedResultCollector
+    OrderedResultCollector,
 )

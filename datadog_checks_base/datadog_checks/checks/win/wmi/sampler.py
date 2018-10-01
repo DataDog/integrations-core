@@ -6,5 +6,5 @@ from datadog_checks.base.checks.win.wmi.sampler import (
     CaseInsensitiveDict,
     ProviderArchitectureMeta,
     ProviderArchitecture,
-    WMISampler
+    WMISampler,
 )

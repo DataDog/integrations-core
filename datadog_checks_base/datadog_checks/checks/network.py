@@ -3,8 +3,4 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from . import AgentCheck
-from datadog_checks.base.checks.base import (
-    Status,
-    NetworkCheck,
-    EventType
-)
+from datadog_checks.base.checks.base import Status, NetworkCheck, EventType

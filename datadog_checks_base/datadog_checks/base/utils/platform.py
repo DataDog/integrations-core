@@ -30,6 +30,7 @@ class Platform(object):
     """
     Return information about the given platform.
     """
+
     @staticmethod
     def is_darwin(name=None):
         name = name or sys.platform
@@ -64,11 +65,7 @@ class Platform(object):
     def is_unix(name=None):
         """ Return true if the platform is a unix, False otherwise. """
         name = name or sys.platform
-        return (
-            Platform.is_darwin(name)
-            or Platform.is_linux(name)
-            or Platform.is_freebsd(name)
-        )
+        return Platform.is_darwin(name) or Platform.is_linux(name) or Platform.is_freebsd(name)
 
     @staticmethod
     def is_win32(name=None):
@@ -81,7 +78,7 @@ class Platform(object):
 
     @staticmethod
     def python_architecture():
-        if sys.maxsize > 2**32:
+        if sys.maxsize > 2 ** 32:
             return "64bit"
         else:
             return "32bit"
@@ -89,6 +86,7 @@ class Platform(object):
     @staticmethod
     def is_ecs_instance():
         from utils.dockerutil import DockerUtil
+
         return DockerUtil().is_ecs()
 
     @staticmethod

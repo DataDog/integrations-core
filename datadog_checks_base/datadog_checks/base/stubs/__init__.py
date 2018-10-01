@@ -3,6 +3,4 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .aggregator import aggregator
 
-__all__ = [
-    'aggregator', 'datadog_agent'
-]
+__all__ = ['aggregator', 'datadog_agent']

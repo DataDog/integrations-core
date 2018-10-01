@@ -7,5 +7,5 @@ from datadog_checks.base.stubs.aggregator import (
     ServiceCheckStub,
     normalize_tags,
     AggregatorStub,
-    aggregator
+    aggregator,
 )

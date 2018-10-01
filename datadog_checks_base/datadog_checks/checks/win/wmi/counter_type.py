@@ -14,5 +14,5 @@ from datadog_checks.base.checks.win.wmi.counter_type import (
     calculate_perf_counter_bulk_count,
     calculate_perf_counter_counter,
     calculate_perf_average_timer,
-    calculate_perf_counter_100ns_queuelen_type
+    calculate_perf_counter_100ns_queuelen_type,
 )

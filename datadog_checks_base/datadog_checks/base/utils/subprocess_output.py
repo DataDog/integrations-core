@@ -51,7 +51,12 @@ def get_subprocess_output(command, log, raise_on_empty_output=True):
 
     log.debug("Running get_subprocess_output with cmd: %s", cmd_args)
     out, err, returncode = subprocess_output(cmd_args, raise_on_empty_output)
-    log.debug("get_subprocess_output with cmd %s returned (len(out): %d ; len(err): %d ; returncode: %d)", cmd_args,
-              len(out), len(err), returncode)
+    log.debug(
+        "get_subprocess_output with cmd %s returned (len(out): %d ; len(err): %d ; returncode: %d)",
+        cmd_args,
+        len(out),
+        len(err),
+        returncode,
+    )
 
     return (out, err, returncode)

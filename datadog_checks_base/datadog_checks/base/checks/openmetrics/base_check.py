@@ -20,6 +20,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         - bar
         - foo
     """
+
     DEFAULT_METRIC_LIMIT = 2000
 
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=None):
@@ -39,8 +40,9 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         # We should be specifying metrics for checks that are vanilla OpenMetricsBaseCheck-based
         if not scraper_config['metrics_mapper']:
-            raise CheckException("You have to collect at least one metric from the endpoint: {}".format(
-                                 scraper_config['prometheus_url']))
+            raise CheckException(
+                "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
+            )
 
         self.process(scraper_config)
 

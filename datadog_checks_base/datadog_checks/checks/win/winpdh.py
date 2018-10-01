@@ -7,5 +7,5 @@ from datadog_checks.base.checks.win.winpdh import (
     DATA_TYPE_DOUBLE,
     DATA_POINT_INTERVAL,
     SINGLE_INSTANCE_KEY,
-    WinPDHCounter
+    WinPDHCounter,
 )

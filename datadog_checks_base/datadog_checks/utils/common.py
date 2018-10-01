@@ -2,9 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.utils.common import (
-    ensure_bytes,
-    ensure_unicode,
-    get_docker_hostname,
-    pattern_filter
-)
+from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, get_docker_hostname, pattern_filter

@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.base checks.libs.timer import Timer
+from datadog_checks.base.checks.libs.timer import Timer

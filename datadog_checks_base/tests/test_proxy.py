@@ -13,22 +13,11 @@ from datadog_checks.base.checks import AgentCheck
 PROXY_SETTINGS = {
     'http': 'http(s)://user:password@proxy_for_http:port',
     'https': 'http(s)://user:password@proxy_for_https:port',
-    'no': None
+    'no': None,
 }
-SKIP_PROXY_SETTINGS = {
-    'http': '',
-    'https': '',
-    'no': None
-}
-NO_PROXY_DD_CONFIG_SETTINGS = {
-    'http': 'http://1.2.3.4:567',
-    'https': 'https://1.2.3.4:567',
-    'no': 'localhost'
-}
-BAD_PROXY_SETTINGS = {
-    'http': 'http://1.2.3.4:567',
-    'https': 'https://1.2.3.4:567',
-}
+SKIP_PROXY_SETTINGS = {'http': '', 'https': '', 'no': None}
+NO_PROXY_DD_CONFIG_SETTINGS = {'http': 'http://1.2.3.4:567', 'https': 'https://1.2.3.4:567', 'no': 'localhost'}
+BAD_PROXY_SETTINGS = {'http': 'http://1.2.3.4:567', 'https': 'https://1.2.3.4:567'}
 
 
 def test_use_proxy():
@@ -106,8 +95,11 @@ def test_https_proxy_fail():
         os.environ.clear()
         os.environ.update(old_env)
 
+
 def test_config_no_proxy():
-    with mock.patch('datadog_checks.base.checks.AgentCheck._get_requests_proxy', return_value=NO_PROXY_DD_CONFIG_SETTINGS):
+    with mock.patch(
+        'datadog_checks.base.checks.AgentCheck._get_requests_proxy', return_value=NO_PROXY_DD_CONFIG_SETTINGS
+    ):
         check = AgentCheck()
         proxy_results = check.get_instance_proxy({}, 'uri/health')
         assert 'localhost' in proxy_results['no']

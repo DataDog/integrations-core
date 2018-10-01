@@ -9,5 +9,5 @@ from datadog_checks.base.checks.win.wmi import (
     TagQueryUniquenessFailure,
     WinWMICheck,
     from_time,
-    to_time
+    to_time,
 )
