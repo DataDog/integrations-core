@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.utils.platform import get_os, Platform
+from datadog_checks.base.utils.platform import get_os, Platform

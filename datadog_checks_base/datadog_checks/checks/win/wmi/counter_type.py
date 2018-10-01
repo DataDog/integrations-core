@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.checks.win.wmi.counter_type import (
+from datadog_checks.base.checks.win.wmi.counter_type import (
     _counter_type_calculators,
     UndefinedCalculator,
     calculator,

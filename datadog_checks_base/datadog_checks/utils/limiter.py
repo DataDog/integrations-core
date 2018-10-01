@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.utils.limiter import Limiter
+from datadog_checks.base.utils.limiter import Limiter

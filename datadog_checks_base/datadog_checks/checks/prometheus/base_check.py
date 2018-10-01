@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.checks.prometheus.base_check import PrometheusScraper, GenericPrometheusCheck
+from datadog_checks.base.checks.prometheus.base_check import PrometheusScraper, GenericPrometheusCheck
