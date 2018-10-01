@@ -26,7 +26,8 @@ The ASP.NET check is included in the [Datadog Agent][1] package, so you don't ne
 
 ## Data Collected
 ### Metrics
-The ASP.NET check does not include any metrics at this time.
+
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 All ASP.NET events and failovers are sent to your [Datadog event stream][4]
@@ -43,3 +44,4 @@ Need help? Contact [Datadog Support][5].
 [4]: https://app.datadoghq.com/event/stream
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[7]: https://github.com/DataDog/integrations-core/blob/master/aspdotnet/metadata.csv
