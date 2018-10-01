@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.checks.win.wmi.sampler import (
+from datadog_checks.checks.win.wmi.sampler import (
     CaseInsensitiveDict,
     ProviderArchitectureMeta,
     ProviderArchitecture,

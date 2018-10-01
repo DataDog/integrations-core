@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.base.checks.thread_pool import (
+from datadog_checks.checks.thread_pool import (
     SENTINEL,
     is_sentinel,
     TimeoutError,

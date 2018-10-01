@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.base.checks.libs.vmware.all_metrics import (
+from datadog_checks.checks.libs.vmware.all_metrics import (
     CPU_METRICS,
     DATASTORE_METRICS,
     DISK_METRICS,

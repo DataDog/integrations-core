@@ -14,7 +14,7 @@ from .common import HERE, PORT, URL, BUCKET_NAME, USER, PASSWORD, CB_CONTAINER_N
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.base.stubs import aggregator
+    from datadog_checks.stubs import aggregator
 
     aggregator.reset()
     return aggregator

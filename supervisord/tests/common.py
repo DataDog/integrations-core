@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.checks.base import AgentCheck
+from datadog_checks.checks.base import AgentCheck
 from datadog_checks.supervisord.supervisord import SupervisordCheck
 
 

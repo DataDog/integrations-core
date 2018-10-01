@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.base.utils.containers import freeze, hash_mutable
+from datadog_checks.utils.containers import freeze, hash_mutable

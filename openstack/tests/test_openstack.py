@@ -24,7 +24,7 @@ from datadog_checks.openstack.openstack import (
     IncompleteIdentity
 )
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 instance = common.MOCK_CONFIG["instances"][0]
 instance['tags'] = ['optional:tag1']
@@ -34,7 +34,7 @@ openstack_check = OpenStackCheck('openstack', init_config, {}, instances=[instan
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.base.stubs import aggregator
+    from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
 

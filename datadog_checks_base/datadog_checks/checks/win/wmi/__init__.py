@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.checks.win.wmi import (
+from datadog_checks.checks.win.wmi import (
     WMIMetric,
     InvalidWMIQuery,
     MissingTagBy,

@@ -9,7 +9,7 @@ import pytest
 import json
 
 from datadog_checks.kubelet import PodListUtils, KubeletCredentials, get_pod_by_uid, is_static_pending_pod
-from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from .test_kubelet import mock_from_file
 
 # Skip the whole tests module on Windows

@@ -6,7 +6,7 @@ import socket
 from distutils.version import LooseVersion
 
 from datadog_checks.kafka_consumer import KafkaCheck
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.utils.common import get_docker_hostname
 
 HOST = get_docker_hostname()
 HOST_IP = socket.gethostbyname(HOST)

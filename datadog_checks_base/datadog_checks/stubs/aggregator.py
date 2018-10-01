@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.stubs.aggregator import (
+from datadog_checks.stubs.aggregator import (
     MetricStub,
     ServiceCheckStub,
     normalize_tags,

@@ -7,7 +7,7 @@
 import gearman
 
 # project
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 
 MAX_NUM_TASKS = 200

@@ -99,8 +99,8 @@ The code would look something like this:
 ```python
 import requests
 
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.errors import CheckException
+from datadog_checks.checks import AgentCheck
+from datadog_checks.errors import CheckException
 
 
 # MyCheck derives from AgentCheck, and provides the required check method.
@@ -144,7 +144,7 @@ import pytest
 
 # Don't forget to import your Integration!
 from datadog_checks.my_check import MyCheck
-from datadog_checks.base.errors import CheckException
+from datadog_checks.errors import CheckException
 
 
 def test_config():
@@ -227,7 +227,7 @@ import subprocess
 import os
 import time
 
-from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.utils.common import get_docker_hostname
 
 
 @pytest.mark.integration

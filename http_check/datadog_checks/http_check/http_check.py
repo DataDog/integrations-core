@@ -16,7 +16,7 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests_ntlm import HttpNtlmAuth
 
-from datadog_checks.base.checks import NetworkCheck, Status
+from datadog_checks.checks import NetworkCheck, Status
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .utils import get_ca_certs_path

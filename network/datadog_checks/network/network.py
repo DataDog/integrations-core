@@ -11,9 +11,9 @@ import socket
 from collections import defaultdict
 
 # project
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import (
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.platform import Platform
+from datadog_checks.utils.subprocess_output import (
     get_subprocess_output,
     SubprocessOutputEmptyError,
 )

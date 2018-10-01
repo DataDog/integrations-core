@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from datadog_checks.base.stubs import aggregator
+from datadog_checks.stubs import aggregator
 
 try:
-    from datadog_checks.base.checks.win.winpdh_base import PDHBaseCheck
+    from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
 
     # for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though
     # it's used below.  noqa to suppress that error.

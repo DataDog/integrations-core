@@ -1,4 +1,4 @@
-from datadog_checks.base.checks.prometheus import GenericPrometheusCheck
+from datadog_checks.checks.prometheus import GenericPrometheusCheck
 
 
 def test_rate_override():

@@ -4,7 +4,7 @@
 
 import os
 import pytest
-from datadog_checks.base.stubs import aggregator
+from datadog_checks.stubs import aggregator
 from datadog_checks.aspdotnet import AspdotnetCheck
 
 # for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though

@@ -9,10 +9,10 @@ from copy import deepcopy
 # 3rd party
 import requests
 
-from datadog_checks.base.errors import CheckException
-from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.config import _is_affirmative
-from datadog_checks.base.utils.headers import headers
+from datadog_checks.errors import CheckException
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.config import _is_affirmative
+from datadog_checks.utils.headers import headers
 
 
 class GitlabRunnerCheck(OpenMetricsBaseCheck):

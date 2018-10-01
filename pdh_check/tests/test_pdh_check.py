@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.base.stubs import aggregator
+from datadog_checks.stubs import aggregator
 from datadog_checks.pdh_check import PDHCheck
 
 # for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though

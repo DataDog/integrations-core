@@ -3,4 +3,4 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from datadog_checks.base.utils.tailfile import TailFile
+from datadog_checks.utils.tailfile import TailFile

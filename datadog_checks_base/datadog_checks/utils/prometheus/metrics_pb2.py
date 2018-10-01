@@ -4,4 +4,4 @@
 # flake8: noqa
 # pylint: skip-file
 
-from datadog_checks.base.utils.prometheus.metrics_pb2 import *
+from datadog_checks.utils.prometheus.metrics_pb2 import *

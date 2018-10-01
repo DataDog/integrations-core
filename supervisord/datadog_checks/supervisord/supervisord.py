@@ -11,7 +11,7 @@ import xmlrpclib
 
 import supervisor.xmlrpc
 
-from datadog_checks.base.checks.base import AgentCheck
+from datadog_checks.checks.base import AgentCheck
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'

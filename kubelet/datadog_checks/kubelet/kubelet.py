@@ -13,9 +13,9 @@ from copy import deepcopy
 import requests
 
 # project
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.errors import CheckException
+from datadog_checks.checks import AgentCheck
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.errors import CheckException
 from kubeutil import get_connection_info
 from tagger import get_tags
 
