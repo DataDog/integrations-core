@@ -13,7 +13,7 @@ The SNMP check is included in the [Datadog Agent][1] package, so you don't need 
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's examples of the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][11]. See the [sample snmp.d/conf.yaml][2] for all available configuration options.
+Here are examples of the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][11]. See the [sample snmp.d/conf.yaml][2] for all available configuration options.
 
 #### SNMP v1-v2 configuration
 
@@ -228,7 +228,7 @@ Need help? Contact [Datadog Support][5].
 ## Further Reading
 Additional helpful documentation, links, and articles:
 
-- [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][7]
+* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][7]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
