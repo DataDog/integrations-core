@@ -1,5 +1,13 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.9.0 / 2018-09-30
+
+* [Added] Allow testing of specific environments. See [#2312](https://github.com/DataDog/integrations-core/pull/2312).
+* [Added] Add run command. See [#2319](https://github.com/DataDog/integrations-core/pull/2319).
+* [Fixed] Fix namespace overwriting. See [#2311](https://github.com/DataDog/integrations-core/pull/2311).
+* [Fixed] Upgrade in-toto to gain full cross-platform release signing support. See [#2315](https://github.com/DataDog/integrations-core/pull/2315).
+* [Added] Command to validate metadata. See [#2269](https://github.com/DataDog/integrations-core/pull/2269).
+
 ## 0.8.1 / 2018-09-25
 
 * [Fixed] Fix Python 2 unicode handling for log pattern error message. See [#2303](https://github.com/DataDog/integrations-core/pull/2303).
