@@ -2,9 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-from .base_check import OpenMetricsBaseCheck
-
-__all__ = [
-    'OpenMetricsBaseCheck',
-]
+from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck

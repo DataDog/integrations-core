@@ -2,23 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-def get_hostname():
-    return b'stubbed.hostname'
-
-
-def log(*args, **kwargs):
-    pass
-
-
-def get_config(*args, **kwargs):
-    return ""
-
-def warning(msg, *args, **kwargs):
-    pass
-
-def error(msg, *args, **kwargs):
-    pass
-
-def debug(msg, *args, **kwargs):
-    pass
+from datadog_checks.base.stubs.datadog_agent import (
+    get_hostname,
+    log,
+    get_config,
+    warning,
+    error,
+    debug
+)
