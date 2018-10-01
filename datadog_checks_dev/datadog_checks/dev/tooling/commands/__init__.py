@@ -11,7 +11,6 @@ from .release import release
 from .run import run
 from .test import test
 from .metadata import metadata
-from .changed import changed
 
 ALL_COMMANDS = (
     clean,
@@ -24,5 +23,4 @@ ALL_COMMANDS = (
     release,
     run,
     test,
-    changed,
 )
