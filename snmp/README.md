@@ -13,25 +13,41 @@ The SNMP check is included in the [Datadog Agent][1] package, so you don't need 
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's an example of `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][11]. See the [sample snmp.d/conf.yaml][2] for all available configuration options:
+Here's examples of the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][11]. See the [sample snmp.d/conf.yaml][2] for all available configuration options.
+
+#### SNMP v1-v2 configuration
 
 ```
 init_config:
    - mibs_folder: /path/to/your/additional/mibs
 
 instances:
+  # SNMP v1-v2 configuration
+  #
    - ip_address: localhost
      port: 161
      community_string: public
-  #  snmp_version: 1 # set to 1 if your devices use SNMP v1; no need to set otherwise, the default is 2
+  #  snmp_version: 2 # Only required for snmp v1, will default to 2
      timeout: 1      # in seconds; default is 1
      retries: 5
-  #  enforce_mib_constraints: false # set to false to NOT verify that returned values meet MIB constraints; default is true
+  #  enforce_mib_constraints: true # set to false to NOT verify that returned values
+  #                                # returned meet MIB constraints. Defaults to true
+  #  tags:
+  #    - optional_tag_1
+  #    - optional_tag_2
+  #
+  #  # Specify metrics you want to monitor
      metrics:
        - MIB: UDP-MIB
          symbol: udpInDatagrams
+       - MIB: TCP-MIB
+         symbol: tcpActiveOpens
+  #    # If it's just a scalar, you can specify by OID and name it
        - OID: 1.3.6.1.2.1.6.5
          name: tcpPassiveOpens
+  #    # You can also query a table and specify
+  #    #   - which columns to report as value (symbols)
+  #    #   - which columns / indexes to use as tags (metric_tags)
        - MIB: IF-MIB
          table: ifTable
          symbols:
@@ -39,7 +55,45 @@ instances:
            - ifOutOctets
          metric_tags:
            - tag: interface
-             column: ifDescr
+             column: ifDescr   # specify which column to read the tag value from
+       - MIB: IP-MIB
+          table: ipSystemStatsTable
+          symbols:
+            - ipSystemStatsInReceives
+          metric_tags:
+            - tag: ipversion
+              index: 1        # specify which index you want to read the tag value from
+```
+
+#### SNMP v3 configuration
+
+```
+init_config:
+   - mibs_folder: /path/to/your/additional/mibs
+
+instances:
+  # SNMP v3 configuration
+  # check http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
+  #
+   - ip_address: 192.168.34.10
+     port: 161 # default value
+     user: user
+     authKey: password
+     privKey: private_key
+     authProtocol: authProtocol          # long string format e.g. usmHMAC192SHA256AuthProtocol
+     privProtocol: privProtocol          # long string format e.g. usmAesCfb256Protocol
+     context_engine_id: contextEngineId  # optional v3-only parameter - typically unneeded
+    #   context_name: contextName        # optional v3-only parameter
+    #   timeout: 1 # second, by default
+     retries: 5
+    #   tags:
+    #     - optional_tag_1
+    #     - optional_tag_2
+     metrics:
+       - MIB: UDP-MIB
+         symbol: udpInDatagrams
+       - MIB: TCP-MIB
+         symbol: tcpActiveOpens
 ```
 
 List each SNMP device as a distinct instance, and for each instance, list any SNMP counters and gauges you like in the `metrics` option. There are a few ways to specify what metrics to collect.
@@ -139,7 +193,6 @@ Example using the `CISCO-TCP-MIB.my`:
  Ignored MIBs:
  Failed MIBs:
 
-
  #ls /opt/datadog-agent/pysnmp/custom_mibpy/
 CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
 
@@ -173,8 +226,9 @@ Returns CRITICAL if the Agent cannot collect SNMP metrics, otherwise OK.
 Need help? Contact [Datadog Support][5].
 
 ## Further Reading
+Additional helpful documentation, links, and articles:
 
-* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?  ][7]
+- [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][7]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent

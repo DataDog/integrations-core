@@ -29,7 +29,7 @@ instances:
   #     # If it's just a scalar, you can specify by OID and name it
   #     - OID: 1.3.6.1.2.1.6.5
   #       name: tcpPassiveOpens
-  #     
+  #
   #     # You can also specify a specific tag for these with the metric_tags field
   #     - OID: 1.3.6.1.2.1.6.5
   #       name: tcpPassiveOpens
@@ -66,7 +66,7 @@ instances:
   #           index: 1        # specify which index you want to read the tag value from
 
   # SNMP v3 configuration
-  # check http://pysnmp.sourceforge.net/docs/current/security-configuration.html
+  # check http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
   #
   # - ip_address: 192.168.34.10
   #   # port: 161 # default value
