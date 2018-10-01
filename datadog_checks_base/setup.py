@@ -9,7 +9,7 @@ from os import path
 HERE = path.abspath(path.dirname(__file__))
 
 ABOUT = {}
-with open(path.join(HERE, "datadog_checks", "__about__.py")) as f:
+with open(path.join(HERE, "datadog_checks", "base",  "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
