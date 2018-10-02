@@ -28,7 +28,7 @@ class CadvisorPrometheusScraperMixin(object):
         # List of strings to filter the input text payload on. If any line contains
         # one of these strings, it will be filtered out before being parsed.
         # INTERNAL FEATURE, might be removed in future versions
-        self._text_filter_blacklist = ['container_name=""']
+        self._text_filter_blacklist = ['pod_name=""']
 
         # these are filled by container_<metric-name>_usage_<metric-unit>
         # and container_<metric-name>_limit_<metric-unit> reads it to compute <metric-name>usage_pct
@@ -124,6 +124,9 @@ class CadvisorPrometheusScraperMixin(object):
         """
         if 'container_name' in labels:
             if labels['container_name'] == 'POD':
+                return True
+            # containerd does not report container_name="POD"
+            elif labels['container_name'] == '' and labels.get('pod_name', False):
                 return True
         # container_cpu_usage_seconds_total has an id label that is a cgroup path
         # eg: /kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb

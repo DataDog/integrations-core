@@ -25,7 +25,7 @@ pg8000==1.10.1
 ply==3.10
 prometheus-client==0.3.0
 protobuf==3.5.1
-psutil==4.4.1
+psutil==5.4.7
 psycopg2-binary==2.7.4
 pyasn1==0.4.2
 pycparser==2.18
@@ -39,14 +39,15 @@ pysnmp==4.4.3
 pysnmp-mibs==0.1.6
 python-binary-memcached==0.26.1; sys_platform != 'win32'
 pyvmomi==v6.5.0.2017.5-1
+pywin32==224; sys_platform == 'win32'
 redis==2.10.5
 requests==2.19.1
 requests_ntlm==1.1.0
 scandir==1.8
+selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 serpent==1.27; sys_platform == 'win32'
 simplejson==3.6.5
 six==1.11.0
 supervisor==3.3.3; python_version < '3.0'
-testfixtures==4.14.3; sys_platform == 'win32'
 uptime==3.0.1
 uuid==1.30
