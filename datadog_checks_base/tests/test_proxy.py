@@ -106,6 +106,7 @@ def test_https_proxy_fail():
         os.environ.clear()
         os.environ.update(old_env)
 
+
 def test_config_no_proxy():
     with mock.patch('datadog_checks.checks.AgentCheck._get_requests_proxy', return_value=NO_PROXY_DD_CONFIG_SETTINGS):
         check = AgentCheck()

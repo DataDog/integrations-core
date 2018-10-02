@@ -21,6 +21,7 @@ from .. import AgentCheck
 #     it will be called in `process_metric`
 #
 
+
 class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
     DEFAULT_METRIC_LIMIT = 2000
 
@@ -56,7 +57,6 @@ class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
 
         _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
         self.monotonic_count('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
-
 
     def _submit_gauge(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """

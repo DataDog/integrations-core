@@ -142,6 +142,7 @@ def calculate_perf_counter_counter(previous, current, property_name):
 
     return (n1 - n0) / ((d1 - d0) / f)
 
+
 @calculator(805438464)
 def calculate_perf_average_timer(previous, current, property_name):
     """
@@ -172,6 +173,7 @@ def calculate_perf_average_timer(previous, current, property_name):
         return
 
     return ((n1 - n0) / f) / (d1 - d0)
+
 
 @calculator(5571840)
 def calculate_perf_counter_100ns_queuelen_type(previous, current, property_name):

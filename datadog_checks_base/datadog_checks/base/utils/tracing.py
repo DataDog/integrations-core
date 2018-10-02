@@ -16,8 +16,10 @@ except ImportError:
 
 _tracing_config = set()
 
+
 def add_trace_check(check_object):
     _tracing_config.add(check_object)
+
 
 @wrapt.decorator
 def traced(wrapped, instance, args, kwargs):

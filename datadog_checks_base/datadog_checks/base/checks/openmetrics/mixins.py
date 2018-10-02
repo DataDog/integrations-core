@@ -19,6 +19,7 @@ from datadog_checks.config import is_affirmative
 if PY3:
     long = int
 
+
 class OpenMetricsScraperMixin(object):
     # pylint: disable=E1101
     # This class is not supposed to be used by itself, it provides scraping behavior but
@@ -169,7 +170,6 @@ class OpenMetricsScraperMixin(object):
         # In combination to label_as_hostname, allows to add a common suffix to the hostnames
         # submitted. This can be used for instance to discriminate hosts between clusters.
         config['label_to_hostname_suffix'] = instance.get('label_to_hostname_suffix', default_instance.get('label_to_hostname_suffix', None))
-
 
         # Add a 'health' service check for the prometheus endpoint
         config['health_service_check'] = is_affirmative(instance.get('health_service_check',

@@ -65,9 +65,9 @@ class Platform(object):
         """ Return true if the platform is a unix, False otherwise. """
         name = name or sys.platform
         return (
-            Platform.is_darwin(name)
-            or Platform.is_linux(name)
-            or Platform.is_freebsd(name)
+            Platform.is_darwin(name) or
+            Platform.is_linux(name) or
+            Platform.is_freebsd(name)
         )
 
     @staticmethod

@@ -14,11 +14,14 @@ def log(*args, **kwargs):
 def get_config(*args, **kwargs):
     return ""
 
+
 def warning(msg, *args, **kwargs):
     pass
 
+
 def error(msg, *args, **kwargs):
     pass
+
 
 def debug(msg, *args, **kwargs):
     pass

@@ -184,7 +184,7 @@ class PrometheusScraperMixin(object):
             while n < len(buf):
                 msg_len, new_pos = _DecodeVarint32(buf, n)
                 n = new_pos
-                msg_buf = buf[n:n+msg_len]
+                msg_buf = buf[n:n + msg_len]
                 n += msg_len
 
                 message = metrics_pb2.MetricFamily()
@@ -626,7 +626,7 @@ class PrometheusScraperMixin(object):
             val = quantile.value
             limit = quantile.quantile
             if self._is_value_valid(val):
-                self._submit_gauge("{}.quantile".format(name), val, metric, custom_tags=custom_tags+["quantile:{}".format(limit)], hostname=hostname)
+                self._submit_gauge("{}.quantile".format(name), val, metric, custom_tags=custom_tags + ["quantile:{}".format(limit)], hostname=hostname)
             else:
                 self.log.debug("Metric value is not supported for metric {}.quantile.".format(name))
 
@@ -652,7 +652,7 @@ class PrometheusScraperMixin(object):
                 val = bucket.cumulative_count
                 limit = bucket.upper_bound
                 if self._is_value_valid(val):
-                    self._submit_gauge("{}.count".format(name), val, metric, custom_tags=custom_tags+["upper_bound:{}".format(limit)], hostname=hostname)
+                    self._submit_gauge("{}.count".format(name), val, metric, custom_tags=custom_tags + ["upper_bound:{}".format(limit)], hostname=hostname)
                 else:
                     self.log.debug("Metric value is not supported for metric {}.count.".format(name))
 

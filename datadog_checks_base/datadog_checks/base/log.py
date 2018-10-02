@@ -22,8 +22,8 @@ class AgentLogHandler(logging.Handler):
 LOG_LEVEL_MAP = {
     'CRIT': logging.CRITICAL,
     'CRITICAL': logging.CRITICAL,
-    'ERR':  logging.ERROR,
-    'ERROR':  logging.ERROR,
+    'ERR': logging.ERROR,
+    'ERROR': logging.ERROR,
     'WARN': logging.WARNING,
     'WARNING': logging.WARNING,
     'INFO': logging.INFO,

@@ -127,10 +127,10 @@ class PDHBaseCheck(AgentCheck):
                 if addl_metrics is not None:
                     for counterset, inst_name, counter_name, dd_name, mtype in addl_metrics:
                         if (
-                            inst_name.lower() == "none"
-                            or len(inst_name) == 0
-                            or inst_name == "*"
-                            or inst_name.lower() == "all"
+                            inst_name.lower() == "none" or
+                            len(inst_name) == 0 or
+                            inst_name == "*" or
+                            inst_name.lower() == "all"
                         ):
                             inst_name = None
                         m = getattr(self, mtype.lower())
