@@ -130,8 +130,6 @@ TAGS = {
         'type:ClusterIP',
         'type:NodePort',
         'type:LoadBalancer',
-        'service:redis-db2',
-        'service:tiller-deploy',
     ],
 }
 

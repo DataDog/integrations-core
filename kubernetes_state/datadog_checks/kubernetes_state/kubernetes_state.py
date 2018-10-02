@@ -66,6 +66,18 @@ class KubernetesState(OpenMetricsBaseCheck):
             'unknown':   self.UNKNOWN
         }
 
+        # Parameters for the count_objects_by_tags method
+        self.object_count_params = {
+            'kube_persistentvolume_status_phase': {
+                'metric_name': 'persistentvolumes.by_phase',
+                'allowed_labels': ['storageclass', 'phase'],
+            },
+            'kube_service_spec_type': {
+                'metric_name': 'service.count',
+                'allowed_labels': ['namespace', 'type'],
+            },
+        }
+
         self.METRIC_TRANSFORMERS = {
             'kube_pod_status_phase': self.kube_pod_status_phase,
             'kube_pod_container_status_waiting_reason': self.kube_pod_container_status_waiting_reason,
@@ -84,7 +96,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_node_spec_unschedulable': self.kube_node_spec_unschedulable,
             'kube_resourcequota': self.kube_resourcequota,
             'kube_limitrange': self.kube_limitrange,
-            'kube_persistentvolume_status_phase': self.kube_persistentvolume_status_phase
+            'kube_persistentvolume_status_phase': self.count_objects_by_tags,
+            'kube_service_spec_type': self.count_objects_by_tags,
         }
 
     def check(self, instance):
@@ -169,7 +182,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_replicationcontroller_status_fully_labeled_replicas': 'replicationcontroller.fully_labeled_replicas',  # noqa: E501
                 'kube_replicationcontroller_status_ready_replicas': 'replicationcontroller.replicas_ready',
                 'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
-                'kube_service_spec_type': 'service.count',
                 'kube_statefulset_replicas': 'statefulset.replicas_desired',
                 'kube_statefulset_status_replicas': 'statefulset.replicas',
                 'kube_statefulset_status_replicas_current': 'statefulset.replicas_current',
@@ -637,16 +649,17 @@ class KubernetesState(OpenMetricsBaseCheck):
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
 
-    def kube_persistentvolume_status_phase(self, metric, scraper_config):
-        """ The persistent volumes by phase. """
-        metric_name = scraper_config['namespace'] + '.persistentvolumes.by_phase'
-        by_phase_counter = Counter()
+    def count_objects_by_tags(self, metric, scraper_config):
+        """ Count objects by whitelisted tags and submit counts as gauges. """
+        config = self.object_count_params[metric.name]
+        metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
+        object_counter = Counter()
+
         for sample in metric.samples:
             tags = [
-                self._label_to_tag("storageclass", sample[self.SAMPLE_LABELS], scraper_config),
-                self._label_to_tag("phase", sample[self.SAMPLE_LABELS], scraper_config)
+                self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config) for l in config['allowed_labels']
             ] + scraper_config['custom_tags']
-            by_phase_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
+            object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in by_phase_counter.iteritems():
+        for tags, count in object_counter.iteritems():
             self.gauge(metric_name, count, tags=list(tags))
