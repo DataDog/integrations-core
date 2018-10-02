@@ -1,5 +1,4 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-from datadog_checks.base.utils.limiter import Limiter
+from ..base.utils.limiter import *

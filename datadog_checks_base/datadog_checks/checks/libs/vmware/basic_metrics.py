@@ -1,7 +1,4 @@
 # (C) Datadog, Inc. 2010-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# flake8: noqa
-
-from datadog_checks.base.libs.vmware.basic_metrics import BASIC_METRICS
+from ....base.checks.libs.vmware.basic_metrics import *

@@ -1,5 +1,4 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from datadog_checks.base.utils.proxy import config_proxy_skip
+from ..base.utils.proxy import *
