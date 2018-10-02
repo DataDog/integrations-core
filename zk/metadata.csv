@@ -1,9 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-zookeeper.bytes_received,gauge,,,,,0,zookeeper,
-zookeeper.bytes_sent,gauge,,,,,0,zookeeper,
-zookeeper.bytes_outstanding,gauge,,,,,0,zookeeper,
-zookeeper.packets_received,gauge,,packet,second,The number of packets received.,0,zookeeper,packets received per second
-zookeeper.packets_sent,gauge,,packet,second,The number of packets sent.,0,zookeeper,packets sent per second
+zookeeper.bytes_received,gauge,,,,Number of bytes received,0,zookeeper,
+zookeeper.bytes_sent,gauge,,,,Number of bytes sent,0,zookeeper,
+zookeeper.bytes_outstanding,gauge,,,,Number of bytes outstanding,0,zookeeper,
 zookeeper.packets_received,gauge,,packet,second,The number of packets received.,0,zookeeper,packets received per second
 zookeeper.packets.received,gauge,,packet,second,The number of packets received.,0,zookeeper,packets received per second
 zookeeper.packets_sent,gauge,,packet,second,The number of packets sent.,0,zookeeper,packets sent per second

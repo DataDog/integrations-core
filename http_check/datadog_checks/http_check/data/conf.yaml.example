@@ -1,158 +1,237 @@
 init_config:
-  # Change default path of trusted certificates
-  # ca_certs: /etc/ssl/certs/ca-certificates.crt
+  ## @param ca_certs - string - optional
+  ## Change default path of trusted certificates
+  #
+  ## ca_certs: /etc/ssl/certs/ca-certificates.crt
 
 instances:
+
+  ## @param name - string - required
+  ## Name of your Http check instance
+  ## To create multiple http checks, create multiple http check instances
+  #
   - name: My first service
+
+  ## @param url - string - required
+  ## Url to check 
+  #  
     url: http://some.url.example.com
+    
+  ## @param timeout - integer - required
+  ## Timeout for your HTTP check
+  #
     timeout: 1
 
-    # The default HTTP method is GET but the (optional) method parameter allows you to change the HTTP method used in
-    # the request.
-    # If any one of the POST, PUT, DELETE, or PATCH method is specified, you can choose to send data in the body of the
-    # request with the data parameter.
-    # SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
-    #
-    # method: get
-    # data:
-    #   key: value
+  ## @param method - string - optional - default: get
+  ## The method parameter allows you to change the HTTP method used in the request.
+  #
+  #  method: get
+   
+  ## @param data - list of key:value elements - optional
+  ## If any one of the POST, PUT, DELETE, or PATCH method is specified, you can choose to send data in the body of the
+  ## request with the data parameter.
+  ## SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
+  #
+  #  data:
+  #    <KEY>: <VALUE>
 
-    # The (optional) content_match parameter will allow the check
-    # to look for a particular string within the response. The check
-    # will report as DOWN if the string is not found.
-    #
-    # content_match uses Python regular expressions which means that
-    # you will have to escape the following "special" characters with
-    # a backslash (\) if you're trying to match them in your content:
-    #  . ^ $ * + ? { } [ ] \ | ( )
-    #
-    # Examples:
-    # content_match: 'In Stock'
-    # content_match: '^(Bread|Apples|Very small rocks|Cider|Gravy|Cherries|Mud|Churches|Lead) float(s)? in water'
+  ## @param content_match - string - optional
+  ## The content_match parameter allows the check
+  ## to look for a particular string within the response. The check
+  ## will report as DOWN if the string is not found.
+  ##
+  ## content_match uses Python regular expressions which means that
+  ## you will have to escape the following "special" characters with
+  ## a backslash (\) if you're trying to match them in your content:
+  ##  . ^ $ * + ? { } [ ] \ | ( )
+  ##
+  ## Examples:
+  ## content_match: 'In Stock'
+  ## content_match: '^(Bread|Apples|Very small rocks|Cider|Gravy|Cherries|Mud|Churches|Lead) float(s)? in water'
+  # 
+  #  content_match: '<REGEX>''
 
-    # The (optional) reverse_content_match parameter will allow the content_match
-    # to work the other way around. That means that the check will report
-    # as DOWN if the string is found.
-    # reverse_content_match: false
+  ## @param reverse_content_match - boolean - optional - default: false 
+  ## The reverse_content_match parameter will allow the content_match
+  ## to work the other way around. That means that the check will report
+  ## as DOWN if the string is found.
+  #
+  #  reverse_content_match: false
 
-    # If your service uses basic authentication, you can optionally
-    # specify a username and password that will be used in the check.
-    #
-    # username: user
-    # password: pass
+  ## @param username - string - optional
+  ## If your service uses basic authentication, you can optionally
+  ## specify a username that will be used in the check.
+  #
+  #  username: <USERNAME>
 
-    # If your service uses NTLM authentication, you can optionally
-    # specify a domain and password that will be used in the check.
-    #
-    # ntlm_domain: domain
-    # password: pass
+  ## @param ntlm_domain - string - optional
+  ## If your service uses NTLM authentication, you can optionally
+  ## specify a domain that will be used in the check.
+  #
+  #  ntlm_domain: <DOMAIN>
 
-    # If your service uses client side certificates, you can optionally
-    # specify a client certificate and key files that will be used in the check.
-    # The private key to your local certificate must be unencrypted.
-    #
-    # client_cert: /opt/client.crt
-    # client_key: /opt/client.key
+  ## @param password - string - optional
+  ## If your service uses basic or NTLM authentication, you can optionally
+  ## specify a password that will be used in the check.
+  #
+  #  password: <PASSWORD>
 
-    # The (optional) http_response_status_code parameter will instruct the check
-    # to look for a particular HTTP response status code or a Regex identifying
-    # a set of possible status codes.
-    # The check will report as DOWN if status code returned differs.
-    # This defaults to 1xx, 2xx and 3xx HTTP status code: (1|2|3)\d\d.
-    # http_response_status_code: 401
+  ## @param client_cert - string - optional
+  ## If your service uses client side certificates, you can optionally
+  ## specify a client certificate file that will be used in the check.
+  #
+  #  client_cert: /opt/client.crt
+  
+  ## @param client_key - string - optional
+  ## If your service uses client side certificates, you can optionally
+  ## specify a client key file that will be used in the check.
+  ## The private key to your local certificate must be unencrypted.
+  #
+  #  client_key: /opt/client.key
 
-    # The (optional) include_content parameter will instruct the check
-    # to include the first 200 characters of the HTTP response body
-    # in notifications sent by this plugin. This is best used with
-    # "healthcheck"-type URLs, where the body contains a brief, human-
-    # readable summary of failure reasons in the case of errors. This
-    # defaults to false.
-    #
-    # include_content: false
+    
+  ## @param http_response_status_code - integer - optional - default: (1|2|3)\d\d
+  ## The http_response_status_code parameter will instruct the check
+  ## to look for a particular HTTP response status code or a Regex identifying
+  ## a set of possible status codes.
+  ## The check will report as DOWN if status code returned differs.
+  ## This defaults to 1xx, 2xx and 3xx HTTP status code.
+  #
+  #  http_response_status_code: (1|2|3)\d\d
 
-    # The (optional) collect_response_time parameter will instruct the
-    # check to create a metric 'network.http.response_time', tagged with
-    # the url, reporting the response time in seconds.
-    #
-    # collect_response_time: true
+  ## @param include_content - boolean - optional - default: false    
+  ## The include_content parameter will instruct the check
+  ## to include the first 200 characters of the HTTP response body
+  ## in notifications sent by this plugin. This is best used with
+  ## "healthcheck"-type URLs, where the body contains a brief, human-
+  ## readable summary of failure reasons in the case of errors.
+  #
+  #  include_content: false
 
-    # The (optional) disable_ssl_validation will instruct the check
-    # to skip the validation of the SSL certificate of the URL being tested.
-    # This is useful when checking SSL connections signed with certificates
-    # that are not themselves signed by a public authority. Even if you are using
-    # HTTPS URLs, you must explicitly set this parameter to false if you want SSL
-    # certificate validation.
-    # When true or unset, the check logs a warning in the Agent's log file.
-    # Defaults to true, set to false if you want SSL certificate validation.
-    #
-    # disable_ssl_validation: true
+  ## @param collect_response_time - boolean - optional - default: true
+  ## Set collect_response_time parameter to true to instruct the check to
+  ## create a metric 'network.http.response_time', tagged with
+  ## the url, reporting the response time in seconds.
+  #
+  #  collect_response_time: true
 
-    # If you enable the disable_ssl_validation above, you might want to disable security warnings
-    # You can use the flag below to do so
-    # ignore_ssl_warning: false
+  ## @param disable_ssl_validation - boolean - optional - default: true
+  ## The (optional) disable_ssl_validation will instruct the check
+  ## to skip the validation of the SSL certificate of the URL being tested.
+  ## This is useful when checking SSL connections signed with certificates
+  ## that are not themselves signed by a public authority. Even if you are using
+  ## HTTPS URLs, you must explicitly set this parameter to false if you want SSL
+  ## certificate validation.
+  ## When true or unset, the check logs a warning in the Agent's log file.
+  ## set to false if you want SSL certificate validation.
+  #
+  #  disable_ssl_validation: true
 
-    # Path of trusted CA certificates used to validate the SSL certificate
-    # for this url.
-    # Overrides the default path and the one specified in init_config.
-    #
-    # ca_certs: /etc/ssl/certs/ca-certificates.crt
+  ## @param ignore_ssl_warning - boolean - optional
+  ## If you enable the disable_ssl_validation above, you might want to disable security warnings
+  ## You can use the flag below to do so
+  #
+  #  ignore_ssl_warning: false
 
-    # The (optional) check_certificate_expiration will instruct the check
-    # to create a service check that checks the expiration of the
-    # ssl certificate. Allow for a warning to occur when x days are
-    # left in the certificate, and alternatively raise a critical
-    # warning if the certificate is y days from the expiration date.
-    # The SSL certificate will always be validated for this additional
-    # service check regardless of the value of disable_ssl_validation.
-    # By default, for the expiration check, the Agent validates the SSL certificate
-    # hostname against the host of the provided url. If necessary, you can
-    # override the hostname to match with ssl_server_name.
-    # You can also disable the verification check for matching hostnames by explicitly
-    # setting check_hostname to false.
-    #
-    # check_certificate_expiration: true
-    # days_warning: 14
-    # days_critical: 7
-    # check_hostname: true
-    # ssl_server_name: hostname
+  ## @param ca_certs - string - optional
+  ## Path of trusted CA certificates used to validate the SSL certificate
+  ## for this url.
+  ## Overrides the default path and the one specified in init_config.
+  #
+  #  ca_certs: /etc/ssl/certs/ca-certificates.crt
 
-    # The (optional) headers parameter allows you to send extra headers
-    # with the request. This is useful for explicitly specifying the host
-    # header or perhaps adding headers for authorisation purposes. Note
-    # that the http client library converts all headers to lowercase.
-    # This is legal according to RFC2616
-    # (See: http://tools.ietf.org/html/rfc2616#section-4.2)
-    # but may be problematic with some HTTP servers
-    # (See: https://code.google.com/p/httplib2/issues/detail?id=169)
-    #
-    # headers:
-    #   Host: alternative.host.example.com
-    #   X-Auth-Token: SOME-AUTH-TOKEN
+  ## @param check_certificate_expiration - boolean - optional
+  ## The check_certificate_expiration will instruct the check
+  ## to create a service check that checks the expiration of the
+  ## ssl certificate. Allow for a warning to occur when x days are
+  ## left in the certificate, and alternatively raise a critical
+  ## warning if the certificate is y days from the expiration date.
+  ##
+  ## When "days" doesn't provide enough granularity (e.g. when a certificate is
+  ## expected to expire in less than 24h) "seconds" can be used. Please note
+  ## that configuration parameters expressed in seconds take precedence over
+  ## the corresponding ones expressed in days.
+  ##
+  ## The SSL certificate will always be validated for this additional
+  ## service check regardless of the value of disable_ssl_validation.
+  ## By default, for the expiration check, the Agent validates the SSL certificate
+  ## hostname against the host of the provided url. 
+  #
+  #  check_certificate_expiration: true
 
-    # The (optional) skip_proxy parameter would bypass any proxy settings enabled
-    # and attempt to reach the the URL directly.
-    # If no proxy is defined at any level, this flag bears no effect.
-    # Defaults to false.
-    #
-    # skip_proxy: false
+  ## @param days_warning - integer - optional
+  ## Express warning threshold for the HTTP check in days
+  #
+  #  days_warning: <THRESHOLD_DAYS>
 
-    # The (optional) allow_redirects parameter can enable redirection.
-    # Defaults to true.
-    #
-    # allow_redirects: true
+  ## @param days_warning - integer - optional
+  ## Express critical threshold for the HTTP check in days
+  #
+  #  days_critical: <THRESHOLD_DAYS>
+
+  ## @param seconds_warning - integer - optional
+  ## Alternatively to days_warning, seconds_warning expresses 
+  ## the warning threshold for the HTTP check in second
+  # 
+  #  seconds_warning: <THRESHOLD_SECONDS>
+
+  ## @param seconds_critical - integer - optional
+  ## Alternatively to days_critical, seconds_critical expresses 
+  ## the critical threshold for the HTTP check in second
+  # 
+  #  seconds_critical: <THRESHOLD_SECONDS>
+
+  ## @param check_hostname - boolean - optional - default: true
+  ## Set check_hostname to false to disable the verification check for matching hostnames.
+  #
+  #  check_hostname: true
+
+  ## @param ssl_server_name - string - optional
+  ## If necessary and check_hostname is set to true, 
+  ## override the hostname to match with ssl_server_name.
+  # 
+  #  ssl_server_name: <HOSTNAME>
+
+  ## @param headers: list of key:value elements - optional
+  ## The headers parameter allows you to send extra headers
+  ## with the check request. This is useful for explicitly specifying the host
+  ## header or perhaps adding headers for authorisation purposes. Note
+  ## that the http client library converts all headers to lowercase.
+  ## This is legal according to RFC2616
+  ## (See: http://tools.ietf.org/html/rfc2616#section-4.2)
+  ## but may be problematic with some HTTP servers
+  ## (See: https://code.google.com/p/httplib2/issues/detail?id=169)
+  #
+  #  headers:
+  #    Host: alternative.host.example.com
+  #    X-Auth-Token: <AUTH_TOKEN>
+
+  ## @param skip_proxy - boolean - optional - default: false
+  ## The skip_proxy parameter would bypass any proxy settings enabled
+  ## and attempt to reach the the URL directly.
+  ## If no proxy is defined at any level, this flag bears no effect.
+  #
+  #  skip_proxy: false
+
+  ## @param allow_redirects - boolean - optional - default: true
+  ## The allow_redirects parameter can enable redirection for the
+  ## HTTP check.
+  #
+  #  allow_redirects: true
 
 
-    # The (optional) include_default_headers parameter instructs the check to include the default headers.
-    # Default headers can be found at:
-    # https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/utils/headers.py
-    #
-    # Defaults to true.
-    #
-    # include_default_headers: true
+  ## @param include_default_headers - boolean - optional - default: true
+  ## The (optional) include_default_headers parameter instructs the check to include the default headers.
+  ## Default headers can be found at:
+  ## https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/utils/headers.py
+  #
+  #  include_default_headers: true
 
-    # tags:
-    #   - url:http://alternative.host.example.com
-    #   - env:production
-
-  # - name: My second service
-  #   url: https://another.url.example.com
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>

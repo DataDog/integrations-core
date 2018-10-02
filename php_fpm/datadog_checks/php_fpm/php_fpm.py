@@ -107,7 +107,7 @@ class PHPFPMCheck(AgentCheck):
         data = {}
         try:
             if use_fastcgi:
-                data = json.loads(self.request_fastcgi(status_url))
+                data = json.loads(self.request_fastcgi(status_url, query='json'))
             else:
                 # TODO: adding the 'full' parameter gets you per-process detailed
                 # informations, which could be nice to parse and output as metrics
@@ -187,7 +187,7 @@ class PHPFPMCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=sc_tags)
 
     @classmethod
-    def request_fastcgi(cls, url):
+    def request_fastcgi(cls, url, query=''):
         parsed_url = urlparse(url)
 
         hostname = parsed_url.hostname
@@ -197,14 +197,12 @@ class PHPFPMCheck(AgentCheck):
         port = str(parsed_url.port or 9000)
         route = parsed_url.path
 
-        query_string = 'json' if route == '/status' else ''
-
         env = {
             'CONTENT_LENGTH': '0',
             'CONTENT_TYPE': '',
             'DOCUMENT_ROOT': '/',
             'GATEWAY_INTERFACE': 'FastCGI/1.1',
-            'QUERY_STRING': query_string,
+            'QUERY_STRING': query,
             'REDIRECT_STATUS': '200',
             'REMOTE_ADDR': '127.0.0.1',
             'REMOTE_PORT': '80',

@@ -8,7 +8,8 @@ import requests
 from .constants import CHANGELOG_LABEL_PREFIX
 
 API_URL = 'https://api.github.com'
-PR_ENDPOINT = API_URL + '/repos/DataDog/integrations-core/pulls/{}'
+PR_ENDPOINT = API_URL + '/repos/DataDog/{}/pulls/{}'
+DEFAULT_REPO = 'integrations-core'
 
 
 def get_auth_info(config=None):
@@ -36,11 +37,14 @@ def get_changelog_types(pr_payload):
     return changelog_labels
 
 
-def get_pr(pr_num, config=None):
+def get_pr(pr_num, config=None, repo=DEFAULT_REPO):
     """
     Get the payload for the given PR number. Let exceptions bubble up.
     """
-    response = requests.get(PR_ENDPOINT.format(pr_num), auth=get_auth_info(config))
+    response = requests.get(
+        PR_ENDPOINT.format(repo, pr_num),
+        auth=get_auth_info(config)
+    )
     response.raise_for_status()
     return response.json()
 
@@ -61,4 +65,7 @@ def from_contributor(pr_payload):
     If the PR comes from a fork, we can safely assumed it's from an
     external contributor.
     """
-    return pr_payload.get('head', {}).get('repo', {}).get('fork') is True
+    try:
+        return pr_payload.get('head', {}).get('repo', {}).get('fork') is True
+    except Exception:
+        return False

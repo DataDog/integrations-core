@@ -32,6 +32,7 @@ setup(
     version=ABOUT["__version__"],
     description='The PowerDNS check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent powerdns_recursor check',
 
     # The project's main homepage.

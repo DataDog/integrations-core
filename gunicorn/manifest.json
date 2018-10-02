@@ -12,6 +12,9 @@
   "metric_prefix": "gunicorn.",
   "metric_to_check": "gunicorn.workers",
   "name": "gunicorn",
+  "process_signatures": [
+    "gunicorn: master"
+  ],
   "public_title": "Datadog-Gunicorn Integration",
   "short_description": "Monitor request rates and durations, log-message rates, and worker processes.",
   "support": "core",

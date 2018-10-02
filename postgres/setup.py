@@ -32,6 +32,7 @@ setup(
     version=ABOUT["__version__"],
     description='The Postgres check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent postgres check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',

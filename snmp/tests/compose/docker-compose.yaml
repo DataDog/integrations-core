@@ -1,0 +1,10 @@
+version: '3.5'
+
+services:
+  snmp:
+    image: "polinux/snmpd"
+    command: -d -V -c /etc/snmp/snmpd.conf
+    ports:
+      - "11111:161/udp"
+    volumes:
+      - ${COMPOSE_DIR}:/etc/snmp

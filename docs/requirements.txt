@@ -1,0 +1,2 @@
+# requirements file to run the docs build
+protobuf

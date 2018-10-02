@@ -26,15 +26,14 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 1. Add this configuration block to your `apache.d/conf.yaml` file to start gathering your [Apache Metrics](#metrics):
 
-    ```yaml
-    init_config:
+        init_config:
 
-    instances:
-        apache_status_url: http://example.com/server-status?auto
-    #   apache_user: example_user # if apache_status_url needs HTTP basic auth
-    #   apache_password: example_password
-    #   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
-    ```
+        instances:
+          - apache_status_url: http://example.com/server-status?auto
+          #  apache_user: example_user # if apache_status_url needs HTTP basic auth
+          #  apache_password: example_password
+          #  disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
+
     Change the `apache_status_url` parameter value and configure it for your environment.
     See the [sample apache.d/conf.yaml][2] for all available configuration options.
 
@@ -50,7 +49,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `apache.yaml` file to start collecting your Apache Logs:
+2. Add this configuration block to your `apache.d/conf.yaml` file to start collecting your Apache Logs:
 
     ```yaml
       logs:

@@ -28,40 +28,31 @@ def pattern_filter(items, whitelist=None, blacklist=None, key=None):
     `blacklist`, with the `whitelist` taking precedence. An optional `key`
     function can be provided that will be passed each item.
     """
+    key = key or __return_self
     if whitelist:
-        key = key or __return_self
+        whitelisted = _filter(items, whitelist, key)
 
         if blacklist:
-            whitelist = whitelist or []
-            blacklist = blacklist or []
-            whitelisted = set()
-            blacklisted = set()
+            blacklisted = _filter(items, blacklist, key)
+            # Remove any blacklisted items from the whitelisted ones.
+            whitelisted.difference_update(blacklisted)
 
-            for item in items:
-                item_key = key(item)
-                whitelisted.update(item_key for pattern in whitelist if re.search(pattern, item_key))
-                blacklisted.update(item_key for pattern in blacklist if re.search(pattern, item_key))
+        return [item for item in items if key(item) in whitelisted]
 
-            # Remove any whitelisted items from the blacklist.
-            blacklisted.difference_update(whitelisted)
-            return [item for item in items if key(item) not in blacklisted]
-        else:
-            whitelisted = {
-                key(item) for pattern in whitelist
-                for item in items
-                if re.search(pattern, key(item))
-            }
-            return [item for item in items if key(item) in whitelisted]
     elif blacklist:
-        key = key or __return_self
-        blacklisted = {
-            key(item) for pattern in blacklist
-            for item in items
-            if re.search(pattern, key(item))
-        }
+        blacklisted = _filter(items, blacklist, key)
         return [item for item in items if key(item) not in blacklisted]
+
     else:
         return items
+
+
+def _filter(items, pattern_list, key):
+    return {
+        key(item) for pattern in pattern_list
+        for item in items
+        if re.search(pattern, key(item))
+    }
 
 
 def __return_self(obj):

@@ -4,5 +4,14 @@
 #
 #    pip-compile --generate-hashes --output-file requirements.txt requirements.in
 #
+pywin32==224 ; sys_platform == "win32" \
+    --hash=sha256:22e218832a54ed206452c8f3ca9eff07ef327f8e597569a4c2828be5eaa09a77 \
+    --hash=sha256:32b37abafbfeddb0fe718008d6aada5a71efa2874f068bee1f9e703983dcc49a \
+    --hash=sha256:35451edb44162d2f603b5b18bd427bc88fcbc74849eaa7a7e7cfe0f507e5c0c8 \
+    --hash=sha256:4eda2e1e50faa706ff8226195b84fbcbd542b08c842a9b15e303589f85bfb41c \
+    --hash=sha256:5f265d72588806e134c8e1ede8561739071626ea4cc25c12d526aa7b82416ae5 \
+    --hash=sha256:6852ceac5fdd7a146b570655c37d9eacd520ed1eaeec051ff41c6fc94243d8bf \
+    --hash=sha256:6dbc4219fe45ece6a0cc6baafe0105604fdee551b5e876dc475d3955b77190ec \
+    --hash=sha256:9bd07746ce7f2198021a9fa187fa80df7b221ec5e4c234ab6f00ea355a3baf99
 uptime==3.0.1 \
     --hash=sha256:7c300254775b807ce46e3dcbcda30aa3b9a204b9c57a7ac1e79ee6dbe3942973

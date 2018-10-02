@@ -12,7 +12,7 @@ from prometheus_client.parser import text_fd_to_metric_families
 
 from six import PY3, iteritems, string_types
 
-from ..base import AgentCheck
+from .. import AgentCheck
 
 from datadog_checks.config import is_affirmative
 
@@ -90,7 +90,8 @@ class OpenMetricsScraperMixin(object):
         # prometheus metrics should have. This can be used when the prometheus
         # endpoint we are scrapping allows to add a custom prefix to it's
         # metrics.
-        config['prometheus_metrics_prefix'] = instance.get('prometheus_metrics_prefix', default_instance.get('prometheus_metrics_prefix', ''))
+        config['prometheus_metrics_prefix'] = instance.get('prometheus_metrics_prefix',
+                                                           default_instance.get('prometheus_metrics_prefix', ''))
 
         # `label_joins` holds the configuration for extracting 1:1 labels from
         # a target metric to all metric matching the label, example:
@@ -165,6 +166,11 @@ class OpenMetricsScraperMixin(object):
         # a label can hold this information, this transfers it to the hostname
         config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
 
+        # In combination to label_as_hostname, allows to add a common suffix to the hostnames
+        # submitted. This can be used for instance to discriminate hosts between clusters.
+        config['label_to_hostname_suffix'] = instance.get('label_to_hostname_suffix', default_instance.get('label_to_hostname_suffix', None))
+
+
         # Add a 'health' service check for the prometheus endpoint
         config['health_service_check'] = is_affirmative(instance.get('health_service_check',
                                                         default_instance.get('health_service_check', True)))
@@ -210,7 +216,7 @@ class OpenMetricsScraperMixin(object):
         :param response: requests.Response
         :return: core.Metric
         """
-        input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE)
+        input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
         if scraper_config['_text_filter_blacklist']:
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
@@ -482,7 +488,10 @@ class OpenMetricsScraperMixin(object):
         """
         if (hostname is None and scraper_config['label_to_hostname'] is not None and
                 scraper_config['label_to_hostname'] in sample[self.SAMPLE_LABELS]):
-                return sample[self.SAMPLE_LABELS][scraper_config['label_to_hostname']]
+                hostname = sample[self.SAMPLE_LABELS][scraper_config['label_to_hostname']]
+                suffix = scraper_config['label_to_hostname_suffix']
+                if suffix is not None:
+                    hostname += suffix
 
         return hostname
 

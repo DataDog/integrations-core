@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from .mixins import PrometheusScraperMixin
-from ..base import AgentCheck
+from .. import AgentCheck
 
 # Prometheus check is a parent class providing a structure and some helpers
 # to collect metrics, events and service checks exposed via Prometheus.
@@ -22,6 +22,8 @@ from ..base import AgentCheck
 #
 
 class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
+    DEFAULT_METRIC_LIMIT = 2000
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
 

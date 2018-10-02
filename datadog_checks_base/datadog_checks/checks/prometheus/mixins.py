@@ -15,7 +15,7 @@ from prometheus_client.parser import text_fd_to_metric_families
 
 from six import PY3, iteritems, string_types
 
-from ..base import AgentCheck
+from .. import AgentCheck
 
 if PY3:
     long = int
@@ -132,6 +132,10 @@ class PrometheusScraperMixin(object):
         # a label can hold this information, this transfers it to the hostname
         self.label_to_hostname = None
 
+        # In combination to label_as_hostname, allows to add a common suffix to the hostnames
+        # submitted. This can be used for instance to discriminate hosts between clusters.
+        self.label_to_hostname_suffix = ""
+
         # Add a "health" service check for the prometheus endpoint
         self.health_service_check = False
 
@@ -197,7 +201,7 @@ class PrometheusScraperMixin(object):
                 yield message
 
         elif 'text/plain' in response.headers['Content-Type']:
-            input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE)
+            input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
             if self._text_filter_blacklist:
                 input_gen = self._text_filter_input(input_gen)
 
@@ -590,7 +594,7 @@ class PrometheusScraperMixin(object):
         if hostname is None and self.label_to_hostname is not None:
             for label in metric.label:
                 if label.name == self.label_to_hostname:
-                    return label.value
+                    return (label.value + self.label_to_hostname_suffix)
 
         return hostname
 

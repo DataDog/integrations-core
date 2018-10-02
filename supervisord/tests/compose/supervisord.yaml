@@ -1,0 +1,7 @@
+version: '3.5'
+
+services:
+  supervisord:
+    image: ${SUPERVISOR_IMAGE}
+    ports:
+      - "19001:19001"

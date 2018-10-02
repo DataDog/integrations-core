@@ -11,6 +11,9 @@
   "metric_prefix": "tokumx.",
   "metric_to_check": "tokumx.uptime",
   "name": "tokumx",
+  "process_signatures": [
+    "mongod --config /etc/tokumx.conf"
+  ],
   "public_title": "Datadog-TokuMX Integration",
   "short_description": "Track metrics for opcounters, replication lag, cache table size, and more.",
   "support": "core",

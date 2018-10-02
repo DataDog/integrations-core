@@ -1,0 +1,12 @@
+version: "3.2"
+
+services:
+  coredns:
+    image: ${COREDNS_IMAGE}
+    command: -conf /data/Corefile
+    ports:
+      - "54:53/udp"
+      - "54:53/tcp"
+      - "9153:9153/tcp"
+    volumes:
+      - ${COREDNS_CONFIG_FOLDER}:/data

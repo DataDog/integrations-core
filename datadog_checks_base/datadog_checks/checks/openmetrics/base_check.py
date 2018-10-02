@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .mixins import OpenMetricsScraperMixin
-from ..base import AgentCheck
+from .. import AgentCheck
 from ...errors import CheckException
 
 
@@ -20,6 +20,8 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         - bar
         - foo
     """
+    DEFAULT_METRIC_LIMIT = 2000
+
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=None):
         super(OpenMetricsBaseCheck, self).__init__(name, init_config, agentConfig, instances=instances)
         self.config_map = {}
@@ -43,7 +45,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.process(scraper_config)
 
     def get_scraper_config(self, instance):
-        endpoint = instance.get('prometheus_url', None)
+        endpoint = instance.get('prometheus_url')
 
         if endpoint is None:
             raise CheckException("Unable to find prometheus URL in config file.")

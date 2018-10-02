@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .mixins import PrometheusScraperMixin
-from ..base import AgentCheck
+from .. import AgentCheck
 from ...errors import CheckException
 
 from six import string_types
@@ -84,6 +84,8 @@ class GenericPrometheusCheck(AgentCheck):
         - bar
         - foo
     """
+    DEFAULT_METRIC_LIMIT = 2000
+
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=""):
         super(GenericPrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
         self.scrapers_map = {}

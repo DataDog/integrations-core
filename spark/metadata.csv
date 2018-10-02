@@ -39,7 +39,7 @@ spark.driver.max_memory,rate,,byte,second,Maximum memory used in the driver,0,sp
 spark.executor.count,rate,,task,,Number of executors,0,spark,exe count
 spark.executor.rdd_blocks,rate,,block,second,Number of persisted RDD blocks in the application's executors,0,spark,exe rdd blk
 spark.executor.memory_used,rate,,byte,second,Amount of memory used for cached RDDs in the application's executors,0,spark,exe mem usd
-spark.executor.max_memory,rate,,byte,second,"Max memory across all executors working for a particular application",0,spark,exe mem max
+spark.executor.max_memory,rate,,byte,second,Max memory across all executors working for a particular application,0,spark,exe mem max
 spark.executor.disk_used,rate,,byte,second,Amount of disk space used by persisted RDDs in the application's executors,0,spark,exe dsk usd
 spark.executor.active_tasks,rate,,task,second,Number of active tasks in the application's executors,0,spark,exe act tsk
 spark.executor.failed_tasks,rate,,task,second,Number of failed tasks in the application's executors,0,spark,exe fld tsk

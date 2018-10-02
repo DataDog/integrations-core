@@ -1,2 +1,1 @@
-# integration pip requirements
-pyvmomi==6.0.0
+pyvmomi==v6.5.0.2017.5-1

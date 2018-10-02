@@ -12,6 +12,9 @@
   "metric_prefix": "rabbitmq.",
   "metric_to_check": "rabbitmq.queue.messages",
   "name": "rabbitmq",
+  "process_signatures": [
+    "rabbitmq"
+  ],
   "public_title": "Datadog-RabbitMQ Integration",
   "short_description": "Track queue size, consumer count, unacknowledged messages, and more.",
   "support": "core",

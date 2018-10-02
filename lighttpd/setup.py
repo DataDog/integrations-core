@@ -30,6 +30,7 @@ setup(
     version=ABOUT["__version__"],
     description='The lighttpd check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent lighttpd check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',

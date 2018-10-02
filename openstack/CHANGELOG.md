@@ -1,5 +1,10 @@
 # CHANGELOG - openstack
 
+## 1.5.0 / 2018-08-29
+
+* [Fixed] Remove duplicate project call and reword os_host config option. See [#2066](https://github.com/DataDog/integrations-core/pull/2066).
+* [Fixed] Use is_affirmative on boolean options. See [#2071](https://github.com/DataDog/integrations-core/pull/2071).
+
 ## 1.4.0 / 2018-08-17
 
 * [Fixed] Only use the short hostname when making "host" queries to Nova. See [#2070](https://github.com/DataDog/integrations-core/pull/2070).

@@ -12,6 +12,9 @@
   "metric_prefix": "activemq.",
   "metric_to_check": "activemq.queue.size",
   "name": "activemq",
+  "process_signatures": [
+    "activemq"
+  ],
   "public_title": "Datadog-ActiveMQ Integration",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
   "support": "core",

@@ -20,12 +20,23 @@ except ImportError:
 
 try:
     import aggregator
+    using_stub_aggregator = False
 except ImportError:
     from ..stubs import aggregator
+    using_stub_aggregator = True
 
 from ..config import is_affirmative
 from ..utils.common import ensure_bytes
 from ..utils.proxy import config_proxy_skip
+from ..utils.limiter import Limiter
+
+
+# Metric types for which it's only useful to submit once per set of tags
+ONE_PER_CONTEXT_METRIC_TYPES = [
+    aggregator.GAUGE,
+    aggregator.RATE,
+    aggregator.MONOTONIC_COUNT,
+]
 
 
 class AgentCheck(object):
@@ -33,6 +44,18 @@ class AgentCheck(object):
     The base class for any Agent based integrations
     """
     OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
+
+    """
+    DEFAULT_METRIC_LIMIT allows to set a limit on the number of metric name and tags combination
+    this check can send per run. This is useful for checks that have an unbounded
+    number of tag values that depend on the input payload.
+    The logic counts one set of tags per gauge/rate/monotonic_count call, and deduplicates
+    sets of tags for other metric types. The first N sets of tags in submission order will
+    be sent to the aggregator, the rest are dropped. The state is reset after each run.
+
+    See https://github.com/DataDog/integrations-core/pull/2093 for more information
+    """
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, *args, **kwargs):
         """
@@ -45,6 +68,7 @@ class AgentCheck(object):
         self.init_config = kwargs.get('init_config', {})
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
+        self.metric_limiter = None
 
         if len(args) > 0:
             self.name = args[0]
@@ -98,6 +122,19 @@ class AgentCheck(object):
             ],
         }
 
+        # Setup metric limits
+        try:
+            metric_limit = self.instances[0].get("max_returned_metrics", self.DEFAULT_METRIC_LIMIT)
+            # Do not allow to disable limiting if the class has set a non-zero default value
+            if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
+                metric_limit = self.DEFAULT_METRIC_LIMIT
+                self.warning("Setting max_returned_metrics to zero is not allowed," +
+                             "reverting to the default of {} metrics".format(self.DEFAULT_METRIC_LIMIT))
+        except Exception:
+            metric_limit = self.DEFAULT_METRIC_LIMIT
+        if metric_limit > 0:
+            self.metric_limiter = Limiter("metrics", metric_limit, self.warning)
+
     @property
     def in_developer_mode(self):
         self._log_deprecation('in_developer_mode')
@@ -117,6 +154,9 @@ class AgentCheck(object):
 
         return config_proxy_skip(proxies, uri, skip)
 
+    def _context_uid(mtype, name, value, tags=None, hostname=None):
+        return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
+
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
             # ignore metric sample
@@ -126,7 +166,27 @@ class AgentCheck(object):
         if hostname is None:
             hostname = b''
 
-        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), float(value), tags, hostname)
+        if self.metric_limiter:
+            if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
+                # Fast path for gauges, rates, monotonic counters, assume one set of tags per call
+                if self.metric_limiter.is_reached():
+                    return
+            else:
+                # Other metric types have a legit use case for several calls per set of tags, track unique sets of tags
+                context = self._context_uid(mtype, name, tags, hostname)
+                if self.metric_limiter.is_reached(context):
+                    return
+
+        try:
+            value = float(value)
+        except ValueError:
+            err_msg = "Metric: {} has non float value: {}. Only float values can be submitted as metrics".format(name, value)
+            if using_stub_aggregator:
+                raise ValueError(err_msg)
+            self.warning(err_msg)
+            return
+
+        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -302,7 +362,6 @@ class AgentCheck(object):
         try:
             self.check(copy.deepcopy(self.instances[0]))
             result = b''
-
         except Exception as e:
             result = json.dumps([
                 {
@@ -310,6 +369,9 @@ class AgentCheck(object):
                     "traceback": traceback.format_exc(),
                 }
             ])
+        finally:
+            if self.metric_limiter:
+                self.metric_limiter.reset()
 
         return result
 

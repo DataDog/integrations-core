@@ -2,7 +2,7 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 powerdns.recursor.cache_entries,gauge,,entry,,The number of entries in the cache,0,powerdns_recursor,cache entries
 powerdns.recursor.negcache_entries,gauge,,entry,,The number of entries in the negative answer cache,0,powerdns_recursor,negcache entries
 powerdns.recursor.packetcache_entries,gauge,,entry,,The number of entries in the packet cache,0,powerdns_recursor,pkt cache entries
-powerdns.recursor.failed_host_entries,gauge,,server,,The number of servers that failed to resolve,0,powerdns_recursor,failed host entries
+powerdns.recursor.failed_host_entries,gauge,,host,,The number of servers that failed to resolve,0,powerdns_recursor,failed host entries
 powerdns.recursor.concurrent_queries,gauge,,query,,The number of MThreads currently running,0,powerdns_recursor,concurrent queries
 powerdns.recursor.throttle_entries,gauge,,entry,,The number of entries in the throttle map,0,powerdns_recursor,throttle entries
 powerdns.recursor.all_outqueries,gauge,,query,second,The number of outgoing udp queries per second,0,powerdns_recursor,all outqueries
@@ -55,7 +55,6 @@ powerdns.recursor.auth6_answers1_10,gauge,,query,second,Number of queries per se
 powerdns.recursor.auth6_answers10_100,gauge,,query,second,Number of queries per second answered by auth6s within 100 milliseconds; Available since pdns_recursor v4.x,0,powerdns_recursor,auth6s answers/sec < 100ms
 powerdns.recursor.auth6_answers100_1000,gauge,,query,second,Number of queries per second answered by auth6s within 1 second; Available since pdns_recursor v4.x,0,powerdns_recursor,auth6s answers/sec < 1s
 powerdns.recursor.dlg_only_drops,gauge,,record,second,The number of records dropped per second because of 'delegation only' setting; Available since pdns_recursor v4.x,0,powerdns_recursor,dlg only drops
-powerdns.recursor.dlg_only_drops,gauge,,record,second,The number of records dropped per second because of 'delegation only' setting; Available since pdns_recursor v4.x,0,powerdns_recursor,dlg only drops
 powerdns.recursor.dnssec_queries,gauge,,record,second,The number of queries received per second with the DO bit set; Available since pdns_recursor v4.x,0,powerdns_recursor,dnssec queries
 powerdns.recursor.dnssec_result_bogus,gauge,,,,The number of DNSSEC validations per second that had the Bogus state; Available since pdns_recursor v4.x,0,powerdns_recursor,dnssec bogus
 powerdns.recursor.dnssec_result_indeterminate,gauge,,,,The number of DNSSEC validations per second that had the Indeterminate state; Available since pdns_recursor v4.x,0,powerdns_recursor,dnssec indeterminate
@@ -63,8 +62,8 @@ powerdns.recursor.dnssec_result_insecure,gauge,,,,The number of DNSSEC validatio
 powerdns.recursor.dnssec_result_nta,gauge,,,,The number of DNSSEC validations per second that had the NTA (negative trust anchor) state; Available since pdns_recursor v4.x,0,powerdns_recursor,dnssec nta
 powerdns.recursor.dnssec_result_secure,gauge,,,,The number of DNSSEC validations per second that had the Secure state; Available since pdns_recursor v4.x,0,powerdns_recursor,dnssec secure
 powerdns.recursor.dnssec_validations,gauge,,,,The number of DNSSEC validations performed per second; Available since pdns_recursor v4.x,0,powerdns_recursor,dnssec validations
-powerdns.recursor.edns_ping_matches,gauge,,server,second,The number of servers per second that sent a valid EDNS PING response; Available since pdns_recursor v4.x,0,powerdns_recursor,edns match
-powerdns.recursor.edns_ping_mismatches,gauge,,server,second,The number of servers per second that sent an invalid EDNS PING response; Available since pdns_recursor v4.x,0,powerdns_recursor,edns mismatch
+powerdns.recursor.edns_ping_matches,gauge,,host,second,The number of servers per second that sent a valid EDNS PING response; Available since pdns_recursor v4.x,0,powerdns_recursor,edns match
+powerdns.recursor.edns_ping_mismatches,gauge,,host,second,The number of servers per second that sent an invalid EDNS PING response; Available since pdns_recursor v4.x,0,powerdns_recursor,edns mismatch
 powerdns.recursor.ignored_packets,gauge,,packet,second,The number of non-query packets received per second on server sockets that should only get queries; Available since pdns_recursor v4.x,0,powerdns_recursor,ignored pkts
 powerdns.recursor.no_error_packets,gauge,,packet,second,The number of erroneous packets received per second; Available since pdns_recursor v4.x,0,powerdns_recursor,error packets
 powerdns.recursor.noedns_outqueries,gauge,,query,second,The number of queries per second sent without EDNS; Available since pdns_recursor v4.x,0,powerdns_recursor,non edns queries
@@ -84,6 +83,5 @@ powerdns.recursor.resource_limits,gauge,,query,second,The number of queries per 
 powerdns.recursor.too_old_drops,gauge,,query,second,The number of questions per second that were dropped because they were too old; Available since pdns_recursor v4.x,0,powerdns_recursor,too old drops
 powerdns.recursor.udp_in_errors,gauge,,packet,second,The number of packets per second that were received faster than the OS could process them; Available since pdns_recursor v4.x,0,powerdns_recursor,udp in errors
 powerdns.recursor.udp_noport_errors,gauge,,packet,second,The number of UDP packets per second where an ICMP response was received saying the remote port was not listening; Available since pdns_recursor v4.x,0,powerdns_recursor,udp noport errors
-powerdns.recursor.udp_in_errors,gauge,,packet,second,The number of packets per second that were received faster than the OS could process them; Available since pdns_recursor v4.x,0,powerdns_recursor,udp in errors
 powerdns.recursor.udp_recvbuf_errors,gauge,,error,second,The number of errors per second caused in the UDP receive buffer; Available since pdns_recursor v4.x,0,powerdns_recursor,udp recvbuf errors
 powerdns.recursor.udp_sndbuf_errors,gauge,,error,second,The number of errors per second caused in the UDP send buffer; Available since pdns_recursor v4.x,0,powerdns_recursor,udp sndbuf errors

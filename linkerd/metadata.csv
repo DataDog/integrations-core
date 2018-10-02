@@ -1,40 +1,40 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-linkerd.jvm.start_time,gauge,,millisecond,,"A gauge of the start time of the Java virtual machine in milliseconds since the epoch",0,linkerd,
-linkerd.jvm.thread.count,gauge,,thread,,"A gauge of the number of live threads including both daemon and non-daemon threads",0,linkerd,
+linkerd.jvm.start_time,gauge,,millisecond,,A gauge of the start time of the Java virtual machine in milliseconds since the epoch,0,linkerd,
+linkerd.jvm.thread.count,gauge,,thread,,A gauge of the number of live threads including both daemon and non-daemon threads,0,linkerd,
 linkerd.jvm.nonheap.committed,gauge,,byte,,"For the non-heap memory, a gauge of the amount of memory, in bytes, committed for the JVM to use",-1,linkerd,
 linkerd.jvm.nonheap.max,gauge,,byte,,"For the non-heap memory, a gauge of the maximum amount of memory, in bytes, that can be used by the JVM",0,linkerd,
 linkerd.jvm.nonheap.used,gauge,,byte,,"For the non-heap memory, a gauge of the current amount of memory used, in bytes",-1,linkerd,
-linkerd.jvm.gc.cycles,gauge,,unit,,"A gauge of the number of the total number of collections that have occurred",0,linkerd,
+linkerd.jvm.gc.cycles,gauge,,unit,,A gauge of the number of the total number of collections that have occurred,0,linkerd,
 linkerd.jvm.gc.msec,gauge,,millisecond,,"A gauge of the total elapsed time doing collections, in milliseconds",0,linkerd,
 linkerd.jvm.heap.committed,gauge,,byte,,"For the heap used for object allocation, a gauge of the amount of memory, in bytes, committed for the JVM to use",-1,linkerd,
 linkerd.jvm.heap.max,gauge,,byte,,"For the heap used for object allocation, a gauge of the maximum amount of memory, in bytes, that can be used by the JVM",0,linkerd,
 linkerd.jvm.heap.used,gauge,,byte,,"For the heap used for object allocation, a gauge of the current amount of memory used, in bytes",-1,linkerd,
-linkerd.jvm.uptime,gauge,,millisecond,,"A gauge of the uptime of the Java virtual machine in milliseconds",0,linkerd,
-linkerd.jvm.num_cpus,gauge,,core,,"A gauge of the number of processors available to the JVM",0,linkerd,
-linkerd.jvm.gc.ParNew.cycles,gauge,,unit,,"A gauge for ParNew of the total number of collections that have occurred",-1,linkerd,
-linkerd.jvm.gc.ConcurrentMarkSweep.cycles,gauge,,unit,,"A gauge for ConcurrentMarkSweep of the total number of collections that have occurred",-1,linkerd,
-linkerd.jvm.fd_count,gauge,,unit,,"(only available on Unix-based OS) A gauge of the number of open file descriptors",-1,linkerd,
+linkerd.jvm.uptime,gauge,,millisecond,,A gauge of the uptime of the Java virtual machine in milliseconds,0,linkerd,
+linkerd.jvm.num_cpus,gauge,,core,,A gauge of the number of processors available to the JVM,0,linkerd,
+linkerd.jvm.gc.ParNew.cycles,gauge,,unit,,A gauge for ParNew of the total number of collections that have occurred,-1,linkerd,
+linkerd.jvm.gc.ConcurrentMarkSweep.cycles,gauge,,unit,,A gauge for ConcurrentMarkSweep of the total number of collections that have occurred,-1,linkerd,
+linkerd.jvm.fd_count,gauge,,unit,,(only available on Unix-based OS) A gauge of the number of open file descriptors,-1,linkerd,
 linkerd.jvm.gc.ConcurrentMarkSweep.msec,gauge,,millisecond,,"A gauge for ConcurrentMarkSweep of the total elapsed time garbage collection pool doing collections, in milliseconds",-1,linkerd,
 linkerd.jvm.gc.ParNew.msec,gauge,,millisecond,,"A gauge for ParNew of the total elapsed time garbage collection pool doing collections, in milliseconds",-1,linkerd,
 linkerd.jvm.mem.current.Par_Eden_Space.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for Par_Eden_Space memory pool",-1,linkerd,
 linkerd.jvm.mem.current.Par_Survivor_Space.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for Par_Survivor_Space memory pool",-1,linkerd,
 linkerd.jvm.mem.current.CMS_Old_Gen.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for CMS_Old_Gen memory pool",-1,linkerd,
 linkerd.jvm.gc.eden.pause_msec.quantile,gauge,,millisecond,,"Stats of the durations, in millseconds, of the eden collection pauses",-1,linkerd,
-linkerd.rt.client.requests_s,rate,,,,"Number of requests by second received by the client",0,linkerd,"client req/s"
-linkerd.rt.client.success_s,rate,,,,"Number of success per second for the client",1,linkerd,"client success/s"
-linkerd.rt.client.connections,rate,,connection,,"Number of active connections for the client",0,linkerd,"client active connections"
-linkerd.rt.client.connects_s,rate,,connection,second,"Number of connection par second for the client",0,linkerd,"client connects/s"
-linkerd.rt.client.status.1XX_s,rate,,unit,second,"Number of request by second returning 1XX status code for the client",0,linkerd,"client 1xx/s"
-linkerd.rt.client.status.2XX_s,rate,,unit,second,"Number of request by second returning 2XX status code for the client",0,linkerd,"client 2xx/s"
-linkerd.rt.client.status.3XX_s,rate,,unit,second,"Number of request by second returning 3XX status code for the client",0,linkerd,"client 3xx/s"
-linkerd.rt.client.status.4XX_s,rate,,unit,second,"Number of request by second returning 4XX status code for the client",-1,linkerd,"client 4xx/s"
-linkerd.rt.client.status.5XX_s,rate,,unit,second,"Number of request by second returning 5XX status code for the client",-1,linkerd,"client 5xx/s"
-linkerd.rt.client.pool_cached,gauge,,connection,,"A gauge of the number of connections cached for the client",0,linkerd,
-linkerd.rt.client.pool_num_too_many_waiters,gauge,,unit,,"A counter of the number of times there were no connections immediately available and there were already too many waiters",-1,linkerd,
-linkerd.rt.client.pool_num_waited,gauge,,unit,,"A counter of the number of times there were no connections immediately available and the client waited for a connection",-1,linkerd,
+linkerd.rt.client.requests_s,rate,,,,Number of requests by second received by the client,0,linkerd,client req/s
+linkerd.rt.client.success_s,rate,,,,Number of success per second for the client,1,linkerd,client success/s
+linkerd.rt.client.connections,rate,,connection,,Number of active connections for the client,0,linkerd,client active connections
+linkerd.rt.client.connects_s,rate,,connection,second,Number of connection par second for the client,0,linkerd,client connects/s
+linkerd.rt.client.status.1XX_s,rate,,unit,second,Number of request by second returning 1XX status code for the client,0,linkerd,client 1xx/s
+linkerd.rt.client.status.2XX_s,rate,,unit,second,Number of request by second returning 2XX status code for the client,0,linkerd,client 2xx/s
+linkerd.rt.client.status.3XX_s,rate,,unit,second,Number of request by second returning 3XX status code for the client,0,linkerd,client 3xx/s
+linkerd.rt.client.status.4XX_s,rate,,unit,second,Number of request by second returning 4XX status code for the client,-1,linkerd,client 4xx/s
+linkerd.rt.client.status.5XX_s,rate,,unit,second,Number of request by second returning 5XX status code for the client,-1,linkerd,client 5xx/s
+linkerd.rt.client.pool_cached,gauge,,connection,,A gauge of the number of connections cached for the client,0,linkerd,
+linkerd.rt.client.pool_num_too_many_waiters,gauge,,unit,,A counter of the number of times there were no connections immediately available and there were already too many waiters,-1,linkerd,
+linkerd.rt.client.pool_num_waited,gauge,,unit,,A counter of the number of times there were no connections immediately available and the client waited for a connection,-1,linkerd,
 linkerd.rt.client.pool_size,gauge,,connection,,"A gauge of the number of connections that are currently alive, either in use or not",0,linkerd,
-linkerd.rt.client.pool_waiters,gauge,,unit,,"A gauge of the number of clients waiting on connections",0,linkerd,
-linkerd.rt.client.request_latency_ms.quantile,gauge,,millisecond,,"Stats of the latency of requests in milliseconds for the client",-1,linkerd,"client requests latency"
-linkerd.rt.server.connections,gauge,,connection,,"Number of active connections for the server",0,linkerd,"server active connections"
-linkerd.rt.server.connects_s,rate,,connection,second,"Number of connection par second for the server",0,linkerd,"server connects/s"
-linkerd.rt.server.request_latency_ms.quantile,gauge,,millisecond,,"Stats of the latency of requests in milliseconds for the server",-1,linkerd,"server requests latency"
+linkerd.rt.client.pool_waiters,gauge,,unit,,A gauge of the number of clients waiting on connections,0,linkerd,
+linkerd.rt.client.request_latency_ms.quantile,gauge,,millisecond,,Stats of the latency of requests in milliseconds for the client,-1,linkerd,client requests latency
+linkerd.rt.server.connections,gauge,,connection,,Number of active connections for the server,0,linkerd,server active connections
+linkerd.rt.server.connects_s,rate,,connection,second,Number of connection par second for the server,0,linkerd,server connects/s
+linkerd.rt.server.request_latency_ms.quantile,gauge,,millisecond,,Stats of the latency of requests in milliseconds for the server,-1,linkerd,server requests latency

@@ -2,14 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.checks.prometheus import GenericPrometheusCheck
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 from .metrics import METRIC_MAP, TYPE_OVERRIDES
 
-class LinkerdCheck(GenericPrometheusCheck):
+class LinkerdCheck(OpenMetricsBaseCheck):
     """
     Collect linkerd metrics from Prometheus
     """
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         labels_mapper = {
             'rt' : 'linkerd_router',

@@ -15,6 +15,13 @@
   "metric_prefix": "docker.",
   "metric_to_check": "docker.containers.running",
   "name": "docker_daemon",
+  "process_signatures": [
+    "dockerd",
+    "docker-containerd",
+    "docker run",
+    "docker daemon",
+    "docker-containerd-shim"
+  ],
   "public_title": "Datadog-Docker Integration",
   "short_description": "Correlate container performance with that of the services running inside them.",
   "support": "core",

@@ -1,5 +1,6 @@
 adodbapi==2.6.0.7; sys_platform == 'win32'
 pyodbc==4.0.13; sys_platform == 'win32'
 pyro4==4.73; sys_platform == 'win32'
+pywin32==224; sys_platform == 'win32'
+selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 serpent==1.27; sys_platform == 'win32'
-testfixtures==4.14.3; sys_platform == 'win32'

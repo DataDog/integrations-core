@@ -1,5 +1,9 @@
 # CHANGELOG - rabbitmq
 
+## 1.5.2 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.5.1 / 2018-03-23
 
 * [BUGFIX] URL encode queue names that might have special characters like '#'. See [#1100][], thanks [@sylr][].

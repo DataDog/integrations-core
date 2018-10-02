@@ -366,7 +366,14 @@ def test_submit_gauge_with_labels_and_hostname_override(mocked_prometheus_check,
     check.gauge.assert_called_with('prometheus.process.vm.bytes', 39211008.0,
                                    ['my_1st_label:my_1st_label_value', 'node:foo'],
                                    hostname="foo")
-
+    # also test with a hostname suffix
+    check2 = mocked_prometheus_check
+    check2.label_to_hostname = 'node'
+    check2.label_to_hostname_suffix = '-cluster-blue'
+    check2._submit(check2.metrics_mapper[ref_gauge.name], ref_gauge)
+    check2.gauge.assert_called_with('prometheus.process.vm.bytes', 39211008.0,
+                                   ['my_1st_label:my_1st_label_value', 'node:foo'],
+                                   hostname="foo-cluster-blue")
 
 def test_submit_gauge_with_labels_and_hostname_already_overridden(mocked_prometheus_check, ref_gauge):
     """ submitting metrics that contain labels should result in tags on the gauge call """

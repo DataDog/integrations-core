@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 from six.moves.urllib.parse import unquote
 
-from .exceptions import APIParsingException, ConfigurationException, APIConnectionException
+from .exceptions import APIParsingException, ConfigurationException, APIConnectionException, APIAuthException
 
 
 class SessionWrapper:
@@ -49,21 +49,23 @@ class SessionWrapper:
         payload = '{}{}'.format(req.method, req.url.replace(self.aci_url, ''))
         payload = unquote(payload)
 
-        signature = self.cert_key.sign(payload,
-                                       padding.PKCS1v15(),
-                                       hashes.SHA256())
-
-        signature = base64.b64encode(signature)
-
         prepped_request = req.prepare()
         if self.apic_cookie:
             prepped_request.headers['Cookie'] = self.apic_cookie
-        else:
+        elif self.cert_key:
+            signature = self.cert_key.sign(payload,
+                                           padding.PKCS1v15(),
+                                           hashes.SHA256())
+
+            signature = base64.b64encode(signature)
             cookie = ('APIC-Request-Signature={}; '
                       'APIC-Certificate-Algorithm=v1.0; '
                       'APIC-Certificate-Fingerprint=fingerprint; '
                       'APIC-Certificate-DN={}').format(signature, self.certDn)
             prepped_request.headers['Cookie'] = cookie
+        else:
+            self.warning("The Cisco ACI Integration requires either a cert or a username and password")
+            raise APIAuthException("The Cisco ACI Integration requires either a cert or a username and password")
 
         response = self.session.send(prepped_request, verify=self.verify, timeout=self.timeout)
         try:
