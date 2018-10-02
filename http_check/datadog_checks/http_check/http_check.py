@@ -278,6 +278,9 @@ class HTTPCheck(NetworkCheck):
         except ssl.CertificateError as e:
             self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
             return (Status.CRITICAL, 0, 0, str(e))
+        except ssl.SSLError as e:
+            self.log.debug("{} error: {}. Cert might be expired.".format(e.library, e.reason))
+            return (Status.DOWN, 0, 0, str(e))
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
             return (Status.DOWN, 0, 0, str(e))
@@ -290,10 +293,7 @@ class HTTPCheck(NetworkCheck):
         self.log.debug("Exp_date: {}".format(exp_date))
         self.log.debug("seconds_left: {}".format(seconds_left))
 
-        if seconds_left < 0:
-            return (Status.DOWN, days_left, seconds_left, "Expired by {} days".format(days_left))
-
-        elif seconds_left < seconds_critical:
+        if seconds_left < seconds_critical:
             return (Status.CRITICAL, days_left, seconds_left,
                     "This cert TTL is critical: only {} days before it expires".format(days_left))
 
