@@ -105,6 +105,40 @@ def test_scalar(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
+def test_enforce_constraint(spin_up_snmp, aggregator, check):
+    """
+    Allow ignoring constraints
+    """
+    instance = common.generate_instance_config(common.CONSTRAINED_OID)
+    instance["community_string"] = "constraint"
+    instance["enforce_mib_constraints"] = True
+
+    check.check(instance)
+
+    assert "service_check_error" in instance and "failed at: ValueConstraintError" in instance["service_check_error"]
+    # Test metrics
+    for metric in common.CONSTRAINED_OID:
+        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0)
+
+    instance["enforce_mib_constraints"] = False
+    check.check(instance)
+    del instance["service_check_error"]
+
+    # Test metrics
+    for metric in common.CONSTRAINED_OID:
+        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+
+    # Test service check
+    aggregator.assert_service_check("snmp.can_check",
+                                    status=SnmpCheck.OK,
+                                    tags=common.CHECK_TAGS,
+                                    at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
 def test_table(spin_up_snmp, aggregator, check):
     """
     Support SNMP tabular objects

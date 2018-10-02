@@ -70,6 +70,13 @@ UNSUPPORTED_METRICS = [
     }
 ]
 
+CONSTRAINED_OID = [
+    {
+        "MIB": "RFC1213-MIB",
+        "symbol": "tcpRtoAlgorithm",
+    }
+]
+
 FORCED_METRICS = [
     {
         'OID': "1.3.6.1.2.1.4.24.6.0",          # Gauge32
