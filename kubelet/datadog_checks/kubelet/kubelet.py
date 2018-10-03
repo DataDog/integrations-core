@@ -74,6 +74,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.cadvisor_legacy_url = None
 
         self.cadvisor_scraper_config = self.get_scraper_config(cadvisor_instance)
+        # Filter out system slices (empty pod name) to reduce memory footprint
+        self.cadvisor_scraper_config['_text_filter_blacklist'] = ['pod_name=""']
+
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
     def _create_kubelet_prometheus_instance(self, instance):
