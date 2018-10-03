@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.6.1 / 2018-09-04
+
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.6.0 / 2018-06-13
 
 * [Added] [mongo] allow disabling of replica access. See [#1516](https://github.com/DataDog/integrations-core/pull/1516).

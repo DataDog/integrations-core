@@ -6,6 +6,7 @@ ecs.fargate.io.bytes.read,rate,,byte,,# bytes read on the disk,0,fargate,io read
 ecs.fargate.cpu.user,rate,,percent,,The percent of time the CPU is under direct control of processes of this container,0,fargate,cpu user
 ecs.fargate.cpu.system,rate,,percent,,The percent of time the CPU is executing system calls on behalf of processes of this container,0,fargate,cpu system
 ecs.fargate.cpu.limit,gauge,,percent,,Limit in percent of the CPU usage,0,fargate,cpu limit
+ecs.fargate.cpu.percent,gauge,,percent,,Percentage of CPU used per container,0,fargate,cpu percent
 ecs.fargate.mem.cache,gauge,,byte,,# of bytes of page cache memory,0,fargate,mem cache
 ecs.fargate.mem.active_file,gauge,,byte,,# of bytes of file-backed memory on active LRU list,0,fargate,mem active file
 ecs.fargate.mem.inactive_file,gauge,,byte,,# of bytes of file-backed memory on inactive LRU list,0,fargate,mem inactive file

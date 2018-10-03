@@ -16,14 +16,13 @@ consul.net.node.latency.p90,gauge,,millisecond,,p90 latency from this node to al
 consul.net.node.latency.p95,gauge,,millisecond,,p95 latency from this node to all others,-1,consul,p95 latency
 consul.net.node.latency.p99,gauge,,millisecond,,p99 latency from this node to all others,-1,consul,p99 latency
 consul.net.node.latency.max,gauge,,millisecond,,maximum latency from this node to all others,-1,consul,max latency
-consul.peers,gauge,,peer,,Number of peers in the peer set,0,consul,peer
+consul.peers,gauge,,,,Number of peers in the peer set,0,consul,peer
 consul.runtime.num_goroutines,gauge,10,,,Number of running goroutines,0,consul,num goroutines
 consul.runtime.alloc_bytes,gauge,10,byte,,Current bytes allocated by the Consul process,0,consul,bytes alloc
 consul.runtime.heap_objects,gauge,10,object,,Number of objects allocated on the heap,0,consul,heap objs
 consul.runtime.sys_bytes,gauge,10,byte,,Total size of the virtual address space reserved by the Go runtime,0,consul,
 consul.runtime.malloc_count,gauge,10,object,,Cumulative count of heap objects allocated,0,consul,
 consul.runtime.free_count,gauge,10,object,,Cumulative count of heap objects freed,0,consul,
-consul.runtime.heap_objects,gauge,10,byte,,Bytes of allocated heap objects,0,consul,heap alloc
 consul.runtime.total_gc_pause_ns,gauge,10,nanosecond,,Cumulative nanoseconds in GC stop-the-world pauses since Consul started,0,consul,
 consul.runtime.total_gc_runs,gauge,10,,,Number of completed GC cycles,0,consul,
 consul.raft.state.leader,rate,10,event,,Number of completed leader elections,-1,consul,leader elecs

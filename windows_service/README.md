@@ -17,13 +17,26 @@ Edit the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root 
 init_config:
 
 instances:
-  - host: . # dot means localhost
-#   username: <REMOTESERVER>\<REMOTEUSER> # if 'host' is a remote host
-#   password: <PASSWORD>
+  ## @param services  - list of strings - required
+  ## List of services to monitor e.g. Dnscache, wmiApSrv, etc.
+  ##
+  ## If any service is set to `ALL`, all services registered with the SCM will be monitored.
+  ##
+  ## The services are treated as regular expressions to allow for advanced matching. So if
+  ## you say `Event.*`, the check will monitor any service starting with the word `Event`.
+  #
+  - services:
+      - <SERVICE_NAME_1>
+      - <SERVICE_NAME_2>
 
-# list at least one service to monitor
-    services:
-#     - wmiApSrv
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every service check emitted by this integration.
+  ##
+  ## Learn more about tagging at https://docs.datadoghq.com/tagging
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 ```
 
 Provide service names as they appear in services.msc's properties field (e.g. `wmiApSrv`), **NOT** the display name (e.g. `WMI Performance Adapter`). For names with spaces: enclose the whole name in double quotation marks (e.g. "Bonjour Service").

@@ -1,0 +1,27 @@
+init_config:
+
+instances:
+  ## @param prometheus_url - string - required
+  ## The Prometheus endpoint to query.
+  #
+  - prometheus_url: http://localhost:8080/_status/vars
+
+  ## @param prometheus_timeout - integer - optional - default: 10
+  ## The timeout for connecting to the prometheus_url.
+  #
+  #  prometheus_timeout: 10
+
+  ## @param send_histograms_buckets - boolean - optional - default: true
+  ## Histogram buckets can be noisy and generate many tags.
+  ## Set send_histograms_buckets to true to pull them.
+  #
+  #  send_histograms_buckets: true
+
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this integration.
+  ##
+  ## Learn more about tagging at https://docs.datadoghq.com/tagging
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>

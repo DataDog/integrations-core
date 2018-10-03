@@ -1,5 +1,17 @@
 # CHANGELOG - http_check
 
+## 2.4.0 / 2018-10-01
+
+* [Fixed] Fix fetching ca_certs from init_config. See [#2318](https://github.com/DataDog/integrations-core/pull/2318).
+* [Added] Allow configuring cert expiration time in seconds. See [#2290](https://github.com/DataDog/integrations-core/pull/2290).
+
+## 2.3.0 / 2018-09-04
+
+* [Fixed] Update cryptography to 2.3. See [#1927](https://github.com/DataDog/integrations-core/pull/1927).
+* [Fixed] fix link in config option description. See [#1865](https://github.com/DataDog/integrations-core/pull/1865).
+* [Added] support NTLM auth. See [#1812](https://github.com/DataDog/integrations-core/pull/1812).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 2.2.0 / 2018-06-20
 
 * [Fixed] Add support client auth for http check cert expiration.. See [#1754](https://github.com/DataDog/integrations-core/pull/1754).

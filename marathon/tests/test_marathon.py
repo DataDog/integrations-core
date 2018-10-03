@@ -50,7 +50,7 @@ def test_default_configuration(aggregator, check, instance, apps, deployments, q
 
     for metric in APP_METRICS:
         aggregator.assert_metric(metric, count=1, tags=['app_id:/my-app', 'version:2016-08-25T18:13:34.079Z',
-                                                        'optional:tag1'])
+                                                        'optional:tag1', 'LABEL_NAME:label_value_1'])
         aggregator.assert_metric(metric, count=1, tags=['app_id:/my-app-2', 'version:2016-08-25T18:13:34.079Z',
                                                         'optional:tag1'])
 
@@ -99,7 +99,8 @@ def test_ensure_queue_count(aggregator, apps, check, instance):
     aggregator.assert_metric('marathon.queue.size', value=0)
     aggregator.assert_metric('marathon.queue.count', value=0, tags=['app_id:/my-app',
                                                                     'version:2016-08-25T18:13:34.079Z',
-                                                                    'optional:tag1'])
+                                                                    'optional:tag1',
+                                                                    'LABEL_NAME:label_value_1'])
     aggregator.assert_metric('marathon.queue.count', value=0, tags=['app_id:/my-app-2',
                                                                     'version:2016-08-25T18:13:34.079Z',
                                                                     'optional:tag1'])

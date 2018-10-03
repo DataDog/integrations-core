@@ -19,13 +19,13 @@ redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxme
 redis.keys.expired,gauge,,key,,The total number of keys expired from the db.,0,redis,keys expired
 redis.mem.fragmentation_ratio,gauge,,fraction,,Ratio between used_memory_rss and used_memory.,-1,redis,frag ratio
 redis.mem.lua,gauge,,byte,,Amount of memory used by the Lua engine.,-1,redis,mem lua
-redis.mem.maxmemory,,byte,,Maximum amount of memory alloted to the Redisdb system.,-1,redis,mem maxmemory
+redis.mem.maxmemory,gauge,,byte,,Maximum amount of memory alloted to the Redisdb system.,-1,redis,mem maxmemory
 redis.mem.peak,gauge,,byte,,The peak amount of memory used by Redis.,-1,redis,mem peak
 redis.mem.rss,gauge,,byte,,Amount of memory that Redis allocated as seen by the os.,-1,redis,mem rss
 redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem used
 redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients
 redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands
-redis.net.commands.instantaneous_ops_per_sec,gauge,command,second,The number of commands processed by the server per second.,0,redis,net commands
+redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands
 redis.net.rejected,gauge,,connection,,The number of rejected connections.,-1,redis,net rejected
 redis.net.slaves,gauge,,connection,,The number of connected slaves.,0,redis,slaves
 redis.perf.latest_fork_usec,gauge,,microsecond,,The duration of the latest fork.,-1,redis,latest fork usec

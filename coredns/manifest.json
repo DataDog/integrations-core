@@ -1,0 +1,22 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "coredns",
+  "metric_prefix": "coredns.",
+  "display_name": "CoreDNS",
+  "short_description": "CoreDNS collects DNS metrics in Kubernetes.",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "guid": "9b316155-fc8e-4cb0-8bd5-8af270759cfb",
+  "public_title": "Datadog-CoreDNS Integration",
+  "categories":[
+    "containers",
+    "network"
+  ],
+  "type":"check",
+  "aliases":[],
+  "is_public": false,
+  "creates_events": false
+}

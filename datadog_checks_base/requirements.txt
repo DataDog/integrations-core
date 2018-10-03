@@ -12,10 +12,15 @@ chardet==3.0.4 \
     --hash=sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae \
     --hash=sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691 \
     # via requests
+ddtrace==0.13.0 \
+    --hash=sha256:d4495f23d902f16bd43c9d18ffde1764aa4bc709b73db0ebfc9c552fe13c818c
 idna==2.7 \
     --hash=sha256:156a6814fb5ac1fc6850fb002e0852d56c0c8d2531923a51032d1b70760e186e \
     --hash=sha256:684a38a6f903c1d71d6d5fac066b58d7768af4de2b832e426ec79c30daa94a16 \
     # via requests
+msgpack-python==0.5.6 \
+    --hash=sha256:378cc8a6d3545b532dfd149da715abae4fda2a3adb6d74e525d0d5e51f46909b \
+    # via ddtrace
 prometheus-client==0.3.0 \
     --hash=sha256:69494dc1ac967c0f626c8193e439755c2b95dd4ed22ef31c277601778a50c7ff
 protobuf==3.5.1 \
@@ -26,6 +31,15 @@ protobuf==3.5.1 \
     --hash=sha256:50c24f0d00b7efb3a72ae638ddc118e713cfe8cef40527afe24f7ebcb878e46d \
     --hash=sha256:95b78959572de7d7fafa3acb718ed71f482932ddddddbd29ba8319c10639d863 \
     --hash=sha256:b20f861b55efd8206428c13e017cc8e2c34b40b2a714446eb202bbf0ff7597a6
+pywin32==224 ; sys_platform == "win32" \
+    --hash=sha256:22e218832a54ed206452c8f3ca9eff07ef327f8e597569a4c2828be5eaa09a77 \
+    --hash=sha256:32b37abafbfeddb0fe718008d6aada5a71efa2874f068bee1f9e703983dcc49a \
+    --hash=sha256:35451edb44162d2f603b5b18bd427bc88fcbc74849eaa7a7e7cfe0f507e5c0c8 \
+    --hash=sha256:4eda2e1e50faa706ff8226195b84fbcbd542b08c842a9b15e303589f85bfb41c \
+    --hash=sha256:5f265d72588806e134c8e1ede8561739071626ea4cc25c12d526aa7b82416ae5 \
+    --hash=sha256:6852ceac5fdd7a146b570655c37d9eacd520ed1eaeec051ff41c6fc94243d8bf \
+    --hash=sha256:6dbc4219fe45ece6a0cc6baafe0105604fdee551b5e876dc475d3955b77190ec \
+    --hash=sha256:9bd07746ce7f2198021a9fa187fa80df7b221ec5e4c234ab6f00ea355a3baf99
 requests==2.19.1 \
     --hash=sha256:63b52e3c866428a224f97cab011de738c36aec0185aa91cfacd418b5d58911d1 \
     --hash=sha256:ec22d826a36ed72a7358ff3fe56cbd4ba69dd7a6718ffd450ff0e9df7a47ce6a
@@ -42,3 +56,6 @@ urllib3==1.23 \
     # via requests
 uuid==1.30 \
     --hash=sha256:1f87cc004ac5120466f36c5beae48b4c48cc411968eed0eaecd3da82aa96193f
+wrapt==1.10.11 \
+    --hash=sha256:d4d560d479f2c21e1b5443bbd15fe7ec4b37fe7e53d335d3b9b0a7b1226fe3c6 \
+    # via ddtrace

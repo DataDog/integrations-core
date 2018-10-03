@@ -11,6 +11,9 @@
   "metric_prefix": "kyototycoon.",
   "metric_to_check": "kyototycoon.records",
   "name": "kyototycoon",
+  "process_signatures": [
+    "ktserver"
+  ],
   "public_title": "Datadog-Kyoto Tycoon Integration",
   "short_description": "Track get, set, and delete operations; monitor replication lag.",
   "support": "core",

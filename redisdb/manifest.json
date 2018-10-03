@@ -16,6 +16,9 @@
   "metric_prefix": "redis.",
   "metric_to_check": "redis.net.clients",
   "name": "redisdb",
+  "process_signatures": [
+    "redis-server"
+  ],
   "public_title": "Datadog-Redis Integration",
   "short_description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
   "support": "core",

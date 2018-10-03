@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check watches for build-related events and sends them to Datadog.
+This check watches for successful build-related events and sends them to Datadog.
 
 Unlike most Agent checks, this one doesn't collect any metrics-just events.
 
@@ -24,14 +24,14 @@ init_config:
 instances:
   - name: My Website
     server: teamcity.mycompany.com
-#   server: user:password@teamcity.mycompany.com # if you set basic_http_authentication to true
-#   basic_http_authentication: true # default is false
+ #  server: user:password@teamcity.mycompany.com # if you set basic_http_authentication to true
+ #  basic_http_authentication: true # default is false
     build_configuration: MyWebsite_Deploy # the internal build ID of the build configuration you wish to track
-#   host_affected: msicalweb6 # defaults to hostname of the Agent's host
-#   is_deployment: true       # causes events to use the word 'deployment' in their messaging
-#   ssl_validation: false     # default is true
-#   tags:                     # add custom tags to events
-#   - test
+ #  host_affected: msicalweb6 # defaults to hostname of the Agent's host
+ #  is_deployment: true       # causes events to use the word 'deployment' in their messaging
+ #  ssl_validation: false     # default is true
+ #  tags:                     # add custom tags to events
+ #    - test
 ```
 
 Add an item like the above to `instances` for each build configuration you want to track.
@@ -47,7 +47,7 @@ Add an item like the above to `instances` for each build configuration you want 
 The Teamcity check does not include any metrics at this time.
 
 ### Events
-All Teamcity events are forwared to your Datadog application.
+Teamcity events representing successful builds are forwarded to your Datadog application.
 
 ### Service Checks
 The Teamcity check does not include any service checks at this time.

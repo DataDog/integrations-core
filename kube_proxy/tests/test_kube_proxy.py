@@ -72,8 +72,7 @@ def test_check_iptables(aggregator, mock_iptables):
     aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:GET', 'code:404', 'host:127.0.0.1:8080'])
     aggregator.assert_metric(NAMESPACE + '.sync_rules.latency.count')
     aggregator.assert_metric(NAMESPACE + '.sync_rules.latency.sum')
-
-    assert aggregator.metrics_asserted_pct == 100.0
+    aggregator.assert_all_metrics_covered()
 
 
 def test_check_userspace(aggregator, mock_userspace):
@@ -89,5 +88,4 @@ def test_check_userspace(aggregator, mock_userspace):
     aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:POST', 'host:127.0.0.1:8080', 'code:201'])
     aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:GET', 'host:127.0.0.1:8080', 'code:200'])
     aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:POST', 'host:127.0.0.1:8080', 'code:201'])
-
-    assert aggregator.metrics_asserted_pct == 100.0
+    aggregator.assert_all_metrics_covered()

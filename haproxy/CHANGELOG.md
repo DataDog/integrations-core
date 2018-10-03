@@ -1,5 +1,11 @@
 # CHANGELOG - haproxy
 
+## 1.3.1 / 2018-09-04
+
+* [Fixed] Make sure all checks' versions are exposed. See [#1945](https://github.com/DataDog/integrations-core/pull/1945).
+* [Fixed] Fix error in case of empty stat info. See [#1944](https://github.com/DataDog/integrations-core/pull/1944).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.3.0 / 2018-06-04
 
 * [Added] Add optional 'active' tag to metrics. See [#1478](https://github.com/DataDog/integrations-core/pull/1478).

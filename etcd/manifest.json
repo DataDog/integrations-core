@@ -14,6 +14,9 @@
   "metric_prefix": "etcd.",
   "metric_to_check": "etcd.store.watchers",
   "name": "etcd",
+  "process_signatures": [
+    "etcd"
+  ],
   "public_title": "Datadog-etcd Integration",
   "short_description": "Track writes, updates, deletes, inter-node latencies, and more Etcd metrics.",
   "support": "core",

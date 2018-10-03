@@ -1,0 +1,37 @@
+ad_identifiers:
+  - coredns
+
+init_config:
+
+instances:
+
+  ## @param prometheus_url - string - required
+  ## To enable CoreDNS metrics you must specify the prometheus url
+  ## and enable the plugin within coredns
+  ## See: https://coredns.io/plugins/metrics/
+  #
+  - prometheus_url: "http://%%host%%:9153/metrics"
+    tags:
+      - "dns-pod:%%host%%"
+
+  ## @param send_histogram_buckets - boolean - optional - default: true
+  ## Set send_histograms_buckets to true to send the histograms bucket.
+  #
+  #  send_histograms_buckets: true
+
+  ## @param send_monotonic_counter - boolean - optional - default: true
+  ## To send counters as monotonic counter
+  ## see: https://github.com/DataDog/integrations-core/issues/1303
+  #
+  #  send_monotonic_counter: true
+
+  ## @param metrics - list of strings - optional
+  ## Metrics from the CoreDNS plugins for 'metrics', 'proxy' and 'cache'
+  ## are enabled by default, however in order to scrape metrics for optional
+  ## plugins, enable the plugin in the CoreDNS corefile and then add the metric below.
+  ## As an example, the 'template' plugin's metrics are below
+  #
+  #  metrics:
+  #    - coredns_template_matches_total: template_matches_count
+  #    - coredns_template_template_failures_total: template_templating_failures_count
+  #    - coredns_template_rr_failures_total: template_resource_record_failures_count

@@ -38,8 +38,8 @@ nginx.cache.miss.responses_written,gauge,,response,,The total number of response
 nginx.cache.miss.responses_written_count,count,,response,,The total number of responses written to the cache,0,nginx,cache miss responses_written
 nginx.cache.revalidated.bytes,gauge,,byte,,The total number of bytes read from the cache,0,nginx,cache revalidated bytes
 nginx.cache.revalidated.bytes_count,count,,byte,,The total number of bytes read from the cache (shown as count),0,nginx,cache revalidated bytes
-nginx.cache.revalidated.response,gauge,,responses,,The total number of responses read from the cache,0,nginx,cache revalidated responses
-nginx.cache.revalidated.response_count,count,,responses,,The total number of responses read from the cache (shown as count),0,nginx,cache revalidated responses
+nginx.cache.revalidated.response,gauge,,response,,The total number of responses read from the cache,0,nginx,cache revalidated responses
+nginx.cache.revalidated.response_count,count,,response,,The total number of responses read from the cache (shown as count),0,nginx,cache revalidated responses
 nginx.cache.size,gauge,,response,,The current size of the cache,0,nginx,cache size
 nginx.cache.stale.bytes,gauge,,byte,,The total number of bytes read from the cache,0,nginx,cache stale bytes
 nginx.cache.stale.bytes_count,count,,byte,,The total number of bytes read from the cache (shown as count),0,nginx,cache stale bytes
@@ -55,8 +55,8 @@ nginx.connections.active,gauge,,connection,,The current number of active client 
 nginx.connections.dropped,gauge,,connection,,The total number of dropped client connections.,0,nginx,conns dropped
 nginx.connections.dropped_count,count,,connection,,The total number of dropped client connections (shown as count).,0,nginx,conns dropped
 nginx.connections.idle,gauge,,connection,,The current number of idle client connections.,0,nginx,conns idle
-nginx.generation,gauge,,reload,,The total number of configuration reloads,0,nginx,generation
-nginx.generation_count,count,,reload,,The total number of configuration reloads (shown as count),0,nginx,generation
+nginx.generation,gauge,,refresh,,The total number of configuration reloads,0,nginx,generation
+nginx.generation_count,count,,refresh,,The total number of configuration reloads (shown as count),0,nginx,generation
 nginx.load_timestamp,gauge,,millisecond,,Time of the last reload of configuration (time since Epoch).,0,nginx,load timestamp
 nginx.pid,gauge,,,,The ID of the worker process that handled status request.,0,nginx,pid
 nginx.ppid,gauge,,,,The ID of the master process that started the worker process,0,nginx,ppid
@@ -90,10 +90,10 @@ nginx.slab.pages.free,gauge,,page,,The current number of free memory pages,0,ngi
 nginx.slab.pages.used,gauge,,page,,The current number of used memory pages,0,nginx,slab pages used
 nginx.slab.slots.fails,gauge,,request,,The number of unsuccessful attempts to allocate memory of specified size,-1,nginx,slab slots fails
 nginx.slab.slots.fails_count,count,,request,,The number of unsuccessful attempts to allocate memory of specified size (shown as count),-1,nginx,slab slots fails
-nginx.slab.slots.free,gauge,,slot,,The current number of free memory slots,-1,nginx,slab slots free
+nginx.slab.slots.free,gauge,,,,The current number of free memory slots,-1,nginx,slab slots free
 nginx.slab.slots.reqs,gauge,,request,,The total number of attempts to allocate memory of specified size,-1,nginx,slab slots reqs
 nginx.slab.slots.reqs_count,count,,request,,The total number of attempts to allocate memory of specified size (shown as count),-1,nginx,slab slots reqs
-nginx.slab.slots.used,gauge,,slot,,The current number of used memory slots,-1,nginx,slab slots used
+nginx.slab.slots.used,gauge,,,,The current number of used memory slots,-1,nginx,slab slots used
 nginx.ssl.handshakes,gauge,,,,The total number of successful SSL handshakes.,0,nginx,ssl handshakes
 nginx.ssl.handshakes_count,count,,,,The total number of successful SSL handshakes (shown as count).,0,nginx,ssl handshakes
 nginx.ssl.handshakes_failed,gauge,,,,The total number of failed SSL handshakes.,-1,nginx,ssl handshakes failed
@@ -123,12 +123,12 @@ nginx.stream.upstream.peers.connections,gauge,,connection,,The total number of c
 nginx.stream.upstream.peers.connections_count,count,,connection,,The total number of client connections forwarded to this server (shown as count).,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.downstart,gauge,,millisecond,,The time (time since Epoch) when the server became “unavail” or “checking” or “unhealthy”,0,nginx,stream upstr peers downstart
 nginx.stream.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the “unavail” or “checking” or “unhealthy” states.,-1,nginx,stream upstr peers downtime
-nginx.stream.upstream.peers.fails,gauge,,fail,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,stream upstr peers fails
-nginx.stream.upstream.peers.fails_count,count,,fail,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,stream upstr peers fails
+nginx.stream.upstream.peers.fails,gauge,,error,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,stream upstr peers fails
+nginx.stream.upstream.peers.fails_count,count,,error,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,stream upstr peers fails
 nginx.stream.upstream.peers.health_checks.checks,gauge,,request,,The total number of health check requests made.,0,nginx,stream upstr peers health checks
 nginx.stream.upstream.peers.health_checks.checks_count,count,,request,,The total number of health check requests made (shown as count).,0,nginx,stream upstr peers health checks
-nginx.stream.upstream.peers.health_checks.fails,gauge,,fail,,The number of failed health checks.,-1,nginx,stream upstr peers health fails
-nginx.stream.upstream.peers.health_checks.fails_count,count,,fail,,The number of failed health checks (shown as count).,-1,nginx,stream upstr peers health fails
+nginx.stream.upstream.peers.health_checks.fails,gauge,,error,,The number of failed health checks.,-1,nginx,stream upstr peers health fails
+nginx.stream.upstream.peers.health_checks.fails_count,count,,error,,The number of failed health checks (shown as count).,-1,nginx,stream upstr peers health fails
 nginx.stream.upstream.peers.health_checks.last_passed,gauge,,,,Boolean indicating if the last health check request was successful and passed tests.,0,nginx,stream upstr peers health last
 nginx.stream.upstream.peers.health_checks.unhealthy,gauge,,,,How many times the server became unhealthy (state “unhealthy”).,-1,nginx,stream upstr peers health last
 nginx.stream.upstream.peers.health_checks.unhealthy_count,count,,,,How many times the server became unhealthy (state “unhealthy”) (shown as count).,-1,nginx,stream upstr peers health last
@@ -141,7 +141,7 @@ nginx.stream.upstream.peers.sent_count,count,,byte,,The total number of bytes se
 nginx.stream.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client connections (state “unavail”).,0,nginx,stream upstr peers unavail
 nginx.stream.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client connections (state “unavail”) (shown as count).,0,nginx,stream upstr peers unavail
 nginx.stream.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,stream upstr peers weight
-nginx.stream.upstream.zombies,gauge,,server,,The current number of servers removed from the group but still processing active client connections.,0,nginx,stream upstr zombies
+nginx.stream.upstream.zombies,gauge,,host,,The current number of servers removed from the group but still processing active client connections.,0,nginx,stream upstr zombies
 nginx.timestamp,gauge,,millisecond,,Current time since Epoch.,0,nginx,timestamp
 nginx.upstream.keepalive,gauge,,connection,,The current number of idle keepalive connections.,0,nginx,upstr keepalive
 nginx.upstream.peers.active,gauge,,connection,,The current number of active connections.,0,nginx,upstr peers active

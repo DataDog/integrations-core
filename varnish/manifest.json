@@ -13,6 +13,9 @@
   "metric_prefix": "varnish.",
   "metric_to_check": "varnish.n_backend",
   "name": "varnish",
+  "process_signatures": [
+    "service varnish start"
+  ],
   "public_title": "Datadog-Varnish Integration",
   "short_description": "Track client and backend connections, cache misses and evictions, and more.",
   "support": "core",

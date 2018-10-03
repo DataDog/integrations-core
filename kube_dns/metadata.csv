@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 kubedns.response_size.bytes.sum,gauge,,byte,,Size of the returns response in bytes.,0,kube_dns,response size sum
 kubedns.response_size.bytes.count,gauge,,response,,Number of responses on which the kubedns.response_size.bytes.sum metric is evaluated.,0,kube_dns,response size sample count
-kubedns.request_duration.seconds.sum,gauge,,second,second,Time (in seconds) each request took to resolve.,-1,kube_dns,request duration time
+kubedns.request_duration.seconds.sum,gauge,,second,,Time (in seconds) each request took to resolve.,-1,kube_dns,request duration time
 kubedns.request_duration.seconds.count,gauge,,request,,Number of requests on which the kubedns.request_duration.seconds.sum metric is evaluated.,0,kube_dns,request duration sample
 kubedns.request_count,gauge,,request,,Total number of DNS requests made.,0,kube_dns,total requests
 kubedns.request_count.count,count,30,request,,Instant number of DNS requests made.,0,kube_dns,requests

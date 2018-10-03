@@ -1,5 +1,10 @@
 # CHANGELOG - nginx
 
+## 3.0.0 / 2018-09-04
+
+* [Changed] Send correct count values for NGINX ever increasing counters. See [#2041](https://github.com/DataDog/integrations-core/pull/2041).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 2.2.0 / 2018-06-04
 
 * [Changed] Log warning, not exception, when trying to collect stream metrics. See [#1536](https://github.com/DataDog/integrations-core/pull/1536).

@@ -84,7 +84,7 @@ def assertMOR(check, instance, name=None, spec=None, tags=None, count=None, subs
     instance_name = instance['name']
     candidates = []
 
-    mor_list = [mor for _, mors in check.morlist_raw[instance_name].iteritems() for mor in mors]
+    mor_list = [mor for _, mors in check.mor_objects_queue._objects_queue[instance_name].iteritems() for mor in mors]
 
     for mor in mor_list:
         if name is not None and name != mor['hostname']:
@@ -114,6 +114,7 @@ def disable_thread_pool(check):
     Disable the thread pool on the check instance
     """
     check.pool = MagicMock(apply_async=lambda func, args: func(*args))
+    check.pool._workq.qsize.return_value = 0
     check.pool_started = True  # otherwise the mock will be overwritten
     return check
 

@@ -1,8 +1,5 @@
 {
-  "categories": [
-    "monitoring",
-    "notification"
-  ],
+  "categories": ["monitoring", "notification"],
   "creates_events": true,
   "display_name": "Nagios",
   "guid": "f7629918-751c-4a05-87e7-0e3de34e51e7",
@@ -11,13 +8,10 @@
   "manifest_version": "1.0.0",
   "metric_prefix": "nagios.",
   "name": "nagios",
+  "process_signatures": ["nagios"],
   "public_title": "Datadog-Nagios Integration",
   "short_description": "Send Nagios service flaps, host alerts, and more to your Datadog event stream.",
   "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
+  "supported_os": ["linux", "mac_os", "windows"],
   "type": "check"
 }

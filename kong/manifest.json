@@ -12,6 +12,9 @@
   "metric_prefix": "kong.",
   "metric_to_check": "kong.total_requests",
   "name": "kong",
+  "process_signatures": [
+    "kong start"
+  ],
   "public_title": "Datadog-Kong Integration",
   "short_description": "Track total requests, response codes, client connections, and more.",
   "support": "core",

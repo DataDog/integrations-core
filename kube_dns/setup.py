@@ -30,6 +30,7 @@ setup(
     version=ABOUT['__version__'],
     description='The KubeDNS check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent kube_dns check',
 
     # The project's main homepage.

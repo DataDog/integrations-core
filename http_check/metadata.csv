@@ -2,4 +2,5 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 network.http.response_time,gauge,,second,,"The response time of an HTTP request to a given url, tagged by url, e.g. 'url:http://example.com'.",-1,network,http resp time
 network.http.can_connect,gauge,,,,"Whether the check can connect, 1 if true, 0 otherwise. Tagged by url, e.g. 'url:http://example.com'.",0,network,http can connect
 network.http.cant_connect,gauge,,,,"Whether the check failed to connect, 1 if true, 0 otherwise. Tagged by url, e.g. 'url:http://example.com'.",0,network,http cannot connect
-http.ssl.days_left,gauge,,day,,"Days until SSL certificate expiration",+1,network,days till expiration
+http.ssl.days_left,gauge,,day,,Days until SSL certificate expiration,1,network,days till expiration
+http.ssl.seconds_left,gauge,,second,,Seconds until SSL certificate expiration,1,network,seconds till expiration

@@ -32,6 +32,7 @@ def instance():
     return {
         'url': 'http://{}:{}'.format(HOST, PORT),
         'tags': ['optional:tag1'],
+        'label_tags': ['LABEL_NAME'],
         'enable_deployment_metrics': True
     }
 

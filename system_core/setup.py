@@ -30,6 +30,7 @@ setup(
     version=ABOUT["__version__"],
     description='The System Core check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent system_core check',
 
     # The project's main homepage.

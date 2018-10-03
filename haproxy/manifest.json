@@ -13,6 +13,11 @@
   "metric_prefix": "haproxy.",
   "metric_to_check": "haproxy.frontend.bytes.in_rate",
   "name": "haproxy",
+  "process_signatures": [
+    "haproxy",
+    "haproxy-master",
+    "haproxy-controller"
+  ],
   "public_title": "Datadog-HAProxy Integration",
   "short_description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
   "support": "core",

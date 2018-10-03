@@ -22,11 +22,11 @@ instances:
   - status_url: http://localhost/status # or whatever pm.status_path is set to in your PHP INI
     ping_url: http://localhost/ping     # or whatever ping.path is set to in your PHP INI
     ping_reply: pong                    # the reply to expect from ping; default is 'pong'
-#   user: <YOUR_USERNAME>     # if the status and ping URLs require HTTP basic auth
-#   password: <YOUR_PASSWORD> # if the status and ping URLs require HTTP basic auth
-#   http_host: <HOST>         # if your FPM pool is only accessible via a specific HTTP vhost
-#   tags:
-#     - instance:foo
+ #  user: <YOUR_USERNAME>     # if the status and ping URLs require HTTP basic auth
+ #  password: <YOUR_PASSWORD> # if the status and ping URLs require HTTP basic auth
+ #  http_host: <HOST>         # if your FPM pool is only accessible via a specific HTTP vhost
+ #  tags:
+ #    - instance:foo
 ```
 
 Configuration Options:

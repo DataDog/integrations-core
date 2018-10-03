@@ -1,13 +1,10 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from __future__ import unicode_literals
 
-# stdlib
 from datetime import datetime
 import _strptime # noqa
-import os.path
 import re
 import socket
 import ssl
@@ -15,156 +12,23 @@ import time
 import warnings
 from urlparse import urlparse
 
-# 3rd party
 import requests
-from requests.adapters import HTTPAdapter
-from requests.packages import urllib3
-from requests.packages.urllib3.util import ssl_
-from requests.packages.urllib3.exceptions import InsecureRequestWarning, SecurityWarning
-from requests.packages.urllib3.packages.ssl_match_hostname import match_hostname
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests_ntlm import HttpNtlmAuth
-
-# project
 from datadog_checks.checks import NetworkCheck, Status
-from datadog_checks.config import _is_affirmative
-from datadog_checks.utils.headers import headers as agent_headers
 
-DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
+from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
+from .utils import get_ca_certs_path
+from .config import from_instance, DEFAULT_EXPECTED_CODE
+
+
+DEFAULT_EXPIRE_DAYS_WARNING = 14
+DEFAULT_EXPIRE_DAYS_CRITICAL = 7
+DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
+DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 CONTENT_LENGTH = 200
 
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
-
-
-class WeakCiphersHTTPSConnection(urllib3.connection.VerifiedHTTPSConnection):
-
-    SUPPORTED_CIPHERS = (
-        'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:'
-        'ECDH+HIGH:DH+HIGH:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+HIGH:'
-        'RSA+3DES:ECDH+RC4:DH+RC4:RSA+RC4:!aNULL:!eNULL:!EXP:-MD5:RSA+RC4+MD5'
-    )
-
-    def __init__(self, host, port, ciphers=None, **kwargs):
-        self.ciphers = ciphers if ciphers is not None else self.SUPPORTED_CIPHERS
-        super(WeakCiphersHTTPSConnection, self).__init__(host, port, **kwargs)
-
-    def connect(self):
-        # Add certificate verification
-        conn = self._new_conn()
-
-        resolved_cert_reqs = ssl_.resolve_cert_reqs(self.cert_reqs)
-        resolved_ssl_version = ssl_.resolve_ssl_version(self.ssl_version)
-
-        hostname = self.host
-        if getattr(self, '_tunnel_host', None):
-            # _tunnel_host was added in Python 2.6.3
-            # (See:
-            # http://hg.python.org/cpython/rev/0f57b30a152f)
-            #
-            # However this check is still necessary in 2.7.x
-
-            self.sock = conn
-            # Calls self._set_hostport(), so self.host is
-            # self._tunnel_host below.
-            self._tunnel()
-            # Mark this connection as not reusable
-            self.auto_open = 0
-
-            # Override the host with the one we're requesting data from.
-            hostname = self._tunnel_host
-
-        # Wrap socket using verification with the root certs in trusted_root_certs
-        self.sock = ssl_.ssl_wrap_socket(conn, self.key_file, self.cert_file,
-                                         cert_reqs=resolved_cert_reqs,
-                                         ca_certs=self.ca_certs,
-                                         server_hostname=hostname,
-                                         ssl_version=resolved_ssl_version,
-                                         ciphers=self.ciphers)
-
-        if self.assert_fingerprint:
-            ssl_.assert_fingerprint(self.sock.getpeercert(binary_form=True), self.assert_fingerprint)
-        elif resolved_cert_reqs != ssl.CERT_NONE \
-                and self.assert_hostname is not False:
-            cert = self.sock.getpeercert()
-            if not cert.get('subjectAltName', ()):
-                warnings.warn((
-                    'Certificate has no `subjectAltName`, falling back to check for a `commonName` for now. '
-                    'This feature is being removed by major browsers and deprecated by RFC 2818. '
-                    '(See https://github.com/shazow/urllib3/issues/497 for details.)'),
-                    SecurityWarning
-                )
-            match_hostname(cert, self.assert_hostname or hostname)
-
-        self.is_verified = (resolved_cert_reqs == ssl.CERT_REQUIRED or self.assert_fingerprint is not None)
-
-
-class WeakCiphersHTTPSConnectionPool(urllib3.connectionpool.HTTPSConnectionPool):
-
-    ConnectionCls = WeakCiphersHTTPSConnection
-
-
-class WeakCiphersPoolManager(urllib3.poolmanager.PoolManager):
-
-    def _new_pool(self, scheme, host, port):
-        if scheme == 'https':
-            return WeakCiphersHTTPSConnectionPool(host, port, **(self.connection_pool_kw))
-        return super(WeakCiphersPoolManager, self)._new_pool(scheme, host, port)
-
-
-class WeakCiphersAdapter(HTTPAdapter):
-    """"Transport adapter" that allows us to use TLS_RSA_WITH_RC4_128_MD5."""
-
-    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
-        # Rewrite of the
-        # requests.adapters.HTTPAdapter.init_poolmanager method
-        # to use WeakCiphersPoolManager instead of
-        # urllib3's PoolManager
-        self._pool_connections = connections
-        self._pool_maxsize = maxsize
-        self._pool_block = block
-
-        self.poolmanager = WeakCiphersPoolManager(num_pools=connections,
-                                                  maxsize=maxsize, block=block, strict=True, **pool_kwargs)
-
-
-def get_ca_certs_path():
-    """
-    Get a path to the trusted certificates of the system
-    """
-    """
-    check is installed via pip to:
-    Windows: embedded/lib/site-packages/datadog_checks/http_check
-    Linux: embedded/lib/python2.7/site-packages/datadog_checks/http_check
-    certificate is installed to   embedded/ssl/certs/cacert.pem
-
-    walk up to embedded, and back down to ssl/certs to find the certificate file
-    """
-
-    ca_certs = []
-
-    embedded_root = os.path.dirname(os.path.abspath(__file__))
-    for _ in range(10):
-        if os.path.basename(embedded_root) == 'embedded':
-            ca_certs.append(os.path.join(embedded_root, 'ssl', 'certs', 'cacert.pem'))
-            break
-        embedded_root = os.path.dirname(embedded_root)
-    else:
-        raise OSError('Unable to locate `embedded` directory. '
-                      'Please specify ca_certs in your http yaml configuration file.')
-
-    try:
-        import tornado
-    except ImportError:
-        # if `tornado` is not present, simply ignore its certificates
-        pass
-    else:
-        ca_certs.append(os.path.join(os.path.dirname(tornado.__file__), 'ca-certificates.crt'))
-
-    ca_certs.append('/etc/ssl/certs/ca-certificates.crt')
-
-    for f in ca_certs:
-        if os.path.exists(f):
-            return f
-    return None
 
 
 class HTTPCheck(NetworkCheck):
@@ -175,54 +39,15 @@ class HTTPCheck(NetworkCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         NetworkCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        self.ca_certs = init_config.get('ca_certs', get_ca_certs_path())
-
-    def _load_conf(self, instance):
-        # Fetches the conf
-        method = instance.get('method', 'get')
-        data = instance.get('data', {})
-        tags = instance.get('tags', [])
-        ntlm_domain = instance.get('ntlm_domain')
-        username = instance.get('username')
-        password = instance.get('password')
-        client_cert = instance.get('client_cert')
-        client_key = instance.get('client_key')
-        http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
-        timeout = int(instance.get('timeout', 10))
-        config_headers = instance.get('headers', {})
-        default_headers = _is_affirmative(instance.get("include_default_headers", True))
-        if default_headers:
-            headers = agent_headers(self.agentConfig)
-        else:
-            headers = {}
-        headers.update(config_headers)
-        url = instance.get('url')
-        content_match = instance.get('content_match')
-        reverse_content_match = _is_affirmative(instance.get('reverse_content_match', False))
-        response_time = _is_affirmative(instance.get('collect_response_time', True))
-        if not url:
-            raise Exception("Bad configuration. You must specify a url")
-        include_content = _is_affirmative(instance.get('include_content', False))
-        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', True))
-        ssl_expire = _is_affirmative(instance.get('check_certificate_expiration', True))
-        instance_ca_certs = instance.get('ca_certs', self.ca_certs)
-        weakcipher = _is_affirmative(instance.get('weakciphers', False))
-        ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
-        check_hostname = _is_affirmative(instance.get('check_hostname', True))
-        skip_proxy = _is_affirmative(
-            instance.get('skip_proxy', instance.get('no_proxy', False)))
-        allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
-
-        return url, ntlm_domain, username, password, client_cert, client_key, method, data, http_response_status_code, \
-            timeout, include_content, headers, response_time, content_match, reverse_content_match, tags, \
-            disable_ssl_validation, ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, \
-            skip_proxy, allow_redirects
+        self.ca_certs = init_config.get('ca_certs')
+        if not self.ca_certs:
+            self.ca_certs = get_ca_certs_path()
 
     def _check(self, instance):
         addr, ntlm_domain, username, password, client_cert, client_key, method, data, http_response_status_code, \
             timeout, include_content, headers, response_time, content_match, reverse_content_match, tags, \
             disable_ssl_validation, ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, \
-            skip_proxy, allow_redirects = self._load_conf(instance)
+            skip_proxy, allow_redirects = from_instance(instance, self.ca_certs)
 
         start = time.time()
 
@@ -382,12 +207,12 @@ class HTTPCheck(NetworkCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs, check_hostname,
-                                                                client_cert, client_key)
-
+            status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs,
+                                                                              check_hostname, client_cert, client_key)
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
             self.gauge('http.ssl.days_left', days_left, tags=tags_list)
+            self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
 
             service_checks.append((self.SC_SSL_CERT, status, msg))
 
@@ -419,14 +244,20 @@ class HTTPCheck(NetworkCheck):
 
     def check_cert_expiration(self, instance, timeout, instance_ca_certs, check_hostname,
                               client_cert=None, client_key=None):
-        warning_days = int(instance.get('days_warning', 14))
-        critical_days = int(instance.get('days_critical', 7))
+        # thresholds expressed in seconds take precendence over those expressed in days
+        seconds_warning = \
+            int(instance.get('seconds_warning', 0)) or \
+            int(instance.get('days_warning', 0)) * 24 * 3600 or \
+            DEFAULT_EXPIRE_WARNING
+        seconds_critical = \
+            int(instance.get('seconds_critical', 0)) or \
+            int(instance.get('days_critical', 0)) * 24 * 3600 or \
+            DEFAULT_EXPIRE_CRITICAL
         url = instance.get('url')
 
         o = urlparse(url)
         host = o.hostname
         server_name = instance.get('ssl_server_name', o.hostname)
-
         port = o.port or 443
 
         try:
@@ -446,27 +277,29 @@ class HTTPCheck(NetworkCheck):
 
         except ssl.CertificateError as e:
             self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
-            return (Status.CRITICAL, 0, str(e))
+            return (Status.CRITICAL, 0, 0, str(e))
+        except ssl.SSLError as e:
+            self.log.debug("{} error: {}. Cert might be expired.".format(e.library, e.reason))
+            return (Status.DOWN, 0, 0, str(e))
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
-            return (Status.DOWN, 0, str(e))
+            return (Status.DOWN, 0, 0, str(e))
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
-        days_left = exp_date - datetime.utcnow()
+        time_left = exp_date - datetime.utcnow()
+        days_left = time_left.days
+        seconds_left = time_left.total_seconds()
 
         self.log.debug("Exp_date: {}".format(exp_date))
-        self.log.debug("days_left: {}".format(days_left))
+        self.log.debug("seconds_left: {}".format(seconds_left))
 
-        if days_left.days < 0:
-            return (Status.DOWN, days_left.days, "Expired by {} days".format(days_left.days))
+        if seconds_left < seconds_critical:
+            return (Status.CRITICAL, days_left, seconds_left,
+                    "This cert TTL is critical: only {} days before it expires".format(days_left))
 
-        elif days_left.days < critical_days:
-            return (Status.CRITICAL, days_left.days, "This cert TTL is critical: only {} days before it expires"
-                    .format(days_left.days))
-
-        elif days_left.days < warning_days:
-            return (Status.WARNING, days_left.days, "This cert is almost expired, only {} days left"
-                    .format(days_left.days))
+        elif seconds_left < seconds_warning:
+            return (Status.WARNING, days_left, seconds_left,
+                    "This cert is almost expired, only {} days left".format(days_left))
 
         else:
-            return (Status.UP, days_left.days, "Days left: {}".format(days_left.days))
+            return (Status.UP, days_left, seconds_left, "Days left: {}".format(days_left))

@@ -40,6 +40,7 @@ setup(
     version=ABOUT["__version__"],
     description='The Apache Check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent apache check',
 
     # The project's main homepage.

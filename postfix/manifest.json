@@ -11,6 +11,10 @@
   "metric_prefix": "postfix.",
   "metric_to_check": "postfix.queue.size",
   "name": "postfix",
+  "process_signatures": [
+    "postfix start",
+    "sendmail -bd"
+  ],
   "public_title": "Datadog-Postfix Integration",
   "short_description": "Monitor the size of all your Postfix queues.",
   "support": "core",

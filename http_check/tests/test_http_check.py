@@ -3,30 +3,121 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 
-# 3p
+import pytest
 import mock
 
 from datadog_checks.http_check import HTTPCheck
-from datadog_checks.utils.headers import headers as agent_headers
 from .common import (
-    FAKE_CERT, CONFIG, CONFIG_HTTP_HEADERS, CONFIG_SSL_ONLY, CONFIG_EXPIRED_SSL, CONFIG_CUSTOM_NAME, CONFIG_DATA_METHOD,
-    CONFIG_HTTP_REDIRECTS, CONFIG_UNORMALIZED_INSTANCE_NAME, CONFIG_DONT_CHECK_EXP
+    HERE, FAKE_CERT, CONFIG, CONFIG_SSL_ONLY, CONFIG_EXPIRED_SSL, CONFIG_CUSTOM_NAME,
+    CONFIG_DATA_METHOD, CONFIG_HTTP_REDIRECTS, CONFIG_UNORMALIZED_INSTANCE_NAME,
+    CONFIG_DONT_CHECK_EXP
 )
 
 
-def test_http_headers(http_check):
-    """
-    Headers format.
-    """
+@pytest.mark.unit
+def test__init__():
+    # empty values should be ignored
+    init_config = {
+        'ca_certs': ''
+    }
+    # `get_ca_certs_path` needs to be mocked because it's used as fallback when
+    # init_config doesn't contain `ca_certs`
+    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', return_value='bar'):
+        http_check = HTTPCheck('http_check', init_config, {})
+        assert http_check.ca_certs == 'bar'
 
-    # Get just the headers from http_check._load_conf(...), which happens to be at index 11
-    headers = http_check._load_conf(CONFIG_HTTP_HEADERS['instances'][0])[11]
+    # normal case
+    init_config = {
+        'ca_certs': 'foo'
+    }
+    http_check = HTTPCheck('http_check', init_config, {})
+    assert http_check.ca_certs == 'foo'
 
-    expected_headers = agent_headers({}).get('User-Agent')
 
-    assert headers["X-Auth-Token"] == "SOME-AUTH-TOKEN", headers
-    assert expected_headers == headers.get('User-Agent'), headers
+def test_check_cert_expiration(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    check_hostname = True
+
+    # up
+    instance = {
+        'url': 'https://sha256.badssl.com/'
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'UP'
+    assert days_left > 0
+    assert seconds_left > 0
+
+    # bad hostname
+    instance = {
+        'url': 'https://wrong.host.badssl.com/'
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'CRITICAL'
+    assert days_left == 0
+    assert seconds_left == 0
+    assert msg == "hostname 'wrong.host.badssl.com' doesn't match either of '*.badssl.com', 'badssl.com'"
+
+    # site is down
+    instance = {
+        'url': 'https://this.does.not.exist.foo'
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'DOWN'
+    assert days_left == 0
+    assert seconds_left == 0
+
+    # cert expired
+    instance = {
+        'url': 'https://expired.badssl.com/'
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'DOWN'
+    assert days_left == 0
+    assert seconds_left == 0
+
+    # critical in days
+    days_critical = 1000
+    instance = {
+        'url': 'https://sha256.badssl.com/',
+        'days_critical': days_critical,
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'CRITICAL'
+    assert 0 < days_left < days_critical
+
+    # critical in seconds (ensure seconds take precedence over days config)
+    seconds_critical = days_critical * 24 * 3600
+    instance = {
+        'url': 'https://sha256.badssl.com/',
+        'days_critical': 0,
+        'seconds_critical': seconds_critical,
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'CRITICAL'
+    assert 0 < seconds_left < seconds_critical
+
+    # warning in days
+    days_warning = 1000
+    instance = {
+        'url': 'https://sha256.badssl.com/',
+        'days_warning': days_warning,
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'WARNING'
+    assert 0 < days_left < days_warning
+
+    # warning in seconds (ensure seconds take precedence over days config)
+    seconds_warning = days_warning * 24 * 3600
+    instance = {
+        'url': 'https://sha256.badssl.com/',
+        'days_warning': 0,
+        'seconds_warning': seconds_warning,
+    }
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
+    assert status == 'WARNING'
+    assert 0 < seconds_left < seconds_warning
 
 
 def test_check(aggregator, http_check):
@@ -108,10 +199,21 @@ def test_check_ssl(aggregator, http_check):
 @mock.patch('ssl.SSLSocket.getpeercert', **{'return_value.raiseError.side_effect': Exception()})
 def test_check_ssl_expire_error(getpeercert_func, aggregator, http_check):
 
-    # Run the check for the one instance
+    # Run the check for the one instance configured with days left
     http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
 
     expired_cert_tags = ['url:https://github.com', 'instance:expired_cert']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1)
+
+
+@mock.patch('ssl.SSLSocket.getpeercert', **{'return_value.raiseError.side_effect': Exception()})
+def test_check_ssl_expire_error_secs(getpeercert_func, aggregator, http_check):
+
+    # Run the check for the one instance configured with seconds left
+    http_check.check(CONFIG_EXPIRED_SSL['instances'][1])
+
+    expired_cert_tags = ['url:https://github.com', 'instance:expired_cert_seconds']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1)
 

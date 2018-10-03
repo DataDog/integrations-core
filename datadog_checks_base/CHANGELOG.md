@@ -1,4 +1,36 @@
-# CHANGELOG - datadog_checks
+# CHANGELOG - datadog_checks_base
+
+## 3.0.0 / 2018-09-25
+
+* [Added] Adds ability to Trace "check" function with DD APM. See [#2079](https://github.com/DataDog/integrations-core/pull/2079).
+* [Changed] Catch exception when string sent as metric value. See [#2293](https://github.com/DataDog/integrations-core/pull/2293).
+* [Changed] Revert default prometheus metric limit to 2000. See [#2248](https://github.com/DataDog/integrations-core/pull/2248).
+* [Fixed] Fix base class imports for Agent 5. See [#2232](https://github.com/DataDog/integrations-core/pull/2232).
+
+## 2.2.1 / 2018-09-11
+
+* [Fixed] Temporarily increase the limit of prometheus metrics sent for 6.5. See [#2214](https://github.com/DataDog/integrations-core/pull/2214).
+
+## 2.2.0 / 2018-09-06
+
+* [Changed] Freeze pyVmomi dep in base check. See [#2181](https://github.com/DataDog/integrations-core/pull/2181).
+
+## 2.1.0 / 2018-09-05
+
+* [Changed] Change order of precedence of whitelist and blacklist for pattern filtering. See [#2174](https://github.com/DataDog/integrations-core/pull/2174).
+
+## 2.0.0 / 2018-09-04
+
+* [Added] Add cluster-name suffix to node-names in kubernetes state. See [#2069](https://github.com/DataDog/integrations-core/pull/2069).
+* [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093](https://github.com/DataDog/integrations-core/pull/2093).
+* [Changed] Allow checks to manually specify in their configuration which defaults to use. See [#2145](https://github.com/DataDog/integrations-core/pull/2145).
+* [Fixed] Moves WMI Check to Pytest. See [#2133](https://github.com/DataDog/integrations-core/pull/2133).
+* [Changed] Use different defaults if scraper_config is created by OpenMetricsBaseCheck. See [#2135](https://github.com/DataDog/integrations-core/pull/2135).
+* [Fixed] Fix Prometheus scraping for Python 3. See [#2128](https://github.com/DataDog/integrations-core/pull/2128).
+* [Changed] Drop protobuf support for OpenMetrics. See [#2098](https://github.com/DataDog/integrations-core/pull/2098).
+* [Added] Add code coverage. See [#2105](https://github.com/DataDog/integrations-core/pull/2105).
+* [Changed] Create OpenMetricsBaseCheck, an improved version of GenericPrometheusCheck. See [#1976](https://github.com/DataDog/integrations-core/pull/1976).
+* [Fixed] Move RiakCS to pytest, fixes duped tags in RiakCS, adds google_cloud_engine pip dep. See [#2081](https://github.com/DataDog/integrations-core/pull/2081).
 
 ## 1.5.0 / 2018-08-19
 

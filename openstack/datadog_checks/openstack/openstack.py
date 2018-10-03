@@ -13,7 +13,7 @@ import simplejson as json
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
-
+from datadog_checks.utils.tracing import traced, add_trace_check
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -530,6 +530,9 @@ class OpenStackCheck(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+
+        if is_affirmative(init_config.get('trace_check', False)):
+            add_trace_check(self)
 
         self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         self.keystone_server_url = init_config.get("keystone_server_url")
@@ -1176,6 +1179,7 @@ class OpenStackCheck(AgentCheck):
 
         return instance_scope
 
+    @traced
     def check(self, instance):
         # have we been backed off
         if not self.should_run(instance):
