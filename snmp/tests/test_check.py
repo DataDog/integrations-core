@@ -12,23 +12,16 @@ def test_command_generator(aggregator):
     Command generator's parameters should match init_config
     """
     check = SnmpCheck('snmp', common.MIBS_FOLDER, {}, {})
-    cmdgen, _, _, _, _, _, _ = check._load_conf(common.SNMP_CONF)
+    snmp_engine, _, _, _, _, _, _, _ = check._load_conf(common.SNMP_CONF)
 
     # Test command generator MIB source
-    mib_folders = cmdgen.snmpEngine.msgAndPduDsp\
-        .mibInstrumController.mibBuilder.getMibSources()
+    mib_folders = snmp_engine.getMibBuilder().getMibSources()
     full_path_mib_folders = map(lambda f: f.fullPath(), mib_folders)
 
     assert "/etc/mibs" in full_path_mib_folders
-    assert not cmdgen.ignoreNonIncreasingOid
-
-    # Test command generator `ignoreNonIncreasingOid` parameter
-    check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, {}, {})
-    cmdgen, _, _, _, _, _, _ = check._load_conf(common.SNMP_CONF)
-    assert cmdgen.ignoreNonIncreasingOid
 
 
-def test_type_support(spin_up_snmp, aggregator, check):
+def test_type_support(aggregator, check):
     """
     Support expected types
     """
@@ -52,7 +45,7 @@ def test_type_support(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_snmpget(spin_up_snmp, aggregator, check):
+def test_snmpget(aggregator, check):
     """
     When failing with 'snmpget' command, SNMP check falls back to 'snpgetnext'
 
@@ -83,7 +76,7 @@ def test_snmpget(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_scalar(spin_up_snmp, aggregator, check):
+def test_scalar(aggregator, check):
     """
     Support SNMP scalar objects
     """
@@ -105,7 +98,7 @@ def test_scalar(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_enforce_constraint(spin_up_snmp, aggregator, check):
+def test_enforce_constraint(aggregator, check):
     """
     Allow ignoring constraints
     """
@@ -122,6 +115,7 @@ def test_enforce_constraint(spin_up_snmp, aggregator, check):
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0)
 
     instance["enforce_mib_constraints"] = False
+    del instance["service_check_error"]
     check.check(instance)
     del instance["service_check_error"]
 
@@ -139,7 +133,7 @@ def test_enforce_constraint(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table(spin_up_snmp, aggregator, check):
+def test_table(aggregator, check):
     """
     Support SNMP tabular objects
     """
@@ -166,7 +160,7 @@ def test_table(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table_v3_MD5_DES(spin_up_snmp, aggregator, check):
+def test_table_v3_MD5_DES(aggregator, check):
     """
     Support SNMP V3 priv modes: MD5 + DES
     """
@@ -206,7 +200,7 @@ def test_table_v3_MD5_DES(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table_v3_MD5_AES(spin_up_snmp, aggregator, check):
+def test_table_v3_MD5_AES(aggregator, check):
     """
     Support SNMP V3 priv modes: MD5 + AES
     """
@@ -246,7 +240,7 @@ def test_table_v3_MD5_AES(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table_v3_SHA_DES(spin_up_snmp, aggregator, check):
+def test_table_v3_SHA_DES(aggregator, check):
     """
     Support SNMP V3 priv modes: SHA + DES
     """
@@ -285,7 +279,7 @@ def test_table_v3_SHA_DES(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table_v3_SHA_AES(spin_up_snmp, aggregator, check):
+def test_table_v3_SHA_AES(aggregator, check):
     """
     Support SNMP V3 priv modes: SHA + AES
     """
@@ -324,7 +318,7 @@ def test_table_v3_SHA_AES(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_invalid_metric(spin_up_snmp, aggregator, check):
+def test_invalid_metric(aggregator, check):
     """
     Invalid metrics raise a Warning and a critical service check
     """
@@ -339,7 +333,7 @@ def test_invalid_metric(spin_up_snmp, aggregator, check):
                                     at_least=1)
 
 
-def test_forcedtype_metric(spin_up_snmp, aggregator, check):
+def test_forcedtype_metric(aggregator, check):
     """
     Forced Types should be reported as metrics of the forced type
     """
@@ -365,7 +359,7 @@ def test_forcedtype_metric(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_invalid_forcedtype_metric(spin_up_snmp, aggregator, check):
+def test_invalid_forcedtype_metric(aggregator, check):
     """
     If a forced type is invalid a warning should be issued + a service check
     should be available
@@ -381,7 +375,7 @@ def test_invalid_forcedtype_metric(spin_up_snmp, aggregator, check):
                                     at_least=1)
 
 
-def test_scalar_with_tags(spin_up_snmp, aggregator, check):
+def test_scalar_with_tags(aggregator, check):
     """
     Support SNMP scalar objects with tags
     """
@@ -404,7 +398,7 @@ def test_scalar_with_tags(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_network_failure(spin_up_snmp, aggregator, check):
+def test_network_failure(aggregator, check):
     """
     Network failure is reported in service check
     """
