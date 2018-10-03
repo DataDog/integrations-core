@@ -16,13 +16,6 @@ def read_fixture_file(fname):
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture
 def check():
     return Marathon('marathon', {}, {}, [{}])
 

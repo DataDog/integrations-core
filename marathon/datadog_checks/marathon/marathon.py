@@ -139,7 +139,7 @@ class Marathon(AgentCheck):
         else:
             auth = None
         ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
-        group = instance.get('group', None)
+        group = instance.get('group')
 
         tags = instance.get('tags', [])
         label_tags = instance.get('label_tags', [])
@@ -148,9 +148,14 @@ class Marathon(AgentCheck):
 
         return url, auth, acs_url, ssl_verify, group, tags, label_tags, timeout
 
-    def get_apps_json(self, url, timeout, auth, acs_url, ssl_verify, tags=None, group=None):
+    def get_apps_json(self, url, timeout, auth, acs_url, ssl_verify, tags, group):
+        """
+        The dictionary containing the apps is cached during collection and reset
+        at every `check()` call.
+        """
         if self.apps_response is not None:
             return self.apps_response
+
         # Marathon apps
         if group is None:
             # embed=apps.counts is not a required parameter but will be in the future:
@@ -159,13 +164,15 @@ class Marathon(AgentCheck):
         else:
             marathon_path = urljoin(url, "v2/groups/{}?embed=group.groups".format(group) +
                                     "&embed=group.apps&embed=group.apps.counts")
+
         self.apps_response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify, tags)
         return self.apps_response
 
-    def process_apps(self, url, timeout, auth, acs_url, ssl_verify, tags=None, label_tags=None, group=None):
+    def process_apps(self, url, timeout, auth, acs_url, ssl_verify, tags, label_tags, group):
         response = self.get_apps_json(url, timeout, auth, acs_url, ssl_verify, tags, group)
         if response is None:
             return
+
         self.gauge('marathon.apps', len(response['apps']), tags=tags)
         for app in response['apps']:
             app_tags = self.get_app_tags(app, tags, label_tags)
