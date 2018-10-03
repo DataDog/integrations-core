@@ -62,6 +62,8 @@ EVENT_FIELDS = {
 RE_LINE_REG = re.compile('^\[(\d+)\] EXTERNAL COMMAND: (\w+);(.*)$')
 RE_LINE_EXT = re.compile('^\[(\d+)\] ([^:]+): (.*)$')
 
+SOURCE_TYPE_NAME = 'Nagios'
+
 
 class Nagios(AgentCheck):
 
@@ -331,14 +333,30 @@ class NagiosEventLogTailer(NagiosTailer):
     def create_event(self, timestamp, event_type, hostname, fields):
         """Factory method called by the parsers
         """
-        d = fields._asdict()
-        d.update({'timestamp': timestamp, 'event_type': event_type})
+        # Agent6 expects a specific set of fields, so we need to place all
+        # extra fields in the msg_title and let the Datadog backend separate them
+        # Any remaining fields that aren't a part of the datadog-agent payload
+        # specification will be dropped.
+        event_payload = fields._asdict()
+        msg_title = "event_soft_hard:" + event_payload.pop('event_soft_hard', "None")
+        msg_title += " | " + "event_type:" + event_payload.pop('event_type', "None")
+        msg_title += " | " + "check_name:" + event_payload.pop('check_name', "None")
+        msg_title += " | " + "event_state:" + event_payload.pop('event_state', "None")
+        msg_title += " | " + "payload:" + event_payload.pop('payload', "None")
+        msg_title += " | " + "ack_author:" + event_payload.pop('ack_author', "None")
+
+        event_payload.update({
+                'timestamp': timestamp,
+                'event_type': event_type,
+                'msg_title': msg_title,
+                'source_type_name': SOURCE_TYPE_NAME,
+        })
 
         # if host is localhost, turn that into the internal host name
-        host = d.get('host', None)
+        host = event_payload.get('host', None)
         if host == "localhost":
-            d["host"] = hostname
-        return d
+            event_payload["host"] = hostname
+        return event_payload
 
 
 class NagiosPerfDataTailer(NagiosTailer):
