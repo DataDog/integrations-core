@@ -4,8 +4,9 @@
 import os
 import sys
 
-from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev import EnvVars, run_command
 from datadog_checks.dev.utils import chdir, remove_path
+from datadog_checks.dev._env import TESTING_PLUGIN
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +29,8 @@ def test_new_check_test():
         )
 
         with chdir(check_path):
-            run_command([sys.executable, '-m', 'pytest'], capture=True, check=True)
+            with EnvVars(ignore=[TESTING_PLUGIN]):
+                run_command([sys.executable, '-m', 'pytest'], capture=True, check=True)
 
         run_command(
             [sys.executable, '-m', 'pip', 'uninstall', '-y', 'my-check'],
