@@ -125,8 +125,10 @@ class ProcessCheck(AgentCheck):
         for proc in psutil.process_iter():
             # Skip access denied processes
             if not refresh_ad_cache and proc.pid in self.ad_cache:
+                self.log.debug("Access denied to process {0} - {1}".format(proc, proc.cmdline()))
                 continue
 
+            self.log.debug("Matching process {0} - {1}".format(proc, proc.cmdline()))
             found = False
             for string in search_string:
                 try:
