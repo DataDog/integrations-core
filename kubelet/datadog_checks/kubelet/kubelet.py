@@ -266,6 +266,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         for pod in pods['items']:
             # Pod reporting
             pod_id = pod.get('metadata', {}).get('uid')
+            if not pod_id:
+                self.log.debug('skipping pod with no uid')
+                continue
             tags = get_tags('kubernetes_pod://%s' % pod_id, False) or None
             if not tags:
                 continue
@@ -276,6 +279,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             containers = pod.get('status', {}).get('containerStatuses', [])
             for container in containers:
                 container_id = container.get('containerID')
+                if not container_id:
+                    self.log.debug('skipping container with no id')
+                    continue
                 tags = get_tags(container_id, False) or None
                 if not tags:
                     continue
