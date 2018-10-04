@@ -7,13 +7,32 @@ import sys
 import pytest
 
 from datadog_checks.dev.conditions import (
-    CheckCommandOutput, CheckDockerLogs, CheckEndpoints
+    CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
 )
 from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
+
+
+class TestWaitFor:
+    def test_no_error_no_result_success(self):
+        assert WaitFor(lambda: None)() is True
+
+    def test_no_error_true_result_success(self):
+        assert WaitFor(lambda: True)() is True
+
+    def test_no_error_non_true_result_fail(self):
+        with pytest.raises(RetryError):
+            WaitFor(lambda: False, attempts=1)()
+
+    def test_error_fail(self):
+        def f():
+            raise Exception
+
+        with pytest.raises(RetryError):
+            WaitFor(f, attempts=1)()
 
 
 class TestCheckCommandOutput:
