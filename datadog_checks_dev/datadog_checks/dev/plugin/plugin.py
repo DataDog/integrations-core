@@ -10,7 +10,7 @@ import pytest
 from .._env import E2E_FIXTURE_NAME, TESTING_PLUGIN
 
 try:
-    from datadog_checks.stubs import aggregator as __aggregator
+    from datadog_checks.base.stubs import aggregator as __aggregator
 
     @pytest.fixture
     def aggregator():

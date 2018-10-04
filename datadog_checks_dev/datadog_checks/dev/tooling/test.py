@@ -104,7 +104,7 @@ def get_available_tox_envs(check, sort=False):
 def coverage_sources(check):
     # All paths are relative to each tox.ini
     if check == 'datadog_checks_base':
-        package_path = 'datadog_checks'
+        package_path = 'datadog_checks/base'
     elif check == 'datadog_checks_dev':
         package_path = 'datadog_checks/dev'
     else:
