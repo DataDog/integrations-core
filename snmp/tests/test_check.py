@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import mock
+
 from . import common
 
 from datadog_checks.snmp import SnmpCheck
@@ -17,8 +19,12 @@ def test_command_generator(aggregator):
     # Test command generator MIB source
     mib_folders = snmp_engine.getMibBuilder().getMibSources()
     full_path_mib_folders = map(lambda f: f.fullPath(), mib_folders)
+    assert check.ignore_nonincreasing_oid is False  # Default value
 
-    assert "/etc/mibs" in full_path_mib_folders
+    check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, {}, {})
+    assert check.ignore_nonincreasing_oid is True
+
+    assert common.MIBS_FOLDER["mibs_folder"] in full_path_mib_folders
 
 
 def test_type_support(aggregator, check):
@@ -58,12 +64,6 @@ def test_snmpget(aggregator, check):
 
     check.check(instance)
 
-    # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS, at_least=1)
-
-    check.check(instance)
-
     # Test metrics
     for metric in common.PLAY_WITH_GET_NEXT_METRICS:
         metric_name = "snmp." + metric['name']
@@ -74,6 +74,41 @@ def test_snmpget(aggregator, check):
                                     tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
+
+
+def test_snmp_getnext_call(check):
+    instance = common.generate_instance_config(common.PLAY_WITH_GET_NEXT_METRICS)
+
+    # Test that we invoke next with the correct keyword arguments that are hard to test otherwise
+    with mock.patch("datadog_checks.snmp.snmp.hlapi.nextCmd") as nextCmd:
+
+        check.check(instance)
+        _, kwargs = nextCmd.call_args
+        assert ("ignoreNonIncreasingOid", False) in kwargs.items()
+        assert ("lexicographicMode", False) in kwargs.items()
+
+        check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, {}, {})
+        check.check(instance)
+        _, kwargs = nextCmd.call_args
+        assert ("ignoreNonIncreasingOid", True) in kwargs.items()
+        assert ("lexicographicMode", False) in kwargs.items()
+
+
+def test_custom_mib(aggregator):
+    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
+    instance["community_string"] = "dummy"
+
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, {}, {})
+    check.check(instance)
+
+    # Test metrics
+    for metric in common.DUMMY_MIB_OID:
+        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1)
+
+    # Test service check
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK,
+                                    tags=common.CHECK_TAGS, at_least=1)
 
 
 def test_scalar(aggregator, check):

@@ -4,6 +4,7 @@
 
 import copy
 import logging
+import os
 
 from datadog_checks.utils.common import get_docker_hostname
 
@@ -11,6 +12,7 @@ log = logging.getLogger(__name__)
 
 HOST = get_docker_hostname()
 PORT = 1161
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
@@ -40,7 +42,7 @@ SNMP_V3_CONF = {
 }
 
 MIBS_FOLDER = {
-    'mibs_folder': "/etc/mibs"
+    'mibs_folder': os.path.join(HERE, "mibs")
 }
 
 IGNORE_NONINCREASING_OID = {
@@ -74,6 +76,13 @@ CONSTRAINED_OID = [
     {
         "MIB": "RFC1213-MIB",
         "symbol": "tcpRtoAlgorithm",
+    }
+]
+
+DUMMY_MIB_OID = [
+    {
+        "MIB": "DUMMY-MIB",
+        "symbol": "scalar",
     }
 ]
 
