@@ -117,7 +117,6 @@ def test_enforce_constraint(aggregator, check):
     instance["enforce_mib_constraints"] = False
     del instance["service_check_error"]
     check.check(instance)
-    del instance["service_check_error"]
 
     # Test metrics
     for metric in common.CONSTRAINED_OID:
