@@ -232,6 +232,24 @@ def test_prometheus_net_summed(monkeypatch, aggregator):
         assert c not in check.rate.mock_calls
 
 
+def test_prometheus_filtering(monkeypatch, aggregator):
+    # Let's intercept the container_cpu_usage_seconds_total
+    # metric to make sure no sample with an empty pod_name
+    # goes through input filtering
+    # 12 out of the 45 samples should pass through the filter
+    method_name = "datadog_checks.kubelet.prometheus.CadvisorPrometheusScraperMixin.container_cpu_usage_seconds_total"
+    with mock.patch(method_name) as mock_method:
+        check = mock_kubelet_check(monkeypatch, [{}])
+        check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+        mock_method.assert_called_once()
+        metric = mock_method.call_args[0][0]
+        assert len(metric.samples) == 12
+        for name, labels, value in metric.samples:
+            assert name == "container_cpu_usage_seconds_total"
+            assert labels["pod_name"] != ""
+
+
 def test_kubelet_check_instance_config(monkeypatch):
     def mock_kubelet_check_no_prom():
         check = mock_kubelet_check(monkeypatch, [{}])
