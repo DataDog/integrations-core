@@ -338,14 +338,13 @@ class NagiosEventLogTailer(NagiosTailer):
         # Any remaining fields that aren't a part of the datadog-agent payload
         # specification will be dropped.
         event_payload = fields._asdict()
-        for key, val in event_payload.iteritems():
-            event_payload[key] = val.lower()
-        msg_title = "event_soft_hard:" + event_payload.pop('event_soft_hard', " ")
-        msg_title += "|" + "event_type:" + event_payload.pop('event_type', " ")
-        msg_title += "|" + "check_name:" + event_payload.pop('check_name', " ")
-        msg_title += "|" + "event_state:" + event_payload.pop('event_state', " ")
-        msg_title += "|" + "payload:" + event_payload.pop('payload', " ")
-        msg_title += "|" + "ack_author:" + event_payload.pop('ack_author', " ")
+
+        msg_title = "event_soft_hard:" + event_payload.get('event_soft_hard', " ")
+        msg_title += "|" + "event_type:" + event_payload.get('event_type', " ")
+        msg_title += "|" + "check_name:" + event_payload.get('check_name', " ")
+        msg_title += "|" + "event_state:" + event_payload.get('event_state', " ")
+        msg_title += "|" + "payload:" + event_payload.get('payload', " ")
+        msg_title += "|" + "ack_author:" + event_payload.get('ack_author', " ")
 
         event_payload.update({
                 'timestamp': timestamp,
