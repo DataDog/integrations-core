@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.10.0 / 2018-10-04
+
+* [Added] Update base package paths. See [#2345](https://github.com/DataDog/integrations-core/pull/2345).
+* [Added] Add generic environment runner. See [#2342](https://github.com/DataDog/integrations-core/pull/2342).
+* [Added] Add WaitFor environment condition. See [#2343](https://github.com/DataDog/integrations-core/pull/2343).
+* [Added] Enable pytest plugin to control environments. See [#2336](https://github.com/DataDog/integrations-core/pull/2336).
+
 ## 0.9.0 / 2018-09-30
 
 * [Added] Allow testing of specific environments. See [#2312](https://github.com/DataDog/integrations-core/pull/2312).
