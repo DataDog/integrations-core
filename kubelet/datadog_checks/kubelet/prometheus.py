@@ -25,11 +25,6 @@ class CadvisorPrometheusScraperMixin(object):
     def __init__(self, *args, **kwargs):
         super(CadvisorPrometheusScraperMixin, self).__init__(*args, **kwargs)
 
-        # List of strings to filter the input text payload on. If any line contains
-        # one of these strings, it will be filtered out before being parsed.
-        # INTERNAL FEATURE, might be removed in future versions
-        self._text_filter_blacklist = ['pod_name=""']
-
         # these are filled by container_<metric-name>_usage_<metric-unit>
         # and container_<metric-name>_limit_<metric-unit> reads it to compute <metric-name>usage_pct
         self.fs_usage_bytes = {}
