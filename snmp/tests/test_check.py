@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import mock
+
 from . import common
 
 from datadog_checks.snmp import SnmpCheck
@@ -12,23 +14,20 @@ def test_command_generator(aggregator):
     Command generator's parameters should match init_config
     """
     check = SnmpCheck('snmp', common.MIBS_FOLDER, {}, {})
-    cmdgen, _, _, _, _, _, _ = check._load_conf(common.SNMP_CONF)
+    snmp_engine, _, _, _, _, _, _, _ = check._load_conf(common.SNMP_CONF)
 
     # Test command generator MIB source
-    mib_folders = cmdgen.snmpEngine.msgAndPduDsp\
-        .mibInstrumController.mibBuilder.getMibSources()
+    mib_folders = snmp_engine.getMibBuilder().getMibSources()
     full_path_mib_folders = map(lambda f: f.fullPath(), mib_folders)
+    assert check.ignore_nonincreasing_oid is False  # Default value
 
-    assert "/etc/mibs" in full_path_mib_folders
-    assert not cmdgen.ignoreNonIncreasingOid
-
-    # Test command generator `ignoreNonIncreasingOid` parameter
     check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, {}, {})
-    cmdgen, _, _, _, _, _, _ = check._load_conf(common.SNMP_CONF)
-    assert cmdgen.ignoreNonIncreasingOid
+    assert check.ignore_nonincreasing_oid is True
+
+    assert common.MIBS_FOLDER["mibs_folder"] in full_path_mib_folders
 
 
-def test_type_support(spin_up_snmp, aggregator, check):
+def test_type_support(aggregator, check):
     """
     Support expected types
     """
@@ -36,8 +35,6 @@ def test_type_support(spin_up_snmp, aggregator, check):
     instance = common.generate_instance_config(metrics)
 
     check.check(instance)
-
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for metric in common.SUPPORTED_METRIC_TYPES:
@@ -54,7 +51,7 @@ def test_type_support(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_snmpget(spin_up_snmp, aggregator, check):
+def test_snmpget(aggregator, check):
     """
     When failing with 'snmpget' command, SNMP check falls back to 'snpgetnext'
 
@@ -66,15 +63,6 @@ def test_snmpget(spin_up_snmp, aggregator, check):
     instance = common.generate_instance_config(common.PLAY_WITH_GET_NEXT_METRICS)
 
     check.check(instance)
-
-    common.wait_for_async(check, aggregator)
-
-    # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS, at_least=1)
-
-    check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for metric in common.PLAY_WITH_GET_NEXT_METRICS:
@@ -88,14 +76,48 @@ def test_snmpget(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_scalar(spin_up_snmp, aggregator, check):
+def test_snmp_getnext_call(check):
+    instance = common.generate_instance_config(common.PLAY_WITH_GET_NEXT_METRICS)
+
+    # Test that we invoke next with the correct keyword arguments that are hard to test otherwise
+    with mock.patch("datadog_checks.snmp.snmp.hlapi.nextCmd") as nextCmd:
+
+        check.check(instance)
+        _, kwargs = nextCmd.call_args
+        assert ("ignoreNonIncreasingOid", False) in kwargs.items()
+        assert ("lexicographicMode", False) in kwargs.items()
+
+        check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, {}, {})
+        check.check(instance)
+        _, kwargs = nextCmd.call_args
+        assert ("ignoreNonIncreasingOid", True) in kwargs.items()
+        assert ("lexicographicMode", False) in kwargs.items()
+
+
+def test_custom_mib(aggregator):
+    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
+    instance["community_string"] = "dummy"
+
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, {}, {})
+    check.check(instance)
+
+    # Test metrics
+    for metric in common.DUMMY_MIB_OID:
+        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1)
+
+    # Test service check
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK,
+                                    tags=common.CHECK_TAGS, at_least=1)
+
+
+def test_scalar(aggregator, check):
     """
     Support SNMP scalar objects
     """
     instance = common.generate_instance_config(common.SCALAR_OBJECTS)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for metric in common.SCALAR_OBJECTS:
@@ -111,14 +133,47 @@ def test_scalar(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table(spin_up_snmp, aggregator, check):
+def test_enforce_constraint(aggregator, check):
+    """
+    Allow ignoring constraints
+    """
+    instance = common.generate_instance_config(common.CONSTRAINED_OID)
+    instance["community_string"] = "constraint"
+    instance["enforce_mib_constraints"] = True
+
+    check.check(instance)
+
+    assert "service_check_error" in instance and "failed at: ValueConstraintError" in instance["service_check_error"]
+    # Test metrics
+    for metric in common.CONSTRAINED_OID:
+        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0)
+
+    instance["enforce_mib_constraints"] = False
+    del instance["service_check_error"]
+    check.check(instance)
+
+    # Test metrics
+    for metric in common.CONSTRAINED_OID:
+        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+
+    # Test service check
+    aggregator.assert_service_check("snmp.can_check",
+                                    status=SnmpCheck.OK,
+                                    tags=common.CHECK_TAGS,
+                                    at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_table(aggregator, check):
     """
     Support SNMP tabular objects
     """
     instance = common.generate_instance_config(common.TABULAR_OBJECTS)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -139,7 +194,7 @@ def test_table(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table_v3_MD5_DES(spin_up_snmp, aggregator, check):
+def test_table_v3_MD5_DES(aggregator, check):
     """
     Support SNMP V3 priv modes: MD5 + DES
     """
@@ -159,7 +214,6 @@ def test_table_v3_MD5_DES(spin_up_snmp, aggregator, check):
     )
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -180,7 +234,7 @@ def test_table_v3_MD5_DES(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table_v3_MD5_AES(spin_up_snmp, aggregator, check):
+def test_table_v3_MD5_AES(aggregator, check):
     """
     Support SNMP V3 priv modes: MD5 + AES
     """
@@ -200,7 +254,6 @@ def test_table_v3_MD5_AES(spin_up_snmp, aggregator, check):
     )
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -221,7 +274,7 @@ def test_table_v3_MD5_AES(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table_v3_SHA_DES(spin_up_snmp, aggregator, check):
+def test_table_v3_SHA_DES(aggregator, check):
     """
     Support SNMP V3 priv modes: SHA + DES
     """
@@ -240,7 +293,6 @@ def test_table_v3_SHA_DES(spin_up_snmp, aggregator, check):
     )
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -261,7 +313,7 @@ def test_table_v3_SHA_DES(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_table_v3_SHA_AES(spin_up_snmp, aggregator, check):
+def test_table_v3_SHA_AES(aggregator, check):
     """
     Support SNMP V3 priv modes: SHA + AES
     """
@@ -280,7 +332,6 @@ def test_table_v3_SHA_AES(spin_up_snmp, aggregator, check):
     )
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for symbol in common.TABULAR_OBJECTS[0]['symbols']:
@@ -301,15 +352,13 @@ def test_table_v3_SHA_AES(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_invalid_metric(spin_up_snmp, aggregator, check):
+def test_invalid_metric(aggregator, check):
     """
     Invalid metrics raise a Warning and a critical service check
     """
 
     instance = common.generate_instance_config(common.INVALID_METRICS)
     check.check(instance)
-
-    common.wait_for_async(check, aggregator)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check",
@@ -318,13 +367,12 @@ def test_invalid_metric(spin_up_snmp, aggregator, check):
                                     at_least=1)
 
 
-def test_forcedtype_metric(spin_up_snmp, aggregator, check):
+def test_forcedtype_metric(aggregator, check):
     """
     Forced Types should be reported as metrics of the forced type
     """
     instance = common.generate_instance_config(common.FORCED_METRICS)
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     for metric in common.FORCED_METRICS:
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
@@ -345,7 +393,7 @@ def test_forcedtype_metric(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_invalid_forcedtype_metric(spin_up_snmp, aggregator, check):
+def test_invalid_forcedtype_metric(aggregator, check):
     """
     If a forced type is invalid a warning should be issued + a service check
     should be available
@@ -353,7 +401,6 @@ def test_invalid_forcedtype_metric(spin_up_snmp, aggregator, check):
     instance = common.generate_instance_config(common.INVALID_FORCED_METRICS)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check",
@@ -362,14 +409,13 @@ def test_invalid_forcedtype_metric(spin_up_snmp, aggregator, check):
                                     at_least=1)
 
 
-def test_scalar_with_tags(spin_up_snmp, aggregator, check):
+def test_scalar_with_tags(aggregator, check):
     """
     Support SNMP scalar objects with tags
     """
     instance = common.generate_instance_config(common.SCALAR_OBJECTS_WITH_TAGS)
 
     check.check(instance)
-    common.wait_for_async(check, aggregator)
 
     # Test metrics
     for metric in common.SCALAR_OBJECTS_WITH_TAGS:
@@ -386,7 +432,7 @@ def test_scalar_with_tags(spin_up_snmp, aggregator, check):
     aggregator.all_metrics_asserted()
 
 
-def test_network_failure(spin_up_snmp, aggregator, check):
+def test_network_failure(aggregator, check):
     """
     Network failure is reported in service check
     """

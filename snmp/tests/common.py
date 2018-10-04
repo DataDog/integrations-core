@@ -3,22 +3,23 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
-import time
 import logging
+import os
 
 from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger(__name__)
 
 HOST = get_docker_hostname()
-PORT = 11111
+PORT = 1161
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
 AUTH_KEY = 'doggiepass'
 PRIV_KEY = 'doggiePRIVkey'
 
-CHECK_TAGS = ['snmp_device:localhost']
+CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
 
 SNMP_CONF = {
@@ -37,10 +38,11 @@ SNMP_V3_CONF = {
     'privKey': None,
     'authProtocol': None,
     'privProtocol': None,
+    'context_name': 'public',
 }
 
 MIBS_FOLDER = {
-    'mibs_folder': "/etc/mibs"
+    'mibs_folder': os.path.join(HERE, "mibs")
 }
 
 IGNORE_NONINCREASING_OID = {
@@ -67,6 +69,20 @@ UNSUPPORTED_METRICS = [
     {
         'OID': "1.3.6.1.2.1.25.6.3.1.5.1",    # String (not supported)
         'name': "IAmString"
+    }
+]
+
+CONSTRAINED_OID = [
+    {
+        "MIB": "RFC1213-MIB",
+        "symbol": "tcpRtoAlgorithm",
+    }
+]
+
+DUMMY_MIB_OID = [
+    {
+        "MIB": "DUMMY-MIB",
+        "symbol": "scalar",
     }
 ]
 
@@ -184,15 +200,3 @@ def generate_v3_instance_config(metrics, name=None, user=None,
         instance_config['privKey'] = priv_key
 
     return instance_config
-
-
-def wait_for_async(check, aggregator):
-    found = False
-    for i in range(30):
-        if len(aggregator.service_checks("snmp.can_check")) >= 1:
-            found = True
-            break
-        time.sleep(2)
-
-    if not found:
-        log.warning("No service checks found!")

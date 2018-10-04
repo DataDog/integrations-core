@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-import time
 import os
 
 from datadog_checks.dev import docker_run
@@ -20,9 +19,9 @@ def spin_up_snmp():
     }
     with docker_run(
         os.path.join(COMPOSE_DIR, 'docker-compose.yaml'),
-        env_vars=env
+        env_vars=env,
+        log_patterns="Listening at"
     ):
-        time.sleep(5)
         yield
 
 

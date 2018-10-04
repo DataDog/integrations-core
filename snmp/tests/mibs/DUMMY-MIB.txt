@@ -1,0 +1,17 @@
+DUMMY-MIB DEFINITIONS ::= BEGIN
+
+    IMPORTS
+        OBJECT-TYPE FROM RFC-1212
+        enterprises FROM RFC1155-SMI;
+
+    dummy OBJECT IDENTIFIER ::= { enterprises 123456789 }
+
+    scalar OBJECT-TYPE
+        SYNTAX INTEGER (1..65535)
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION
+            "dummy scalar"
+        ::= { dummy 1 }
+
+END
