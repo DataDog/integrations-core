@@ -71,7 +71,7 @@ def string_to_toml_type(s):
 
 def get_version_file(check_name):
     if check_name == 'datadog_checks_base':
-        return os.path.join(get_root(), check_name, 'datadog_checks', '__about__.py')
+        return os.path.join(get_root(), check_name, 'datadog_checks', 'base', '__about__.py')
     elif check_name == 'datadog_checks_dev':
         return os.path.join(get_root(), check_name, 'datadog_checks', 'dev', '__about__.py')
     else:

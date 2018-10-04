@@ -217,7 +217,7 @@ def freeze():
 
     root = get_root()
     static_file = os.path.join(
-        root, 'datadog_checks_base', 'datadog_checks', 'data', 'agent_requirements.in'
+        root, 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in'
     )
 
     echo_info('Static file: {}'.format(static_file))
