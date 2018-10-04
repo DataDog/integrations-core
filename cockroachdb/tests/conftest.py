@@ -25,6 +25,4 @@ def dd_environment(instance):
 def instance():
     return {
         'prometheus_url': 'http://{}:{}/_status/vars'.format(HOST, PORT),
-        'disk_space_warning': '15',
-        'disk_space_critical': '5',
     }
