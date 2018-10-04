@@ -302,6 +302,9 @@ def mocked_get_tags(entity, _):
             'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
         ]
     }
+    # Match agent 6.5 behaviour of not accepting None
+    if entity is None:
+        raise ValueError("None is not a valid entity id")
     return tag_store.get(entity, [])
 
 
@@ -321,6 +324,30 @@ def test_report_pods_running(monkeypatch):
             "kube_container_name:fluentd-gcp",
             "kube_deployment:fluentd-gcp-v2.0.10"
         ]),
+        mock.call('kubernetes.containers.running', 2, [
+            "kube_container_name:prometheus-to-sd-exporter",
+            "kube_deployment:fluentd-gcp-v2.0.10"
+        ]),
+    ]
+    check.gauge.assert_has_calls(calls, any_order=True)
+
+
+def test_report_pods_running_none_ids(monkeypatch):
+    # Make sure the method is resilient to inconsistent podlists
+    podlist = json.loads(mock_from_file('pods.json'))
+    podlist["items"][0]['metadata']['uid'] = None
+    podlist["items"][1]['status']['containerStatuses'][0]['containerID'] = None
+
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=podlist))
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+    pod_list = check.retrieve_pod_list()
+
+    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
+        check._report_pods_running(pod_list, [])
+
+    calls = [
+        mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
         mock.call('kubernetes.containers.running', 2, [
             "kube_container_name:prometheus-to-sd-exporter",
             "kube_deployment:fluentd-gcp-v2.0.10"
