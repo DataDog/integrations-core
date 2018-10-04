@@ -969,7 +969,7 @@ class OpenStackCheck(AgentCheck):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
         hypervisor_hostname = server_details.get('hypervisor_hostname')
-        host_tags = self._get_host_aggregate_tag(use_shortname)
+        host_tags = self._get_host_aggregate_tag(hypervisor_hostname, use_shortname=use_shortname)
         host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
 
         server_id = server_details.get('server_id')
