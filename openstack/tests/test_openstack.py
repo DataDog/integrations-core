@@ -338,3 +338,30 @@ def test_cache_between_runs(self, *args):
     cached_servers = openstackCheck.server_details_by_id
     assert 'server-1' not in cached_servers
     assert 'server_newly_added' in cached_servers
+
+
+@mock.patch(
+    'datadog_checks.openstack.OpenStackCheck._make_request_with_auth_fallback',
+    return_value=common.MOCK_NOVA_SERVERS)
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_nova_endpoint',
+            return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_auth_token', return_value="test_auth_token")
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_project_name_from_id', return_value="None")
+def test_project_name_none(self, *args):
+    """
+    Ensure the cache contains the expected VMs between check runs.
+    """
+
+    openstackCheck = OpenStackCheck("test", {
+        'keystone_server_url': 'http://10.0.2.15:5000',
+        'ssl_verify': False,
+        'exclude_server_ids': common.EXCLUDED_SERVER_IDS
+    }, {}, instances=common.MOCK_CONFIG)
+
+    # Start off with a list of servers
+    openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
+    i_key = "test_instance"
+
+    # Update the cached list of servers based on what the endpoint returns
+    openstackCheck.get_all_servers(i_key)
+    assert len(self.server_details_by_id) == 0
