@@ -10,12 +10,13 @@ DOCKER_DIR = os.path.join(HERE, 'docker')
 
 
 @pytest.fixture(scope='session', autouse=True)
-def spin_up_envoy():
+def dd_environment():
     flavor = os.getenv('FLAVOR', 'default')
+    instance = INSTANCES['main']
 
     with docker_run(
         os.path.join(DOCKER_DIR, flavor, 'docker-compose.yaml'),
         build=True,
-        endpoints=INSTANCES['main']['stats_url']
+        endpoints=instance['stats_url']
     ):
-        yield
+        yield instance

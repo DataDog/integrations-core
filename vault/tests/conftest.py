@@ -13,9 +13,11 @@ DOCKER_DIR = os.path.join(HERE, 'docker')
 
 
 @pytest.fixture(scope='session', autouse=True)
-def spin_up_vault():
+def dd_environment():
+    instance = INSTANCES['main']
+
     with docker_run(
         os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
-        endpoints='{}/sys/health'.format(INSTANCES['main']['api_url'])
+        endpoints='{}/sys/health'.format(instance['api_url'])
     ):
-        yield
+        yield instance

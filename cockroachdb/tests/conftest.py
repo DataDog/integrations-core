@@ -13,18 +13,16 @@ DOCKER_DIR = os.path.join(HERE, 'docker')
 
 
 @pytest.fixture(scope='session', autouse=True)
-def spin_up_cockroachdb(instance):
+def dd_environment(instance):
     with docker_run(
         os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
         endpoints=instance['prometheus_url'],
     ):
-        yield
+        yield instance
 
 
 @pytest.fixture(scope='session')
 def instance():
     return {
         'prometheus_url': 'http://{}:{}/_status/vars'.format(HOST, PORT),
-        'disk_space_warning': '15',
-        'disk_space_critical': '5',
     }
