@@ -1,44 +1,44 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-ci_docker_machines_provider_machine_creation_duration_seconds_bucket,histogram,,request,second,Histogram of Docker machine creation time,0,gitlab_runner,docker machine creation time
-ci_docker_machines_provider_machine_creation_duration_seconds_sum,gauge,,request,second,Sum of Docker machine creation time,0,gitlab_runner,sum docker machine creation time
-ci_docker_machines_provider_machine_creation_duration_seconds_count,gauge,,request,second,Count of Docker machine creation time,0,gitlab_runner,count docker machine creation time
-ci_docker_machines_provider_machine_states,gauge,,request,second,The current number of machines per state in this provider,0,gitlab_runner,total docker machines per state
-ci_runner_errors,counter,,request,second,The number of catched errors,0,gitlab_runner,errors
-ci_runner_version_info,gauge,,request,,A metric with a constant '1' value labeled by different build stats fields,0,gitlab_runner,version info
-ci_ssh_docker_machines_provider_machine_creation_duration_seconds_bucket,histogram,,request,second,Histogram of SSH Docker machine creation time,0,gitlab_runner,ssh docker machine creation time
-ci_ssh_docker_machines_provider_machine_creation_duration_seconds_sum,histogram,,request,second,Sum of SSH Docker machine creation time,0,gitlab_runner,sum ssh docker machine creation time
-ci_ssh_docker_machines_provider_machine_creation_duration_seconds_count,histogram,,request,second,Count of SSH Docker machine creation time,0,gitlab_runner,count ssh docker machine creation time
-ci_ssh_docker_machines_provider_machine_states,gauge,,request,second,The current number of machines per state in this provider,0,gitlab_runner,total ssh docker machines per state
-go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab_runner,gc duration
-go_gc_duration_seconds_sum,gauge,,request,second,Sum of the GC invocation durations,0,gitlab_runner,sum gc duration
-go_gc_duration_seconds_count,gauge,,request,second,Count of the GC invocation durations,0,gitlab_runner,count gc duration
-go_goroutines,gauge,,request,second,Number of goroutines that currently exist,0,gitlab_runner,goroutines
-go_memstats_alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use,0,gitlab_runner,bytes allocated in use
-go_memstats_alloc_bytes_total,counter,,byte,,Total number of bytes allocated,0,gitlab_runner,bytes allocated
-go_memstats_buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table,0,gitlab_runner,bytes profiling bucket
-go_memstats_frees_total,counter,,request,,Total number of frees,0,gitlab_runner,number of frees
-go_memstats_gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata,0,gitlab_runner,bytes garbage collection
-go_memstats_heap_alloc_bytes,gauge,,byte,,Number of heap bytes allocated and still in use,0,gitlab_runner,heap bytes allocated and in use
-go_memstats_heap_idle_bytes,gauge,,byte,,Number of heap bytes waiting to be used,0,gitlab_runner,heap bytes unused
-go_memstats_heap_inuse_bytes,gauge,,byte,,Number of heap bytes that are in use,0,gitlab_runner,heap bytes in use
-go_memstats_heap_objects,gauge,,request,,Number of allocated objects,0,gitlab_runner,allocated objects
-go_memstats_heap_released_bytes_total,counter,,byte,,Total number of heap bytes released to OS,0,gitlab_runner,heap bytes released
-go_memstats_heap_sys_bytes,gauge,,byte,,Number of heap bytes obtained from system,0,gitlab_runner,heap bytes obtained
-go_memstats_last_gc_time_seconds,gauge,,request,,Number of seconds since 1970 of last garbage collection,0,gitlab_runner,epoch since last gc
-go_memstats_lookups_total,counter,,request,,Total number of pointer lookups,0,gitlab_runner,pointer lookups
-go_memstats_mallocs_total,counter,,request,,Total number of mallocs,0,gitlab_runner,number of mallocs
-go_memstats_mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures,0,gitlab_runner,mcache bytes used
-go_memstats_mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system,0,gitlab_runner,mcache bytes from sys
-go_memstats_mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures,0,gitlab_runner,mspan bytes used
-go_memstats_mspan_sys_bytes,gauge,,byte,,Number of bytes used for mspan structures obtained from system,0,gitlab_runner,mspan bytes from sys
-go_memstats_next_gc_bytes,gauge,,byte,,Number of heap bytes when next garbage collection will take place,0,gitlab_runner,heap bytes next gc
-go_memstats_other_sys_bytes,gauge,,byte,,Number of bytes used for other system allocations,0,gitlab_runner,other bytes used
-go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes in use by the stack allocator,0,gitlab_runner,bytes stack allocator
-go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,gitlab_runner,bytes stack allocator from sys
-go_memstats_sys_bytes,gauge,,byte,,Number of bytes obtained by system. Sum of all system allocations,0,gitlab_runner,sum system allocations
-process_cpu_seconds_total,counter,,request,second,Total user and system CPU time spent in seconds,0,gitlab_runner,user and system cpu time
-process_max_fds,gauge,,request,,Maximum number of open file descriptors,0,gitlab_runner,max fds
-process_open_fds,gauge,,request,,Number of open file descriptors,0,gitlab_runner,open fds
-process_resident_memory_bytes,gauge,,byte,,Resident memory size in bytes,0,gitlab_runner,rss bytes
-process_start_time_seconds,gauge,,request,second,Start time of the process since unix epoch in seconds,0,gitlab_runner,epoch time since start
-process_virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes,0,gitlab_runner,virtual memory bytes
+gitlab_runner.ci_docker_machines_provider_machine_creation_duration_seconds_bucket,gauge,,request,second,Histogram of Docker machine creation time,0,gitlab_runner,docker machine creation time
+gitlab_runner.ci_docker_machines_provider_machine_creation_duration_seconds_sum,gauge,,request,second,Sum of Docker machine creation time,0,gitlab_runner,sum docker machine creation time
+gitlab_runner.ci_docker_machines_provider_machine_creation_duration_seconds_count,gauge,,request,second,Count of Docker machine creation time,0,gitlab_runner,count docker machine creation time
+gitlab_runner.ci_docker_machines_provider_machine_states,gauge,,request,second,The current number of machines per state in this provider,0,gitlab_runner,total docker machines per state
+gitlab_runner.ci_runner_errors,counter,,request,second,The number of catched errors,0,gitlab_runner,errors
+gitlab_runner.ci_runner_version_info,gauge,,request,,A metric with a constant '1' value labeled by different build stats fields,0,gitlab_runner,version info
+gitlab_runner.ci_ssh_docker_machines_provider_machine_creation_duration_seconds_bucket,gauge,,request,second,Histogram of SSH Docker machine creation time,0,gitlab_runner,ssh docker machine creation time
+gitlab_runner.ci_ssh_docker_machines_provider_machine_creation_duration_seconds_sum,gauge,,request,second,Sum of SSH Docker machine creation time,0,gitlab_runner,sum ssh docker machine creation time
+gitlab_runner.ci_ssh_docker_machines_provider_machine_creation_duration_seconds_count,gauge,,request,second,Count of SSH Docker machine creation time,0,gitlab_runner,count ssh docker machine creation time
+gitlab_runner.ci_ssh_docker_machines_provider_machine_states,gauge,,request,second,The current number of machines per state in this provider,0,gitlab_runner,total ssh docker machines per state
+gitlab_runner.go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab_runner,gc duration
+gitlab_runner.go_gc_duration_seconds_sum,gauge,,request,second,Sum of the GC invocation durations,0,gitlab_runner,sum gc duration
+gitlab_runner.go_gc_duration_seconds_count,gauge,,request,second,Count of the GC invocation durations,0,gitlab_runner,count gc duration
+gitlab_runner.go_goroutines,gauge,,request,second,Number of goroutines that currently exist,0,gitlab_runner,goroutines
+gitlab_runner.go_memstats_alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use,0,gitlab_runner,bytes allocated in use
+gitlab_runner.go_memstats_alloc_bytes_total,counter,,byte,,Total number of bytes allocated,0,gitlab_runner,bytes allocated
+gitlab_runner.go_memstats_buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table,0,gitlab_runner,bytes profiling bucket
+gitlab_runner.go_memstats_frees_total,counter,,request,,Total number of frees,0,gitlab_runner,number of frees
+gitlab_runner.go_memstats_gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata,0,gitlab_runner,bytes garbage collection
+gitlab_runner.go_memstats_heap_alloc_bytes,gauge,,byte,,Number of heap bytes allocated and still in use,0,gitlab_runner,heap bytes allocated and in use
+gitlab_runner.go_memstats_heap_idle_bytes,gauge,,byte,,Number of heap bytes waiting to be used,0,gitlab_runner,heap bytes unused
+gitlab_runner.go_memstats_heap_inuse_bytes,gauge,,byte,,Number of heap bytes that are in use,0,gitlab_runner,heap bytes in use
+gitlab_runner.go_memstats_heap_objects,gauge,,request,,Number of allocated objects,0,gitlab_runner,allocated objects
+gitlab_runner.go_memstats_heap_released_bytes_total,counter,,byte,,Total number of heap bytes released to OS,0,gitlab_runner,heap bytes released
+gitlab_runner.go_memstats_heap_sys_bytes,gauge,,byte,,Number of heap bytes obtained from system,0,gitlab_runner,heap bytes obtained
+gitlab_runner.go_memstats_last_gc_time_seconds,gauge,,request,,Number of seconds since 1970 of last garbage collection,0,gitlab_runner,epoch since last gc
+gitlab_runner.go_memstats_lookups_total,counter,,request,,Total number of pointer lookups,0,gitlab_runner,pointer lookups
+gitlab_runner.go_memstats_mallocs_total,counter,,request,,Total number of mallocs,0,gitlab_runner,number of mallocs
+gitlab_runner.go_memstats_mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures,0,gitlab_runner,mcache bytes used
+gitlab_runner.go_memstats_mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system,0,gitlab_runner,mcache bytes from sys
+gitlab_runner.go_memstats_mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures,0,gitlab_runner,mspan bytes used
+gitlab_runner.go_memstats_mspan_sys_bytes,gauge,,byte,,Number of bytes used for mspan structures obtained from system,0,gitlab_runner,mspan bytes from sys
+gitlab_runner.go_memstats_next_gc_bytes,gauge,,byte,,Number of heap bytes when next garbage collection will take place,0,gitlab_runner,heap bytes next gc
+gitlab_runner.go_memstats_other_sys_bytes,gauge,,byte,,Number of bytes used for other system allocations,0,gitlab_runner,other bytes used
+gitlab_runner.go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes in use by the stack allocator,0,gitlab_runner,bytes stack allocator
+gitlab_runner.go_memstats_stack_sys_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,gitlab_runner,bytes stack allocator from sys
+gitlab_runner.go_memstats_sys_bytes,gauge,,byte,,Number of bytes obtained by system. Sum of all system allocations,0,gitlab_runner,sum system allocations
+gitlab_runner.process_cpu_seconds_total,counter,,request,second,Total user and system CPU time spent in seconds,0,gitlab_runner,user and system cpu time
+gitlab_runner.process_max_fds,gauge,,request,,Maximum number of open file descriptors,0,gitlab_runner,max fds
+gitlab_runner.process_open_fds,gauge,,request,,Number of open file descriptors,0,gitlab_runner,open fds
+gitlab_runner.process_resident_memory_bytes,gauge,,byte,,Resident memory size in bytes,0,gitlab_runner,rss bytes
+gitlab_runner.process_start_time_seconds,gauge,,request,second,Start time of the process since unix epoch in seconds,0,gitlab_runner,epoch time since start
+gitlab_runner.process_virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes,0,gitlab_runner,virtual memory bytes

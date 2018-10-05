@@ -1,5 +1,6 @@
 from datadog_checks.checks.prometheus import GenericPrometheusCheck
 
+
 def test_rate_override():
     endpoint = "none"
     instance = {
@@ -33,6 +34,7 @@ def test_timeout_override():
     instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace', 'prometheus_timeout': 5}
     check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
     assert check.get_scraper(instance).prometheus_timeout == 5
+
 
 def test_label_to_hostname_override():
     endpoint = "none"

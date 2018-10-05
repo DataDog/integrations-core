@@ -221,11 +221,12 @@ Tomcat uses by default the `log4j` logger. To activate the logging into a file a
 ```
 log4j.rootLogger = INFO, CATALINA
 
-# Define all the appenders
+ # Define all the appenders
 log4j.appender.CATALINA = org.apache.log4j.DailyRollingFileAppender
 log4j.appender.CATALINA.File = /var/log/tomcat/catalina.log
 log4j.appender.CATALINA.Append = true
-# Roll-over the log once per day
+
+ # Roll-over the log once per day
 log4j.appender.CATALINA.layout = org.apache.log4j.PatternLayout
 log4j.appender.CATALINA.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
 
@@ -251,7 +252,7 @@ log4j.appender.CONSOLE = org.apache.log4j.ConsoleAppender
 log4j.appender.CONSOLE.layout = org.apache.log4j.PatternLayout
 log4j.appender.CONSOLE.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
 
-# Configure which loggers log to which appenders
+ # Configure which loggers log to which appenders
 log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost] = INFO, LOCALHOST
 log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/manager] =\
   INFO, MANAGER
@@ -293,7 +294,8 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
 
   Change the `path` and `service` parameter values and configure them for your environment.
     see the [sample tomcat.yaml][17] for all available configuration options.
-    * [Restart the Agent][16].
+
+* [Restart the Agent][16].
 
 ### Validation
 

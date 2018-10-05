@@ -9,6 +9,8 @@ Get metrics from agent_metrics service in real time to:
 
 **NOTE**: The Agent Metrics check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents prior to major version 6**.
 
+To collect Agent metrics for Agent v6+, use the [Go-expvar check][10] with [the `agent_stats.yaml ` configuration file][9] packaged with the Agent.
+
 ## Setup
 ### Installation
 
@@ -46,3 +48,5 @@ Need help? Contact [Datadog Support][5].
 [5]: https://docs.datadoghq.com/help/
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[9]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/go_expvar.d/agent_stats.yaml.example 
+[10]: https://docs.datadoghq.com/integrations/go_expvar/

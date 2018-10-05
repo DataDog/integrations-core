@@ -1,19 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import os
 import pytest
 from mock import patch
 
 from .common import HERE
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 @pytest.fixture(scope='session')
@@ -34,7 +26,6 @@ def mock_get_ca_certs_path():
     """
     Mimic get_ca_certs_path() by using the certificates located in the `tests/` folder
     """
-
     embedded_certs = os.path.join(HERE, 'fixtures', 'cacert.pem')
 
     if os.path.exists(embedded_certs):

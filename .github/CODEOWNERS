@@ -11,10 +11,10 @@
 manifest.json      @DataDog/baklava @DataDog/agent-integrations
 
 # Container monitoring
-/docker_daemon/    @DataDog/kenafeh @DataDog/agent-integrations
-/ecs_fargate/      @DataDog/kenafeh @DataDog/agent-integrations
-/kube_dns/         @DataDog/kenafeh @DataDog/agent-integrations
-/kube_proxy/       @DataDog/kenafeh @DataDog/agent-integrations
-/kubelet/          @DataDog/kenafeh @DataDog/agent-integrations
-/kubernetes/       @DataDog/kenafeh @DataDog/agent-integrations
-/kubernetes_state/ @DataDog/kenafeh @DataDog/agent-integrations
+/docker_daemon/    @DataDog/container-integrations @DataDog/agent-integrations
+/ecs_fargate/      @DataDog/container-integrations @DataDog/agent-integrations
+/kube_dns/         @DataDog/container-integrations @DataDog/agent-integrations
+/kube_proxy/       @DataDog/container-integrations @DataDog/agent-integrations
+/kubelet/          @DataDog/container-integrations @DataDog/agent-integrations
+/kubernetes/       @DataDog/container-integrations @DataDog/agent-integrations
+/kubernetes_state/ @DataDog/container-integrations @DataDog/agent-integrations

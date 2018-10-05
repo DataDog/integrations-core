@@ -5,6 +5,6 @@ init_config:
 
 instances:
   - url: "http://%%host%%:8500"
-    catalog_checks: yes
-    new_leader_checks: yes
+    catalog_checks: true
+    new_leader_checks: true
     # service_whitelist:

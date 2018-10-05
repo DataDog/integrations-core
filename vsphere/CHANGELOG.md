@@ -1,5 +1,48 @@
 # CHANGELOG - vsphere
 
+## 3.3.1 / 2018-09-19
+
+* [Fixed] Fix batch implementation logic. See [#2265](https://github.com/DataDog/integrations-core/pull/2265).
+
+## 3.3.0 / 2018-09-17
+
+* [Added]  Add ability to filter metrics by collection level. See [#2226](https://github.com/DataDog/integrations-core/pull/2226).
+* [Changed] Precompute list of metric IDs to improve performance. See [#2221](https://github.com/DataDog/integrations-core/pull/2221).
+
+## 3.2.0 / 2018-09-11
+
+* [Fixed] Handle missing attributes in property collector result. See [#2205](https://github.com/DataDog/integrations-core/pull/2205).
+* [Fixed] Make the metadata cache thread safe. See [#2212](https://github.com/DataDog/integrations-core/pull/2212).
+* [Fixed] Make the connection list thread safe. See [#2201](https://github.com/DataDog/integrations-core/pull/2201).
+* [Fixed] Check that objects queue is initialized before processing it, and process it entirely. See [#2192](https://github.com/DataDog/integrations-core/pull/2192).
+* [Changed] Rewrite the Mor cache. See [#2173](https://github.com/DataDog/integrations-core/pull/2173).
+
+## 3.1.0 / 2018-09-06
+
+* [Changed] Downgrade pyvmomi to v6.5.0.2017.5-1. See [#2180](https://github.com/DataDog/integrations-core/pull/2180).
+
+## 3.0.0 / 2018-09-04
+
+* [Changed] Upgrade pyvmomi to 6.7.0. See [#2153](https://github.com/DataDog/integrations-core/pull/2153).
+* [Changed] Make first level cache thread safe. See [#2146](https://github.com/DataDog/integrations-core/pull/2146).
+
+## 2.4.0 / 2018-08-30
+
+* [Fixed] Control size of the thread pool job queue. See [#2131](https://github.com/DataDog/integrations-core/pull/2131).
+* [Changed] Make the cache configuration thread safe. See [#2125](https://github.com/DataDog/integrations-core/pull/2125).
+* [Changed] Removed unused `_clean` method, added more unit tests. See [#2120](https://github.com/DataDog/integrations-core/pull/2120).
+
+## 2.3.1 / 2018-08-28
+
+* [Fixed]  Fix `KeyError` due to race condition on the cache. See [#2099](https://github.com/DataDog/integrations-core/pull/2099).
+
+## 2.3.0 / 2018-08-21
+
+* [Fixed] Drastically improve check performance by reducing number of calls to vSphere API. See [#2039](https://github.com/DataDog/integrations-core/pull/2039).
+* [Fixed] Retry connection once on failure, and correctly send CRITICAL service check if the connection still cannot be made. See [#2060](https://github.com/DataDog/integrations-core/pull/2060).
+* [Fixed] fix race condition and keyerror. See [#1893](https://github.com/DataDog/integrations-core/pull/1893).
+* [Changed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 2.2.0 / 2018-06-20
 
 * [Changed] Bump requests to 2.19.1. See [#1743](https://github.com/DataDog/integrations-core/pull/1743).

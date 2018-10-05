@@ -25,8 +25,8 @@ init_config:
 instances:
   - host: localhost
     port: 6379 # or wherever your Redis listens
-#   unix_socket_path: /var/run/redis/redis.sock # if your Redis uses a socket instead of TCP
-#   password: myredispassword                   # if your Redis requires auth
+  # unix_socket_path: /var/run/redis/redis.sock # if your Redis uses a socket instead of TCP
+  # password: myredispassword                   # if your Redis requires auth
 ```
 
 Configuration Options:

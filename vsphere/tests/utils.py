@@ -24,128 +24,57 @@ class MockedMOR(Mock):
         # Mocking
         super(MockedMOR, self).__init__(**kwargs)
 
-        # Handle special attributes
-        name = kwargs.get('name')
-        is_labeled = kwargs.get('label', False)
-
-        self.name = name
+        self.name = kwargs.get('name')
         self.parent = None
+        self.parent_name = kwargs.get('parent_name', None)
         self.customValue = []
+        power_state = kwargs.get('runtime.powerState', None)
+        host_name = kwargs.get('runtime.host_name', None)
+        if power_state:
+            self.runtime_powerState = getattr(vim.VirtualMachinePowerState, power_state)
+        if host_name:
+            self.runtime_host_name = host_name
 
-        if is_labeled:
+        if kwargs.get('label', False):
             self.customValue.append(Mock(value="DatadogMonitored"))
 
 
-class MockedContainer(Mock):
-    TYPES = [vim.Datacenter, vim.Datastore, vim.HostSystem, vim.VirtualMachine]
-
-    def __init__(self, **kwargs):
-        # Mocking
-        super(MockedContainer, self).__init__(**kwargs)
-
-        self.topology = kwargs.get('topology')
-        self.view_idx = 0
-
-    def container_view(self, topology_node, vimtype):
-        view = []
-
-        def get_child_topology(attribute):
-            entity = getattr(topology_node, attribute)
-            try:
-                for child in entity:
-                    child_topology = self.container_view(child, vimtype)
-                    view.extend(child_topology)
-            except TypeError:
-                child_topology = self.container_view(entity, vimtype)
-                view.extend(child_topology)
-
-        if isinstance(topology_node, vimtype):
-            view = [topology_node]
-
-        if hasattr(topology_node, 'childEntity'):
-            get_child_topology('childEntity')
-        elif hasattr(topology_node, 'hostFolder'):
-            get_child_topology('hostFolder')
-        elif hasattr(topology_node, 'host'):
-            get_child_topology('host')
-        elif hasattr(topology_node, 'vm'):
-            get_child_topology('vm')
-
-        return view
-
-    @property
-    def view(self):
-        view = self.container_view(self.topology, self.TYPES[self.view_idx])
-        self.view_idx += 1
-        self.view_idx = self.view_idx % len(self.TYPES)
-        return view
-
-
 def create_topology(topology_json):
-    """
-    Helper, recursively generate a vCenter topology from a JSON description.
-    Return a `MockedMOR` object.
+    objects = []
+    with open(topology_json) as f:
+        topology = json.loads(f.read())
+        for obj_desc in topology:
+            obj = MockedMOR(**obj_desc)
+            objects.append(obj)
+        # Assign parent object based on name, as well as runtime host for VMs
+        for obj in objects:
+            if obj.parent_name:
+                obj.parent = next(obj2 for obj2 in objects if obj2.name == obj.parent_name)
+            if hasattr(obj, "runtime_host_name"):
+                obj.runtime_host = next(obj2 for obj2 in objects if obj2.name == obj.runtime_host_name)
 
-    Examples:
-      ```
-      topology_desc = "
-        {
-          "childEntity": [
-            {
-              "hostFolder": {
-                "childEntity": [
-                  {
-                    "spec": "ClusterComputeResource",
-                    "name": "compute_resource1"
-                  }
-                ]
-              },
-              "spec": "Datacenter",
-              "name": "datacenter1"
-            }
-          ],
-          "spec": "Folder",
-          "name": "rootFolder"
-        }
-      "
+        return objects
 
-      topo = create_topology(topology_desc)
 
-      assert isinstance(topo, Folder)
-      assert isinstance(topo.childEntity[0].name) == "compute_resource1"
-      ```
-    """
-    def rec_build(topology_desc):
-        """
-        Build MORs recursively.
-        """
-        parsed_topology = {}
+def retrieve_properties_mock(all_mors):
+    objects = []
+    properties_res = MagicMock(objects=objects, token=None)
+    mor_properties = ["name", "parent", "customValue", "runtime_powerState", "runtime_host"]
+    for mor in all_mors:
+        prop_set = []
+        for prop_name in mor_properties:
+            try:
+                prop = MagicMock()
+                prop.val = getattr(mor, prop_name)
+                prop.name = prop_name.replace("_", ".")
+                prop_set.append(prop)
+            except AttributeError:
+                # Only VMs have powerState or host attribute
+                continue
 
-        for field, value in topology_desc.iteritems():
-            parsed_value = value
-            if isinstance(value, dict):
-                parsed_value = rec_build(value)
-            elif isinstance(value, list):
-                parsed_value = [rec_build(obj) for obj in value]
-            else:
-                parsed_value = value
-            parsed_topology[field] = parsed_value
+        objects.append(MagicMock(obj=mor, propSet=prop_set))
 
-        mor = MockedMOR(**parsed_topology)
-
-        # set parent
-        for field, value in topology_desc.iteritems():
-            if isinstance(parsed_topology[field], list):
-                for m in parsed_topology[field]:
-                    if isinstance(m, MockedMOR):
-                        m.parent = mor
-            elif isinstance(parsed_topology[field], MockedMOR):
-                parsed_topology[field].parent = mor
-
-        return mor
-
-    with open(os.path.join(HERE, 'fixtures', topology_json)) as f:
-        return rec_build(json.loads(f.read()))
+    return properties_res
 
 
 def assertMOR(check, instance, name=None, spec=None, tags=None, count=None, subset=False):
@@ -155,10 +84,7 @@ def assertMOR(check, instance, name=None, spec=None, tags=None, count=None, subs
     instance_name = instance['name']
     candidates = []
 
-    if spec:
-        mor_list = check.morlist_raw[instance_name][spec]
-    else:
-        mor_list = [mor for _, mors in check.morlist_raw[instance_name].iteritems() for mor in mors]
+    mor_list = [mor for _, mors in check.mor_objects_queue._objects_queue[instance_name].iteritems() for mor in mors]
 
     for mor in mor_list:
         if name is not None and name != mor['hostname']:
@@ -188,6 +114,7 @@ def disable_thread_pool(check):
     Disable the thread pool on the check instance
     """
     check.pool = MagicMock(apply_async=lambda func, args: func(*args))
+    check.pool._workq.qsize.return_value = 0
     check.pool_started = True  # otherwise the mock will be overwritten
     return check
 
@@ -196,18 +123,20 @@ def get_mocked_server():
     """
     Return a mocked Server object
     """
-    # create topology from a fixture file
-    vcenter_topology = create_topology('vsphere_topology.json')
     # mock pyvmomi stuff
-    view_mock = MockedContainer(topology=vcenter_topology)
-    viewmanager_mock = MagicMock(**{'CreateContainerView.return_value': view_mock})
+    all_mors = create_topology(os.path.join(HERE, 'fixtures', 'vsphere_topology.json'))
+    root_folder_mock = next(mor for mor in all_mors if mor.name == "rootFolder")
     event_mock = MagicMock(createdTime=datetime.now())
     eventmanager_mock = MagicMock(latestEvent=event_mock)
-    content_mock = MagicMock(viewManager=viewmanager_mock, eventManager=eventmanager_mock)
+    property_collector_mock = MagicMock()
+    property_collector_mock.RetrievePropertiesEx.return_value = retrieve_properties_mock(all_mors)
+    content_mock = MagicMock(
+        eventManager=eventmanager_mock, propertyCollector=property_collector_mock, rootFolder=root_folder_mock
+    )
     # assemble the mocked server
     server_mock = MagicMock()
     server_mock.configure_mock(**{
         'RetrieveContent.return_value': content_mock,
-        'content': content_mock,
+        'content': content_mock
     })
     return server_mock

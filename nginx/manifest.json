@@ -12,6 +12,9 @@
   "metric_prefix": "nginx.",
   "metric_to_check": "nginx.net.connections",
   "name": "nginx",
+  "process_signatures": [
+    "nginx: master process"
+  ],
   "public_title": "Datadog-Nginx Integration",
   "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
   "support": "core",

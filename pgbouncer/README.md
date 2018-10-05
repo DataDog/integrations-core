@@ -23,6 +23,8 @@ instances:
     password: <YOUR_PASSWORD>
     # tags:
     #   - env:prod
+    
+  # Note: when the instance is configured with `database_url`, `host`, `port`, `username` and `password` are ignored.
   - database_url: postgresql://<DB_USER>:<DB_PASS>@<DB_HOST>:<DB_PORT>/dbname?sslmode=require
     # tags:
     #   - role:main

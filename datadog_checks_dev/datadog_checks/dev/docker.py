@@ -7,11 +7,10 @@ from contextlib import contextmanager
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from ._env import tear_down_env
-from .conditions import CheckDockerLogs, CheckEndpoints
-from .structures import EnvVars, LazyFunction
+from .conditions import CheckDockerLogs
+from .env import environment_run
+from .structures import LazyFunction
 from .subprocess import run_command
-from .utils import mock_context_manager
 
 
 def get_docker_hostname():
@@ -49,13 +48,14 @@ def docker_run(
     service_name=None,
     up=None,
     down=None,
+    sleep=None,
     endpoints=None,
     log_patterns=None,
     conditions=None,
     env_vars=None,
     wrapper=None
 ):
-    """This utility provides a convenient way to safely spin up and tear down Docker environments.
+    """This utility provides a convenient way to safely set up and tear down Docker environments.
 
     :param compose_file: A path to a Docker compose file. A custom tear
                          down is not required when using this.
@@ -64,10 +64,12 @@ def docker_run(
     :type build: ``bool``
     :param service_name: Optional name for when ``compose_file`` is provided.
     :type service_name: ``str``
-    :param up: A custom spin up callable.
+    :param up: A custom setup callable.
     :type up: ``callable``
-    :param down: A custom tear down callable. This is required when using a custom spin up.
+    :param down: A custom tear down callable. This is required when using a custom setup.
     :type down: ``callable``
+    :param sleep: Number of seconds to wait before yielding.
+    :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
                       ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
     :type endpoints: ``list`` of ``str``, or a single ``str``
@@ -82,55 +84,44 @@ def docker_run(
     :param wrapper: A context manager to use during execution.
     """
     if compose_file and up:
-        raise TypeError('You must select either a compose file or a custom spin up callable, not both.')
+        raise TypeError('You must select either a compose file or a custom setup callable, not both.')
 
     if compose_file is not None:
         if not isinstance(compose_file, string_types):
-            raise TypeError('The path to the compose file must be a string.')
-        spin_up = ComposeFileUp(compose_file, build=build, service_name=service_name)
+            raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
+
+        set_up = ComposeFileUp(compose_file, build=build, service_name=service_name)
         if down is not None:
-            if not callable(down):
-                raise TypeError('The custom tear down must be callable.')
             tear_down = down
         else:
             tear_down = ComposeFileDown(compose_file)
-    elif up is not None:
-        if not callable(up):
-            raise TypeError('The custom spin up must be callable.')
-        elif down is None:
-            raise ValueError('A custom tear down must be selected when using a custom spin up.')
-        elif not callable(down):
-            raise TypeError('The custom tear down must be callable.')
-        spin_up = up
-        tear_down = down
     else:
-        raise TypeError('You must select either a compose file or a custom spin up callable.')
+        set_up = up
+        tear_down = down
 
-    conditions = list(conditions) if conditions is not None else []
+    docker_conditions = []
 
     if log_patterns is not None:
         if compose_file is None:
             raise ValueError(
                 'The `log_patterns` convenience is unavailable when using '
-                'a custom spin up. Please use a custom condition instead.'
+                'a custom setup. Please use a custom condition instead.'
             )
-        conditions.append(CheckDockerLogs(compose_file, log_patterns))
+        docker_conditions.append(CheckDockerLogs(compose_file, log_patterns))
 
-    if endpoints is not None:
-        conditions.append(CheckEndpoints(endpoints))
+    if conditions is not None:
+        docker_conditions.extend(conditions)
 
-    env_vars = mock_context_manager() if env_vars is None else EnvVars(env_vars)
-    wrapper = mock_context_manager() if wrapper is None else wrapper
-
-    with env_vars, wrapper:
-        try:
-            result = spin_up()
-            for condition in conditions:
-                condition()
-            yield result
-        finally:
-            if tear_down_env():
-                tear_down()
+    with environment_run(
+        up=set_up,
+        down=tear_down,
+        sleep=sleep,
+        endpoints=endpoints,
+        conditions=docker_conditions,
+        env_vars=env_vars,
+        wrapper=wrapper,
+    ) as result:
+        yield result
 
 
 class ComposeFileUp(LazyFunction):

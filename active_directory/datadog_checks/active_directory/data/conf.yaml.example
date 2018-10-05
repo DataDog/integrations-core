@@ -1,46 +1,75 @@
 init_config:
 
 instances:
-  # "." means the current host
-  - host: .
-  # username: my_username
-  # password: my_password
-  #
-  #   The additional metrics is a list of additional counters to collect.  The
-  #   list is formatted as follows:
-  #   ['<counterset name>', <counter instance name>, '<counter name>', <metric name>, <metric type>]
-  #
-  #   <counterset name>  is the name of the PDH Counter Set (the name of the counter)
-  #   <counter instance name> is the specific counter instance to collect, for example 
-  #           "Default Web Site".  Specify 'none' For all instances of the counter.
-  #   <counter name> is the individual counter to report
-  #   <metric name> is the name you want to show up in Datadog
-  #   <metric type> is from the standard choices for all agent checks, such as gauge,
-  #       rate, histogram or counter
-  #   
-  #   additional_metrics:
-  #     - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
+
+  ## @param host - string - required
+  ## Host that the Datadog active directory check connects to.
+  ## "." means the current host 
   # 
-  # `counter_data_types` allows the precision with which counters are queried on a per metric basis
-  # counter_data_types:
-  #   - <metric_name>,<data_type>
-  #   - active_directory.dra.inbound.bytes.total,int
-  #   - active_directory.ldap.bind_time,float
+  - host: .
+
+  ## @param username - string - optional
+  ## Username from the credentials needed to connect to the host. 
+  #
+  #  username: <USER_NAME>
+
+  ## @param password - string optional
+  ## Password from the credentials needed to connect to the host.
+  #
+  #  password: <PASSWORD>
+
+  ## @param additional_metrics - list of lists - optional
+  ## The additional metrics is a list of items that represent additional counters to collect. 
+  ## Each item is a list of strings, formatted as follows: 
+  ##  
+  ## ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
+  ##
+  ## <COUNTERSET_NAME> is the name of the PDH Counter Set (the name of the counter)
+  ## <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example 
+  ##                          "Default Web Site".  Specify 'none' For all instances of 
+  ##                          the counter.
+  ## <COUNTER_NAME> is the individual counter to report
+  ## <METRIC_NAME> is the name you want to show up in Datadog
+  ## <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge,
+  ##                rate, histogram or counter
   #   
-  # tags:
-  #   - optional:tag_1
+  #  additional_metrics:
+  #    - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
+  
+
+  ## @param counter_data_types - list of strings - optional
+  ## counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> element that
+  ## allows the precision with which counters are queried on a per metric basis
+  ## <METRIC_NAME>: Name of your metric 
+  ## <DATA_TYPE>  : Type of your metric, can be int, float
+  #
+  #  counter_data_types:
+  #    - <METRIC_NAME>,<DATA_TYPE>
+  #    - active_directory.dra.inbound.bytes.total,int
+  #    - active_directory.ldap.bind_time,float
+
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
-#logs:
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
+## service - mandatory - Name of the service owning the log
+## source  - mandatory - Attribute that defines which integration is sending the logs
+## sourcecategory - optional - Multiple value attribute. Can be used to refine the source attribtue
+## tags: - optional - Add tags to each logs collected
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 
-    # - type : (mandatory) type of log input source (tcp / udp / file / windows_event)
-    #   port / path /channel: (mandatory) Set port if type is tcp or udp. Set path if type is file and channel if windows_event
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
-    #   tags: (optional) add tags to each logs collected
-    
-    # - type: file
-    #   path: /path/to/active_directory/file.log
-    #   source: ruby
-    #   service: <MY_SERVICE>
+#logs:
+#  - type: file
+#    path: /path/to/active_directory/file.log
+#    source: ruby
+#    service: <SERVICE_NAME>

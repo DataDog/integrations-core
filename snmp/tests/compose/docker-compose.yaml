@@ -1,0 +1,10 @@
+version: '3.5'
+
+services:
+  snmp:
+    image: "datadog/docker-library:snmp"
+    ports:
+      - "1161:1161/udp"
+    command: --args-from-file=/usr/snmpsim/data/args_list.txt
+    volumes:
+      - ${COMPOSE_DIR}/data/:/usr/snmpsim/data/

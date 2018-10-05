@@ -1,0 +1,7 @@
+.:53 {
+    errors
+    health
+    prometheus :9153
+    proxy . /etc/resolv.conf
+    cache 30
+}

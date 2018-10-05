@@ -139,6 +139,14 @@ CONFIG_EXPIRED_SSL = {
             'check_certificate_expiration': True,
             'days_warning': 14,
             'days_critical': 7,
+        },
+        {
+            'name': 'expired_cert_seconds',
+            'url': 'https://github.com',
+            'timeout': 1,
+            'check_certificate_expiration': True,
+            'seconds_warning': 3600,
+            'seconds_critical': 60,
         }
     ]
 }
@@ -189,17 +197,6 @@ CONFIG_DONT_CHECK_EXP = {
     ]
 }
 
-CONFIG_HTTP_HEADERS = {
-    'instances': [
-        {
-            'url': 'https://google.com',
-            'name': 'UpService',
-            'timeout': 1,
-            'headers': {"X-Auth-Token": "SOME-AUTH-TOKEN"}
-        }
-    ]
-}
-
 CONFIG_HTTP_REDIRECTS = {
     'instances': [
         {
@@ -218,14 +215,14 @@ CONFIG_DATA_METHOD = {
     'instances': [
         {
             'name': 'post_json',
-            'url': 'http://httpbin.org/post',
+            'url': 'http://mockbin.com/request',
             'timeout': 1,
             'method': 'post',
             'data': {'foo': 'bar', 'baz': ['qux', 'quux']},
         },
         {
             'name': 'post_str',
-            'url': 'http://httpbin.org/post',
+            'url': 'http://mockbin.com/request',
             'timeout': 1,
             'method': 'post',
             'data': '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"'
@@ -234,42 +231,42 @@ CONFIG_DATA_METHOD = {
         },
         {
             'name': 'put_json',
-            'url': 'http://httpbin.org/put',
+            'url': 'http://mockbin.com/request',
             'timeout': 1,
             'method': 'put',
             'data': {'foo': 'bar', 'baz': ['qux', 'quux']},
         },
         {
             'name': 'put_str',
-            'url': 'http://httpbin.org/put',
+            'url': 'http://mockbin.com/request',
             'timeout': 1,
             'method': 'put',
             'data': 'Lorem ipsum',
         },
         {
             'name': 'patch_json',
-            'url': 'http://httpbin.org/patch',
+            'url': 'http://mockbin.com/request',
             'timeout': 1,
             'method': 'patch',
             'data': {'foo': 'bar', 'baz': ['qux', 'quux']},
         },
         {
             'name': 'patch_str',
-            'url': 'http://httpbin.org/patch',
+            'url': 'http://mockbin.com/request',
             'timeout': 1,
             'method': 'patch',
             'data': 'Lorem ipsum',
         },
         {
             'name': 'delete_json',
-            'url': 'http://httpbin.org/delete',
+            'url': 'http://mockbin.com/request',
             'timeout': 1,
             'method': 'delete',
             'data': {'foo': 'bar', 'baz': ['qux', 'quux']},
         },
         {
             'name': 'delete_str',
-            'url': 'http://httpbin.org/delete',
+            'url': 'http://mockbin.com/request',
             'timeout': 1,
             'method': 'delete',
             'data': 'Lorem ipsum',

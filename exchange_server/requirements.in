@@ -1,0 +1,1 @@
+pywin32==224; sys_platform == 'win32'

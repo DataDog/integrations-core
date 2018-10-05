@@ -1,5 +1,67 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.10.0 / 2018-10-04
+
+* [Added] Update base package paths. See [#2345](https://github.com/DataDog/integrations-core/pull/2345).
+* [Added] Add generic environment runner. See [#2342](https://github.com/DataDog/integrations-core/pull/2342).
+* [Added] Add WaitFor environment condition. See [#2343](https://github.com/DataDog/integrations-core/pull/2343).
+* [Added] Enable pytest plugin to control environments. See [#2336](https://github.com/DataDog/integrations-core/pull/2336).
+
+## 0.9.0 / 2018-09-30
+
+* [Added] Allow testing of specific environments. See [#2312](https://github.com/DataDog/integrations-core/pull/2312).
+* [Added] Add run command. See [#2319](https://github.com/DataDog/integrations-core/pull/2319).
+* [Fixed] Fix namespace overwriting. See [#2311](https://github.com/DataDog/integrations-core/pull/2311).
+* [Fixed] Upgrade in-toto to gain full cross-platform release signing support. See [#2315](https://github.com/DataDog/integrations-core/pull/2315).
+* [Added] Command to validate metadata. See [#2269](https://github.com/DataDog/integrations-core/pull/2269).
+
+## 0.8.1 / 2018-09-25
+
+* [Fixed] Fix Python 2 unicode handling for log pattern error message. See [#2303](https://github.com/DataDog/integrations-core/pull/2303).
+
+## 0.8.0 / 2018-09-25
+
+* [Added] Add new templates for other integration types. See [#2285](https://github.com/DataDog/integrations-core/pull/2285).
+* [Added] Add release signing via in-toto. See [#2224](https://github.com/DataDog/integrations-core/pull/2224).
+* [Added] Add prometheus metadata.csv and metric map auto-generation. See [#2117](https://github.com/DataDog/integrations-core/pull/2117).
+* [Added] Keep track of the checks changed at every Datadog Agent release. See [#2277](https://github.com/DataDog/integrations-core/pull/2277).
+
+## 0.7.0 / 2018-09-18
+
+* [Added] Fix manifest validation policy. See [#2258](https://github.com/DataDog/integrations-core/pull/2258).
+* [Added] Add config option to select the default repository. See [#2243](https://github.com/DataDog/integrations-core/pull/2243).
+
+## 0.6.2 / 2018-09-14
+
+* [Fixed] Revert "Update base package paths (#2235)". See [#2240](https://github.com/DataDog/integrations-core/pull/2240).
+
+## 0.6.1 / 2018-09-14
+
+* [Fixed] Move datadog_checks_base code into sub base package. See [#2167](https://github.com/DataDog/integrations-core/pull/2167).
+
+## 0.6.0 / 2018-09-14
+
+* [Added] Update base package paths. See [#2235](https://github.com/DataDog/integrations-core/pull/2235).
+* [Added] Add ability to add wait time in docker_run. See [#2196](https://github.com/DataDog/integrations-core/pull/2196).
+* [Added] Add better debugging to test command. See [#2194](https://github.com/DataDog/integrations-core/pull/2194).
+* [Fixed] Gracefully handle tags that already exist. See [#2172](https://github.com/DataDog/integrations-core/pull/2172).
+* [Fixed] Fix release freeze command. See [#2188](https://github.com/DataDog/integrations-core/pull/2188).
+* [Added] Add ability to filter checks to test by changes. See [#2163](https://github.com/DataDog/integrations-core/pull/2163).
+
+## 0.5.0 / 2018-09-04
+
+* [Added] Allow automated releasing by looking at github labels. See [#2169](https://github.com/DataDog/integrations-core/pull/2169).
+* [Fixed] Handle character limit for Trello card descriptions. See [#2162](https://github.com/DataDog/integrations-core/pull/2162).
+
+## 0.4.1 / 2018-08-31
+
+* [Fixed] Fix trello command for other repos. See [#2155](https://github.com/DataDog/integrations-core/pull/2155).
+
+## 0.4.0 / 2018-08-28
+
+* [Added] Add code coverage. See [#2105](https://github.com/DataDog/integrations-core/pull/2105).
+* [Added] Add command to create new integrations. See [#2037](https://github.com/DataDog/integrations-core/pull/2037).
+
 ## 0.3.1 / 2018-08-03
 
 * [Fixed] Fix clean command. See [#1992](https://github.com/DataDog/integrations-core/pull/1992).

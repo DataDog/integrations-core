@@ -12,6 +12,9 @@
   "metric_prefix": "cassandra.",
   "metric_to_check": "cassandra.load.count",
   "name": "cassandra",
+  "process_signatures": [
+    "java org.apache.cassandra.service.CassandraDaemon"
+  ],
   "public_title": "Datadog-Cassandra Integration",
   "short_description": "Track cluster performance, capacity, overall health, and much more.",
   "support": "core",

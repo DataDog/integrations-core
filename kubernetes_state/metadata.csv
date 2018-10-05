@@ -53,7 +53,6 @@ kubernetes_state.node.status,gauge,,,,Submitted with a value of 1 for each node 
 kubernetes_state.nodes.by_condition,gauge,,,,To sum by `condition` and `status` to get number of nodes in a given condition.,0,kubernetes,k8s_state.nodes.by_cond
 kubernetes_state.hpa.min_replicas,gauge,,,,Lower limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.min_replicas
 kubernetes_state.hpa.max_replicas,gauge,,,,Upper limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.max_replicas
-kubernetes_state.hpa.target_cpu,gauge,,,,Target CPU percentage of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.target_cpu
 kubernetes_state.hpa.desired_replicas,gauge,,,,Desired number of replicas of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.desired_replicas
 kubernetes_state.pod.ready,gauge,,,,"In association with the `condition` tag, whether the pod is ready to serve requests, e.g. `condition:true` keeps the pods that are in a ready state",1,kubernetes,k8s_state.pod.ready
 kubernetes_state.pod.scheduled,gauge,,,,Reports the status of the scheduling process for the pod with its tags,0,kubernetes,k8s_state.pod.scheduled
@@ -87,6 +86,7 @@ kubernetes_state.resourcequota.requests.memory.limit,gauge,,byte,,Hard limit on 
 kubernetes_state.resourcequota.requests.storage.limit,gauge,,byte,,Hard limit on the total of storage bytes requested for a resource quota,0,kubernetes,k8s_state.resourcequota.requests.storage.limit
 kubernetes_state.resourcequota.limits.cpu.limit,gauge,,cpu,,Hard limit on the sum of CPU core limits for a resource quota,0,kubernetes,k8s_state.resourcequota.limits.cpu.limit
 kubernetes_state.resourcequota.limits.memory.limit,gauge,,byte,,Hard limit on the sum of memory bytes limits for a resource quota,0,kubernetes,k8s_state.resourcequota.limits.mem.limit
+kubernetes_state.service.count,gauge,,,,Sum by namespace and type to count active services,0,kubernetes,k8s_state.svc.count
 kubernetes_state.statefulset.replicas,gauge,,,,The number of replicas per statefulset,0,kubernetes,k8s_state.statefulset.replicas
 kubernetes_state.statefulset.replicas_desired,gauge,,,,The number of desired replicas per statefulset,0,kubernetes,k8s_state.statefulset.replicas_desired
 kubernetes_state.statefulset.replicas_current,gauge,,,,The number of current replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_current

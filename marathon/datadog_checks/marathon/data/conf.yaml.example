@@ -19,3 +19,9 @@ instances:
   #
   #   acs_url: the base ACS endpoint url if an ACS token is required to access the marathon API
   #   acs_url: https://server:port
+  #
+  #   static tags for all metrics
+  #   tags: ['name:value']
+  #
+  #   dynamic tags for metrics. The tag value is taken from the label in marathon
+  #   label_tags: ['name']

@@ -1,0 +1,4 @@
+--v3-user=datadogMD5DES --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=MD5 --v3-priv-proto=DES
+--v3-user=datadogMD5AES --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=MD5 --v3-priv-proto=AES
+--v3-user=datadogSHADES --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=SHA --v3-priv-proto=DES
+--v3-user=datadogSHAAES --v3-auth-key=doggiepass --v3-priv-key=doggiePRIVkey --v3-auth-proto=SHA --v3-priv-proto=AES

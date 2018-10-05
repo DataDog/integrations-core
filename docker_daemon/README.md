@@ -53,7 +53,7 @@ Note that in the command above, you are able to pass your API key to the Datadog
 | DD_URL | Sets the Datadog intake server URL where the Agent will send data. This is useful when [using an agent as a proxy][7]. |
 | LOG_LEVEL | Sets logging verbosity (CRITICAL, ERROR, WARNING, INFO, DEBUG). For example, `-e LOG_LEVEL=DEBUG` will set logging to debug mode.
 | TAGS | Sets host tags as a comma delimited string. You can pass both simple tags and key-value tags. For example, `-e TAGS="simple-tag, tag-key:tag-value"`. |
-| EC2_TAGS | Enabling this feature allows the agent to query and capture custom tags set using the EC2 API during startup. To enable, set the value to "yes", for example, `-e EC2_TAGS=yes`. Note that this feature requires an [IAM role][8] associated with the instance. |
+| EC2_TAGS | Enabling this feature allows the agent to query and capture custom tags set using the EC2 API during startup. To enable, set the value to "yes", for example, `-e EC2_TAGS=yes`. Note that this feature requires an IAM role associated with the instance. |
 | NON_LOCAL_TRAFFIC | Enabling this feature will allow statsd reporting from any external IP. For example, `-e NON_LOCAL_TRAFFIC=yes`. This can be used to report metrics from other containers or systems. See [network configuration][9] for more details.
 | PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD | Sets proxy configuration details. For more information, see the [Agent proxy documentation][10] |
 | SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, please see the [Autodiscovery guide][11]. |
@@ -146,9 +146,7 @@ Returns `OK` otherwise.
 
 **docker.container_health**:
 
-Returns `CRITICAL` if a container is unhealthy.
-Returns `UNKNOWN` if the health is unknown.
-Returns `OK` otherwise.
+This Service Check is only available for Agent v5. It Returns `CRITICAL` if a container is unhealthy, `UNKNOWN` if the health is unknown, `OK` otherwise.
 
 **docker.exit**:
 
@@ -186,7 +184,6 @@ We've also written several other in-depth blog posts to help you get the most ou
 [5]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example
 [6]: https://app.datadoghq.com/account/settings#agent/docker
 [7]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-the-agent-as-a-proxy
-[8]: https://github.com/DataDog/dd-agent/wiki/Capturing-EC2-tags-at-startup
 [9]: https://github.com/DataDog/dd-agent/wiki/Network-Traffic-and-Proxy-Configuration
 [10]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy
 [11]: https://docs.datadoghq.com/agent/autodiscovery/

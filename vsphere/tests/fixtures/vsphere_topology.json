@@ -1,1 +1,77 @@
-{"childEntity": [{"hostFolder": {"childEntity": [{"host": [{"spec": "HostSystem", "name": "host1", "vm": []}, {"spec": "HostSystem", "name": "host2", "vm": []}], "spec": "ClusterComputeResource", "name": "compute_resource1"}]}, "spec": "Datacenter", "name": "datacenter1"}, {"childEntity": [{"hostFolder": {"childEntity": [{"host": [{"vm": [{"runtime": {"powerState": "poweredOn"}, "spec": "VirtualMachine", "name": "vm1"}, {"runtime": {"powerState": "poweredOn"}, "spec": "VirtualMachine", "name": "vm2", "label": true}, {"runtime": {"powerState": "poweredOff"}, "spec": "VirtualMachine", "name": "vm3", "label": true}, {"runtime": {"powerState": "poweredOn"}, "spec": "VirtualMachine", "name": "vm4", "label": true}], "spec": "HostSystem", "name": "host3"}], "spec": "ClusterComputeResource", "name": "compute_resource2"}]}, "spec": "Datacenter", "name": "datacenter2"}], "spec": "Folder", "name": "folder1"}], "spec": "Folder", "name": "rootFolder"}
+[
+  {
+    "spec": "Folder",
+    "name": "rootFolder"
+  },
+  {
+    "spec": "Datacenter",
+    "name": "datacenter1",
+    "parent_name": "rootFolder"
+  },
+  {
+    "spec": "ClusterComputeResource",
+    "name": "compute_resource1",
+    "parent_name": "datacenter1"
+  },
+  {
+    "spec": "HostSystem",
+    "name": "host1",
+    "parent_name": "compute_resource1"
+  },
+  {
+    "spec": "HostSystem",
+    "name": "host2",
+    "parent_name": "compute_resource1"
+  },
+  {
+    "spec": "Folder",
+    "name": "folder1",
+    "parent_name": "rootFolder"
+  },
+  {
+    "spec": "Datacenter",
+    "name": "datacenter2",
+    "parent_name": "folder1"
+  },
+  {
+    "spec": "ClusterComputeResource",
+    "name": "compute_resource2",
+    "parent_name": "datacenter2"
+  },
+  {
+    "spec": "HostSystem",
+    "name": "host3",
+    "parent_name": "compute_resource2"
+  },
+  {
+    "spec": "VirtualMachine",
+    "name": "vm1",
+    "parent_name": "host3",
+    "runtime.powerState": "poweredOn",
+    "runtime.host_name": "host3"
+  },
+  {
+    "spec": "VirtualMachine",
+    "name": "vm2",
+    "parent_name": "host3",
+    "runtime.powerState": "poweredOn",
+    "runtime.host_name": "host3",
+    "label": true
+  },
+  {
+    "spec": "VirtualMachine",
+    "name": "vm3",
+    "parent_name": "host3",
+    "runtime.powerState": "poweredOff",
+    "runtime.host_name": "host3",
+    "label": true
+  },
+  {
+    "spec": "VirtualMachine",
+    "name": "vm4",
+    "parent_name": "host3",
+    "runtime.powerState": "poweredOn",
+    "runtime.host_name": "host3",
+    "label": true
+  }
+]

@@ -30,6 +30,7 @@ setup(
     version=ABOUT["__version__"],
     description='The MS Exchange check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent exchange check',
 
     # The project's main homepage.

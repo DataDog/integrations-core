@@ -13,6 +13,45 @@ from .subprocess import run_command
 from .utils import file_exists
 
 
+class WaitFor(LazyFunction):
+    def __init__(self, func, timeout=1, attempts=60, wait=1, args=(), kwargs=None):
+        if kwargs is None:
+            kwargs = {}
+
+        self.func = func
+        self.timeout = timeout
+        self.attempts = attempts
+        self.wait = wait
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self):
+        last_result = None
+        last_error = None
+
+        for _ in range(self.attempts):
+            try:
+                result = self.func(*self.args, **self.kwargs)
+            except Exception as e:
+                last_error = str(e)
+                continue
+            else:
+                last_result = result
+
+            if last_result is None or last_result is True:
+                return True
+
+            time.sleep(self.wait)
+        else:
+            raise RetryError(
+                'Result: {}\n'
+                'Error: {}'.format(
+                    repr(last_result),
+                    last_error,
+                )
+            )
+
+
 class CheckEndpoints(LazyFunction):
     def __init__(self, endpoints, timeout=1, attempts=60, wait=1):
         self.endpoints = [endpoints] if isinstance(endpoints, string_types) else endpoints
@@ -22,7 +61,7 @@ class CheckEndpoints(LazyFunction):
 
     def __call__(self):
         last_endpoint = ''
-        last_error = ''
+        last_error = None
 
         for _ in range(self.attempts):
             for endpoint in self.endpoints:
@@ -101,9 +140,9 @@ class CheckCommandOutput(LazyFunction):
             time.sleep(self.wait)
         else:
             raise RetryError(
-                'Command: {}\n'
-                'Exit code: {}\n'
-                'Captured Output: {}'.format(
+                u'Command: {}\n'
+                u'Exit code: {}\n'
+                u'Captured Output: {}'.format(
                     self.command,
                     exit_code,
                     log_output

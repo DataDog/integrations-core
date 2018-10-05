@@ -34,9 +34,10 @@ OPTIONAL_ATTRIBUTES = {
     'aliases',
     'description',
     'is_beta',
-    # Move these two below to mandatory when all integration are fixed
+    # Move these two below (metric_to_check and metric_prefix) to mandatory when all integration are fixed
     'metric_to_check',
     'metric_prefix',
+    'process_signatures',
 }
 
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
@@ -340,19 +341,6 @@ def verify(fix, include_extras):
                 if not isinstance(is_public, bool):
                     failed += 1
                     output = '  required boolean: is_public'
-
-                    if fix:
-                        decoded['is_public'] = correct_is_public
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `is_public`: {}'.format(correct_is_public)))
-
-                        failed -= 1
-                    else:
-                        display_queue.append((echo_failure, output))
-                elif is_public != correct_is_public:
-                    failed += 1
-                    output = '  invalid `is_public`: {}'.format(is_public)
 
                     if fix:
                         decoded['is_public'] = correct_is_public

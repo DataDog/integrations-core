@@ -1,111 +1,111 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab,gc duration
-go_gc_duration_seconds_sum,gauge,,request,second,Sum of the GC invocation durations,0,gitlab,sum gc duration
-go_gc_duration_seconds_count,gauge,,request,second,Count of the GC invocation durations,0,gitlab,count gc duration
-go_goroutines,gauge,,request,second,Number of goroutines that currently exist,0,gitlab,goroutines
-go_memstats_alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use,0,gitlab,bytes allocated in use
-go_memstats_alloc_bytes_total,counter,,byte,,Total number of bytes allocated,0,gitlab,bytes allocated
-go_memstats_buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table,0,gitlab,bytes profiling bucket
-go_memstats_frees_total,counter,,request,,Total number of frees,0,gitlab,number of frees
-go_memstats_gc_cpu_fraction,gauge,,request,second,The fraction of this program's available CPU time used by the GC since the program started,0,gitlab,GC cpu fraction
-go_memstats_gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata,0,gitlab,bytes garbage collection
-go_memstats_heap_alloc_bytes,gauge,,byte,,Number of heap bytes allocated and still in use,0,gitlab,heap bytes allocated and in use
-go_memstats_heap_idle_bytes,gauge,,byte,,Number of heap bytes waiting to be used,0,gitlab,heap bytes unused
-go_memstats_heap_inuse_bytes,gauge,,byte,,Number of heap bytes that are in use,0,gitlab,heap bytes in use
-go_memstats_heap_objects,gauge,,request,,Number of allocated objects,0,gitlab,allocated objects
-go_memstats_heap_released_bytes_total,counter,,byte,,Total number of heap bytes released to OS,0,gitlab,heap bytes released
-go_memstats_heap_sys_bytes,gauge,,byte,,Number of heap bytes obtained from system,0,gitlab,heap bytes obtained
-go_memstats_last_gc_time_seconds,gauge,,request,,Number of seconds since 1970 of last garbage collection,0,gitlab,epoch since last gc
-go_memstats_lookups_total,counter,,request,,Total number of pointer lookups,0,gitlab,pointer lookups
-go_memstats_mallocs_total,counter,,request,,Total number of mallocs,0,gitlab,number of mallocs
-go_memstats_mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures,0,gitlab,mcache bytes used
-go_memstats_mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system,0,gitlab,mcache bytes from sys
-go_memstats_mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures,0,gitlab,mspan bytes used
-go_memstats_mspan_sys_bytes,gauge,,byte,,Number of bytes used for mspan structures obtained from system,0,gitlab,mspan bytes from sys
-go_memstats_next_gc_bytes,gauge,,byte,,Number of heap bytes when next garbage collection will take place,0,gitlab,heap bytes next gc
-go_memstats_other_sys_bytes,gauge,,byte,,Number of bytes used for other system allocations,0,gitlab,other bytes used
-go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes in use by the stack allocator,0,gitlab,bytes stack allocator
-go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,gitlab,bytes stack allocator from sys
-go_memstats_sys_bytes,gauge,,byte,,Number of bytes obtained by system. Sum of all system allocations,0,gitlab,sum system allocations
-go_threads,gauge,,request,second,Number of OS threads create,0,gitlab,go threads
-http_request_duration_microseconds,gauge,,request,second,The HTTP request latencies in microseconds,0,gitlab,HTTP req latencies
-http_request_size_bytes,gauge,,byte,,The HTTP request sizes in bytes,0,gitlab,HTTP req sizes
-http_requests_total,counter,,request,second,Total number of HTTP requests made,0,gitlab,total HTTP reqs
-http_response_size_bytes,gauge,,byte,,The HTTP response sizes in bytes,0,gitlab,HTTP resp sizes
-process_cpu_seconds_total,counter,,request,second,Total user and system CPU time spent in seconds,0,gitlab,user and system cpu time
-process_max_fds,gauge,,request,,Maximum number of open file descriptors,0,gitlab,max fds
-process_open_fds,gauge,,request,,Number of open file descriptors,0,gitlab,open fds
-process_resident_memory_bytes,gauge,,byte,,Resident memory size in bytes,0,gitlab,rss bytes
-process_start_time_seconds,gauge,,request,second,Start time of the process since unix epoch in seconds,0,gitlab,epoch time since start
-process_virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes,0,gitlab,virtual memory bytes
-prometheus_build_info,gauge,,request,second,A metric with a constant '1' value labeled by version revision branch and goversion from which prometheus was built,0,gitlab,build info
-prometheus_config_last_reload_success_timestamp_seconds,gauge,,request,second,Timestamp of the last successful configuration reload,0,gitlab,Timestamp successful config reload
-prometheus_config_last_reload_successful,gauge,,request,second,Whether the last configuration reload attempt was successful,0,gitlab,flag successful config reload
-prometheus_engine_queries,gauge,,request,second,The current number of queries being executed or waiting,0,gitlab,current queries
-prometheus_engine_queries_concurrent_max,gauge,,request,second,The max number of concurrent queries,0,gitlab,max concurrent queries
-prometheus_engine_query_duration_seconds,gauge,,request,second,Query timing,0,gitlab,query timing
-prometheus_evaluator_duration_seconds,gauge,,request,second,The duration of rule group evaluations,0,gitlab,duration evaluator
-prometheus_evaluator_iterations_missed_total,counter,,request,second,The total number of rule group evaluations missed due to slow rule group evaluation,0,gitlab,total evaluations missed
-prometheus_evaluator_iterations_skipped_total,counter,,request,second,The total number of rule group evaluations skipped due to throttled metric storage,0,gitlab,total evaluations skipped
-prometheus_evaluator_iterations_total,counter,,request,second,The total number of scheduled rule group evaluations whether executed missed or skipped,0,gitlab,total evaluations scheduled
-prometheus_local_storage_checkpoint_duration_seconds,gauge,,request,second,The duration in seconds taken for checkpointing open chunks and chunks yet to be persisted,0,gitlab,duration checkpointing open chunks
-prometheus_local_storage_checkpoint_last_duration_seconds,gauge,,request,second,The duration in seconds it took to last checkpoint open chunks and chunks yet to be persisted,0,gitlab,duration last checkpoint open chunks
-prometheus_local_storage_checkpoint_last_size_bytes,gauge,,byte,,The size of the last checkpoint of open chunks and chunks yet to be persisted,0,gitlab,size last checkpoint open chunks
-prometheus_local_storage_checkpoint_series_chunks_written,gauge,,request,second,The number of chunk written per series while checkpointing open chunks and chunks yet to be persisted,0,gitlab,checkpoint series chunks written
-prometheus_local_storage_checkpointing,gauge,,request,second,1 if the storage is checkpointing and 0 otherwise,0,gitlab,storage checkpointing flag
-prometheus_local_storage_chunk_ops_total,counter,,request,second,The total number of chunk operations by their type,0,gitlab,chunk ops by type
-prometheus_local_storage_chunks_to_persist,counter,,request,second,The current number of chunks waiting for persistence,0,gitlab,chunks to be persisted
-prometheus_local_storage_fingerprint_mappings_total,counter,,request,second,The total number of fingerprints being mapped to avoid collisions,0,gitlab,fingerprints mapped
-prometheus_local_storage_inconsistencies_total,counter,,request,second,A counter incremented each time an inconsistency in the local storage is detected. If this is greater zero then restart the server as soon as possible,0,gitlab,total storage inconsistencies
-prometheus_local_storage_indexing_batch_duration_seconds,gauge,,request,second,Quantiles for batch indexing duration in seconds,0,gitlab,batch indexing duration quantiles
-prometheus_local_storage_indexing_batch_sizes,gauge,,request,second,Quantiles for indexing batch sizes (number of metrics per batch),0,gitlab,indexing batch sizes quantiles
-prometheus_local_storage_indexing_queue_capacity,gauge,,request,second,The capacity of the indexing queue,0,gitlab,indexing queue capacity
-prometheus_local_storage_indexing_queue_length,gauge,,request,second,The number of metrics waiting to be indexed,0,gitlab,metrics queued for indexing
-prometheus_local_storage_ingested_samples_total,counter,,request,second,The total number of samples ingested,0,gitlab,samples ingested
-prometheus_local_storage_maintain_series_duration_seconds,gauge,,request,second,The duration in seconds it took to perform maintenance on a series,0,gitlab,series maintenance duration
-prometheus_local_storage_memory_chunkdescs,gauge,,request,second,The current number of chunk descriptors in memory,0,gitlab,chunk descriptors in memory
-prometheus_local_storage_memory_chunks,gauge,,request,second,The current number of chunks in memory. The number does not include cloned chunks (i.e. chunks without a descriptor),0,gitlab,chunks in memory
-prometheus_local_storage_memory_dirty_series,gauge,,request,second,The current number of series that would require a disk seek during crash recovery,0,gitlab,memory dirty series
-prometheus_local_storage_memory_series,gauge,,request,second,The current number of series in memory,0,gitlab,series in memory
-prometheus_local_storage_non_existent_series_matches_total,counter,,request,second,How often a non-existent series was referred to during label matching or chunk preloading. This is an indication of outdated label indexes,0,gitlab,total non-existent series matches
-prometheus_local_storage_open_head_chunks,gauge,,request,second,The current number of open head chunks,0,gitlab,open head chunks
-prometheus_local_storage_out_of_order_samples_total,counter,,request,second,The total number of samples that were discarded because their timestamps were at or before the last received sample for a series,0,gitlab,samples out of order
-prometheus_local_storage_persist_errors_total,counter,,request,second,The total number of errors while writing to the persistence layer,0,gitlab,persistence write errors
-prometheus_local_storage_persistence_urgency_score,gauge,,request,second,A score of urgency to persist chunks. 0 is least urgent and 1 most,0,gitlab,chunk persistence urgency score
-prometheus_local_storage_queued_chunks_to_persist_total,counter,,request,second,The total number of chunks queued for persistence,0,gitlab,chunks queued for persistence
-prometheus_local_storage_rushed_mode,gauge,,request,second,1 if the storage is in rushed mode and 0 otherwise,0,gitlab,flag storage in rushed mode
-prometheus_local_storage_series_chunks_persisted,gauge,,request,second,The number of chunks persisted per series,0,gitlab,chunks persisted per series
-prometheus_local_storage_series_ops_total,counter,,request,second,The total number of series operations by their type,0,gitlab,series ops by type
-prometheus_local_storage_started_dirty,gauge,,request,second,Whether the local storage was found to be dirty (and crash recovery occurred) during Prometheus startup,0,gitlab,local storage started dirty
-prometheus_local_storage_target_heap_size_bytes,gauge,,byte,,The configured target heap size in bytes,0,gitlab,target heap size
-prometheus_notifications_alertmanagers_discovered,gauge,,request,second,The number of alertmanagers discovered and active,0,gitlab,alertmanagers active
-prometheus_notifications_dropped_total,counter,,request,second,Total number of alerts dropped due to errors when sending to Alertmanager,0,gitlab,alerts dropped
-prometheus_notifications_queue_capacity,gauge,,request,second,The capacity of the alert notifications queue,0,gitlab,alert notifications capacity
-prometheus_notifications_queue_length,gauge,,request,second,The number of alert notifications in the queue,0,gitlab,alert notifications queued
-prometheus_rule_evaluation_failures_total,gauge,,request,second,The total number of rule evaluation failures,0,gitlab,evaluation failures
-prometheus_sd_azure_refresh_duration_seconds,gauge,,request,second,The duration of a Azure-SD refresh in seconds,0,gitlab,Azure-SD refresh duration
-prometheus_sd_azure_refresh_failures_total,counter,,request,second,Number of Azure-SD refresh failures,0,gitlab,Azure-SD refresh failures
-prometheus_sd_consul_rpc_duration_seconds,gauge,,request,second,The duration of a Consul RPC call in seconds,0,gitlab,Consul RPC call duration
-prometheus_sd_consul_rpc_failures_total,counter,,request,second,The number of Consul RPC call failures,0,gitlab,Consul RPC lookup failures
-prometheus_sd_dns_lookup_failures_total,counter,,request,second,The number of DNS-SD lookup failures,0,gitlab,DNS-SD lookup failures
-prometheus_sd_dns_lookups_total,counter,,request,second,The number of DNS-SD lookups,0,gitlab,DNS-SD lookups
-prometheus_sd_ec2_refresh_duration_seconds,gauge,,request,second,The duration of a EC2-SD refresh in seconds,0,gitlab,EC2-SD refresh duration
-prometheus_sd_ec2_refresh_failures_total,counter,,request,second,The number of EC2-SD scrape failures,0,gitlab,EC2-SD scrape failures
-prometheus_sd_file_read_errors_total,counter,,request,second,The number of File-SD read errors,0,gitlab,File-SD read errors
-prometheus_sd_file_scan_duration_seconds,gauge,,request,second,The duration of the File-SD scan in seconds,0,gitlab,File-SD scan duration
-prometheus_sd_gce_refresh_duration,gauge,,request,second,The duration of a GCE-SD refresh in seconds,0,gitlab,GCE-SD refresh duration
-prometheus_sd_gce_refresh_failures_total,counter,,request,second,The number of GCE-SD refresh failures,0,gitlab,GCE-SD refresh failures
-prometheus_sd_kubernetes_events_total,counter,,request,second,The number of Kubernetes events handled,0,gitlab,K8s events handled
-prometheus_sd_marathon_refresh_duration_seconds,gauge,,request,second,The duration of a Marathon-SD refresh in seconds,0,gitlab,Marathon-SD refresh duration
-prometheus_sd_marathon_refresh_failures_total,counter,,request,second,The number of Marathon-SD refresh failures,0,gitlab,Marathon-SD refresh failures
-prometheus_sd_openstack_refresh_duration_seconds,gauge,,request,second,The duration of an OpenStack-SD refresh in seconds,0,gitlab,OpenStack-SD refresh duration
-prometheus_sd_openstack_refresh_failures_total,counter,,request,second,The number of OpenStack-SD scrape failures,0,gitlab,OpenStack-SD scrape failures
-prometheus_sd_triton_refresh_duration_seconds,gauge,,request,second,The duration of a Triton-SD refresh in seconds,0,gitlab,Triton-SD refresh duration
-prometheus_sd_triton_refresh_failures_total,counter,,request,second,The number of Triton-SD scrape failures,0,gitlab,Triton-SD scrape failures
-prometheus_target_interval_length_seconds,gauge,,request,second,Actual intervals between scrapes,0,gitlab,interval between scrapes
-prometheus_target_scrape_pool_sync_total,counter,,request,second,Total number of syncs that were executed on a scrape pool,0,gitlab,total syncs on scrape pool
-prometheus_target_scrapes_exceeded_sample_limit_total,gauge,,request,second,Total number of scrapes that hit the sample limit and were rejected,0,gitlab,total scrapes rejected
-prometheus_target_skipped_scrapes_total,counter,,request,second,Total number of scrapes that were skipped because the metric storage was throttled,0,gitlab,total scrapes skipped
-prometheus_target_sync_length_seconds,gauge,,request,second,Actual interval to sync the scrape pool,0,gitlab,scrape pool sync interval
-prometheus_treecache_watcher_goroutines,gauge,,request,second,The current number of watcher goroutines,0,gitlab,watcher goroutines
-prometheus_treecache_zookeeper_failures_total,counter,,request,second,The total number of ZooKeeper failures,0,gitlab,total Zookeeper failures
+gitlab.go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab,gc duration
+gitlab.go_gc_duration_seconds_sum,gauge,,request,second,Sum of the GC invocation durations,0,gitlab,sum gc duration
+gitlab.go_gc_duration_seconds_count,gauge,,request,second,Count of the GC invocation durations,0,gitlab,count gc duration
+gitlab.go_goroutines,gauge,,request,second,Number of goroutines that currently exist,0,gitlab,goroutines
+gitlab.go_memstats_alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use,0,gitlab,bytes allocated in use
+gitlab.go_memstats_alloc_bytes_total,counter,,byte,,Total number of bytes allocated,0,gitlab,bytes allocated
+gitlab.go_memstats_buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table,0,gitlab,bytes profiling bucket
+gitlab.go_memstats_frees_total,counter,,request,,Total number of frees,0,gitlab,number of frees
+gitlab.go_memstats_gc_cpu_fraction,gauge,,request,second,The fraction of this program's available CPU time used by the GC since the program started,0,gitlab,GC cpu fraction
+gitlab.go_memstats_gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata,0,gitlab,bytes garbage collection
+gitlab.go_memstats_heap_alloc_bytes,gauge,,byte,,Number of heap bytes allocated and still in use,0,gitlab,heap bytes allocated and in use
+gitlab.go_memstats_heap_idle_bytes,gauge,,byte,,Number of heap bytes waiting to be used,0,gitlab,heap bytes unused
+gitlab.go_memstats_heap_inuse_bytes,gauge,,byte,,Number of heap bytes that are in use,0,gitlab,heap bytes in use
+gitlab.go_memstats_heap_objects,gauge,,request,,Number of allocated objects,0,gitlab,allocated objects
+gitlab.go_memstats_heap_released_bytes_total,counter,,byte,,Total number of heap bytes released to OS,0,gitlab,heap bytes released
+gitlab.go_memstats_heap_sys_bytes,gauge,,byte,,Number of heap bytes obtained from system,0,gitlab,heap bytes obtained
+gitlab.go_memstats_last_gc_time_seconds,gauge,,request,,Number of seconds since 1970 of last garbage collection,0,gitlab,epoch since last gc
+gitlab.go_memstats_lookups_total,counter,,request,,Total number of pointer lookups,0,gitlab,pointer lookups
+gitlab.go_memstats_mallocs_total,counter,,request,,Total number of mallocs,0,gitlab,number of mallocs
+gitlab.go_memstats_mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures,0,gitlab,mcache bytes used
+gitlab.go_memstats_mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system,0,gitlab,mcache bytes from sys
+gitlab.go_memstats_mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures,0,gitlab,mspan bytes used
+gitlab.go_memstats_mspan_sys_bytes,gauge,,byte,,Number of bytes used for mspan structures obtained from system,0,gitlab,mspan bytes from sys
+gitlab.go_memstats_next_gc_bytes,gauge,,byte,,Number of heap bytes when next garbage collection will take place,0,gitlab,heap bytes next gc
+gitlab.go_memstats_other_sys_bytes,gauge,,byte,,Number of bytes used for other system allocations,0,gitlab,other bytes used
+gitlab.go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes in use by the stack allocator,0,gitlab,bytes stack allocator
+gitlab.go_memstats_stack_sys_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,gitlab,bytes stack allocator from sys
+gitlab.go_memstats_sys_bytes,gauge,,byte,,Number of bytes obtained by system. Sum of all system allocations,0,gitlab,sum system allocations
+gitlab.go_threads,gauge,,request,second,Number of OS threads create,0,gitlab,go threads
+gitlab.http_request_duration_microseconds,gauge,,request,second,The HTTP request latencies in microseconds,0,gitlab,HTTP req latencies
+gitlab.http_request_size_bytes,gauge,,byte,,The HTTP request sizes in bytes,0,gitlab,HTTP req sizes
+gitlab.http_requests_total,counter,,request,second,Total number of HTTP requests made,0,gitlab,total HTTP reqs
+gitlab.http_response_size_bytes,gauge,,byte,,The HTTP response sizes in bytes,0,gitlab,HTTP resp sizes
+gitlab.process_cpu_seconds_total,counter,,request,second,Total user and system CPU time spent in seconds,0,gitlab,user and system cpu time
+gitlab.process_max_fds,gauge,,request,,Maximum number of open file descriptors,0,gitlab,max fds
+gitlab.process_open_fds,gauge,,request,,Number of open file descriptors,0,gitlab,open fds
+gitlab.process_resident_memory_bytes,gauge,,byte,,Resident memory size in bytes,0,gitlab,rss bytes
+gitlab.process_start_time_seconds,gauge,,request,second,Start time of the process since unix epoch in seconds,0,gitlab,epoch time since start
+gitlab.process_virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes,0,gitlab,virtual memory bytes
+gitlab.prometheus_build_info,gauge,,request,second,A metric with a constant '1' value labeled by version revision branch and goversion from which prometheus was built,0,gitlab,build info
+gitlab.prometheus_config_last_reload_success_timestamp_seconds,gauge,,request,second,Timestamp of the last successful configuration reload,0,gitlab,Timestamp successful config reload
+gitlab.prometheus_config_last_reload_successful,gauge,,request,second,Whether the last configuration reload attempt was successful,0,gitlab,flag successful config reload
+gitlab.prometheus_engine_queries,gauge,,request,second,The current number of queries being executed or waiting,0,gitlab,current queries
+gitlab.prometheus_engine_queries_concurrent_max,gauge,,request,second,The max number of concurrent queries,0,gitlab,max concurrent queries
+gitlab.prometheus_engine_query_duration_seconds,gauge,,request,second,Query timing,0,gitlab,query timing
+gitlab.prometheus_evaluator_duration_seconds,gauge,,request,second,The duration of rule group evaluations,0,gitlab,duration evaluator
+gitlab.prometheus_evaluator_iterations_missed_total,counter,,request,second,The total number of rule group evaluations missed due to slow rule group evaluation,0,gitlab,total evaluations missed
+gitlab.prometheus_evaluator_iterations_skipped_total,counter,,request,second,The total number of rule group evaluations skipped due to throttled metric storage,0,gitlab,total evaluations skipped
+gitlab.prometheus_evaluator_iterations_total,counter,,request,second,The total number of scheduled rule group evaluations whether executed missed or skipped,0,gitlab,total evaluations scheduled
+gitlab.prometheus_local_storage_checkpoint_duration_seconds,gauge,,request,second,The duration in seconds taken for checkpointing open chunks and chunks yet to be persisted,0,gitlab,duration checkpointing open chunks
+gitlab.prometheus_local_storage_checkpoint_last_duration_seconds,gauge,,request,second,The duration in seconds it took to last checkpoint open chunks and chunks yet to be persisted,0,gitlab,duration last checkpoint open chunks
+gitlab.prometheus_local_storage_checkpoint_last_size_bytes,gauge,,byte,,The size of the last checkpoint of open chunks and chunks yet to be persisted,0,gitlab,size last checkpoint open chunks
+gitlab.prometheus_local_storage_checkpoint_series_chunks_written,gauge,,request,second,The number of chunk written per series while checkpointing open chunks and chunks yet to be persisted,0,gitlab,checkpoint series chunks written
+gitlab.prometheus_local_storage_checkpointing,gauge,,request,second,1 if the storage is checkpointing and 0 otherwise,0,gitlab,storage checkpointing flag
+gitlab.prometheus_local_storage_chunk_ops_total,counter,,request,second,The total number of chunk operations by their type,0,gitlab,chunk ops by type
+gitlab.prometheus_local_storage_chunks_to_persist,counter,,request,second,The current number of chunks waiting for persistence,0,gitlab,chunks to be persisted
+gitlab.prometheus_local_storage_fingerprint_mappings_total,counter,,request,second,The total number of fingerprints being mapped to avoid collisions,0,gitlab,fingerprints mapped
+gitlab.prometheus_local_storage_inconsistencies_total,counter,,request,second,A counter incremented each time an inconsistency in the local storage is detected. If this is greater zero then restart the server as soon as possible,0,gitlab,total storage inconsistencies
+gitlab.prometheus_local_storage_indexing_batch_duration_seconds,gauge,,request,second,Quantiles for batch indexing duration in seconds,0,gitlab,batch indexing duration quantiles
+gitlab.prometheus_local_storage_indexing_batch_sizes,gauge,,request,second,Quantiles for indexing batch sizes (number of metrics per batch),0,gitlab,indexing batch sizes quantiles
+gitlab.prometheus_local_storage_indexing_queue_capacity,gauge,,request,second,The capacity of the indexing queue,0,gitlab,indexing queue capacity
+gitlab.prometheus_local_storage_indexing_queue_length,gauge,,request,second,The number of metrics waiting to be indexed,0,gitlab,metrics queued for indexing
+gitlab.prometheus_local_storage_ingested_samples_total,counter,,request,second,The total number of samples ingested,0,gitlab,samples ingested
+gitlab.prometheus_local_storage_maintain_series_duration_seconds,gauge,,request,second,The duration in seconds it took to perform maintenance on a series,0,gitlab,series maintenance duration
+gitlab.prometheus_local_storage_memory_chunkdescs,gauge,,request,second,The current number of chunk descriptors in memory,0,gitlab,chunk descriptors in memory
+gitlab.prometheus_local_storage_memory_chunks,gauge,,request,second,The current number of chunks in memory. The number does not include cloned chunks (i.e. chunks without a descriptor),0,gitlab,chunks in memory
+gitlab.prometheus_local_storage_memory_dirty_series,gauge,,request,second,The current number of series that would require a disk seek during crash recovery,0,gitlab,memory dirty series
+gitlab.prometheus_local_storage_memory_series,gauge,,request,second,The current number of series in memory,0,gitlab,series in memory
+gitlab.prometheus_local_storage_non_existent_series_matches_total,counter,,request,second,How often a non-existent series was referred to during label matching or chunk preloading. This is an indication of outdated label indexes,0,gitlab,total non-existent series matches
+gitlab.prometheus_local_storage_open_head_chunks,gauge,,request,second,The current number of open head chunks,0,gitlab,open head chunks
+gitlab.prometheus_local_storage_out_of_order_samples_total,counter,,request,second,The total number of samples that were discarded because their timestamps were at or before the last received sample for a series,0,gitlab,samples out of order
+gitlab.prometheus_local_storage_persist_errors_total,counter,,request,second,The total number of errors while writing to the persistence layer,0,gitlab,persistence write errors
+gitlab.prometheus_local_storage_persistence_urgency_score,gauge,,request,second,A score of urgency to persist chunks. 0 is least urgent and 1 most,0,gitlab,chunk persistence urgency score
+gitlab.prometheus_local_storage_queued_chunks_to_persist_total,counter,,request,second,The total number of chunks queued for persistence,0,gitlab,chunks queued for persistence
+gitlab.prometheus_local_storage_rushed_mode,gauge,,request,second,1 if the storage is in rushed mode and 0 otherwise,0,gitlab,flag storage in rushed mode
+gitlab.prometheus_local_storage_series_chunks_persisted,gauge,,request,second,The number of chunks persisted per series,0,gitlab,chunks persisted per series
+gitlab.prometheus_local_storage_series_ops_total,counter,,request,second,The total number of series operations by their type,0,gitlab,series ops by type
+gitlab.prometheus_local_storage_started_dirty,gauge,,request,second,Whether the local storage was found to be dirty (and crash recovery occurred) during Prometheus startup,0,gitlab,local storage started dirty
+gitlab.prometheus_local_storage_target_heap_size_bytes,gauge,,byte,,The configured target heap size in bytes,0,gitlab,target heap size
+gitlab.prometheus_notifications_alertmanagers_discovered,gauge,,request,second,The number of alertmanagers discovered and active,0,gitlab,alertmanagers active
+gitlab.prometheus_notifications_dropped_total,counter,,request,second,Total number of alerts dropped due to errors when sending to Alertmanager,0,gitlab,alerts dropped
+gitlab.prometheus_notifications_queue_capacity,gauge,,request,second,The capacity of the alert notifications queue,0,gitlab,alert notifications capacity
+gitlab.prometheus_notifications_queue_length,gauge,,request,second,The number of alert notifications in the queue,0,gitlab,alert notifications queued
+gitlab.prometheus_rule_evaluation_failures_total,gauge,,request,second,The total number of rule evaluation failures,0,gitlab,evaluation failures
+gitlab.prometheus_sd_azure_refresh_duration_seconds,gauge,,request,second,The duration of a Azure-SD refresh in seconds,0,gitlab,Azure-SD refresh duration
+gitlab.prometheus_sd_azure_refresh_failures_total,counter,,request,second,Number of Azure-SD refresh failures,0,gitlab,Azure-SD refresh failures
+gitlab.prometheus_sd_consul_rpc_duration_seconds,gauge,,request,second,The duration of a Consul RPC call in seconds,0,gitlab,Consul RPC call duration
+gitlab.prometheus_sd_consul_rpc_failures_total,counter,,request,second,The number of Consul RPC call failures,0,gitlab,Consul RPC lookup failures
+gitlab.prometheus_sd_dns_lookup_failures_total,counter,,request,second,The number of DNS-SD lookup failures,0,gitlab,DNS-SD lookup failures
+gitlab.prometheus_sd_dns_lookups_total,counter,,request,second,The number of DNS-SD lookups,0,gitlab,DNS-SD lookups
+gitlab.prometheus_sd_ec2_refresh_duration_seconds,gauge,,request,second,The duration of a EC2-SD refresh in seconds,0,gitlab,EC2-SD refresh duration
+gitlab.prometheus_sd_ec2_refresh_failures_total,counter,,request,second,The number of EC2-SD scrape failures,0,gitlab,EC2-SD scrape failures
+gitlab.prometheus_sd_file_read_errors_total,counter,,request,second,The number of File-SD read errors,0,gitlab,File-SD read errors
+gitlab.prometheus_sd_file_scan_duration_seconds,gauge,,request,second,The duration of the File-SD scan in seconds,0,gitlab,File-SD scan duration
+gitlab.prometheus_sd_gce_refresh_duration,gauge,,request,second,The duration of a GCE-SD refresh in seconds,0,gitlab,GCE-SD refresh duration
+gitlab.prometheus_sd_gce_refresh_failures_total,counter,,request,second,The number of GCE-SD refresh failures,0,gitlab,GCE-SD refresh failures
+gitlab.prometheus_sd_kubernetes_events_total,counter,,request,second,The number of Kubernetes events handled,0,gitlab,K8s events handled
+gitlab.prometheus_sd_marathon_refresh_duration_seconds,gauge,,request,second,The duration of a Marathon-SD refresh in seconds,0,gitlab,Marathon-SD refresh duration
+gitlab.prometheus_sd_marathon_refresh_failures_total,counter,,request,second,The number of Marathon-SD refresh failures,0,gitlab,Marathon-SD refresh failures
+gitlab.prometheus_sd_openstack_refresh_duration_seconds,gauge,,request,second,The duration of an OpenStack-SD refresh in seconds,0,gitlab,OpenStack-SD refresh duration
+gitlab.prometheus_sd_openstack_refresh_failures_total,counter,,request,second,The number of OpenStack-SD scrape failures,0,gitlab,OpenStack-SD scrape failures
+gitlab.prometheus_sd_triton_refresh_duration_seconds,gauge,,request,second,The duration of a Triton-SD refresh in seconds,0,gitlab,Triton-SD refresh duration
+gitlab.prometheus_sd_triton_refresh_failures_total,counter,,request,second,The number of Triton-SD scrape failures,0,gitlab,Triton-SD scrape failures
+gitlab.prometheus_target_interval_length_seconds,gauge,,request,second,Actual intervals between scrapes,0,gitlab,interval between scrapes
+gitlab.prometheus_target_scrape_pool_sync_total,counter,,request,second,Total number of syncs that were executed on a scrape pool,0,gitlab,total syncs on scrape pool
+gitlab.prometheus_target_scrapes_exceeded_sample_limit_total,gauge,,request,second,Total number of scrapes that hit the sample limit and were rejected,0,gitlab,total scrapes rejected
+gitlab.prometheus_target_skipped_scrapes_total,counter,,request,second,Total number of scrapes that were skipped because the metric storage was throttled,0,gitlab,total scrapes skipped
+gitlab.prometheus_target_sync_length_seconds,gauge,,request,second,Actual interval to sync the scrape pool,0,gitlab,scrape pool sync interval
+gitlab.prometheus_treecache_watcher_goroutines,gauge,,request,second,The current number of watcher goroutines,0,gitlab,watcher goroutines
+gitlab.prometheus_treecache_zookeeper_failures_total,counter,,request,second,The total number of ZooKeeper failures,0,gitlab,total Zookeeper failures

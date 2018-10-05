@@ -12,7 +12,7 @@ Get metrics from Btrfs service in real time to:
 ## Setup
 ### Installation
 
-The Btrfs check is included in the [Datadog Agent][4] package, so you don't need to install anything else on your servers that use at least one Btrfs filesystem.
+The Btrfs check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers that use at least one Btrfs filesystem.
 
 ### Configuration
 

@@ -1,7 +1,9 @@
+ddtrace==0.13.0
 prometheus-client==0.3.0
-requests==2.19.1
 protobuf==3.5.1
+pywin32==224; sys_platform == 'win32'
+requests==2.19.1
 simplejson==3.6.5
+six==1.11.0
 uptime==3.0.1
 uuid==1.30
-six==1.11.0

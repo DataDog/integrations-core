@@ -9,7 +9,7 @@ from os import path
 HERE = path.abspath(path.dirname(__file__))
 
 ABOUT = {}
-with open(path.join(HERE, "datadog_checks", "__about__.py")) as f:
+with open(path.join(HERE, "datadog_checks", "base", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -18,7 +18,6 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     LONG_DESC = f.read()
 
 
-# Parse requirements
 def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()

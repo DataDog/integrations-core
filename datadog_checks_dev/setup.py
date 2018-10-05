@@ -23,6 +23,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 
 
 REQUIRES = [
+    'coverage>=4.5.1',
     'mock',
     'pytest',
     'pytest-benchmark',
@@ -71,7 +72,9 @@ setup(
             'click',
             'colorama',
             'docker-compose>=1.21.2',
+            'in-toto>=0.2.3.dev5',
             'pip-tools',
+            'pyperclip>=1.6.4',
             'requests<2.19.0',
             'semver',
             'setuptools>=38.6.0',

@@ -12,7 +12,7 @@ import re
 import requests
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 DEFAULT_MAX_METRICS = 350
 PATH = "path"
@@ -59,6 +59,7 @@ DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT
 
 GO_EXPVAR_URL_PATH = "/debug/vars"
 
+
 class GoExpvar(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -76,7 +77,8 @@ class GoExpvar(AgentCheck):
                 del ssl_params[key]
 
         # Load SSL configuration, if available.
-        # ssl_verify can be a bool or a string (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
+        # ssl_verify can be a bool or a string
+        # (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
         if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), basestring):
             verify = ssl_params.get('ssl_verify')
         else:
@@ -108,7 +110,10 @@ class GoExpvar(AgentCheck):
             url = parsed_url._replace(path=GO_EXPVAR_URL_PATH).geturl()
 
         tags = instance.get('tags', [])
-        tags.append("expvar_url:%s" % url)
+        expvar_url_tag = "expvar_url:%s" % url
+        if expvar_url_tag not in tags:
+            tags.append(expvar_url_tag)
+
         data = self._get_data(url, instance)
         metrics = DEFAULT_METRICS + instance.get("metrics", [])
         max_metrics = instance.get("max_returned_metrics", DEFAULT_MAX_METRICS)
@@ -210,9 +215,15 @@ class GoExpvar(AgentCheck):
                                           ]
                             }
                         }
-                  -keys: ["key1", "key2", "1", "value"] would return [(["key1", "key2", "1", "value"], 72)]
-                  -keys: ["key1", "key2", "1", "*"] would return [(["key1", "key2", "1", "value"], 72), (["key1", "key2", "1", "name"], "object2")]
-                  -keys: ["key1", "key2", "*", "value"] would return [(["key1", "key2", "1", "value"], 72), (["key1", "key2", "0", "value"], 42)]
+                  -keys: ["key1", "key2", "1", "value"]
+                    would return:
+                        [(["key1", "key2", "1", "value"], 72)]
+                  -keys: ["key1", "key2", "1", "*"]
+                    would return:
+                        [(["key1", "key2", "1", "value"], 72), (["key1", "key2", "1", "name"], "object2")]
+                  -keys: ["key1", "key2", "*", "value"]
+                    would return:
+                        [(["key1", "key2", "1", "value"], 72), (["key1", "key2", "0", "value"], 42)]
         '''
 
         if traversed_path is None:

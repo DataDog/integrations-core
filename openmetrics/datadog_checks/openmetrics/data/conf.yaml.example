@@ -1,0 +1,109 @@
+init_config:
+
+instances:
+  ## @param prometheus_url - string -required
+  ## The Prometheus endpoint to query.
+  #
+  - prometheus_url: http://service/prometheus
+
+  ## @param namespace - string - required
+  ## The namespace to be prepended to all metrics.
+  #
+    namespace: "service"
+
+  ## @param metrics - list of strings - required
+  ## List of metrics to be fetched from the prometheus endpoint, if there's a 
+  ## value it'll be renamed. This list should contain at least one metric
+  #
+    metrics:
+      - processor: cpu
+      - memory: mem
+      - io
+
+  ## @param prometheus_metrics_prefix - string - optional
+  ## <PREFIX> for exposed Prometheus metrics.
+  #
+  #  prometheus_metrics_prefix: <PREFIX>_
+
+  ## @param health_service_check - boolean - optional - default: true
+  ## Send a service check reporting about the health of the prometheus endpoint
+  ## It's named <NAMESPACE>.prometheus.health
+  #
+  #  health_service_check: true
+
+  ## @param label_to_hostname - string - optional  
+  ## Override the hostname with the value of one label.
+  #
+  #  label_to_hostname: node
+
+  ## @param label_joins - custom - optional
+  ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping
+  #
+  #  label_joins:
+  #    target_metric:
+  #      label_to_match: <MATCHED_LABEL>
+  #      labels_to_get:
+  #        - <EXTRA_LABEL_1>
+  #        - <EXTRA_LABEL_2>
+
+  ## @param labels_mapper - list of key:value elements - optional 
+  ## The label mapper allows you to rename labels.
+  #
+  #  labels_mapper:
+  #    flavor: origin
+
+  ## @param type_overrides - list of key:value elements - optional
+  ## Type override allows you to override a type in the prometheus the payload
+  ## or type an untyped metrics (they're ignored by default)
+  ## Supported <METRIC_TYPE> are `gauge`, `count`, `rate`
+  #
+  #  type_overrides:
+  #    <METRIC_NAME>: <METRIC_TYPE>
+
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+  ## @param send_histograms_buckets - boolean - optional - default: false
+  ## Set send_histograms_buckets to true to send the histograms bucket.
+  #
+  #  send_histograms_buckets: false
+
+  ## @param send_monotonic_counter - boolean - optional - default: false
+  ## Set send_monotonic_counter to true to send counters as monotonic counter.
+  #
+  #  send_monotonic_counter: false
+
+  ## @param exclude_labels - list of strings - optional
+  ## List of label to be excluded
+  #
+  #  exclude_labels:
+  #    - timestamp
+
+  ## @param prometheus_timeout - integer - optional - default: 10
+  ## Set a timeout for the prometheus query.
+  #
+  #  prometheus_timeout: 10
+
+  ## @param ssl_cert - string - optional
+  ## If your prometheus endpoint is secured, enter the path to the certificate and 
+  ## you should specify the private key in ssl_private_key parameter
+  ## or it can be the path to a file containing both the certificate & the private key
+  #
+  #  ssl_cert: "<CERT_PATH>"
+
+  ## @param ssl_private_key - string - optional
+  ## Needed if the certificate linked in ssl_cert does not include the private key.
+  ## Note: The private key to your local certificate must be unencrypted.
+  # 
+  #  ssl_private_key: "<KEY_PATH>"
+
+  ## @param ssl_ca_cert - string - optional 
+  ## The path to the trusted CA used for generating custom certificates.
+  #
+  #  ssl_ca_cert: "<CA_CERT_PATH>"

@@ -4,18 +4,15 @@
 import socket
 import threading
 import re
+from contextlib import closing
 
+import pg8000
+from six.moves import zip_longest
 try:
     import psycopg2
 except ImportError:
     psycopg2 = None
-import pg8000
 
-try:
-    # this module is only available in agent 6
-    import datadog_agent
-except ImportError:
-    datadog_agent = None
 from datadog_checks.checks import AgentCheck
 from datadog_checks.errors import CheckException
 from datadog_checks.config import _is_affirmative
@@ -32,10 +29,6 @@ def psycopg2_connect(*args, **kwargs):
         kwargs['host'] = kwargs['unix_sock']
         del kwargs['unix_sock']
     return psycopg2.connect(*args, **kwargs)
-
-
-def add_instance_tags_to_server_metrics():
-    return datadog_agent is None
 
 
 class ShouldRestartException(Exception):
@@ -311,6 +304,47 @@ SELECT s.schemaname,
         'relation': False
     }
 
+    # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
+    ACTIVITY_METRICS_9_2 = [
+        "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
+        "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
+    ]
+
+    # The metrics we retrieve from pg_stat_activity when the postgres version >= 8.3
+    ACTIVITY_METRICS_8_3 = [
+        "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
+        "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
+    ]
+
+    # The metrics we retrieve from pg_stat_activity when the postgres version < 8.3
+    ACTIVITY_METRICS_LT_8_3 = [
+        "SUM(CASE WHEN query_start IS NOT NULL THEN 1 ELSE 0 END)",
+        "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
+    ]
+
+    # The metrics we collect from pg_stat_activity that we zip with one of the lists above
+    ACTIVITY_DD_METRICS = [
+        ('postgresql.transactions.open', GAUGE),
+        ('postgresql.transactions.idle_in_transaction', GAUGE),
+    ]
+
+    # The base query for postgres version >= 10
+    ACTIVITY_QUERY_10 = """
+SELECT datname,
+    %s
+FROM pg_stat_activity
+WHERE backend_type = 'client backend'
+GROUP BY datid, datname
+"""
+
+    # The base query for postgres version < 10
+    ACTIVITY_QUERY_LT_10 = """
+SELECT datname,
+    %s
+FROM pg_stat_activity
+GROUP BY datid, datname
+"""
+
     # keep track of host/port present in any configured instance
     _known_servers = set()
     _known_servers_lock = threading.RLock()
@@ -325,7 +359,13 @@ SELECT s.schemaname,
         self.db_bgw_metrics = []
         self.db_archiver_metrics = []
         self.replication_metrics = {}
+        self.activity_metrics = {}
         self.custom_metrics = {}
+
+        # Deprecate custom_metrics in favor of custom_queries
+        if instances is not None and any(['custom_metrics' in instance for instance in instances]):
+            self.warning("DEPRECATION NOTICE: Please use the new custom_queries option "
+                         "rather than the now deprecated custom_metrics")
 
     def _server_known(self, host, port):
         """
@@ -355,20 +395,21 @@ SELECT s.schemaname,
         if key not in self.versions:
             cursor = db.cursor()
             cursor.execute('SHOW SERVER_VERSION;')
-            result = cursor.fetchone()
+            version = cursor.fetchone()[0]
             try:
-                version = map(int, result[0].split(' ')[0].split('.'))
+                version_parts = version.split(' ')[0].split('.')
+                version = [int(part) for part in version_parts]
             except Exception:
                 # Postgres might be in beta, with format \d+beta\d+
-                version = list(re.match('(\d+)(beta)(\d+)', result[0]).groups())
+                match = re.match('(\d+)(beta)(\d+)', version)
+                if match:
+                    version_parts = list(match.groups())
 
-                # We found a valid beta version
-                if len(version) == 3:
-                    # Replace beta with a negative number to properly compare versions
-                    version[1] = -1
-                    version = map(int, version)
-                else:
-                    version = result[0]
+                    # We found a valid beta version
+                    if len(version_parts) == 3:
+                        # Replace `beta` with a negative number to properly compare versions
+                        version_parts[1] = -1
+                        version = [int(part) for part in version_parts]
 
             self.versions[key] = version
 
@@ -378,9 +419,20 @@ SELECT s.schemaname,
     def _is_above(self, key, db, version_to_compare):
         version = self._get_version(key, db)
         if type(version) == list:
-            return version >= version_to_compare
+            # iterate from major down to bugfix
+            for v, vc in zip_longest(version, version_to_compare, fillvalue=0):
+                if v == vc:
+                    continue
+
+                return v > vc
+
+            # return True if version is the same
+            return True
 
         return False
+
+    def _is_8_3_or_above(self, key, db):
+        return self._is_above(key, db, [8, 3, 0])
 
     def _is_9_1_or_above(self, key, db):
         return self._is_above(key, db, [9, 1, 0])
@@ -444,7 +496,8 @@ SELECT s.schemaname,
             'query': "SELECT datname, %s "
             "FROM pg_stat_database "
             "WHERE datname not ilike 'template%%' "
-            "  AND datname not ilike 'rdsadmin' ",
+            "  AND datname not ilike 'rdsadmin' "
+            "  AND datname not ilike 'azure_maintenance' ",
             'relation': False,
         }
 
@@ -526,8 +579,9 @@ SELECT s.schemaname,
         }
 
     def _get_replication_metrics(self, key, db):
-        """ Use either REPLICATION_METRICS_9_1 or REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2
-        depending on the postgres version.
+        """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
+        REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
+        postgres version.
         Uses a dictionnary to save the result for each instance
         """
         metrics = self.replication_metrics.get(key)
@@ -540,6 +594,38 @@ SELECT s.schemaname,
                 self.replication_metrics[key].update(self.REPLICATION_METRICS_9_2)
             metrics = self.replication_metrics.get(key)
         return metrics
+
+    def _get_activity_metrics(self, key, db):
+        """ Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
+        depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
+        Uses a dictionnary to save the result for each instance
+        """
+        metrics_data = self.activity_metrics.get(key)
+        metrics = None
+        query = None
+        if metrics_data is None:
+            query = self.ACTIVITY_QUERY_10 if self._is_10_or_above(key, db) else self.ACTIVITY_QUERY_LT_10
+            metrics_query = None
+            if self._is_9_2_or_above(key, db):
+                metrics_query = self.ACTIVITY_METRICS_9_2
+            elif self._is_8_3_or_above(key, db):
+                metrics_query = self.ACTIVITY_METRICS_8_3
+            else:
+                metrics_query = self.ACTIVITY_METRICS_LT_8_3
+
+            metrics = {k: v for k, v in zip(metrics_query, self.ACTIVITY_DD_METRICS)}
+            self.activity_metrics[key] = (metrics, query)
+        else:
+            metrics, query = metrics_data
+
+        return {
+            'descriptors': [
+                ('datname', 'db'),
+            ],
+            'metrics': metrics,
+            'query': query,
+            'relation': False
+        }
 
     def _build_relations_config(self, yamlconfig):
         """Builds a dictionary from relations configuration while maintaining compatibility
@@ -649,15 +735,16 @@ SELECT s.schemaname,
 
         return len(results)
 
-    def _collect_stats(self, key, db, instance_tags, relations, custom_metrics, function_metrics, count_metrics,
-                       database_size_metrics, collect_default_db, interface_error, programming_error):
+    def _collect_stats(self, key, db, instance_tags, relations, custom_metrics, collect_function_metrics,
+                       collect_count_metrics, collect_activity_metrics, collect_database_size_metrics,
+                       collect_default_db, interface_error, programming_error):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
 
-        db_instance_metrics = self._get_instance_metrics(key, db, database_size_metrics, collect_default_db)
+        db_instance_metrics = self._get_instance_metrics(key, db, collect_database_size_metrics, collect_default_db)
         bgw_instance_metrics = self._get_bgw_metrics(key, db)
         archiver_instance_metrics = self._get_archiver_metrics(key, db)
 
@@ -666,10 +753,11 @@ SELECT s.schemaname,
             self.LOCK_METRICS,
         ]
 
-        if function_metrics:
+        if collect_function_metrics:
             metric_scope.append(self.FUNCTION_METRICS)
-        if count_metrics:
+        if collect_count_metrics:
             metric_scope.append(self.COUNT_METRICS)
+
         # Do we need relation-specific metrics?
         relations_config = {}
         if relations:
@@ -700,15 +788,17 @@ SELECT s.schemaname,
             self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, relations,
                               False, programming_error, relations_config)
 
+            if collect_activity_metrics:
+                activity_metrics = self._get_activity_metrics(key, db)
+                self._query_scope(cursor, activity_metrics, key, db, instance_tags, relations,
+                                  False, programming_error, relations_config)
+
             for scope in list(metric_scope) + custom_metrics:
                 self._query_scope(cursor, scope, key, db, instance_tags, relations,
                                   scope in custom_metrics, programming_error, relations_config)
 
             cursor.close()
-        except interface_error as e:
-            self.log.error("Connection error: %s" % str(e))
-            raise ShouldRestartException
-        except socket.error as e:
+        except (interface_error, socket.error) as e:
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
 
@@ -757,6 +847,107 @@ SELECT s.schemaname,
         self.dbs[key] = connection
         return connection
 
+    def _get_custom_queries(self, db, tags, custom_queries, programming_error):
+        """
+        Given a list of custom_queries, execute each query and parse the result for metrics
+        """
+        cursor = db.cursor()
+
+        for custom_query in custom_queries:
+            metric_prefix = custom_query.get('metric_prefix')
+            if not metric_prefix:
+                self.log.error("custom query field `metric_prefix` is required")
+                continue
+            metric_prefix = metric_prefix.rstrip('.')
+
+            query = custom_query.get('query')
+            if not query:
+                self.log.error(
+                    "custom query field `query` is required for metric_prefix `{}`".format(metric_prefix)
+                )
+                continue
+
+            columns = custom_query.get('columns')
+            if not columns:
+                self.log.error(
+                    "custom query field `columns` is required for metric_prefix `{}`".format(metric_prefix)
+                )
+                continue
+
+            with closing(cursor) as cursor:
+                try:
+                    self.log.debug("Running query: {}".format(query))
+                    cursor.execute(query)
+                    row = cursor.fetchone()
+                except programming_error as e:
+                    self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
+                    db.rollback()
+                    continue
+
+                if not row:
+                    self.log.debug("query result for metric_prefix {}: returned an empty result".format(metric_prefix))
+                    continue
+
+                if len(columns) != len(row):
+                    self.log.error(
+                        "query result for metric_prefix {}: expected {} columns, got {}".format(
+                            metric_prefix, len(columns), len(row)
+                        )
+                    )
+                    continue
+
+                metric_info = []
+                query_tags = custom_query.get('tags', [])
+                query_tags.extend(tags)
+
+                for column, value in zip(columns, row):
+                    # Columns can be ignored via configuration.
+                    if not column:
+                        continue
+
+                    name = column.get('name')
+                    if not name:
+                        self.log.error(
+                            "column field `name` is required for metric_prefix `{}`".format(metric_prefix)
+                        )
+                        break
+
+                    column_type = column.get('type')
+                    if not column_type:
+                        self.log.error(
+                            "column field `type` is required for column `{}` "
+                            "of metric_prefix `{}`".format(name, metric_prefix)
+                        )
+                        break
+
+                    if column_type == 'tag':
+                        query_tags.append('{}:{}'.format(name, value))
+                    else:
+                        if not hasattr(self, column_type):
+                            self.log.error(
+                                "invalid submission method `{}` for column `{}` of "
+                                "metric_prefix `{}`".format(column_type, name, metric_prefix)
+                            )
+                            break
+                        try:
+                            metric_info.append((
+                                '{}.{}'.format(metric_prefix, name),
+                                float(value),
+                                column_type
+                            ))
+                        except (ValueError, TypeError):
+                            self.log.error(
+                                "non-numeric value `{}` for metric column `{}` of "
+                                "metric_prefix `{}`".format(value, name, metric_prefix)
+                            )
+                            break
+
+                # Only submit metrics if there were absolutely no errors - all or nothing.
+                else:
+                    for info in metric_info:
+                        metric, value, method = info
+                        getattr(self, method)(metric, value, tags=query_tags)
+
     def _get_custom_metrics(self, custom_metrics, key):
         # Pre-processed cached custom_metrics
         if key in self.custom_metrics:
@@ -798,10 +989,11 @@ SELECT s.schemaname,
         dbname = instance.get('dbname', None)
         relations = instance.get('relations', [])
         ssl = _is_affirmative(instance.get('ssl', False))
-        function_metrics = _is_affirmative(instance.get('collect_function_metrics', False))
+        collect_function_metrics = _is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
-        count_metrics = _is_affirmative(instance.get('collect_count_metrics', True))
-        database_size_metrics = _is_affirmative(instance.get('collect_database_size_metrics', True))
+        collect_count_metrics = _is_affirmative(instance.get('collect_count_metrics', True))
+        collect_activity_metrics = _is_affirmative(instance.get('collect_activity_metrics', False))
+        collect_database_size_metrics = _is_affirmative(instance.get('collect_database_size_metrics', True))
         collect_default_db = _is_affirmative(instance.get('collect_default_database', False))
 
         if relations and not dbname:
@@ -813,6 +1005,7 @@ SELECT s.schemaname,
         key = (host, port, dbname)
 
         custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []), key)
+        custom_queries = instance.get('custom_queries', [])
 
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
@@ -837,13 +1030,17 @@ SELECT s.schemaname,
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags)
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
-            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics,
-                                database_size_metrics, collect_default_db, interface_error, programming_error)
+            self._collect_stats(key, db, tags, relations, custom_metrics, collect_function_metrics,
+                                collect_count_metrics, collect_activity_metrics, collect_database_size_metrics,
+                                collect_default_db, interface_error, programming_error)
+            self._get_custom_queries(db, tags, custom_queries, programming_error)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=False)
-            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics,
-                                database_size_metrics, collect_default_db, interface_error, programming_error)
+            self._collect_stats(key, db, tags, relations, custom_metrics, collect_function_metrics,
+                                collect_count_metrics, collect_activity_metrics, collect_database_size_metrics,
+                                collect_default_db, interface_error, programming_error)
+            self._get_custom_queries(db, tags, custom_queries, programming_error)
 
         if db is not None:
             service_check_tags = self._get_service_check_tags(host, port, tags)

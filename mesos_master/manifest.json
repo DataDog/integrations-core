@@ -17,6 +17,10 @@
   "metric_prefix": "mesos.",
   "metric_to_check": "mesos.role.mem",
   "name": "mesos_master",
+  "process_signatures": [
+    "mesos-master.sh --ip=127.0.0.1 --work_dir=/var/lib/mesos",
+    "mesos-agent.sh --master --work_dir=/var/lib/mesos"
+  ],
   "public_title": "Datadog-Mesos Master Integration",
   "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
   "support": "core",

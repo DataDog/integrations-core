@@ -86,7 +86,7 @@ elasticsearch.number_of_data_nodes,gauge,,node,,The number of data nodes in the 
 elasticsearch.number_of_nodes,gauge,,node,,The total number of nodes in the cluster.,0,elasticsearch,number of nodes
 elasticsearch.pending_tasks_priority_high,gauge,,task,,The number of high priority pending tasks.,0,elasticsearch,pending high priority tasks
 elasticsearch.pending_tasks_priority_urgent,gauge,,task,,The number of urgent priority pending tasks.,0,elasticsearch,pending urgent tasks
-elasticsearch.pending_tasks_time_in_queue,gauge,,ms,,The average time spent by tasks in the queue.,0,elasticsearch,tasks time in queue
+elasticsearch.pending_tasks_time_in_queue,gauge,,millisecond,,The average time spent by tasks in the queue.,0,elasticsearch,tasks time in queue
 elasticsearch.pending_tasks_total,gauge,,task,,The total number of pending tasks.,0,elasticsearch,pending tasks
 elasticsearch.primaries.docs.count,gauge,,document,,The total number of documents in the primary shards.,0,elasticsearch,primary docs count
 elasticsearch.primaries.docs.deleted,gauge,,document,,The total number of documents deleted from the primary shards.,0,elasticsearch,primary docs deleted

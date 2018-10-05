@@ -1,0 +1,53 @@
+adodbapi==2.6.0.7; sys_platform == 'win32'
+asn1crypto==0.24.0
+beautifulsoup4==4.5.1
+boto==2.46.1
+cffi==1.11.5
+cryptography==2.3
+cx_oracle==6.0.1
+ddtrace==0.13.0
+dnspython==1.12.0
+enum34==1.1.6
+flup==1.0.3.dev-20110405; python_version < '3.0'
+gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
+google-compute-engine==2.8.3
+httplib2==0.10.3
+ipaddress==1.0.22
+jaydebeapi==1.1.1
+jpype1==0.6.3
+kafka-python==1.4.3; sys_platform != 'win32'
+kazoo==2.4.0; sys_platform != 'win32'
+ldap3==2.5
+meld3==1.0.2
+ntplib==0.3.3
+paramiko==2.1.5
+pg8000==1.10.1
+ply==3.10
+prometheus-client==0.3.0
+protobuf==3.5.1
+psutil==5.4.7
+psycopg2-binary==2.7.4
+pyasn1==0.4.2
+pycparser==2.18
+pycryptodomex==3.4.7
+pymongo==3.5.1
+pymysql==0.8.0
+pyodbc==4.0.13; sys_platform == 'win32'
+pyro4==4.73; sys_platform == 'win32'
+pysmi==0.2.2
+pysnmp==4.4.3
+pysnmp-mibs==0.1.6
+python-binary-memcached==0.26.1; sys_platform != 'win32'
+pyvmomi==v6.5.0.2017.5-1
+pywin32==224; sys_platform == 'win32'
+redis==2.10.5
+requests==2.19.1
+requests_ntlm==1.1.0
+scandir==1.8
+selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
+serpent==1.27; sys_platform == 'win32'
+simplejson==3.6.5
+six==1.11.0
+supervisor==3.3.3; python_version < '3.0'
+uptime==3.0.1
+uuid==1.30

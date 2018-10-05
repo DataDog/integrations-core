@@ -1,3 +1,1 @@
-mock==2.0.0
-pytest
-pywin32; sys_platform == 'win32'
+datadog-checks-dev

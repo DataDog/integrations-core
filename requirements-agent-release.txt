@@ -1,88 +1,97 @@
-active_directory==1.1.0; sys_platform == 'win32'
-activemq_xml==1.0.0
-apache==1.3.0
-aspdotnet==0.1.2; sys_platform == 'win32'
-btrfs==1.2.0; sys_platform != 'win32'
-cacti==1.1.1; sys_platform == 'linux2'
-cassandra_nodetool==0.1.2
-ceph==1.3.0; sys_platform != 'win32'
-cisco_aci==1.1.0
-consul==1.5.0
-couch==2.6.0
-couchbase==1.5.0
-datadog_checks_base==1.5.0
-directory==1.2.0
-disk==1.2.0
-dns_check==1.1.1
-dotnetclr==1.0.0; sys_platform == 'win32'
-ecs_fargate==1.2.0
-elastic==1.7.0
-envoy==1.3.0
-etcd==1.5.0
-exchange_server==1.1.0; sys_platform == 'win32'
-fluentd==1.0.0
-gearmand==1.1.0; sys_platform != 'win32'
-gitlab==1.1.0
-gitlab_runner==1.1.0
-go_expvar==1.0.3
-gunicorn==1.2.0; sys_platform != 'win32'
-haproxy==1.3.0
-hdfs_datanode==1.3.0; sys_platform != 'win32'
-hdfs_namenode==1.3.0; sys_platform != 'win32'
-http_check==2.2.0
-iis==2.1.0; sys_platform == 'win32'
-istio==1.1.0
-kafka_consumer==1.4.0; sys_platform != 'win32'
-kong==1.2.0
-kube_dns==1.4.0
-kube_proxy==1.1.0
-kubelet==1.4.0; sys_platform == 'linux2'
-kubernetes_state==2.7.0; sys_platform != 'win32'
-kyototycoon==1.3.0
-lighttpd==1.2.0
-linkerd==1.1.0
-linux_proc_extras==1.0.0; sys_platform == 'linux'
-mapreduce==1.2.0
-marathon==1.4.0; sys_platform != 'win32'
-mcache==1.3.1; sys_platform != 'win32'
-mesos_master==1.2.0; sys_platform != 'win32'
-mesos_slave==1.2.0; sys_platform != 'win32'
-mongo==1.6.0
-mysql==1.3.0
-nagios==1.1.0
-network==1.6.0
-nfsstat==0.2.0; sys_platform == 'linux2'
-nginx==2.2.0
-openstack==1.4.0
-oracle==1.3.0
-pdh_check==1.2.0; sys_platform == 'win32'
+active_directory==1.1.1; sys_platform == 'win32'
+activemq==1.0.2
+activemq_xml==1.0.1
+apache==1.3.1
+aspdotnet==0.1.3; sys_platform == 'win32'
+btrfs==1.2.1; sys_platform != 'win32'
+cacti==1.1.2; sys_platform == 'linux2'
+cassandra==1.2.2
+cassandra_nodetool==0.1.3
+ceph==1.3.1; sys_platform != 'win32'
+cisco_aci==1.2.0
+consul==1.5.1
+couch==2.6.1
+couchbase==1.5.1
+datadog_checks_base==3.0.0
+directory==1.3.0
+disk==1.3.0
+dns_check==1.1.2
+dotnetclr==1.0.1; sys_platform == 'win32'
+ecs_fargate==1.3.0
+elastic==1.7.1
+envoy==1.4.0
+etcd==1.5.1
+exchange_server==1.1.1; sys_platform == 'win32'
+fluentd==1.0.1
+gearmand==1.1.1; sys_platform != 'win32'
+gitlab==1.2.0
+gitlab_runner==1.2.0
+go-metro==1.0.0; sys_platform == 'linux2'
+go_expvar==1.0.4
+gunicorn==1.2.1; sys_platform != 'win32'
+haproxy==1.3.1
+hdfs_datanode==1.3.1; sys_platform != 'win32'
+hdfs_namenode==1.3.1; sys_platform != 'win32'
+http_check==2.4.0
+iis==2.1.1; sys_platform == 'win32'
+istio==2.0.0
+kafka==1.1.1
+kafka_consumer==1.4.1; sys_platform != 'win32'
+kong==1.2.1
+kube_dns==2.0.0
+kube_proxy==2.0.0
+kubelet==2.0.0; sys_platform == 'linux2'
+kubernetes_state==3.0.0; sys_platform != 'win32'
+kyototycoon==1.4.1
+lighttpd==1.2.1
+linkerd==1.2.0
+linux_proc_extras==1.0.1; sys_platform == 'linux2'
+mapreduce==1.2.1
+marathon==1.4.1; sys_platform != 'win32'
+mcache==1.3.2; sys_platform != 'win32'
+mesos_master==1.2.1; sys_platform != 'win32'
+mesos_slave==1.2.1; sys_platform != 'win32'
+mongo==1.6.1
+mysql==1.4.0
+nagios==1.1.1
+network==1.6.1
+nfsstat==0.2.1; sys_platform == 'linux2'
+nginx==3.0.0
+openldap==1.0.0
+openstack==1.5.0
+oracle==1.4.0
+pdh_check==1.2.1; sys_platform == 'win32'
 pgbouncer==1.3.0; sys_platform != 'win32'
-php_fpm==1.2.0
-postfix==1.2.1; sys_platform != 'win32'
-postgres==2.1.3
-powerdns_recursor==1.0.0
-process==1.3.0
-prometheus==1.0.0
-rabbitmq==1.5.1
-redisdb==1.6.0
-riak==1.3.0
-riakcs==1.1.0
-snmp==1.4.0
-spark==1.4.0
-sqlserver==1.5.0; sys_platform == 'win32'
-squid==1.0.1
-ssh_check==1.3.0
-supervisord==1.1.2
-system_core==1.0.0
-system_swap==1.1.0
-tcp_check==2.0.1
-teamcity==1.1.0
-tokumx==1.2.0
-twemproxy==1.2.0
-varnish==1.2.0
-vsphere==2.2.0
-win32_event_log==1.1.1; sys_platform == 'win32'
-win32_service==1.2.0; sys_platform == 'win32'
-wmi_check==1.1.1; sys_platform == 'win32'
-yarn==1.3.0
-zk==1.2.0; sys_platform != 'win32'
+php_fpm==1.3.0
+postfix==1.2.2; sys_platform != 'win32'
+postgres==2.2.2
+powerdns_recursor==1.1.1
+process==1.4.0
+prometheus==2.0.0
+rabbitmq==1.5.2
+redisdb==1.7.0
+riak==1.3.1
+riakcs==1.1.1
+snmp==1.4.1
+solr==1.1.0
+spark==1.4.1
+sqlserver==1.6.0; sys_platform == 'win32'
+squid==1.0.2
+ssh_check==1.3.1
+statsd==1.1.1
+supervisord==1.1.3
+system_core==1.0.2
+system_swap==1.1.1
+tcp_check==2.0.2
+teamcity==1.1.1
+tokumx==1.2.1
+tomcat==1.1.1
+twemproxy==1.2.1
+varnish==1.2.1
+vault==1.2.0
+vsphere==3.3.1
+win32_event_log==1.2.0; sys_platform == 'win32'
+windows_service==1.2.1; sys_platform == 'win32'
+wmi_check==1.1.2; sys_platform == 'win32'
+yarn==1.4.0
+zk==1.2.1; sys_platform != 'win32'

@@ -13,10 +13,12 @@ from urlparse import urlparse
 import requests
 
 # project
-from checks import AgentCheck, CheckException
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.errors import CheckException
+from datadog_checks.config import _is_affirmative
 
 DEFAULT_MASTER_PORT = 5050
+
 
 class MesosSlave(AgentCheck):
     GAUGE = AgentCheck.gauge
@@ -25,72 +27,72 @@ class MesosSlave(AgentCheck):
     service_check_needed = True
 
     TASK_STATUS = {
-        'TASK_STARTING'     : AgentCheck.OK,
-        'TASK_RUNNING'      : AgentCheck.OK,
-        'TASK_FINISHED'     : AgentCheck.OK,
-        'TASK_FAILED'       : AgentCheck.CRITICAL,
-        'TASK_KILLED'       : AgentCheck.WARNING,
-        'TASK_LOST'         : AgentCheck.CRITICAL,
-        'TASK_STAGING'      : AgentCheck.OK,
-        'TASK_ERROR'        : AgentCheck.CRITICAL,
+        'TASK_STARTING': AgentCheck.OK,
+        'TASK_RUNNING': AgentCheck.OK,
+        'TASK_FINISHED': AgentCheck.OK,
+        'TASK_FAILED': AgentCheck.CRITICAL,
+        'TASK_KILLED': AgentCheck.WARNING,
+        'TASK_LOST': AgentCheck.CRITICAL,
+        'TASK_STAGING': AgentCheck.OK,
+        'TASK_ERROR': AgentCheck.CRITICAL,
     }
 
     TASK_METRICS = {
-        'cpus'                              : ('mesos.state.task.cpu', GAUGE),
-        'mem'                               : ('mesos.state.task.mem', GAUGE),
-        'disk'                              : ('mesos.state.task.disk', GAUGE),
+        'cpus': ('mesos.state.task.cpu', GAUGE),
+        'mem': ('mesos.state.task.mem', GAUGE),
+        'disk': ('mesos.state.task.disk', GAUGE),
     }
 
     SLAVE_TASKS_METRICS = {
-        'slave/tasks_failed'                : ('mesos.slave.tasks_failed', MONOTONIC_COUNT),
-        'slave/tasks_finished'              : ('mesos.slave.tasks_finished', MONOTONIC_COUNT),
-        'slave/tasks_killed'                : ('mesos.slave.tasks_killed', MONOTONIC_COUNT),
-        'slave/tasks_lost'                  : ('mesos.slave.tasks_lost', MONOTONIC_COUNT),
-        'slave/tasks_running'               : ('mesos.slave.tasks_running', GAUGE),
-        'slave/tasks_staging'               : ('mesos.slave.tasks_staging', GAUGE),
-        'slave/tasks_starting'              : ('mesos.slave.tasks_starting', GAUGE),
+        'slave/tasks_failed': ('mesos.slave.tasks_failed', MONOTONIC_COUNT),
+        'slave/tasks_finished': ('mesos.slave.tasks_finished', MONOTONIC_COUNT),
+        'slave/tasks_killed': ('mesos.slave.tasks_killed', MONOTONIC_COUNT),
+        'slave/tasks_lost': ('mesos.slave.tasks_lost', MONOTONIC_COUNT),
+        'slave/tasks_running': ('mesos.slave.tasks_running', GAUGE),
+        'slave/tasks_staging': ('mesos.slave.tasks_staging', GAUGE),
+        'slave/tasks_starting': ('mesos.slave.tasks_starting', GAUGE),
     }
 
     SYSTEM_METRICS = {
-        'system/cpus_total'                 : ('mesos.stats.system.cpus_total', GAUGE),
-        'system/load_15min'                 : ('mesos.stats.system.load_15min', GAUGE),
-        'system/load_1min'                  : ('mesos.stats.system.load_1min', GAUGE),
-        'system/load_5min'                  : ('mesos.stats.system.load_5min', GAUGE),
-        'system/mem_free_bytes'             : ('mesos.stats.system.mem_free_bytes', GAUGE),
-        'system/mem_total_bytes'            : ('mesos.stats.system.mem_total_bytes', GAUGE),
-        'slave/registered'                  : ('mesos.stats.registered', GAUGE),
-        'slave/uptime_secs'                 : ('mesos.stats.uptime_secs', GAUGE),
+        'system/cpus_total': ('mesos.stats.system.cpus_total', GAUGE),
+        'system/load_15min': ('mesos.stats.system.load_15min', GAUGE),
+        'system/load_1min': ('mesos.stats.system.load_1min', GAUGE),
+        'system/load_5min': ('mesos.stats.system.load_5min', GAUGE),
+        'system/mem_free_bytes': ('mesos.stats.system.mem_free_bytes', GAUGE),
+        'system/mem_total_bytes': ('mesos.stats.system.mem_total_bytes', GAUGE),
+        'slave/registered': ('mesos.stats.registered', GAUGE),
+        'slave/uptime_secs': ('mesos.stats.uptime_secs', GAUGE),
     }
 
     SLAVE_RESOURCE_METRICS = {
-        'slave/cpus_percent'                : ('mesos.slave.cpus_percent', GAUGE),
-        'slave/cpus_total'                  : ('mesos.slave.cpus_total', GAUGE),
-        'slave/cpus_used'                   : ('mesos.slave.cpus_used', GAUGE),
-        'slave/gpus_percent'                : ('mesos.slave.gpus_percent', GAUGE), # >= 1.0.0
-        'slave/gpus_total'                  : ('mesos.slave.gpus_total', GAUGE), # >= 1.0.0
-        'slave/gpus_used'                   : ('mesos.slave.gpus_used', GAUGE), # >= 1.0.0
-        'slave/disk_percent'                : ('mesos.slave.disk_percent', GAUGE),
-        'slave/disk_total'                  : ('mesos.slave.disk_total', GAUGE),
-        'slave/disk_used'                   : ('mesos.slave.disk_used', GAUGE),
-        'slave/mem_percent'                 : ('mesos.slave.mem_percent', GAUGE),
-        'slave/mem_total'                   : ('mesos.slave.mem_total', GAUGE),
-        'slave/mem_used'                    : ('mesos.slave.mem_used', GAUGE),
+        'slave/cpus_percent': ('mesos.slave.cpus_percent', GAUGE),
+        'slave/cpus_total': ('mesos.slave.cpus_total', GAUGE),
+        'slave/cpus_used': ('mesos.slave.cpus_used', GAUGE),
+        'slave/gpus_percent': ('mesos.slave.gpus_percent', GAUGE),  # >= 1.0.0
+        'slave/gpus_total': ('mesos.slave.gpus_total', GAUGE),  # >= 1.0.0
+        'slave/gpus_used': ('mesos.slave.gpus_used', GAUGE),  # >= 1.0.0
+        'slave/disk_percent': ('mesos.slave.disk_percent', GAUGE),
+        'slave/disk_total': ('mesos.slave.disk_total', GAUGE),
+        'slave/disk_used': ('mesos.slave.disk_used', GAUGE),
+        'slave/mem_percent': ('mesos.slave.mem_percent', GAUGE),
+        'slave/mem_total': ('mesos.slave.mem_total', GAUGE),
+        'slave/mem_used': ('mesos.slave.mem_used', GAUGE),
     }
 
     SLAVE_EXECUTORS_METRICS = {
-        'slave/executors_registering'       : ('mesos.slave.executors_registering', GAUGE),
-        'slave/executors_running'           : ('mesos.slave.executors_running', GAUGE),
-        'slave/executors_terminated'        : ('mesos.slave.executors_terminated', GAUGE),
-        'slave/executors_terminating'       : ('mesos.slave.executors_terminating', GAUGE),
+        'slave/executors_registering': ('mesos.slave.executors_registering', GAUGE),
+        'slave/executors_running': ('mesos.slave.executors_running', GAUGE),
+        'slave/executors_terminated': ('mesos.slave.executors_terminated', GAUGE),
+        'slave/executors_terminating': ('mesos.slave.executors_terminating', GAUGE),
     }
 
     STATS_METRICS = {
-        'slave/frameworks_active'           : ('mesos.slave.frameworks_active', GAUGE),
-        'slave/invalid_framework_messages'  : ('mesos.slave.invalid_framework_messages', GAUGE),
-        'slave/invalid_status_updates'      : ('mesos.slave.invalid_status_updates', GAUGE),
-        'slave/recovery_errors'             : ('mesos.slave.recovery_errors', GAUGE),
-        'slave/valid_framework_messages'    : ('mesos.slave.valid_framework_messages', GAUGE),
-        'slave/valid_status_updates'        : ('mesos.slave.valid_status_updates', GAUGE),
+        'slave/frameworks_active': ('mesos.slave.frameworks_active', GAUGE),
+        'slave/invalid_framework_messages': ('mesos.slave.invalid_framework_messages', GAUGE),
+        'slave/invalid_status_updates': ('mesos.slave.invalid_status_updates', GAUGE),
+        'slave/recovery_errors': ('mesos.slave.recovery_errors', GAUGE),
+        'slave/valid_framework_messages': ('mesos.slave.valid_framework_messages', GAUGE),
+        'slave/valid_status_updates': ('mesos.slave.valid_status_updates', GAUGE),
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -209,7 +211,7 @@ class MesosSlave(AgentCheck):
         if stats_metrics:
             tags = tags if tags else instance_tags
             metrics = [self.SLAVE_TASKS_METRICS, self.SYSTEM_METRICS, self.SLAVE_RESOURCE_METRICS,
-                      self.SLAVE_EXECUTORS_METRICS, self.STATS_METRICS]
+                       self.SLAVE_EXECUTORS_METRICS, self.STATS_METRICS]
             for m in metrics:
                 for key_name, (metric_name, metric_func) in m.iteritems():
                     if key_name in stats_metrics:

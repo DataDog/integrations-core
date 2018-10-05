@@ -31,6 +31,7 @@ setup(
     name='datadog_checks_tests_helper',
     description='The Datadog Check Tests Helpers',
     long_description=LONG_DESC,
+    long_description_content_type='text/markdown',
     keywords='datadog agent checks tests',
     url='https://github.com/DataDog/datadog-agent-tk',
     author='Datadog',

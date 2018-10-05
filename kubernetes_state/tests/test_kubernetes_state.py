@@ -55,9 +55,9 @@ METRICS = [
     NAMESPACE + '.container.ready',
     NAMESPACE + '.container.running',
     NAMESPACE + '.container.terminated',
-    NAMESPACE + '.container.status_report.count.terminated',
     NAMESPACE + '.container.waiting',
     NAMESPACE + '.container.status_report.count.waiting',
+    NAMESPACE + '.container.status_report.count.terminated',
     NAMESPACE + '.container.restarts',
     NAMESPACE + '.container.cpu_requested',
     NAMESPACE + '.container.memory_requested',
@@ -78,6 +78,21 @@ METRICS = [
     NAMESPACE + '.statefulset.replicas_current',
     NAMESPACE + '.statefulset.replicas_ready',
     NAMESPACE + '.statefulset.replicas_updated',
+    # resourcequotas
+    NAMESPACE + '.resourcequota.cpu.used',
+    NAMESPACE + '.resourcequota.cpu.limit',
+    NAMESPACE + '.resourcequota.memory.used',
+    NAMESPACE + '.resourcequota.memory.limit',
+    NAMESPACE + '.resourcequota.pods.used',
+    NAMESPACE + '.resourcequota.pods.limit',
+    NAMESPACE + '.resourcequota.limits.cpu.used',
+    NAMESPACE + '.resourcequota.limits.cpu.limit',
+    NAMESPACE + '.resourcequota.limits.memory.used',
+    NAMESPACE + '.resourcequota.limits.memory.limit',
+    # limitrange
+    NAMESPACE + '.limitrange.cpu.default_request',
+    # services
+    NAMESPACE + '.service.count',
 ]
 
 TAGS = {
@@ -95,14 +110,27 @@ TAGS = {
         'namespace:kube-system'
     ],
     NAMESPACE + '.container.status_report.count.waiting': [
-        'reason:CrashLoopBackoff',
-        'reason:CrashLoopBackOff',
+        'reason:ContainerCreating',
+        'reason:CrashLoopBackoff',  # Lowercase "off"
+        'reason:CrashLoopBackOff',  # Uppercase "Off"
         'reason:ErrImagePull',
-        'reason:ImagePullBackoff'
+        'reason:ImagePullBackoff',
+        'pod:kube-dns-1326421443-hj4hx',
+        'pod:hello-1509998340-k4f8q'
+    ],
+    NAMESPACE + '.container.status_report.count.terminated': [
+        'pod:pod2',
     ],
     NAMESPACE + '.persistentvolumeclaim.request_storage': [
         'storageclass:manual'
-    ]
+    ],
+    NAMESPACE + '.service.count': [
+        'namespace:kube-system',
+        'namespace:default',
+        'type:ClusterIP',
+        'type:NodePort',
+        'type:LoadBalancer',
+    ],
 }
 
 JOINED_METRICS = {
@@ -178,8 +206,8 @@ def instance():
 
 
 @pytest.fixture
-def check():
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance()])
+def check(instance):
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
     with open(os.path.join(HERE, 'fixtures', 'prometheus.txt'), 'rb') as f:
         check.poll = mock.MagicMock(return_value=MockResponse(f.read(), 'text/plain'))
 
@@ -294,8 +322,11 @@ def test_join_custom_labels(aggregator, instance, check):
         }
     }
 
+    endpoint = instance['kube_state_url']
+    scraper_config = check.config_map[endpoint]
+
     # this would be normally done in the __init__ function of the check
-    check.label_joins.update(instance['label_joins'])
+    scraper_config['label_joins'].update(instance['label_joins'])
 
     # run check twice to have pod/node mapping
     for _ in range(2):
@@ -310,8 +341,25 @@ def test_join_custom_labels(aggregator, instance, check):
 
 
 def test_disabling_hostname_override(instance):
+    endpoint = instance['kube_state_url']
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    assert check.label_to_hostname == "node"
+    scraper_config = check.config_map[endpoint]
+    assert scraper_config['label_to_hostname'] == "node"
+
     instance["hostname_override"] = False
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    assert check.label_to_hostname is None
+    scraper_config = check.config_map[endpoint]
+    assert scraper_config['label_to_hostname'] is None
+
+
+def test_removing_pod_phase_service_checks(aggregator, instance, check):
+    check.send_pod_phase_service_checks = False
+    for _ in range(2):
+        check.check(instance)
+    # We should still send gauges
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Running', 'optional:tag1'], value=3)
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2)
+    # the service checks should not be sent
+    assert NAMESPACE + '.pod.status_phase' not in aggregator._service_checks

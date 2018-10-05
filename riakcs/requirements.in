@@ -1,2 +1,2 @@
-
 boto==2.46.1
+google-compute-engine==2.8.3

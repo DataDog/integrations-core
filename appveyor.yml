@@ -1,68 +1,45 @@
 version: '{branch}.{build}'
-shallow_clone: true
-environment:
-  TRAVIS_BUILD_DIR: c:\projects\integrations-core
-  INTEGRATIONS_DIR: c:\projects\integrations-core\embedded
-  PIP_CACHE: c:\projects\integrations-core\.cache\pip
-  VOLATILE_DIR: c:\projects
-  NOSE_FILTER: not unix and not fixme and not winfixme
-  PYWIN_PATH: C:\projects\integrations-core\.cache\pywin32-py2.7.exe
-  SKIP_LINT: true
-  DD_AGENT_BRANCH: master
-  SDK_TESTING: true
-  PYTHON: C:\Python27-x64
-  PYTHON_VERSION: 2.7.13
-  PYTHON_ARCH: 64
-  PYWIN32_URL: https://downloads.sourceforge.net/project/pywin32/pywin32/Build%20219/pywin32-219.win-amd64-py2.7.exe
-  PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win-amd64.egg
-init:
-  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+clone_depth: 3
+build: off
+test: off
+skip_branch_with_pr: true
 cache:
-  - C:\projects\integrations-core\.cache
-  - C:\projects\integrations-core\vendor\cache
-  - C:\projects\integrations-core\embedded
+  - '%LOCALAPPDATA%\pip\Cache'
 services:
   - iis
   # We can't start more than one MSSQL instance to avoid conflicts on TCP port 1433. The only workaround to test a check
   # against multiple versions is letting the test code to start/stop the corresponding services so that they run one at
   # a time. See https://www.appveyor.com/docs/services-databases/ for details.
   - mssql2008r2sp2
+
+branches:
+  only:
+    - master
+
+environment:
+  PYTHON2: C:\Python27-x64
+  PYTHON3: C:\Python36-x64
+
+init:
+  # Add Python 3 to PATH
+  - set PATH=%PYTHON3%;%PYTHON3%\Scripts;%PATH%
+  - python -c "import sys; print(sys.version)"
+
+  # Add Python 2 to PATH before Python 3
+  - set PATH=%PYTHON2%;%PYTHON2%\Scripts;%PATH%
+  - python -c "import sys; print(sys.version)"
+
+  - if defined APPVEYOR_PULL_REQUEST_NUMBER ( set "CHANGED_ONLY_FLAG= --changed" ) else ( set "CHANGED_ONLY_FLAG= " )
+
 install:
-  # Use the 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
-  - set PATH=C:\Ruby22-x64\bin;%PATH%
-  - bundle install
-  - bundle package
-  - git clone -b %DD_AGENT_BRANCH% https://github.com/DataDog/dd-agent.git c:\projects\dd-agent
-  - if not exist %PIP_CACHE% mkdir %PIP_CACHE%
-  - cmd: appveyor-retry powershell If (-Not (Test-Path $env:PYWIN_PATH)) {(new-object net.webclient).DownloadFile("$env:PYWIN32_URL", "$env:PYWIN_PATH")}
-  - "%PYTHON%/Scripts/easy_install.exe %PYWIN_PATH%"
-  - ps: mkdir -p $(python -m site --user-site)
-  - ps: echo "C:\projects\dd-agent" | out-file "$(python -m site --user-site)/datadog-agent.pth" -encoding ASCII
-  - ps: (& "$env:PYTHON/python.exe" -m pip install --upgrade pip)
-  - ps: '& "$env:PYTHON/Scripts/pip.exe" install -r c:\projects\dd-agent\requirements.txt'
-  # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
-  - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
-  - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -U virtualenv)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" uninstall -y docker-py)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .\datadog_checks_dev[cli])
+  - python -m pip install --upgrade --disable-pip-version-check pip virtualenv codecov
+  - pip uninstall -y docker-py
+  - pip install .\datadog_checks_dev[cli]
   - ddev config set core .
-  - cd datadog_checks_base
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd sqlserver
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd windows_service
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd wmi_check
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-build: off
+
 test_script:
-  - ddev test datadog_checks_base datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check sqlserver windows_service
-  - bundle exec rake ci:run[wmi_check]
+  # Only test any of these that have changed for pull requests
+  - ddev test%CHANGED_ONLY_FLAG% datadog_checks_base active_directory aspdotnet dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
 
 # Uncomment the following to enable RDP connection into the builder and debug a build
 # on_finish:

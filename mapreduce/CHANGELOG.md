@@ -1,5 +1,10 @@
 # CHANGELOG - mapreduce
 
+## 1.2.1 / 2018-09-04
+
+* [Fixed] Fix bug and typo in DEFAULT_CLUSTER_NAME for YARN check. See [#1814](https://github.com/DataDog/integrations-core/pull/1814). Thanks [eplanet](https://github.com/eplanet).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.2.0 / 2018-06-06
 
 * [Added] Add support for HTTP authentication. See [#1678](https://github.com/DataDog/integrations-core/pull/1678).

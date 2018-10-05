@@ -1,35 +1,94 @@
-##########
-# WARNING
-##########
-# This sample works only for ActiveMQ >= 5.8.0
-# If you are running a version older than that, you can refer to agent 5.10.x released
-# sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
+## WARNING
+## This sample works only for ActiveMQ >= 5.8.0
+## If you are running a version older than that, you can refer to agent 5.10.x released
+## sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
 
 instances:
+  
+  ## @param host - string - required
+  ## ActiveMQ host to connect to.
+  #
   - host: localhost
+
+  ## @param port - integer - required
+  ## ActiveMQ port to connect to.
+  #
     port: 1099
-  #   user: username
-  #   password: password
-  #   process_name_regex: .*process_name.* # Instead of specifying a host, and port. The agent can connect using the attach api.
-  #                                        # This requires the JDK to be installed and the path to tools.jar to be set below.
-  #   tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar # To be set when process_name_regex is set
+
+  ## @param user - string - optional
+  ## Username from the credentials needed to connect to the host. 
+  #
+  #  user: <USERNAME>
+  
+  ## @param password - string - optional
+  ## Password from the credentials needed to connect to the host. 
+  #
+  #  password: <PASSWORD>
+
+  ## @param process_name_regex - string - optional
+  ## Instead of specifying a host, and port. The agent can connect using the attach api.
+  ## This requires the JDK to be installed and the path to tools.jar to be set below in tools_jar_path parameter.
+  #
+  #  process_name_regex: .*process_name.* 
+
+  ## @param tools_jar_path - string - optional
+  ## Needs to be set when process_name_regex parameter is set.
+  #
+  #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+  
+  ## @param name - string - optional
+  ## XXXXXXXXXXX
+  #
   #   name: activemq_instance
-  #   # java_bin_path: /path/to/java # Optional, should be set if the agent cannot find your java executable
-  #   # java_options: "-Xmx200m -Xms50m" # Optional, Java JVM options
-  #   # trust_store_path: /path/to/trustStore.jks # Optional, should be set if ssl is enabled
-  #   # trust_store_password: password
-  #   tags:
-  #     env: stage
-  #     newTag: test
+
+    ## @param java_bin_path - string - optional
+    ## java_bin_path should be set if the agent cannot find your java executable
+    #
+    #  java_bin_path: <JAVA_PATH>
+
+    ## @param java_options - string - optional
+    ## List of Java JVM options.
+    #
+    #  java_options: "-Xmx200m -Xms50m"
+
+    ## @param trust_store_path - string - optional
+    ## trust_store_path should be set if ssl is enabled.
+    ## path to your trusted store
+    #
+    #  trust_store_path: <TRUSTSTORE.JKS_PATH>
+
+    ## @param trust_store_password - string - optional
+    ## trust_store_password should be set if ssl is enabled
+    ## password for your TrustStore.jks file
+    #
+    #  trust_store_password: <PASSWORD>
+  
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
 init_config:
+
+  ## @param is_jmx - boolean - required
+  ## Whether or not this file is a configuration for a JMX integration
+  #
   is_jmx: true
+  
+  ## @param collect_default_metrics - boolean - required
+  ## Whether or not the check should collect all default metrics for this integration.
+  #
   collect_default_metrics: true
 
-  # List of metrics to be collected by the integration
-  # Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-  # Agent 5: Customize all your metrics below
-  # Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+  ## List of metrics to be collected by the integration
+  ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+  ## Agent 5: Customize all your metrics below
+  ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+  
   conf:
     - include:
         destinationType: Queue

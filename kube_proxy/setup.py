@@ -30,6 +30,7 @@ setup(
     version=ABOUT["__version__"],
     description='The kube_proxy Check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent kube_proxy check',
 
     # The project's main homepage.
@@ -58,9 +59,6 @@ setup(
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-
-    # Testing setup and dependencies
-    tests_require=get_requirements(path.join('tests', 'requirements.txt')),
 
     # Extra files to ship with the wheel package
     include_package_data=True,

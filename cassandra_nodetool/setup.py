@@ -31,6 +31,7 @@ setup(
     version=ABOUT['__version__'],
     description='The Cassandra Nodetool check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent cassandra_nodetool check',
 
     # The project's main homepage.

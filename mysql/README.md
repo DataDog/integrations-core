@@ -32,6 +32,13 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
+For mySQL 8.0+ create the `datadog` user with the native password hashing method:
+
+```
+mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
+Query OK, 0 rows affected (0.00 sec)
+```
+
 Please note that `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][14].
 
 
@@ -53,6 +60,13 @@ mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CO
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 
 mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
+Query OK, 0 rows affected (0.00 sec)
+```
+
+For mySQL 8.0+ set `max_user_connections` with:
+
+```
+mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -355,6 +369,7 @@ Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherw
 * [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][26]
 * [How can I collect more metrics from my SQL Server integration?][27]
 * [Database user lacks privileges][28]
+* [How to collect metrics with a SQL Stored Procedure?][32]
 
 ## Further Reading
 Read our [series of blog posts][29] about monitoring MySQL with Datadog.
@@ -379,3 +394,4 @@ Read our [series of blog posts][29] about monitoring MySQL with Datadog.
 [29]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/
 [30]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png
 [31]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[32]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-with-sql-stored-procedure/

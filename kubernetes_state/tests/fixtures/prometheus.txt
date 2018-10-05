@@ -812,3 +812,30 @@ kube_service_labels{label_app="helm",label_name="tiller",namespace="kube-system"
 kube_service_labels{label_addonmanager_kubernetes_io_mode="Reconcile",label_k8s_app="kube-dns",label_kubernetes_io_name="KubeDNS",namespace="kube-system",service="kube-dns"} 1
 kube_service_labels{label_addonmanager_kubernetes_io_mode="Reconcile",label_app="kubernetes-dashboard",label_kubernetes_io_minikube_addons="dashboard",label_kubernetes_io_minikube_addons_endpoint="dashboard",namespace="kube-system",service="kubernetes-dashboard"} 1
 kube_service_labels{label_app="kube-state-metrics",label_chart="kube-state-metrics-0.3.1",label_heritage="Tiller",label_release="jaundiced-numbat",namespace="default",service="jaundiced-numbat-kube-state-metrics"} 1
+# HELP kube_service_spec_type Type about service.
+# TYPE kube_service_spec_type gauge
+kube_service_spec_type{namespace="default",service="datadog-cluster-agent",type="ClusterIP"} 1
+kube_service_spec_type{namespace="default",service="ddrc1-kube-state-metrics",type="ClusterIP"} 1
+kube_service_spec_type{namespace="default",service="kubernetes",type="ClusterIP"} 1
+kube_service_spec_type{namespace="default",service="redis-db2",type="LoadBalancer"} 1
+kube_service_spec_type{namespace="default",service="redis-db2-bis",type="LoadBalancer"} 1
+kube_service_spec_type{namespace="kube-system",service="default-http-backend",type="NodePort"} 1
+kube_service_spec_type{namespace="kube-system",service="heapster",type="ClusterIP"} 1
+kube_service_spec_type{namespace="kube-system",service="kube-dns",type="ClusterIP"} 1
+kube_service_spec_type{namespace="kube-system",service="metrics-server",type="ClusterIP"} 1
+kube_service_spec_type{namespace="kube-system",service="tiller-deploy",type="ClusterIP"} 1
+# HELP kube_resourcequota Information about resource quota.
+# TYPE kube_resourcequota gauge
+kube_resourcequota{namespace="default",resource="cpu",resourcequota="custom-resource-quotas",type="hard"} 65
+kube_resourcequota{namespace="default",resource="cpu",resourcequota="custom-resource-quotas",type="used"} 15.904
+kube_resourcequota{namespace="default",resource="limits.cpu",resourcequota="custom-resource-quotas",type="hard"} 100
+kube_resourcequota{namespace="default",resource="limits.cpu",resourcequota="custom-resource-quotas",type="used"} 15.904
+kube_resourcequota{namespace="default",resource="limits.memory",resourcequota="custom-resource-quotas",type="hard"} 1.34217728e+11
+kube_resourcequota{namespace="default",resource="limits.memory",resourcequota="custom-resource-quotas",type="used"} 7.7129056256e+10
+kube_resourcequota{namespace="default",resource="memory",resourcequota="custom-resource-quotas",type="hard"} 1.34217728e+11
+kube_resourcequota{namespace="default",resource="memory",resourcequota="custom-resource-quotas",type="used"} 7.7129056256e+10
+kube_resourcequota{namespace="default",resource="pods",resourcequota="custom-resource-quotas",type="hard"} 1000
+kube_resourcequota{namespace="default",resource="pods",resourcequota="custom-resource-quotas",type="used"} 497
+# HELP kube_limitrange Information about limit range.
+# TYPE kube_limitrange gauge
+kube_limitrange{constraint="defaultRequest",limitrange="limits",namespace="default",resource="cpu",type="Container"} 0.1

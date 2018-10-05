@@ -4,7 +4,7 @@ rabbitmq.node.disk_free,gauge,,byte,,Current free disk space,0,rabbitmq,disk fre
 rabbitmq.node.mem_used,gauge,,byte,,Memory used in bytes,0,rabbitmq,mem used
 rabbitmq.node.run_queue,gauge,,process,,Average number of Erlang processes waiting to run,0,rabbitmq,run queue
 rabbitmq.node.sockets_used,gauge,,,,Number of file descriptors used as sockets,0,rabbitmq,skts used
-rabbitmq.node.partitions,gauge,,partition,,Number of network partitions this node is seeing,0,rabbitmq,partitions
+rabbitmq.node.partitions,gauge,,,,Number of network partitions this node is seeing,0,rabbitmq,partitions
 rabbitmq.node.running,gauge,,,,Is the node running or not,0,rabbitmq,running
 rabbitmq.node.mem_alarm,gauge,,,,Does the host has memory alarm,0,rabbitmq,mem_alarm
 rabbitmq.node.disk_alarm,gauge,,,,Does the node have disk alarm,0,rabbitmq,disk_alarm
@@ -22,11 +22,11 @@ rabbitmq.exchange.messages.publish.count,gauge,,message,,Count of messages publi
 rabbitmq.exchange.messages.publish.rate,gauge,,message,,Rate of messages published per second,0,rabbitmq,xchng msgs pub rate
 rabbitmq.exchange.messages.publish_in.count,gauge,,message,,Count of messages published from channels into this exchange,0,rabbitmq,xchng msgs pub in
 rabbitmq.exchange.messages.publish_in.rate,gauge,,message,,Rate of messages published from channels into this exchange per sec,0,rabbitmq,xchng msgs pub in rate
-rabbitmq.exchange.messages.publish_out.count,gauge,,message,,"Count of messages published from this exchange into queues",0,rabbitmq,xchng msgs pub out
-rabbitmq.exchange.messages.publish_out.rate,gauge,,message,,"Rate of messages published from this exchange into queues per second",0,rabbitmq,xchng msgs pub out rate
-rabbitmq.queue.active_consumers,gauge,,consumer,,"Number of active consumers, consumers that can immediately receive any messages sent to the queue",0,rabbitmq,act cons
-rabbitmq.queue.bindings.count,gauge,,bind,,"Number of bindings for a specific queue",0,rabbitmq,queue bind
-rabbitmq.queue.consumers,gauge,,consumer,,Number of consumers,0,rabbitmq,cons
+rabbitmq.exchange.messages.publish_out.count,gauge,,message,,Count of messages published from this exchange into queues,0,rabbitmq,xchng msgs pub out
+rabbitmq.exchange.messages.publish_out.rate,gauge,,message,,Rate of messages published from this exchange into queues per second,0,rabbitmq,xchng msgs pub out rate
+rabbitmq.queue.active_consumers,gauge,,,,"Number of active consumers, consumers that can immediately receive any messages sent to the queue",0,rabbitmq,act cons
+rabbitmq.queue.bindings.count,gauge,,,,Number of bindings for a specific queue,0,rabbitmq,queue bind
+rabbitmq.queue.consumers,gauge,,,,Number of consumers,0,rabbitmq,cons
 rabbitmq.queue.consumer_utilisation,gauge,,fraction,,The ratio of time that a queue's consumers can take new messages,0,rabbitmq,cons util
 rabbitmq.queue.memory,gauge,,byte,,"Bytes of memory consumed by the Erlang process associated with the queue, including stack, heap and internal structures",0,rabbitmq,mem
 rabbitmq.queue.messages,gauge,,message,,Count of the total messages in the queue,0,rabbitmq,msgs
@@ -46,4 +46,4 @@ rabbitmq.queue.messages.publish.rate,gauge,,message,second,Rate per second of me
 rabbitmq.queue.messages.redeliver.count,gauge,,message,,Count of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,msgs redelv
 rabbitmq.queue.messages.redeliver.rate,gauge,,message,second,Rate per second of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,msgs redelv rate
 rabbitmq.connections,gauge,,connection,,"Number of current connections to a given rabbitmq vhost, tagged 'rabbitmq_vhost:<vhost_name>'",0,rabbitmq,connections
-rabbitmq.connections.state,gauge,,connection_state,,Number of connections in the specified connection state,0,rabbitmq,connection_state
+rabbitmq.connections.state,gauge,,connection,,Number of connections in the specified connection state,0,rabbitmq,connection_state

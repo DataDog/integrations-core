@@ -27,3 +27,20 @@ instances:
     #  - db3
     # max_nodes_per_check: 10     # CouchDB 2.x only. How many nodes each check will report if no name is provided. Defaults to 20.
     # max_dbs_per_check: 20       # Optional. How many databases to scan. Default to 50.
+
+## Log Section (Available for Agent >=6.0)
+
+#logs:
+
+    # - type : (mandatory) type of log input source (tcp / udp / file)
+    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
+    #   service : (mandatory) name of the service owning the log
+    #   source : (mandatory) attribute that defines which integration is sending the logs
+    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
+    #   tags: (optional) add tags to each logs collected
+    
+    # - type: file
+    #   path: /var/log/couchdb/couch.log
+    #   source: couchdb
+    #   sourcecategory: database
+    #   service: couch

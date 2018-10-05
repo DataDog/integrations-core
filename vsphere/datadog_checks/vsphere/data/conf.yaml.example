@@ -1,64 +1,131 @@
-# Section used for global vsphere check config
+## Section used for global vsphere check configuration
+
 init_config:
 
-# Define your list of instances here
-# each item is a vCenter instance you want to connect to and
-# fetch metrics from
+## @param batch_morlist_size - integer - optional - default: 50
+## This value is used to determine the number of MORs the check will retrieve metrics for in the same API call
+## If too many API calls are made by the check, consider increasing this value
+## If payloads are too large, consider decreasing this value
+## A value <= 0 means unlimited: it makes one query for all the monitored objects
+#
+#  batch_morlist_size: 50
+
+## @param batch_property_collector_size - integer - optional - default: 500
+##  This value is used to determine the maximum number of MORs returned by vCenter in the same API call,
+## when exploring the infrastructure
+## If too many API calls are made by the check, consider increasing this value
+## If payloads are too large, consider decreasing this value
+## A value <= 0 means unlimited: it will query for the maximum number of objects at once
+#
+#  batch_property_collector_size: 500
+
+## @param refresh_morlist_interval - integer - optional - default: 180
+## Number of seconds between each discovering and caching of your vSphere environment
+## Consider increasing this value if your environment is large, as caching can take some time to complete
+#
+#  refresh_morlist_interval: 180
+
+## @param clean_morlist_interval - integer - optional - default: 2*refresh_morlist_interval
+## Number of seconds to wait before an object is considered deleted from your vSphere environment and removed from the cache
+## This value should be higher than refresh_morlist_interval.
+#
+#  clean_morlist_interval: 360
+
+## @param refresh_metrics_metadata_interval - integer - optional - default: 600
+## Number of seconds between each refresh of the metrics metadata cache
+#
+#  refresh_metrics_metadata_interval: 600
+
+
+## Define your list of instances here each item is a
+## vCenter instance you want to connect to and fetch metrics from
+
 instances:
-  # name must be a unique key representing your vCenter instance
-  # mandatory
+  
+  ## @param name - string - required
+  ## name must be a unique key representing your vCenter instance
+  #
   - name: main-vcenter
 
-    # the host used to resolve the vCenter IP
-    # mandatory
-    host: vcenter.domain.com
+  ## @param host - string - required
+  ## the host used to resolve the vCenter IP
+  #
+    host: <HOSTNAME>
 
-    # Read-only credentials to connect to vCenter
-    # mandatory
-    # see https://app.datadoghq.com/account/settings#integrations/vsphere
+  ## @param username - string - required 
+  ## Enter the username of the read-only credentials 
+  ## to connect to vCenter
+  ## see https://app.datadoghq.com/account/settings#integrations/vsphere
+  #
     username: datadog-readonly@vsphere.local
-    password: mypassword
 
-    # Set to false to disable SSL verification, when connecting to vCenter
-    # optional
-    # ssl_verify: true
+  ## @param password - string - required 
+  ## Enter the password of the read-only credentials 
+  ## to connect to vCenter
+  ## see https://app.datadoghq.com/account/settings#integrations/vsphere
+  # 
+    password: <PASSWORD>
 
-    # Set to the absolute file path of a directory containing CA certificates
-    # in PEM format
-    # optional
-    # ssl_capath: "/path/to/directory"
+  ## @param ssl_verify - boolean - optional - default: true
+  ## Set to false to disable SSL verification, when connecting to vCenter
+  #
+  #  ssl_verify: true
 
-    # Use a regex like this if you want only the check
-    # to fetch metrics for these ESXi hosts and the VMs
-    # running on it
-    # optional
-    # host_include_only_regex: .*\.prod.datadoghq.com
+  ## @param ssl_capath - string - optional
+  ## Set to the absolute file path of a directory containing CA certificates
+  ## in PEM format
+  #
+  #  ssl_capath: "<DIRECTORY_PATH>"
 
-    # Use a regex to include only the VMs that are
-    # matching this pattern.
-    # optional
-    # vm_include_only_regex: .*\.sql\.datadoghq\.com
+  ## @param host_include_only_regex - string - optional
+  ## Use a regex like this if you want only the check
+  ## to fetch metrics for these ESXi hosts and the VMs
+  ## running on it
+  #
+  #  host_include_only_regex: <REGEX>
 
-    # Set to true if you'd like to only collect metrics on vSphere VMs which
-    # are marked by a custom field with the value 'DatadogMonitored'
-    # To set this custom field with PowerCLI, use the follow command: 
-    #   Get-VM <MyVMName> | Set-CustomField -Name "DatadogMonitored" -Value "DatadogMonitored"
-    # optional
-    # include_only_marked: false
+  ## @param vm_include_only_regex - string - optional
+  ## Use a regex to include only the VMs that are
+  ## matching this pattern.
+  #
+  #  vm_include_only_regex: <REGEX>
 
-    # When set to true, this will collect EVERY metric
-    # from vCenter, which means a LOT of metrics you probably
-    # do not care about. We have selected a set of metrics
-    # that are interesting to monitor for you if false
-    # optional
-    # all_metrics: false # /!\ will generate a lot of metrics
+  ## @param include_only_marked - boolean - optional - default: false
+  ## Set to true if you'd like to only collect metrics on vSphere VMs which
+  ## are marked by a custom field with the value 'DatadogMonitored'
+  ## To set this custom field with PowerCLI, use the follow command: 
+  ##   Get-VM <MyVMName> | Set-CustomField -Name "DatadogMonitored" -Value "DatadogMonitored"
+  #
+  #  include_only_marked: false
 
-    # Event config is a dictionary
-    # For now the only switch you can flip is collect_vcenter_alarms
-    # which will send as events the alarms set in vCenter
-    # event_config:
-    #   collect_vcenter_alarms: true # defaults to false
+  ## @param all_metrics - boolean - optional - default: false
+  ## This parameter has been deprecated in favor of `collection_level`
+  ## Please set `collection_level: 4` if you want to collect all the metrics
+  ## available on your system.
+  #
+  #  all_metrics: false
 
-    # Set (optional) custom tags for each metric
-    # tags:
-    #   - optional:tag1
+  ## @param collection_level - integer - optional - default: 1
+  ## A number between 1 and 4 to specify how many metrics will be sent
+  ## 1: Only basic metrics - 4: every metric available.
+  ## Warning: Depending on the size of the vSphere environment, metric collection can be slow,
+  ## very CPU intensive and put pressure on the vCenter Server
+  # 
+  #  collection_level: 1
+
+  ## @param event_config - dictionary - optional 
+  ## Event config is a dictionary
+  ## For now the only switch you can flip is collect_vcenter_alarms
+  ## which will send as events the alarms set in vCenter
+  #
+  #  event_config:
+  #    collect_vcenter_alarms: true
+
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>

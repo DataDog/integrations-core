@@ -13,6 +13,9 @@
   "metric_prefix": "mysql.",
   "metric_to_check": "mysql.net.connections",
   "name": "MySQL",
+  "process_signatures": [
+    "mysqld"
+  ],
   "public_title": "Datadog-MySQL Integration",
   "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
   "support": "core",

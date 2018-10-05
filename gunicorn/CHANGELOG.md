@@ -1,5 +1,10 @@
 # CHANGELOG - gunicorn
 
+## 1.2.1 / 2018-09-04
+
+* [Fixed] Gunicorn intergration - fix problem with multiple master processes. See [#1839](https://github.com/DataDog/integrations-core/pull/1839). Thanks [mrmm](https://github.com/mrmm).
+* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.2.0 / 2018-03-23
 
 * [FEATURE] add custom tag support.

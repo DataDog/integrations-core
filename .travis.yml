@@ -28,7 +28,7 @@ stages:
     if: (branch = master) AND (type != pull_request)
 
 script:
-  - travis_retry ddev test ${CHECK}
+  - travis_retry ddev test --cov ${CHECK}
   - ddev test ${CHECK} --bench || true
 
 # Conditional jobs are currently buggy and verbose.
@@ -45,14 +45,16 @@ jobs:
       script:
         - ddev dep verify
         - ddev manifest verify --include-extras
-        - ddev test
+        - ddev metadata verify
+        - ddev test --cov
         - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base PYTHON3=true
       script:
         - ddev dep verify
         - ddev manifest verify --include-extras
-        - travis_retry ddev test ${CHECK}
+        - ddev metadata verify
+        - travis_retry ddev test --cov ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
       env: CHECK=datadog_checks_dev PYTHON3=true
@@ -77,6 +79,8 @@ jobs:
     - stage: test
       env: CHECK=cisco_aci
     - stage: test
+      env: CHECK=cockroachdb
+    - stage: test
       env: CHECK=consul
     - stage: test
       env: CHECK=couch
@@ -91,6 +95,8 @@ jobs:
     - stage: test
       env: CHECK=dotnetclr
     - stage: test
+      env: CHECK=ecs_fargate
+    - stage: test
       env: CHECK=elastic
     - stage: test
       env: CHECK=envoy PYTHON3=true
@@ -104,6 +110,8 @@ jobs:
       env: CHECK=gearmand
     - stage: test
       env: CHECK=gitlab
+    - stage: test
+      env: CHECK=go_expvar
     - stage: test
       env: CHECK=gunicorn
     - stage: test
@@ -122,6 +130,8 @@ jobs:
       env: CHECK=kafka_consumer
     - stage: test
       env: CHECK=kong
+    - stage: test
+      env: CHECK=kube_dns
     - stage: test
       env: CHECK=kube_proxy
     - stage: test
@@ -142,6 +152,10 @@ jobs:
       env: CHECK=marathon
     - stage: test
       env: CHECK=mcache
+    - stage: test
+      env: CHECK=mesos_slave
+    - stage: test
+      env: CHECK=mesos_master
     - stage: test
       env: CHECK=mongo
     - stage: test
@@ -171,6 +185,8 @@ jobs:
     - stage: test
       env: CHECK=postgres
     - stage: test
+      env: CHECK=postfix
+    - stage: test
       env: CHECK=powerdns_recursor
     - stage: test
       env: CHECK=process
@@ -183,6 +199,10 @@ jobs:
     - stage: test
       env: CHECK=riak
     - stage: test
+      env: CHECK=riakcs
+    - stage: test
+      env: CHECK=snmp
+    - stage: test
       env: CHECK=spark
     - stage: test
       env: CHECK=sqlserver
@@ -191,13 +211,19 @@ jobs:
     - stage: test
       env: CHECK=statsd
     - stage: test
+      env: CHECK=supervisord
+    - stage: test
       env: CHECK=squid
     - stage: test
       env: CHECK=system_core
     - stage: test
+      env: CHECK=system_swap
+    - stage: test
       env: CHECK=tcp_check
     - stage: test
       env: CHECK=teamcity
+    - stage: test
+      env: CHECK=tokumx
     - stage: test
       env: CHECK=twemproxy
     - stage: test
@@ -215,7 +241,7 @@ before_install:
   - .travis/prepare.sh
   - PATH="$PATH:$(pyenv root)/versions/3.6/bin"
 install:
-  - pip install -U pip setuptools
+  - pip install -U pip setuptools codecov
   - pip install ./datadog_checks_dev[cli]
   - ddev config set core .
 # we should clean generated files before we save the cache

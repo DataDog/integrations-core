@@ -11,6 +11,9 @@
   "metric_prefix": "pgbouncer.",
   "metric_to_check": "pgbouncer.pools.sv_idle",
   "name": "pgbouncer",
+  "process_signatures": [
+    "pgbouncer"
+  ],
   "public_title": "Datadog-PGBouncer Integration",
   "short_description": "Track connection pool metrics and monitor traffic to and from your application.",
   "support": "core",

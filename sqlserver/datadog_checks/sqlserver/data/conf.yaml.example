@@ -10,11 +10,13 @@ init_config:
   #
   # custom_metrics:
 
-    # This is a basic custom metric. There is not instance associated with
-    # this counter.
+    # This is a basic custom metric. There is no instance associated with
+    # this counter. You can specify optional tags to be sent.
     #
     # - name: sqlserver.clr.execution
     #   counter_name: CLR Execution
+    #   tags:
+    #     - tag_name:value
 
     # The counter_name field uses the counter name of SQL server database objects
     # https://docs.microsoft.com/en-us/sql/relational-databases/performance-monitor/sql-server-databases-object
@@ -25,6 +27,13 @@ init_config:
     # - name: sqlserver.exec.in_progress
     #   counter_name: OLEDB calls
     #   instance_name: Cumulative execution time (ms) per second
+
+    # You can also query by the object_name for finer granularity.
+    #
+    # - name: sqlserver.cache.hit_ratio
+    #   counter_name: Cache Hit Ratio
+    #   instance_name: SQL Plans
+    #   object_name: SQLServer:Plan Cache
 
     # This counter has multiple instances associated with it and we want
     # every instance available. We'll use the special case ALL instance
@@ -37,14 +46,14 @@ init_config:
     #   tag_by: db
 
     # the default table from which counters are drawn is the sys.dm_os_performance_counters
-    # table.  This integration also supports 
+    # table.  This integration also supports
     #  sys.dm_os_wait_stats
     #  sys.dm_os_memory_clerks
     #  sys.dm_io_virtual_file_stats
 
     # to report a metric drawn from one of the additional tables, specify the table in
     # the counter definition, as well as the counter columns to be reported
-    
+
     # - name: sqlserver.LCK_M_S
     #   table: sys.dm_os_wait_stats
     #   counter_name: LCK_M_S
@@ -68,7 +77,7 @@ init_config:
     # As well as capturing from the DMV you can also capture from a custom proc
     # Please note this feature will produce a number of custom metrics that might affect your billing
     # This feature is also only available when using the adodbapi driver (set by default)
-    # To use this feature, specify in your instance the procedure to execute : 
+    # To use this feature, specify in your instance the procedure to execute :
     # stored_procedure: ProcedureToExecute
     #
     # The proc should return this table
@@ -81,11 +90,11 @@ init_config:
     # )
     #
     # NOTE: SET NOCOUNT to ON inside proc to avoid extra resultsets that prevent valid query results
-    # 
+    #
     # You can also specify:
     # ignore_missing_database : if DB doesn't exist on the server then don't do the check. Default False
     # proc_only_if : run this SQL before each call to stored_procedure. Only if it returns 1 then call the proc
-    # proc_only_if_database : the database to run the proc_only_if SQL in. Optional. 
+    # proc_only_if_database : the database to run the proc_only_if SQL in. Optional.
     #                         Defaults to database attribute
     #
     # The proc_only_if guard condition is useful for HA scenarios where a database can move between servers.
@@ -95,9 +104,9 @@ instances:
 
   - host: HOST,PORT
 
-    # Optional. Choose the ADO provider.  Note that the (default) provider 
+    # Optional. Choose the ADO provider.  Note that the (default) provider
     # SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-    # provider, set the adoprovider to "MSOLEDBSQL" below.  You will also need 
+    # provider, set the adoprovider to "MSOLEDBSQL" below.  You will also need
     # to download the new provider from
     # https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
 
@@ -120,7 +129,7 @@ instances:
     # Optional, specify a custom connection string to be used
     # Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
     # connection_string: "my_connection_string"
-    
+
     # Optional, timeout in seconds for the connection and each command run
     # command_timeout: 30
     # database: my_database # Optional, defaults to "master"
@@ -137,4 +146,4 @@ instances:
   #   stored_procedure: GetDatadogMetrics
   #   proc_only_if: SELECT CASE CONVERT(sysname,DatabasePropertyEx('MyDB','Updateability')) WHEN 'READ_WRITE' THEN 1 ELSE 0 END
   #   proc_only_if_database: master
-  #   ignore_missing_database: True 
+  #   ignore_missing_database: True

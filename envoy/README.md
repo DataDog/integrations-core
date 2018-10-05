@@ -106,7 +106,7 @@ Setting | Description
 
 #### Metric filtering
 
-Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, the blacklist is applied as long as it doesn't conflict with the whitelist.
+Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, then whitelist is applied first, and then blacklist is applied on the resulting set.
 
 The filtering occurs before tag extraction, so you have the option to have certain tags decide whether or not to keep or ignore metrics. An exhaustive list of all metrics and tags can be found in [metrics.py][15]. Let's walk through an example of Envoy metric tagging!
 

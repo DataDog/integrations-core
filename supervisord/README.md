@@ -60,10 +60,10 @@ instances:
     host: localhost
     port: 9001
 
-# To collect from the socket instead
-# - name: supervisord0
-#   host: http://127.0.0.1
-#   socket: unix:///var/run//supervisor.sock
+ #To collect from the socket instead
+ #- name: supervisord0
+ #  host: http://127.0.0.1
+ #  socket: unix:///var/run//supervisor.sock
 ```
 
 Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).

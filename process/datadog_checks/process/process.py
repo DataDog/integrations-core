@@ -1,18 +1,14 @@
-# (C) Datadog, Inc. 2010-2017
-# (C) Luca Cipriani <luca@c9.io> 2013
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 import time
 import os
+import re
 import subprocess
 
-# 3p
 import psutil
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.platform import Platform
@@ -145,10 +141,10 @@ class ProcessCheck(AgentCheck):
                         cmdline = proc.cmdline()
                         if os.name == 'nt':
                             lstring = string.lower()
-                            if lstring in ' '.join(cmdline).lower():
+                            if re.search(lstring, ' '.join(cmdline).lower()):
                                 found = True
                         else:
-                            if string in ' '.join(cmdline):
+                            if re.search(string, ' '.join(cmdline)):
                                 found = True
                 except psutil.NoSuchProcess:
                     self.log.warning('Process disappeared while scanning')
@@ -188,7 +184,7 @@ class ProcessCheck(AgentCheck):
             result = {}
 
         # Ban certain method that we know fail
-        if method == 'memory_info_ex' and Platform.is_win32() or Platform.is_solaris():
+        if method == 'memory_info' and Platform.is_win32() or Platform.is_solaris():
             return result
         elif method == 'num_fds' and not Platform.is_unix():
             return result
@@ -264,7 +260,7 @@ class ProcessCheck(AgentCheck):
             st['mem_pct'].append(mem_percent)
 
             # will fail on win32 and solaris
-            shared_mem = self.psutil_wrapper(p, 'memory_info_ex', ['shared'], try_sudo).get('shared')
+            shared_mem = self.psutil_wrapper(p, 'memory_info', ['shared'], try_sudo).get('shared')
             if shared_mem is not None and meminfo.get('rss') is not None:
                 st['real'].append(meminfo['rss'] - shared_mem)
             else:

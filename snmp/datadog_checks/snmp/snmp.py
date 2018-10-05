@@ -2,23 +2,17 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# std
 from collections import defaultdict
-from functools import wraps
 
-# 3rd party
-from pysnmp.entity.rfc3413.oneliner import cmdgen
 import pysnmp.proto.rfc1902 as snmp_type
-from pysnmp.smi import builder
+from pysnmp.smi import builder, view
 from pysnmp.smi.exval import noSuchInstance, noSuchObject
 from pysnmp.error import PySnmpError
 from pyasn1.type.univ import OctetString
+from pysnmp import hlapi
 
-# project
-from checks.network_checks import NetworkCheck, Status
-from config import _is_affirmative
-
-
+from datadog_checks.checks.network import NetworkCheck, Status
+from datadog_checks.config import _is_affirmative
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 (CounterBasedGauge64, ZeroBasedCounter64) = builder.MibBuilder().importSymbols(
@@ -60,8 +54,6 @@ class SnmpCheck(NetworkCheck):
             if 'name' not in instance:
                 instance['name'] = self._get_instance_key(instance)
 
-        self.generators = {}
-
         # Set OID batch size
         self.oid_batch_size = int(init_config.get("oid_batch_size", DEFAULT_OID_BATCH_SIZE))
 
@@ -82,14 +74,9 @@ class SnmpCheck(NetworkCheck):
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
         enforce_constraints = _is_affirmative(instance.get('enforce_mib_constraints', True))
+        snmp_engine, mib_view_controller = self.create_snmp_engine(self.mibs_path)
 
-        instance_key = instance['name']
-        cmd_generator = self.generators.get(instance_key, None)
-        if not cmd_generator:
-            cmd_generator = self.create_command_generator(self.mibs_path, self.ignore_nonincreasing_oid)
-            self.generators[instance_key] = cmd_generator
-
-        return cmd_generator, ip_address, tags, metrics, timeout, retries, enforce_constraints
+        return snmp_engine, mib_view_controller, ip_address, tags, metrics, timeout, retries, enforce_constraints
 
     def _get_instance_key(self, instance):
         key = instance.get('name', None)
@@ -110,37 +97,20 @@ class SnmpCheck(NetworkCheck):
 
         return key
 
-    def snmp_logger(self, func):
-        """
-        Decorator to log, with DEBUG level, SNMP commands
-        """
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            self.log.debug("Running SNMP command {0} on OIDS {1}"
-                           .format(func.__name__, args[2:]))
-            result = func(*args, **kwargs)
-            self.log.debug("Returned vars: {0}".format(result[-1]))
-            return result
-        return wrapper
-
-    def create_command_generator(self, mibs_path, ignore_nonincreasing_oid):
+    def create_snmp_engine(self, mibs_path):
         '''
         Create a command generator to perform all the snmp query.
         If mibs_path is not None, load the mibs present in the custom mibs
         folder. (Need to be in pysnmp format)
         '''
-        cmd_generator = cmdgen.CommandGenerator()
-        cmd_generator.ignoreNonIncreasingOid = ignore_nonincreasing_oid
-
+        snmp_engine = hlapi.SnmpEngine()
+        mib_builder = snmp_engine.getMibBuilder()
         if mibs_path is not None:
-            mib_builder = cmd_generator.snmpEngine.msgAndPduDsp.\
-                mibInstrumController.mibBuilder
-            mib_sources = mib_builder.getMibSources() + \
-                (builder.DirMibSource(mibs_path), )
-            mib_builder.setMibSources(*mib_sources)
+            mib_builder.addMibSources(builder.DirMibSource(mibs_path))
 
-        return cmd_generator
+        mib_view_controller = view.MibViewController(mib_builder)
 
+        return snmp_engine, mib_view_controller
 
     @classmethod
     def get_auth_data(cls, instance):
@@ -154,9 +124,8 @@ class SnmpCheck(NetworkCheck):
 
             # See http://pysnmp.sourceforge.net/docs/current/security-configuration.html
             if int(instance.get("snmp_version", 2)) == 1:
-                return cmdgen.CommunityData(instance['community_string'],
-                    mpModel=0)
-            return cmdgen.CommunityData(instance['community_string'], mpModel=1)
+                return hlapi.CommunityData(instance['community_string'], mpModel=0)
+            return hlapi.CommunityData(instance['community_string'], mpModel=1)
 
         elif "user" in instance:
             # SNMP v3
@@ -167,23 +136,18 @@ class SnmpCheck(NetworkCheck):
             priv_protocol = None
             if "authKey" in instance:
                 auth_key = instance["authKey"]
-                auth_protocol = cmdgen.usmHMACMD5AuthProtocol
+                auth_protocol = hlapi.usmHMACMD5AuthProtocol
             if "privKey" in instance:
                 priv_key = instance["privKey"]
-                auth_protocol = cmdgen.usmHMACMD5AuthProtocol
-                priv_protocol = cmdgen.usmDESPrivProtocol
+                auth_protocol = hlapi.usmHMACMD5AuthProtocol
+                priv_protocol = hlapi.usmDESPrivProtocol
             if "authProtocol" in instance:
-                auth_protocol = getattr(cmdgen, instance["authProtocol"])
+                auth_protocol = getattr(hlapi, instance["authProtocol"])
             if "privProtocol" in instance:
-                priv_protocol = getattr(cmdgen, instance["privProtocol"])
-            return cmdgen.UsmUserData(user,
-                                      auth_key,
-                                      priv_key,
-                                      auth_protocol,
-                                      priv_protocol)
+                priv_protocol = getattr(hlapi, instance["privProtocol"])
+            return hlapi.UsmUserData(user, auth_key, priv_key, auth_protocol, priv_protocol)
         else:
             raise Exception("An authentication method needs to be provided")
-
 
     @classmethod
     def get_context_data(cls, instance):
@@ -205,7 +169,6 @@ class SnmpCheck(NetworkCheck):
 
         return context_engine_id, context_name
 
-
     @classmethod
     def get_transport_target(cls, instance, timeout, retries):
         '''
@@ -214,18 +177,17 @@ class SnmpCheck(NetworkCheck):
         if "ip_address" not in instance:
             raise Exception("An IP address needs to be specified")
         ip_address = instance["ip_address"]
-        port = int(instance.get("port", 161)) # Default SNMP port
-        return cmdgen.UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
+        port = int(instance.get("port", 161))  # Default SNMP port
+        return hlapi.UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
 
     def raise_on_error_indication(self, error_indication, instance):
         if error_indication:
-            message = "{0} for instance {1}".format(error_indication,
-                                                    instance["ip_address"])
+            message = "{} for instance {}".format(error_indication, instance["ip_address"])
             instance["service_check_error"] = message
             raise Exception(message)
 
-    def check_table(self, instance, cmd_generator, oids, lookup_names,
-                    timeout, retries, enforce_constraints=False):
+    def check_table(self, instance, snmp_engine, mib_view_controller, oids, lookup_names,
+                    timeout, retries, enforce_constraints=False, mibs_to_load=None):
         '''
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -244,8 +206,6 @@ class SnmpCheck(NetworkCheck):
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
 
         # Set aliases for snmpget and snmpgetnext with logging
-        snmpget = self.snmp_logger(cmd_generator.getCmd)
-        snmpgetnext = self.snmp_logger(cmd_generator.nextCmd)
         transport_target = self.get_transport_target(instance, timeout, retries)
         auth_data = self.get_auth_data(instance)
         context_engine_id, context_name = self.get_context_data(instance)
@@ -257,15 +217,17 @@ class SnmpCheck(NetworkCheck):
         while first_oid < len(oids):
             try:
                 # Start with snmpget command
-                error_indication, error_status, error_index, var_binds = snmpget(
+                oids_batch = oids[first_oid:first_oid + self.oid_batch_size]
+                self.log.debug("Running SNMP command get on OIDS {}".format(oids_batch))
+                error_indication, error_status, error_index, var_binds = next(hlapi.getCmd(
+                    snmp_engine,
                     auth_data,
                     transport_target,
-                    *(oids[first_oid:first_oid + self.oid_batch_size]),
-                    lookupValues=enforce_constraints,
-                    lookupNames=lookup_names,
-                    contextEngineId=context_engine_id,
-                    contextName=context_name
-                )
+                    hlapi.ContextData(context_engine_id, context_name),
+                    *(oids_batch),
+                    lookupMib=enforce_constraints
+                ))
+                self.log.debug("Returned vars: {}".format(var_binds))
 
                 # Raise on error_indication
                 self.raise_on_error_indication(error_indication, instance)
@@ -277,49 +239,50 @@ class SnmpCheck(NetworkCheck):
                     result_oid, value = var
                     if reply_invalid(value):
                         oid_tuple = result_oid.asTuple()
-                        oid = ".".join([str(i) for i in oid_tuple])
-                        missing_results.append(oid)
+                        missing_results.append(hlapi.ObjectType(hlapi.ObjectIdentity(oid_tuple)))
                     else:
                         complete_results.append(var)
 
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
-                    error_indication, error_status, error_index, var_binds_table = snmpgetnext(
+                    self.log.debug("Running SNMP command getNext on OIDS {}".format(missing_results))
+                    for error_indication, error_status, error_index, var_binds_table in hlapi.nextCmd(
+                        snmp_engine,
                         auth_data,
                         transport_target,
+                        hlapi.ContextData(context_engine_id, context_name),
                         *missing_results,
-                        lookupValues=enforce_constraints,
-                        lookupNames=lookup_names,
-                        contextEngineId=context_engine_id,
-                        contextName=context_name
-                    )
+                        lookupMib=enforce_constraints,
+                        ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
+                        lexicographicMode=False  # Don't walk through the entire MIB, stop at end of table
+                    ):
 
-                    # Raise on error_indication
-                    self.raise_on_error_indication(error_indication, instance)
+                        self.log.debug("Returned vars: {}".format(var_binds))
+                        # Raise on error_indication
+                        self.raise_on_error_indication(error_indication, instance)
 
-                    if error_status:
-                        message = "{0} for instance {1}".format(error_status.prettyPrint(),
-                                                                instance["ip_address"])
-                        instance["service_check_error"] = message
+                        if error_status:
+                            message = "{} for instance {}".format(error_status.prettyPrint(), instance["ip_address"])
+                            instance["service_check_error"] = message
 
-                        # submit CRITICAL service check if we can't connect to device
-                        if 'unknownUserName' in message:
-                            instance["service_check_severity"] = Status.CRITICAL
-                            self.log.error(message)
-                        else:
-                            self.warning(message)
+                            # submit CRITICAL service check if we can't connect to device
+                            if 'unknownUserName' in message:
+                                instance["service_check_severity"] = Status.CRITICAL
+                                self.log.error(message)
+                            else:
+                                self.warning(message)
 
-                    for table_row in var_binds_table:
-                        complete_results.extend(table_row)
+                        for table_row in var_binds_table:
+                            complete_results.append(table_row)
 
                 all_binds.extend(complete_results)
 
             except PySnmpError as e:
                 if "service_check_error" not in instance:
-                    instance["service_check_error"] = "Fail to collect some metrics: {0}".format(e)
+                    instance["service_check_error"] = "Fail to collect some metrics: {}".format(e)
                 if "service_check_severity" not in instance:
                     instance["service_check_severity"] = Status.CRITICAL
-                self.warning("Fail to collect some metrics: {0}".format(e))
+                self.warning("Fail to collect some metrics: {}".format(e))
 
             # if we fail move onto next batch
             first_oid = first_oid + self.oid_batch_size
@@ -330,13 +293,19 @@ class SnmpCheck(NetworkCheck):
 
         for result_oid, value in all_binds:
             if lookup_names:
+                if not enforce_constraints:
+                    # if enforce_constraints is false, then MIB resolution has not been done yet
+                    # so we need to do it manually. We have to specify the mibs that we will need
+                    # to resolve the name.
+                    oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple()).loadMibs(*mibs_to_load)
+                    result_oid = oid_to_resolve.resolveWithMib(mib_view_controller)
                 _, metric, indexes = result_oid.getMibSymbol()
                 results[metric][indexes] = value
             else:
                 oid = result_oid.asTuple()
                 matching = ".".join([str(i) for i in oid])
                 results[matching] = value
-        self.log.debug("Raw results: {0}".format(results))
+        self.log.debug("Raw results: {}".format(results))
         return results
 
     def _check(self, instance):
@@ -345,45 +314,54 @@ class SnmpCheck(NetworkCheck):
         and should be looked up and one for those specified by oids
         '''
 
-        cmd_generator, ip_address, tags, metrics, timeout, retries, enforce_constraints = self._load_conf(instance)
+        (snmp_engine, mib_view_controller, ip_address,
+         tags, metrics, timeout, retries, enforce_constraints) = self._load_conf(instance)
 
         if not metrics:
             raise Exception('Metrics list must contain at least one metric')
 
-        tags += ['snmp_device:{0}'.format(ip_address)]
+        tags += ['snmp_device:{}'.format(ip_address)]
 
         table_oids = []
         raw_oids = []
+        mibs_to_load = set()
 
         # Check the metrics completely defined
         for metric in metrics:
             if 'MIB' in metric:
                 try:
                     assert "table" in metric or "symbol" in metric
+                    if not enforce_constraints:
+                        # We need this only if we don't enforce constraints to be able to lookup MIBs manually
+                        mibs_to_load.add(metric["MIB"])
                     to_query = metric.get("table", metric.get("symbol"))
-                    table_oids.append(cmdgen.MibVariable(metric["MIB"], to_query))
+                    table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric["MIB"], to_query)))
                 except Exception as e:
                     self.log.warning("Can't generate MIB object for variable : %s\n"
                                      "Exception: %s", metric, e)
             elif 'OID' in metric:
-                raw_oids.append(metric['OID'])
+                raw_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID'])))
             else:
-                raise Exception('Unsupported metric in config file: %s' % metric)
+                raise Exception('Unsupported metric in config file: {}'.format(metric))
         try:
             if table_oids:
                 self.log.debug("Querying device %s for %s oids", ip_address, len(table_oids))
-                table_results = self.check_table(instance, cmd_generator, table_oids, True, timeout, retries,
-                                                 enforce_constraints=enforce_constraints)
+                table_results = self.check_table(
+                    instance, snmp_engine, mib_view_controller, table_oids, True, timeout, retries,
+                    enforce_constraints=enforce_constraints, mibs_to_load=mibs_to_load
+                )
                 self.report_table_metrics(metrics, table_results, tags)
 
             if raw_oids:
                 self.log.debug("Querying device %s for %s oids", ip_address, len(raw_oids))
-                raw_results = self.check_table(instance, cmd_generator, raw_oids, False, timeout, retries,
-                                               enforce_constraints=False)
+                raw_results = self.check_table(
+                    instance, snmp_engine, mib_view_controller, raw_oids, False, timeout, retries,
+                    enforce_constraints=False
+                )
                 self.report_raw_metrics(metrics, raw_results, tags)
         except Exception as e:
             if "service_check_error" not in instance:
-                instance["service_check_error"] = "Fail to collect metrics for {0} - {1}".format(instance['name'], e)
+                instance["service_check_error"] = "Fail to collect metrics for {} - {}".format(instance['name'], e)
             self.warning(instance["service_check_error"])
         finally:
             # Report service checks
@@ -396,7 +374,7 @@ class SnmpCheck(NetworkCheck):
             return [(self.SC_STATUS, Status.UP, None)]
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):
-        sc_tags = ['snmp_device:{0}'.format(instance["ip_address"])]
+        sc_tags = ['snmp_device:{}'.format(instance["ip_address"])]
         custom_tags = instance.get('tags', [])
         tags = sc_tags + custom_tags
 
@@ -477,9 +455,9 @@ class SnmpCheck(NetworkCheck):
                     metric_tags = metric_tags + metric.get('metric_tags')
                 self.submit_metric(name, val, forced_type, metric_tags)
             elif 'OID' in metric:
-                pass # This one is already handled by the other batch of requests
+                pass  # This one is already handled by the other batch of requests
             else:
-                raise Exception('Unsupported metric in config file: %s' % metric)
+                raise Exception('Unsupported metric in config file: {}'.format(metric))
 
     def get_index_tags(self, index, results, index_tags, column_tags):
         '''
@@ -501,7 +479,7 @@ class SnmpCheck(NetworkCheck):
             except IndexError:
                 self.log.warning("Not enough indexes, skipping this tag")
                 continue
-            tags.append("{0}:{1}".format(tag_group, tag_value))
+            tags.append("{}:{}".format(tag_group, tag_value))
         for col_tag in column_tags:
             tag_group = col_tag[0]
             try:
@@ -514,7 +492,7 @@ class SnmpCheck(NetworkCheck):
                                  tag_group)
                 continue
             tag_value = tag_value.prettyPrint()
-            tags.append("{0}:{1}".format(tag_group, tag_value))
+            tags.append("{}:{}".format(tag_group, tag_value))
         return tags
 
     def submit_metric(self, name, snmp_value, forced_type, tags=None):
@@ -525,7 +503,7 @@ class SnmpCheck(NetworkCheck):
         tags = [] if tags is None else tags
         if reply_invalid(snmp_value):
             # Metrics not present in the queried object
-            self.log.warning("No such Mib available: %s" % name)
+            self.log.warning("No such Mib available: {}".format(name))
             return
 
         metric_name = self.normalize(name, prefix="snmp")
@@ -538,8 +516,8 @@ class SnmpCheck(NetworkCheck):
                 value = int(snmp_value)
                 self.rate(metric_name, value, tags)
             else:
-                self.warning("Invalid forced-type specified: {0} in {1}".format(forced_type, name))
-                raise Exception("Invalid forced-type in config file: {0}".format(name))
+                self.warning("Invalid forced-type specified: {} in {}".format(forced_type, name))
+                raise Exception("Invalid forced-type in config file: {}".format(name))
 
             return
 

@@ -25,6 +25,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Set](#set)
       - [Show](#show)
       - [Update](#update)
+    - [Create](#create)
     - [Dep](#dep)
       - [Freeze](#freeze)
       - [Pin](#pin)
@@ -33,6 +34,8 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
     - [Manifest](#manifest)
       - [Set](#set-1)
       - [Verify](#verify-1)
+    - [Metadata](#metadata)
+      - [Verify](#verify-2)
     - [Release](#release)
       - [Changelog](#changelog)
       - [Freeze](#freeze-1)
@@ -43,6 +46,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Tag](#tag)
       - [Testable](#testable)
       - [Upload](#upload)
+    - [Run](#run)
     - [Test](#test)
 - [Development](#development)
   - [Installation](#installation-1)
@@ -53,6 +57,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
     - [Utilities](#utilities)
       - [Subprocess commands](#subprocess-commands)
       - [Temporary directories](#temporary-directories)
+  - [Practices](#practices)
 
 ## Management
 
@@ -61,7 +66,7 @@ This is the layer that provides the developer CLI.
 ### Installation
 
 ```console
-$ pip install datadog-checks-dev[cli]
+$ pip install "datadog-checks-dev[cli]"
 ```
 
 At this point there should be a working executable, `ddev`, in your PATH. The
@@ -79,6 +84,7 @@ $ ddev
 Usage: ddev [OPTIONS] COMMAND [ARGS]...
 
 Options:
+  -c, --core    Work on `integrations-core`.
   -e, --extras  Work on `integrations-extras`.
   -x, --here    Work on the current location.
   -q, --quiet
@@ -88,8 +94,10 @@ Options:
 Commands:
   clean     Remove a project's build artifacts
   config    Manage the config file
+  create    Create scaffolding for a new integration
   dep       Manage dependencies
   manifest  Manage manifest files
+  metadata  Manage metadata files
   release   Manage the release of checks
   test      Run tests
 ```
@@ -217,6 +225,23 @@ Options:
   -h, --help  Show this message and exit.
 ```
 
+#### Create
+
+```console
+$ ddev create -h
+Usage: ddev create [OPTIONS] NAME
+
+  Create scaffolding for a new integration.
+
+Options:
+  -t, --type [check|jmx|tile]  The type of integration to create
+  -l, --location TEXT          The directory where files will be written
+  -ni, --non-interactive       Disable prompting for fields
+  -q, --quiet                  Show less output
+  -n, --dry-run                Only show what would be created
+  -h, --help                   Show this message and exit.
+```
+
 #### Dep
 
 ```console
@@ -333,6 +358,34 @@ Options:
   -h, --help            Show this message and exit.
 ```
 
+#### Metadata
+
+```console
+$ ddev metadata -h
+Usage: ddev metadata [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  verify  Validate `metadata.csv` files, takes optional `check` argument
+```
+
+##### Verify
+
+```console
+$ ddev metadata verify -h
+Usage: ddev metadata verify [OPTIONS] [CHECK]
+
+  Validates metadata.csv files
+
+  If `check` is specified, only the check will be validated, otherwise all
+  matching files in directory.
+
+Options:
+  -h, --help  Show this message and exit.
+```
+
 #### Release
 
 ```console
@@ -387,17 +440,26 @@ Options:
 
 ```console
 $ ddev release make -h
-Usage: ddev release make [OPTIONS] CHECK VERSION
+Usage: ddev release make [OPTIONS] CHECK [VERSION]
 
   Perform a set of operations needed to release a single check:
 
-  * update the version in __about__.py
-  * update the changelog
-  * update the requirements-agent-release.txt file
-  * commit the above changes
+    * update the version in __about__.py
+    * update the changelog
+    * update the requirements-agent-release.txt file
+    * update in-toto metadata
+    * commit the above changes
+
+  You can release everything at once by setting the check to `all`.
+
+  If you run into issues signing:
+
+    - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
 
 Options:
-  -h, --help  Show this message and exit.
+  --skip-sign  Skip the signing of release metadata
+  --sign-only  Only sign release metadata
+  -h, --help   Show this message and exit.
 ```
 
 ##### Show
@@ -455,6 +517,8 @@ Usage: ddev release tag [OPTIONS] CHECK [VERSION]
   Tag the HEAD of the git repo with the current release number for a
   specific check. The tag is pushed to origin by default.
 
+  You can tag everything at once by setting the check to `all`.
+
   Notice: specifying a different version than the one in __about__.py is a
   maintenance task that should be run under very specific circumstances
   (e.g. re-align an old release performed on the wrong commit).
@@ -507,6 +571,15 @@ Options:
   -h, --help     Show this message and exit.
 ```
 
+#### Run
+
+```console
+$ pwd
+C:\Users\ofek.lev\Desktop
+$ ddev run pwd
+C:\Users\ofek.lev\Desktop\code\integrations-core
+```
+
 #### Test
 
 ```console
@@ -518,10 +591,22 @@ Usage: ddev test [OPTIONS] [CHECKS]...
   If no checks are specified, this will only test checks that were changed
   compared to the master branch.
 
+  You can also select specific comma-separated environments to test like so:
+
+  $ ddev test mysql:mysql57,maria10130
+
 Options:
-  -b, --bench  Run only benchmarks
-  --every      Run every kind of test
-  -h, --help   Show this message and exit.
+  -s, --style        Run only style checks
+  -b, --bench        Run only benchmarks
+  -c, --cov          Measure code coverage
+  -m, --cov-missing  Show line numbers of statements that were not executed
+  --pdb              Drop to PDB on first failure, then end test session
+  -d, --debug        Set the log level to debug
+  -v, --verbose      Increase verbosity (can be used additively)
+  -l, --list         List available test environments
+  --changed          Only test changed checks
+  --cov-keep         Keep coverage reports
+  -h, --help         Show this message and exit.
 ```
 
 ## Development
@@ -621,6 +706,11 @@ Some examples:
 >>> assert origin == os.getcwd()
 >>>
 ```
+
+### Practices
+
+- If you see branches or functions that are unlikely to be executed or would be nearly impossible to
+  test, exclude them from code coverage consideration by adding 2 spaces followed by `# no cov`.
 
 [1]: https://github.com/DataDog/datadog-agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/stubs/aggregator.py

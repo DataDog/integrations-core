@@ -32,6 +32,7 @@ setup(
     version=ABOUT["__version__"],
     description='The Windows Performance Counters check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent pdh_check check',
 
     # The project's main homepage.
