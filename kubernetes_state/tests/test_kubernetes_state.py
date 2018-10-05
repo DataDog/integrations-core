@@ -91,6 +91,8 @@ METRICS = [
     NAMESPACE + '.resourcequota.limits.memory.limit',
     # limitrange
     NAMESPACE + '.limitrange.cpu.default_request',
+    # services
+    NAMESPACE + '.service.count',
 ]
 
 TAGS = {
@@ -121,7 +123,14 @@ TAGS = {
     ],
     NAMESPACE + '.persistentvolumeclaim.request_storage': [
         'storageclass:manual'
-    ]
+    ],
+    NAMESPACE + '.service.count': [
+        'namespace:kube-system',
+        'namespace:default',
+        'type:ClusterIP',
+        'type:NodePort',
+        'type:LoadBalancer',
+    ],
 }
 
 JOINED_METRICS = {
