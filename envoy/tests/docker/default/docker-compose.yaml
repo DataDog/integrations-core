@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 
 services:
 
@@ -10,8 +10,6 @@ services:
         ENVOY_VERSION: ${ENVOY_VERSION}
     volumes:
       - ./front-envoy.yaml:/etc/front-envoy.yaml
-    networks:
-      - envoymesh
     expose:
       - "80"
       - "8001"
@@ -26,7 +24,7 @@ services:
     volumes:
       - ./service-envoy.yaml:/etc/service-envoy.yaml
     networks:
-      envoymesh:
+      default:
         aliases:
           - service1
     environment:
@@ -41,7 +39,7 @@ services:
     volumes:
       - ./service-envoy.yaml:/etc/service-envoy.yaml
     networks:
-      envoymesh:
+      default:
         aliases:
           - service2
     environment:
@@ -50,4 +48,5 @@ services:
       - "80"
 
 networks:
-  envoymesh: {}
+  default:
+    name: dd_envoy

@@ -11,6 +11,10 @@ INSTANCES = {
         'tags': ['instance:foobar'],
         'detect_leader': True,
     },
+    'e2e': {
+        'api_url': 'http://vault:{}/v1'.format(PORT),
+        'detect_leader': True,
+    },
     'bad_url': {
         'api_url': 'http://1.2.3.4:555/v1',
         'tags': ['instance:foobar'],

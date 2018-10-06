@@ -15,6 +15,9 @@ INSTANCES = {
     'main': {
         'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
     },
+    'e2e': {
+        'stats_url': 'http://front-envoy:{}/stats'.format(PORT),
+    },
     'whitelist': {
         'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
         'metric_whitelist': [

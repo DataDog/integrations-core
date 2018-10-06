@@ -19,4 +19,4 @@ def dd_environment():
         build=True,
         endpoints=instance['stats_url']
     ):
-        yield instance
+        yield INSTANCES['e2e']
