@@ -20,4 +20,4 @@ def dd_environment():
         os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
         endpoints='{}/sys/health'.format(instance['api_url'])
     ):
-        yield instance
+        yield INSTANCES['e2e']

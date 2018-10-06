@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 
 services:
   cockroachdb:
@@ -12,8 +12,7 @@ services:
     ports:
       - "26257:26257"
       - "8080:8080"
-    networks:
-     - roachnet
 
 networks:
-  roachnet: {}
+  default:
+    name: dd_cockroachdb
