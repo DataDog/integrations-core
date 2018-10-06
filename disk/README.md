@@ -27,8 +27,7 @@ See [metadata.csv][4] for a list of metrics provided by this integration.
 The Disk check does not include any events at this time.
 
 ### Service Checks
-
-**`disk.service_check_rw`**:
+**`disk.read_write`**:
 Returns `CRITICAL` if filesystem is in read-only mode.
 
 ## Troubleshooting

@@ -2,7 +2,7 @@
     {
         "agent_version": "6.5.0",
         "integration":"disk",
-        "check": "disk.service_check_rw",
+        "check": "disk.read_write",
         "statuses": ["ok", "critical", "unknown"],
         "groups": ["device"],
         "name": "Disk read_write",
