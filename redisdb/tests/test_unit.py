@@ -30,7 +30,7 @@ def test__get_conn(check):
     assert conn2 != conn1
 
 
-def test__check_command_stats(check, aggregator):
+def test__check_command_stats_host(check, aggregator):
     conn = mock.MagicMock()
     conn.info.return_value = {
         # this is from a real use case in Redis >5.0 where this line can be
@@ -47,3 +47,19 @@ def test__check_command_stats(check, aggregator):
     expected_tags = ['foo:bar', 'command:host']
     aggregator.assert_metric('redis.command.calls', value=2, count=1, tags=expected_tags)
     aggregator.assert_metric('redis.command.usec_per_call', value=72.5, count=1, tags=expected_tags)
+
+    aggregator.reset()
+
+    # test a normal command, too
+    conn.info.return_value = {
+        'cmdstat_lpush': {
+            'usec_per_call': 14.00,
+            'usec': 56,
+            'calls': 4
+        }
+    }
+    check._check_command_stats(conn, ['foo:bar'])
+
+    expected_tags = ['foo:bar', 'command:lpush']
+    aggregator.assert_metric('redis.command.calls', value=4, count=1, tags=expected_tags)
+    aggregator.assert_metric('redis.command.usec_per_call', value=14.00, count=1, tags=expected_tags)
