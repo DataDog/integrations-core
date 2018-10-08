@@ -176,8 +176,9 @@ class PostfixCheck(AgentCheck):
                 count = sum(len(files) for root, dirs, files in os.walk(queue_path))
             else:
                 # can dd-agent user run sudo?
-                test_sudo = os.system('setsid sudo -l < /dev/null')
-                if test_sudo == 0:
+                test_sudo = ['sudo', '-l']
+                _, _, exit_code = get_subprocess_output(test_sudo, self.log, False)
+                if exit_code == 0:
                     # default to `root` for backward compatibility
                     postfix_user = self.init_config.get('postfix_user', 'root')
                     cmd = ['sudo', '-u', postfix_user, 'find', queue_path, '-type', 'f']
