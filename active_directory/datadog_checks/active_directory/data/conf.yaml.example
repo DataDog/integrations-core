@@ -13,7 +13,7 @@ instances:
   #
   #  username: <USER_NAME>
 
-  ## @param password - string optional
+  ## @param password - string - optional
   ## Password from the credentials needed to connect to the host.
   #
   #  password: <PASSWORD>
