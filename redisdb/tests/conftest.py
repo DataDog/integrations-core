@@ -7,6 +7,7 @@ import time
 import pytest
 import redis
 
+from datadog_checks.redisdb import Redis
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from .common import HOST, PORT, MASTER_PORT, REPLICA_PORT, PASSWORD
 
@@ -86,13 +87,6 @@ def redis_cluster():
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture
 def redis_instance():
     return {
         'host': HOST,
@@ -118,3 +112,8 @@ def master_instance():
         'host': HOST,
         'port': MASTER_PORT,
     }
+
+
+@pytest.fixture
+def check():
+    return Redis('redisdb', {}, {}, None)

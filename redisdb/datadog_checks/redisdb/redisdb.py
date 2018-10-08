@@ -408,8 +408,13 @@ class Redis(AgentCheck):
 
         for key, stats in command_stats.iteritems():
             command = key.split('_', 1)[1]
-            command_tags = tags + ['command:%s' % command]
-            self.gauge('redis.command.calls', stats['calls'], tags=command_tags)
+            command_tags = tags + ['command:{}'.format(command)]
+
+            # When `host:` is passed as a command, `calls` ends up having a leading `:`
+            # see https://github.com/DataDog/integrations-core/issues/839
+            calls = stats.get('calls') if command != 'host' else stats.get(':calls')
+
+            self.gauge('redis.command.calls', calls, tags=command_tags)
             self.gauge('redis.command.usec_per_call', stats['usec_per_call'], tags=command_tags)
 
     def check(self, instance):
