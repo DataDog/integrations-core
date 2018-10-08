@@ -22,32 +22,22 @@ init_config:
    - mibs_folder: /path/to/your/additional/mibs
 
 instances:
-  # SNMP v1-v2 configuration
-  #
    - ip_address: localhost
      port: 161
      community_string: public
   #  snmp_version: 2 # Only required for snmp v1, will default to 2
-     timeout: 1      # in seconds; default is 1
+     timeout: 1
      retries: 5
   #  enforce_mib_constraints: true # set to false to NOT verify that returned values
   #                                # returned meet MIB constraints. Defaults to true
-  #  tags:
-  #    - optional_tag_1
-  #    - optional_tag_2
-  #
-  #  # Specify metrics you want to monitor
+
      metrics:
        - MIB: UDP-MIB
          symbol: udpInDatagrams
        - MIB: TCP-MIB
          symbol: tcpActiveOpens
-  #    # If it's just a scalar, you can specify by OID and name it
        - OID: 1.3.6.1.2.1.6.5
          name: tcpPassiveOpens
-  #    # You can also query a table and specify
-  #    #   - which columns to report as value (symbols)
-  #    #   - which columns / indexes to use as tags (metric_tags)
        - MIB: IF-MIB
          table: ifTable
          symbols:
@@ -55,40 +45,34 @@ instances:
            - ifOutOctets
          metric_tags:
            - tag: interface
-             column: ifDescr   # specify which column to read the tag value from
+             column: ifDescr
        - MIB: IP-MIB
           table: ipSystemStatsTable
           symbols:
             - ipSystemStatsInReceives
           metric_tags:
             - tag: ipversion
-              index: 1        # specify which index you want to read the tag value from
+              index: 1
 ```
 
 #### SNMP v3 configuration
+
+Note: Refer to the [SNMP Library reference][12] to see all configuration options.
 
 ```
 init_config:
    - mibs_folder: /path/to/your/additional/mibs
 
 instances:
-  # SNMP v3 configuration
-  # check http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
-  #
    - ip_address: 192.168.34.10
-     port: 161 # default value
-     user: user
-     authKey: password
-     privKey: private_key
-     authProtocol: authProtocol          # long string format e.g. usmHMAC192SHA256AuthProtocol
-     privProtocol: privProtocol          # long string format e.g. usmAesCfb256Protocol
-     context_engine_id: contextEngineId  # optional v3-only parameter - typically unneeded
-    #   context_name: contextName        # optional v3-only parameter
-    #   timeout: 1 # second, by default
+     port: 161
+     user: <USERNAME>
+     authKey: <PASSWORD>
+     privKey: <PRIVACY_TYPE_KEY>
+     authProtocol: <AUTHENTICATION_PROTOCOL>
+     privProtocol: <PRIVACY_TYPE>
+     timeout: 1 # second, by default
      retries: 5
-    #   tags:
-    #     - optional_tag_1
-    #     - optional_tag_2
      metrics:
        - MIB: UDP-MIB
          symbol: udpInDatagrams
@@ -241,3 +225,4 @@ Additional helpful documentation, links, and articles:
 [9]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
 [10]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
 [11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[12]: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
