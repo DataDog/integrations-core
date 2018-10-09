@@ -364,7 +364,6 @@ class ESCheck(AgentCheck):
         "elasticsearch.fs.total.disk_writes": ("rate", "fs.io_stats.total.write_operations"),
         "elasticsearch.fs.total.disk_read_size_in_bytes": ("gauge", "fs.io_stats.total.read_kilobytes"),
         "elasticsearch.fs.total.disk_write_size_in_bytes": ("gauge", "fs.io_stats.total.write_kilobytes"),
-        # Some of these exist in previous ES versions but not worth the time/effort to support fine grain
         "elasticsearch.breakers.inflight_requests.tripped": ("gauge", "breakers.inflight_requests.tripped"),
         "elasticsearch.breakers.inflight_requests.overhead": ("gauge", "breakers.inflight_requests.overhead"),
         "elasticsearch.breakers.inflight_requests.estimated_size_in_bytes": ("gauge", "breakers.inflight_requests.estimated_size_in_bytes"),
