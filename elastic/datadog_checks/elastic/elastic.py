@@ -841,7 +841,7 @@ class ESCheck(AgentCheck):
 
         cluster_health_metrics = self.CLUSTER_HEALTH_METRICS
         if version >= [2, 4, 0]:
-            cluster_health_metrics += self.CLUSTER_HEALTH_METRICS_POST_2_4
+            cluster_health_metrics.update(self.CLUSTER_HEALTH_METRICS_POST_2_4)
 
         for metric, desc in cluster_health_metrics.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
