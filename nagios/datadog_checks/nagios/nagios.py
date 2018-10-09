@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 from collections import namedtuple
+import json
 import re
 from inspect import getargspec
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.tailfile import TailFile
 
@@ -339,17 +338,27 @@ class NagiosEventLogTailer(NagiosTailer):
         # specification will be dropped.
         event_payload = fields._asdict()
 
-        msg_title = "event_soft_hard:" + event_payload.get('event_soft_hard', " ")
-        msg_title += "|" + "event_type:" + event_payload.get('event_type', " ")
-        msg_title += "|" + "check_name:" + event_payload.get('check_name', " ")
-        msg_title += "|" + "event_state:" + event_payload.get('event_state', " ")
-        msg_title += "|" + "payload:" + event_payload.get('payload', " ")
-        msg_title += "|" + "ack_author:" + event_payload.get('ack_author', " ")
+        json_text = """{
+            "event_type": "%s",
+            "event_soft_hard": "%s",
+            "check_name": "%s",
+            "event_state": "%s",
+            "payload": "%s",
+            "ack_author": "%s"
+        }""" % (
+                event_payload.pop('event_type', None),
+                event_payload.pop('event_soft_hard', None),
+                event_payload.pop('check_name', None),
+                event_payload.pop('event_state', None),
+                event_payload.pop('payload', None),
+                event_payload.pop('ack_author', None)
+        )
+        msg_text = json.loads(json_text)
 
         event_payload.update({
                 'timestamp': timestamp,
                 'event_type': event_type,
-                'msg_title': msg_title,
+                'msg_text': msg_text,
                 'source_type_name': SOURCE_TYPE_NAME,
         })
 
