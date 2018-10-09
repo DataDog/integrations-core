@@ -206,6 +206,7 @@ elasticsearch.transport.server_open,gauge,,connection,,The number of connections
 elasticsearch.transport.tx_count,gauge,,packet,,The total number of packets sent in cluster communication.,0,elasticsearch,transport packets sent
 elasticsearch.transport.tx_size,gauge,,byte,,The total size of data sent in cluster communication.,0,elasticsearch,transport bytes sent
 elasticsearch.unassigned_shards,gauge,,shard,,The number of shards that are unassigned to a node.,0,elasticsearch,unassigned shards
+elasticsearch.delayed_unassigned_shards,gauge,,shard,,The number of shards whose allocation has been delayed.,0,elasticsearch,delayed unassigned shards
 jvm.gc.collection_count,gauge,,garbage collection,,The total number of garbage collections run by the JVM.,0,elasticsearch,jvm gc count
 jvm.gc.collection_time,gauge,,second,,The total time spent on garbage collection in the JVM.,0,elasticsearch,jvm gc time
 jvm.gc.collectors.old.collection_time,gauge,,second,,The total time spent in major GCs in the JVM that collect old generation objects.,0,elasticsearch,jvm old gc time

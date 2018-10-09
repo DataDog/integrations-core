@@ -395,6 +395,10 @@ class ESCheck(AgentCheck):
         "elasticsearch.cluster_status": ("gauge", "status", lambda v: {"red": 0, "yellow": 1, "green": 2}.get(v, -1)),
     }
 
+    CLUSTER_HEALTH_METRICS_POST_2_4 = {
+        "elasticsearch.delayed_unassigned_shards": ("gauge", "delayed_unassigned_shards"),
+    }
+
     CLUSTER_PENDING_TASKS = {
         "elasticsearch.pending_tasks_total": ("gauge", "pending_task_total"),
         "elasticsearch.pending_tasks_priority_high": ("gauge", "pending_tasks_priority_high"),
@@ -510,7 +514,7 @@ class ESCheck(AgentCheck):
         # Load the health data.
         health_url = self._join_url(config.url, health_url, admin_forwarder)
         health_data = self._get_data(health_url, config)
-        self._process_health_data(health_data, config)
+        self._process_health_data(health_data, config, version)
 
         if config.pending_task_stats:
             # Load the pending_tasks data.
@@ -822,7 +826,7 @@ class ESCheck(AgentCheck):
         else:
             self._metric_not_found(metric, path)
 
-    def _process_health_data(self, data, config):
+    def _process_health_data(self, data, config, version):
         cluster_status = data.get('status')
         if not self.cluster_status.get(config.url):
             self.cluster_status[config.url] = cluster_status
@@ -834,6 +838,10 @@ class ESCheck(AgentCheck):
             self.cluster_status[config.url] = cluster_status
             event = self._create_event(cluster_status, tags=config.tags)
             self.event(event)
+
+        cluster_health_metrics = self.CLUSTER_HEALTH_METRICS
+        if version >= [2, 4, 0]:
+            cluster_health_metrics += self.CLUSTER_HEALTH_METRICS_POST_2_4
 
         for metric, desc in self.CLUSTER_HEALTH_METRICS.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
