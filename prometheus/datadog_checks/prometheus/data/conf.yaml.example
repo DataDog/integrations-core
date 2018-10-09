@@ -18,9 +18,7 @@ instances:
   ## This list should contain at least one metric
   #
     metrics:
-      - processor: cpu
-  #    - memory: mem
-  #    - io
+      - <METRIC_TO_FETCH>: <NEW_NAME>
 
   ## @param prometheus_metrics_prefix - string - optional
   ## Prefix for exposed Prometheus metrics.
