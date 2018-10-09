@@ -349,11 +349,11 @@ class PrometheusScraperMixin(object):
                         _l.value = _metric['labels'][lbl]
         return _obj
 
-    def scrape_metrics(self, endpoint):
+    def scrape_metrics(self, endpoint, pFormat=None):
         """
         Poll the data from prometheus and return the metrics as a generator.
         """
-        response = self.poll(endpoint)
+        response = self.poll(endpoint, pFormat)
         try:
             # no dry run if no label joins
             if not self.label_joins:
@@ -389,7 +389,10 @@ class PrometheusScraperMixin(object):
         if instance:
             kwargs['custom_tags'] = instance.get('tags', [])
 
-        for metric in self.scrape_metrics(endpoint):
+        # define in config the pFormat if there is any
+        pFormat = instance.get('pFormat') if instance.get('pFormat') else None
+
+        for metric in self.scrape_metrics(endpoint, pFormat=pFormat):
             self.process_metric(metric, **kwargs)
 
     def store_labels(self, message):
@@ -499,6 +502,10 @@ class PrometheusScraperMixin(object):
             headers['accept-encoding'] = 'gzip'
         if pFormat == PrometheusFormat.PROTOBUF:
             headers['accept'] = 'application/vnd.google.protobuf; ' \
+                                'proto=io.prometheus.client.MetricFamily; ' \
+                                'encoding=delimited'
+        elif pFormat == PrometheusFormat.TEXT:
+            headers['accept'] = 'plain/text; ' \
                                 'proto=io.prometheus.client.MetricFamily; ' \
                                 'encoding=delimited'
         headers.update(self.extra_headers)
