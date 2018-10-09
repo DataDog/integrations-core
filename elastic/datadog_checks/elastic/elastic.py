@@ -366,7 +366,8 @@ class ESCheck(AgentCheck):
         "elasticsearch.fs.total.disk_write_size_in_bytes": ("gauge", "fs.io_stats.total.write_kilobytes"),
         "elasticsearch.breakers.inflight_requests.tripped": ("gauge", "breakers.inflight_requests.tripped"),
         "elasticsearch.breakers.inflight_requests.overhead": ("gauge", "breakers.inflight_requests.overhead"),
-        "elasticsearch.breakers.inflight_requests.estimated_size_in_bytes": ("gauge", "breakers.inflight_requests.estimated_size_in_bytes"),
+        "elasticsearch.breakers.inflight_requests.estimated_size_in_bytes":
+            ("gauge", "breakers.inflight_requests.estimated_size_in_bytes"),
     }
 
     ADDITIONAL_METRICS_PRE_6_3 = {
