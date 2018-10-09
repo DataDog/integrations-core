@@ -27,4 +27,4 @@ instances:
     #
     # Send (deprecated) pod.phase service checks (default false)
     # We recommend using the corresponding gauges instead, which benefit from historical data unlike service checks
-    # send_pod_phase_service_checks: true
+    # send_pod_phase_service_checks: false
