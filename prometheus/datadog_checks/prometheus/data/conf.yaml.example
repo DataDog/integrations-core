@@ -12,13 +12,13 @@ instances:
   #
   #  namespace: <SERVICE_NAME>
 
-  ## @param metrics - list of key:value elements - optional
+  ## @param metrics - list of key:value elements - required
   ## List of metrics to be fetched from the prometheus endpoint, if there's a value it'll be renamed
   ## The format is <METRIC_TO_FETCH>: <NEW_NAME>
   ## This list should contain at least one metric
   #
-  #  metrics:
-  #    - processor: cpu
+    metrics:
+      - processor: cpu
   #    - memory: mem
   #    - io
 

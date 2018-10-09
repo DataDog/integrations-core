@@ -20,3 +20,4 @@ instances:
   ## Set a timeout in second for the prometheus query.
   # 
   #  prometheus_timeout: 10
+  
