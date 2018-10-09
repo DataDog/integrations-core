@@ -843,7 +843,7 @@ class ESCheck(AgentCheck):
         if version >= [2, 4, 0]:
             cluster_health_metrics += self.CLUSTER_HEALTH_METRICS_POST_2_4
 
-        for metric, desc in self.CLUSTER_HEALTH_METRICS.iteritems():
+        for metric, desc in cluster_health_metrics.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
 
         # Process the service check
