@@ -390,7 +390,7 @@ class PrometheusScraperMixin(object):
             kwargs['custom_tags'] = instance.get('tags', [])
 
         # define in config the pFormat if there is any
-        pFormat = instance.get('pFormat') if instance.get('pFormat') else None
+        pFormat = instance.get('pFormat') if instance.get('pFormat')
 
         for metric in self.scrape_metrics(endpoint, pFormat=pFormat):
             self.process_metric(metric, **kwargs)
