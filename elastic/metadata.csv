@@ -10,6 +10,9 @@ elasticsearch.breakers.parent.tripped,gauge,,,,The number of times the parent ci
 elasticsearch.breakers.request.estimated_size_in_bytes,gauge,,byte,,The estimated size in bytes of the request circuit breaker.,0,elasticsearch,req breaker size
 elasticsearch.breakers.request.overhead,gauge,,,,The constant multiplier for byte estimations of the request circuit breaker.,0,elasticsearch,req breaker overhead
 elasticsearch.breakers.request.tripped,gauge,,,,The number of times the request circuit breaker has tripped.,0,elasticsearch,req breaker tripped
+elasticsearch.breakers.inflight_requests.tripped,gauge,,,,The number of times the inflight circuit breaker has tripped.,0,elasticsearch,inflight breaker tripped
+elasticsearch.breakers.inflight_requests.overhead,gauge,,,,The constant multiplier for byte estimations of the inflight circuit breaker.,0,elasticsearch,inflight breaker overhead
+elasticsearch.breakers.inflight_requests.estimated_size_in_bytes,gauge,,byte,,The estimated size in bytes of the inflight circuit breaker.,0,elasticsearch,req breaker size
 elasticsearch.cache.field.evictions,gauge,,eviction,,The total number of evictions from the field data cache.,0,elasticsearch,field cache evictions
 elasticsearch.cache.field.size,gauge,,byte,,The size of the field cache.,0,elasticsearch,field cache size
 elasticsearch.cache.filter.count,gauge,,item,,The number of items in the filter cache.,0,elasticsearch,filter cache elements
