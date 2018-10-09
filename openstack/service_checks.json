@@ -3,7 +3,7 @@
         "agent_version": "5.6.0",
         "check": "openstack.neutron.api.up",
         "statuses": ["ok", "critical", "unknown"],
-        "name": "Is Up",
+        "name": "OpenStack Neutron API Up",
         "groups": ["host", "keystone_server"],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -11,7 +11,7 @@
         "agent_version": "5.6.0",
         "check": "openstack.nova.api.up",
         "statuses": ["ok", "critical", "unknown"],
-        "name": "Is Up",
+        "name": "OpenStack Nova API Up",
         "groups": ["host", "keystone_server"],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -19,15 +19,15 @@
         "agent_version": "5.6.0",
         "check": "openstack.keystone.api.up",
         "statuses": ["ok", "critical"],
-        "name": "Is Up",
-        "groups": ["host", "server"],
+        "name": "OpenStack Keystone API Up",
+        "groups": ["host", "keystone_server"],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise."
     },
     {
         "agent_version": "5.6.0",
         "check": "openstack.nova.hypervisor.up",
         "statuses": ["ok", "critical", "unknown"],
-        "name": "Is Up",
+        "name": "OpenStack Nova Hypervisor Up",
         "groups": ["host", "hypervisor", "hypervisor_id", "virt_type"],
         "description": "Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise."
     },
@@ -35,7 +35,7 @@
         "agent_version": "5.6.0",
         "check": "openstack.neutron.network.up",
         "statuses": ["ok", "critical", "unknown"],
-        "name": "Is Up",
+        "name": "OpenStack Neutron Network Up",
         "groups": ["host", "network", "network_name", "tenant_id"],
         "description": "Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise."
     }
