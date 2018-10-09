@@ -205,11 +205,10 @@ SELECT schemaname, count(*) FROM
 
     q1 = ('CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
           '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END')
-    q2 = ('abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn())) '
-          'AS replication_delay_bytes')
+    q2 = ('abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))')
     REPLICATION_METRICS_10 = {
         q1: ('postgresql.replication_delay', GAUGE),
-        q2: ('postgresql.replication_delay_bytes', GAUGE)
+        q2: ('postgresql.replication_delay_bytes', GAUGE),
     }
 
     q = ('CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
