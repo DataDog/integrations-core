@@ -47,6 +47,7 @@ class CassandraNodetoolCheck(AgentCheck):
         keyspaces = instance.get("keyspaces", [])
         username = instance.get("username", "")
         password = instance.get("password", "")
+        ssl = instance.get("ssl", False)
         tags = instance.get("tags", [])
 
         # Flag to send service checks only once and not for every keyspace
@@ -60,6 +61,9 @@ class CassandraNodetoolCheck(AgentCheck):
             cmd = nodetool_cmd + ['-h', host, '-p', str(port)]
             if username and password:
                 cmd += ['-u', username, '-pw', password]
+            # add ssl if requested
+            if ssl:
+                cmd += ['--ssl']
             cmd += ['status', '--', keyspace]
 
             # Execute the command
