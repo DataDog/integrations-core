@@ -6,9 +6,11 @@ import shutil
 import tempfile
 
 import pytest
+import mock
 
 from datadog_checks.dev.utils import create_file, temp_dir as temp_directory
 from datadog_checks.directory import DirectoryCheck
+from datadog_checks.errors import ConfigurationError
 
 CHECK_NAME = 'directory'
 
@@ -227,12 +229,13 @@ def test_non_existent_directory():
     """
     Missing or inaccessible directory coverage.
     """
-    config = {'instances': [{'directory': '/non-existent/directory'}]}
-    with pytest.raises(Exception):
-        dir_check.check(config)
+    with pytest.raises(ConfigurationError):
+        dir_check.check({'directory': '/non-existent/directory'})
 
 
 def test_non_existent_directory_ignore_missing():
     config = {'directory': '/non-existent/directory',
               'ignore_missing': True}
+    dir_check._get_stats = mock.MagicMock()
     dir_check.check(config)
+    dir_check._get_stats.assert_called_once()

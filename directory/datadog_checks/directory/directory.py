@@ -38,7 +38,7 @@ class DirectoryCheck(AgentCheck):
         try:
             directory = instance['directory']
         except KeyError:
-            raise Exception('DirectoryCheck: missing `directory` in config')
+            raise ConfigurationError('DirectoryCheck: missing `directory` in config')
 
         abs_directory = abspath(directory)
         name = instance.get('name', directory)
