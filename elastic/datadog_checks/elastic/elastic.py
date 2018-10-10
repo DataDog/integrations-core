@@ -1,19 +1,19 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 from collections import defaultdict, namedtuple
 import time
 import urlparse
+
 import requests
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers
 
 
-class NodeNotFound(Exception):
-    pass
+class AuthenticationError(requests.exceptions.HTTPError):
+    """Authentication Error, unable to reach server"""
 
 
 ESInstanceConfig = namedtuple(
@@ -909,7 +909,3 @@ class ESCheck(AgentCheck):
             'event_object': hostname,
             'tags': tags
         }
-
-
-class AuthenticationError(requests.exceptions.HTTPError):
-    """Authentication Error, unable to reach server"""
