@@ -22,7 +22,7 @@ log = logging.getLogger('test_elastic')
 
 
 @pytest.mark.unit
-def test_url_join(aggregator, elastic_check):
+def test__join_url(aggregator, elastic_check):
     adm_forwarder_joined_url = elastic_check._join_url(
         "https://localhost:9444/elasticsearch-admin",
         "/stats",

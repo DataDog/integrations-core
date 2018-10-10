@@ -479,8 +479,10 @@ class ESCheck(AgentCheck):
         return version
 
     def _join_url(self, base, url, admin_forwarder=False):
-        # overrides `urlparse.urljoin` since it removes base url path
-        # https://docs.python.org/2/library/urlparse.html#urlparse.urljoin
+        """
+        overrides `urlparse.urljoin` since it removes base url path
+        https://docs.python.org/2/library/urlparse.html#urlparse.urljoin
+        """
         if admin_forwarder:
             return base + url
         else:
@@ -520,10 +522,10 @@ class ESCheck(AgentCheck):
                 self._process_metric(index_data, metric, *desc, tags=tags)
 
     def _define_params(self, version, cluster_stats):
-        """ Define the set of URLs and METRICS to use depending on the
-            running ES version.
         """
-
+        Define the set of URLs and METRICS to use depending on the
+        running ES version.
+        """
         pshard_stats_url = "/_stats"
 
         if version >= [0, 90, 10]:
@@ -617,7 +619,8 @@ class ESCheck(AgentCheck):
             stats_metrics, pshard_stats_metrics
 
     def _get_data(self, url, config, send_sc=True):
-        """ Hit a given URL and return the parsed json
+        """
+        Hit a given URL and return the parsed json
         """
         # Load basic authentication configuration, if available.
         if config.username and config.password:
@@ -744,7 +747,7 @@ class ESCheck(AgentCheck):
             else:
                 self.rate(metric, value, tags=tags, hostname=hostname)
         else:
-            self._metric_not_found(metric, path)
+            self.log.debug("Metric not found: %s -> %s", path, metric)
 
     def _process_health_data(self, data, config, version):
         cluster_status = data.get('status')
@@ -797,9 +800,6 @@ class ESCheck(AgentCheck):
             message=msg,
             tags=config.service_check_tags+config.health_tags
         )
-
-    def _metric_not_found(self, metric, path):
-        self.log.debug("Metric not found: %s -> %s", path, metric)
 
     def _create_event(self, status, tags=None):
         hostname = self.hostname.decode('utf-8')
