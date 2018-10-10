@@ -1,47 +1,26 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 import time
 import urlparse
 
 import requests
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers
+
+from .config import from_instance
 
 
 class AuthenticationError(requests.exceptions.HTTPError):
     """Authentication Error, unable to reach server"""
 
 
-ESInstanceConfig = namedtuple(
-    'ESInstanceConfig', [
-        'admin_forwarder',
-        'pshard_stats',
-        'pshard_graceful_to',
-        'cluster_stats',
-        'index_stats',
-        'password',
-        'service_check_tags',
-        'health_tags',
-        'tags',
-        'timeout',
-        'url',
-        'username',
-        'pending_task_stats',
-        'ssl_verify',
-        'ssl_cert',
-        'ssl_key',
-    ])
-
-
 class ESCheck(AgentCheck):
     SERVICE_CHECK_CONNECT_NAME = 'elasticsearch.can_connect'
     SERVICE_CHECK_CLUSTER_STATUS = 'elasticsearch.cluster_health'
-
-    DEFAULT_TIMEOUT = 5
+    SOURCE_TYPE_NAME = 'elasticsearch'
 
     # Clusterwise metrics, pre aggregated on ES, compatible with all ES versions
     PRIMARY_SHARD_METRICS = {
@@ -406,72 +385,13 @@ class ESCheck(AgentCheck):
         "elasticsearch.pending_tasks_time_in_queue": ("gauge", "pending_tasks_time_in_queue"),
     }
 
-    SOURCE_TYPE_NAME = 'elasticsearch'
-
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-
         # Host status needs to persist across all checks
         self.cluster_status = {}
 
-    def get_instance_config(self, instance):
-        url = instance.get('url')
-        if url is None:
-            raise Exception("A URL must be specified in the instance")
-
-        pshard_stats = _is_affirmative(instance.get('pshard_stats', False))
-        pshard_graceful_to = _is_affirmative(instance.get('pshard_graceful_timeout', False))
-        index_stats = _is_affirmative(instance.get('index_stats', False))
-        cluster_stats = _is_affirmative(instance.get('cluster_stats', False))
-        if 'is_external' in instance:
-            cluster_stats = _is_affirmative(instance.get('is_external', False))
-
-        pending_task_stats = _is_affirmative(instance.get('pending_task_stats', True))
-        admin_forwarder = _is_affirmative(instance.get('admin_forwarder', False))
-        # Support URLs that have a path in them from the config, for
-        # backwards-compatibility.
-        parsed = urlparse.urlparse(url)
-        if parsed[2] != "" and not admin_forwarder:
-            url = "%s://%s" % (parsed[0], parsed[1])
-        port = parsed.port
-        host = parsed.hostname
-
-        custom_tags = instance.get('tags', [])
-        service_check_tags = [
-            'host:%s' % host,
-            'port:%s' % port
-        ]
-        service_check_tags.extend(custom_tags)
-
-        # Tag by URL so we can differentiate the metrics
-        # from multiple instances
-        tags = ['url:%s' % url]
-        tags.extend(custom_tags)
-
-        timeout = instance.get('timeout') or self.DEFAULT_TIMEOUT
-
-        config = ESInstanceConfig(
-            admin_forwarder=admin_forwarder,
-            pshard_stats=pshard_stats,
-            pshard_graceful_to=pshard_graceful_to,
-            cluster_stats=cluster_stats,
-            index_stats=index_stats,
-            password=instance.get('password'),
-            service_check_tags=service_check_tags,
-            health_tags=[],
-            ssl_cert=instance.get('ssl_cert'),
-            ssl_key=instance.get('ssl_key'),
-            ssl_verify=instance.get('ssl_verify'),
-            tags=tags,
-            timeout=timeout,
-            url=url,
-            username=instance.get('username'),
-            pending_task_stats=pending_task_stats
-        )
-        return config
-
     def check(self, instance):
-        config = self.get_instance_config(instance)
+        config = from_instance(instance)
         admin_forwarder = config.admin_forwarder
 
         # Check ES version for this instance and define parameters

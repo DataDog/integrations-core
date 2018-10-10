@@ -8,11 +8,13 @@ import time
 import pytest
 import requests
 
+from datadog_checks.elastic import ESCheck
+
 from .common import HERE, URL
 
 
-@pytest.fixture(scope="session", autouse=True)
-def spin_up_elastic():
+@pytest.fixture(scope="session")
+def elastic_cluster():
     args = [
         'docker-compose', '-f', os.path.join(HERE, 'compose', 'docker-compose.yaml')
     ]
@@ -31,3 +33,8 @@ def spin_up_elastic():
     requests.put(URL, '/datadog/')
     yield
     subprocess.check_call(args + ["down"])
+
+
+@pytest.fixture
+def elastic_check():
+    return ESCheck('elastic', {}, {})

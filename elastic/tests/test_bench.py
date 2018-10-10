@@ -5,11 +5,10 @@ import time
 
 import requests
 
-from datadog_checks.elastic import ESCheck
-from .common import CHECK_NAME, CONFIG, PASSWORD, URL, USER
+from .common import CONFIG, PASSWORD, URL, USER
 
 
-def test_check(benchmark):
+def test_check(benchmark, elastic_cluster, elastic_check):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
 
     for _ in range(3):
@@ -21,7 +20,7 @@ def test_check(benchmark):
     benchmark(elastic_check.check, CONFIG)
 
 
-def test_pshard_metrics(benchmark):
+def test_pshard_metrics(benchmark, elastic_cluster, elastic_check):
     elastic_latency = 10
     config = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
 
@@ -35,8 +34,6 @@ def test_pshard_metrics(benchmark):
     benchmark(elastic_check.check, config)
 
 
-def test_index_metrics(benchmark):
+def test_index_metrics(benchmark, elastic_cluster, elastic_check):
     config = {'url': URL, 'index_stats': True, 'username': USER, 'password': PASSWORD}
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
-
     benchmark(elastic_check.check, config)

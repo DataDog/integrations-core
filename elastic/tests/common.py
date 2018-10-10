@@ -5,8 +5,6 @@ import os
 
 from datadog_checks.utils.common import get_docker_hostname
 
-CHECK_NAME = "elastic"
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 USER = "elastic"
 PASSWORD = "changeme"
@@ -20,7 +18,6 @@ URL = 'http://{0}:{1}'.format(HOST, PORT)
 BAD_URL = 'http://{0}:{1}'.format(HOST, BAD_PORT)
 
 CONFIG = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': TAGS}
-BAD_CONFIG = {'url': BAD_URL, 'password': PASSWORD}
 
 INDEX_METRICS_MOCK_DATA = [{
         "health": "green",

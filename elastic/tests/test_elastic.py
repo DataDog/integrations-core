@@ -1,33 +1,26 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from mock import patch
 import logging
 import os
 import socket
 import time
 
+from mock import patch
 import pytest
 import requests
 
 from datadog_checks.elastic import ESCheck
 from .common import (
-    BAD_CONFIG, CHECK_NAME, CLUSTER_TAG, CONF_HOSTNAME,
-    CONFIG, HOST, PASSWORD, PORT, TAGS, URL, USER,
+    CLUSTER_TAG, CONF_HOSTNAME, CONFIG, HOST, PASSWORD, PORT, TAGS, URL, USER,
     INDEX_METRICS_MOCK_DATA, get_es_version
 )
 
 log = logging.getLogger('test_elastic')
 
 
-def test_bad_port():
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
-    with pytest.raises(Exception):
-        elastic_check.check(BAD_CONFIG)
-
-
-def test_url_join(aggregator):
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
+@pytest.mark.unit
+def test_url_join(aggregator, elastic_check):
     adm_forwarder_joined_url = elastic_check._join_url(
         "https://localhost:9444/elasticsearch-admin",
         "/stats",
@@ -39,9 +32,8 @@ def test_url_join(aggregator):
     assert joined_url == "https://localhost:9444/stats"
 
 
-def test_check(aggregator):
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
-    default_tags = ["url:http://{0}:{1}".format(HOST, PORT)]
+def test_check(elastic_cluster, elastic_check, aggregator):
+    default_tags = ["url:http://{}:{}".format(HOST, PORT)]
 
     for _ in xrange(2):
         try:
@@ -160,73 +152,20 @@ def test_check(aggregator):
         aggregator.assert_service_check('elasticsearch.cluster_health')
 
 
-def test_config_parser():
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
-    instance = {
-        "username": "user",
-        "password": "pass",
-        "is_external": "yes",
-        "url": "http://foo.bar",
-        "tags": ["a", "b:c"],
-    }
-    c = elastic_check.get_instance_config(instance)
-    assert c.username == "user"
-    assert c.password == "pass"
-    assert c.admin_forwarder is False
-    assert c.cluster_stats is True
-    assert c.url == "http://foo.bar"
-    assert c.tags == ["url:http://foo.bar", "a", "b:c"]
-    assert c.timeout == elastic_check.DEFAULT_TIMEOUT
-    assert c.service_check_tags == ["host:foo.bar", "port:None", "a", "b:c"]
-
-    instance = {
-        "url": "http://192.168.42.42:12999",
-        "timeout": 15}
-    c = elastic_check.get_instance_config(instance)
-    assert c.username is None
-    assert c.password is None
-    assert c.cluster_stats is False
-    assert c.url == "http://192.168.42.42:12999"
-    assert c.tags == ["url:http://192.168.42.42:12999"]
-    assert c.timeout == 15
-    assert c.service_check_tags == ["host:192.168.42.42", "port:12999"]
-
-    instance = {
-        "username": "user",
-        "password": "pass",
-        "url": "https://foo.bar:9200",
-        "ssl_verify": "true",
-        "ssl_cert": "/path/to/cert.pem",
-        "ssl_key": "/path/to/cert.key",
-        "admin_forwarder": "1"
-    }
-    c = elastic_check.get_instance_config(instance)
-    assert c.username == "user"
-    assert c.password == "pass"
-    assert c.admin_forwarder is True
-    assert c.cluster_stats is False
-    assert c.url == "https://foo.bar:9200"
-    assert c.tags == ["url:https://foo.bar:9200"]
-    assert c.timeout == elastic_check.DEFAULT_TIMEOUT
-    assert c.service_check_tags == ["host:foo.bar", "port:9200"]
-    assert c.ssl_verify == "true"
-    assert c.ssl_cert == "/path/to/cert.pem"
-    assert c.ssl_key == "/path/to/cert.key"
-
-
-def test_pshard_metrics(aggregator):
-    """ Tests that the pshard related metrics are forwarded and that the
-        document count for primary indexes is twice smaller as the global
-        document count when "number_of_replicas" is set to 1 """
+def test_pshard_metrics(aggregator, elastic_check):
+    """
+    Tests that the pshard related metrics are forwarded and that the
+    document count for primary indexes is twice smaller as the global
+    document count when "number_of_replicas" is set to 1
+    """
     elastic_latency = 10
     config = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
 
     requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 1}}')
     requests.put(URL + '/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
     requests.put(URL + '/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
-
     time.sleep(elastic_latency)
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
+
     elastic_check.check(config)
 
     pshard_stats_metrics = dict(ESCheck.PRIMARY_SHARD_METRICS)
@@ -243,11 +182,10 @@ def test_pshard_metrics(aggregator):
     aggregator.assert_metric('elasticsearch.primaries.docs.count')
 
 
-def test_index_metrics(aggregator):
+def test_index_metrics(aggregator, elastic_check):
     # Tests that index level metrics are forwarded
     config = {'url': URL, 'index_stats': True, 'username': USER, 'password': PASSWORD}
 
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
     index_metrics = dict(ESCheck.INDEX_STATS_METRICS)
     elastic_check.check(config)
 
@@ -256,14 +194,15 @@ def test_index_metrics(aggregator):
             aggregator.assert_metric(m_name)
 
 
-def test_health_event(aggregator):
+def test_health_event(aggregator, elastic_check):
     dummy_tags = ['elastique:recherche']
     config = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
 
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
     # Should be yellow at first
     requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}')
+
     elastic_check.check(config)
+
     if get_es_version() < [2, 0, 0]:
         assert len(aggregator.events) == 1
         assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:' + URL]
@@ -273,19 +212,16 @@ def test_health_event(aggregator):
 
 
 def mock_output(*args, **kwargse):
-    if "/_cat/indices" in args[0]:
-        return INDEX_METRICS_MOCK_DATA
-    else:
-        return {}
+    return INDEX_METRICS_MOCK_DATA if "/_cat/indices" in args[0] else {}
 
 
 @patch('datadog_checks.elastic.elastic.ESCheck._get_data', side_effect=mock_output)
-def test_get_index_metrics(mock_output, aggregator):
+def test_get_index_metrics(mock_output, aggregator, elastic_check):
     dummy_tags = ['elastique:recherche']
     config = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags, "index_stats": True}
 
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
     elastic_check.check(config)
+
     tags = ['url:http://localhost:9200', 'elastique:recherche']
     aggregator.assert_metric('elasticsearch.pending_tasks_priority_high', value=0.0, tags=tags, count=1)
     aggregator.assert_metric('elasticsearch.index.health', value=0.0, tags=tags + ['index_name:index_1'], count=1)
