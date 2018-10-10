@@ -450,7 +450,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             if 'pod' in sample[self.SAMPLE_LABELS]:
                 tags.append(self._format_tag('pod', sample[self.SAMPLE_LABELS]['pod'], scraper_config))
 
-            self.count(metric_name, sample[self.SAMPLE_VALUE], tags + scraper_config['custom_tags'])
+            self.gauge(metric_name, sample[self.SAMPLE_VALUE], tags + scraper_config['custom_tags'],
+                       hostname=self.get_hostname_for_sample(sample, scraper_config))
 
     def kube_pod_container_status_waiting_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(metric, '.container.status_report.count.waiting',

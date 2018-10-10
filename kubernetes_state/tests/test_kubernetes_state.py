@@ -159,7 +159,9 @@ JOINED_METRICS = {
 
 HOSTNAMES = {
     NAMESPACE + '.pod.ready': 'minikube',
-    NAMESPACE + '.pod.scheduled': 'minikube'
+    NAMESPACE + '.pod.scheduled': 'minikube',
+    NAMESPACE + '.container.status_report.count.waiting': 'minikube',
+    NAMESPACE + '.container.status_report.count.terminated': 'minikube'
 }
 
 ZERO_METRICS = [
