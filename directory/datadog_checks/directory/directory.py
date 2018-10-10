@@ -61,7 +61,7 @@ class DirectoryCheck(AgentCheck):
             if not ignore_missing:
                 raise ConfigurationError(msg)
 
-            self.log.info(msg)
+            self.log.warning(msg)
 
         self._get_stats(
             abs_directory,
