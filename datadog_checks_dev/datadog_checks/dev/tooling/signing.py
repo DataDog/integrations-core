@@ -55,6 +55,8 @@ def run_in_toto(key_id, products):
         product_list=products,
         # Keep file size down
         compact_json=True,
+        # Cross-platform support
+        normalize_line_endings=True,
     )
 
 
