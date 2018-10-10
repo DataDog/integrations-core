@@ -29,20 +29,36 @@ def test_custom_metrics(aggregator, postgres_standalone, pg_instance):
 @pytest.mark.integration
 def test_custom_queries(aggregator, postgres_standalone, pg_instance):
     pg_instance.update({
-        'custom_queries': [{
-            'metric_prefix': 'custom',
-            'query': "SELECT letter, num FROM (VALUES (21, 'a'), (22, 'b'), (23, 'c')) AS t (num,letter) LIMIT 1",
-            'columns': [
-                {
-                    'name': 'customtag',
-                    'type': 'tag',
-                },
-                {
-                    'name': 'num',
-                    'type': 'gauge',
-                }
-            ],
-        }],
+        'custom_queries': [
+            {
+                'metric_prefix': 'custom',
+                'query': "SELECT letter, num FROM (VALUES (21, 'a'), (22, 'b'), (23, 'c')) AS t (num,letter) LIMIT 1",
+                'columns': [
+                    {
+                        'name': 'customtag',
+                        'type': 'tag',
+                    },
+                    {
+                        'name': 'num',
+                        'type': 'gauge',
+                    }
+                ],
+            },
+            {
+                'metric_prefix': 'another_custom_one',
+                'query': "SELECT letter, num FROM (VALUES (21, 'a'), (22, 'b'), (23, 'c')) AS t (num,letter) LIMIT 1",
+                'columns': [
+                    {
+                        'name': 'customtag',
+                        'type': 'tag',
+                    },
+                    {
+                        'name': 'num',
+                        'type': 'gauge',
+                    }
+                ],
+            }
+        ],
     })
     postgres_check = PostgreSql('postgres', {}, {})
     postgres_check.check(pg_instance)

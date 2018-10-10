@@ -853,8 +853,6 @@ GROUP BY datid, datname
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
         """
-        cursor = db.cursor()
-
         for custom_query in custom_queries:
             metric_prefix = custom_query.get('metric_prefix')
             if not metric_prefix:
@@ -876,6 +874,7 @@ GROUP BY datid, datname
                 )
                 continue
 
+            cursor = db.cursor()
             with closing(cursor) as cursor:
                 try:
                     self.log.debug("Running query: {}".format(query))
