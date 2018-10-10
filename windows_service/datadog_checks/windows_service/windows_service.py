@@ -8,6 +8,8 @@ from six import iteritems
 
 from datadog_checks.checks import AgentCheck
 
+SERVICE_PATTERN_FLAGS = re.IGNORECASE
+
 
 class WindowsService(AgentCheck):
     SERVICE_CHECK_NAME = 'windows_service.state'
@@ -40,7 +42,7 @@ class WindowsService(AgentCheck):
         if 'host' in instance:
             services = set(service.replace('%', '.*') for service in services)
 
-        service_patterns = {service: re.compile(service) for service in services}
+        service_patterns = {service: re.compile(service, SERVICE_PATTERN_FLAGS) for service in services}
         services_unseen = set(services)
 
         try:
