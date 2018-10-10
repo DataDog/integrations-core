@@ -19,7 +19,7 @@ def instance_bad_config():
 @pytest.fixture
 def instance_basic():
     return {
-        'services': ['EventLog', 'Dnscache', 'NonExistentService'],
+        'services': ['eventlog', 'Dnscache', 'NonExistentService'],
         'tags': ['optional:tag1'],
     }
 
