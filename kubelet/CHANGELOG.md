@@ -1,5 +1,13 @@
 # CHANGELOG - kubelet
 
+## 2.1.0 / 2018-10-10
+
+* [Fixed] Fix parsing errors when the podlist is in an inconsistent state. See [#2338](https://github.com/DataDog/integrations-core/pull/2338).
+* [Fixed] Fix kubelet input filtering. See [#2344](https://github.com/DataDog/integrations-core/pull/2344).
+* [Fixed] Fix pod metric filtering for containerd. See [#2283](https://github.com/DataDog/integrations-core/pull/2283).
+* [Added] Add additional kubelet metrics. See [#2245](https://github.com/DataDog/integrations-core/pull/2245).
+* [Added] Add the kubernetes.containers.running metric. See [#2191](https://github.com/DataDog/integrations-core/pull/2191). Thanks [Devatoria](https://github.com/Devatoria).
+
 ## 2.0.0 / 2018-09-04
 
 * [Changed] Update kubelet to use the new OpenMetricsBaseCheck. See [#1982](https://github.com/DataDog/integrations-core/pull/1982).
