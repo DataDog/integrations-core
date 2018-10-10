@@ -9,8 +9,6 @@ from .common import CONFIG, PASSWORD, URL, USER
 
 
 def test_check(benchmark, elastic_cluster, elastic_check):
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
-
     for _ in range(3):
         try:
             elastic_check.check(CONFIG)
@@ -27,9 +25,7 @@ def test_pshard_metrics(benchmark, elastic_cluster, elastic_check):
     requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 1}}')
     requests.put(URL + '/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
     requests.put(URL + '/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
-
     time.sleep(elastic_latency)
-    elastic_check = ESCheck(CHECK_NAME, {}, {})
 
     benchmark(elastic_check.check, config)
 

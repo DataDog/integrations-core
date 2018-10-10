@@ -11,6 +11,8 @@ import pytest
 import requests
 
 from datadog_checks.elastic import ESCheck
+from datadog_checks.elastic.config import from_instance
+
 from .common import (
     CLUSTER_TAG, CONF_HOSTNAME, CONFIG, HOST, PASSWORD, PORT, TAGS, URL, USER,
     INDEX_METRICS_MOCK_DATA, get_es_version
@@ -47,8 +49,8 @@ def test_check(elastic_cluster, elastic_check, aggregator):
     ESCheck.CLUSTER_HEALTH_METRICS.update(ESCheck.CLUSTER_PENDING_TASKS)
     expected_metrics.update(ESCheck.CLUSTER_HEALTH_METRICS)
 
-    instance = elastic_check.get_instance_config(CONFIG)
-    es_version = elastic_check._get_es_version(instance)
+    config = from_instance(CONFIG)
+    es_version = elastic_check._get_es_version(config)
 
     assert es_version == get_es_version()
 
