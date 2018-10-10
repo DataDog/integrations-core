@@ -40,7 +40,7 @@ kafka_consumer==1.4.1; sys_platform != 'win32'
 kong==1.2.1
 kube_dns==2.0.0
 kube_proxy==2.0.0
-kubelet==2.0.0; sys_platform == 'linux2'
+kubelet==2.1.0; sys_platform == 'linux2'
 kubernetes_state==3.0.0; sys_platform != 'win32'
 kyototycoon==1.4.1
 lighttpd==1.2.1
