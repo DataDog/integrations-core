@@ -17,6 +17,8 @@ class TrelloClient:
             'Integrations': '5ae1e3e2c81fff836d00497e',
             'Containers': '5ae1cab495edd80852396c71',
             'Agent': '5ae1e3d62a5167779e65e87d',
+            'Logs': '5aeca4c19707c4222bf6d883',
+            'Process': '5aeca4c8621e4359b9cb9c27',
         }
 
     def create_card(self, team, name, body):
