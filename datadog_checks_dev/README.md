@@ -31,6 +31,12 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Pin](#pin)
       - [Resolve](#resolve)
       - [Verify](#verify)
+    - [Env](#env)
+      - [Check](#check)
+      - [List](#list)
+      - [Prune](#prune)
+      - [Start](#start)
+      - [Stop](#stop)
     - [Manifest](#manifest)
       - [Set](#set-1)
       - [Verify](#verify-1)
@@ -313,6 +319,91 @@ $ ddev dep verify -h
 Usage: ddev dep verify [OPTIONS]
 
   Verify the uniqueness of dependency versions across all checks.
+
+Options:
+  -h, --help  Show this message and exit.
+```
+
+#### Env
+
+```console
+$ ddev env
+Usage: ddev env [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  check  Run an Agent check
+  ls     List active or available environments
+  prune  Remove all configuration for environments
+  start  Start an environment
+  stop   Stop environments
+```
+
+##### Check
+
+```console
+$ ddev env check -h
+Usage: ddev env check [OPTIONS] CHECK [ENV]
+
+  Run an Agent check.
+
+Options:
+  -r, --rate
+  -h, --help  Show this message and exit.
+```
+
+##### List
+
+```console
+$ ddev env ls -h
+Usage: ddev env ls [OPTIONS] [CHECKS]...
+
+  List active or available environments.
+
+Options:
+  -h, --help  Show this message and exit.
+```
+
+##### Prune
+
+```console
+$ ddev env prune -h
+Usage: ddev env prune [OPTIONS]
+
+  Remove all configuration for environments.
+
+Options:
+  -f, --force
+  -h, --help   Show this message and exit.
+```
+
+##### Start
+
+```console
+$ ddev env start -h
+Usage: ddev env start [OPTIONS] CHECK ENV
+
+  Start an environment.
+
+Options:
+  -a, --agent TEXT  The agent build to use e.g. a Docker tag like
+                    `datadog/agent:6.5.2`. For Docker environments you can use
+                    an integer corresponding to fields in the config (agent5,
+                    agent6, etc.)
+  --dev / --prod    Whether to use the latest version of a check or what is
+                    shipped
+  -h, --help        Show this message and exit.
+```
+
+##### Stop
+
+```console
+$ ddev env stop -h
+Usage: ddev env stop [OPTIONS] CHECK [ENV]
+
+  Stop environments.
 
 Options:
   -h, --help  Show this message and exit.
