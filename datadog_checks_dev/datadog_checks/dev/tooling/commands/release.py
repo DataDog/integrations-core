@@ -298,6 +298,8 @@ def testable(ctx, start_id, agent_version, dry_run):
         options = OrderedDict((
             ('1', 'Agent'),
             ('2', 'Containers'),
+            ('3', 'Logs'),
+            ('4', 'Process'),
             ('s', 'Skip'),
             ('q', 'Quit'),
         ))

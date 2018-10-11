@@ -358,12 +358,16 @@ class ESCheck(AgentCheck):
         "elasticsearch.thread_pool.force_merge.rejected": ("rate", "thread_pool.force_merge.rejected"),
     }
 
-    ADDITIONAL_METRICS_5_x = {  # Stats are only valid for v5.x
+    ADDITIONAL_METRICS_5_x = {
         "elasticsearch.fs.total.disk_io_op": ("rate", "fs.io_stats.total.operations"),
         "elasticsearch.fs.total.disk_reads": ("rate", "fs.io_stats.total.read_operations"),
         "elasticsearch.fs.total.disk_writes": ("rate", "fs.io_stats.total.write_operations"),
         "elasticsearch.fs.total.disk_read_size_in_bytes": ("gauge", "fs.io_stats.total.read_kilobytes"),
         "elasticsearch.fs.total.disk_write_size_in_bytes": ("gauge", "fs.io_stats.total.write_kilobytes"),
+        "elasticsearch.breakers.inflight_requests.tripped": ("gauge", "breakers.inflight_requests.tripped"),
+        "elasticsearch.breakers.inflight_requests.overhead": ("gauge", "breakers.inflight_requests.overhead"),
+        "elasticsearch.breakers.inflight_requests.estimated_size_in_bytes":
+            ("gauge", "breakers.inflight_requests.estimated_size_in_bytes"),
     }
 
     ADDITIONAL_METRICS_PRE_6_3 = {
@@ -389,6 +393,10 @@ class ESCheck(AgentCheck):
         "elasticsearch.initializing_shards": ("gauge", "initializing_shards"),
         "elasticsearch.unassigned_shards": ("gauge", "unassigned_shards"),
         "elasticsearch.cluster_status": ("gauge", "status", lambda v: {"red": 0, "yellow": 1, "green": 2}.get(v, -1)),
+    }
+
+    CLUSTER_HEALTH_METRICS_POST_2_4 = {
+        "elasticsearch.delayed_unassigned_shards": ("gauge", "delayed_unassigned_shards"),
     }
 
     CLUSTER_PENDING_TASKS = {
@@ -506,7 +514,7 @@ class ESCheck(AgentCheck):
         # Load the health data.
         health_url = self._join_url(config.url, health_url, admin_forwarder)
         health_data = self._get_data(health_url, config)
-        self._process_health_data(health_data, config)
+        self._process_health_data(health_data, config, version)
 
         if config.pending_task_stats:
             # Load the pending_tasks data.
@@ -818,7 +826,7 @@ class ESCheck(AgentCheck):
         else:
             self._metric_not_found(metric, path)
 
-    def _process_health_data(self, data, config):
+    def _process_health_data(self, data, config, version):
         cluster_status = data.get('status')
         if not self.cluster_status.get(config.url):
             self.cluster_status[config.url] = cluster_status
@@ -831,7 +839,11 @@ class ESCheck(AgentCheck):
             event = self._create_event(cluster_status, tags=config.tags)
             self.event(event)
 
-        for metric, desc in self.CLUSTER_HEALTH_METRICS.iteritems():
+        cluster_health_metrics = self.CLUSTER_HEALTH_METRICS
+        if version >= [2, 4, 0]:
+            cluster_health_metrics.update(self.CLUSTER_HEALTH_METRICS_POST_2_4)
+
+        for metric, desc in cluster_health_metrics.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
 
         # Process the service check
