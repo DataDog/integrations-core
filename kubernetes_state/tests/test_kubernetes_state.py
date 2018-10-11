@@ -93,6 +93,9 @@ METRICS = [
     NAMESPACE + '.limitrange.cpu.default_request',
     # services
     NAMESPACE + '.service.count',
+    # jobs
+    NAMESPACE + '.job.failed',
+    NAMESPACE + '.job.succeeded',
 ]
 
 TAGS = {
@@ -130,6 +133,14 @@ TAGS = {
         'type:ClusterIP',
         'type:NodePort',
         'type:LoadBalancer',
+    ],
+    NAMESPACE + '.job.failed': [
+        'job:hello',
+        'job_name:hello2',
+    ],
+    NAMESPACE + '.job.succeeded': [
+        'job:hello',
+        'job_name:hello2',
     ],
 }
 
@@ -172,6 +183,8 @@ ZERO_METRICS = [
     NAMESPACE + '.container.waiting',
     NAMESPACE + '.endpoint.address_available',
     NAMESPACE + '.endpoint.address_not_ready',
+    NAMESPACE + '.job.failed',
+    NAMESPACE + '.job.succeeded',
 ]
 
 
