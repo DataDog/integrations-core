@@ -338,22 +338,17 @@ class NagiosEventLogTailer(NagiosTailer):
         # specification will be dropped.
         event_payload = fields._asdict()
 
-        json_text = """{
-            "event_type": "%s",
-            "event_soft_hard": "%s",
-            "check_name": "%s",
-            "event_state": "%s",
-            "payload": "%s",
-            "ack_author": "%s"
-        }""" % (
-                event_payload.pop('event_type', None),
-                event_payload.pop('event_soft_hard', None),
-                event_payload.pop('check_name', None),
-                event_payload.pop('event_state', None),
-                event_payload.pop('payload', None),
-                event_payload.pop('ack_author', None)
-        )
-        msg_text = json.loads(json_text)
+        msg_text = {
+            'event_type': event_payload.pop('event_type', None),
+            'event_soft_hard': event_payload.pop('event_soft_hard', None),
+            'check_name': event_payload.pop('check_name', None),
+            'event_state': event_payload.pop('event_state', None),
+            'payload': event_payload.pop('payload', None),
+            'ack_author': event_payload.pop('ack_author', None)
+        }
+
+        msg_text = json.dumps(msg_text)
+        self.log.info("Nagios Event pack: {}".format(msg_text))
 
         event_payload.update({
                 'timestamp': timestamp,

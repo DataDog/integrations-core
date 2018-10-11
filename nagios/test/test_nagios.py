@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import json
 import tempfile
 import time
 import pytest
@@ -41,6 +41,7 @@ class TestEventLogTailer:
                 assert int(event["timestamp"]) > 0, line
                 assert event["host"] is not None, line
                 counters[t] = counters.get(t, 0) + 1
+                event['msg_text'] = json.loads(event['msg_text'])
 
                 if t == "SERVICE ALERT":
                     assert event['msg_text']["event_soft_hard"] in ("SOFT", "HARD"), line
