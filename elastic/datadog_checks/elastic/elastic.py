@@ -12,6 +12,7 @@ from datadog_checks.utils.headers import headers
 
 from .config import from_instance
 from .metrics import stats_for_version, pshard_stats_for_version, health_stats_for_version
+from .metrics import CLUSTER_PENDING_TASKS
 
 
 class AuthenticationError(requests.exceptions.HTTPError):
@@ -250,9 +251,9 @@ class ESCheck(AgentCheck):
             'pending_tasks_time_in_queue':      average_time_in_queue/(total or 1),  # if total is 0
         }
 
-        for metric in self.CLUSTER_PENDING_TASKS:
+        for metric in CLUSTER_PENDING_TASKS:
             # metric description
-            desc = self.CLUSTER_PENDING_TASKS[metric]
+            desc = CLUSTER_PENDING_TASKS[metric]
             self._process_metric(node_data, metric, *desc, tags=config.tags)
 
     def _process_stats_data(self, data, stats_metrics, config):
