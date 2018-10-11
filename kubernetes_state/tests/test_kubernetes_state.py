@@ -286,7 +286,6 @@ def test_update_kube_state_metrics(aggregator, instance, check):
                              tags=['storageclass:local-data', 'phase:Pending', 'optional:tag1'], value=0)
     aggregator.assert_metric(NAMESPACE + '.persistentvolumes.by_phase',
                              tags=['storageclass:local-data', 'phase:Released', 'optional:tag1'], value=0)
-    
 
     for metric in METRICS:
         aggregator.assert_metric(metric, hostname=HOSTNAMES.get(metric, None))
