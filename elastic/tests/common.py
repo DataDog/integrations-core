@@ -17,7 +17,7 @@ CLUSTER_TAG = [u"cluster_name:elasticsearch"]
 URL = 'http://{0}:{1}'.format(HOST, PORT)
 BAD_URL = 'http://{0}:{1}'.format(HOST, BAD_PORT)
 
-CONFIG = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': TAGS}
+TEST_INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': TAGS}
 
 INDEX_METRICS_MOCK_DATA = [{
         "health": "green",
@@ -48,7 +48,12 @@ INDEX_METRICS_MOCK_DATA = [{
 
 def get_es_version():
     version = os.environ.get("ELASTIC_VERSION")
-    dd_versions = {'0_90': [0, 90, 13], '1_0': [1, 0, 3], '1_1': [1, 1, 2], '1_2': [1, 2, 4]}
+    dd_versions = {
+        '0_90': [0, 90, 13],
+        '1_0': [1, 0, 3],
+        '1_1': [1, 1, 2],
+        '1_2': [1, 2, 4]
+    }
     if version is None:
         return [6, 0, 1]
     if '_' in version:

@@ -5,17 +5,17 @@ import time
 
 import requests
 
-from .common import CONFIG, PASSWORD, URL, USER
+from .common import TEST_INSTANCE, PASSWORD, URL, USER
 
 
 def test_check(benchmark, elastic_cluster, elastic_check):
     for _ in range(3):
         try:
-            elastic_check.check(CONFIG)
+            elastic_check.check(TEST_INSTANCE)
         except Exception:
             time.sleep(1)
 
-    benchmark(elastic_check.check, CONFIG)
+    benchmark(elastic_check.check, TEST_INSTANCE)
 
 
 def test_pshard_metrics(benchmark, elastic_cluster, elastic_check):
