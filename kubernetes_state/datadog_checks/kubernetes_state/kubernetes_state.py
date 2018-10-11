@@ -484,7 +484,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = []
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -496,7 +496,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = []
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -507,7 +507,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -518,7 +518,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:

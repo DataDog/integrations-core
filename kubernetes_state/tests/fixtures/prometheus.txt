@@ -147,6 +147,15 @@ kube_job_complete{condition="true",job="hello-1509998460",namespace="default"} 1
 kube_job_complete{condition="unknown",job="hello-1509998340",namespace="default"} 0
 kube_job_complete{condition="unknown",job="hello-1509998400",namespace="default"} 0
 kube_job_complete{condition="unknown",job="hello-1509998460",namespace="default"} 0
+kube_job_complete{condition="false",job_name="hello-1509998340",namespace="default"} 0
+kube_job_complete{condition="false",job_name="hello-1509998400",namespace="default"} 0
+kube_job_complete{condition="false",job_name="hello-1509998460",namespace="default"} 0
+kube_job_complete{condition="true",job_name="hello-1509998340",namespace="default"} 1
+kube_job_complete{condition="true",job_name="hello-1509998400",namespace="default"} 1
+kube_job_complete{condition="true",job_name="hello-1509998460",namespace="default"} 1
+kube_job_complete{condition="unknown",job_name="hello-1509998340",namespace="default"} 0
+kube_job_complete{condition="unknown",job_name="hello-1509998400",namespace="default"} 0
+kube_job_complete{condition="unknown",job_name="hello-1509998460",namespace="default"} 0
 # HELP kube_job_created Unix creation timestamp
 # TYPE kube_job_created gauge
 kube_job_created{job="hello-1509998340",namespace="default"} 1.509998347e+09
@@ -182,6 +191,9 @@ kube_job_status_completion_time{job="hello-1509998460",namespace="default"} 1.50
 kube_job_status_failed{job="hello-1509998340",namespace="default"} 0
 kube_job_status_failed{job="hello-1509998400",namespace="default"} 0
 kube_job_status_failed{job="hello-1509998460",namespace="default"} 0
+kube_job_status_failed{job_name="hello-1509998340",namespace="default"} 0
+kube_job_status_failed{job_name="hello-1509998400",namespace="default"} 0
+kube_job_status_failed{job_name="hello-1509998460",namespace="default"} 0
 # HELP kube_job_status_start_time StartTime represents time when the job was acknowledged by the Job Manager.
 # TYPE kube_job_status_start_time counter
 kube_job_status_start_time{job="hello-1509998340",namespace="default"} 1.509998347e+09
@@ -192,6 +204,9 @@ kube_job_status_start_time{job="hello-1509998460",namespace="default"} 1.5099984
 kube_job_status_succeeded{job="hello-1509998340",namespace="default"} 1
 kube_job_status_succeeded{job="hello-1509998400",namespace="default"} 1
 kube_job_status_succeeded{job="hello-1509998460",namespace="default"} 1
+kube_job_status_succeeded{job_name="hello-1509998340",namespace="default"} 1
+kube_job_status_succeeded{job_name="hello-1509998400",namespace="default"} 1
+kube_job_status_succeeded{job_name="hello-1509998460",namespace="default"} 1
 # HELP kube_namespace_created Unix creation timestamp
 # TYPE kube_namespace_created gauge
 kube_namespace_created{namespace="default"} 1.508406437e+09
