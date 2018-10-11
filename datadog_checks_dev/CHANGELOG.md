@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.11.0 / 2018-10-11
+
+* [Added] Add E2E support. See [#2375](https://github.com/DataDog/integrations-core/pull/2375).
+* [Added] Ensure new core checks use latest dev package for testing. See [#2386](https://github.com/DataDog/integrations-core/pull/2386).
+* [Fixed] Normalize line endings for release signing. See [#2364](https://github.com/DataDog/integrations-core/pull/2364).
+* [Added] Support more teams for Trello test cards. See [#2365](https://github.com/DataDog/integrations-core/pull/2365).
+
 ## 0.10.0 / 2018-10-04
 
 * [Added] Update base package paths. See [#2345](https://github.com/DataDog/integrations-core/pull/2345).
