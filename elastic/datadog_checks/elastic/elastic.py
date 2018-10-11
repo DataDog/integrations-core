@@ -12,7 +12,7 @@ from datadog_checks.utils.headers import headers
 
 from .config import from_instance
 from .metrics import stats_for_version, pshard_stats_for_version, health_stats_for_version
-from .metrics import CLUSTER_PENDING_TASKS
+from .metrics import CLUSTER_PENDING_TASKS, INDEX_STATS_METRICS
 
 
 class AuthenticationError(requests.exceptions.HTTPError):
@@ -133,7 +133,7 @@ class ESCheck(AgentCheck):
         cat_url = '/_cat/indices?format=json&bytes=b'
         index_url = self._join_url(config.url, cat_url, admin_forwarder)
         index_resp = self._get_data(index_url, config)
-        index_stats_metrics = self.INDEX_STATS_METRICS
+        index_stats_metrics = INDEX_STATS_METRICS
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
         for idx in index_resp:
             tags = config.tags + ['index_name:' + idx['index']]
@@ -180,7 +180,7 @@ class ESCheck(AgentCheck):
             pending_tasks_url = None
             stats_url = "/_cluster/nodes/stats?all=true" if cluster_stats else "/_cluster/nodes/_local/stats?all=true"
 
-        return pshard_stats_url, health_url, pending_tasks_url, stats_url
+        return health_url, stats_url, pshard_stats_url, pending_tasks_url
 
     def _get_data(self, url, config, send_sc=True):
         """
