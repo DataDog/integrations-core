@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 4.0.0 / 2018-10-11
+
+* [Added] Added generic error class ConfigurationError. See [#2367](https://github.com/DataDog/integrations-core/pull/2367).
+* [Changed] Add base subpackage to datadog_checks_base. See [#2331](https://github.com/DataDog/integrations-core/pull/2331).
+* [Added] Freeze Agent requirements. See [#2328](https://github.com/DataDog/integrations-core/pull/2328).
+* [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).
+
 ## 3.0.0 / 2018-09-25
 
 * [Added] Adds ability to Trace "check" function with DD APM. See [#2079](https://github.com/DataDog/integrations-core/pull/2079).
