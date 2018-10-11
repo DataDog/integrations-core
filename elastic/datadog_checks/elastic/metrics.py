@@ -858,9 +858,9 @@ CLUSTER_PENDING_TASKS = {
 }
 
 
-def get_for_version(version):
+def stats_for_version(version):
     """
-    Get the proper set of metrics for the specified ES version
+    Get the proper set of stats metrics for the specified ES version
     """
     metrics = STATS_METRICS
 
@@ -915,9 +915,26 @@ def get_for_version(version):
     else:
         metrics.update(ADDITIONAL_METRICS_PRE_6_3)
 
-    # Version specific stats metrics about the primary shards
+    return metrics
+
+
+def pshard_stats_for_version(version):
+    """
+    Get the proper set of pshard metrics for the specified ES version
+    """
     pshard_stats_metrics = PRIMARY_SHARD_METRICS
     if version >= [1, 0, 0]:
         pshard_stats_metrics.update(PRIMARY_SHARD_METRICS_POST_1_0)
 
-    return metrics, pshard_stats_metrics
+    return pshard_stats_metrics
+
+
+def health_stats_for_version(version):
+    """
+    Get the proper set of health metrics for the specified ES version
+    """
+    cluster_health_metrics = CLUSTER_HEALTH_METRICS
+    if version >= [2, 4, 0]:
+        cluster_health_metrics.update(CLUSTER_HEALTH_METRICS_POST_2_4)
+
+    return cluster_health_metrics

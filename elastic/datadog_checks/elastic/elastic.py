@@ -11,7 +11,7 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 
 from .config import from_instance
-from .metrics import get_for_version
+from .metrics import stats_for_version, pshard_stats_for_version, health_stats_for_version
 
 
 class AuthenticationError(requests.exceptions.HTTPError):
@@ -41,7 +41,8 @@ class ESCheck(AgentCheck):
             raise
 
         health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version, config.cluster_stats)
-        stats_metrics, pshard_stats_metrics = get_for_version(version)
+        stats_metrics = stats_for_version(version)
+        pshard_stats_metrics = pshard_stats_for_version(version)
 
         # Load stats data.
         # This must happen before other URL processing as the cluster name
@@ -324,9 +325,7 @@ class ESCheck(AgentCheck):
             event = self._create_event(cluster_status, tags=config.tags)
             self.event(event)
 
-        cluster_health_metrics = self.CLUSTER_HEALTH_METRICS
-        if version >= [2, 4, 0]:
-            cluster_health_metrics.update(self.CLUSTER_HEALTH_METRICS_POST_2_4)
+        cluster_health_metrics = health_stats_for_version(version)
 
         for metric, desc in cluster_health_metrics.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
