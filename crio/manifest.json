@@ -4,7 +4,7 @@
   ],
   "creates_events": false,
   "display_name": "CRI-O",
-  "guid": "6eb96c6a-3e2d-4236-9387-fa3b0c455336",
+  "guid": "40fd8230-d178-4e8e-9e6a-6ce4acc19a85",
   "is_public": false,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",

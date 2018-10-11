@@ -1,22 +1,16 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-#
 import os
 import pytest
 import mock
 
-# 3p
-
-# project
 from datadog_checks.crio import CrioCheck
 
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
 }
 
-# Constants
 CHECK_NAME = 'crio'
 NAMESPACE = 'crio'
 
@@ -26,16 +20,15 @@ def mock_data():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_data = mock.patch(
+    with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: text_data.split("\n"),
             headers={'Content-Type': "text/plain"}
         )
-    )
-    yield mock_data.start()
-    mock_data.stop()
+    ):
+        yield
 
 
 @pytest.fixture()
@@ -43,16 +36,15 @@ def mock_userspace():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_userspace.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_userspace = mock.patch(
+    with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: text_data.split("\n"),
             headers={'Content-Type': "text/plain"}
         )
-    )
-    yield mock_userspace.start()
-    mock_userspace.stop()
+    ):
+        yield
 
 
 def test_crio(aggregator, mock_data):
