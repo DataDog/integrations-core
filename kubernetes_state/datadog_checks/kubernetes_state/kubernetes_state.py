@@ -41,7 +41,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         generic_instances = [kubernetes_state_instance]
         super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
-        self.send_pod_phase_service_checks = is_affirmative(instance.get('send_pod_phase_service_checks', True))
+        self.send_pod_phase_service_checks = is_affirmative(instance.get('send_pod_phase_service_checks', False))
         if self.send_pod_phase_service_checks:
             self.warning("DEPRECATION NOTICE: pod phase service checks are deprecated. Please set "
                          "`send_pod_phase_service_checks` to false and rely on corresponding gauges instead")
