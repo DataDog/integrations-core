@@ -22,7 +22,7 @@ from ....utils import file_exists
 @click.option(
     '--agent', '-a', default='6',
     help=(
-        'The agent build to use e.g. a Docker tag like `datadog/agent:6.5.2`. For '
+        'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
         'Docker environments you can use an integer corresponding to fields in the '
         'config (agent5, agent6, etc.)'
     )
