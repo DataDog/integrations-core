@@ -388,9 +388,10 @@ Usage: ddev env start [OPTIONS] CHECK ENV
   Start an environment.
 
 Options:
-  -a, --agent TEXT  The agent build to use e.g. a Docker tag. For Docker
-                    environments you can use an integer corresponding to
-                    fields in the config (agent5, agent6, etc.)
+  -a, --agent TEXT  The agent build to use e.g. a Docker tag like
+                    `datadog/agent:6.5.2`. For Docker environments you can use
+                    an integer corresponding to fields in the config (agent5,
+                    agent6, etc.)
   --dev / --prod    Whether to use the latest version of a check or what is
                     shipped
   -h, --help        Show this message and exit.

@@ -22,8 +22,9 @@ from ....utils import file_exists
 @click.option(
     '--agent', '-a', default='6',
     help=(
-        'The agent build to use e.g. a Docker tag. For Docker environments you can '
-        'use an integer corresponding to fields in the config (agent5, agent6, etc.)'
+        'The agent build to use e.g. a Docker tag like `datadog/agent:6.5.2`. For '
+        'Docker environments you can use an integer corresponding to fields in the '
+        'config (agent5, agent6, etc.)'
     )
 )
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
