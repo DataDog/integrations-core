@@ -15,7 +15,7 @@ instances:
   #
     cassandra_aliasing: true
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
   ## The 'environment' tag depends on the <cluster_name> in Cassandra configuration:
   ##   - if the environment information (eg 'prod' or 'test') is included in the <cluster_name>, just use <cluster_name>.
@@ -28,12 +28,12 @@ instances:
   #  tags:
   #    - environment: default_environment
   #    - datacenter: default_datacenter
-    
+
   ## @param user - string - optional
   ##
   #
   #  user: <USERNAME>
-  
+
   ## @param password - string - optional
   ## XXXXXXXXXXX
   #
@@ -42,7 +42,7 @@ instances:
   ## @param process_name_regex - string - optional
   ## XXXXXXXXXXX
   #
-  #  process_name_regex: .*process_name.* 
+  #  process_name_regex: .*process_name.*
 
   ## @param tools_jar_path - string - optional
   ## Instead of specifying a host, and port. The agent can connect using the attach api.
@@ -50,33 +50,50 @@ instances:
   ## Note: It needs to be set when process_name_regex parameter is set
   #
   #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
-  
+
   ## @param name - string - optional
   ## XXXXXXXXXXX
   #
   #   name: activemq_instance
 
-    ## @param java_bin_path - string - optional
-    ## java_bin_path should be set if the agent cannot find your java executable
-    #
-    #  java_bin_path: <JAVA_PATH>
+  ## @param java_bin_path - string - optional
+  ## java_bin_path should be set if the agent cannot find your java executable
+  #
+  #  java_bin_path: <JAVA_PATH>
 
-    ## @param java_options - string - optional
-    ## List of Java JVM options.
-    #
-    #  java_options: "-Xmx200m -Xms50m"
+  ## @param java_options - string - optional
+  ## List of Java JVM options.
+  #
+  #  java_options: "-Xmx200m -Xms50m"
 
-    ## @param trust_store_path - string - optional
-    ## trust_store_path should be set if ssl is enabled.
-    ## path to your trusted store
-    #
-    #  trust_store_path: <TRUSTSTORE.JKS_PATH>
+  ## @param trust_store_path - string - optional
+  ## trust_store_path should be set if ssl is enabled.
+  ## path to your trusted store
+  #
+  #  trust_store_path: <TRUSTSTORE.JKS_PATH>
 
-    ## @param trust_store_password - string - optional
-    ## trust_store_password should be set if ssl is enabled
-    ## password for your TrustStore.jks file
-    #
-    #  trust_store_password: password
+  ## @param trust_store_password - string - optional
+  ## trust_store_password should be set if ssl is enabled
+  ## password for your TrustStore.jks file
+  #
+  #  trust_store_password: password
+
+  ## @param key_store_path - string - optional
+  ## key_store_path should be set if client authentication is enabled on the target JVM.
+  ## path to your key store
+  #
+  #  key_store_path: <KEYSTORE.JKS_PATH>
+
+  ## @param key_store_password - string - optional
+  ## key_store_password should be set if client authentication is enabled on the target JVM.
+  ## password for your KeyStore.jks file
+  #
+  #  key_store_password: <PASSWORD>
+
+  ## @param rmi_registry_ssl - boolean - optional
+  ## Whether or not the agent should connect to the rmi registry using ssl.
+  #
+  #  rmi_registry_ssl: false
 
 
 ## Log Section (Available for Agent >=6.0)
@@ -96,15 +113,15 @@ instances:
 #    source: cassandra
 #    sourcecategory: database
 #    service: myapplication
-    
-    
+
+
 init_config:
 
   ## @param is_jmx - boolean - required - default: true
   ## Whether or not this file is a configuration for a JMX integration
   #
   is_jmx: true
-  
+
   ## @param collect_default_metrics - boolean - required - default: true
   ## Whether or not the check should collect all default metrics for this integration.
   #
