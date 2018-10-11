@@ -60,9 +60,6 @@ setup(
     install_requires=[CHECKS_BASE_REQ],
 
 
-    # Testing setup and dependencies
-    tests_require=get_requirements("requirements-dev.txt"),
-
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
