@@ -1,2 +1,2 @@
-datadog-checks-dev
+-e ../datadog_checks_dev
 virtualenv
