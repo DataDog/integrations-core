@@ -446,6 +446,12 @@ class OpenMetricsScraperMixin(object):
         return requests.get(endpoint, headers=headers, stream=True, timeout=scraper_config['prometheus_timeout'],
                             cert=cert, verify=verify, auth=auth)
 
+    def get_hostname_for_sample(self, sample, scraper_config):
+        """
+        Expose the label_to_hostname mapping logic to custom handler methods
+        """
+        return self._get_hostname(None, sample, scraper_config)
+
     def _submit(self, metric_name, metric, scraper_config, hostname=None):
         """
         For each sample in the metric, report it as a gauge with all labels as tags

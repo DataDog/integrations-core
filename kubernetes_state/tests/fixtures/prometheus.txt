@@ -506,6 +506,7 @@ kube_pod_info{created_by_kind="ReplicaSet",created_by_name="kube-dns-1326421443"
 kube_pod_info{created_by_kind="ReplicaSet",created_by_name="tiller-deploy-1651615695",host_ip="192.168.99.100",namespace="kube-system",node="minikube",pod="tiller-deploy-1651615695-dcphn",pod_ip="172.17.0.6"} 1
 kube_pod_info{created_by_kind="ReplicationController",created_by_name="kubernetes-dashboard",host_ip="192.168.99.100",namespace="kube-system",node="minikube",pod="kubernetes-dashboard-zhtjl",pod_ip="172.17.0.2"} 1
 kube_pod_info{created_by_kind="ReplicationController",created_by_name="registry-creds",host_ip="192.168.99.100",namespace="kube-system",node="minikube",pod="registry-creds-hq249",pod_ip=""} 1
+kube_pod_info{created_by_kind="Job",created_by_name="hello-1509998400",host_ip="192.168.99.100",node="minikube",namespace="ns2",pod="pod2",pod_ip=""} 1
 # HELP kube_pod_labels Kubernetes labels converted to Prometheus labels.
 # TYPE kube_pod_labels gauge
 kube_pod_labels{namespace="default",pod="nxf-126"} 1
