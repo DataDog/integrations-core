@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 4.1.0 / 2018-10-12
+
+* [Added] Expose core functionality at the root. See [#2394](https://github.com/DataDog/integrations-core/pull/2394).
+* [Added] base: add check name to Limiter warning message. See [#2391](https://github.com/DataDog/integrations-core/pull/2391).
+* [Fixed] Fix import of _get_py_loglevel. See [#2383](https://github.com/DataDog/integrations-core/pull/2383).
+* [Fixed] Fix hostname override and type for status_report.count metrics. See [#2372](https://github.com/DataDog/integrations-core/pull/2372).
+
 ## 4.0.0 / 2018-10-11
 
 * [Added] Added generic error class ConfigurationError. See [#2367](https://github.com/DataDog/integrations-core/pull/2367).
