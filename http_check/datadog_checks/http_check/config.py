@@ -4,6 +4,7 @@
 from collections import namedtuple
 
 from datadog_checks.config import _is_affirmative
+from datadog_checks.errors import ConfigurationError
 from datadog_checks.utils.headers import headers as agent_headers
 
 
@@ -46,7 +47,9 @@ def from_instance(instance, default_ca_certs=None):
     reverse_content_match = _is_affirmative(instance.get('reverse_content_match', False))
     response_time = _is_affirmative(instance.get('collect_response_time', True))
     if not url:
-        raise Exception("Bad configuration. You must specify a url")
+        raise ConfigurationError("Bad configuration. You must specify a url")
+    if not url.startswith("http"):
+        raise ConfigurationError("The url {} must start with the scheme http or https".format(url))
     include_content = _is_affirmative(instance.get('include_content', False))
     disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', True))
     ssl_expire = _is_affirmative(instance.get('check_certificate_expiration', True))

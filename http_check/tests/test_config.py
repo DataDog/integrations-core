@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.errors import ConfigurationError
 from datadog_checks.utils.headers import headers as agent_headers
 from datadog_checks.http_check.config import from_instance, DEFAULT_EXPECTED_CODE
 
@@ -13,9 +14,16 @@ def test_from_instance():
     Test the defaults and the pieces of _load_conf that actually perform some logic
     """
     # misconfiguration
-    with pytest.raises(Exception) as e:
+    with pytest.raises(ConfigurationError) as e:
         from_instance({})
         assert 'Bad configuration' in str(e)
+
+    # misconfiguration
+    with pytest.raises(ConfigurationError) as e:
+        from_instance({
+            'url': 'example.com'
+        })
+        assert 'scheme' in str(e)
 
     # defaults
     params = from_instance({
