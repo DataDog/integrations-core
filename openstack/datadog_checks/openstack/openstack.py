@@ -818,6 +818,7 @@ class OpenStackCheck(AgentCheck):
             'hypervisor:{}'.format(hyp_hostname),
             'hypervisor_id:{}'.format(hyp['id']),
             'virt_type:{}'.format(hyp['hypervisor_type']),
+            'status:{}'.format(hyp['status']),
         ]
         host_tags = self._get_host_aggregate_tag(hyp_hostname,
                                                  use_shortname=use_shortname)
