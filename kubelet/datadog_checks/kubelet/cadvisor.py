@@ -26,6 +26,8 @@ DEFAULT_ENABLED_RATES = [
     'cpu.*.total']
 DEFAULT_ENABLED_GAUGES = [
     'memory.usage',
+    'memory.working_set',
+    'memory.rss',
     'filesystem.usage']
 DEFAULT_POD_LEVEL_METRICS = [
     'network.*']
