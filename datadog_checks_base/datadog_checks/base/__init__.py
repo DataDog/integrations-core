@@ -4,9 +4,14 @@
 from .__about__ import __version__
 from .checks import AgentCheck
 from .checks.openmetrics import OpenMetricsBaseCheck
-from .checks.win import PDHBaseCheck
 from .config import is_affirmative
 from .errors import ConfigurationError
+
+# Windows-only
+try:
+    from .checks.win import PDHBaseCheck
+except ImportError:
+    PDHBaseCheck = None
 
 __all__ = [
     '__version__',
