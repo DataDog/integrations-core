@@ -57,7 +57,7 @@ class TestPatternFilter:
 class TestLimiter():
     def test_no_uid(self):
         warnings = []
-        limiter = Limiter("names", 10, warning_func=warnings.append)
+        limiter = Limiter("my_check", "names", 10, warning_func=warnings.append)
         for i in range(0, 10):
             assert limiter.is_reached() is False
         assert limiter.get_status() == (10, 10, False)
@@ -65,7 +65,7 @@ class TestLimiter():
         # Reach limit
         assert limiter.is_reached() is True
         assert limiter.get_status() == (11, 10, True)
-        assert warnings == ["Exceeded limit of 10 names, ignoring next ones"]
+        assert warnings == ["Check my_check exceeded limit of 10 names, ignoring next ones"]
 
         # Make sure warning is only sent once
         assert limiter.is_reached() is True
@@ -73,7 +73,7 @@ class TestLimiter():
 
     def test_with_uid(self):
         warnings = []
-        limiter = Limiter("names", 10, warning_func=warnings.append)
+        limiter = Limiter("my_check", "names", 10, warning_func=warnings.append)
         for i in range(0, 20):
             assert limiter.is_reached("dummy1") is False
         assert limiter.get_status() == (1, 10, False)
@@ -84,7 +84,7 @@ class TestLimiter():
         assert len(warnings) == 0
 
     def test_mixed(self):
-        limiter = Limiter("names", 10)
+        limiter = Limiter("my_check", "names", 10)
 
         for i in range(0, 20):
             assert limiter.is_reached("dummy1") is False
@@ -95,7 +95,7 @@ class TestLimiter():
         assert limiter.get_status() == (6, 10, False)
 
     def test_reset(self):
-        limiter = Limiter("names", 10)
+        limiter = Limiter("my_check", "names", 10)
 
         for i in range(1, 20):
             limiter.is_reached("dummy1")

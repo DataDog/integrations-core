@@ -133,7 +133,7 @@ class AgentCheck(object):
         except Exception:
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
-            self.metric_limiter = Limiter("metrics", metric_limit, self.warning)
+            self.metric_limiter = Limiter(self.name, "metrics", metric_limit, self.warning)
 
     @property
     def in_developer_mode(self):
