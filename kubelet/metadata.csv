@@ -10,7 +10,9 @@ kubernetes.io.write_bytes,gauge,,byte,,The amount of bytes written to the disk,0
 kubernetes.memory.capacity,gauge,,byte,,The amount of memory (in bytes) in this machine,0,kubelet,k8s.mem.capacity
 kubernetes.memory.limits,gauge,,byte,,The limit of memory set,0,kubelet,k8s.mem.limits
 kubernetes.memory.requests,gauge,,byte,,The requested memory,0,kubelet,k8s.mem.requests
-kubernetes.memory.usage,gauge,,byte,,The amount of memory used,-1,kubelet,k8s.mem
+kubernetes.memory.usage,gauge,,byte,,Current memory usage in bytes including all memory regardless of when it was accessed,-1,kubelet,k8s.mem
+kubernetes.memory.working_set,gauge,,byte,,Current working set in bytes - this is what the OOM killer is watching for,-1,kubelet,k8s.mem.ws
+kubernetes.memory.rss,gauge,,byte,,Size of RSS in bytes,-1,kubelet,k8s.mem.rss
 kubernetes.memory.usage_pct,gauge,,fraction,,The percentage of memory used,-1,kubelet,k8s.mem.used_pct
 kubernetes.network.rx_bytes,gauge,,byte,second,The amount of bytes per second received,0,kubelet,k8s.net.rx
 kubernetes.network.rx_dropped,gauge,,packet,second,The amount of rx packets dropped per second,-1,kubelet,k8s.net.rx.drop

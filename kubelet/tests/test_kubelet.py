@@ -47,6 +47,8 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.memory.limits',
     'kubernetes.memory.requests',
     'kubernetes.memory.usage',
+    'kubernetes.memory.working_set',
+    'kubernetes.memory.rss',
     'kubernetes.network.rx_bytes',
     'kubernetes.network.tx_bytes'
 ]
