@@ -1,5 +1,9 @@
 # CHANGELOG - gunicorn
 
+## 1.3.0 / 2018-10-12
+
+* [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).
+
 ## 1.2.1 / 2018-09-04
 
 * [Fixed] Gunicorn intergration - fix problem with multiple master processes. See [#1839](https://github.com/DataDog/integrations-core/pull/1839). Thanks [mrmm](https://github.com/mrmm).
