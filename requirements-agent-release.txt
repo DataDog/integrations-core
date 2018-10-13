@@ -25,7 +25,7 @@ exchange_server==1.2.0; sys_platform == 'win32'
 fluentd==1.0.1
 gearmand==1.1.1; sys_platform != 'win32'
 gitlab==2.0.0
-gitlab_runner==1.2.0
+gitlab_runner==2.0.0
 go-metro==1.0.0; sys_platform == 'linux2'
 go_expvar==1.0.4
 gunicorn==1.2.1; sys_platform != 'win32'
