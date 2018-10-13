@@ -507,6 +507,8 @@ Usage: ddev release changelog [OPTIONS] CHECK VERSION [OLD_VERSION]
   This method is supposed to be used by other tasks and not directly.
 
 Options:
+  --initial
+  -q, --quiet
   -n, --dry-run
   -h, --help     Show this message and exit.
 ```
@@ -548,6 +550,7 @@ Usage: ddev release make [OPTIONS] CHECK [VERSION]
     - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
 
 Options:
+  --new        Ensure versions are at 1.0.0
   --skip-sign  Skip the signing of release metadata
   --sign-only  Only sign release metadata
   -h, --help   Show this message and exit.

@@ -17,7 +17,7 @@ from .utils import (
     echo_warning
 )
 from ..constants import (
-    AGENT_REQ_FILE, AGENT_V5_ONLY, CHANGELOG_TYPE_NONE, get_root
+    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_CHECKS, CHANGELOG_TYPE_NONE, NOT_CHECKS, get_root
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
@@ -500,10 +500,11 @@ def tag(check, version, push, dry_run):
 )
 @click.argument('check')
 @click.argument('version', required=False)
+@click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.option('--sign-only', is_flag=True, help='Only sign release metadata')
 @click.pass_context
-def make(ctx, check, version, skip_sign, sign_only):
+def make(ctx, check, version, initial_release, skip_sign, sign_only):
     """Perform a set of operations needed to release a single check:
 
     \b
@@ -541,11 +542,18 @@ def make(ctx, check, version, skip_sign, sign_only):
     else:
         checks = [check]
 
+    if initial_release:
+        version = '1.0.0'
+
     for check in checks:
         if sign_only:
             break
+        elif initial_release and check in BETA_CHECKS:
+            continue
 
-        echo_success('Check `{}`'.format(check))
+        # Initial releases will only bump if not already 1.0.0 so no need to always output
+        if not initial_release:
+            echo_success('Check `{}`'.format(check))
 
         if version:
             # sanity check on the version provided
@@ -553,7 +561,10 @@ def make(ctx, check, version, skip_sign, sign_only):
             p_version = parse_version_info(version)
             p_current = parse_version_info(cur_version)
             if p_version <= p_current:
-                abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
+                if initial_release:
+                    continue
+                else:
+                    abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
         else:
             cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
             if not changelog_types:
@@ -561,6 +572,9 @@ def make(ctx, check, version, skip_sign, sign_only):
                 continue
             bump_function = get_bump_function(changelog_types)
             version = bump_function(cur_version)
+
+        if initial_release:
+            echo_success('Check `{}`'.format(check))
 
         # update the version number
         echo_info('Current version of check {}: {}'.format(check, cur_version))
@@ -572,14 +586,20 @@ def make(ctx, check, version, skip_sign, sign_only):
         echo_waiting('Updating the changelog... ', nl=False)
         # TODO: Avoid double GitHub API calls when bumping all checks at once
         ctx.invoke(
-            changelog, check=check, version=version, old_version=cur_version, quiet=True, dry_run=False
+            changelog,
+            check=check,
+            version=version,
+            old_version=cur_version,
+            initial=initial_release,
+            quiet=True,
+            dry_run=False
         )
         echo_success('success!')
 
         commit_targets = [check]
 
         # update the global requirements file
-        if check != 'datadog_checks_dev':
+        if check not in NOT_CHECKS:
             commit_targets.append(AGENT_REQ_FILE)
             req_file = os.path.join(root, AGENT_REQ_FILE)
             echo_waiting('Updating the Agent requirements file... ', nl=False)
@@ -593,8 +613,9 @@ def make(ctx, check, version, skip_sign, sign_only):
         msg = '[Release] Bumped {} version to {}'.format(check, version)
         git_commit(commit_targets, msg)
 
-        # Reset version
-        version = None
+        if not initial_release:
+            # Reset version
+            version = None
 
     if sign_only or not skip_sign:
         echo_waiting('Updating release metadata...')
@@ -614,10 +635,11 @@ def make(ctx, check, version, skip_sign, sign_only):
 @click.argument('check')
 @click.argument('version')
 @click.argument('old_version', required=False)
+@click.option('--initial', is_flag=True)
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, quiet, dry_run):
+def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -637,12 +659,16 @@ def changelog(ctx, check, version, old_version, quiet, dry_run):
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_commits_since(check, target_tag)
+    diff_lines = get_commits_since(check, None if initial else target_tag)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
     if not quiet:
         echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
+
+    if initial:
+        # Only use the first one
+        del pr_numbers[:-1]
 
     user_config = ctx.obj
     entries = []
