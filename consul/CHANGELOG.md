@@ -1,5 +1,9 @@
 # CHANGELOG - consul
 
+## 1.5.2 / 2018-10-12
+
+* [Fixed] Update consul timestamp to use supported python functions. See [#2199](https://github.com/DataDog/integrations-core/pull/2199). Thanks [hhansell](https://github.com/hhansell).
+
 ## 1.5.1 / 2018-09-04
 
 * [Fixed] Accept more standard boolean values for instance config options. See [#1954](https://github.com/DataDog/integrations-core/pull/1954).
