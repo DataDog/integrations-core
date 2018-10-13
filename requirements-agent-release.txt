@@ -85,7 +85,7 @@ system_swap==1.2.0
 tcp_check==2.0.2
 teamcity==1.1.1
 tokumx==1.2.1
-tomcat==1.1.1
+tomcat==1.2.0
 twemproxy==1.2.1
 varnish==1.2.1
 vault==1.2.0
