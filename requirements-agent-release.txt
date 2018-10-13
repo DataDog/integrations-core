@@ -3,7 +3,7 @@ activemq==1.1.0
 activemq_xml==1.0.1
 apache==1.3.1
 aspdotnet==0.2.0; sys_platform == 'win32'
-btrfs==1.2.1; sys_platform != 'win32'
+btrfs==1.3.0; sys_platform != 'win32'
 cacti==1.1.2; sys_platform == 'linux2'
 cassandra==1.2.2
 cassandra_nodetool==0.1.3
