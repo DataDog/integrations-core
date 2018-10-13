@@ -54,7 +54,7 @@ mesos_slave==1.2.1; sys_platform != 'win32'
 mongo==1.6.1
 mysql==1.4.0
 nagios==1.1.2
-network==1.6.1
+network==1.7.0
 nfsstat==0.2.1; sys_platform == 'linux2'
 nginx==3.0.0
 openldap==1.0.0
