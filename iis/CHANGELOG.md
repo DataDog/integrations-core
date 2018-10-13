@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.2.0 / 2018-10-12
+
+* [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).
+
 ## 2.1.1 / 2018-09-04
 
 * [Fixed] Fix 'attempted connection' metrics. See [#1970](https://github.com/DataDog/integrations-core/pull/1970).
