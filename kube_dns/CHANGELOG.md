@@ -1,5 +1,9 @@
 # CHANGELOG - Kube-dns
 
+## 2.0.1 / 2018-10-12
+
+* [Fixed] Submit metrics with instance tags. See [#2299](https://github.com/DataDog/integrations-core/pull/2299).
+
 ## 2.0.0 / 2018-09-04
 
 * [Changed] Update kube_dns to use the new OpenMetricsBaseCheck. See [#1980](https://github.com/DataDog/integrations-core/pull/1980).

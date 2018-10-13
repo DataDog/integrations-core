@@ -1,5 +1,11 @@
 # CHANGELOG - elastic
 
+## 1.8.0 / 2018-10-12
+
+* [Fixed] Move config parser to its own module. See [#2370](https://github.com/DataDog/integrations-core/pull/2370).
+* [Added] Added delayed_unassigned_shards metric. See [#2361](https://github.com/DataDog/integrations-core/pull/2361).
+* [Added] Added inflight_requests metrics (version 5.4 and later).. See [#2360](https://github.com/DataDog/integrations-core/pull/2360).
+
 ## 1.7.1 / 2018-09-04
 
 * [Fixed] Add thread write queue to fix Elasticsearch 6.3.x compatibility. See [#1943](https://github.com/DataDog/integrations-core/pull/1943).

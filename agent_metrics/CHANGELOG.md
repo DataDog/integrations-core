@@ -1,5 +1,9 @@
 # CHANGELOG - agent_metrics
 
+## 1.2.0 / 2018-10-12
+
+* [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).
+
 ## 1.1.1 / 2018-09-04
 
 * [Fixed] Moves Agent Metrics to Pytest. See [#2059](https://github.com/DataDog/integrations-core/pull/2059).

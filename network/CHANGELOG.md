@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 1.7.0 / 2018-10-12
+
+* [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).
+
 ## 1.6.1 / 2018-09-04
 
 * [Fixed] Retrieve no_proxy directly from the Datadog Agent's configuration. See [#2004](https://github.com/DataDog/integrations-core/pull/2004).

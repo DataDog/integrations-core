@@ -1,5 +1,9 @@
 # CHANGELOG - postfix
 
+## 1.2.3 / 2018-10-12
+
+* [Fixed] Use subprocess to get sudo capabilities instead of system(). See [#2353](https://github.com/DataDog/integrations-core/pull/2353).
+
 ## 1.2.2 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

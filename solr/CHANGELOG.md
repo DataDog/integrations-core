@@ -1,5 +1,10 @@
 # CHANGELOG - solr
 
+## 1.2.0 / 2018-10-12
+
+* [Added] [jmx] add rmi registry ssl config option. See [#2371](https://github.com/DataDog/integrations-core/pull/2371).
+* [Fixed] Fix Solr file indenting. See [#2189](https://github.com/DataDog/integrations-core/pull/2189).
+
 ## 1.1.0 / 2018-09-04
 
 * [Added] Add metrics for Solr 7. See [#2042](https://github.com/DataDog/integrations-core/pull/2042).

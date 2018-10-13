@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 1.4.2 / 2018-10-12
+
+* [Fixed] Fix `enforce_mib_constraints` parameter having no effect.. See [#2340](https://github.com/DataDog/integrations-core/pull/2340).
+
 ## 1.4.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

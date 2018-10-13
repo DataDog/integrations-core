@@ -1,5 +1,10 @@
 # CHANGELOG - Prometheus
 
+## 3.0.0 / 2018-10-12
+
+* [Changed] Change default prometheus metric limit to 2000. See [#2248](https://github.com/DataDog/integrations-core/pull/2248).
+* [Fixed] Temporarily increase the limit of prometheus metrics sent for 6.5. See [#2214](https://github.com/DataDog/integrations-core/pull/2214).
+
 ## 2.0.0 / 2018-09-04
 
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093](https://github.com/DataDog/integrations-core/pull/2093).
