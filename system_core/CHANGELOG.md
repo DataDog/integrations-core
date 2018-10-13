@@ -1,5 +1,9 @@
 # CHANGELOG - system_core
 
+## 1.1.0 / 2018-10-12
+
+* [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).
+
 ## 1.0.2 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
