@@ -33,6 +33,14 @@ AGENT_V5_ONLY = {
     'ntp',
 }
 
+BETA_PACKAGES = {
+    'datadog_checks_dev',
+}
+
+NOT_CHECKS = {
+    'datadog_checks_dev',
+}
+
 # If a file changes in a PR with any of these file extensions,
 # a test will run against the check containing the file
 TESTABLE_FILE_EXTENSIONS = (
