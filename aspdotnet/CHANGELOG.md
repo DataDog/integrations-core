@@ -1,5 +1,10 @@
 # CHANGELOG - Aspdotnet
 
+## 0.2.0 / 2018-10-12
+
+* [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).
+* [Fixed] Remove unused port config option for pdh checks. See [#2244](https://github.com/DataDog/integrations-core/pull/2244).
+
 ## 0.1.3 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
