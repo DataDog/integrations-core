@@ -1,5 +1,9 @@
 # CHANGELOG - Aspdotnet
 
+## 1.0.0 / 2018-10-13
+
+* [Added] moves aspdotnet and dotnet clr metrics to their own checks. See [#884](https://github.com/DataDog/integrations-core/pull/884).
+
 ## 0.2.0 / 2018-10-12
 
 * [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).
