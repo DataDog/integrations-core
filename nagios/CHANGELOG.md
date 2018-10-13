@@ -1,5 +1,9 @@
 # CHANGELOG - nagios
 
+## 1.1.2 / 2018-10-12
+
+* [Fixed] Fix empty event issue with Agent 6. See [#2348](https://github.com/DataDog/integrations-core/pull/2348).
+
 ## 1.1.1 / 2018-09-04
 
 * [Fixed] Add Agent 6 compatibility by not sending timestamps for gauge metrics (Agent 6 only). See [#1822](https://github.com/DataDog/integrations-core/pull/1822).
