@@ -73,7 +73,7 @@ redisdb==1.7.1
 riak==1.3.1
 riakcs==1.1.1
 snmp==1.4.2
-solr==1.1.0
+solr==1.2.0
 spark==1.4.1
 sqlserver==1.6.0; sys_platform == 'win32'
 squid==1.0.2
