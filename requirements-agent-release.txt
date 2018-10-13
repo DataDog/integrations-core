@@ -41,7 +41,7 @@ kong==1.2.1
 kube_dns==2.0.1
 kube_proxy==3.0.0
 kubelet==2.2.0; sys_platform == 'linux2'
-kubernetes_state==3.0.0; sys_platform != 'win32'
+kubernetes_state==3.1.0; sys_platform != 'win32'
 kyototycoon==1.4.1
 lighttpd==1.2.1
 linkerd==1.2.0

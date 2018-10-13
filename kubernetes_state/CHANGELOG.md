@@ -1,5 +1,15 @@
 # CHANGELOG - kubernetes_state
 
+## 3.1.0 / 2018-10-12
+
+* [Fixed] Fix job metrics tagging on KSM 1.4+. See [#2384](https://github.com/DataDog/integrations-core/pull/2384).
+* [Fixed] include node condition value in check message. See [#2362](https://github.com/DataDog/integrations-core/pull/2362). Thanks [dwradcliffe](https://github.com/dwradcliffe).
+* [Fixed] Fix hostname override and type for status_report.count metrics. See [#2372](https://github.com/DataDog/integrations-core/pull/2372).
+* [Deprecated] [kubernetes_state] don't send pod phase service checks by default. See [#2354](https://github.com/DataDog/integrations-core/pull/2354).
+* [Added] Report number of services per namespace and type. See [#2247](https://github.com/DataDog/integrations-core/pull/2247).
+* [Fixed] Fix KSM deprecation warning on A5. See [#2317](https://github.com/DataDog/integrations-core/pull/2317).
+* [Fixed] Include ContainerCreating in pod waiting status reasons. See [#2063](https://github.com/DataDog/integrations-core/pull/2063). Thanks [deiwin](https://github.com/deiwin).
+
 ## 3.0.0 / 2018-09-04
 
 * [Changed] Update kubernetes_state to use the new OpenMetricsBaseCheck. See [#1983](https://github.com/DataDog/integrations-core/pull/1983).
