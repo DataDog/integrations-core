@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 1.5.0 / 2018-10-12
+
+* [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).
+
 ## 1.4.0 / 2018-09-04
 
 * [Added] Added regex support to process check when exact_match is False.. See [#2055](https://github.com/DataDog/integrations-core/pull/2055). Thanks [asandeep](https://github.com/asandeep).
