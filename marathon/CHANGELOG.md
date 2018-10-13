@@ -1,5 +1,10 @@
 # CHANGELOG - marathon
 
+## 1.5.0 / 2018-10-12
+
+* [Fixed] Removed default arguments from process_apps. See [#2337](https://github.com/DataDog/integrations-core/pull/2337).
+* [Added] Add ability to tag metrics based on marathon labels. See [#2165](https://github.com/DataDog/integrations-core/pull/2165). Thanks [ashirley](https://github.com/ashirley).
+
 ## 1.4.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
