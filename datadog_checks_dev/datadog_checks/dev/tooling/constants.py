@@ -33,7 +33,7 @@ AGENT_V5_ONLY = {
     'ntp',
 }
 
-BETA_CHECKS = {
+BETA_PACKAGES = {
     'datadog_checks_dev',
 }
 

@@ -17,7 +17,7 @@ from .utils import (
     echo_warning
 )
 from ..constants import (
-    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_CHECKS, CHANGELOG_TYPE_NONE, NOT_CHECKS, get_root
+    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, get_root
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
@@ -548,7 +548,7 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
     for check in checks:
         if sign_only:
             break
-        elif initial_release and check in BETA_CHECKS:
+        elif initial_release and check in BETA_PACKAGES:
             continue
 
         # Initial releases will only bump if not already 1.0.0 so no need to always output
