@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 2.2.0 / 2018-10-12
+
+* [Added] Add kubelet rss and working set memory metrics. See [#2390](https://github.com/DataDog/integrations-core/pull/2390).
+
 ## 2.1.0 / 2018-10-10
 
 * [Fixed] Fix parsing errors when the podlist is in an inconsistent state. See [#2338](https://github.com/DataDog/integrations-core/pull/2338).
