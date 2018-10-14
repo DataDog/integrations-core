@@ -537,9 +537,9 @@ class SQLServer(AgentCheck):
                 rows = cursor.fetchall()
                 self.log.debug("Row count ({}) : {}".format(proc, cursor.rowcount))
 
-                log_rows = 5
+                log_rows = 1
                 items = [dict(zip([key[0] for key in cursor.description], row)) for row in rows]
-                self.log.debug("First {} rows : {}".format(log_rows, json.dumps({'rows': items[:log_rows]})))
+                self.log.trace("First {} rows : {}".format(log_rows, json.dumps({'rows': items[:log_rows]})))
 
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
