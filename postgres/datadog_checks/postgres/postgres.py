@@ -402,14 +402,14 @@ GROUP BY datid, datname
                 version_parts = version.split(' ')[0].split('.')
                 version = [int(part) for part in version_parts]
             except Exception:
-                # Postgres might be in beta, with format \d+beta\d+
-                match = re.match('(\d+)(beta)(\d+)', version)
+                # Postgres might be in development, with format \d+[beta|rc]\d+
+                match = re.match('(\d+)([a-zA-Z]+)(\d+)', version)
                 if match:
                     version_parts = list(match.groups())
 
-                    # We found a valid beta version
+                    # We found a valid development version
                     if len(version_parts) == 3:
-                        # Replace `beta` with a negative number to properly compare versions
+                        # Replace development tag with a negative number to properly compare versions
                         version_parts[1] = -1
                         version = [int(part) for part in version_parts]
 
