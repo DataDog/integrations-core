@@ -318,13 +318,16 @@ def testable(ctx, start_id, agent_version, dry_run):
         commit_id = parse_pr_number(commit_subject)
         if commit_id:
             api_response = get_pr(commit_id, user_config, repo=repo, raw=True)
-            if api_response.status_code == 403:
+            if api_response.status_code == 401:
+                abort('Access denied. Please ensure your GitHub token has correct permissions.')
+            elif api_response.status_code == 403:
                 echo_failure(
-                    'Access denied. Please set a GitHub HTTPS token with correct perms to avoid rate limits.'
+                    'Error getting info for #{}. Please set a GitHub HTTPS '
+                    'token to avoid rate limits.'.format(commit_id)
                 )
                 continue
             elif api_response.status_code == 404:
-                echo_warning('Skipping #{}, not a pull request...'.format(commit_id))
+                echo_info('Skipping #{}, not a pull request...'.format(commit_id))
                 continue
 
             api_response.raise_for_status()
@@ -332,9 +335,12 @@ def testable(ctx, start_id, agent_version, dry_run):
         else:
             try:
                 api_response = get_pr_from_hash(commit_hash, repo, user_config, raw=True)
-                if api_response.status_code == 403:
+                if api_response.status_code == 401:
+                    abort('Access denied. Please ensure your GitHub token has correct permissions.')
+                elif api_response.status_code == 403:
                     echo_failure(
-                        'Access denied. Please set a GitHub HTTPS token with correct perms to avoid rate limits.'
+                        'Error getting info for #{}. Please set a GitHub HTTPS '
+                        'token to avoid rate limits.'.format(commit_id)
                     )
                     continue
 
