@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.12.1 / 2018-10-15
+
+* [Fixed] Improve handling of github api errors for trello. See [#2411](https://github.com/DataDog/integrations-core/pull/2411).
+* [Fixed] Make every check's `tests` directory path unique for coverage. See [#2406](https://github.com/DataDog/integrations-core/pull/2406).
+
 ## 0.12.0 / 2018-10-15
 
 * [Fixed] Fix trello for issue number in commit message. See [#2408](https://github.com/DataDog/integrations-core/pull/2408).
