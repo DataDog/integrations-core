@@ -86,7 +86,7 @@ class HTTPCheck(NetworkCheck):
                     # Emit a warning if disable_ssl_validation is not explicitly set and we're not ignoring warnings
                     else:
                         self.log.warning("Parameter disable_ssl_validation for {} is not explicitly set, "
-                                     "defaults to true".format(addr))
+                                         "defaults to true".format(addr))
 
             instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for {} - {}".format(addr, instance_proxy))
