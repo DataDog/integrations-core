@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.12.0 / 2018-10-15
+
+* [Fixed] Fix trello for issue number in commit message. See [#2408](https://github.com/DataDog/integrations-core/pull/2408).
+* [Added] Support the initial release of integrations. See [#2399](https://github.com/DataDog/integrations-core/pull/2399).
+
 ## 0.11.0 / 2018-10-11
 
 * [Added] Add E2E support. See [#2375](https://github.com/DataDog/integrations-core/pull/2375).
