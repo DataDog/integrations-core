@@ -7,7 +7,7 @@ import click
 
 from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
 from ..constants import get_root
-from ..test import get_tox_envs, pytest_coverage_sources
+from ..test import fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from ...subprocess import run_command
 from ...utils import chdir, file_exists, remove_path, running_on_ci
 
@@ -132,6 +132,7 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
                     if result.code:
                         abort('\nFailed!', code=result.code)
 
+                    fix_coverage_report(check, 'coverage.xml')
                     run_command('codecov -X gcov -F {} -f coverage.xml'.format(check))
                 else:
                     if not cov_keep:

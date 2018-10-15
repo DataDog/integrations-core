@@ -5,7 +5,7 @@ from .constants import TESTABLE_FILE_EXTENSIONS, get_root
 from .git import files_changed
 from .utils import get_testable_checks
 from ..subprocess import run_command
-from ..utils import chdir, path_join
+from ..utils import chdir, path_join, read_file_binary, write_file_binary
 
 STYLE_ENVS = {
     'flake8',
@@ -123,6 +123,15 @@ def coverage_sources(check):
         package_path = 'datadog_checks/{}'.format(check)
 
     return package_path, 'tests'
+
+
+def fix_coverage_report(check, report_file):
+    report = read_file_binary(report_file)
+
+    # Make every check's `tests` directory path unique so they don't get combined in UI
+    report = report.replace(b'"tests/', '"{}/tests/'.format(check).encode('utf-8'))
+
+    write_file_binary(report_file, report)
 
 
 def pytest_coverage_sources(*checks):
