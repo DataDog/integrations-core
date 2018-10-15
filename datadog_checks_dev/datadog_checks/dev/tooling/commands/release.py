@@ -317,14 +317,36 @@ def testable(ctx, start_id, agent_version, dry_run):
     for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id:
-            try:
-                pr_data = get_pr(commit_id, user_config, repo=repo)
-            except Exception:
-                echo_warning('Skipping #{}, not a pull request...'.format(commit_id))
+            api_response = get_pr(commit_id, user_config, repo=repo, raw=True)
+            if api_response.status_code == 401:
+                abort('Access denied. Please ensure your GitHub token has correct permissions.')
+            elif api_response.status_code == 403:
+                echo_failure(
+                    'Error getting info for #{}. Please set a GitHub HTTPS '
+                    'token to avoid rate limits.'.format(commit_id)
+                )
                 continue
+            elif api_response.status_code == 404:
+                echo_info('Skipping #{}, not a pull request...'.format(commit_id))
+                continue
+
+            api_response.raise_for_status()
+            pr_data = api_response.json()
         else:
             try:
-                pr_data = get_pr_from_hash(commit_hash, repo, user_config).get('items', [{}])[0]
+                api_response = get_pr_from_hash(commit_hash, repo, user_config, raw=True)
+                if api_response.status_code == 401:
+                    abort('Access denied. Please ensure your GitHub token has correct permissions.')
+                elif api_response.status_code == 403:
+                    echo_failure(
+                        'Error getting info for #{}. Please set a GitHub HTTPS '
+                        'token to avoid rate limits.'.format(commit_id)
+                    )
+                    continue
+
+                api_response.raise_for_status()
+                pr_data = api_response.json()
+                pr_data = pr_data.get('items', [{}])[0]
             # Commit to master
             except IndexError:
                 pr_data = {

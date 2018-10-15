@@ -37,7 +37,7 @@ def get_changelog_types(pr_payload):
     return changelog_labels
 
 
-def get_pr(pr_num, config=None, repo=DEFAULT_REPO):
+def get_pr(pr_num, config=None, repo=DEFAULT_REPO, raw=False):
     """
     Get the payload for the given PR number. Let exceptions bubble up.
     """
@@ -45,19 +45,27 @@ def get_pr(pr_num, config=None, repo=DEFAULT_REPO):
         PR_ENDPOINT.format(repo, pr_num),
         auth=get_auth_info(config)
     )
-    response.raise_for_status()
-    return response.json()
+
+    if raw:
+        return response
+    else:
+        response.raise_for_status()
+        return response.json()
 
 
-def get_pr_from_hash(commit_hash, repo, config=None):
+def get_pr_from_hash(commit_hash, repo, config=None, raw=False):
     response = requests.get(
         'https://api.github.com/search/issues?q=sha:{}+repo:DataDog/{}'.format(
             commit_hash, repo
         ),
         auth=get_auth_info(config)
     )
-    response.raise_for_status()
-    return response.json()
+
+    if raw:
+        return response
+    else:
+        response.raise_for_status()
+        return response.json()
 
 
 def from_contributor(pr_payload):
