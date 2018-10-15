@@ -61,6 +61,6 @@ for more details about how to test and develop Agent based integrations.
 [2]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/cookiecutter-datadog-check/blob/master/%7B%7Bcookiecutter.check_name%7D%7D/metadata.csv
+[5]: https://github.com/DataDog/integrations-core/blob/master/coredns/metadata.csv
 [6]: https://docs.datadoghq.com/developers/
 [7]: http://docs.datadoghq.com/help/
