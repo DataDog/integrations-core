@@ -17,12 +17,12 @@ def parse_config_from_result(env, result):
     if '{}: platform mismatch'.format(env) in result.stdout:
         return None, None, 'The environment `{}` does not support this platform.'.format(env)
 
-    if 'no tests ran' not in result.stdout:
-        return None, None, '{}\n{}\nAn unexpected error occurred.'.format(result.stdout, result.stderr)
-
     decoded = parse_encoded_config_data(result.stdout)
     if decoded is None:
-        return None, None, '{}\n{}\nUnable to parse configuration.'.format(result.stdout, result.stderr)
+        return None, None, (
+            '{}\n{}\nUnable to parse configuration. Try recreating your env to get the '
+            'latest version of the dev package.'.format(result.stdout, result.stderr)
+        )
 
     config = decoded['config']
     metadata = decoded['metadata']
