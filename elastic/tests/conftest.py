@@ -38,8 +38,12 @@ def elastic_cluster():
         except Exception:
             time.sleep(2)
 
-    # Create an index in ES
-    requests.put(URL, '/datadog/')
+    # Create an index
+    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 1}}')
+    requests.put(URL + '/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
+    requests.put(URL + '/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
+    time.sleep(3)  # wait for the index to build
+
     yield
     subprocess.check_call(args + ["down"])
 

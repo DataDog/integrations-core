@@ -3,33 +3,24 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
-import requests
-
-from .common import TEST_INSTANCE, PASSWORD, URL, USER
+from .common import PASSWORD, URL, USER
 
 
-def test_check(benchmark, elastic_cluster, elastic_check):
+def test_check(benchmark, elastic_cluster, elastic_check, instance):
     for _ in range(3):
         try:
-            elastic_check.check(TEST_INSTANCE)
+            elastic_check.check(instance)
         except Exception:
             time.sleep(1)
 
-    benchmark(elastic_check.check, TEST_INSTANCE)
+    benchmark(elastic_check.check, instance)
 
 
 def test_pshard_metrics(benchmark, elastic_cluster, elastic_check):
-    elastic_latency = 10
-    config = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
-
-    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 1}}')
-    requests.put(URL + '/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
-    requests.put(URL + '/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
-    time.sleep(elastic_latency)
-
-    benchmark(elastic_check.check, config)
+    instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
+    benchmark(elastic_check.check, instance)
 
 
 def test_index_metrics(benchmark, elastic_cluster, elastic_check):
-    config = {'url': URL, 'index_stats': True, 'username': USER, 'password': PASSWORD}
-    benchmark(elastic_check.check, config)
+    instance = {'url': URL, 'index_stats': True, 'username': USER, 'password': PASSWORD}
+    benchmark(elastic_check.check, instance)
