@@ -6,6 +6,7 @@ from .checks import AgentCheck
 from .checks.openmetrics import OpenMetricsBaseCheck
 from .config import is_affirmative
 from .errors import ConfigurationError
+from .utils.common import ensure_bytes, ensure_unicode
 
 # Windows-only
 try:
@@ -19,5 +20,7 @@ __all__ = [
     'OpenMetricsBaseCheck',
     'PDHBaseCheck',
     'ConfigurationError',
+    'ensure_bytes',
+    'ensure_unicode',
     'is_affirmative',
 ]
