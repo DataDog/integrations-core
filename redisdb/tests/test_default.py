@@ -1,15 +1,16 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
-from distutils.version import StrictVersion
-from copy import deepcopy
 
-from datadog_checks.redisdb import Redis
-import pytest
+from copy import deepcopy
+from distutils.version import StrictVersion
+
 import mock
+import pytest
 import redis
 
+from datadog_checks.redisdb import Redis
 from .common import PORT, PASSWORD, HOST
 
 
@@ -30,9 +31,6 @@ STAT_METRICS = [
 
 @pytest.mark.integration
 def test_redis_default(aggregator, redis_auth, redis_instance):
-    """
-
-    """
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
     db.flushdb()
     db.lpush("test_list", 1)
@@ -72,9 +70,6 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
 
 @pytest.mark.integration
 def test_service_check(aggregator, redis_auth, redis_instance):
-    """
-
-    """
     redis_check = Redis('redisdb', {}, {})
     redis_check.check(redis_instance)
 

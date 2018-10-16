@@ -1,12 +1,11 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
 import pytest
 
 from datadog_checks.redisdb import Redis
-
 from .common import PORT, PASSWORD, HOST
 
 
@@ -26,7 +25,7 @@ def test_redis_auth_ok(aggregator, redis_auth):
 
 
 @pytest.mark.integration
-def test_redis_auth_empty_pass(aggregator, redis_auth):
+def test_redis_auth_empty_pass(redis_auth):
     """
     Test the check providing an empty password
     """
@@ -47,7 +46,7 @@ def test_redis_auth_empty_pass(aggregator, redis_auth):
 
 
 @pytest.mark.integration
-def test_redis_auth_wrong_pass(aggregator, redis_auth):
+def test_redis_auth_wrong_pass(redis_auth):
     """
     Test the check providing the wrong password
     """
