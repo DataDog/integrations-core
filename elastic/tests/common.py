@@ -11,13 +11,17 @@ PASSWORD = "changeme"
 HOST = get_docker_hostname()
 PORT = '9200'
 BAD_PORT = '9405'
-CONF_HOSTNAME = "foo"
-TAGS = [u"foo:bar", u"baz"]
-CLUSTER_TAG = [u"cluster_name:elasticsearch"]
-URL = 'http://{0}:{1}'.format(HOST, PORT)
-BAD_URL = 'http://{0}:{1}'.format(HOST, BAD_PORT)
+CLUSTER_TAG = ["cluster_name:test-cluster"]
+URL = 'http://{}:{}'.format(HOST, PORT)
+BAD_URL = 'http://{}:{}'.format(HOST, BAD_PORT)
 
-TEST_INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': TAGS}
+
+TEST_INSTANCE = {
+    'url': URL,
+    'username': USER,
+    'password': PASSWORD,
+    'tags': ["foo:bar", "baz"]
+}
 
 INDEX_METRICS_MOCK_DATA = [{
         "health": "green",
@@ -44,19 +48,3 @@ INDEX_METRICS_MOCK_DATA = [{
         "pri.store.size": "10.5"
     },
 ]
-
-
-def get_es_version():
-    version = os.environ.get("ELASTIC_VERSION")
-    dd_versions = {
-        '0_90': [0, 90, 13],
-        '1_0': [1, 0, 3],
-        '1_1': [1, 1, 2],
-        '1_2': [1, 2, 4]
-    }
-    if version is None:
-        return [6, 0, 1]
-    if '_' in version:
-        return dd_versions[version]
-    else:
-        return [int(k) for k in version.split(".")]

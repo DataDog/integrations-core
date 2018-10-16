@@ -777,6 +777,17 @@ ADDITIONAL_METRICS_5_x = {
     'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
         'gauge', 'breakers.inflight_requests.estimated_size_in_bytes'
     ),
+    # some 5.x version use `in_flight` instead of `inflight`
+    # the check will skip the versions that don't apply
+    # 'elasticsearch.breakers.inflight_requests.tripped': (
+    #     'gauge', 'breakers.in_flight_requests.tripped'
+    # ),
+    # 'elasticsearch.breakers.inflight_requests.overhead': (
+    #     'gauge', 'breakers.in_flight_requests.overhead'
+    # ),
+    # 'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
+    #     'gauge', 'breakers.in_flight_requests.estimated_size_in_bytes'
+    # ),
 }
 
 ADDITIONAL_METRICS_PRE_6_3 = {
