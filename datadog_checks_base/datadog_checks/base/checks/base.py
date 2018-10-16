@@ -180,7 +180,10 @@ class AgentCheck(object):
         try:
             value = float(value)
         except ValueError:
-            err_msg = "Metric: {} has non float value: {}. Only float values can be submitted as metrics".format(name, value)
+            err_msg = (
+                "Metric: {} has non float value: {}. "
+                "Only float values can be submitted as metrics.".format(repr(name), repr(value))
+            )
             if using_stub_aggregator:
                 raise ValueError(err_msg)
             self.warning(err_msg)
