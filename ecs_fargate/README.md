@@ -19,27 +19,24 @@ To start monitoring AWS Fargate tasks and services, deploy the containerized Dat
 The example task definition below deploys the Datadog Agent to Fargate, along with a Redis container in the same task.
 
 ```
-{ "family": "redis-datadog", 
-  "networkMode": "awsvpc", 
-  "containerDefinitions": 
-  [ { "name": "redis", 
-      "image": "redis:latest", 
-      "essential": true, 
-      "dockerLabels": 
-      { "com.datadoghq.ad.instances": "[{\"host\": \"%%host%%\", \"port\": 6379}]", 
-        "com.datadoghq.ad.check_names": "[\"redisdb\"]", 
-        "com.datadoghq.ad.init_configs": "[{}]" } }, 
-    { "name": "datadog-agent", 
-      "image": "datadog/agent:latest", 
-      "essential": true, 
-      "environment": 
-      [ { "name": "DD_API_KEY", 
-          "value": "$YOUR_API_KEY" }, 
-        { "name": "ECS_FARGATE", 
-          "value": "true" } ] } ], 
-  "requiresCompatibilities": [ "FARGATE" ], 
-  "cpu": "256", 
-  "memory": "512" }
+{'containerDefinitions': [{'dockerLabels': {'com.datadoghq.ad.check_names': '["redisdb"]',
+                                            'com.datadoghq.ad.init_configs': '[{}]',
+                                            'com.datadoghq.ad.instances': '[{"host": "%%host%%", "port": 6379}]'},
+                           'essential': true,
+                           'image': 'redis:latest',
+                           'name': 'redis'},
+                          {'environment': [{'name': 'DD_API_KEY',
+                                            'value': '$YOUR_API_KEY'},
+                                           {'name': 'ECS_FARGATE',
+                                            'value': 'true'}],
+                           'essential': true,
+                           'image': 'datadog/agent:latest',
+                           'name': 'datadog-agent'}],
+ 'cpu': '256',
+ 'family': 'redis-datadog',
+ 'memory': '512',
+ 'networkMode': 'awsvpc',
+ 'requiresCompatibilities': ['FARGATE']}
 ```
 
 After saving that task definition locally as `redis-datadog.json`, register the task with ECS using the [AWS CLI][11]:
