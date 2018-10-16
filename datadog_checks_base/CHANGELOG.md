@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 4.2.0 / 2018-10-16
+
+* [Added] Expose text conversion methods. See [#2420](https://github.com/DataDog/integrations-core/pull/2420).
+* [Fixed] Handle unicode strings in non-float handler's error message. See [#2419](https://github.com/DataDog/integrations-core/pull/2419).
+
 ## 4.1.0 / 2018-10-12
 
 * [Added] Expose core functionality at the root. See [#2394](https://github.com/DataDog/integrations-core/pull/2394).
