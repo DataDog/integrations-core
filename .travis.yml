@@ -79,9 +79,11 @@ jobs:
     - stage: test
       env: CHECK=cisco_aci
     - stage: test
-      env: CHECK=cockroachdb
+      env: CHECK=cockroachdb PYTHON3=true
     - stage: test
       env: CHECK=consul
+    - stage: test
+      env: CHECK=coredns PYTHON3=true
     - stage: test
       env: CHECK=couch
     - stage: test
