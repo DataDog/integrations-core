@@ -197,7 +197,7 @@ jobs:
     - stage: test
       env: CHECK=rabbitmq
     - stage: test
-      env: CHECK=redisdb
+      env: CHECK=redisdb PYTHON3=true
     - stage: test
       env: CHECK=riak
     - stage: test
