@@ -104,7 +104,7 @@ class GenericPrometheusCheck(AgentCheck):
             endpoint,
             send_histograms_buckets=instance.get('send_histograms_buckets', True),
             send_monotonic_counter=instance.get('send_monotonic_counter', True),
-            instance=ƒ,
+            instance=instance,
             ignore_unmapped=True
         )
 
