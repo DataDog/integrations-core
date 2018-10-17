@@ -104,9 +104,13 @@ class GenericPrometheusCheck(AgentCheck):
             endpoint,
             send_histograms_buckets=instance.get('send_histograms_buckets', True),
             send_monotonic_counter=instance.get('send_monotonic_counter', True),
-            instance=instance,
+            instance=ƒ,
             ignore_unmapped=True
         )
+
+        # Change name to namespace in order to display it in the status page
+        namespace = instance.get("namespace", "prometheus")
+        self.name = namespace
 
     def _extract_rate_metrics(self, type_overrides):
         rate_metrics = []
