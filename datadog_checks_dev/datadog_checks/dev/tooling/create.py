@@ -51,7 +51,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         )
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
-        tox_base_dep = '../datadog_checks_base[deps]'
+        tox_base_dep = '-e../datadog_checks_base[deps]'
     else:
         author = 'U.N. Owen'
         email = email_packages = 'friend@datadog.community'
