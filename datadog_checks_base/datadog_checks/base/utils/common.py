@@ -25,7 +25,7 @@ def get_docker_hostname():
 
 def pattern_filter(items, whitelist=None, blacklist=None, key=None):
     """This filters `items` by a regular expression `whitelist` and/or
-    `blacklist`, with the `whitelist` taking precedence. An optional `key`
+    `blacklist`, with the `blacklist` taking precedence. An optional `key`
     function can be provided that will be passed each item.
     """
     key = key or __return_self
