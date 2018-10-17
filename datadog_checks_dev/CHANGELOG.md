@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.13.0 / 2018-10-17
+
+* [Added] Ensure new checks use editable install of datadog_checks_base for tests. See [#2427](https://github.com/DataDog/integrations-core/pull/2427).
+* [Fixed] Relax e2e config parsing. See [#2416](https://github.com/DataDog/integrations-core/pull/2416).
+* [Fixed] Fix sleep on WaitFor helper. See [#2418](https://github.com/DataDog/integrations-core/pull/2418).
+
 ## 0.12.1 / 2018-10-15
 
 * [Fixed] Improve handling of github api errors for trello. See [#2411](https://github.com/DataDog/integrations-core/pull/2411).
