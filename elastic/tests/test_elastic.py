@@ -9,7 +9,7 @@ import requests
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
-    INDEX_STATS_METRICS, CLUSTER_PENDING_TASKS, ADDITIONAL_METRICS_1_x,
+    CLUSTER_PENDING_TASKS, ADDITIONAL_METRICS_1_x, index_stats_for_version,
     stats_for_version, pshard_stats_for_version, health_stats_for_version
 )
 from .common import CLUSTER_TAG, PASSWORD, URL, USER
@@ -76,10 +76,12 @@ def test_check(elastic_cluster, elastic_check, instance, aggregator, cluster_tag
 
     elastic_check.check(instance)
 
-    # node stats
+    # node stats, blacklist metrics that can't be tested in a small, single node instance
+    blacklist = ADDITIONAL_METRICS_1_x.keys() + [
+        'elasticsearch.indices.segments.index_writer_max_memory_in_bytes',
+    ]
     for m_name, desc in stats_for_version(es_version).iteritems():
-        # exclude metrics that cannot be tested within a CI environment
-        if m_name in ADDITIONAL_METRICS_1_x:
+        if m_name in blacklist:
             continue
         aggregator.assert_metric(m_name, count=1, tags=node_tags)
 
@@ -128,7 +130,8 @@ def test_index_metrics(elastic_cluster, aggregator, elastic_check, instance, clu
         pytest.skip("Index metrics are only tested in version 1.0.0+")
 
     elastic_check.check(instance)
-    for m_name, desc in INDEX_STATS_METRICS.iteritems():
+    print(aggregator._metrics)
+    for m_name, desc in index_stats_for_version(es_version).iteritems():
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
 
 

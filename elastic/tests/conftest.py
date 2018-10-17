@@ -32,19 +32,15 @@ def elastic_cluster():
 
     for _ in xrange(20):
         try:
-            res = requests.get(URL)
+            # Create an index
+            res = requests.put(URL + '/testindex', auth=(USER, PASSWORD))
             res.raise_for_status()
             break
         except Exception:
             time.sleep(2)
 
-    # Create an index
-    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 1}}')
-    requests.put(URL + '/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
-    requests.put(URL + '/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
-    time.sleep(3)  # wait for the index to build
-
     yield
+
     subprocess.check_call(args + ["down"])
 
 
@@ -63,8 +59,7 @@ def instance():
     }
 
 
-@pytest.fixture
-def cluster_tags():
+def _cluster_tags():
     return [
         'url:{}'.format(URL),
         'cluster_name:test-cluster',
@@ -72,5 +67,10 @@ def cluster_tags():
 
 
 @pytest.fixture
+def cluster_tags():
+    return _cluster_tags()
+
+
+@pytest.fixture
 def node_tags():
-    return cluster_tags().append('node_name:test-node')
+    return _cluster_tags().append('node_name:test-node')

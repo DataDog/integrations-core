@@ -769,25 +769,14 @@ ADDITIONAL_METRICS_5_x = {
         'gauge', 'fs.io_stats.total.write_kilobytes'
     ),
     'elasticsearch.breakers.inflight_requests.tripped': (
-        'gauge', 'breakers.inflight_requests.tripped'
+        'gauge', 'breakers.in_flight_requests.tripped'
     ),
     'elasticsearch.breakers.inflight_requests.overhead': (
-        'gauge', 'breakers.inflight_requests.overhead'
+        'gauge', 'breakers.in_flight_requests.overhead'
     ),
     'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
-        'gauge', 'breakers.inflight_requests.estimated_size_in_bytes'
+        'gauge', 'breakers.in_flight_requests.estimated_size_in_bytes'
     ),
-    # some 5.x version use `in_flight` instead of `inflight`
-    # the check will skip the versions that don't apply
-    # 'elasticsearch.breakers.inflight_requests.tripped': (
-    #     'gauge', 'breakers.in_flight_requests.tripped'
-    # ),
-    # 'elasticsearch.breakers.inflight_requests.overhead': (
-    #     'gauge', 'breakers.in_flight_requests.overhead'
-    # ),
-    # 'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
-    #     'gauge', 'breakers.in_flight_requests.estimated_size_in_bytes'
-    # ),
 }
 
 ADDITIONAL_METRICS_PRE_6_3 = {
@@ -949,3 +938,10 @@ def health_stats_for_version(version):
         cluster_health_metrics.update(CLUSTER_HEALTH_METRICS_POST_2_4)
 
     return cluster_health_metrics
+
+
+def index_stats_for_version(version):
+    """
+    Get the proper set of index metrics for the specified ES version
+    """
+    return INDEX_STATS_METRICS

@@ -5,10 +5,8 @@ services:
     image: "${ELASTIC_REGISTRY}:${ELASTIC_IMAGE}"
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    command:
-      - elasticsearch
-      - "-Des.cluster.name=test-cluster"
-      - "-Des.node.name=test-node"
+      - "cluster.name=test-cluster"
+      - "node.name=test-node"
     ports:
       - "9200:9200"
     ulimits:

@@ -11,8 +11,10 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 
 from .config import from_instance
-from .metrics import stats_for_version, pshard_stats_for_version, health_stats_for_version
-from .metrics import CLUSTER_PENDING_TASKS, INDEX_STATS_METRICS
+from .metrics import (
+    stats_for_version, pshard_stats_for_version, health_stats_for_version, index_stats_for_version,
+    CLUSTER_PENDING_TASKS
+)
 
 
 class AuthenticationError(requests.exceptions.HTTPError):
@@ -84,7 +86,7 @@ class ESCheck(AgentCheck):
 
         if config.index_stats and version >= [1, 0, 0]:
             try:
-                self._get_index_metrics(config, admin_forwarder)
+                self._get_index_metrics(config, admin_forwarder, version)
             except requests.ReadTimeout as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
@@ -129,14 +131,16 @@ class ESCheck(AgentCheck):
         else:
             return urlparse.urljoin(base, url)
 
-    def _get_index_metrics(self, config, admin_forwarder):
+    def _get_index_metrics(self, config, admin_forwarder, version):
         cat_url = '/_cat/indices?format=json&bytes=b'
         index_url = self._join_url(config.url, cat_url, admin_forwarder)
         index_resp = self._get_data(index_url, config)
-        index_stats_metrics = INDEX_STATS_METRICS
+        index_stats_metrics = index_stats_for_version(version)
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
         for idx in index_resp:
             tags = config.tags + ['index_name:' + idx['index']]
+            # we need to remap metric names because the ones from elastic
+            # contain dots and that would confuse `_process_metric()` (sic)
             index_data = {
                 'docs_count':         idx.get('docs.count'),
                 'docs_deleted':       idx.get('docs.deleted'),

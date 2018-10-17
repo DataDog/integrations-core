@@ -12,7 +12,6 @@ services:
       - "-Des.node.name=test-node"
     ports:
       - "9200:9200"
-      - "9300:9300"
     ulimits:
       memlock:
         soft: -1
