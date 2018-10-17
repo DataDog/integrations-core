@@ -1,14 +1,15 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from collections import defaultdict
 import time
-import urlparse
+from collections import defaultdict
 
 import requests
+from six import iteritems, itervalues
+from six.moves.urllib.parse import urljoin
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.headers import headers
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.headers import headers
 
 from .config import from_instance
 from .metrics import (
@@ -39,7 +40,7 @@ class ESCheck(AgentCheck):
         # (URLs and metrics) accordingly
         try:
             version = self._get_es_version(config)
-        except AuthenticationError as e:
+        except AuthenticationError:
             self.log.exception("The ElasticSearch credentials are incorrect")
             raise
 
@@ -49,18 +50,18 @@ class ESCheck(AgentCheck):
 
         # Load stats data.
         # This must happen before other URL processing as the cluster name
-        # is retreived here, and added to the tag list.
+        # is retrieved here, and added to the tag list.
         stats_url = self._join_url(config.url, stats_url, admin_forwarder)
         stats_data = self._get_data(stats_url, config)
         if stats_data.get('cluster_name'):
-            # retreive the cluster name from the data, and append it to the
+            # retrieve the cluster name from the data, and append it to the
             # master tag list.
             cluster_name_tag = "cluster_name:{}".format(stats_data['cluster_name'])
             config.tags.append(cluster_name_tag)
             config.health_tags.append(cluster_name_tag)
         self._process_stats_data(stats_data, stats_metrics, config)
 
-        # Load clusterwise data
+        # Load cluster-wise data
         # Note: this is a cluster-wide query, might TO.
         if config.pshard_stats:
             send_sc = bubble_ex = not config.pshard_graceful_to
@@ -106,8 +107,8 @@ class ESCheck(AgentCheck):
             # pre-release versions of elasticearch are suffixed with -rcX etc..
             # peel that off so that the map below doesn't error out
             version = data['version']['number'].split('-')[0]
-            version = map(int, version.split('.')[0:3])
-        except AuthenticationError as e:
+            version = [int(p) for p in version.split('.')[0:3]]
+        except AuthenticationError:
             raise
         except Exception as e:
             self.warning(
@@ -129,7 +130,7 @@ class ESCheck(AgentCheck):
         if admin_forwarder:
             return base + url
         else:
-            return urlparse.urljoin(base, url)
+            return urljoin(base, url)
 
     def _get_index_metrics(self, config, admin_forwarder, version):
         cat_url = '/_cat/indices?format=json&bytes=b'
@@ -156,7 +157,7 @@ class ESCheck(AgentCheck):
                 index_data['health'] = health_stat[index_data['health'].lower()]
 
             # Ensure that index_data does not contain None values
-            for key, value in index_data.items():
+            for key, value in list(iteritems(index_data)):
                 if value is None:
                     del index_data[key]
                     self.log.warning("The index metric data for %s was not found", key)
@@ -203,10 +204,12 @@ class ESCheck(AgentCheck):
             verify = config.ssl_verify
         else:
             verify = None
-        if config.ssl_cert and config.ssl_key:
-            cert = (config.ssl_cert, config.ssl_key)
-        elif config.ssl_cert:
-            cert = config.ssl_cert
+
+        if config.ssl_cert:
+            if config.ssl_key:
+                cert = (config.ssl_cert, config.ssl_key)
+            else:
+                cert = config.ssl_cert
         else:
             cert = None
 
@@ -230,12 +233,12 @@ class ESCheck(AgentCheck):
                 self.service_check(
                     self.SERVICE_CHECK_CONNECT_NAME,
                     AgentCheck.CRITICAL,
-                    message="Error {0} when hitting {1}".format(e, url),
+                    message="Error {} when hitting {}".format(e, url),
                     tags=config.service_check_tags
                 )
             raise
 
-        self.log.debug("request to url {0} returned: {1}".format(url, resp))
+        self.log.debug("request to url {} returned: {}".format(url, resp))
 
         return resp.json()
 
@@ -247,12 +250,13 @@ class ESCheck(AgentCheck):
             p_tasks[task.get('priority')] += 1
             average_time_in_queue += task.get('time_in_queue_millis', 0)
 
-        total = sum(p_tasks.values())
+        total = sum(itervalues(p_tasks))
         node_data = {
             'pending_task_total':               total,
             'pending_tasks_priority_high':      p_tasks['high'],
             'pending_tasks_priority_urgent':    p_tasks['urgent'],
-            'pending_tasks_time_in_queue':      average_time_in_queue/(total or 1),  # if total is 0
+            # if total is 0 default to 1
+            'pending_tasks_time_in_queue':      average_time_in_queue // (total or 1),
         }
 
         for metric in CLUSTER_PENDING_TASKS:
@@ -262,7 +266,7 @@ class ESCheck(AgentCheck):
 
     def _process_stats_data(self, data, stats_metrics, config):
         cluster_stats = config.cluster_stats
-        for node_data in data.get('nodes', {}).itervalues():
+        for node_data in itervalues(data.get('nodes', {})):
             metric_hostname = None
             metrics_tags = list(config.tags)
 
@@ -270,7 +274,7 @@ class ESCheck(AgentCheck):
             node_name = node_data.get('name')
             if node_name:
                 metrics_tags.append(
-                    u"node_name:{}".format(node_name)
+                    'node_name:{}'.format(node_name)
                 )
 
             # Resolve the node's hostname
@@ -280,14 +284,14 @@ class ESCheck(AgentCheck):
                         metric_hostname = node_data[k]
                         break
 
-            for metric, desc in stats_metrics.iteritems():
+            for metric, desc in iteritems(stats_metrics):
                 self._process_metric(
                     node_data, metric, *desc,
                     tags=metrics_tags, hostname=metric_hostname
                 )
 
     def _process_pshard_stats_data(self, data, config, pshard_stats_metrics):
-        for metric, desc in pshard_stats_metrics.iteritems():
+        for metric, desc in iteritems(pshard_stats_metrics):
             self._process_metric(data, metric, *desc, tags=config.tags)
 
     def _process_metric(self, data, metric, xtype, path, xform=None,
@@ -332,7 +336,7 @@ class ESCheck(AgentCheck):
 
         cluster_health_metrics = health_stats_for_version(version)
 
-        for metric, desc in cluster_health_metrics.iteritems():
+        for metric, desc in iteritems(cluster_health_metrics):
             self._process_metric(data, metric, *desc, tags=config.tags)
 
         # Process the service check
@@ -364,25 +368,25 @@ class ESCheck(AgentCheck):
             self.SERVICE_CHECK_CLUSTER_STATUS,
             status,
             message=msg,
-            tags=config.service_check_tags+config.health_tags
+            tags=config.service_check_tags + config.health_tags
         )
 
     def _create_event(self, status, tags=None):
         hostname = self.hostname.decode('utf-8')
         if status == "red":
             alert_type = "error"
-            msg_title = "{0} is {1}".format(hostname, status)
+            msg_title = "{} is {}".format(hostname, status)
 
         elif status == "yellow":
             alert_type = "warning"
-            msg_title = "{0} is {1}".format(hostname, status)
+            msg_title = "{} is {}".format(hostname, status)
 
         else:
             # then it should be green
             alert_type = "success"
-            msg_title = "{0} recovered as {1}".format(hostname, status)
+            msg_title = "{} recovered as {}".format(hostname, status)
 
-        msg = "ElasticSearch: {0} just reported as {1}".format(hostname, status)
+        msg = "ElasticSearch: {} just reported as {}".format(hostname, status)
 
         return {
             'timestamp': int(time.time()),
