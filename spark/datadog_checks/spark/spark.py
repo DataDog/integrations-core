@@ -560,7 +560,7 @@ class SparkCheck(AgentCheck):
                 self.log.debug('streaming/statistics: %s', response)
                 tags = ['app_name:%s' % str(app_name)]
                 tags.extend(addl_tags)
-
+                self.log.debug('response type: %s', type(response))
                 for stats in response:
                     self._set_metrics_from_json(tags, stats, SPARK_STREAMING_STATISTICS_METRICS)
             except HTTPError as e:
