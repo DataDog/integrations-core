@@ -65,6 +65,8 @@ def verify():
                     display(message)
                 continue
 
+            unique_names = set()
+            unique_checks = set()
             for service_check in decoded:
                 # attributes are valid
                 attrs = set(service_check)
@@ -93,6 +95,12 @@ def verify():
                 if not check or not isinstance(check, string_types):
                     failed += 1
                     display_queue.append((echo_failure, '  required non-null string: check'))
+                else:
+                    if check in unique_checks:
+                        failed += 1
+                        display_queue.append((echo_failure, '  {} is not a unique check'.format(check)))
+                    else:
+                        unique_checks.add(check)
 
                 # description
                 description = service_check.get('description')
@@ -117,6 +125,12 @@ def verify():
                 if not name or not isinstance(name, string_types):
                     failed += 1
                     display_queue.append((echo_failure, '  required non-null string: name'))
+                else:
+                    if name in unique_names:
+                        failed += 1
+                        display_queue.append((echo_failure, '  {} is not a unique name'.format(name)))
+                    else:
+                        unique_names.add(name)
 
                 # statuses
                 statuses = service_check.get('statuses')
