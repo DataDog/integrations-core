@@ -43,20 +43,22 @@ def get_agent_requirement_line(check, version):
     """
     # base check and siblings have no manifest
     if check in ('datadog_checks_base', 'datadog_checks_tests_helper'):
-        return '{}=={}'.format(check, version)
+        return '{}=={}'.format(check.replace("_", "-"), version)
 
     m = load_manifest(check)
     platforms = sorted(m.get('supported_os', []))
 
     # all platforms
     if platforms == ALL_PLATFORMS:
-        return '{}=={}'.format(check, version)
+        return 'datadog-{}=={}'.format(check.replace("_", "-"), version)
     # one specific platform
     elif len(platforms) == 1:
-        return "{}=={}; sys_platform == '{}'".format(check, version, PLATFORMS_TO_PY.get(platforms[0]))
+        return "datadog-{}=={}; sys_platform == '{}'".format(
+            check.replace("_", "-"), version, PLATFORMS_TO_PY.get(platforms[0])
+        )
     # assuming linux+mac here for brevity
     elif platforms and 'windows' not in platforms:
-        return "{}=={}; sys_platform != 'win32'".format(check, version)
+        return "datadog-{}=={}; sys_platform != 'win32'".format(check.replace("_", "-"), version)
     else:
         raise Exception("Can't parse the `supported_os` list for the check {}: {}".format(check, platforms))
 
