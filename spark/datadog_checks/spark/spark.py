@@ -560,12 +560,12 @@ class SparkCheck(AgentCheck):
                 self.log.debug('streaming/statistics: %s', response)
                 tags = ['app_name:%s' % str(app_name)]
                 tags.extend(addl_tags)
-                self.log.debug('response type: %s', type(response))
-                for stats in response:
-                    self._set_metrics_from_json(tags, stats, SPARK_STREAMING_STATISTICS_METRICS)
+
+                # NOTE: response is a dict
+                self._set_metrics_from_json(tags, response, SPARK_STREAMING_STATISTICS_METRICS)
             except HTTPError as e:
-                #  NOTE: If api call return response 404
-                # then it means that the application is not a streaming application
+                # NOTE: If api call returns response 404
+                # then it means that the application is not a streaming application, we should skip metric submission
                 if e.response.status_code != 404:
                     raise
 
