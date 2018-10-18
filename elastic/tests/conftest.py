@@ -20,6 +20,11 @@ COMPOSE_FILES_MAP = {
 
 
 def ping_elastic():
+    """
+    The PUT request we use to ping the server will create an index named `testindex` 
+    as soon as ES is available. This is just one possible ping strategy but it's needed 
+    as a fixture for tests that require that index to exist in order to pass.
+    """
     response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD))
     response.raise_for_status()
 
