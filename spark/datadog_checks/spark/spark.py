@@ -573,6 +573,9 @@ class SparkCheck(AgentCheck):
         '''
         Parse the JSON response and set the metrics
         '''
+        if metrics_json is not None:
+            return
+        
         for status, (metric_name, metric_type) in metrics.iteritems():
             metric_status = metrics_json.get(status)
 
