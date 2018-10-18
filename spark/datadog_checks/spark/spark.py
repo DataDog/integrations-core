@@ -124,6 +124,22 @@ SPARK_RDD_METRICS = {
     'diskUsed': ('spark.rdd.disk_used', INCREMENT)
 }
 
+SPARK_STREAMING_STATISTICS_METRICS = {
+    'avgInputRate': ('spark.streaming.statistics.avg_input_rate', INCREMENT),
+    'avgProcessingTime': ('spark.streaming.statistics.avg_processing_time', INCREMENT),
+    'avgSchedulingDelay': ('spark.streaming.statistics.avg_scheduling_delay', INCREMENT),
+    'avgTotalDelay': ('spark.streaming.statistics.avg_total_delay', INCREMENT),
+    'batchDuration': ('spark.streaming.statistics.batch_duration', INCREMENT),
+    'numActiveBatches': ('spark.streaming.statistics.num_active_batches', INCREMENT),
+    'numActiveReceivers': ('spark.streaming.statistics.num_active_receivers', INCREMENT),
+    'numInactiveReceivers': ('spark.streaming.statistics.num_inactive_receivers', INCREMENT),
+    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', INCREMENT),
+    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', INCREMENT),
+    'numReceivers': ('spark.streaming.statistics.num_receivers', INCREMENT),
+    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', INCREMENT),
+    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', INCREMENT)
+}
+
 RequestsConfig = namedtuple(
     'RequestsConfig', [
         'auth',
@@ -163,6 +179,9 @@ class SparkCheck(AgentCheck):
 
         # Get the rdd metrics
         self._spark_rdd_metrics(instance, spark_apps, tags, requests_config)
+
+        # Get the streaming statistics metrics
+        self._spark_streaming_statistics_metrics(instance, spark_apps, tags, requests_config)
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
@@ -526,6 +545,27 @@ class SparkCheck(AgentCheck):
 
             if len(response):
                 self._set_metric('spark.rdd.count', INCREMENT, len(response), tags)
+
+    def _spark_streaming_statistics_metrics(self, instance, running_apps, addl_tags, requests_config):
+        '''
+        Get metrics for each application streaming statistics.
+        '''
+        for app_id, (app_name, tracking_url) in running_apps.iteritems():
+
+            base_url = self._get_request_url(instance, tracking_url)
+            response = self._rest_request_to_json(
+                base_url,
+                SPARK_APPS_PATH,
+                SPARK_SERVICE_CHECK, requests_config, addl_tags, app_id, 'streaming/statistics')
+            self.log.debug('streaming/statistics: %s', response)
+            tags = ['app_name:%s' % str(app_name)]
+            tags.extend(addl_tags)
+
+            for rdd in response:
+                self._set_metrics_from_json(tags, rdd, SPARK_STREAMING_STATISTICS_METRICS)
+
+            if len(response):
+                self._set_metric('spark.streaming.statistics.count', INCREMENT, len(response), tags)
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
         '''
