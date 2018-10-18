@@ -39,7 +39,7 @@ instances:
   #  password: <PASSWORD>
 
   ## @param ssl - boolean - optional
-  ## Whether or not to use the --ssl parameter to nodetool to initiate a connection over SSL to to the JMX server.
+  ## Whether or not to use the --ssl parameter to nodetool to initiate a connection over SSL to the JMX server.
   #
   #  ssl: <true|false>
 
