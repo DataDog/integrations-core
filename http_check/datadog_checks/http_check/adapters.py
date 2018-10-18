@@ -5,10 +5,10 @@ import ssl
 import warnings
 
 from requests.adapters import HTTPAdapter
-from requests.packages import urllib3
-from requests.packages.urllib3.util import ssl_
-from requests.packages.urllib3.exceptions import SecurityWarning
-from requests.packages.urllib3.packages.ssl_match_hostname import match_hostname
+import urllib3
+from urllib3.util import ssl_
+from urllib3.exceptions import SecurityWarning
+from urllib3.packages.ssl_match_hostname import match_hostname
 
 
 class WeakCiphersHTTPSConnection(urllib3.connection.VerifiedHTTPSConnection):

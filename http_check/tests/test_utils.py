@@ -36,7 +36,7 @@ def test__get_ca_certs_paths_ko():
 @pytest.mark.unit
 def test__get_ca_certs_paths():
     with mock.patch('datadog_checks.http_check.utils.os.path.dirname') as dirname:
-        # create a tmp `embeddeded` folder
+        # create a tmp `embedded` folder
         with temp_dir() as tmp:
             target = os.path.join(tmp, 'embedded')
             os.mkdir(target)

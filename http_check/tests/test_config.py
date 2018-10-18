@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base import ConfigurationError
 from datadog_checks.utils.headers import headers as agent_headers
 from datadog_checks.http_check.config import from_instance, DEFAULT_EXPECTED_CODE
 

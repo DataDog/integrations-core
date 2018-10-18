@@ -99,7 +99,7 @@ jobs:
     - stage: test
       env: CHECK=ecs_fargate
     - stage: test
-      env: CHECK=elastic
+      env: CHECK=elastic PYTHON3=true
     - stage: test
       env: CHECK=envoy PYTHON3=true
     - stage: test
@@ -123,7 +123,7 @@ jobs:
     - stage: test
       env: CHECK=hdfs_namenode
     - stage: test
-      env: CHECK=http_check
+      env: CHECK=http_check PYTHON3=true
     - stage: test
       env: CHECK=iis
     - stage: test
