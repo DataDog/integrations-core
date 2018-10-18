@@ -108,6 +108,10 @@ class GenericPrometheusCheck(AgentCheck):
             ignore_unmapped=True
         )
 
+        # Change name to namespace in order to display it in the status page
+        namespace = instance.get("namespace", "prometheus")
+        self.name = namespace
+
     def _extract_rate_metrics(self, type_overrides):
         rate_metrics = []
         for metric in type_overrides:
