@@ -2,17 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import subprocess
-import time
 
 import pytest
 import requests
-from datadog_checks.elastic import ESCheck
 
+from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.elastic import ESCheck
 from .common import HERE, URL, USER, PASSWORD
 
 
-CUSTOM_TAGS = ["foo:bar", "baz"]
+CUSTOM_TAGS = ['foo:bar', 'baz']
 COMPOSE_FILES_MAP = {
     'elasticsearch_0_90': 'elasticsearch_0_90.yaml',
     '1-alpine': 'legacy.yaml',
@@ -20,28 +19,27 @@ COMPOSE_FILES_MAP = {
 }
 
 
-@pytest.fixture(scope="session")
-def elastic_cluster():
-    image_name = os.environ.get("ELASTIC_IMAGE")
+def ping_elastic():
+    """
+    The PUT request we use to ping the server will create an index named `testindex`
+    as soon as ES is available. This is just one possible ping strategy but it's needed
+    as a fixture for tests that require that index to exist in order to pass.
+    """
+    response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD))
+    response.raise_for_status()
+
+
+@pytest.fixture(scope='session')
+def dd_environment(instance):
+    image_name = os.environ.get('ELASTIC_IMAGE')
     compose_file = COMPOSE_FILES_MAP.get(image_name, 'docker-compose.yaml')
-    args = [
-        'docker-compose', '-f', os.path.join(HERE, 'compose', compose_file)
-    ]
-    subprocess.check_call(args + ["up", "-d"])
-    print("Waiting for ES to boot...")
+    compose_file = os.path.join(HERE, 'compose', compose_file)
 
-    for _ in xrange(20):
-        try:
-            # Create an index
-            res = requests.put(URL + '/testindex', auth=(USER, PASSWORD))
-            res.raise_for_status()
-            break
-        except Exception:
-            time.sleep(2)
-
-    yield
-
-    subprocess.check_call(args + ["down"])
+    with docker_run(
+        compose_file=compose_file,
+        conditions=[WaitFor(ping_elastic)],
+    ):
+        yield instance
 
 
 @pytest.fixture
@@ -49,7 +47,7 @@ def elastic_check():
     return ESCheck('elastic', {}, {})
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def instance():
     return {
         'url': URL,
@@ -60,10 +58,13 @@ def instance():
 
 
 def _cluster_tags():
-    return [
+    tags = [
         'url:{}'.format(URL),
         'cluster_name:test-cluster',
-    ] + CUSTOM_TAGS
+    ]
+    tags.extend(CUSTOM_TAGS)
+
+    return tags
 
 
 @pytest.fixture

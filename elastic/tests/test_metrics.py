@@ -1,10 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# flake8: noqa
 import pytest
 
-from datadog_checks.elastic.metrics import *
+from datadog_checks.elastic.metrics import (
+    health_stats_for_version, pshard_stats_for_version, stats_for_version
+)
 
 
 @pytest.mark.unit
@@ -15,47 +16,47 @@ def test_stats_for_version():
 
     # v0.90.5
     metrics = stats_for_version([0, 90, 5])
-    assert len(metrics) == 127
+    assert len(metrics) == 124
 
     # v0.90.10
     metrics = stats_for_version([0, 90, 10])
-    assert len(metrics) == 131
+    assert len(metrics) == 122
 
     # v1
     metrics = stats_for_version([1, 0, 0])
-    assert len(metrics) == 139
+    assert len(metrics) == 130
 
     # v1.3.0
     metrics = stats_for_version([1, 3, 0])
-    assert len(metrics) == 141
+    assert len(metrics) == 132
 
     # v1.4.0
     metrics = stats_for_version([1, 4, 0])
-    assert len(metrics) == 161
+    assert len(metrics) == 152
 
     # v1.5.0
     metrics = stats_for_version([1, 5, 0])
-    assert len(metrics) == 164
+    assert len(metrics) == 155
 
     # v1.6.0
     metrics = stats_for_version([1, 6, 0])
-    assert len(metrics) == 172
+    assert len(metrics) == 163
 
     # v2
     metrics = stats_for_version([2, 0, 0])
-    assert len(metrics) == 184
+    assert len(metrics) == 162
 
     # v2.1.0
     metrics = stats_for_version([2, 1, 0])
-    assert len(metrics) == 189
+    assert len(metrics) == 167
 
     # v5
     metrics = stats_for_version([5, 0, 0])
-    assert len(metrics) == 192
+    assert len(metrics) == 167
 
     # v6.3.0
     metrics = stats_for_version([6, 3, 0])
-    assert len(metrics) == 196
+    assert len(metrics) == 167
 
 
 @pytest.mark.unit
