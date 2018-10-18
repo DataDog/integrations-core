@@ -5,8 +5,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import pytest
 import mock
+import pytest
 
 from datadog_checks.http_check import HTTPCheck
 from .common import (
@@ -196,22 +196,20 @@ def test_check_ssl(aggregator, http_check):
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=connection_err_tags, count=1)
 
 
-@mock.patch('ssl.SSLSocket.getpeercert', **{'return_value.raiseError.side_effect': Exception()})
-def test_check_ssl_expire_error(getpeercert_func, aggregator, http_check):
-
-    # Run the check for the one instance configured with days left
-    http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
+def test_check_ssl_expire_error(aggregator, http_check):
+    with mock.patch('ssl.SSLSocket.getpeercert', side_effect=Exception()):
+        # Run the check for the one instance configured with days left
+        http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
 
     expired_cert_tags = ['url:https://github.com', 'instance:expired_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=expired_cert_tags, count=1)
 
 
-@mock.patch('ssl.SSLSocket.getpeercert', **{'return_value.raiseError.side_effect': Exception()})
-def test_check_ssl_expire_error_secs(getpeercert_func, aggregator, http_check):
-
-    # Run the check for the one instance configured with seconds left
-    http_check.check(CONFIG_EXPIRED_SSL['instances'][1])
+def test_check_ssl_expire_error_secs(aggregator, http_check):
+    with mock.patch('ssl.SSLSocket.getpeercert', side_effect=Exception()):
+        # Run the check for the one instance configured with seconds left
+        http_check.check(CONFIG_EXPIRED_SSL['instances'][1])
 
     expired_cert_tags = ['url:https://github.com', 'instance:expired_cert_seconds']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
@@ -247,11 +245,10 @@ def test_check_allow_redirects(aggregator, http_check):
                                     tags=redirect_service_tags, count=1)
 
 
-@mock.patch('ssl.SSLSocket.getpeercert', return_value=FAKE_CERT)
-def test_mock_case(getpeercert_func, aggregator, http_check):
-
-    # Run the check for the one instance
-    http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
+def test_mock_case(aggregator, http_check):
+    with mock.patch('ssl.SSLSocket.getpeercert', return_value=FAKE_CERT):
+        # Run the check for the one instance
+        http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
 
     expired_cert_tags = ['url:https://github.com', 'instance:expired_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
@@ -262,7 +259,7 @@ def test_service_check_instance_name_normalization(aggregator, http_check):
     """
     Service check `instance` tag value is normalized.
 
-    Note: necessary to avoid mismatch and backward incompatiblity.
+    Note: necessary to avoid mismatch and backward incompatibility.
     """
 
     # Run the check for the one instance

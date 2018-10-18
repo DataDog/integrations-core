@@ -282,15 +282,15 @@ class AgentCheck(object):
             if prefix is not None:
                 prefix = self.convert_to_underscore_separated(prefix)
         else:
-            name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", metric_name)
+            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric_name)
         # Eliminate multiple _
-        name = re.sub(r"__+", "_", name)
+        name = re.sub(br"__+", b"_", name)
         # Don't start/end with _
-        name = re.sub(r"^_", "", name)
-        name = re.sub(r"_$", "", name)
+        name = re.sub(br"^_", b"", name)
+        name = re.sub(br"_$", b"", name)
         # Drop ._ and _.
-        name = re.sub(r"\._", ".", name)
-        name = re.sub(r"_\.", ".", name)
+        name = re.sub(br"\._", b".", name)
+        name = re.sub(br"_\.", b".", name)
 
         if prefix is not None:
             return prefix + "." + name
