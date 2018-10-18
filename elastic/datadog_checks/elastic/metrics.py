@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from .utils import ms_to_second
 
 # Metrics definition format is a dictionary mapping:
 # datadog_metric_name --> (datadog_metric_type, es_metric_name, optional_conversion_func)
@@ -20,7 +21,7 @@ PRIMARY_SHARD_METRICS = {
         'gauge', '_all.primaries.indexing.index_total'
     ),
     'elasticsearch.primaries.indexing.index.time': (
-        'gauge', '_all.primaries.indexing.index_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.indexing.index_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.indexing.index.current': (
         'gauge', '_all.primaries.indexing.index_current'
@@ -29,7 +30,7 @@ PRIMARY_SHARD_METRICS = {
         'gauge', '_all.primaries.indexing.delete_total'
     ),
     'elasticsearch.primaries.indexing.delete.time': (
-        'gauge', '_all.primaries.indexing.delete_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.indexing.delete_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.indexing.delete.current': (
         'gauge', '_all.primaries.indexing.delete_current'
@@ -38,7 +39,7 @@ PRIMARY_SHARD_METRICS = {
         'gauge', '_all.primaries.get.total'
     ),
     'elasticsearch.primaries.get.time': (
-        'gauge', '_all.primaries.get.time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.get.time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.get.current': (
         'gauge', '_all.primaries.get.current'
@@ -47,19 +48,19 @@ PRIMARY_SHARD_METRICS = {
         'gauge', '_all.primaries.get.exists_total'
     ),
     'elasticsearch.primaries.get.exists.time': (
-        'gauge', '_all.primaries.get.exists_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.get.exists_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.get.missing.total': (
         'gauge', '_all.primaries.get.missing_total'
     ),
     'elasticsearch.primaries.get.missing.time': (
-        'gauge', '_all.primaries.get.missing_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.get.missing_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.search.query.total': (
         'gauge', '_all.primaries.search.query_total'
     ),
     'elasticsearch.primaries.search.query.time': (
-        'gauge', '_all.primaries.search.query_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.search.query_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.search.query.current': (
         'gauge', '_all.primaries.search.query_current'
@@ -68,7 +69,7 @@ PRIMARY_SHARD_METRICS = {
         'gauge', '_all.primaries.search.fetch_total'
     ),
     'elasticsearch.primaries.search.fetch.time': (
-        'gauge', '_all.primaries.search.fetch_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.search.fetch_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.search.fetch.current': (
         'gauge', '_all.primaries.search.fetch_current'
@@ -92,7 +93,7 @@ PRIMARY_SHARD_METRICS_POST_1_0 = {
         'gauge', '_all.primaries.merges.total'
     ),
     'elasticsearch.primaries.merges.total.time': (
-        'gauge', '_all.primaries.merges.total_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.merges.total_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.merges.total.docs': (
         'gauge', '_all.primaries.merges.total_docs'
@@ -104,13 +105,13 @@ PRIMARY_SHARD_METRICS_POST_1_0 = {
         'gauge', '_all.primaries.refresh.total'
     ),
     'elasticsearch.primaries.refresh.total.time': (
-        'gauge', '_all.primaries.refresh.total_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.refresh.total_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.primaries.flush.total': (
         'gauge', '_all.primaries.flush.total'
     ),
     'elasticsearch.primaries.flush.total.time': (
-        'gauge', '_all.primaries.flush.total_time_in_millis', lambda v: float(v)/1000
+        'gauge', '_all.primaries.flush.total_time_in_millis', lambda ms: ms_to_second(ms)
     ),
 }
 
@@ -129,7 +130,7 @@ STATS_METRICS = {
         'gauge', 'indices.indexing.index_total'
     ),
     'elasticsearch.indexing.index.time': (
-        'gauge', 'indices.indexing.index_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.indexing.index_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.indexing.index.current': (
         'gauge', 'indices.indexing.index_current'
@@ -138,7 +139,7 @@ STATS_METRICS = {
         'gauge', 'indices.indexing.delete_total'
     ),
     'elasticsearch.indexing.delete.time': (
-        'gauge', 'indices.indexing.delete_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.indexing.delete_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.indexing.delete.current': (
         'gauge', 'indices.indexing.delete_current'
@@ -147,7 +148,7 @@ STATS_METRICS = {
         'gauge', 'indices.get.total'
     ),
     'elasticsearch.get.time': (
-        'gauge', 'indices.get.time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.get.time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.get.current': (
         'gauge', 'indices.get.current'
@@ -156,19 +157,19 @@ STATS_METRICS = {
         'gauge', 'indices.get.exists_total'
     ),
     'elasticsearch.get.exists.time': (
-        'gauge', 'indices.get.exists_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.get.exists_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.get.missing.total': (
         'gauge', 'indices.get.missing_total'
     ),
     'elasticsearch.get.missing.time': (
-        'gauge', 'indices.get.missing_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.get.missing_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.search.query.total': (
         'gauge', 'indices.search.query_total'
     ),
     'elasticsearch.search.query.time': (
-        'gauge', 'indices.search.query_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.search.query_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.search.query.current': (
         'gauge', 'indices.search.query_current'
@@ -177,7 +178,7 @@ STATS_METRICS = {
         'gauge', 'indices.search.fetch_total'
     ),
     'elasticsearch.search.fetch.time': (
-        'gauge', 'indices.search.fetch_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.search.fetch_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.search.fetch.current': (
         'gauge', 'indices.search.fetch_current'
@@ -201,7 +202,7 @@ STATS_METRICS = {
         'gauge', 'indices.merges.total'
     ),
     'elasticsearch.merges.total.time': (
-        'gauge', 'indices.merges.total_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.merges.total_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.merges.total.docs': (
         'gauge', 'indices.merges.total_docs'
@@ -213,13 +214,13 @@ STATS_METRICS = {
         'gauge', 'indices.refresh.total'
     ),
     'elasticsearch.refresh.total.time': (
-        'gauge', 'indices.refresh.total_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.refresh.total_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.flush.total': (
         'gauge', 'indices.flush.total'
     ),
     'elasticsearch.flush.total.time': (
-        'gauge', 'indices.flush.total_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'indices.flush.total_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.process.open_fd': (
         'gauge', 'process.open_file_descriptors'
@@ -463,13 +464,13 @@ JVM_METRICS_POST_0_90_10 = {
         'gauge', 'jvm.gc.collectors.young.collection_count'
     ),
     'jvm.gc.collectors.young.collection_time': (
-        'gauge', 'jvm.gc.collectors.young.collection_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'jvm.gc.collectors.young.collection_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'jvm.gc.collectors.old.count': (
         'gauge', 'jvm.gc.collectors.old.collection_count'
     ),
     'jvm.gc.collectors.old.collection_time': (
-        'gauge', 'jvm.gc.collectors.old.collection_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'jvm.gc.collectors.old.collection_time_in_millis', lambda ms: ms_to_second(ms)
     ),
 }
 
@@ -478,19 +479,19 @@ JVM_METRICS_PRE_0_90_10 = {
         'gauge', 'jvm.gc.collectors.ConcurrentMarkSweep.collection_count'
     ),
     'jvm.gc.concurrent_mark_sweep.collection_time': (
-        'gauge', 'jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'jvm.gc.par_new.count': (
         'gauge', 'jvm.gc.collectors.ParNew.collection_count'
     ),
     'jvm.gc.par_new.collection_time': (
-        'gauge', 'jvm.gc.collectors.ParNew.collection_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'jvm.gc.collectors.ParNew.collection_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'jvm.gc.collection_count': (
         'gauge', 'jvm.gc.collection_count'
     ),
     'jvm.gc.collection_time': (
-        'gauge', 'jvm.gc.collection_time_in_millis', lambda v: float(v)/1000
+        'gauge', 'jvm.gc.collection_time_in_millis', lambda ms: ms_to_second(ms)
     ),
 }
 
@@ -578,7 +579,7 @@ ADDITIONAL_METRICS_POST_1_3_0 = {
 
 ADDITIONAL_METRICS_POST_1_4_0 = {
     'elasticsearch.indices.indexing.throttle_time': (
-        'rate', 'indices.indexing.throttle_time_in_millis', lambda v: float(v)/1000
+        'rate', 'indices.indexing.throttle_time_in_millis', lambda ms: ms_to_second(ms)
     ),
     'elasticsearch.indices.query_cache.memory_size_in_bytes': (
         'gauge', 'indices.query_cache.memory_size_in_bytes'
@@ -647,7 +648,7 @@ ADDITIONAL_METRICS_POST_1_5_0 = {
         'gauge', 'indices.recovery.current_as_target'
     ),
     'elasticsearch.indices.recovery.throttle_time': (
-        'rate', 'indices.recovery.throttle_time_in_millis', lambda v: float(v)/1000
+        'rate', 'indices.recovery.throttle_time_in_millis', lambda ms: ms_to_second(ms)
     ),
 }
 
@@ -862,7 +863,7 @@ def stats_for_version(version):
     """
     Get the proper set of stats metrics for the specified ES version
     """
-    metrics = STATS_METRICS
+    metrics = dict(STATS_METRICS)
 
     # JVM additional metrics
     if version >= [0, 90, 10]:
@@ -922,7 +923,7 @@ def pshard_stats_for_version(version):
     """
     Get the proper set of pshard metrics for the specified ES version
     """
-    pshard_stats_metrics = PRIMARY_SHARD_METRICS
+    pshard_stats_metrics = dict(PRIMARY_SHARD_METRICS)
     if version >= [1, 0, 0]:
         pshard_stats_metrics.update(PRIMARY_SHARD_METRICS_POST_1_0)
 
@@ -933,7 +934,7 @@ def health_stats_for_version(version):
     """
     Get the proper set of health metrics for the specified ES version
     """
-    cluster_health_metrics = CLUSTER_HEALTH_METRICS
+    cluster_health_metrics = dict(CLUSTER_HEALTH_METRICS)
     if version >= [2, 4, 0]:
         cluster_health_metrics.update(CLUSTER_HEALTH_METRICS_POST_2_4)
 
@@ -944,4 +945,9 @@ def index_stats_for_version(version):
     """
     Get the proper set of index metrics for the specified ES version
     """
-    return INDEX_STATS_METRICS
+    index_stats = {}
+
+    if version:
+        index_stats.update(INDEX_STATS_METRICS)
+
+    return index_stats

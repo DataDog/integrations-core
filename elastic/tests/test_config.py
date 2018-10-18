@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.elastic.config import from_instance, DEFAULT_TIMEOUT
-from datadog_checks.errors import ConfigurationError
 
 
 @pytest.mark.unit
