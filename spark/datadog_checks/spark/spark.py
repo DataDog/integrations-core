@@ -551,21 +551,23 @@ class SparkCheck(AgentCheck):
         Get metrics for each application streaming statistics.
         '''
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
+            try:
+                base_url = self._get_request_url(instance, tracking_url)
+                response = self._rest_request_to_json(
+                    base_url,
+                    SPARK_APPS_PATH,
+                    None, requests_config, addl_tags, app_id, 'streaming/statistics')
+                self.log.debug('streaming/statistics: %s', response)
+                tags = ['app_name:%s' % str(app_name)]
+                tags.extend(addl_tags)
 
-            base_url = self._get_request_url(instance, tracking_url)
-            response = self._rest_request_to_json(
-                base_url,
-                SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, requests_config, addl_tags, app_id, 'streaming/statistics')
-            self.log.debug('streaming/statistics: %s', response)
-            tags = ['app_name:%s' % str(app_name)]
-            tags.extend(addl_tags)
-
-            for rdd in response:
-                self._set_metrics_from_json(tags, rdd, SPARK_STREAMING_STATISTICS_METRICS)
-
-            if len(response):
-                self._set_metric('spark.streaming.statistics.count', INCREMENT, len(response), tags)
+                for stats in response:
+                    self._set_metrics_from_json(tags, stats, SPARK_STREAMING_STATISTICS_METRICS)
+            except HTTPError as e:
+                #  NOTE: If api call return response 404
+                # then it means that the application is not a streaming application
+                if e.response.status_code != 404:
+                    raise
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
         '''
