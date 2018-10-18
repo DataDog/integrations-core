@@ -11,6 +11,7 @@ from .meta import meta
 from .metadata import metadata
 from .release import release
 from .run import run
+from .service_checks import service_checks
 from .test import test
 
 ALL_COMMANDS = (
@@ -24,5 +25,6 @@ ALL_COMMANDS = (
     metadata,
     release,
     run,
+    service_checks,
     test,
 )
