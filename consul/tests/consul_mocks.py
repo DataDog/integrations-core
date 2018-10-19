@@ -1,8 +1,9 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import random
+
+from six import iteritems
 
 MOCK_CONFIG = {
     'url': 'http://localhost:8500',
@@ -12,7 +13,7 @@ MOCK_CONFIG = {
 MOCK_CONFIG_SERVICE_WHITELIST = {
     'url': 'http://localhost:8500',
     'catalog_checks': True,
-    'service_whitelist': ['service_{0}'.format(k) for k in range(70)]
+    'service_whitelist': ['service_{}'.format(k) for k in range(70)]
 }
 
 MOCK_CONFIG_LEADER_CHECK = {
@@ -35,7 +36,7 @@ MOCK_CONFIG_NETWORK_LATENCY_CHECKS = {
 
 
 def mock_check(check, mocks):
-    for f_name, m in mocks.iteritems():
+    for f_name, m in iteritems(mocks):
         if not hasattr(check, f_name):
             continue
         else:
@@ -57,7 +58,7 @@ def _get_consul_mocks():
 
 def _get_random_ip():
     rand_int = int(15 * random.random()) + 10
-    return "10.0.2.{0}".format(rand_int)
+    return "10.0.2.{}".format(rand_int)
 
 
 def mock_get_all_nodes(instance):
@@ -116,7 +117,7 @@ def mock_get_services_in_cluster(instance):
 def mock_get_n_services_in_cluster(n):
     dct = {}
     for i in range(n):
-        k = "service_{0}".format(i)
+        k = "service_{}".format(i)
         dct[k] = []
     return dct
 
@@ -157,7 +158,6 @@ def mock_get_nodes_in_cluster(instance):
 
 
 def mock_get_nodes_with_service(instance, service):
-
     return [
         {
             "Checks": [
@@ -172,11 +172,11 @@ def mock_get_nodes_with_service(instance, service):
                     "Status": "passing"
                 },
                 {
-                    "CheckID": "service:{0}".format(service),
-                    "Name": "service check {0}".format(service),
+                    "CheckID": "service:{}".format(service),
+                    "Name": "service check {}".format(service),
                     "Node": "node-1",
                     "Notes": "",
-                    "Output": "Service {0} alive".format(service),
+                    "Output": "Service {} alive".format(service),
                     "ServiceID": service,
                     "ServiceName": "",
                     "Status": "passing"
@@ -200,7 +200,6 @@ def mock_get_nodes_with_service(instance, service):
 
 
 def mock_get_nodes_with_service_warning(instance, service):
-
     return [
         {
             "Checks": [
@@ -215,11 +214,11 @@ def mock_get_nodes_with_service_warning(instance, service):
                     "Status": "passing"
                 },
                 {
-                    "CheckID": "service:{0}".format(service),
-                    "Name": "service check {0}".format(service),
+                    "CheckID": "service:{}".format(service),
+                    "Name": "service check {}".format(service),
                     "Node": "node-1",
                     "Notes": "",
-                    "Output": "Service {0} alive".format(service),
+                    "Output": "Service {} alive".format(service),
                     "ServiceID": service,
                     "ServiceName": "",
                     "Status": "warning"
@@ -243,7 +242,6 @@ def mock_get_nodes_with_service_warning(instance, service):
 
 
 def mock_get_nodes_with_service_critical(instance, service):
-
     return [
         {
             "Checks": [
@@ -258,21 +256,21 @@ def mock_get_nodes_with_service_critical(instance, service):
                     "Status": "passing"
                 },
                 {
-                    "CheckID": "service:{0}".format(service),
-                    "Name": "service check {0}".format(service),
+                    "CheckID": "service:{}".format(service),
+                    "Name": "service check {}".format(service),
                     "Node": "node-1",
                     "Notes": "",
-                    "Output": "Service {0} alive".format(service),
+                    "Output": "Service {} alive".format(service),
                     "ServiceID": service,
                     "ServiceName": "",
                     "Status": "warning"
                 },
                 {
-                    "CheckID": "service:{0}".format(service),
-                    "Name": "service check {0}".format(service),
+                    "CheckID": "service:{}".format(service),
+                    "Name": "service check {}".format(service),
                     "Node": "node-1",
                     "Notes": "",
-                    "Output": "Service {0} alive".format(service),
+                    "Output": "Service {} alive".format(service),
                     "ServiceID": service,
                     "ServiceName": "",
                     "Status": "critical"

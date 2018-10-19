@@ -1,14 +1,12 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-
-import common
-import consul_mocks
 
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.utils.containers import hash_mutable
+from . import common
+from . import consul_mocks
 
 log = logging.getLogger(__file__)
 
@@ -162,7 +160,7 @@ def test_service_checks(aggregator):
     aggregator.assert_service_check('consul.check', count=5)
 
 
-def test_cull_services_list(aggregator):
+def test_cull_services_list():
     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -176,18 +174,18 @@ def test_cull_services_list(aggregator):
 
     # Big whitelist
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    whitelist = ['service_{0}'.format(k) for k in range(num_services)]
+    whitelist = ['service_{}'.format(k) for k in range(num_services)]
     assert len(consul_check._cull_services_list(services, whitelist)) == consul_check.MAX_SERVICES
 
     # Big whitelist with max_services
     assert len(consul_check._cull_services_list(services, whitelist, max_services)) == max_services
 
     # Whitelist < MAX_SERVICES should spit out the whitelist
-    whitelist = ['service_{0}'.format(k) for k in range(consul_check.MAX_SERVICES - 1)]
+    whitelist = ['service_{}'.format(k) for k in range(consul_check.MAX_SERVICES - 1)]
     assert set(consul_check._cull_services_list(services, whitelist)) == set(whitelist)
 
     # Whitelist < max_services param should spit out the whitelist
-    whitelist = ['service_{0}'.format(k) for k in range(max_services - 1)]
+    whitelist = ['service_{}'.format(k) for k in range(max_services - 1)]
     assert set(consul_check._cull_services_list(services, whitelist, max_services)) == set(whitelist)
 
     # No whitelist, still triggers truncation
@@ -232,8 +230,8 @@ def test_new_leader_event(aggregator):
 
     event = aggregator.events[0]
     assert event['event_type'] == 'consul.new_leader'
-    assert 'prev_consul_leader:My Old Leader' in event['tags']
-    assert 'curr_consul_leader:My New Leader' in event['tags']
+    assert 'prev_consul_leader:My Old Leader' == event['tags']
+    assert 'curr_consul_leader:My New Leader' == event['tags']
 
 
 def test_self_leader_event(aggregator):
@@ -254,8 +252,8 @@ def test_self_leader_event(aggregator):
     assert our_url == consul_check._instance_states[instance_hash].last_known_leader
     event = aggregator.events[0]
     assert event['event_type'] == 'consul.new_leader'
-    assert 'prev_consul_leader:My Old Leader' in event['tags']
-    assert 'curr_consul_leader:{}'.format(our_url) in event['tags']
+    assert 'prev_consul_leader:My Old Leader' == event['tags']
+    assert 'curr_consul_leader:{}'.format(our_url) == event['tags']
 
     # We are already the leader, no new events
     aggregator.reset()
@@ -279,8 +277,8 @@ def test_self_leader_event(aggregator):
     assert our_url == consul_check._instance_states[instance_hash].last_known_leader
     event = aggregator.events[0]
     assert event['event_type'] == 'consul.new_leader'
-    assert 'prev_consul_leader:{}'.format(other_url) in event['tags']
-    assert 'curr_consul_leader:{}'.format(our_url) in event['tags']
+    assert 'prev_consul_leader:{}'.format(other_url) == event['tags']
+    assert 'curr_consul_leader:{}'.format(our_url) == event['tags']
 
 
 def test_network_latency_checks(aggregator):

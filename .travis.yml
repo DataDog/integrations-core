@@ -81,7 +81,7 @@ jobs:
     - stage: test
       env: CHECK=cockroachdb PYTHON3=true
     - stage: test
-      env: CHECK=consul
+      env: CHECK=consul PYTHON3=true
     - stage: test
       env: CHECK=coredns PYTHON3=true
     - stage: test
