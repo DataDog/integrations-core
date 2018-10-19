@@ -32,6 +32,8 @@ DEFAULT_NOVA_API_VERSION = V21_NOVA_API_VERSION
 FALLBACK_NOVA_API_VERSION = 'v2'
 DEFAULT_NEUTRON_API_VERSION = 'v2.0'
 
+DEFAULT_PAGINATED_SERVER_LIMIT = 1000
+
 DEFAULT_API_REQUEST_TIMEOUT = 10  # seconds
 
 NOVA_HYPERVISOR_METRICS = [
@@ -535,6 +537,10 @@ class OpenStackCheck(AgentCheck):
         self.keystone_server_url = init_config.get("keystone_server_url")
         self._hypervisor_name_cache = {}
 
+        self.paginated_server_limit = init_config.get('paginated_server_limit') or DEFAULT_PAGINATED_SERVER_LIMIT
+
+        self.request_timeout = init_config.get('request_timeout') or DEFAULT_API_REQUEST_TIMEOUT
+
         if not self.keystone_server_url:
             raise IncompleteConfig()
 
@@ -572,7 +578,7 @@ class OpenStackCheck(AgentCheck):
         # }
         self.server_details_by_id = {}
 
-    def _make_request_with_auth_fallback(self, url, headers=None, params=None):
+    def _make_request_with_auth_fallback(self, url, headers=None, params=None, timeout=DEFAULT_API_REQUEST_TIMEOUT):
         """
         Generic request handler for OpenStack API requests
         Raises specialized Exceptions for commonly encountered error codes
@@ -584,7 +590,7 @@ class OpenStackCheck(AgentCheck):
                 headers=headers,
                 verify=self._ssl_verify,
                 params=params,
-                timeout=DEFAULT_API_REQUEST_TIMEOUT,
+                timeout=timeout,
                 proxies=self.proxy_config,
             )
             resp.raise_for_status()
@@ -874,10 +880,20 @@ class OpenStackCheck(AgentCheck):
         servers = []
 
         try:
-            # Get a list of active servers
+            # Get a list of active servers using pagination
             query_params['status'] = 'ACTIVE'
-            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+            query_params['limit'] = self.paginated_server_limit
+            resp = self._make_request_with_auth_fallback(url, headers, params=query_params, timeout=self.request_timeout)
             servers.extend(resp['servers'])
+            # Avoid the extra request since we know we're done when the response has anywhere between
+            # 0 and paginated_server_limit servers
+            while len(resp['servers']) == self.paginated_server_limit:
+                query_params['marker'] = resp['servers'][-1]['id']
+                resp = self._make_request_with_auth_fallback(url, headers, params=query_params, timeout=self.request_timeout)
+                servers.extend(resp['servers'])
+            
+            query_params['limit'] = None
+            query_params['marker'] = None
 
             # Don't collect Deleted or Shut off VMs on the first run:
             if i_key in self.changes_since_time:
