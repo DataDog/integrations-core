@@ -1,20 +1,20 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 from collections import namedtuple
 import socket
 import os
 import platform
 
-# project
 from datadog_checks.network import Network
+from datadog_checks.dev.utils import running_on_ci
 
 import mock
 import pytest
 
-FIXTURE_DIR = os.path.dirname(__file__)
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 CX_STATE_GAUGES_VALUES = {
     'system.net.udp4.connections': 2,
@@ -37,7 +37,6 @@ def network_check():
     return Network('network', {}, {})
 
 
-@pytest.fixture
 def ss_subprocess_mock(*args, **kwargs):
     if args[0][-1] == '-4' and args[0][-3] == '-u':
         file_name = 'ss_ipv4_udp'
@@ -48,50 +47,37 @@ def ss_subprocess_mock(*args, **kwargs):
     elif args[0][-1] == '-6' and args[0][-3] == '-t':
         file_name = 'ss_ipv6_tcp'
 
-    with open(file_name, FIXTURE_DIR) as f:
+    with open(os.path.join(FIXTURE_DIR, file_name)) as f:
         contents = f.read()
         contents = contents.decode('string-escape')
-        return contents.decode("utf-8")
+        return contents.decode("utf-8"), None, None
 
 
-@pytest.fixture
 def netstat_subprocess_mock(*args, **kwargs):
     if args[0][0] == 'ss':
         raise OSError
     elif args[0][0] == 'netstat':
-        with open('netstat', FIXTURE_DIR) as f:
+        with open(os.path.join(FIXTURE_DIR, 'netstat')) as f:
             contents = f.read()
             contents = contents.decode('string-escape')
-            return contents.decode("utf-8")
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+            return contents.decode("utf-8"), None, None
 
 
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=ss_subprocess_mock)
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_cx_state_linux_ss(mock_is_linux, mock_get_subprocess_output, aggregator):
-    network_check.check({})
+def test_cx_state(aggregator, network_check):
+    instance = {'collect_connection_state': True}
+    with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
+        out.side_effect = ss_subprocess_mock
+        network_check._collect_cx_state = True
+        network_check.check(instance)
+        for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
+            aggregator.assert_metric(metric, value=value)
+        aggregator.reset()
 
-    # Assert metrics
-    for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
-        aggregator.assert_metric(metric, value=value, tags=['optional:tag1'])
-
-
-@pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=netstat_subprocess_mock)
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_cx_state_linux_netstat(mock_is_linux, mock_get_subprocess_output, aggregator, network_check):
-    network_check.run_check({})
-
-    # Assert metrics
-    for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
-        aggregator.assert_metric(metric, value=value, tags=['optional:tag1'])
+        out.side_effect = netstat_subprocess_mock
+        network_check.check(instance)
+        for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
+            aggregator.assert_metric(metric, value=value)
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
@@ -217,7 +203,6 @@ def test_cx_counters_psutil(aggregator, network_check):
         for _, m in aggregator._metrics.iteritems():
             assert 'device:Ethernet' in m[0].tags
             if 'bytes_rcvd' in m[0].name:
-                print m
                 assert m[0].value == 3280598526
 
 
