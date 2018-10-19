@@ -317,7 +317,7 @@ def test_network_exclusion(*args):
             return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_auth_token', return_value="test_auth_token")
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_project_name_from_id', return_value="tenant-1")
-def test_cache_between_runs(self, *args):
+def test_cache_between_runs(*args):
     """
     Ensure the cache contains the expected VMs between check runs.
     """
@@ -347,7 +347,7 @@ def test_cache_between_runs(self, *args):
             return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_auth_token', return_value="test_auth_token")
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_project_name_from_id', return_value="None")
-def test_project_name_none(self, *args):
+def test_project_name_none(*args):
     """
     Ensure the cache contains the expected VMs between check runs.
     """
@@ -364,4 +364,35 @@ def test_project_name_none(self, *args):
 
     # Update the cached list of servers based on what the endpoint returns
     openstackCheck.get_all_servers(i_key)
-    assert len(self.server_details_by_id) == 0
+    assert 'server_newly_added' in openstackCheck.server_details_by_id
+    assert 'server-1' not in openstackCheck.server_details_by_id
+
+
+def get_server_details_response(self, url, headers=None, params=None, timeout=None):
+    if 'marker' not in params:
+        return common.MOCK_NOVA_SERVERS_PAGINATED
+    return common.EMPTY_NOVA_SERVERS
+
+
+@mock.patch('datadog_checks.openstack.OpenStackCheck._make_request_with_auth_fallback',
+            side_effect=get_server_details_response)
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_nova_endpoint',
+            return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876", autospec=True)
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_auth_token', return_value="test_auth_token", autospec=True)
+@mock.patch('datadog_checks.openstack.OpenStackCheck.get_project_name_from_id', return_value="None", autospec=True)
+def test_get_paginated_server(*args):
+    """
+    Ensure the server cache is updated while using pagination
+    """
+
+    openstackCheck = OpenStackCheck("test", {
+        'keystone_server_url': 'http://10.0.2.15:5000',
+        'ssl_verify': False,
+        'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
+        'paginated_server_limit': 1
+    }, {}, instances=common.MOCK_CONFIG)
+
+    i_key = "test_instance"
+    openstackCheck.get_all_servers(i_key)
+    assert len(openstackCheck.server_details_by_id) == 1
+    assert 'server-1' in openstackCheck.server_details_by_id

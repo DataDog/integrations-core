@@ -883,15 +883,19 @@ class OpenStackCheck(AgentCheck):
             # Get a list of active servers using pagination
             query_params['status'] = 'ACTIVE'
             query_params['limit'] = self.paginated_server_limit
-            resp = self._make_request_with_auth_fallback(url, headers, params=query_params, timeout=self.request_timeout)
+            resp = self._make_request_with_auth_fallback(
+                url, headers, params=query_params, timeout=self.request_timeout
+            )
             servers.extend(resp['servers'])
             # Avoid the extra request since we know we're done when the response has anywhere between
             # 0 and paginated_server_limit servers
             while len(resp['servers']) == self.paginated_server_limit:
                 query_params['marker'] = resp['servers'][-1]['id']
-                resp = self._make_request_with_auth_fallback(url, headers, params=query_params, timeout=self.request_timeout)
+                resp = self._make_request_with_auth_fallback(
+                    url, headers, params=query_params, timeout=self.request_timeout
+                )
                 servers.extend(resp['servers'])
-            
+
             query_params['limit'] = None
             query_params['marker'] = None
 
