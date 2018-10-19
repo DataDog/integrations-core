@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import sys
 
+from six import string_types
+
 try:
     from textwrap import indent as __indent_text
 except ImportError:
@@ -65,3 +67,9 @@ def abort(text=None, code=1, out=False):
     if text is not None:
         click.secho(text, fg='red', bold=True, err=not out)
     sys.exit(code)
+
+
+def parse_version_parts(version):
+    if not isinstance(version, string_types):
+        return []
+    return [int(v) for v in version.split('.') if v.isdigit()]
