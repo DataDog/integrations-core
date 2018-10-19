@@ -992,6 +992,7 @@ class OpenStackCheck(AgentCheck):
         hypervisor_hostname = server_details.get('hypervisor_hostname')
         host_tags = self._get_host_aggregate_tag(hypervisor_hostname, use_shortname=use_shortname)
         host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
+        self.external_host_tags[server_details.get('server_name')] = host_tags
 
         server_id = server_details.get('server_id')
         server_name = server_details.get('server_name')
