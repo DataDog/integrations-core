@@ -1,20 +1,19 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 from collections import namedtuple
 import socket
 import os
 import platform
 
-# project
 from datadog_checks.network import Network
 
 import mock
 import pytest
 
-FIXTURE_DIR = os.path.dirname(__file__)
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 CX_STATE_GAUGES_VALUES = {
     'system.net.udp4.connections': 2,
@@ -31,10 +30,12 @@ CX_STATE_GAUGES_VALUES = {
     'system.net.tcp6.time_wait': 1,
 }
 
-network_check = Network('network', {}, {})
-
 
 @pytest.fixture
+def network_check():
+    return Network('network', {}, {})
+
+
 def ss_subprocess_mock(*args, **kwargs):
     if args[0][-1] == '-4' and args[0][-3] == '-u':
         file_name = 'ss_ipv4_udp'
@@ -45,66 +46,51 @@ def ss_subprocess_mock(*args, **kwargs):
     elif args[0][-1] == '-6' and args[0][-3] == '-t':
         file_name = 'ss_ipv6_tcp'
 
-    with open(file_name, FIXTURE_DIR) as f:
+    with open(os.path.join(FIXTURE_DIR, file_name)) as f:
         contents = f.read()
         contents = contents.decode('string-escape')
-        return contents.decode("utf-8")
+        return contents.decode("utf-8"), None, None
 
 
-@pytest.fixture
 def netstat_subprocess_mock(*args, **kwargs):
     if args[0][0] == 'ss':
         raise OSError
     elif args[0][0] == 'netstat':
-        with open('netstat', FIXTURE_DIR) as f:
+        with open(os.path.join(FIXTURE_DIR, 'netstat')) as f:
             contents = f.read()
             contents = contents.decode('string-escape')
-            return contents.decode("utf-8")
+            return contents.decode("utf-8"), None, None
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+@pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
+def test_cx_state(aggregator, network_check):
+    instance = {'collect_connection_state': True}
+    with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
+        out.side_effect = ss_subprocess_mock
+        network_check._collect_cx_state = True
+        network_check.check(instance)
+        for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
+            aggregator.assert_metric(metric, value=value)
+        aggregator.reset()
 
-
-@pytest.mark.skipif(platform.system() is not 'Linux',
-                    reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=ss_subprocess_mock)
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_cx_state_linux_ss(mock_is_linux, mock_get_subprocess_output, aggregator):
-    network_check.check({})
-
-    # Assert metrics
-    for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
-        aggregator.assert_metric(metric, value=value, tags=['optional:tag1'])
-
-
-@pytest.mark.skipif(platform.system() is not 'Linux',
-                    reason="Only runs on Unix systems")
-@mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=netstat_subprocess_mock)
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_cx_state_linux_netstat(mock_is_linux, mock_get_subprocess_output, aggregator):
-    network_check.run_check({})
-
-    # Assert metrics
-    for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
-        aggregator.assert_metric(metric, value=value, tags=['optional:tag1'])
+        out.side_effect = netstat_subprocess_mock
+        network_check.check(instance)
+        for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
+            aggregator.assert_metric(metric, value=value)
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_solaris', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_win_uses_psutil(*args):
+def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, network_check):
         with mock.patch.object(network_check, '_check_psutil') as _check_psutil:
             network_check.check({})
             network_check._check_psutil = mock.MagicMock()
             _check_psutil.assert_called_once_with({})
 
 
-def test_check_psutil(aggregator):
+def test_check_psutil(aggregator, network_check):
     with mock.patch.object(network_check, '_cx_state_psutil') as _cx_state_psutil, \
             mock.patch.object(network_check, '_cx_counters_psutil') as _cx_counters_psutil:
         network_check._collect_cx_state = False
@@ -120,7 +106,7 @@ def test_check_psutil(aggregator):
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
 
-def test_cx_state_psutil(aggregator):
+def test_cx_state_psutil(aggregator, network_check):
     sconn = namedtuple(
         'sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])
     conn = [
@@ -182,12 +168,14 @@ def test_cx_state_psutil(aggregator):
 
     with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
         mock_psutil.net_connections.return_value = conn
+        network_check = Network('network', {}, {})
+        network_check._setup_metrics({})
         network_check._cx_state_psutil()
         for _, m in aggregator._metrics.iteritems():
             assert results[m[0].name] == m[0].value
 
 
-def test_cx_counters_psutil(aggregator):
+def test_cx_counters_psutil(aggregator, network_check):
     snetio = namedtuple(
         'snetio',
         ['bytes_sent', 'bytes_recv', 'packets_sent',
@@ -214,11 +202,10 @@ def test_cx_counters_psutil(aggregator):
         for _, m in aggregator._metrics.iteritems():
             assert 'device:Ethernet' in m[0].tags
             if 'bytes_rcvd' in m[0].name:
-                print m
                 assert m[0].value == 3280598526
 
 
-def test_parse_protocol_psutil(aggregator):
+def test_parse_protocol_psutil(aggregator, network_check):
     import socket
     conn = mock.MagicMock()
 
