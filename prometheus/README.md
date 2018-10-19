@@ -16,7 +16,7 @@ The Prometheus check is packaged with the Agent starting version 6.1.0.
 
 ### Configuration
 
-Edit the `prometheus.d/conf.yaml` file to to retrieve metrics from your prometheus instances.
+Edit the `prometheus.d/conf.yaml` file to retrieve metrics from applications that expose OpenMetrics / Prometheus end points.
 
 Each instance is at least composed of:
 
