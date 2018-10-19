@@ -7,7 +7,6 @@ import os
 import platform
 
 from datadog_checks.network import Network
-from datadog_checks.dev.utils import running_on_ci
 
 import mock
 import pytest
