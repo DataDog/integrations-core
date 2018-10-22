@@ -15,8 +15,8 @@ import requests
 from requests.exceptions import RequestException
 
 # project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
+from datadog_checks.base import AgentCheck
+from datadog_checks.base import is_affirmative
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 EXCHANGE_TYPE = 'exchanges'
@@ -168,7 +168,7 @@ class RabbitMQ(AgentCheck):
             base_url = 'http://' + base_url
             parsed_url = urlparse.urlparse(base_url)
 
-        ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
+        ssl_verify = is_affirmative(instance.get('ssl_verify', True))
         if not ssl_verify and parsed_url.scheme == 'https':
             self.log.warning('Skipping SSL cert validation for %s based on configuration.' % (base_url))
 
@@ -196,7 +196,7 @@ class RabbitMQ(AgentCheck):
         }
 
         for object_type, filters in specified.iteritems():
-            for filter_type, filter_objects in filters.iteritems():
+            for _, filter_objects in filters.iteritems():
                 if type(filter_objects) != list:
                     raise TypeError(
                         "{0} / {0}_regexes parameter must be a list".format(object_type))
@@ -251,14 +251,15 @@ class RabbitMQ(AgentCheck):
             self.log.error(msg)
 
             # tag every vhost as CRITICAL or they would keep the latest value, OK, in case the RabbitMQ server goes down
-            msg = "error while contacting rabbitmq (%s), setting aliveness to CRITICAL for vhosts: %s"
-            msg = msg % (base_url, self.cached_vhosts)
+            msg = "error while contacting rabbitmq ({}), setting aliveness to CRITICAL for vhosts: {}".format(
+                base_url, self.cached_vhosts
+            )
             self.log.error(msg)
             for vhost in self.cached_vhosts.get(base_url, []):
                 self.service_check('rabbitmq.aliveness',
                                    AgentCheck.CRITICAL,
-                                   ['vhost:%s' % vhost] + custom_tags,
-                                   message=u"Could not contact aliveness API")
+                                   ['vhost:{}'.format(vhost)] + custom_tags,
+                                   message="Could not contact aliveness API")
 
     def _get_data(self, url, auth=None, ssl_verify=True, proxies=None):
         if proxies is None:
@@ -290,7 +291,7 @@ class RabbitMQ(AgentCheck):
                 for p in regex_filters:
                     match = re.search(p, name)
                     if match:
-                        if _is_affirmative(tag_families) and match.groups():
+                        if is_affirmative(tag_families) and match.groups():
                             if object_type == QUEUE_TYPE:
                                 data_line["queue_family"] = match.groups()[0]
                             if object_type == EXCHANGE_TYPE:
@@ -305,7 +306,7 @@ class RabbitMQ(AgentCheck):
                 # Absolute names work only for queues and exchanges
                 if object_type != QUEUE_TYPE and object_type != EXCHANGE_TYPE:
                     continue
-                absolute_name = '%s/%s' % (data_line.get("vhost"), name)
+                absolute_name = '{}/{}'.format(data_line.get("vhost"), name)
                 if absolute_name in explicit_filters:
                     matching_lines.append(data_line)
                     explicit_filters.remove(absolute_name)
@@ -314,7 +315,7 @@ class RabbitMQ(AgentCheck):
                 for p in regex_filters:
                     match = re.search(p, absolute_name)
                     if match:
-                        if _is_affirmative(tag_families) and match.groups():
+                        if is_affirmative(tag_families) and match.groups():
                             if object_type == QUEUE_TYPE:
                                 data_line["queue_family"] = match.groups()[0]
                             if object_type == EXCHANGE_TYPE:
@@ -334,7 +335,7 @@ class RabbitMQ(AgentCheck):
             tag = data.get(t)
             if tag:
                 # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
-                tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
+                tags.append('{}_{}:{}'.format(TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
     def get_stats(self, instance, base_url, object_type, max_detailed,
@@ -470,7 +471,7 @@ class RabbitMQ(AgentCheck):
         """
         if len(explicit_filters) > max_detailed:
             raise Exception(
-                "The maximum number of %s you can specify is %d." % (object_type, max_detailed))
+                "The maximum number of {} you can specify is {}.".format(object_type, max_detailed))
 
         # a list of queues/nodes is specified. We process only those
         data = self._filter_list(data,
@@ -487,9 +488,8 @@ class RabbitMQ(AgentCheck):
         if len(data) > max_detailed:
             # Display a warning in the info page
             msg = ("Too many items to fetch. "
-                   "You must choose the %s you are interested in by editing the rabbitmq.yaml configuration file"
-                   "or get in touch with Datadog Support")
-            msg = msg % object_type
+                   "You must choose the {} you are interested in by editing the rabbitmq.yaml configuration file"
+                   "or get in touch with Datadog Support").format(object_type)
             self.warning(msg)
 
         for data_line in data[:max_detailed]:
@@ -514,10 +514,10 @@ class RabbitMQ(AgentCheck):
             value = root.get(keys[-1], None)
             if value is not None:
                 try:
-                    self.gauge('rabbitmq.%s.%s' % (
+                    self.gauge('rabbitmq.{}.{}'.format(
                         METRIC_SUFFIX[object_type], metric_name), operation(value), tags=tags)
                 except ValueError:
-                    self.log.debug("Caught ValueError for %s %s = %s  with tags: %s" % (
+                    self.log.debug("Caught ValueError for {} {} = {}  with tags: {}".format(
                         METRIC_SUFFIX[object_type], attribute, value, tags))
 
     def _get_queue_bindings_metrics(self, base_url, custom_tags, data, instance_proxy,
@@ -567,25 +567,27 @@ class RabbitMQ(AgentCheck):
                 connection_states[conn.get('state', 'direct')] += 1
 
         for vhost, nb_conn in stats.iteritems():
-            self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)] + custom_tags)
+            self.gauge('rabbitmq.connections', nb_conn, tags=['{}_vhost:{}'.format(TAG_PREFIX, vhost)] + custom_tags)
 
         for conn_state, nb_conn in connection_states.iteritems():
             self.gauge('rabbitmq.connections.state',
                        nb_conn,
-                       tags=['%s_conn_state:%s' % (TAG_PREFIX, conn_state)] + custom_tags)
+                       tags=['{}_conn_state:{}'.format(TAG_PREFIX, conn_state)] + custom_tags)
 
     def alert(self, base_url, max_detailed, size, object_type, custom_tags):
-        key = "%s%s" % (base_url, object_type)
+        key = "{}{}".format(base_url, object_type)
         if key in self.already_alerted:
             # We have already posted an event
             return
 
         self.already_alerted.append(key)
 
-        title = "RabbitMQ integration is approaching the limit on the number of %s that can be collected from on %s" % (
-            object_type, self.hostname)
-        msg = """%s %s are present. The limit is %s.
-        Please get in touch with Datadog support to increase the limit.""" % (size, object_type, max_detailed)
+        title = (
+            "RabbitMQ integration is approaching the limit on the number of {} that can be collected from on {}"
+        ).format(object_type, self.hostname)
+        msg = (
+            "{} {} are present. The limit is {}. Please get in touch with Datadog support to increase the limit."
+        ).format(size, object_type, max_detailed)
 
         event = {
             "timestamp": int(time.time()),
@@ -595,8 +597,8 @@ class RabbitMQ(AgentCheck):
             "alert_type": 'warning',
             "source_type_name": SOURCE_TYPE_NAME,
             "host": self.hostname,
-            "tags": ["base_url:%s" % base_url, "host:%s" % self.hostname] + custom_tags,
-            "event_object": "rabbitmq.limit.%s" % object_type,
+            "tags": ["base_url:{}".format(base_url), "host:{}".format(self.hostname)] + custom_tags,
+            "event_object": "rabbitmq.limit.{}".format(object_type),
         }
 
         self.event(event)
@@ -618,16 +620,16 @@ class RabbitMQ(AgentCheck):
         """
 
         for vhost in vhosts:
-            tags = ['vhost:%s' % vhost] + custom_tags
+            tags = ['vhost:{}'.format(vhost)] + custom_tags
             # We need to urlencode the vhost because it can be '/'.
-            path = u'aliveness-test/%s' % (urllib.quote_plus(vhost))
+            path = u'aliveness-test/{}'.format(urllib.quote_plus(vhost))
             aliveness_url = urlparse.urljoin(base_url, path)
             aliveness_proxy = self.get_instance_proxy(instance, aliveness_url)
             aliveness_response = self._get_data(aliveness_url,
                                                 auth=auth,
                                                 ssl_verify=ssl_verify,
                                                 proxies=aliveness_proxy)
-            message = u"Response from aliveness API: %s" % aliveness_response
+            message = u"Response from aliveness API: {}".format(aliveness_response)
 
             if aliveness_response.get('status') == 'ok':
                 status = AgentCheck.OK
