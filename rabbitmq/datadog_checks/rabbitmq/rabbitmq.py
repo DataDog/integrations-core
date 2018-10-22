@@ -23,6 +23,7 @@ EXCHANGE_TYPE = 'exchanges'
 QUEUE_TYPE = 'queues'
 NODE_TYPE = 'nodes'
 CONNECTION_TYPE = 'connections'
+OVERVIEW_TYPE = 'overview'
 MAX_DETAILED_EXCHANGES = 50
 MAX_DETAILED_QUEUES = 200
 MAX_DETAILED_NODES = 100
@@ -100,10 +101,51 @@ NODE_ATTRIBUTES = [
     ('disk_free_alarm', 'disk_alarm', float),
 ]
 
+OVERVIEW_ATTRIBUTES = [
+    ("object_totals/connections", "object_totals.connections", float),
+    ("object_totals/channels", "object_totals.channels", float),
+    ("object_totals/queues", "object_totals.queues", float),
+    ("object_totals/consumers", "object_totals.consumers", float),
+
+    ("queue_totals/messages", "queue_totals.messages.count", float),
+    ("queue_totals/messages_details/rate", "queue_totals.messages.rate", float),
+
+    ("queue_totals/messages_ready", "queue_totals.messages_ready.count", float),
+    ("queue_totals/messages_ready_details/rate", "queue_totals.messages_ready.rate", float),
+
+    ("queue_totals/messages_unacknowledged", "queue_totals.messages_unacknowledged.count", float),
+    ("queue_totals/messages_unacknowledged_details/rate", "queue_totals.messages_unacknowledged.rate", float),
+
+    ('message_stats/ack', 'messages.ack.count', float),
+    ('message_stats/ack_details/rate', 'messages.ack.rate', float),
+
+    ('message_stats/confirm', 'messages.confirm.count', float),
+    ('message_stats/confirm_details/rate', 'messages.confirm.rate', float),
+
+    ('message_stats/deliver_get', 'messages.deliver_get.count', float),
+    ('message_stats/deliver_get_details/rate', 'messages.deliver_get.rate', float),
+
+    ('message_stats/publish', 'messages.publish.count', float),
+    ('message_stats/publish_details/rate', 'messages.publish.rate', float),
+
+    ('message_stats/publish_in', 'messages.publish_in.count', float),
+    ('message_stats/publish_in_details/rate', 'messages.publish_in.rate', float),
+
+    ('message_stats/publish_out', 'messages.publish_out.count', float),
+    ('message_stats/publish_out_details/rate', 'messages.publish_out.rate', float),
+
+    ('message_stats/return_unroutable', 'messages.return_unroutable.count', float),
+    ('message_stats/return_unroutable_details/rate', 'messages.return_unroutable.rate', float),
+
+    ('message_stats/redeliver', 'messages.redeliver.count', float),
+    ('message_stats/redeliver_details/rate', 'messages.redeliver.rate', float),
+]
+
 ATTRIBUTES = {
     EXCHANGE_TYPE: EXCHANGE_ATTRIBUTES,
     QUEUE_TYPE: QUEUE_ATTRIBUTES,
     NODE_TYPE: NODE_ATTRIBUTES,
+    OVERVIEW_TYPE: OVERVIEW_ATTRIBUTES,
 }
 
 TAG_PREFIX = 'rabbitmq'
@@ -122,6 +164,9 @@ TAGS_MAP = {
     },
     NODE_TYPE: {
         'name': 'node',
+    },
+    OVERVIEW_TYPE: {
+        'cluster_name': 'cluster'
     }
 }
 
@@ -129,6 +174,7 @@ METRIC_SUFFIX = {
     EXCHANGE_TYPE: "exchange",
     QUEUE_TYPE: "queue",
     NODE_TYPE: "node",
+    OVERVIEW_TYPE: "overview",
 }
 
 
@@ -234,6 +280,7 @@ class RabbitMQ(AgentCheck):
                            limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
             self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE],
                            limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
+            self.get_overview_stats(instance, base_url, custom_tags, auth=auth, ssl_verify=ssl_verify)
 
             self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags,
                                       auth=auth, ssl_verify=ssl_verify)
@@ -501,6 +548,12 @@ class RabbitMQ(AgentCheck):
         if object_type is QUEUE_TYPE:
             self._get_queue_bindings_metrics(base_url, custom_tags, data, instance_proxy,
                                              instance, object_type, auth, ssl_verify)
+
+    def get_overview_stats(self, instance, base_url, custom_tags, auth=None, ssl_verify=True):
+        instance_proxy = self.get_instance_proxy(instance, base_url)
+        data = self._get_data(urlparse.urljoin(base_url, "overview"), auth=auth,
+                              ssl_verify=ssl_verify, proxies=instance_proxy)
+        self._get_metrics(data, OVERVIEW_TYPE, custom_tags)
 
     def _get_metrics(self, data, object_type, custom_tags):
         tags = self._get_tags(data, object_type, custom_tags)
