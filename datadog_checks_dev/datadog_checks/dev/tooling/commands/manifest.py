@@ -60,19 +60,22 @@ def manifest():
 def verify(fix, include_extras):
     """Validate all `manifest.json` files."""
     all_guids = {}
-    task_failed = True
+    task_failed = False
 
     root = get_root()
     root_name = basepath(get_root())
 
+    ok_checks = 0
+    failed_checks = 0
+    fixed_checks = 0
+    echo_info("Validating all manifest.json files...")
     for check_name in sorted(os.listdir(root)):
         manifest_file = os.path.join(root, check_name, 'manifest.json')
 
         if file_exists(manifest_file):
-            echo_info('Checking {}/manifest.json...'.format(check_name), nl=False)
+            display_queue = []
             file_failures = 0
             file_fixed = False
-            display_queue = []
 
             try:
                 decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
@@ -360,16 +363,28 @@ def verify(fix, include_extras):
                         display_queue.append((echo_failure, output))
 
             if file_failures > 0:
-                echo_failure(" FAILED")
                 task_failed = True
-            else:
-                echo_success(" OK" if not file_fixed else " FIXED")
-            for display_func, message in display_queue:
-                display_func(message)
+                failed_checks += 1
+                # Display detailed info if file invalid
+                echo_info("{}/manifest.json... ".format(check_name), nl=False)
+                echo_failure("FAILED")
+                for display_func, message in display_queue:
+                    display_func(message)
+            elif not file_fixed:
+                ok_checks += 1
 
             if fix and file_fixed:
                 new_manifest = '{}\n'.format(json.dumps(decoded, indent=2, separators=(',', ': ')))
                 write_file(manifest_file, new_manifest)
+                # Display detailed info if file has been completely fixed
+                if file_failures == 0:
+                    fixed_checks += 1
+                    echo_info("{}/manifest.json... ".format(check_name), nl=False)
+                    echo_success("FIXED")
+                    for display_func, message in display_queue:
+                        display_func(message)
+
+    echo_info("{} valid files, {} fixed and {} invalid".format(ok_checks, fixed_checks, failed_checks))
 
     if task_failed:
         abort()
