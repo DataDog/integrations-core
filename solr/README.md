@@ -24,8 +24,8 @@ instances:
     port: 9999
 
   # if tomcat requires authentication
-  #   user: <TOMCAT_USERNAME>
-  #   password: <TOMCAT_PASSWORD>
+  #   user: <SOLR_USERNAME>
+  #   password: <SOLR_PASSWORD>
 
 init_config:
   conf:
