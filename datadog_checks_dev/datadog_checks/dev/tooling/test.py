@@ -134,6 +134,37 @@ def fix_coverage_report(check, report_file):
     write_file_binary(report_file, report)
 
 
+def construct_pytest_options(verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False):
+    # Prevent no verbosity
+    pytest_options = '--verbosity={}'.format(verbose or 1)
+
+    if enter_pdb:
+        # Drop to PDB on first failure, then end test session
+        pytest_options += ' --pdb -x'
+
+    if debug:
+        pytest_options += ' --log-level=debug'
+
+    if bench:
+        pytest_options += ' --benchmark-only --benchmark-cprofile=tottime'
+    else:
+        pytest_options += ' --benchmark-skip'
+
+    if coverage:
+        pytest_options += (
+            # Located at the root of each repo
+            ' --cov-config=../.coveragerc'
+            # Use the same .coverage file to aggregate results
+            ' --cov-append'
+            # Show no coverage report until the end
+            ' --cov-report='
+            # This will be formatted to the appropriate coverage paths for each package
+            ' {}'
+        )
+
+    return pytest_options
+
+
 def pytest_coverage_sources(*checks):
     return ' '.join(
         ' '.join(
