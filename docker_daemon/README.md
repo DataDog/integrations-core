@@ -118,6 +118,11 @@ Some options have moved from `docker_daemon.yaml` to the main `datadog.yaml`:
   * `docker_root` option has been split in two options `container_cgroup_root` and `container_proc_root`
   * `exclude_pause_container` has been added to exclude pause containers on Kubernetes and Openshift (default to true). This will avoid removing them from the exclude list by error
 
+Additional changes:
+
+  * The `TAGS` environment variable was renamed to `DD_TAGS`
+  * The Docker Hub repository has changed from [datadog/docker-dd-agent][29] to [datadog/agent][30]
+
 The [`import`][15] command converts the old `docker_daemon.yaml` to the new `docker.yaml`. The command also moves needed settings from `docker_daemon.yaml` to `datadog.yaml`.
 
 ## Data Collected
@@ -204,3 +209,5 @@ We've also written several other in-depth blog posts to help you get the most ou
 [26]: https://www.datadoghq.com/blog/monitor-docker-datadog/
 [27]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/docker.png
 [28]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/integrations-docker-dockerps.png
+[29]: https://hub.docker.com/r/datadog/docker-dd-agent/
+[30]: https://hub.docker.com/r/datadog/agent/
