@@ -41,13 +41,14 @@ def verify():
 
     task_failed = False
     root = get_root()
-
+    echo_info("Validating all service_checks.json files...")
+    failed_checks = 0
+    ok_checks = 0
     for check_name in sorted(os.listdir(root)):
         service_checks_file = os.path.join(root, check_name, 'service_checks.json')
 
         if file_exists(service_checks_file):
             file_failed = False
-            echo_info('Checking {}/service_checks.json...'.format(check_name), nl=False)
             display_queue = []
 
             try:
@@ -134,13 +135,17 @@ def verify():
                     display_queue.append((echo_failure, '  required non empty list: statuses'))
 
             if file_failed:
-                echo_failure(" FAILED")
                 task_failed = True
+                failed_checks += 1
+                # Display detailed info if file invalid
+                echo_info("{}/service_checks.json... ".format(check_name), nl=False)
+                echo_failure("FAILED")
+                for display_func, message in display_queue:
+                    display_func(message)
             else:
-                echo_success(" OK")
-            task_failed = task_failed or file_failed
-            for display, message in display_queue:
-                display(message)
+                ok_checks += 1
+
+    echo_info("{} valid files and {} invalid".format(ok_checks, failed_checks))
 
     if task_failed:
         abort()
