@@ -7,7 +7,7 @@ import click
 
 from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
 from ..constants import get_root
-from ..test import fix_coverage_report, get_tox_envs, pytest_coverage_sources
+from ..test import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from ...subprocess import run_command
 from ...utils import chdir, file_exists, remove_path, running_on_ci
 
@@ -53,40 +53,27 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
     root = get_root()
     testing_on_ci = running_on_ci()
 
-    # Start building pytest command line args
-    pytest_options = '--verbosity={}'.format(verbose or 1)
-
-    if enter_pdb:
-        pytest_options = '--pdb -x {}'.format(pytest_options)
-
-    if debug:
-        pytest_options = '{} --log-level=debug'.format(pytest_options)
-
-    if bench:
-        pytest_options = '{} --benchmark-only --benchmark-cprofile=tottime'.format(pytest_options)
-    else:
-        pytest_options = '{} --benchmark-skip'.format(pytest_options)
-
-    if coverage:
-        pytest_options = '{} {}'.format(
-            pytest_options,
-            '--cov-config=../.coveragerc '
-            '--cov-append '
-            '--cov-report= {}'
-        )
+    pytest_options = construct_pytest_options(
+        verbose=verbose,
+        enter_pdb=enter_pdb,
+        debug=debug,
+        bench=bench,
+        coverage=coverage
+    )
+    coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 
     test_env_vars = {
-        'DDEV_COV_MISSING': str(cov_missing or testing_on_ci),
-        'PYTEST_ADDOPTS': pytest_options,
-
+        # Environment variables we need tox to pass down
         'TOX_TESTENV_PASSENV': (
-            # used in .coveragerc for whether or not to show missing line numbers for coverage
+            # Used in .coveragerc for whether or not to show missing line numbers for coverage
             'DDEV_COV_MISSING '
-            # space-separated list of pytest options
+            # Space-separated list of pytest options
             'PYTEST_ADDOPTS '
             # https://docs.docker.com/compose/reference/envvars/
             'DOCKER_* COMPOSE_*'
         ),
+        'DDEV_COV_MISSING': coverage_show_missing_lines,
+        'PYTEST_ADDOPTS': pytest_options,
     }
 
     check_envs = get_tox_envs(checks, style=style, benchmark=bench, changed_only=changed)
