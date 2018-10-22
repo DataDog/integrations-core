@@ -76,9 +76,17 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
         )
 
     test_env_vars = {
-        'TOX_TESTENV_PASSENV': 'DDEV_COV_MISSING PYTEST_ADDOPTS',
         'DDEV_COV_MISSING': str(cov_missing or testing_on_ci),
         'PYTEST_ADDOPTS': pytest_options,
+
+        'TOX_TESTENV_PASSENV': (
+            # used in .coveragerc for whether or not to show missing line numbers for coverage
+            'DDEV_COV_MISSING '
+            # space-separated list of pytest options
+            'PYTEST_ADDOPTS '
+            # https://docs.docker.com/compose/reference/envvars/
+            'DOCKER_* COMPOSE_*'
+        ),
     }
 
     check_envs = get_tox_envs(checks, style=style, benchmark=bench, changed_only=changed)
@@ -115,7 +123,15 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
             echo_waiting(wait_text)
             echo_waiting('-' * len(wait_text))
 
-            result = run_command('tox --develop -e {}'.format(','.join(envs)))
+            result = run_command(
+                'tox '
+                # so users won't get failures for our possibly strict CI requirements
+                '--skip-missing-interpreters '
+                # so coverage tracks the real locations instead of .tox virtual envs
+                '--develop '
+                # comma-separated list of environments
+                '-e {}'.format(','.join(envs))
+            )
             if result.code:
                 abort('\nFailed!', code=result.code)
 
