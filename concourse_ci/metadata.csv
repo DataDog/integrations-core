@@ -1,0 +1,6 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+concourse.ci.scheduling_full_duration,gauge,,milliseconds,,The time taken to schedule an entire pipeline including the time taken to load the version information from the database and calculate the latest valid versions for each job,0,concourse_ci,
+concourse.ci.scheduling_loading_versions_duration,gauge,,milliseconds,,The time taken to load the version information from the database,0,concourse_ci,
+concourse.ci.scheduling_job_duration,gauge,,milliseconds,,The time taken to calculate the set of valid input versions when scheduling a job,0,concourse_ci,
+concourse.ci.worker_containers,count,,,,The number of containers that are currently running on workers,0,concourse_ci,
+concourse.ci.worker_volumes,count,,,,The number of volumes that are currently present on workers,0,concourse_ci,
