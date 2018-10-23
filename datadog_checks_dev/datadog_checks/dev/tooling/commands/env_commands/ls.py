@@ -20,7 +20,7 @@ def ls(checks):
         checks = sorted(get_testable_checks() & set(checks))
 
         for check in checks:
-            envs = get_available_tox_envs(check, test_only=True)
+            envs = get_available_tox_envs(check, e2e_only=True)
 
             if envs:
                 echo_success('{}:'.format(check))

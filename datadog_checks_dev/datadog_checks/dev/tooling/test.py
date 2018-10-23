@@ -70,13 +70,13 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
         yield check, envs_selected
 
 
-def get_available_tox_envs(check, sort=False, test_only=False):
+def get_available_tox_envs(check, sort=False, e2e_only=False):
     with chdir(path_join(get_root(), check)):
-        env_list = run_command('tox --listenvs', capture='out').stdout
+        env_list = run_command('tox --listenvs-all', capture='out').stdout
 
     env_list = [e.strip() for e in env_list.splitlines()]
 
-    if test_only:
+    if e2e_only:
         sort = True
 
     if sort:
@@ -91,19 +91,19 @@ def get_available_tox_envs(check, sort=False, test_only=False):
 
         for e in benchmark_envs:
             env_list.remove(e)
-            if not test_only:
+            if not e2e_only:
                 env_list.append(e)
 
         # Put style checks at the end always
         for style_type in STYLE_ENVS:
             try:
                 env_list.remove(style_type)
-                if not test_only:
+                if not e2e_only:
                     env_list.append(style_type)
             except ValueError:
                 pass
 
-        if test_only:
+        if e2e_only:
             # No need for unit tests as they wouldn't set up a real environment
             try:
                 env_list.remove('unit')
