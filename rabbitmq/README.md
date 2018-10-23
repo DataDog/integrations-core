@@ -24,12 +24,14 @@ Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of you
 
 Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][2] to enable it.
 
-Agent user needs at least `monitoring` tag and minimum required permissions:  
-**conf** - `^aliveness-test$`  
-**write** - `^amq\.default$`  
-**read** - `.*`  
+Agent user needs at least the `monitoring` tag and those required permissions:
 
-You can create user for default vhost like this:
+* **conf** - `^aliveness-test$`  
+* **write** - `^amq\.default$`  
+* **read** - `.*`  
+
+Create a user for default vhost with the following commands:
+
 ```
 rabbitmqctl add_user datadog somesecret
 rabbitmqctl set_permissions  -p / datadog "^aliveness-test$" "^amq\.default$" ".*"
