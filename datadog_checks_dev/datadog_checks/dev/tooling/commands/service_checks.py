@@ -52,12 +52,11 @@ def verify():
 
             try:
                 decoded = json.loads(read_file(service_checks_file).strip(), object_pairs_hook=OrderedDict)
-            except JSONDecodeError:
-                file_failed = True
-                display_queue.append((echo_failure, '  invalid json: {}'.format(service_checks_file)))
-
-                for display_func, message in display_queue:
-                    display_func(message)
+            except JSONDecodeError as e:
+                failed_checks += 1
+                echo_info("{}/service_checks.json... ".format(check_name), nl=False)
+                echo_failure("FAILED")
+                echo_failure('  invalid json: {}'.format(e))
                 continue
 
             unique_names = set()
