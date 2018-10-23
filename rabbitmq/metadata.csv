@@ -51,25 +51,25 @@ rabbitmq.overview.object_totals.connections,gauge,,messages,second,Total number 
 rabbitmq.overview.object_totals.channels,gauge,,messages,second,Total number of channels,0,rabbitmq,total channels
 rabbitmq.overview.object_totals.queues,gauge,,messages,second,Total number of queues,0,rabbitmq,total queues
 rabbitmq.overview.object_totals.consumers,gauge,,messages,second,Total number of consumers,0,rabbitmq,total consumers
-rabbitmq.overview.queue_totals.messages.count,gauge,,messages,second,Total number of messages (ready plus unacknowledged),0,rabbitmq,total messages
+rabbitmq.overview.queue_totals.messages.count,gauge,,messages,,Total number of messages (ready plus unacknowledged),0,rabbitmq,total messages
 rabbitmq.overview.queue_totals.messages.rate,gauge,,messages,second,Rate of number of messages (ready plus unacknowledged),0,rabbitmq,total messages rate
-rabbitmq.overview.queue_totals.messages_ready.count,gauge,,messages,second,Number of messages ready for delivery,0,rabbitmq,total messages ready
+rabbitmq.overview.queue_totals.messages_ready.count,gauge,,messages,,Number of messages ready for delivery,0,rabbitmq,total messages ready
 rabbitmq.overview.queue_totals.messages_ready.rate,gauge,,messages,second,Rate of number of messages ready for delivery,0,rabbitmq,total messages ready rate
-rabbitmq.overview.queue_totals.messages_unacknowledged.count,gauge,,messages,second,Number of unacknowledged messages,0,rabbitmq,total messages unack
+rabbitmq.overview.queue_totals.messages_unacknowledged.count,gauge,,messages,,Number of unacknowledged messages,0,rabbitmq,total messages unack
 rabbitmq.overview.queue_totals.messages_unacknowledged.rate,gauge,,messages,second,Rate of number of unacknowledged messages,0,rabbitmq,total messages unack rate
 rabbitmq.overview.messages.ack.count,gauge,,message,,Number of messages delivered to clients and acknowledged,0,rabbitmq,total msgs ack
-rabbitmq.overview.messages.ack.rate,gauge,,message,,Rate of messages delivered to clients and acknowledged per second ,0,rabbitmq,total msgs ack rate
+rabbitmq.overview.messages.ack.rate,gauge,,message,second,Rate of messages delivered to clients and acknowledged per second ,0,rabbitmq,total msgs ack rate
 rabbitmq.overview.messages.confirm.count,gauge,,message,,Count of messages confirmed,0,rabbitmq,total msgs cnfrm
-rabbitmq.overview.messages.confirm.rate,gauge,,message,,Rate of messages confirmed per second,0,rabbitmq,total msgs cnfrm rate
+rabbitmq.overview.messages.confirm.rate,gauge,,message,second,Rate of messages confirmed per second,0,rabbitmq,total msgs cnfrm rate
 rabbitmq.overview.messages.deliver_get.count,gauge,,message,,"Sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get",0,rabbitmq,total msgs dlv get
-rabbitmq.overview.messages.deliver_get.rate,gauge,,message,,"Rate per second of the sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get",0,rabbitmq,total msgs dlv get rate
+rabbitmq.overview.messages.deliver_get.rate,gauge,,message,second,"Rate per second of the sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get",0,rabbitmq,total msgs dlv get rate
 rabbitmq.overview.messages.redeliver.count,gauge,,message,,Count of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,total msgs redlv
-rabbitmq.overview.messages.redeliver.rate,gauge,,message,,Rate of subset of messages in deliver_get which had the redelivered flag set per second ,0,rabbitmq,total msgs redlv rate
+rabbitmq.overview.messages.redeliver.rate,gauge,,message,second,Rate of subset of messages in deliver_get which had the redelivered flag set per second ,0,rabbitmq,total msgs redlv rate
 rabbitmq.overview.messages.return_unroutable.count,gauge,,message,,Count of messages returned to publisher as unroutable,0,rabbitmq,total msgs unroutable
-rabbitmq.overview.messages.return_unroutable.rate,gauge,,message,,Rate of messages returned to publisher as unroutable per second,0,rabbitmq,total msgs unroutable rate
+rabbitmq.overview.messages.return_unroutable.rate,gauge,,message,second,Rate of messages returned to publisher as unroutable per second,0,rabbitmq,total msgs unroutable rate
 rabbitmq.overview.messages.publish.count,gauge,,message,,Count of messages published,0,rabbitmq,total msgs pub
-rabbitmq.overview.messages.publish.rate,gauge,,message,,Rate of messages published per second,0,rabbitmq,total msgs pub rate
+rabbitmq.overview.messages.publish.rate,gauge,,message,second,Rate of messages published per second,0,rabbitmq,total msgs pub rate
 rabbitmq.overview.messages.publish_in.count,gauge,,message,,Count of messages published from channels into this overview,0,rabbitmq,total msgs pub in
-rabbitmq.overview.messages.publish_in.rate,gauge,,message,,Rate of messages published from channels into this overview per sec,0,rabbitmq,total msgs pub in rate
+rabbitmq.overview.messages.publish_in.rate,gauge,,message,second,Rate of messages published from channels into this overview per sec,0,rabbitmq,total msgs pub in rate
 rabbitmq.overview.messages.publish_out.count,gauge,,message,,Count of messages published from this overview into queues,0,rabbitmq,total msgs pub out
-rabbitmq.overview.messages.publish_out.rate,gauge,,message,,Rate of messages published from this overview into queues per second,0,rabbitmq,total msgs pub out rate
+rabbitmq.overview.messages.publish_out.rate,gauge,,message,second,Rate of messages published from this overview into queues per second,0,rabbitmq,total msgs pub out rate

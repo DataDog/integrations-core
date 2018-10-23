@@ -15,8 +15,7 @@ import requests
 from requests.exceptions import RequestException
 
 # project
-from datadog_checks.base import AgentCheck
-from datadog_checks.base import is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 EXCHANGE_TYPE = 'exchanges'
