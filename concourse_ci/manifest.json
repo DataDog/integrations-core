@@ -5,5 +5,5 @@
     "short_description": "Collect metrics emitted from Concourse-ci.",
     "metric_prefix": "concourse.ci.",
     "metric_to_check": "concourse.ci.scheduling_full_duration",
-    "creates_events": false,
+    "creates_events": false
 }
