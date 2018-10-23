@@ -1,5 +1,11 @@
 # CHANGELOG - elastic
 
+## 1.9.0 / 2018-10-23
+
+* [Added] Add option to prevent duplicate hostnames. See [#2453](https://github.com/DataDog/integrations-core/pull/2453).
+* [Added] Support Python 3. See [#2417](https://github.com/DataDog/integrations-core/pull/2417).
+* [Fixed] Move metrics definition and logic into its own module. See [#2381](https://github.com/DataDog/integrations-core/pull/2381).
+
 ## 1.8.0 / 2018-10-12
 
 * [Fixed] Move config parser to its own module. See [#2370](https://github.com/DataDog/integrations-core/pull/2370).
