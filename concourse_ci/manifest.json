@@ -1,0 +1,9 @@
+{
+    "manifest_version": "1.0.0",
+    "name": "concourse-ci",
+    "display_name": "Concourse ci",
+    "short_description": "Collect metrics emitted from Concourse-ci.",
+    "metric_prefix": "concourse.ci.",
+    "metric_to_check": "concourse.ci.scheduling_full_duration",
+    "creates_events": false,
+}

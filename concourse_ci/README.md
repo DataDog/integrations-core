@@ -5,7 +5,7 @@ Capture metrics emitted by concourse-ci.
 ## Setup
 
 Concourse-ci comes bundled with a Datadog metrics emitter. Configure the `Datadog Metric Emitter` by
-setting the Datadog agent host, port and set the prefix to `concourse`.
+setting the Datadog agent host, port and set the prefix to `concourse.ci.`.
 
 ```
 Metric Emitter (Datadog):
