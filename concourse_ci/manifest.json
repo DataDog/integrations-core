@@ -1,6 +1,20 @@
 {
+    "categories": [
+        "Collaboration"
+    ],
+    "guid": "054cc9fb-01c4-4f05-98b5-fae828746787",
+    "is_public": true,
+    "maintainer": "help@datadoghq.com",
+    "public_title": "Datadog-Concourse-ci Integration",
+    "support": "core",
+    "supported_os": [
+        "linux",
+        "mac_os",
+        "windows"
+      ],
+    "type": "check",
     "manifest_version": "1.0.0",
-    "name": "concourse-ci",
+    "name": "concourse_ci",
     "display_name": "Concourse ci",
     "short_description": "Collect metrics emitted from Concourse-ci.",
     "metric_prefix": "concourse.ci.",
