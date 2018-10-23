@@ -78,12 +78,11 @@ def verify(fix, include_extras):
 
             try:
                 decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
-            except JSONDecodeError:
-                file_failures += 1
-                display_queue.append((echo_failure, '  invalid json: {}'.format(manifest_file)))
-
-                for display, message in display_queue:
-                    display(message)
+            except JSONDecodeError as e:
+                failed_checks += 1
+                echo_info("{}/manifest.json... ".format(check_name), nl=False)
+                echo_failure("FAILED")
+                echo_failure('  invalid json: {}'.format(e))
                 continue
 
             # attributes are valid
