@@ -71,8 +71,13 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
 
 
 def get_available_tox_envs(check, sort=False, e2e_only=False):
+    if e2e_only:
+        tox_command = 'tox --listenvs-all'
+    else:
+        tox_command = 'tox --listenvs'
+
     with chdir(path_join(get_root(), check)):
-        env_list = run_command('tox --listenvs-all', capture='out').stdout
+        env_list = run_command(tox_command, capture='out').stdout
 
     env_list = [e.strip() for e in env_list.splitlines()]
 
