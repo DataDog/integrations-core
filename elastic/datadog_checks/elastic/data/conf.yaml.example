@@ -15,7 +15,12 @@ instances:
   # This parameter was also called `is_external` and you can still use it but it
   # will be removed in version 6.
   #
-  # If you enable the "index_stats" flag, you will collect metrics for individual 
+  # If each machine only runs a single Elasticsearch node per cluster, you will
+  # want to set each Elasticsearch `node.name` to the machine hostname. You may
+  # then set `node_name_as_host` to `true` to avoid duplicate hostnames. See:
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/node.name.html
+  #
+  # If you enable the "index_stats" flag, you will collect metrics for individual
   # indices.
   #
   # If you enable the "pshard_stats" flag, statistics over primary shards
@@ -39,6 +44,7 @@ instances:
   - url: http://localhost:9200
     # username: username
     # password: password
+    # node_name_as_host: false
     # cluster_stats: false
     # index_stats: false
     # pshard_stats: false
@@ -51,7 +57,7 @@ instances:
     # tags:
     #   - 'tag1:key1'
     #   - 'tag2:key2'
-    
+
 ## Log Section (Available for Agent >=6.0)
 
 #logs:
@@ -62,7 +68,7 @@ instances:
     #   source : (mandatory) attribute that defines which integration is sending the logs
     #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
     #   tags: (optional) add tags to each logs collected
-    
+
     # - type: file
     #   path: /var/log/elasticsearch/*.log
     #   source: elasticsearch

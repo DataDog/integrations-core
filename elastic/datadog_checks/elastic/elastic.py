@@ -265,7 +265,6 @@ class ESCheck(AgentCheck):
             self._process_metric(node_data, metric, *desc, tags=config.tags)
 
     def _process_stats_data(self, data, stats_metrics, config):
-        cluster_stats = config.cluster_stats
         for node_data in itervalues(data.get('nodes', {})):
             metric_hostname = None
             metrics_tags = list(config.tags)
@@ -278,7 +277,10 @@ class ESCheck(AgentCheck):
                 )
 
             # Resolve the node's hostname
-            if cluster_stats:
+            if config.node_name_as_host:
+                if node_name:
+                    metric_hostname = node_name
+            elif config.cluster_stats:
                 for k in ['hostname', 'host']:
                     if k in node_data:
                         metric_hostname = node_data[k]
