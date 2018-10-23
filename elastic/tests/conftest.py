@@ -57,6 +57,17 @@ def instance():
     }
 
 
+@pytest.fixture(scope='session')
+def instance_normalize_hostname():
+    return {
+        'url': URL,
+        'username': USER,
+        'password': PASSWORD,
+        'tags': CUSTOM_TAGS,
+        'node_name_as_host': True,
+    }
+
+
 def _cluster_tags():
     tags = [
         'url:{}'.format(URL),
@@ -74,4 +85,6 @@ def cluster_tags():
 
 @pytest.fixture
 def node_tags():
-    return _cluster_tags().append('node_name:test-node')
+    tags = _cluster_tags()
+    tags.append('node_name:test-node')
+    return tags
