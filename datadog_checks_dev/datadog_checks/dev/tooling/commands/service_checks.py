@@ -39,7 +39,6 @@ def service_checks():
 def verify():
     """Validate all `service_checks.json` files."""
 
-    task_failed = False
     root = get_root()
     echo_info("Validating all service_checks.json files...")
     failed_checks = 0
@@ -135,7 +134,6 @@ def verify():
                     display_queue.append((echo_failure, '  required non empty list: statuses'))
 
             if file_failed:
-                task_failed = True
                 failed_checks += 1
                 # Display detailed info if file invalid
                 echo_info("{}/service_checks.json... ".format(check_name), nl=False)
@@ -145,7 +143,8 @@ def verify():
             else:
                 ok_checks += 1
 
-    echo_info("{} valid files and {} invalid".format(ok_checks, failed_checks))
-
-    if task_failed:
+    if ok_checks:
+        echo_success("{} valid files".format(ok_checks))
+    if failed_checks:
+        echo_failure("{} invalid files".format(failed_checks))
         abort()
