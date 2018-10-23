@@ -34,7 +34,7 @@ def start(ctx, check, env, agent, dev):
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
 
-    envs = get_available_tox_envs(check, test_only=True)
+    envs = get_available_tox_envs(check, e2e_only=True)
 
     if env not in envs:
         echo_failure('`{}` is not an available environment.'.format(env))
