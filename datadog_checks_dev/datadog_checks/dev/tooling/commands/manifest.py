@@ -60,7 +60,6 @@ def manifest():
 def verify(fix, include_extras):
     """Validate all `manifest.json` files."""
     all_guids = {}
-    task_failed = False
 
     root = get_root()
     root_name = basepath(get_root())
@@ -363,7 +362,6 @@ def verify(fix, include_extras):
                         display_queue.append((echo_failure, output))
 
             if file_failures > 0:
-                task_failed = True
                 failed_checks += 1
                 # Display detailed info if file invalid
                 echo_info("{}/manifest.json... ".format(check_name), nl=False)
@@ -384,9 +382,12 @@ def verify(fix, include_extras):
                     for display_func, message in display_queue:
                         display_func(message)
 
-    echo_info("{} valid files, {} fixed and {} invalid".format(ok_checks, fixed_checks, failed_checks))
-
-    if task_failed:
+    if ok_checks:
+        echo_success("{} valid files".format(ok_checks))
+    if fixed_checks:
+        echo_info("{} fixed files".format(fixed_checks))
+    if failed_checks:
+        echo_failure("{} invalid files".format(failed_checks))
         abort()
 
 
