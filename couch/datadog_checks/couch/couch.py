@@ -204,7 +204,7 @@ class CouchDB2:
         for key, value in data['sizes'].items():
             self.gauge("couchdb.by_db.{0}_size".format(key), value, tags)
 
-        for key in ['purge_seq', 'doc_del_count', 'doc_count']:
+        for key in ['doc_del_count', 'doc_count']:
             self.gauge("couchdb.by_db.{0}".format(key), data[key], tags)
 
     def _build_dd_metrics(self, info, tags):
