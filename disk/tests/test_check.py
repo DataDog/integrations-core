@@ -87,6 +87,7 @@ def aggregator():
     aggregator.reset()
     return aggregator
 
+
 @pytest.fixture(scope="module")
 def psutil_mocks():
     p1 = mock.patch('psutil.disk_partitions', return_value=[MockPart()],
@@ -104,6 +105,7 @@ def psutil_mocks():
     p3.stop()
     p4.stop()
 
+
 def test_bad_config():
     """
     Check creation will fail if more than one `instance` is passed to the
@@ -111,6 +113,7 @@ def test_bad_config():
     """
     with pytest.raises(Exception):
         Disk('disk', None, {}, [{}, {}])
+
 
 def test_default_options():
     check = Disk('disk', None, {}, [{}])
@@ -124,6 +127,7 @@ def test_default_options():
     assert check._device_tag_re == []
     assert check._service_check_rw is False
 
+
 def test_disk_check(aggregator):
     """
     Basic check to see if all metrics are there
@@ -134,6 +138,7 @@ def test_disk_check(aggregator):
         aggregator.assert_metric(name, tags=[])
 
     assert aggregator.metrics_asserted_pct == 100.0
+
 
 def test__exclude_disk_psutil():
     """
@@ -177,6 +182,7 @@ def test__exclude_disk_psutil():
     assert c._exclude_disk_psutil(MockPart(device='sdz', mountpoint='/run')) is True
     assert c._exclude_disk_psutil(MockPart(device='sdz', mountpoint='/run/shm')) is False
 
+
 def test_device_exclusion_logic_no_name():
     """
     Same as above but with default configuration values and device='' to expose a bug in #2359
@@ -190,6 +196,7 @@ def test_device_exclusion_logic_no_name():
 
     assert c._exclude_disk_psutil(MockPart(device='', mountpoint='/run')) is True
     assert c._exclude_disk_psutil(MockPart(device='', mountpoint='/run/shm')) is False
+
 
 def test_psutil(aggregator, psutil_mocks):
     """
@@ -210,6 +217,7 @@ def test_psutil(aggregator, psutil_mocks):
 
     assert aggregator.metrics_asserted_pct == 100.0
 
+
 def test_use_mount(aggregator, psutil_mocks):
     """
     Same as above, using mount to tag
@@ -226,6 +234,7 @@ def test_use_mount(aggregator, psutil_mocks):
 
     assert aggregator.metrics_asserted_pct == 100.0
 
+
 def test_psutil_rw(aggregator, psutil_mocks):
     """
     Check for 'ro' option in the mounts
@@ -236,6 +245,7 @@ def test_psutil_rw(aggregator, psutil_mocks):
 
     aggregator.assert_service_check('disk.read_write', status=Disk.CRITICAL)
 
+
 def mock_df_output(fname):
     """
     Load fixtures from tests/fixtures/ folder and return a tuple matching the
@@ -243,6 +253,7 @@ def mock_df_output(fname):
     """
     with open(os.path.join(HERE, 'fixtures', fname)) as f:
         return f.read(), '', ''
+
 
 def test_no_psutil_debian(aggregator):
     p1 = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__="statvfs")
@@ -262,6 +273,7 @@ def test_no_psutil_debian(aggregator):
         aggregator.assert_metric(name, tags=['device:udev'])
     assert aggregator.metrics_asserted_pct == 100.0
 
+
 def test_no_psutil_freebsd(aggregator):
     p1 = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__="statvfs")
     p2 = mock.patch('datadog_checks.disk.disk.get_subprocess_output',
@@ -277,6 +289,7 @@ def test_no_psutil_freebsd(aggregator):
     for name, value in GAUGES_VALUES.iteritems():
         aggregator.assert_metric(name, value=value, tags=['device:zroot'])
     assert aggregator.metrics_asserted_pct == 100.0
+
 
 def test_no_psutil_centos(aggregator):
     p1 = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__="statvfs")
@@ -295,6 +308,7 @@ def test_no_psutil_centos(aggregator):
             aggregator.assert_metric(name, tags=['device:{}'.format(device)])
     assert aggregator.metrics_asserted_pct == 100.0
 
+
 def test_legacy_option():
     """
     Ensure check option overrides datadog.conf
@@ -305,6 +319,7 @@ def test_legacy_option():
     c = Disk('disk', None, {'use_mount': 'yes'}, [{'use_mount': 'no'}])
     assert c._use_mount is False
 
+
 def test_ignore_empty_regex():
     """
     Ignore empty regex as they match all strings
@@ -313,8 +328,9 @@ def test_ignore_empty_regex():
     check = Disk('disk', None, {'device_blacklist_re': ''}, [{}])
     assert check._excluded_disk_re == re.compile('^$')
 
+
 def test_device_tagging(aggregator, psutil_mocks):
-    instances = [{'use_mount': 'no', 'device_tag_re': {"/dev/sda.*": "type:dev,tag:two"}, 'tags':["optional:tags1"]}]
+    instances = [{'use_mount': 'no', 'device_tag_re': {"/dev/sda.*": "type:dev,tag:two"}, 'tags': ["optional:tags1"]}]
     c = Disk('disk', None, {}, instances)
     c.check(instances[0])
 

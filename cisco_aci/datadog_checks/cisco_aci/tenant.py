@@ -145,7 +145,7 @@ class Tenant:
         for event in event_list:
             ev = event.get('eventRecord', {}).get('attributes', {})
             created = ev.get('created')
-            create_date = re.search('\d{4}-\d{2}-\d{1,2}T\d{2}:\d{2}:\d{2}', created).group(0)
+            create_date = re.search(r'\d{4}-\d{2}-\d{1,2}T\d{2}:\d{2}:\d{2}', created).group(0)
 
             self.log.debug("ev time: {}".format(created))
             strptime = datetime.datetime.strptime(create_date, '%Y-%m-%dT%H:%M:%S')
