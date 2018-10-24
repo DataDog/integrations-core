@@ -238,7 +238,7 @@ def test_alias_tag_path(go_expvar_mock, check, aggregator):
         "expvar_url": common.URL_WITH_PATH,
         "metrics": [
             {
-                "path": "array/\d+/key",
+                "path": r"array/\d+/key",
                 "alias": "array.dict.key",
                 "type": "gauge",
             }

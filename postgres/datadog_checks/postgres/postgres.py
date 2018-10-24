@@ -403,7 +403,7 @@ GROUP BY datid, datname
                 version = [int(part) for part in version_parts]
             except Exception:
                 # Postgres might be in development, with format \d+[beta|rc]\d+
-                match = re.match('(\d+)([a-zA-Z]+)(\d+)', version)
+                match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', version)
                 if match:
                     version_parts = list(match.groups())
 

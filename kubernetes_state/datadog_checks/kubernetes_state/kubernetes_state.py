@@ -389,9 +389,9 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def _trim_job_tag(self, name):
         """
-        Trims suffix of job names if they match -(\d{4,10}$)
+        Trims suffix of job names if they match -(\\d{4,10}$)
         """
-        pattern = "(-\d{4,10}$)"
+        pattern = r"(-\d{4,10}$)"
         return re.sub(pattern, '', name)
 
     # Labels attached: namespace, pod

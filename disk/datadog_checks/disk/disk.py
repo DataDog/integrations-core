@@ -136,14 +136,13 @@ class Disk(AgentCheck):
                     self.service_check(
                         'disk.read_write',
                         AgentCheck.OK if rwro[0] == 'rw' else AgentCheck.CRITICAL,
-                        tags=tags+['device:%s' % (device_name)]
+                        tags=tags + ['device:{}'.format(device_name)]
                     )
                 else:
                     self.service_check(
                         'disk.read_write', AgentCheck.UNKNOWN,
-                        tags=tags+['device:%s' % (device_name)]
+                        tags=tags + ['device:{}'.format(device_name)]
                     )
-
 
         self.collect_latency_metrics()
 
@@ -235,9 +234,9 @@ class Disk(AgentCheck):
                 read_time_pct = disk.read_time * 100.0 / 1000.0
                 write_time_pct = disk.write_time * 100.0 / 1000.0
                 self.rate(self.METRIC_DISK.format('read_time_pct'),
-                      read_time_pct, device_name=disk_name, tags=self._custom_tags)
+                          read_time_pct, device_name=disk_name, tags=self._custom_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'),
-                      write_time_pct, device_name=disk_name, tags=self._custom_tags)
+                          write_time_pct, device_name=disk_name, tags=self._custom_tags)
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters

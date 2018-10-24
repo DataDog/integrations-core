@@ -774,7 +774,7 @@ class MySql(AgentCheck):
             pid = self._get_server_pid(db)
 
         if pid:
-            self.log.debug("System metrics for mysql w\ pid: %s" % pid)
+            self.log.debug("System metrics for mysql w/ pid: %s" % pid)
             # At last, get mysql cpu data out of psutil or procfs
 
             try:

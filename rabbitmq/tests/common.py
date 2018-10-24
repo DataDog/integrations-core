@@ -29,8 +29,8 @@ CONFIG_REGEX = {
     'rabbitmq_api_url': URL,
     'rabbitmq_user': 'guest',
     'rabbitmq_pass': 'guest',
-    'queues_regexes': ['test\d+'],
-    'exchanges_regexes': ['test\d+']
+    'queues_regexes': [r'test\d+'],
+    'exchanges_regexes': [r'test\d+']
 
 }
 
@@ -46,8 +46,8 @@ CONFIG_WITH_FAMILY = {
     'rabbitmq_user': 'guest',
     'rabbitmq_pass': 'guest',
     'tag_families': True,
-    'queues_regexes': ['(test)\d+'],
-    'exchanges_regexes': ['(test)\d+']
+    'queues_regexes': [r'(test)\d+'],
+    'exchanges_regexes': [r'(test)\d+']
 }
 
 CONFIG_DEFAULT_VHOSTS = {

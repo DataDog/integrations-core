@@ -432,7 +432,7 @@ class HAProxy(AgentCheck):
         """
         Use a named regexp on the current service_name to create extra tags
         Example HAProxy service name: be_edge_http_sre-prod_elk
-        Example named regexp: be_edge_http_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)
+        Example named regexp: be_edge_http_(?P<team>[a-z]+)\\-(?P<env>[a-z]+)_(?P<app>.*)
         Resulting tags: ['team:sre','env:prod','app:elk']
         """
         if not tags_regex or not service_name:
