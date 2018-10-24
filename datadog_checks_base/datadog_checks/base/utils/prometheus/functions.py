@@ -13,8 +13,8 @@ def parse_metric_family(buf):
     Parse the binary buffer in input, searching for Prometheus messages
     of type MetricFamily [0] delimited by a varint32 [1].
 
-    [0] https://github.com/prometheus/client_model/blob/086fe7ca28bde6cec2acd5223423c1475a362858/metrics.proto#L76-%20%20L81
-    [1] https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/AbstractMessageLite#writeDelimitedTo(java.io.OutputStream)
+    [0] https://github.com/prometheus/client_model/blob/086fe7ca28bde6cec2acd5223423c1475a362858/metrics.proto#L76-%20%20L81  # noqa: E501
+    [1] https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/AbstractMessageLite#writeDelimitedTo(java.io.OutputStream)  # noqa: E501
     """
     n = 0
     while n < len(buf):

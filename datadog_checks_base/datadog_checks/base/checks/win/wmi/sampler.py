@@ -2,7 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# pylint: disable=E0401
+# flake8: noqa
+
 """
 A lightweight Python WMI module wrapper built on top of `pywin32` and `win32com` extensions.
 

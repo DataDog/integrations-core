@@ -114,7 +114,7 @@ class PDHBaseCheck(AgentCheck):
                             precision=precision
                         )
                     except Exception:
-                        self.log.warning("Couldn't create counter %s\%s" % (counterset, counter_name))
+                        self.log.warning("Couldn't create counter %s\\%s" % (counterset, counter_name))
                         self.log.warning("Datadog Agent will not report %s" % dd_name)
                         continue
 
@@ -147,7 +147,7 @@ class PDHBaseCheck(AgentCheck):
                                 precision=precision
                             )
                         except Exception:
-                            self.log.warning("Couldn't create counter %s\%s" % (counterset, counter_name))
+                            self.log.warning("Couldn't create counter %s\\%s" % (counterset, counter_name))
                             self.log.warning("Datadog Agent will not report %s" % dd_name)
                             continue
 
