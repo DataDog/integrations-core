@@ -30,7 +30,7 @@ def ping_cluster():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
+def dd_environment(instance_single_node_install):
     """
     Start a cluster with one master, one replica, and one unhealthy replica.
     """
@@ -44,13 +44,26 @@ def dd_environment(instance):
         conditions=[WaitFor(ping_cluster)],
         env_vars=env_vars,
     ):
-        yield instance
+        yield instance_single_node_install
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance():
     return {
         'url': common.URL,
+        'catalog_checks': True,
+        'network_latency_checks': True,
+        'new_leader_checks': True,
+        'self_leader_check': True,
+        'acl_token': 'token',
+    }
+
+
+@pytest.fixture(scope='session')
+def instance_single_node_install():
+    return {
+        'url': common.URL,
+        'single_node_install': True,
         'catalog_checks': True,
         'network_latency_checks': True,
         'new_leader_checks': True,
