@@ -459,7 +459,7 @@ Find below the description for each attributes-each one of them is mandatory-of 
 | `check`         | Name of the Service Check, it must be unique.                                                                            |
 | `statuses`      | List of different status of the check, to choose among `ok`, `warning`, and `critical`. `unknown` is also a possibility. |
 | `groups`        | [Tags][14] sent with the Service Check.                                                                                  |
-| `name`          | Displayed name of the Service Check. The Displayed name must be unique and self explanatory.                             |
+| `name`          | Displayed name of the Service Check. The displayed name must be unique and self explanatory.                             |
 | `description`   | Description of the Service Check                                                                                         |
 
 ### Building
