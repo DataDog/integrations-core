@@ -202,7 +202,6 @@ couchdb.fabric.doc_update.write_quorum_errors,gauge,,error,,number of write quor
 couchdb.by_db.file_size,gauge,,byte,,size of the database file on disk,0,couchdb2,
 couchdb.by_db.external_size,gauge,,byte,,size of the database uncompressed,0,couchdb2,
 couchdb.by_db.active_size,gauge,,byte,,size of live data,0,couchdb2,
-couchdb.by_db.purge_seq,gauge,,operation,,number of purge operations on the databse,0,couchdb2,
 couchdb.by_db.doc_del_count,gauge,,document,,number of deleted documents,0,couchd2,
 couchdb.by_db.doc_count,gauge,,document,,number of documents,0,couchdb2,
 couchdb.erlang.message_queues.size,gauge,,,,,0,couchdb2,
