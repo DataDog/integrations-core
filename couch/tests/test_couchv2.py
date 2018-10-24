@@ -472,7 +472,7 @@ def test_view_compaction_metrics(aggregator, check, gauges, couch_cluster):
                 check.check(config)
 
             for m_name in aggregator._metrics:
-                if re.search('view_compaction\.progress', m_name) is not None:
+                if re.search(r'view_compaction\.progress', m_name) is not None:
                     metric_found = True
                     for gauge in gauges["view_compaction_tasks_gauges"]:
                         aggregator.assert_metric(gauge)
