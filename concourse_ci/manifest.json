@@ -5,18 +5,18 @@
     "guid": "054cc9fb-01c4-4f05-98b5-fae828746787",
     "is_public": true,
     "maintainer": "help@datadoghq.com",
-    "public_title": "Datadog-Concourse-ci Integration",
+    "public_title": "Datadog-Concourse-CI Integration",
     "support": "core",
     "supported_os": [
         "linux",
         "mac_os",
         "windows"
       ],
-    "type": "check",
-    "manifest_version": "1.0.0",
+    "type": "dogstatsd",
+    "manifest_version": "1.0.1",
     "name": "concourse_ci",
-    "display_name": "Concourse ci",
-    "short_description": "Collect metrics emitted from Concourse-ci.",
+    "display_name": "Concourse CI",
+    "short_description": "Collect metrics emitted from Concourse CI.",
     "metric_prefix": "concourse.ci.",
     "metric_to_check": "concourse.ci.scheduling_full_duration",
     "creates_events": false
