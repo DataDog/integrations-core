@@ -12,8 +12,8 @@
         "mac_os",
         "windows"
       ],
-    "type": "dogstatsd",
-    "manifest_version": "1.0.1",
+    "type": "statsd",
+    "manifest_version": "1.0.2",
     "name": "concourse_ci",
     "display_name": "Concourse CI",
     "short_description": "Collect metrics emitted from Concourse CI.",

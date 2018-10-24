@@ -2,6 +2,6 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 concourse.ci.scheduling_full_duration,gauge,,millisecond,,The time taken to schedule an entire pipeline including the time taken to load the version information from the database and calculate the latest valid versions for each job,0,concourse_ci,
 concourse.ci.scheduling_loading_versions_duration,gauge,,millisecond,,The time taken to load the version information from the database,0,concourse_ci,
 concourse.ci.scheduling_job_duration,gauge,,millisecond,,The time taken to calculate the set of valid input versions when scheduling a job,0,concourse_ci,
-concourse.ci.worker_containers,gauge,,containers,,The number of containers that are currently running on workers,0,concourse_ci,
-concourse.ci.worker_volumes,gauge,,volumes,,The number of volumes that are currently present on workers,0,concourse_ci,
+concourse.ci.worker_containers,gauge,,container,,The number of containers that are currently running on workers,0,concourse_ci,
+concourse.ci.worker_volumes,gauge,,,,The number of volumes that are currently present on workers,0,concourse_ci,
 concourse.ci.http_response_time,gauge,,millisecond,,The duration for each request to an ATC,0,concourse_ci,
