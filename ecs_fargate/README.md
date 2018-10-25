@@ -61,40 +61,11 @@ This task launches the Datadog Agent container. Configure the task using the [AW
 
 ##### AWS CLI
 
-1. Download the following as json:
-
-```
-{
-    "family": "<TASK_NAME>",
-    "networkMode": "awsvpc",
-    "containerDefinitions": [
-        {
-            "name": "datadog-agent",
-            "image": "datadog/agent:latest",
-            "essential": true,
-            "environment": [
-                {
-                    "name": "DD_API_KEY",
-                    "value": "<YOUR_API_KEY>"
-                },
-                {
-                    "name": "ECS_FARGATE",
-                    "value": "true"
-                }
-            ]
-        }
-    ],
-    "requiresCompatibilities": [
-        "FARGATE"
-    ],
-    "cpu": "256",
-    "memory": "512"
-}
-```
+1. Download [datadog-agent-ecs-fargate.json][18].
 2. Update the json with a **TASK_NAME** and your [Datadog API Key][13].
 3. Execute the following command to register the ECS task definition:
 ```
-aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>.json
+aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
 ```
 
 ##### Web UI
@@ -137,7 +108,7 @@ aws ecs create-cluster --cluster-name "<CLUSTER_NAME>"
 aws ecs run-task --cluster <CLUSTER_NAME> \
 --network-configuration "awsvpcConfiguration={subnets=["<PRIVATE_SUBNET>"],securityGroups=["<SECURITY_GROUP>"]}" \
 --task-definition arn:aws:ecs:us-east-1:<AWS_ACCOUNT_NUMBER>:task-definition/<TASK_NAME>:1 \
---region us-east-1 --launch-type FARGATE --platform-version 1.1.0
+--region <AWS_REGION> --launch-type FARGATE --platform-version 1.1.0
 ```
 
 ##### Web UI
@@ -174,7 +145,8 @@ Need help? Contact [Datadog Support][3].
 
 ## Further Reading
 
-* [Monitor AWS Fargate applications with Datadog][4]
+* Blog post: [Monitor AWS Fargate applications with Datadog][4]
+* FAQ: [Integration Setup for ECS Fargate][19]
 
 
 [1]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
@@ -194,3 +166,5 @@ Need help? Contact [Datadog Support][3].
 [15]: https://docs.datadoghq.com/integrations/amazon_web_services/#installation
 [16]: https://docs.aws.amazon.com/IAM/latest/UserGuide/list_ecs.html
 [17]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html#service_scheduler_replica
+[18]: https://docs.datadoghq.com/json/datadog-agent-ecs-fargate.json
+[19]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/
