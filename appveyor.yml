@@ -12,10 +12,6 @@ services:
   # a time. See https://www.appveyor.com/docs/services-databases/ for details.
   - mssql2008r2sp2
 
-branches:
-  only:
-    - master
-
 environment:
   PYTHON2: C:\Python27-x64
   PYTHON3: C:\Python36-x64
