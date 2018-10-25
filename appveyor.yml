@@ -2,7 +2,6 @@ version: '{branch}.{build}'
 clone_depth: 3
 build: off
 test: off
-skip_branch_with_pr: true
 cache:
   - '%LOCALAPPDATA%\pip\Cache'
 services:
@@ -11,6 +10,11 @@ services:
   # against multiple versions is letting the test code to start/stop the corresponding services so that they run one at
   # a time. See https://www.appveyor.com/docs/services-databases/ for details.
   - mssql2008r2sp2
+
+skip_tags: true
+branches:
+  only:
+    - master
 
 environment:
   PYTHON2: C:\Python27-x64
