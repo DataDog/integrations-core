@@ -12,7 +12,7 @@
         "mac_os",
         "windows"
       ],
-    "type": "statsd",
+    "type": "check",
     "manifest_version": "1.0.2",
     "name": "concourse_ci",
     "display_name": "Concourse CI",
