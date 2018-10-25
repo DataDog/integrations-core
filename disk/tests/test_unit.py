@@ -142,6 +142,18 @@ def test_psutil(aggregator, gauge_metrics, rate_metrics):
 
 
 @pytest.mark.usefixtures('psutil_mocks')
+def test_psutil_rw(aggregator):
+    """
+    Check for 'ro' option in the mounts
+    """
+    instance = {'service_check_rw': 'yes'}
+    c = Disk('disk', None, {}, [instance])
+    c.check(instance)
+
+    aggregator.assert_service_check('disk.read_write', status=Disk.CRITICAL)
+
+
+@pytest.mark.usefixtures('psutil_mocks')
 def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics):
     """
     Same as above, using mount to tag
@@ -156,18 +168,6 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
         aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
 
     aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.usefixtures('psutil_mocks')
-def test_psutil_rw(aggregator):
-    """
-    Check for 'ro' option in the mounts
-    """
-    instance = {'service_check_rw': 'yes'}
-    c = Disk('disk', None, {}, [instance])
-    c.check(instance)
-
-    aggregator.assert_service_check('disk.read_write', status=Disk.CRITICAL)
 
 
 @pytest.mark.usefixtures('psutil_mocks')
