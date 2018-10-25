@@ -136,7 +136,13 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
                         abort('\nFailed!', code=result.code)
 
                     fix_coverage_report(check, 'coverage.xml')
-                    run_command('codecov -X gcov -F {} -f coverage.xml'.format(check))
+                    run_command([
+                        'codecov',
+                        '-X', 'gcov',
+                        '--root', root,
+                        '-F', check,
+                        '-f', 'coverage.xml'
+                    ])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')
