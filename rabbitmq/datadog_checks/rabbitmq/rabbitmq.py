@@ -8,11 +8,13 @@ import re
 import time
 import urllib
 import urlparse
+import warnings
 from collections import defaultdict
 
 # 3p
 import requests
 from requests.exceptions import RequestException
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 # project
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -213,8 +215,11 @@ class RabbitMQ(AgentCheck):
             base_url = 'http://' + base_url
             parsed_url = urlparse.urlparse(base_url)
 
+        suppress_warning = False
         ssl_verify = is_affirmative(instance.get('ssl_verify', True))
         if not ssl_verify and parsed_url.scheme == 'https':
+            # Only allow suppressing the warning if not ssl_verify
+            suppress_warning = instance.get('ignore_ssl_warning', False)
             self.log.warning('Skipping SSL cert validation for %s based on configuration.' % (base_url))
 
         # Limit of queues/nodes to collect metrics from
@@ -248,7 +253,7 @@ class RabbitMQ(AgentCheck):
 
         auth = (username, password)
 
-        return base_url, max_detailed, specified, auth, ssl_verify, custom_tags
+        return base_url, max_detailed, specified, auth, ssl_verify, custom_tags, suppress_warning
 
     def _get_vhosts(self, instance, base_url, auth=None, ssl_verify=True):
         vhosts = instance.get('vhosts')
@@ -263,7 +268,7 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, auth, ssl_verify, custom_tags = self._get_config(instance)
+        base_url, max_detailed, specified, auth, ssl_verify, custom_tags, suppress_warning = self._get_config(instance)
         try:
             vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
             self.cached_vhosts[base_url] = vhosts
@@ -272,21 +277,26 @@ class RabbitMQ(AgentCheck):
             if self._limit_vhosts(instance):
                 limit_vhosts = vhosts
 
-            # Generate metrics from the status API.
-            self.get_stats(instance, base_url, EXCHANGE_TYPE, max_detailed[EXCHANGE_TYPE], specified[EXCHANGE_TYPE],
-                           limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
-            self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE],
-                           limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
-            self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE],
-                           limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
-            self.get_overview_stats(instance, base_url, custom_tags, auth=auth, ssl_verify=ssl_verify)
+            with warnings.catch_warnings():
+                # Suppress warnings from urllib3 only if ssl_verify is set to False and ssl_warning is set to False
+                if suppress_warning:
+                    warnings.simplefilter('ignore', InsecureRequestWarning)
 
-            self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags,
-                                      auth=auth, ssl_verify=ssl_verify)
+                # Generate metrics from the status API.
+                self.get_stats(instance, base_url, EXCHANGE_TYPE, max_detailed[EXCHANGE_TYPE], specified[EXCHANGE_TYPE],
+                               limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
+                self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE],
+                               limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
+                self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE],
+                               limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
+                self.get_overview_stats(instance, base_url, custom_tags, auth=auth, ssl_verify=ssl_verify)
 
-            # Generate a service check from the aliveness API. In the case of an invalid response
-            # code or unparseable JSON this check will send no data.
-            self._check_aliveness(instance, base_url, vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
+                self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags,
+                                          auth=auth, ssl_verify=ssl_verify)
+
+                # Generate a service check from the aliveness API. In the case of an invalid response
+                # code or unparseable JSON this check will send no data.
+                self._check_aliveness(instance, base_url, vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
 
             # Generate a service check for the service status.
             self.service_check('rabbitmq.status', AgentCheck.OK, custom_tags)
