@@ -11,6 +11,7 @@ services:
   # a time. See https://www.appveyor.com/docs/services-databases/ for details.
   - mssql2008r2sp2
 
+skip_branch_with_pr: true
 skip_tags: true
 branches:
   only:
