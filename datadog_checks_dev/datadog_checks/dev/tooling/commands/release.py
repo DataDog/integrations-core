@@ -891,7 +891,7 @@ def agent_changelog(since, to, output, force):
         catalog_to = parse_agent_req_file(contents_to)
 
         version_changes = OrderedDict()
-        changes_per_agent[agent_tags[i]] = version_changes
+        changes_per_agent[agent_tags[i-1]] = version_changes
 
         for name, ver in catalog_to.iteritems():
             old_ver = catalog_from.get(name, "")
