@@ -15,7 +15,7 @@ from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
 from pyVmomi import vmodl  # pylint: disable=E0611
 
-from datadog_checks.config import _is_affirmative
+from datadog_checks.config import is_affirmative
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
@@ -319,7 +319,7 @@ class VSphereCheck(AgentCheck):
                 self.log.warning("Unable to extract host tags for vSphere instance: {}".format(i_key))
                 continue
 
-            for name, mor in self.mor_cache.mors(i_key):
+            for _, mor in self.mor_cache.mors(i_key):
                 # Note: some mors have a None hostname
                 hostname = mor.get('hostname')
                 if hostname:
@@ -382,6 +382,7 @@ class VSphereCheck(AgentCheck):
             if resource == vim.VirtualMachine:
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
+                property_spec.pathSet.append("guest.hostName")
             property_specs.append(property_spec)
 
         # Create our filter spec from the above specs
@@ -418,7 +419,7 @@ class VSphereCheck(AgentCheck):
 
         return mor_attrs
 
-    def _get_all_objs(self, server_instance, regexes=None, include_only_marked=False, tags=None):
+    def _get_all_objs(self, server_instance, regexes=None, include_only_marked=False, tags=None, use_guest_hostname=False):
         """
         Explore vCenter infrastructure to discover hosts, virtual machines, etc.
         and compute their associated tags.
@@ -459,7 +460,10 @@ class VSphereCheck(AgentCheck):
                 not self._is_excluded(obj, properties, regexes, include_only_marked) and
                 any(isinstance(obj, vimtype) for vimtype in RESOURCE_TYPE_METRICS)
             ):
-                hostname = properties.get("name", "unknown")
+                if use_guest_hostname:
+                    hostname = properties.get("guest.hostName", properties.get("name", "unknown"))
+                else:
+                    hostname = properties.get("name", "unknown")
                 if properties.get("parent"):
                     instance_tags += self._get_parent_tags(obj, all_objects)
 
@@ -514,7 +518,9 @@ class VSphereCheck(AgentCheck):
         """
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
-        all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags)
+        use_guest_hostname = is_affirmative(instance.get("use_guest_hostname", False))
+        all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags,
+                                      use_guest_hostname=use_guest_hostname)
         self.mor_objects_queue.fill(i_key, dict(all_objs))
 
     @staticmethod
@@ -576,7 +582,7 @@ class VSphereCheck(AgentCheck):
             'host_include': instance.get('host_include_only_regex'),
             'vm_include': instance.get('vm_include_only_regex')
         }
-        include_only_marked = _is_affirmative(instance.get('include_only_marked', False))
+        include_only_marked = is_affirmative(instance.get('include_only_marked', False))
 
         # Discover hosts and virtual machines
         self.pool.apply_async(
@@ -834,7 +840,7 @@ class VSphereCheck(AgentCheck):
         batch_size = self.batch_morlist_size or n_mors
         for batch in self.mor_cache.mors_batch(i_key, batch_size):
             query_specs = []
-            for mor_name, mor in batch.iteritems():
+            for _, mor in batch.iteritems():
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
                 if mor['mor_type'] not in REALTIME_RESOURCES and ('metrics' not in mor or not mor['metrics']):

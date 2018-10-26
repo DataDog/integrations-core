@@ -41,7 +41,7 @@ init_config:
 ## vCenter instance you want to connect to and fetch metrics from
 
 instances:
-  
+
   ## @param name - string - required
   ## name must be a unique key representing your vCenter instance
   #
@@ -52,18 +52,18 @@ instances:
   #
     host: <HOSTNAME>
 
-  ## @param username - string - required 
-  ## Enter the username of the read-only credentials 
+  ## @param username - string - required
+  ## Enter the username of the read-only credentials
   ## to connect to vCenter
   ## see https://app.datadoghq.com/account/settings#integrations/vsphere
   #
     username: datadog-readonly@vsphere.local
 
-  ## @param password - string - required 
-  ## Enter the password of the read-only credentials 
+  ## @param password - string - required
+  ## Enter the password of the read-only credentials
   ## to connect to vCenter
   ## see https://app.datadoghq.com/account/settings#integrations/vsphere
-  # 
+  #
     password: <PASSWORD>
 
   ## @param ssl_verify - boolean - optional - default: true
@@ -93,7 +93,7 @@ instances:
   ## @param include_only_marked - boolean - optional - default: false
   ## Set to true if you'd like to only collect metrics on vSphere VMs which
   ## are marked by a custom field with the value 'DatadogMonitored'
-  ## To set this custom field with PowerCLI, use the follow command: 
+  ## To set this custom field with PowerCLI, use the follow command:
   ##   Get-VM <MyVMName> | Set-CustomField -Name "DatadogMonitored" -Value "DatadogMonitored"
   #
   #  include_only_marked: false
@@ -110,10 +110,19 @@ instances:
   ## 1: Only basic metrics - 4: every metric available.
   ## Warning: Depending on the size of the vSphere environment, metric collection can be slow,
   ## very CPU intensive and put pressure on the vCenter Server
-  # 
+  #
   #  collection_level: 1
 
-  ## @param event_config - dictionary - optional 
+  ## @param use_guest_hostname - boolean - optional - default: false
+  ## If true, the check will use the guest hostname for VMs instead of the VM name
+  ## This requires the VM to have VM tools installed in it. If the guest hostname is
+  ## not available, it will fallback to the VM name.
+  ## Use this if you install the agent in VMs so that the hosts are not duplicated
+  ## in the web application UI.
+  #
+  #  use_guest_hostname: false
+
+  ## @param event_config - dictionary - optional
   ## Event config is a dictionary
   ## For now the only switch you can flip is collect_vcenter_alarms
   ## which will send as events the alarms set in vCenter
@@ -121,9 +130,9 @@ instances:
   #  event_config:
   #    collect_vcenter_alarms: true
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
