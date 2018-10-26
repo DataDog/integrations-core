@@ -25,7 +25,6 @@ STAT_METRICS = [
     'zookeeper.bytes_sent',
     'zookeeper.connections',
     'zookeeper.connections',
-    'zookeeper.bytes_outstanding',
     'zookeeper.outstanding_requests',
     'zookeeper.zxid.epoch',
     'zookeeper.zxid.count',
@@ -90,13 +89,6 @@ def get_conn_failure_config():
         'expected_mode': "down",
         'tags': []
     }
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 def get_version():
