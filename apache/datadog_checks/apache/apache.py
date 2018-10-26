@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import requests
 from six.moves.urllib.parse import urlparse
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks import AgentCheck
 
@@ -56,6 +57,9 @@ class Apache(AgentCheck):
         tags = instance.get('tags', [])
 
         disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', False))
+
+        if disable_ssl_validation:
+            requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
         auth = None
         if 'apache_user' in instance and 'apache_password' in instance:
