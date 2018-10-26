@@ -37,7 +37,9 @@ init:
   - diskperf -y
 
 install:
-  - python -m pip install --upgrade --disable-pip-version-check pip virtualenv codecov
+  - python -m pip install --upgrade --disable-pip-version-check pip virtualenv
+  # https://github.com/codecov/codecov-python/pull/169
+  - python -m pip install --upgrade --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@c97a8cf8e1bd8cde2dfc35f61de7bb3b55cd291a
   - pip uninstall -y docker-py
   - pip install .\datadog_checks_dev[cli]
   - ddev config set core .
