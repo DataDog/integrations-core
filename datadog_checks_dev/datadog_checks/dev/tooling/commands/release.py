@@ -893,7 +893,7 @@ def agent_changelog(since, to, output, force):
         version_changes = OrderedDict()
         changes_per_agent[agent_tags[i-1]] = version_changes
 
-        for name, ver in catalog_to.iteritems():
+        for name, ver in iteritems(catalog_to):
             old_ver = catalog_from.get(name, "")
             if old_ver != ver:
                 # determine whether major version changed
