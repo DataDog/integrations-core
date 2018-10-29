@@ -58,6 +58,7 @@ SOURCE_TYPE_NAME = 'spark'
 INCREMENT = 'increment'
 GAUGE = 'gauge'
 COUNT = 'count'
+MONOTONIC_COUNT = 'monotonic_count'
 
 # Metrics to collect
 SPARK_JOB_METRICS = {
@@ -135,11 +136,11 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'numActiveBatches': ('spark.streaming.statistics.num_active_batches', GAUGE),
     'numActiveReceivers': ('spark.streaming.statistics.num_active_receivers', GAUGE),
     'numInactiveReceivers': ('spark.streaming.statistics.num_inactive_receivers', GAUGE),
-    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', COUNT), # monotonic_count?
-    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', COUNT), # monotonic_count?
+    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', MONOTONIC_COUNT),
+    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', MONOTONIC_COUNT),
     'numReceivers': ('spark.streaming.statistics.num_receivers', GAUGE),
-    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', COUNT), # monotonic_count?
-    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', COUNT) # monotonic_count?
+    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', MONOTONIC_COUNT),
+    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT)
 }
 
 RequestsConfig = namedtuple(
@@ -600,6 +601,8 @@ class SparkCheck(AgentCheck):
             self.gauge(metric_name, value, tags=tags)
         elif metric_type == COUNT:
             self.count(metric_name, value, tags=tags)
+        elif metric_type == MONOTONIC_COUNT:
+            self.monotonic_count(metric_name, value, tags=tags)
         else:
             self.log.error('Metric type "%s" unknown' % metric_type)
 
