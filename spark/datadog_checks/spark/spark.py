@@ -56,6 +56,8 @@ SOURCE_TYPE_NAME = 'spark'
 
 # Metric types
 INCREMENT = 'increment'
+GAUGE = 'gauge'
+COUNT = 'count'
 
 # Metrics to collect
 SPARK_JOB_METRICS = {
@@ -125,19 +127,19 @@ SPARK_RDD_METRICS = {
 }
 
 SPARK_STREAMING_STATISTICS_METRICS = {
-    'avgInputRate': ('spark.streaming.statistics.avg_input_rate', INCREMENT),
-    'avgProcessingTime': ('spark.streaming.statistics.avg_processing_time', INCREMENT),
-    'avgSchedulingDelay': ('spark.streaming.statistics.avg_scheduling_delay', INCREMENT),
-    'avgTotalDelay': ('spark.streaming.statistics.avg_total_delay', INCREMENT),
-    'batchDuration': ('spark.streaming.statistics.batch_duration', INCREMENT),
-    'numActiveBatches': ('spark.streaming.statistics.num_active_batches', INCREMENT),
-    'numActiveReceivers': ('spark.streaming.statistics.num_active_receivers', INCREMENT),
-    'numInactiveReceivers': ('spark.streaming.statistics.num_inactive_receivers', INCREMENT),
-    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', INCREMENT),
-    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', INCREMENT),
-    'numReceivers': ('spark.streaming.statistics.num_receivers', INCREMENT),
-    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', INCREMENT),
-    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', INCREMENT)
+    'avgInputRate': ('spark.streaming.statistics.avg_input_rate', GAUGE),
+    'avgProcessingTime': ('spark.streaming.statistics.avg_processing_time', GAUGE),
+    'avgSchedulingDelay': ('spark.streaming.statistics.avg_scheduling_delay', GAUGE),
+    'avgTotalDelay': ('spark.streaming.statistics.avg_total_delay', GAUGE),
+    'batchDuration': ('spark.streaming.statistics.batch_duration', GAUGE),
+    'numActiveBatches': ('spark.streaming.statistics.num_active_batches', COUNT),
+    'numActiveReceivers': ('spark.streaming.statistics.num_active_receivers', COUNT),
+    'numInactiveReceivers': ('spark.streaming.statistics.num_inactive_receivers', COUNT),
+    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', COUNT),
+    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', COUNT),
+    'numReceivers': ('spark.streaming.statistics.num_receivers', COUNT),
+    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', COUNT),
+    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', COUNT)
 }
 
 RequestsConfig = namedtuple(
@@ -594,8 +596,12 @@ class SparkCheck(AgentCheck):
             tags = []
         if metric_type == INCREMENT:
             self.increment(metric_name, value, tags=tags)
+        if metric_type == GAUGE:
+            self.gauge(metric_name, value, tags=tags)
+        if metric_type == COUNT:
+            self.count(metric_name, value, tags=tags)
         else:
-            self.log.error('Metric type "%s" unknown' % (metric_type))
+            self.log.error('Metric type "%s" unknown' % metric_type)
 
     def _rest_request(self, address, object_path, service_name, requests_config, tags, *args, **kwargs):
         '''
