@@ -113,9 +113,9 @@ class PDHBaseCheck(AgentCheck):
                             machine_name=remote_machine,
                             precision=precision
                         )
-                    except Exception:
-                        self.log.warning("Couldn't create counter %s\\%s" % (counterset, counter_name))
-                        self.log.warning("Datadog Agent will not report %s" % dd_name)
+                    except Exception as e:
+                        self.log.warning("Couldn't create counter {}\\{} due to {}".format(counterset, counter_name, e))
+                        self.log.warning("Datadog Agent will not report {}".format(dd_name)
                         continue
 
                     entry = [inst_name, dd_name, m, obj]
@@ -146,8 +146,8 @@ class PDHBaseCheck(AgentCheck):
                                 machine_name=remote_machine,
                                 precision=precision
                             )
-                        except Exception:
-                            self.log.warning("Couldn't create counter %s\\%s" % (counterset, counter_name))
+                        except Exception as e:
+                            self.log.warning("Couldn't create counter {}\\{} due to {}".format(counterset, counter_name, e))
                             self.log.warning("Datadog Agent will not report %s" % dd_name)
                             continue
 
