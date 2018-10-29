@@ -12,14 +12,57 @@ Get metrics from all your containers running in ECS Fargate:
 
 The ECS Fargate check is packaged with the Agent, [run the Agent][1] with your containers to start collecting metrics.
 
+### Deploying the Datadog Agent on AWS Fargate
+
+To start monitoring AWS Fargate tasks and services, deploy the containerized Datadog Agent on Fargate. In addition to passing the usual `DD_API_KEY` environment variable, you must set the `ECS_FARGATE `environment variable to `true`.
+
+The example task definition below deploys the Datadog Agent to Fargate, along with a Redis container in the same task.
+
+```
+{'containerDefinitions': [{'dockerLabels': {'com.datadoghq.ad.check_names': '["redisdb"]',
+                                            'com.datadoghq.ad.init_configs': '[{}]',
+                                            'com.datadoghq.ad.instances': '[{"host": "%%host%%", "port": 6379}]'},
+                           'essential': true,
+                           'image': 'redis:latest',
+                           'name': 'redis'},
+                          {'environment': [{'name': 'DD_API_KEY',
+                                            'value': '$YOUR_API_KEY'},
+                                           {'name': 'ECS_FARGATE',
+                                            'value': 'true'}],
+                           'essential': true,
+                           'image': 'datadog/agent:latest',
+                           'name': 'datadog-agent'}],
+ 'cpu': '256',
+ 'family': 'redis-datadog',
+ 'memory': '512',
+ 'networkMode': 'awsvpc',
+ 'requiresCompatibilities': ['FARGATE']}
+```
+
+After saving that task definition locally as `redis-datadog.json`, register the task with ECS using the [AWS CLI][11]:
+
+```
+aws ecs register-task-definition --cli-input-json file://./redis-datadog.json
+```
+
+Once the task has been registered, you can run it in a Fargate cluster, making sure to provide one or more private subnets and security groups for your task. Note that Fargate version 1.1.0 or greater is required, so specify the platform version in the command:
+
+```
+aws ecs create-cluster --cluster-name "fargate-test" aws ecs run-task --cluster fargate-test \
+--network-configuration "awsvpcConfiguration={subnets=["$PRIVATE_SUBNET"],securityGroups=["$SECURITY_GROUP"]}" \
+--task-definition arn:aws:ecs:us-east-1:$AWS_ACCOUNT_NUMBER:task-definition/redis-datadog:1 \
+--region us-east-1 --launch-type FARGATE --platform-version 1.1.0
+```
+
+Check the status of the task in the [ECS Console][12]. After a few moments, Fargate containers appear on the Datadog [Containers][13] page.
+
 ### Configuration
 
 #### Metric Collection
 
-1. Edit the `ecs_fargate.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your ECS Fargate performance data.
-    See the [sample ecs_fargate.d/conf.yaml][6] for all available configuration options.
+1. Edit the `ecs_fargate.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your ECS Fargate performance data. See the [sample ecs_fargate.d/conf.yaml][6] for all available configuration options.
 
-2. [Restart the Agent][5]
+2. Re-deploy the Agent task with the updated configuration.
 
 #### Log Collection
 
@@ -80,3 +123,6 @@ Need help? Contact [Datadog Support][3].
 [8]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html
 [9]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html
 [10]: https://docs.datadoghq.com/integrations/amazon_lambda/#log-collection
+[11]: https://aws.amazon.com/cli/
+[12]: https://console.aws.amazon.com/ecs/home
+[13]: https://app.datadoghq.com/containers
