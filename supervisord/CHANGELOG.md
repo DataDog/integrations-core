@@ -1,5 +1,9 @@
 # CHANGELOG - supervisord
 
+## 1.1.4 / 2018-10-29
+
+* [Fixed] Fix AgentCheck import. See [#2482](https://github.com/DataDog/integrations-core/pull/2482).
+
 ## 1.1.3 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
