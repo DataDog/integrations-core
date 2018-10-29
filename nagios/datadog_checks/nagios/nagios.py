@@ -58,8 +58,8 @@ EVENT_FIELDS = {
 }
 
 # Regex for the Nagios event log
-RE_LINE_REG = re.compile('^\[(\d+)\] EXTERNAL COMMAND: (\w+);(.*)$')
-RE_LINE_EXT = re.compile('^\[(\d+)\] ([^:]+): (.*)$')
+RE_LINE_REG = re.compile(r'^\[(\d+)\] EXTERNAL COMMAND: (\w+);(.*)$')
+RE_LINE_EXT = re.compile(r'^\[(\d+)\] ([^:]+): (.*)$')
 
 SOURCE_TYPE_NAME = 'Nagios'
 
@@ -67,11 +67,11 @@ SOURCE_TYPE_NAME = 'Nagios'
 class Nagios(AgentCheck):
 
     NAGIOS_CONF_KEYS = [
-        re.compile('^(?P<key>log_file)\s*=\s*(?P<value>.+)$'),
-        re.compile('^(?P<key>host_perfdata_file_template)\s*=\s*(?P<value>.+)$'),
-        re.compile('^(?P<key>service_perfdata_file_template)\s*=\s*(?P<value>.+)$'),
-        re.compile('^(?P<key>host_perfdata_file)\s*=\s*(?P<value>.+)$'),
-        re.compile('^(?P<key>service_perfdata_file)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>log_file)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>host_perfdata_file_template)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>service_perfdata_file_template)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>host_perfdata_file)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>service_perfdata_file)\s*=\s*(?P<value>.+)$'),
     ]
 
     def gauge(self, *args, **kwargs):

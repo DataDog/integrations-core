@@ -361,10 +361,10 @@ class MongoDb(AgentCheck):
     https://docs.mongodb.org/manual/reference/command/serverStatus/#server-status-locks
     """
     CASE_SENSITIVE_METRIC_NAME_SUFFIXES = {
-        '\.R\\b': ".shared",
-        '\.r\\b': ".intent_shared",
-        '\.W\\b': ".exclusive",
-        '\.w\\b': ".intent_exclusive",
+        r'\.R\b': ".shared",
+        r'\.r\b': ".intent_shared",
+        r'\.W\b': ".exclusive",
+        r'\.w\b': ".intent_exclusive",
     }
 
     """

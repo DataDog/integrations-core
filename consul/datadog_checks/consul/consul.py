@@ -268,11 +268,13 @@ class ConsulCheck(AgentCheck):
         for tag in instance.get('tags', []):
             main_tags.append(tag)
 
+        single_node_install = is_affirmative(instance.get('single_node_install', False))
         if not self._is_instance_leader(instance, instance_state):
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:follower"])
-            self.log.debug("This consul agent is not the cluster leader. "
-                           "Skipping service and catalog checks for this instance")
-            return
+            if not single_node_install:
+                self.log.debug("This consul agent is not the cluster leader. "
+                               "Skipping service and catalog checks for this instance")
+                return
         else:
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:leader"])
 

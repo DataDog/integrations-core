@@ -255,8 +255,8 @@ class Ceph(AgentCheck):
             """Take a single health check string, return (OSD name, percentage used)"""
             # Full string looks like: osd.2 is full at 95%
             # Near full string: osd.1 is near full at 94%
-            pct = re.compile('\d+%').findall(health)
-            osd = re.compile('osd.\d+').findall(health)
+            pct = re.compile(r'\d+%').findall(health)
+            osd = re.compile(r'osd.\d+').findall(health)
             if len(pct) > 0 and len(osd) > 0:
                 return osd[0], int(pct[0][:-1])
             else:

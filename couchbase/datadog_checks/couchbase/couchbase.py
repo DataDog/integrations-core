@@ -255,7 +255,7 @@ class Couchbase(AgentCheck):
         's': 1,
     }
 
-    seconds_value_pattern = re.compile('(\d+(\.\d+)?)(\D+)')
+    seconds_value_pattern = re.compile(r'(\d+(\.\d+)?)(\D+)')
 
     class CouchbaseInstanceState(object):
         def __init__(self):
@@ -533,10 +533,10 @@ class Couchbase(AgentCheck):
     # Returns input if non-camelCase variable is detected.
     def camel_case_to_joined_lower(self, variable):
         # replace non-word with _
-        converted_variable = re.sub('\W+', '_', variable)
+        converted_variable = re.sub(r'\W+', '_', variable)
 
         # insert _ in front of capital letters and lowercase the string
-        converted_variable = re.sub('([A-Z])', '_\g<1>', converted_variable).lower()
+        converted_variable = re.sub('([A-Z])', r'_\g<1>', converted_variable).lower()
 
         # remove duplicate _
         converted_variable = re.sub('_+', '_', converted_variable)

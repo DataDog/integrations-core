@@ -18,20 +18,20 @@ METRICS = [
     'consul.catalog.services_warning',
     'consul.catalog.services_critical',
     'consul.catalog.total_nodes',
-    'consul.net.node.latency.p95',
-    'consul.net.node.latency.min',
-    'consul.net.node.latency.p25',
-    'consul.net.node.latency.median',
-    'consul.net.node.latency.max',
-    'consul.net.node.latency.max',
-    'consul.net.node.latency.p99',
-    'consul.net.node.latency.p90',
-    'consul.net.node.latency.p75'
+    # Enable again when it's figured out why only followers submit these
+    # 'consul.net.node.latency.p95',
+    # 'consul.net.node.latency.min',
+    # 'consul.net.node.latency.p25',
+    # 'consul.net.node.latency.median',
+    # 'consul.net.node.latency.max',
+    # 'consul.net.node.latency.p99',
+    # 'consul.net.node.latency.p90',
+    # 'consul.net.node.latency.p75'
 ]
 
 
 @pytest.mark.integration
-def test_integration(aggregator, instance, dd_environment):
+def test_check(aggregator, instance, dd_environment):
     """
     Testing Consul Integration
     """
@@ -40,6 +40,23 @@ def test_integration(aggregator, instance, dd_environment):
 
     for m in METRICS:
         aggregator.assert_metric(m, at_least=0)
+
+    aggregator.assert_metric('consul.peers', value=3)
+
+    aggregator.assert_service_check('consul.check')
+    aggregator.assert_service_check('consul.up', tags=[
+        'consul_datacenter:dc1',
+        'consul_url:{}'.format(common.URL)
+    ])
+
+
+@pytest.mark.integration
+def test_single_node_install(aggregator, instance_single_node_install, dd_environment):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check.check(instance_single_node_install)
+
+    for m in METRICS:
+        aggregator.assert_metric(m, at_least=1)
 
     aggregator.assert_metric('consul.peers', value=3)
 

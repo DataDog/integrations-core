@@ -2,7 +2,6 @@ version: '{branch}.{build}'
 clone_depth: 3
 build: off
 test: off
-skip_branch_with_pr: true
 cache:
   - '%LOCALAPPDATA%\pip\Cache'
 services:
@@ -12,6 +11,8 @@ services:
   # a time. See https://www.appveyor.com/docs/services-databases/ for details.
   - mssql2008r2sp2
 
+skip_branch_with_pr: true
+skip_tags: true
 branches:
   only:
     - master
@@ -29,17 +30,23 @@ init:
   - set PATH=%PYTHON2%;%PYTHON2%\Scripts;%PATH%
   - python -c "import sys; print(sys.version)"
 
+  # Decide how we'll run tests
   - if defined APPVEYOR_PULL_REQUEST_NUMBER ( set "CHANGED_ONLY_FLAG= --changed" ) else ( set "CHANGED_ONLY_FLAG= " )
 
+  # Newer versions of Windows require this for full use of psutil
+  - diskperf -y
+
 install:
-  - python -m pip install --upgrade --disable-pip-version-check pip virtualenv codecov
+  - python -m pip install --upgrade --disable-pip-version-check pip virtualenv
+  # https://github.com/codecov/codecov-python/pull/169
+  - python -m pip install --upgrade --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@c97a8cf8e1bd8cde2dfc35f61de7bb3b55cd291a
   - pip uninstall -y docker-py
   - pip install .\datadog_checks_dev[cli]
   - ddev config set core .
 
 test_script:
   # Only test any of these that have changed for pull requests
-  - ddev test%CHANGED_ONLY_FLAG% datadog_checks_base active_directory aspdotnet dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
+  - ddev test%CHANGED_ONLY_FLAG% -c datadog_checks_base active_directory aspdotnet disk dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
 
 # Uncomment the following to enable RDP connection into the builder and debug a build
 # on_finish:

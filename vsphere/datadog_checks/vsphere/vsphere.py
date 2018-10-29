@@ -250,7 +250,7 @@ class VSphereCheck(AgentCheck):
         except Exception as e:
             err_msg = (
                 "A connection to {} can be established, but performing operations on the server fails: {}"
-            ).format(instance.get('host'), instance.get('username'), e)
+            ).format(instance.get('host'), e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=service_check_tags, message=err_msg)
             raise ConnectionError(err_msg)
@@ -262,8 +262,8 @@ class VSphereCheck(AgentCheck):
         tags = instance.get('tags', [])
 
         service_check_tags = [
-            'vcenter_server:{0}'.format(instance.get('name')),
-            'vcenter_host:{0}'.format(instance.get('host')),
+            'vcenter_server:{}'.format(instance.get('name')),
+            'vcenter_host:{}'.format(instance.get('host')),
         ] + tags
         service_check_tags = list(set(service_check_tags))
 

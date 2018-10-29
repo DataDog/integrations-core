@@ -11,7 +11,7 @@ from ..constants import get_root
 from ...subprocess import run_command
 from ...utils import path_join
 
-MANIFEST_VERSION_PATTERN = 'agent (\d)'
+MANIFEST_VERSION_PATTERN = r'agent (\d)'
 
 
 class DockerInterface(object):
