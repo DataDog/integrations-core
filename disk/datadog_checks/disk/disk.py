@@ -52,8 +52,10 @@ class Disk(AgentCheck):
         return psutil is not None
 
     def _load_conf(self, instance):
+        self._use_mount = is_affirmative(instance.get('use_mount', False))
         self._excluded_filesystems = instance.get('excluded_filesystems', [])
         self._excluded_disks = instance.get('excluded_disks', [])
+        self._excluded_disk_re = re.compile(instance.get('excluded_disk_re', '^$'))
         self._excluded_mountpoint_re = re.compile(instance.get('excluded_mountpoint_re', '^$'))
         self._tag_by_filesystem = is_affirmative(instance.get('tag_by_filesystem', False))
         self._all_partitions = is_affirmative(instance.get('all_partitions', False))
@@ -63,27 +65,6 @@ class Disk(AgentCheck):
 
         # Force exclusion of CDROM (iso9660) from disk check
         self._excluded_filesystems.append('iso9660')
-
-        # FIXME: 6.x, drop use_mount option in datadog.conf
-        self._load_legacy_option(instance, 'use_mount', False, operation=is_affirmative)
-
-        # FIXME: 6.x, drop device_blacklist_re option in datadog.conf
-        self._load_legacy_option(
-            instance, 'excluded_disk_re', '^$', legacy_name='device_blacklist_re', operation=re.compile
-        )
-
-    def _load_legacy_option(self, instance, option, default, legacy_name=None, operation=lambda l: l):
-        value = instance.get(option, default)
-        legacy_name = legacy_name or option
-
-        if value == default and legacy_name in self.agentConfig:
-            self.log.warning(
-                'Using `{}` in datadog.conf has been deprecated '
-                'in favor of `{}` in disk.yaml'.format(legacy_name, option)
-            )
-            value = self.agentConfig.get(legacy_name) or default
-
-        setattr(self, '_{}'.format(option), operation(value))
 
     def collect_metrics_psutil(self):
         self._valid_disks = {}
