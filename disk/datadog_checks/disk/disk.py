@@ -155,29 +155,23 @@ class Disk(AgentCheck):
         mount_point = mount_point.rsplit(' ', 1)[0]
 
         return (
-            self._blacklist_disk(device, file_system, mount_point)
-            or not self._whitelist_disk(device, file_system, mount_point)
+            self._disk_blacklisted(device, file_system, mount_point)
+            or not self._disk_whitelisted(device, file_system, mount_point)
         )
 
-    def _whitelist_disk(self, device, file_system, mount_point):
-        if not self._whitelist_file_system(file_system):
-            return False
-        elif not self._whitelist_device(device):
-            return False
-        elif not self._whitelist_mount_point(mount_point):
-            return False
+    def _disk_whitelisted(self, device, file_system, mount_point):
+        return (
+            self._whitelist_file_system(file_system)
+            and self._whitelist_device(device)
+            and self._whitelist_mount_point(mount_point)
+        )
 
-        return True
-
-    def _blacklist_disk(self, device, file_system, mount_point):
-        if self._blacklist_file_system(file_system):
-            return True
-        elif self._blacklist_device(device):
-            return True
-        elif self._blacklist_mount_point(mount_point):
-            return True
-
-        return False
+    def _disk_blacklisted(self, device, file_system, mount_point):
+        return (
+            self._blacklist_file_system(file_system)
+            or self._blacklist_device(device)
+            or self._blacklist_mount_point(mount_point)
+        )
 
     def _whitelist_file_system(self, file_system):
         if self._file_system_whitelist is None:
