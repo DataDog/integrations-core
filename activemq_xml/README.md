@@ -10,11 +10,11 @@ Get metrics from ActiveMQ XML service in real time to:
 ## Setup
 ### Installation
 
-The Activemq XML check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
+The ActiveMQ XML check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
 ### Configuration
 
-1. Edit the `activemq_xml.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9], to point to your server and port, set the masters to monitor.
+1. Edit `activemq_xml.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][9] with your stats `url`.
 
     See the [sample activemq_xml.d/conf.yaml][2] for all available configuration options.
 
