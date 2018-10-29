@@ -604,7 +604,7 @@ class SparkCheck(AgentCheck):
         elif metric_type == MONOTONIC_COUNT:
             self.monotonic_count(metric_name, value, tags=tags)
         else:
-            self.log.error('Metric type "%s" unknown' % metric_type)
+            self.log.error('Metric type "{}" unknown'.format(metric_type))
 
     def _rest_request(self, address, object_path, service_name, requests_config, tags, *args, **kwargs):
         '''
