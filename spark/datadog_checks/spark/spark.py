@@ -132,14 +132,14 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'avgSchedulingDelay': ('spark.streaming.statistics.avg_scheduling_delay', GAUGE),
     'avgTotalDelay': ('spark.streaming.statistics.avg_total_delay', GAUGE),
     'batchDuration': ('spark.streaming.statistics.batch_duration', GAUGE),
-    'numActiveBatches': ('spark.streaming.statistics.num_active_batches', COUNT),
-    'numActiveReceivers': ('spark.streaming.statistics.num_active_receivers', COUNT),
-    'numInactiveReceivers': ('spark.streaming.statistics.num_inactive_receivers', COUNT),
-    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', COUNT),
-    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', COUNT),
-    'numReceivers': ('spark.streaming.statistics.num_receivers', COUNT),
-    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', COUNT),
-    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', COUNT)
+    'numActiveBatches': ('spark.streaming.statistics.num_active_batches', GAUGE),
+    'numActiveReceivers': ('spark.streaming.statistics.num_active_receivers', GAUGE),
+    'numInactiveReceivers': ('spark.streaming.statistics.num_inactive_receivers', GAUGE),
+    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', COUNT), # monotonic_count?
+    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', COUNT), # monotonic_count?
+    'numReceivers': ('spark.streaming.statistics.num_receivers', GAUGE),
+    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', COUNT), # monotonic_count?
+    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', COUNT) # monotonic_count?
 }
 
 RequestsConfig = namedtuple(
