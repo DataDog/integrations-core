@@ -596,9 +596,9 @@ class SparkCheck(AgentCheck):
             tags = []
         if metric_type == INCREMENT:
             self.increment(metric_name, value, tags=tags)
-        if metric_type == GAUGE:
+        elif metric_type == GAUGE:
             self.gauge(metric_name, value, tags=tags)
-        if metric_type == COUNT:
+        elif metric_type == COUNT:
             self.count(metric_name, value, tags=tags)
         else:
             self.log.error('Metric type "%s" unknown' % metric_type)
