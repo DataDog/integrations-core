@@ -115,7 +115,7 @@ instances:
 
   ## @param use_guest_hostname - boolean - optional - default: false
   ## If true, the check will use the guest hostname for VMs instead of the VM name
-  ## This requires the VM to have VM tools installed in it. If the guest hostname is
+  ## This requires the VM to have VMware tools installed in it. If the guest hostname is
   ## not available, it will fallback to the VM name.
   ## Use this if you install the agent in VMs so that the hosts are not duplicated
   ## in the web application UI.
