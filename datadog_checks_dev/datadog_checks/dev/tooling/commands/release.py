@@ -884,16 +884,16 @@ def agent_changelog(since, to, output, force):
     changes_per_agent = OrderedDict()
 
     for i in range(1, len(agent_tags)):
-        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i-1])
+        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i - 1])
         catalog_from = parse_agent_req_file(contents_from)
 
         contents_to = git_show_file(AGENT_REQ_FILE, agent_tags[i])
         catalog_to = parse_agent_req_file(contents_to)
 
         version_changes = OrderedDict()
-        changes_per_agent[agent_tags[i]] = version_changes
+        changes_per_agent[agent_tags[i - 1]] = version_changes
 
-        for name, ver in catalog_to.iteritems():
+        for name, ver in iteritems(catalog_to):
             old_ver = catalog_from.get(name, "")
             if old_ver != ver:
                 # determine whether major version changed
