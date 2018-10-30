@@ -19,8 +19,10 @@ VERSION_BUMP = OrderedDict([
     ('minor', semver.bump_minor),
     ('patch', semver.bump_patch),
     ('fix', semver.bump_patch),
-    ('pre', semver.bump_prerelease),
     ('build', semver.bump_build),
+    ('pre', semver.bump_prerelease),
+    ('rc', semver.bump_prerelease),
+    ('beta', semver.bump_prerelease),
 ])
 
 # The checks requirement file used by the agent
