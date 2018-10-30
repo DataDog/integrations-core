@@ -30,10 +30,13 @@ class MockedMOR(Mock):
         self.customValue = []
         power_state = kwargs.get('runtime.powerState', None)
         host_name = kwargs.get('runtime.host_name', None)
+        guest_hostname = kwargs.get('guest.hostName', None)
         if power_state:
             self.runtime_powerState = getattr(vim.VirtualMachinePowerState, power_state)
         if host_name:
             self.runtime_host_name = host_name
+        if guest_hostname:
+            self.guest_hostName = guest_hostname
 
         if kwargs.get('label', False):
             self.customValue.append(Mock(value="DatadogMonitored"))
@@ -59,7 +62,7 @@ def create_topology(topology_json):
 def retrieve_properties_mock(all_mors):
     objects = []
     properties_res = MagicMock(objects=objects, token=None)
-    mor_properties = ["name", "parent", "customValue", "runtime_powerState", "runtime_host"]
+    mor_properties = ["name", "parent", "customValue", "runtime_powerState", "runtime_host", "guest_hostName"]
     for mor in all_mors:
         prop_set = []
         for prop_name in mor_properties:

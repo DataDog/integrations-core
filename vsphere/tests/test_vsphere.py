@@ -231,6 +231,31 @@ def test__cache_morlist_raw_async(vsphere, instance):
         assertMOR(vsphere, instance, name="vm4", spec="vm", subset=True, tags=tags)
 
 
+def test_use_guest_hostname(vsphere, instance):
+    # Default value
+    with mock.patch("datadog_checks.vsphere.VSphereCheck._get_all_objs") as mock_get_all_objs, \
+         mock.patch("datadog_checks.vsphere.vsphere.vmodl"):
+        vsphere._cache_morlist_raw_async(instance, [])
+        # Default value
+        mock_get_all_objs.call_args[1]["use_guest_hostname"] is False
+
+        # use guest hostname
+        instance["use_guest_hostname"] = True
+        vsphere._cache_morlist_raw_async(instance, [])
+        mock_get_all_objs.call_args[1]["use_guest_hostname"] is True
+
+    with mock.patch("datadog_checks.vsphere.vsphere.vmodl"):
+
+        # Discover hosts and virtual machines
+        instance["use_guest_hostname"] = True
+        vsphere._cache_morlist_raw_async(instance, [])
+        assertMOR(vsphere, instance, spec="vm", count=3)
+        # Fallback on VM name when guest hostname not available
+        assertMOR(vsphere, instance, name="vm1", spec="vm", subset=True)
+        assertMOR(vsphere, instance, name="vm2_guest", spec="vm", subset=True)
+        assertMOR(vsphere, instance, name="vm4_guest", spec="vm", subset=True)
+
+
 def test__process_mor_objects_queue(vsphere, instance):
     vsphere.log = MagicMock()
     vsphere._process_mor_objects_queue_async = MagicMock()
