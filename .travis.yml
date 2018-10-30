@@ -89,9 +89,11 @@ jobs:
     - stage: test
       env: CHECK=couchbase
     - stage: test
+      env: CHECK=crio PYTHON3=true
+    - stage: test
       env: CHECK=directory PYTHON3=true
     - stage: test
-      env: CHECK=disk
+      env: CHECK=disk PYTHON3=true
     - stage: test
       env: CHECK=dns_check
     - stage: test
