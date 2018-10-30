@@ -419,7 +419,14 @@ class VSphereCheck(AgentCheck):
 
         return mor_attrs
 
-    def _get_all_objs(self, server_instance, regexes=None, include_only_marked=False, tags=None, use_guest_hostname=False):
+    def _get_all_objs(
+        self,
+        server_instance,
+        regexes=None,
+        include_only_marked=False,
+        tags=None,
+        use_guest_hostname=False
+    ):
         """
         Explore vCenter infrastructure to discover hosts, virtual machines, etc.
         and compute their associated tags.
