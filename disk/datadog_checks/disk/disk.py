@@ -155,55 +155,55 @@ class Disk(AgentCheck):
         mount_point = mount_point.rsplit(' ', 1)[0]
 
         return (
-            self._disk_blacklisted(device, file_system, mount_point)
-            or not self._disk_whitelisted(device, file_system, mount_point)
+            self._partition_blacklisted(device, file_system, mount_point)
+            or not self._partition_whitelisted(device, file_system, mount_point)
         )
 
-    def _disk_whitelisted(self, device, file_system, mount_point):
+    def _partition_whitelisted(self, device, file_system, mount_point):
         return (
-            self._whitelist_file_system(file_system)
-            and self._whitelist_device(device)
-            and self._whitelist_mount_point(mount_point)
+            self._file_system_whitelisted(file_system)
+            and self._device_whitelisted(device)
+            and self._mount_point_whitelisted(mount_point)
         )
 
-    def _disk_blacklisted(self, device, file_system, mount_point):
+    def _partition_blacklisted(self, device, file_system, mount_point):
         return (
-            self._blacklist_file_system(file_system)
-            or self._blacklist_device(device)
-            or self._blacklist_mount_point(mount_point)
+            self._file_system_blacklisted(file_system)
+            or self._device_blacklisted(device)
+            or self._mount_point_blacklisted(mount_point)
         )
 
-    def _whitelist_file_system(self, file_system):
+    def _file_system_whitelisted(self, file_system):
         if self._file_system_whitelist is None:
             return True
 
         return not not self._file_system_whitelist.match(file_system)
 
-    def _blacklist_file_system(self, file_system):
+    def _file_system_blacklisted(self, file_system):
         if self._file_system_blacklist is None:
             return False
 
         return not not self._file_system_blacklist.match(file_system)
 
-    def _whitelist_device(self, device):
+    def _device_whitelisted(self, device):
         if not device or self._device_whitelist is None:
             return True
 
         return not not self._device_whitelist.match(device)
 
-    def _blacklist_device(self, device):
+    def _device_blacklisted(self, device):
         if not device or self._device_blacklist is None:
             return False
 
         return not not self._device_blacklist.match(device)
 
-    def _whitelist_mount_point(self, mount_point):
+    def _mount_point_whitelisted(self, mount_point):
         if self._mount_point_whitelist is None:
             return True
 
         return not not self._mount_point_whitelist.match(mount_point)
 
-    def _blacklist_mount_point(self, mount_point):
+    def _mount_point_blacklisted(self, mount_point):
         if self._mount_point_blacklist is None:
             return False
 
