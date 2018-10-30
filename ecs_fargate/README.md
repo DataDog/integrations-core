@@ -5,25 +5,26 @@
 Get metrics from all your containers running in ECS Fargate:
 
 * CPU/Memory usage & limit metrics
-* I/O metrics
+* Monitor your applications running on Fargate via Datadog integrations or custom metrics.
 
 ## Setup
 The following steps cover setup of the Datadog Container Agent within AWS ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
 
 ### Installation
-To monitor your ECS Fargate containers with Datadog, run the Agent as a container in same task definition as your application. To collect metrics with Datadog, each task definition requires a Datadog Agent container. Follow these setup steps:
+To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in same task definition as your application. To collect metrics with Datadog, each task definition should include a sidecar Datadog Agent container. Follow these setup steps:
 
 1. **Add an ECS Fargate Task**
 2. **Create or Modify your IAM Policy**
-3. **Run the Datadog Agent as a Replica Service**
+3. **Run the Task as a Replica Service**
 
 #### Create an ECS Fargate Task
-This task launches the Datadog Agent container. Configure the task using the [AWS CLI tools][11] or the [Amazon Web Console][12].
+This task launches the Datadog Agent container. Configure the task using the [AWS CLI tools][11] or the [Amazon Web Console][12]. **Note**: To monitor your application or integrations, add them to this task.
 
 ##### AWS CLI
 
 1. Download [datadog-agent-ecs-fargate.json][18].
 2. Update the json with a **TASK_NAME** and your [Datadog API Key][13].
+3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][19].
 3. Execute the following command to register the ECS task definition:
 ```
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
@@ -34,7 +35,7 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 1. Log in to your [AWS Web Console][12] and navigate to the ECS section.
 2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button.
 3. Select **Fargate** as the launch type, then click the **Next step** button.
-4. Enter a **Task Definition Name**, such as `datadog-agent-task`.
+4. Enter a **Task Definition Name**, such as `my-app-and-datadog`.
 5. Select a Task execution IAM role. See permission requirements in the [Create or Modify your IAM Policy](##create-or-modify-your-iam-policy) section below.
 6. Choose **Task memory** and **Task CPU** based on your needs.
 7. Click the **Add container** button.
@@ -43,8 +44,9 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 10. For **Memory Limits** enter `256` soft limit.
 11. Scroll down to the **Advanced container configuration** section and enter `10` in **CPU units**.
 12. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API Key][13] as the value. *If you feel more comfortable storing secrets in s3, refer to the [ECS Configuration guide][14].*
-13. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`.
-14. Click **Add** to add the container. Click **Create** to create the task definition.
+13. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
+14. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][19].
+15. Click **Create** to create the task definition.
 
 #### Create or Modify your IAM Policy
 Add the following permissions to your [Datadog IAM policy][15] to collect ECS Fargate metrics. For more information on ECS policies, [review the documentation on the AWS website][16].
@@ -55,8 +57,8 @@ Add the following permissions to your [Datadog IAM policy][15] to collect ECS Fa
 | `ecs:ListContainerInstances`     | List instances of a cluster.                                      |
 | `ecs:DescribeContainerInstances` | Describe instances to add metrics on resources and tasks running. |
 
-#### Run the Datadog Agent as a Replica Service
-The only option in ECS Fargate is to run the Datadog Agent as a [Replica Service][17].
+#### Run the Task as a Replica Service
+The only option in ECS Fargate is to run the task as a [Replica Service][17]. The Datadog Agent runs as a sidecar in each Fargate task.
 
 ##### AWS CLI
 Run the following commands using the [AWS CLI tools][11]. **Note**: Fargate version 1.1.0 or greater is required, so the command below specifies the platform version.
