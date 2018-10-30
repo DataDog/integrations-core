@@ -7,13 +7,14 @@ import os
 import platform
 import re
 
-from six import iteritems
+from six import iteritems, string_types
+
 try:
     import psutil
 except ImportError:
     psutil = None
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.base.utils.timeout import timeout, TimeoutException
@@ -30,11 +31,24 @@ class Disk(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         if instances is not None and len(instances) > 1:
-            raise Exception('Disk check only supports one configured instance.')
+            raise ConfigurationError('Disk check only supports one configured instance.')
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
 
-        # Get the configuration once for all
-        self._load_conf(instances[0])
+        instance = instances[0]
+        self._use_mount = is_affirmative(instance.get('use_mount', False))
+        self._all_partitions = is_affirmative(instance.get('all_partitions', False))
+        self._file_system_whitelist = instance.get('file_system_whitelist', [])
+        self._file_system_blacklist = instance.get('file_system_blacklist', [])
+        self._device_whitelist = instance.get('device_whitelist', [])
+        self._device_blacklist = instance.get('device_blacklist', [])
+        self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
+        self._mount_point_blacklist = instance.get('mount_point_blacklist', [])
+        self._tag_by_filesystem = is_affirmative(instance.get('tag_by_filesystem', False))
+        self._device_tag_re = instance.get('device_tag_re', {})
+        self._custom_tags = instance.get('tags', [])
+        self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
+
+        self._compile_pattern_filters(instance)
         self._compile_tag_re()
 
     def check(self, instance):
@@ -51,26 +65,11 @@ class Disk(AgentCheck):
     def _psutil(cls):
         return psutil is not None
 
-    def _load_conf(self, instance):
-        self._use_mount = is_affirmative(instance.get('use_mount', False))
-        self._excluded_filesystems = instance.get('excluded_filesystems', [])
-        self._excluded_disks = instance.get('excluded_disks', [])
-        self._excluded_disk_re = re.compile(instance.get('excluded_disk_re', '^$'))
-        self._excluded_mountpoint_re = re.compile(instance.get('excluded_mountpoint_re', '^$'))
-        self._tag_by_filesystem = is_affirmative(instance.get('tag_by_filesystem', False))
-        self._all_partitions = is_affirmative(instance.get('all_partitions', False))
-        self._device_tag_re = instance.get('device_tag_re', {})
-        self._custom_tags = instance.get('tags', [])
-        self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
-
-        # Force exclusion of CDROM (iso9660) from disk check
-        self._excluded_filesystems.append('iso9660')
-
     def collect_metrics_psutil(self):
         self._valid_disks = {}
         for part in psutil.disk_partitions(all=True):
             # we check all exclude conditions
-            if self._exclude_disk_psutil(part):
+            if self.exclude_disk(part):
                 continue
 
             # Get disk metrics here to be able to exclude on total usage
@@ -128,7 +127,7 @@ class Disk(AgentCheck):
 
         self.collect_latency_metrics()
 
-    def _exclude_disk_psutil(self, part):
+    def exclude_disk(self, part):
         # skip cd-rom drives with no disk in it; they may raise
         # ENOENT, pop-up a Windows GUI error for a non-ready
         # partition or just hang;
@@ -136,38 +135,79 @@ class Disk(AgentCheck):
         skip_win = Platform.is_win32() and ('cdrom' in part.opts or part.fstype == '')
         return skip_win or self._exclude_disk(part.device, part.fstype, part.mountpoint)
 
-    def _exclude_disk(self, name, filesystem, mountpoint):
+    def _exclude_disk(self, device, file_system, mount_point):
         """
         Return True for disks we don't want or that match regex in the config file
         """
-        self.log.debug('_exclude_disk: {}, {}, {}'.format(name, filesystem, mountpoint))
+        self.log.debug('_exclude_disk: {}, {}, {}'.format(device, file_system, mount_point))
+
+        if not device or device == 'none':
+            device = None
+
+            # Allow no device if `all_partitions` is true so we can evaluate mount points
+            if not self._all_partitions:
+                return True
 
         # Hack for NFS secure mounts
         # Secure mounts might look like this: '/mypath (deleted)', we should
-        # ignore all the bits not part of the mountpoint name. Take also into
-        # account a space might be in the mountpoint.
-        mountpoint = mountpoint.rsplit(' ', 1)[0]
+        # ignore all the bits not part of the mount point name. Take also into
+        # account a space might be in the mount point.
+        mount_point = mount_point.rsplit(' ', 1)[0]
 
-        name_empty = not name or name == 'none'
+        return (
+            self._partition_blacklisted(device, file_system, mount_point)
+            or not self._partition_whitelisted(device, file_system, mount_point)
+        )
 
-        # allow empty names if `all_partitions` is `true` so we can evaluate mountpoints
-        if name_empty and not self._all_partitions:
+    def _partition_whitelisted(self, device, file_system, mount_point):
+        return (
+            self._file_system_whitelisted(file_system)
+            and self._device_whitelisted(device)
+            and self._mount_point_whitelisted(mount_point)
+        )
+
+    def _partition_blacklisted(self, device, file_system, mount_point):
+        return (
+            self._file_system_blacklisted(file_system)
+            or self._device_blacklisted(device)
+            or self._mount_point_blacklisted(mount_point)
+        )
+
+    def _file_system_whitelisted(self, file_system):
+        if self._file_system_whitelist is None:
             return True
-        # device is listed in `excluded_disks`
-        elif not name_empty and name in self._excluded_disks:
-            return True
-        # device name matches `excluded_disk_re`
-        elif not name_empty and self._excluded_disk_re.match(name):
-            return True
-        # device mountpoint matches `excluded_mountpoint_re`
-        elif self._excluded_mountpoint_re.match(mountpoint):
-            return True
-        # fs is listed in `excluded_filesystems`
-        elif filesystem in self._excluded_filesystems:
-            return True
-        # all good, don't exclude the disk
-        else:
+
+        return not not self._file_system_whitelist.match(file_system)
+
+    def _file_system_blacklisted(self, file_system):
+        if self._file_system_blacklist is None:
             return False
+
+        return not not self._file_system_blacklist.match(file_system)
+
+    def _device_whitelisted(self, device):
+        if not device or self._device_whitelist is None:
+            return True
+
+        return not not self._device_whitelist.match(device)
+
+    def _device_blacklisted(self, device):
+        if not device or self._device_blacklist is None:
+            return False
+
+        return not not self._device_blacklist.match(device)
+
+    def _mount_point_whitelisted(self, mount_point):
+        if self._mount_point_whitelist is None:
+            return True
+
+        return not not self._mount_point_whitelist.match(mount_point)
+
+    def _mount_point_blacklisted(self, mount_point):
+        if self._mount_point_blacklist is None:
+            return False
+
+        return not not self._mount_point_blacklist.match(mount_point)
 
     def _collect_part_metrics(self, part, usage):
         metrics = {}
@@ -311,6 +351,80 @@ class Disk(AgentCheck):
 
         # Filter fake or unwanteddisks.
         return [d for d in flattened_devices if self._keep_device(d)]
+
+    def _compile_pattern_filters(self, instance):
+        # Force exclusion of CDROM (iso9660)
+        file_system_blacklist_extras = ['iso9660']
+        device_blacklist_extras = []
+        mount_point_blacklist_extras = []
+
+        deprecation_message = '`{old}` is deprecated and will be removed in 6.9. Please use `{new}` instead.'
+
+        if 'excluded_filesystems' in instance:
+            file_system_blacklist_extras.extend(
+                '{}$'.format(pattern) for pattern in instance['excluded_filesystems'] if pattern
+            )
+            self.warning(deprecation_message.format(old='excluded_filesystems', new='file_system_blacklist'))
+
+        if 'excluded_disks' in instance:
+            device_blacklist_extras.extend(
+                '{}$'.format(pattern) for pattern in instance['excluded_disks'] if pattern
+            )
+            self.warning(deprecation_message.format(old='excluded_disks', new='device_blacklist'))
+
+        if 'excluded_disk_re' in instance:
+            device_blacklist_extras.append(instance['excluded_disk_re'])
+            self.warning(deprecation_message.format(old='excluded_disk_re', new='device_blacklist'))
+
+        if 'excluded_mountpoint_re' in instance:
+            mount_point_blacklist_extras.append(instance['excluded_mountpoint_re'])
+            self.warning(deprecation_message.format(old='excluded_mountpoint_re', new='mount_point_blacklist'))
+
+        # Any without valid patterns will become None
+        self._file_system_whitelist = self._compile_valid_patterns(self._file_system_whitelist, casing=re.I)
+        self._file_system_blacklist = self._compile_valid_patterns(
+            self._file_system_blacklist,
+            casing=re.I,
+            extra_patterns=file_system_blacklist_extras
+        )
+        self._device_whitelist = self._compile_valid_patterns(self._device_whitelist)
+        self._device_blacklist = self._compile_valid_patterns(
+            self._device_blacklist,
+            extra_patterns=device_blacklist_extras
+        )
+        self._mount_point_whitelist = self._compile_valid_patterns(self._mount_point_whitelist)
+        self._mount_point_blacklist = self._compile_valid_patterns(
+            self._mount_point_blacklist,
+            extra_patterns=mount_point_blacklist_extras
+        )
+
+    def _compile_valid_patterns(self, patterns, casing=IGNORE_CASE, extra_patterns=None):
+        valid_patterns = []
+
+        if isinstance(patterns, string_types):
+            patterns = [patterns]
+        else:
+            patterns = list(patterns)
+
+        if extra_patterns:
+            for extra_pattern in extra_patterns:
+                if extra_pattern not in patterns:
+                    patterns.append(extra_pattern)
+
+        for pattern in patterns:
+            # Ignore empty patterns as they match everything
+            if not pattern:
+                continue
+
+            try:
+                re.compile(pattern, casing)
+            except Exception:
+                self.log.warning('{} is not a valid regular expression and will be ignored'.format(pattern))
+            else:
+                valid_patterns.append(pattern)
+
+        if valid_patterns:
+            return re.compile('|'.join(valid_patterns), casing)
 
     def _compile_tag_re(self):
         """
