@@ -19,7 +19,7 @@ def test_default_options():
     assert check._use_mount is False
     assert check._all_partitions is False
     assert check._file_system_whitelist is None
-    assert check._file_system_blacklist == re.compile('iso9660', re.I)
+    assert check._file_system_blacklist == re.compile('iso9660$', re.I)
     assert check._device_whitelist is None
     assert check._device_blacklist is None
     assert check._mount_point_whitelist is None

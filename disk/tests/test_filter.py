@@ -34,7 +34,7 @@ def test_bad_config_string_regex():
     c = Disk('disk', None, {}, [instance])
 
     assert c._file_system_whitelist == re.compile('test', re.I)
-    assert c._file_system_blacklist == re.compile('test|iso9660', re.I)
+    assert c._file_system_blacklist == re.compile('test|iso9660$', re.I)
     assert c._device_whitelist == re.compile('test', IGNORE_CASE)
     assert c._device_blacklist == re.compile('test', IGNORE_CASE)
     assert c._mount_point_whitelist == re.compile('test', IGNORE_CASE)
@@ -53,7 +53,7 @@ def test_ignore_empty_regex():
     c = Disk('disk', None, {}, [instance])
 
     assert c._file_system_whitelist == re.compile('test', re.I)
-    assert c._file_system_blacklist == re.compile('test|iso9660', re.I)
+    assert c._file_system_blacklist == re.compile('test|iso9660$', re.I)
     assert c._device_whitelist == re.compile('test', IGNORE_CASE)
     assert c._device_blacklist == re.compile('test', IGNORE_CASE)
     assert c._mount_point_whitelist == re.compile('test', IGNORE_CASE)
@@ -239,7 +239,7 @@ def test_legacy_config():
     }
     c = Disk('disk', None, {}, [instance])
 
-    assert c._file_system_blacklist == re.compile('iso9660|test$', re.I)
+    assert c._file_system_blacklist == re.compile('iso9660$|test$', re.I)
     assert c._device_blacklist == re.compile('test1$|test2', IGNORE_CASE)
     assert c._mount_point_blacklist == re.compile('test', IGNORE_CASE)
 

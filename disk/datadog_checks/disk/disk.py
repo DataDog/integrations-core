@@ -354,7 +354,7 @@ class Disk(AgentCheck):
 
     def _compile_pattern_filters(self, instance):
         # Force exclusion of CDROM (iso9660)
-        file_system_blacklist_extras = ['iso9660']
+        file_system_blacklist_extras = ['iso9660$']
         device_blacklist_extras = []
         mount_point_blacklist_extras = []
 
