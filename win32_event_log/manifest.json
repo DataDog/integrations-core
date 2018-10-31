@@ -1,4 +1,7 @@
 {
+  "aliases": [
+    "/integrations/event_viewer/"
+  ],
   "categories": [
     "os & system"
   ],

@@ -2,16 +2,19 @@
 
 ## Overview
 
-This check watches for events in the Windows Event Log and forwards them to Datadog.
+The Win 32 event log check watches for Windows Event Logs and forwards them to Datadog. Enable this check to:
+
+- Track system and application events in Datadog.
+- Correlate system and application events with the rest of your application.
 
 ## Setup
 ### Installation
 
-The Windows Event Log check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Windows hosts.
+The Windows Event Log check is included in the [Datadog Agent][1] package. There is no additional installation required.
 
 ### Configuration
 
-Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [sample win32_event_log.d/conf.yaml][2] for all available configuration options:
+Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. This minimal file captures all events from localhost:
 
 ```
 init_config:
@@ -20,13 +23,85 @@ instances:
   - host: localhost
 ```
 
-This minimal file will capture all events from localhost, but you can configure the check to only collect certain kinds of events. See the [example check configuration][2] for a comprehensive list and description of options that allow you to do that.
+See the [sample win32_event_log.d/conf.yaml][2] for all available configuration options.
 
 [Restart the Agent][3] to start sending Windows events to Datadog.
 
+### Filters
+Use the Windows Event Viewer GUI to list all the event logs available for capture with this integration.
+
+To determine the exact values, set your filters to use the following PowerShell command:
+
+```
+Get-WmiObject -Class Win32_NTLogEvent
+```
+
+For instance, to see the latest event logged in the `Security` LogFile, use:
+
+```
+Get-WmiObject -Class Win32_NTLogEvent -Filter "LogFile='Security'" | select -First 1
+```
+
+The values listed in the output of the command can be set in `win32_event_log.yaml` to capture the same kind of events.
+
+<div class="alert alert-info">
+The information given by the  <code> Get-EventLog</code> PowerShell command or the Windows Event ViewerGUI may slightly differ from <code>Get-WmiObject</code>.<br>
+Please double-check your filters' values with <code>Get-WmiObject</code> if the integration doesn't capture the events you set up.
+</div>
+
+1 - Configure one or more filters for the event log. A filter allows you to choose what log events you want to get into Datadog.
+
+Filter on the following properties:
+
+* type: Warning, Error, Information
+* log_file: Application, System, Setup, Security
+* source_name: Any available source name
+* user: Any valid user name
+
+For each filter, add an instance in the configuration file at `conf.d/win32_event_log.yaml`.
+
+Here are some example filters you could use:
+
+```yaml
+instances:
+    # The following captures errors and warnings from SQL Server which
+    # puts all events under the MSSQLSERVER source and tag them with #sqlserver.
+    -   tags:
+            - sqlserver
+        type:
+            - Warning
+            - Error
+        log_file:
+            - Application
+        source_name:
+            - MSSQLSERVER
+
+    # This instance captures all system errors and tags them with #system.
+    -   tags:
+            - system
+        type:
+            - Error
+        log_file:
+            - System
+```
+
+2 - [Restart the Agent][3] using the Agent Manager (or restart the service)
+
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `win32_event_log` under the Checks section.
+Check the info page in the Datadog Agent Manager or run the [Agent's `status` subcommand][4] and look for `win32_event_log` under the Checks section. It should display a section similar to the following:
+
+```shell
+Checks
+======
+
+  [...]
+
+  win32_event_log
+  ---------------
+      - instance #0 [OK]
+      - Collected 0 metrics, 2 events & 1 service check
+```
 
 ## Data Collected
 ### Metrics
@@ -43,7 +118,7 @@ The Win32 Event log check does not include any service checks at this time.
 Need help? Contact [Datadog Support][5].
 
 ## Further Reading
-### Knowledge base
+### Documentation
 
 * [How to add event log files to the `Win32_NTLogEvent` WMI class][6]
 
@@ -54,7 +129,7 @@ Need help? Contact [Datadog Support][5].
 * [Monitoring Windows Server 2012 with Datadog][9]
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings#agent/windows
 [2]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
