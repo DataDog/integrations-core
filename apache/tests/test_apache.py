@@ -9,6 +9,8 @@ import requests
 import time
 import logging
 
+from six.moves import xrange
+
 from datadog_checks.apache import Apache
 from datadog_checks.utils.common import get_docker_hostname
 
