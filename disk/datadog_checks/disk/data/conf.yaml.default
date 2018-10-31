@@ -49,7 +49,6 @@ instances:
   #    - tmpfs$
   #    - rootfs$
   #    - autofs$
-  #    - .*binfmt_misc
 
   ## @param device_whitelist - list of regex - optional
   ## Instruct the check to only collect from matching devices.
@@ -96,6 +95,7 @@ instances:
   ## When conflicts arise, this will override `mount_point_whitelist`.
   #
   #  mount_point_blacklist:
+  #    - /proc/sys/fs/binfmt_misc
   #    - /dev/sde
   #    - [FJ]:
 
