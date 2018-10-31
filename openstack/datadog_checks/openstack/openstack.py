@@ -930,8 +930,6 @@ class OpenStackCheck(AgentCheck):
             self.warning('Unable to get the list of all servers: {}'.format(str(e)))
             raise e
 
-        new_server = {}
-
         for server in servers:
             new_server = {}
             new_server['server_id'] = server.get('id')
