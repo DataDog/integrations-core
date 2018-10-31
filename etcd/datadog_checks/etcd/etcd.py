@@ -2,14 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests
-from six import iteritems
+from six import iteritems, string_types
+from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.utils.headers import headers
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.utils.headers import headers
+from .metrics import METRIC_MAP
 
 
-class Etcd(AgentCheck):
+class Etcd(OpenMetricsBaseCheck):
 
     DEFAULT_TIMEOUT = 5
 
@@ -69,7 +70,118 @@ class Etcd(AgentCheck):
         'standardDeviation': 'etcd.leader.latency.stddev',
     }
 
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        if instances is not None:
+            for instance in instances:
+                # For legacy check ensure prometheus_url is set so
+                # OpenMetricsBaseCheck instantiation succeeds
+                if not is_affirmative(instance.get('use_preview', False)):
+                    instance.setdefault('prometheus_url', '')
+
+        super(Etcd, self).__init__(
+            name,
+            init_config,
+            agentConfig,
+            instances,
+            default_instances={
+                'etcd': {
+                    'prometheus_url': 'http://localhost:2379/metrics',
+                    'namespace': 'etcd',
+                    'metrics': [METRIC_MAP],
+                    'send_histograms_buckets': True,
+                }
+            },
+            default_namespace='etcd',
+        )
+
     def check(self, instance):
+        if is_affirmative(instance.get('use_preview', False)):
+            self.check_post_v3(instance)
+        else:
+            self.warning(
+                'In Agent 6.9 this check will only support ETCD v3+. If you '
+                'wish to preview the new version, set `use_v3` to `true`.'
+            )
+            self.check_pre_v3(instance)
+
+    @classmethod
+    def access_api(cls, scraper_config, path, data='{}'):
+        url = urlparse(scraper_config['prometheus_url'])
+        endpoint = '{}://{}{}'.format(url.scheme, url.netloc, path)
+
+        timeout = scraper_config['prometheus_timeout']
+
+        username = scraper_config['username']
+        password = scraper_config['password']
+        auth = (username, password) if username and password else None
+
+        cert = None
+        if isinstance(scraper_config['ssl_cert'], string_types):
+            if isinstance(scraper_config['ssl_private_key'], string_types):
+                cert = (scraper_config['ssl_cert'], scraper_config['ssl_private_key'])
+            else:
+                cert = scraper_config['ssl_cert']
+
+        verify = True
+        if isinstance(scraper_config['ssl_ca_cert'], string_types):
+            verify = scraper_config['ssl_ca_cert']
+
+        response = {}
+        try:
+            r = requests.post(endpoint, data=data, timeout=timeout, auth=auth, verify=verify, cert=cert)
+            response.update(r.json())
+        except Exception:
+            pass
+
+        return response
+
+    @classmethod
+    def is_leader(cls, scraper_config):
+        # Modify endpoint as etcd stabilizes
+        # https://github.com/etcd-io/etcd/blob/master/Documentation/dev-guide/api_grpc_gateway.md#notes
+        response = cls.access_api(scraper_config, '/v3beta/maintenance/status')
+
+        leader = response.get('leader')
+        member = response.get('header', {}).get('member_id')
+
+        return leader and member and leader == member
+
+    @classmethod
+    def get_leader_state(cls, scraper_config, tags):
+        is_leader = cls.is_leader(scraper_config)
+
+        if is_leader is not None:
+            tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
+
+    def check_post_v3(self, instance):
+        scraper_config = self.get_scraper_config(instance)
+
+        if 'prometheus_url' not in scraper_config:
+            raise ConfigurationError(
+                'You have to define at least one `prometheus_url`.'
+            )
+
+        if not scraper_config.get('metrics_mapper'):
+            raise ConfigurationError(
+                'You have to collect at least one metric from the endpoint `{}`.'.format(
+                    scraper_config['prometheus_url']
+                )
+            )
+
+        custom_tags = list(scraper_config['custom_tags'])
+        tags = list(custom_tags)
+
+        self.get_leader_state(scraper_config, tags)
+
+        # Add leader tag for the duration of this run
+        scraper_config['custom_tags'][:] = tags
+
+        try:
+            self.process(scraper_config)
+        finally:
+            scraper_config['custom_tags'][:] = custom_tags
+
+    def check_pre_v3(self, instance):
         if 'url' not in instance:
             raise Exception('etcd instance missing "url" value.')
 
@@ -99,10 +211,10 @@ class Etcd(AgentCheck):
         is_leader = False
 
         # Gather self health status
-        sc_state = AgentCheck.UNKNOWN
+        sc_state = self.UNKNOWN
         health_status = self._get_health_status(url, ssl_params, timeout)
         if health_status is not None:
-            sc_state = AgentCheck.OK if self._is_healthy(health_status) else AgentCheck.CRITICAL
+            sc_state = self.OK if self._is_healthy(health_status) else self.CRITICAL
         self.service_check(self.HEALTH_SERVICE_CHECK_NAME, sc_state, tags=instance_tags)
 
         # Gather self metrics
@@ -163,7 +275,7 @@ class Etcd(AgentCheck):
 
         # Service check
         if self_response is not None and store_response is not None:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
+            self.service_check(self.SERVICE_CHECK_NAME, self.OK,
                                tags=instance_tags)
 
     def _get_health_status(self, url, ssl_params, timeout):
@@ -202,18 +314,18 @@ class Etcd(AgentCheck):
         try:
             r = self._perform_request(url, path, ssl_params, timeout)
         except requests.exceptions.Timeout:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL,
                                message='Timeout when hitting {}'.format(url),
                                tags=tags + ['url:{}'.format(url)])
             raise
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL,
                                message='Error hitting {}. Error: {}'.format(url, str(e)),
                                tags=tags + ['url:{}'.format(url)])
             raise
 
         if r.status_code != 200:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL,
                                message='Got {} when hitting {}'.format(r.status_code, url),
                                tags=tags + ['url:{}'.format(url)])
             raise Exception('Http status code {} on url {}'.format(r.status_code, url))

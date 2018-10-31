@@ -1,8 +1,67 @@
 init_config:
 
 instances:
-  # API endpoint of your etcd instance
-  - url: "https://server:port"
+  ## @param use_preview - boolean - required - default: false
+  ## Whether or not to preview the new version of the check supporting only ETCD 3+
+  #
+  - use_preview: false
+
+  ## @param prometheus_url - string - required
+  ## The Prometheus endpoint to query.
+  #
+  #  prometheus_url: http://localhost:2379/metrics
+
+  ## @param send_histograms_buckets - boolean - optional - default: true
+  ## Histogram buckets can be noisy and generate many tags.
+  ## Set send_histograms_buckets to true to pull them.
+  #
+  #  send_histograms_buckets: true
+
+  ## @param username - string - optional
+  ## The username to use if the `prometheus_url` is behind basic auth.
+  #
+  #  username: <USERNAME>
+
+  ## @param password - string - optional
+  ## The password to use if the `prometheus_url` is behind basic auth.
+  #
+  #  password: <PASSWORD>
+
+  ## @param ssl_cert - string - optional
+  ## The certificate to use when connecting to the `prometheus_url`.
+  ## It may also contain an unencrypted private key to use.
+  #
+  #  ssl_cert: <CERT_PATH>
+
+  ## @param ssl_private_key - string - optional
+  ## The unencrypted private key to use when connecting to the `prometheus_url`.
+  ## This is required if `ssl_cert` is set and it does not already contain a private key.
+  #
+  #  ssl_private_key: <PRIVATE_KEY_PATH>
+
+  ## @param ssl_ca_cert - string - optional
+  ## The path to a CA_BUNDLE file or directory with certificates of trusted CAs.
+  #
+  #  ssl_ca_cert: <CA_CERT_PATH>
+
+  ## @param prometheus_timeout - integer - optional - default: 10
+  ## The timeout for connecting to the `prometheus_url`.
+  #
+  #  prometheus_timeout: 10
+
+  ## @param tags - list of key:value string - optional
+  ## List of tags to attach to every metric and service check emitted by this integration.
+  ##
+  ## Learn more about tagging at https://docs.datadoghq.com/tagging
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+
+  #  API endpoint of your etcd instance
+  #  url: "https://server:port"
+
     # Change the time to wait on an etcd API request
     # timeout: 5
 
