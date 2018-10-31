@@ -217,7 +217,10 @@ def test_cache_utils():
         assert openstack_check._is_expired('aggregates')
 
 
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_servers', return_value=common.ALL_SERVER_DETAILS)
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_servers',
+    return_value=common.ALL_SERVER_DETAILS
+)
 def test_server_exclusion(*args):
     """
     Exclude servers using regular expressions.
@@ -241,7 +244,10 @@ def test_server_exclusion(*args):
         assert server_id in common.FILTERED_SERVER_ID
 
 
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_servers', return_value=common.ALL_SERVER_DETAILS)
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_servers',
+    return_value=common.ALL_SERVER_DETAILS
+)
 def test_server_exclusion_by_project(*args):
     """
     Exclude servers using regular expressions.
@@ -265,7 +271,10 @@ def test_server_exclusion_by_project(*args):
         assert server_id in common.FILTERED_BY_PROJ_SERVER_ID
 
 
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_servers', return_value=common.ALL_SERVER_DETAILS)
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_servers',
+    return_value=common.ALL_SERVER_DETAILS
+)
 def test_server_include_all_by_default(*args):
     """
     Exclude servers using regular expressions.
@@ -284,7 +293,10 @@ def test_server_include_all_by_default(*args):
     assert len(server_ids) == 4
 
 
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_network_ids', return_value=common.ALL_IDS)
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_network_ids',
+    return_value=common.ALL_IDS
+)
 def test_network_exclusion(*args):
     """
     Exclude networks using regular expressions.
@@ -311,8 +323,14 @@ def test_network_exclusion(*args):
     return_value=common.MOCK_NOVA_SERVERS)
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_nova_endpoint',
             return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token', return_value="test_auth_token")
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id', return_value="tenant-1")
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token',
+    return_value="test_auth_token"
+)
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
+    return_value="tenant-1"
+)
 def test_cache_between_runs(*args):
     """
     Ensure the cache contains the expected VMs between check runs.
@@ -341,8 +359,14 @@ def test_cache_between_runs(*args):
     return_value=common.MOCK_NOVA_SERVERS)
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_nova_endpoint',
             return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token', return_value="test_auth_token")
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id', return_value="None")
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token',
+    return_value="test_auth_token"
+)
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
+    return_value="None"
+)
 def test_project_name_none(*args):
     """
     Ensure the cache contains the expected VMs between check runs.
@@ -374,8 +398,14 @@ def get_server_details_response(self, url, headers=None, params=None, timeout=No
             side_effect=get_server_details_response)
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_nova_endpoint',
             return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876", autospec=True)
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token', return_value="test_auth_token", autospec=True)
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id', return_value="None", autospec=True)
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token',
+    return_value="test_auth_token", autospec=True
+)
+@mock.patch(
+    'datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
+    return_value="None", autospec=True
+)
 def test_get_paginated_server(*args):
     """
     Ensure the server cache is updated while using pagination
