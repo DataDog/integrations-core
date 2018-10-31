@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datetime import datetime, timedelta
-from urlparse import urljoin
+from six.moves.urllib.parse import urljoin
 import re
 import time
 import random
@@ -10,6 +10,7 @@ import copy
 
 import requests
 import simplejson as json
+from six import iteritems
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
@@ -625,7 +626,7 @@ class OpenStackControllerCheck(AgentCheck):
 
     def delete_current_scope(self):
         scope_to_delete = self._parent_scope if self._parent_scope else self._current_scope
-        for i_key, scope in self.instance_map.items():
+        for i_key, scope in list(iteritems(self.instance_map)):
             if scope is scope_to_delete:
                 self.log.debug("Deleting current scope: %s", i_key)
                 del self.instance_map[i_key]
@@ -770,10 +771,10 @@ class OpenStackControllerCheck(AgentCheck):
     def _parse_uptime_string(self, uptime):
         """ Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n' """
         uptime = uptime.strip()
-        load_averages = uptime[uptime.find('load average:'):].split(':')[1].split(',')
+        load_averages = uptime[uptime.find('load average:'):].split(':')[1].strip().split(',')
+        load_averages = [float(load_avg) for load_avg in load_averages]
         uptime_sec = uptime.split(',')[0]
-
-        return {'loads': map(float, load_averages), 'uptime_sec': uptime_sec}
+        return {'loads': load_averages, 'uptime_sec': uptime_sec}
 
     def get_all_aggregate_hypervisors(self):
         url = '{}/os-aggregates'.format(self.get_nova_endpoint())
@@ -866,7 +867,7 @@ class OpenStackControllerCheck(AgentCheck):
         else:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, hostname=hyp_hostname, tags=service_check_tags)
 
-        for label, val in hyp.iteritems():
+        for label, val in iteritems(hyp):
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{}".format(label)
                 self.gauge(metric_label, val, tags=tags)
@@ -968,11 +969,11 @@ class OpenStackControllerCheck(AgentCheck):
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             for exclude_id_rule in self.exclude_server_id_rules:
-                for server_id in self.server_details_by_id.keys():
+                for server_id in list(self.server_details_by_id):
                     if re.match(exclude_id_rule, server_id):
                         del self.server_details_by_id[server_id]
 
-        for _, server in self.server_details_by_id.iteritems():
+        for _, server in iteritems(self.server_details_by_id):
             proj_list.add(server.get('project_name'))
 
         projects_filtered = pattern_filter(
@@ -983,7 +984,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         self.server_details_by_id = {
                 sid: server for (sid, server)
-                in self.server_details_by_id.iteritems()
+                in iteritems(self.server_details_by_id)
                 if server.get('project_name') in projects_filtered
         }
 
@@ -1246,7 +1247,7 @@ class OpenStackControllerCheck(AgentCheck):
                 scope_map.update(instance_scope.project_scope_map)
                 self._parent_scope = instance_scope
 
-            for _, scope in scope_map.iteritems():
+            for _, scope in iteritems(scope_map):
                 # Store the scope on the object so we don't have to keep passing it around
                 self._current_scope = scope
 
@@ -1275,9 +1276,9 @@ class OpenStackControllerCheck(AgentCheck):
             )
 
             projects = \
-                {name: v for (name, v) in projects.iteritems() if name in proj_filtered}
+                {name: v for (name, v) in iteritems(projects) if name in proj_filtered}
 
-            for name, project in projects.iteritems():
+            for name, project in iteritems(projects):
                 self.get_stats_for_single_project(project, custom_tags)
 
             self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
@@ -1419,7 +1420,7 @@ class OpenStackControllerCheck(AgentCheck):
         """
         self.log.debug("Collecting external_host_tags now")
         external_host_tags = []
-        for k, v in self.external_host_tags.iteritems():
+        for k, v in iteritems(self.external_host_tags):
             external_host_tags.append((k, {SOURCE_TYPE: v}))
 
         self.log.debug("Sending external_host_tags: %s", external_host_tags)

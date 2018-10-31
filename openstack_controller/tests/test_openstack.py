@@ -7,8 +7,9 @@ import time
 
 import mock
 import pytest
+from six import iteritems
 
-import common
+from . import common
 
 from datadog_checks.openstack_controller.openstack_controller import (
     OpenStackControllerCheck,
@@ -142,7 +143,7 @@ def test_unscoped_from_config():
 
                 assert scope.auth_token == 'fake_token'
                 assert len(scope.project_scope_map) == 1
-                for _, scope in scope.project_scope_map.iteritems():
+                for _, scope in iteritems(scope.project_scope_map):
                     assert isinstance(scope, OpenStackProjectScope)
                     assert scope.auth_token == 'fake_token'
                     assert scope.tenant_id == '263fd9'
