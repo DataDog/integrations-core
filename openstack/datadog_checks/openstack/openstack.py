@@ -105,6 +105,14 @@ UNSCOPED_AUTH = 'unscoped'
 BASE_BACKOFF_SECS = 15
 MAX_BACKOFF_SECS = 300
 
+SERVER_FIELDS_REQ = [
+    'server_id',
+    'state',
+    'server_name',
+    'hypervisor_hostname',
+    'tenant_id',
+]
+
 
 class OpenStackAuthFailure(Exception):
     pass
@@ -922,6 +930,8 @@ class OpenStackCheck(AgentCheck):
             self.warning('Unable to get the list of all servers: {}'.format(str(e)))
             raise e
 
+        new_server = {}
+
         for server in servers:
             new_server = {}
             new_server['server_id'] = server.get('id')
@@ -930,6 +940,12 @@ class OpenStackCheck(AgentCheck):
             new_server['hypervisor_hostname'] = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
             new_server['tenant_id'] = server.get('tenant_id')
             new_server['availability_zone'] = server.get('OS-EXT-AZ:availability_zone')
+
+            # Confirm that the new server has all the required fields
+            if not all(key in new_server for key in SERVER_FIELDS_REQ):
+                self.log.debug("Server {} is missing one of the required keys. Not adding to cache".format(new_server))
+                continue
+
             # Update our cached list of servers
             if (
                 new_server['server_id'] not in self.server_details_by_id
