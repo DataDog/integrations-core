@@ -7,5 +7,5 @@ from datadog_checks.dev import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
-PORT = '2379'
+PORT = '23790'
 MAIN_URL = 'http://{}:{}'.format(HOST, PORT)
