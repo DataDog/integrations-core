@@ -17,7 +17,7 @@ from .utils import (
     echo_warning
 )
 from ..constants import (
-    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, get_root
+    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP, get_root
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
@@ -584,6 +584,17 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
         if version:
             # sanity check on the version provided
             cur_version = get_version_string(check)
+
+            # Keep track of intermediate version bumps
+            prev_version = cur_version
+            for method in version.split(','):
+                # Apply any supported version bumping methods. Chaining is required for going
+                # from mainline releases to development releases since e.g. x.y.z > x.y.z-rc.A.
+                # So for an initial bug fix dev release you can do `fix,rc`.
+                if method in VERSION_BUMP:
+                    version = VERSION_BUMP[method](prev_version)
+                    prev_version = version
+
             p_version = parse_version_info(version)
             p_current = parse_version_info(cur_version)
             if p_version <= p_current:
