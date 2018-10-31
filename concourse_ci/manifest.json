@@ -18,6 +18,6 @@
     "display_name": "Concourse CI",
     "short_description": "Collect metrics emitted from Concourse CI.",
     "metric_prefix": "concourse.ci.",
-    "metric_to_check": "concourse.ci.scheduling_full_duration",
+    "metric_to_check": "concourse.ci.goroutines",
     "creates_events": false
 }
