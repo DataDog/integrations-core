@@ -175,6 +175,8 @@ jobs:
     - stage: test
       env: CHECK=openstack
     - stage: test
+      env: CHECK=openstack_controller
+    - stage: test
       env: CHECK=oracle
     - stage: test
       env: CHECK=pdh_check
