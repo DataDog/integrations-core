@@ -1,0 +1,23 @@
+{
+  "display_name": "Openstack_controller",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "openstack_controller",
+  "metric_prefix": "openstack_controller.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "49979592-9096-460a-b086-f173f26c6626",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Openstack_controller Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": true
+}

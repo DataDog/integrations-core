@@ -19,7 +19,7 @@ try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
 except ImportError:
-    # Agent < 6.0: the Agent pulls tags invoking `OpenStackCheck.get_external_host_tags`
+    # Agent < 6.0: the Agent pulls tags invoking `OpenStackControllerCheck.get_external_host_tags`
     set_external_tags = None
 
 
@@ -515,7 +515,7 @@ class KeystoneCatalog(object):
             raise MissingNovaEndpoint()
 
 
-class OpenStackCheck(AgentCheck):
+class OpenStackControllerCheck(AgentCheck):
     CACHE_TTL = {"aggregates": 300, "physical_hosts": 300, "hypervisors": 300}  # seconds
 
     FETCH_TIME_ACCESSORS = {
