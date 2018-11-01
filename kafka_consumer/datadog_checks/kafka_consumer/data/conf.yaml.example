@@ -51,6 +51,14 @@ instances:
     # ssl_keyfile: /path/to/key/file
     # ssl_password: password1
 
+    # Setting aggregate_consumer_lag to True will tell the check to report
+    # consumer lag metrics as a summed total across all monitored paritions per
+    # topic.
+    aggregate_consumer_lag: false
+    # Setting per_partition_consumer_lag to True (default) will tell the check
+    # to report consumer lag metrics at a partition level. Enabling this could
+    # lead to a large number of metrics being sent.
+    per_partition_consumer_lag: true
     # kafka_consumer_offsets: false
     consumer_groups:
       my_consumer:  # consumer group name

@@ -133,10 +133,10 @@ class KafkaCheck(AgentCheck):
 
         # Report the consumer group offsets and consumer lag
         if zk_consumer_offsets:
-            self._report_consumer_metrics(highwater_offsets, zk_consumer_offsets,
+            self._report_consumer_metrics(instance, highwater_offsets, zk_consumer_offsets,
                                           topic_partitions_without_a_leader, tags=custom_tags + ['source:zk'])
         if kafka_consumer_offsets:
-            self._report_consumer_metrics(highwater_offsets, kafka_consumer_offsets,
+            self._report_consumer_metrics(instance, highwater_offsets, kafka_consumer_offsets,
                                           topic_partitions_without_a_leader, tags=custom_tags + ['source:kafka'])
 
     def stop(self):
@@ -311,11 +311,20 @@ class KafkaCheck(AgentCheck):
 
         return highwater_offsets, list(set(topic_partitions_without_a_leader))
 
-    def _report_consumer_metrics(self, highwater_offsets, consumer_offsets, unled_topic_partitions=None, tags=None):
+    def _report_consumer_metrics(self, instance, highwater_offsets, consumer_offsets, unled_topic_partitions=None,
+                                 tags=None):
+        report_per_partition_consumer_lag = is_affirmative(
+            instance.get('per_partition_consumer_lag', True))
+        report_aggregate_consumer_lag = is_affirmative(
+            instance.get('aggregate_consumer_lag', False))
+
         if unled_topic_partitions is None:
             unled_topic_partitions = []
         if tags is None:
             tags = []
+
+        total_consumer_lag = defaultdict(int)
+
         for (consumer_group, topic, partition), consumer_offset in iteritems(consumer_offsets):
             # Report the consumer group offsets and consumer lag
             if (topic, partition) not in highwater_offsets:
@@ -346,7 +355,15 @@ class KafkaCheck(AgentCheck):
                                  key, severity="error")
                 self.log.debug(message)
 
-            self.gauge('kafka.consumer_lag', consumer_lag, tags=consumer_group_tags)
+            total_consumer_lag[(consumer_group, topic)] += consumer_lag
+            if report_per_partition_consumer_lag:
+                self.gauge('kafka.consumer_lag', consumer_lag, tags=consumer_group_tags)
+
+        if report_aggregate_consumer_lag:
+            for (consumer_group, topic), total_lag in iteritems(total_consumer_lag):
+                consumer_group_tags = ['topic:%s' % topic,
+                                       'consumer_group:%s' % consumer_group] + tags
+                self.gauge('kafka.consumer_lag.total', total_lag, tags=consumer_group_tags)
 
     def _get_zk_path_children(self, zk_conn, zk_path, name_for_error):
         """Fetch child nodes for a given Zookeeper path."""
