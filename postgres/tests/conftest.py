@@ -60,6 +60,11 @@ def postgres_standalone():
 
         print "\n Docker inspect help {} \n".format(output)
 
+        output =  subprocess.check_output([
+            "docker",
+            "ps"
+        ])
+
         output = subprocess.check_output([
             "docker",
             "inspect",
