@@ -5,13 +5,13 @@ The logos folder should contain three images with filenames and sizes that exact
 #### `saas_logos-bot.png` (200 × 128)
 
 - Integration tile images at `/account/settings`
-- Description heading at `/account/settings#integrations/{integration_name}`
+- Description heading at `/account/settings#integrations/{check_name}`
 - Integration monitor tiles and search bar results images at `/monitors#create/integration`
 
 #### `saas_logos-small.png` (120 × 60)
 
 - Integration dashboards list images at `/dash/list`
-- Some integration dashboards/screenboards at `/dash/integration/{integration_dash_name}`
+- Some integration dashboards/screenboards at `/dash/integration/{check_name}`
 
 #### `avatars-bot.png` (128 × 128)
 
