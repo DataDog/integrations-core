@@ -127,7 +127,7 @@ Need help? Contact [Datadog Support][7].
 
 ## Development
 
-Please refer to the [main documentation][6]
+See the [main documentation][6]
 for more details about how to test and develop Agent based integrations.
 
 [1]: https://app.datadoghq.com/account/settings#agent

@@ -30,7 +30,7 @@ See [this gist][7] for an example of metrics exposed by linkerd.
 
 Attention: Depending on your linkerd configuration, some metrics might not be exposed by linkerd.
 
-To list the metrics exposed by your current configuration, please run
+To list the metrics exposed by your current configuration, run
 ```bash
 curl <linkerd_prometheus_endpoint>
 ```

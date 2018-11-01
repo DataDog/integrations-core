@@ -122,7 +122,7 @@ Configure a `password` in `redisdb.yaml`.
 
 ## Development
 
-Please refer to the [main documentation][7] for more details about how to test and develop Agent based integrations.
+See the [main documentation][7] for more details about how to test and develop Agent based integrations.
 
 ### Testing Guidelines
 

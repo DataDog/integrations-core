@@ -56,7 +56,7 @@ The TCP check does not include any events at this time.
 
 Returns DOWN if the Agent cannot connect to the configured `host` and `port`, otherwise UP.
 
-To create alert conditions on this service check in the Datadog app, click **Network** on the [Create Monitor][6] page, not **Integration**.
+To create alert conditions on this service check in Datadog, click **Network** on the [Create Monitor][6] page, not **Integration**.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][7].

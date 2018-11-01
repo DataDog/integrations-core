@@ -26,7 +26,7 @@ Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your 
 
 #### Metric Collection
 
-**The following instructions are for the Datadog agent >= 5.0. For agents before that, refer to the [older documentation][17].**
+**The following instructions are for the Datadog agent >= 5.0. For agents before that, see the [older documentation][17].**
 
 Kafka bean names depend on the exact Kafka version you're running. You should always use the example that comes packaged with the Agent as a base since that will be the most up-to-date configuration. Use [this sample configuration file][18] as an example, but note that the version there may be for a newer version of the Agent than what you've got installed.
 
