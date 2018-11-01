@@ -109,13 +109,13 @@ jmx_metrics:
               metric_type: gauge
               alias: kafka.producer.request_latency_max
           - record-send-rate:
-              metric_type: rate
+              metric_type: gauge
               alias: kafka.producer.records_send_rate
           - records-per-request-avg:
               metric_type: gauge
               alias: kafka.producer.records_per_request
           - record-retry-rate:
-              metric_type: rate
+              metric_type: gauge
               alias: kafka.producer.record_retry_rate
           - record-error-rate:
               metric_type: gauge
