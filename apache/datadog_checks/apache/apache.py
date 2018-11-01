@@ -85,11 +85,10 @@ class Apache(AgentCheck):
             self.service_check(service_check_name, AgentCheck.OK,
                                tags=service_check_tags)
         self.log.debug("apache check succeeded")
-        response = r.content
         metric_count = 0
         # Loop through and extract the numerical values
-        for line in response.splitlines():
-            values = line.decode().split(': ')
+        for line in r.iter_lines(decode_unicode=True):
+            values = line.split(': ')
             if len(values) == 2:  # match
                 metric, value = values
                 try:

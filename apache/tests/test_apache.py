@@ -9,8 +9,6 @@ import requests
 import time
 import logging
 
-from six.moves import xrange
-
 from datadog_checks.apache import Apache
 from datadog_checks.utils.common import get_docker_hostname
 
@@ -60,7 +58,7 @@ APACHE_RATES = [
 
 
 def wait_for_apache():
-    for _ in xrange(0, 100):
+    for _ in range(0, 100):
         res = None
         try:
             res = requests.get(STATUS_URL)
@@ -83,7 +81,7 @@ def spin_up_apache():
     ]
     subprocess.check_call(args + ["up", "-d", "--build"], env=env)
     wait_for_apache()
-    for _ in xrange(0, 100):
+    for _ in range(0, 100):
         requests.get(BASE_URL)
     time.sleep(20)
     yield
