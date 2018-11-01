@@ -48,6 +48,19 @@ def postgres_standalone():
 
         output = subprocess.check_output([
             "docker",
+            "-v"
+        ])
+        print "\n Docker version {} \n".format(output)
+
+        output = subprocess.check_output([
+            "docker",
+            "inspect --help"
+        ])
+        
+        print "\n Docker inspect help {} \n".format(output)
+
+        output = subprocess.check_output([
+            "docker",
             "inspect",
             "--format='{{json .State.Health.Status}}'",
             "compose_postgres_1"])
