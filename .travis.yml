@@ -65,7 +65,7 @@ jobs:
     - stage: test
       env: CHECK=agent_metrics
     - stage: test
-      env: CHECK=apache
+      env: CHECK=apache PYTHON3=true
     - stage: test
       env: CHECK=aspdotnet
     - stage: test
