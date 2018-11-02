@@ -148,7 +148,7 @@ def construct_pytest_options(verbose=0, enter_pdb=False, debug=False, bench=Fals
         pytest_options += ' --pdb -x'
 
     if debug:
-        pytest_options += ' --log-level=debug'
+        pytest_options += ' --log-level=debug -s'
 
     if bench:
         pytest_options += ' --benchmark-only --benchmark-cprofile=tottime'
