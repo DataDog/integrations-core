@@ -1,6 +1,7 @@
 version: '2.1'
 services:
   postgres:
+    container_name: compose_postgres_1
     image: "postgres:${POSTGRES_VERSION}-alpine"
     ports:
       - 5432:5432
