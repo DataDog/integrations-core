@@ -270,14 +270,14 @@ class RabbitMQ(AgentCheck):
     def check(self, instance):
         base_url, max_detailed, specified, auth, ssl_verify, custom_tags, suppress_warning = self._get_config(instance)
         try:
-            vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
-            self.cached_vhosts[base_url] = vhosts
-
-            limit_vhosts = []
-            if self._limit_vhosts(instance):
-                limit_vhosts = vhosts
-
             with warnings.catch_warnings():
+                vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
+                self.cached_vhosts[base_url] = vhosts
+
+                limit_vhosts = []
+                if self._limit_vhosts(instance):
+                    limit_vhosts = vhosts
+
                 # Suppress warnings from urllib3 only if ssl_verify is set to False and ssl_warning is set to False
                 if suppress_warning:
                     warnings.simplefilter('ignore', InsecureRequestWarning)
