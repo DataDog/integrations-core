@@ -14,7 +14,7 @@ Get metrics from OpenStack service in real time to:
 
 To capture OpenStack metrics you need to [install the Agent][1] on your hosts running hypervisors.
 
-**Note**: Installing the OpenStack Integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, please visit our Billing FAQ.
+**Note**: Installing the OpenStack Integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit our Billing FAQ.
 
 ### Configuration
 

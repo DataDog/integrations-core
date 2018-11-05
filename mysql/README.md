@@ -39,7 +39,7 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password b
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-Please note that `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][14].
+Note that `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][14].
 
 
 Verify that the user was created successfully using the following command - replace ```<UNIQUEPASSWORD>``` with the password you created above:

@@ -57,7 +57,7 @@ instances:
 
 #### SNMP v3 configuration
 
-Note: Refer to the [SNMP Library reference][12] to see all configuration options.
+Note: See the [SNMP Library reference][12] to see all configuration options.
 
 ```
 init_config:

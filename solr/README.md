@@ -187,7 +187,7 @@ Here is another filtering example:
 
 #### Note
 
-List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, please use singletons and multiple `include` statements instead.
+List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple `include` statements instead.
 
     # Datadog Agent > 5.3.0
       conf:

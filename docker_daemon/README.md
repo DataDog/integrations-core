@@ -11,7 +11,7 @@ Configure this Agent check to get metrics from docker_daemon service in real tim
 
 **NOTE**: The Docker check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents prior to major version 6**.
 
-**To learn how to use the Docker_daemon Integration with the Agent major version 6 [Consult our dedicated agent v6 setup](#agent-v6).**
+**To learn how to use the Docker_daemon Integration with the Agent major version 6 [Consult the dedicated agent v6 setup](#agent-v6).**
 
 ## Setup
 ### Installation
@@ -56,7 +56,7 @@ Note that in the command above, you are able to pass your API key to the Datadog
 | EC2_TAGS | Enabling this feature allows the agent to query and capture custom tags set using the EC2 API during startup. To enable, set the value to "yes", for example, `-e EC2_TAGS=yes`. Note that this feature requires an IAM role associated with the instance. |
 | NON_LOCAL_TRAFFIC | Enabling this feature allows statsd reporting from any external IP. For example, `-e NON_LOCAL_TRAFFIC=yes`. This can be used to report metrics from other containers or systems. See [network configuration][9] for more details.
 | PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD | Sets proxy configuration details. For more information, see the [Agent proxy documentation][10] |
-| SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, please see the [Autodiscovery guide][11]. |
+| SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, see the [Autodiscovery guide][11]. |
 
 **Note**: Add `--restart=unless-stopped` if you want your agent to be resistant to restarts.
 
@@ -75,7 +75,7 @@ docker run -d --name dd-agent \
 
 #### Alpine Linux based container
 
-Our standard Docker image is based on Debian Linux, but as of version 5.7 of the Datadog Agent, we also offer an [Alpine Linux][12] based image. The Alpine Linux image is considerably smaller in size than the traditional Debian-based image. It also inherits Alpine's security-oriented design.
+The standard Docker image is based on Debian Linux, but as of version 5.7 of the Datadog Agent, we also offer an [Alpine Linux][12] based image. The Alpine Linux image is considerably smaller in size than the traditional Debian-based image. It also inherits Alpine's security-oriented design.
 
 To use the Alpine Linux image, simply append `-alpine` to the version tag. For example:
 
@@ -97,7 +97,7 @@ For example, the first version of the Docker image that bundles the Datadog Agen
 
 #### Custom containers and additional information
 
-For more information about building custom Docker containers with the Datadog Agent, the Alpine Linux based image, versioning, and more, please reference [our `docker-dd-agent` project on Github][1].
+For more information about building custom Docker containers with the Datadog Agent, the Alpine Linux based image, versioning, and more, reference [the `docker-dd-agent` project on Github][1].
 
 ### Validation
 
@@ -114,7 +114,7 @@ The new docker check is named `docker`. Starting from version 6.0, the Agent won
 Some options have moved from `docker_daemon.yaml` to the main `datadog.yaml`:
 
   * `collect_labels_as_tags` has been renamed `docker_labels_as_tags` and now supports high cardinality tags, see the details in `datadog.yaml.example`
-  * `exclude` and `include` lists have been renamed `ac_include` and `ac_exclude`. In order to make filtering consistent accross all components of the agent, we had to drop filtering on arbitrary tags. The only supported filtering tags are `image` (image name) and `name` (container name). Regexp filtering is still available, see `datadog.yaml.example` for examples
+  * `exclude` and `include` lists have been renamed `ac_include` and `ac_exclude`. In order to make filtering consistent across all components of the agent, we had to drop filtering on arbitrary tags. The only supported filtering tags are `image` (image name) and `name` (container name). Regexp filtering is still available, see `datadog.yaml.example` for examples
   * `docker_root` option has been split in two options `container_cgroup_root` and `container_proc_root`
   * `exclude_pause_container` has been added to exclude pause containers on Kubernetes and Openshift (default to true). This avoids removing them from the exclude list by error.
 

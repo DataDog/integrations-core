@@ -66,7 +66,7 @@ Use the [autodiscovery feature][105] for logs to override the `service` and `sou
 
 ### Validation
 
-In the Datadog app, search for `mesos.cluster` in the Metrics Explorer.
+In Datadog, search for `mesos.cluster` in the Metrics Explorer.
 
 ## Data Collected
 ### Metrics
