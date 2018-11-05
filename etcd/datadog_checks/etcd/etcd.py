@@ -104,8 +104,7 @@ class Etcd(OpenMetricsBaseCheck):
             )
             self.check_pre_v3(instance)
 
-    @classmethod
-    def access_api(cls, scraper_config, path, data='{}'):
+    def access_api(self, scraper_config, path, data='{}'):
         url = urlparse(scraper_config['prometheus_url'])
         endpoint = '{}://{}{}'.format(url.scheme, url.netloc, path)
 
@@ -125,30 +124,30 @@ class Etcd(OpenMetricsBaseCheck):
         verify = True
         if isinstance(scraper_config['ssl_ca_cert'], string_types):
             verify = scraper_config['ssl_ca_cert']
+        elif not is_affirmative(scraper_config['ssl_verify']):
+            verify = False
 
         response = {}
         try:
             r = requests.post(endpoint, data=data, timeout=timeout, auth=auth, verify=verify, cert=cert)
             response.update(r.json())
-        except Exception:
-            pass
+        except Exception as e:
+            self.log.debug('Error accessing GRPC gateway: {}'.format(e))
 
         return response
 
-    @classmethod
-    def is_leader(cls, scraper_config):
+    def is_leader(self, scraper_config):
         # Modify endpoint as etcd stabilizes
         # https://github.com/etcd-io/etcd/blob/master/Documentation/dev-guide/api_grpc_gateway.md#notes
-        response = cls.access_api(scraper_config, '/v3beta/maintenance/status')
+        response = self.access_api(scraper_config, '/v3beta/maintenance/status')
 
         leader = response.get('leader')
         member = response.get('header', {}).get('member_id')
 
         return leader and member and leader == member
 
-    @classmethod
-    def get_leader_state(cls, scraper_config, tags):
-        is_leader = cls.is_leader(scraper_config)
+    def add_leader_state_tag(self, scraper_config, tags):
+        is_leader = self.is_leader(scraper_config)
 
         if is_leader is not None:
             tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
@@ -171,7 +170,7 @@ class Etcd(OpenMetricsBaseCheck):
         custom_tags = list(scraper_config['custom_tags'])
         tags = list(custom_tags)
 
-        self.get_leader_state(scraper_config, tags)
+        self.add_leader_state_tag(scraper_config, tags)
 
         # Add leader tag for the duration of this run
         scraper_config['custom_tags'][:] = tags

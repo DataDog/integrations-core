@@ -44,6 +44,11 @@ instances:
   #
   #  ssl_ca_cert: <CA_CERT_PATH>
 
+  ## @param ssl_verify - boolean - optional - default: true
+  ## Instruct the check to validate SSL certificates when connecting to `prometheus_url` and GRPC gateway.
+  #
+  #  ssl_verify: true
+
   ## @param prometheus_timeout - integer - optional - default: 10
   ## The timeout for connecting to the `prometheus_url`.
   #
