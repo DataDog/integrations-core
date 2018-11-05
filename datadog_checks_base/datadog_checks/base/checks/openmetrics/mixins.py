@@ -189,6 +189,9 @@ class OpenMetricsScraperMixin(object):
         # The path to the trusted CA used for generating custom certificates
         config['ssl_ca_cert'] = instance.get('ssl_ca_cert', default_instance.get('ssl_ca_cert', None))
 
+        # Whether or not to validate SSL certificates
+        config['ssl_verify'] = is_affirmative(instance.get('ssl_verify', default_instance.get('ssl_verify', True)))
+
         # Extra http headers to be sent when polling endpoint
         config['extra_headers'] = default_instance.get('extra_headers', {})
         config['extra_headers'].update(instance.get('extra_headers', {}))
@@ -437,12 +440,16 @@ class OpenMetricsScraperMixin(object):
                 cert = (scraper_config['ssl_cert'], scraper_config['ssl_private_key'])
             else:
                 cert = scraper_config['ssl_cert']
-        verify = True
+
+        verify = scraper_config['ssl_verify']
+        # TODO: deprecate use as `ssl_verify` boolean
+        if scraper_config['ssl_ca_cert'] is False:
+            verify = False
+
         if isinstance(scraper_config['ssl_ca_cert'], string_types):
             verify = scraper_config['ssl_ca_cert']
-        elif scraper_config['ssl_ca_cert'] is False:
+        elif verify is False:
             disable_warnings(InsecureRequestWarning)
-            verify = False
 
         # Determine the authentication settings
         username = scraper_config['username']
