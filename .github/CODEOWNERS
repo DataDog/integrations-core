@@ -20,5 +20,5 @@ manifest.json       @DataDog/baklava @DataDog/agent-integrations
 /kubernetes_state/  @DataDog/container-integrations @DataDog/agent-integrations
 
 # To keep ProdSec up-to-date with changes to requirements.txt.
-*/requirements.in   @DataDog/prodsec @DataDog/agent-integrations
-*/requirements.txt  @DataDog/prodsec @DataDog/agent-integrations
+requirements.in   @DataDog/prodsec
+requirements.txt  @DataDog/prodsec
