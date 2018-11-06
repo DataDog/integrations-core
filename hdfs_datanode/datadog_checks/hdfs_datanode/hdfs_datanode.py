@@ -23,11 +23,18 @@ from urlparse import urljoin
 
 # 3rd party
 import requests
+import requests_kerberos
 from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
 from simplejson import JSONDecodeError
 
 # Project
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck, is_affirmative
+
+KERBEROS_STRATEGIES = {
+    'required': requests_kerberos.REQUIRED,
+    'optional': requests_kerberos.OPTIONAL,
+    'disabled': requests_kerberos.DISABLED,
+}
 
 
 class HDFSDataNode(AgentCheck):
@@ -70,14 +77,27 @@ class HDFSDataNode(AgentCheck):
         tags.append("datanode_url:{}".format(jmx_address))
         tags = list(set(tags))
 
+        auth = None
+
         # Authenticate our connection to JMX endpoint if required
+        kerberos = instance.get('kerberos')
         username = instance.get('username')
         password = instance.get('password')
-        auth = None
         if username is not None and password is not None:
             auth = (username, password)
+        elif kerberos is not None:
+            if kerberos not in KERBEROS_STRATEGIES:
+                raise Exception('Invalid Kerberos strategy `{}`'.format(kerberos))
 
-        disable_ssl_validation = instance.get('disable_ssl_validation', False)
+            auth = requests_kerberos.HTTPKerberosAuth(
+                mutual_authentication=KERBEROS_STRATEGIES[kerberos],
+                delegate=is_affirmative(instance.get('kerberos_delegate', False)),
+                force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
+                hostname_override=instance.get('kerberos_hostname'),
+                principal=instance.get('kerberos_principal')
+            )
+
+        disable_ssl_validation = is_affirmative(instance.get('disable_ssl_validation', False))
 
         # Get data from JMX
         hdfs_datanode_beans = self._get_jmx_data(jmx_address, auth, disable_ssl_validation, tags)
