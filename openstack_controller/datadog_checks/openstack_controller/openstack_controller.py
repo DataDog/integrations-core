@@ -18,6 +18,8 @@ from datadog_checks.utils.common import pattern_filter
 
 from .utils import get_instance_key
 from .retry_backoff import BackOffRetry
+from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteAuthScope,
+                         IncompleteIdentity, MissingNovaEndpoint, MissingNeutronEndpoint, KeystoneUnreachable)
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -113,42 +115,6 @@ SERVER_FIELDS_REQ = [
     'hypervisor_hostname',
     'tenant_id',
 ]
-
-
-class OpenStackAuthFailure(Exception):
-    pass
-
-
-class InstancePowerOffFailure(Exception):
-    pass
-
-
-class IncompleteConfig(Exception):
-    pass
-
-
-class IncompleteAuthScope(IncompleteConfig):
-    pass
-
-
-class IncompleteIdentity(IncompleteConfig):
-    pass
-
-
-class MissingEndpoint(Exception):
-    pass
-
-
-class MissingNovaEndpoint(MissingEndpoint):
-    pass
-
-
-class MissingNeutronEndpoint(MissingEndpoint):
-    pass
-
-
-class KeystoneUnreachable(Exception):
-    pass
 
 
 class OpenStackScope(object):
@@ -1317,7 +1283,6 @@ class OpenStackControllerCheck(AgentCheck):
         except Exception as e:
             self.warning('Unable to get projects: {}'.format(str(e)))
             raise e
-
 
     def get_scoped_project(self, project_auth_scope):
         """
