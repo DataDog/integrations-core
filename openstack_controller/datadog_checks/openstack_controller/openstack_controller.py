@@ -590,11 +590,6 @@ class OpenStackControllerCheck(AgentCheck):
                 self.log.debug("Deleting current scope: %s", i_key)
                 del self.instance_map[i_key]
 
-    def reset_backoff(self, instance):
-        i_key = get_instance_key(instance)
-        self.backoff[i_key]['retries'] = 0
-        self.backoff[i_key]['scheduled'] = time.time()
-
     def get_scope_for_instance(self, instance):
         i_key = get_instance_key(instance)
         self.log.debug("Getting scope for instance %s", i_key)
