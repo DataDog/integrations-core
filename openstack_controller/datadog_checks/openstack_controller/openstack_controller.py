@@ -4,7 +4,6 @@
 from datetime import datetime, timedelta
 from six.moves.urllib.parse import urljoin
 import re
-import time
 import random
 import copy
 
