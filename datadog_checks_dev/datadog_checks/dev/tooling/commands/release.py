@@ -493,6 +493,7 @@ def tag(check, version, push, dry_run):
     else:
         checks = [check]
 
+    current_branch = get_current_branch()
     for check in checks:
         echo_success('Check `{}`'.format(check))
 
@@ -502,7 +503,7 @@ def tag(check, version, push, dry_run):
 
         # get the tag name
         release_tag = get_release_tag_string(check, version)
-        echo_waiting('Tagging HEAD with {}'.format(release_tag))
+        echo_waiting('Tagging {} with {}'.format(current_branch, release_tag))
 
         if dry_run:
             version = None
