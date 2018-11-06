@@ -11,17 +11,9 @@ from six import iteritems
 
 from . import common
 
-from datadog_checks.openstack_controller.openstack_controller import (
-    OpenStackControllerCheck,
-    OpenStackProjectScope,
-    OpenStackUnscoped,
-    KeystoneCatalog,
-    IncompleteConfig,
-    IncompleteAuthScope,
-    IncompleteIdentity
-)
-
-from datadog_checks.checks import AgentCheck
+from datadog_checks.openstack.exceptions import IncompleteIdentity
+from datadog_checks.openstack.openstack import OpenStackControllerCheck
+from datadog_checks.openstack.scopes import (OpenStackProjectScope, OpenStackUnscoped, KeystoneCatalog)
 
 instance = common.MOCK_CONFIG["instances"][0]
 instance['tags'] = ['optional:tag1']
@@ -45,9 +37,8 @@ class MockHTTPResponse(object):
         return self.response_dict
 
 
-MOCK_HTTP_RESPONSE = MockHTTPResponse(
-    response_dict=common.EXAMPLE_AUTH_RESPONSE, headers={
-        "X-Subject-Token": "fake_token"})
+MOCK_HTTP_RESPONSE = MockHTTPResponse(response_dict=common.EXAMPLE_AUTH_RESPONSE,
+                                      headers={"X-Subject-Token": "fake_token"})
 MOCK_HTTP_PROJECTS_RESPONSE = MockHTTPResponse(response_dict=common.EXAMPLE_PROJECTS_RESPONSE, headers={})
 
 
