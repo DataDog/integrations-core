@@ -15,8 +15,6 @@ from six import iteritems
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
-from datadog_checks.utils.tracing import traced
-
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
