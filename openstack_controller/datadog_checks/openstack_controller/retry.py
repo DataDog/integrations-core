@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import time
-import random
+from random import SystemRandom
 
 from .utils import get_instance_key
 
@@ -15,7 +15,7 @@ class BackOffRetry(object):
 
     def __init__(self, check):
         self.backoff = {}
-        random.seed()
+        self.random = SystemRandom()
         self.check = check
 
     def should_run(self, instance):
@@ -37,7 +37,7 @@ class BackOffRetry(object):
 
         # let's add some jitter  (half jitter)
         backoff_interval = jitter / 2
-        backoff_interval += random.randint(0, backoff_interval)
+        backoff_interval += self.random.randint(0, backoff_interval)
 
         tags = instance.get('tags', [])
         hypervisor_name = self.check.hypervisor_name_cache.get(i_key)

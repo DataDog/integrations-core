@@ -16,7 +16,7 @@ from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
 
 from .utils import get_instance_key
-from .retry_backoff import BackOffRetry
+from .retry import BackOffRetry
 from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteAuthScope,
                          IncompleteIdentity, MissingNovaEndpoint, MissingNeutronEndpoint, KeystoneUnreachable)
 
