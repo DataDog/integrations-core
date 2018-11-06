@@ -15,7 +15,7 @@ from six import iteritems
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
-from datadog_checks.utils.tracing import traced, add_trace_check
+from datadog_checks.utils.tracing import traced
 
 
 try:
@@ -543,9 +543,6 @@ class OpenStackControllerCheck(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-
-        if is_affirmative(init_config.get('trace_check', False)):
-            add_trace_check(self)
 
         self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         self.keystone_server_url = init_config.get("keystone_server_url")
