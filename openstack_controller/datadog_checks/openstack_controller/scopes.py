@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from urlparse import urljoin
+from six.moves.urllib.parse import urljoin
 import requests
 import simplejson as json
 
@@ -14,7 +14,8 @@ from .exceptions import (IncompleteConfig, IncompleteIdentity, MissingNovaEndpoi
 
 
 UNSCOPED_AUTH = 'unscoped'
-DEFAULT_NOVA_API_VERSION = 'v2.1'
+V21_NOVA_API_VERSION = 'v2.1'
+DEFAULT_NOVA_API_VERSION = V21_NOVA_API_VERSION
 
 
 class OpenStackScope(object):
@@ -128,8 +129,9 @@ class OpenStackScope(object):
         the Nova service with the requested version
         Sends a CRITICAL service check when no viable candidates are found in the Catalog
         """
+        nova_version = nova_api_version or DEFAULT_NOVA_API_VERSION
         catalog = json_resp.get('token', {}).get('catalog', [])
-        nova_match = 'novav21' if nova_api_version == DEFAULT_NOVA_API_VERSION or nova_api_version is None else 'nova'
+        nova_match = 'novav21' if nova_version == V21_NOVA_API_VERSION else 'nova'
 
         for entry in catalog:
             if entry['name'] == nova_match or 'Compute' in entry['name']:
