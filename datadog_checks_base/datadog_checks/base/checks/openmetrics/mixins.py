@@ -207,6 +207,9 @@ class OpenMetricsScraperMixin(object):
         # Custom tags that will be sent with each metric
         config['custom_tags'] = instance.get('tags', [])
 
+        # Additional tags to be sent with each metric
+        config['_metric_tags'] = []
+
         # List of strings to filter the input text payload on. If any line contains
         # one of these strings, it will be filtered out before being parsed.
         # INTERNAL FEATURE, might be removed in future versions
@@ -392,7 +395,9 @@ class OpenMetricsScraperMixin(object):
         # Should we send a service check for when we make a request
         health_service_check = scraper_config['health_service_check']
         service_check_name = '{}{}'.format(scraper_config['namespace'], '.prometheus.health')
-        service_check_tags = scraper_config['custom_tags'] + ['endpoint:' + endpoint]
+        service_check_tags = ['endpoint:{}'.format(endpoint)]
+        service_check_tags.extend(scraper_config['custom_tags'])
+
         try:
             response = self.send_request(endpoint, scraper_config, headers)
         except requests.exceptions.SSLError:
@@ -566,6 +571,7 @@ class OpenMetricsScraperMixin(object):
     def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):
         custom_tags = scraper_config['custom_tags']
         _tags = list(custom_tags)
+        _tags.extend(scraper_config['_metric_tags'])
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
                 tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
