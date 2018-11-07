@@ -39,7 +39,7 @@ class OpenStackScope(object):
         project_scope_map = {}
         for project in projects:
             identity = {"methods": ['token'], "token": {"id": auth_token}}
-            scope = {'project': {'id': project['id']}}
+            scope = {'project': {'id': project.get('id')}}
             token_resp = KeystoneApi.post_auth_token(keystone_server_url,
                                                      identity,
                                                      ssl_verify,
@@ -50,15 +50,18 @@ class OpenStackScope(object):
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json()),
             project_auth_scope = {
                 'project': {
-                    'name': project['name'],
-                    'id': project['id'],
-                    'domain': {} if project['domain_id'] is None else {'id': project['domain_id']},
+                    'name': project.get('name'),
+                    'id': project.get('id'),
+                    'domain': {} if project.get('domain_id') is None else {'id': project.get('domain_id')},
                 }
             }
 
             project_scope = OpenStackProject(project_auth_token, project_auth_scope, nova_endpoint, neutron_endpoint)
-            project_key = project['name'], project['id']
-
+            project_name = project.get('name')
+            project_id = project.get('id')
+            if project_name is None or project_id is None:
+                break
+            project_key = (project_name, project_id)
             project_scope_map[project_key] = project_scope
 
         return cls(auth_token, project_scope_map)

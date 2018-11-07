@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
-import random
 import copy
 import requests
 
@@ -166,7 +165,6 @@ class OpenStackControllerCheck(AgentCheck):
         self.proxy_config = None if skip_proxy else self.proxies
 
         self.backoff = BackOffRetry(self)
-        random.seed()
 
         # ISO8601 date time: used to filter the call to get the list of nova servers
         self.changes_since_time = {}

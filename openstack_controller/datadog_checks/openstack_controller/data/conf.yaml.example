@@ -87,14 +87,6 @@ instances:
             id: <DOMAIN_ID>
 
 
-  ## @param append_tenant_id - optional - boolean - default:false
-  ## In some cases, the nova url is returned without the tenant id suffixed
-  ## e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<TENANT_ID>
-  ## Setting append_tenant_id to true manually adds this suffix for downstream requests.
-  #
-  #  append_tenant_id: false
-
-
   ## @param collect_hypervisor_load - optional - boolean - default:false
   ## Collects hypervisor_load.1/5/15 for each hypervisor
   ## Disabled by default to increase performance of the check.

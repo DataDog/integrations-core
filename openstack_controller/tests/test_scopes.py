@@ -19,10 +19,12 @@ def test_get_nova_endpoint():
     assert OpenStackScope._get_nova_endpoint(
         common.EXAMPLE_AUTH_RESPONSE,
         nova_api_version='v2') == u'http://10.0.2.15:8773/'
+    # TODO test exceptions
 
 
 def test_get_neutron_endpoint():
     assert OpenStackScope._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
+    # TODO test exceptions
 
 
 BAD_USERS = [
@@ -61,43 +63,86 @@ class MockHTTPResponse(object):
         return self.response_dict
 
 
-MOCK_HTTP_RESPONSE = MockHTTPResponse(response_dict=common.EXAMPLE_AUTH_RESPONSE,
-                                      headers={"X-Subject-Token": "fake_token"})
-MOCK_HTTP_PROJECTS_RESPONSE = MockHTTPResponse(response_dict=common.EXAMPLE_PROJECTS_RESPONSE, headers={})
-
 PROJECTS_RESPONSE = [
         {
-            "domain_id": "1789d1",
-            "enabled": True,
-            "id": "263fd9",
-            "links": {
-                "self": "https://example.com/identity/v3/projects/263fd9"
-            },
-            "name": "Test Group"
+            "domain_id": "1111",
+            "id": "3333",
+            "name": "name 1"
+        },
+        {
+            "domain_id": "22222",
+            "id": "4444",
+            "name": "name 2"
         },
     ]
 
+PROJECT_RESPONSE = [
+        {
+            "domain_id": "1111",
+            "id": "3333",
+            "name": "name 1"
+        }
+    ]
 
-def test_unscoped_from_config():
+
+def test_from_config_simple():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
 
     instance_config = {'user': GOOD_USERS[0]['user']}
 
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
-    # mock_http_response['token'].pop('catalog')
-    mock_http_response['token'].pop('project')
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
+
     with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=PROJECTS_RESPONSE):
-            instance_config['append_tenant_id'] = True
             scope = OpenStackScope.from_config(init_config, instance_config)
             assert isinstance(scope, OpenStackScope)
 
             assert scope.auth_token == 'fake_token'
-            assert len(scope.project_scope_map) == 1
+            assert len(scope.project_scope_map) == 2
+            expected_tenant_id = ['3333', '4444']
             for index, scope in iteritems(scope.project_scope_map):
                 assert isinstance(scope, OpenStackProject)
                 assert scope.auth_token == 'fake_token'
-                assert scope.tenant_id == '263fd9'
+                assert scope.tenant_id in expected_tenant_id
+                expected_tenant_id.remove(scope.tenant_id)
+
+
+def test_from_config_with_missing_name():
+    init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
+
+    instance_config = {'user': GOOD_USERS[0]['user']}
+
+    mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
+    mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
+
+    project_response_without_name = copy.deepcopy(PROJECTS_RESPONSE)
+    del project_response_without_name[0]["name"]
+
+    with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
+                    return_value=mock_response):
+        with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
+                        return_value=project_response_without_name):
+            scope = OpenStackScope.from_config(init_config, instance_config)
+            assert len(scope.project_scope_map) == 0
+
+
+def test_from_config_with_missing_id():
+    init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
+
+    instance_config = {'user': GOOD_USERS[0]['user']}
+
+    mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
+    mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
+
+    project_response_without_name = copy.deepcopy(PROJECTS_RESPONSE)
+    del project_response_without_name[0]["id"]
+
+    with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
+                    return_value=mock_response):
+        with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
+                        return_value=project_response_without_name):
+            scope = OpenStackScope.from_config(init_config, instance_config)
+            assert len(scope.project_scope_map) == 0
