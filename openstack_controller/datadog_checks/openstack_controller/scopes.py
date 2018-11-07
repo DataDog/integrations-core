@@ -14,8 +14,7 @@ from .exceptions import (IncompleteConfig, IncompleteIdentity, MissingNovaEndpoi
 
 
 UNSCOPED_AUTH = 'unscoped'
-V21_NOVA_API_VERSION = 'v2.1'
-DEFAULT_NOVA_API_VERSION = V21_NOVA_API_VERSION
+DEFAULT_NOVA_API_VERSION = 'v2.1'
 
 
 class OpenStackScope(object):
@@ -119,7 +118,6 @@ class OpenStackScope(object):
 
         raise MissingNeutronEndpoint()
 
-
     @classmethod
     def _get_nova_endpoint(cls, json_resp, nova_api_version=None):
         """
@@ -127,10 +125,8 @@ class OpenStackScope(object):
         the Nova service with the requested version
         Sends a CRITICAL service check when no viable candidates are found in the Catalog
         """
-        nova_version = nova_api_version or DEFAULT_NOVA_API_VERSION
         catalog = json_resp.get('token', {}).get('catalog', [])
-
-        nova_match = 'novav21' if nova_version == V21_NOVA_API_VERSION else 'nova'
+        nova_match = 'novav21' if nova_api_version == DEFAULT_NOVA_API_VERSION or nova_api_version is None else 'nova'
 
         for entry in catalog:
             if entry['name'] == nova_match or 'Compute' in entry['name']:
@@ -143,8 +139,7 @@ class OpenStackScope(object):
 
                 if valid_endpoints:
                     # Favor public endpoints over internal
-                    nova_endpoint = valid_endpoints.get("public", valid_endpoints.get("internal"))
-                    return nova_endpoint
+                    return valid_endpoints.get("public", valid_endpoints.get("internal"))
 
         raise MissingNovaEndpoint()
 

@@ -157,18 +157,6 @@ EXAMPLE_PROJECTS_RESPONSE = {
     }
 }
 
-BAD_USERS = [
-    {'user': {}},
-    {'user': {'name': ''}},
-    {'user': {'name': 'test_name', 'password': ''}},
-    {'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {}}},
-    {'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': ''}}},
-]
-
-GOOD_USERS = [
-    {'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}},
-]
-
 # .. server/network
 ALL_SERVER_DETAILS = {
     "server-1": {"id": "server-1", "name": "server-name-1", "status": "ACTIVE", "project_name": "testproj"},

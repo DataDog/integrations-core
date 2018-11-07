@@ -4,16 +4,12 @@
 import copy
 import re
 import time
-
 import mock
 import pytest
-from six import iteritems
 
 from . import common
 
-from datadog_checks.openstack_controller.exceptions import IncompleteIdentity
 from datadog_checks.openstack_controller import OpenStackControllerCheck
-from datadog_checks.openstack_controller.scopes import (OpenStackProject, OpenStackScope)
 
 instance = common.MOCK_CONFIG["instances"][0]
 instance['tags'] = ['optional:tag1']
@@ -26,80 +22,6 @@ def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
-
-
-class MockHTTPResponse(object):
-    def __init__(self, response_dict, headers):
-        self.response_dict = response_dict
-        self.headers = headers
-
-    def json(self):
-        return self.response_dict
-
-
-MOCK_HTTP_RESPONSE = MockHTTPResponse(response_dict=common.EXAMPLE_AUTH_RESPONSE,
-                                      headers={"X-Subject-Token": "fake_token"})
-MOCK_HTTP_PROJECTS_RESPONSE = MockHTTPResponse(response_dict=common.EXAMPLE_PROJECTS_RESPONSE, headers={})
-
-
-def _test_bad_user(user):
-    with pytest.raises(IncompleteIdentity):
-        OpenStackScope._get_user_identity(user)
-
-
-def test_get_user_identity():
-    for user in common.BAD_USERS:
-        _test_bad_user(user)
-
-    for user in common.GOOD_USERS:
-        parsed_user = OpenStackScope._get_user_identity(user)
-        assert parsed_user == {'methods': ['password'], 'password': user}
-
-
-def test_unscoped_from_config():
-    init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
-
-    good_instance_config = {'user': common.GOOD_USERS[0]['user']}
-
-    mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
-    mock_http_response['token'].pop('catalog')
-    mock_http_response['token'].pop('project')
-    mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
-    with mock.patch(
-        'datadog_checks.openstack_controller.scopes.OpenStackScope._request_auth_token',
-        return_value=mock_response
-    ):
-        with mock.patch(
-            'datadog_checks.openstack_controller.scopes.OpenStackScope._request_project_list',
-            return_value=MOCK_HTTP_PROJECTS_RESPONSE
-        ):
-            with mock.patch(
-                'datadog_checks.openstack_controller.scopes.OpenStackScope._get_token_for_project',
-                return_value=MOCK_HTTP_RESPONSE
-            ):
-                append_config = good_instance_config.copy()
-                append_config['append_tenant_id'] = True
-                scope = OpenStackScope.from_config(init_config, append_config)
-                assert isinstance(scope, OpenStackScope)
-
-                assert scope.auth_token == 'fake_token'
-                assert len(scope.project_scope_map) == 1
-                for _, scope in iteritems(scope.project_scope_map):
-                    assert isinstance(scope, OpenStackProject)
-                    assert scope.auth_token == 'fake_token'
-                    assert scope.tenant_id == '263fd9'
-
-
-def test_get_nova_endpoint():
-    assert OpenStackScope._get_nova_endpoint(
-        common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
-    assert OpenStackScope._get_nova_endpoint(
-        common.EXAMPLE_AUTH_RESPONSE,
-        nova_api_version='v2') == u'http://10.0.2.15:8773/'
-
-
-def test_get_neutron_endpoint():
-    assert OpenStackScope._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
 
 
 def test_parse_uptime_string():
@@ -245,7 +167,7 @@ def test_cache_between_runs(*args):
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck._make_request_with_auth_fallback',
             return_value=common.MOCK_NOVA_SERVERS)
-@mock.patch('datadog_checks.openstack_controller.scopes.OpenStackControllerCheck._get_nova_endpoint',
+@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_nova_endpoint',
             return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token',
             return_value="test_auth_token")
