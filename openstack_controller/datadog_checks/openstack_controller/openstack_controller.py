@@ -509,7 +509,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         self.keystone_server_url = init_config.get("keystone_server_url")
-        self._hypervisor_name_cache = {}
+        self.hypervisor_name_cache = {}
 
         self.paginated_server_limit = init_config.get('paginated_server_limit') or DEFAULT_PAGINATED_SERVER_LIMIT
 
@@ -749,7 +749,7 @@ class OpenStackControllerCheck(AgentCheck):
                                         use_shortname=False,
                                         collect_hypervisor_load=False):
         hyp_hostname = hyp.get('hypervisor_hostname')
-        self._hypervisor_name_cache[get_instance_key(instance)] = hyp_hostname
+        self.hypervisor_name_cache[get_instance_key(instance)] = hyp_hostname
         custom_tags = custom_tags or []
         tags = [
             'hypervisor:{}'.format(hyp_hostname),
