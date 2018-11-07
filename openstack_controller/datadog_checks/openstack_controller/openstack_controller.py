@@ -863,8 +863,12 @@ class OpenStackControllerCheck(AgentCheck):
             new_server['availability_zone'] = server.get('OS-EXT-AZ:availability_zone')
 
             # Confirm that the new server has all the required fields
-            if not all(key in new_server for key in SERVER_FIELDS_REQ):
-                self.log.debug("Server {} is missing one of the required keys. Not adding to cache".format(new_server))
+            if not all(new_server[key] is not None for key in SERVER_FIELDS_REQ):
+                self.log.debug(
+                    "Server {} has None for one of the required keys."
+                    "Not collecting server metrics for this server."
+                    .format(new_server)
+                )
                 continue
 
             # Update our cached list of servers
