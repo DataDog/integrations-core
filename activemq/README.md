@@ -1,8 +1,8 @@
-# Activemq Integration
+# ActiveMQ Integration
 
 ## Overview
 
-The ActiveMQ check lets you collect metrics for brokers and queues, producers and consumers, and more.
+The ActiveMQ check collects metrics for brokers and queues, producers and consumers, and more.
 
 **Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][110].
 
@@ -16,7 +16,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 ### Configuration
 
 1. **Make sure that [JMX Remote is enabled][103] on your ActiveMQ server.**
-2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][111]. See the [sample activemq.d/conf.yaml][104] for all available configuration options.
+2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][111]. See the [sample activemq.d/conf.yaml][104] for all available configuration options.
 
       ```yaml
       instances:
@@ -91,14 +91,13 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 
 ## Data Collected
 ### Metrics
-The ActiveMQ check does not include any metrics at this time.
+See [metadata.csv][112] for a list of metrics provided by this integration.
 
 ### Events
 The ActiveMQ check does not include any events at this time.
 
 ### Service Checks
-**activemq.can_connect**:
-
+**activemq.can_connect**:  
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise.
 
 ## Troubleshooting
@@ -119,3 +118,4 @@ Need help? Contact [Datadog Support][107].
 [109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [110]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
 [111]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[112]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
