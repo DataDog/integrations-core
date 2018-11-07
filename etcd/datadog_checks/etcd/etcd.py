@@ -167,18 +167,12 @@ class Etcd(OpenMetricsBaseCheck):
                 )
             )
 
-        custom_tags = list(scraper_config['custom_tags'])
-        tags = list(custom_tags)
-
+        tags = []
         self.add_leader_state_tag(scraper_config, tags)
 
-        # Add leader tag for the duration of this run
-        scraper_config['custom_tags'][:] = tags
+        scraper_config['_metric_tags'][:] = tags
 
-        try:
-            self.process(scraper_config)
-        finally:
-            scraper_config['custom_tags'][:] = custom_tags
+        self.process(scraper_config)
 
     def check_pre_v3(self, instance):
         if 'url' not in instance:

@@ -39,9 +39,13 @@ def test_check(aggregator, instance):
     check = Etcd('etcd', {}, {}, [instance])
     check.check(instance)
 
+    tags = [
+        'is_leader:{}'.format('true' if is_leader(URL) else 'false')
+    ]
+
     for metric in itervalues(METRIC_MAP):
         try:
-            aggregator.assert_metric(metric)
+            aggregator.assert_metric(metric, tags=tags)
         except AssertionError:
             pass
 
@@ -55,7 +59,6 @@ def test_service_check(aggregator, instance):
 
     tags = [
         'endpoint:{}'.format(instance['prometheus_url']),
-        'is_leader:{}'.format('true' if is_leader(URL) else 'false')
     ]
 
     aggregator.assert_service_check('etcd.prometheus.health', Etcd.OK, tags=tags, count=1)
