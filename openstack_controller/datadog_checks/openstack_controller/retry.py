@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 import time
 from random import SystemRandom
@@ -35,7 +35,7 @@ class BackOffRetry(object):
         self.backoff[i_key]['retries'] += 1
         jitter = min(MAX_BACKOFF_SECS, BASE_BACKOFF_SECS * 2 ** self.backoff[i_key]['retries'])
 
-        # let's add some jitter  (half jitter)
+        # let's add some jitter (half jitter)
         backoff_interval = jitter / 2
         backoff_interval += self.random.randint(0, backoff_interval)
 

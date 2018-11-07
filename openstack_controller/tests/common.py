@@ -157,23 +157,6 @@ EXAMPLE_PROJECTS_RESPONSE = {
     }
 }
 
-BAD_AUTH_SCOPES = [
-    {'auth_scope': {'project': {}}},
-    {'auth_scope': {'project': {'id': ''}}},
-    {'auth_scope': {'project': {'name': 'test'}}},
-    {'auth_scope': {'project': {'name': 'test', 'domain': {}}}},
-    {'auth_scope': {'project': {'name': 'test', 'domain': {'id': ''}}}},
-]
-
-GOOD_UNSCOPED_AUTH_SCOPES = [
-    {'auth_scope': {}},  # unscoped project
-]
-
-GOOD_AUTH_SCOPES = [
-    {'auth_scope': {'project': {'id': 'test_project_id'}}},
-    {'auth_scope': {'project': {'name': 'test', 'domain': {'id': 'test_id'}}}},
-]
-
 BAD_USERS = [
     {'user': {}},
     {'user': {'name': ''}},
@@ -319,8 +302,7 @@ MOCK_CONFIG = {
     },
     'instances': [
         {
-            'name': 'test_name', 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
-            'auth_scope': {'project': {'id': 'test_project_id'}},
+            'name': 'test_name', 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}
         }
     ]
 }
