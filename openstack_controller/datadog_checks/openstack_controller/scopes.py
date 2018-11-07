@@ -145,8 +145,8 @@ class OpenStackScope(object):
                     # Favor public endpoints over internal
                     nova_endpoint = valid_endpoints.get("public", valid_endpoints.get("internal"))
                     return nova_endpoint
-        else:
-            raise MissingNovaEndpoint()
+
+        raise MissingNovaEndpoint()
 
 
 class OpenStackProject:
