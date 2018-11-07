@@ -8,7 +8,7 @@ from collections import OrderedDict, namedtuple
 from datetime import datetime
 
 import click
-from semver import parse_version_info
+from semver import finalize_version, parse_version_info
 from six import StringIO, iteritems
 
 from .dep import freeze as dep_freeze
@@ -585,15 +585,19 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
             # sanity check on the version provided
             cur_version = get_version_string(check)
 
-            # Keep track of intermediate version bumps
-            prev_version = cur_version
-            for method in version.split(','):
-                # Apply any supported version bumping methods. Chaining is required for going
-                # from mainline releases to development releases since e.g. x.y.z > x.y.z-rc.A.
-                # So for an initial bug fix dev release you can do `fix,rc`.
-                if method in VERSION_BUMP:
-                    version = VERSION_BUMP[method](prev_version)
-                    prev_version = version
+            if version == 'final':
+                # Remove any pre-release metadata
+                version = finalize_version(cur_version)
+            else:
+                # Keep track of intermediate version bumps
+                prev_version = cur_version
+                for method in version.split(','):
+                    # Apply any supported version bumping methods. Chaining is required for going
+                    # from mainline releases to development releases since e.g. x.y.z > x.y.z-rc.A.
+                    # So for an initial bug fix dev release you can do `fix,rc`.
+                    if method in VERSION_BUMP:
+                        version = VERSION_BUMP[method](prev_version)
+                        prev_version = version
 
             p_version = parse_version_info(version)
             p_current = parse_version_info(cur_version)
