@@ -76,6 +76,7 @@ class OpenStackScope(object):
 
         try:
             auth_resp = KeystoneApi.post_auth_token(keystone_server_url, identity, ssl_verify, proxy=proxy_config)
+            token_resp = auth_resp.headers.get('X-Subject-Token')
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             raise KeystoneUnreachable("Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
                 user=identity['password']['user']['name'],
@@ -84,32 +85,7 @@ class OpenStackScope(object):
                 url=keystone_server_url,
             ))
 
-        # NOTE: Using the password.user.domain.id seems the preferred way to go
-        # See https://developer.openstack.org/api-ref/identity/v3/
-        # Also as part of the `_get_user_identity` method we call right before,
-        # we check that the ID exists otherwise we raise an exception
-        # Leaving this commented until we test it
-        #
-        # if exception_msg:
-        #     try:
-        #         identity['password']['user']['domain']['name'] = identity['password']['user']['domain'].pop('id')
-        #         auth_resp = KeystoneApi.post_auth_token(keystone_server_url, identity, ssl_verify, proxy=proxy_config)
-        #     except (
-        #             requests.exceptions.HTTPError,
-        #             requests.exceptions.Timeout,
-        #             requests.exceptions.ConnectionError,
-        #     ) as e:
-        #         exception_msg = "{msg} and also failed keystone auth with \
-        #             identity:{user} domain:{domain} scope:{scope} @{url}: {ex}".format(
-        #             msg=exception_msg,
-        #             user=identity['password']['user']['name'],
-        #             domain=identity['password']['user']['domain']['name'],
-        #             scope=UNSCOPED_AUTH,
-        #             url=keystone_server_url,
-        #             ex=e,
-        #         )
-        #         raise KeystoneUnreachable(exception_msg)
-        return auth_resp.headers.get('X-Subject-Token'), auth_resp
+        return token_resp, auth_resp
 
     @classmethod
     def _get_user_identity(cls, instance_config):
@@ -124,9 +100,8 @@ class OpenStackScope(object):
         """
         user = instance_config.get('user')
 
-        if not (
-            user and user.get('name') and user.get('password') and user.get("domain") and user.get("domain").get("id")
-        ):
+        if not (user and user.get('name') and user.get('password') and user.get("domain")
+                and user.get("domain").get("id")):
             raise IncompleteIdentity()
 
         identity = {"methods": ['password'], "password": {"user": user}}
@@ -141,7 +116,6 @@ class OpenStackScope(object):
         catalog = json_resp.get('token', {}).get('catalog', [])
         match = 'neutron'
 
-        neutron_endpoint = None
         for entry in catalog:
             if entry['name'] == match or 'Networking' in entry['name']:
                 valid_endpoints = {}
@@ -152,12 +126,10 @@ class OpenStackScope(object):
 
                 if valid_endpoints:
                     # Favor public endpoints over internal
-                    neutron_endpoint = valid_endpoints.get("public", valid_endpoints.get("internal"))
-                    break
-        else:
-            raise MissingNeutronEndpoint()
+                    return valid_endpoints.get("public", valid_endpoints.get("internal"))
 
-        return neutron_endpoint
+        raise MissingNeutronEndpoint()
+
 
     @classmethod
     def _get_nova_endpoint(cls, json_resp, nova_api_version=None):
