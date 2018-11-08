@@ -24,7 +24,13 @@ class OpenStackScope(object):
         self.project_scope_map = project_scope_map
 
     @classmethod
-    def from_config(cls, init_config, instance_config, proxy_config=None):
+    def from_config(cls, init_config, instance_config, proxy_config=None, logger=None):
+        if logger:
+            log = logger
+        else:
+            import logging
+            log = logging.getLogger('openstack_controller')
+
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
@@ -46,6 +52,7 @@ class OpenStackScope(object):
                                                      ssl_verify,
                                                      scope=scope,
                                                      proxy=proxy_config)
+            log.debug(token_resp)
             project_auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json(), nova_api_version)
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json()),
