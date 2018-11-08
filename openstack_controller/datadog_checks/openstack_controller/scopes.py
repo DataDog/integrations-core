@@ -22,12 +22,12 @@ class OpenStackScope(object):
         self.project_scope_map = project_scope_map
 
     @classmethod
-    def from_config(cls, init_config, instance_config, proxy_config=None, logger=None):
-        if logger:
-            log = logger
-        else:
-            import logging
-            log = logging.getLogger('openstack_controller')
+    def from_config(cls, init_config, instance_config, proxy_config=None):
+        # if logger:
+        #     log = logger
+        # else:
+        #     import logging
+        #     log = logging.getLogger('openstack_controller')
 
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
@@ -113,14 +113,14 @@ class OpenStackScope(object):
         for entry in catalog:
             if entry.get('name') == 'neutron' and entry.get('type') == 'network':
                 valid_endpoints = {}
-                for ep in entry.get('endpoints', {}):
+                for ep in entry.get('endpoints'):
                     interface = ep.get('interface', '')
                     if interface in ['public', 'internal']:
                         valid_endpoints[interface] = ep.get('url')
 
                 if valid_endpoints:
                     # Favor public endpoints over internal
-                    return valid_endpoints.get("public", valid_endpoints.get("internal"))
+                    return valid_endpoints.get('public', valid_endpoints.get('internal'))
 
         raise MissingNeutronEndpoint()
 
@@ -136,14 +136,14 @@ class OpenStackScope(object):
             if entry.get('name') == 'nova' and entry.get('type') == 'compute':
                 # Collect any endpoints on the public or internal interface
                 valid_endpoints = {}
-                for ep in entry.get('endpoints', {}):
+                for ep in entry.get('endpoints'):
                     interface = ep.get('interface', '')
                     if interface in ['public', 'internal']:
                         valid_endpoints[interface] = ep.get('url')
 
                 if valid_endpoints:
                     # Favor public endpoints over internal
-                    return valid_endpoints.get("public", valid_endpoints.get("internal"))
+                    return valid_endpoints.get('public', valid_endpoints.get('internal'))
 
         raise MissingNovaEndpoint()
 

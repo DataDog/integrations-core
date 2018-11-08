@@ -706,8 +706,7 @@ class OpenStackControllerCheck(AgentCheck):
             # We're missing a project scope for this instance
             # Let's populate it now
             try:
-                instance_scope = OpenStackScope.from_config(self.init_config, instance, proxy_config=self.proxy_config,
-                                                            logger=self.log)
+                instance_scope = OpenStackScope.from_config(self.init_config, instance, proxy_config=self.proxy_config)
 
                 self.service_check(
                     self.IDENTITY_API_SC,
