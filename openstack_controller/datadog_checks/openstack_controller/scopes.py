@@ -113,7 +113,7 @@ class OpenStackScope(object):
         for entry in catalog:
             if entry.get('name') == 'neutron' and entry.get('type') == 'network':
                 valid_endpoints = {}
-                for ep in entry.get('endpoints', []):
+                for ep in entry.get('endpoints', {}):
                     interface = ep.get('interface', '')
                     if interface in ['public', 'internal']:
                         valid_endpoints[interface] = ep.get('url')
@@ -136,7 +136,7 @@ class OpenStackScope(object):
             if entry.get('name') == 'nova' and entry.get('type') == 'compute':
                 # Collect any endpoints on the public or internal interface
                 valid_endpoints = {}
-                for ep in entry.get('endpoints', []):
+                for ep in entry.get('endpoints', {}):
                     interface = ep.get('interface', '')
                     if interface in ['public', 'internal']:
                         valid_endpoints[interface] = ep.get('url')
