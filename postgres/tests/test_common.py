@@ -4,6 +4,8 @@
 import pytest
 import os
 
+import psycopg2
+
 from datadog_checks.postgres import PostgreSql
 
 from .common import HOST, PORT, DB_NAME
@@ -112,6 +114,19 @@ def test_connections_metrics(aggregator, check, postgres_standalone, pg_instance
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=pg_instance['tags'])
     aggregator.assert_metric('postgresql.connections', count=1, tags=pg_instance['tags']+['db:datadog_test'])
+
+
+@pytest.mark.integration
+def test_locks_metrics(aggregator, check, postgres_standalone, pg_instance):
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres") as conn:
+        with conn.cursor() as cur:
+            cur.execute('LOCK persons')
+
+            check.check(pg_instance)
+
+    print(repr(aggregator._metrics))
+
+    aggregator.assert_metric('postgresql.locks', count=1, tags=pg_instance['tags']+['lock_mode:AccessExclusiveLock','table:persons','db:datadog_test'])
 
 
 @pytest.mark.integration
