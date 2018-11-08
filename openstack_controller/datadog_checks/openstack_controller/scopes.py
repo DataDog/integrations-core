@@ -52,7 +52,10 @@ class OpenStackScope(object):
                                                      ssl_verify,
                                                      scope=scope,
                                                      proxy=proxy_config)
-            log.debug(token_resp)
+            log.debug("start token_resp")
+            log.debug(token_resp.json())
+            log.debug("end token_resp")
+            
             project_auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json(), nova_api_version)
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json()),
