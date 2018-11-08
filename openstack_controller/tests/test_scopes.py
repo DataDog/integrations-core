@@ -16,9 +16,6 @@ from datadog_checks.openstack_controller.scopes import (OpenStackProject, OpenSt
 def test_get_nova_endpoint():
     assert OpenStackScope._get_nova_endpoint(
         common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
-    assert OpenStackScope._get_nova_endpoint(
-        common.EXAMPLE_AUTH_RESPONSE,
-        nova_api_version='v2') == u'http://10.0.2.15:8773/'
     # TODO test exceptions
 
 
