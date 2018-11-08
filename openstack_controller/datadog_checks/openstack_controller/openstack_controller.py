@@ -648,18 +648,18 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check(
                 self.COMPUTE_API_SC,
                 AgentCheck.OK,
-                tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
+                tags=["keystone_server:{}".format(self.init_config.get("keystone_server_url"))] + tags,
             )
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             self.service_check(
                 self.COMPUTE_API_SC,
                 AgentCheck.CRITICAL,
-                tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
+                tags=["keystone_server:{}".format(self.init_config.get("keystone_server_url"))] + tags,
             )
 
         # Neutron
         try:
-            self.log.debug("Nova endpoint: {}".format(scope.neutron_endpoint))
+            self.log.debug("Neutron endpoint: {}".format(scope.neutron_endpoint))
             requests.get(
                 scope.neutron_endpoint,
                 headers=headers,
@@ -670,13 +670,13 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check(
                 self.NETWORK_API_SC,
                 AgentCheck.OK,
-                tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
+                tags=["keystone_server:{}".format(self.init_config.get("keystone_server_url"))] + tags,
             )
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             self.service_check(
                 self.NETWORK_API_SC,
                 AgentCheck.CRITICAL,
-                tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
+                tags=["keystone_server:{}".format(self.init_config.get("keystone_server_url"))] + tags,
             )
 
     def get_scope_map(self, instance):

@@ -146,7 +146,7 @@ class OpenStackScope(object):
         for ep in entry.get('endpoints'):
             interface = ep.get('interface', '')
             if interface in ['public', 'internal']:
-                valid_endpoints[interface] = ep.get('url')
+                valid_endpoints[interface] = ep['url']
         return valid_endpoints
 
 
