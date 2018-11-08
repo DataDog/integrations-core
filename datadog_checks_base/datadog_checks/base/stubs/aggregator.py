@@ -37,6 +37,7 @@ class AggregatorStub(object):
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        self._partial_commit_count = 0
 
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
         self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
@@ -46,6 +47,20 @@ class AggregatorStub(object):
 
     def submit_event(self, check, check_id, event):
         self._events.append(event)
+
+    def partial_commit(self, check, check_id):
+        """
+        Allows the aggregator to commit the already submitted metrics to the forwarder,
+        in order to keep the memory usage bound. The check mush ensure it will not
+        re-submit points for contexts that are already flushed.
+        """
+        self._partial_commit_count += 1
+
+    def partial_commit_count(self):
+        """
+        Return the number of partial commits allowed by the check
+        """
+        return self._partial_commit_count
 
     def metrics(self, name):
         """
@@ -216,6 +231,7 @@ class AggregatorStub(object):
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        self._partial_commit_count = 0
 
     def all_metrics_asserted(self):
         assert self.metrics_asserted_pct >= 100.0
@@ -271,7 +287,6 @@ class AggregatorStub(object):
         Return all the service checks names seen so far
         """
         return [ensure_unicode(name) for name in self._service_checks.keys()]
-
 
 # Use the stub as a singleton
 aggregator = AggregatorStub()

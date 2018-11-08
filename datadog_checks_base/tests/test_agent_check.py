@@ -160,3 +160,11 @@ class TestLimits():
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10
+
+
+class TestPartialCommit():
+    def test_partial_commit_count(self, aggregator):
+        check = AgentCheck()
+        check.partial_commit()
+        check.partial_commit()
+        assert aggregator.partial_commit_count() == 2

@@ -256,6 +256,14 @@ class AgentCheck(object):
             event['aggregation_key'] = ensure_bytes(event['aggregation_key'])
         aggregator.submit_event(self, self.check_id, event)
 
+    def partial_commit(self):
+        """
+        Allows the aggregator to commit the already submitted metrics to the forwarder,
+        in order to keep the memory usage bound. The check mush ensure it will not
+        re-submit points for contexts that are already flushed.
+        """
+        aggregator.partial_commit(self, self.check_id)
+
     # TODO(olivier): implement service_metadata if it's worth it
     def service_metadata(self, meta_name, value):
         pass

@@ -286,6 +286,10 @@ class OpenMetricsScraperMixin(object):
         for metric in self.scrape_metrics(scraper_config):
             self.process_metric(metric, scraper_config, metric_transformers=metric_transformers)
 
+            # Allows the aggregator to commit the already submitted metrics to the forwarder,
+            # in order to keep the memory usage bound.
+            self.partial_commit()
+
     def _store_labels(self, metric, scraper_config):
         scraper_config['label_joins']
         # If targeted metric, store labels
