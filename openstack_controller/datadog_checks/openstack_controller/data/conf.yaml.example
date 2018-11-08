@@ -50,10 +50,6 @@ init_config:
 #    - <NETWORK_ID>
 #    - <NETWORK_ID_PREFIX>*
 
-## @param nova_api_version - optional - string - default:'v2.1'
-## Nova API version to use, this check supports v2 and v2.1 (default).
-#
-#  nova_api_version: 'v2.1'
 
 ## @param ssl_verify - optional - boolean - default:true
 ## Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may

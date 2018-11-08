@@ -14,8 +14,6 @@ from .exceptions import (IncompleteConfig, IncompleteIdentity, MissingNovaEndpoi
 
 
 UNSCOPED_AUTH = 'unscoped'
-V21_NOVA_API_VERSION = 'v2.1'
-DEFAULT_NOVA_API_VERSION = V21_NOVA_API_VERSION
 
 
 class OpenStackScope(object):
@@ -36,7 +34,6 @@ class OpenStackScope(object):
             raise IncompleteConfig()
 
         ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
-        nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
         auth_token = cls._get_auth_response_from_config(init_config, instance_config, proxy_config)
 
         # list all projects
@@ -55,9 +52,9 @@ class OpenStackScope(object):
             log.debug("start token_resp")
             log.debug(token_resp.json())
             log.debug("end token_resp")
-            
+
             project_auth_token = token_resp.headers.get('X-Subject-Token')
-            nova_endpoint = cls._get_nova_endpoint(token_resp.json(), nova_api_version)
+            nova_endpoint = cls._get_nova_endpoint(token_resp.json())
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json()),
             project_auth_scope = {
                 'project': {
@@ -116,15 +113,13 @@ class OpenStackScope(object):
         Sends a CRITICAL service check when none are found registered in the Catalog
         """
         catalog = json_resp.get('token', {}).get('catalog', [])
-        match = 'neutron'
-
         for entry in catalog:
-            if entry['name'] == match or 'Networking' in entry['name']:
+            if entry.get('name') == 'neutron' and entry.get('type') == 'network':
                 valid_endpoints = {}
-                for ep in entry['endpoints']:
+                for ep in entry.get('endpoints'), []:
                     interface = ep.get('interface', '')
                     if interface in ['public', 'internal']:
-                        valid_endpoints[interface] = ep['url']
+                        valid_endpoints[interface] = ep.get('url')
 
                 if valid_endpoints:
                     # Favor public endpoints over internal
@@ -133,24 +128,21 @@ class OpenStackScope(object):
         raise MissingNeutronEndpoint()
 
     @classmethod
-    def _get_nova_endpoint(cls, json_resp, nova_api_version=None):
+    def _get_nova_endpoint(cls, json_resp):
         """
         Parse the service catalog returned by the Identity API for an endpoint matching
         the Nova service with the requested version
         Sends a CRITICAL service check when no viable candidates are found in the Catalog
         """
-        nova_version = nova_api_version or DEFAULT_NOVA_API_VERSION
         catalog = json_resp.get('token', {}).get('catalog', [])
-        nova_match = 'novav21' if nova_version == V21_NOVA_API_VERSION else 'nova'
-
         for entry in catalog:
-            if entry['name'] == nova_match or 'Compute' in entry['name']:
+            if entry.get('name') == 'nova' and entry.get('type') == 'compute':
                 # Collect any endpoints on the public or internal interface
                 valid_endpoints = {}
-                for ep in entry['endpoints']:
+                for ep in entry.get('endpoints', []):
                     interface = ep.get('interface', '')
                     if interface in ['public', 'internal']:
-                        valid_endpoints[interface] = ep['url']
+                        valid_endpoints[interface] = ep.get('url')
 
                 if valid_endpoints:
                     # Favor public endpoints over internal
