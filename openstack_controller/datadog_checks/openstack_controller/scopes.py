@@ -23,12 +23,6 @@ class OpenStackScope(object):
 
     @classmethod
     def from_config(cls, init_config, instance_config, proxy_config=None):
-        # if logger:
-        #     log = logger
-        # else:
-        #     import logging
-        #     log = logging.getLogger('openstack_controller')
-
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
@@ -52,7 +46,7 @@ class OpenStackScope(object):
 
             project_auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json())
-            neutron_endpoint = cls._get_neutron_endpoint(token_resp.json()),
+            neutron_endpoint = cls._get_neutron_endpoint(token_resp.json())
             project_auth_scope = {
                 'project': {
                     'name': project.get('name'),
@@ -145,7 +139,7 @@ class OpenStackScope(object):
         valid_endpoints = {}
         for ep in entry.get('endpoints'):
             interface = ep.get('interface', '')
-            if interface in ['public', 'internal'] and valid_endpoints.get(interface) is None:
+            if interface in ['public', 'internal']:
                 valid_endpoints[interface] = ep['url']
         return valid_endpoints
 
