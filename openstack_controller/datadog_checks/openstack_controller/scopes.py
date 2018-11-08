@@ -49,9 +49,6 @@ class OpenStackScope(object):
                                                      ssl_verify,
                                                      scope=scope,
                                                      proxy=proxy_config)
-            log.debug("start token_resp")
-            log.debug(token_resp.json())
-            log.debug("end token_resp")
 
             project_auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json())
@@ -116,7 +113,7 @@ class OpenStackScope(object):
         for entry in catalog:
             if entry.get('name') == 'neutron' and entry.get('type') == 'network':
                 valid_endpoints = {}
-                for ep in entry.get('endpoints'), []:
+                for ep in entry.get('endpoints', []):
                     interface = ep.get('interface', '')
                     if interface in ['public', 'internal']:
                         valid_endpoints[interface] = ep.get('url')
