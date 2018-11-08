@@ -637,6 +637,7 @@ class OpenStackControllerCheck(AgentCheck):
         headers = {"X-Auth-Token": scope.auth_token}
 
         try:
+            self.log.debug("Nova endpoint: {}".format(scope.nova_endpoint))
             requests.get(
                 scope.nova_endpoint,
                 headers=headers,
@@ -658,6 +659,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         # Neutron
         try:
+            self.log.debug("Nova endpoint: {}".format(scope.neutron_endpoint))
             requests.get(
                 scope.neutron_endpoint,
                 headers=headers,
