@@ -9,7 +9,7 @@ def config_proxy_skip(proxies, uri, skip_proxy=False):
     """
     Returns an amended copy of the proxies dictionary - used by `requests`,
     it will disable the proxy if the uri provided is to be reached directly.
-    :param proxies dict with existing proxies: 'https', 'http', 'no' as pontential keys
+    :param proxies A dict with existing proxies: `https`, `http`, and `no` are potential keys.
     :param uri URI to determine if a proxy is necessary or not.
     :param skip_proxy If `True`, the returned proxy dictionary will disable all proxies.
     """
