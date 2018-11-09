@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "5.8.0",
-        "integration":"powerdns_recursor",
+        "integration":"powerdns recursor",
         "check": "powerdns.recursor.can_connect",
         "statuses": ["ok", "critical"],
         "groups": ["host", "port"],
