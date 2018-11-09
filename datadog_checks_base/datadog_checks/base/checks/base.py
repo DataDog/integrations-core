@@ -269,8 +269,7 @@ class AgentCheck(object):
         prefix.b.c
         :param metric The metric name to normalize
         :param prefix A prefix to to add to the normalized name, default None
-        :param fix_case A boolean, indicating whether to make sure that
-                        the metric name returned is in underscore_case
+        :param fix_case A boolean, indicating whether to make sure that the metric name returned is in underscore_case
         """
         if isinstance(metric, text_type):
             metric_name = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')

@@ -321,7 +321,7 @@ class ApplyResult(object):
     the Job didn't process yet. It's possible to use this object to
     wait for the result/exception of the job to be available.
 
-    The result objects returns by the Pool::*_async() methods are of
+    The result objects returns by the `Pool::*_async()` methods are of
     this type"""
     def __init__(self, collector=None, callback=None):
         """

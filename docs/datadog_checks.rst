@@ -16,7 +16,7 @@ Subpackages
 datadog\_checks.config
 ----------------------
 
-.. automodule:: datadog_checks.config
+.. automodule:: datadog_checks.base.config
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ datadog\_checks.config
 datadog\_checks.errors
 ----------------------
 
-.. automodule:: datadog_checks.errors
+.. automodule:: datadog_checks.base.errors
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +32,7 @@ datadog\_checks.errors
 datadog\_checks.log
 -------------------
 
-.. automodule:: datadog_checks.log
+.. automodule:: datadog_checks.base.log
     :members:
     :undoc-members:
     :show-inheritance:

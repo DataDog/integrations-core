@@ -15,7 +15,7 @@ Subpackages
 datadog\_checks.checks.base
 ---------------------------
 
-.. automodule:: datadog_checks.checks.base
+.. automodule:: datadog_checks.base.checks.base
     :members:
     :undoc-members:
     :show-inheritance:
@@ -23,7 +23,7 @@ datadog\_checks.checks.base
 datadog\_checks.checks.network
 ------------------------------
 
-.. automodule:: datadog_checks.checks.network
+.. automodule:: datadog_checks.base.checks.network
     :members:
     :undoc-members:
     :show-inheritance:
