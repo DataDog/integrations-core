@@ -10,6 +10,7 @@ from .common import HOST, PORT, DB_NAME
 
 
 COMMON_METRICS = [
+    'postgresql.before_xid_wraparound',
     'postgresql.connections',
     'postgresql.commits',
     'postgresql.rollbacks',
