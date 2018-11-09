@@ -2,16 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-
 import mock
 import pytest
 from six import iteritems
 
-from . import common
-
+from datadog_checks.openstack_controller.scopes import (OpenStackProject, OpenStackScope)
 from datadog_checks.openstack_controller.exceptions import (IncompleteIdentity, MissingNovaEndpoint,
                                                             MissingNeutronEndpoint)
-from datadog_checks.openstack_controller.scopes import (OpenStackProject, OpenStackScope)
+
+from . import common
 
 
 def test_get_endpoint():
@@ -117,7 +116,7 @@ PROJECT_RESPONSE = [
 
 
 def test_from_config_simple():
-    init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
+    init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     instance_config = {'user': GOOD_USERS[0]['user']}
 
@@ -142,7 +141,7 @@ def test_from_config_simple():
 
 
 def test_from_config_with_missing_name():
-    init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
+    init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     instance_config = {'user': GOOD_USERS[0]['user']}
 
@@ -161,7 +160,7 @@ def test_from_config_with_missing_name():
 
 
 def test_from_config_with_missing_id():
-    init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
+    init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     instance_config = {'user': GOOD_USERS[0]['user']}
 
