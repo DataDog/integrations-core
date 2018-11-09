@@ -103,15 +103,9 @@ class OpenStackScope(object):
         Parse the service catalog returned by the Identity API for an endpoint matching the Neutron service
         Sends a CRITICAL service check when none are found registered in the Catalog
         """
-        catalog = json_resp.get('token', {}).get('catalog', [])
-        for entry in catalog:
-            if entry.get('name') == 'neutron' and entry.get('type') == 'network':
-                valid_endpoints = cls._get_valid_endpoints(entry)
-
-                if valid_endpoints:
-                    # Favor public endpoints over internal
-                    return valid_endpoints.get('public', valid_endpoints.get('internal'))
-
+        valid_endpoint = cls._get_valid_endpoint(json_resp, 'neutron', 'network')
+        if valid_endpoint:
+            return valid_endpoint
         raise MissingNeutronEndpoint()
 
     @classmethod
@@ -121,27 +115,33 @@ class OpenStackScope(object):
         the Nova service with the requested version
         Sends a CRITICAL service check when no viable candidates are found in the Catalog
         """
-        catalog = json_resp.get('token', {}).get('catalog', [])
+        valid_endpoint = cls._get_valid_endpoint(json_resp, 'nova', 'compute')
+        if valid_endpoint:
+            return valid_endpoint
+        raise MissingNovaEndpoint()
+
+    @classmethod
+    def _get_valid_endpoint(cls, resp, name, type):
+        """
+        Parse the service catalog returned by the Identity API for an endpoint matching
+        the Nova service with the requested version
+        Sends a CRITICAL service check when no viable candidates are found in the Catalog
+        """
+        catalog = resp.get('token', {}).get('catalog', [])
         for entry in catalog:
-            if entry.get('name') == 'nova' and entry.get('type') == 'compute':
+            if entry.get('name') and entry.get('type') and entry.get('name') == name and entry.get('type') == type:
                 # Collect any endpoints on the public or internal interface
-                valid_endpoints = cls._get_valid_endpoints(entry)
+                valid_endpoints = {}
+                for ep in entry.get('endpoints'):
+                    interface = ep.get('interface', '')
+                    if interface in ['public', 'internal']:
+                        valid_endpoints[interface] = ep.get('url')
 
                 if valid_endpoints:
                     # Favor public endpoints over internal
                     return valid_endpoints.get('public', valid_endpoints.get('internal'))
 
-        raise MissingNovaEndpoint()
-
-    @classmethod
-    def _get_valid_endpoints(cls, entry):
-        # Collect any endpoints on the public or internal interface
-        valid_endpoints = {}
-        for ep in entry.get('endpoints'):
-            interface = ep.get('interface', '')
-            if interface in ['public', 'internal']:
-                valid_endpoints[interface] = ep['url']
-        return valid_endpoints
+        return None
 
 
 class OpenStackProject:

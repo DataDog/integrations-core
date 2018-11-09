@@ -9,19 +9,53 @@ from six import iteritems
 
 from . import common
 
-from datadog_checks.openstack_controller.exceptions import IncompleteIdentity
+from datadog_checks.openstack_controller.exceptions import (IncompleteIdentity, MissingNovaEndpoint,
+                                                            MissingNeutronEndpoint)
 from datadog_checks.openstack_controller.scopes import (OpenStackProject, OpenStackScope)
 
 
-def test_get_nova_endpoint():
+def test_get_endpoint():
     assert OpenStackScope._get_nova_endpoint(
         common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
-    # TODO test exceptions
+    with pytest.raises(MissingNovaEndpoint):
+        OpenStackScope._get_nova_endpoint({})
 
-
-def test_get_neutron_endpoint():
     assert OpenStackScope._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
-    # TODO test exceptions
+    with pytest.raises(MissingNeutronEndpoint):
+        OpenStackScope._get_neutron_endpoint({})
+
+    assert OpenStackScope._get_valid_endpoint({}, None, None) is None
+    assert OpenStackScope._get_valid_endpoint({'token': {}}, None, None) is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{}]}}, None, None) is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+        u'type': u'compute',
+        u'name': u'nova'}]}}, None, None) is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, None, None) is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{u'url': u'dummy_url', u'interface': u'dummy'}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{u'url': u'dummy_url'}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{u'interface': u'public'}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') is None
+    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{u'url': u'dummy_url', u'interface': u'internal'}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') == 'dummy_url'
 
 
 BAD_USERS = [
