@@ -74,15 +74,15 @@ class GenericPrometheusCheck(AgentCheck):
     """
     GenericPrometheusCheck is a class that helps instantiating PrometheusCheck only
     with YAML configurations. As each check has it own states it maintains a map
-    of all checks so that the one corresponding to the instance is executed
+    of all checks so that the one corresponding to the instance is executed.
+    Minimal example configuration::
 
-    Minimal example configuration:
-    instances:
-    - prometheus_url: http://foobar/endpoint
-        namespace: "foobar"
-        metrics:
-        - bar
-        - foo
+        instances:
+        - prometheus_url: http://example.com/endpoint
+            namespace: "foobar"
+            metrics:
+            - bar
+            - foo
     """
     DEFAULT_METRIC_LIMIT = 2000
 
