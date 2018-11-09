@@ -14,7 +14,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     Minimal example configuration::
 
         instances:
-        - prometheus_url: http://foobar/endpoint
+        - prometheus_url: http://example.com/endpoint
             namespace: "foobar"
             metrics:
             - bar
