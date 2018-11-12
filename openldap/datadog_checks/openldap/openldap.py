@@ -38,8 +38,8 @@ class OpenLDAP(AgentCheck):
             res = conn.bind()
             if not res:
                 raise ldap3.core.exceptions.LDAPBindError("Error binding to server: {}".format(conn.result))
-        except ldap3.core.exceptions.LDAPBindError:
-            self.log.exception("Could not connect to server at %s: %s", url, conn.result)
+        except ldap3.core.exceptions.LDAPExceptionError as e:
+            self.log.exception("Could not connect to server at %s: %s", url, e)
             self.service_check("{}.can_connect".format(METRIC_PREFIX), self.CRITICAL, tags=tags)
             raise
 
