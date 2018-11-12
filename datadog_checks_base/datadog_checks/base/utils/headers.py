@@ -1,12 +1,20 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+try:
+    import datadog_agent
+except ImportError:
+    datadog_agent = None
 
 
 def headers(agentConfig, **kwargs):
     # Build the request headers
+    if datadog_agent:
+        version = datadog_agent.get_version() or '0.0.0'
+    else:
+        version = agentConfig.get('version', '0.0.0')
     res = {
-        'User-Agent': 'Datadog Agent/%s' % agentConfig.get('version', '0.0.0'),
+        'User-Agent': 'Datadog Agent/%s' % agentConfig.get('version', version),
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'text/html, */*',
     }
