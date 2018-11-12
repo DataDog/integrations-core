@@ -14,6 +14,8 @@ from six import iteritems
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
+from datadog_checks.utils.tracing import traced
+
 
 from .utils import get_instance_key
 from .retry import BackOffRetry
@@ -1145,6 +1147,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         return instance_scope
 
+    @traced
     def check(self, instance):
         # have we been backed off
         if not self.backoff.should_run(instance):
