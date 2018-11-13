@@ -37,34 +37,6 @@ EXAMPLE_AUTH_RESPONSE = {
             {
                 u'endpoints': [
                     {
-                        u'url': u'http://10.0.2.15:8773/',
-                        u'interface': u'public',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'541baeb9ab7542609d7ae307a7a9d5f0'
-                    },
-                    {
-                        u'url': u'http: //10.0.2.15:8773/',
-                        u'interface': u'admin',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'5c648acaea9941659a5dc04fb3b18e49'
-                    },
-                    {
-                        u'url': u'http: //10.0.2.15:8773/',
-                        u'interface': u'internal',
-                        u'region': u'RegionOne',
-                        u'region_id': u'RegionOne',
-                        u'id': u'cb70e610620542a1804522d365226981'
-                    }
-                ],
-                u'type': u'compute',
-                u'id': u'1398dc02f9b7474eb165106485033b48',
-                u'name': u'nova'
-            },
-            {
-                u'endpoints': [
-                    {
                         u'url': u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876',
                         u'interface': u'internal',
                         u'region': u'RegionOne',
@@ -86,10 +58,37 @@ EXAMPLE_AUTH_RESPONSE = {
                         u'id': u'de93edcbf7f9446286687ec68423c36f'
                     }
                 ],
-                u'type': u'computev21',
+                u'type': u'compute',
                 u'id': u'2023bd4f451849ba8abeaaf283cdde4f',
-                u'name': u'novav21'
+                u'name': u'nova'
             },
+            {
+                u'endpoints': [
+                    {
+                        u'url': u'http://10.0.3.111:8776/v1/***************************4bfc1',
+                        u'interface': u'public',
+                        u'region': u'RegionOne',
+                        u'region_id': u'RegionOne',
+                        u'id': u'***************************2452f'
+                    },
+                    {
+                        u'url': u'http://172.29.236.101:8776/v1/***************************4bfc1',
+                        u'interface': u'admin',
+                        u'region': u'RegionOne',
+                        u'region_id': u'RegionOne',
+                        u'id': u'***************************8239f'
+                    },
+                    {
+                        u'url': u'http://172.29.236.101:8776/v1/***************************4bfc1',
+                        u'interface': u'internal',
+                        u'region': u'RegionOne',
+                        u'region_id': u'RegionOne',
+                        u'id': u'***************************7caa1'
+                    }
+                ],
+                u'type': u'volume',
+                u'id': u'***************************e7e16',
+                u'name': u'cinder'},
             {
                 u'endpoints': [
                     {
@@ -156,35 +155,6 @@ EXAMPLE_PROJECTS_RESPONSE = {
         "next": None,
     }
 }
-
-BAD_AUTH_SCOPES = [
-    {'auth_scope': {'project': {}}},
-    {'auth_scope': {'project': {'id': ''}}},
-    {'auth_scope': {'project': {'name': 'test'}}},
-    {'auth_scope': {'project': {'name': 'test', 'domain': {}}}},
-    {'auth_scope': {'project': {'name': 'test', 'domain': {'id': ''}}}},
-]
-
-GOOD_UNSCOPED_AUTH_SCOPES = [
-    {'auth_scope': {}},  # unscoped project
-]
-
-GOOD_AUTH_SCOPES = [
-    {'auth_scope': {'project': {'id': 'test_project_id'}}},
-    {'auth_scope': {'project': {'name': 'test', 'domain': {'id': 'test_id'}}}},
-]
-
-BAD_USERS = [
-    {'user': {}},
-    {'user': {'name': ''}},
-    {'user': {'name': 'test_name', 'password': ''}},
-    {'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {}}},
-    {'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': ''}}},
-]
-
-GOOD_USERS = [
-    {'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}},
-]
 
 # .. server/network
 ALL_SERVER_DETAILS = {
@@ -319,8 +289,7 @@ MOCK_CONFIG = {
     },
     'instances': [
         {
-            'name': 'test_name', 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
-            'auth_scope': {'project': {'id': 'test_project_id'}},
+            'name': 'test_name', 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}
         }
     ]
 }
