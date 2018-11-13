@@ -1,5 +1,5 @@
-datadog\_checks.checks.win
-==========================
+win
+===
 
 Subpackages
 -----------
@@ -8,24 +8,24 @@ Subpackages
 
     datadog_checks.checks.win.wmi
 
-datadog\_checks.checks.win.winpdh
----------------------------------
+winpdh
+------
 
 .. automodule:: datadog_checks.base.checks.win.winpdh
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.checks.win.winpdh\_base
----------------------------------------
+winpdh\_base
+------------
 
 .. automodule:: datadog_checks.base.checks.win.winpdh_base
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.checks.win.winpdh\_stub
----------------------------------------
+winpdh\_stub
+------------
 
 .. automodule:: datadog_checks.base.checks.win.winpdh_stub
     :members:
