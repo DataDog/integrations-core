@@ -23,6 +23,13 @@ Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of you
 
 To get started with the PostgreSQL integration, create at least a read-only Datadog user with proper access to your PostgreSQL server. Start psql on your PostgreSQL database and run:
 
+For version 10 and above:
+```
+create user datadog with password '<PASSWORD>';
+grant pg_monitor to datadog;
+```
+
+For other versions:
 ```
 create user datadog with password '<PASSWORD>';
 grant SELECT ON pg_stat_database to datadog;
