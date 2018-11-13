@@ -13,15 +13,12 @@ from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
 from datadog_checks.utils.tracing import traced
 
-
-
 from .scopes import OpenStackScope
 from .settings import DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION
 from .utils import get_instance_key
 from .retry import BackOffRetry
 from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
                          MissingNeutronEndpoint, KeystoneUnreachable)
-
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
