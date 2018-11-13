@@ -69,7 +69,7 @@ jobs:
     - stage: test
       env: CHECK=aspdotnet
     - stage: test
-      env: CHECK=btrfs
+      env: CHECK=btrfs PYTHON3=true
     - stage: test
       env: CHECK=cacti
     - stage: test
