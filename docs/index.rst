@@ -20,7 +20,7 @@ The :ref:`datadog_checks_base` package provides a set of functionalities used by
 * Boilerplate code implementing common operations.
 * A testing framework that can be used independently of the Agent.
 
-The :ref:`datadog_checks_dev` package provides tools to ease development and testing:
+The :ref:`datadog_checks_dev` package provides tools for use during development and testing:
 
 * A global ``pytest`` fixture exposing the test framework.
 * Many utilities to assist with common tasks such as IO and environment setup/tear down.
