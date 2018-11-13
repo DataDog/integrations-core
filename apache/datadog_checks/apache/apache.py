@@ -12,7 +12,11 @@ try:
 except ImportError:
     from datadog_checks.config import _is_affirmative
 
-from datadog_checks.utils.headers import headers
+# compatability layer
+try:
+    from util import headers
+except ImportError:
+    from datadog_checks.utils.headers import headers
 
 
 class Apache(AgentCheck):
