@@ -1,4 +1,4 @@
-.. _datadog_checks:
+.. _datadog_checks_base:
 
 datadog_checks_base
 ===================
@@ -13,24 +13,24 @@ Subpackages
     datadog_checks.stubs
     datadog_checks.utils
 
-datadog\_checks.config
-----------------------
+config
+------
 
 .. automodule:: datadog_checks.base.config
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.errors
-----------------------
+errors
+------
 
 .. automodule:: datadog_checks.base.errors
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.log
--------------------
+log
+---
 
 .. automodule:: datadog_checks.base.log
     :members:

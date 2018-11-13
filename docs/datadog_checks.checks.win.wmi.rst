@@ -1,16 +1,16 @@
-datadog\_checks.checks.win.wmi
-==============================
+wmi
+===
 
-datadog\_checks.checks.win.wmi.counter\_type
---------------------------------------------
+counter\_type
+-------------
 
 .. automodule:: datadog_checks.base.checks.win.wmi.counter_type
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.checks.win.wmi.sampler
---------------------------------------
+sampler
+-------
 
 .. automodule:: datadog_checks.base.checks.win.wmi.sampler
     :members:
