@@ -1,72 +1,72 @@
-datadog\_checks.utils
-=====================
+utils
+=====
 
-datadog\_checks.utils.common
-----------------------------
+common
+------
 
 .. automodule:: datadog_checks.base.utils.common
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.utils.containers
---------------------------------
+containers
+----------
 
 .. automodule:: datadog_checks.base.utils.containers
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.utils.headers
------------------------------
+headers
+-------
 
 .. automodule:: datadog_checks.base.utils.headers
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.utils.limiter
------------------------------
+limiter
+-------
 
 .. automodule:: datadog_checks.base.utils.limiter
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.utils.platform
-------------------------------
+platform
+--------
 
 .. automodule:: datadog_checks.base.utils.platform
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.utils.proxy
----------------------------
+proxy
+-----
 
 .. automodule:: datadog_checks.base.utils.proxy
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.utils.subprocess\_output
-----------------------------------------
+subprocess\_output
+------------------
 
 .. automodule:: datadog_checks.base.utils.subprocess_output
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.utils.tailfile
-------------------------------
+tailfile
+--------
 
 .. automodule:: datadog_checks.base.utils.tailfile
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.utils.timeout
------------------------------
+timeout
+-------
 
 .. automodule:: datadog_checks.base.utils.timeout
     :members:

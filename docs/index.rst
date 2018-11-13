@@ -13,12 +13,18 @@ Integrations Core API docs
 The Datadog Check Toolkit
 -------------------------
 
-The :ref:`datadog_checks` toolkit provides a set of functionalities used by any Agent based Integration:
+The :ref:`datadog_checks_base` package provides a set of functionalities used by any Agent based Integration:
 
-* :meth:`datadog_checks.checks.base.AgentCheck`, the base class that every Agent-based Integration is derived from.
+* :class:`~datadog_checks.base.checks.base.AgentCheck`, the base class that every Agent-based Integration is derived from.
 * :ref:`Prometheus <prometheus>` and :ref:`OpenMetrics <openmetrics>` facilities.
 * Boilerplate code implementing common operations.
 * A testing framework that can be used independently of the Agent.
+
+The :ref:`datadog_checks_dev` package provides tools to ease development and testing:
+
+* A global ``pytest`` fixture exposing the test framework.
+* Many utilities to assist with common tasks such as IO and environment setup/tear down.
+* A rich CLI, :ref:`ddev`, to run tests & E2E environments, manage dependencies, create new integrations, etc.
 
 
 Table of Contents
@@ -27,7 +33,8 @@ Table of Contents
 .. toctree::
     :maxdepth: 3
 
-    datadog_checks
+    datadog_checks_base
+    datadog_checks_dev
 
 
 Indices and tables

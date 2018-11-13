@@ -12,13 +12,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../datadog_checks_base'))
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('../datadog_checks_base'))
+# sys.path.insert(1, os.path.abspath('../datadog_checks_dev'))
 
 autodoc_mock_imports = [
-    'prometheus_client',
-    'six.moves',
     'winreg',
     'win32wnet',
     'win32pdh',
@@ -53,6 +52,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx_click.ext',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
