@@ -14,8 +14,6 @@
 #
 # import os
 # import sys
-# sys.path.insert(0, os.path.abspath('../datadog_checks_base'))
-# sys.path.insert(1, os.path.abspath('../datadog_checks_dev'))
 
 autodoc_mock_imports = [
     'winreg',
