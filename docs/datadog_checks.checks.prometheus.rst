@@ -1,26 +1,26 @@
 .. _prometheus:
 
-prometheus
-==========
+datadog\_checks.checks.prometheus
+=================================
 
-base\_check
------------
+datadog\_checks.checks.prometheus.base\_check
+---------------------------------------------
 
 .. automodule:: datadog_checks.base.checks.prometheus.base_check
     :members:
     :undoc-members:
     :show-inheritance:
 
-mixins
-------
+datadog\_checks.checks.prometheus.mixins
+----------------------------------------
 
 .. automodule:: datadog_checks.base.checks.prometheus.mixins
     :members:
     :undoc-members:
     :show-inheritance:
 
-prometheus\_base
-----------------
+datadog\_checks.checks.prometheus.prometheus\_base
+--------------------------------------------------
 
 .. automodule:: datadog_checks.base.checks.prometheus.prometheus_base
     :members:

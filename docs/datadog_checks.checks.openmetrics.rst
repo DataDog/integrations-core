@@ -1,18 +1,18 @@
 .. _openmetrics:
 
-openmetrics
-===========
+datadog\_checks.checks.openmetrics
+==================================
 
-base\_check
------------
+datadog\_checks.checks.openmetrics.base\_check
+----------------------------------------------
 
 .. automodule:: datadog_checks.base.checks.openmetrics.base_check
     :members:
     :undoc-members:
     :show-inheritance:
 
-mixins
-------
+datadog\_checks.checks.openmetrics.mixins
+-----------------------------------------
 
 .. automodule:: datadog_checks.base.checks.openmetrics.mixins
     :members:
