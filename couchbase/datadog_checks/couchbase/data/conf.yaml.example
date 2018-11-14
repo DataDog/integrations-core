@@ -6,6 +6,7 @@ instances:
     password: password
     # query_monitoring_url: http://localhost:8093 # Url to get query monitoring stats, available since couchbase 4.5. See https://developer.couchbase.com/documentation/server/4.5/tools/query-monitoring.html
     # timeout: 10 # Optional timeout to http connections to the API
+    # ssl_verify: true # Whether or not to validate SSL certificates
     # tags:
     #   - optional_tag1
     #   - optional_tag2
