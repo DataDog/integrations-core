@@ -178,4 +178,4 @@ Need help? Contact [Datadog Support][5].
 [8]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/
 [9]: https://www.datadoghq.com/blog/windows-server-monitoring/
 [10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
-[11]: /logs/processing/pipelines/#integration-pipelines
+[11]: https://docs.datadoghq.com/logs/processing/pipelines/#integration-pipelines
