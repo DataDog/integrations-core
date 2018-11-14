@@ -61,7 +61,7 @@ jobs:
     - stage: test
       env: CHECK=active_directory
     - stage: test
-      env: CHECK=activemq_xml
+      env: CHECK=activemq_xml PYTHON3=true
     - stage: test
       env: CHECK=agent_metrics
     - stage: test
