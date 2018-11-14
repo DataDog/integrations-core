@@ -1,5 +1,10 @@
 # CHANGELOG - couchbase
 
+## 1.6.0 / 2018-11-14
+
+* [Added] Add ssl_verify option. See [#2584](https://github.com/DataDog/integrations-core/pull/2584).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.5.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
