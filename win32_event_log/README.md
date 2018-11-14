@@ -63,7 +63,7 @@ logs:
 Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from. 
 Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][11].
 
-Finally, [Restart the Agent][3]
+Finally, [restart the Agent][3]
 
 
 ### Filters
@@ -154,7 +154,7 @@ The Win32 Event log check does not include any service checks at this time.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 ## Further Reading
 ### Documentation
