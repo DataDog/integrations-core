@@ -31,13 +31,13 @@ See the [sample win32_event_log.d/conf.yaml][2] for all available configuration 
 
 To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or via the Datadog Agent Manager. 
 
-To see the channel list run the following command in a PowerShell:
+To see the channel list, run the following command in a PowerShell:
 
 ```powershell
 Get-WinEvent -ListLog *
 ```
 
-To see the most active channels run the following command in a PowerShell:
+To see the most active channels, run the following command in a PowerShell:
 
 ```powershell
 Get-WinEvent -ListLog * | sort RecordCount -Descending
