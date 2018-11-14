@@ -3,7 +3,8 @@
     "/integrations/event_viewer/"
   ],
   "categories": [
-    "os & system"
+    "os & system",
+    "log collection"
   ],
   "creates_events": true,
   "display_name": "Win32",
