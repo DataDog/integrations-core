@@ -16,7 +16,7 @@ The Windows Event Log check is included in the [Datadog Agent][1] package. There
 
 Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. This minimal file captures all events from localhost:
 
-```
+```yaml
 init_config:
 
 instances:
@@ -26,6 +26,45 @@ instances:
 See the [sample win32_event_log.d/conf.yaml][2] for all available configuration options.
 
 [Restart the Agent][3] to start sending Windows events to Datadog.
+
+### Log collection
+
+To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or via the Datadog Agent Manager. 
+
+To see the channel list run the following command in a PowerShell:
+
+```powershell
+Get-WinEvent -ListLog *
+```
+
+To see the most active channels run the following command in a PowerShell:
+
+```powershell
+Get-WinEvent -ListLog * | sort RecordCount -Descending
+```
+
+Then add the channels in your `win32_event_log.d/conf.yaml` configuration file:
+
+```
+logs:
+  - type: windows_event
+    channel_path: <CHANNEL_1>
+    source: <CHANNEL_1>
+    service: myservice
+    sourcecategory: windowsevent
+
+  - type: windows_event
+    channel_path: <CHANNEL_2>
+    source: <CHANNEL_2>
+    service: myservice
+    sourcecategory: windowsevent
+```
+
+Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from. 
+Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][11].
+
+Finally, [Restart the Agent][3]
+
 
 ### Filters
 Use the Windows Event Viewer GUI to list all the event logs available for capture with this integration.
@@ -139,3 +178,4 @@ Need help? Contact [Datadog Support][5].
 [8]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/
 [9]: https://www.datadoghq.com/blog/windows-server-monitoring/
 [10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[11]: /logs/processing/pipelines/#integration-pipelines
