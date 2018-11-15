@@ -10,7 +10,7 @@ Installation
     $ pip install "datadog-checks-dev[cli]"
 
 This results in a working executable, ``ddev``, in your PATH. The
-help flag shortcut `-h` is available globally.
+help flag shortcut ``-h`` is available globally.
 
 To always use the latest version, instead do:
 
