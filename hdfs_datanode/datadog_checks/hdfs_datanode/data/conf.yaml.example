@@ -24,6 +24,7 @@ instances:
   # kerberos_force_initiate: false
   # kerberos_hostname: null
   # kerberos_principal: null
+  # kerberos_keytab: /path/to/keytab_file
 
   # Optionally disable SSL validation. Sometimes when using proxies or self-signed certs
   # we'll want to override validation.
