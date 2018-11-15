@@ -21,7 +21,7 @@ To always use the latest version, instead do:
 Usage
 ^^^^^
 
-Upon the first invocation, `ddev` will attempt to create the config file if it
+Upon the first invocation, ``ddev`` will attempt to create the config file if it
 does not yet exist. `integrations-core` will be the target if the path exists
 unless otherwise specified, defaulting to the current location. This allows
 for full functionality no matter where you are.
