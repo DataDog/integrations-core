@@ -1,4 +1,10 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+kubernetes.cpu.cfs.periods,gauge,,,,Number of elapsed enforcement period intervals,0,kubelet,k8s.cpu.cfs.periods
+kubernetes.cpu.load.10s.avg,gauge,,,,Container cpu load average over the last 10 seconds,0,kubelet,k8s.cpu.load.10s
+kubernetes.cpu.system.total,rate,,nanocore,,The number of cores used for system time,0,kubelet,k8s.cpu.system
+kubernetes.cpu.user.total,rate,,nanocore,,The number of cores used for user time,0,kubelet,k8s.cpu.user
+kubernetes.cpu.cfs.throttled.periods,rate,,,,Number of throttled period intervals,-1,kubelet,k8s.cpu.throttled.periods
+kubernetes.cpu.cfs.throttled.seconds,rate,,,,Total time duration the container has been throttled,-1,kubelet,k8s.cpu.throttled.sec
 kubernetes.cpu.capacity,gauge,,core,,The number of cores in this machine,0,kubelet,k8s.cpu.capacity
 kubernetes.cpu.usage.total,gauge,,nanocore,,The number of cores used,-1,kubelet,k8s.cpu
 kubernetes.cpu.limits,gauge,,core,,The limit of cpu cores set,0,kubelet,k8s.cpu.limits
