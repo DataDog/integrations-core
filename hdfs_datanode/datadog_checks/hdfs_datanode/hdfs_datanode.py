@@ -134,14 +134,14 @@ class HDFSDataNode(AgentCheck):
 
         disable_ssl_validation = is_affirmative(instance.get('disable_ssl_validation', False))
 
+        old_keytab_path = None
+        if 'kerberos_keytab' in instance:
+            old_keytab_path = os.getenv('KRB5_CLIENT_KTNAME')
+            os.environ['KRB5_CLIENT_KTNAME'] = instance['kerberos_keytab']
+
         self.log.debug('Attempting to connect to "{}"'.format(url))
 
-        old_keytab_path = None
         try:
-            if 'kerberos_keytab' in instance:
-                old_keytab_path = os.getenv('KRB5_CLIENT_KTNAME')
-                os.environ['KRB5_CLIENT_KTNAME'] = instance['kerberos_keytab']
-
             response = requests.get(
                 url, auth=auth, timeout=self.default_integration_http_timeout, verify=not disable_ssl_validation
             )
