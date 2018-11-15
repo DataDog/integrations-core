@@ -36,7 +36,7 @@ The Developer Toolkit is designed for use by any Agent-based integration and pro
 * The :ref:`api` package, providing a Python API for use during development and testing.
 * A rich CLI, :ref:`ddev`, to run tests & E2E environments, manage dependencies, create new integrations and much more.
 
-`datadog-checks-dev` is distributed on PyPI as a universal wheel
+``datadog-checks-dev`` is distributed on PyPI as a universal wheel
 and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and PyPy.
 
 Table of Contents
