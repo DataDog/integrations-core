@@ -21,6 +21,7 @@ from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
 from datadog_checks.checks.libs.timer import Timer
+from datadog_checks.utils.common import ensure_bytes
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .errors import BadConfigError, ConnectionError
@@ -511,8 +512,8 @@ class VSphereCheck(AgentCheck):
                 obj_list[vimtype].append({
                     "mor_type": mor_type,
                     "mor": obj,
-                    "hostname": hostname,
-                    "tags": tags + instance_tags
+                    "hostname": ensure_bytes if hostname else hostname,
+                    "tags": self._normalize_tags_type(tags + instance_tags)
                 })
 
         self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
