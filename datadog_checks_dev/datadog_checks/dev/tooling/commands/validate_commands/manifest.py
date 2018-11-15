@@ -9,11 +9,11 @@ from collections import OrderedDict
 import click
 from six import string_types
 
-from .utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
-from ..constants import get_root
-from ..utils import parse_version_parts
-from ...compat import JSONDecodeError
-from ...utils import basepath, file_exists, read_file, write_file
+from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ...constants import get_root
+from ...utils import parse_version_parts
+from ....compat import JSONDecodeError
+from ....utils import basepath, file_exists, read_file, write_file
 
 REQUIRED_ATTRIBUTES = {
     'categories',
@@ -44,22 +44,14 @@ OPTIONAL_ATTRIBUTES = {
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
 
-@click.group(
+@click.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help='Manage manifest files'
-)
-def manifest():
-    pass
-
-
-@manifest.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate all `manifest.json` files'
+    short_help='Validate `manifest.json` files'
 )
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.option('--include-extras', '-i', is_flag=True, help='Include optional fields')
-def verify(fix, include_extras):
-    """Validate all `manifest.json` files."""
+def manifest(fix, include_extras):
+    """Validate `manifest.json` files."""
     all_guids = {}
 
     root = get_root()
@@ -389,39 +381,3 @@ def verify(fix, include_extras):
     if failed_checks:
         echo_failure("{} invalid files".format(failed_checks))
         abort()
-
-
-@manifest.command(
-    'set',
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Assign values to manifest file entries for every check'
-)
-@click.argument('key')
-@click.argument('value')
-def set_value(key, value):
-    """Assigns values to manifest file entries for every check."""
-    root = get_root()
-    updated_checks = 0
-
-    for check in sorted(os.listdir(root)):
-        manifest_file = os.path.join(root, check, 'manifest.json')
-
-        if file_exists(manifest_file):
-            try:
-                decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
-            except JSONDecodeError:
-                echo_failure('Invalid json: {}'.format(manifest_file))
-                continue
-
-            decoded[key] = value
-
-            new_manifest = '{}\n'.format(
-                json.dumps(decoded, indent=2, separators=(',', ': '))
-            )
-
-            write_file(manifest_file, new_manifest)
-
-            updated_checks += 1
-
-    display = echo_success if updated_checks else echo_warning
-    display('Set `{}` to `{}` in {} checks.'.format(key, value, updated_checks))
