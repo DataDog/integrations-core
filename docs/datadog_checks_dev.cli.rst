@@ -22,7 +22,7 @@ Usage
 ^^^^^
 
 Upon the first invocation, ``ddev`` will attempt to create the config file if it
-does not yet exist. `integrations-core` will be the target if the path exists
+does not yet exist. ``integrations-core`` will be the target if the path exists
 unless otherwise specified, defaulting to the current location. This allows
 for full functionality no matter where you are.
 
