@@ -23,7 +23,7 @@ from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
     git_show_file, git_tag_list
 )
-from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash
+from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
     update_version_module
@@ -55,6 +55,37 @@ def validate_version(ctx, param, value):
         return '{}.{}'.format(version_info.major, version_info.minor)
     except ValueError:
         raise click.BadParameter('needs to be in semver format x.y[.z]')
+
+
+def create_trello_card(client, teams, pr_title, pr_url, pr_body):
+    body = u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
+
+    for team in teams:
+        creation_attempts = 3
+        for attempt in range(3):
+            rate_limited, error, response = client.create_card(team, pr_title, body)
+            if rate_limited:
+                wait_time = 10
+                echo_warning(
+                    'Attempt {} of {}: A rate limit in effect, retrying in {} '
+                    'seconds...'.format(attempt + 1, creation_attempts, wait_time)
+                )
+                time.sleep(wait_time)
+            elif error:
+                if attempt + 1 == creation_attempts:
+                    echo_failure('Error: {}'.format(error))
+                    break
+
+                wait_time = 2
+                echo_warning(
+                    'Attempt {} of {}: An error has occurred, retrying in {} '
+                    'seconds...'.format(attempt + 1, creation_attempts, wait_time)
+                )
+                time.sleep(wait_time)
+            else:
+                echo_success('Created card for team {}: '.format(team), nl=False)
+                echo_info(response.json().get('url'))
+                break
 
 
 @click.group(
@@ -216,9 +247,10 @@ def changes(ctx, check, dry_run):
 )
 @click.option('--start', 'start_id', help='The PR number or commit hash to start at')
 @click.option('--since', 'agent_version', callback=validate_version, help='The version of the Agent to compare')
+@click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.pass_context
-def testable(ctx, start_id, agent_version, dry_run):
+def testable(ctx, start_id, agent_version, milestone, dry_run):
     """Create a Trello card for each change that needs to be tested for
     the next release. Run via `ddev -x release testable` to force the use
     of the current directory.
@@ -291,6 +323,7 @@ def testable(ctx, start_id, agent_version, dry_run):
         options = OrderedDict((
             ('1', 'Integrations'),
             ('2', 'Containers'),
+            ('3', 'Agent'),
             ('s', 'Skip'),
             ('q', 'Quit'),
         ))
@@ -300,6 +333,8 @@ def testable(ctx, start_id, agent_version, dry_run):
             ('2', 'Containers'),
             ('3', 'Logs'),
             ('4', 'Process'),
+            ('5', 'Trace'),
+            ('6', 'Integrations'),
             ('s', 'Skip'),
             ('q', 'Quit'),
         ))
@@ -371,10 +406,25 @@ def testable(ctx, start_id, agent_version, dry_run):
                 )
                 continue
 
+        pr_labels = sorted(get_pr_labels(pr_data))
+        if any(label.lower().startswith('documentation') for label in pr_labels):
+            echo_info('Skipping documentation {}.'.format(format_commit_id(commit_id)))
+            continue
+
+        pr_milestone = get_pr_milestone(pr_data)
+        if milestone and pr_milestone != milestone:
+            echo_info('Looking for milestone {}, skipping {}.'.format(milestone, format_commit_id(commit_id)))
+            continue
+
         pr_url = pr_data.get('html_url', 'https://github.com/DataDog/{}/pull/{}'.format(repo, commit_id))
         pr_title = pr_data.get('title', commit_subject)
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
+
+        teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
+        if teams:
+            create_trello_card(trello, teams, pr_title, pr_url, pr_body)
+            continue
 
         finished = False
         choice_error = ''
@@ -389,6 +439,13 @@ def testable(ctx, start_id, agent_version, dry_run):
 
             echo_success('Author: ', nl=False, indent=indent)
             echo_info(pr_author)
+
+            echo_success('Labels: ', nl=False, indent=indent)
+            echo_info(', '.join(pr_labels))
+
+            if pr_milestone:
+                echo_success('Milestone: ', nl=False, indent=indent)
+                echo_info(pr_milestone)
 
             # Ensure Unix lines feeds just in case
             echo_info(pr_body.strip('\r'), indent=indent)
@@ -429,35 +486,7 @@ def testable(ctx, start_id, agent_version, dry_run):
                 echo_warning('Exited at {}'.format(format_commit_id(commit_id)))
                 return
             else:
-                creation_attempts = 3
-                for attempt in range(3):
-                    rate_limited, error, response = trello.create_card(
-                        value,
-                        pr_title,
-                        u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
-                    )
-                    if rate_limited:
-                        wait_time = 10
-                        echo_warning(
-                            'Attempt {} of {}: A rate limit in effect, retrying in {} '
-                            'seconds...'.format(attempt + 1, creation_attempts, wait_time)
-                        )
-                        time.sleep(wait_time)
-                    elif error:
-                        if attempt + 1 == creation_attempts:
-                            echo_failure('Error: {}'.format(error))
-                            break
-
-                        wait_time = 2
-                        echo_warning(
-                            'Attempt {} of {}: An error has occurred, retrying in {} '
-                            'seconds...'.format(attempt + 1, creation_attempts, wait_time)
-                        )
-                        time.sleep(wait_time)
-                    else:
-                        echo_success('Created card: ', nl=False)
-                        echo_info(response.json().get('url'))
-                        break
+                create_trello_card(trello, [value], pr_title, pr_url, pr_body)
 
             finished = True
 

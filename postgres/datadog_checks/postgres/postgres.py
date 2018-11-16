@@ -57,10 +57,11 @@ class PostgreSql(AgentCheck):
         'tup_inserted': ('postgresql.rows_inserted', RATE),
         'tup_updated': ('postgresql.rows_updated', RATE),
         'tup_deleted': ('postgresql.rows_deleted', RATE),
+        '2^31 - age(datfrozenxid) as wraparound': ('postgresql.before_xid_wraparound', GAUGE),
     }
 
     DATABASE_SIZE_METRICS = {
-        'pg_database_size(datname) as pg_database_size': ('postgresql.database_size', GAUGE),
+        'pg_database_size(psd.datname) as pg_database_size': ('postgresql.database_size', GAUGE),
     }
 
     NEWER_92_METRICS = {
@@ -483,7 +484,7 @@ GROUP BY datid, datname
 
             # add size metrics if needed
             if database_size_metrics:
-                self.instance_metrics[key] = dict(self.instance_metrics[key], **self.DATABASE_SIZE_METRICS)
+                self.instance_metrics[key].update(self.DATABASE_SIZE_METRICS)
 
             metrics = self.instance_metrics.get(key)
 
@@ -493,18 +494,19 @@ GROUP BY datid, datname
             return None
 
         res = {
-            'descriptors': [('datname', 'db')],
+            'descriptors': [('psd.datname', 'db')],
             'metrics': metrics,
-            'query': "SELECT datname, %s "
-            "FROM pg_stat_database "
-            "WHERE datname not ilike 'template%%' "
-            "  AND datname not ilike 'rdsadmin' "
-            "  AND datname not ilike 'azure_maintenance' ",
+            'query': "SELECT psd.datname, %s "
+            "FROM pg_stat_database psd "
+            "JOIN pg_database pd ON psd.datname = pd.datname "
+            "WHERE psd.datname not ilike 'template%%' "
+            "  AND psd.datname not ilike 'rdsadmin' "
+            "  AND psd.datname not ilike 'azure_maintenance' ",
             'relation': False,
         }
 
         if not collect_default_db:
-            res["query"] += "  AND datname not ilike 'postgres'"
+            res["query"] += "  AND psd.datname not ilike 'postgres'"
 
         return res
 

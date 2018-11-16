@@ -97,7 +97,7 @@ def set_value(ctx, key, value):
             hide_input=scrubbing
         )
 
-    if key in ('core', 'extras') and not value.startswith('~'):
+    if key in ('core', 'extras', 'agent') and not value.startswith('~'):
         value = os.path.abspath(value)
 
     user_config = new_config = ctx.obj

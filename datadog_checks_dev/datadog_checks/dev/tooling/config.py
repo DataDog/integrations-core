@@ -27,6 +27,7 @@ SECRET_KEYS = {
 DEFAULT_CONFIG = OrderedDict([
     ('core', os.path.join('~', 'dd', 'integrations-core')),
     ('extras', os.path.join('~', 'dd', 'integrations-extras')),
+    ('agent', os.path.join('~', 'dd', 'datadog-agent')),
     ('repo', 'core'),
     ('agent6', 'datadog/agent-dev:master'),
     ('agent5', 'datadog/dev-dd-agent:master'),

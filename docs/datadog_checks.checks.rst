@@ -1,5 +1,5 @@
-datadog\_checks.checks
-======================
+checks
+======
 
 Subpackages
 -----------
@@ -12,16 +12,16 @@ Subpackages
     datadog_checks.checks.prometheus
     datadog_checks.checks.win
 
-datadog\_checks.checks.base
----------------------------
+base
+----
 
 .. automodule:: datadog_checks.base.checks.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.checks.network
-------------------------------
+network
+-------
 
 .. automodule:: datadog_checks.base.checks.network
     :members:

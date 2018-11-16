@@ -21,6 +21,7 @@ from .retry import BackOffRetry
 from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
                          MissingNeutronEndpoint, KeystoneUnreachable, AuthenticationNeeded)
 
+
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
