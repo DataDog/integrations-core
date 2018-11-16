@@ -38,10 +38,10 @@ instances:
   #
   #  password: <PASSWORD>
 
-  ## @param ssl - boolean - optional
+  ## @param ssl - boolean - optional - default:false
   ## Whether or not to use the --ssl parameter to nodetool to initiate a connection over SSL to the JMX server.
   #
-  #  ssl: <true|false>
+  #  ssl: false
 
   ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
