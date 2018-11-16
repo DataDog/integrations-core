@@ -512,7 +512,7 @@ class VSphereCheck(AgentCheck):
                 obj_list[vimtype].append({
                     "mor_type": mor_type,
                     "mor": obj,
-                    "hostname": ensure_bytes if hostname else hostname,
+                    "hostname": ensure_bytes(hostname) if hostname else hostname,
                     "tags": self._normalize_tags_type(tags + instance_tags)
                 })
 
