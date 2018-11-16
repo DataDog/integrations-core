@@ -7,6 +7,3 @@ instances:
 
     # Add additional custom tags to the metrics
     # tags: ['custom:tag']
-
-    # Whitelist some containers label if you want to collect them
-    # label_whitelist: ['']
