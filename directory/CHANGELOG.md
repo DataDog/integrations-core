@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.3.1 / 2018-10-12
+
+* [Fixed] Make the error message more clear in case a path is not accessible. See [#2369](https://github.com/DataDog/integrations-core/pull/2369).
+
 ## 1.3.0 / 2018-09-04
 
 * [Added] Add option to pattern-match full directory path. See [#2026](https://github.com/DataDog/integrations-core/pull/2026).

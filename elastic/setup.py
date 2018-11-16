@@ -25,7 +25,7 @@ with open(path.join(HERE, "datadog_checks", "elastic", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base'
+CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 
 setup(
     name='datadog-elastic',
@@ -61,8 +61,6 @@ setup(
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-
-    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     include_package_data=True,

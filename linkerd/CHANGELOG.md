@@ -1,5 +1,9 @@
 # CHANGELOG - Linkerd
 
+## 2.0.0 / 2018-10-12
+
+* [Changed] Update linkerd to use the new OpenMetricsBaseCheck. See [#1984](https://github.com/DataDog/integrations-core/pull/1984).
+
 ## 1.2.0 / 2018-09-04
 
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093](https://github.com/DataDog/integrations-core/pull/2093).

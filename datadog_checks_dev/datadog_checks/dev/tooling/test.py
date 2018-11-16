@@ -5,7 +5,7 @@ from .constants import TESTABLE_FILE_EXTENSIONS, get_root
 from .git import files_changed
 from .utils import get_testable_checks
 from ..subprocess import run_command
-from ..utils import chdir, path_join
+from ..utils import chdir, path_join, read_file_binary, write_file_binary
 
 STYLE_ENVS = {
     'flake8',
@@ -70,11 +70,19 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
         yield check, envs_selected
 
 
-def get_available_tox_envs(check, sort=False):
+def get_available_tox_envs(check, sort=False, e2e_only=False):
+    if e2e_only:
+        tox_command = 'tox --listenvs-all'
+    else:
+        tox_command = 'tox --listenvs'
+
     with chdir(path_join(get_root(), check)):
-        env_list = run_command('tox --listenvs', capture='out').stdout
+        env_list = run_command(tox_command, capture='out').stdout
 
     env_list = [e.strip() for e in env_list.splitlines()]
+
+    if e2e_only:
+        sort = True
 
     if sort:
         env_list.sort()
@@ -88,13 +96,22 @@ def get_available_tox_envs(check, sort=False):
 
         for e in benchmark_envs:
             env_list.remove(e)
-            env_list.append(e)
+            if not e2e_only:
+                env_list.append(e)
 
         # Put style checks at the end always
         for style_type in STYLE_ENVS:
             try:
                 env_list.remove(style_type)
-                env_list.append(style_type)
+                if not e2e_only:
+                    env_list.append(style_type)
+            except ValueError:
+                pass
+
+        if e2e_only:
+            # No need for unit tests as they wouldn't set up a real environment
+            try:
+                env_list.remove('unit')
             except ValueError:
                 pass
 
@@ -111,6 +128,46 @@ def coverage_sources(check):
         package_path = 'datadog_checks/{}'.format(check)
 
     return package_path, 'tests'
+
+
+def fix_coverage_report(check, report_file):
+    report = read_file_binary(report_file)
+
+    # Make every check's `tests` directory path unique so they don't get combined in UI
+    report = report.replace(b'"tests/', '"{}/tests/'.format(check).encode('utf-8'))
+
+    write_file_binary(report_file, report)
+
+
+def construct_pytest_options(verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False):
+    # Prevent no verbosity
+    pytest_options = '--verbosity={}'.format(verbose or 1)
+
+    if enter_pdb:
+        # Drop to PDB on first failure, then end test session
+        pytest_options += ' --pdb -x'
+
+    if debug:
+        pytest_options += ' --log-level=debug -s'
+
+    if bench:
+        pytest_options += ' --benchmark-only --benchmark-cprofile=tottime'
+    else:
+        pytest_options += ' --benchmark-skip'
+
+    if coverage:
+        pytest_options += (
+            # Located at the root of each repo
+            ' --cov-config=../.coveragerc'
+            # Use the same .coverage file to aggregate results
+            ' --cov-append'
+            # Show no coverage report until the end
+            ' --cov-report='
+            # This will be formatted to the appropriate coverage paths for each package
+            ' {}'
+        )
+
+    return pytest_options
 
 
 def pytest_coverage_sources(*checks):

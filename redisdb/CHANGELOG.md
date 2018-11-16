@@ -1,5 +1,10 @@
 # CHANGELOG - redisdb
 
+## 1.7.1 / 2018-10-12
+
+* [Fixed] Handle `host:` command when parsing commandstats output. See [#2356](https://github.com/DataDog/integrations-core/pull/2356).
+* [Fixed] Fix multiple db key length. See [#2187](https://github.com/DataDog/integrations-core/pull/2187).
+
 ## 1.7.0 / 2018-09-04
 
 * [Added] Support finding key lengths on any db. See [#1948](https://github.com/DataDog/integrations-core/pull/1948).

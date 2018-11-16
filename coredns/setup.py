@@ -7,7 +7,7 @@ from codecs import open
 from os import path
 
 HERE = path.abspath(path.dirname(__file__))
-CHECKS_BASE_REQ = 'datadog-checks-base'
+CHECKS_BASE_REQ = 'datadog-checks-base>=4.1.0'
 
 # Get version info
 ABOUT = {}

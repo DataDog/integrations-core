@@ -128,12 +128,12 @@ class AgentCheck(object):
             # Do not allow to disable limiting if the class has set a non-zero default value
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
-                self.warning("Setting max_returned_metrics to zero is not allowed," +
+                self.warning("Setting max_returned_metrics to zero is not allowed, "
                              "reverting to the default of {} metrics".format(self.DEFAULT_METRIC_LIMIT))
         except Exception:
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
-            self.metric_limiter = Limiter("metrics", metric_limit, self.warning)
+            self.metric_limiter = Limiter(self.name, "metrics", metric_limit, self.warning)
 
     @property
     def in_developer_mode(self):
@@ -180,7 +180,10 @@ class AgentCheck(object):
         try:
             value = float(value)
         except ValueError:
-            err_msg = "Metric: {} has non float value: {}. Only float values can be submitted as metrics".format(name, value)
+            err_msg = (
+                "Metric: {} has non float value: {}. "
+                "Only float values can be submitted as metrics.".format(repr(name), repr(value))
+            )
             if using_stub_aggregator:
                 raise ValueError(err_msg)
             self.warning(err_msg)
@@ -266,8 +269,7 @@ class AgentCheck(object):
         prefix.b.c
         :param metric The metric name to normalize
         :param prefix A prefix to to add to the normalized name, default None
-        :param fix_case A boolean, indicating whether to make sure that
-                        the metric name returned is in underscore_case
+        :param fix_case A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
         """
         if isinstance(metric, text_type):
             metric_name = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
@@ -279,15 +281,15 @@ class AgentCheck(object):
             if prefix is not None:
                 prefix = self.convert_to_underscore_separated(prefix)
         else:
-            name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", metric_name)
+            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric_name)
         # Eliminate multiple _
-        name = re.sub(r"__+", "_", name)
+        name = re.sub(br"__+", b"_", name)
         # Don't start/end with _
-        name = re.sub(r"^_", "", name)
-        name = re.sub(r"_$", "", name)
+        name = re.sub(br"^_", b"", name)
+        name = re.sub(br"_$", b"", name)
         # Drop ._ and _.
-        name = re.sub(r"\._", ".", name)
-        name = re.sub(r"_\.", ".", name)
+        name = re.sub(br"\._", b".", name)
+        name = re.sub(br"_\.", b".", name)
 
         if prefix is not None:
             return prefix + "." + name

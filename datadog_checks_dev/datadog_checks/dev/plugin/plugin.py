@@ -44,17 +44,20 @@ def dd_environment_runner(request):
 
         raise
 
+    metadata = {}
+
     # Environment fixture also returned some metadata
     if isinstance(config, tuple):
-        config, metadata = config
+        config, possible_metadata = config
 
         # Support only defining the env_type for ease-of-use
-        if isinstance(metadata, str):
-            metadata = {'env_type': metadata}
+        if isinstance(possible_metadata, str):
+            metadata['env_type'] = possible_metadata
+        else:
+            metadata.update(possible_metadata)
 
     # Default to Docker as that is the most common
-    else:
-        metadata = {'env_type': 'docker'}
+    metadata.setdefault('env_type', 'docker')
 
     data = {
         'config': config,

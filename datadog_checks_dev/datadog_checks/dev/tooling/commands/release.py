@@ -8,7 +8,7 @@ from collections import OrderedDict, namedtuple
 from datetime import datetime
 
 import click
-from semver import parse_version_info
+from semver import finalize_version, parse_version_info
 from six import StringIO, iteritems
 
 from .dep import freeze as dep_freeze
@@ -17,7 +17,7 @@ from .utils import (
     echo_warning
 )
 from ..constants import (
-    AGENT_REQ_FILE, AGENT_V5_ONLY, CHANGELOG_TYPE_NONE, get_root
+    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP, get_root
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
@@ -317,10 +317,36 @@ def testable(ctx, start_id, agent_version, dry_run):
     for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id:
-            pr_data = get_pr(commit_id, user_config, repo=repo)
+            api_response = get_pr(commit_id, user_config, repo=repo, raw=True)
+            if api_response.status_code == 401:
+                abort('Access denied. Please ensure your GitHub token has correct permissions.')
+            elif api_response.status_code == 403:
+                echo_failure(
+                    'Error getting info for #{}. Please set a GitHub HTTPS '
+                    'token to avoid rate limits.'.format(commit_id)
+                )
+                continue
+            elif api_response.status_code == 404:
+                echo_info('Skipping #{}, not a pull request...'.format(commit_id))
+                continue
+
+            api_response.raise_for_status()
+            pr_data = api_response.json()
         else:
             try:
-                pr_data = get_pr_from_hash(commit_hash, repo, user_config).get('items', [{}])[0]
+                api_response = get_pr_from_hash(commit_hash, repo, user_config, raw=True)
+                if api_response.status_code == 401:
+                    abort('Access denied. Please ensure your GitHub token has correct permissions.')
+                elif api_response.status_code == 403:
+                    echo_failure(
+                        'Error getting info for #{}. Please set a GitHub HTTPS '
+                        'token to avoid rate limits.'.format(commit_id)
+                    )
+                    continue
+
+                api_response.raise_for_status()
+                pr_data = api_response.json()
+                pr_data = pr_data.get('items', [{}])[0]
             # Commit to master
             except IndexError:
                 pr_data = {
@@ -500,10 +526,11 @@ def tag(check, version, push, dry_run):
 )
 @click.argument('check')
 @click.argument('version', required=False)
+@click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.option('--sign-only', is_flag=True, help='Only sign release metadata')
 @click.pass_context
-def make(ctx, check, version, skip_sign, sign_only):
+def make(ctx, check, version, initial_release, skip_sign, sign_only):
     """Perform a set of operations needed to release a single check:
 
     \b
@@ -541,19 +568,44 @@ def make(ctx, check, version, skip_sign, sign_only):
     else:
         checks = [check]
 
+    if initial_release:
+        version = '1.0.0'
+
     for check in checks:
         if sign_only:
             break
+        elif initial_release and check in BETA_PACKAGES:
+            continue
 
-        echo_success('Check `{}`'.format(check))
+        # Initial releases will only bump if not already 1.0.0 so no need to always output
+        if not initial_release:
+            echo_success('Check `{}`'.format(check))
 
         if version:
             # sanity check on the version provided
             cur_version = get_version_string(check)
+
+            if version == 'final':
+                # Remove any pre-release metadata
+                version = finalize_version(cur_version)
+            else:
+                # Keep track of intermediate version bumps
+                prev_version = cur_version
+                for method in version.split(','):
+                    # Apply any supported version bumping methods. Chaining is required for going
+                    # from mainline releases to development releases since e.g. x.y.z > x.y.z-rc.A.
+                    # So for an initial bug fix dev release you can do `fix,rc`.
+                    if method in VERSION_BUMP:
+                        version = VERSION_BUMP[method](prev_version)
+                        prev_version = version
+
             p_version = parse_version_info(version)
             p_current = parse_version_info(cur_version)
             if p_version <= p_current:
-                abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
+                if initial_release:
+                    continue
+                else:
+                    abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
         else:
             cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
             if not changelog_types:
@@ -561,6 +613,9 @@ def make(ctx, check, version, skip_sign, sign_only):
                 continue
             bump_function = get_bump_function(changelog_types)
             version = bump_function(cur_version)
+
+        if initial_release:
+            echo_success('Check `{}`'.format(check))
 
         # update the version number
         echo_info('Current version of check {}: {}'.format(check, cur_version))
@@ -572,14 +627,20 @@ def make(ctx, check, version, skip_sign, sign_only):
         echo_waiting('Updating the changelog... ', nl=False)
         # TODO: Avoid double GitHub API calls when bumping all checks at once
         ctx.invoke(
-            changelog, check=check, version=version, old_version=cur_version, quiet=True, dry_run=False
+            changelog,
+            check=check,
+            version=version,
+            old_version=cur_version,
+            initial=initial_release,
+            quiet=True,
+            dry_run=False
         )
         echo_success('success!')
 
         commit_targets = [check]
 
         # update the global requirements file
-        if check != 'datadog_checks_dev':
+        if check not in NOT_CHECKS:
             commit_targets.append(AGENT_REQ_FILE)
             req_file = os.path.join(root, AGENT_REQ_FILE)
             echo_waiting('Updating the Agent requirements file... ', nl=False)
@@ -593,8 +654,9 @@ def make(ctx, check, version, skip_sign, sign_only):
         msg = '[Release] Bumped {} version to {}'.format(check, version)
         git_commit(commit_targets, msg)
 
-        # Reset version
-        version = None
+        if not initial_release:
+            # Reset version
+            version = None
 
     if sign_only or not skip_sign:
         echo_waiting('Updating release metadata...')
@@ -614,10 +676,11 @@ def make(ctx, check, version, skip_sign, sign_only):
 @click.argument('check')
 @click.argument('version')
 @click.argument('old_version', required=False)
+@click.option('--initial', is_flag=True)
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, quiet, dry_run):
+def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -637,12 +700,16 @@ def changelog(ctx, check, version, old_version, quiet, dry_run):
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
-    diff_lines = get_commits_since(check, target_tag)
+    diff_lines = get_commits_since(check, None if initial else target_tag)
 
     # for each PR get the title, we'll use it to populate the changelog
     pr_numbers = parse_pr_numbers(diff_lines)
     if not quiet:
         echo_info('Found {} PRs merged since tag: {}'.format(len(pr_numbers), target_tag))
+
+    if initial:
+        # Only use the first one
+        del pr_numbers[:-1]
 
     user_config = ctx.obj
     entries = []
@@ -832,16 +899,16 @@ def agent_changelog(since, to, output, force):
     changes_per_agent = OrderedDict()
 
     for i in range(1, len(agent_tags)):
-        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i-1])
+        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i - 1])
         catalog_from = parse_agent_req_file(contents_from)
 
         contents_to = git_show_file(AGENT_REQ_FILE, agent_tags[i])
         catalog_to = parse_agent_req_file(contents_to)
 
         version_changes = OrderedDict()
-        changes_per_agent[agent_tags[i]] = version_changes
+        changes_per_agent[agent_tags[i - 1]] = version_changes
 
-        for name, ver in catalog_to.iteritems():
+        for name, ver in iteritems(catalog_to):
             old_ver = catalog_from.get(name, "")
             if old_ver != ver:
                 # determine whether major version changed

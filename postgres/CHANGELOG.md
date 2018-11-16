@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 2.2.3 / 2018-10-14
+
+* [Fixed] Fix version detection for new development releases. See [#2401](https://github.com/DataDog/integrations-core/pull/2401).
+
 ## 2.2.2 / 2018-09-11
 
 * [Fixed] Fix version detection for Postgres v10+. See [#2208](https://github.com/DataDog/integrations-core/pull/2208).

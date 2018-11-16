@@ -1,5 +1,5 @@
-datadog\_checks.checks.libs
-===========================
+libs
+====
 
 Subpackages
 -----------
@@ -9,18 +9,18 @@ Subpackages
     datadog_checks.checks.libs.vmware
 
 
-datadog\_checks.checks.libs.thread\_pool
-----------------------------------------
+thread\_pool
+------------
 
-.. automodule:: datadog_checks.checks.libs.thread_pool
+.. automodule:: datadog_checks.base.checks.libs.thread_pool
     :members:
     :undoc-members:
     :show-inheritance:
 
-datadog\_checks.checks.libs.timer
----------------------------------
+timer
+-----
 
-.. automodule:: datadog_checks.checks.libs.timer
+.. automodule:: datadog_checks.base.checks.libs.timer
     :members:
     :undoc-members:
     :show-inheritance:

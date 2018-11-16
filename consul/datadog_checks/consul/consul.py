@@ -1,21 +1,17 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import islice
-from math import ceil, floor, sqrt
-from urlparse import urljoin
+from math import ceil, sqrt
 
-# project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.containers import hash_mutable
-from datadog_checks.config import is_affirmative
-
-# 3p
 import requests
+from six import iteritems, iterkeys, itervalues
+from six.moves.urllib.parse import urljoin
+
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.containers import hash_mutable
 
 EPOCH = datetime(1970, 1, 1)
 
@@ -58,8 +54,11 @@ class ConsulCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'consul'
 
-    MAX_CONFIG_TTL = 300  # seconds
-    MAX_SERVICES = 50  # cap on distinct Consul ServiceIDs to interrogate
+    # seconds
+    MAX_CONFIG_TTL = 300
+
+    # cap on distinct Consul ServiceIDs to interrogate
+    MAX_SERVICES = 50
 
     STATUS_SC = {
         'up': AgentCheck.OK,
@@ -103,7 +102,7 @@ class ConsulCheck(AgentCheck):
                 resp = requests.get(url, verify=cabundlefile, headers=headers)
 
         except requests.exceptions.Timeout:
-            self.log.exception('Consul request to {0} timed out'.format(url))
+            self.log.exception('Consul request to {} timed out'.format(url))
             raise
 
         resp.raise_for_status()
@@ -133,7 +132,7 @@ class ConsulCheck(AgentCheck):
         agent_port = local_config.get('Member', {}).get('Tags', {}).get('port') or \
             local_config.get('Config', {}).get('Ports', {}).get('Server')
 
-        agent_url = "{0}:{1}".format(agent_addr, agent_port)
+        agent_url = "{}:{}".format(agent_addr, agent_port)
         self.log.debug("Agent url is %s" % agent_url)
         return agent_url
 
@@ -160,8 +159,8 @@ class ConsulCheck(AgentCheck):
                                                                 self.init_config.get('self_leader_check', False)))
 
         if perform_new_leader_checks and perform_self_leader_check:
-            self.log.warn('Both perform_self_leader_check and perform_new_leader_checks are set, '
-                          'ignoring perform_new_leader_checks')
+            self.log.warning('Both perform_self_leader_check and perform_new_leader_checks are set, '
+                             'ignoring perform_new_leader_checks')
         elif not perform_new_leader_checks and not perform_self_leader_check:
             # Nothing to do here
             return
@@ -173,7 +172,7 @@ class ConsulCheck(AgentCheck):
             #   1. Consul Agent is Down
             #   2. The cluster is in the midst of a leader election
             #   3. The Datadog agent is not able to reach the Consul instance (network partition et al.)
-            self.log.warn('Consul Leader information is not available!')
+            self.log.warning('Consul Leader information is not available!')
             return
 
         if not instance_state.last_known_leader:
@@ -188,22 +187,22 @@ class ConsulCheck(AgentCheck):
             # There was a leadership change
             if perform_new_leader_checks or (perform_self_leader_check and agent == leader):
                 # We either emit all leadership changes or emit when we become the leader and that just happened
-                self.log.info(('Leader change from {0} to {1}. Sending new leader event').format(
+                self.log.info('Leader change from {} to {}. Sending new leader event'.format(
                     instance_state.last_known_leader, leader))
 
                 self.event({
                     "timestamp": int((datetime.now() - EPOCH).total_seconds()),
                     "event_type": "consul.new_leader",
                     "source_type_name": self.SOURCE_TYPE_NAME,
-                    "msg_title": "New Consul Leader Elected in consul_datacenter:{0}".format(agent_dc),
+                    "msg_title": "New Consul Leader Elected in consul_datacenter:{}".format(agent_dc),
                     "aggregation_key": "consul.new_leader",
-                    "msg_text": "The Node at {0} is the new leader of the consul datacenter {1}".format(
+                    "msg_text": "The Node at {} is the new leader of the consul datacenter {}".format(
                         leader,
                         agent_dc
                     ),
-                    "tags": ["prev_consul_leader:{0}".format(instance_state.last_known_leader),
-                             "curr_consul_leader:{0}".format(leader),
-                             "consul_datacenter:{0}".format(agent_dc)]
+                    "tags": ["prev_consul_leader:{}".format(instance_state.last_known_leader),
+                             "curr_consul_leader:{}".format(leader),
+                             "consul_datacenter:{}".format(agent_dc)]
                 })
 
         instance_state.last_known_leader = leader
@@ -216,7 +215,7 @@ class ConsulCheck(AgentCheck):
         return self.consul_request(instance, '/v1/catalog/services')
 
     def get_nodes_with_service(self, instance, service):
-        consul_request_url = '/v1/health/service/{0}'.format(service)
+        consul_request_url = '/v1/health/service/{}'.format(service)
 
         return self.consul_request(instance, consul_request_url)
 
@@ -226,25 +225,30 @@ class ConsulCheck(AgentCheck):
             if len(service_whitelist) > max_services:
                 self.warning('More than %d services in whitelist. Service list will be truncated.' % max_services)
 
-            services = {s: services[s] for s in [s for s in services if s in service_whitelist][:max_services]}
+            whitelisted_services = [s for s in services if s in service_whitelist]
+            services = {s: services[s] for s in whitelisted_services[:max_services]}
         else:
             if len(services) <= max_services:
-                log_line = 'Consul service whitelist not defined. Agent will poll for all {0} services found'
-                log_line = log_line.format(len(services))
+                log_line = (
+                    'Consul service whitelist not defined. '
+                    'Agent will poll for all {} services found'.format(len(services))
+                )
                 self.log.debug(log_line)
             else:
-                log_line = 'Consul service whitelist not defined. Agent will poll for at most {0} services'
-                log_line = log_line.format(max_services)
+                log_line = (
+                    'Consul service whitelist not defined. '
+                    'Agent will poll for at most {} services'.format(max_services)
+                )
                 self.warning(log_line)
-                services = {s: services[s] for s in list(islice(services.iterkeys(), 0, max_services))}
+                services = {s: services[s] for s in list(islice(iterkeys(services), 0, max_services))}
 
         return services
 
     def _get_service_tags(self, service, tags):
-        service_tags = ['consul_service_id:{0}'.format(service)]
+        service_tags = ['consul_service_id:{}'.format(service)]
 
         for tag in tags:
-            service_tags.append('consul_{0}_service_tag:{1}'.format(service, tag))
+            service_tags.append('consul_{}_service_tag:{}'.format(service, tag))
 
         return service_tags
 
@@ -259,20 +263,22 @@ class ConsulCheck(AgentCheck):
         agent_dc = self._get_agent_datacenter(instance, instance_state)
 
         if agent_dc is not None:
-            main_tags.append('consul_datacenter:{0}'.format(agent_dc))
+            main_tags.append('consul_datacenter:{}'.format(agent_dc))
 
         for tag in instance.get('tags', []):
             main_tags.append(tag)
 
+        single_node_install = is_affirmative(instance.get('single_node_install', False))
         if not self._is_instance_leader(instance, instance_state):
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:follower"])
-            self.log.debug("This consul agent is not the cluster leader." +
-                           "Skipping service and catalog checks for this instance")
-            return
+            if not single_node_install:
+                self.log.debug("This consul agent is not the cluster leader. "
+                               "Skipping service and catalog checks for this instance")
+                return
         else:
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:leader"])
 
-        service_check_tags = main_tags + ['consul_url:{0}'.format(instance.get('url'))]
+        service_check_tags = main_tags + ['consul_url:{}'.format(instance.get('url'))]
         perform_catalog_checks = is_affirmative(instance.get('catalog_checks',
                                                              self.init_config.get('catalog_checks')))
         perform_network_latency_checks = is_affirmative(instance.get('network_latency_checks',
@@ -285,23 +291,23 @@ class ConsulCheck(AgentCheck):
             sc = {}
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
-                sc_id = '{0}/{1}/{2}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
+                sc_id = '{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
                 status = self.STATUS_SC.get(check['Status'])
                 if status is None:
                     status = AgentCheck.UNKNOWN
 
                 if sc_id not in sc:
-                    tags = ["check:{0}".format(check["CheckID"])]
+                    tags = ["check:{}".format(check["CheckID"])]
                     if check["ServiceName"]:
-                        tags.append("service:{0}".format(check["ServiceName"]))
+                        tags.append("service:{}".format(check["ServiceName"]))
                     if check["ServiceID"]:
-                        tags.append("consul_service_id:{0}".format(check["ServiceID"]))
+                        tags.append("consul_service_id:{}".format(check["ServiceID"]))
                     sc[sc_id] = {'status': status, 'tags': tags}
 
                 elif self.STATUS_SEVERITY[status] > self.STATUS_SEVERITY[sc[sc_id]['status']]:
                     sc[sc_id]['status'] = status
 
-            for s in sc.values():
+            for s in itervalues(sc):
                 self.service_check(self.HEALTH_CHECK, s['status'], tags=main_tags+s['tags'])
 
         except Exception as e:
@@ -400,27 +406,27 @@ class ConsulCheck(AgentCheck):
                 for status_key in self.STATUS_SC:
                     status_value = node_status[status_key]
                     self.gauge(
-                        '{0}.nodes_{1}'.format(self.CONSUL_CATALOG_CHECK, status_key),
+                        '{}.nodes_{}'.format(self.CONSUL_CATALOG_CHECK, status_key),
                         status_value,
-                        tags=main_tags+service_tags
+                        tags=main_tags + service_tags
                     )
 
-            for node, service_status in nodes_to_service_status.iteritems():
+            for node, service_status in iteritems(nodes_to_service_status):
                 # For every node discovered for whitelisted services, gauge the following:
                 # `consul.catalog.services_up` : Total services registered on node
                 # `consul.catalog.services_passing` : Total passing services on node
                 # `consul.catalog.services_warning` : Total warning services on node
                 # `consul.catalog.services_critical` : Total critical services on node
 
-                node_tags = ['consul_node_id:{0}'.format(node)]
-                self.gauge('{0}.services_up'.format(self.CONSUL_CATALOG_CHECK),
+                node_tags = ['consul_node_id:{}'.format(node)]
+                self.gauge('{}.services_up'.format(self.CONSUL_CATALOG_CHECK),
                            len(services),
                            tags=main_tags+node_tags)
 
                 for status_key in self.STATUS_SC:
                     status_value = service_status[status_key]
                     self.gauge(
-                        '{0}.services_{1}'.format(self.CONSUL_CATALOG_CHECK, status_key),
+                        '{}.services_{}'.format(self.CONSUL_CATALOG_CHECK, status_key),
                         status_value,
                         tags=main_tags+node_tags
                     )
@@ -444,7 +450,7 @@ class ConsulCheck(AgentCheck):
                 for other in datacenters:
                     other_name = other['Datacenter']
                     if name == other_name:
-                        # Ignore ourself
+                        # Ignore ourselves
                         continue
                     latencies = []
                     for node_a in datacenter['Coordinates']:
@@ -454,7 +460,7 @@ class ConsulCheck(AgentCheck):
                     tags = main_tags + ['source_datacenter:{}'.format(name),
                                         'dest_datacenter:{}'.format(other_name)]
                     n = len(latencies)
-                    half_n = int(floor(n / 2))
+                    half_n = int(n // 2)
                     if n % 2:
                         median = latencies[half_n]
                     else:
@@ -462,7 +468,8 @@ class ConsulCheck(AgentCheck):
                     self.gauge('consul.net.dc.latency.min', latencies[0], hostname='', tags=tags)
                     self.gauge('consul.net.dc.latency.median', median, hostname='', tags=tags)
                     self.gauge('consul.net.dc.latency.max', latencies[-1], hostname='', tags=tags)
-                # We've found ourself, we can move on
+
+                # We've found ourselves, we can move on
                 break
 
         # Intra-datacenter
@@ -480,7 +487,7 @@ class ConsulCheck(AgentCheck):
                     latencies.append(distance(node, other))
                 latencies.sort()
                 n = len(latencies)
-                half_n = int(floor(n / 2))
+                half_n = int(n // 2)
                 if n % 2:
                     median = latencies[half_n]
                 else:

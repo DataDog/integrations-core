@@ -1,5 +1,28 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.13.0 / 2018-10-17
+
+* [Added] Ensure new checks use editable install of datadog_checks_base for tests. See [#2427](https://github.com/DataDog/integrations-core/pull/2427).
+* [Fixed] Relax e2e config parsing. See [#2416](https://github.com/DataDog/integrations-core/pull/2416).
+* [Fixed] Fix sleep on WaitFor helper. See [#2418](https://github.com/DataDog/integrations-core/pull/2418).
+
+## 0.12.1 / 2018-10-15
+
+* [Fixed] Improve handling of github api errors for trello. See [#2411](https://github.com/DataDog/integrations-core/pull/2411).
+* [Fixed] Make every check's `tests` directory path unique for coverage. See [#2406](https://github.com/DataDog/integrations-core/pull/2406).
+
+## 0.12.0 / 2018-10-15
+
+* [Fixed] Fix trello for issue number in commit message. See [#2408](https://github.com/DataDog/integrations-core/pull/2408).
+* [Added] Support the initial release of integrations. See [#2399](https://github.com/DataDog/integrations-core/pull/2399).
+
+## 0.11.0 / 2018-10-11
+
+* [Added] Add E2E support. See [#2375](https://github.com/DataDog/integrations-core/pull/2375).
+* [Added] Ensure new core checks use latest dev package for testing. See [#2386](https://github.com/DataDog/integrations-core/pull/2386).
+* [Fixed] Normalize line endings for release signing. See [#2364](https://github.com/DataDog/integrations-core/pull/2364).
+* [Added] Support more teams for Trello test cards. See [#2365](https://github.com/DataDog/integrations-core/pull/2365).
+
 ## 0.10.0 / 2018-10-04
 
 * [Added] Update base package paths. See [#2345](https://github.com/DataDog/integrations-core/pull/2345).

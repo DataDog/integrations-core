@@ -29,6 +29,7 @@ REQUIRES = [
     'pytest-benchmark',
     'pytest-cov',
     'pytest-mock',
+    'requests>=2.20.0',
     'six',
 ]
 
@@ -71,11 +72,11 @@ setup(
             'atomicwrites',
             'click',
             'colorama',
-            'docker-compose>=1.21.2',
+            'docker-compose>=1.23.1,<1.24.0',
             'in-toto==0.2.3',
             'pip-tools',
-            'pyperclip>=1.6.4',
-            'requests<2.19.0',
+            'pyperclip>=1.7.0',
+            'PyYAML>=3.13',
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',

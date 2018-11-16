@@ -126,9 +126,15 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in stats.iteritems():
+            self.submit_perf_metrics(instance, container_tags, container_id, container_stats)
+
+        self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)
+
+    def submit_perf_metrics(self, instance, container_tags, container_id, container_stats):
+        try:
             if container_stats is None:
-                self.log.debug("Could not collect stats from {}".format(container_id))
-                continue
+                self.log.debug("Empty stats for container {}".format(container_id))
+                return
 
             tags = container_tags[container_id]
 
@@ -150,11 +156,14 @@ class FargateCheck(AgentCheck):
             if prevalue_system is not None and prevalue_total is not None:
                 cpu_delta = float(value_total) - float(prevalue_total)
                 system_delta = float(value_system) - float(prevalue_system)
+            else:
+                cpu_delta = 0.0
+                system_delta = 0.0
 
-            active_cpus = float(cpu_stats['online_cpus'])
+            active_cpus = float(cpu_stats.get('online_cpus', 0.0))
 
             cpu_percent = 0.0
-            if system_delta > 0 and cpu_delta > 0:
+            if system_delta > 0 and cpu_delta > 0 and active_cpus > 0:
                 cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
                 cpu_percent = round(cpu_percent, 2)
                 self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
@@ -194,4 +203,5 @@ class FargateCheck(AgentCheck):
                 self.rate(metric_name + 'read', read_counter, tags)
                 self.rate(metric_name + 'write', write_counter, tags)
 
-        self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)
+        except Exception as e:
+            self.warning("Cannot retrieve metrics for {}: {}".format(container_id, e))

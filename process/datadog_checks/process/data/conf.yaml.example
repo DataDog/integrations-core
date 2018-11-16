@@ -4,6 +4,10 @@ init_config:
   # low if you want to alert on process service checks.
   # pid_cache_duration: 120
   #
+  # the check maintains a list of PIDs for which it got access denied. It won't try to look at them again for the 
+  # duration in seconds specified by access_denied_cache_duration. Default value is 120 seconds.
+  # access_denied_cache_duration: 120
+  #
   # used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
   # DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
   # procfs_path: /proc

@@ -65,7 +65,7 @@ class WinPDHCounter(object):
                 try:
                     self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
                 except:  # noqa: E722
-                    self.logger.fatal("Failed to create counter.  No instances of %s\%s" % (
+                    self.logger.fatal("Failed to create counter.  No instances of %s\\%s" % (
                         self._class_name, self._counter_name))
                 try:
                     self.logger.debug("Path: %s\n" % text_type(path))
@@ -101,7 +101,7 @@ class WinPDHCounter(object):
                 try:
                     self.counterdict[SINGLE_INSTANCE_KEY] = win32pdh.AddCounter(self.hq, path)
                 except:  # noqa: E722
-                    self.logger.fatal("Failed to create counter.  No instances of %s\%s" % (
+                    self.logger.fatal("Failed to create counter.  No instances of %s\\%s" % (
                         self._class_name, counter_name))
                     raise
                 self._is_single_instance = True

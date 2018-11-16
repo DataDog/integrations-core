@@ -5,6 +5,8 @@ import subprocess
 import os
 import time
 
+import psycopg2
+
 import pytest
 import mock
 from datadog_checks.postgres import PostgreSql
@@ -46,17 +48,12 @@ def postgres_standalone():
             subprocess.check_call(args + ["down"], env=env)
             raise Exception("PostgreSQL boot timed out!")
 
-        output = subprocess.check_output([
-            "docker",
-            "inspect",
-            "--format='{{json .State.Health.Status}}'",
-            "compose_postgres_1"])
-
-        # we get a json string output from docker
-        if output.strip() == "'\"healthy\"'":
+        try:
+            psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
             break
-        attempts += 1
-        time.sleep(1)
+        except psycopg2.OperationalError:
+            attempts += 1
+            time.sleep(1)
 
     yield
     subprocess.check_call(args + ["down"], env=env)

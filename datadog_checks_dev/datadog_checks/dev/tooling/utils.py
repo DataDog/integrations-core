@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 import requests
 import semver
+from six import string_types
 
 from .constants import VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
@@ -155,3 +156,9 @@ def parse_agent_req_file(contents):
         catalog[name] = version[0]
 
     return catalog
+
+
+def parse_version_parts(version):
+    if not isinstance(version, string_types):
+        return []
+    return [int(v) for v in version.split('.') if v.isdigit()]

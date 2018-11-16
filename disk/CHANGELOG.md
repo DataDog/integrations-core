@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 1.4.0 / 2018-10-12
+
+* [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).
+
 ## 1.3.0 / 2018-09-04
 
 * [Added] Adding optional service_check_rw parameter to check for read-only filesystem. See [#2086](https://github.com/DataDog/integrations-core/pull/2086). Thanks [bberezov](https://github.com/bberezov).

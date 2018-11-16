@@ -79,7 +79,7 @@ instances:
   # /!\ The private key to your local certificate must be unencrypted.
   # ssl_private_key: "/path/to/key"
   #
-  # The path to the trusted CA used for generating custom certificates
+  # The path to the trusted CA used for generating custom certificates. Set this to False to disable SSL
   # ssl_ca_cert: "/path/to/cacert"
 
   # The check limits itself to 2000 metrics by default, you can increase this limit if needed

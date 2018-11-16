@@ -182,6 +182,9 @@ kube_job_status_completion_time{job="hello-1509998460",namespace="default"} 1.50
 kube_job_status_failed{job="hello-1509998340",namespace="default"} 0
 kube_job_status_failed{job="hello-1509998400",namespace="default"} 0
 kube_job_status_failed{job="hello-1509998460",namespace="default"} 0
+kube_job_status_failed{job_name="hello2-1509998340",namespace="default"} 0
+kube_job_status_failed{job_name="hello2-1509998400",namespace="default"} 0
+kube_job_status_failed{job_name="hello2-1509998460",namespace="default"} 0
 # HELP kube_job_status_start_time StartTime represents time when the job was acknowledged by the Job Manager.
 # TYPE kube_job_status_start_time counter
 kube_job_status_start_time{job="hello-1509998340",namespace="default"} 1.509998347e+09
@@ -192,6 +195,9 @@ kube_job_status_start_time{job="hello-1509998460",namespace="default"} 1.5099984
 kube_job_status_succeeded{job="hello-1509998340",namespace="default"} 1
 kube_job_status_succeeded{job="hello-1509998400",namespace="default"} 1
 kube_job_status_succeeded{job="hello-1509998460",namespace="default"} 1
+kube_job_status_succeeded{job_name="hello2-1509998340",namespace="default"} 1
+kube_job_status_succeeded{job_name="hello2-1509998400",namespace="default"} 1
+kube_job_status_succeeded{job_name="hello2-1509998460",namespace="default"} 1
 # HELP kube_namespace_created Unix creation timestamp
 # TYPE kube_namespace_created gauge
 kube_namespace_created{namespace="default"} 1.508406437e+09
@@ -506,6 +512,7 @@ kube_pod_info{created_by_kind="ReplicaSet",created_by_name="kube-dns-1326421443"
 kube_pod_info{created_by_kind="ReplicaSet",created_by_name="tiller-deploy-1651615695",host_ip="192.168.99.100",namespace="kube-system",node="minikube",pod="tiller-deploy-1651615695-dcphn",pod_ip="172.17.0.6"} 1
 kube_pod_info{created_by_kind="ReplicationController",created_by_name="kubernetes-dashboard",host_ip="192.168.99.100",namespace="kube-system",node="minikube",pod="kubernetes-dashboard-zhtjl",pod_ip="172.17.0.2"} 1
 kube_pod_info{created_by_kind="ReplicationController",created_by_name="registry-creds",host_ip="192.168.99.100",namespace="kube-system",node="minikube",pod="registry-creds-hq249",pod_ip=""} 1
+kube_pod_info{created_by_kind="Job",created_by_name="hello-1509998400",host_ip="192.168.99.100",node="minikube",namespace="ns2",pod="pod2",pod_ip=""} 1
 # HELP kube_pod_labels Kubernetes labels converted to Prometheus labels.
 # TYPE kube_pod_labels gauge
 kube_pod_labels{namespace="default",pod="nxf-126"} 1

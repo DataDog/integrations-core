@@ -35,6 +35,8 @@ CRI collect metrics about the resource usage of your containers running through 
 CPU and memory metrics are collected out of the box and you can additionally collect some disk metrics
 if they are supported by your CRI (CRI-O doesn't support them for now)
 
+See [metadata.csv][7] for a list of metrics provided by this integration.
+
 ### Service Checks
 
 CRI does not include service checks.
@@ -52,3 +54,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/help/
+[7]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv

@@ -41,7 +41,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         generic_instances = [kubernetes_state_instance]
         super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
-        self.send_pod_phase_service_checks = is_affirmative(instance.get('send_pod_phase_service_checks', True))
+        self.send_pod_phase_service_checks = is_affirmative(instance.get('send_pod_phase_service_checks', False))
         if self.send_pod_phase_service_checks:
             self.warning("DEPRECATION NOTICE: pod phase service checks are deprecated. Please set "
                          "`send_pod_phase_service_checks` to false and rely on corresponding gauges instead")
@@ -331,7 +331,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         else:
             node = self._label_to_tag('node', sample[self.SAMPLE_LABELS], scraper_config)
             condition = self._label_to_tag('condition', sample[self.SAMPLE_LABELS], scraper_config)
-            message = "{} is currently reporting {}".format(node, condition)
+            message = "{} is currently reporting {} = {}".format(node, condition, label_value)
 
         if condition_map['service_check_name'] is None:
             self.log.debug("Unable to handle {} - unknown condition {}".format(service_check_name, label_value))
@@ -389,9 +389,9 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def _trim_job_tag(self, name):
         """
-        Trims suffix of job names if they match -(\d{4,10}$)
+        Trims suffix of job names if they match -(\\d{4,10}$)
         """
-        pattern = "(-\d{4,10}$)"
+        pattern = r"(-\d{4,10}$)"
         return re.sub(pattern, '', name)
 
     # Labels attached: namespace, pod
@@ -450,7 +450,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             if 'pod' in sample[self.SAMPLE_LABELS]:
                 tags.append(self._format_tag('pod', sample[self.SAMPLE_LABELS]['pod'], scraper_config))
 
-            self.count(metric_name, sample[self.SAMPLE_VALUE], tags + scraper_config['custom_tags'])
+            self.gauge(metric_name, sample[self.SAMPLE_VALUE], tags + scraper_config['custom_tags'],
+                       hostname=self.get_hostname_for_sample(sample, scraper_config))
 
     def kube_pod_container_status_waiting_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(metric, '.container.status_report.count.waiting',
@@ -483,7 +484,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = []
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -495,7 +496,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = []
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -506,7 +507,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -517,7 +518,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:

@@ -1,6 +1,8 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import division
+
 import re
 import time
 from collections import defaultdict
@@ -9,8 +11,7 @@ from copy import deepcopy
 import redis
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 
 DEFAULT_MAX_SLOW_ENTRIES = 128
 MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"
@@ -117,9 +118,9 @@ class Redis(AgentCheck):
 
     def _generate_instance_key(self, instance):
         if 'unix_socket_path' in instance:
-            return (instance.get('unix_socket_path'), instance.get('db'))
+            return instance.get('unix_socket_path'), instance.get('db')
         else:
-            return (instance.get('host'), instance.get('port'), instance.get('db'))
+            return instance.get('host'), instance.get('port'), instance.get('db')
 
     def _get_conn(self, instance):
         no_cache = is_affirmative(instance.get('disable_connection_cache', False))
@@ -142,7 +143,7 @@ class Redis(AgentCheck):
                 self.connections[key] = redis.Redis(**connection_params)
 
             except TypeError:
-                msg = "You need a redis library that supports authenticated connections. Try sudo easy_install redis."
+                msg = "You need a redis library that supports authenticated connections. Try `pip install redis`."
                 raise Exception(msg)
 
         return self.connections[key]
@@ -172,7 +173,6 @@ class Redis(AgentCheck):
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
         start = time.time()
-        info = None
         try:
             info = conn.info()
             tags = sorted(tags + ["redis_role:%s" % info["role"]])
@@ -194,41 +194,38 @@ class Redis(AgentCheck):
         # Save the database statistics.
         for key in info.keys():
             if self.db_key_pattern.match(key):
-                db_tags = list(tags) + ["redis_db:" + key]
+                db_tags = tags + ["redis_db:" + key]
                 # allows tracking percentage of expired keys as DD does not
                 # currently allow arithmetic on metric for monitoring
                 expires_keys = info[key]["expires"]
                 total_keys = info[key]["keys"]
                 persist_keys = total_keys - expires_keys
                 self.gauge("redis.persist", persist_keys, tags=db_tags)
-                self.gauge("redis.persist.percent", 100.0 * persist_keys / total_keys, tags=db_tags)
-                self.gauge("redis.expires.percent", 100.0 * expires_keys / total_keys, tags=db_tags)
+                self.gauge("redis.persist.percent", 100 * persist_keys / total_keys, tags=db_tags)
+                self.gauge("redis.expires.percent", 100 * expires_keys / total_keys, tags=db_tags)
 
                 for subkey in self.subkeys:
                     # Old redis module on ubuntu 10.04 (python-redis 0.6.1) does not
                     # returns a dict for those key but a string: keys=3,expires=0
                     # Try to parse it (see lighthouse #46)
-                    val = -1
                     try:
                         val = info[key].get(subkey, -1)
                     except AttributeError:
                         val = self._parse_dict_string(info[key], subkey, -1)
-                    metric = '.'.join(['redis', subkey])
+                    metric = 'redis.{}'.format(subkey)
                     self.gauge(metric, val, tags=db_tags)
 
         # Save a subset of db-wide statistics
-        for info_name, value in info.iteritems():
+        for info_name, value in iteritems(info):
             if info_name in self.GAUGE_KEYS:
                 self.gauge(self.GAUGE_KEYS[info_name], info[info_name], tags=tags)
             elif info_name in self.RATE_KEYS:
                 self.rate(self.RATE_KEYS[info_name], info[info_name], tags=tags)
 
         # Save the number of commands.
-        self.rate('redis.net.commands', info['total_commands_processed'],
-                  tags=tags)
+        self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
         if 'instantaneous_ops_per_sec' in info:
-            self.gauge('redis.net.instantaneous_ops_per_sec', info['instantaneous_ops_per_sec'],
-                       tags=tags)
+            self.gauge('redis.net.instantaneous_ops_per_sec', info['instantaneous_ops_per_sec'], tags=tags)
 
         # Check some key lengths if asked
         self._check_key_lengths(conn, instance, list(tags))
@@ -252,7 +249,7 @@ class Redis(AgentCheck):
             return
 
         # get all the available databases
-        databases = conn.info('keyspace').keys()
+        databases = list(conn.info('keyspace'))
         if not databases:
             self.warning("Redis database is empty")
             return
@@ -286,24 +283,25 @@ class Redis(AgentCheck):
                     keys = [key_pattern, ]
 
                 for key in keys:
+                    text_key = ensure_unicode(key)
                     try:
-                        key_type = db_conn.type(key)
+                        key_type = ensure_unicode(db_conn.type(key))
                     except redis.ResponseError:
-                        self.log.info("key {} on remote server; skipping".format(key))
+                        self.log.info("key {} on remote server; skipping".format(text_key))
                         continue
 
                     if key_type == 'list':
-                        lengths[key] += db_conn.llen(key)
+                        lengths[text_key] += db_conn.llen(key)
                     elif key_type == 'set':
-                        lengths[key] += db_conn.scard(key)
+                        lengths[text_key] += db_conn.scard(key)
                     elif key_type == 'zset':
-                        lengths[key] += db_conn.zcard(key)
+                        lengths[text_key] += db_conn.zcard(key)
                     elif key_type == 'hash':
-                        lengths[key] += db_conn.hlen(key)
+                        lengths[text_key] += db_conn.hlen(key)
                     else:
                         # If the type is unknown, it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.
-                        lengths[key] += 0
+                        lengths[text_key] += 0
 
         # send the metrics
         for key, total in iteritems(lengths):
@@ -323,7 +321,7 @@ class Redis(AgentCheck):
                     slave_tags = tags[:]
                     for slave_tag in ('ip', 'port'):
                         if slave_tag in info[key]:
-                            slave_tags.append('slave_{0}:{1}'.format(slave_tag, info[key][slave_tag]))
+                            slave_tags.append('slave_{}:{}'.format(slave_tag, info[key][slave_tag]))
                     slave_tags.append('slave_id:%s' % key.lstrip('slave'))
                     self.gauge('redis.replication.delay', delay, tags=slave_tags)
 
@@ -380,6 +378,8 @@ class Redis(AgentCheck):
         #   'id': 496L,
         #   'start_time': 1422529869}
         for slowlog in slowlogs:
+            slowlog['command'] = ensure_unicode(slowlog['command'])
+
             if slowlog['start_time'] > max_ts:
                 max_ts = slowlog['start_time']
 
@@ -389,7 +389,7 @@ class Redis(AgentCheck):
             # an empty `command` field
             # FIXME when https://github.com/andymccurdy/redis-py/pull/622 is released in redis-py
             if command:
-                slowlog_tags.append('command:{0}'.format(command[0]))
+                slowlog_tags.append('command:{}'.format(command[0]))
 
             value = slowlog['duration']
             self.histogram('redis.slowlog.micros', value, tags=slowlog_tags)
@@ -406,7 +406,7 @@ class Redis(AgentCheck):
                          "INFO COMMANDSTATS only works with Redis >= 2.6.")
             return
 
-        for key, stats in command_stats.iteritems():
+        for key, stats in iteritems(command_stats):
             command = key.split('_', 1)[1]
             command_tags = tags + ['command:{}'.format(command)]
 

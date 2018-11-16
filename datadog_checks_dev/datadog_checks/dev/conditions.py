@@ -34,6 +34,7 @@ class WaitFor(LazyFunction):
                 result = self.func(*self.args, **self.kwargs)
             except Exception as e:
                 last_error = str(e)
+                time.sleep(self.wait)
                 continue
             else:
                 last_result = result

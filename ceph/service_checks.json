@@ -33,7 +33,7 @@
         "check": "ceph.osd_full",
         "statuses": ["ok", "warning", "critical"],
         "groups": ["host"],
-        "name": "Ceph OSD Orphan",
+        "name": "Ceph OSD Full",
         "description": "Returns `OK` if your OSDs are not full. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
     },
     {

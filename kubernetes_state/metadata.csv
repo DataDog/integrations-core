@@ -2,9 +2,9 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 kubernetes_state.container.ready,gauge,,,,Whether the containers readiness check succeeded,0,kubernetes,k8s_state.container.rdy
 kubernetes_state.container.running,gauge,,,,Whether the container is currently in running state,0,kubernetes,k8s_state.container.running
 kubernetes_state.container.terminated,gauge,,,,Whether the container is currently in terminated state,0,kubernetes,k8s_state.container.term
-kubernetes_state.container.status_report.count.terminated,count,,,,Count of the containers currently reporting a in terminated state with the reason as a tag,-1,kubernetes,k8s_state.container.status_report.count.term
+kubernetes_state.container.status_report.count.terminated,gauge,,,,Count of the containers currently reporting a in terminated state with the reason as a tag,-1,kubernetes,k8s_state.container.status_report.count.term
 kubernetes_state.container.waiting,gauge,,,,Whether the container is currently in waiting state,0,kubernetes,k8s_state.container.wait
-kubernetes_state.container.status_report.count.waiting,count,,,,Count of the containers currently reporting a in waiting state with the reason as a tag,-1,kubernetes,k8s_state.container.status_report.count.wait
+kubernetes_state.container.status_report.count.waiting,gauge,,,,Count of the containers currently reporting a in waiting state with the reason as a tag,-1,kubernetes,k8s_state.container.status_report.count.wait
 kubernetes_state.container.gpu.request,gauge,,,,The number of requested gpu devices by a container,0,kubernetes,k8s_state.container.gpu.request
 kubernetes_state.container.gpu.limit,gauge,,,,The limit on gpu devices to be used by a container,0,kubernetes,k8s_state.container.gpu.limit
 kubernetes_state.container.restarts,gauge,,,,The number of restarts per container,-1,kubernetes,k8s_state.container.restarts

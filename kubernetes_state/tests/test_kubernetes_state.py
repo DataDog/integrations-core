@@ -93,6 +93,9 @@ METRICS = [
     NAMESPACE + '.limitrange.cpu.default_request',
     # services
     NAMESPACE + '.service.count',
+    # jobs
+    NAMESPACE + '.job.failed',
+    NAMESPACE + '.job.succeeded',
 ]
 
 TAGS = {
@@ -131,6 +134,14 @@ TAGS = {
         'type:NodePort',
         'type:LoadBalancer',
     ],
+    NAMESPACE + '.job.failed': [
+        'job:hello',
+        'job_name:hello2',
+    ],
+    NAMESPACE + '.job.succeeded': [
+        'job:hello',
+        'job_name:hello2',
+    ],
 }
 
 JOINED_METRICS = {
@@ -159,7 +170,9 @@ JOINED_METRICS = {
 
 HOSTNAMES = {
     NAMESPACE + '.pod.ready': 'minikube',
-    NAMESPACE + '.pod.scheduled': 'minikube'
+    NAMESPACE + '.pod.scheduled': 'minikube',
+    NAMESPACE + '.container.status_report.count.waiting': 'minikube',
+    NAMESPACE + '.container.status_report.count.terminated': 'minikube'
 }
 
 ZERO_METRICS = [
@@ -170,6 +183,8 @@ ZERO_METRICS = [
     NAMESPACE + '.container.waiting',
     NAMESPACE + '.endpoint.address_available',
     NAMESPACE + '.endpoint.address_not_ready',
+    NAMESPACE + '.job.failed',
+    NAMESPACE + '.job.succeeded',
 ]
 
 
@@ -239,21 +254,6 @@ def test_update_kube_state_metrics(aggregator, instance, check):
     aggregator.assert_service_check(NAMESPACE + '.node.memory_pressure', check.OK)
     aggregator.assert_service_check(NAMESPACE + '.node.network_unavailable', check.OK)
     aggregator.assert_service_check(NAMESPACE + '.node.disk_pressure', check.OK)
-    # Running
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.OK,
-                                    tags=['namespace:default', 'pod:task-pv-pod', 'optional:tag1'])
-    # Pending
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.WARNING,
-                                    tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml', 'optional:tag1'])
-    # Succeeded
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.OK,
-                                    tags=['namespace:default', 'pod:hello-1509998340-k4f8q', 'optional:tag1'])
-    # Failed
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.CRITICAL,
-                                    tags=['namespace:default', 'pod:should-run-once', 'optional:tag1'])
-    # Unknown
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.UNKNOWN,
-                                    tags=['namespace:default', 'pod:hello-1509998460-tzh8k', 'optional:tag1'])
 
     # Make sure we send counts for all statuses to avoid no-data graphing issues
     aggregator.assert_metric(NAMESPACE + '.nodes.by_condition',
@@ -293,6 +293,8 @@ def test_update_kube_state_metrics(aggregator, instance, check):
             aggregator.assert_metric_has_tag(metric, tag)
         if metric not in ZERO_METRICS:
             assert_not_all_zeroes(aggregator, metric)
+
+    assert NAMESPACE + '.pod.status_phase' not in aggregator._service_checks
 
     # FIXME: the original assert for resourcequota wasn't working, following line should be uncommented
     # assert resourcequota_was_collected(aggregator)
@@ -352,8 +354,8 @@ def test_disabling_hostname_override(instance):
     assert scraper_config['label_to_hostname'] is None
 
 
-def test_removing_pod_phase_service_checks(aggregator, instance, check):
-    check.send_pod_phase_service_checks = False
+def test_add_pod_phase_service_checks(aggregator, instance, check):
+    check.send_pod_phase_service_checks = True
     for _ in range(2):
         check.check(instance)
     # We should still send gauges
@@ -361,5 +363,19 @@ def test_removing_pod_phase_service_checks(aggregator, instance, check):
                              tags=['namespace:default', 'phase:Running', 'optional:tag1'], value=3)
     aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
                              tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2)
-    # the service checks should not be sent
-    assert NAMESPACE + '.pod.status_phase' not in aggregator._service_checks
+    # the service checks should be sent as well
+    # Running
+    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.OK,
+                                    tags=['namespace:default', 'pod:task-pv-pod', 'optional:tag1'])
+    # Pending
+    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.WARNING,
+                                    tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml', 'optional:tag1'])
+    # Succeeded
+    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.OK,
+                                    tags=['namespace:default', 'pod:hello-1509998340-k4f8q', 'optional:tag1'])
+    # Failed
+    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.CRITICAL,
+                                    tags=['namespace:default', 'pod:should-run-once', 'optional:tag1'])
+    # Unknown
+    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.UNKNOWN,
+                                    tags=['namespace:default', 'pod:hello-1509998460-tzh8k', 'optional:tag1'])

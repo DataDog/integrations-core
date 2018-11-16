@@ -61,11 +61,11 @@ def test_get_instance_with_default(check):
     """
     collect_default_db = False
     res = check._get_instance_metrics(KEY, 'dbname', False, collect_default_db)
-    assert "  AND datname not ilike 'postgres'" in res['query']
+    assert "  AND psd.datname not ilike 'postgres'" in res['query']
 
     collect_default_db = True
     res = check._get_instance_metrics(KEY, 'dbname', False, collect_default_db)
-    assert "  AND datname not ilike 'postgres'" not in res['query']
+    assert "  AND psd.datname not ilike 'postgres'" not in res['query']
 
 
 def test_get_instance_metrics_instance(check):
@@ -100,9 +100,13 @@ def test_get_version(check):
     db.cursor().fetchone.return_value = ['11beta3']
     assert check._get_version('beta_version', db) == [11, -1, 3]
 
+    # Test #rc# style versions
+    db.cursor().fetchone.return_value = ['11rc1']
+    assert check._get_version('rc_version', db) == [11, -1, 1]
+
     # Test #unknown# style versions
     db.cursor().fetchone.return_value = ['11nightly3']
-    assert check._get_version('unknown_version', db) == '11nightly3'
+    assert check._get_version('unknown_version', db) == [11, -1, 3]
 
 
 def test_is_above(check):

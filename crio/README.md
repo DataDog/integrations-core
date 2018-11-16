@@ -29,6 +29,8 @@ The integration relies on the `--enable-metrics` option of CRI-O that is disable
 CRI-O collect metrics about the count and latency of operations that are done by the runtime.
 We're also collecting CPU and memory usage of CRI-O golang binary itself.
 
+See [metadata.csv][7] for a list of metrics provided by this integration.
+
 ### Service Checks
 
 CRI-O includes a service check about the reachability of the metrics endpoint.
@@ -46,3 +48,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/help/
+[7]: https://github.com/DataDog/integrations-core/blob/master/crio/metadata.csv

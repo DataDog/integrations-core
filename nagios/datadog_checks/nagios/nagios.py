@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 from collections import namedtuple
+import json
 import re
 from inspect import getargspec
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.tailfile import TailFile
 
@@ -59,18 +58,20 @@ EVENT_FIELDS = {
 }
 
 # Regex for the Nagios event log
-RE_LINE_REG = re.compile('^\[(\d+)\] EXTERNAL COMMAND: (\w+);(.*)$')
-RE_LINE_EXT = re.compile('^\[(\d+)\] ([^:]+): (.*)$')
+RE_LINE_REG = re.compile(r'^\[(\d+)\] EXTERNAL COMMAND: (\w+);(.*)$')
+RE_LINE_EXT = re.compile(r'^\[(\d+)\] ([^:]+): (.*)$')
+
+SOURCE_TYPE_NAME = 'Nagios'
 
 
 class Nagios(AgentCheck):
 
     NAGIOS_CONF_KEYS = [
-        re.compile('^(?P<key>log_file)\s*=\s*(?P<value>.+)$'),
-        re.compile('^(?P<key>host_perfdata_file_template)\s*=\s*(?P<value>.+)$'),
-        re.compile('^(?P<key>service_perfdata_file_template)\s*=\s*(?P<value>.+)$'),
-        re.compile('^(?P<key>host_perfdata_file)\s*=\s*(?P<value>.+)$'),
-        re.compile('^(?P<key>service_perfdata_file)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>log_file)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>host_perfdata_file_template)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>service_perfdata_file_template)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>host_perfdata_file)\s*=\s*(?P<value>.+)$'),
+        re.compile(r'^(?P<key>service_perfdata_file)\s*=\s*(?P<value>.+)$'),
     ]
 
     def gauge(self, *args, **kwargs):
@@ -331,14 +332,36 @@ class NagiosEventLogTailer(NagiosTailer):
     def create_event(self, timestamp, event_type, hostname, fields):
         """Factory method called by the parsers
         """
-        d = fields._asdict()
-        d.update({'timestamp': timestamp, 'event_type': event_type})
+        # Agent6 expects a specific set of fields, so we need to place all
+        # extra fields in the msg_title and let the Datadog backend separate them
+        # Any remaining fields that aren't a part of the datadog-agent payload
+        # specification will be dropped.
+        event_payload = fields._asdict()
+
+        msg_text = {
+            'event_type': event_payload.pop('event_type', None),
+            'event_soft_hard': event_payload.pop('event_soft_hard', None),
+            'check_name': event_payload.pop('check_name', None),
+            'event_state': event_payload.pop('event_state', None),
+            'payload': event_payload.pop('payload', None),
+            'ack_author': event_payload.pop('ack_author', None)
+        }
+
+        msg_text = json.dumps(msg_text)
+        self.log.info("Nagios Event pack: {}".format(msg_text))
+
+        event_payload.update({
+                'timestamp': timestamp,
+                'event_type': event_type,
+                'msg_text': msg_text,
+                'source_type_name': SOURCE_TYPE_NAME,
+        })
 
         # if host is localhost, turn that into the internal host name
-        host = d.get('host', None)
+        host = event_payload.get('host', None)
         if host == "localhost":
-            d["host"] = hostname
-        return d
+            event_payload["host"] = hostname
+        return event_payload
 
 
 class NagiosPerfDataTailer(NagiosTailer):

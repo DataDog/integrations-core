@@ -8,7 +8,7 @@ import common
 from datadog_checks.cassandra_nodetool import CassandraNodetoolCheck
 
 
-def mock_output(*args):
+def mock_output(*args, **kwargs):
     with open(path.join(common.HERE, 'fixtures', 'nodetool_output')) as f:
         contents = f.read()
         return contents, "", 0
@@ -20,12 +20,11 @@ def test_check(mock_output, aggregator):
     integration.check(common.CONFIG_INSTANCE)
 
     # test per datacenter metrics
-    assert all([a == b for a, b in zip(mock_output.call_args[0][0],
-                                       ['docker', 'exec', common.CASSANDRA_CONTAINER_NAME, 'nodetool', '-h',
-                                        'localhost', '-p', '7199', '-u', 'controlRole', '-pw', 'QED',
-                                        'status', '--', 'test']
-                                       )
-                ])
+    args = [
+        'docker', 'exec', common.CASSANDRA_CONTAINER_NAME, 'nodetool', '-h', 'localhost', '-p', '7199', '-u',
+        'controlRole', '-pw', 'QED', 'status', '--', 'test'
+    ]
+    assert all([a == b for a, b in zip(mock_output.call_args[0][0], args)])
     aggregator.assert_metric('cassandra.nodetool.status.replication_availability', value=64.5,
                              tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
     aggregator.assert_metric('cassandra.nodetool.status.replication_availability', value=200,

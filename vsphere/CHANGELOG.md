@@ -1,5 +1,11 @@
 # CHANGELOG - vsphere
 
+## 3.4.0 / 2018-10-31
+
+* [Added] Add option to use guest hostname instead of VM name. See [#2479](https://github.com/DataDog/integrations-core/pull/2479).
+* [Added] Upgrade requests. See [#2481](https://github.com/DataDog/integrations-core/pull/2481).
+* [Fixed] Fix "insufficient permission" error message formatting. See [#2480](https://github.com/DataDog/integrations-core/pull/2480).
+
 ## 3.3.1 / 2018-09-19
 
 * [Fixed] Fix batch implementation logic. See [#2265](https://github.com/DataDog/integrations-core/pull/2265).

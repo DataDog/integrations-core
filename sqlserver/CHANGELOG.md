@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.7.0 / 2018-10-12
+
+* [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).
+
 ## 1.6.0 / 2018-09-04
 
 * [Added] Support higher query granularity. See [#2017](https://github.com/DataDog/integrations-core/pull/2017).

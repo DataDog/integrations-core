@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
-from datadog_checks.config import _is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.utils.headers import headers as agent_headers
 
 
-DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
+DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
 
 
 Config = namedtuple('Config',
@@ -35,7 +35,7 @@ def from_instance(instance, default_ca_certs=None):
     http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
     timeout = int(instance.get('timeout', 10))
     config_headers = instance.get('headers', {})
-    default_headers = _is_affirmative(instance.get("include_default_headers", True))
+    default_headers = is_affirmative(instance.get("include_default_headers", True))
     if default_headers:
         headers = agent_headers({})
     else:
@@ -43,20 +43,22 @@ def from_instance(instance, default_ca_certs=None):
     headers.update(config_headers)
     url = instance.get('url')
     content_match = instance.get('content_match')
-    reverse_content_match = _is_affirmative(instance.get('reverse_content_match', False))
-    response_time = _is_affirmative(instance.get('collect_response_time', True))
+    reverse_content_match = is_affirmative(instance.get('reverse_content_match', False))
+    response_time = is_affirmative(instance.get('collect_response_time', True))
     if not url:
-        raise Exception("Bad configuration. You must specify a url")
-    include_content = _is_affirmative(instance.get('include_content', False))
-    disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', True))
-    ssl_expire = _is_affirmative(instance.get('check_certificate_expiration', True))
+        raise ConfigurationError("Bad configuration. You must specify a url")
+    if not url.startswith("http"):
+        raise ConfigurationError("The url {} must start with the scheme http or https".format(url))
+    include_content = is_affirmative(instance.get('include_content', False))
+    disable_ssl_validation = is_affirmative(instance.get('disable_ssl_validation', True))
+    ssl_expire = is_affirmative(instance.get('check_certificate_expiration', True))
     instance_ca_certs = instance.get('ca_certs', default_ca_certs)
-    weakcipher = _is_affirmative(instance.get('weakciphers', False))
-    ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
-    check_hostname = _is_affirmative(instance.get('check_hostname', True))
-    skip_proxy = _is_affirmative(
+    weakcipher = is_affirmative(instance.get('weakciphers', False))
+    ignore_ssl_warning = is_affirmative(instance.get('ignore_ssl_warning', False))
+    check_hostname = is_affirmative(instance.get('check_hostname', True))
+    skip_proxy = is_affirmative(
         instance.get('skip_proxy', instance.get('no_proxy', False)))
-    allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
+    allow_redirects = is_affirmative(instance.get('allow_redirects', True))
 
     return Config(url, ntlm_domain, username, password, client_cert, client_key,
                   method, data, http_response_status_code, timeout,

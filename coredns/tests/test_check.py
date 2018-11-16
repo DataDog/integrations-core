@@ -1,8 +1,9 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 
-# project
+from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.coredns import CoreDNSCheck
 
 CHECK_NAME = 'coredns'
@@ -44,7 +45,8 @@ class TestCoreDNS:
         for metric in self.METRICS:
             aggregator.assert_metric(metric)
 
-    def test_docker(self, aggregator, spin_up_coredns, dockerinstance):
+    @pytest.mark.skipif(ON_WINDOWS, reason='No `dig` utility on Windows')
+    def test_docker(self, aggregator, dd_environment, dockerinstance):
         """
         Testing metrics emitted from docker container.
         """

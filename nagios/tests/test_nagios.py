@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import json
 import tempfile
 import time
 import pytest
@@ -41,13 +41,14 @@ class TestEventLogTailer:
                 assert int(event["timestamp"]) > 0, line
                 assert event["host"] is not None, line
                 counters[t] = counters.get(t, 0) + 1
+                event['msg_text'] = json.loads(event['msg_text'])
 
                 if t == "SERVICE ALERT":
-                    assert event["event_soft_hard"] in ("SOFT", "HARD"), line
-                    assert event["event_state"] in ("CRITICAL", "WARNING", "UNKNOWN", "OK"), line
-                    assert event["check_name"] is not None
+                    assert event['msg_text']["event_soft_hard"] in ("SOFT", "HARD"), line
+                    assert event['msg_text']["event_state"] in ("CRITICAL", "WARNING", "UNKNOWN", "OK"), line
+                    assert event['msg_text']["check_name"] is not None
                 elif t == "SERVICE NOTIFICATION":
-                    assert event["event_state"] in (
+                    assert event['msg_text']["event_state"] in (
                         "ACKNOWLEDGEMENT",
                         "OK",
                         "CRITICAL",
@@ -56,14 +57,14 @@ class TestEventLogTailer:
                     ), line
                 elif t == "SERVICE FLAPPING ALERT":
                     assert event["flap_start_stop"] in ("STARTED", "STOPPED"), line
-                    assert event["check_name"] is not None
+                    assert event['msg_text']["check_name"] is not None
                 elif t == "ACKNOWLEDGE_SVC_PROBLEM":
-                    assert event["check_name"] is not None
-                    assert event["ack_author"] is not None
+                    assert event['msg_text']["check_name"] is not None
+                    assert event['msg_text']["ack_author"] is not None
                     assert int(event["sticky_ack"]) >= 0
                     assert int(event["notify_ack"]) >= 0
                 elif t == "ACKNOWLEDGE_HOST_PROBLEM":
-                    assert event["ack_author"] is not None
+                    assert event['msg_text']["ack_author"] is not None
                     assert int(event["sticky_ack"]) >= 0
                     assert int(event["notify_ack"]) >= 0
                 elif t == "HOST DOWNTIME ALERT":

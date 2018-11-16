@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 2.0.0 / 2018-10-12
+
+* [Changed] Update gitlab to use the new OpenMetricsBaseCheck. See [#1977](https://github.com/DataDog/integrations-core/pull/1977).
+
 ## 1.2.0 / 2018-09-04
 
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093](https://github.com/DataDog/integrations-core/pull/2093).

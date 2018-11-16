@@ -24,8 +24,8 @@ instances:
     port: 9999
 
   # if tomcat requires authentication
-  #   user: <TOMCAT_USERNAME>
-  #   password: <TOMCAT_PASSWORD>
+  #   user: <SOLR_USERNAME>
+  #   password: <SOLR_PASSWORD>
 
 init_config:
   conf:
@@ -105,7 +105,10 @@ Configuration Options
 * `tools_jar_path` - (Optional) - To be set when process_name_regex is set.
 * `java_bin_path` - (Optional) - Should be set if the agent cannot find your java executable.
 * `java_options` - (Optional) - Java JVM options
-* `trust_store_path` and `trust_store_password` - (Optional) - Should be set if ssl is enabled.
+* `trust_store_path` and `trust_store_password` - (Optional) - should be set if "com.sun.management.jmxremote.ssl" is set to true on the target JVM.
+* `key_store_path` and `key_store_password` - (Optional) - should be set if "com.sun.management.jmxremote.ssl.need.client.auth" is set to true on the target JVM.
+* `rmi_registry_ssl` - (Optional) - should be set to true if "com.sun.management.jmxremote.registry.ssl" is set to true on the target JVM.
+
 
 The `conf` parameter is a list of dictionaries. Only 2 keys are allowed in this dictionary:
 
@@ -184,7 +187,7 @@ Here is another filtering example:
 
 #### Note
 
-List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, please use singletons and multiple `include` statements instead.
+List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple `include` statements instead.
 
     # Datadog Agent > 5.3.0
       conf:

@@ -59,7 +59,7 @@ def init_config():
 @pytest.fixture
 def instance_sql2008():
     return {
-        'host': '(local)\SQL2008R2SP2',
+        'host': r'(local)\SQL2008R2SP2',
         'username': 'sa',
         'password': 'Password12!',
     }

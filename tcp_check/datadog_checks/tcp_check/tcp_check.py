@@ -123,3 +123,5 @@ class TCPCheck(NetworkCheck):
                            tags=tags,
                            message=msg
                            )
+        # Report as a metric as well
+        self.gauge("network.tcp.can_connect", 1 if status == Status.UP else 0, tags=tags)

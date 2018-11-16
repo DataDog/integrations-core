@@ -1,1 +1,1 @@
-datadog-checks-dev
+{test_dev_dep}

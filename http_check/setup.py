@@ -25,7 +25,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base'
+CHECKS_BASE_REQ = 'datadog_checks_base>=4.2.0'
 
 setup(
     name='datadog-http_check',
@@ -61,7 +61,6 @@ setup(
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     include_package_data=True,

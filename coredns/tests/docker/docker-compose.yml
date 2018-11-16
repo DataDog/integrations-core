@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   coredns:
-    image: ${COREDNS_IMAGE}
+    image: coredns/coredns:${COREDNS_VERSION}
     command: -conf /data/Corefile
     ports:
       - "54:53/udp"

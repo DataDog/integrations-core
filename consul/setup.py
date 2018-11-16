@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from setuptools import setup
 from codecs import open
 from os import path
@@ -24,7 +23,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base'
+CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 
 setup(
     name='datadog-consul',
@@ -59,7 +58,6 @@ setup(
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     include_package_data=True,

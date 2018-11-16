@@ -48,13 +48,16 @@ def parse_pr_numbers(git_log_lines):
     return prs
 
 
-def get_commits_since(check_name, target_tag):
+def get_commits_since(check_name, target_tag=None):
     """
     Get the list of commits from `target_tag` to `HEAD` for the given check
     """
     root = get_root()
     target_path = os.path.join(root, check_name)
-    command = 'git log --pretty=%s {}... {}'.format(target_tag, target_path)
+    command = 'git log --pretty=%s {}{}'.format(
+        '' if target_tag is None else '{}... '.format(target_tag),
+        target_path
+    )
 
     with chdir(root):
         return run_command(command, capture=True).stdout.splitlines()

@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
 
 DEFAULT_METRICS = {
@@ -89,7 +87,7 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
         """
         endpoint = instance.get('prometheus_url')
         if endpoint is None:
-            raise CheckException("Unable to find prometheus endpoint in config file.")
+            raise ConfigurationError("Unable to find prometheus endpoint in config file.")
 
         metrics = [DEFAULT_METRICS, GO_METRICS]
         metrics.extend(instance.get('metrics', []))

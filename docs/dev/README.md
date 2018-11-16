@@ -1,6 +1,10 @@
 ---
 title: Introduction to Agent-based Integrations
 kind: documentation
+aliases:
+  - /guides/agent_checks/
+  - /agent/agent_checks
+  - /developers/agent_checks/
 ---
 
 ## Why create an Integration?

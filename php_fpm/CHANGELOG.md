@@ -1,5 +1,9 @@
 # CHANGELOG - php_fpm
 
+## 1.3.1 / 2018-10-12
+
+* [Fixed] Make the status route-agnostic when using fastcgi. See [#2282](https://github.com/DataDog/integrations-core/pull/2282).
+
 ## 1.3.0 / 2018-09-04
 
 * [Added] Support fastcgi requests. See [#1997](https://github.com/DataDog/integrations-core/pull/1997).
