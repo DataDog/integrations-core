@@ -164,121 +164,115 @@ ALL_SERVER_DETAILS = {
     "other-2": {"id": "other-2", "name": "server-name-other-2", "status": "ACTIVE", "project_name": "blacklist_2"}
 }
 
-EMPTY_NOVA_SERVERS = {
-    "servers": []
-}
+EMPTY_NOVA_SERVERS = []
 
 # One example from MOCK_NOVA_SERVERS to emulate pagination
-MOCK_NOVA_SERVERS_PAGINATED = {
-    "servers": [
-        {
-            "OS-DCF:diskConfig": "AUTO",
-            "OS-EXT-AZ:availability_zone": "nova",
-            "OS-EXT-SRV-ATTR:host": "compute",
-            "OS-EXT-SRV-ATTR:hostname": "server-1",
-            "OS-EXT-SRV-ATTR:hypervisor_hostname": "fake-mini",
-            "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
-            "OS-EXT-SRV-ATTR:kernel_id": "",
-            "OS-EXT-SRV-ATTR:launch_index": 0,
-            "OS-EXT-SRV-ATTR:ramdisk_id": "",
-            "OS-EXT-SRV-ATTR:reservation_id": "r-iffothgx",
-            "OS-EXT-SRV-ATTR:root_device_name": "/dev/sda",
-            "OS-EXT-SRV-ATTR:user_data": "IyEvYmluL2Jhc2gKL2Jpbi9zdQplY2hvICJJIGFtIGluIHlvdSEiCg==",
-            "OS-EXT-STS:power_state": 1,
-            "OS-EXT-STS:task_state": 'null',
-            "OS-EXT-STS:vm_state": "active",
-            "OS-SRV-USG:launched_at": "2017-02-14T19:24:43.891568",
-            "OS-SRV-USG:terminated_at": 'null',
-            "accessIPv4": "1.2.3.4",
-            "accessIPv6": "80fe::",
-            "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
-            "host_status": "UP",
-            "id": "server-1",
-            "metadata": {
-                "My Server Name": "Apache1"
-            },
-            "name": "new-server-test",
-            "status": "ACTIVE",
-            "tags": [],
-            "tenant_id": "6f70656e737461636b20342065766572",
-            "updated": "2017-02-14T19:24:43Z",
-            "user_id": "fake"
-        }
-    ]
-}
+MOCK_NOVA_SERVERS_PAGINATED = [
+    {
+        "OS-DCF:diskConfig": "AUTO",
+        "OS-EXT-AZ:availability_zone": "nova",
+        "OS-EXT-SRV-ATTR:host": "compute",
+        "OS-EXT-SRV-ATTR:hostname": "server-1",
+        "OS-EXT-SRV-ATTR:hypervisor_hostname": "fake-mini",
+        "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+        "OS-EXT-SRV-ATTR:kernel_id": "",
+        "OS-EXT-SRV-ATTR:launch_index": 0,
+        "OS-EXT-SRV-ATTR:ramdisk_id": "",
+        "OS-EXT-SRV-ATTR:reservation_id": "r-iffothgx",
+        "OS-EXT-SRV-ATTR:root_device_name": "/dev/sda",
+        "OS-EXT-SRV-ATTR:user_data": "IyEvYmluL2Jhc2gKL2Jpbi9zdQplY2hvICJJIGFtIGluIHlvdSEiCg==",
+        "OS-EXT-STS:power_state": 1,
+        "OS-EXT-STS:task_state": 'null',
+        "OS-EXT-STS:vm_state": "active",
+        "OS-SRV-USG:launched_at": "2017-02-14T19:24:43.891568",
+        "OS-SRV-USG:terminated_at": 'null',
+        "accessIPv4": "1.2.3.4",
+        "accessIPv6": "80fe::",
+        "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
+        "host_status": "UP",
+        "id": "server-1",
+        "metadata": {
+            "My Server Name": "Apache1"
+        },
+        "name": "new-server-test",
+        "status": "ACTIVE",
+        "tags": [],
+        "tenant_id": "6f70656e737461636b20342065766572",
+        "updated": "2017-02-14T19:24:43Z",
+        "user_id": "fake"
+    }
+]
 
 # Example response from - https://developer.openstack.org/api-ref/compute/#list-servers-detailed
 # ID and server-name values have been changed for test readability
-MOCK_NOVA_SERVERS = {
-    "servers": [
-        {
-            "OS-DCF:diskConfig": "AUTO",
-            "OS-EXT-AZ:availability_zone": "nova",
-            "OS-EXT-SRV-ATTR:host": "compute",
-            "OS-EXT-SRV-ATTR:hostname": "server-1",
-            "OS-EXT-SRV-ATTR:hypervisor_hostname": "fake-mini",
-            "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
-            "OS-EXT-SRV-ATTR:kernel_id": "",
-            "OS-EXT-SRV-ATTR:launch_index": 0,
-            "OS-EXT-SRV-ATTR:ramdisk_id": "",
-            "OS-EXT-SRV-ATTR:reservation_id": "r-iffothgx",
-            "OS-EXT-SRV-ATTR:root_device_name": "/dev/sda",
-            "OS-EXT-SRV-ATTR:user_data": "IyEvYmluL2Jhc2gKL2Jpbi9zdQplY2hvICJJIGFtIGluIHlvdSEiCg==",
-            "OS-EXT-STS:power_state": 1,
-            "OS-EXT-STS:task_state": 'null',
-            "OS-EXT-STS:vm_state": "active",
-            "OS-SRV-USG:launched_at": "2017-02-14T19:24:43.891568",
-            "OS-SRV-USG:terminated_at": 'null',
-            "accessIPv4": "1.2.3.4",
-            "accessIPv6": "80fe::",
-            "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
-            "host_status": "UP",
-            "id": "server-1",
-            "metadata": {
-                "My Server Name": "Apache1"
-            },
-            "name": "new-server-test",
-            "status": "DELETED",
-            "tags": [],
-            "tenant_id": "6f70656e737461636b20342065766572",
-            "updated": "2017-02-14T19:24:43Z",
-            "user_id": "fake"
+MOCK_NOVA_SERVERS = [
+    {
+        "OS-DCF:diskConfig": "AUTO",
+        "OS-EXT-AZ:availability_zone": "nova",
+        "OS-EXT-SRV-ATTR:host": "compute",
+        "OS-EXT-SRV-ATTR:hostname": "server-1",
+        "OS-EXT-SRV-ATTR:hypervisor_hostname": "fake-mini",
+        "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+        "OS-EXT-SRV-ATTR:kernel_id": "",
+        "OS-EXT-SRV-ATTR:launch_index": 0,
+        "OS-EXT-SRV-ATTR:ramdisk_id": "",
+        "OS-EXT-SRV-ATTR:reservation_id": "r-iffothgx",
+        "OS-EXT-SRV-ATTR:root_device_name": "/dev/sda",
+        "OS-EXT-SRV-ATTR:user_data": "IyEvYmluL2Jhc2gKL2Jpbi9zdQplY2hvICJJIGFtIGluIHlvdSEiCg==",
+        "OS-EXT-STS:power_state": 1,
+        "OS-EXT-STS:task_state": 'null',
+        "OS-EXT-STS:vm_state": "active",
+        "OS-SRV-USG:launched_at": "2017-02-14T19:24:43.891568",
+        "OS-SRV-USG:terminated_at": 'null',
+        "accessIPv4": "1.2.3.4",
+        "accessIPv6": "80fe::",
+        "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
+        "host_status": "UP",
+        "id": "server-1",
+        "metadata": {
+            "My Server Name": "Apache1"
         },
-        {
-            "OS-DCF:diskConfig": "AUTO",
-            "OS-EXT-AZ:availability_zone": "nova",
-            "OS-EXT-SRV-ATTR:host": "compute",
-            "OS-EXT-SRV-ATTR:hostname": "server-2",
-            "OS-EXT-SRV-ATTR:hypervisor_hostname": "fake-mini",
-            "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
-            "OS-EXT-SRV-ATTR:kernel_id": "",
-            "OS-EXT-SRV-ATTR:launch_index": 0,
-            "OS-EXT-SRV-ATTR:ramdisk_id": "",
-            "OS-EXT-SRV-ATTR:reservation_id": "r-iffothgx",
-            "OS-EXT-SRV-ATTR:root_device_name": "/dev/sda",
-            "OS-EXT-SRV-ATTR:user_data": "IyEvYmluL2Jhc2gKL2Jpbi9zdQplY2hvICJJIGFtIGluIHlvdSEiCg==",
-            "OS-EXT-STS:power_state": 1,
-            "OS-EXT-STS:task_state": 'null',
-            "OS-EXT-STS:vm_state": "active",
-            "OS-SRV-USG:launched_at": "2017-02-14T19:24:43.891568",
-            "OS-SRV-USG:terminated_at": 'null',
-            "accessIPv4": "1.2.3.4",
-            "accessIPv6": "80fe::",
-            "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
-            "host_status": "UP",
-            "id": "server_newly_added",
-            "metadata": {
-                "My Server Name": "Apache1"
-            },
-            "name": "newly_added_server",
-            "status": "ACTIVE",
-            "tags": [],
-            "tenant_id": "6f70656e737461636b20342065766572",
-            "updated": "2017-02-14T19:24:43Z",
-            "user_id": "fake"
-        }
-    ]
-}
+        "name": "new-server-test",
+        "status": "DELETED",
+        "tags": [],
+        "tenant_id": "6f70656e737461636b20342065766572",
+        "updated": "2017-02-14T19:24:43Z",
+        "user_id": "fake"
+    },
+    {
+        "OS-DCF:diskConfig": "AUTO",
+        "OS-EXT-AZ:availability_zone": "nova",
+        "OS-EXT-SRV-ATTR:host": "compute",
+        "OS-EXT-SRV-ATTR:hostname": "server-2",
+        "OS-EXT-SRV-ATTR:hypervisor_hostname": "fake-mini",
+        "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+        "OS-EXT-SRV-ATTR:kernel_id": "",
+        "OS-EXT-SRV-ATTR:launch_index": 0,
+        "OS-EXT-SRV-ATTR:ramdisk_id": "",
+        "OS-EXT-SRV-ATTR:reservation_id": "r-iffothgx",
+        "OS-EXT-SRV-ATTR:root_device_name": "/dev/sda",
+        "OS-EXT-SRV-ATTR:user_data": "IyEvYmluL2Jhc2gKL2Jpbi9zdQplY2hvICJJIGFtIGluIHlvdSEiCg==",
+        "OS-EXT-STS:power_state": 1,
+        "OS-EXT-STS:task_state": 'null',
+        "OS-EXT-STS:vm_state": "active",
+        "OS-SRV-USG:launched_at": "2017-02-14T19:24:43.891568",
+        "OS-SRV-USG:terminated_at": 'null',
+        "accessIPv4": "1.2.3.4",
+        "accessIPv6": "80fe::",
+        "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
+        "host_status": "UP",
+        "id": "server_newly_added",
+        "metadata": {
+            "My Server Name": "Apache1"
+        },
+        "name": "newly_added_server",
+        "status": "ACTIVE",
+        "tags": [],
+        "tenant_id": "6f70656e737461636b20342065766572",
+        "updated": "2017-02-14T19:24:43Z",
+        "user_id": "fake"
+    }
+]
 
 # .. config
 MOCK_CONFIG = {

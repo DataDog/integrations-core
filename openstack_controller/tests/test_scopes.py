@@ -4,6 +4,7 @@
 import copy
 import mock
 import pytest
+import logging
 from six import iteritems
 
 from datadog_checks.openstack_controller.scopes import (OpenStackProject, OpenStackScope)
@@ -11,6 +12,9 @@ from datadog_checks.openstack_controller.exceptions import (IncompleteIdentity, 
                                                             MissingNeutronEndpoint)
 
 from . import common
+
+
+log = logging.getLogger('test_openstack_controller')
 
 
 def test_get_endpoint():
@@ -115,9 +119,8 @@ PROJECT_RESPONSE = [
     ]
 
 
-def test_from_config_simple():
+def test_from_config_simple(*args):
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
-
     instance_config = {'user': GOOD_USERS[0]['user']}
 
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
@@ -127,20 +130,20 @@ def test_from_config_simple():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=PROJECTS_RESPONSE):
-            scope = OpenStackScope.from_config(init_config, instance_config)
+            scope = OpenStackScope.from_config(log, init_config, instance_config)
             assert isinstance(scope, OpenStackScope)
 
             assert scope.auth_token == 'fake_token'
-            assert len(scope.project_scope_map) == 2
+            assert len(scope.project_scopes) == 2
             expected_tenant_id = ['3333', '4444']
-            for index, scope in iteritems(scope.project_scope_map):
+            for index, scope in iteritems(scope.project_scopes):
                 assert isinstance(scope, OpenStackProject)
                 assert scope.auth_token == 'fake_token'
                 assert scope.tenant_id in expected_tenant_id
                 expected_tenant_id.remove(scope.tenant_id)
 
 
-def test_from_config_with_missing_name():
+def test_from_config_with_missing_name(*args):
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     instance_config = {'user': GOOD_USERS[0]['user']}
@@ -155,11 +158,11 @@ def test_from_config_with_missing_name():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=project_response_without_name):
-            scope = OpenStackScope.from_config(init_config, instance_config)
-            assert len(scope.project_scope_map) == 0
+            scope = OpenStackScope.from_config(log, init_config, instance_config, proxy_config=None)
+            assert len(scope.project_scopes) == 0
 
 
-def test_from_config_with_missing_id():
+def test_from_config_with_missing_id(*args):
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     instance_config = {'user': GOOD_USERS[0]['user']}
@@ -174,5 +177,5 @@ def test_from_config_with_missing_id():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=project_response_without_name):
-            scope = OpenStackScope.from_config(init_config, instance_config)
-            assert len(scope.project_scope_map) == 0
+            scope = OpenStackScope.from_config(log, init_config, instance_config, proxy_config=None)
+            assert len(scope.project_scopes) == 0
