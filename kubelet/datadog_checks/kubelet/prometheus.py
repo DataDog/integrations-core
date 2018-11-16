@@ -32,7 +32,6 @@ class CadvisorPrometheusScraperMixin(object):
 
         self.CADVISOR_METRIC_TRANSFORMERS = {
             'container_cpu_usage_seconds_total': self.container_cpu_usage_seconds_total,
-            'container_cpu_cfs_periods_total': self.container_cpu_cfs_periods_total,
             'container_cpu_load_average_10s': self.container_cpu_load_average_10s,
             'container_cpu_system_seconds_total': self.container_cpu_system_seconds_total,
             'container_cpu_user_seconds_total': self.container_cpu_user_seconds_total,
@@ -68,6 +67,7 @@ class CadvisorPrometheusScraperMixin(object):
             # so the key is different than the kubelet scraper.
             'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
             'ignore_metrics': [
+                'container_cpu_cfs_periods_total',
                 'container_fs_inodes_free',
                 'container_fs_inodes_total',
                 'container_fs_io_current',
@@ -385,30 +385,25 @@ class CadvisorPrometheusScraperMixin(object):
                                  sample[self.SAMPLE_VALUE] * 10. ** 9)
         self._process_container_metric('rate', metric_name, metric, scraper_config)
 
-    def container_cpu_cfs_periods_total(self, metric, scraper_config):
-        metric_name = scraper_config['namespace'] + '.cpu.cfs.periods'
-        # FIXME: using gauge rn but that's likely linearly increasing? Rate is prolly preferable
-        self._process_container_metric('gauge', metric_name, metric, scraper_config)
-
     def container_cpu_load_average_10s(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.load.10s.avg'
         self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_cpu_system_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.system.total'
-        self._process_container_metric('rate', metric_name, metric, scraper_config)
+        self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_cpu_user_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.user.total'
-        self._process_container_metric('rate', metric_name, metric, scraper_config)
+        self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_cpu_cfs_throttled_periods_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.cfs.throttled.periods'
-        self._process_container_metric('rate', metric_name, metric, scraper_config)
+        self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_cpu_cfs_throttled_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.cfs.throttled.seconds'
-        self._process_container_metric('rate', metric_name, metric, scraper_config)
+        self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
     def container_fs_reads_bytes_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.io.read_bytes'

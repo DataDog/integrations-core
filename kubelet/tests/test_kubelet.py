@@ -54,7 +54,6 @@ EXPECTED_METRICS_COMMON = [
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
-    'kubernetes.cpu.cfs.periods',
     'kubernetes.cpu.load.10s.avg',
     'kubernetes.cpu.system.total',
     'kubernetes.cpu.user.total',
