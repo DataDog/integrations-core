@@ -340,7 +340,7 @@ SELECT s.schemaname,
         "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
         "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
         "THEN 1 ELSE null END )",
-        "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )", 
+        "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
 
     # The metrics we collect from pg_stat_activity that we zip with one of the lists above

@@ -53,6 +53,8 @@ CONNECTION_METRICS = [
 ACTIVITY_METRICS = [
     'postgresql.transactions.open',
     'postgresql.transactions.idle_in_transaction',
+    'postgresql.active_queries',
+    'postgresql.waiting_queries',
 ]
 
 
