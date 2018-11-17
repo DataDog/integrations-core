@@ -100,6 +100,7 @@ class PostgreSql(AgentCheck):
         ],
         'metrics': {
             'lock_count': ('postgresql.locks', GAUGE),
+            'ungranted_locks': ('postgresql.ungranted_locks'),
         },
         'query': """
 SELECT mode,
@@ -307,27 +308,47 @@ SELECT s.schemaname,
     }
 
     # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
+    ACTIVITY_METRICS_9_6 = [
+        "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
+        "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
+        "THEN 1 ELSE null END )",
+        "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
+    ]
+
+    # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
     ACTIVITY_METRICS_9_2 = [
         "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
+        "THEN 1 ELSE null END )",
+        "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
 
     # The metrics we retrieve from pg_stat_activity when the postgres version >= 8.3
     ACTIVITY_METRICS_8_3 = [
         "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
+        "THEN 1 ELSE null END )",
+        "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
 
     # The metrics we retrieve from pg_stat_activity when the postgres version < 8.3
     ACTIVITY_METRICS_LT_8_3 = [
         "SUM(CASE WHEN query_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
+        "THEN 1 ELSE null END )",
+        "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )", 
     ]
 
     # The metrics we collect from pg_stat_activity that we zip with one of the lists above
     ACTIVITY_DD_METRICS = [
         ('postgresql.transactions.open', GAUGE),
         ('postgresql.transactions.idle_in_transaction', GAUGE),
+        ('postgresql.active_queries', GAUGE),
+        ('postgresql.waiting_queries', GAUGE),
     ]
 
     # The base query for postgres version >= 10
@@ -446,6 +467,9 @@ GROUP BY datid, datname
 
     def _is_9_4_or_above(self, key, db):
         return self._is_above(key, db, [9, 4, 0])
+
+    def _is_9_6_or_above(self, key, db):
+        return self._is_above(key, db, [9, 6, 0])
 
     def _is_10_or_above(self, key, db):
         return self._is_above(key, db, [10, 0, 0])
@@ -609,7 +633,10 @@ GROUP BY datid, datname
 
         if metrics_data is None:
             query = self.ACTIVITY_QUERY_10 if self._is_10_or_above(key, db) else self.ACTIVITY_QUERY_LT_10
-            if self._is_9_2_or_above(key, db):
+            metrics_query = None
+            if self._is_9_6_or_above(key, db):
+                metrics_query = self.ACTIVITY_METRICS_9_6
+            elif self._is_9_2_or_above(key, db):
                 metrics_query = self.ACTIVITY_METRICS_9_2
             elif self._is_8_3_or_above(key, db):
                 metrics_query = self.ACTIVITY_METRICS_8_3
