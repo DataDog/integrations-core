@@ -727,9 +727,10 @@ class OpenStackControllerCheck(AgentCheck):
                 self.filter_excluded_servers()
 
                 # Deep copy the cache so we can remove things from the Original during the iteration
-                # Allows us to remove bad servers from the cache if needbe
+                # Allows us to remove bad servers from the cache if need be
                 server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
+                self.log.debug("Fetch stats from %s server(s)" % len(server_cache_copy))
                 for server in server_cache_copy:
                     server_tags = copy.deepcopy(custom_tags)
                     server_tags.append("nova_managed_server")

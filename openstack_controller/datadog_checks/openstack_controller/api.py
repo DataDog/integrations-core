@@ -176,6 +176,8 @@ class KeystoneApi(AbstractApi):
         """
         Returns all projects in the domain
         """
+        # TODO: Is this call needed, we loop over all project and then call keystone for projects by giving
+        # the project token (not keystone)
         url = urljoin(self.endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
         headers = {'X-Auth-Token': project_token}
         try:
