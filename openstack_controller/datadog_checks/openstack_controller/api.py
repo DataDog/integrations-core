@@ -174,7 +174,7 @@ class KeystoneApi(AbstractApi):
         """
         Returns all projects in the domain
         """
-        url = "{}/{}/{}".format(self.endpoint, DEFAULT_KEYSTONE_API_VERSION, "projects")
+        url = urljoin(self.endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
         headers = {'X-Auth-Token': self.auth_token}
         try:
             r = self._make_request(url, headers)
@@ -201,7 +201,7 @@ class KeystoneApi(AbstractApi):
         Returns the project that this instance of the check is scoped to
         """
         filter_params = {}
-        url = "{}/{}/{}".format(self.endpoint, DEFAULT_KEYSTONE_API_VERSION, "projects")
+        url = urljoin(self.endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
         if tenant_id:
             if project_name:
                 return {"id": tenant_id, "name": project_name}, None, None
