@@ -655,11 +655,11 @@ class OpenStackControllerCheck(AgentCheck):
                     tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
                 )
 
-        self.set_scopes_cache(instance, instance_scope)
-
         if not instance_scope:
             # Fast fail in the absence of an instance_scope
             raise IncompleteConfig()
+
+        self.set_scopes_cache(instance, instance_scope)
         return instance_scope
 
     @traced
