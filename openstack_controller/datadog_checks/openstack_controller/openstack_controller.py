@@ -266,7 +266,7 @@ class OpenStackControllerCheck(AgentCheck):
                     }
 
         except Exception as e:
-            self.warning('Unable to get the list of aggregates: {}'.format(str(e)))
+            self.warning('Unable to get the list of aggregates: {}'.format(e))
             raise e
 
         return hypervisor_aggregate_map
@@ -316,7 +316,7 @@ class OpenStackControllerCheck(AgentCheck):
             try:
                 uptime = self.get_uptime_for_single_hypervisor(hyp['id'])
             except Exception as e:
-                self.warning('Unable to get uptime for hypervisor {}: {}'.format(hyp['id'], str(e)))
+                self.warning('Unable to get uptime for hypervisor {}: {}'.format(hyp['id'], e))
                 uptime = {}
 
             load_averages = uptime.get("loads")
@@ -758,7 +758,7 @@ class OpenStackControllerCheck(AgentCheck):
             self.delete_instance_scope()
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code < 500:
-                self.warning("Error reaching nova API: %s", e)
+                self.warning("Error reaching nova API: %s" % e)
             else:
                 # exponential backoff
                 self.do_backoff(instance)
@@ -797,7 +797,7 @@ class OpenStackControllerCheck(AgentCheck):
             return project_details
 
         except Exception as e:
-            self.warning('Unable to get the project details: {}'.format(str(e)))
+            self.warning('Unable to get the project details: {}'.format(e))
             raise e
 
     def _get_host_aggregate_tag(self, hyp_hostname, use_shortname=False):
