@@ -160,7 +160,6 @@ class OpenStackControllerCheck(AgentCheck):
 
         # Current instance and project authentication scopes
         self.instance_scope = None
-        self.project_scope = None
 
         # Hypervisor names cache
         self.hypervisor_name_cache = {}
@@ -687,8 +686,8 @@ class OpenStackControllerCheck(AgentCheck):
                 self._send_api_service_checks(project_scope, custom_tags)
 
                 self.log.debug("Running check with credentials: \n")
-                self.log.debug("Nova Url: %s", self.project_scope.nova_endpoint)
-                self.log.debug("Neutron Url: %s", self.project_scope.neutron_endpoint)
+                self.log.debug("Nova Url: %s", project_scope.nova_endpoint)
+                self.log.debug("Neutron Url: %s", project_scope.neutron_endpoint)
                 self._neutron_api = NeutronApi(self.log,
                                                self._ssl_verify,
                                                self.proxy_config,
