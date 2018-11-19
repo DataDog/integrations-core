@@ -654,8 +654,8 @@ class OpenStackControllerCheck(AgentCheck):
                     AgentCheck.CRITICAL,
                     tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
                 )
-            else:
-                self.set_scopes_cache(instance, instance_scope)
+
+        self.set_scopes_cache(instance, instance_scope)
 
         if not instance_scope:
             # Fast fail in the absence of an instance_scope
