@@ -102,6 +102,7 @@ class DNSCheck(NetworkCheck):
             return Status.CRITICAL, 'DNS resolution of {0} has failed'.format(hostname)
 
         else:
+            tags = self._get_tags(instance)
             if response_time > 0:
                 self.gauge('dns.response_time', response_time, tags=tags)
             self.log.debug('Resolved hostname: {0}'.format(hostname))

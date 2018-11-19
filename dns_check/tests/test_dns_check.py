@@ -82,9 +82,6 @@ CONFIG_INVALID = [
     ({'name': 'valid_domain_for_nxdomain_type',
         'hostname': 'example.com',
         'record_type': 'NXDOMAIN'}, "DNS resolution of example.com has failed"),
-    ({'name': 'invalid_ip',
-        'hostname': 'www.example.org',
-        'resolves_as': '127.0.0.2'}, "DNS resolution returns the wrong IP"),
 ]
 
 
