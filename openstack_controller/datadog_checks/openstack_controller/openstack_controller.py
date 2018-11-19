@@ -615,10 +615,8 @@ class OpenStackControllerCheck(AgentCheck):
                     tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
                 )
             except KeystoneUnreachable as e:
-                self.warning(
-                    "The agent could not contact the specified identity server at {} . \
-                    Are you sure it is up at that address?".format(self.keystone_server_url)
-                )
+                self.log.warning("The agent could not contact the specified identity server at {} . "
+                                 "Are you sure it is up at that address?".format(self.keystone_server_url))
                 self.log.debug("Problem grabbing auth token: %s", e)
                 self.service_check(
                     self.IDENTITY_API_SC,

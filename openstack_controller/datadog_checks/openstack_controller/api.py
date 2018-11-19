@@ -142,12 +142,13 @@ class KeystoneApi(AbstractApi):
             return resp
 
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            raise KeystoneUnreachable(
-                "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
+            msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
                     user=identity['password']['user']['name'],
                     domain=identity['password']['user']['domain']['id'],
                     scope=UNSCOPED_AUTH,
-                    url=self.endpoint))
+                    url=self.endpoint)
+            self.logger.debug(msg)
+            raise KeystoneUnreachable(msg)
 
     def get_auth_projects(self):
         try:
@@ -165,10 +166,11 @@ class KeystoneApi(AbstractApi):
 
             return resp.json().get('projects')
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-            exception_msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
-                url=self.endpoint, ex=e
-            )
-            raise KeystoneUnreachable(exception_msg)
+            msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
+                    url=self.endpoint,
+                    ex=e)
+            self.logger.debug(msg)
+            raise KeystoneUnreachable(msg)
 
     def get_projects(self):
         """
