@@ -11,11 +11,19 @@ class MockDNSAnswer:
 
     class MockRrset:
         def __init__(self, address):
-            self.items = [MockDNSAnswer.MockItem(address)]
+            addresses = [x.strip() for x in address.split(',')]
+            if addresses > 1:
+                items = []
+                for address in addresses:
+                    items.append(MockDNSAnswer.MockItem(address))
+                    self.items = items
+            else:
+                self.items = [MockDNSAnswer.MockItem(address)]
 
     class MockItem:
         def __init__(self, address):
             self._address = address
+            self.address = address
 
         def to_text(self):
             return self._address
@@ -35,7 +43,9 @@ class MockTime(object):
 
 def success_query_mock(d_name, rdtype):
     if rdtype == 'A':
-        return MockDNSAnswer('127.0.0.1')
+        if d_name == 'my.example.org':
+            return MockDNSAnswer('127.0.0.2,127.0.0.3,127.0.0.4')
+        return MockDNSAnswer('127.0.0.2')
     elif rdtype == 'CNAME':
         return MockDNSAnswer('alias.example.org')
 
