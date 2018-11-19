@@ -188,10 +188,10 @@ class KeystoneApi(AbstractApi):
             self.logger.warning('Unable to get projects: {}'.format(e))
             raise e
 
-    def get_project_name_from_id(self, project_id):
+    def get_project_name_from_id(self, project_token, project_id):
         url = urljoin(self.endpoint, "{}/{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects", project_id))
         self.logger.debug("Project URL is %s", url)
-        headers = {'X-Auth-Token': self.auth_token}
+        headers = {'X-Auth-Token': project_token}
         try:
             r = self._make_request(url, headers)
             return r.get('project', {})['name']

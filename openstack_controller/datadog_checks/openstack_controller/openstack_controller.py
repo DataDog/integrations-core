@@ -342,7 +342,7 @@ class OpenStackControllerCheck(AgentCheck):
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
-    def get_all_servers(self, instance_name):
+    def get_all_servers(self, project_auth_token, instance_name):
         query_params = {}
 
         # If we don't have a timestamp for this instance, default to None
@@ -405,15 +405,13 @@ class OpenStackControllerCheck(AgentCheck):
                 continue
 
             # Update our cached list of servers
-            if (
-                new_server['server_id'] not in self.server_details_by_id
-                and new_server['state'] in DIAGNOSTICABLE_STATES
-            ):
+            if (new_server['server_id'] not in self.server_details_by_id \
+                and new_server['state'] in DIAGNOSTICABLE_STATES):
                 self.log.debug("Adding server to cache: %s", new_server)
                 # The project may not exist if the server isn't in an active state
                 # Query for the project name here to avoid 404s
                 # If the project name conversion fails, we won't add this server
-                new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
+                new_server['project_name'] = self.get_project_name_from_id(project_auth_token, new_server['tenant_id'])
                 if new_server['project_name']:
                     self.server_details_by_id[new_server['server_id']] = new_server
             elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
@@ -723,7 +721,7 @@ class OpenStackControllerCheck(AgentCheck):
                                                    collect_hypervisor_load=collect_hypervisor_load)
 
                 # This updates the server cache directly
-                self.get_all_servers(instance_name)
+                self.get_all_servers(project_scope.auth_token, instance_name)
                 self.filter_excluded_servers()
 
                 # Deep copy the cache so we can remove things from the Original during the iteration
@@ -857,8 +855,8 @@ class OpenStackControllerCheck(AgentCheck):
     def get_projects(self, project_token):
         return self._keystone_api.get_projects(project_token)
 
-    def get_project_name_from_id(self, project_id):
-        return self._keystone_api.get_project_name_from_id(project_id)
+    def get_project_name_from_id(self, project_token, project_id):
+        return self._keystone_api.get_project_name_from_id(project_token, project_id)
 
     def get_project_details(self, tenant_id, project_name, domain_id):
         return self._keystone_api.get_project_details(tenant_id, project_name, domain_id)
