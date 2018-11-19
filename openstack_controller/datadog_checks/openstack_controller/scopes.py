@@ -7,10 +7,9 @@ from .exceptions import (IncompleteConfig, IncompleteIdentity, MissingNovaEndpoi
 from .api import KeystoneApi
 
 
-class OpenStackScope(object):
-    def __init__(self, auth_token, project_scopes):
-        self.auth_token = auth_token
-        self.project_scopes = project_scopes
+class ScopeFetcher(object):
+    def __init__(self):
+        pass
 
     @classmethod
     def from_config(cls, logger, init_config, instance_config, proxy_config=None):
@@ -42,7 +41,7 @@ class OpenStackScope(object):
                 }
             }
 
-            project_scope = OpenStackProject(project_auth_token, project_auth_scope, nova_endpoint, neutron_endpoint)
+            project_scope = Project(project_auth_token, project_auth_scope, nova_endpoint, neutron_endpoint)
             project_name = project.get('name')
             project_id = project.get('id')
             if project_name is None or project_id is None:
@@ -50,7 +49,7 @@ class OpenStackScope(object):
             project_key = (project_name, project_id)
             project_scopes[project_key] = project_scope
 
-        return cls(auth_token, project_scopes)
+        return Scope(auth_token, project_scopes)
 
     @classmethod
     def _get_auth_response_from_config(cls, logger, init_config, instance_config, proxy_config=None):
@@ -64,8 +63,8 @@ class OpenStackScope(object):
         resp = keystone_api.post_auth_token(identity)
         return resp.headers.get('X-Subject-Token')
 
-    @classmethod
-    def _get_user_identity(cls, instance_config):
+    @staticmethod
+    def _get_user_identity(instance_config):
         """
         Parse user identity out of init_config
 
@@ -107,8 +106,8 @@ class OpenStackScope(object):
             return valid_endpoint
         raise MissingNovaEndpoint()
 
-    @classmethod
-    def _get_valid_endpoint(cls, resp, name, entry_type):
+    @staticmethod
+    def _get_valid_endpoint(resp, name, entry_type):
         """
         Parse the service catalog returned by the Identity API for an endpoint matching
         the Nova service with the requested version
@@ -132,7 +131,13 @@ class OpenStackScope(object):
         return None
 
 
-class OpenStackProject:
+class Scope(object):
+    def __init__(self, auth_token, project_scopes):
+        self.auth_token = auth_token
+        self.project_scopes = project_scopes
+
+
+class Project:
     """
     Container class for a single project's authorization scope
     Embeds the auth token to be included with API requests, and refreshes
@@ -142,8 +147,8 @@ class OpenStackProject:
     def __init__(self, auth_token, auth_scope, nova_endpoint, neutron_endpoint):
         self.auth_token = auth_token
         # Store some identifiers for this project
-        self.project_name = auth_scope["project"].get("name")
-        self.domain_id = auth_scope["project"].get("domain", {}).get("id")
-        self.tenant_id = auth_scope["project"].get("id")
+        self.name = auth_scope.get("project", {}).get("name")
+        self.domain_id = auth_scope.get("project", {}).get("domain", {}).get("id")
+        self.tenant_id = auth_scope.get("project", {}).get("id")
         self.nova_endpoint = nova_endpoint
         self.neutron_endpoint = neutron_endpoint

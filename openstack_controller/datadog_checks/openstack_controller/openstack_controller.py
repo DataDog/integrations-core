@@ -13,7 +13,7 @@ from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
 from datadog_checks.utils.tracing import traced
 
-from .scopes import OpenStackScope
+from .scopes import ScopeFetcher
 from .api import ComputeApi, NeutronApi, KeystoneApi
 from .settings import DEFAULT_API_REQUEST_TIMEOUT
 from .utils import get_instance_name
@@ -130,7 +130,7 @@ class OpenStackControllerCheck(AgentCheck):
     HYPERVISOR_CACHE_EXPIRY = 120  # seconds
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+        super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
 
         skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies
@@ -515,12 +515,12 @@ class OpenStackControllerCheck(AgentCheck):
             server_tags.append('project_name:{}'.format(project_name))
 
         try:
-            for st in server_stats['limits']['absolute']:
+            for st in server_stats:
                 if _is_valid_metric(st):
                     metric_key = PROJECT_METRICS[st]
                     self.gauge(
                         "openstack.nova.limits.{}".format(metric_key),
-                        server_stats['limits']['absolute'][st],
+                        server_stats[st],
                         tags=server_tags,
                     )
         except KeyError:
@@ -604,8 +604,8 @@ class OpenStackControllerCheck(AgentCheck):
             # authentication previously failed and got removed from the cache
             # Let's populate it now
             try:
-                instance_scope = OpenStackScope.from_config(self.log, self.init_config, instance,
-                                                            proxy_config=self.proxy_config)
+                instance_scope = ScopeFetcher.from_config(self.log, self.init_config, instance,
+                                                          proxy_config=self.proxy_config)
                 # Set keystone api with proper token
                 self._keystone_api = KeystoneApi(self.log, self._ssl_verify, self.proxy_config,
                                                  self.keystone_server_url, instance_scope.auth_token)
@@ -759,7 +759,7 @@ class OpenStackControllerCheck(AgentCheck):
             self.delete_instance_scope()
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code < 500:
-                self.warning("Error reaching nova API")
+                self.warning("Error reaching nova API: %s", e)
             else:
                 # exponential backoff
                 self.do_backoff(instance)
@@ -787,14 +787,14 @@ class OpenStackControllerCheck(AgentCheck):
         try:
             project_details, tenant_id, project_name = self.get_project_details(
                 project_scope.tenant_id,
-                project_scope.project_name,
+                project_scope.name,
                 project_scope.domain_id)
 
             # Set the tenant_id so we won't have to fetch it next time
             if project_scope.tenant_id:
                 project_scope.tenant_id = tenant_id
-            if project_scope.project_name:
-                project_scope.project_name = project_name
+            if project_scope.name:
+                project_scope.name = project_name
             return project_details
 
         except Exception as e:
