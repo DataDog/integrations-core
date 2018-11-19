@@ -692,12 +692,12 @@ class OpenStackControllerCheck(AgentCheck):
                                                self._ssl_verify,
                                                self.proxy_config,
                                                project_scope.neutron_endpoint,
-                                               self.instance_scope.auth_token)
+                                               project_scope.auth_token)
                 self._compute_api = ComputeApi(self.log,
                                                self._ssl_verify,
                                                self.proxy_config,
                                                project_scope.nova_endpoint,
-                                               self.instance_scope.auth_token)
+                                               project_scope.auth_token)
 
                 project = self.get_and_update_project_details(project_scope)
                 if project and project.get('name'):

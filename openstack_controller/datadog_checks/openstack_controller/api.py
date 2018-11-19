@@ -125,10 +125,9 @@ class KeystoneApi(AbstractApi):
         self.auth_token = auth_token
 
     def post_auth_token(self, identity, scope=UNSCOPED_AUTH):
-        auth_url = ""
+        auth_url = urljoin(self.endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         try:
             payload = {'auth': {'identity': identity, 'scope': scope}}
-            auth_url = urljoin(self.endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
             headers = {'Content-Type': 'application/json'}
 
             resp = requests.post(
@@ -188,7 +187,7 @@ class KeystoneApi(AbstractApi):
             raise e
 
     def get_project_name_from_id(self, project_id):
-        url = "{}/{}/{}/{}".format(self.endpoint, DEFAULT_KEYSTONE_API_VERSION, "projects", project_id)
+        url = urljoin(self.endpoint, "{}/{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects", project_id))
         self.logger.debug("Project URL is %s", url)
         headers = {'X-Auth-Token': self.auth_token}
         try:
