@@ -45,7 +45,7 @@ class AbstractApi:
                 raise InstancePowerOffFailure()
             else:
                 raise e
-
+        self.logger.debug("url: %s || response: %s", url, resp.json())
         return resp.json()
 
 
