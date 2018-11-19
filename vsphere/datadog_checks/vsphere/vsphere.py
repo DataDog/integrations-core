@@ -21,6 +21,7 @@ from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
 from datadog_checks.checks.libs.timer import Timer
+from datadog_checks.utils.common import ensure_bytes
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .errors import BadConfigError, ConnectionError
@@ -182,7 +183,7 @@ class VSphereCheck(AgentCheck):
 
         try:
             new_events = event_manager.QueryEvents(query_filter)
-            self.log.debug("Got {0} events from vCenter event manager".format(len(new_events)))
+            self.log.debug("Got {} events from vCenter event manager".format(len(new_events)))
             for event in new_events:
                 normalized_event = VSphereEvent(event, self.event_config[i_key])
                 # Can return None if the event if filtered out
@@ -262,7 +263,7 @@ class VSphereCheck(AgentCheck):
         tags = instance.get('tags', [])
 
         service_check_tags = [
-            'vcenter_server:{}'.format(instance.get('name')),
+            b'vcenter_server:{}'.format(instance.get('name')),
             'vcenter_host:{}'.format(instance.get('host')),
         ] + tags
         service_check_tags = list(set(service_check_tags))
@@ -316,7 +317,7 @@ class VSphereCheck(AgentCheck):
         for instance in self.instances:
             i_key = self._instance_key(instance)
             if not self.mor_cache.contains(i_key):
-                self.log.warning("Unable to extract host tags for vSphere instance: {}".format(i_key))
+                self.log.warning(b"Unable to extract host tags for vSphere instance: {}".format(i_key))
                 continue
 
             for _, mor in self.mor_cache.mors(i_key):
@@ -335,15 +336,15 @@ class VSphereCheck(AgentCheck):
             parent_name = all_objects.get(parent, {}).get("name", "unknown")
             tag = []
             if isinstance(parent, vim.HostSystem):
-                tag.append(u'vsphere_host:{}'.format(parent_name))
+                tag.append('vsphere_host:{}'.format(parent_name))
             elif isinstance(parent, vim.Folder):
-                tag.append(u'vsphere_folder:{}'.format(parent_name))
+                tag.append('vsphere_folder:{}'.format(parent_name))
             elif isinstance(parent, vim.ComputeResource):
                 if isinstance(parent, vim.ClusterComputeResource):
-                    tag.append(u'vsphere_cluster:{}'.format(parent_name))
-                tag.append(u'vsphere_compute:{}'.format(parent_name))
+                    tag.append('vsphere_cluster:{}'.format(parent_name))
+                tag.append('vsphere_compute:{}'.format(parent_name))
             elif isinstance(parent, vim.Datacenter):
-                tag.append(u'vsphere_datacenter:{}'.format(parent_name))
+                tag.append('vsphere_datacenter:{}'.format(parent_name))
 
             tags = self._get_parent_tags(parent, all_objects)
             if tag:
@@ -471,6 +472,7 @@ class VSphereCheck(AgentCheck):
                     hostname = properties.get("guest.hostName", properties.get("name", "unknown"))
                 else:
                     hostname = properties.get("name", "unknown")
+                hostname = ensure_bytes(hostname)
                 if properties.get("parent"):
                     instance_tags += self._get_parent_tags(obj, all_objects)
 
@@ -486,19 +488,19 @@ class VSphereCheck(AgentCheck):
                     host = "unknown"
                     if host_mor:
                         host = all_objects.get(host_mor, {}).get("name", "unknown")
-                    instance_tags.append(u'vsphere_host:{}'.format(host))
+                    instance_tags.append('vsphere_host:{}'.format(host))
                 elif isinstance(obj, vim.HostSystem):
-                    vsphere_type = u'vsphere_type:host'
+                    vsphere_type = 'vsphere_type:host'
                     vimtype = vim.HostSystem
                     mor_type = "host"
                 elif isinstance(obj, vim.Datastore):
-                    vsphere_type = u'vsphere_type:datastore'
-                    instance_tags.append(u'vsphere_datastore:{}'.format(properties.get("name", "unknown")))
+                    vsphere_type = 'vsphere_type:datastore'
+                    instance_tags.append('vsphere_datastore:{}'.format(properties.get("name", "unknown")))
                     hostname = None
                     vimtype = vim.Datastore
                     mor_type = "datastore"
                 elif isinstance(obj, vim.Datacenter):
-                    vsphere_type = u'vsphere_type:datacenter'
+                    vsphere_type = 'vsphere_type:datacenter'
                     hostname = None
                     vimtype = vim.Datacenter
                     mor_type = "datacenter"
@@ -512,7 +514,7 @@ class VSphereCheck(AgentCheck):
                     "mor_type": mor_type,
                     "mor": obj,
                     "hostname": hostname,
-                    "tags": tags + instance_tags
+                    "tags": self._normalize_tags_type(tags + instance_tags)
                 })
 
         self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
@@ -573,7 +575,7 @@ class VSphereCheck(AgentCheck):
         discovery.
         """
         i_key = self._instance_key(instance)
-        self.log.debug("Caching the morlist for vcenter instance %s" % i_key)
+        self.log.debug(b"Caching the morlist for vcenter instance {}".format(i_key))
 
         # If the queue is not completely empty, don't do anything
         for resource_type in RESOURCE_TYPE_METRICS:
@@ -584,7 +586,7 @@ class VSphereCheck(AgentCheck):
                                "(latest refresh was {}s ago)".format(resource_type, time.time() - last))
                 return
 
-        instance_tag = "vcenter_server:%s" % instance.get('name')
+        instance_tag = b"vcenter_server:{}".format(instance.get('name'))
         regexes = {
             'host_include': instance.get('host_include_only_regex'),
             'vm_include': instance.get('vm_include_only_regex')
@@ -638,7 +640,7 @@ class VSphereCheck(AgentCheck):
         self.mor_cache.init_instance(i_key)
 
         if not self.mor_objects_queue.contains(i_key):
-            self.log.debug("Objects queue is not initialized yet for instance {}, skipping processing".format(i_key))
+            self.log.debug(b"Objects queue is not initialized yet for instance {}, skipping processing".format(i_key))
             return
 
         for resource_type in RESOURCE_TYPE_METRICS:
@@ -683,7 +685,7 @@ class VSphereCheck(AgentCheck):
 
         i_key = self._instance_key(instance)
         self.metadata_cache.init_instance(i_key)
-        self.log.info("Warming metrics metadata cache for instance {}".format(i_key))
+        self.log.info(b"Warming metrics metadata cache for instance {}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
         custom_tags = instance.get('tags', [])
@@ -711,7 +713,7 @@ class VSphereCheck(AgentCheck):
                 # Build the list of metrics we will want to collect
                 metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter.key, instance="*"))
 
-        self.log.info("Finished metadata collection for instance {}".format(i_key))
+        self.log.info(b"Finished metadata collection for instance {}".format(i_key))
         # Reset metadata
         self.metadata_cache.set_metadata(i_key, new_metadata)
         self.metadata_cache.set_metric_ids(i_key, metric_ids)
@@ -827,17 +829,17 @@ class VSphereCheck(AgentCheck):
         """
         i_key = self._instance_key(instance)
         if not self.mor_cache.contains(i_key):
-            self.log.debug("Not collecting metrics for instance '{}', nothing to do yet.".format(i_key))
+            self.log.debug(b"Not collecting metrics for instance '{}', nothing to do yet.".format(i_key))
             return
 
         vm_count = 0
         custom_tags = instance.get('tags', [])
-        tags = ["vcenter_server:{}".format(instance.get('name'))] + custom_tags
+        tags = [b"vcenter_server:{}".format(instance.get('name'))] + custom_tags
 
         n_mors = self.mor_cache.instance_size(i_key)
         if not n_mors:
             self.gauge('vsphere.vm.count', vm_count, tags=tags)
-            self.log.debug("No Mor objects to process for instance '{}', skip...".format(i_key))
+            self.log.debug(b"No Mor objects to process for instance '{}', skip...".format(i_key))
             return
 
         self.log.debug("Collecting metrics for {} mors".format(n_mors))
