@@ -63,7 +63,7 @@ logs:
 Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from. 
 Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][11].
 
-Finally, [restart the Agent][3]
+Finally, [restart the Agent][3].
 
 
 ### Filters
@@ -85,7 +85,7 @@ The values listed in the output of the command can be set in `win32_event_log.ya
 
 <div class="alert alert-info">
 The information given by the  <code> Get-EventLog</code> PowerShell command or the Windows Event ViewerGUI may slightly differ from <code>Get-WmiObject</code>.<br>
-Please double-check your filters' values with <code>Get-WmiObject</code> if the integration doesn't capture the events you set up.
+Double-check your filters' values with <code>Get-WmiObject</code> if the integration doesn't capture the events you set up.
 </div>
 
 1 - Configure one or more filters for the event log. A filter allows you to choose what log events you want to get into Datadog.
@@ -99,7 +99,7 @@ Filter on the following properties:
 
 For each filter, add an instance in the configuration file at `conf.d/win32_event_log.yaml`.
 
-Here are some example filters you could use:
+Some example filters:
 
 ```yaml
 instances:
@@ -147,7 +147,7 @@ Checks
 The Win32 Event log check does not include any metrics at this time.
 
 ### Events
-All Windows Event are forwarded to your Datadog application
+All Windows Event are forwarded to your Datadog application.
 
 ### Service Checks
 The Win32 Event log check does not include any service checks at this time.
