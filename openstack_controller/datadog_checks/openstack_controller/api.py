@@ -125,6 +125,7 @@ class KeystoneApi(AbstractApi):
         self.auth_token = auth_token
 
     def post_auth_token(self, identity, scope=UNSCOPED_AUTH):
+        auth_url =""
         try:
             payload = {'auth': {'identity': identity, 'scope': scope}}
             auth_url = urljoin(self.endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
@@ -142,15 +143,15 @@ class KeystoneApi(AbstractApi):
             return resp
 
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
-                    user=identity['password']['user']['name'],
-                    domain=identity['password']['user']['domain']['id'],
-                    scope=UNSCOPED_AUTH,
-                    url=self.endpoint)
+            msg = "Failed keystone auth with identity:{identity} scope:{scope} @{url}".format(
+                identity=identity,
+                scope=scope,
+                url=auth_url)
             self.logger.debug(msg)
             raise KeystoneUnreachable(msg)
 
     def get_auth_projects(self):
+        auth_url = ""
         try:
             auth_url = urljoin(self.endpoint, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
             headers = {'X-Auth-Token': self.auth_token}
@@ -167,7 +168,7 @@ class KeystoneApi(AbstractApi):
             return resp.json().get('projects')
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
-                    url=self.endpoint,
+                    url=auth_url,
                     ex=e)
             self.logger.debug(msg)
             raise KeystoneUnreachable(msg)
