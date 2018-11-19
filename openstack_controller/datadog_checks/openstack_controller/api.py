@@ -19,7 +19,7 @@ class AbstractApi:
         self.ssl_verify = ssl_verify
         self.proxy_config = proxy_config
 
-    def _make_request(self, url, headers=None, params=None, timeout=DEFAULT_API_REQUEST_TIMEOUT):
+    def _make_request(self, url, headers, params=None, timeout=DEFAULT_API_REQUEST_TIMEOUT):
         """
         Generic request handler for OpenStack API requests
         Raises specialized Exceptions for commonly encountered error codes
