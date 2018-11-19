@@ -51,7 +51,7 @@ class AbstractApi:
 
 class ComputeApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config)
+        AbstractApi.__init__(self, logger, ssl_verify, proxy_config)
         self.endpoint = endpoint
         self.auth_token = auth_token
 
@@ -93,7 +93,7 @@ class ComputeApi(AbstractApi):
 
 class NeutronApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(NeutronApi, self).__init__(logger, ssl_verify, proxy_config)
+        AbstractApi.__init__(self, logger, ssl_verify, proxy_config)
         self.endpoint = endpoint
         self.auth_token = auth_token
 
@@ -125,7 +125,7 @@ class KeystoneApi(AbstractApi):
         self.auth_token = auth_token
 
     def post_auth_token(self, identity, scope=UNSCOPED_AUTH):
-        auth_url =""
+        auth_url = ""
         try:
             payload = {'auth': {'identity': identity, 'scope': scope}}
             auth_url = urljoin(self.endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))

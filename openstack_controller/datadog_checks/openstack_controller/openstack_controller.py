@@ -199,7 +199,7 @@ class OpenStackControllerCheck(AgentCheck):
 
     def get_project_scopes(self, instance):
         instance_scope = self.get_instance_scope(instance)
-        project_scopes = copy.deepcopy(instance_scope.project_scope_map)
+        project_scopes = copy.deepcopy(instance_scope.project_scopes)
         return project_scopes
 
     def get_network_stats(self, tags):
@@ -604,7 +604,7 @@ class OpenStackControllerCheck(AgentCheck):
             # authentication previously failed and got removed from the cache
             # Let's populate it now
             try:
-                self.log.info("Fetch scope for instance {}".format(instance))
+                self.log.debug("Fetch scope for instance {}".format(instance))
                 instance_scope = ScopeFetcher.from_config(self.log, self.init_config, instance,
                                                           proxy_config=self.proxy_config)
                 # Set keystone api with proper token
