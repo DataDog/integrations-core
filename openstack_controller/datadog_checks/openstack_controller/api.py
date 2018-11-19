@@ -172,12 +172,12 @@ class KeystoneApi(AbstractApi):
             self.logger.debug(msg)
             raise KeystoneUnreachable(msg)
 
-    def get_projects(self):
+    def get_projects(self, project_token):
         """
         Returns all projects in the domain
         """
         url = urljoin(self.endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
-        headers = {'X-Auth-Token': self.auth_token}
+        headers = {'X-Auth-Token': project_token}
         try:
             r = self._make_request(url, headers)
             return r['projects']
