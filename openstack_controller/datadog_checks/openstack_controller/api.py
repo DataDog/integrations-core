@@ -24,7 +24,7 @@ class AbstractApi:
         Generic request handler for OpenStack API requests
         Raises specialized Exceptions for commonly encountered error codes
         """
-        self.logger.debug("Request URL and Params: %s, %s", url, params)
+        self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, headers, params)
         resp = {}
         try:
             resp = requests.get(
