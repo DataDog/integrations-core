@@ -80,8 +80,8 @@ def test_project_name_none(*args):
     assert 'server-1' not in check.server_details_by_id
 
 
-def get_server_details_response(self, query_params, timeout=None):
-    if 'marker' not in query_params:
+def get_server_details_response(url, header, params=None, timeout=None):
+    if 'marker' not in params:
         return common.MOCK_NOVA_SERVERS_PAGINATED
     return common.EMPTY_NOVA_SERVERS
 
@@ -102,6 +102,6 @@ def get_server_details_response(self, query_params, timeout=None):
 #         'paginated_server_limit': 1
 #     }, {}, instances=common.MOCK_CONFIG)
 #
-#     check.get_all_servers("test_instance")
+#     check.get_all_servers(None, "test_instance")
 #     assert len(check.server_details_by_id) == 1
 #     assert 'server-1' in check.server_details_by_id

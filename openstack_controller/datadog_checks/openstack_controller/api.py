@@ -18,6 +18,8 @@ class AbstractApi(object):
         self.logger = logger
         self.ssl_verify = ssl_verify
         self.proxy_config = proxy_config
+        # Cache for the `_make_request` method
+        self.cache = {}
 
     def _make_request(self, url, headers, params=None, timeout=DEFAULT_API_REQUEST_TIMEOUT):
         """
@@ -25,6 +27,13 @@ class AbstractApi(object):
         Raises specialized Exceptions for commonly encountered error codes
         """
         self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, headers, params)
+
+        # Checking if request is in cache
+        cache_key = "|".join([url, headers, params, timeout])
+        if cache_key in self.cache:
+            self.logger.debug("Request found in cache. cache key %s", cache_key)
+            return self.cache.get('cache_key')
+
         resp = {}
         try:
             resp = requests.get(
@@ -46,7 +55,11 @@ class AbstractApi(object):
             else:
                 raise e
         self.logger.debug("url: %s || response: %s", url, resp.json())
-        return resp.json()
+        jresp = resp.json()
+
+        # Adding response to the cache
+        self.cache[cache_key] = jresp
+        return jresp
 
 
 class ComputeApi(AbstractApi):
@@ -163,7 +176,7 @@ class KeystoneApi(AbstractApi):
                 proxies=self.proxy_config
             )
             resp.raise_for_status()
-
+            self.logger.debug("url: %s || response: %s", auth_url, resp.json().get('projects'))
             return resp.json().get('projects')
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
@@ -182,6 +195,7 @@ class KeystoneApi(AbstractApi):
         headers = {'X-Auth-Token': project_token}
         try:
             r = self._make_request(url, headers)
+            self.logger.debug("url: %s || response: %s", url, r['projects'])
             return r['projects']
 
         except Exception as e:
