@@ -191,7 +191,7 @@ jobs:
     - stage: test
       env: CHECK=php_fpm PYTHON3=true
     - stage: test
-      env: CHECK=postgres
+      env: CHECK=postgres PYTHON3=true
     - stage: test
       env: CHECK=postfix
     - stage: test

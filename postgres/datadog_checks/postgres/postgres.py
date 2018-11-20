@@ -7,15 +7,14 @@ import re
 from contextlib import closing
 
 import pg8000
+from six import iteritems
 from six.moves import zip_longest
 try:
     import psycopg2
 except ImportError:
     psycopg2 = None
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException
-from datadog_checks.config import _is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 
 MAX_CUSTOM_RESULTS = 100
@@ -206,7 +205,7 @@ SELECT schemaname, count(*) FROM
 
     q1 = ('CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
           '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END')
-    q2 = ('abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))')
+    q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
     REPLICATION_METRICS_10 = {
         q1: ('postgresql.replication_delay', GAUGE),
         q2: ('postgresql.replication_delay_bytes', GAUGE),
@@ -366,18 +365,20 @@ GROUP BY datid, datname
         self.custom_metrics = {}
 
         # Deprecate custom_metrics in favor of custom_queries
-        if instances is not None and any(['custom_metrics' in instance for instance in instances]):
+        if instances is not None and any('custom_metrics' in instance for instance in instances):
             self.warning("DEPRECATION NOTICE: Please use the new custom_queries option "
                          "rather than the now deprecated custom_metrics")
 
-    def _server_known(self, host, port):
+    @classmethod
+    def _server_known(cls, host, port):
         """
         Return whether the hostname and port combination was already seen
         """
         with PostgreSql._known_servers_lock:
             return (host, port) in PostgreSql._known_servers
 
-    def _set_server_known(self, host, port):
+    @classmethod
+    def _set_server_known(cls, host, port):
         """
         Store the host/port combination for this server
         """
@@ -385,7 +386,7 @@ GROUP BY datid, datname
             PostgreSql._known_servers.add((host, port))
 
     def _get_pg_attrs(self, instance):
-        if _is_affirmative(instance.get('use_psycopg2', False)):
+        if is_affirmative(instance.get('use_psycopg2', False)):
             if psycopg2 is None:
                 self.log.error("Unable to import psycopg2, falling back to pg8000")
             else:
@@ -605,11 +606,9 @@ GROUP BY datid, datname
         Uses a dictionnary to save the result for each instance
         """
         metrics_data = self.activity_metrics.get(key)
-        metrics = None
-        query = None
+
         if metrics_data is None:
             query = self.ACTIVITY_QUERY_10 if self._is_10_or_above(key, db) else self.ACTIVITY_QUERY_LT_10
-            metrics_query = None
             if self._is_9_2_or_above(key, db):
                 metrics_query = self.ACTIVITY_METRICS_9_2
             elif self._is_8_3_or_above(key, db):
@@ -645,9 +644,9 @@ GROUP BY datid, datname
                     config[name]['schemas'] = element['schemas']
                     config[name]['relation_name'] = name
                 else:
-                    self.log.warn('Unhandled relations config type: %s' % str(element))
+                    self.log.warning('Unhandled relations config type: {}'.format(element))
             except KeyError:
-                self.log.warn('Failed to parse config element=%s, check syntax' % str(element))
+                self.log.warning('Failed to parse config element={}, check syntax'.format(element))
         return config
 
     def _query_scope(self, cursor, scope, key, db, instance_tags, relations, is_custom_metrics, programming_error,
@@ -661,16 +660,16 @@ GROUP BY datid, datname
             log_func = self.log.warning
 
         # build query
-        cols = scope['metrics'].keys()  # list of metrics to query, in some order
+        cols = list(scope['metrics'])  # list of metrics to query, in some order
         # we must remember that order to parse results
 
         try:
             # if this is a relation-specific query, we need to list all relations last
             if scope['relation'] and len(relations) > 0:
-                relnames = ', '.join("'{0}'".format(w) for w in relations_config.iterkeys())
+                relnames = ', '.join("'{0}'".format(w) for w in relations_config)
                 query = scope['query'] % (", ".join(cols), "%s")  # Keep the last %s intact
                 self.log.debug("Running query: %s with relations: %s" % (query, relnames))
-                cursor.execute(query % (relnames))
+                cursor.execute(query % relnames)
             else:
                 query = scope['query'] % (", ".join(cols))
                 self.log.debug("Running query: %s" % query)
@@ -710,7 +709,7 @@ GROUP BY datid, datname
                     config_schemas = relations_config[relname]['schemas']
                     if config_schemas and desc_map['schema'] not in config_schemas:
                         return len(results)
-                except (KeyError):
+                except KeyError:
                     pass
 
             # Build tags
@@ -723,7 +722,7 @@ GROUP BY datid, datname
             else:
                 tags = [t for t in instance_tags]
 
-            tags += [("%s:%s" % (k, v)) for (k, v) in desc_map.iteritems()]
+            tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
             # [(metric-map, value), (metric-map, value), ...]
             # metric-map is: (dd_name, "rate"|"gauge")
@@ -806,7 +805,8 @@ GROUP BY datid, datname
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
 
-    def _get_service_check_tags(self, host, port, tags):
+    @classmethod
+    def _get_service_check_tags(cls, host, port, tags):
         service_check_tags = [
             "host:%s" % host,
             "port:%s" % port,
@@ -816,7 +816,7 @@ GROUP BY datid, datname
         return service_check_tags
 
     def get_connection(self, key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=True):
-        "Get and memoize connections to instances"
+        """Get and memoize connections to instances"""
         if key in self.dbs and use_cached:
             return self.dbs[key]
 
@@ -836,6 +836,8 @@ GROUP BY datid, datname
                 else:
                     connection = connect_fct(host=host, user=user, password=password,
                                              database=dbname, ssl=ssl)
+                self.dbs[key] = connection
+                return connection
             except Exception as e:
                 message = u'Error establishing postgres connection: %s' % (str(e))
                 service_check_tags = self._get_service_check_tags(host, port, tags)
@@ -844,12 +846,9 @@ GROUP BY datid, datname
                 raise
         else:
             if not host:
-                raise CheckException("Please specify a Postgres host to connect to.")
+                raise ConfigurationError('Please specify a Postgres host to connect to.')
             elif not user:
-                raise CheckException("Please specify a user to connect to Postgres as.")
-
-        self.dbs[key] = connection
-        return connection
+                raise ConfigurationError('Please specify a user to connect to Postgres as.')
 
     def _get_custom_queries(self, db, tags, custom_queries, programming_error):
         """
@@ -962,21 +961,21 @@ GROUP BY datid, datname
         for m in custom_metrics:
             for param in required_parameters:
                 if param not in m:
-                    raise CheckException("Missing {0} parameter in custom metric".format(param))
+                    raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
 
             self.log.debug("Metric: {0}".format(m))
 
             try:
-                for ref, (_, mtype) in m['metrics'].iteritems():
+                for ref, (_, mtype) in iteritems(m['metrics']):
                     cap_mtype = mtype.upper()
                     if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
-                        raise CheckException("Collector method {0} is not known. "
-                                             "Known methods are RATE, GAUGE, MONOTONIC".format(cap_mtype))
+                        raise ConfigurationError('Collector method {} is not known. '
+                                                 'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype))
 
                     m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
                     self.log.debug("Method: %s" % (str(mtype)))
             except Exception as e:
-                raise CheckException("Error processing custom metric '{}': {}".format(m, e))
+                raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
 
         self.custom_metrics[key] = custom_metrics
         return custom_metrics
@@ -991,13 +990,13 @@ GROUP BY datid, datname
         tags = instance.get('tags', [])
         dbname = instance.get('dbname', None)
         relations = instance.get('relations', [])
-        ssl = _is_affirmative(instance.get('ssl', False))
-        collect_function_metrics = _is_affirmative(instance.get('collect_function_metrics', False))
+        ssl = is_affirmative(instance.get('ssl', False))
+        collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
-        collect_count_metrics = _is_affirmative(instance.get('collect_count_metrics', True))
-        collect_activity_metrics = _is_affirmative(instance.get('collect_activity_metrics', False))
-        collect_database_size_metrics = _is_affirmative(instance.get('collect_database_size_metrics', True))
-        collect_default_db = _is_affirmative(instance.get('collect_default_database', False))
+        collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
+        collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
+        collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
+        collect_default_db = is_affirmative(instance.get('collect_default_database', False))
 
         if relations and not dbname:
             self.warning('"dbname" parameter must be set when using the "relations" parameter.')
@@ -1022,9 +1021,6 @@ GROUP BY datid, datname
 
         self.log.debug("Custom metrics: %s" % custom_metrics)
 
-        # preset tags to the database name
-        db = None
-
         connect_fct, interface_error, programming_error = self._get_pg_attrs(instance)
 
         # Collect metrics
@@ -1045,13 +1041,12 @@ GROUP BY datid, datname
                                 collect_default_db, interface_error, programming_error)
             self._get_custom_queries(db, tags, custom_queries, programming_error)
 
-        if db is not None:
-            service_check_tags = self._get_service_check_tags(host, port, tags)
-            message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=service_check_tags, message=message)
-            try:
-                # commit to close the current query transaction
-                db.commit()
-            except Exception as e:
-                self.log.warning("Unable to commit: {0}".format(e))
+        service_check_tags = self._get_service_check_tags(host, port, tags)
+        message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
+        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
+                           tags=service_check_tags, message=message)
+        try:
+            # commit to close the current query transaction
+            db.commit()
+        except Exception as e:
+            self.log.warning("Unable to commit: {0}".format(e))
