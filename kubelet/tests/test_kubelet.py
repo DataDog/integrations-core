@@ -320,6 +320,9 @@ def mocked_get_tags(entity, _):
         ],
         "kubernetes_pod://260c2b1d43b094af6d6b4ccba082c2db": [
             'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
+        ],
+        "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": [
+            'pod_name:pi-kff76'
         ]
     }
     # Match agent 6.5 behaviour of not accepting None
@@ -385,7 +388,6 @@ def test_report_container_spec_metrics(monkeypatch):
     check.pod_list_utils = mock.Mock(**attrs)
 
     pod_list = check.retrieve_pod_list()
-
     instance_tags = ["one:1", "two:2"]
     with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
         check._report_container_spec_metrics(pod_list, instance_tags)
@@ -410,6 +412,8 @@ def test_report_container_spec_metrics(monkeypatch):
         mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
         mock.call('kubernetes.cpu.requests', 0.1, ["pod_name=demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
+    if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
+        raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
     check.gauge.assert_has_calls(calls, any_order=True)
 
 
