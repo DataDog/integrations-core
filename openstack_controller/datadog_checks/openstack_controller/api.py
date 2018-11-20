@@ -29,7 +29,7 @@ class AbstractApi(object):
         self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, headers, params)
 
         # Checking if request is in cache
-        cache_key = "|".join([url, json.dump(headers), json.dump(params), timeout])
+        cache_key = "|".join([url, headers, params, timeout])
         if cache_key in self.cache:
             self.logger.debug("Request found in cache. cache key %s", cache_key)
             return self.cache.get(cache_key)
@@ -176,8 +176,9 @@ class KeystoneApi(AbstractApi):
                 proxies=self.proxy_config
             )
             resp.raise_for_status()
-            self.logger.debug("url: %s || response: %s", auth_url, resp.json().get('projects'))
-            return resp.json().get('projects')
+            jresp = resp.json().get('projects')
+            self.logger.debug("url: %s || response: %s", auth_url, jresp)
+            return jresp
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
                     url=auth_url,
@@ -195,7 +196,6 @@ class KeystoneApi(AbstractApi):
         headers = {'X-Auth-Token': project_token}
         try:
             r = self._make_request(url, headers)
-            self.logger.debug("url: %s || response: %s", url, json.dumps(r['projects']))
             return r['projects']
 
         except Exception as e:
