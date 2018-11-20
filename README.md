@@ -71,7 +71,7 @@ For those whom it may concern, the following is a list of GPG public key
 fingerprints known to correspond to our developers at the time of writing (Nov
 20 2018):
 
-* [Christine Chen](ihttps://api.github.com/users/ChristineTChen/gpg_keys)
+* [Christine Chen](https://api.github.com/users/ChristineTChen/gpg_keys)
   * `57CE 2495 EA48 D456 B9C4  BA4F 66E8 2239 9141 D9D3`
   * `36C0 82E7 38C7 B4A1 E169  11C0 D633 59C4 875A 1A9A`
 * [Dave Coleman](https://api.github.com/users/dcoleman17/gpg_keys)
