@@ -80,28 +80,27 @@ def test_project_name_none(*args):
     assert 'server-1' not in check.server_details_by_id
 
 
-def get_server_details_response(url, header, params=None, timeout=None):
+def get_server_details_response(params, timeout=None):
     if 'marker' not in params:
         return common.MOCK_NOVA_SERVERS_PAGINATED
     return common.EMPTY_NOVA_SERVERS
 
 
-# @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
-#             side_effect=get_server_details_response)
-# @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
-#             return_value=None, autospec=True)
-# def test_get_paginated_server(*args):
-#     """
-#     Ensure the server cache is updated while using pagination
-#     """
-#
-#     check = OpenStackControllerCheck("test", {
-#         'keystone_server_url': 'http://10.0.2.15:5000',
-#         'ssl_verify': False,
-#         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
-#         'paginated_server_limit': 1
-#     }, {}, instances=common.MOCK_CONFIG)
-#
-#     check.get_all_servers(None, "test_instance")
-#     assert len(check.server_details_by_id) == 1
-#     assert 'server-1' in check.server_details_by_id
+@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
+            side_effect=get_server_details_response)
+@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
+            return_value="proj_name")
+def test_get_paginated_server(*args):
+    """
+    Ensure the server cache is updated while using pagination
+    """
+
+    check = OpenStackControllerCheck("test", {
+        'keystone_server_url': 'http://10.0.2.15:5000',
+        'ssl_verify': False,
+        'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
+        'paginated_server_limit': 1
+    }, {}, instances=common.MOCK_CONFIG)
+    check.get_all_servers(None, "test_instance")
+    assert len(check.server_details_by_id) == 1
+    assert 'server-1' in check.server_details_by_id
