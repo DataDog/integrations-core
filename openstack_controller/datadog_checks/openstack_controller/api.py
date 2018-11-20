@@ -29,10 +29,10 @@ class AbstractApi(object):
         self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, headers, params)
 
         # Checking if request is in cache
-        cache_key = "|".join([url, headers, params, timeout])
+        cache_key = "|".join([url, json.dump(headers), json.dump(params), timeout])
         if cache_key in self.cache:
             self.logger.debug("Request found in cache. cache key %s", cache_key)
-            return self.cache.get('cache_key')
+            return self.cache.get(cache_key)
 
         resp = {}
         try:
