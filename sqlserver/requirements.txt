@@ -6,7 +6,7 @@
 #
 adodbapi==2.6.0.7 ; sys_platform == "win32" \
     --hash=sha256:7aa5f79136a757cbeac8ea00f554e541fbd59c7f6be87443127bf0319c4bb0a3
-pyodbc==4.0.13 ; sys_platform == "win32" \
+pyodbc==4.0.13 \
     --hash=sha256:05da16d4f6464498d78a4618db4d888a8528f0a03a9b1a17d62a2d0e84c424a4 \
     --hash=sha256:174580250fb76d75b214f1d47c0a9bdc7196f421ba44ca62226698e0ccd72fa9 \
     --hash=sha256:26b719271c8676578d5732f517ef56438669f90fbb6a33f16b0825b8311156af \
