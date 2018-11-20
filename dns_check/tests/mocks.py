@@ -16,7 +16,7 @@ class MockDNSAnswer:
                 items = []
                 for address in addresses:
                     items.append(MockDNSAnswer.MockItem(address))
-                    self.items = items
+                self.items = items
             else:
                 self.items = [MockDNSAnswer.MockItem(address)]
 

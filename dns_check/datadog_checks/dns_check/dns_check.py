@@ -115,28 +115,22 @@ class DNSCheck(NetworkCheck):
         number_of_results = len(answer.rrset.items)
 
         assert(len(ips) == number_of_results)
-        if number_of_results > 1:
-            result_ips = []
-            for rip in answer.rrset.items:
-                result = rip.to_text().lower()
-                if result.endswith('.'):
-                    result = result[:-1]
-                result_ips.append(result)
-
-            for ip in ips:
-                assert(ip in result_ips)
-        else:
-            result = answer.rrset.items[0].to_text()
+        result_ips = []
+        for rip in answer.rrset.items:
+            result = rip.to_text().lower()
             if result.endswith('.'):
                 result = result[:-1]
-            assert(result == resolves_as)
+            result_ips.append(result)
+
+        for ip in ips:
+            assert(ip in result_ips)
 
     def _get_tags(self, instance):
         hostname = instance.get('hostname')
         instance_name = instance.get('name', hostname)
         record_type = instance.get('record_type', 'A')
         custom_tags = instance.get('tags', [])
-        resolved_as = instance.get('resolves_as', None)
+        resolved_as = instance.get('resolves_as')
         tags = []
 
         try:
