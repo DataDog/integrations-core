@@ -11,7 +11,7 @@ from .exceptions import (InstancePowerOffFailure, AuthenticationNeeded, Keystone
 UNSCOPED_AUTH = 'unscoped'
 
 
-class AbstractApi:
+class AbstractApi(object):
     DEFAULT_API_REQUEST_TIMEOUT = 10  # seconds
 
     def __init__(self, logger, ssl_verify, proxy_config):

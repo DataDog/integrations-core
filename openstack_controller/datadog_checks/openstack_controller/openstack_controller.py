@@ -770,7 +770,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         instance_name = get_instance_name(instance)
         tags = instance.get('tags', [])
-        hypervisor_name = self.check.hypervisor_name_cache.get(instance_name)
+        hypervisor_name = self.hypervisor_name_cache.get(instance_name)
         if hypervisor_name:
             tags.extend("hypervisor:{}".format(hypervisor_name))
 
