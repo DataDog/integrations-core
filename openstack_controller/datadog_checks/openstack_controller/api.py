@@ -195,7 +195,7 @@ class KeystoneApi(AbstractApi):
         headers = {'X-Auth-Token': project_token}
         try:
             r = self._make_request(url, headers)
-            self.logger.debug("url: %s || response: %s", url, str(r['projects']))
+            self.logger.debug("url: %s || response: %s", url, json.dumps(r['projects']))
             return r['projects']
 
         except Exception as e:
