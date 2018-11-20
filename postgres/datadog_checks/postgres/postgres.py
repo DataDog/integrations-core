@@ -96,21 +96,23 @@ class PostgreSql(AgentCheck):
     LOCK_METRICS = {
         'descriptors': [
             ('mode', 'lock_mode'),
+            ('datname', 'db'),
             ('relname', 'table'),
         ],
         'metrics': {
             'lock_count': ('postgresql.locks', GAUGE),
-            'ungranted_locks': ('postgresql.ungranted_locks'),
         },
         'query': """
 SELECT mode,
+       pd.datname,
        pc.relname,
        count(*) AS %s
   FROM pg_locks l
+  JOIN pg_database pd ON (l.database = pd.oid)
   JOIN pg_class pc ON (l.relation = pc.oid)
  WHERE l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg_%%'
- GROUP BY pc.relname, mode""",
+ GROUP BY pd.datname, pc.relname, mode""",
         'relation': False,
     }
 
