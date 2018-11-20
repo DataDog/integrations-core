@@ -347,9 +347,10 @@ class AgentCheck(object):
 
         return normalized_tags
 
-    def warning(self, warning_message):
+    def warning(self, warning_message, log=True):
         warning_message = str(warning_message)
-        self.log.warning(warning_message)
+        if log:
+            self.log.warning(warning_message)
         self.warnings.append(warning_message)
 
     def get_warnings(self):
