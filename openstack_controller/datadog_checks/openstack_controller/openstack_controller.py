@@ -405,8 +405,8 @@ class OpenStackControllerCheck(AgentCheck):
                 continue
 
             # Update our cached list of servers
-            if (new_server['server_id'] not in self.server_details_by_id \
-                and new_server['state'] in DIAGNOSTICABLE_STATES):
+            if (new_server['server_id'] not in self.server_details_by_id and
+                    new_server['state'] in DIAGNOSTICABLE_STATES):
                 self.log.debug("Adding server to cache: %s", new_server)
                 # The project may not exist if the server isn't in an active state
                 # Query for the project name here to avoid 404s

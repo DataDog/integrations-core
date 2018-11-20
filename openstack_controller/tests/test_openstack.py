@@ -51,7 +51,7 @@ def test_cache_between_runs(*args):
     # Start off with a list of servers
     check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers("test_instance")
+    check.get_all_servers(None, "test_instance")
 
     cached_servers = check.server_details_by_id
     assert 'server-1' not in cached_servers
@@ -75,7 +75,7 @@ def test_project_name_none(*args):
     # Start off with a list of servers
     check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers("test_instance")
+    check.get_all_servers(None, "test_instance")
     assert 'server_newly_added' in check.server_details_by_id
     assert 'server-1' not in check.server_details_by_id
 
