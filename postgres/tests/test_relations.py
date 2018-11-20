@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 
 from datadog_checks.postgres import PostgreSql
@@ -46,7 +45,8 @@ IDX_METRICS = [
 
 
 @pytest.mark.integration
-def test_relations_metrics(aggregator, postgres_standalone, pg_instance):
+@pytest.mark.usefixtures('dd_environment')
+def test_relations_metrics(aggregator, pg_instance):
     pg_instance['relations'] = ['persons']
 
     posgres_check = PostgreSql('postgres', {}, {})
@@ -66,7 +66,8 @@ def test_relations_metrics(aggregator, postgres_standalone, pg_instance):
 
 
 @pytest.mark.integration
-def test_index_metrics(aggregator, postgres_standalone, pg_instance):
+@pytest.mark.usefixtures('dd_environment')
+def test_index_metrics(aggregator, pg_instance):
     pg_instance['relations'] = ['breed']
     pg_instance['dbname'] = 'dogs'
 

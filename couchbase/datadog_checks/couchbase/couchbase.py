@@ -392,13 +392,14 @@ class Couchbase(AgentCheck):
 
         self.log.debug('Fetching Couchbase stats at url: {}'.format(url))
 
+        ssl_verify = instance.get('ssl_verify', True)
         timeout = float(instance.get('timeout', DEFAULT_TIMEOUT))
 
         auth = None
         if 'user' in instance and 'password' in instance:
             auth = (instance['user'], instance['password'])
 
-        r = requests.get(url, auth=auth, headers=headers(self.agentConfig), timeout=timeout)
+        r = requests.get(url, auth=auth, verify=ssl_verify, headers=headers(self.agentConfig), timeout=timeout)
         r.raise_for_status()
         return r.json()
 

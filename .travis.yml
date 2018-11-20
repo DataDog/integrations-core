@@ -43,17 +43,19 @@ jobs:
   include:
     - stage: test_changed
       script:
-        - ddev dep verify
-        - ddev manifest verify --include-extras
-        - ddev metadata verify
+        - ddev validate dep
+        - ddev validate manifest --include-extras
+        - ddev validate metadata
+        - ddev validate service-checks
         - ddev test --cov
         - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base PYTHON3=true
       script:
-        - ddev dep verify
-        - ddev manifest verify --include-extras
-        - ddev metadata verify
+        - ddev validate dep
+        - ddev validate manifest --include-extras
+        - ddev validate metadata
+        - ddev validate service-checks
         - travis_retry ddev test --cov ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
@@ -61,7 +63,7 @@ jobs:
     - stage: test
       env: CHECK=active_directory
     - stage: test
-      env: CHECK=activemq_xml
+      env: CHECK=activemq_xml PYTHON3=true
     - stage: test
       env: CHECK=agent_metrics
     - stage: test
@@ -69,7 +71,7 @@ jobs:
     - stage: test
       env: CHECK=aspdotnet
     - stage: test
-      env: CHECK=btrfs
+      env: CHECK=btrfs PYTHON3=true
     - stage: test
       env: CHECK=cacti
     - stage: test
@@ -189,7 +191,7 @@ jobs:
     - stage: test
       env: CHECK=php_fpm PYTHON3=true
     - stage: test
-      env: CHECK=postgres
+      env: CHECK=postgres PYTHON3=true
     - stage: test
       env: CHECK=postfix
     - stage: test

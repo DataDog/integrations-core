@@ -1,14 +1,14 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 
 from datadog_checks.postgres import PostgreSql
 
 
 @pytest.mark.integration
-def test_custom_metrics(aggregator, postgres_standalone, pg_instance):
+@pytest.mark.usefixtures('dd_environment')
+def test_custom_metrics(aggregator, pg_instance):
     pg_instance.update({
         'relations': ['persons'],
         'custom_metrics': [{
@@ -27,7 +27,8 @@ def test_custom_metrics(aggregator, postgres_standalone, pg_instance):
 
 
 @pytest.mark.integration
-def test_custom_queries(aggregator, postgres_standalone, pg_instance):
+@pytest.mark.usefixtures('dd_environment')
+def test_custom_queries(aggregator, pg_instance):
     pg_instance.update({
         'custom_queries': [
             {

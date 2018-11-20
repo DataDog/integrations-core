@@ -12,7 +12,7 @@ instances:
     namespace: "service"
 
   ## @param metrics - list of strings - required
-  ## List of metrics to be fetched from the prometheus endpoint, if there's a 
+  ## List of metrics to be fetched from the prometheus endpoint, if there's a
   ## value it'll be renamed. This list should contain at least one metric
   #
     metrics:
@@ -31,7 +31,7 @@ instances:
   #
   #  health_service_check: true
 
-  ## @param label_to_hostname - string - optional  
+  ## @param label_to_hostname - string - optional
   ## Override the hostname with the value of one label.
   #
   #  label_to_hostname: node
@@ -46,7 +46,7 @@ instances:
   #        - <EXTRA_LABEL_1>
   #        - <EXTRA_LABEL_2>
 
-  ## @param labels_mapper - list of key:value elements - optional 
+  ## @param labels_mapper - list of key:value elements - optional
   ## The label mapper allows you to rename labels.
   #
   #  labels_mapper:
@@ -60,9 +60,9 @@ instances:
   #  type_overrides:
   #    <METRIC_NAME>: <METRIC_TYPE>
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
@@ -91,7 +91,7 @@ instances:
   #  prometheus_timeout: 10
 
   ## @param ssl_cert - string - optional
-  ## If your prometheus endpoint is secured, enter the path to the certificate and 
+  ## If your prometheus endpoint is secured, enter the path to the certificate and
   ## you should specify the private key in ssl_private_key parameter
   ## or it can be the path to a file containing both the certificate & the private key
   #
@@ -100,10 +100,17 @@ instances:
   ## @param ssl_private_key - string - optional
   ## Needed if the certificate linked in ssl_cert does not include the private key.
   ## Note: The private key to your local certificate must be unencrypted.
-  # 
+  #
   #  ssl_private_key: "<KEY_PATH>"
 
-  ## @param ssl_ca_cert - string - optional 
+  ## @param ssl_ca_cert - string - optional
   ## The path to the trusted CA used for generating custom certificates.
   #
   #  ssl_ca_cert: "<CA_CERT_PATH>"
+
+  ## @param extra_headers - list of key:value elements - optional
+  ## A list of additional HTTP headers to send in queries to the openmetrics endpoint.
+  ## Can be combined with autodiscovery template variables. Eg: "Authorization: Bearer %%env_TOKEN%%".
+  #
+  #  extra_headers:
+  #    <HEADER_NAME>: <HEADER_VALUE>

@@ -84,12 +84,22 @@ def test_check(aggregator, check, openldap_server, instance):
 def test_check_ssl(aggregator, check, openldap_server, instance_ssl):
     tags = ["url:{}".format(instance_ssl["url"]), "test:integration"]
     # Should fail certificate verification
-    with pytest.raises(ldap3.core.exceptions.LDAPSocketOpenError):
+    with pytest.raises(ldap3.core.exceptions.LDAPExceptionError):
         check.check(instance_ssl)
+        aggregator.assert_service_check("openldap.can_connect", check.CRITICAL, tags=tags)
     instance_ssl["ssl_verify"] = False
     # Should work now
     check.check(instance_ssl)
     aggregator.assert_service_check("openldap.can_connect", check.OK, tags=tags)
+
+
+def test_check_connection_failure(aggregator, check, openldap_server, instance):
+    instance["url"] = "bad_url"
+    tags = ["url:{}".format(instance["url"]), "test:integration"]
+    # Should fail certificate verification
+    with pytest.raises(ldap3.core.exceptions.LDAPExceptionError):
+        check.check(instance)
+        aggregator.assert_service_check("openldap.can_connect", check.CRITICAL, tags=tags)
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')

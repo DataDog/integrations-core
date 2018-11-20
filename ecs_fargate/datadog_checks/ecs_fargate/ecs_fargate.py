@@ -6,6 +6,17 @@ from six import iteritems
 
 from datadog_checks.checks import AgentCheck
 
+
+try:
+    from tagger import get_tags
+except ImportError:
+    import logging
+    log = logging.getLogger(__name__)
+    log.warning('This check is only supported on Agent 6')
+
+    def get_tags(name, card):
+        return []
+
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
 API_ENDPOINT = 'http://169.254.170.2/v2'
@@ -15,11 +26,6 @@ DEFAULT_TIMEOUT = 5
 
 # Default value is maxed out for some cgroup metrics
 CGROUP_NO_VALUE = 0x7ffffffffffff000
-
-# Do not collect these labels are we already have the info as tags
-LABEL_BLACKLIST = ['com.amazonaws.ecs.cluster', 'com.amazonaws.ecs.container-name', 'com.amazonaws.ecs.task-arn',
-                   'com.amazonaws.ecs.task-definition-family', 'com.amazonaws.ecs.task-definition-version',
-                   'com.datadoghq.ad.check_names', 'com.datadoghq.ad.init_configs', 'com.datadoghq.ad.instances']
 
 # Metrics constants
 MEMORY_GAUGE_METRICS = ['cache', 'mapped_file', 'rss', 'hierarchical_memory_limit', 'active_anon',
@@ -73,27 +79,22 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg)
             return
 
-        common_tags = [
-            'ecs_cluster:' + metadata['Cluster'],
-            'ecs_task_family:' + metadata['Family'],
-            'ecs_task_version:' + metadata['Revision']
-        ]
-        common_tags.extend(custom_tags)
-        label_whitelist = instance.get('label_whitelist', [])
-
         container_tags = {}
         for container in metadata['Containers']:
             c_id = container['DockerId']
-            container_tags[c_id] = []
-            container_tags[c_id].extend(common_tags)
-            container_tags[c_id].append('docker_name:' + container['DockerName'])
-            container_tags[c_id].append('docker_image:' + container['Image'])
-            image_split = container['Image'].split(':')
-            container_tags[c_id].append('image_name:' + ':'.join(image_split[:-1]))
-            container_tags[c_id].append('image_tag:' + image_split[-1])
-            for label, value in container["Labels"].iteritems():
-                if label in label_whitelist or label not in LABEL_BLACKLIST:
-                    container_tags[c_id].append(label + ':' + value)
+            tagger_tags = get_tags('docker://%s' % c_id, True)
+
+            # Compatibility with previous versions of the check
+            compat_tags = []
+            for tag in tagger_tags:
+                if tag.startswith(("task_family:", "task_version:")):
+                    compat_tags.append("ecs_" + tag)
+                elif tag.startswith("cluster_name:"):
+                    compat_tags.append(tag.replace("cluster_name:", "ecs_cluster:"))
+                elif tag.startswith("container_name:"):
+                    compat_tags.append(tag.replace("container_name:", "docker_name:"))
+
+            container_tags[c_id] = tagger_tags + compat_tags + custom_tags
 
             if container.get('Limits', {}).get('CPU', 0) > 0:
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])

@@ -8,11 +8,11 @@ from collections import OrderedDict
 import click
 from six import string_types
 
-from .utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
-from ..constants import get_root
-from ..utils import parse_version_parts
-from ...compat import JSONDecodeError
-from ...utils import file_exists, read_file
+from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...constants import get_root
+from ...utils import parse_version_parts
+from ....compat import JSONDecodeError
+from ....utils import file_exists, read_file
 
 REQUIRED_ATTRIBUTES = {
     'agent_version',
@@ -25,21 +25,13 @@ REQUIRED_ATTRIBUTES = {
 }
 
 
-@click.group(
+@click.command(
+    'service-checks',
     context_settings=CONTEXT_SETTINGS,
-    short_help='Manage service checks files'
+    short_help='Validate `service_checks.json` files'
 )
 def service_checks():
-    pass
-
-
-@service_checks.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate all `service_checks.json` files'
-)
-def verify():
     """Validate all `service_checks.json` files."""
-
     root = get_root()
     echo_info("Validating all service_checks.json files...")
     failed_checks = 0
