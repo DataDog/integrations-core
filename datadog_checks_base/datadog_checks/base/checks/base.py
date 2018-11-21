@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
+from os.path import basename
 import logging
 import re
 import json
@@ -354,7 +355,7 @@ class AgentCheck(object):
         lineno = frame.f_lineno
         filename = frame.f_code.co_filename
         # only log the last part of the filename, not the full path
-        filename = filename.split('/')[-1]
+        filename = basename(filename)
 
         self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
         self.warnings.append(warning_message)
