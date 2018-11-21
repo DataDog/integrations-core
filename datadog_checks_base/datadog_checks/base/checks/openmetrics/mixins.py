@@ -300,6 +300,12 @@ class OpenMetricsScraperMixin(object):
         if metric.name in scraper_config['label_joins']:
             matching_label = scraper_config['label_joins'][metric.name]['label_to_match']
             for sample in metric.samples:
+                # metadata-only metrics that are used for label joins are always equal to 1
+                # this is required for metrics where all combinations of a state are sent
+                # but only the active one is set to 1 (others are set to 0)
+                # example: kube_pod_status_phase in kube-state-metrics
+                if sample[self.SAMPLE_VALUE] != 1:
+                    continue
                 labels_list = []
                 matching_value = None
                 for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
