@@ -71,6 +71,12 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.network_plugin.latency.sum',
     'kubernetes.kubelet.network_plugin.latency.count',
     'kubernetes.kubelet.network_plugin.latency.quantile',
+    'kubernetes.kubelet.volume.stats.available_bytes',
+    'kubernetes.kubelet.volume.stats.capacity_bytes',
+    'kubernetes.kubelet.volume.stats.used_bytes',
+    'kubernetes.kubelet.volume.stats.inodes',
+    'kubernetes.kubelet.volume.stats.inodes_free',
+    'kubernetes.kubelet.volume.stats.inodes_used',
 ]
 
 
