@@ -73,7 +73,7 @@ jobs:
     - stage: test
       env: CHECK=btrfs PYTHON3=true
     - stage: test
-      env: CHECK=cacti
+      env: CHECK=cacti PYTHON3=true
     - stage: test
       env: CHECK=cassandra_nodetool
     - stage: test
