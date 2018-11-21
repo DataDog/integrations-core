@@ -9,6 +9,7 @@ import json
 import copy
 import traceback
 import unicodedata
+import inspect
 
 from six import iteritems, text_type
 
