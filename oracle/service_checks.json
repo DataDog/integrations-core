@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "6.0.0",
-        "integration": "Oracle",
+        "integration": "oracle database",
         "check": "oracle.can_connect",
         "statuses": ["ok", "critical"],
         "groups": ["server"],
