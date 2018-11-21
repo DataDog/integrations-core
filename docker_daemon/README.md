@@ -144,19 +144,18 @@ The Docker integration produces the following events:
 * Update
 
 ### Service Checks
-**docker.service_up**:
 
+**docker.service_up**:  
 Returns `CRITICAL` if the Agent is unable to collect the list of containers from the Docker daemon.
 Returns `OK` otherwise.
 
-**docker.container_health**:
-
+**docker.container_health**:  
 This Service Check is only available for Agent v5. It Returns `CRITICAL` if a container is unhealthy, `UNKNOWN` if the health is unknown, `OK` otherwise.
 
-**docker.exit**:
+**docker.exit**:  
+Returns `CRITICAL` if a container exited with a non-zero exit code, otherwise returns`OK`.
 
-Returns `CRITICAL` if a container exited with a non-zero exit code.
-Returns `OK` otherwise.
+**Note**: To use `docker.exit`, add `collect_exit_code: true` in your [Docker YAML file][31] and restart the Agent.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][17].
@@ -211,3 +210,4 @@ We've also written several other in-depth blog posts to help you get the most ou
 [28]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/integrations-docker-dockerps.png
 [29]: https://hub.docker.com/r/datadog/docker-dd-agent/
 [30]: https://hub.docker.com/r/datadog/agent/
+[31]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L124
