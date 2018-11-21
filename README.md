@@ -68,8 +68,8 @@ and [knowledge base][12]. You can also visit our
 ## GPG public keys
 
 For those whom it may concern, the following is a list of GPG public key
-fingerprints known to correspond to our developers at the time of writing (Nov
-20 2018):
+fingerprints known to correspond to developers who, at the time of writing (Nov
+20 2018), can trigger a build by signing a commit:
 
 * [Christine Chen](https://api.github.com/users/ChristineTChen/gpg_keys)
   * `57CE 2495 EA48 D456 B9C4  BA4F 66E8 2239 9141 D9D3`
