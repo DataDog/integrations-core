@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "5.2.0",
-        "integration":"windows_service",
+        "integration":"windows service",
         "check": "windows_service.state",
         "statuses": ["ok", "warning", "critical", "unknown"],
         "groups": ["host", "service"],
