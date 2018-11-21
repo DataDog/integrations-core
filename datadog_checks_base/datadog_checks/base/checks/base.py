@@ -347,10 +347,16 @@ class AgentCheck(object):
 
         return normalized_tags
 
-    def warning(self, warning_message, log=True):
+    def warning(self, warning_message):
         warning_message = str(warning_message)
-        if log:
-            self.log.warning(warning_message)
+
+        frame = inspect.currentframe().f_back
+        lineno = frame.f_lineno
+        filename = frame.f_code.co_filename
+        # only log the last part of the filename, not the full path
+        filename = filename.split('/')[-1]
+
+        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
         self.warnings.append(warning_message)
 
     def get_warnings(self):
