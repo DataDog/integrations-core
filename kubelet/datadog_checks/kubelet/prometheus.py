@@ -391,19 +391,19 @@ class CadvisorPrometheusScraperMixin(object):
 
     def container_cpu_system_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.system.total'
-        self._process_container_metric('gauge', metric_name, metric, scraper_config)
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
 
     def container_cpu_user_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.user.total'
-        self._process_container_metric('gauge', metric_name, metric, scraper_config)
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
 
     def container_cpu_cfs_throttled_periods_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.cfs.throttled.periods'
-        self._process_container_metric('gauge', metric_name, metric, scraper_config)
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
 
     def container_cpu_cfs_throttled_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.cfs.throttled.seconds'
-        self._process_container_metric('gauge', metric_name, metric, scraper_config)
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
 
     def container_fs_reads_bytes_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.io.read_bytes'
