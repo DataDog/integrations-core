@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 3.5.0 / 2018-11-21
+
+* [Added] Handle unicode characters in vSphere object names. See [#2596](https://github.com/DataDog/integrations-core/pull/2596).
+
 ## 3.4.0 / 2018-10-31
 
 * [Added] Add option to use guest hostname instead of VM name. See [#2479](https://github.com/DataDog/integrations-core/pull/2479).
