@@ -1,16 +1,18 @@
-# stdlib
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import time
-import urllib
-
-# 3p
-import pymongo
-
-# project
-from datadog_checks.checks import AgentCheck
-from urlparse import urlsplit
-from datadog_checks.config import _is_affirmative
 from distutils.version import LooseVersion
+
+import pymongo
+from six import PY3, iteritems, itervalues
+from six.moves.urllib.parse import unquote_plus, urlsplit
+
+from datadog_checks.base import AgentCheck, is_affirmative
+
+if PY3:
+    long = int
 
 DEFAULT_TIMEOUT = 30
 GAUGE = AgentCheck.gauge
@@ -302,8 +304,8 @@ class MongoDb(AgentCheck):
         "wiredTiger.cache.maximum bytes configured": GAUGE,
         "wiredTiger.cache.maximum page size at eviction": GAUGE,
         "wiredTiger.cache.modified pages evicted": GAUGE,
-        "wiredTiger.cache.pages read into cache": GAUGE, # noqa
-        "wiredTiger.cache.pages written from cache": GAUGE, # noqa
+        "wiredTiger.cache.pages read into cache": GAUGE,  # noqa
+        "wiredTiger.cache.pages written from cache": GAUGE,  # noqa
         "wiredTiger.cache.pages currently held in the cache": (GAUGE, "wiredTiger.cache.pages_currently_held_in_cache"),  # noqa
         "wiredTiger.cache.pages evicted because they exceeded the in-memory maximum": (RATE, "wiredTiger.cache.pages_evicted_exceeding_the_in-memory_maximum"),  # noqa
         "wiredTiger.cache.pages evicted by application threads": RATE,
@@ -416,11 +418,12 @@ class MongoDb(AgentCheck):
         self.metrics_to_collect_by_instance = {}
 
         self.collection_metrics_names = []
-        for (key, value) in self.COLLECTION_METRICS.iteritems():
+        for key, value in iteritems(self.COLLECTION_METRICS):
             self.collection_metrics_names.append(key.split('.')[1])
 
-    def get_library_versions(self):
-        return {"pymongo": pymongo.version}
+    @classmethod
+    def get_library_versions(cls):
+        return {'pymongo': pymongo.version}
 
     def get_state_description(self, state):
         if state in self.REPLSET_MEMBER_STATES:
@@ -434,7 +437,7 @@ class MongoDb(AgentCheck):
         else:
             return 'UNKNOWN'
 
-    def _report_replica_set_state(self, state, clean_server_name, replset_name, agentConfig):
+    def _report_replica_set_state(self, state, clean_server_name, replset_name):
         """
         Report the member's replica set state
         * Submit a service check.
@@ -443,9 +446,9 @@ class MongoDb(AgentCheck):
         last_state = self._last_state_by_server.get(clean_server_name, -1)
         self._last_state_by_server[clean_server_name] = state
         if last_state != state and last_state != -1:
-            return self.create_event(last_state, state, clean_server_name, replset_name, agentConfig)
+            return self.create_event(last_state, state, clean_server_name, replset_name)
 
-    def hostname_for_event(self, clean_server_name, agentConfig):
+    def hostname_for_event(self, clean_server_name):
         """Return a reasonable hostname for a replset membership event to mention."""
         uri = urlsplit(clean_server_name)
         if '@' in uri.netloc:
@@ -456,14 +459,14 @@ class MongoDb(AgentCheck):
             hostname = self.hostname
         return hostname
 
-    def create_event(self, last_state, state, clean_server_name, replset_name, agentConfig):
+    def create_event(self, last_state, state, clean_server_name, replset_name):
         """Create an event with a message describing the replication
             state of a mongo node"""
 
         status = self.get_state_description(state)
         short_status = self.get_state_name(state)
         last_short_status = self.get_state_name(last_state)
-        hostname = self.hostname_for_event(clean_server_name, agentConfig)
+        hostname = self.hostname_for_event(clean_server_name)
         msg_title = "%s is %s for %s" % (hostname, short_status, replset_name)
         msg = "MongoDB %s (%s) just reported as %s (%s) for %s; it was %s before."
         msg = msg % (hostname, clean_server_name, status, short_status, replset_name, last_short_status)
@@ -489,7 +492,7 @@ class MongoDb(AgentCheck):
         metrics_to_collect = {}
 
         # Defaut metrics
-        for default_metrics in self.DEFAULT_METRICS.itervalues():
+        for default_metrics in itervalues(self.DEFAULT_METRICS):
             metrics_to_collect.update(default_metrics)
 
         # Additional metrics metrics
@@ -552,7 +555,7 @@ class MongoDb(AgentCheck):
         metric_suffix = "ps" if submit_method == RATE else ""
 
         # Replace case-sensitive metric name characters
-        for pattern, repl in self.CASE_SENSITIVE_METRIC_NAME_SUFFIXES.iteritems():
+        for pattern, repl in iteritems(self.CASE_SENSITIVE_METRIC_NAME_SUFFIXES):
             metric_name = re.compile(pattern).sub(repl, metric_name)
 
         # Normalize, and wrap
@@ -602,7 +605,8 @@ class MongoDb(AgentCheck):
 
         return authenticated
 
-    def _parse_uri(self, server, sanitize_username=False):
+    @classmethod
+    def _parse_uri(cls, server, sanitize_username=False):
         """
         Parses a MongoDB-formatted URI (e.g. mongodb://user:pass@server/db) and returns parsed elements
         and a sanitized URI.
@@ -618,7 +622,7 @@ class MongoDb(AgentCheck):
         # Remove password (and optionally username) from sanitized server URI.
         # To ensure that the `replace` works well, we first need to url-decode the raw server string
         # since the password parsed by pymongo is url-decoded
-        decoded_server = urllib.unquote_plus(server)
+        decoded_server = unquote_plus(server)
         clean_server_name = decoded_server.replace(password, "*" * 5) if password else decoded_server
 
         if sanitize_username and username:
@@ -675,7 +679,7 @@ class MongoDb(AgentCheck):
             'ssl_ca_certs': instance.get('ssl_ca_certs', None)
         }
 
-        for key, param in ssl_params.items():
+        for key, param in list(iteritems(ssl_params)):
             if param is None:
                 del ssl_params[key]
 
@@ -781,16 +785,14 @@ class MongoDb(AgentCheck):
         status['fsyncLocked'] = 1 if ops.get('fsyncLock') else 0
 
         status['stats'] = db.command('dbstats')
-        dbstats = {}
-        dbstats[db_name] = {'stats': status['stats']}
+        dbstats = {db_name: {'stats': status['stats']}}
 
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
-        if _is_affirmative(instance.get('replica_check', True)):
+        if is_affirmative(instance.get('replica_check', True)):
             try:
                 data = {}
-                dbnames = []
 
                 replSet = admindb.command('replSetGetStatus')
                 if replSet:
@@ -864,7 +866,7 @@ class MongoDb(AgentCheck):
 
                     # Submit events
                     self._report_replica_set_state(
-                        data['state'], clean_server_name, replset_name, self.agentConfig
+                        data['state'], clean_server_name, replset_name
                     )
 
             except Exception as e:
@@ -916,7 +918,7 @@ class MongoDb(AgentCheck):
             submit_method, metric_name_alias = self._resolve_metric(metric_name, metrics_to_collect)
             submit_method(self, metric_name_alias, value, tags=tags)
 
-        for st, value in dbstats.iteritems():
+        for st, value in iteritems(dbstats):
             for metric_name in metrics_to_collect:
                 if not metric_name.startswith('stats.'):
                     continue
@@ -946,7 +948,7 @@ class MongoDb(AgentCheck):
                     self._resolve_metric(metric_name, metrics_to_collect)
                 submit_method(self, metric_name_alias, val, tags=metrics_tags)
 
-        if _is_affirmative(instance.get('collections_indexes_stats')):
+        if is_affirmative(instance.get('collections_indexes_stats')):
             mongo_version = cli.server_info().get('version', '0.0')
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
                 self._collect_indexes_stats(instance, db, tags)
@@ -958,7 +960,7 @@ class MongoDb(AgentCheck):
         if 'top' in additional_metrics:
             try:
                 dbtop = db.command('top')
-                for ns, ns_metrics in dbtop['totals'].iteritems():
+                for ns, ns_metrics in iteritems(dbtop['totals']):
                     if "." not in ns:
                         continue
 
@@ -1032,7 +1034,7 @@ class MongoDb(AgentCheck):
                     # encountered an error trying to access options.size for the oplog collection
                     self.log.warning(u"Failed to record `ReplicationInfo` metrics.")
 
-            for (m, value) in oplog_data.iteritems():
+            for m, value in iteritems(oplog_data):
                 submit_method, metric_name_alias = \
                     self._resolve_metric('oplog.%s' % m, metrics_to_collect)
                 submit_method(self, metric_name_alias, value, tags=tags)
@@ -1062,7 +1064,7 @@ class MongoDb(AgentCheck):
                         submit_method, metric_name_alias = \
                             self._resolve_metric('collection.%s' % m, self.COLLECTION_METRICS)
                         # loop through the indexes
-                        for (idx, val) in value.iteritems():
+                        for idx, val in iteritems(value):
                             # we tag the index
                             idx_tags = coll_tags + ["index:%s" % idx]
                             submit_method(self, metric_name_alias, val, tags=idx_tags)
