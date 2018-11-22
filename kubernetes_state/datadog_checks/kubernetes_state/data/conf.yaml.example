@@ -25,10 +25,6 @@ instances:
     # overriden by the value of the label, this can be deactivated (all metrics
     # will be attached to the host running KSM)
     # hostname_override: true
-    #
-    # Send (deprecated) pod.phase service checks (default true, will be turned off in future versions)
-    # We recommend using the corresponding gauges instead, which benefit from historical data unlike service checks
-    # send_pod_phase_service_checks: false
 
     # You can also specify here custom tags to be added to all metrics reported by this integration
     #  tags:
