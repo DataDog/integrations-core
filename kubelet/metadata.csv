@@ -1,4 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+kubernetes.containers.last_state.terminated,gauge,,,,The number of containers that were previously terminated,0,kubelet,k8s.containers.last_state.terminated
+kubernetes.containers.restarts,gauge,,,,The number of times the container has been restarted,1,kubelet,k8s.containers.restarts
+kubernetes.containers.state.running,gauge,,,,The number of currently running containers,0,kubelet,k8s.containers.state.running
+kubernetes.containers.state.terminated,gauge,,,,The number of currently terminated containers,0,kubelet,k8s.containers.state.terminated
+kubernetes.containers.state.waiting,gauge,,,,The number of currently waiting containers,0,kubelet,k8s.containers.state.waiting
 kubernetes.cpu.load.10s.avg,gauge,,,,Container cpu load average over the last 10 seconds,0,kubelet,k8s.cpu.load.10s
 kubernetes.cpu.system.total,rate,,core,,The number of cores used for system time,0,kubelet,k8s.cpu.system
 kubernetes.cpu.user.total,rate,,core,,The number of cores used for user time,0,kubelet,k8s.cpu.user
