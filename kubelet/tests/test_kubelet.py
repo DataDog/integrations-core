@@ -50,10 +50,15 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.memory.working_set',
     'kubernetes.memory.rss',
     'kubernetes.network.rx_bytes',
-    'kubernetes.network.tx_bytes'
+    'kubernetes.network.tx_bytes',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
+    'kubernetes.cpu.load.10s.avg',
+    'kubernetes.cpu.system.total',
+    'kubernetes.cpu.user.total',
+    'kubernetes.cpu.cfs.throttled.periods',
+    'kubernetes.cpu.cfs.throttled.seconds',
     'kubernetes.memory.usage_pct',
     'kubernetes.network.rx_dropped',
     'kubernetes.network.rx_errors',
@@ -267,7 +272,7 @@ def test_prometheus_filtering(monkeypatch, aggregator):
         mock_method.assert_called_once()
         metric = mock_method.call_args[0][0]
         assert len(metric.samples) == 12
-        for name, labels, value in metric.samples:
+        for name, labels, _ in metric.samples:
             assert name == "container_cpu_usage_seconds_total"
             assert labels["pod_name"] != ""
 
