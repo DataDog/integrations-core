@@ -11,6 +11,7 @@ PROJECTS = {u'projects': [{u'is_domain': False, u'description': u'Bootstrap proj
 
 
 def make_request_responses(url, header, params=None, timeout=None):
+    print(url)
     if url == "http://10.0.2.15:5000/v3/projects":
         return PROJECTS
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/limits":
@@ -6022,6 +6023,8 @@ SERIES = [
     }
 ]
 
+AUTH_PROJECTS_RESPONSE = [{u'is_domain': False, u'description': u'Keystone Identity Service', u'links': {u'self': u'http://172.29.236.101:5000/v3/projects/***************************4bfc1'}, u'enabled': True, u'domain_id': u'default', u'parent_id': u'default', u'id': u'***************************4bfc1', u'name': u'service'}]
+
 
 class MockHTTPResponse(object):
     def __init__(self, response_dict, headers):
@@ -6032,29 +6035,29 @@ class MockHTTPResponse(object):
         return self.response_dict
 
 
-# def test_check(aggregator):
-#     instance = common.MOCK_CONFIG["instances"][0]
-#     init_config = common.MOCK_CONFIG['init_config']
-#     check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
-#
-#     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
-#     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
-#
-#     with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
-#                     return_value=mock_response):
-#         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
-#                         return_value=PROJECTS_RESPONSE):
-#             with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
-#                             side_effect=make_request_responses):
-#                 check.check(common.MOCK_CONFIG['instances'][0])
-#                 for m in aggregator._metrics:
-#                     print(m)
-#                 for s in SERIES:
-#                     name = s.get('metric')
-#                     value = s.get('value')
-#                     tags = s.get('tags')
-#                     host = s.get('host')
-#                     aggregator.assert_metric(name, value=value, tags=tags, hostname=host)
-#
-#         # Assert coverage for this check on this instance
-#         aggregator.assert_all_metrics_covered()
+def test_check(aggregator):
+    instance = common.MOCK_CONFIG["instances"][0]
+    init_config = common.MOCK_CONFIG['init_config']
+    check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
+
+    mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
+    mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
+
+    with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
+                    return_value=mock_response):
+        with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
+                        return_value=AUTH_PROJECTS_RESPONSE):
+            with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+                            side_effect=make_request_responses):
+                check.check(common.MOCK_CONFIG['instances'][0])
+                for m in aggregator._metrics:
+                    print(m)
+                for s in SERIES:
+                    name = s.get('metric')
+                    value = s.get('value')
+                    tags = s.get('tags')
+                    host = s.get('host')
+                    aggregator.assert_metric(name, value=value, tags=tags, hostname=host)
+
+        # Assert coverage for this check on this instance
+        aggregator.assert_all_metrics_covered()
