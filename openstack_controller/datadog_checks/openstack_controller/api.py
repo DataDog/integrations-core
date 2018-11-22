@@ -152,7 +152,7 @@ class KeystoneApi(AbstractApi):
                 proxies=self.proxy_config,
             )
             resp.raise_for_status()
-            self.logger.debug("url: %s || response: %s", auth_url, resp)
+            self.logger.debug("url: %s || response: %s", auth_url, resp.json())
             return resp
 
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
