@@ -165,7 +165,7 @@ jobs:
     - stage: test
       env: CHECK=mongo PYTHON3=true
     - stage: test
-      env: CHECK=mysql
+      env: CHECK=mysql PYTHON3=true
     - stage: test
       env: CHECK=nagios
     - stage: test
