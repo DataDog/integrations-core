@@ -31,6 +31,20 @@ instances:
 
 **Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up -no matter what OS it's running on- to point to a vSphere appliance server. You will have to update your `<VCENTER_HOSTNAME>` accordingly.
 
+### Compatibility
+
+Starting with version 3.3.0 of the check, shipped in agent version 6.5.0/5.27.0, we introduced a new optional parameter `collection_level` to select which metrics to collect from vCenter, and deprecated the optional parameter `all_metrics`. Along with this change, the names of the metrics sent to Datadog by the integration have changed, with the addition of a suffix specifying the rollup type of the metric exposed by vCenter (`.avg`, `.sum`, etc.).
+
+By default, starting with version 3.3.0, the `collection_level` is set to 1 and the new metric names with the additional suffix are sent by the integration.
+The following scenarios are possible when using the vSphere integration:
+1. You never used the integration before, and you just install an agent newer than 6.5.0/5.27.0. Nothing specific in that case, you can just use the integration, configure the `collection_level` as you wish and view your metrics in Datadog.
+
+1. You used the integration with an agent older than 6.5.0/5.27.0, and upgraded to a newer version.
+    1. If your configuration specifically set the `all_metrics` parameter to either `true` or `false`, nothing changes for you, you will still see the same metrics in Datadog. You should then change your dashboards and monitors to use the new metric names and then switch to the new `collection_level` parameter.
+    1. If your configuration did not specify the `all_metrics` parameter, upon upgrade, the integration will default to the `collection_level` parameter set to 1 and send the metrics with the new name to Datadog. \
+    **Warning**: this will break your dashboard graphs and monitors scoped on the deprecated metrics, which will stop being sent.
+    To prevent this, you should explicitely set `all_metrics: false` in your configuration to continue reporting the same metrics, then change your dashboards and monitors to use the new metrics before switching back to using `collection_level`.
+
 #### Configuration Options
 
 * `ssl_verify` (Optional) - Set to false to disable SSL verification, when connecting to vCenter
