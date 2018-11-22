@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+# flake8: noqa
 import shutil
 
 # NOTE: Set one minute for any GPG subprocess to timeout in in-toto.  Should be
