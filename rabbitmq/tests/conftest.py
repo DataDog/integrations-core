@@ -49,6 +49,16 @@ def setup_rabbitmq():
         setup_vhosts(rabbitmq_admin_script)
         setup_more(rabbitmq_admin_script)
         setup_more_with_vhosts(rabbitmq_admin_script)
+
+        # Set cluster name
+        url = "http://{}:{}/api/cluster-name".format(HOST, PORT)
+        res = requests.put(
+            url,
+            data='{"name": "rabbitmqtest"}',
+            auth=("guest", "guest"),
+            headers={"Content-Type": "application/json"}
+        )
+        res.raise_for_status()
         yield
 
 

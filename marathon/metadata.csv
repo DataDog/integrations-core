@@ -1,7 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 marathon.apps,gauge,,,,Number of applications,0,marathon,apps
 marathon.deployments,gauge,,,,Number of running or pending deployments,0,marathon,deployments
-marathon.queue.size,gauge,,,,Number of apps waiting to be deployed,0,marathon,apps
 marathon.backoffFactor,gauge,,,,Backoff time multiplication factor for each consecutive failed task launch; tagged by app_id and version,0,marathon,backoff factor
 marathon.backoffSeconds,gauge,,second,,Task backoff period; tagged by app_id and version,0,marathon,backoff
 marathon.cpus,gauge,,,,Configured CPUs for each instance of a given application,0,marathon,cpus

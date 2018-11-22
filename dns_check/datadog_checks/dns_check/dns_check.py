@@ -65,11 +65,14 @@ class DNSCheck(NetworkCheck):
         timeout = float(instance.get('timeout', self.default_timeout))
         resolver.lifetime = timeout
         record_type = instance.get('record_type', 'A')
+        resolves_as = instance.get('resolves_as', None)
+        if resolves_as and record_type not in ['A', 'CNAME', 'MX']:
+            raise BadConfException('"resolves_as" can currently only support A, CNAME and MX records')
 
-        return hostname, timeout, nameserver, record_type, resolver
+        return hostname, timeout, nameserver, record_type, resolver, resolves_as
 
     def _check(self, instance):
-        hostname, timeout, nameserver, record_type, resolver = self._load_conf(instance)
+        hostname, timeout, nameserver, record_type, resolver, resolves_as = self._load_conf(instance)
 
         # Perform the DNS query, and report its duration as a gauge
         response_time = 0
@@ -87,6 +90,8 @@ class DNSCheck(NetworkCheck):
             else:
                 answer = resolver.query(hostname, rdtype=record_type)
                 assert(answer.rrset.items[0].to_text())
+                if resolves_as:
+                    self._check_answer(answer, resolves_as)
 
             response_time = time_func() - t0
 
@@ -105,16 +110,31 @@ class DNSCheck(NetworkCheck):
             self.log.debug('Resolved hostname: {0}'.format(hostname))
             return Status.UP, 'UP'
 
+    def _check_answer(self, answer, resolves_as):
+        ips = [x.strip().lower() for x in resolves_as.split(',')]
+        number_of_results = len(answer.rrset.items)
+
+        assert(len(ips) == number_of_results)
+        result_ips = []
+        for rip in answer.rrset.items:
+            result = rip.to_text().lower()
+            if result.endswith('.'):
+                result = result[:-1]
+            result_ips.append(result)
+
+        for ip in ips:
+            assert(ip in result_ips)
+
     def _get_tags(self, instance):
         hostname = instance.get('hostname')
         instance_name = instance.get('name', hostname)
         record_type = instance.get('record_type', 'A')
         custom_tags = instance.get('tags', [])
+        resolved_as = instance.get('resolves_as')
         tags = []
 
         try:
             nameserver = instance.get('nameserver') or dns.resolver.Resolver().nameservers[0]
-            tags.append('nameserver:{0}'.format(nameserver))
         except IndexError:
             self.log.error('No DNS server was found on this host.')
 
@@ -122,6 +142,9 @@ class DNSCheck(NetworkCheck):
                               'resolved_hostname:{0}'.format(hostname),
                               'instance:{0}'.format(instance_name),
                               'record_type:{0}'.format(record_type)]
+        if resolved_as:
+            tags.append('resolved_as:{0}'.format(resolved_as))
+
         return tags
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):

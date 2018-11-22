@@ -34,12 +34,16 @@ def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
 
     # Queue attributes, should be only one queue fetched
     for mname in metrics.Q_METRICS:
-        aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
-                                         mname, 'rabbitmq_queue:test1', count=1)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:test1', count=1)
     # Exchange attributes, should be only one exchange fetched
     for mname in metrics.E_METRICS:
-        aggregator.assert_metric_has_tag('rabbitmq.exchange.%s' %
-                                         mname, 'rabbitmq_exchange:test1', count=1)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test1', count=1)
+    # Overview attributes
+    for mname in metrics.OVERVIEW_METRICS_TOTALS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)
+    for mname in metrics.OVERVIEW_METRICS_MESSAGES:
+        # All messages metrics are not always present, so we assert with at_least=0
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', at_least=0)
 
     aggregator.assert_service_check('rabbitmq.aliveness',
                                     tags=['vhost:/', "tag1:1", "tag2"],
@@ -69,21 +73,22 @@ def test_regex(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
 
     # Exchange attributes
     for mname in metrics.E_METRICS:
-        aggregator.assert_metric_has_tag('rabbitmq.exchange.%s' %
-                                         mname, 'rabbitmq_exchange:test1', count=1)
-        aggregator.assert_metric_has_tag('rabbitmq.exchange.%s' %
-                                         mname, 'rabbitmq_exchange:test5', count=1)
-        aggregator.assert_metric_has_tag('rabbitmq.exchange.%s' %
-                                         mname, 'rabbitmq_exchange:tralala', count=0)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test1', count=1)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:test5', count=1)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange:tralala', count=0)
 
     # Queue attributes
     for mname in metrics.Q_METRICS:
-        aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
-                                         mname, 'rabbitmq_queue:test1', count=3)
-        aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
-                                         mname, 'rabbitmq_queue:test5', count=3)
-        aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
-                                         mname, 'rabbitmq_queue:tralala', count=0)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:test1', count=3)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:test5', count=3)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:tralala', count=0)
+
+    # Overview attributes
+    for mname in metrics.OVERVIEW_METRICS_TOTALS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)
+    for mname in metrics.OVERVIEW_METRICS_MESSAGES:
+        # All messages metrics are not always present, so we assert with at_least=0
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', at_least=0)
 
     aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:/'], status=RabbitMQ.OK)
     aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:myvhost'], status=RabbitMQ.OK)
@@ -105,14 +110,18 @@ def test_limit_vhosts(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
 
     for mname in metrics.Q_METRICS:
-        aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
-                                         mname, 'rabbitmq_queue:test1', count=3)
-        aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
-                                         mname, 'rabbitmq_queue:test5', count=3)
-        aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
-                                         mname, 'rabbitmq_queue:tralala', count=0)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:test1', count=3)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:test5', count=3)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue:tralala', count=0)
     for mname in metrics.E_METRICS:
-        aggregator.assert_metric('rabbitmq.exchange.%s' % mname, count=2)
+        aggregator.assert_metric(mname, count=2)
+
+    # Overview attributes
+    for mname in metrics.OVERVIEW_METRICS_TOTALS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)
+    for mname in metrics.OVERVIEW_METRICS_MESSAGES:
+        # All messages metrics are not always present, so we assert with at_least=0
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', at_least=0)
 
     # Service checks
     aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:/'], status=RabbitMQ.OK)
@@ -134,12 +143,17 @@ def test_family_tagging(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost'], value=0, count=1)
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
     for mname in metrics.E_METRICS:
-        aggregator.assert_metric_has_tag('rabbitmq.exchange.%s' %
-                                         mname, 'rabbitmq_exchange_family:test', count=2)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_exchange_family:test', count=2)
 
     for mname in metrics.Q_METRICS:
-        aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
-                                         mname, 'rabbitmq_queue_family:test', count=6)
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_queue_family:test', count=6)
+
+    # Overview attributes
+    for mname in metrics.OVERVIEW_METRICS_TOTALS:
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', count=1)
+    for mname in metrics.OVERVIEW_METRICS_MESSAGES:
+        # All messages metrics are not always present, so we assert with at_least=0
+        aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', at_least=0)
 
     aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
 

@@ -64,6 +64,10 @@ complete no-op for the test suite, please prepend the commit message with the
 string `[skip ci]` to skip the build and test and give that slot to someone else
 who does need it.
 
+If your commit is testing possible backward-incompatible changes to the base package
+or many integrations at once, you can preface a commit message with `[ci run all]` to
+test everything at once in separate runners, thus avoiding timeouts.
+
 ### Squash your commits
 
 Please rebase your changes on `master` and squash your commits whenever possible,

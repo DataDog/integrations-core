@@ -6,6 +6,17 @@ from six import iteritems
 
 from datadog_checks.checks import AgentCheck
 
+
+try:
+    from tagger import get_tags
+except ImportError:
+    import logging
+    log = logging.getLogger(__name__)
+    log.warning('This check is only supported on Agent 6')
+
+    def get_tags(name, card):
+        return []
+
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
 API_ENDPOINT = 'http://169.254.170.2/v2'
@@ -16,16 +27,15 @@ DEFAULT_TIMEOUT = 5
 # Default value is maxed out for some cgroup metrics
 CGROUP_NO_VALUE = 0x7ffffffffffff000
 
-# Do not collect these labels are we already have the info as tags
-LABEL_BLACKLIST = ["com.amazonaws.ecs.cluster", "com.amazonaws.ecs.container-name", "com.amazonaws.ecs.task-arn",
-                   "com.amazonaws.ecs.task-definition-family", "com.amazonaws.ecs.task-definition-version",
-                   "com.datadoghq.ad.check_names", "com.datadoghq.ad.init_configs", "com.datadoghq.ad.instances"]
-
 # Metrics constants
-MEMORY_GAUGE_METRICS = ['cache','mapped_file','rss','hierarchical_memory_limit','active_anon',
-                        'active_file','inactive_file','hierarchical_memsw_limit']
-MEMORY_RATE_METRICS = ['pgpgin', 'pgpgout', 'pgmajfault','pgfault']
-IO_METRICS = {'io_service_bytes_recursive':'ecs.fargate.io.bytes.', 'io_serviced_recursive':'ecs.fargate.io.ops.'}
+MEMORY_GAUGE_METRICS = ['cache', 'mapped_file', 'rss', 'hierarchical_memory_limit', 'active_anon',
+                        'active_file', 'inactive_file', 'hierarchical_memsw_limit']
+MEMORY_RATE_METRICS = ['pgpgin', 'pgpgout', 'pgmajfault', 'pgfault']
+IO_METRICS = {
+    'io_service_bytes_recursive': 'ecs.fargate.io.bytes.',
+    'io_serviced_recursive': 'ecs.fargate.io.ops.'
+}
+
 
 class FargateCheck(AgentCheck):
 
@@ -63,30 +73,28 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
             return
 
-        if not all(k in metadata for k in ["Cluster","Containers"]):
+        if not all(k in metadata for k in ['Cluster', 'Containers']):
             msg = 'Missing critical metadata in {} endpoint response'.format(metadata_endpoint)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg)
             return
 
-        common_tags = ['ecs_cluster:' + metadata['Cluster'], 'ecs_task_family:' + metadata['Family'],
-            'ecs_task_version:' + metadata['Revision']]
-        common_tags.extend(custom_tags)
-        label_whitelist = instance.get('label_whitelist', [])
-
         container_tags = {}
         for container in metadata['Containers']:
             c_id = container['DockerId']
-            container_tags[c_id] = []
-            container_tags[c_id].extend(common_tags)
-            container_tags[c_id].append('docker_name:' + container['DockerName'])
-            container_tags[c_id].append('docker_image:' + container['Image'])
-            image_split = container['Image'].split(':')
-            container_tags[c_id].append('image_name:' + ':'.join(image_split[:-1]))
-            container_tags[c_id].append('image_tag:' + image_split[-1])
-            for label, value in container["Labels"].iteritems():
-                if label in label_whitelist or label not in LABEL_BLACKLIST:
-                    container_tags[c_id].append(label + ':' + value)
+            tagger_tags = get_tags('docker://%s' % c_id, True)
+
+            # Compatibility with previous versions of the check
+            compat_tags = []
+            for tag in tagger_tags:
+                if tag.startswith(("task_family:", "task_version:")):
+                    compat_tags.append("ecs_" + tag)
+                elif tag.startswith("cluster_name:"):
+                    compat_tags.append(tag.replace("cluster_name:", "ecs_cluster:"))
+                elif tag.startswith("container_name:"):
+                    compat_tags.append(tag.replace("container_name:", "docker_name:"))
+
+            container_tags[c_id] = tagger_tags + compat_tags + custom_tags
 
             if container.get('Limits', {}).get('CPU', 0) > 0:
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
@@ -119,18 +127,47 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in stats.iteritems():
+            self.submit_perf_metrics(instance, container_tags, container_id, container_stats)
+
+        self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)
+
+    def submit_perf_metrics(self, instance, container_tags, container_id, container_stats):
+        try:
+            if container_stats is None:
+                self.log.debug("Empty stats for container {}".format(container_id))
+                return
+
             tags = container_tags[container_id]
 
             # CPU metrics
             cpu_stats = container_stats.get('cpu_stats', {})
+            prev_cpu_stats = container_stats.get('precpu_stats', {})
 
-            value = cpu_stats.get('system_cpu_usage')
-            if value is not None:
-                self.rate('ecs.fargate.cpu.system', value, tags)
+            value_system = cpu_stats.get('system_cpu_usage')
+            if value_system is not None:
+                self.rate('ecs.fargate.cpu.system', value_system, tags)
 
-            value = cpu_stats.get('cpu_usage', {}).get('total_usage')
-            if value is not None:
-                self.rate('ecs.fargate.cpu.user', value, tags)
+            value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
+            if value_total is not None:
+                self.rate('ecs.fargate.cpu.user', value_total, tags)
+
+            prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
+            prevalue_system = prev_cpu_stats.get('system_cpu_usage')
+
+            if prevalue_system is not None and prevalue_total is not None:
+                cpu_delta = float(value_total) - float(prevalue_total)
+                system_delta = float(value_system) - float(prevalue_system)
+            else:
+                cpu_delta = 0.0
+                system_delta = 0.0
+
+            active_cpus = float(cpu_stats.get('online_cpus', 0.0))
+
+            cpu_percent = 0.0
+            if system_delta > 0 and cpu_delta > 0 and active_cpus > 0:
+                cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
+                cpu_percent = round(cpu_percent, 2)
+                self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
 
             # Memory metrics
             memory_stats = container_stats.get('memory_stats', {})
@@ -167,4 +204,5 @@ class FargateCheck(AgentCheck):
                 self.rate(metric_name + 'read', read_counter, tags)
                 self.rate(metric_name + 'write', write_counter, tags)
 
-        self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)
+        except Exception as e:
+            self.warning("Cannot retrieve metrics for {}: {}".format(container_id, e))

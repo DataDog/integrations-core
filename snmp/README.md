@@ -13,7 +13,9 @@ The SNMP check is included in the [Datadog Agent][1] package, so you don't need 
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's an example of `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][11]. See the [sample snmp.d/conf.yaml][2] for all available configuration options:
+Here are examples of the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][11]. See the [sample snmp.d/conf.yaml][2] for all available configuration options.
+
+#### SNMP v1-v2 configuration
 
 ```
 init_config:
@@ -23,13 +25,17 @@ instances:
    - ip_address: localhost
      port: 161
      community_string: public
-  #  snmp_version: 1 # set to 1 if your devices use SNMP v1; no need to set otherwise, the default is 2
-     timeout: 1      # in seconds; default is 1
+  #  snmp_version: 2 # Only required for snmp v1, will default to 2
+     timeout: 1
      retries: 5
-  #  enforce_mib_constraints: false # set to false to NOT verify that returned values meet MIB constraints; default is true
+  #  enforce_mib_constraints: true # set to false to NOT verify that returned values
+  #                                # returned meet MIB constraints. Defaults to true
+
      metrics:
        - MIB: UDP-MIB
          symbol: udpInDatagrams
+       - MIB: TCP-MIB
+         symbol: tcpActiveOpens
        - OID: 1.3.6.1.2.1.6.5
          name: tcpPassiveOpens
        - MIB: IF-MIB
@@ -40,6 +46,38 @@ instances:
          metric_tags:
            - tag: interface
              column: ifDescr
+       - MIB: IP-MIB
+          table: ipSystemStatsTable
+          symbols:
+            - ipSystemStatsInReceives
+          metric_tags:
+            - tag: ipversion
+              index: 1
+```
+
+#### SNMP v3 configuration
+
+Note: See the [SNMP Library reference][12] to see all configuration options.
+
+```
+init_config:
+   - mibs_folder: /path/to/your/additional/mibs
+
+instances:
+   - ip_address: 192.168.34.10
+     port: 161
+     user: <USERNAME>
+     authKey: <PASSWORD>
+     privKey: <PRIVACY_TYPE_KEY>
+     authProtocol: <AUTHENTICATION_PROTOCOL>
+     privProtocol: <PRIVACY_TYPE>
+     timeout: 1 # second, by default
+     retries: 5
+     metrics:
+       - MIB: UDP-MIB
+         symbol: udpInDatagrams
+       - MIB: TCP-MIB
+         symbol: tcpActiveOpens
 ```
 
 List each SNMP device as a distinct instance, and for each instance, list any SNMP counters and gauges you like in the `metrics` option. There are a few ways to specify what metrics to collect.
@@ -139,7 +177,6 @@ Example using the `CISCO-TCP-MIB.my`:
  Ignored MIBs:
  Failed MIBs:
 
-
  #ls /opt/datadog-agent/pysnmp/custom_mibpy/
 CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
 
@@ -173,8 +210,9 @@ Returns CRITICAL if the Agent cannot collect SNMP metrics, otherwise OK.
 Need help? Contact [Datadog Support][5].
 
 ## Further Reading
+Additional helpful documentation, links, and articles:
 
-* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?  ][7]
+* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][7]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -187,3 +225,4 @@ Need help? Contact [Datadog Support][5].
 [9]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
 [10]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
 [11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[12]: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based

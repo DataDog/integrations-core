@@ -46,7 +46,7 @@ The TokuMX check is included in the [Datadog Agent][1] package, so you don't nee
         echo -e "\033[0;32mdatadog user - OK\033[0m" || \
         echo -e "\033[0;31mdatadog user - Missing\033[0m"
 
-For more details about creating and managing users in MongoDB, refer to [the MongoDB documentation][2].
+For more details about creating and managing users in MongoDB, see [the MongoDB documentation][2].
 
 #### Connect the Agent
 

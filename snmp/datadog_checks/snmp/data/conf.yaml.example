@@ -1,89 +1,169 @@
+## WARNING: This configuration files is for SNMP v1, v2 and v3 
+## Check carefully all variables depending of your SNMP version.
+## To learn more about SNMP v3 configuration check: 
+## http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
+
 init_config:
-#    #You can specify an additional folder for your custom mib files (python format)
-#    mibs_folder: /path/to/your/mibs/folder
-#    ignore_nonincreasing_oid: False
+
+## @param mibs_folder - string - required
+## Specify an additional folder for your custom mib files (python format).
+#
+#  mibs_folder: /path/to/your/mibs/folder
+
+## @param ignore_nonincreasing_oid - boolean - optional - default: false
+## 
+#  ignore_nonincreasing_oid: false
 
 instances:
+  
+  ## @param ip_address - string - required
+  ## For SNMP v1 & v2 enter localhost
+  ## For SNMP v3 enter 192.168.34.10 
+  #
+  - ip_address: localhost
 
-  # SNMP v1-v2 configuration
+  ## @param port - integer - required
+  ## Default SNMP port.
   #
-  # - ip_address: localhost
-  #   port: 161
-  #   community_string: public
-  #   snmp_version: 2 # Only required for snmp v1, will default to 2
-  #   timeout: 1 # second, by default
-  #   retries: 5
-  #   enforce_mib_constraints: true  # if set to false we will not check the values
-  #                                  # returned meet the MIB constraints. Defaults to True.
-  #   tags:
-  #     - optional_tag_1
-  #     - optional_tag_2
+    port: 161
+  
+  ## @param community_string - string - optional
+  ## Only useful for SNMP v1 & v2.
   #
-  #   # Specify metrics you want to monitor
-  #   metrics:
-  #     # You can specify metrics using MIBS (Counter and Gauge)
-  #     - MIB: UDP-MIB
-  #       symbol: udpInDatagrams
-  #     - MIB: TCP-MIB
-  #       symbol: tcpActiveOpens
-  #     # If it's just a scalar, you can specify by OID and name it
-  #     - OID: 1.3.6.1.2.1.6.5
-  #       name: tcpPassiveOpens
-  #     
-  #     # You can also specify a specific tag for these with the metric_tags field
-  #     - OID: 1.3.6.1.2.1.6.5
-  #       name: tcpPassiveOpens
-  #       metric_tags:
-  #         - TCP
+  #  community_string: public
+  
+  ## @param snmp_version - integer - optional - default: 2
+  ## If you are using SNMP v1 set snmp_version to 1 (required)
+  ## If you are using SNMP v3 set snmp_version to 3 (required)
   #
-  #     # This monitor auto-detects OID data types from the remote agent's response.
-  #     # If you're dealing with a buggy agent that returns incorrect data types for OIDs,
-  #     # You can force the data type with the 'forced_type' parameter.  Valid options for
-  #     # this parameter are 'gauge' and 'counter'.
-  #     # Example: When a F5 Networks load balancer is queried for this OID, it will return
-  #     # it as a Counter64 when it should be a gauge.  So, we force the data type to gauge:
-  #     - OID: 1.3.6.1.4.1.3375.2.1.1.2.1.8.0
-  #       name: F5_TotalCurrentConnections
-  #       forced_type: gauge
-  #
-  #     # You can also query a table and specify
-  #     #   - which columns to report as value (symbols)
-  #     #   - which columns / indexes to use as tags (metric_tags)
-  #     - MIB: IF-MIB
-  #       table: ifTable
-  #       symbols:
-  #         - ifInOctets
-  #         - ifOutOctets
-  #       metric_tags:
-  #         - tag: interface
-  #           column: ifDescr  # specify which column to read the tag value from
-  #     - MIB: IP-MIB
-  #       table: ipSystemStatsTable
-  #       symbols:
-  #         - ipSystemStatsInReceives
-  #       metric_tags:
-  #         - tag: ipversion
-  #           index: 1        # specify which index you want to read the tag value from
+  #  snmp_version: 2
 
-  # SNMP v3 configuration
-  # check http://pysnmp.sourceforge.net/docs/current/security-configuration.html
+  ## @param timeout - integer - optional - default: 1
+  ## Amount of second before timing out.
   #
-  # - ip_address: 192.168.34.10
-  #   # port: 161 # default value
-  #   user: user
-  #   authKey: password
-  #   privKey: private_key
-  #   authProtocol: authProtocol
-  #   privProtocol: privProtocol
-  #   context_engine_id: contextEngineId  # optional v3-only parameter - typically unneeded
-  #   context_name: contextName  # optional v3-only parameter
-  #   timeout: 1 # second, by default
-  #   retries: 5
-  #   tags:
-  #     - optional_tag_1
-  #     - optional_tag_2
-  #   metrics:
-  #     - MIB: UDP-MIB
-  #       symbol: udpInDatagrams
-  #     - MIB: TCP-MIB
-  #       symbol: tcpActiveOpens
+  #  timeout: 1
+
+  ## @param retries - integer - optional - default: 5
+  ## Amount of retries before failure.  
+  #  
+  #  retries: 5
+
+  ## @param enforce_mib_constraints - boolean - optional - default: true
+  ## If set to false we will not check the values returned meet the MIB constraints.
+  #  
+  #  enforce_mib_constraints: true
+
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+  ## SNMP v3 specific configuration
+  ## All parameter are commented here even if they are required since
+  ## the default configuration is for SNMP v2
+  ## Learn more about SNMP v3 configuration here: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
+
+  ## @param user - string - required
+  ## USERNAME to connect to your SNMP devices.
+  #
+  #  user: <USERNAME>
+
+  ## @param authProtocol - string -required
+  ## Authentication type to use when connecting to your SNMP devices.
+  # 
+  #  authProtocol: <AUTHENTICATION_PROTOCOL>
+
+  ## @param authKey - string - required
+  ## Authentication key to use with your Authentication type.
+  #
+  #  authKey: <AUTHENTICATION_TYPE_KEY>
+
+  ## @param privProtocol - string - required
+  ## Privacy type to use when connecting to your SNMP devices.
+  #
+  #  privProtocol: <PRIVACY_TYPE>
+
+  ## @param privKey - string - required
+  ## Privacy type key to use with your Privacy type.
+  #
+  #  privKey: <PRIVACY_TYPE_KEY>
+
+  ## @param context_engine_id - string - optional
+  ## ID of your context engine; typically unneeded.
+  ## (optional SNMP v3-only parameter)
+  #  
+  #  context_engine_id: <CONTEXT_ENGINE_ID>
+
+  ## @param context_name - string - optional
+  ## Name of your context (optional SNMP v3-only parameter).
+  #
+  #  context_name: <CONTEXT_NAME>
+
+  ## @param metrics - list of elements - required
+  ## Specify metrics you want to monitor by using MIBS for Counter and Gauge, i.e:
+  ## - MIB: UDP-MIB
+  ##   symbol: udpInDatagrams
+  ## 
+  ## If it's just a scalar, you can specify by OID and name it:
+  ##
+  ## - OID: 1.3.6.1.2.1.6.5
+  ##   name: tcpPassiveOpens
+  ## 
+  ## Optional parameters:
+  ##
+  ## Use the 'metric_tags' parameter to specify a specific tag for a collected metric:
+  ##
+  ## - OID: 1.3.6.1.2.1.6.5
+  ##   name: tcpPassiveOpens
+  ##   metric_tags:
+  ##     - TCP
+  ##
+  ## User the 'forced_type' parameter to enforce a data type for OIDs if the 
+  ## auto-detection for OID data types from the remote agent's response is failing.
+  ## Example: When a F5 Networks load balancer is queried for this OID, it returns
+  ## it as a Counter64 when it should be a gauge. So, this configuration forces 
+  ## the data type to gauge:
+  ##
+  ## - OID: 1.3.6.1.4.1.3375.2.1.1.2.1.8.0
+  ##   name: F5_TotalCurrentConnections
+  ##   forced_type: gauge
+  ##
+  ## Query a table with the 'table' parameter and specify:
+  ##  - which columns to report as value with the 'symbols' parameter.
+  ##  - which columns / indexes to use as tags with the 'metric_tags' parameter.
+  ##  - which column to read the tag value from with the 'column' parameter.
+  ##  - which index you want to read the tag value from with the 'index' parameter.
+  ##
+  ## Example: 
+  ##  
+  ##  - MIB: IF-MIB
+  ##    table: ifTable
+  ##    symbols:
+  ##      - ifInOctets
+  ##      - ifOutOctets
+  ##    metric_tags:
+  ##      - tag: interface
+  ##        column: ifDescr  
+  ##  - MIB: IP-MIB
+  ##    table: ipSystemStatsTable
+  ##    symbols:
+  ##      - ipSystemStatsInReceives
+  ##         metric_tags:
+  ##           - tag: ipversion
+  ##             index: 1     
+  #
+    metrics:
+      - MIB: UDP-MIB
+        symbol: udpInDatagrams
+      - MIB: TCP-MIB
+        symbol: tcpActiveOpens
+      - OID: 1.3.6.1.2.1.6.5
+        name: tcpPassiveOpens
+      - OID: 1.3.6.1.2.1.6.5
+        name: tcpPassiveOpens
+        metric_tags:
+          - TCP

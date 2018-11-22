@@ -233,8 +233,7 @@ def test_regex_tags(aggregator, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
     config['tags'] = ['region:infra']
     # OS3 service: be_edge_http_sre-production_elk-kibana
-    config['tags_regex'] = 'be_(?P<security>edge_http|http)?_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(' \
-                           '?P<app>.*)'
+    config['tags_regex'] = r'be_(?P<security>edge_http|http)?_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
     haproxy_check.check(config)
 

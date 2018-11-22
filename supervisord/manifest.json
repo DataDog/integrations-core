@@ -14,6 +14,10 @@
   "metric_prefix": "supervisord.",
   "metric_to_check": "supervisord.process.count",
   "name": "supervisord",
+  "process_signatures": [
+    "python supervisord",
+    "supervisord"
+  ],
   "public_title": "Datadog-Supervisord Integration",
   "short_description": "Monitor the status, uptime, and number of supervisor-managed processes.",
   "support": "core",

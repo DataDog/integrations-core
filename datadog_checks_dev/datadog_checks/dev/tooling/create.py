@@ -50,7 +50,8 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
             .format(year=str(datetime.now().year))
         )
         support_type = 'core'
-        tox_base_dep = '../datadog_checks_base[deps]'
+        test_dev_dep = '-e ../datadog_checks_dev'
+        tox_base_dep = '-e../datadog_checks_base[deps]'
     else:
         author = 'U.N. Owen'
         email = email_packages = 'friend@datadog.community'
@@ -60,6 +61,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         )
         license_header = ''
         support_type = 'contrib'
+        test_dev_dep = 'datadog-checks-dev'
         tox_base_dep = 'datadog-checks-base[deps]'
 
     config = {
@@ -76,6 +78,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         'install_info': install_info,
         'repo_choice': repo_choice,
         'support_type': support_type,
+        'test_dev_dep': test_dev_dep,
         'tox_base_dep': tox_base_dep,
     }
     config.update(kwargs)

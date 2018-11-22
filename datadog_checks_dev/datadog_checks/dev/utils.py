@@ -12,6 +12,7 @@ from six import PY3, text_type
 from six.moves.urllib.request import urlopen
 
 from .compat import FileNotFoundError, PermissionError
+from .structures import EnvVars
 
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
@@ -172,20 +173,22 @@ def temp_dir():
 
 
 @contextmanager
-def chdir(d, cwd=None):
+def chdir(d, cwd=None, env_vars=None):
     origin = cwd or os.getcwd()
     os.chdir(d)
+    env_vars = EnvVars(env_vars) if env_vars else mock_context_manager()
 
     try:
-        yield
+        with env_vars:
+            yield
     finally:
         os.chdir(origin)
 
 
 @contextmanager
-def temp_chdir(cwd=None):
+def temp_chdir(cwd=None, env_vars=None):
     with temp_dir() as d:
-        with chdir(d, cwd=cwd):
+        with chdir(d, cwd=cwd, env_vars=env_vars):
             yield d
 
 

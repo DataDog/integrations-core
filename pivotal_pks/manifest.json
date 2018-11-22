@@ -1,0 +1,21 @@
+{
+  "display_name": "Pivotal PKS",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "pivotal_pks",
+  "creates_events": false,
+  "short_description": "Enterprise-Grade Kubernetes offering from Pivotal.",
+  "guid": "b0090603-01c8-4ad9-8f9a-4f3700bf065b",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os"
+  ],
+  "public_title": "Datadog-Pivotal Container Service Integration",
+  "categories": [
+    "containers",
+    "orchestration"
+  ],
+  "type": "check",
+  "is_public": true
+}

@@ -25,6 +25,6 @@ instances:
     # will be attached to the host running KSM)
     # hostname_override: true
     #
-    # Send (deprecated) pod.phase service checks (default true, will be turned off in future versions)
+    # Send (deprecated) pod.phase service checks (default false)
     # We recommend using the corresponding gauges instead, which benefit from historical data unlike service checks
     # send_pod_phase_service_checks: false

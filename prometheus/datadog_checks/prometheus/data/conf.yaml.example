@@ -102,7 +102,7 @@ instances:
   #  ssl_private_key: "<KEY_PATH>"
 
   ## @param ssl_ca_cert - string - optional
-  ## The path to the trusted CA used for generating custom certificates
+  ## The path to the trusted CA used for generating custom certificates. Set this to False to disable SSL
   # 
   #  ssl_ca_cert: "<CA_CERT_PATH>"
 

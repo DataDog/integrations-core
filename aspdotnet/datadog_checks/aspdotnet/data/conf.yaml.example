@@ -1,11 +1,23 @@
 init_config:
-  # Any global configurable parameters should be added here
 
 instances:
-  #   A typical instance configuration might include a hostname and port
-  #   a set of customizable tags and other parameters we might need to
-  #   configure the behavior of our check.
+
+  ## @param host - string - required
+  ## ASP .NET host to connect to.
   #
-  # - host: localhost
-  #   port: 26379
-  #   tags: ['custom:tag']
+  - host: localhost
+  
+  ## @param port - integer - required
+  ## ASP .NET port to connect to. 
+  #
+    port: 26379
+
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+

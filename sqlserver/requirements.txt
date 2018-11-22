@@ -4,9 +4,9 @@
 #
 #    pip-compile --generate-hashes --output-file requirements.txt requirements.in
 #
-adodbapi==2.6.0.7 \
+adodbapi==2.6.0.7 ; sys_platform == "win32" \
     --hash=sha256:7aa5f79136a757cbeac8ea00f554e541fbd59c7f6be87443127bf0319c4bb0a3
-pyodbc==4.0.13 \
+pyodbc==4.0.13 ; sys_platform == "win32" \
     --hash=sha256:05da16d4f6464498d78a4618db4d888a8528f0a03a9b1a17d62a2d0e84c424a4 \
     --hash=sha256:174580250fb76d75b214f1d47c0a9bdc7196f421ba44ca62226698e0ccd72fa9 \
     --hash=sha256:26b719271c8676578d5732f517ef56438669f90fbb6a33f16b0825b8311156af \
@@ -20,20 +20,25 @@ pyodbc==4.0.13 \
     --hash=sha256:dd7c1095dd23aef2f025e425a2fe490adb1371fac2c980cc69ae1426060100f0 \
     --hash=sha256:dd9cc044aa72c1e9939733ac7ed5e6df576b1cf0e52620b7f20566b26a729180 \
     --hash=sha256:e50af893c8aefbbb9437951d2b9b7c14f9d9be504f907805ba83388f0397a537
-pyro4==4.73 \
+pyro4==4.73 ; sys_platform == "win32" \
     --hash=sha256:4a71a613015d1a2bca6939d9ce4d5866ccd1fd30365ebbbf67482b6341867cf8 \
     --hash=sha256:536b07a097d0619e7ab1effa3747fda177a24168d17a07a93ca9ac30977608f7
-selectors34==1.2 \
+pywin32==224 ; sys_platform == "win32" \
+    --hash=sha256:22e218832a54ed206452c8f3ca9eff07ef327f8e597569a4c2828be5eaa09a77 \
+    --hash=sha256:32b37abafbfeddb0fe718008d6aada5a71efa2874f068bee1f9e703983dcc49a \
+    --hash=sha256:35451edb44162d2f603b5b18bd427bc88fcbc74849eaa7a7e7cfe0f507e5c0c8 \
+    --hash=sha256:4eda2e1e50faa706ff8226195b84fbcbd542b08c842a9b15e303589f85bfb41c \
+    --hash=sha256:5f265d72588806e134c8e1ede8561739071626ea4cc25c12d526aa7b82416ae5 \
+    --hash=sha256:6852ceac5fdd7a146b570655c37d9eacd520ed1eaeec051ff41c6fc94243d8bf \
+    --hash=sha256:6dbc4219fe45ece6a0cc6baafe0105604fdee551b5e876dc475d3955b77190ec \
+    --hash=sha256:9bd07746ce7f2198021a9fa187fa80df7b221ec5e4c234ab6f00ea355a3baf99
+selectors34==1.2.0 ; sys_platform == "win32" and python_version < "3.4" \
     --hash=sha256:09f5066337f8a76fb5233f267873f89a27a17c10bf79575954894bb71686451c \
-    --hash=sha256:b8906fa8cd794fa1de5c8c7ccf8937d4d6a1d2937acc525594e5c6d04508d22d \
-    # via pyro4
-serpent==1.27 \
+    --hash=sha256:b8906fa8cd794fa1de5c8c7ccf8937d4d6a1d2937acc525594e5c6d04508d22d
+serpent==1.27 ; sys_platform == "win32" \
     --hash=sha256:6f8dc4317fb5b5a9629b5e518846bc9fee374b8171533726dc68df52b36ee912 \
     --hash=sha256:eb489aeb85333f6ee5ab2f4bc666a5731d870a562b26b6e63c6b9384befd3186
 six==1.11.0 \
     --hash=sha256:70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9 \
     --hash=sha256:832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb \
     # via selectors34
-testfixtures==4.14.3 \
-    --hash=sha256:c505e92d3c679ce4001a990327e99275ce657a16cd40b54423c7e24c6fdf0b2f \
-    --hash=sha256:f9ab6face00b0b3284ced1e46acf0d715d1c5988f3826dc49e71d5fa522a2f7f

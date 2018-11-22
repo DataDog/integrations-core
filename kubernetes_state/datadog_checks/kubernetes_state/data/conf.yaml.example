@@ -50,3 +50,9 @@ instances:
   #  tags:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
+
+  ## @param prometheus_timeout - integer - optional - default: 10
+  ## Set a timeout for the prometheus query.
+  #
+  #  prometheus_timeout: 10
+

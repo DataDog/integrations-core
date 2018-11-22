@@ -32,6 +32,7 @@ setup(
     version=ABOUT['__version__'],
     description='The Openstack check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent openstack check',
 
     # The project's main homepage.
@@ -61,7 +62,6 @@ setup(
     # Run-time dependencies
 
     install_requires=[CHECKS_BASE_REQ],
-    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     include_package_data=True,

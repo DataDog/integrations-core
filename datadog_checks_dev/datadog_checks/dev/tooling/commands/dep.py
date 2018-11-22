@@ -56,56 +56,9 @@ def display_package_changes(pre_packages, post_packages, indent=''):
             ))
 
 
-def display_multiple_attributes(attributes, message):
-    echo_failure(message)
-    for attribute, checks in sorted(iteritems(attributes)):
-        if len(checks) == 1:
-            echo_info('    {}: {}'.format(attribute, checks[0]))
-        elif len(checks) == 2:
-            echo_info('    {}: {} and {}'.format(attribute, checks[0], checks[1]))
-        else:
-            remaining = len(checks) - 2
-            echo_info('    {}: {}, {}, and {} other{}'.format(
-                attribute,
-                checks[0],
-                checks[1],
-                remaining,
-                's' if remaining > 1 else ''
-            ))
-
-
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
 def dep():
     pass
-
-
-@dep.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Verify the uniqueness of dependency versions across all checks'
-)
-def verify():
-    """Verify the uniqueness of dependency versions across all checks."""
-    all_packages, _ = collect_packages()
-    failed = False
-
-    for package, package_data in sorted(iteritems(all_packages)):
-        versions = package_data['versions']
-        if len(versions) > 1:
-            failed = True
-            display_multiple_attributes(versions, 'Multiple versions found for package `{}`:'.format(package))
-        else:
-            version, checks = get_next(iteritems(versions))
-            if version is None:
-                failed = True
-                echo_failure('Unpinned dependency `{}` in the `{}` check.'.format(package, checks[0]))
-
-        markers = package_data['markers']
-        if len(markers) > 1:
-            failed = True
-            display_multiple_attributes(markers, 'Multiple markers found for package `{}`:'.format(package))
-
-    if failed:
-        abort()
 
 
 @dep.command(
@@ -217,7 +170,7 @@ def freeze():
 
     root = get_root()
     static_file = os.path.join(
-        root, 'datadog_checks_base', 'datadog_checks', 'data', 'agent_requirements.in'
+        root, 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in'
     )
 
     echo_info('Static file: {}'.format(static_file))

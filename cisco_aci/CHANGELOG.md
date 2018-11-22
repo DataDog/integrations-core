@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.2.1 / 2018-10-12
+
+* [Fixed] fixes cisco for username and password. See [#2267](https://github.com/DataDog/integrations-core/pull/2267).
+
 ## 1.2.0 / 2018-09-04
 
 * [Added] Use Certs in the Cisco Check as well as Passwords. See [#1986](https://github.com/DataDog/integrations-core/pull/1986).

@@ -11,6 +11,9 @@
   "metric_prefix": "lighttpd.",
   "metric_to_check": "lighttpd.performance.uptime",
   "name": "lighttpd",
+  "process_signatures": [
+    "lighttpd"
+  ],
   "public_title": "Datadog-Lighttpd Integration",
   "short_description": "Track uptime, bytes served, requests per second, response codes, and more.",
   "support": "core",

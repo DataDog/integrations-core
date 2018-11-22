@@ -13,6 +13,9 @@
   "metric_prefix": "kafka.",
   "metric_to_check": "kafka.net.bytes_out",
   "name": "kafka",
+  "process_signatures": [
+    "java kafka.kafka"
+  ],
   "public_title": "Datadog-Kafka Integration",
   "short_description": "Collect metrics for producers and consumers, replication, max lag, and more.",
   "support": "core",

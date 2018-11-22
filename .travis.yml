@@ -23,9 +23,9 @@ env:
 
 stages:
   - name: test_changed
-    if: type = pull_request
+    if: ((type = pull_request) AND (NOT commit_message =~ /ci run all/))
   - name: test
-    if: (branch = master) AND (type != pull_request)
+    if: ((branch = master) AND (type != pull_request)) OR ((commit_message =~ /ci run all/) AND (type = pull_request))
 
 script:
   - travis_retry ddev test --cov ${CHECK}
@@ -43,15 +43,19 @@ jobs:
   include:
     - stage: test_changed
       script:
-        - ddev dep verify
-        - ddev manifest verify --include-extras
+        - ddev validate dep
+        - ddev validate manifest --include-extras
+        - ddev validate metadata
+        - ddev validate service-checks
         - ddev test --cov
         - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base PYTHON3=true
       script:
-        - ddev dep verify
-        - ddev manifest verify --include-extras
+        - ddev validate dep
+        - ddev validate manifest --include-extras
+        - ddev validate metadata
+        - ddev validate service-checks
         - travis_retry ddev test --cov ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
@@ -59,17 +63,17 @@ jobs:
     - stage: test
       env: CHECK=active_directory
     - stage: test
-      env: CHECK=activemq_xml
+      env: CHECK=activemq_xml PYTHON3=true
     - stage: test
       env: CHECK=agent_metrics
     - stage: test
-      env: CHECK=apache
+      env: CHECK=apache PYTHON3=true
     - stage: test
       env: CHECK=aspdotnet
     - stage: test
-      env: CHECK=btrfs
+      env: CHECK=btrfs PYTHON3=true
     - stage: test
-      env: CHECK=cacti
+      env: CHECK=cacti PYTHON3=true
     - stage: test
       env: CHECK=cassandra_nodetool
     - stage: test
@@ -77,21 +81,29 @@ jobs:
     - stage: test
       env: CHECK=cisco_aci
     - stage: test
-      env: CHECK=consul
+      env: CHECK=cockroachdb PYTHON3=true
+    - stage: test
+      env: CHECK=consul PYTHON3=true
+    - stage: test
+      env: CHECK=coredns PYTHON3=true
     - stage: test
       env: CHECK=couch
     - stage: test
       env: CHECK=couchbase
     - stage: test
+      env: CHECK=crio PYTHON3=true
+    - stage: test
       env: CHECK=directory PYTHON3=true
     - stage: test
-      env: CHECK=disk
+      env: CHECK=disk PYTHON3=true
     - stage: test
       env: CHECK=dns_check
     - stage: test
       env: CHECK=dotnetclr
     - stage: test
-      env: CHECK=elastic
+      env: CHECK=ecs_fargate
+    - stage: test
+      env: CHECK=elastic PYTHON3=true
     - stage: test
       env: CHECK=envoy PYTHON3=true
     - stage: test
@@ -115,7 +127,7 @@ jobs:
     - stage: test
       env: CHECK=hdfs_namenode
     - stage: test
-      env: CHECK=http_check
+      env: CHECK=http_check PYTHON3=true
     - stage: test
       env: CHECK=iis
     - stage: test
@@ -151,7 +163,7 @@ jobs:
     - stage: test
       env: CHECK=mesos_master
     - stage: test
-      env: CHECK=mongo
+      env: CHECK=mongo PYTHON3=true
     - stage: test
       env: CHECK=mysql
     - stage: test
@@ -169,6 +181,8 @@ jobs:
     - stage: test
       env: CHECK=openstack
     - stage: test
+      env: CHECK=openstack_controller PYTHON3=true
+    - stage: test
       env: CHECK=oracle
     - stage: test
       env: CHECK=pdh_check
@@ -177,7 +191,7 @@ jobs:
     - stage: test
       env: CHECK=php_fpm PYTHON3=true
     - stage: test
-      env: CHECK=postgres
+      env: CHECK=postgres PYTHON3=true
     - stage: test
       env: CHECK=postfix
     - stage: test
@@ -189,7 +203,7 @@ jobs:
     - stage: test
       env: CHECK=rabbitmq
     - stage: test
-      env: CHECK=redisdb
+      env: CHECK=redisdb PYTHON3=true
     - stage: test
       env: CHECK=riak
     - stage: test
@@ -204,6 +218,8 @@ jobs:
       env: CHECK=ssh_check
     - stage: test
       env: CHECK=statsd
+    - stage: test
+      env: CHECK=supervisord
     - stage: test
       env: CHECK=squid
     - stage: test

@@ -28,6 +28,7 @@ setup(
     version=ABOUT["__version__"],
     description='The PGbouncer check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent pgbouncer check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
@@ -45,7 +46,6 @@ setup(
     ],
     packages=['datadog_checks.pgbouncer'],
     install_requires=[CHECKS_BASE_REQ],
-    tests_require=get_requirements("requirements-dev.txt"),
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

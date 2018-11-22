@@ -72,7 +72,7 @@ Need help? Contact [Datadog Support][6].
 
 ## Development
 
-Please refer to the [main documentation][14] for more details about how to test and develop Agent based integrations.
+See the [main documentation][14] for more details about how to test and develop Agent based integrations.
 
 ### Testing Guidelines
 

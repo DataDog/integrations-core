@@ -16,7 +16,7 @@ Edit the `kube_proxy.d/conf.yaml` file to point to your server and port, set the
 
 Note: If you edit the namespace & metrics name, or add any other metric they are considered as custom
 
-Please contribute to the integration if you want to add a relevant metric.
+Contribute to the integration if you want to add a relevant metric.
 
 ## Validation
 

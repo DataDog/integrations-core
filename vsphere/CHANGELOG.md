@@ -1,5 +1,36 @@
 # CHANGELOG - vsphere
 
+## 3.5.0 / 2018-11-21
+
+* [Added] Handle unicode characters in vSphere object names. See [#2596](https://github.com/DataDog/integrations-core/pull/2596).
+
+## 3.4.0 / 2018-10-31
+
+* [Added] Add option to use guest hostname instead of VM name. See [#2479](https://github.com/DataDog/integrations-core/pull/2479).
+* [Added] Upgrade requests. See [#2481](https://github.com/DataDog/integrations-core/pull/2481).
+* [Fixed] Fix "insufficient permission" error message formatting. See [#2480](https://github.com/DataDog/integrations-core/pull/2480).
+
+## 3.3.1 / 2018-09-19
+
+* [Fixed] Fix batch implementation logic. See [#2265](https://github.com/DataDog/integrations-core/pull/2265).
+
+## 3.3.0 / 2018-09-17
+
+* [Added]  Add ability to filter metrics by collection level. See [#2226](https://github.com/DataDog/integrations-core/pull/2226).
+* [Changed] Precompute list of metric IDs to improve performance. See [#2221](https://github.com/DataDog/integrations-core/pull/2221).
+
+## 3.2.0 / 2018-09-11
+
+* [Fixed] Handle missing attributes in property collector result. See [#2205](https://github.com/DataDog/integrations-core/pull/2205).
+* [Fixed] Make the metadata cache thread safe. See [#2212](https://github.com/DataDog/integrations-core/pull/2212).
+* [Fixed] Make the connection list thread safe. See [#2201](https://github.com/DataDog/integrations-core/pull/2201).
+* [Fixed] Check that objects queue is initialized before processing it, and process it entirely. See [#2192](https://github.com/DataDog/integrations-core/pull/2192).
+* [Changed] Rewrite the Mor cache. See [#2173](https://github.com/DataDog/integrations-core/pull/2173).
+
+## 3.1.0 / 2018-09-06
+
+* [Changed] Downgrade pyvmomi to v6.5.0.2017.5-1. See [#2180](https://github.com/DataDog/integrations-core/pull/2180).
+
 ## 3.0.0 / 2018-09-04
 
 * [Changed] Upgrade pyvmomi to 6.7.0. See [#2153](https://github.com/DataDog/integrations-core/pull/2153).

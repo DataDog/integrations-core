@@ -19,8 +19,10 @@ VERSION_BUMP = OrderedDict([
     ('minor', semver.bump_minor),
     ('patch', semver.bump_patch),
     ('fix', semver.bump_patch),
-    ('pre', semver.bump_prerelease),
-    ('build', semver.bump_build),
+    ('rc', lambda v: semver.bump_prerelease(v, 'rc')),
+    ('pre', lambda v: semver.bump_prerelease(v, 'pre')),
+    ('alpha', lambda v: semver.bump_prerelease(v, 'alpha')),
+    ('beta', lambda v: semver.bump_prerelease(v, 'beta')),
 ])
 
 # The checks requirement file used by the agent
@@ -31,6 +33,14 @@ AGENT_V5_ONLY = {
     'docker_daemon',
     'kubernetes',
     'ntp',
+}
+
+BETA_PACKAGES = {
+    'datadog_checks_dev',
+}
+
+NOT_CHECKS = {
+    'datadog_checks_dev',
 }
 
 # If a file changes in a PR with any of these file extensions,

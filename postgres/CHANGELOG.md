@@ -1,5 +1,18 @@
 # CHANGELOG - postgres
 
+## 2.2.3 / 2018-10-14
+
+* [Fixed] Fix version detection for new development releases. See [#2401](https://github.com/DataDog/integrations-core/pull/2401).
+
+## 2.2.2 / 2018-09-11
+
+* [Fixed] Fix version detection for Postgres v10+. See [#2208](https://github.com/DataDog/integrations-core/pull/2208).
+
+## 2.2.1 / 2018-09-06
+
+* [Fixed]  Gracefully handle errors when performing custom_queries. See [#2184](https://github.com/DataDog/integrations-core/pull/2184).
+* [Fixed] Gracefully handle failed version regex match. See [#2178](https://github.com/DataDog/integrations-core/pull/2178).
+
 ## 2.2.0 / 2018-09-04
 
 * [Added] Add number of "idle in transaction" transactions and open transactions. See [#2118](https://github.com/DataDog/integrations-core/pull/2118).

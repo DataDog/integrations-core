@@ -31,6 +31,7 @@ setup(
     name='datadog_checks_tests_helper',
     description='The Datadog Check Tests Helpers',
     long_description=LONG_DESC,
+    long_description_content_type='text/markdown',
     keywords='datadog agent checks tests',
     url='https://github.com/DataDog/datadog-agent-tk',
     author='Datadog',
@@ -52,5 +53,4 @@ setup(
     include_package_data=True,
     install_requires=get_requirements('requirements.in'),
 
-    tests_require=['pytest<4', ],
 )

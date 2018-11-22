@@ -86,7 +86,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
         """
         metric_name = scraper_config['namespace'] + metric_suffix
         for sample in metric.samples:
-            _tags = []
+            _tags = scraper_config['custom_tags']
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
                 _tags.append('{}:{}'.format(label_name, label_value))
             # submit raw metric

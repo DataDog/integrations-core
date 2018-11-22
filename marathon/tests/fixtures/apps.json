@@ -68,7 +68,8 @@
       },
       "labels": {
         "HAPROXY_0_VHOST": "my-app.my-org.net",
-        "HAPROXY_GROUP": "my-app"
+        "HAPROXY_GROUP": "my-app",
+        "LABEL_NAME": "label_value_1"
       },
       "acceptedResourceRoles": null,
       "ipAddress": null,

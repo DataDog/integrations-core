@@ -1,14 +1,12 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-
-import common
-import consul_mocks
 
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.utils.containers import hash_mutable
+from . import common
+from . import consul_mocks
 
 log = logging.getLogger(__file__)
 
@@ -162,7 +160,7 @@ def test_service_checks(aggregator):
     aggregator.assert_service_check('consul.check', count=5)
 
 
-def test_cull_services_list(aggregator):
+def test_cull_services_list():
     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -176,18 +174,18 @@ def test_cull_services_list(aggregator):
 
     # Big whitelist
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    whitelist = ['service_{0}'.format(k) for k in range(num_services)]
+    whitelist = ['service_{}'.format(k) for k in range(num_services)]
     assert len(consul_check._cull_services_list(services, whitelist)) == consul_check.MAX_SERVICES
 
     # Big whitelist with max_services
     assert len(consul_check._cull_services_list(services, whitelist, max_services)) == max_services
 
     # Whitelist < MAX_SERVICES should spit out the whitelist
-    whitelist = ['service_{0}'.format(k) for k in range(consul_check.MAX_SERVICES - 1)]
+    whitelist = ['service_{}'.format(k) for k in range(consul_check.MAX_SERVICES - 1)]
     assert set(consul_check._cull_services_list(services, whitelist)) == set(whitelist)
 
     # Whitelist < max_services param should spit out the whitelist
-    whitelist = ['service_{0}'.format(k) for k in range(max_services - 1)]
+    whitelist = ['service_{}'.format(k) for k in range(max_services - 1)]
     assert set(consul_check._cull_services_list(services, whitelist, max_services)) == set(whitelist)
 
     # No whitelist, still triggers truncation
@@ -296,18 +294,18 @@ def test_network_latency_checks(aggregator):
 
     latency = []
     for m_name, metrics in aggregator._metrics.items():
-        if m_name.startswith('consul.net.'):
+        if m_name.startswith(b'consul.net.'):
             latency.extend(metrics)
     latency.sort()
     # Make sure we have the expected number of metrics
     assert 19 == len(latency)
 
     # Only 3 dc-latency metrics since we only do source = self
-    dc = [m for m in latency if '.dc.latency.' in m[0]]
+    dc = [m for m in latency if b'.dc.latency.' in m[0]]
     assert 3 == len(dc)
     assert 1.6746410750238774 == dc[0][2]
 
     # 16 latency metrics, 2 nodes * 8 metrics each
-    node = [m for m in latency if '.node.latency.' in m[0]]
+    node = [m for m in latency if b'.node.latency.' in m[0]]
     assert 16 == len(node)
     assert 0.26577747932995816 == node[0][2]

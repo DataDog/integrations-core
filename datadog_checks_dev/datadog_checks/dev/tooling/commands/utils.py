@@ -4,9 +4,9 @@
 import sys
 
 try:
-    from textwrap import indent as indent_text
+    from textwrap import indent as __indent_text
 except ImportError:
-    def indent_text(text, prefix):
+    def __indent_text(text, prefix):
         return ''.join(
             (prefix + line if line.strip() else line)
             for line in text.splitlines(True)
@@ -18,9 +18,17 @@ CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
 }
 UNKNOWN_OPTIONS = {
-    'help_option_names': ['-h', '--help'],
+    'help_option_names': [],
     'ignore_unknown_options': True,
 }
+DEFAULT_INDENT = '    '
+
+
+def indent_text(text, indent):
+    return __indent_text(
+        text,
+        DEFAULT_INDENT if indent is True else indent
+    )
 
 
 def echo_info(text, nl=True, err=False, indent=None):

@@ -22,7 +22,7 @@ except ImportError:
 METRIC_TYPES = ['counter', 'gauge']
 
 # As case can vary depending on Kubernetes versions, we match the lowercase string
-WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff']
+WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating']
 WHITELISTED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 
@@ -41,12 +41,10 @@ class KubernetesState(OpenMetricsBaseCheck):
         generic_instances = [kubernetes_state_instance]
         super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
-        self.send_pod_phase_service_checks = is_affirmative(instance.get('send_pod_phase_service_checks', True))
-        self._deprecations['send_pod_phase_service_checks'] = [
-            False,
-            "DEPRECATION NOTICE: pod phase service checks are deprecated. Please set "
-            "`send_pod_phase_service_checks` to false and rely on corresponding gauges instead",
-        ]
+        self.send_pod_phase_service_checks = is_affirmative(instance.get('send_pod_phase_service_checks', False))
+        if self.send_pod_phase_service_checks:
+            self.warning("DEPRECATION NOTICE: pod phase service checks are deprecated. Please set "
+                         "`send_pod_phase_service_checks` to false and rely on corresponding gauges instead")
 
         self.pod_phase_to_status = {
             'Pending':   self.WARNING,
@@ -68,6 +66,18 @@ class KubernetesState(OpenMetricsBaseCheck):
             'unknown':   self.UNKNOWN
         }
 
+        # Parameters for the count_objects_by_tags method
+        self.object_count_params = {
+            'kube_persistentvolume_status_phase': {
+                'metric_name': 'persistentvolumes.by_phase',
+                'allowed_labels': ['storageclass', 'phase'],
+            },
+            'kube_service_spec_type': {
+                'metric_name': 'service.count',
+                'allowed_labels': ['namespace', 'type'],
+            },
+        }
+
         self.METRIC_TRANSFORMERS = {
             'kube_pod_status_phase': self.kube_pod_status_phase,
             'kube_pod_container_status_waiting_reason': self.kube_pod_container_status_waiting_reason,
@@ -86,7 +96,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_node_spec_unschedulable': self.kube_node_spec_unschedulable,
             'kube_resourcequota': self.kube_resourcequota,
             'kube_limitrange': self.kube_limitrange,
-            'kube_persistentvolume_status_phase': self.kube_persistentvolume_status_phase
+            'kube_persistentvolume_status_phase': self.count_objects_by_tags,
+            'kube_service_spec_type': self.count_objects_by_tags,
         }
 
     def check(self, instance):
@@ -320,7 +331,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         else:
             node = self._label_to_tag('node', sample[self.SAMPLE_LABELS], scraper_config)
             condition = self._label_to_tag('condition', sample[self.SAMPLE_LABELS], scraper_config)
-            message = "{} is currently reporting {}".format(node, condition)
+            message = "{} is currently reporting {} = {}".format(node, condition, label_value)
 
         if condition_map['service_check_name'] is None:
             self.log.debug("Unable to handle {} - unknown condition {}".format(service_check_name, label_value))
@@ -378,9 +389,9 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def _trim_job_tag(self, name):
         """
-        Trims suffix of job names if they match -(\d{4,10}$)
+        Trims suffix of job names if they match -(\\d{4,10}$)
         """
-        pattern = "(-\d{4,10}$)"
+        pattern = r"(-\d{4,10}$)"
         return re.sub(pattern, '', name)
 
     # Labels attached: namespace, pod
@@ -400,7 +411,6 @@ class KubernetesState(OpenMetricsBaseCheck):
             if self.send_pod_phase_service_checks:
                 pod_tag = self._label_to_tag('pod', sample[self.SAMPLE_LABELS], scraper_config)
                 namespace_tag = self._label_to_tag('namespace', sample[self.SAMPLE_LABELS], scraper_config)
-                self._log_deprecation('send_pod_phase_service_checks')
                 self._condition_to_tag_check(sample, check_basename, self.pod_phase_to_status, scraper_config,
                                              tags=[pod_tag, namespace_tag] + scraper_config['custom_tags'])
 
@@ -440,7 +450,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             if 'pod' in sample[self.SAMPLE_LABELS]:
                 tags.append(self._format_tag('pod', sample[self.SAMPLE_LABELS]['pod'], scraper_config))
 
-            self.count(metric_name, sample[self.SAMPLE_VALUE], tags + scraper_config['custom_tags'])
+            self.gauge(metric_name, sample[self.SAMPLE_VALUE], tags + scraper_config['custom_tags'],
+                       hostname=self.get_hostname_for_sample(sample, scraper_config))
 
     def kube_pod_container_status_waiting_reason(self, metric, scraper_config):
         self._submit_metric_kube_pod_container_status_reason(metric, '.container.status_report.count.waiting',
@@ -473,7 +484,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = []
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -485,7 +496,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = []
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -496,7 +507,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -507,7 +518,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
-                if label_name == 'job':
+                if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
@@ -639,16 +650,17 @@ class KubernetesState(OpenMetricsBaseCheck):
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
 
-    def kube_persistentvolume_status_phase(self, metric, scraper_config):
-        """ The persistent volumes by phase. """
-        metric_name = scraper_config['namespace'] + '.persistentvolumes.by_phase'
-        by_phase_counter = Counter()
+    def count_objects_by_tags(self, metric, scraper_config):
+        """ Count objects by whitelisted tags and submit counts as gauges. """
+        config = self.object_count_params[metric.name]
+        metric_name = "{}.{}".format(scraper_config['namespace'], config['metric_name'])
+        object_counter = Counter()
+
         for sample in metric.samples:
             tags = [
-                self._label_to_tag("storageclass", sample[self.SAMPLE_LABELS], scraper_config),
-                self._label_to_tag("phase", sample[self.SAMPLE_LABELS], scraper_config)
+                self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config) for l in config['allowed_labels']
             ] + scraper_config['custom_tags']
-            by_phase_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
+            object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in by_phase_counter.iteritems():
+        for tags, count in object_counter.iteritems():
             self.gauge(metric_name, count, tags=list(tags))

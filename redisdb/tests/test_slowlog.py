@@ -1,13 +1,14 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
+
 import random
 
-from datadog_checks.redisdb import Redis
-import redis
 import pytest
+import redis
 
+from datadog_checks.redisdb import Redis
 from .common import PORT, PASSWORD, HOST
 
 

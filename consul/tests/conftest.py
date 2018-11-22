@@ -1,74 +1,84 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-import subprocess
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import logging
 
 import pytest
 import requests
 
-import common
+from datadog_checks.dev import WaitFor, docker_run
+from . import common
 
-log = logging.getLogger(__file__)
+
+def _consul_config_path():
+    server_file = 'server-{}.json'.format(os.getenv('CONSUL_VERSION'))
+    return os.path.join(common.HERE, 'compose', server_file)
 
 
-def wait_for_cluster():
+def ping_cluster():
     """
     Wait for the slave to connect to the master
     """
-    from time import sleep
-    for i in xrange(0, 50):
-        sleep(1)
-        try:
-            res = requests.get("{}/v1/status/peers".format(common.URL))
-            # Wait for all 3 agents to join the cluster
-            if len(res.json()) == 3:
-                return True
-        except Exception as e:
-            log.info("Error connecting to the cluster: %s", e)
-            pass
+    response = requests.get('{}/v1/status/peers'.format(common.URL))
+    response.raise_for_status()
+
+    # Wait for all 3 agents to join the cluster
+    if len(response.json()) == 3:
+        return True
 
     return False
 
 
-@pytest.fixture(scope="session")
-def consul_cluster():
+@pytest.fixture(scope='session')
+def dd_environment(instance_single_node_install):
     """
-    Start a cluster with one master, one replica and one unhealthy replica and
-    stop it after the tests are done.
-    If there's any problem executing docker-compose, let the exception bubble
-    up.
+    Start a cluster with one master, one replica, and one unhealthy replica.
     """
-    env = os.environ
-    env['CONSUL_CONFIG_PATH'] = _consul_config_path()
-    env['CONSUL_PORT'] = common.PORT
+    env_vars = {
+        'CONSUL_CONFIG_PATH': _consul_config_path(),
+        'CONSUL_PORT': common.PORT,
+    }
 
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'compose.yaml')
-    ]
-
-    subprocess.check_call(args + ["down"])
-    subprocess.check_call(args + ["up", "-d"])
-    # wait for the cluster to be up before yielding
-    if not wait_for_cluster():
-        raise Exception("Consul cluster boot timed out!")
-    yield
-    subprocess.check_call(args + ["down"])
+    with docker_run(
+        os.path.join(common.HERE, 'compose', 'compose.yaml'),
+        conditions=[WaitFor(ping_cluster)],
+        env_vars=env_vars,
+    ):
+        yield instance_single_node_install
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+def instance():
+    return {
+        'url': common.URL,
+        'catalog_checks': True,
+        'network_latency_checks': True,
+        'new_leader_checks': True,
+        'self_leader_check': True,
+        'acl_token': 'token',
+    }
 
 
-def _consul_config_path():
-    server_file = "server-{0}.json".format(_consul_version())
-    return os.path.join(common.HERE, 'compose', server_file)
+@pytest.fixture(scope='session')
+def instance_single_node_install():
+    return {
+        'url': common.URL,
+        'single_node_install': True,
+        'catalog_checks': True,
+        'network_latency_checks': True,
+        'new_leader_checks': True,
+        'self_leader_check': True,
+        'acl_token': 'token',
+    }
 
 
-def _consul_version():
-    return os.getenv("CONSUL_VERSION")
+@pytest.fixture(scope='session')
+def instance_bad_token():
+    return {
+        'url': common.URL,
+        'catalog_checks': True,
+        'network_latency_checks': True,
+        'new_leader_checks': True,
+        'self_leader_check': True,
+        'acl_token': 'wrong_token',
+    }

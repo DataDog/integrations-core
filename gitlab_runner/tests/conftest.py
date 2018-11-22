@@ -48,7 +48,7 @@ def gitlab_runner_service(request):
     subprocess.check_call(args + ['up', '-d'], env=env)
 
     # wait for gitlab_runner to be up, it depends on gitlab
-    if not wait_for(GITLAB_RUNNER_URL, timeout=160):
+    if not wait_for(GITLAB_RUNNER_URL):
         raise Exception("gitlab_runner container timed out!")
 
     # run pre-test commands
@@ -59,12 +59,12 @@ def gitlab_runner_service(request):
     yield
 
 
-def wait_for(URL, timeout):
+def wait_for(URL):
     """
     Wait for specified URL
     """
 
-    for i in xrange(timeout):
+    for i in xrange(180):
         try:
             r = requests.get(URL)
             r.raise_for_status()

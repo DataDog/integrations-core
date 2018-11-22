@@ -36,7 +36,7 @@ See [metadata.csv][4] for a list of metrics provided by this integration.
 The Gitlab Runner check does not include any events at this time.
 
 ### Service Checks
-The Gitlab Runner check currently provides a service check to ensure that the Runner can talk to the Gitlab master and another one to ensure that the
+The Gitlab Runner check provides a service check to ensure that the Runner can talk to the Gitlab master and another one to ensure that the
 local Prometheus endpoint is available.
 
 ## Troubleshooting

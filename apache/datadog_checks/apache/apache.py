@@ -1,14 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from six.moves.urllib.parse import urlparse
 
-# stdlib
-import urlparse
-
-# 3rd party
 import requests
 
-# project
 from datadog_checks.checks import AgentCheck
 # compatability layer
 try:
@@ -68,7 +64,7 @@ class Apache(AgentCheck):
             auth = (instance['apache_user'], instance['apache_password'])
 
         # Submit a service check for status page availability.
-        parsed_url = urlparse.urlparse(url)
+        parsed_url = urlparse(url)
         apache_host = parsed_url.hostname
         apache_port = parsed_url.port or 80
         service_check_name = 'apache.can_connect'
@@ -89,10 +85,9 @@ class Apache(AgentCheck):
             self.service_check(service_check_name, AgentCheck.OK,
                                tags=service_check_tags)
         self.log.debug("apache check succeeded")
-        response = r.content
         metric_count = 0
         # Loop through and extract the numerical values
-        for line in response.splitlines():
+        for line in r.iter_lines(decode_unicode=True):
             values = line.split(': ')
             if len(values) == 2:  # match
                 metric, value = values

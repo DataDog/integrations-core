@@ -15,6 +15,11 @@
   "metric_prefix": "postgresql.",
   "metric_to_check": "postgresql.connections",
   "name": "postgres",
+  "process_signatures": [
+    "postgres -D",
+    "pg_ctl start -l logfile",
+    "postgres -c 'pg_ctl start -D -l"
+  ],
   "public_title": "Datadog-Postgres SQL Integration",
   "short_description": "Collect a wealth of database performance and health metrics.",
   "support": "core",

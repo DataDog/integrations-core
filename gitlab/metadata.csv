@@ -25,7 +25,7 @@ gitlab.go_memstats_mspan_sys_bytes,gauge,,byte,,Number of bytes used for mspan s
 gitlab.go_memstats_next_gc_bytes,gauge,,byte,,Number of heap bytes when next garbage collection will take place,0,gitlab,heap bytes next gc
 gitlab.go_memstats_other_sys_bytes,gauge,,byte,,Number of bytes used for other system allocations,0,gitlab,other bytes used
 gitlab.go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes in use by the stack allocator,0,gitlab,bytes stack allocator
-gitlab.go_memstats_stack_inuse_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,gitlab,bytes stack allocator from sys
+gitlab.go_memstats_stack_sys_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,gitlab,bytes stack allocator from sys
 gitlab.go_memstats_sys_bytes,gauge,,byte,,Number of bytes obtained by system. Sum of all system allocations,0,gitlab,sum system allocations
 gitlab.go_threads,gauge,,request,second,Number of OS threads create,0,gitlab,go threads
 gitlab.http_request_duration_microseconds,gauge,,request,second,The HTTP request latencies in microseconds,0,gitlab,HTTP req latencies

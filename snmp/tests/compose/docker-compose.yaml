@@ -2,9 +2,9 @@ version: '3.5'
 
 services:
   snmp:
-    image: "polinux/snmpd"
-    command: -d -V -c /etc/snmp/snmpd.conf
+    image: "datadog/docker-library:snmp"
     ports:
-      - "11111:161/udp"
+      - "1161:1161/udp"
+    command: --args-from-file=/usr/snmpsim/data/args_list.txt
     volumes:
-      - ${COMPOSE_DIR}:/etc/snmp
+      - ${COMPOSE_DIR}/data/:/usr/snmpsim/data/

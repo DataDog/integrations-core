@@ -12,7 +12,11 @@ from contextlib import contextmanager
 from collections import defaultdict
 
 # 3rd party
-import adodbapi
+try:
+    import adodbapi
+except ImportError:
+    adodbapi = None
+
 try:
     import pyodbc
 except ImportError:
@@ -21,6 +25,9 @@ except ImportError:
 # project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
+
+if adodbapi is None and pyodbc is None:
+    raise ImportError('adodbapi or pyodbc must be installed to use this check.')
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'
@@ -90,9 +97,11 @@ class SQLServer(AgentCheck):
         ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', '')  # BULK_COUNT
     ]
-    valid_connectors = ['adodbapi']
+    valid_connectors = []
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL']
     default_adoprovider = 'SQLOLEDB'
+    if adodbapi is not None:
+        valid_connectors.append('adodbapi')
     if pyodbc is not None:
         valid_connectors.append('odbc')
     valid_tables = [
@@ -531,8 +540,11 @@ class SQLServer(AgentCheck):
             cursor = self.get_cursor(instance, self.DEFAULT_DB_KEY)
 
             try:
+                self.log.debug("Calling Stored Procedure : {}".format(proc))
                 cursor.callproc(proc)
                 rows = cursor.fetchall()
+                self.log.debug("Row count ({}) : {}".format(proc, cursor.rowcount))
+
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
 

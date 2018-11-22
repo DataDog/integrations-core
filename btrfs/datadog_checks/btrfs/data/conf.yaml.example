@@ -1,8 +1,19 @@
 init_config:
-# Not required for this check
+
 
 instances:
-  - excluded_devices: [] # List of devices to exclude
-# Optional tags to be applied to every emitted metric and service check.
-#   tags:
-#    - name:optional_tag
+  ## @param excluded_devices - list of string - required 
+  ## List of devices to exclude
+  #
+  - excluded_devices:
+  #    - <DEVICE_1>
+  #    - <DEVICE_2>
+
+  ## @param tags  - list of key:value element - optional 
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## 
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>

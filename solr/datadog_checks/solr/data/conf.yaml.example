@@ -7,10 +7,15 @@ instances:
   #                                                                       #   This requires the JDK to be installed and the path to tools.jar to be set below.
   #   tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar # To be set when process_name_regex is set
   #   name: solr_instance
-  #   # java_bin_path: /path/to/java # Optional, should be set if the agent cannot find your java executable
-  #   # java_options: "-Xmx200m -Xms50m" # Optional, Java JVM options
-  #   # trust_store_path: /path/to/trustStore.jks # Optional, should be set if ssl is enabled
-  #   # trust_store_password: password
+  #   java_bin_path: /path/to/java # Optional, should be set if the agent cannot find your java executable
+  #   java_options: "-Xmx200m -Xms50m" # Optional, Java JVM options
+  #
+  #   trust_store_path: /path/to/trustStore.jks # Optional, should be set if "com.sun.management.jmxremote.ssl" is set to true on the target JVM.
+  #   trust_store_password: password
+  #   key_store_path: /path/to/keyStore.jks # Optional, should be set if "com.sun.management.jmxremote.ssl.need.client.auth" is set to true on the target JVM.
+  #   key_store_password: password
+  #   rmi_registry_ssl: false # Optional, should be set to true if "com.sun.management.jmxremote.registry.ssl" is set to true on the target JVM.
+  #
   #   tags:
   #     env: stage
   #     newTag: test
@@ -27,7 +32,7 @@ init_config:
   conf:
 
 
-  # Solr 7 MBeans:
+  # Solr 7 MBeans
   - include:
       category: SEARCHER
       name:
@@ -160,67 +165,67 @@ init_config:
           metric_type: gauge
 
 
-  # Solr version < 7 MBeans:
-    - include:
-        type: searcher
-        attribute:
-          maxDoc:
-            alias: solr.searcher.maxdoc
-            metric_type: gauge
-          numDocs:
-            alias: solr.searcher.numdocs
-            metric_type: gauge
-          warmupTime:
-            alias: solr.searcher.warmup
-            metric_type: gauge
-    - include:
-        id: org.apache.solr.search.FastLRUCache
-        attribute:
-          cumulative_lookups:
-            alias: solr.cache.lookups
-            metric_type: counter
-          cumulative_hits:
-            alias: solr.cache.hits
-            metric_type: counter
-          cumulative_inserts:
-            alias: solr.cache.inserts
-            metric_type: counter
-          cumulative_evictions:
-            alias: solr.cache.evictions
-            metric_type: counter
-    - include:
-        id: org.apache.solr.search.LRUCache
-        attribute:
-          cumulative_lookups:
-            alias: solr.cache.lookups
-            metric_type: counter
-          cumulative_hits:
-            alias: solr.cache.hits
-            metric_type: counter
-          cumulative_inserts:
-            alias: solr.cache.inserts
-            metric_type: counter
-          cumulative_evictions:
-            alias: solr.cache.evictions
-            metric_type: counter
-    - include:
-        id: org.apache.solr.handler.component.SearchHandler
-        attribute:
-          errors:
-            alias: solr.search_handler.errors
-            metric_type: counter
-          requests:
-            alias: solr.search_handler.requests
-            metric_type: counter
-          timeouts:
-            alias: solr.search_handler.timeouts
-            metric_type: counter
-          totalTime:
-            alias: solr.search_handler.time
-            metric_type: counter
-          avgTimePerRequest:
-            alias: solr.search_handler.avg_time_per_req
-            metric_type: gauge
-          avgRequestsPerSecond:
-            alias: solr.search_handler.avg_requests_per_sec
-            metric_type: gauge
+  # Solr version < 7 MBeans
+  - include:
+      type: searcher
+      attribute:
+        maxDoc:
+          alias: solr.searcher.maxdoc
+          metric_type: gauge
+        numDocs:
+          alias: solr.searcher.numdocs
+          metric_type: gauge
+        warmupTime:
+          alias: solr.searcher.warmup
+          metric_type: gauge
+  - include:
+      id: org.apache.solr.search.FastLRUCache
+      attribute:
+        cumulative_lookups:
+          alias: solr.cache.lookups
+          metric_type: counter
+        cumulative_hits:
+          alias: solr.cache.hits
+          metric_type: counter
+        cumulative_inserts:
+          alias: solr.cache.inserts
+          metric_type: counter
+        cumulative_evictions:
+          alias: solr.cache.evictions
+          metric_type: counter
+  - include:
+      id: org.apache.solr.search.LRUCache
+      attribute:
+        cumulative_lookups:
+          alias: solr.cache.lookups
+          metric_type: counter
+        cumulative_hits:
+          alias: solr.cache.hits
+          metric_type: counter
+        cumulative_inserts:
+          alias: solr.cache.inserts
+          metric_type: counter
+        cumulative_evictions:
+          alias: solr.cache.evictions
+          metric_type: counter
+  - include:
+      id: org.apache.solr.handler.component.SearchHandler
+      attribute:
+        errors:
+          alias: solr.search_handler.errors
+          metric_type: counter
+        requests:
+          alias: solr.search_handler.requests
+          metric_type: counter
+        timeouts:
+          alias: solr.search_handler.timeouts
+          metric_type: counter
+        totalTime:
+          alias: solr.search_handler.time
+          metric_type: counter
+        avgTimePerRequest:
+          alias: solr.search_handler.avg_time_per_req
+          metric_type: gauge
+        avgRequestsPerSecond:
+          alias: solr.search_handler.avg_requests_per_sec
+          metric_type: gauge

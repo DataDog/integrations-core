@@ -2,43 +2,89 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import subprocess
-import time
 
 import pytest
 import requests
 
-from .common import HERE, URL, get_es_version
+from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.elastic import ESCheck
+from .common import HERE, URL, USER, PASSWORD
 
 
-@pytest.fixture(scope="session", autouse=True)
-def spin_up_elastic():
-    args = [
-        'docker-compose', '-f', os.path.join(HERE, 'compose', 'elastic.yaml')
-    ]
-    env = os.environ
-    env['ELASTIC_CONFIG'] = "dummy=true"
-    if get_es_version() >= [6, 3, 0]:
-        env['ELASTIC_CONFIG'] = "xpack.monitoring.collection.enabled=true"
-    subprocess.check_call(args + ["up", "-d"])
-    print("Waiting for ES to boot...")
+CUSTOM_TAGS = ['foo:bar', 'baz']
+COMPOSE_FILES_MAP = {
+    'elasticsearch_0_90': 'elasticsearch_0_90.yaml',
+    '1-alpine': 'legacy.yaml',
+    '2-alpine': 'legacy.yaml',
+}
 
-    for _ in xrange(20):
-        try:
-            res = requests.get(URL)
-            res.raise_for_status()
-            break
-        except Exception:
-            time.sleep(2)
 
-    # Create an index in ES
-    requests.put(URL, '/datadog/')
-    yield
-    subprocess.check_call(args + ["down"])
+def ping_elastic():
+    """
+    The PUT request we use to ping the server will create an index named `testindex`
+    as soon as ES is available. This is just one possible ping strategy but it's needed
+    as a fixture for tests that require that index to exist in order to pass.
+    """
+    response = requests.put('{}/testindex'.format(URL), auth=(USER, PASSWORD))
+    response.raise_for_status()
+
+
+@pytest.fixture(scope='session')
+def dd_environment(instance):
+    image_name = os.environ.get('ELASTIC_IMAGE')
+    compose_file = COMPOSE_FILES_MAP.get(image_name, 'docker-compose.yaml')
+    compose_file = os.path.join(HERE, 'compose', compose_file)
+
+    with docker_run(
+        compose_file=compose_file,
+        conditions=[WaitFor(ping_elastic)],
+    ):
+        yield instance
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+def elastic_check():
+    return ESCheck('elastic', {}, {})
+
+
+@pytest.fixture(scope='session')
+def instance():
+    return {
+        'url': URL,
+        'username': USER,
+        'password': PASSWORD,
+        'tags': CUSTOM_TAGS,
+    }
+
+
+@pytest.fixture(scope='session')
+def instance_normalize_hostname():
+    return {
+        'url': URL,
+        'username': USER,
+        'password': PASSWORD,
+        'tags': CUSTOM_TAGS,
+        'node_name_as_host': True,
+    }
+
+
+def _cluster_tags():
+    tags = [
+        'url:{}'.format(URL),
+        'cluster_name:test-cluster',
+    ]
+    tags.extend(CUSTOM_TAGS)
+
+    return tags
+
+
+@pytest.fixture
+def cluster_tags():
+    return _cluster_tags()
+
+
+@pytest.fixture
+def node_tags():
+    tags = _cluster_tags()
+    tags.append('node_name:test-node')
+    return tags

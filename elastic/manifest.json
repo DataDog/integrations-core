@@ -15,6 +15,9 @@
   "metric_prefix": "elasticsearch.",
   "metric_to_check": "elasticsearch.search.query.total",
   "name": "elastic",
+  "process_signatures": [
+    "java org.elasticsearch.bootstrap.Elasticsearch"
+  ],
   "public_title": "Datadog-ElasticSearch Integration",
   "short_description": "Monitor overall cluster status down to JVM heap usage and everything in between.",
   "support": "core",

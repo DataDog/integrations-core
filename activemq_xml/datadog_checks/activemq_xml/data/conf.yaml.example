@@ -1,22 +1,47 @@
 init_config:
 
 instances:
+
+  ## @param url - string - required
+  ## url to gather the stats from.
+  ## It should be something like http://<hostname>:8161
+  ## Note: the agent check will append /admin/xml/queues.jsp to the url
+  #
   - url: http://localhost:8161
-    # the url will probably be something like http://<hostname>:8161
-    # the agent check will append /admin/xml/queues.jsp to the url 
-    # username: username
-    # password: password
-    # suppress_errors: false # suppress connection errors if url is expected to be sometimes offline (eg standby host)
-       
-    #detailed_queues: # Optional. If you have more than 300 queues you need to list the ones you want to track
-      # - queue1
-      # - queue2
 
+  ## @param username - string - optional
+  ## Username from the credentials needed to connect to the url. 
+  #
+  #  username: <USERNAME>
+  
+  ## @param password - string - optional
+  ## Password from the credentials needed to connect to the host. 
+  #
+  #  password: <PASSWORD>
+  
+  ## @param suppress_errors - boolean - optional - default: false
+  ## Suppresses connection errors if url is expected to be sometimes offline (e.g. standby host).
+  #
+  #  suppress_errors: false
+     
+  ## @param detailed_queues - list of string - optional
+  ## If you have more than 300 queues you need to list the ones you want to track.
+  #
+  #  detailed_queues:
+  #    - <QUEUE_1>
+  #    - <QUEUE_2>
 
-    #detailed_topics: # Optional. If you have more than 300 topics you need to list the ones you want to track
-      # - topic1
-      # - topic2
+  ## @param detailed_topics - list of string - optional
+  ## If you have more than 300 topics you need to list the ones you want to track.
+  #
+  #  detailed_topics:
+  #    - <TOPIC_1>
+  #    - <TOPIC_2>
 
-    #detailed_subscribers: # Optional. If you have more than 300 subscribers you need to list the ones you want to track
-      # - subscriber1
-      # - subscriber2
+  ## @param detailed_subscribers - list of string - optional
+  ## If you have more than 300 subscribers you need to list the ones you want to track.
+  #
+  #  detailed_subscribers:
+  #   - <SUBSCRIBER_1>
+  #   - <SUBSCRIBER_2>
+

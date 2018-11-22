@@ -30,6 +30,7 @@ setup(
     version=ABOUT["__version__"],
     description='The Teamcity check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent teamcity check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
@@ -51,7 +52,6 @@ setup(
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     include_package_data=True,

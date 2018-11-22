@@ -5,16 +5,22 @@ from .clean import clean
 from .config import config
 from .create import create
 from .dep import dep
-from .manifest import manifest
+from .env import env
+from .meta import meta
 from .release import release
+from .run import run
 from .test import test
+from .validate import validate
 
 ALL_COMMANDS = (
     clean,
     config,
     create,
     dep,
-    manifest,
+    env,
+    meta,
     release,
+    run,
     test,
+    validate,
 )

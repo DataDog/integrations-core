@@ -16,6 +16,10 @@
   "metric_prefix": "zookeeper.",
   "metric_to_check": "zookeeper.connections",
   "name": "zk",
+  "process_signatures": [
+    "zkServer.sh start",
+    "java zoo.cfg"
+  ],
   "public_title": "Datadog-ZooKeeper Integration",
   "short_description": "Track client connections and latencies, and know when requests are backing up.",
   "support": "core",

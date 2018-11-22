@@ -46,10 +46,9 @@ PROMETHEUS_CHECK_INSTANCE = {
     'prometheus_url': 'http://fake.endpoint:10055/metrics',
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
     'namespace': 'prometheus',
-
     # Defaults for checks that were based on PrometheusCheck
     'send_monotonic_counter': False,
-    'health_service_check': True
+    'health_service_check': True,
 }
 
 
@@ -99,7 +98,9 @@ def mock_get():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
+            status_code=200,
+            iter_lines=lambda **kwargs: text_data.split("\n"),
+            headers={'Content-Type': text_content_type},
         ),
     ):
         yield text_data
@@ -125,14 +126,17 @@ def test_process_metric_gauge(aggregator, mocked_prometheus_check, mocked_promet
 
 def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """ Metric absent from the metrics_mapper """
-    filtered_gauge = GaugeMetricFamily('process_start_time_seconds', 'Start time of the process since unix epoch in seconds.')
+    filtered_gauge = GaugeMetricFamily(
+        'process_start_time_seconds', 'Start time of the process since unix epoch in seconds.'
+    )
     filtered_gauge.add_metric([], 123456789.0)
     mocked_prometheus_scraper_config['_dry_run'] = False
 
     check = mocked_prometheus_check
     check.process_metric(filtered_gauge, mocked_prometheus_scraper_config, metric_transformers={})
     check.log.debug.assert_called_with(
-        "Unable to handle metric: process_start_time_seconds - error: No handler function named 'process_start_time_seconds' defined"
+        "Unable to handle metric: process_start_time_seconds - "
+        "error: No handler function named 'process_start_time_seconds' defined"
     )
     aggregator.assert_all_metrics_covered()
 
@@ -141,9 +145,8 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
     """Tests poll using the text format"""
     check = mocked_prometheus_check
     mock_response = mock.MagicMock(
-        status_code=200,
-        iter_lines=lambda **kwargs: text_data.split("\n"),
-        headers={'Content-Type': text_content_type})
+        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
+    )
     with mock.patch('requests.get', return_value=mock_response, __name__="get"):
         response = check.poll(mocked_prometheus_scraper_config)
         messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
@@ -154,7 +157,9 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """ submitting metrics that contain labels should result in tags on the gauge call """
-    ref_gauge = GaugeMetricFamily('process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label'])
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
+    )
     ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
 
     check = mocked_prometheus_check
@@ -172,7 +177,9 @@ def test_submit_gauge_with_labels_and_hostname_override(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
     """ submitting metrics that contain labels should result in tags on the gauge call """
-    ref_gauge = GaugeMetricFamily('process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node'])
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
+    )
     ref_gauge.add_metric(['my_1st_label_value', 'foo'], 54927360.0)
 
     check = mocked_prometheus_check
@@ -206,7 +213,9 @@ def test_submit_gauge_with_labels_and_hostname_already_overridden(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
     """ submitting metrics that contain labels should result in tags on the gauge call """
-    ref_gauge = GaugeMetricFamily('process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node'])
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'node']
+    )
     ref_gauge.add_metric(['my_1st_label_value', 'foo'], 54927360.0)
 
     check = mocked_prometheus_check
@@ -225,7 +234,9 @@ def test_submit_gauge_with_labels_and_hostname_already_overridden(
 def test_labels_not_added_as_tag_once_for_each_metric(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge
 ):
-    ref_gauge = GaugeMetricFamily('process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label'])
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
+    )
     ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
 
     check = mocked_prometheus_check
@@ -249,21 +260,26 @@ def test_submit_gauge_with_custom_tags(
 ):
     """ Providing custom tags should add them as is on the gauge call """
     check = mocked_prometheus_check
-    tags = ['env:dev', 'app:my_pretty_app']
-    mocked_prometheus_scraper_config['custom_tags'] = tags
+    mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
+    mocked_prometheus_scraper_config['_metric_tags'] = ['foo:bar']
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check._submit(metric, ref_gauge, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.process.vm.bytes', 54927360.0, tags=tags, count=1)
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes',
+        54927360.0,
+        tags=mocked_prometheus_scraper_config['custom_tags'] + mocked_prometheus_scraper_config['_metric_tags'],
+        count=1
+    )
 
 
-def test_submit_gauge_with_labels_mapper(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
-):
+def test_submit_gauge_with_labels_mapper(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """
     Submitting metrics that contain labels mappers should result in tags
     on the gauge call with transformed tag names
     """
-    ref_gauge = GaugeMetricFamily('process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label'])
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
+    )
     ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
 
     check = mocked_prometheus_check
@@ -283,14 +299,14 @@ def test_submit_gauge_with_labels_mapper(
     )
 
 
-def test_submit_gauge_with_exclude_labels(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
-):
+def test_submit_gauge_with_exclude_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """
     Submitting metrics when filtering with exclude_labels should end up with
     a filtered tags list
     """
-    ref_gauge = GaugeMetricFamily('process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label'])
+    ref_gauge = GaugeMetricFamily(
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
+    )
     ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
 
     check = mocked_prometheus_check
@@ -342,7 +358,9 @@ def test_submit_summary(aggregator, mocked_prometheus_check, mocked_prometheus_s
 
 def test_submit_histogram(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
-    _histo.add_metric([], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 1), ("4.324e+08", 1) , ("+Inf", 3)], sum_value=3)
+    _histo.add_metric(
+        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 1), ("4.324e+08", 1), ("+Inf", 3)], sum_value=3
+    )
     check = mocked_prometheus_check
     check._submit('custom.histogram', _histo, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.histogram.sum', 3, tags=[], count=1)
@@ -371,9 +389,12 @@ def test_filter_sample_on_gauge(p_check, mocked_prometheus_scraper_config):
         '# TYPE kube_deployment_status_replicas gauge\n'
         'kube_deployment_status_replicas{deployment="event-exporter-v0.1.7"} 1\n'
         'kube_deployment_status_replicas{deployment="heapster-v1.4.3"} 1\n'
-        'kube_deployment_status_replicas{deployment="kube-dns"} 2\n')
+        'kube_deployment_status_replicas{deployment="kube-dns"} 2\n'
+    )
 
-    expected_metric = GaugeMetricFamily('kube_deployment_status_replicas', 'The number of replicas per deployment.', labels=['deployment'])
+    expected_metric = GaugeMetricFamily(
+        'kube_deployment_status_replicas', 'The number of replicas per deployment.', labels=['deployment']
+    )
     expected_metric.add_metric(['event-exporter-v0.1.7'], 1)
     expected_metric.add_metric(['heapster-v1.4.3'], 1)
 
@@ -386,6 +407,7 @@ def test_filter_sample_on_gauge(p_check, mocked_prometheus_scraper_config):
     assert 1 == len(metrics)
     current_metric = metrics[0]
     assert expected_metric == current_metric
+
 
 def test_parse_one_gauge(p_check, mocked_prometheus_scraper_config):
     """
@@ -404,7 +426,9 @@ def test_parse_one_gauge(p_check, mocked_prometheus_scraper_config):
         "etcd_server_has_leader 1\n"
     )
 
-    expected_etcd_metric = GaugeMetricFamily('etcd_server_has_leader', 'Whether or not a leader exists. 1 is existence, 0 is not.')
+    expected_etcd_metric = GaugeMetricFamily(
+        'etcd_server_has_leader', 'Whether or not a leader exists. 1 is existence, 0 is not.'
+    )
     expected_etcd_metric.add_metric([], 1)
 
     # Iter on the generator to get all metrics
@@ -470,27 +494,30 @@ def test_parse_one_histograms_with_label(p_check, mocked_prometheus_scraper_conf
         'etcd_disk_wal_fsync_duration_seconds_count{app="vault"} 4\n'
     )
 
-    expected_etcd_vault_metric = HistogramMetricFamily('etcd_disk_wal_fsync_duration_seconds',
-        'The latency distributions of fsync called by wal.',
-        labels=['app']
+    expected_etcd_vault_metric = HistogramMetricFamily(
+        'etcd_disk_wal_fsync_duration_seconds', 'The latency distributions of fsync called by wal.', labels=['app']
     )
-    expected_etcd_vault_metric.add_metric(['vault'], buckets=[
-        ('0.001', 2.0),
-        ('0.002', 2.0),
-        ('0.004', 2.0),
-        ('0.008', 2.0),
-        ('0.016', 4.0),
-        ('0.032', 4.0),
-        ('0.064', 4.0),
-        ('0.128', 4.0),
-        ('0.256', 4.0),
-        ('0.512', 4.0),
-        ('1.024', 4.0),
-        ('2.048', 4.0),
-        ('4.096', 4.0),
-        ('8.192', 4.0),
-        ('+Inf', 4.0)
-    ], sum_value=0.026131671)
+    expected_etcd_vault_metric.add_metric(
+        ['vault'],
+        buckets=[
+            ('0.001', 2.0),
+            ('0.002', 2.0),
+            ('0.004', 2.0),
+            ('0.008', 2.0),
+            ('0.016', 4.0),
+            ('0.032', 4.0),
+            ('0.064', 4.0),
+            ('0.128', 4.0),
+            ('0.256', 4.0),
+            ('0.512', 4.0),
+            ('1.024', 4.0),
+            ('2.048', 4.0),
+            ('4.096', 4.0),
+            ('8.192', 4.0),
+            ('+Inf', 4.0),
+        ],
+        sum_value=0.026131671,
+    )
 
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, text_content_type)
@@ -502,7 +529,9 @@ def test_parse_one_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     assert expected_etcd_vault_metric.documentation == current_metric.documentation
     assert expected_etcd_vault_metric.name == current_metric.name
     assert expected_etcd_vault_metric.type == current_metric.type
-    assert sorted(expected_etcd_vault_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
+    assert sorted(expected_etcd_vault_metric.samples, key=lambda i: i[0]) == sorted(
+        current_metric.samples, key=lambda i: i[0]
+    )
 
 
 def test_parse_one_histogram(p_check, mocked_prometheus_scraper_config):
@@ -599,24 +628,30 @@ def test_parse_one_histogram(p_check, mocked_prometheus_scraper_config):
         'etcd_disk_wal_fsync_duration_seconds_count 4\n'
     )
 
-    expected_etcd_metric = HistogramMetricFamily('etcd_disk_wal_fsync_duration_seconds', 'The latency distributions of fsync called by wal.')
-    expected_etcd_metric.add_metric([], buckets=[
-        ('0.001', 2.0),
-        ('0.002', 2.0),
-        ('0.004', 2.0),
-        ('0.008', 2.0),
-        ('0.016', 4.0),
-        ('0.032', 4.0),
-        ('0.064', 4.0),
-        ('0.128', 4.0),
-        ('0.256', 4.0),
-        ('0.512', 4.0),
-        ('1.024', 4.0),
-        ('2.048', 4.0),
-        ('4.096', 4.0),
-        ('8.192', 4.0),
-        ('+Inf', 4.0)
-    ], sum_value=0.026131671)
+    expected_etcd_metric = HistogramMetricFamily(
+        'etcd_disk_wal_fsync_duration_seconds', 'The latency distributions of fsync called by wal.'
+    )
+    expected_etcd_metric.add_metric(
+        [],
+        buckets=[
+            ('0.001', 2.0),
+            ('0.002', 2.0),
+            ('0.004', 2.0),
+            ('0.008', 2.0),
+            ('0.016', 4.0),
+            ('0.032', 4.0),
+            ('0.064', 4.0),
+            ('0.128', 4.0),
+            ('0.256', 4.0),
+            ('0.512', 4.0),
+            ('1.024', 4.0),
+            ('2.048', 4.0),
+            ('4.096', 4.0),
+            ('8.192', 4.0),
+            ('+Inf', 4.0),
+        ],
+        sum_value=0.026131671,
+    )
 
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, text_content_type)
@@ -627,7 +662,10 @@ def test_parse_one_histogram(p_check, mocked_prometheus_scraper_config):
     assert expected_etcd_metric.documentation == current_metric.documentation
     assert expected_etcd_metric.name == current_metric.name
     assert expected_etcd_metric.type == current_metric.type
-    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
+    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(
+        current_metric.samples, key=lambda i: i[0]
+    )
+
 
 def test_parse_two_histograms_with_label(p_check, mocked_prometheus_scraper_config):
     text_data = (
@@ -672,42 +710,50 @@ def test_parse_two_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     expected_etcd_metric = HistogramMetricFamily(
         'etcd_disk_wal_fsync_duration_seconds',
         'The latency distributions of fsync called by wal.',
-        labels=['kind', 'app']
+        labels=['kind', 'app'],
     )
-    expected_etcd_metric.add_metric(['fs', 'vault'], buckets=[
-        ('0.001', 2.0),
-        ('0.002', 2.0),
-        ('0.004', 2.0),
-        ('0.008', 2.0),
-        ('0.016', 4.0),
-        ('0.032', 4.0),
-        ('0.064', 4.0),
-        ('0.128', 4.0),
-        ('0.256', 4.0),
-        ('0.512', 4.0),
-        ('1.024', 4.0),
-        ('2.048', 4.0),
-        ('4.096', 4.0),
-        ('8.192', 4.0),
-        ('+Inf', 4.0)
-    ], sum_value=0.026131671)
-    expected_etcd_metric.add_metric(['fs', 'kubernetes'], buckets=[
-        ('0.001', 718.0),
-        ('0.002', 740.0),
-        ('0.004', 743.0),
-        ('0.008', 748.0),
-        ('0.016', 751.0),
-        ('0.032', 751.0),
-        ('0.064', 751.0),
-        ('0.128', 751.0),
-        ('0.256', 751.0),
-        ('0.512', 751.0),
-        ('1.024', 751.0),
-        ('2.048', 751.0),
-        ('4.096', 751.0),
-        ('8.192', 751.0),
-        ('+Inf', 751.0)
-    ], sum_value=0.3097010759999998)
+    expected_etcd_metric.add_metric(
+        ['fs', 'vault'],
+        buckets=[
+            ('0.001', 2.0),
+            ('0.002', 2.0),
+            ('0.004', 2.0),
+            ('0.008', 2.0),
+            ('0.016', 4.0),
+            ('0.032', 4.0),
+            ('0.064', 4.0),
+            ('0.128', 4.0),
+            ('0.256', 4.0),
+            ('0.512', 4.0),
+            ('1.024', 4.0),
+            ('2.048', 4.0),
+            ('4.096', 4.0),
+            ('8.192', 4.0),
+            ('+Inf', 4.0),
+        ],
+        sum_value=0.026131671,
+    )
+    expected_etcd_metric.add_metric(
+        ['fs', 'kubernetes'],
+        buckets=[
+            ('0.001', 718.0),
+            ('0.002', 740.0),
+            ('0.004', 743.0),
+            ('0.008', 748.0),
+            ('0.016', 751.0),
+            ('0.032', 751.0),
+            ('0.064', 751.0),
+            ('0.128', 751.0),
+            ('0.256', 751.0),
+            ('0.512', 751.0),
+            ('1.024', 751.0),
+            ('2.048', 751.0),
+            ('4.096', 751.0),
+            ('8.192', 751.0),
+            ('+Inf', 751.0),
+        ],
+        sum_value=0.3097010759999998,
+    )
 
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, text_content_type)
@@ -723,7 +769,9 @@ def test_parse_two_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     assert expected_etcd_metric.documentation == current_metric.documentation
     assert expected_etcd_metric.name == current_metric.name
     assert expected_etcd_metric.type == current_metric.type
-    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
+    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(
+        current_metric.samples, key=lambda i: i[0]
+    )
 
 
 def test_parse_one_summary(p_check, mocked_prometheus_scraper_config):
@@ -764,11 +812,13 @@ def test_parse_one_summary(p_check, mocked_prometheus_scraper_config):
         'http_response_size_bytes_count{handler="prometheus"} 5\n'
     )
 
-    expected_etcd_metric = SummaryMetricFamily('http_response_size_bytes', 'The HTTP response sizes in bytes.', labels=["handler"])
+    expected_etcd_metric = SummaryMetricFamily(
+        'http_response_size_bytes', 'The HTTP response sizes in bytes.', labels=["handler"]
+    )
     expected_etcd_metric.add_metric(["prometheus"], 5.0, 120512.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler":"prometheus", "quantile": "0.5"}, 24547.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler":"prometheus", "quantile": "0.9"}, 25763.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler":"prometheus", "quantile": "0.99"}, 25763.0)
+    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler": "prometheus", "quantile": "0.5"}, 24547.0)
+    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler": "prometheus", "quantile": "0.9"}, 25763.0)
+    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler": "prometheus", "quantile": "0.99"}, 25763.0)
 
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, text_content_type)
@@ -780,7 +830,10 @@ def test_parse_one_summary(p_check, mocked_prometheus_scraper_config):
     assert expected_etcd_metric.documentation == current_metric.documentation
     assert expected_etcd_metric.name == current_metric.name
     assert expected_etcd_metric.type == current_metric.type
-    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
+    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(
+        current_metric.samples, key=lambda i: i[0]
+    )
+
 
 def test_parse_one_summary_with_no_quantile(p_check, mocked_prometheus_scraper_config):
     """
@@ -805,7 +858,9 @@ def test_parse_one_summary_with_no_quantile(p_check, mocked_prometheus_scraper_c
         'http_response_size_bytes_count{handler="prometheus"} 5\n'
     )
 
-    expected_etcd_metric = SummaryMetricFamily('http_response_size_bytes', 'The HTTP response sizes in bytes.', labels=["handler"])
+    expected_etcd_metric = SummaryMetricFamily(
+        'http_response_size_bytes', 'The HTTP response sizes in bytes.', labels=["handler"]
+    )
     expected_etcd_metric.add_metric(["prometheus"], 5.0, 120512.0)
 
     # Iter on the generator to get all metrics
@@ -818,7 +873,9 @@ def test_parse_one_summary_with_no_quantile(p_check, mocked_prometheus_scraper_c
     assert expected_etcd_metric.documentation == current_metric.documentation
     assert expected_etcd_metric.name == current_metric.name
     assert expected_etcd_metric.type == current_metric.type
-    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
+    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(
+        current_metric.samples, key=lambda i: i[0]
+    )
 
 
 def test_parse_two_summaries_with_labels(p_check, mocked_prometheus_scraper_config):
@@ -837,15 +894,29 @@ def test_parse_two_summaries_with_labels(p_check, mocked_prometheus_scraper_conf
         'http_response_size_bytes_count{from="cluster",handler="prometheus"} 4\n'
     )
 
-    expected_etcd_metric = SummaryMetricFamily('http_response_size_bytes', 'The HTTP response sizes in bytes.', labels=["from","handler"])
-    expected_etcd_metric.add_metric(["internet","prometheus"], 5.0, 120512.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"from":"internet", "handler":"prometheus", "quantile": "0.5"}, 24547.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"from":"internet", "handler":"prometheus", "quantile": "0.9"}, 25763.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"from":"internet", "handler":"prometheus", "quantile": "0.99"}, 25763.0)
-    expected_etcd_metric.add_metric(["cluster","prometheus"], 4.0, 94913.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"from":"cluster", "handler":"prometheus", "quantile": "0.5"}, 24615.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"from":"cluster", "handler":"prometheus", "quantile": "0.9"}, 24627.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"from":"cluster", "handler":"prometheus", "quantile": "0.99"}, 24627.0)
+    expected_etcd_metric = SummaryMetricFamily(
+        'http_response_size_bytes', 'The HTTP response sizes in bytes.', labels=["from", "handler"]
+    )
+    expected_etcd_metric.add_metric(["internet", "prometheus"], 5.0, 120512.0)
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"from": "internet", "handler": "prometheus", "quantile": "0.5"}, 24547.0
+    )
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"from": "internet", "handler": "prometheus", "quantile": "0.9"}, 25763.0
+    )
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"from": "internet", "handler": "prometheus", "quantile": "0.99"}, 25763.0
+    )
+    expected_etcd_metric.add_metric(["cluster", "prometheus"], 4.0, 94913.0)
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"from": "cluster", "handler": "prometheus", "quantile": "0.5"}, 24615.0
+    )
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"from": "cluster", "handler": "prometheus", "quantile": "0.9"}, 24627.0
+    )
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"from": "cluster", "handler": "prometheus", "quantile": "0.99"}, 24627.0
+    )
 
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, text_content_type)
@@ -858,7 +929,10 @@ def test_parse_two_summaries_with_labels(p_check, mocked_prometheus_scraper_conf
     assert expected_etcd_metric.documentation == current_metric.documentation
     assert expected_etcd_metric.name == current_metric.name
     assert expected_etcd_metric.type == current_metric.type
-    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
+    assert sorted(expected_etcd_metric.samples, key=lambda i: i[0]) == sorted(
+        current_metric.samples, key=lambda i: i[0]
+    )
+
 
 def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_config):
     text_data = (
@@ -871,11 +945,19 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
         'http_response_size_bytes_count{handler="prometheus"} 0\n'
     )
 
-    expected_etcd_metric = SummaryMetricFamily('http_response_size_bytes', 'The HTTP response sizes in bytes.', labels=["handler"])
+    expected_etcd_metric = SummaryMetricFamily(
+        'http_response_size_bytes', 'The HTTP response sizes in bytes.', labels=["handler"]
+    )
     expected_etcd_metric.add_metric(["prometheus"], 0.0, 0.0)
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler":"prometheus", "quantile": "0.5"}, float('nan'))
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler":"prometheus", "quantile": "0.9"}, float('nan'))
-    expected_etcd_metric.add_sample("http_response_size_bytes", {"handler":"prometheus", "quantile": "0.99"}, float('nan'))
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"handler": "prometheus", "quantile": "0.5"}, float('nan')
+    )
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"handler": "prometheus", "quantile": "0.9"}, float('nan')
+    )
+    expected_etcd_metric.add_sample(
+        "http_response_size_bytes", {"handler": "prometheus", "quantile": "0.99"}, float('nan')
+    )
 
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, text_content_type)
@@ -890,6 +972,7 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
     assert math.isnan(current_metric.samples[0][2])
     assert math.isnan(current_metric.samples[1][2])
     assert math.isnan(current_metric.samples[2][2])
+
 
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join on text format """
@@ -920,138 +1003,268 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
     check.process(mocked_prometheus_scraper_config)
 
     # check a bunch of metrics
-    aggregator.assert_metric('ksm.pod.ready', 1.0,
-        tags=['pod:event-exporter-v0.1.7-958884745-qgnbw',
+    aggregator.assert_metric(
+        'ksm.pod.ready',
+        1.0,
+        tags=[
+            'pod:event-exporter-v0.1.7-958884745-qgnbw',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.32.3.14'], count=1)
-    aggregator.assert_metric('ksm.pod.ready', 1.0,
-        tags=['pod:fluentd-gcp-v2.0.9-6dj58',
+            'pod_ip:11.32.3.14',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.ready',
+        1.0,
+        tags=[
+            'pod:fluentd-gcp-v2.0.9-6dj58',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.132.0.7'], count=1)
-    aggregator.assert_metric('ksm.pod.ready', 1.0,
-        tags=['pod:fluentd-gcp-v2.0.9-z348z',
+            'pod_ip:11.132.0.7',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.ready',
+        1.0,
+        tags=[
+            'pod:fluentd-gcp-v2.0.9-z348z',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-            'pod_ip:11.132.0.14'], count=1)
-    aggregator.assert_metric('ksm.pod.ready', 1.0,
-        tags=['pod:heapster-v1.4.3-2027615481-lmjm5',
+            'pod_ip:11.132.0.14',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.ready',
+        1.0,
+        tags=[
+            'pod:heapster-v1.4.3-2027615481-lmjm5',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-            'pod_ip:11.32.5.7'], count=1)
-    aggregator.assert_metric('ksm.pod.ready', 1.0,
-        tags=['pod:kube-dns-3092422022-lvrmx',
+            'pod_ip:11.32.5.7',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.ready',
+        1.0,
+        tags=[
+            'pod:kube-dns-3092422022-lvrmx',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.32.3.10'], count=1)
-    aggregator.assert_metric('ksm.pod.ready', 1.0,
-        tags=['pod:kube-dns-3092422022-x0tjx',
+            'pod_ip:11.32.3.10',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.ready',
+        1.0,
+        tags=[
+            'pod:kube-dns-3092422022-x0tjx',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.32.3.9'], count=1)
-    aggregator.assert_metric('ksm.pod.ready', 1.0,
-        tags=['pod:kube-dns-autoscaler-97162954-mf6d3',
+            'pod_ip:11.32.3.9',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.ready',
+        1.0,
+        tags=[
+            'pod:kube-dns-autoscaler-97162954-mf6d3',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-            'pod_ip:11.32.5.6'], count=1)
-    aggregator.assert_metric('ksm.pod.ready', 1.0,
-        tags=['pod:kube-proxy-gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+            'pod_ip:11.32.5.6',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.ready',
+        1.0,
+        tags=[
+            'pod:kube-proxy-gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.132.0.7'], count=1)
-    aggregator.assert_metric('ksm.pod.scheduled', 1.0,
-        tags=['pod:ungaged-panther-kube-state-metrics-3918010230-64xwc',
+            'pod_ip:11.132.0.7',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.scheduled',
+        1.0,
+        tags=[
+            'pod:ungaged-panther-kube-state-metrics-3918010230-64xwc',
             'namespace:default',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-            'pod_ip:11.32.5.45'], count=1)
-    aggregator.assert_metric('ksm.pod.scheduled', 1.0,
-        tags=['pod:event-exporter-v0.1.7-958884745-qgnbw',
+            'pod_ip:11.32.5.45',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.scheduled',
+        1.0,
+        tags=[
+            'pod:event-exporter-v0.1.7-958884745-qgnbw',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.32.3.14'], count=1)
-    aggregator.assert_metric('ksm.pod.scheduled', 1.0,
-        tags=['pod:fluentd-gcp-v2.0.9-6dj58',
-        'namespace:kube-system',
-        'condition:true',
-        'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-        'pod_ip:11.132.0.7'], count=1)
-    aggregator.assert_metric('ksm.pod.scheduled', 1.0,
-        tags=['pod:fluentd-gcp-v2.0.9-z348z',
-        'namespace:kube-system',
-        'condition:true',
-        'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-        'pod_ip:11.132.0.14'], count=1)
-    aggregator.assert_metric('ksm.pod.scheduled', 1.0,
-        tags=['pod:heapster-v1.4.3-2027615481-lmjm5',
+            'pod_ip:11.32.3.14',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.scheduled',
+        1.0,
+        tags=[
+            'pod:fluentd-gcp-v2.0.9-6dj58',
+            'namespace:kube-system',
+            'condition:true',
+            'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+            'pod_ip:11.132.0.7',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.scheduled',
+        1.0,
+        tags=[
+            'pod:fluentd-gcp-v2.0.9-z348z',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
-            'pod_ip:11.32.5.7'], count=1)
-    aggregator.assert_metric('ksm.pod.scheduled', 1.0,
-        tags=['pod:kube-dns-3092422022-lvrmx',
+            'pod_ip:11.132.0.14',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.scheduled',
+        1.0,
+        tags=[
+            'pod:heapster-v1.4.3-2027615481-lmjm5',
+            'namespace:kube-system',
+            'condition:true',
+            'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
+            'pod_ip:11.32.5.7',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.scheduled',
+        1.0,
+        tags=[
+            'pod:kube-dns-3092422022-lvrmx',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.32.3.10'], count=1)
-    aggregator.assert_metric('ksm.pod.scheduled', 1.0,
-        tags=['pod:kube-dns-3092422022-x0tjx',
+            'pod_ip:11.32.3.10',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.pod.scheduled',
+        1.0,
+        tags=[
+            'pod:kube-dns-3092422022-x0tjx',
             'namespace:kube-system',
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
-            'pod_ip:11.32.3.9'], count=1)
-    aggregator.assert_metric('ksm.deploy.replicas.available', 1.0,
-        tags=['namespace:kube-system',
+            'pod_ip:11.32.3.9',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.deploy.replicas.available',
+        1.0,
+        tags=[
+            'namespace:kube-system',
             'deployment:event-exporter-v0.1.7',
             'label_k8s_app:event-exporter',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
-            'label_kubernetes_io_cluster_service:true'], count=1)
-    aggregator.assert_metric('ksm.deploy.replicas.available', 1.0,
-        tags=['namespace:kube-system',
+            'label_kubernetes_io_cluster_service:true',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.deploy.replicas.available',
+        1.0,
+        tags=[
+            'namespace:kube-system',
             'deployment:heapster-v1.4.3',
             'label_k8s_app:heapster',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
-            'label_kubernetes_io_cluster_service:true'], count=1)
-    aggregator.assert_metric('ksm.deploy.replicas.available', 2.0,
-        tags=['namespace:kube-system',
+            'label_kubernetes_io_cluster_service:true',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.deploy.replicas.available',
+        2.0,
+        tags=[
+            'namespace:kube-system',
             'deployment:kube-dns',
             'label_kubernetes_io_cluster_service:true',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
-            'label_k8s_app:kube-dns'], count=1)
-    aggregator.assert_metric('ksm.deploy.replicas.available', 1.0,
-        tags=['namespace:kube-system',
+            'label_k8s_app:kube-dns',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.deploy.replicas.available',
+        1.0,
+        tags=[
+            'namespace:kube-system',
             'deployment:kube-dns-autoscaler',
             'label_kubernetes_io_cluster_service:true',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
-            'label_k8s_app:kube-dns-autoscaler'], count=1)
-    aggregator.assert_metric('ksm.deploy.replicas.available', 1.0,
-        tags=['namespace:kube-system',
+            'label_k8s_app:kube-dns-autoscaler',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.deploy.replicas.available',
+        1.0,
+        tags=[
+            'namespace:kube-system',
             'deployment:kubernetes-dashboard',
             'label_kubernetes_io_cluster_service:true',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
-            'label_k8s_app:kubernetes-dashboard'], count=1)
-    aggregator.assert_metric('ksm.deploy.replicas.available', 1.0,
-        tags=['namespace:kube-system',
+            'label_k8s_app:kubernetes-dashboard',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.deploy.replicas.available',
+        1.0,
+        tags=[
+            'namespace:kube-system',
             'deployment:l7-default-backend',
             'label_k8s_app:glbc',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
-            'label_kubernetes_io_cluster_service:true'], count=1)
-    aggregator.assert_metric('ksm.deploy.replicas.available', 1.0,
-        tags=['namespace:kube-system',
-            'deployment:tiller-deploy'], count=1)
-    aggregator.assert_metric('ksm.deploy.replicas.available', 1.0,
-        tags=['namespace:default',
-            'deployment:ungaged-panther-kube-state-metrics'], count=1)
+            'label_kubernetes_io_cluster_service:true',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.deploy.replicas.available', 1.0, tags=['namespace:kube-system', 'deployment:tiller-deploy'], count=1
+    )
+    aggregator.assert_metric(
+        'ksm.deploy.replicas.available',
+        1.0,
+        tags=['namespace:default', 'deployment:ungaged-panther-kube-state-metrics'],
+        count=1,
+    )
+
 
 def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join GC on text format """
@@ -1102,6 +1315,7 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
         assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
         assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
         assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
+
 
 def test_label_joins_missconfigured(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join missconfigured label is ignored """
@@ -1162,7 +1376,10 @@ def test_label_join_not_existing(aggregator, mocked_prometheus_check, mocked_pro
         'ksm.pod.ready', 1.0, tags=['pod:fluentd-gcp-v2.0.9-z348z', 'namespace:kube-system', 'condition:true'], count=1
     )
 
-def test_label_join_metric_not_existing(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+
+def test_label_join_metric_not_existing(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get
+):
     """ Tests label join on non existing metric is ignored """
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
@@ -1228,10 +1445,15 @@ def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, 
     check = mocked_prometheus_check
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
+    mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
     check.process(mocked_prometheus_scraper_config)
 
     aggregator.assert_service_check(
-        'ksm.prometheus.health', status=OpenMetricsBaseCheck.OK, tags=['endpoint:http://fake.endpoint:10055/metrics'], count=1
+        'ksm.prometheus.health',
+        status=OpenMetricsBaseCheck.OK,
+        tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
+        count=1,
     )
 
 
@@ -1240,11 +1462,17 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
     check = mocked_prometheus_check
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
+    mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
     with pytest.raises(requests.ConnectionError):
         check.process(mocked_prometheus_scraper_config)
     aggregator.assert_service_check(
-        'ksm.prometheus.health', status=OpenMetricsBaseCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"], count=1
+        'ksm.prometheus.health',
+        status=OpenMetricsBaseCheck.CRITICAL,
+        tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
+        count=1,
     )
+
 
 def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_config):
     check = mocked_prometheus_check
@@ -1255,12 +1483,9 @@ def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_co
         "line with string1",
         "line with string2",
         "line with string1 and string2",
-        "line with string"
+        "line with string",
     ]
-    expected_out = [
-        "line with string3",
-        "line with string"
-    ]
+    expected_out = ["line with string3", "line with string"]
 
     filtered = [x for x in check._text_filter_input(lines_in, mocked_prometheus_scraper_config)]
     assert filtered == expected_out

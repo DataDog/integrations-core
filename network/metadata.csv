@@ -5,40 +5,40 @@ system.net.packets_in.count,gauge,,packet,second,The number of packets of data r
 system.net.packets_in.error,gauge,,error,second,The number of packet receive errors detected by the device driver.,-1,system,pkts in err
 system.net.packets_out.count,gauge,,packet,second,The number of packets of data transmitted by the interface.,0,system,packets out
 system.net.packets_out.error,gauge,,error,second,The number of packet transmit errors detected by the device driver.,-1,system,pkts out err
-system.net.tcp.in_segs,gauge,,segment,second,The number of TCP segments received.,0,system,segs in
-system.net.tcp.in_segs.count,count,,segment,,Total number of received TCP segments.,0,system,segs in
-system.net.tcp.out_segs,gauge,,segment,second,The number of TCP segments transmitted.,0,system,segs out
-system.net.tcp.out_segs.count,count,,segment,,Total number of transmitted TCP segments.,0,system,segs out
-system.net.tcp.rcv_packs,gauge,,packet,second,The number of TCP packets received.,0,system,pkts rcvd
-system.net.tcp.retrans_packs,gauge,,packet,second,The number of TCP packets retransmitted.,0,system,pkts retrans
-system.net.tcp.retrans_segs,gauge,,segment,second,The number of TCP segments retransmitted.,0,system,segs retrans
-system.net.tcp.retrans_segs.count,count,,segment,,Total number of retransmitted TCP segments.,0,system,segs retrans
-system.net.tcp.sent_packs,gauge,,packet,second,The number of TCP packets transmitted.,0,system,pkts sent
-system.net.tcp.listen_overflows,gauge,,,,The number of times connections have overflowed the accept buffer. Available since Agent v5.14.0.,-1,system,tcp listen overflows
-system.net.tcp.listen_overflows.count,count,,,,Total number of times connections have overflowed the accept buffer.,-1,system,tcp listen overflows
-system.net.tcp.listen_drops,gauge,,,,The number of times connections have dropped out of listen. Available since Agent v5.14.0.,-1,system,tcp listen drops
-system.net.tcp.listen_drops.count,count,,,,Total number of times connections have dropped out of listen.,-1,system,tcp listen drops
-system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped because there wasn't room in the TCP backlog. Available since Agent v5.14.0.,-1,system,tcp backlog drops
-system.net.tcp.backlog_drops.count,count,,packet,,Total number of packets dropped because there wasn't room in the TCP backlog.,-1,system,tcp backlog drops
-system.net.tcp.failed_retransmits.count,count,,packet,,Total number of packets that failed to be retransmitted.,-1,system,tcp failed retrans
+system.net.tcp.in_segs,gauge,,segment,second,The number of TCP segments received (Linux or Solaris only).,0,system,segs in
+system.net.tcp.in_segs.count,count,,segment,,Total number of received TCP segments (Linux or Solaris only).,0,system,segs in
+system.net.tcp.out_segs,gauge,,segment,second,The number of TCP segments transmitted (Linux or Solaris only).,0,system,segs out
+system.net.tcp.out_segs.count,count,,segment,,Total number of transmitted TCP segments (Linux or Solaris only).,0,system,segs out
+system.net.tcp.rcv_packs,gauge,,packet,second,The number of TCP packets received (BDS only).,0,system,pkts rcvd
+system.net.tcp.retrans_packs,gauge,,packet,second,The number of TCP packets retransmitted (BDS only).,0,system,pkts retrans
+system.net.tcp.retrans_segs,gauge,,segment,second,The number of TCP segments retransmitted (Linux or Solaris only).,0,system,segs retrans
+system.net.tcp.retrans_segs.count,count,,segment,,Total number of retransmitted TCP segments (Linux or Solaris only).,0,system,segs retrans
+system.net.tcp.sent_packs,gauge,,packet,second,The number of TCP packets transmitted (BDS only).,0,system,pkts sent
+system.net.tcp.listen_overflows,gauge,,,,The number of times connections have overflowed the accept buffer (Linux only). Available since Agent v5.14.0.,-1,system,tcp listen overflows
+system.net.tcp.listen_overflows.count,count,,,,Total number of times connections have overflowed the accept buffer (Linux only).,-1,system,tcp listen overflows
+system.net.tcp.listen_drops,gauge,,,,The number of times connections have dropped out of listen (Linux only). Available since Agent v5.14.0.,-1,system,tcp listen drops
+system.net.tcp.listen_drops.count,count,,,,Total number of times connections have dropped out of listen (Linux only).,-1,system,tcp listen drops
+system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped because there wasn't room in the TCP backlog (Linux only). Available since Agent v5.14.0.,-1,system,tcp backlog drops
+system.net.tcp.backlog_drops.count,count,,packet,,Total number of packets dropped because there wasn't room in the TCP backlog (Linux only).,-1,system,tcp backlog drops
+system.net.tcp.failed_retransmits.count,count,,packet,,Total number of packets that failed to be retransmitted (Linux only).,-1,system,tcp failed retrans
 system.net.tcp4.closing,gauge,,connection,second,The number of TCP IPv4 closing connections. ,0,system,tcp4 closing
-system.net.tcp4.established,gauge,,connection,second,The number of TCP IPv4 closing connections. ,0,system,tcp4 established
+system.net.tcp4.established,gauge,,connection,second,The number of TCP IPv4 established connections. ,0,system,tcp4 established
 system.net.tcp4.listening,gauge,,connection,second,The number of TCP IPv4 listening connections. ,0,system,tcp4 listening
 system.net.tcp4.opening,gauge,,connection,second,The number of TCP IPv4 opening connections. ,0,system,tcp4 opening
 system.net.tcp6.closing,gauge,,connection,second,The number of TCP IPv6 closing connections. ,0,system,tcp6 closing
-system.net.tcp6.established,gauge,,connection,second,The number of TCP IPv6 closing connections. ,0,system,tcp6 established
+system.net.tcp6.established,gauge,,connection,second,The number of TCP IPv6 established connections. ,0,system,tcp6 established
 system.net.tcp6.listening,gauge,,connection,second,The number of TCP IPv6 listening connections. ,0,system,tcp6 listening
 system.net.tcp6.opening,gauge,,connection,second,The number of TCP IPv6 opening connections. ,0,system,tcp6 opening
-system.net.udp.in_datagrams,gauge,,datagram,second,The rate of UDP datagrams delivered to UDP users.,0,system,udp in datagrams
-system.net.udp.in_datagrams.count,count,,datagram,,Total number of UDP datagrams delivered to UDP users.,0,system,udp in datagrams
-system.net.udp.in_errors,gauge,,datagram,second,The rate of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.,-1,system,udp in errors
-system.net.udp.in_errors.count,count,,datagram,,Total number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.,-1,system,udp in errors
-system.net.udp.no_ports,gauge,,datagram,second,The rate of received UDP datagrams for which there was no application at the destination port.,-1,system,udp no_ports
-system.net.udp.no_ports.count,count,,datagram,,Total number of received UDP datagrams for which there was no application at the destination port.,-1,system,udp no_ports
-system.net.udp.out_datagrams,gauge,,datagram,second,The rate of UDP datagrams sent from this entity.,0,system,udp out datagrams
-system.net.udp.out_datagrams.count,count,,datagram,,Total number of UDP datagrams sent from this entity.,0,system,udp out datagrams
-system.net.udp.rcv_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the receive buffer.,-1,system,udp rcv buf errs
-system.net.udp.rcv_buf_errors.count,count,,error,,Total number of UDP datagrams lost because there was no room in the receive buffer.,-1,system,udp rcv buf errs
-system.net.udp.snd_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the send buffer.,-1,system,udp snd buf errs
-system.net.udp.snd_buf_errors.count,count,,error,,Total number of UDP datagrams lost because there was no room in the send buffer.,-1,system,udp snd buf errs
-system.net.udp.in_csum_errors.count,count,,error,,Total number of UDP datagrams that failed checksum verification.,-1,system,udp in csum errors
+system.net.udp.in_datagrams,gauge,,datagram,second,The rate of UDP datagrams delivered to UDP users (Linux only).,0,system,udp in datagrams
+system.net.udp.in_datagrams.count,count,,datagram,,Total number of UDP datagrams delivered to UDP users (Linux only).,0,system,udp in datagrams
+system.net.udp.in_errors,gauge,,datagram,second,The rate of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port (Linux only).,-1,system,udp in errors
+system.net.udp.in_errors.count,count,,datagram,,Total number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port (Linux only).,-1,system,udp in errors
+system.net.udp.no_ports,gauge,,datagram,second,The rate of received UDP datagrams for which there was no application at the destination port (Linux only).,-1,system,udp no_ports
+system.net.udp.no_ports.count,count,,datagram,,Total number of received UDP datagrams for which there was no application at the destination port (Linux only).,-1,system,udp no_ports
+system.net.udp.out_datagrams,gauge,,datagram,second,The rate of UDP datagrams sent from this entity (Linux only).,0,system,udp out datagrams
+system.net.udp.out_datagrams.count,count,,datagram,,Total number of UDP datagrams sent from this entity (Linux only).,0,system,udp out datagrams
+system.net.udp.rcv_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the receive buffer (Linux only).,-1,system,udp rcv buf errs
+system.net.udp.rcv_buf_errors.count,count,,error,,Total number of UDP datagrams lost because there was no room in the receive buffer (Linux only).,-1,system,udp rcv buf errs
+system.net.udp.snd_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the send buffer (Linux only).,-1,system,udp snd buf errs
+system.net.udp.snd_buf_errors.count,count,,error,,Total number of UDP datagrams lost because there was no room in the send buffer (Linux only).,-1,system,udp snd buf errs
+system.net.udp.in_csum_errors.count,count,,error,,Total number of UDP datagrams that failed checksum verification (Linux only).,-1,system,udp in csum errors

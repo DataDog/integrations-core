@@ -1,2 +1,1 @@
-datadog-checks-dev
-pywin32; sys_platform == 'win32'
+-e ../datadog_checks_dev

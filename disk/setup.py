@@ -24,13 +24,14 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base'
+CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 
 setup(
     name='datadog-disk',
     version=ABOUT["__version__"],
     description='The Disk check',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='datadog agent disk check',
 
     # The project's main homepage.

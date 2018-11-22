@@ -49,7 +49,7 @@ unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
 export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 ```
 
-**Note:** Agent 6 uses upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.service` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][4] or [systemd][5] for more information on how to configured these settings.
+**Note:** Agent 6 uses upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][4] or [systemd][5] for more information on how to configure these settings.
 
 #### After installing either the JDBC Driver or the Instant Client
 
@@ -64,7 +64,7 @@ CREATE USER datadog IDENTIFIED BY <password>;
 
 -- Grant access to the datadog user.
 GRANT CONNECT TO datadog;
-GRANT SELECT ON GV$PROCESS TO datadog;
+GRANT SELECT ON GV_$PROCESS TO datadog;
 GRANT SELECT ON gv_$sysmetric TO datadog;
 GRANT SELECT ON sys.dba_data_files TO datadog;
 ```

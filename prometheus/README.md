@@ -4,7 +4,9 @@
 
 Extract custom metrics from any prometheus endpoints.
 
-**Note:** All the metrics retrieved by this integration will be considered as custom metrics.
+<div class="alert alert-warning">
+All the metrics retrieved by this integration are considered custom metrics.
+</div>
 
 ## Setup
 
@@ -14,22 +16,21 @@ The Prometheus check is packaged with the Agent starting version 6.1.0.
 
 ### Configuration
 
-Edit the `prometheus.d/conf.yaml` file to add your different prometheus instances you want to retrieve metrics from.
+Edit the `prometheus.d/conf.yaml` file to retrieve metrics from applications that expose OpenMetrics / Prometheus end points.
 
 Each instance is at least composed of:
 
-* a `prometheus_url` that points to the metric route (**Note:** must be unique)
-* a `namespace` that will be prepended to all metrics (to avoid metrics name collision)
-* a list of `metrics` that you want to retrieve as custom metrics, for each metric you can either simply add it to the list `- metric_name` or renaming it like `- metric_name: renamed`. It's also possible to use a `*` wildcard such as `- metric*` that would fetch all matching metrics (to use with caution as it can potentially send a lot of custom metrics)
+| Setting          | Description                                                                                                      |
+|------------------|------------------------------------------------------------------------------------------------------------------|
+| `prometheus_url` | A URL that points to the metric route (**Note:** must be unique)                                                 |
+| `namespace`      | This namespace is prepended to all metrics (to avoid metrics name collision)                                     |
+| `metrics`        | A list of metrics to retrieve as custom metrics in the form `- <METRIC_NAME>` or `- <METRIC_NAME:RENAME_METRIC>` |
 
-There is also a couple of more advanced settings (ssl, labels joining, custom tags,...) that are documented in the [example configuration][2]
+When listing metrics, it's possible to use the wildcard `*` like this `- <METRIC_NAME>*` to retrieve all matching metrics. **Note:** use wildcards with caution as it can potentially send a lot of custom metrics.
 
-If you are monitoring an off-the-shelf software and you think it would deserve an official integration, have a look at `kube-proxy` for an example, and don't hesitate to contribute.
+More advanced settings (ssl, labels joining, custom tags,...) are documented in the [sample prometheus.d/conf.yaml][2]
 
-Due to the nature of this integration, it is possible to submit a high number of custom metrics
-to Datadog. To provide users control over the maximum number of metrics sent in the case of
-configuration errors or input changes, the check has a default limit of 2000 metrics.
-You can increase this limit, if needed, by setting the `max_returned_metrics` option.
+Due to the nature of this integration, it's possible to submit a high number of custom metrics to Datadog. To provide users control over the maximum number of metrics sent in the case of configuration errors or input changes, the check has a default limit of 2000 metrics. If needed, this limit can be increased by setting the option `max_returned_metrics` in the `prometheus.d/conf.yaml` file.
 
 ### Validation
 
@@ -38,7 +39,7 @@ You can increase this limit, if needed, by setting the `max_returned_metrics` op
 ## Data Collected
 ### Metrics
 
-All metrics collected by the prometheus check are forwared to Datadog as custom metrics.
+All metrics collected by the prometheus check are forwarded to Datadog as custom metrics.
 
 ### Events
 The Prometheus check does not include any events at this time.
@@ -57,7 +58,7 @@ Need help? Contact [Datadog Support][3].
 * [Writing a custom Prometheus Check][6]
 
 [1]: https://docs.datadoghq.com/agent/faq/agent-status-and-information/
-[2]: https://docs.datadoghq.com/agent/prometheus/
+[2]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/help/
 [4]: https://www.datadoghq.com/blog/monitor-prometheus-metrics/
 [5]: https://docs.datadoghq.com/agent/prometheus/

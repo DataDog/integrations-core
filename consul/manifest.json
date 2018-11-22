@@ -15,6 +15,11 @@
   "metric_prefix": "consul.",
   "metric_to_check": "consul.peers",
   "name": "consul",
+  "process_signatures": [
+    "consul agent",
+    "consul_agent",
+    "consul-agent"
+  ],
   "public_title": "Datadog-Consul Integration",
   "short_description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
   "support": "core",

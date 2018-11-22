@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "5.0.0",
-        "integration":"cisco_aci",
+        "integration":"cisco aci",
         "check": "cisco_aci.can_connect",
         "statuses": ["ok", "critical"],
         "groups": ["url"],

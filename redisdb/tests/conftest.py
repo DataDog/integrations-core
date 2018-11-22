@@ -1,12 +1,13 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import time
 
 import pytest
 import redis
 
+from datadog_checks.redisdb import Redis
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from .common import HOST, PORT, MASTER_PORT, REPLICA_PORT, PASSWORD
 
@@ -34,6 +35,9 @@ class CheckCluster(LazyFunction):
                     and master.info().get('connected_slaves')
                     and replica.info().get('master_link_status') != 'down'
                 ):
+                    master.lpush('test_key1', 'test_value1')
+                    master.lpush('test_key2', 'test_value2')
+                    master.lpush('test_key3', 'test_value3')
                     break
             except redis.ConnectionError:
                 pass
@@ -66,12 +70,9 @@ def redis_auth():
 
 
 @pytest.fixture(scope='session')
-def redis_cluster():
+def dd_environment(master_instance):
     """
-    Start a cluster with one master, one replica and one unhealthy replica and
-    stop it after the tests are done.
-    If there's any problem executing docker-compose, let the exception bubble
-    up.
+    Start a cluster with one master, one replica, and one unhealthy replica.
     """
     with docker_run(
         os.path.join(HERE, 'compose', '1m-2s.compose'),
@@ -82,14 +83,7 @@ def redis_cluster():
             )
         ]
     ):
-        yield
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+        yield master_instance
 
 
 @pytest.fixture
@@ -112,9 +106,15 @@ def replica_instance():
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def master_instance():
     return {
         'host': HOST,
         'port': MASTER_PORT,
+        'keys': ['test_*'],
     }
+
+
+@pytest.fixture
+def check():
+    return Redis('redisdb', {}, {}, None)

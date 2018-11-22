@@ -8,6 +8,7 @@ from time import time
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
+from datadog_checks.errors import ConfigurationError
 from .traverse import walk
 
 
@@ -37,7 +38,7 @@ class DirectoryCheck(AgentCheck):
         try:
             directory = instance['directory']
         except KeyError:
-            raise Exception('DirectoryCheck: missing `directory` in config')
+            raise ConfigurationError('DirectoryCheck: missing `directory` in config')
 
         abs_directory = abspath(directory)
         name = instance.get('name', directory)
@@ -54,15 +55,13 @@ class DirectoryCheck(AgentCheck):
         custom_tags = instance.get('tags', [])
 
         if not exists(abs_directory):
-            if ignore_missing:
-                self.log.info(
-                    'DirectoryCheck: the directory `{}` does not exist. Skipping.'.format(abs_directory)
-                )
-                return
+            msg = "Either directory '{}' doesn't exist or the Agent doesn't "\
+                  "have permissions to access it, skipping.".format(abs_directory)
 
-            raise Exception(
-                'DirectoryCheck: the directory `{}` does not exist. Skipping.'.format(abs_directory)
-            )
+            if not ignore_missing:
+                raise ConfigurationError(msg)
+
+            self.log.warning(msg)
 
         self._get_stats(
             abs_directory,

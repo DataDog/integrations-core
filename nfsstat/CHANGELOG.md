@@ -1,5 +1,9 @@
 # CHANGELOG - Nfsstat
 
+## 1.0.0 / 2018-10-13
+
+* [Added] NFSIOStat Check. See [#720](https://github.com/DataDog/integrations-core/pull/720).
+
 ## 0.2.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

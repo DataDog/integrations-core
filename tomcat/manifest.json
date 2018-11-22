@@ -12,6 +12,9 @@
   "metric_prefix": "tomcat.",
   "metric_to_check": "tomcat.threads.count",
   "name": "tomcat",
+  "process_signatures": [
+    "java tomcat"
+  ],
   "public_title": "Datadog-Tomcat Integration",
   "short_description": "Track requests per second, bytes served, cache hits, servlet metrics, and more.",
   "support": "core",

@@ -255,7 +255,7 @@ class Couchbase(AgentCheck):
         's': 1,
     }
 
-    seconds_value_pattern = re.compile('(\d+(\.\d+)?)(\D+)')
+    seconds_value_pattern = re.compile(r'(\d+(\.\d+)?)(\D+)')
 
     class CouchbaseInstanceState(object):
         def __init__(self):
@@ -392,13 +392,14 @@ class Couchbase(AgentCheck):
 
         self.log.debug('Fetching Couchbase stats at url: {}'.format(url))
 
+        ssl_verify = instance.get('ssl_verify', True)
         timeout = float(instance.get('timeout', DEFAULT_TIMEOUT))
 
         auth = None
         if 'user' in instance and 'password' in instance:
             auth = (instance['user'], instance['password'])
 
-        r = requests.get(url, auth=auth, headers=headers(self.agentConfig), timeout=timeout)
+        r = requests.get(url, auth=auth, verify=ssl_verify, headers=headers(self.agentConfig), timeout=timeout)
         r.raise_for_status()
         return r.json()
 
@@ -533,10 +534,10 @@ class Couchbase(AgentCheck):
     # Returns input if non-camelCase variable is detected.
     def camel_case_to_joined_lower(self, variable):
         # replace non-word with _
-        converted_variable = re.sub('\W+', '_', variable)
+        converted_variable = re.sub(r'\W+', '_', variable)
 
         # insert _ in front of capital letters and lowercase the string
-        converted_variable = re.sub('([A-Z])', '_\g<1>', converted_variable).lower()
+        converted_variable = re.sub('([A-Z])', r'_\g<1>', converted_variable).lower()
 
         # remove duplicate _
         converted_variable = re.sub('_+', '_', converted_variable)

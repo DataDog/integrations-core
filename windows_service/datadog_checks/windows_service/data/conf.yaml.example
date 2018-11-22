@@ -1,46 +1,23 @@
 init_config:
 
 instances:
-    # For each instance you define what host to connect to (defaulting to the
-    # current host) as well as a list of services you care about. The service
-    # names should match the Service name in the properties and NOT the display
-    # name in the services.msc list.
-    #
-    # If you want to check services on a remote host, you have to specify a
-    # hostname and (optional) credentials
-    #
-    #-  host: MYREMOTESERVER
-    #   username: MYREMOTESERVER\fred
-    #   password: mysecretpassword
-    #   services:
-    #     - ServiceExample
-    #     - AnotherService
-    #
-    # The sample configuration will monitor the WMI Performance Adapter service,
-    # named "wmiApSrv" in the service properties.
-    #
-    - host: . # "." means the current host
-      services:
-        - wmiApSrv
-      # The optional tag field allows custom tagging for each metric
-      # tags:
-      #   - optional:tag1
+  ## @param services  - list of strings - required
+  ## List of services to monitor e.g. Dnscache, wmiApSrv, etc.
+  ##
+  ## If any service is set to `ALL`, all services registered with the SCM will be monitored.
+  ##
+  ## The services are treated as regular expressions to allow for advanced matching. So if
+  ## you say `Event.*`, the check will monitor any service starting with the word `Event`.
+  #
+  - services:
+      - <SERVICE_NAME_1>
+      - <SERVICE_NAME_2>
 
-    # NOTE when using wildcards or the "ALL" option, the check will NOT report
-    # services that are not registered with the SCM.  When a service is explicitly
-    # requested, then the check will report CRITICAL if the service is not found.
-    # However, it is not possible to report missing services with wildcards or the
-    # ALL feature.
-
-    # services can be specified via wildcard, using '%' as the wildcard. So,
-    # the following will report all services that start with Event (i.e EventLog and
-    # EventSystem)
-    # - host: .
-    #   services:
-    #     - Event%
-
-    # using the ALL keyword, the check will report the status of all services registered
-    # with the SCM. (ALL is case-sensitive.  Must be all caps)
-    # - host: .
-    #   services:
-    #     - ALL
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every service check emitted by this integration.
+  ##
+  ## Learn more about tagging at https://docs.datadoghq.com/tagging
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
