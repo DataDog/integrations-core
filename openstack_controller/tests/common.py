@@ -285,7 +285,6 @@ MOCK_CONFIG = {
     'init_config': {
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
-        'exclude_network_ids': EXCLUDED_NETWORK_IDS,
     },
     'instances': [
         {
