@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.14.1 / 2018-11-22
+
+* [Fixed] Increase gpg timeout to give time to developers to interact with Yubikeys. See [#2613](https://github.com/DataDog/integrations-core/pull/2613).
+* [Fixed] Fix requirements-agent-release.txt updating. See [#2617](https://github.com/DataDog/integrations-core/pull/2617).
+
 ## 0.14.0 / 2018-11-16
 
 * [Added] Support agent repo. See [#2600](https://github.com/DataDog/integrations-core/pull/2600).
