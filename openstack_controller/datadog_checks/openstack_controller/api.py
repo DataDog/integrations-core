@@ -54,8 +54,8 @@ class AbstractApi(object):
                 raise InstancePowerOffFailure()
             else:
                 raise e
-        self.logger.debug("url: %s || response: %s", url, resp.json())
         jresp = resp.json()
+        self.logger.debug("url: %s || response: %s", url, jresp)
 
         # Adding response to the cache
         self.cache[cache_key] = jresp

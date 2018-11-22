@@ -72,14 +72,14 @@ EXAMPLE_AUTH_RESPONSE = {
                         u'id': u'***************************2452f'
                     },
                     {
-                        u'url': u'http://172.29.236.101:8776/v1/***************************4bfc1',
+                        u'url': u'http://10.0.2.15:8776/v1/***************************4bfc1',
                         u'interface': u'admin',
                         u'region': u'RegionOne',
                         u'region_id': u'RegionOne',
                         u'id': u'***************************8239f'
                     },
                     {
-                        u'url': u'http://172.29.236.101:8776/v1/***************************4bfc1',
+                        u'url': u'http://10.0.2.15:8776/v1/***************************4bfc1',
                         u'interface': u'internal',
                         u'region': u'RegionOne',
                         u'region_id': u'RegionOne',
