@@ -1,17 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# flake8: noqa
 import shutil
 
-# NOTE: Set one minute for any GPG subprocess to timeout in in-toto.  Should be
-# enough time for developers to find and enter their PIN and / or touch their
-# Yubikey. We do this before we load the rest of in-toto, so that this setting
-# takes effect.
-import in_toto.settings
-in_toto.settings.SUBPROCESS_TIMEOUT = 60
-
-from in_toto import runlib
+from in_toto import runlib, settings
 from in_toto.gpg.constants import GPG_COMMAND
 
 from .constants import get_root
@@ -19,6 +11,12 @@ from ..subprocess import run_command
 from ..utils import (
     chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
 )
+
+# NOTE: Set one minute for any GPG subprocess to timeout in in-toto.  Should be
+# enough time for developers to find and enter their PIN and / or touch their
+# Yubikey. We do this before we load the rest of in-toto, so that this setting
+# takes effect.
+settings.SUBPROCESS_TIMEOUT = 60
 
 LINK_DIR = '.links'
 STEP_NAME = 'tag'
