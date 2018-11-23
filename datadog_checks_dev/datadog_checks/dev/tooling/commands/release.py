@@ -577,7 +577,7 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
       - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
     """
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
-    from ..signing import update_link_metadata
+    from ..signing import update_link_metadata, YubikeyException
 
     root = get_root()
     releasing_all = check == 'all'
