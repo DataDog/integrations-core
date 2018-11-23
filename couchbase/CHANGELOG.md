@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.6.1 / 2018-11-23
+
+* [Fixed] Keep running the check when one endpoint fails. See [#2638](https://github.com/DataDog/integrations-core/pull/2638).
+
 ## 1.6.0 / 2018-11-14
 
 * [Added] Add ssl_verify option. See [#2584](https://github.com/DataDog/integrations-core/pull/2584).
