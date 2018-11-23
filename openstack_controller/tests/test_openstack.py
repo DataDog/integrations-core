@@ -224,3 +224,237 @@ def test_get_paginated_server(*args):
     openstackCheck.get_all_servers(i_key)
     assert len(openstackCheck.server_details_by_id) == 1
     assert 'server-1' in openstackCheck.server_details_by_id
+
+
+OS_AGGREGATES_RESPONSE = {
+    "aggregates": [
+        {
+            "availability_zone": "london",
+            "created_at": "2016-12-27T23:47:32.911515",
+            "deleted": False,
+            "deleted_at": None,
+            "hosts": [
+                "compute"
+            ],
+            "id": 1,
+            "metadata": {
+                "availability_zone": "london"
+            },
+            "name": "name",
+            "updated_at": None,
+            "uuid": "6ba28ba7-f29b-45cc-a30b-6e3a40c2fb14"
+        }
+    ]
+}
+
+
+def get_diagnostics_pre_2_48_response(url, headers=None, params=None, timeout=None):
+    print(url)
+    if "diagnostics" in url:
+        return {
+            "cpu0_time": 17300000000,
+            "memory": 524288,
+            "vda_errors": -1,
+            "vda_read": 262144,
+            "vda_read_req": 112,
+            "vda_write": 5778432,
+            "vda_write_req": 488,
+            "vnet1_rx": 2070139,
+            "vnet1_rx_drop": 0,
+            "vnet1_rx_errors": 0,
+            "vnet1_rx_packets": 26701,
+            "vnet1_tx": 140208,
+            "vnet1_tx_drop": 0,
+            "vnet1_tx_errors": 0,
+            "vnet1_tx_packets": 662
+        }
+    if "os-aggregates" in url:
+        return OS_AGGREGATES_RESPONSE
+
+
+def get_diagnostics_post_2_48_response(url, headers=None, params=None, timeout=None):
+    if "diagnostics" in url:
+        return {
+            "config_drive": True,
+            "cpu_details": [
+                {
+                    "id": 0,
+                    "time": 17300000000,
+                    "utilisation": 15
+                }
+            ],
+            "disk_details": [
+                {
+                    "errors_count": 1,
+                    "read_bytes": 262144,
+                    "read_requests": 112,
+                    "write_bytes": 5778432,
+                    "write_requests": 488
+                }
+            ],
+            "driver": "libvirt",
+            "hypervisor": "kvm",
+            "hypervisor_os": "ubuntu",
+            "memory_details": {
+                "maximum": 524288,
+                "used": 0
+            },
+            "nic_details": [
+                {
+                    "mac_address": "01:23:45:67:89:ab",
+                    "rx_drop": 200,
+                    "rx_errors": 100,
+                    "rx_octets": 2070139,
+                    "rx_packets": 26701,
+                    "rx_rate": 300,
+                    "tx_drop": 500,
+                    "tx_errors": 400,
+                    "tx_octets": 140208,
+                    "tx_packets": 662,
+                    "tx_rate": 600
+                }
+            ],
+            "num_cpus": 1,
+            "num_disks": 1,
+            "num_nics": 1,
+            "state": "running",
+            "uptime": 46664
+        }
+    if "os-aggregates" in url:
+        return OS_AGGREGATES_RESPONSE
+
+
+def test_get_stats_for_single_server_pre_2_48(aggregator, *args):
+
+    with mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck._make_request_with_auth_fallback',
+                    side_effect=get_diagnostics_pre_2_48_response):
+        with mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_nova_endpoint',
+                        return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876"):
+            with mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token',
+                            return_value="test_auth_token"):
+                openstackCheck = OpenStackControllerCheck("test", {
+                    'keystone_server_url': 'http://10.0.2.15:5000',
+                    'ssl_verify': False,
+                    'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
+                    'paginated_server_limit': 1
+                }, {}, instances=common.MOCK_CONFIG)
+
+                openstackCheck.get_stats_for_single_server({})
+        for m in aggregator.not_asserted():
+            print(m)
+        aggregator.assert_metric('openstack.nova.server.vda_read_req', value=112.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_drop', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_read', value=262144.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.memory', value=524288.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.cpu0_time', value=17300000000.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_errors', value=-1.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_drop', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx', value=2070139.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_packets', value=662.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_packets', value=26701.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_write_req', value=488.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_write', value=5778432.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_errors', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+    for m in aggregator.not_asserted():
+        print(m)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_get_stats_for_single_server_post_2_48(aggregator, *args):
+    with mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck._make_request_with_auth_fallback',
+                    side_effect=get_diagnostics_post_2_48_response):
+        with mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_nova_endpoint',
+                        return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876"):
+            with mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_auth_token',
+                            return_value="test_auth_token"):
+                openstackCheck = OpenStackControllerCheck("test", {
+                    'keystone_server_url': 'http://10.0.2.15:5000',
+                    'ssl_verify': False,
+                    'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
+                    'paginated_server_limit': 1
+                }, {}, instances=common.MOCK_CONFIG)
+
+                openstackCheck.get_stats_for_single_server({})
+
+        aggregator.assert_metric('openstack.nova.server.vda_read_req', value=112.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_drop', value=500.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_read', value=262144.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.memory', value=524288.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.cpu0_time', value=17300000000.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_errors', value=1.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_drop', value=200.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx', value=2070139.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_packets', value=662.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_errors', value=400.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_packets', value=26701.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_write_req', value=488.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_write', value=5778432.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_errors', value=100.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+    for m in aggregator.not_asserted():
+        print(m)
+
+    aggregator.assert_all_metrics_covered()

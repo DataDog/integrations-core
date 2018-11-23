@@ -581,22 +581,52 @@ class OpenStackControllerCheck(AgentCheck):
                 tags.append("hypervisor:{}".format(hypervisor_hostname))
             if server_name:
                 tags.append("server_name:{}".format(server_name))
-            for st in server_stats:
-                if _is_interface_metric(st):
+
+            is_post_2_48 = True if server_stats.get("cpu_details") else False
+            print(is_post_2_48, server_stats)
+            if not is_post_2_48:
+                # microversion pre 2.48
+                metrics_to_submit = server_stats
+            else:
+                # microversion post 2.48
+                metrics_to_submit = dict()
+                cpu_details = server_stats.get("cpu_details", [{}])[0]
+                metrics_to_submit['cpu0_time'] = cpu_details.get('time', 0)
+                memory_details = server_stats.get("memory_details", {})
+                metrics_to_submit['memory'] = memory_details.get('maximum', 0)
+                disk_details = server_stats.get("disk_details", [{}])[0]
+                metrics_to_submit['vda_errors'] = disk_details.get('errors_count', 0)
+                metrics_to_submit['vda_read'] = disk_details.get('read_bytes', 0)
+                metrics_to_submit['vda_read_req'] = disk_details.get('read_requests', 0)
+                metrics_to_submit['vda_write'] = disk_details.get('write_bytes', 0)
+                metrics_to_submit['vda_write_req'] = disk_details.get('write_requests', 0)
+                nic_details = server_stats.get("nic_details", [{}])[0]
+                mac_address = nic_details.get("mac_address", "")
+                metrics_to_submit['{}_rx'.format(mac_address)] = nic_details.get('rx_octets', 0)
+                metrics_to_submit['{}_rx_drop'.format(mac_address)] = nic_details.get('rx_drop', 0)
+                metrics_to_submit['{}_rx_errors'.format(mac_address)] = nic_details.get('rx_errors', 0)
+                metrics_to_submit['{}_rx_packets'.format(mac_address)] = nic_details.get('rx_packets', 0)
+                metrics_to_submit['{}_tx'.format(mac_address)] = nic_details.get('tx_octets', 0)
+                metrics_to_submit['{}_tx_drop'.format(mac_address)] = nic_details.get('tx_drop', 0)
+                metrics_to_submit['{}_tx_errors'.format(mac_address)] = nic_details.get('tx_errors', 0)
+                metrics_to_submit['{}_tx_packets'.format(mac_address)] = nic_details.get('tx_packets', 0)
+
+            for m in metrics_to_submit:
+                if _is_interface_metric(m):
                     # Example of interface metric
                     # tap123456_rx_errors
-                    metric_pre = re.split("(_rx|_tx)", st)
+                    metric_pre = re.split("(_rx|_tx)", m)
                     interface = "interface:{}".format(metric_pre[0])
                     self.gauge(
-                        "openstack.nova.server.{}{}".format(metric_pre[1], metric_pre[2]),
-                        server_stats[st],
+                        "openstack.nova.server.{}{}".format(metric_pre[1].replace("_", ""), metric_pre[2]),
+                        metrics_to_submit[m],
                         tags=tags+host_tags+[interface],
                         hostname=server_id,
                     )
-                elif _is_valid_metric(st):
+                elif _is_valid_metric(m):
                     self.gauge(
-                        "openstack.nova.server.{}".format(st.replace("-", "_")),
-                        server_stats[st],
+                        "openstack.nova.server.{}".format(m.replace("-", "_")),
+                        metrics_to_submit[m],
                         tags=tags+host_tags,
                         hostname=server_id,
                     )
