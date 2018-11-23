@@ -295,7 +295,6 @@ class OpenMetricsScraperMixin(object):
             self.process_metric(metric, scraper_config, metric_transformers=metric_transformers)
 
     def _store_labels(self, metric, scraper_config):
-        scraper_config['label_joins']
         # If targeted metric, store labels
         if metric.name in scraper_config['label_joins']:
             matching_label = scraper_config['label_joins'][metric.name]['label_to_match']
@@ -306,18 +305,23 @@ class OpenMetricsScraperMixin(object):
                 # example: kube_pod_status_phase in kube-state-metrics
                 if sample[self.SAMPLE_VALUE] != 1:
                     continue
-                labels_list = []
+                label_set = set()
                 matching_value = None
                 for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                     if label_name == matching_label:
                         matching_value = label_value
                     elif label_name in scraper_config['label_joins'][metric.name]['labels_to_get']:
-                        labels_list.append((label_name, label_value))
+                        label_set.add((label_name, label_value))
                 try:
-                    scraper_config['_label_mapping'][matching_label][matching_value] = labels_list
+                    if scraper_config['_label_mapping'][matching_label].get(matching_value):
+                        scraper_config['_label_mapping'][matching_label][matching_value] = label_set.union(
+                            scraper_config['_label_mapping'][matching_label][matching_value]
+                        )
+                    else:
+                        scraper_config['_label_mapping'][matching_label][matching_value] = label_set
                 except KeyError:
                     if matching_value is not None:
-                        scraper_config['_label_mapping'][matching_label] = {matching_value: labels_list}
+                        scraper_config['_label_mapping'][matching_label] = {matching_value: label_set}
 
     def _join_labels(self, metric, scraper_config):
         # Filter metric to see if we can enrich with joined labels
