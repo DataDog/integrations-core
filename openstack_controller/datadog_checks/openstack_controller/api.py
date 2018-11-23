@@ -64,7 +64,7 @@ class AbstractApi(object):
 
 class ComputeApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        AbstractApi.__init__(self, logger, ssl_verify, proxy_config)
+        super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config)
         self.endpoint = endpoint
         self.auth_token = auth_token
 
@@ -106,7 +106,7 @@ class ComputeApi(AbstractApi):
 
 class NeutronApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        AbstractApi.__init__(self, logger, ssl_verify, proxy_config)
+        super(NeutronApi, self).__init__(logger, ssl_verify, proxy_config)
         self.endpoint = endpoint
         self.auth_token = auth_token
 
@@ -133,7 +133,7 @@ class NeutronApi(AbstractApi):
 
 class KeystoneApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        AbstractApi.__init__(self, logger, ssl_verify, proxy_config)
+        super(KeystoneApi, self).__init__(logger, ssl_verify, proxy_config)
         self.endpoint = endpoint
         self.auth_token = auth_token
 
