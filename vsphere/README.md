@@ -33,17 +33,17 @@ instances:
 
 ### Compatibility
 
-Starting with version 3.3.0 of the check, shipped in agent version 6.5.0/5.27.0, we introduced a new optional parameter `collection_level` to select which metrics to collect from vCenter, and deprecated the optional parameter `all_metrics`. Along with this change, the names of the metrics sent to Datadog by the integration have changed, with the addition of a suffix specifying the rollup type of the metric exposed by vCenter (`.avg`, `.sum`, etc.).
+Starting with version 3.3.0 of the check, shipped in agent version 6.5.0/5.27.0, a new optional parameter `collection_level` was introduced to select which metrics to collect from vCenter, and the optional parameter `all_metrics` was deprecated. Along with this change, the names of the metrics sent to Datadog by the integration have changed, with the addition of a suffix specifying the rollup type of the metric exposed by vCenter (`.avg`, `.sum`, etc.).
 
 By default, starting with version 3.3.0, the `collection_level` is set to 1 and the new metric names with the additional suffix are sent by the integration.
 The following scenarios are possible when using the vSphere integration:
-1. You never used the integration before, and you just install an agent newer than 6.5.0/5.27.0. Nothing specific in that case, you can just use the integration, configure the `collection_level` as you wish and view your metrics in Datadog.
+1. You never used the integration before, and you just installed an agent newer than 6.5.0/5.27.0. Nothing specific in that case, you can just use the integration, configure the `collection_level` as you wish and view your metrics in Datadog.
 
 1. You used the integration with an agent older than 6.5.0/5.27.0, and upgraded to a newer version.
-    1. If your configuration specifically set the `all_metrics` parameter to either `true` or `false`, nothing changes for you, you will still see the same metrics in Datadog. You should then change your dashboards and monitors to use the new metric names and then switch to the new `collection_level` parameter.
+    1. If your configuration specifically set the `all_metrics` parameter to either `true` or `false`, nothing changes for you, you the same metrics are sent to Datadog. You should then update your dashboards and monitors to use the new metric names before switching to the new `collection_level` parameter, since `all_metrics` is deprecated and will eventually be removed.
     1. If your configuration did not specify the `all_metrics` parameter, upon upgrade, the integration will default to the `collection_level` parameter set to 1 and send the metrics with the new name to Datadog. \
     **Warning**: this will break your dashboard graphs and monitors scoped on the deprecated metrics, which will stop being sent.
-    To prevent this, you should explicitely set `all_metrics: false` in your configuration to continue reporting the same metrics, then change your dashboards and monitors to use the new metrics before switching back to using `collection_level`.
+    To prevent this, you should explicitely set `all_metrics: false` in your configuration to continue reporting the same metrics, then update your dashboards and monitors to use the new metrics before switching back to using `collection_level`.
 
 #### Configuration Options
 
@@ -52,7 +52,8 @@ The following scenarios are possible when using the vSphere integration:
 * `host_include_only_regex` (Optional) - Use a regex like this if you want only the check to fetch metrics for these ESXi hosts and the VMs running on it
 * `vm_include_only_regex` (Optional) - Use a regex to include only the VMs that are matching this pattern.
 * `include_only_marked` (Optional) - Set to true if you'd like to only collect metrics on vSphere VMs which are marked by a custom field with the value 'DatadogMonitored'. To set this custom field with PowerCLI, use the follow command: `Get-VM <MyVMName> | Set-CustomField -Name "DatadogMonitored" -Value "DatadogMonitored"`
-* `all_metrics` (Optional) - When set to true, this will collect EVERY metric from vCenter, which means a LOT of metrics you probably do not care about. We have selected a set of metrics that are interesting to monitor for you if false.
+* `collection_level` (Optional) - A number between 1 and 4 to specify how many metrics will be sent, 1 meaning only important monitoring metrics and 4 meaning every metric available.
+* `all_metrics` (Deprecated, Optional) - When set to true, this will collect EVERY metric from vCenter, which means a LOT of metrics you probably do not care about. We have selected a set of metrics that are interesting to monitor for you if false.
 * `event_config` (Optional) - Event config is a dictionary. For now the only switch you can flip is collect_vcenter_alarms which will send as events the alarms set in vCenter.
 
 ### Validation
