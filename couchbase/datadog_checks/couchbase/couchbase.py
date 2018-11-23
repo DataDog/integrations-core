@@ -489,16 +489,9 @@ class Couchbase(AgentCheck):
                     couchbase['buckets'][bucket['name']] = bucket_samples
 
         # Next, get the query monitoring data
-        query_monitoring_url = instance.get('query_monitoring_url', None)
-        if query_monitoring_url is not None:
-            try:
-                url = '{}{}'.format(query_monitoring_url, COUCHBASE_VITALS_PATH)
-                query = self._get_stats(url, instance)
-                if query is not None:
-                    couchbase['query'] = query
-            except requests.exceptions.HTTPError:
-                self.log.error("Error accessing the endpoint {}, make sure you're running at least "
-                               "couchbase 4.5 to collect the query monitoring metrics".format(url))
+        query_data = self._get_query_monitoring_data(instance)
+        if query_data is not None:
+            couchbase['query'] = query_data
 
         # Next, get all the tasks
         tasks_url = '{}{}/tasks'.format(server, COUCHBASE_STATS_PATH)
@@ -529,6 +522,19 @@ class Couchbase(AgentCheck):
             self.log.error("Error accessing the endpoint {}".format(url))
 
         return couchbase
+
+    def _get_query_monitoring_data(self, instance):
+        query_data = None
+        query_monitoring_url = instance.get('query_monitoring_url')
+        if query_monitoring_url:
+            try:
+                url = '{}{}'.format(query_monitoring_url, COUCHBASE_VITALS_PATH)
+                query_data = self._get_stats(url, instance)
+            except requests.exceptions.RequestException:
+                self.log.error("Error accessing the endpoint {}, make sure you're running at least "
+                               "couchbase 4.5 to collect the query monitoring metrics".format(url))
+
+        return query_data
 
     # Takes a camelCased variable and returns a joined_lower equivalent.
     # Returns input if non-camelCase variable is detected.
