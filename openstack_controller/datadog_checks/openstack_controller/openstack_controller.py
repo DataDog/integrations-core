@@ -600,16 +600,17 @@ class OpenStackControllerCheck(AgentCheck):
                 metrics_to_submit['vda_read_req'] = disk_details.get('read_requests', 0)
                 metrics_to_submit['vda_write'] = disk_details.get('write_bytes', 0)
                 metrics_to_submit['vda_write_req'] = disk_details.get('write_requests', 0)
-                nic_details = server_stats.get("nic_details", [{}])[0]
-                mac_address = nic_details.get("mac_address", "")
-                metrics_to_submit['{}_rx'.format(mac_address)] = nic_details.get('rx_octets', 0)
-                metrics_to_submit['{}_rx_drop'.format(mac_address)] = nic_details.get('rx_drop', 0)
-                metrics_to_submit['{}_rx_errors'.format(mac_address)] = nic_details.get('rx_errors', 0)
-                metrics_to_submit['{}_rx_packets'.format(mac_address)] = nic_details.get('rx_packets', 0)
-                metrics_to_submit['{}_tx'.format(mac_address)] = nic_details.get('tx_octets', 0)
-                metrics_to_submit['{}_tx_drop'.format(mac_address)] = nic_details.get('tx_drop', 0)
-                metrics_to_submit['{}_tx_errors'.format(mac_address)] = nic_details.get('tx_errors', 0)
-                metrics_to_submit['{}_tx_packets'.format(mac_address)] = nic_details.get('tx_packets', 0)
+                nic_details = server_stats.get("nic_details", [{}])
+                for n in nic_details:
+                    mac_address = n.get("mac_address", "")
+                    metrics_to_submit['{}_rx'.format(mac_address)] = n.get('rx_octets', 0)
+                    metrics_to_submit['{}_rx_drop'.format(mac_address)] = n.get('rx_drop', 0)
+                    metrics_to_submit['{}_rx_errors'.format(mac_address)] = n.get('rx_errors', 0)
+                    metrics_to_submit['{}_rx_packets'.format(mac_address)] = n.get('rx_packets', 0)
+                    metrics_to_submit['{}_tx'.format(mac_address)] = n.get('tx_octets', 0)
+                    metrics_to_submit['{}_tx_drop'.format(mac_address)] = n.get('tx_drop', 0)
+                    metrics_to_submit['{}_tx_errors'.format(mac_address)] = n.get('tx_errors', 0)
+                    metrics_to_submit['{}_tx_packets'.format(mac_address)] = n.get('tx_packets', 0)
 
             for m in metrics_to_submit:
                 if _is_interface_metric(m):

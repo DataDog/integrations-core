@@ -265,7 +265,15 @@ def get_diagnostics_pre_2_48_response(url, headers=None, params=None, timeout=No
             "vnet1_tx": 140208,
             "vnet1_tx_drop": 0,
             "vnet1_tx_errors": 0,
-            "vnet1_tx_packets": 662
+            "vnet1_tx_packets": 662,
+            "vnet2_rx": 2070139,
+            "vnet2_rx_drop": 0,
+            "vnet2_rx_errors": 0,
+            "vnet2_rx_packets": 26701,
+            "vnet2_tx": 140208,
+            "vnet2_tx_drop": 0,
+            "vnet2_tx_errors": 0,
+            "vnet2_tx_packets": 662
         }
     if "os-aggregates" in url:
         return OS_AGGREGATES_RESPONSE
@@ -311,6 +319,19 @@ def get_diagnostics_post_2_48_response(url, headers=None, params=None, timeout=N
                     "tx_octets": 140208,
                     "tx_packets": 662,
                     "tx_rate": 600
+                },
+                {
+                    "mac_address": "01:23:45:67:89:cd",
+                    "rx_drop": 200,
+                    "rx_errors": 100,
+                    "rx_octets": 2070139,
+                    "rx_packets": 26701,
+                    "rx_rate": 300,
+                    "tx_drop": 500,
+                    "tx_errors": 400,
+                    "tx_octets": 140208,
+                    "tx_packets": 662,
+                    "tx_rate": 600
                 }
             ],
             "num_cpus": 1,
@@ -343,23 +364,29 @@ def test_get_stats_for_single_server_pre_2_48(aggregator, *args):
         aggregator.assert_metric('openstack.nova.server.vda_read_req', value=112.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
-        aggregator.assert_metric('openstack.nova.server.tx_drop', value=0.0,
-                                 tags=['availability_zone:NA', 'interface:vnet1'],
-                                 hostname='')
         aggregator.assert_metric('openstack.nova.server.vda_read', value=262144.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
         aggregator.assert_metric('openstack.nova.server.memory', value=524288.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
-        aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
-                                 tags=['availability_zone:NA', 'interface:vnet1'],
-                                 hostname='')
         aggregator.assert_metric('openstack.nova.server.cpu0_time', value=17300000000.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
         aggregator.assert_metric('openstack.nova.server.vda_errors', value=-1.0,
                                  tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_write_req', value=488.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_write', value=5778432.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_drop', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
+                                 tags=['availability_zone:NA', 'interface:vnet1'],
                                  hostname='')
         aggregator.assert_metric('openstack.nova.server.rx_drop', value=0.0,
                                  tags=['availability_zone:NA', 'interface:vnet1'],
@@ -376,14 +403,32 @@ def test_get_stats_for_single_server_pre_2_48(aggregator, *args):
         aggregator.assert_metric('openstack.nova.server.rx_packets', value=26701.0,
                                  tags=['availability_zone:NA', 'interface:vnet1'],
                                  hostname='')
-        aggregator.assert_metric('openstack.nova.server.vda_write_req', value=488.0,
-                                 tags=['availability_zone:NA'],
-                                 hostname='')
-        aggregator.assert_metric('openstack.nova.server.vda_write', value=5778432.0,
-                                 tags=['availability_zone:NA'],
-                                 hostname='')
         aggregator.assert_metric('openstack.nova.server.rx_errors', value=0.0,
                                  tags=['availability_zone:NA', 'interface:vnet1'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_drop', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet2'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
+                                 tags=['availability_zone:NA', 'interface:vnet2'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_drop', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet2'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx', value=2070139.0,
+                                 tags=['availability_zone:NA', 'interface:vnet2'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_packets', value=662.0,
+                                 tags=['availability_zone:NA', 'interface:vnet2'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet2'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_packets', value=26701.0,
+                                 tags=['availability_zone:NA', 'interface:vnet2'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_errors', value=0.0,
+                                 tags=['availability_zone:NA', 'interface:vnet2'],
                                  hostname='')
 
     aggregator.assert_all_metrics_covered()
@@ -408,23 +453,29 @@ def test_get_stats_for_single_server_post_2_48(aggregator, *args):
         aggregator.assert_metric('openstack.nova.server.vda_read_req', value=112.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
-        aggregator.assert_metric('openstack.nova.server.tx_drop', value=500.0,
-                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
-                                 hostname='')
         aggregator.assert_metric('openstack.nova.server.vda_read', value=262144.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
         aggregator.assert_metric('openstack.nova.server.memory', value=524288.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
-        aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
-                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
-                                 hostname='')
         aggregator.assert_metric('openstack.nova.server.cpu0_time', value=17300000000.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
         aggregator.assert_metric('openstack.nova.server.vda_errors', value=1.0,
                                  tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_write_req', value=488.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.vda_write', value=5778432.0,
+                                 tags=['availability_zone:NA'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_drop', value=500.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
                                  hostname='')
         aggregator.assert_metric('openstack.nova.server.rx_drop', value=200.0,
                                  tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
@@ -441,14 +492,32 @@ def test_get_stats_for_single_server_post_2_48(aggregator, *args):
         aggregator.assert_metric('openstack.nova.server.rx_packets', value=26701.0,
                                  tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
                                  hostname='')
-        aggregator.assert_metric('openstack.nova.server.vda_write_req', value=488.0,
-                                 tags=['availability_zone:NA'],
-                                 hostname='')
-        aggregator.assert_metric('openstack.nova.server.vda_write', value=5778432.0,
-                                 tags=['availability_zone:NA'],
-                                 hostname='')
         aggregator.assert_metric('openstack.nova.server.rx_errors', value=100.0,
                                  tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:cd'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_drop', value=500.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:cd'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_drop', value=200.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:cd'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx', value=2070139.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:cd'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_packets', value=662.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:cd'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.tx_errors', value=400.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:cd'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_packets', value=26701.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:cd'],
+                                 hostname='')
+        aggregator.assert_metric('openstack.nova.server.rx_errors', value=100.0,
+                                 tags=['availability_zone:NA', 'interface:01:23:45:67:89:cd'],
                                  hostname='')
 
     aggregator.assert_all_metrics_covered()
