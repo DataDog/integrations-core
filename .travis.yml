@@ -47,6 +47,7 @@ jobs:
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
+        - ddev validate agent-reqs
         - ddev test --cov
         - ddev test --bench || true
     - stage: test
@@ -56,6 +57,7 @@ jobs:
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
+        - ddev validate agent-reqs
         - travis_retry ddev test --cov ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
