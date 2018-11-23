@@ -690,9 +690,11 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
     if sign_only or not skip_sign:
         echo_waiting('Updating release metadata...')
         echo_info('Please touch your Yubikey immediately after entering your PIN!')
-        commit_targets = update_link_metadata(checks)
-
-        git_commit(commit_targets, '[Release] Update metadata', force=True)
+        try:
+            commit_targets = update_link_metadata(checks)
+            git_commit(commit_targets, '[Release] Update metadata', force=True)
+        except YubikeyException as e:
+            abort('A problem occurred while signing metadata: {}'.format(e))
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
