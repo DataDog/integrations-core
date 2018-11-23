@@ -249,7 +249,6 @@ OS_AGGREGATES_RESPONSE = {
 
 
 def get_diagnostics_pre_2_48_response(url, headers=None, params=None, timeout=None):
-    print(url)
     if "diagnostics" in url:
         return {
             "cpu0_time": 17300000000,
@@ -340,8 +339,7 @@ def test_get_stats_for_single_server_pre_2_48(aggregator, *args):
                 }, {}, instances=common.MOCK_CONFIG)
 
                 openstackCheck.get_stats_for_single_server({})
-        for m in aggregator.not_asserted():
-            print(m)
+
         aggregator.assert_metric('openstack.nova.server.vda_read_req', value=112.0,
                                  tags=['availability_zone:NA'],
                                  hostname='')
@@ -387,8 +385,6 @@ def test_get_stats_for_single_server_pre_2_48(aggregator, *args):
         aggregator.assert_metric('openstack.nova.server.rx_errors', value=0.0,
                                  tags=['availability_zone:NA', 'interface:vnet1'],
                                  hostname='')
-    for m in aggregator.not_asserted():
-        print(m)
 
     aggregator.assert_all_metrics_covered()
 
@@ -454,7 +450,5 @@ def test_get_stats_for_single_server_post_2_48(aggregator, *args):
         aggregator.assert_metric('openstack.nova.server.rx_errors', value=100.0,
                                  tags=['availability_zone:NA', 'interface:01:23:45:67:89:ab'],
                                  hostname='')
-    for m in aggregator.not_asserted():
-        print(m)
 
     aggregator.assert_all_metrics_covered()
