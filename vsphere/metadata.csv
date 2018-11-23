@@ -1,18 +1,54 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-vsphere.cpu.extra,gauge,,millisecond,,Milliseconds of extra CPU time.,-1,vsphere,cpu extra
-vsphere.cpu.ready,gauge,,millisecond,,Milliseconds of CPU time spent in ready state.,-1,vsphere,cpu ready
-vsphere.cpu.usage,gauge,,percent,,Percentage of CPU capacity being used.,-1,vsphere,cpu usage
-vsphere.cpu.usagemhz,gauge,,megahertz,,Total megehertz of CPU being used.,-1,vsphere,cpu usagemhz
-vsphere.disk.commandsAborted,gauge,,occurrence,,Number of SCSI commands aborted.,-1,vsphere,disk cmd abort
-vsphere.disk.deviceLatency,gauge,,millisecond,,Average amount of time it takes to complete an SCSI command from physical device.,-1,vsphere,disk dev lat
-vsphere.disk.deviceReadLatency,gauge,,millisecond,,Average amount of time it takes to complete read from physical device.,-1,vsphere,disk dev read lat
-vsphere.disk.deviceWriteLatency,gauge,,millisecond,,Average amount of time it takes to complete write to the physical device (LUN).,-1,vsphere,disk dev write lat
-vsphere.disk.queueLatency,gauge,,millisecond,,Average amount of time spent in VMkernel queue (per SCSI command).,-1,vsphere,disk queue lat
-vsphere.disk.totalLatency,gauge,,millisecond,,Sum of average amount of time (in kernel and device) to process an SCSI command issued by the Guest OS to the vm.,-1,vsphere,disk total lat
-vsphere.mem.active,gauge,,kibibyte,,Kilobytes of memory that the VMkernel estimates is being actively used based on recently touched memory pages.,-1,vsphere,mem active
-vsphere.mem.compressed,gauge,,kibibyte,,Kilobytes of memory that have been compressed.,-1,vsphere,mem compressed
-vsphere.mem.consumed,gauge,,kibibyte,,Kilobytes of used memory.,-1,vsphere,mem consumed
-vsphere.mem.overhead,gauge,,kibibyte,,Kilobytes of memory allocated to a vm beyond its reserved amount.,-1,vsphere,mem overhead
-vsphere.mem.vmmemctl,gauge,,kibibyte,,Kilobytes of memory allocated by the virtual machine memory control driver (vmmemctl).,-1,vsphere,mem vmmemctl
-vsphere.network.received,rate,,kibibyte,,Number of kilobytes received by the host.,-1,vsphere,net rx
-vsphere.network.transmitted,rate,,kibibyte,,Number of kilobytes transmitted by the host.,-1,vsphere,net tx
+vsphere.cpu.extra,gauge,,millisecond,,Milliseconds of extra CPU time,-1,vsphere,cpu extra
+vsphere.cpu.ready,gauge,,millisecond,,Milliseconds of CPU time spent in ready state,-1,vsphere,cpu ready
+vsphere.cpu.usage,gauge,,percent,,Percentage of CPU capacity being used,-1,vsphere,cpu usage
+vsphere.cpu.usagemhz,gauge,,megahertz,,Total megehertz of CPU being used,-1,vsphere,cpu usagemhz
+vsphere.disk.commandsAborted,gauge,,occurrence,,Number of SCSI commands aborted,-1,vsphere,disk cmd abort
+vsphere.disk.deviceLatency,gauge,,millisecond,,Average amount of time it takes to complete an SCSI command from physical device,-1,vsphere,disk dev lat
+vsphere.disk.deviceReadLatency,gauge,,millisecond,,Average amount of time it takes to complete read from physical device,-1,vsphere,disk dev read lat
+vsphere.disk.deviceWriteLatency,gauge,,millisecond,,Average amount of time it takes to complete write to the physical device (LUN),-1,vsphere,disk dev write lat
+vsphere.disk.queueLatency,gauge,,millisecond,,Average amount of time spent in VMkernel queue (per SCSI command),-1,vsphere,disk queue lat
+vsphere.disk.totalLatency,gauge,,millisecond,,Sum of average amount of time (in kernel and device) to process an SCSI command issued by the Guest OS to the vm,-1,vsphere,disk total lat
+vsphere.mem.active,gauge,,kibibyte,,Kilobytes of memory that the VMkernel estimates is being actively used based on recently touched memory pages,-1,vsphere,mem active
+vsphere.mem.compressed,gauge,,kibibyte,,Kilobytes of memory that have been compressed,-1,vsphere,mem compressed
+vsphere.mem.consumed,gauge,,kibibyte,,Kilobytes of used memory,-1,vsphere,mem consumed
+vsphere.mem.overhead,gauge,,kibibyte,,Kilobytes of memory allocated to a vm beyond its reserved amount,-1,vsphere,mem overhead
+vsphere.mem.vmmemctl,gauge,,kibibyte,,Kilobytes of memory allocated by the virtual machine memory control driver (vmmemctl),-1,vsphere,mem vmmemctl
+vsphere.network.received,rate,,kibibyte,,Number of kilobytes received by the host,-1,vsphere,net rx
+vsphere.network.transmitted,rate,,kibibyte,,Number of kilobytes transmitted by the host,-1,vsphere,net tx
+vsphere.cpu.ready.sum,gauge,,millisecond,,Milliseconds of CPU time spent in ready state,-1,vsphere,cpu ready sum
+vsphere.cpu.usage.avg,gauge,,percent,,Percentage of CPU capacity being used,-1,vsphere,cpu usage avg
+vsphere.cpu.usagemhz.avg,gauge,,megahertz,,"CPU usage, as measured in megahertz",-1,vsphere,cpu usagemhz avg
+vsphere.cpu.totalmhz.avg,gauge,,megahertz,,Total megehertz of CPU being used,-1,vsphere,cpu totalmhz avg
+vsphere.mem.consumed.avg,gauge,,kibibyte,,"Amount of host physical memory consumed by a virtual machine, host, or cluster",-1,vsphere,mem consumed avg
+vsphere.mem.overhead.avg,gauge,,kibibyte,,Host physical memory consumed by the virtualization infrastructure for running the virtual machine,-1,vsphere,mem overhead avg
+vsphere.mem.swapinRate.avg,gauge,,kibibyte,second,Rate at which memory is swapped from disk into active memory,-1,vsphere,mem swapinRate avg
+vsphere.mem.swapoutRate.avg,gauge,,kibibyte,second,Rate at which memory is being swapped from active memory to disk,-1,vsphere,mem swapoutRate avg
+vsphere.mem.totalmb.avg,gauge,,kibibyte,,Total amount of host physical memory of all hosts in the cluster that is available for virtual machine memory (physical memory for use by the guest OS) and virtual machine overhead memory,1,vsphere,mem totalmb avg
+vsphere.mem.usage.avg,gauge,,kibibyte,,Memory usage as percent of total configured or available memory,-1,vsphere,mem usage avg
+vsphere.mem.vmmemctl.avg,gauge,,kibibyte,,Amount of memory allocated by the virtual machine memory control driver (vmmemctl),-1,vsphere,mem vmmemctl avg
+vsphere.net.usage.avg,gauge,,kibibyte,second,Network utilization (combined transmit- and receive-rates),0,vsphere,net usage avg
+vsphere.datastore.datastoreIops.avg,gauge,,,,Storage I/O Control aggregated IOPS,-1,vsphere,datastoreIops avg
+vsphere.datastore.datastoreMaxQueueDepth.latest,gauge,,,,Storage I/O Control datastore maximum queue depth,1,vsphere,datastoreMaxQueueDepth latest
+vsphere.datastore.datastoreReadIops.latest,gauge,,,,Storage DRS datastore read I/O rate,0,vsphere,datastoreReadIops latest
+vsphere.datastore.datastoreReadOIO.latest,gauge,,request,,Storage DRS datastore outstanding read requests,-1,vsphere,datastoreReadOIO latest
+vsphere.datastore.datastoreVMObservedLatency.latest,gauge,,microsecond,,The average datastore latency as seen by virtual machines,-1,vsphere,datastoreVMObservedLatency latest
+vsphere.datastore.datastoreWriteIops.latest,gauge,,,,Storage DRS datastore write I/O rate,-1,vsphere,datastoreWriteIops latest
+vsphere.datastore.datastoreWriteOIO.latest,gauge,,request,,Storage DRS datastore outstanding write requests,-1,vsphere,datastoreWriteOIO latest
+vsphere.datastore.numberReadAveraged.avg,gauge,,command,,Average number of read commands issued per second to the datastore,0,vsphere,numberReadAveraged avg
+vsphere.datastore.siocActiveTimePercentage.avg,gauge,,percent,,Percentage of time Storage I/O Control actively controlled datastore latency,-1,vsphere,siocActiveTimePercentage avg
+vsphere.datastore.sizeNormalizedDatastoreLatency.avg,gauge,,microsecond,,Storage I/O Control size-normalized I/O latency,-1,vsphere,sizeNormalizedDatastoreLatency avg
+vsphere.datastore.totalReadLatency.avg,gauge,,millisecond,,Average amount of time for a read operation from the datastore,-1,vsphere,totalReadLatency avg
+vsphere.datastore.totalWriteLatency.avg,gauge,,millisecond,,Average amount of time for a write operation from the datastore,-1,vsphere,totalWriteLatency avg
+vsphere.disk.deviceLatency.avg,gauge,,millisecond,,Average amount of time it takes to complete an SCSI command from physical device,-1,vsphere,disk dev lat avg
+vsphere.disk.maxQueueDepth.avg,gauge,,,,Maximum queue depth,0,vsphere,disk maxQueueDepth avg
+vsphere.disk.maxTotalLatency.latest,gauge,,millisecond,,Highest latency value across all disks used by the host,-1,vsphere,disk max total lat
+vsphere.disk.numberReadAveraged.avg,gauge,,command,,Average number of read commands issued per second to the datastore,0,vsphere,disk num read avg
+vsphere.disk.numberWriteAveraged.avg,gauge,,command,,Average number of write commands issued per second to the datastore,0,vsphere,disk num write avg
+vsphere.disk.usage.avg,gauge,,kibibyte,second,Aggregated disk I/O rate,0,vsphere,disk usage avg
+vsphere.virtualDisk.numberReadAveraged.avg,gauge,,,,Average number of read commands issued per second to the virtual disk,0,vsphere,virtualdisk num read avg
+vsphere.virtualDisk.numberWriteAveraged.avg,gauge,,,,Average number of write commands issued per second to the virtual disk,0,vsphere,virtualdisk num write avg
+vsphere.virtualDisk.totalReadLatency.avg,gauge,,millisecond,,Average amount of time for a read operation from the virtual disk,-1,vsphere,virtualdisk totalReadLatency avg
+vsphere.virtualDisk.totalWriteLatency.avg,gauge,,millisecond,,Average amount of time for a write operation from the virtual disk,-1,vsphere,virtualdisk totalWriteLatency avg
+vsphere.sys.heartbeat.latest,gauge,,,,Number of heartbeats issued per virtual machine,0,vsphere,heartbeat
+vsphere.sys.uptime.latest,gauge,,second,,"Total time elapsed, in seconds, since last system startup",0,vsphere,uptime
