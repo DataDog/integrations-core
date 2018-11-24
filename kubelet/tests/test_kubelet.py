@@ -37,6 +37,7 @@ NODE_SPEC = {
 }
 
 EXPECTED_METRICS_COMMON = [
+    'kubernetes.containers.restarts',
     'kubernetes.containers.state.running',
     'kubernetes.cpu.capacity',
     'kubernetes.cpu.usage.total',
@@ -464,6 +465,14 @@ def test_report_container_state_metrics(monkeypatch):
             'kube_deployment:fluentd-gcp-v2.0.10'
         ] + instance_tags),
         mock.call('kubernetes.containers.state.running', 1, [
+            'kube_container_name:prometheus-to-sd-exporter',
+            'kube_deployment:fluentd-gcp-v2.0.10'
+        ] + instance_tags),
+        mock.call('kubernetes.containers.restarts', 1, [
+            'kube_container_name:fluentd-gcp',
+            'kube_deployment:fluentd-gcp-v2.0.10'
+        ] + instance_tags),
+        mock.call('kubernetes.containers.restarts', 0, [
             'kube_container_name:prometheus-to-sd-exporter',
             'kube_deployment:fluentd-gcp-v2.0.10'
         ] + instance_tags),

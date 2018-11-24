@@ -372,6 +372,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
                 tags = get_tags('%s' % cid, True) + instance_tags
 
+                restart_count = ctr_status.get('restartCount', 0)
+                self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)
+
                 for (metric_name, field_name) in [('state', 'state'), ('last_state', 'lastState')]:
                     c_state = ctr_status.get(field_name, {})
 
