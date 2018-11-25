@@ -305,23 +305,21 @@ class OpenMetricsScraperMixin(object):
                 # example: kube_pod_status_phase in kube-state-metrics
                 if sample[self.SAMPLE_VALUE] != 1:
                     continue
-                label_set = set()
+                label_dict = dict()
                 matching_value = None
                 for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                     if label_name == matching_label:
                         matching_value = label_value
                     elif label_name in scraper_config['label_joins'][metric.name]['labels_to_get']:
-                        label_set.add((label_name, label_value))
+                        label_dict[label_name] = label_value
                 try:
                     if scraper_config['_label_mapping'][matching_label].get(matching_value):
-                        scraper_config['_label_mapping'][matching_label][matching_value] = label_set.union(
-                            scraper_config['_label_mapping'][matching_label][matching_value]
-                        )
+                        scraper_config['_label_mapping'][matching_label][matching_value].update(label_dict)
                     else:
-                        scraper_config['_label_mapping'][matching_label][matching_value] = label_set
+                        scraper_config['_label_mapping'][matching_label][matching_value] = label_dict
                 except KeyError:
                     if matching_value is not None:
-                        scraper_config['_label_mapping'][matching_label] = {matching_value: label_set}
+                        scraper_config['_label_mapping'][matching_label] = {matching_value: label_dict}
 
     def _join_labels(self, metric, scraper_config):
         # Filter metric to see if we can enrich with joined labels
@@ -335,10 +333,11 @@ class OpenMetricsScraperMixin(object):
                     scraper_config['_active_label_mapping'][label_name][sample[self.SAMPLE_LABELS][label_name]] = True
                     # If mapping found add corresponding labels
                     try:
-                        for label_tuple in (
-                            scraper_config['_label_mapping'][label_name][sample[self.SAMPLE_LABELS][label_name]]
+                        for name, val in (
+                            iteritems(scraper_config['_label_mapping'][label_name][sample[self.SAMPLE_LABELS]
+                                                                                   [label_name]])
                         ):
-                            sample[self.SAMPLE_LABELS][label_tuple[0]] = label_tuple[1]
+                            sample[self.SAMPLE_LABELS][name] = val
                     except KeyError:
                         pass
 
