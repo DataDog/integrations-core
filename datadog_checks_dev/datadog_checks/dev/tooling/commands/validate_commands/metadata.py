@@ -174,6 +174,8 @@ VALID_UNIT_NAMES = {
     'exacore',
     'build',
     'prediction',
+    'heap',
+    'volume',
 }
 
 PROVIDER_INTEGRATIONS = {
