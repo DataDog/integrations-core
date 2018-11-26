@@ -4,12 +4,12 @@
 
 ## Overview
 
-Connect Kafka to Datadog in order to:
+Connect Kafka to Datadog to:
 
-* Visualize the performance of your cluster in real time
-* Correlate the performance of Kafka with the rest of your applications
+* Visualize the performance of your cluster in real time.
+* Correlate the performance of Kafka with the rest of your applications.
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation][13] for more detailed instructions.
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated on the info page. Specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation][13] for more detailed instructions.
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][14].
 
@@ -18,7 +18,7 @@ To collect Kafka consumer metrics, see the [kafka_consumer check][14].
 
 The Agent's Kafka check is included in the [Datadog Agent][15] package, so you don't need to install anything else on your Kafka nodes.
 
-The check collects metrics via JMX, so you'll need a JVM on each kafka node so the Agent can fork [jmxfetch][16]. You can use the same JVM that Kafka uses.
+The check collects metrics via JMX, so you need a JVM on each kafka node so the Agent can fork [jmxfetch][16]. You can use the same JVM that Kafka uses.
 
 ### Configuration
 
@@ -28,7 +28,7 @@ Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your 
 
 **The following instructions are for the Datadog agent >= 5.0. For agents before that, see the [older documentation][17].**
 
-Kafka bean names depend on the exact Kafka version you're running. You should always use the example that comes packaged with the Agent as a base since that will be the most up-to-date configuration. Use [this sample configuration file][18] as an example, but note that the version there may be for a newer version of the Agent than what you've got installed.
+Kafka bean names depend on the exact Kafka version you're running. Use the [example configuration file][18] that comes packaged with the Agent as a base since it is the most up-to-date configuration. **Note**: the Agent version in the example may be for a newer version of the Agent than what you have installed.
 
 After you've configured `kafka.yaml`, [restart the Agent][19] to begin sending Kafka metrics to Datadog.
 
@@ -36,7 +36,7 @@ After you've configured `kafka.yaml`, [restart the Agent][19] to begin sending K
 
 **Available for Agent >6.0**
 
-Kafka uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
+Kafka uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties` file:
 
 ```
 # Set root logger level to INFO and its only appender to R
@@ -46,7 +46,7 @@ log4j.appender.R.layout=org.apache.log4j.PatternLayout
 log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
 ```
 
-By default, our integration pipeline support the following conversion patterns:
+By default, our integration pipeline supports the following conversion patterns:
 
   ```
   %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
@@ -54,7 +54,7 @@ By default, our integration pipeline support the following conversion patterns:
   %r [%t] %p %c %x - %m%n
   ```
 
-Make sure you clone and edit the [integration pipeline][20] if you have a different format.
+Clone and edit the [integration pipeline][20] if you have a different format.
 
 * Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
 
@@ -62,7 +62,7 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
   logs_enabled: true
   ```
 
-* Add this configuration block to your `kafka.d/conf.yaml` file to start collecting your Kafka Logs:
+* Add the following configuration block to your `kafka.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample kafka.d/conf.yaml][18] for all available configuration options.
 
   ```
   logs:
@@ -77,16 +77,27 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
       #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
   ```
 
-  Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample kafka.d/conf.yaml][18] for all available configuration options.
-
 * [Restart the Agent][19].
 
 **Learn more about log collection [in the log documentation][21]**
 
 ### Validation
 
-[Run the Agent's `status` subcommand][22] and look for `kafka` under the Checks section.
+[Run the Agent's status subcommand][22] and look for `kafka` under the **JMXFetch** section:
+
+```
+========
+JMXFetch
+========
+  Initialized checks
+  ==================
+    kafka
+      instance_name : kafka-localhost-9999
+      message : 
+      metric_count : 46
+      service_check_count : 0
+      status : OK
+```
 
 ## Data Collected
 ### Metrics
@@ -96,10 +107,8 @@ See [metadata.csv][23] for a list of metrics provided by this check.
 The Kafka check does not include any events at this time.
 
 ### Service Checks
-**kafka.can_connect**
-
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance.
-Returns `OK` otherwise.
+**kafka.can_connect**  
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance, otherwise returns `OK`.
 
 ## Troubleshooting
 
