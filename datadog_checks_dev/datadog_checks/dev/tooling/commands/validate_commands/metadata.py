@@ -174,6 +174,11 @@ VALID_UNIT_NAMES = {
     'exacore',
     'build',
     'prediction',
+    'watt',
+    'kilowatt',
+    'megawatt',
+    'gigawatt',
+    'terawatt',
 }
 
 PROVIDER_INTEGRATIONS = {
