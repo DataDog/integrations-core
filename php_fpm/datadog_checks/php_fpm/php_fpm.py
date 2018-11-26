@@ -192,8 +192,8 @@ class PHPFPMCheck(AgentCheck):
 
         if parsed_url.scheme == "unix":
             # Example of expected format: unix:///path/to/file.sock/ping
-            sock = parsed_url.path.split('.sock')[0]+'.sock'
-            route = parsed_url.path.split('.sock')[1]
+            sock_file, _, route = parsed_url.path.partition('.sock')
+            sock_file += '.sock'
             hostname = 'localhost'
             port = '80'
             fcgi = FCGIApp(connect=sock)
