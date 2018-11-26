@@ -13,7 +13,7 @@
         "windows"
       ],
     "type": "check",
-    "manifest_version": "1.0.2",
+    "manifest_version": "1.0.0",
     "name": "concourse_ci",
     "display_name": "Concourse CI",
     "short_description": "Collect metrics emitted from Concourse CI.",
