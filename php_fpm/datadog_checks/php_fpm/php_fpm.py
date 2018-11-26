@@ -196,7 +196,7 @@ class PHPFPMCheck(AgentCheck):
             sock_file += '.sock'
             hostname = 'localhost'
             port = '80'
-            fcgi = FCGIApp(connect=sock)
+            fcgi = FCGIApp(connect=sock_file)
         else:
             hostname = parsed_url.hostname
             if hostname == 'localhost':
