@@ -23,6 +23,13 @@ Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of you
 
 To get started with the PostgreSQL integration, create at least a read-only Datadog user with proper access to your PostgreSQL server. Start psql on your PostgreSQL database and run:
 
+For PostgreSQL version 10 and above:
+```
+create user datadog with password '<PASSWORD>';
+grant pg_monitor to datadog;
+```
+
+For older PostgreSQL versions:
 ```
 create user datadog with password '<PASSWORD>';
 grant SELECT ON pg_stat_database to datadog;
@@ -63,7 +70,19 @@ When it prompts for a password, enter the one used in the first command.
 
   * **`collect_function_metrics`** (Optional) - Collect metrics regarding PL/pgSQL functions from pg_stat_user_functions
   * **`collect_count_metrics`** (Optional) - Collect count metrics. The default value is `True` for backward compatibility, but this might be slow. The recommended value is `False`.
-
+  * **`collect_activity_metrics`** (Optional) - Collect metrics regarding transactions from pg_stat_activity, default value is `False`. Please make sure the user has sufficient privileges to read from pg_stat_activity before enabling this option.
+  
+    For PostgreSQL versions 9.6 and below, run the following and create a `SECURITY DEFINER` to read from pg_stat_activity.
+     ```
+    CREATE FUNCTION pg_stat_activity() RETURNS SETOF pg_catalog.pg_stat_activity AS 
+    $$ SELECT * from pg_catalog.pg_stat_activity; $$
+    LANGUAGE sql VOLATILE SECURITY DEFINER;
+  
+    CREATE VIEW pg_stat_activity_dd AS SELECT * FROM pg_stat_activity();
+    grant SELECT ON pg_stat_activity_dd to datadog;
+    ```
+  * **`collect_database_size_metrics`** Collect database size metrics. Default value is True but they might be slow with large databases.
+  * **`collect_default_database`** (Optional) Include statistics from the default database 'postgres' in the check metrics, default to `False`.
 * [Restart the Agent][15] to start sending PostgreSQL metrics to Datadog.
 
 #### Log Collection
@@ -118,7 +137,7 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
 ## Data Collected
 ### Metrics
 
-Some of the metrics listed below require additional configuration, refer to the [sample postgres.d/conf.yaml][14] for all configurable options.
+Some of the metrics listed below require additional configuration, see the [sample postgres.d/conf.yaml][14] for all configurable options.
 
 See [metadata.csv][18] for a list of metrics provided by this integration.
 

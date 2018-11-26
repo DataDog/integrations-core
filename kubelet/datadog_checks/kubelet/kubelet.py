@@ -99,6 +99,12 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 'kubelet_runtime_operations': 'kubelet.runtime.operations',
                 'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
                 'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+                'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
+                'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
+                'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
+                'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
+                'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
+                'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
             }],
             # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
             'send_monotonic_counter': instance.get('send_monotonic_counter', False),
@@ -300,7 +306,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """Reports pod requests & limits by looking at pod specs."""
         for pod in pod_list['items']:
             pod_name = pod.get('metadata', {}).get('name')
-            if not pod_name:
+            pod_phase = pod.get('status', {}).get('phase')
+            if self._should_ignore_pod(pod_name, pod_phase):
                 continue
 
             for ctr in pod['spec']['containers']:
@@ -309,7 +316,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
                 c_name = ctr.get('name', '')
                 cid = None
-
                 for ctr_status in pod['status'].get('containerStatuses', []):
                     if ctr_status.get('name') == c_name:
                         # it is already prefixed with 'runtime://'
@@ -358,3 +364,13 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             else:
                 unit += char
         return float(number) * FACTORS.get(unit, 1)
+
+    @staticmethod
+    def _should_ignore_pod(name, phase):
+        """
+        Pods that are neither pending or running should not be counted
+        in resource requests and limits.
+        """
+        if not name or phase not in ["Running", "Pending"]:
+            return True
+        return False

@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from datadog_checks.couchbase import Couchbase
 
 
@@ -42,3 +41,12 @@ def test_extract_seconds_value():
         test_output = couchbase.extract_seconds_value(test_input)
         assert test_output == expected_output, 'Input was {}, expected output was {}, actual output was {}'.format(
             test_input, expected_output, test_output)
+
+
+def test__get_query_monitoring_data():
+    """
+    `query_monitoring_url` can potentially fail, be sure we don't raise when the
+    endpoint is not reachable
+    """
+    couchbase = Couchbase('couchbase', {}, {})
+    couchbase._get_query_monitoring_data({'query_monitoring_url': 'http://foo/bar'})

@@ -225,7 +225,8 @@ class PgBouncer(AgentCheck):
             self._collect_stats(db, tags)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
-            db = self._get_connection(key, host, port, user, password, tags=tags, use_cached=False)
+            db = self._get_connection(key, host, port, user, password, tags=tags,
+                                      database_url=database_url, use_cached=False)
             self._collect_stats(db, tags)
 
         redacted_dsn = self._get_redacted_dsn(host, port, user, database_url)

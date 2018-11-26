@@ -17,7 +17,7 @@ If you are only collecting standard metrics from Microsoft Windows and other pac
 1.  Submit perfomance counters using System.Diagnostics in .NET, then access them via WMI.
 2.  Implement a COM-based WMI provider for your application. You would typically only do this if you are using a non-.NET language.
 
-To learn more about using System.Diagnostics, refer to [the MSDN documentation here][1]. After adding your metric you should be able to find it in WMI. To browse the WMI namespaces you may find this tool useful: [WMI Explorer][2]. You can find the same information with Powershell [here][3]. Also review the information in the [Datadog Knowledge Base article][4].
+To learn more about using System.Diagnostics, see [the MSDN documentation][1]. After adding your metric you should be able to find it in WMI. To browse the WMI namespaces you may find this tool useful: [WMI Explorer][2]. You can find the same information with Powershell [here][3]. Also review the information in the [Datadog Knowledge Base article][4].
 
 If you assign the new metric a category of My_New_Metric, the WMI path will be
 `\\<ComputerName>\ROOT\CIMV2:Win32_PerfFormattedData_My_New_Metric`

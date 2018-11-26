@@ -88,10 +88,10 @@ Unless you want to configure a custom `mesos_slave.d/conf.yaml`-perhaps you need
 
 ### Validation
 #### DC/OS
-Under the Services tab in the DC/OS web UI you should see the Datadog Agent shown. In the Datadog app, search for `mesos.slave` in the Metrics Explorer.
+Under the Services tab in the DC/OS web UI you should see the Datadog Agent shown. In Datadog, search for `mesos.slave` in the Metrics Explorer.
 
 #### Marathon
-If you are not using DC/OS, then datadog-agent is in the list of running applications with a healthy status. In the Datadog app, search for `mesos.slave` in the Metrics Explorer.
+If you are not using DC/OS, then datadog-agent is in the list of running applications with a healthy status. In Datadog, search for `mesos.slave` in the Metrics Explorer.
 
 ## Data Collected
 ### Metrics

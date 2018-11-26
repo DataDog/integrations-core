@@ -255,7 +255,7 @@ class Couchbase(AgentCheck):
         's': 1,
     }
 
-    seconds_value_pattern = re.compile('(\d+(\.\d+)?)(\D+)')
+    seconds_value_pattern = re.compile(r'(\d+(\.\d+)?)(\D+)')
 
     class CouchbaseInstanceState(object):
         def __init__(self):
@@ -392,13 +392,14 @@ class Couchbase(AgentCheck):
 
         self.log.debug('Fetching Couchbase stats at url: {}'.format(url))
 
+        ssl_verify = instance.get('ssl_verify', True)
         timeout = float(instance.get('timeout', DEFAULT_TIMEOUT))
 
         auth = None
         if 'user' in instance and 'password' in instance:
             auth = (instance['user'], instance['password'])
 
-        r = requests.get(url, auth=auth, headers=headers(self.agentConfig), timeout=timeout)
+        r = requests.get(url, auth=auth, verify=ssl_verify, headers=headers(self.agentConfig), timeout=timeout)
         r.raise_for_status()
         return r.json()
 
@@ -488,16 +489,9 @@ class Couchbase(AgentCheck):
                     couchbase['buckets'][bucket['name']] = bucket_samples
 
         # Next, get the query monitoring data
-        query_monitoring_url = instance.get('query_monitoring_url', None)
-        if query_monitoring_url is not None:
-            try:
-                url = '{}{}'.format(query_monitoring_url, COUCHBASE_VITALS_PATH)
-                query = self._get_stats(url, instance)
-                if query is not None:
-                    couchbase['query'] = query
-            except requests.exceptions.HTTPError:
-                self.log.error("Error accessing the endpoint {}, make sure you're running at least "
-                               "couchbase 4.5 to collect the query monitoring metrics".format(url))
+        query_data = self._get_query_monitoring_data(instance)
+        if query_data is not None:
+            couchbase['query'] = query_data
 
         # Next, get all the tasks
         tasks_url = '{}{}/tasks'.format(server, COUCHBASE_STATS_PATH)
@@ -529,14 +523,27 @@ class Couchbase(AgentCheck):
 
         return couchbase
 
+    def _get_query_monitoring_data(self, instance):
+        query_data = None
+        query_monitoring_url = instance.get('query_monitoring_url')
+        if query_monitoring_url:
+            try:
+                url = '{}{}'.format(query_monitoring_url, COUCHBASE_VITALS_PATH)
+                query_data = self._get_stats(url, instance)
+            except requests.exceptions.RequestException:
+                self.log.error("Error accessing the endpoint {}, make sure you're running at least "
+                               "couchbase 4.5 to collect the query monitoring metrics".format(url))
+
+        return query_data
+
     # Takes a camelCased variable and returns a joined_lower equivalent.
     # Returns input if non-camelCase variable is detected.
     def camel_case_to_joined_lower(self, variable):
         # replace non-word with _
-        converted_variable = re.sub('\W+', '_', variable)
+        converted_variable = re.sub(r'\W+', '_', variable)
 
         # insert _ in front of capital letters and lowercase the string
-        converted_variable = re.sub('([A-Z])', '_\g<1>', converted_variable).lower()
+        converted_variable = re.sub('([A-Z])', r'_\g<1>', converted_variable).lower()
 
         # remove duplicate _
         converted_variable = re.sub('_+', '_', converted_variable)

@@ -1,0 +1,117 @@
+init_config:
+
+## @param keystone_server_url - string - required
+## URL of your identity server. Note that the server must support Identity API v3
+#
+  keystone_server_url: <"https://my-keystone-server.com:<port>/">
+
+
+## @param os_host - string - optional
+## The hostname of this machine registered with Nova. 
+## Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
+#
+#  os_host: <HOSTNAME>
+
+
+## @param whitelist_project_names - list of string - optional - default:[]
+## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
+## Regex expressions for the project names are supported.
+## Whitelist takes precedence over blacklist in case of overlap.
+#
+#  whitelist_project_names:
+#    - <PROJECT_NAME>
+#    - <PROJECT_PREFIX>*
+
+
+## @param blacklist_project_names - list of string - optional - default:[]
+## IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
+## Regex expressions for the project names are supported.
+## Whitelist takes precedence over blacklist in case of overlap.
+#
+#  blacklist_project_names:
+#    - <PROJECT_NAME>
+#    - <PROJECT_PREFIX>*
+
+
+## @param exclude_server_ids - list of string - optional - default:[]
+## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
+## Regex expressions for the server IDs are supported.
+#
+#  exclude_server_ids:
+#    - <SERVER_ID>
+#    - <SERVER_ID_PREFIX>*
+
+
+## @param exclude_network_ids - optional - list of string - default:[]
+## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the neutron:get_networks operation)
+## Regex expressions for the network IDs to exclude are supported.
+#
+#  exclude_network_ids:
+#    - <NETWORK_ID>
+#    - <NETWORK_ID_PREFIX>*
+
+
+## @param ssl_verify - optional - boolean - default:true
+## Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
+## need to set to false when using self-signed certs.
+#
+#  ssl_verify: true
+
+## @param use_agent_proxy - optional - boolean - default:true
+## Whether the dd-agent proxy should also be used for openstack API requests (if set).
+#
+#  use_agent_proxy: true
+
+instances:
+
+## @param name - required - string
+## Unique identifier for this instance.
+#
+  - name: <INSTANCE_NAME>
+
+
+  ## @param user - required - user_object
+  ## Password authentication is the only auth method supported
+  ## User expects username, password, and user domain id
+  ## `user` should resolve to a structure like {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
+  ## The check uses the Unscoped token method to collect information about all available projects to the user.
+  #
+    user:
+        password: <PASSWORD>
+        name: <USER_NAME>
+        domain:
+            id: <DOMAIN_ID>
+
+
+  ## @param collect_hypervisor_load - optional - boolean - default:false
+  ## Collects hypervisor_load.1/5/15 for each hypervisor
+  ## Disabled by default to increase performance of the check.
+  ## With this enabled there is an extra N requests per check run (N = # of hypervisors)
+  ## If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
+  #
+  #  collect_hypervisor_load: false
+
+
+  ## @param use_shortname - optional - boolean - default:false
+  ## In some OpenStack environments, the hostname registered to Nova is the shortname. 
+  ## Enabling this enforces the check to split the hostname up to the first period when
+  ## comparing against nova responses. Only affects aggregate tagging. 
+  #
+  #  use_shortname: false
+
+
+  ## @param collect_limits_from_all_projects - optional - boolean - default:true
+  ## The admin user defined for Datadog starts with a "default" project. 
+  ## If this option is disabled, project limits metrics are only collected from projects the
+  ## datadog defined user has access to view. 
+  #
+  #  collect_limits_from_all_projects: true
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## Note: server metrics override the host tag and thus do not get the host-level tags specified in datadog.(conf/yaml)
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>

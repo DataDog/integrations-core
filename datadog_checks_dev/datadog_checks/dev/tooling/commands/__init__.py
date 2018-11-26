@@ -6,12 +6,11 @@ from .config import config
 from .create import create
 from .dep import dep
 from .env import env
-from .manifest import manifest
 from .meta import meta
-from .metadata import metadata
 from .release import release
 from .run import run
 from .test import test
+from .validate import validate
 
 ALL_COMMANDS = (
     clean,
@@ -19,10 +18,9 @@ ALL_COMMANDS = (
     create,
     dep,
     env,
-    manifest,
     meta,
-    metadata,
     release,
     run,
     test,
+    validate,
 )

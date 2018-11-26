@@ -8,8 +8,8 @@ from io import open
 import click
 from six import PY2, iteritems
 
-from .utils import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
-from ..utils import get_metadata_file, get_metric_sources, load_manifest
+from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
+from ...utils import get_metadata_file, get_metric_sources, load_manifest
 
 REQUIRED_HEADERS = {
     'metric_name',
@@ -174,6 +174,8 @@ VALID_UNIT_NAMES = {
     'exacore',
     'build',
     'prediction',
+    'heap',
+    'volume',
 }
 
 PROVIDER_INTEGRATIONS = {
@@ -182,20 +184,12 @@ PROVIDER_INTEGRATIONS = {
 }
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Manage metadata files'
-)
-def metadata():
-    pass
-
-
-@metadata.command(
+@click.command(
     context_settings=CONTEXT_SETTINGS,
     short_help='Validate `metadata.csv` files'
 )
 @click.argument('check', required=False)
-def verify(check):
+def metadata(check):
     """Validates metadata.csv files
 
     If `check` is specified, only the check will be validated,

@@ -126,7 +126,7 @@ class CiscoTags:
                 eth_list = self.api.get_eth_list_for_epg(tenant_name, app_name, epg_name)
                 for eth in eth_list:
                     eth_attrs = eth.get('fvRsCEpToPathEp', {}).get('attributes', {})
-                    port = re.search('/pathep-\[(.+?)\]', eth_attrs.get('tDn', ''))
+                    port = re.search(r'/pathep-\[(.+?)\]', eth_attrs.get('tDn', ''))
                     if not port:
                         continue
                     eth_tag = 'port:' + port.group(1)

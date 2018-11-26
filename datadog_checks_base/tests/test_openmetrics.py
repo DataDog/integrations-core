@@ -135,7 +135,8 @@ def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_pro
     check = mocked_prometheus_check
     check.process_metric(filtered_gauge, mocked_prometheus_scraper_config, metric_transformers={})
     check.log.debug.assert_called_with(
-        "Unable to handle metric: process_start_time_seconds - error: No handler function named 'process_start_time_seconds' defined"
+        "Unable to handle metric: process_start_time_seconds - "
+        "error: No handler function named 'process_start_time_seconds' defined"
     )
     aggregator.assert_all_metrics_covered()
 
@@ -259,11 +260,16 @@ def test_submit_gauge_with_custom_tags(
 ):
     """ Providing custom tags should add them as is on the gauge call """
     check = mocked_prometheus_check
-    tags = ['env:dev', 'app:my_pretty_app']
-    mocked_prometheus_scraper_config['custom_tags'] = tags
+    mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
+    mocked_prometheus_scraper_config['_metric_tags'] = ['foo:bar']
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
     check._submit(metric, ref_gauge, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.process.vm.bytes', 54927360.0, tags=tags, count=1)
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes',
+        54927360.0,
+        tags=mocked_prometheus_scraper_config['custom_tags'] + mocked_prometheus_scraper_config['_metric_tags'],
+        count=1
+    )
 
 
 def test_submit_gauge_with_labels_mapper(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -1439,12 +1445,14 @@ def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, 
     check = mocked_prometheus_check
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
+    mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
     check.process(mocked_prometheus_scraper_config)
 
     aggregator.assert_service_check(
         'ksm.prometheus.health',
         status=OpenMetricsBaseCheck.OK,
-        tags=['endpoint:http://fake.endpoint:10055/metrics'],
+        tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
 
@@ -1454,12 +1462,14 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
     check = mocked_prometheus_check
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
+    mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
     with pytest.raises(requests.ConnectionError):
         check.process(mocked_prometheus_scraper_config)
     aggregator.assert_service_check(
         'ksm.prometheus.health',
         status=OpenMetricsBaseCheck.CRITICAL,
-        tags=["endpoint:http://fake.endpoint:10055/metrics"],
+        tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
 

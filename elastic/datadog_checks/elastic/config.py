@@ -12,6 +12,7 @@ ESInstanceConfig = namedtuple('ESInstanceConfig', [
     'admin_forwarder',
     'pshard_stats',
     'pshard_graceful_to',
+    'node_name_as_host',
     'cluster_stats',
     'index_stats',
     'password',
@@ -41,6 +42,7 @@ def from_instance(instance):
 
     pshard_stats = is_affirmative(instance.get('pshard_stats', False))
     pshard_graceful_to = is_affirmative(instance.get('pshard_graceful_timeout', False))
+    node_name_as_host = is_affirmative(instance.get('node_name_as_host', False))
     index_stats = is_affirmative(instance.get('index_stats', False))
     cluster_stats = is_affirmative(instance.get('cluster_stats', False))
     if 'is_external' in instance:
@@ -74,6 +76,7 @@ def from_instance(instance):
         admin_forwarder=admin_forwarder,
         pshard_stats=pshard_stats,
         pshard_graceful_to=pshard_graceful_to,
+        node_name_as_host=node_name_as_host,
         cluster_stats=cluster_stats,
         index_stats=index_stats,
         password=instance.get('password'),

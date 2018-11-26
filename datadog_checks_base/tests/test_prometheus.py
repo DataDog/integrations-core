@@ -322,7 +322,8 @@ def test_process_metric_filtered(mocked_prometheus_check):
     check._dry_run = False
     check.process_metric(filtered_gauge)
     check.log.debug.assert_called_with(
-        "Unable to handle metric: process_start_time_seconds - error: 'PrometheusCheck' object has no attribute 'process_start_time_seconds'"
+        "Unable to handle metric: process_start_time_seconds - "
+        "error: 'PrometheusCheck' object has no attribute 'process_start_time_seconds'"
     )
     check.gauge.assert_not_called()
 

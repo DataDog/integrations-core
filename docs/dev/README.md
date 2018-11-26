@@ -1,6 +1,10 @@
 ---
 title: Introduction to Agent-based Integrations
 kind: documentation
+aliases:
+  - /guides/agent_checks/
+  - /agent/agent_checks
+  - /developers/agent_checks/
 ---
 
 ## Why create an Integration?
@@ -27,5 +31,5 @@ All of the details-including prerequisites, code examples, and more-are in the [
 [1]: https://docs.datadoghq.com/developers/metrics/
 [6]: https://github.com/DataDog/integrations-extras
 [10]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/new_check_howto.md 
-[11]: https://docs.datadoghq.com/developers/agent_checks/
+[11]: https://docs.datadoghq.com/developers/write_agent_check/
 [12]: https://docs.datadoghq.com/developers/office_hours/

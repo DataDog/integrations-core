@@ -21,25 +21,25 @@ import psutil
 
 BSD_TCP_METRICS = [
     (re.compile(
-        "^\s*(\d+) data packets \(\d+ bytes\) retransmitted\s*$"
+        r"^\s*(\d+) data packets \(\d+ bytes\) retransmitted\s*$"
     ), 'system.net.tcp.retrans_packs'),
     (re.compile(
-        "^\s*(\d+) packets sent\s*$"
+        r"^\s*(\d+) packets sent\s*$"
     ), 'system.net.tcp.sent_packs'),
     (re.compile(
-        "^\s*(\d+) packets received\s*$"
+        r"^\s*(\d+) packets received\s*$"
     ), 'system.net.tcp.rcv_packs')
 ]
 
 SOLARIS_TCP_METRICS = [
     (re.compile(
-        "\s*tcpRetransSegs\s*=\s*(\d+)\s*"
+        r"\s*tcpRetransSegs\s*=\s*(\d+)\s*"
     ), 'system.net.tcp.retrans_segs'),
     (re.compile(
-        "\s*tcpOutDataSegs\s*=\s*(\d+)\s*"
+        r"\s*tcpOutDataSegs\s*=\s*(\d+)\s*"
     ), 'system.net.tcp.in_segs'),
     (re.compile(
-        "\s*tcpInSegs\s*=\s*(\d+)\s*"
+        r"\s*tcpInSegs\s*=\s*(\d+)\s*"
     ), 'system.net.tcp.out_segs')
 ]
 

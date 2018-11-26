@@ -1,14 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 from xml.etree import ElementTree
 
-# third party
 import requests
+from six import iteritems
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 
@@ -105,7 +102,7 @@ class ActiveMQXML(AgentCheck):
                 continue
 
             el_tags = tags + ["{0}:{1}".format(el_type, name)]
-            for attr_name, alias in TOPIC_QUEUE_METRICS.iteritems():
+            for attr_name, alias in iteritems(TOPIC_QUEUE_METRICS):
                 metric_name = "activemq.{0}.{1}".format(el_type, alias)
                 value = stats.get(attr_name, 0)
                 self.gauge(metric_name, value, tags=el_tags)

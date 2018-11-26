@@ -1,5 +1,13 @@
 # CHANGELOG - hdfs_datanode
 
+## 1.5.0 / 2018-11-14
+
+* [Added] Support keytab files for kerberos. See [#2591](https://github.com/DataDog/integrations-core/pull/2591).
+
+## 1.4.0 / 2018-11-07
+
+* [Added] Support Kerberos auth. See [#2516](https://github.com/DataDog/integrations-core/pull/2516).
+
 ## 1.3.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

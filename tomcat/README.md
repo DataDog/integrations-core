@@ -17,12 +17,11 @@ And more.
 
 The Tomcat check is included in the [Datadog Agent][13] package, so you don't need to install anything else on your Tomcat servers.
 
-This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][14] to do that.
+This check is JMX-based, so you need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][14] to do that.
 
 ### Configuration
 
-1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][24] to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
-  See the [sample tomcat.d/conf.yaml][17] for all available configuration options.
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][24] to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection). See the [sample tomcat.d/conf.yaml][17] for all available configuration options.
 
 2. [Restart the Agent][16]
 
@@ -109,66 +108,74 @@ See the [JMX Check documentation][15] for a list of configuration options usable
 
 Configuration Options:
 
-* `user` and `password` (Optional) - Username and password.
-* `process_name_regex` - (Optional) - Instead of specifying a host and port or jmx_url, the agent can connect using the attach api. This requires the JDK to be installed and the path to tools.jar to be set.
-* `tools_jar_path` - (Optional) - To be set when process_name_regex is set.
-* `java_bin_path` - (Optional) - Should be set if the agent cannot find your java executable.
-* `java_options` - (Optional) - Java JVM options
-* `trust_store_path` and `trust_store_password` - (Optional) - should be set if "com.sun.management.jmxremote.ssl" is set to true on the target JVM.
-* `key_store_path` and `key_store_password` - (Optional) - should be set if "com.sun.management.jmxremote.ssl.need.client.auth" is set to true on the target JVM.
-* `rmi_registry_ssl` - (Optional) - should be set to true if "com.sun.management.jmxremote.registry.ssl" is set to true on the target JVM.
+| Option                                        | Required | Description                                                                                                                                                                |
+|-----------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `user` and `password`                         | No       | Username and password                                                                                                                                                      |
+| `process_name_regex`                          | No       | Instead of specifying a host and port or `jmx_url`, the agent can connect using the attach api. This requires the JDK to be installed and the path to tools.jar to be set. |
+| `tools_jar_path`                              | No       | Should be set when `process_name_regex` is set.                                                                                                                            |
+| `java_bin_path`                               | No       | Should be set if the agent cannot find your java executable.                                                                                                               |
+| `java_options`                                | No       | Java JVM options                                                                                                                                                           |
+| `trust_store_path` and `trust_store_password` | No       | Should be set if `com.sun.management.jmxremote.ssl` is set to true on the target JVM.                                                                                      |
+| `key_store_path` and `key_store_password`     | No       | Should be set if `com.sun.management.jmxremote.ssl.need.client.auth` is set to true on the target JVM.                                                                     |
+| `rmi_registry_ssl`                            | No       | Should be set to true if `com.sun.management.jmxremote.registry.ssl` is set to true on the target JVM.                                                                     |
 
 The `conf` parameter is a list of dictionaries. Only 2 keys are allowed in this dictionary:
 
-* `include` (**mandatory**): Dictionary of filters, any attribute that matches these filters will be collected unless it also matches the "exclude" filters (see below)
-* `exclude` (**optional**): Another dictionary of filters. Attributes that match these filters won't be collected
+| Key       | Required | Description                                                                                                                   |
+|-----------|----------|-------------------------------------------------------------------------------------------------------------------------------|
+| `include` | Yes      | A dictionary of filters. Any attribute that matches these filters are collected unless it also matches the "exclude" filters. |
+| `exclude` | No       | A dictionary of filters. Attributes that match these filters won't be collected.                                              |
 
 For a given bean, metrics get tagged in the following manner:
 
     mydomain:attr0=val0,attr1=val1
 
-Your metric will be mydomain (or some variation depending on the attribute inside the bean) and have the tags `attr0:val0, attr1:val1, domain:mydomain`.
+Your metric is mydomain (or some variation depending on the attribute inside the bean) and has the tags `attr0:val0, attr1:val1, domain:mydomain`.
 
-If you specify an alias in an `include` key that is formatted as *camel case*, it will be converted to *snake case*. For example, `MyMetricName` will be shown in Datadog as `my_metric_name`.
+If you specify an alias in an `include` key that is formatted as *camel case*, it is converted to *snake case*. For example, `MyMetricName` is shown in Datadog as `my_metric_name`.
 
-  See the [sample tomcat.yaml][17] for all available configuration options.
+See the [sample tomcat.yaml][17] for all available configuration options.
 
 ##### The `attribute` filter
 
-The `attribute` filter can accept two types of values:
+The `attribute` filter accepts two types of values:
 
 * A dictionary whose keys are attributes names:
 
-      conf:
-        - include:
-            attribute:
-              maxThreads:
-                alias: tomcat.threads.max
-                metric_type: gauge
-              currentThreadCount:
-                alias: tomcat.threads.count
-                metric_type: gauge
-              bytesReceived:
-                alias: tomcat.bytes_rcvd
-                metric_type: counter
+```
+  conf:
+    - include:
+        attribute:
+          maxThreads:
+            alias: tomcat.threads.max
+            metric_type: gauge
+          currentThreadCount:
+            alias: tomcat.threads.count
+            metric_type: gauge
+          bytesReceived:
+            alias: tomcat.bytes_rcvd
+            metric_type: counter
+```
 
-In that case you can specify an alias for the metric that will become the metric name in Datadog. You can also specify the metric type either a gauge or a counter. If you choose counter, a rate per second will be computed for this metric.
+For the case above, the metric aliases specified become the metric name in Datadog. Also, the metric type can be specified as a gauge or counter. If you choose counter, a rate per second is computed for this metric.
 
 * A list of attributes names:
 
-      conf:
-        - include:
-            domain: org.apache.cassandra.db
-            attribute:
-              - BloomFilterDiskSpaceUsed
-              - BloomFilterFalsePositives
-              - BloomFilterFalseRatio
-              - Capacity
-              - CompressionRatio
-              - CompletedTasks
-              - ExceptionCount
-              - Hits
-              - RecentHitRate
+```
+  conf:
+    - include:
+        domain: org.apache.cassandra.db
+        attribute:
+          - BloomFilterDiskSpaceUsed
+          - BloomFilterFalsePositives
+          - BloomFilterFalseRatio
+          - Capacity
+          - CompressionRatio
+          - CompletedTasks
+          - ExceptionCount
+          - Hits
+          - RecentHitRate
+```
 
 In that case:
 
@@ -177,42 +184,45 @@ In that case:
 
 Here is another filtering example:
 
-    instances:
-      - host: 127.0.0.1
-        name: jmx_instance
-        port: 9999
+```
+instances:
+  - host: 127.0.0.1
+    name: jmx_instance
+    port: 9999
 
-    init_config:
-      conf:
-        - include:
-            bean: org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency
-            attribute:
-              - OneMinuteRate
-              - 75thPercentile
-              - 95thPercentile
-              - 99thPercentile
+init_config:
+  conf:
+    - include:
+        bean: org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency
+        attribute:
+          - OneMinuteRate
+          - 75thPercentile
+          - 95thPercentile
+          - 99thPercentile
+```
 
+<div class="alert alert-warning">
+  <b>Note:</b> List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple <code>include</code> statements instead.
+</div>
 
-#### Note
+```
+# Datadog Agent > 5.3.0
+  conf:
+    - include:
+        domain: domain_name
+        bean:
+          - first_bean_name
+          - second_bean_name
 
-List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, please use singletons and multiple `include` statements instead.
-
-    # Datadog Agent > 5.3.0
-      conf:
-        - include:
-            domain: domain_name
-            bean:
-              - first_bean_name
-              - second_bean_name
-
-    # Older Datadog Agent versions
-      conf:
-        - include:
-            domain: domain_name
-            bean: first_bean_name
-        - include:
-            domain: domain_name
-            bean: second_bean_name
+# Older Datadog Agent versions
+  conf:
+    - include:
+        domain: domain_name
+        bean: first_bean_name
+    - include:
+        domain: domain_name
+        bean: second_bean_name
+```
 
 #### Log Collection
 
@@ -264,7 +274,7 @@ log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/hos
 
 Check Tomcat [logging documentation][18] for more information about Tomcat logging capabilities.
 
-By default, our integration pipeline support the following conversion patterns:
+By default, Datadog's integration pipeline support the following conversion patterns:
 
   ```
   %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
@@ -294,8 +304,7 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
       #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
   ```
 
-  Change the `path` and `service` parameter values and configure them for your environment.
-    see the [sample tomcat.yaml][17] for all available configuration options.
+* Change the `path` and `service` parameter values and configure them for your environment. See the [sample tomcat.yaml][17] for all available configuration options.
 
 * [Restart the Agent][16].
 
@@ -312,25 +321,23 @@ The Tomcat check does not include any events at this time.
 
 ### Service Checks
 
-**tomcat.can_connect**
-
+**tomcat.can_connect**  
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Tomcat instance. Returns `OK` otherwise.
-
 
 ## Troubleshooting
 ### Commands to view the metrics that are available:
 
 The `datadog-agent jmx` command was added in version 4.1.0.
 
-  * List attributes that match at least one of your instances configuration:
+  * List attributes that match at least one of your instance configurations:
 `sudo /etc/init.d/datadog-agent jmx list_matching_attributes`
-  * List attributes that do match one of your instances configuration but that are not being collected because it would exceed the number of metrics that can be collected:
+  * List attributes that match one of your instance configurations but that are not collected because it would exceed the number of metrics that can be collected:
 `sudo /etc/init.d/datadog-agent jmx list_limited_attributes`
-  * List attributes that will actually be collected by your current instances configuration:
+  * List attributes that are actually collected by your current instance configurations:
 `sudo /etc/init.d/datadog-agent jmx list_collected_attributes`
-  * List attributes that don't match any of your instances configuration:
+  * List attributes that don't match any of your instance configurations:
 `sudo /etc/init.d/datadog-agent jmx list_not_matching_attributes`
-  * List every attributes available that has a type supported by JMXFetch:
+  * List every attribute available that has a type supported by JMXFetch:
 `sudo /etc/init.d/datadog-agent jmx list_everything`
   * Start the collection of metrics based on your current configuration and display them in the console:
 `sudo /etc/init.d/datadog-agent jmx collect`

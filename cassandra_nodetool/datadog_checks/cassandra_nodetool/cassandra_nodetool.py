@@ -31,9 +31,9 @@ TO_BYTES = {
 class CassandraNodetoolCheck(AgentCheck):
 
     datacenter_name_re = re.compile('^Datacenter: (.*)')
-    node_status_re = re.compile('^(?P<status>[UD])[NLJM] +(?P<address>\d+\.\d+\.\d+\.\d+) +'
-                                '(?P<load>\d+(\.\d*)?) (?P<load_unit>(K|M|G|T)?i?B) +\d+ +'
-                                '(?P<owns>(\d+(\.\d+)?)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(?P<rack>.*)')
+    node_status_re = re.compile(r'^(?P<status>[UD])[NLJM] +(?P<address>\d+\.\d+\.\d+\.\d+) +'
+                                r'(?P<load>\d+(\.\d*)?) (?P<load_unit>(K|M|G|T)?i?B) +\d+ +'
+                                r'(?P<owns>(\d+(\.\d+)?)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(?P<rack>.*)')
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -47,6 +47,7 @@ class CassandraNodetoolCheck(AgentCheck):
         keyspaces = instance.get("keyspaces", [])
         username = instance.get("username", "")
         password = instance.get("password", "")
+        ssl = instance.get("ssl", False)
         tags = instance.get("tags", [])
 
         # Flag to send service checks only once and not for every keyspace
@@ -60,10 +61,13 @@ class CassandraNodetoolCheck(AgentCheck):
             cmd = nodetool_cmd + ['-h', host, '-p', str(port)]
             if username and password:
                 cmd += ['-u', username, '-pw', password]
+            # add ssl if requested
+            if ssl:
+                cmd += ['--ssl']
             cmd += ['status', '--', keyspace]
 
             # Execute the command
-            out, err, _ = get_subprocess_output(cmd, self.log, False)
+            out, err, _ = get_subprocess_output(cmd, self.log, False, log_debug=False)
             if err or 'Error:' in out:
                 self.log.error('Error executing nodetool status: %s', err or out)
                 continue

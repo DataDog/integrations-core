@@ -61,11 +61,11 @@ def test_get_instance_with_default(check):
     """
     collect_default_db = False
     res = check._get_instance_metrics(KEY, 'dbname', False, collect_default_db)
-    assert "  AND datname not ilike 'postgres'" in res['query']
+    assert "  AND psd.datname not ilike 'postgres'" in res['query']
 
     collect_default_db = True
     res = check._get_instance_metrics(KEY, 'dbname', False, collect_default_db)
-    assert "  AND datname not ilike 'postgres'" not in res['query']
+    assert "  AND psd.datname not ilike 'postgres'" not in res['query']
 
 
 def test_get_instance_metrics_instance(check):

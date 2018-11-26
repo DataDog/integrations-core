@@ -7,7 +7,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.utils.headers import headers as agent_headers
 
 
-DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
+DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
 
 
 Config = namedtuple('Config',

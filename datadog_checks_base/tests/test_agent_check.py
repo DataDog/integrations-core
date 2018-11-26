@@ -50,8 +50,10 @@ class TestServiceChecks:
         check.service_check("testservicecheck", AgentCheck.OK, tags=None, message="")
         aggregator.assert_service_check("testservicecheck", status=AgentCheck.OK)
 
-        check.service_check("testservicecheckwithhostname", AgentCheck.OK, tags=["foo", "bar"], hostname="testhostname", message="a message")
-        aggregator.assert_service_check("testservicecheckwithhostname", status=AgentCheck.OK, tags=["foo", "bar"], hostname="testhostname", message="a message")
+        check.service_check("testservicecheckwithhostname", AgentCheck.OK, tags=["foo", "bar"], hostname="testhostname",
+                            message="a message")
+        aggregator.assert_service_check("testservicecheckwithhostname", status=AgentCheck.OK, tags=["foo", "bar"],
+                                        hostname="testhostname", message="a message")
 
         check.service_check("testservicecheckwithnonemessage", AgentCheck.OK, message=None)
         aggregator.assert_service_check("testservicecheckwithnonemessage", status=AgentCheck.OK, )

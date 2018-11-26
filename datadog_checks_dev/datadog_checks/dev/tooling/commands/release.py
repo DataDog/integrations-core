@@ -8,7 +8,7 @@ from collections import OrderedDict, namedtuple
 from datetime import datetime
 
 import click
-from semver import parse_version_info
+from semver import finalize_version, parse_version_info
 from six import StringIO, iteritems
 
 from .dep import freeze as dep_freeze
@@ -17,13 +17,13 @@ from .utils import (
     echo_warning
 )
 from ..constants import (
-    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, get_root
+    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP, get_root
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
     git_show_file, git_tag_list
 )
-from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash
+from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
     update_version_module
@@ -55,6 +55,37 @@ def validate_version(ctx, param, value):
         return '{}.{}'.format(version_info.major, version_info.minor)
     except ValueError:
         raise click.BadParameter('needs to be in semver format x.y[.z]')
+
+
+def create_trello_card(client, teams, pr_title, pr_url, pr_body):
+    body = u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
+
+    for team in teams:
+        creation_attempts = 3
+        for attempt in range(3):
+            rate_limited, error, response = client.create_card(team, pr_title, body)
+            if rate_limited:
+                wait_time = 10
+                echo_warning(
+                    'Attempt {} of {}: A rate limit in effect, retrying in {} '
+                    'seconds...'.format(attempt + 1, creation_attempts, wait_time)
+                )
+                time.sleep(wait_time)
+            elif error:
+                if attempt + 1 == creation_attempts:
+                    echo_failure('Error: {}'.format(error))
+                    break
+
+                wait_time = 2
+                echo_warning(
+                    'Attempt {} of {}: An error has occurred, retrying in {} '
+                    'seconds...'.format(attempt + 1, creation_attempts, wait_time)
+                )
+                time.sleep(wait_time)
+            else:
+                echo_success('Created card for team {}: '.format(team), nl=False)
+                echo_info(response.json().get('url'))
+                break
 
 
 @click.group(
@@ -216,9 +247,10 @@ def changes(ctx, check, dry_run):
 )
 @click.option('--start', 'start_id', help='The PR number or commit hash to start at')
 @click.option('--since', 'agent_version', callback=validate_version, help='The version of the Agent to compare')
+@click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.pass_context
-def testable(ctx, start_id, agent_version, dry_run):
+def testable(ctx, start_id, agent_version, milestone, dry_run):
     """Create a Trello card for each change that needs to be tested for
     the next release. Run via `ddev -x release testable` to force the use
     of the current directory.
@@ -291,6 +323,7 @@ def testable(ctx, start_id, agent_version, dry_run):
         options = OrderedDict((
             ('1', 'Integrations'),
             ('2', 'Containers'),
+            ('3', 'Agent'),
             ('s', 'Skip'),
             ('q', 'Quit'),
         ))
@@ -300,6 +333,8 @@ def testable(ctx, start_id, agent_version, dry_run):
             ('2', 'Containers'),
             ('3', 'Logs'),
             ('4', 'Process'),
+            ('5', 'Trace'),
+            ('6', 'Integrations'),
             ('s', 'Skip'),
             ('q', 'Quit'),
         ))
@@ -371,10 +406,25 @@ def testable(ctx, start_id, agent_version, dry_run):
                 )
                 continue
 
+        pr_labels = sorted(get_pr_labels(pr_data))
+        if any(label.lower().startswith('documentation') for label in pr_labels):
+            echo_info('Skipping documentation {}.'.format(format_commit_id(commit_id)))
+            continue
+
+        pr_milestone = get_pr_milestone(pr_data)
+        if milestone and pr_milestone != milestone:
+            echo_info('Looking for milestone {}, skipping {}.'.format(milestone, format_commit_id(commit_id)))
+            continue
+
         pr_url = pr_data.get('html_url', 'https://github.com/DataDog/{}/pull/{}'.format(repo, commit_id))
         pr_title = pr_data.get('title', commit_subject)
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
+
+        teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
+        if teams:
+            create_trello_card(trello, teams, pr_title, pr_url, pr_body)
+            continue
 
         finished = False
         choice_error = ''
@@ -389,6 +439,13 @@ def testable(ctx, start_id, agent_version, dry_run):
 
             echo_success('Author: ', nl=False, indent=indent)
             echo_info(pr_author)
+
+            echo_success('Labels: ', nl=False, indent=indent)
+            echo_info(', '.join(pr_labels))
+
+            if pr_milestone:
+                echo_success('Milestone: ', nl=False, indent=indent)
+                echo_info(pr_milestone)
 
             # Ensure Unix lines feeds just in case
             echo_info(pr_body.strip('\r'), indent=indent)
@@ -429,35 +486,7 @@ def testable(ctx, start_id, agent_version, dry_run):
                 echo_warning('Exited at {}'.format(format_commit_id(commit_id)))
                 return
             else:
-                creation_attempts = 3
-                for attempt in range(3):
-                    rate_limited, error, response = trello.create_card(
-                        value,
-                        pr_title,
-                        u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
-                    )
-                    if rate_limited:
-                        wait_time = 10
-                        echo_warning(
-                            'Attempt {} of {}: A rate limit in effect, retrying in {} '
-                            'seconds...'.format(attempt + 1, creation_attempts, wait_time)
-                        )
-                        time.sleep(wait_time)
-                    elif error:
-                        if attempt + 1 == creation_attempts:
-                            echo_failure('Error: {}'.format(error))
-                            break
-
-                        wait_time = 2
-                        echo_warning(
-                            'Attempt {} of {}: An error has occurred, retrying in {} '
-                            'seconds...'.format(attempt + 1, creation_attempts, wait_time)
-                        )
-                        time.sleep(wait_time)
-                    else:
-                        echo_success('Created card: ', nl=False)
-                        echo_info(response.json().get('url'))
-                        break
+                create_trello_card(trello, [value], pr_title, pr_url, pr_body)
 
             finished = True
 
@@ -548,7 +577,7 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
       - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
     """
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
-    from ..signing import update_link_metadata
+    from ..signing import update_link_metadata, YubikeyException
 
     root = get_root()
     releasing_all = check == 'all'
@@ -584,6 +613,21 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
         if version:
             # sanity check on the version provided
             cur_version = get_version_string(check)
+
+            if version == 'final':
+                # Remove any pre-release metadata
+                version = finalize_version(cur_version)
+            else:
+                # Keep track of intermediate version bumps
+                prev_version = cur_version
+                for method in version.split(','):
+                    # Apply any supported version bumping methods. Chaining is required for going
+                    # from mainline releases to development releases since e.g. x.y.z > x.y.z-rc.A.
+                    # So for an initial bug fix dev release you can do `fix,rc`.
+                    if method in VERSION_BUMP:
+                        version = VERSION_BUMP[method](prev_version)
+                        prev_version = version
+
             p_version = parse_version_info(version)
             p_current = parse_version_info(cur_version)
             if p_version <= p_current:
@@ -646,9 +690,11 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
     if sign_only or not skip_sign:
         echo_waiting('Updating release metadata...')
         echo_info('Please touch your Yubikey immediately after entering your PIN!')
-        commit_targets = update_link_metadata(checks)
-
-        git_commit(commit_targets, '[Release] Update metadata', force=True)
+        try:
+            commit_targets = update_link_metadata(checks)
+            git_commit(commit_targets, '[Release] Update metadata', force=True)
+        except YubikeyException as e:
+            abort('A problem occurred while signing metadata: {}'.format(e))
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
@@ -884,16 +930,16 @@ def agent_changelog(since, to, output, force):
     changes_per_agent = OrderedDict()
 
     for i in range(1, len(agent_tags)):
-        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i-1])
+        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i - 1])
         catalog_from = parse_agent_req_file(contents_from)
 
         contents_to = git_show_file(AGENT_REQ_FILE, agent_tags[i])
         catalog_to = parse_agent_req_file(contents_to)
 
         version_changes = OrderedDict()
-        changes_per_agent[agent_tags[i]] = version_changes
+        changes_per_agent[agent_tags[i - 1]] = version_changes
 
-        for name, ver in catalog_to.iteritems():
+        for name, ver in iteritems(catalog_to):
             old_ver = catalog_from.get(name, "")
             if old_ver != ver:
                 # determine whether major version changed

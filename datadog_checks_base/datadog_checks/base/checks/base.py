@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
+from os.path import basename
 import logging
 import re
 import json
 import copy
 import traceback
 import unicodedata
+import inspect
 
 from six import iteritems, text_type
 
@@ -128,7 +130,7 @@ class AgentCheck(object):
             # Do not allow to disable limiting if the class has set a non-zero default value
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
-                self.warning("Setting max_returned_metrics to zero is not allowed," +
+                self.warning("Setting max_returned_metrics to zero is not allowed, "
                              "reverting to the default of {} metrics".format(self.DEFAULT_METRIC_LIMIT))
         except Exception:
             metric_limit = self.DEFAULT_METRIC_LIMIT
@@ -269,8 +271,7 @@ class AgentCheck(object):
         prefix.b.c
         :param metric The metric name to normalize
         :param prefix A prefix to to add to the normalized name, default None
-        :param fix_case A boolean, indicating whether to make sure that
-                        the metric name returned is in underscore_case
+        :param fix_case A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
         """
         if isinstance(metric, text_type):
             metric_name = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
@@ -350,7 +351,14 @@ class AgentCheck(object):
 
     def warning(self, warning_message):
         warning_message = str(warning_message)
-        self.log.warning(warning_message)
+
+        frame = inspect.currentframe().f_back
+        lineno = frame.f_lineno
+        filename = frame.f_code.co_filename
+        # only log the last part of the filename, not the full path
+        filename = basename(filename)
+
+        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
         self.warnings.append(warning_message)
 
     def get_warnings(self):

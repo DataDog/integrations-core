@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
-    CLUSTER_PENDING_TASKS, ADDITIONAL_METRICS_1_x, index_stats_for_version,
+    CLUSTER_PENDING_TASKS, ADDITIONAL_METRICS_1_x, STATS_METRICS, index_stats_for_version,
     stats_for_version, pshard_stats_for_version, health_stats_for_version
 )
 from .common import CLUSTER_TAG, PASSWORD, URL, USER
@@ -93,7 +93,7 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
     for m_name, desc in iteritems(expected_metrics):
         aggregator.assert_metric(m_name, count=1, tags=cluster_tags)
 
-    aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK, tags=node_tags)
+    aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK, tags=config.service_check_tags)
 
     # Assert service metadata
     # self.assertServiceMetadata(['version'], count=3)
@@ -104,6 +104,14 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
         # Warning because elasticsearch status should be yellow, according to
         # http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
         aggregator.assert_service_check('elasticsearch.cluster_health')
+
+
+def test_node_name_as_host(dd_environment, elastic_check, instance_normalize_hostname, aggregator, node_tags):
+    elastic_check.check(instance_normalize_hostname)
+    node_name = node_tags[-1].split(':')[1]
+
+    for m_name, _ in iteritems(STATS_METRICS):
+        aggregator.assert_metric(m_name, count=1, tags=node_tags, hostname=node_name)
 
 
 def test_pshard_metrics(dd_environment, elastic_check, aggregator):

@@ -1,5 +1,29 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.14.1 / 2018-11-22
+
+* [Fixed] Increase gpg timeout to give time to developers to interact with Yubikeys. See [#2613](https://github.com/DataDog/integrations-core/pull/2613).
+* [Fixed] Fix requirements-agent-release.txt updating. See [#2617](https://github.com/DataDog/integrations-core/pull/2617).
+
+## 0.14.0 / 2018-11-16
+
+* [Added] Support agent repo. See [#2600](https://github.com/DataDog/integrations-core/pull/2600).
+* [Added] Improve trello releasing. See [#2599](https://github.com/DataDog/integrations-core/pull/2599).
+* [Added] Refactor validations under `validate` command. See [#2593](https://github.com/DataDog/integrations-core/pull/2593).
+* [Added] Upgrade docker-compose and requests. See [#2503](https://github.com/DataDog/integrations-core/pull/2503).
+* [Added] Disable pytest output capturing when debugging. See [#2502](https://github.com/DataDog/integrations-core/pull/2502).
+* [Added] Support specifying type of semver version bumps. See [#2491](https://github.com/DataDog/integrations-core/pull/2491).
+* [Fixed] Fixed off-by-one missing latest release. See [#2478](https://github.com/DataDog/integrations-core/pull/2478).
+* [Added] Fix codecov error on appveyor. See [#2474](https://github.com/DataDog/integrations-core/pull/2474).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+* [Fixed] Improve output of `ddev manifest verify` command. See [#2444](https://github.com/DataDog/integrations-core/pull/2444).
+* [Added] Add service_checks.json files validation. See [#2432](https://github.com/DataDog/integrations-core/pull/2432).
+* [Added] Make all tox envs available to E2E. See [#2457](https://github.com/DataDog/integrations-core/pull/2457).
+* [Added] Ensure new checks include the E2E fixture. See [#2455](https://github.com/DataDog/integrations-core/pull/2455).
+* [Fixed] Handle any clipboard errors for E2E. See [#2454](https://github.com/DataDog/integrations-core/pull/2454).
+* [Added] Prevent misconfigured tox files. See [#2447](https://github.com/DataDog/integrations-core/pull/2447).
+* [Fixed] Add `datadog-` prefix to packages name. See [#2430](https://github.com/DataDog/integrations-core/pull/2430).
+
 ## 0.13.0 / 2018-10-17
 
 * [Added] Ensure new checks use editable install of datadog_checks_base for tests. See [#2427](https://github.com/DataDog/integrations-core/pull/2427).

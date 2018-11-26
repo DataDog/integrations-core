@@ -23,13 +23,26 @@ def get_auth_info(config=None):
         return user, token
 
 
+def get_pr_labels(pr_payload):
+    labels = []
+    for label in (pr_payload.get('labels') or []):
+        name = label.get('name')
+        if name:
+            labels.append(name)
+
+    return labels
+
+
+def get_pr_milestone(pr_payload):
+    return (pr_payload.get('milestone') or {}).get('title', '')
+
+
 def get_changelog_types(pr_payload):
     """
     Fetch the labels from the PR and process the ones related to the changelog.
     """
     changelog_labels = []
-    for label in pr_payload.get('labels', []):
-        name = label.get('name', '')
+    for name in get_pr_labels(pr_payload):
         if name.startswith(CHANGELOG_LABEL_PREFIX):
             # only add the name, e.g. for `changelog/Added` it's just `Added`
             changelog_labels.append(name.split(CHANGELOG_LABEL_PREFIX)[1])

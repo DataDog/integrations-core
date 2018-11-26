@@ -1,5 +1,16 @@
 # CHANGELOG - datadog_checks_base
 
+## 4.3.0 / 2018-11-12
+
+* [Added] Add option to prevent subprocess command logging. See [#2565](https://github.com/DataDog/integrations-core/pull/2565).
+* [Added] Support Kerberos auth. See [#2516](https://github.com/DataDog/integrations-core/pull/2516).
+* [Added] Add option to send additional metric tags for Open Metrics. See [#2514](https://github.com/DataDog/integrations-core/pull/2514).
+* [Added] Add standard ssl_verify option to Open Metrics. See [#2507](https://github.com/DataDog/integrations-core/pull/2507).
+* [Added] Winpdh improve exception messages. See [#2486](https://github.com/DataDog/integrations-core/pull/2486).
+* [Added] Upgrade requests. See [#2481](https://github.com/DataDog/integrations-core/pull/2481).
+* [Fixed] Fix bug making the network check read /proc instead of /host/proc on containers. See [#2460](https://github.com/DataDog/integrations-core/pull/2460).
+* [Added] Fix unicode handling on A6. See [#2435](https://github.com/DataDog/integrations-core/pull/2435).
+
 ## 4.2.0 / 2018-10-16
 
 * [Added] Expose text conversion methods. See [#2420](https://github.com/DataDog/integrations-core/pull/2420).

@@ -45,8 +45,8 @@ For more information on integrations, please reference our [documentation][11]
 and [knowledge base][12]. You can also visit our
 [help page][13] to connect with us.
 
-[1]: https://travis-ci.org/DataDog/integrations-core.svg?branch=master
-[2]: https://travis-ci.org/DataDog/integrations-core
+[1]: https://api.travis-ci.com/DataDog/integrations-core.svg?branch=master
+[2]: https://travis-ci.com/DataDog/integrations-core
 [3]: https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true
 [4]: https://ci.appveyor.com/project/Datadog/integrations-core
 [5]: https://github.com/DataDog/integrations-extras

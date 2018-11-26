@@ -34,7 +34,7 @@ def start(ctx, check, env, agent, dev):
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
 
-    envs = get_available_tox_envs(check, test_only=True)
+    envs = get_available_tox_envs(check, e2e_only=True)
 
     if env not in envs:
         echo_failure('`{}` is not an available environment.'.format(env))
@@ -106,9 +106,15 @@ def start(ctx, check, env, agent, dev):
 
     click.echo()
 
-    echo_success('The path to `{}` will be copied to your clipboard: '.format(environment.config_file_name), nl=False)
+    try:
+        pyperclip.copy(environment.config_file)
+    except Exception:
+        config_message = 'Config file: '
+    else:
+        config_message = 'Config file (copied to your clipboard): '
+
+    echo_success(config_message, nl=False)
     echo_info(environment.config_file)
-    pyperclip.copy(environment.config_file)
 
     echo_success('To run this check, do: ', nl=False)
     echo_info('ddev env check {} {}'.format(check, env))
