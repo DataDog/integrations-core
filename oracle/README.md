@@ -51,6 +51,36 @@ export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 
 **Note:** Agent 6 uses upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][4] or [systemd][5] for more information on how to configure these settings.
 
+The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files: `/int/init/datadog-agent.conf`. This system is using Upstart.
+
+```
+description "Datadog Agent"
+
+start on started networking
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 5
+normal exit 0
+
+# Logging to console from the agent is disabled since the agent already logs using file or
+# syslog depending on its configuration. We make upstart log what the process still outputs in order
+# to log panics/crashes to /var/log/upstart/datadog-agent.log
+console log
+env DD_LOG_TO_CONSOLE=false
+env LD_LIBRARY_PATH=/usr/lib/oracle/11.2/client64/lib/
+
+setuid dd-agent
+
+script
+  exec /opt/datadog-agent/bin/agent/agent start -p /opt/datadog-agent/run/agent.pid
+end script
+
+post-stop script
+  rm -f /opt/datadog-agent/run/agent.pid
+end script
+```
+
 #### After installing either the JDBC Driver or the Instant Client
 
 Finally, create a read-only datadog user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
