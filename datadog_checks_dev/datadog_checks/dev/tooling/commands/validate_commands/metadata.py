@@ -179,6 +179,8 @@ VALID_UNIT_NAMES = {
     'megawatt',
     'gigawatt',
     'terawatt',
+    'heap',
+    'volume',
 }
 
 PROVIDER_INTEGRATIONS = {
