@@ -45,26 +45,6 @@ For more information on integrations, please reference our [documentation][11]
 and [knowledge base][12]. You can also visit our
 [help page][13] to connect with us.
 
-[1]: https://api.travis-ci.com/DataDog/integrations-core.svg?branch=master
-[2]: https://travis-ci.com/DataDog/integrations-core
-[3]: https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true
-[4]: https://ci.appveyor.com/project/Datadog/integrations-core
-[5]: https://github.com/DataDog/integrations-extras
-[6]: https://docs.datadoghq.com/developers/integrations
-[7]: https://github.com/DataDog/datadog-agent
-[8]: https://docs.datadoghq.com/agent/
-[9]: https://docs.pytest.org/en/latest/
-[10]: https://packaging.python.org/tutorials/distributing-packages/
-[11]: https://docs.datadoghq.com
-[12]: https://help.datadoghq.com/hc/en-us
-[13]: https://docs.datadoghq.com/help/
-[15]: https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt
-[16]: https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt
-[17]: https://codecov.io/github/DataDog/integrations-core/coverage.svg?branch=master
-[18]: https://codecov.io/github/DataDog/integrations-core?branch=master
-[19]: https://readthedocs.org/projects/datadog-checks-base/badge/?version=latest
-[20]: https://datadog-checks-base.readthedocs.io/en/latest/?badge=latest
-
 ## GPG public keys
 
 For those whom it may concern, the following is a list of GPG public key
@@ -95,4 +75,24 @@ fingerprints known to correspond to developers who, at the time of writing (Nov
 * [Greg Zussa](https://api.github.com/users/gzussa/gpg_keys)
   * `D24D 57CE 96BD F8C2 9BB0  BEAB C783 0ECB 08F8 8C74`
   * `3936 7937 7466 5878 C67A  50E9 3C67 09D5 583F B57C`
+
+[1]: https://api.travis-ci.com/DataDog/integrations-core.svg?branch=master
+[2]: https://travis-ci.com/DataDog/integrations-core
+[3]: https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true
+[4]: https://ci.appveyor.com/project/Datadog/integrations-core
+[5]: https://github.com/DataDog/integrations-extras
+[6]: https://docs.datadoghq.com/developers/integrations
+[7]: https://github.com/DataDog/datadog-agent
+[8]: https://docs.datadoghq.com/agent/
+[9]: https://docs.pytest.org/en/latest/
+[10]: https://packaging.python.org/tutorials/distributing-packages/
+[11]: https://docs.datadoghq.com
+[12]: https://help.datadoghq.com/hc/en-us
+[13]: https://docs.datadoghq.com/help/
+[15]: https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt
+[16]: https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt
+[17]: https://codecov.io/github/DataDog/integrations-core/coverage.svg?branch=master
+[18]: https://codecov.io/github/DataDog/integrations-core?branch=master
+[19]: https://readthedocs.org/projects/datadog-checks-base/badge/?version=latest
+[20]: https://datadog-checks-base.readthedocs.io/en/latest/?badge=latest
 
