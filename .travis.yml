@@ -135,7 +135,7 @@ jobs:
     - stage: test
       env: CHECK=istio
     - stage: test
-      env: CHECK=kafka_consumer
+      env: CHECK=kafka_consumer PYTHON3=true
     - stage: test
       env: CHECK=kong
     - stage: test
