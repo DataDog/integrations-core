@@ -38,7 +38,6 @@ NODE_SPEC = {
 
 EXPECTED_METRICS_COMMON = [
     'kubernetes.containers.restarts',
-    'kubernetes.containers.state.running',
     'kubernetes.cpu.capacity',
     'kubernetes.cpu.usage.total',
     'kubernetes.cpu.limits',
@@ -186,11 +185,6 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, instance_tags):
             for tag in instance_tags:
                 aggregator.assert_metric_has_tag(metric, tag)
     for metric in EXPECTED_METRICS_PROMETHEUS:
-        aggregator.assert_metric(metric)
-        if instance_tags:
-            for tag in instance_tags:
-                aggregator.assert_metric_has_tag(metric, tag)
-    for metric in ['kubernetes.containers.state.terminated']:
         aggregator.assert_metric(metric)
         if instance_tags:
             for tag in instance_tags:
@@ -460,14 +454,6 @@ def test_report_container_state_metrics(monkeypatch):
             'kube_container_name:prometheus-to-sd-exporter',
             'kube_deployment:fluentd-gcp-v2.0.10'
         ] + instance_tags + ['reason:CrashLoopBackOff']),
-        mock.call('kubernetes.containers.state.running', 1, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags),
-        mock.call('kubernetes.containers.state.running', 1, [
-            'kube_container_name:prometheus-to-sd-exporter',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags),
         mock.call('kubernetes.containers.restarts', 1, [
             'kube_container_name:fluentd-gcp',
             'kube_deployment:fluentd-gcp-v2.0.10'
@@ -478,6 +464,13 @@ def test_report_container_state_metrics(monkeypatch):
         ] + instance_tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
+
+    container_state_gauges = [x[0][2] for x in check.gauge.call_args_list
+                              if x[0][0].startswith('kubernetes.containers.state')]
+    if any(map(lambda e: 'reason:TransientReason' in e, container_state_gauges)):
+        raise AssertionError('kubernetes.containers.state.* was submitted with a transient reason')
+    if any(map(lambda e: not any(x for x in e if x.startswith('reason:')), container_state_gauges)):
+        raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
 
 class MockResponse(mock.Mock):

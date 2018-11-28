@@ -378,7 +378,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 for (metric_name, field_name) in [('state', 'state'), ('last_state', 'lastState')]:
                     c_state = ctr_status.get(field_name, {})
 
-                    for state_name in ['running', 'terminated', 'waiting']:
+                    for state_name in ['terminated', 'waiting']:
                         state_reasons = WHITELISTED_CONTAINER_STATE_REASONS.get(state_name, [])
                         self._submit_container_state_metric(metric_name, state_name, c_state, state_reasons, tags)
 
@@ -391,6 +391,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
             if reason.lower() in state_reasons:
                 reason_tags.append('reason:%s' % (reason))
+            else:
+                return
 
             gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
             self.gauge(gauge_name, 1, tags + reason_tags)

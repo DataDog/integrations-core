@@ -915,7 +915,11 @@
                         "image": "datadog/dev-dd-agent:beta",
                         "imageID": "docker-pullable://datadog/dev-dd-agent@sha256:1672a9c8741813070b5fac803d598c379e37e678e989582c55b7659b01f36eb4",
                         "state": {
-                            "running": {
+                            "terminated": {
+                                "containerID": "docker://326b384481ca95204018e3e837c61e522b64a3b86c3804142a22b2d1db9dbd7b",
+                                "exitCode": 0,
+                                "finishedAt": "2018-02-13T16:12:00Z",
+                                "reason": "TransientReason",
                                 "startedAt": "2018-02-13T16:11:00Z"
                             }
                         },
