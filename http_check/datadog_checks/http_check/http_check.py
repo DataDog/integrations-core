@@ -20,6 +20,7 @@ from requests_ntlm import HttpNtlmAuth
 
 from datadog_checks.base import ensure_bytes, ensure_unicode
 from datadog_checks.base.checks import NetworkCheck, Status
+from datadog_checks.utils.null_context_manager import NullContextManager
 from .config import from_instance, DEFAULT_EXPECTED_CODE
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .utils import get_ca_certs_path
@@ -73,6 +74,7 @@ class HTTPCheck(NetworkCheck):
             ))
 
         service_checks = []
+        r = NullContextManager()
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to {}".format(addr))
