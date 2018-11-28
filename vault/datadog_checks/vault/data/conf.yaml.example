@@ -20,11 +20,25 @@ instances:
   # username: USERNAME
   # password: PASSWORD
 
+  # If Vault setup uses SSL, you might need to set the following options as well.
+
+  # You can specify a local cert to use as client side certificate
+  # as a single file (containing the private key and the certificate concatenated)
+  # client_cert_file: '/path/to/client.concatenated.pem'
+
+  # Or as two separate files (for certificate and key):
+  # client_cert_file: '/path/to/client.cert.pem'
+  # private_key_file: '/path/to/private.key.pem'
+
   # The (optional) ssl_verify parameter will instruct the check to validate SSL
   # certificates when connecting to Vault. Defaulting to true, set to false if
   # you want to disable SSL certificate validation.
   #
   # ssl_verify: true
+  #
+  # If ssl_verify is enabled, optionally specify a path to
+  # a ca bundle file or directory to trust additional roots
+  # ca_bundle_path: '/path/to/trusted_ca_bundle_file'
   #
   # If you disable the ssl_verify above, you will still receive security
   # warnings in logs. You can disable those too using the flag below.
