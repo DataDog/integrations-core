@@ -16,6 +16,11 @@ vsphere.mem.overhead,gauge,,kibibyte,,Kilobytes of memory allocated to a vm beyo
 vsphere.mem.vmmemctl,gauge,,kibibyte,,Kilobytes of memory allocated by the virtual machine memory control driver (vmmemctl),-1,vsphere,mem vmmemctl
 vsphere.network.received,rate,,kibibyte,,Number of kilobytes received by the host,-1,vsphere,net rx
 vsphere.network.transmitted,rate,,kibibyte,,Number of kilobytes transmitted by the host,-1,vsphere,net tx
+vpshere.clusterServices.cpufairness.latest,gauge,,,,Fairness of distributed CPU resource allocation,0,vsphere,cluster cpufairness latest
+vpshere.clusterServices.effectivecpu.avg,gauge,,megahertz,,Total available CPU resources of all hosts within a cluster,1,vsphere,cluster effectivecpu avg
+vpshere.clusterServices.effectivemem.avg,gauge,,mebibyte,,Total amount of machine memory of all hosts in the cluster that is available for use for virtual machine memory (physical memory for use by the Guest OS) and virtual machine overhead memory,1,vsphere,cluster effectivemem avg
+vpshere.clusterServices.failover.latest,gauge,,,,vSphere HA number of failures that can be tolerated,1,vsphere,cluster failover latest
+vpshere.clusterServices.memfairness.latest,gauge,,,,Fairness of distributed memory resource allocation,0,vsphere,cluster memfairness latest
 vsphere.cpu.ready.sum,gauge,,millisecond,,Milliseconds of CPU time spent in ready state,-1,vsphere,cpu ready sum
 vsphere.cpu.usage.avg,gauge,,percent,,Percentage of CPU capacity being used,-1,vsphere,cpu usage avg
 vsphere.cpu.usagemhz.avg,gauge,,megahertz,,"CPU usage, as measured in megahertz",-1,vsphere,cpu usagemhz avg
@@ -105,6 +110,10 @@ vsphere.datastore.datastoreReadBytes.latest,gauge,,millisecond,,Storage DRS data
 vsphere.datastore.datastoreWriteBytes.latest,gauge,,millisecond,,Storage DRS datastore bytes written,0,vsphere,datastoreWriteBytes latest
 vsphere.datastore.read.avg,gauge,,kibibyte,second,Rate of reading data from the datastore,0,vsphere,datastore read avg
 vsphere.datastore.write.avg,gauge,,kibibyte,second,Rate of writing data to the datastore,0,vsphere,datastore write avg
+vsphere.disk.capacity.latest,gauge,,kibibyte,,Configured size of the datastore,0,vsphere,disk capacity latest
+vsphere.disk.provisioned.latest,gauge,,kibibyte,,Amount of storage set aside for use by a datastore or a virtual machine. Files on the datastore and the virtual machine can expand to this size but not beyond it,0,vsphere,disk provisioned latest
+vsphere.disk.unshared.latest,gauge,,kibibyte,,Amount of space associated exclusively with a virtual machine,0,vsphere,disk unshared latest
+vsphere.disk.used.latest,gauge,,kibibyte,,"Amount of space actually used by the virtual machine or the datastore. May be less than the amount provisioned at any given time, depending on whether the virtual machine is powered-off, whether snapshots have been created or not, and other such factors",0,vsphere,disk used latest
 vsphere.disk.deviceLatency.avg,gauge,,millisecond,,Average amount of time it takes to complete an SCSI command from physical device,-1,vsphere,disk dev lat avg
 vsphere.disk.maxQueueDepth.avg,gauge,,command,,Maximum queue depth,0,vsphere,disk maxQueueDepth avg
 vsphere.disk.maxTotalLatency.latest,gauge,,millisecond,,Highest latency value across all disks used by the host,-1,vsphere,disk max total lat
@@ -155,3 +164,23 @@ vsphere.storagePath.busResets.sum,gauge,,command,,Number of SCSI-bus reset comma
 vsphere.storagePath.commandsAborted.sum,gauge,,command,,Number of SCSI commands aborted,-1,vsphere,storagePath commandsAborted sum
 vsphere.sys.heartbeat.latest,gauge,,,,Number of heartbeats issued per virtual machine,0,vsphere,heartbeat
 vsphere.sys.uptime.latest,gauge,,second,,Total time elapsed since last system startup,0,vsphere,uptime
+vsphere.vmop.numChangeDS.latest,gauge,,operation,,Number of datastore change operations for powered-off and suspended virtual machines,0,vsphere,vmop numChangeDS
+vsphere.vmop.numChangeHost.latest,gauge,,operation,,Number of host change operations for powered-off and suspended virtual machines,0,vsphere,vmop numChangeHost
+vsphere.vmop.numChangeHostDS.latest,gauge,,operation,,Number of host and datastore change operations for powered-off and suspended virtual machines,0,vsphere,vmop numChangeHostDS
+vsphere.vmop.numClone.latest,gauge,,operation,,Number of virtual machine clone operations,0,vsphere,vmop numClone
+vsphere.vmop.numCreate.latest,gauge,,operation,,Number of virtual machine create operations,0,vsphere,vmop numCreate
+vsphere.vmop.numDeploy.latest,gauge,,operation,,Number of virtual machine template deploy operations,0,vsphere,vmop numDeploy
+vsphere.vmop.numDestroy.latest,gauge,,operation,,Number of virtual machine delete operations,0,vsphere,vmop numDestroy
+vsphere.vmop.numPoweroff.latest,gauge,,operation,,Number of virtual machine power off operations,0,vsphere,vmop numPoweroff
+vsphere.vmop.numPoweron.latest,gauge,,operation,,Number of virtual machine power on operations,0,vsphere,vmop numPoweron
+vsphere.vmop.numRebootGuest.latest,gauge,,operation,,Number of virtual machine guest reboot operations,0,vsphere,vmop numRebootGuest
+vsphere.vmop.numReconfigure.latest,gauge,,operation,,Number of virtual machine reconfigure operations,0,vsphere,vmop numReconfigure
+vsphere.vmop.numRegister.latest,gauge,,operation,,Number of virtual machine register operations,0,vsphere,vmop numRegister
+vsphere.vmop.numReset.latest,gauge,,operation,,Number of virtual machine reset operations,0,vsphere,vmop numReset
+vsphere.vmop.numSVMotion.latest,gauge,,operation,,Number of migrations with Storage vMotion (datastore change operations for powered-on VMs),0,vsphere,vmop numSVMotion
+vsphere.vmop.numShutdownGuest.latest,gauge,,operation,,Number of virtual machine guest shutdown operations,0,vsphere,vmop numShutdownGuest
+vsphere.vmop.numStandbyGuest.latest,gauge,,operation,,Number of virtual machine standby guest operations,0,vsphere,vmop numStandbyGuest
+vsphere.vmop.numSuspend.latest,gauge,,operation,,Number of virtual machine suspend operations,0,vsphere,vmop numSuspend
+vsphere.vmop.numUnregister.latest,gauge,,operation,,Number of virtual machine unregister operations,0,vsphere,vmop numUnregister
+vsphere.vmop.numVMotion.latest,gauge,,operation,,Number of migrations with vMotion (host change operations for powered-on VMs),0,vsphere,vmop numVMotion
+vsphere.vmop.numXVMotion.latest,gauge,,operation,,Number of host and datastore change operations for powered-on and suspended virtual machines,0,vsphere,vmop numXVMotion
