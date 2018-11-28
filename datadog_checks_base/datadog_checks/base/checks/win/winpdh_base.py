@@ -9,7 +9,7 @@ try:
 except ImportError:
     from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 
-from .. import AgentCheck
+from ... import AgentCheck, is_affirmative
 from ...utils.containers import hash_mutable
 
 int_types = [
@@ -169,6 +169,8 @@ class PDHBaseCheck(AgentCheck):
         key = hash_mutable(instance)
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             try:
+                if not is_affirmative(instance.get('cache_counter_instances', True)):
+                    counter.collect_counters()
                 vals = counter.get_all_values()
                 for instance_name, val in iteritems(vals):
                     tags = []
