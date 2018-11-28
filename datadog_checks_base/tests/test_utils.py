@@ -4,6 +4,7 @@
 
 from datadog_checks.utils.common import pattern_filter
 from datadog_checks.utils.limiter import Limiter
+from datadog_checks.utils.null_context_manager import NullContextManager
 
 
 class Item:
@@ -105,3 +106,9 @@ class TestLimiter():
         assert limiter.get_status() == (0, 10, False)
         assert limiter.is_reached("dummy1") is False
         assert limiter.get_status() == (1, 10, False)
+
+
+class TestNullContextManager():
+    def test_thing(self):
+        with NullContextManager("dummy") as dummy:
+            assert dummy == "dummy"
