@@ -102,13 +102,15 @@ def test__get_all_objs(vsphere, instance):
     mocked_host = MockedMOR(spec="HostSystem")
     mocked_datastore = MockedMOR(spec="Datastore")
     mocked_datacenter = MockedMOR(spec="Datacenter")
+    mocked_cluster = MockedMOR(spec="ClusterComputeResource")
     mocked_mors_attrs = {
         vm_no_parent: {"name": "vm_no_parent", "runtime.powerState": vim.VirtualMachinePowerState.poweredOn},
         vm_no_powerstate: {"name": "vm_no_powerstate"},
         vm_host_parent: {"parent": mocked_host, "runtime.powerState": vim.VirtualMachinePowerState.poweredOn},
         mocked_host: {"name": "mocked_host", "parent": None},
         mocked_datastore: {},
-        mocked_datacenter: {"parent": MockedMOR(spec="Folder", name="unknown folder")}
+        mocked_cluster: {"name": "cluster"},
+        mocked_datacenter: {"parent": MockedMOR(spec="Folder", name="unknown folder"), "name": "datacenter"}
     }
     with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
         obj_list = vsphere._get_all_objs(server_instance)
@@ -144,8 +146,15 @@ def test__get_all_objs(vsphere, instance):
             "mor_type": "datacenter",
             "mor": mocked_datacenter,
             "hostname": None,
-            "tags": ["vsphere_folder:unknown", "vsphere_type:datacenter"]
+            "tags": ["vsphere_folder:unknown", "vsphere_datacenter:datacenter", "vsphere_type:datacenter"]
         } in obj_list[vim.Datacenter]
+        assert len(obj_list[vim.ClusterComputeResource]) == 1
+        assert {
+            "mor_type": "cluster",
+            "mor": mocked_cluster,
+            "hostname": None,
+            "tags": ["vsphere_cluster:cluster", "vsphere_type:cluster"]
+        } in obj_list[vim.ClusterComputeResource]
 
 
 def test__collect_mors_and_attributes(vsphere, instance):
@@ -203,8 +212,8 @@ def test__cache_morlist_raw_async(vsphere, instance):
         # Discover hosts and virtual machines
         vsphere._cache_morlist_raw_async(instance, tags, include_regexes, include_only_marked)
 
-        # Assertions: 1 labeled+monitored VM + 2 hosts + 2 datacenters.
-        assertMOR(vsphere, instance, count=5)
+        # Assertions: 1 labeled+monitored VM + 2 hosts + 2 datacenters + 2 clusters + 1 datastore.
+        assertMOR(vsphere, instance, count=8)
 
         # ...on hosts
         assertMOR(vsphere, instance, spec="host", count=2)
@@ -270,14 +279,22 @@ def test__process_mor_objects_queue(vsphere, instance):
     i_key = vsphere._instance_key(instance)
     with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
         vsphere._cache_morlist_raw(instance)
-        assert sum(vsphere.mor_objects_queue.size(i_key, resource_type) for resource_type in RESOURCE_TYPE_METRICS) == 8
+        assert sum(vsphere.mor_objects_queue.size(i_key, res_type) for res_type in RESOURCE_TYPE_METRICS) == 11
         vsphere._process_mor_objects_queue(instance)
         # Object queue should be empty after processing
-        assert sum(vsphere.mor_objects_queue.size(i_key, resource_type) for resource_type in RESOURCE_TYPE_METRICS) == 0
-        assert vsphere._process_mor_objects_queue_async.call_count == 2  # Once for each datacenter
+        assert sum(vsphere.mor_objects_queue.size(i_key, res_type) for res_type in RESOURCE_TYPE_METRICS) == 0
+        assert vsphere._process_mor_objects_queue_async.call_count == 0  # realtime only
         for call_args in vsphere._process_mor_objects_queue_async.call_args_list:
             # query_specs parameter should be a list of size 1 since the batch size is 1
             assert len(call_args[0][1]) == 1
+
+        instance["collect_realtime_only"] = False
+        vsphere._cache_morlist_raw(instance)
+        assert sum(vsphere.mor_objects_queue.size(i_key, res_type) for res_type in RESOURCE_TYPE_METRICS) == 11
+        vsphere._process_mor_objects_queue(instance)
+        # Object queue should be empty after processing
+        assert sum(vsphere.mor_objects_queue.size(i_key, res_type) for res_type in RESOURCE_TYPE_METRICS) == 0
+        assert vsphere._process_mor_objects_queue_async.call_count == 5  # 2 datacenters, 2 clusters, 1 datastore
 
 
 def test_collect_realtime_only(vsphere, instance):
@@ -289,8 +306,8 @@ def test_collect_realtime_only(vsphere, instance):
     with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
         vsphere._cache_morlist_raw(instance)
         vsphere._process_mor_objects_queue(instance)
-        # Called once to process the 2 datacenters
-        assert vsphere._process_mor_objects_queue_async.call_count == 1
+        # Called once to process the 2 datacenters, then 2 clusters, then the datastore
+        assert vsphere._process_mor_objects_queue_async.call_count == 3
 
     instance["collect_realtime_only"] = True
     vsphere._process_mor_objects_queue_async.reset_mock()
