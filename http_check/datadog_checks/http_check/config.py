@@ -17,7 +17,7 @@ Config = namedtuple('Config',
                     'content_match, reverse_content_match, tags,'
                     'disable_ssl_validation, ssl_expire, instance_ca_certs,'
                     'weakcipher, check_hostname, ignore_ssl_warning,'
-                    'skip_proxy, allow_redirects')
+                    'skip_proxy, allow_redirects, stream')
 
 
 def from_instance(instance, default_ca_certs=None):
@@ -59,10 +59,11 @@ def from_instance(instance, default_ca_certs=None):
     skip_proxy = is_affirmative(
         instance.get('skip_proxy', instance.get('no_proxy', False)))
     allow_redirects = is_affirmative(instance.get('allow_redirects', True))
+    stream = is_affirmative(instance.get('stream', False))
 
     return Config(url, ntlm_domain, username, password, client_cert, client_key,
                   method, data, http_response_status_code, timeout,
                   include_content, headers, response_time, content_match,
                   reverse_content_match, tags, disable_ssl_validation,
                   ssl_expire, instance_ca_certs, weakcipher, check_hostname,
-                  ignore_ssl_warning, skip_proxy, allow_redirects)
+                  ignore_ssl_warning, skip_proxy, allow_redirects, stream)
