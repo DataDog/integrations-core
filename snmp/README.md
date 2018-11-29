@@ -213,6 +213,8 @@ Need help? Contact [Datadog Support][5].
 Additional helpful documentation, links, and articles:
 
 * [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][7]
+* [How to monitor SNMP devices?][13]
+* [Monitoring Unifi devices using SNMP and Datadog][14]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -226,3 +228,5 @@ Additional helpful documentation, links, and articles:
 [10]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
 [11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
 [12]: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
+[13]: https://docs.datadoghq.com/agent/faq/how-to-monitor-snmp-devices/
+[14]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
