@@ -72,6 +72,8 @@ class HTTPCheck(NetworkCheck):
                 down_msg
             ))
 
+        # Store tags in a temporary list so that we don't modify the global tags data structure
+        tags_list = list(tags)
         service_checks = []
         r = None
         try:
@@ -151,8 +153,6 @@ class HTTPCheck(NetworkCheck):
             raise
 
         else:
-            # Store tags in a temporary list so that we don't modify the global tags data structure
-            tags_list = list(tags)
             # Only add the URL tag if it's not already present
             if not any(filter(re.compile('^url:').match, tags_list)):
                 tags_list.append('url:{}'.format(addr))
