@@ -53,7 +53,7 @@ def cassandra_cluster():
     env['CONTAINER_PORT'] = common.PORT
 
     # We need to restrict permission on the password file
-    os.chmod(os.path.join(common.HERE, 'compose', 'jmxremote.password'), stat.S_IRUSR)
+    os.chmod(os.path.join(common.HERE, 'compose', 'jmxremote.password'), stat.S_IRWXU)
 
     docker_compose_args = [
         "docker-compose",
