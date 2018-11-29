@@ -20,7 +20,6 @@ from requests_ntlm import HttpNtlmAuth
 
 from datadog_checks.base import ensure_bytes, ensure_unicode
 from datadog_checks.base.checks import NetworkCheck, Status
-from datadog_checks.utils.null_context_manager import NullContextManager
 from .config import from_instance, DEFAULT_EXPECTED_CODE
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .utils import get_ca_certs_path
@@ -74,7 +73,7 @@ class HTTPCheck(NetworkCheck):
             ))
 
         service_checks = []
-        r = NullContextManager()
+        r = None
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to {}".format(addr))
@@ -151,7 +150,7 @@ class HTTPCheck(NetworkCheck):
             self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
             raise
 
-        with r:
+        else:
             # Store tags in a temporary list so that we don't modify the global tags data structure
             tags_list = list(tags)
             # Only add the URL tag if it's not already present
@@ -208,6 +207,9 @@ class HTTPCheck(NetworkCheck):
 
                 else:
                     send_status_up("{} is UP".format(addr))
+        finally:
+            if r is not None:
+                r.close()
 
         # Report status metrics as well
         if service_checks:
