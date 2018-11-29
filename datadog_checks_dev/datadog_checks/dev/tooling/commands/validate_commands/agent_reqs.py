@@ -46,7 +46,7 @@ def agent_reqs():
     if ok_checks:
         echo_success("{} correctly pinned checks".format(ok_checks))
     if unreleased_checks:
-        echo_success("{} unreleased checks".format(unreleased_checks))
+        echo_warning("{} unreleased checks".format(unreleased_checks))
     if failed_checks:
         echo_failure("{} checks out of sync".format(failed_checks))
         abort()
