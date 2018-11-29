@@ -9,7 +9,7 @@ import logging
 import pytest
 import time
 
-import common
+from . import common
 
 log = logging.getLogger(__file__)
 
