@@ -35,14 +35,12 @@ def agent_reqs():
                 echo_warning('{} has not yet been released'.format(check_name))
             elif check_version != pinned_version:
                 failed_checks += 1
-                if pinned_version:
-                    echo_failure("{} has version {} but is pinned to {}".format(
-                        check_name, check_version, pinned_version
-                    ))
-                else:
-                    echo_failure("{} has version {} but is not pinned".format(check_name, check_version))
+                echo_failure("{} has version {} but is pinned to {}".format(
+                    check_name, check_version, pinned_version
+                ))
             else:
                 ok_checks += 1
+
     if ok_checks:
         echo_success("{} correctly pinned checks".format(ok_checks))
     if unreleased_checks:
