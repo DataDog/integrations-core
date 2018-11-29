@@ -37,6 +37,7 @@ NODE_SPEC = {
 }
 
 EXPECTED_METRICS_COMMON = [
+    'kubernetes.containers.restarts',
     'kubernetes.cpu.capacity',
     'kubernetes.cpu.usage.total',
     'kubernetes.cpu.limits',
@@ -188,6 +189,7 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, instance_tags):
         if instance_tags:
             for tag in instance_tags:
                 aggregator.assert_metric_has_tag(metric, tag)
+
     assert aggregator.metrics_asserted_pct == 100.0
 
 
@@ -426,6 +428,49 @@ def test_report_container_spec_metrics(monkeypatch):
     if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
     check.gauge.assert_has_calls(calls, any_order=True)
+
+
+def test_report_container_state_metrics(monkeypatch):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list',
+                        mock.Mock(return_value=json.loads(mock_from_file('pods_crashed.json'))))
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+
+    attrs = {'is_excluded.return_value': False}
+    check.pod_list_utils = mock.Mock(**attrs)
+
+    pod_list = check.retrieve_pod_list()
+
+    instance_tags = ["one:1", "two:2"]
+    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
+        check._report_container_state_metrics(pod_list, instance_tags)
+
+    calls = [
+        mock.call('kubernetes.containers.last_state.terminated', 1, [
+            'kube_container_name:fluentd-gcp',
+            'kube_deployment:fluentd-gcp-v2.0.10'
+        ] + instance_tags + ['reason:OOMKilled']),
+        mock.call('kubernetes.containers.state.waiting', 1, [
+            'kube_container_name:prometheus-to-sd-exporter',
+            'kube_deployment:fluentd-gcp-v2.0.10'
+        ] + instance_tags + ['reason:CrashLoopBackOff']),
+        mock.call('kubernetes.containers.restarts', 1, [
+            'kube_container_name:fluentd-gcp',
+            'kube_deployment:fluentd-gcp-v2.0.10'
+        ] + instance_tags),
+        mock.call('kubernetes.containers.restarts', 0, [
+            'kube_container_name:prometheus-to-sd-exporter',
+            'kube_deployment:fluentd-gcp-v2.0.10'
+        ] + instance_tags),
+    ]
+    check.gauge.assert_has_calls(calls, any_order=True)
+
+    container_state_gauges = [x[0][2] for x in check.gauge.call_args_list
+                              if x[0][0].startswith('kubernetes.containers.state')]
+    if any(map(lambda e: 'reason:TransientReason' in e, container_state_gauges)):
+        raise AssertionError('kubernetes.containers.state.* was submitted with a transient reason')
+    if any(map(lambda e: not any(x for x in e if x.startswith('reason:')), container_state_gauges)):
+        raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
 
 class MockResponse(mock.Mock):
