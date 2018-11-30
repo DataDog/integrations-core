@@ -1,5 +1,9 @@
 # CHANGELOG - ceph
 
+## 1.3.2 / 2018-11-30
+
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.3.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
