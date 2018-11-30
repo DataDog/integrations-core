@@ -161,7 +161,7 @@ class Vault(AgentCheck):
                 if config['ssl_ignore_warning']:
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
-                 response = requests.get(
+                response = requests.get(
                     url,
                     auth=config['auth'],
                     cert=config['ssl_cert'],
