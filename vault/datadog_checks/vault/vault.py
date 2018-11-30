@@ -5,6 +5,7 @@ import warnings
 from time import time as timestamp
 
 import requests
+from six import string_types
 from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks import AgentCheck
@@ -126,10 +127,21 @@ class Vault(AgentCheck):
             password = instance.get('password')
             config['auth'] = (username, password) if username and password else None
 
-            config['client_cert_file'] = instance.get('client_cert_file', False)
-            config['private_key_file'] = instance.get('private_key_file', False)
-            config['ssl_verify'] = is_affirmative(instance.get('ssl_verify', True))
-            config['ca_bundle_path'] = instance.get('ca_bundle_path', False)
+            ssl_cert = instance.get('ssl_cert')
+            ssl_private_key = instance.get('ssl_private_key')
+            if isinstance(ssl_cert, string_types):
+                if isinstance(ssl_private_key, string_types):
+                    config['ssl_cert'] = (ssl_cert, ssl_private_key)
+                else:
+                    config['ssl_cert'] = ssl_cert
+            else:
+                config['ssl_cert'] = None
+
+            if isinstance(instance.get('ssl_ca_cert'), string_types):
+                config['ssl_verify'] = instance['ssl_ca_cert']
+            else:
+                config['ssl_verify'] = is_affirmative(instance.get('ssl_verify', True))
+
             config['ssl_ignore_warning'] = is_affirmative(instance.get('ssl_ignore_warning', False))
             config['proxies'] = self.get_instance_proxy(instance, config['api_url'])
             config['timeout'] = int(instance.get('timeout', 20))
@@ -149,44 +161,15 @@ class Vault(AgentCheck):
                 if config['ssl_ignore_warning']:
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
-                # if ssl_verify is enabled
-                # optionally use the ca_bundle_path, if specified
-                ssl_verify_or_bundle = config['ssl_verify']
-                if ssl_verify_or_bundle and config['ca_bundle_path']:
-                    ssl_verify_or_bundle = config['ca_bundle_path']
-
-                if config['client_cert_file']:
-                    if config['private_key_file']:
-                        response = requests.get(
-                            url,
-                            cert=(
-                                config['client_cert_file'],
-                                config['private_key_file']),
-                            auth=config['auth'],
-                            verify=ssl_verify_or_bundle,
-                            proxies=config['proxies'],
-                            timeout=config['timeout'],
-                            headers=config['headers']
-                        )
-                    else:
-                        response = requests.get(
-                            url,
-                            cert=config['client_cert_file'],
-                            auth=config['auth'],
-                            verify=ssl_verify_or_bundle,
-                            proxies=config['proxies'],
-                            timeout=config['timeout'],
-                            headers=config['headers']
-                        )
-                else:
-                    response = requests.get(
-                        url,
-                        auth=config['auth'],
-                        verify=ssl_verify_or_bundle,
-                        proxies=config['proxies'],
-                        timeout=config['timeout'],
-                        headers=config['headers']
-                    )
+                 response = requests.get(
+                    url,
+                    auth=config['auth'],
+                    cert=config['ssl_cert'],
+                    verify=config['ssl_verify'],
+                    proxies=config['proxies'],
+                    timeout=config['timeout'],
+                    headers=config['headers']
+                )
         except requests.exceptions.Timeout:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, config['timeout'])
             self.service_check(
