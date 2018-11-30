@@ -12,7 +12,7 @@ datadog-checks-base==4.3.0
 datadog-cisco-aci==1.3.0
 datadog-cockroachdb==1.0.0
 datadog-consul==1.6.0
-datadog-coredns==1.0.0; sys_platform == 'linux2'
+datadog-coredns==1.1.0; sys_platform == 'linux2'
 datadog-couch==2.6.1
 datadog-couchbase==1.6.1
 datadog-crio==1.0.0
