@@ -199,12 +199,15 @@ class WinPDHCounter(object):
             None, self._machine_name, self._class_name, win32pdh.PERF_DETAIL_WIZARD
         )
         if self._instance_name is None and len(instances) > 0:
+            all_instances = set()
             for inst in instances:
                 path = self._make_counter_path(self._machine_name, self._counter_name, inst, counters)
                 if not path:
                     continue
+                all_instances.add(inst)
+
                 try:
-                    self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
+                    self.counterdict.setdefault(inst, win32pdh.AddCounter(self.hq, path))
                 except:  # noqa: E722
                     self.logger.fatal("Failed to create counter.  No instances of %s\\%s" % (
                         self._class_name, self._counter_name))
@@ -214,6 +217,10 @@ class WinPDHCounter(object):
                     # some unicode characters are not translatable here.  Don't fail just
                     # because we couldn't log
                     self.logger.debug("Failed to log path")
+
+            expired_instances = set(self.counterdict) - all_instances
+            for inst in expired_instances:
+                del self.counterdict[inst]
         else:
             if self._instance_name is not None:
                 # check to see that it's valid
