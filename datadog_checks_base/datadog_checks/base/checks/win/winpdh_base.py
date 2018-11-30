@@ -118,7 +118,7 @@ class PDHBaseCheck(AgentCheck):
         cache_counter_instances = is_affirmative(instance.get('cache_counter_instances', True))
 
         if not cache_counter_instances:
-            for counter, values in iteritems(self._missing_counters):
+            for counter, values in list(iteritems(self._missing_counters)):
                 self._make_counters(key, ([counter], values))
 
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
@@ -178,8 +178,8 @@ class PDHBaseCheck(AgentCheck):
     @classmethod
     def _no_instance(cls, inst_name):
         return (
-            inst_name.lower() == 'none'
-            or len(inst_name) == 0
-            or inst_name == '*'
-            or inst_name.lower() == 'all'
+            inst_name.lower() == 'none' or
+            len(inst_name) == 0 or
+            inst_name == '*' or
+            inst_name.lower() == 'all'
         )
