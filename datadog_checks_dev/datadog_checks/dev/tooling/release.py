@@ -65,11 +65,15 @@ def get_agent_requirement_line(check, version):
         return "{}=={}; sys_platform == '{}'".format(
             package_name, version, PLATFORMS_TO_PY.get(platforms[0])
         )
-    # assuming linux+mac here for brevity
-    elif platforms and 'windows' not in platforms:
-        return "{}=={}; sys_platform != 'win32'".format(package_name, version)
-    else:
-        raise Exception("Can't parse the `supported_os` list for the check {}: {}".format(check, platforms))
+    elif platforms:
+        if 'windows' not in platforms:
+            return "{}=={}; sys_platform != 'win32'".format(package_name, version)
+        elif 'mac_os' not in platforms:
+            return "{}=={}; sys_platform != 'darwin'".format(package_name, version)
+        elif 'linux' not in platforms:
+            return "{}=={}; sys_platform != 'linux2'".format(package_name, version)
+
+    raise Exception("Can't parse the `supported_os` list for the check {}: {}".format(check, platforms))
 
 
 def update_agent_requirements(req_file, check, newline):
