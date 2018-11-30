@@ -1,1 +1,34 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+ibm_mq.queue.service_interval,gauge,,millisecond,,the time since last serviced,0,ibm_mq,service interval
+ibm_mq.queue.inhibit_put,gauge,,occurrence,,puts are inhibited,0,ibm_mq,puts inhibited
+ibm_mq.queue.depth_low_limit,gauge,,item,the low limit on the depth to create an alert,0,ibm_mq,depth low limit
+ibm_mq.queue.inhibit_get,gauge,,occurrence,,gets are inhibited,0,ibm_mq,gets inhibited
+ibm_mq.queue.harden_get_backout,gauge,,request,,number of times a message is retrieved,0,ibm_mq,times messages retrieved
+ibm_mq.queue.service_interval_event,gauge,,occurrence,,is service necessary,0,ibm_mq,service needed
+ibm_mq.queue.trigger_control,gauge,,method,,controls if trigger messages are written to an initiation queue,0,ibm_mq,trigger control
+ibm_mq.queue.usage,gauge,,resource,,what the queue is used for,0,ibm_mq,usage
+ibm_mq.queue.scope,gauge,,controls if the queue exists in a cell directory,0,ibm_mq,scope
+ibm_mq.queue.type,gauge,,resource,,the type of queue,0,ibm_mq,queue type
+ibm_mq.queue.depth_max,gauge,,message,,the max depth of the queue,0,ibm_mq,queue max depth
+ibm_mq.queue.backout_threshold,gauge,,resource,,backout threshold used by other applications,0,ibm_mq,backout threshold
+ibm_mq.queue.depth_high_event,gauge,,event,,a depth high event has been generated,0,ibm_mq,depth high event
+ibm_mq.queue.depth_low_event,gauge,,event,,a depth low event has been generated,0,ibm_mq,depth low event
+ibm_mq.queue.trigger_message_priority,gauge,,resource,,the message priority below which a message doesn't generate a trigger message,0,ibm_mq,trigger message priority
+ibm_mq.queue.depth_current,gauge,,message,,the number of messages in the queue,0,ibm_mq,messages
+ibm_mq.queue.depth_max_event,gauge,,event,,controls whether queue full events are generated,0,ibm_mq,messages
+ibm_mq.queue.open_input_count,gauge,,connection,,the number of handles currently open,0,ibm_mq,open handles
+ibm_mq.queue.persistence,gauge,,resource,,the default persistance of messages on the queue,0,ibm_mq,persistance
+ibm_mq.queue.trigger_depth,gauge,,resource,,the number of messages on the queue before a trigger event is written,0,ibm_mq,queue trigger depth
+ibm_mq.queue.max_message_length,gauge,,resource,,the max length of a message,0,ibm_mq,max message length
+ibm_mq.queue.depth_high_limit,gauge,,resource,,the threshold against which the queue depth is compared before generated a queue high event,0,ibm_mq,depth high limit
+ibm_mq.queue.priority,gauge,,resource,,the default priority for messages on the queue,0,ibm_mq,default priority
+ibm_mq.queue.input_open_option,gauge,,resource,,the default way to open the queue for input,0,ibm_mq,default open option
+ibm_mq.queue.message_delivery_sequence,gauge,,resource,,the order in which messages will be returned after a get operation,0,ibm_mq,message delivery sequence
+ibm_mq.queue.retention_interval,gauge,,hour,,the period of time to retain the queue after elapsed it is elegible for deletion,0,ibm_mq,retention interval
+ibm_mq.queue.open_output_count,gauge,,connection,,the number of handles that are available for adding messages,0,ibm_mq,open output count
+ibm_mq.queue.trigger_type,gauge,,resource,,the conditions under which trigger messages are written as a result of messages arriving on this queue,0,ibm_mq,trigger type
+ibm_mq.queue.depth_percent,gauge,,percent,,the percent of the queue that is currently utilized,0,ibm_mq,queue usage percentage
+ibm_mq.queue_manager.dist_lists,gauge,,resource,,This indicates whether distribution-list messages can be placed on the queue,0,ibm_mq,dist list
+ibm_mq.queue_manager.max_msg_list,gauge,,byte,,the length of the longest message the queue manager can handle,0,ibm_mq,max message length
+ibm_mq.queue.max_channels,gauge,,connection,,the max number of channels that can be connected,0,ibm_mq,max channels
+ibm_mq.queue.oldest_message_age,gauge,,seconds,,the age of the oldest message on the queue in seconds,0,ibm_mq,oldest message
