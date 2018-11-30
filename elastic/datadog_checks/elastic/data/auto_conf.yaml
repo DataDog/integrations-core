@@ -1,5 +1,6 @@
 ad_identifiers:
   - elasticsearch
+  - elasticsearch-oss
 
 init_config:
 
