@@ -1,5 +1,9 @@
 # CHANGELOG - couch
 
+## 3.0.0 / 2018-11-30
+
+* [Removed] Add CouchDB 2.2.0 compatibility by dropping the `purge_seq` metric. See [#2287](https://github.com/DataDog/integrations-core/pull/2287). Thanks [janl](https://github.com/janl).
+
 ## 2.6.1 / 2018-09-04
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945](https://github.com/DataDog/integrations-core/pull/1945).
