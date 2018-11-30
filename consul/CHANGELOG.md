@@ -1,5 +1,10 @@
 # CHANGELOG - consul
 
+## 1.6.0 / 2018-11-30
+
+* [Added] Add option to run the full check on any node. See [#2461](https://github.com/DataDog/integrations-core/pull/2461).
+* [Added] Support Python 3. See [#2446](https://github.com/DataDog/integrations-core/pull/2446).
+
 ## 1.5.2 / 2018-10-12
 
 * [Fixed] Update consul timestamp to use supported python functions. See [#2199](https://github.com/DataDog/integrations-core/pull/2199). Thanks [hhansell](https://github.com/hhansell).
