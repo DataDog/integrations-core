@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 ibm_mq.queue.service_interval,gauge,,millisecond,,the time since last serviced,0,ibm_mq,service interval
 ibm_mq.queue.inhibit_put,gauge,,occurrence,,puts are inhibited,0,ibm_mq,puts inhibited
-ibm_mq.queue.depth_low_limit,gauge,,item,the low limit on the depth to create an alert,0,ibm_mq,depth low limit
+ibm_mq.queue.depth_low_limit,gauge,,item,,the low limit on the depth to create an alert,0,ibm_mq,depth low limit
 ibm_mq.queue.inhibit_get,gauge,,occurrence,,gets are inhibited,0,ibm_mq,gets inhibited
 ibm_mq.queue.harden_get_backout,gauge,,request,,number of times a message is retrieved,0,ibm_mq,times messages retrieved
 ibm_mq.queue.service_interval_event,gauge,,occurrence,,is service necessary,0,ibm_mq,service needed
