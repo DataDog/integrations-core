@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 1.8.0 / 2018-11-30
+
+* [Added] Support Python 3. See [#2422](https://github.com/DataDog/integrations-core/pull/2422).
+
 ## 1.7.1 / 2018-10-12
 
 * [Fixed] Handle `host:` command when parsing commandstats output. See [#2356](https://github.com/DataDog/integrations-core/pull/2356).
