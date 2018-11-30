@@ -1,5 +1,9 @@
 # CHANGELOG - apache
 
+## 1.4.0 / 2018-11-30
+
+* [Added] Add python3 support. See [#2497](https://github.com/DataDog/integrations-core/pull/2497).
+
 ## 1.3.1 / 2018-09-04
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945](https://github.com/DataDog/integrations-core/pull/1945).
