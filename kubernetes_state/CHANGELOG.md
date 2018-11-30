@@ -1,5 +1,10 @@
 # CHANGELOG - kubernetes_state
 
+## 4.0.0 / 2018-11-30
+
+* [Removed] Remove KSM deprecated pod phase service checks. See [#2631](https://github.com/DataDog/integrations-core/pull/2631).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 3.1.0 / 2018-10-12
 
 * [Fixed] Fix job metrics tagging on KSM 1.4+. See [#2384](https://github.com/DataDog/integrations-core/pull/2384).

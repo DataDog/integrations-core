@@ -1,5 +1,9 @@
 # CHANGELOG - go_expvar
 
+## 1.0.5 / 2018-11-30
+
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.0.4 / 2018-09-04
 
 * [Fixed] Move Goexpvar to pytest. See [#2089](https://github.com/DataDog/integrations-core/pull/2089).

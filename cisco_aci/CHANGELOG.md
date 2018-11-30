@@ -1,5 +1,10 @@
 # CHANGELOG - cisco_aci
 
+## 1.3.0 / 2018-11-30
+
+* [Added] Upgrade cryptography. See [#2659](https://github.com/DataDog/integrations-core/pull/2659).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.2.1 / 2018-10-12
 
 * [Fixed] fixes cisco for username and password. See [#2267](https://github.com/DataDog/integrations-core/pull/2267).

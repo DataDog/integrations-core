@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.15.1 / 2018-11-30
+
+* [Fixed] Handle unreleased checks for agent reqs validation. See [#2664](https://github.com/DataDog/integrations-core/pull/2664).
+
 ## 0.15.0 / 2018-11-27
 
 * [Added] Added Watt units to metadata validation. See [#2645](https://github.com/DataDog/integrations-core/pull/2645).
