@@ -207,7 +207,8 @@ class WinPDHCounter(object):
                 all_instances.add(inst)
 
                 try:
-                    self.counterdict.setdefault(inst, win32pdh.AddCounter(self.hq, path))
+                    if inst not in self.counterdict:
+                        self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
                 except:  # noqa: E722
                     self.logger.fatal("Failed to create counter.  No instances of %s\\%s" % (
                         self._class_name, self._counter_name))
