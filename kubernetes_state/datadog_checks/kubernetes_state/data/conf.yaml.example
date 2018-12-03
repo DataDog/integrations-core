@@ -32,12 +32,6 @@ instances:
   #
   #  hostname_override: true
 
-  ## @param send_pod_phase_service_checks - boolean - optional 
-  ## Send (deprecated) pod.phase service checks (default true, will be turned off in future versions)
-  ## We recommend using the corresponding gauges instead, which benefit from historical data unlike service checks
-  #
-  #  send_pod_phase_service_checks: false
-
   ## @param tags  - list of key:value element - optional 
   ## List of tags to attach to every metric, event and service check emitted by this integration.
   ## 
@@ -51,4 +45,3 @@ instances:
   ## Set a timeout for the prometheus query.
   #
   #  prometheus_timeout: 10
-
