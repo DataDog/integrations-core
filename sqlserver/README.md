@@ -47,6 +47,14 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
 3. [Restart the Agent][3] to start sending SQL Server metrics to Datadog.
 
+#### Linux
+
+A few extra configuration steps are required to get the sqlserver integration running on a Linux host. 
+
+1. Install am ODBC SQL Server Driver, for example the Microsoft ODBC Driver [18]
+2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder
+3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as specified in the `odbcinst.ini file`. 
+
 ### Validation
 
 [Run the Agent's `status` subcommand][4] and look for `sqlserver` under the Checks section.
@@ -123,3 +131,4 @@ brew install freetds --with-unixodbc
 [15]: http://www.freetds.org/
 [16]: https://brew.sh/
 [17]: https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017 
+[18]: https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-2017
