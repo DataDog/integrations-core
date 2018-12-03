@@ -190,12 +190,20 @@ class PHPFPMCheck(AgentCheck):
     def request_fastcgi(cls, url, query=''):
         parsed_url = urlparse(url)
 
-        hostname = parsed_url.hostname
-        if hostname == 'localhost':
-            hostname = '127.0.0.1'
-
-        port = str(parsed_url.port or 9000)
-        route = parsed_url.path
+        if parsed_url.scheme == "unix":
+            # Example of expected format: unix:///path/to/file.sock/ping
+            sock_file, _, route = parsed_url.path.partition('.sock')
+            sock_file += '.sock'
+            hostname = 'localhost'
+            port = '80'
+            fcgi = FCGIApp(connect=sock_file)
+        else:
+            hostname = parsed_url.hostname
+            if hostname == 'localhost':
+                hostname = '127.0.0.1'
+            port = str(parsed_url.port or 9000)
+            route = parsed_url.path
+            fcgi = FCGIApp(host=hostname, port=port)
 
         env = {
             'CONTENT_LENGTH': '0',
@@ -218,8 +226,6 @@ class PHPFPMCheck(AgentCheck):
             'wsgi.errors': StringIO(),
             'wsgi.input': StringIO(),
         }
-
-        fcgi = FCGIApp(host=hostname, port=port)
 
         # Return first response
         return fcgi(env, lambda *args, **kwargs: '')[0]

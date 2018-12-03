@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  ibmmq:
+    image: ibmcom/mq:${IBM_MQ_VERSION}
+    environment:
+      - MQ_QMGR_NAME=datadog
+      - LICENSE=accept
+    ports:
+      - "11414:1414"

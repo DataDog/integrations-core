@@ -14,6 +14,11 @@
     "parent_name": "datacenter1"
   },
   {
+    "spec": "Datastore",
+    "name": "datastore",
+    "parent_name": "datacenter1"
+  },
+  {
     "spec": "HostSystem",
     "name": "host1",
     "parent_name": "compute_resource1"

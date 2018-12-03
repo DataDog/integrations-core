@@ -1,5 +1,9 @@
 # CHANGELOG - nagios
 
+## 1.1.3 / 2018-11-30
+
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.1.2 / 2018-10-12
 
 * [Fixed] Fix empty event issue with Agent 6. See [#2348](https://github.com/DataDog/integrations-core/pull/2348).

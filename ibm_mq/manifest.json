@@ -1,0 +1,21 @@
+{
+  "display_name": "IBM MQ",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "ibm_mq",
+  "metric_prefix": "ibm_mq.",
+  "metric_to_check": "ibm_mq.queue.usage",
+  "creates_events": false,
+  "short_description": "IBM MQ is a Message Queue",
+  "guid": "873153b6-5184-438a-8a32-1e2d2e490dde",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "public_title": "Datadog-Ibm_mq Integration",
+  "categories": [
+    "Message Queue"
+  ],
+  "type": "check",
+  "is_public": false
+}

@@ -10,6 +10,7 @@ The Network Time Protocol (NTP) integration is enabled by default and reports th
 
 Default NTP servers reached:
 
+* `0.datadog.pool.ntp.org`
 * `1.datadog.pool.ntp.org`
 * `2.datadog.pool.ntp.org`
 * `3.datadog.pool.ntp.org`

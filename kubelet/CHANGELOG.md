@@ -1,5 +1,12 @@
 # CHANGELOG - kubelet
 
+## 2.3.0 / 2018-11-30
+
+* [Added] Add restart and container state metrics to kubelet. See [#2605](https://github.com/DataDog/integrations-core/pull/2605). Thanks [schleyfox](https://github.com/schleyfox).
+* [Added] Add more cpu metrics. See [#2595](https://github.com/DataDog/integrations-core/pull/2595).
+* [Added] Add kubelet volume metrics. See [#2256](https://github.com/DataDog/integrations-core/pull/2256). Thanks [derekchan](https://github.com/derekchan).
+* [Fixed] [kubelet] correctly ignore pods that are neither running or pending for resource limits&requests. See [#2597](https://github.com/DataDog/integrations-core/pull/2597).
+
 ## 2.2.0 / 2018-10-12
 
 * [Added] Add kubelet rss and working set memory metrics. See [#2390](https://github.com/DataDog/integrations-core/pull/2390).

@@ -24,6 +24,10 @@ LINK_DIR = '.links'
 STEP_NAME = 'tag'
 
 
+class YubikeyException(Exception):
+    pass
+
+
 def read_gitignore_patterns():
     exclude_patterns = []
 
@@ -42,7 +46,7 @@ def get_key_id(gpg_exe):
         if line.startswith('Signature key ....:'):
             return line.split(':')[1].replace(' ', '')
     else:
-        raise Exception('Could not find private signing key on Yubikey!')
+        raise YubikeyException('Could not find private signing key on Yubikey!')
 
 
 def run_in_toto(key_id, products):

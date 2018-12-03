@@ -1,5 +1,9 @@
 # CHANGELOG - dns_check
 
+## 1.2.0 / 2018-11-30
+
+* [Added] add ability to check A, CNAME and MX results. See [#2615](https://github.com/DataDog/integrations-core/pull/2615). Thanks [volksman](https://github.com/volksman).
+
 ## 1.1.2 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

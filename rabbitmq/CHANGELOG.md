@@ -1,5 +1,11 @@
 # CHANGELOG - rabbitmq
 
+## 1.6.0 / 2018-11-30
+
+* [Added] Option to ignore SSL warnings. See [#2472](https://github.com/DataDog/integrations-core/pull/2472). Thanks [tebriel](https://github.com/tebriel).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+* [Added] Add cluster wide metrics. See [#2449](https://github.com/DataDog/integrations-core/pull/2449).
+
 ## 1.5.2 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

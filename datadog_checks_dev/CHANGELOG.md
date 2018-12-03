@@ -1,5 +1,16 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.15.1 / 2018-11-30
+
+* [Fixed] Handle unreleased checks for agent reqs validation. See [#2664](https://github.com/DataDog/integrations-core/pull/2664).
+
+## 0.15.0 / 2018-11-27
+
+* [Added] Added Watt units to metadata validation. See [#2645](https://github.com/DataDog/integrations-core/pull/2645).
+* [Added] Added Heap and Volume units to metadata validation. See [#2647](https://github.com/DataDog/integrations-core/pull/2647).
+* [Fixed] Gently handle Yubikey exceptions. See [#2641](https://github.com/DataDog/integrations-core/pull/2641).
+* [Added] Added validation step for the agent-requirements file. See [#2642](https://github.com/DataDog/integrations-core/pull/2642).
+
 ## 0.14.1 / 2018-11-22
 
 * [Fixed] Increase gpg timeout to give time to developers to interact with Yubikeys. See [#2613](https://github.com/DataDog/integrations-core/pull/2613).
