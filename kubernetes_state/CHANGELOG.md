@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 4.1.0 / 2018-12-02
+
+* [Added] Add phase tag to pod metrics. See [#2624](https://github.com/DataDog/integrations-core/pull/2624).
+
 ## 4.0.0 / 2018-11-30
 
 * [Removed] Remove KSM deprecated pod phase service checks. See [#2631](https://github.com/DataDog/integrations-core/pull/2631).
