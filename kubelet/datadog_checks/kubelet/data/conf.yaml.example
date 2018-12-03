@@ -14,11 +14,6 @@ instances:
   ## 1.7.6+ clusters expose container metrics in the prometheus format.
   ## This is the default setting. See next section for legacy clusters.
 
-  ## @param metrics_endpoint - string - optional
-  ## DEPRECATED: please specify `cadvisor_metrics_endpoint` instead
-  #
-  #  metrics_endpoint: http://10.8.0.1:10255/metrics/cadvisor
-
   ## @param cadvisor_metrics_endpoint - string - optional
   ## url of the cadvisor metrics prometheus endpoint.
   ## Pass an empty string, or set the cadvisor_port option to disable cadvisor metrics collection.
