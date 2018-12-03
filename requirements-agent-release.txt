@@ -45,7 +45,7 @@ datadog-kong==1.2.1
 datadog-kube-dns==2.0.1
 datadog-kube-proxy==3.0.0
 datadog-kubelet==2.3.0; sys_platform == 'linux2'
-datadog-kubernetes-state==4.0.0; sys_platform != 'win32'
+datadog-kubernetes-state==4.1.0; sys_platform != 'win32'
 datadog-kyototycoon==1.4.1
 datadog-lighttpd==1.2.1
 datadog-linkerd==2.0.0
