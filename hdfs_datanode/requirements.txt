@@ -88,6 +88,8 @@ ipaddress==1.0.22 \
 pycparser==2.19 \
     --hash=sha256:a988718abfad80b6b157acce7bf130a30876d27603738ac39f140993246b25b3 \
     # via cffi
+pykerberos==1.2.1 ; sys_platform != "win32" \
+    --hash=sha256:4f2dca8df5f84a3be039c026893850d731a8bb38395292e1610ffb0a08ba876c
 requests-kerberos==0.12.0 \
     --hash=sha256:5733abc0b6524815f6fc72d5c0ec9f3fb89137b852adea2a461c45931f5675e0 \
     --hash=sha256:9d21f15241c53c2ad47e813138b9aee4b9acdd04b82048c4388ade15f40a52fd
@@ -103,7 +105,7 @@ urllib3==1.24.1 \
     --hash=sha256:61bf29cada3fc2fbefad4fdf059ea4bd1b4a86d2b6d15e1c7c0b582b9752fe39 \
     --hash=sha256:de9529817c93f27c8ccbfead6985011db27bd0ddfcdb2d86f3f663385c6a9c22 \
     # via requests
-winkerberos==0.7.0 \
+winkerberos==0.7.0 ; sys_platform == "win32" \
     --hash=sha256:0ca44087ab43979b0d8ffccb25353c8955d0bf755718405bcd2ad5e889eddfa8 \
     --hash=sha256:14dbbcaeacc13aee0fc8a1d0bb12a29500642fe616c41b50bd9e0ff962372ec9 \
     --hash=sha256:240a1678c320501ade115511b4d10d44b9ff8e7d724b053dc5b3544cbfe6753b \
