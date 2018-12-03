@@ -50,7 +50,7 @@ CRI does not include any events.
 Need help? Contact [Datadog Support][6].
 
 [1]: https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/
-[3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/cri.d/conf.yaml.example
+[2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/cri.d/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/help/
