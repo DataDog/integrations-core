@@ -582,26 +582,26 @@ class OpenStackControllerCheck(AgentCheck):
             if server_name:
                 tags.append("server_name:{}".format(server_name))
 
-        # microversion pre 2.48
-        for m in server_stats:
-            if _is_interface_metric(m):
-                # Example of interface metric
-                # tap123456_rx_errors
-                metric_pre = re.split("(_rx|_tx)", m)
-                interface = "interface:{}".format(metric_pre[0])
-                self.gauge(
-                    "openstack.nova.server.{}{}".format(metric_pre[1].replace("_", ""), metric_pre[2]),
-                    server_stats[m],
-                    tags=tags+host_tags+[interface],
-                    hostname=server_id,
-                )
-            elif _is_valid_metric(m):
-                self.gauge(
-                    "openstack.nova.server.{}".format(m.replace("-", "_")),
-                    server_stats[m],
-                    tags=tags+host_tags,
-                    hostname=server_id,
-                )
+            # microversion pre 2.48
+            for m in server_stats:
+                if _is_interface_metric(m):
+                    # Example of interface metric
+                    # tap123456_rx_errors
+                    metric_pre = re.split("(_rx|_tx)", m)
+                    interface = "interface:{}".format(metric_pre[0])
+                    self.gauge(
+                        "openstack.nova.server.{}{}".format(metric_pre[1].replace("_", ""), metric_pre[2]),
+                        server_stats[m],
+                        tags=tags+host_tags+[interface],
+                        hostname=server_id,
+                    )
+                elif _is_valid_metric(m):
+                    self.gauge(
+                        "openstack.nova.server.{}".format(m.replace("-", "_")),
+                        server_stats[m],
+                        tags=tags+host_tags,
+                        hostname=server_id,
+                    )
 
     def get_stats_for_single_project(self, project, tags=None):
         def _is_valid_metric(label):
