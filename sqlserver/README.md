@@ -49,7 +49,7 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
 #### Linux
 
-Extra configuration steps are required to get the sqlserver integration running on a Linux host:
+Extra configuration steps are required to get the SQL Server integration running on a Linux host:
 
 1. Install an ODBC SQL Server Driver, for example the [Microsoft ODBC Driver][18].
 2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder.
