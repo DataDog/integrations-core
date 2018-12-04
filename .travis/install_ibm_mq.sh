@@ -7,7 +7,7 @@ MQ_URL=http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/m
 MQ_PACKAGES="MQSeriesRuntime-*.rpm MQSeriesServer-*.rpm MQSeriesMsg*.rpm MQSeriesJava*.rpm MQSeriesJRE*.rpm MQSeriesGSKit*.rpm"
 
 if [ -z "$CHECK" ]; then
-    OUT=$(ddev test --list)i
+    OUT=$(ddev test --list)
     if [[ "$OUT" != *"ibm_mq"* ]]; then
         exit 0
     fi
