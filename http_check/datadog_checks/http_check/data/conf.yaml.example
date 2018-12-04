@@ -219,6 +219,12 @@ instances:
   #
   #  allow_redirects: true
 
+  ## @param stream - boolean - optional - default: false
+  ## The stream parameter can be used to check the status code and/or
+  ## response time of URLs that return an endless stream of data.
+  #
+  #  stream: false
+
 
   ## @param include_default_headers - boolean - optional - default: true
   ## The (optional) include_default_headers parameter instructs the check to include the default headers.

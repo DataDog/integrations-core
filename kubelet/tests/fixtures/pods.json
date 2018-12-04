@@ -1238,6 +1238,145 @@
                 "selfLink": "/api/v1/namespaces/default/pods/demo-app-success-c485bc67b-klj45",
                 "uid": "24d6daa3-10d8-11e8-bd5a-42010af00137"
             }
+        },
+        {
+            "metadata": {
+                "name": "pi-kff76",
+                "generateName": "pi-",
+                "namespace": "default",
+                "selfLink": "/api/v1/namespaces/default/pods/pi-kff76",
+                "uid": "dbf813d6-e9e1-11e8-b4ce-42010a840233",
+                "resourceVersion": "6406877",
+                "creationTimestamp": "2018-11-16T20:54:50Z",
+                "labels": {
+                    "controller-uid": "dbf66fbb-e9e1-11e8-b4ce-42010a840233",
+                    "job-name": "pi"
+                },
+                "annotations": {
+                    "kubernetes.io/config.seen": "2018-11-16T20:54:50.234317712Z",
+                    "kubernetes.io/config.source": "api",
+                    "kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu request for container pi"
+                },
+                "ownerReferences": [
+                    {
+                        "apiVersion": "batch/v1",
+                        "kind": "Job",
+                        "name": "pi",
+                        "uid": "dbf66fbb-e9e1-11e8-b4ce-42010a840233",
+                        "controller": true,
+                        "blockOwnerDeletion": true
+                    }
+                ]
+            },
+            "spec": {
+                "volumes": [
+                    {
+                        "name": "default-token-7tz4b",
+                        "secret": {
+                            "secretName": "default-token-7tz4b",
+                            "defaultMode": 420
+                        }
+                    }
+                ],
+                "containers": [
+                    {
+                        "name": "pi",
+                        "image": "perl",
+                        "command": [
+                            "perl",
+                            "-Mbignum=bpi",
+                            "-wle",
+                            "print bpi(2000)"
+                        ],
+                        "resources": {
+                            "requests": {
+                                "cpu": "100m"
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "name": "default-token-7tz4b",
+                                "readOnly": true,
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                            }
+                        ],
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "imagePullPolicy": "Always"
+                    }
+                ],
+                "restartPolicy": "Never",
+                "terminationGracePeriodSeconds": 30,
+                "dnsPolicy": "ClusterFirst",
+                "serviceAccountName": "default",
+                "serviceAccount": "default",
+                "nodeName": "gke-haissam-default-pool-9c7c1fbf-tbv9",
+                "securityContext": {},
+                "schedulerName": "default-scheduler",
+                "tolerations": [
+                    {
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "effect": "NoExecute",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "effect": "NoExecute",
+                        "tolerationSeconds": 300
+                    }
+                ]
+            },
+            "status": {
+                "phase": "Succeeded",
+                "conditions": [
+                    {
+                        "type": "Initialized",
+                        "status": "True",
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2018-11-16T20:54:50Z",
+                        "reason": "PodCompleted"
+                    },
+                    {
+                        "type": "Ready",
+                        "status": "False",
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2018-11-16T20:55:33Z",
+                        "reason": "PodCompleted"
+                    },
+                    {
+                        "type": "PodScheduled",
+                        "status": "True",
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2018-11-16T20:54:50Z"
+                    }
+                ],
+                "hostIP": "10.132.0.14",
+                "podIP": "10.8.2.99",
+                "startTime": "2018-11-16T20:54:50Z",
+                "containerStatuses": [
+                    {
+                        "name": "pi",
+                        "state": {
+                            "terminated": {
+                                "exitCode": 0,
+                                "reason": "Completed",
+                                "startedAt": "2018-11-16T20:55:27Z",
+                                "finishedAt": "2018-11-16T20:55:32Z",
+                                "containerID": "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903"
+                            }
+                        },
+                        "lastState": {},
+                        "ready": false,
+                        "restartCount": 0,
+                        "image": "perl:latest",
+                        "imageID": "docker-pullable://perl@sha256:0d0f76231a6230cd37ad6aefbd919f049dc5a93f46be99666327e79b653ec241",
+                        "containerID": "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903"
+                    }
+                ],
+                "qosClass": "Burstable"
+            }
         }
     ],
     "kind": "PodList",

@@ -540,8 +540,11 @@ class SQLServer(AgentCheck):
             cursor = self.get_cursor(instance, self.DEFAULT_DB_KEY)
 
             try:
+                self.log.debug("Calling Stored Procedure : {}".format(proc))
                 cursor.callproc(proc)
                 rows = cursor.fetchall()
+                self.log.debug("Row count ({}) : {}".format(proc, cursor.rowcount))
+
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
 

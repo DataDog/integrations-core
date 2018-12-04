@@ -113,6 +113,14 @@ instances:
   #
   #  collection_level: 1
 
+  ## @param collect_realtime_only - boolean - optional - default: true
+  ## Set to true to collect only host and VM metrics. Set to false to collect
+  ## cluster, datastore and datacenter metrics as well.
+  ## Collecting non realtime metrics will decrease performance as it
+  ## requires computation from the vCenter server.
+  #
+  #  collect_realtime_only: true
+
   ## @param use_guest_hostname - boolean - optional - default: false
   ## If true, the check will use the guest hostname for VMs instead of the VM name
   ## This requires the VM to have VMware tools installed in it. If the guest hostname is

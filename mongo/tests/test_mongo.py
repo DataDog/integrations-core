@@ -1,10 +1,12 @@
-import common
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from . import common
 
-from types import ListType
+import pytest
+from six import itervalues
 
-import logging
-
-log = logging.getLogger('test_mongo')
+from datadog_checks.dev.utils import ensure_bytes
 
 METRIC_VAL_CHECKS = {
     'mongodb.asserts.msgps': lambda x: x >= 0,
@@ -42,20 +44,16 @@ METRIC_VAL_CHECKS_OLD = {
 }
 
 
-def test_mongo(spin_up_mongo, aggregator, set_up_mongo, check):
-
-    instance = {
-        'server': "mongodb://testUser:testPass@%s:%s/test?authSource=authDB" % (common.HOST, common.PORT1)
-    }
-
+@pytest.mark.usefixtures('dd_environment')
+def test_mongo(aggregator, check, instance_authdb):
     # Run the check against our running server
-    check.check(instance)
+    check.check(instance_authdb)
 
     # Metric assertions
-    metrics = aggregator._metrics.values()
+    metrics = list(itervalues(aggregator._metrics))
     assert metrics
 
-    assert isinstance(metrics, ListType)
+    assert isinstance(metrics, list)
     assert len(metrics) > 0
 
     for m in metrics:
@@ -65,26 +63,27 @@ def test_mongo(spin_up_mongo, aggregator, set_up_mongo, check):
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
 
 
-def test_mongo2(spin_up_mongo, aggregator, set_up_mongo, check):
-    instance = {
-        'server': "mongodb://testUser2:testPass2@%s:%s/test" % (common.HOST, common.PORT1)
-    }
+@pytest.mark.usefixtures('dd_environment')
+def test_mongo2(aggregator, check, instance_user):
     # Run the check against our running server
-    check.check(instance)
+    check.check(instance_user)
 
     # Service checks
-    service_checks = aggregator._service_checks.values()
+    service_checks = list(itervalues(aggregator._service_checks))
     service_checks_count = len(service_checks)
     assert service_checks_count > 0
     assert len(service_checks[0]) == 1
     # Assert that all service checks have the proper tags: host and port
     for sc in service_checks[0]:
-        assert "host:%s" % common.HOST in sc.tags
-        assert "port:%s" % common.PORT1 in sc.tags or "port:%s" % common.PORT2 in sc.tags
-        assert "db:test" in sc.tags
+        assert ensure_bytes('host:{}'.format(common.HOST)) in sc.tags
+        assert (
+            ensure_bytes('port:{}'.format(common.PORT1)) in sc.tags
+            or ensure_bytes('port:{}'.format(common.PORT2)) in sc.tags
+        )
+        assert b'db:test' in sc.tags
 
     # Metric assertions
-    metrics = aggregator._metrics.values()
+    metrics = list(itervalues(aggregator._metrics))
     assert metrics
     assert len(metrics) > 0
 
@@ -95,18 +94,15 @@ def test_mongo2(spin_up_mongo, aggregator, set_up_mongo, check):
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
 
 
-def test_mongo_old_config(spin_up_mongo, aggregator, set_up_mongo, check):
-    instance = {
-        'server': "mongodb://%s:%s/test" % (common.HOST, common.PORT1)
-    }
-
+@pytest.mark.usefixtures('dd_environment')
+def test_mongo_old_config(aggregator, check, instance):
     # Run the check against our running server
     check.check(instance)
 
     # Metric assertions
-    metrics = aggregator._metrics.values()
+    metrics = list(itervalues(aggregator._metrics))
     assert metrics
-    assert isinstance(metrics, ListType)
+    assert isinstance(metrics, list)
     assert len(metrics) > 0
 
     for m in metrics:
@@ -116,17 +112,15 @@ def test_mongo_old_config(spin_up_mongo, aggregator, set_up_mongo, check):
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
 
 
-def test_mongo_old_config_2(spin_up_mongo, aggregator, set_up_mongo, check):
-    instance = {
-        'server': "mongodb://%s:%s/test" % (common.HOST, common.PORT1)
-    }
+@pytest.mark.usefixtures('dd_environment')
+def test_mongo_old_config_2(aggregator, check, instance):
     # Run the check against our running server
     check.check(instance)
 
     # Metric assertions
-    metrics = aggregator._metrics.values()
+    metrics = list(itervalues(aggregator._metrics))
     assert metrics
-    assert isinstance(metrics, ListType)
+    assert isinstance(metrics, list)
     assert len(metrics) > 0
 
     for m in metrics:

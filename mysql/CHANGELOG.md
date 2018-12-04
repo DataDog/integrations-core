@@ -1,5 +1,10 @@
 # CHANGELOG - mysql
 
+## 1.5.0 / 2018-11-30
+
+* [Added] Support Python 3. See [#2630](https://github.com/DataDog/integrations-core/pull/2630).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.4.0 / 2018-09-04
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945](https://github.com/DataDog/integrations-core/pull/1945).

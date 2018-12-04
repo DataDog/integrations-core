@@ -20,10 +20,10 @@
     {
         "agent_version": "6.2.1",
         "integration":"couchbase",
-        "check": "couchbase.by_node.health_status",
+        "check": "couchbase.by_node.health",
         "statuses": ["ok", "critical"],
         "groups": ["node"],
-        "name": "Node Health Status",
+        "name": "Node Health",
         "description": "Returns `CRITICAL` if the node is unhealthy. Returns `OK` otherwise."
     }
 ]

@@ -1,25 +1,23 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-from os import environ
-import logging
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import subprocess
+from os import environ
 
 import mock
-import pytest
 import psutil
+import pytest
+
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.mysql import MySql
-from datadog_checks.utils.platform import Platform
-
-from . import common, variables, tags, common_config
-
-log = logging.getLogger('test_mysql')
+from . import common, tags, variables
 
 
-def test_minimal_config(aggregator, spin_up_mysql):
+@pytest.mark.usefixtures('dd_environment')
+def test_minimal_config(aggregator, instance_basic):
     mysql_check = MySql(common.CHECK_NAME, {}, {})
-    mysql_check.check(common_config.MYSQL_MINIMAL_CONFIG)
+    mysql_check.check(instance_basic)
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK,
@@ -33,9 +31,10 @@ def test_minimal_config(aggregator, spin_up_mysql):
         aggregator.assert_metric(mname, at_least=0)
 
 
-def test_complex_config(aggregator, spin_up_mysql):
-    mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[common_config.MYSQL_COMPLEX_CONFIG])
-    mysql_check.check(common_config.MYSQL_COMPLEX_CONFIG)
+@pytest.mark.usefixtures('dd_environment')
+def test_complex_config(aggregator, instance_complex):
+    mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[instance_complex])
+    mysql_check.check(instance_complex)
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK,
@@ -108,14 +107,15 @@ def test_complex_config(aggregator, spin_up_mysql):
     aggregator.assert_all_metrics_covered()
 
 
-def test_connection_failure(aggregator, spin_up_mysql):
+@pytest.mark.usefixtures('dd_environment')
+def test_connection_failure(aggregator, instance_error):
     """
     Service check reports connection failure
     """
-    mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[common_config.CONNECTION_FAILURE])
+    mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[instance_error])
 
     with pytest.raises(Exception):
-        mysql_check.check(common_config.CONNECTION_FAILURE)
+        mysql_check.check(instance_error)
 
     aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL,
                                     tags=tags.SC_FAILURE_TAGS, count=1)
@@ -123,9 +123,10 @@ def test_connection_failure(aggregator, spin_up_mysql):
     aggregator.assert_all_metrics_covered()
 
 
-def test_complex_config_replica(aggregator, spin_up_mysql):
+@pytest.mark.usefixtures('dd_environment')
+def test_complex_config_replica(aggregator, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, {})
-    config = copy.deepcopy(common_config.MYSQL_COMPLEX_CONFIG)
+    config = copy.deepcopy(instance_complex)
     config['port'] = common.SLAVE_PORT
     mysql_check.check(config)
 
@@ -138,9 +139,6 @@ def test_complex_config_replica(aggregator, spin_up_mysql):
     # Travis MySQL not running replication - FIX in flavored test.
     aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK,
                                     tags=tags.SC_TAGS_REPLICA, at_least=1)
-
-    ver = map(lambda x: int(x), mysql_check.mysql_version[mysql_check._get_host_key()])
-    ver = tuple(ver)
 
     testable_metrics = (variables.STATUS_VARS + variables.VARIABLES_VARS +
                         variables.INNODB_VARS + variables.BINLOG_VARS +

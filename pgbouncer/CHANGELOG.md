@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 1.3.1 / 2018-11-30
+
+* [Fixed] Failure to reconnect to PGBouncer when using database URL. See [#2587](https://github.com/DataDog/integrations-core/pull/2587). Thanks [VSpike](https://github.com/VSpike).
+
 ## 1.3.0 / 2018-08-07
 
 * [Added] Add the ability to specify 'use_cached' connections in config. See [#2000](https://github.com/DataDog/integrations-core/pull/2000). Thanks [kellydunn](https://github.com/kellydunn).

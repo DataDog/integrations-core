@@ -56,6 +56,9 @@ SOURCE_TYPE_NAME = 'spark'
 
 # Metric types
 INCREMENT = 'increment'
+GAUGE = 'gauge'
+COUNT = 'count'
+MONOTONIC_COUNT = 'monotonic_count'
 
 # Metrics to collect
 SPARK_JOB_METRICS = {
@@ -124,6 +127,22 @@ SPARK_RDD_METRICS = {
     'diskUsed': ('spark.rdd.disk_used', INCREMENT)
 }
 
+SPARK_STREAMING_STATISTICS_METRICS = {
+    'avgInputRate': ('spark.streaming.statistics.avg_input_rate', GAUGE),
+    'avgProcessingTime': ('spark.streaming.statistics.avg_processing_time', GAUGE),
+    'avgSchedulingDelay': ('spark.streaming.statistics.avg_scheduling_delay', GAUGE),
+    'avgTotalDelay': ('spark.streaming.statistics.avg_total_delay', GAUGE),
+    'batchDuration': ('spark.streaming.statistics.batch_duration', GAUGE),
+    'numActiveBatches': ('spark.streaming.statistics.num_active_batches', GAUGE),
+    'numActiveReceivers': ('spark.streaming.statistics.num_active_receivers', GAUGE),
+    'numInactiveReceivers': ('spark.streaming.statistics.num_inactive_receivers', GAUGE),
+    'numProcessedRecords': ('spark.streaming.statistics.num_processed_records', MONOTONIC_COUNT),
+    'numReceivedRecords': ('spark.streaming.statistics.num_received_records', MONOTONIC_COUNT),
+    'numReceivers': ('spark.streaming.statistics.num_receivers', GAUGE),
+    'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', MONOTONIC_COUNT),
+    'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT)
+}
+
 RequestsConfig = namedtuple(
     'RequestsConfig', [
         'auth',
@@ -163,6 +182,9 @@ class SparkCheck(AgentCheck):
 
         # Get the rdd metrics
         self._spark_rdd_metrics(instance, spark_apps, tags, requests_config)
+
+        # Get the streaming statistics metrics
+        self._spark_streaming_statistics_metrics(instance, spark_apps, tags, requests_config)
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
@@ -527,10 +549,36 @@ class SparkCheck(AgentCheck):
             if len(response):
                 self._set_metric('spark.rdd.count', INCREMENT, len(response), tags)
 
+    def _spark_streaming_statistics_metrics(self, instance, running_apps, addl_tags, requests_config):
+        '''
+        Get metrics for each application streaming statistics.
+        '''
+        for app_id, (app_name, tracking_url) in running_apps.iteritems():
+            try:
+                base_url = self._get_request_url(instance, tracking_url)
+                response = self._rest_request_to_json(
+                    base_url,
+                    SPARK_APPS_PATH,
+                    SPARK_SERVICE_CHECK, requests_config, addl_tags, app_id, 'streaming/statistics')
+                self.log.debug('streaming/statistics: %s', response)
+                tags = ['app_name:%s' % str(app_name)]
+                tags.extend(addl_tags)
+
+                # NOTE: response is a dict
+                self._set_metrics_from_json(tags, response, SPARK_STREAMING_STATISTICS_METRICS)
+            except HTTPError as e:
+                # NOTE: If api call returns response 404
+                # then it means that the application is not a streaming application, we should skip metric submission
+                if e.response.status_code != 404:
+                    raise
+
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
         '''
         Parse the JSON response and set the metrics
         '''
+        if metrics_json is None:
+            return
+
         for status, (metric_name, metric_type) in metrics.iteritems():
             metric_status = metrics_json.get(status)
 
@@ -549,8 +597,14 @@ class SparkCheck(AgentCheck):
             tags = []
         if metric_type == INCREMENT:
             self.increment(metric_name, value, tags=tags)
+        elif metric_type == GAUGE:
+            self.gauge(metric_name, value, tags=tags)
+        elif metric_type == COUNT:
+            self.count(metric_name, value, tags=tags)
+        elif metric_type == MONOTONIC_COUNT:
+            self.monotonic_count(metric_name, value, tags=tags)
         else:
-            self.log.error('Metric type "%s" unknown' % (metric_type))
+            self.log.error('Metric type "{}" unknown'.format(metric_type))
 
     def _rest_request(self, address, object_path, service_name, requests_config, tags, *args, **kwargs):
         '''
