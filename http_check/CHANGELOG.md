@@ -1,5 +1,14 @@
 # CHANGELOG - http_check
 
+## 3.1.0 / 2018-11-30
+
+* [Added] Add option to set `stream` parameter on requests. See [#2658](https://github.com/DataDog/integrations-core/pull/2658). Thanks [syskill](https://github.com/syskill).
+* [Added] Upgrade cryptography. See [#2659](https://github.com/DataDog/integrations-core/pull/2659).
+* [Added] Upgrade requests. See [#2481](https://github.com/DataDog/integrations-core/pull/2481).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+* [Added] Fix unicode handling on A6. See [#2435](https://github.com/DataDog/integrations-core/pull/2435).
+* [Added] Validate that the url starts with the scheme. See [#2393](https://github.com/DataDog/integrations-core/pull/2393).
+
 ## 3.0.0 / 2018-10-12
 
 * [Added] Handle SSL exception and send a DOWN service check status. See [#2332](https://github.com/DataDog/integrations-core/pull/2332).

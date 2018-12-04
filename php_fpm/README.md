@@ -69,6 +69,20 @@ server {
 
 If you find this approach too tedious at scale, setting `use_fastcgi` to `true` instructs the check to bypass any proxy servers and communicate directly with PHP-FPM using FastCGI. The default port is `9000` for when omitted from `status_url` or `ping_url`.
 
+### Unix sockets
+
+If your php-fpm installation uses unix sockets, you have to use the below syntax for `status_url`, `ping_url` and enable `use_fastcgi`:
+
+```
+init_config:
+
+instances:
+  - status_url: unix:///path/to/file.sock/status 
+    ping_url: unix:///path/to/file.sock/ping    
+    ping_reply: pong                   
+    use_fastcgi: true
+```
+
 ### Validation
 
 [Run the Agent's `status` subcommand][4] and look for `php_fpm` under the Checks section.

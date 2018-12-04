@@ -30,7 +30,7 @@ def test_from_instance():
         'url': 'https://example.com',
         'name': 'UpService',
     })
-    assert len(params) == 24
+    assert len(params) == 25
 
     # `url` is mandatory
     assert params[0] == 'https://example.com'
@@ -80,6 +80,8 @@ def test_from_instance():
     assert params[22] is False
     # default `allow_redirects` is True
     assert params[23] is True
+    # default `stream` is False
+    assert params[24] is False
 
     # headers
     params = from_instance({

@@ -32,6 +32,11 @@ class CadvisorPrometheusScraperMixin(object):
 
         self.CADVISOR_METRIC_TRANSFORMERS = {
             'container_cpu_usage_seconds_total': self.container_cpu_usage_seconds_total,
+            'container_cpu_load_average_10s': self.container_cpu_load_average_10s,
+            'container_cpu_system_seconds_total': self.container_cpu_system_seconds_total,
+            'container_cpu_user_seconds_total': self.container_cpu_user_seconds_total,
+            'container_cpu_cfs_throttled_periods_total': self.container_cpu_cfs_throttled_periods_total,
+            'container_cpu_cfs_throttled_seconds_total': self.container_cpu_cfs_throttled_seconds_total,
             'container_fs_reads_bytes_total': self.container_fs_reads_bytes_total,
             'container_fs_writes_bytes_total': self.container_fs_writes_bytes_total,
             'container_network_receive_bytes_total': self.container_network_receive_bytes_total,
@@ -45,7 +50,7 @@ class CadvisorPrometheusScraperMixin(object):
             'container_memory_usage_bytes': self.container_memory_usage_bytes,
             'container_memory_working_set_bytes': self.container_memory_working_set_bytes,
             'container_memory_rss': self.container_memory_rss,
-            'container_spec_memory_limit_bytes': self.container_spec_memory_limit_bytes
+            'container_spec_memory_limit_bytes': self.container_spec_memory_limit_bytes,
         }
 
     def _create_cadvisor_prometheus_instance(self, instance):
@@ -63,11 +68,6 @@ class CadvisorPrometheusScraperMixin(object):
             'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
             'ignore_metrics': [
                 'container_cpu_cfs_periods_total',
-                'container_cpu_cfs_throttled_periods_total',
-                'container_cpu_cfs_throttled_seconds_total',
-                'container_cpu_load_average_10s',
-                'container_cpu_system_seconds_total',
-                'container_cpu_user_seconds_total',
                 'container_fs_inodes_free',
                 'container_fs_inodes_total',
                 'container_fs_io_current',
@@ -254,7 +254,6 @@ class CadvisorPrometheusScraperMixin(object):
                 )
                 # TODO
                 # metric.Clear()  # Ignore this metric message
-
         return seen
 
     def _process_container_metric(self, type, metric_name, metric, scraper_config):
@@ -384,7 +383,26 @@ class CadvisorPrometheusScraperMixin(object):
             # Replacing the sample tuple to convert cores in nano cores
             metric.samples[i] = (sample[self.SAMPLE_NAME], sample[self.SAMPLE_LABELS],
                                  sample[self.SAMPLE_VALUE] * 10. ** 9)
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
 
+    def container_cpu_load_average_10s(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.cpu.load.10s.avg'
+        self._process_container_metric('gauge', metric_name, metric, scraper_config)
+
+    def container_cpu_system_seconds_total(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.cpu.system.total'
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
+
+    def container_cpu_user_seconds_total(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.cpu.user.total'
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
+
+    def container_cpu_cfs_throttled_periods_total(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.cpu.cfs.throttled.periods'
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
+
+    def container_cpu_cfs_throttled_seconds_total(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.cpu.cfs.throttled.seconds'
         self._process_container_metric('rate', metric_name, metric, scraper_config)
 
     def container_fs_reads_bytes_total(self, metric, scraper_config):

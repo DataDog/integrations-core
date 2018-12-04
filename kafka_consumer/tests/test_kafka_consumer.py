@@ -1,12 +1,16 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import time
-
 import pytest
+from six import iteritems
 
-from .common import is_supported
 from datadog_checks.kafka_consumer import KafkaCheck
+from .common import is_supported
+
+pytestmark = pytest.mark.skipif(
+    not is_supported('kafka'),
+    reason='kafka consumer offsets not supported in current environment'
+)
 
 
 BROKER_METRICS = [
@@ -19,27 +23,16 @@ CONSUMER_METRICS = [
 ]
 
 
-@pytest.mark.kafka
-def test_check_kafka(kafka_cluster, kafka_producer, kafka_consumer, kafka_instance, aggregator):
+@pytest.mark.usefixtures('dd_environment', 'kafka_consumer', 'kafka_producer')
+def test_check_kafka(aggregator, kafka_instance):
     """
     Testing Kafka_consumer check.
     """
-    if not is_supported(['kafka']):
-        pytest.skip("kafka consumer offsets not supported in current environment")
-
-    if not kafka_producer.is_alive():
-        kafka_producer.start()
-        time.sleep(5)
-
-    if not kafka_consumer.is_alive():
-        kafka_consumer.start()
-        time.sleep(5)
-
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
     kafka_consumer_check.check(kafka_instance)
 
-    for name, consumer_group in kafka_instance['consumer_groups'].iteritems():
-        for topic, partitions in consumer_group.iteritems():
+    for name, consumer_group in iteritems(kafka_instance['consumer_groups']):
+        for topic, partitions in iteritems(consumer_group):
             for partition in partitions:
                 tags = ["topic:{}".format(topic),
                         "partition:{}".format(partition)] + ['optional:tag1']

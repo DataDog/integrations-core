@@ -15,7 +15,11 @@ class AgentLogHandler(logging.Handler):
     log message within the main agent logging system.
     """
     def emit(self, record):
-        msg = "({}:{}) | {}".format(record.filename, record.lineno, self.format(record))
+        msg = "({}:{}) | {}".format(
+            getattr(record, '_filename', record.filename),
+            getattr(record, '_lineno', record.lineno),
+            self.format(record)
+        )
         datadog_agent.log(msg, record.levelno)
 
 

@@ -354,28 +354,10 @@ def test_disabling_hostname_override(instance):
     assert scraper_config['label_to_hostname'] is None
 
 
-def test_add_pod_phase_service_checks(aggregator, instance, check):
-    check.send_pod_phase_service_checks = True
+def test_pod_phase_gauges(aggregator, instance, check):
     for _ in range(2):
         check.check(instance)
-    # We should still send gauges
     aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
                              tags=['namespace:default', 'phase:Running', 'optional:tag1'], value=3)
     aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
                              tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2)
-    # the service checks should be sent as well
-    # Running
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.OK,
-                                    tags=['namespace:default', 'pod:task-pv-pod', 'optional:tag1'])
-    # Pending
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.WARNING,
-                                    tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml', 'optional:tag1'])
-    # Succeeded
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.OK,
-                                    tags=['namespace:default', 'pod:hello-1509998340-k4f8q', 'optional:tag1'])
-    # Failed
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.CRITICAL,
-                                    tags=['namespace:default', 'pod:should-run-once', 'optional:tag1'])
-    # Unknown
-    aggregator.assert_service_check(NAMESPACE + '.pod.phase', check.UNKNOWN,
-                                    tags=['namespace:default', 'pod:hello-1509998460-tzh8k', 'optional:tag1'])

@@ -55,3 +55,16 @@ spark.rdd.num_partitions,rate,,,second,Number of persisted RDD partitions in the
 spark.rdd.num_cached_partitions,rate,,,second,Number of in-memory cached RDD partitions in the application,0,spark,rdd num ch part
 spark.rdd.memory_used,rate,,byte,second,Amount of memory used in the application's persisted RDDs,0,spark,rdd mem usd
 spark.rdd.disk_used,rate,,byte,second,Amount of disk space used by persisted RDDs in the application,0,spark,rdd dsk usd
+spark.streaming.statistics.avg_input_rate,rate,,byte,second,Average streaming input data rate,0,spark,streaming avg input rate
+spark.streaming.statistics.avg_processing_time,gauge,,millisecond,,Average application's streaming batch processing time,0,spark,streaming avg processing time
+spark.streaming.statistics.avg_scheduling_delay,gauge,,millisecond,,Average application's streaming batch scheduling delay,0,spark,streaming avg scheduling delay
+spark.streaming.statistics.avg_total_delay,gauge,,millisecond,,Average application's streaming batch total delay,0,spark,streaming avg total delay
+spark.streaming.statistics.batch_duration,gauge,,millisecond,,Application's streaming batch duration,0,spark,streaming batch duration
+spark.streaming.statistics.num_active_batches,rate,,job,second, Number of active streaming batches,0,spark,num active batches
+spark.streaming.statistics.num_active_receivers,rate,,object,second,Number of active streaming receivers,0,spark,num active receivers
+spark.streaming.statistics.num_inactive_receivers,rate,,object,second,Number of inactive streaming receivers,0,spark,num inactive receivers
+spark.streaming.statistics.num_processed_records,rate,,record,second,Number of processed streaming records ,0,spark,num processed records
+spark.streaming.statistics.num_received_records,rate,,record,second,Number of received streaming records,0,spark,num received records
+spark.streaming.statistics.num_receivers,rate,,object,second,Number of streaming application's receivers,0,spark,num receivers
+spark.streaming.statistics.num_retained_completed_batches,rate,,job,second,Number of retained completed application's streaming batches,0,spark,num retained completed batches
+spark.streaming.statistics.num_total_completed_batches,rate,,job,second,Total number of completed application's streaming batches,0,spark,num total completed batches

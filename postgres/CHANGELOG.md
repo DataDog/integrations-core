@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 2.3.0 / 2018-11-30
+
+* [Added] Include db tag with postgresql.locks metrics. See [#2567](https://github.com/DataDog/integrations-core/pull/2567). Thanks [sj26](https://github.com/sj26).
+* [Added] Support Python 3. See [#2616](https://github.com/DataDog/integrations-core/pull/2616).
+
 ## 2.2.3 / 2018-10-14
 
 * [Fixed] Fix version detection for new development releases. See [#2401](https://github.com/DataDog/integrations-core/pull/2401).

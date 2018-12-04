@@ -145,6 +145,9 @@ coredns_health_request_duration_seconds_bucket{le="8.192"} 1.32441e+06
 coredns_health_request_duration_seconds_bucket{le="+Inf"} 1.32441e+06
 coredns_health_request_duration_seconds_sum 643.1446459869876
 coredns_health_request_duration_seconds_count 1.32441e+06
+# HELP coredns_panic_count_total A metrics that counts the number of panics.
+# TYPE coredns_panic_count_total counter
+coredns_panic_count_total 0
 # HELP coredns_proxy_request_count_total Counter of requests made per protocol, proxy protocol, family and upstream.
 # TYPE coredns_proxy_request_count_total counter
 coredns_proxy_request_count_total{family="1",proto="udp",proxy_proto="dns",to="10.205.0.2:53"} 2031

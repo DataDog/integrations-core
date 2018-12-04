@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 1.3.0 / 2018-11-30
+
+* [Added] Support custom certificates. See [#2657](https://github.com/DataDog/integrations-core/pull/2657). Thanks [eedwards-sk](https://github.com/eedwards-sk).
+
 ## 1.2.0 / 2018-08-15
 
 * [Added] Add is_leader metric. See [#2057](https://github.com/DataDog/integrations-core/pull/2057).

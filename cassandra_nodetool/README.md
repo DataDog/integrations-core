@@ -39,6 +39,10 @@ instances:
   # username:
   # password:
 
+  # Whether or not to use the --ssl parameter for nodetool to initiate a connection over SSL to the JMX server.
+  # Optional boolean. If included must be true or false.
+  # ssl: false
+
   # a list of additional tags to be sent with the metrics
   # tags: []
 ```

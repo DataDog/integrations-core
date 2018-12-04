@@ -1,0 +1,85 @@
+init_config:
+
+instances:
+  ## @param channel - string - required
+  ## The IBMMQ Channel to connect to.
+  #
+  - channel: 'DEV.ADMIN.SVRCONN'
+
+  ## @param queue_manager - string - required
+  ## The name of the queue manager.
+  #
+    queue_manager: 'datadog'
+
+  ## @param mq_installation_dir - string - required - default: /opt/mqm
+  ## The directory where MQ is installed, required to ensure the c bindings are set correctly
+  #
+    mq_installation_dir: /opt/mqm
+
+  ## @param host - string - required - default: localhost
+  ## The host IBM MQ is running on.
+  #
+    host: 'localhost'
+
+  ## @param port - string - required - default: 1414
+  ## The port IBM MQ is listening on.
+  #
+    port: '1414'
+
+  ## @param username - string - optional
+  ## <USERNAME> of the IBMMQ Channel to connect to.
+  #
+  #  username: '<USERNAME>'
+
+  ## @param password - string - optional
+  ## <PASSWORD> of the IBMMQ Channel to connect to.
+  #
+  #  password: '<PASSWORD>'
+
+  ## @param queues - list of string - optional
+  ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+  #
+  #  queues:
+  #    - '<QUEUE_NAME>'
+
+  ## @param ssl_auth - string - optional
+  ## Whether or not to use SSL auth while connecting to the channel.
+  #
+  #  ssl_auth: 'no'
+
+  ## @param ssl_cipher_spec - string - optional - default: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+  ## The ssl cipher to use.
+  #
+  #  ssl_cipher_spec: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+
+  ## @param ssl_key_repository_location - string - optional - default: '/var/mqm/ssl-db/client/KeyringClient'
+  ## The location of the ssl keyring.
+  #
+  #  ssl_key_repository_location: '/var/mqm/ssl-db/client/KeyringClient'
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+## Log Section (Available for Agent >=6.0)
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
+## service - mandatory - Name of the service owning the log
+## source  - mandatory - Attribute that defines which integration is sending the logs
+## sourcecategory - optional - Multiple value attribute. Can be used to refine the source attribtue
+## tags: - optional - Add tags to each logs collected
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+
+#logs:
+#  - type: file
+#    path: /var/mqm/errors/*
+#    service: ibm_mq
+#    source: ibm_mq
+#    sourcecategory: errors

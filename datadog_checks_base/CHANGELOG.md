@@ -1,5 +1,18 @@
 # CHANGELOG - datadog_checks_base
 
+## 4.5.0 / 2018-12-02
+
+* [Added] Improve OpenMetrics label joins. See [#2624](https://github.com/DataDog/integrations-core/pull/2624).
+
+## 4.4.0 / 2018-11-30
+
+* [Added] Add linux as supported OS. See [#2614](https://github.com/DataDog/integrations-core/pull/2614).
+* [Added] Upgrade cryptography. See [#2659](https://github.com/DataDog/integrations-core/pull/2659).
+* [Added] Upgrade requests. See [#2656](https://github.com/DataDog/integrations-core/pull/2656).
+* [Fixed] Fix not_asserted aggregator stub function. See [#2639](https://github.com/DataDog/integrations-core/pull/2639).
+* [Added] Log line where `AgentCheck.warning` was called in the check. See [#2620](https://github.com/DataDog/integrations-core/pull/2620).
+* [Fixed] Fix requirements-agent-release.txt updating. See [#2617](https://github.com/DataDog/integrations-core/pull/2617).
+
 ## 4.3.0 / 2018-11-12
 
 * [Added] Add option to prevent subprocess command logging. See [#2565](https://github.com/DataDog/integrations-core/pull/2565).

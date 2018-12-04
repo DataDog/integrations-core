@@ -1,2 +1,2 @@
+cryptography==2.3.1
 requests_ntlm==1.1.0
-cryptography==2.3
