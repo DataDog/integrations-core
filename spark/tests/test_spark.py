@@ -96,6 +96,8 @@ YARN_SPARK_EXECUTOR_URL = \
     Url(join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'executors'))
 YARN_SPARK_RDD_URL = \
     Url(join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd'))
+YARN_SPARK_STREAMING_STATISTICS_URL = \
+    Url(join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics'))
 
 # Mesos Service URLs
 MESOS_APP_URL = Url(urljoin(SPARK_MESOS_URL, MESOS_APPS_PATH))
@@ -104,6 +106,8 @@ MESOS_SPARK_JOB_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP
 MESOS_SPARK_STAGE_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'stages'))
 MESOS_SPARK_EXECUTOR_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'executors'))
 MESOS_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd'))
+MESOS_SPARK_STREAMING_STATISTICS_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID,
+                                                        'streaming/statistics'))
 
 # Spark Standalone Service URLs
 STANDALONE_APP_URL = Url(urljoin(STANDALONE_URL, STANDALONE_APPS_PATH))
@@ -113,11 +117,15 @@ STANDALONE_SPARK_JOB_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPAR
 STANDALONE_SPARK_STAGE_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'stages'))
 STANDALONE_SPARK_EXECUTOR_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'executors'))
 STANDALONE_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd'))
+STANDALONE_SPARK_STREAMING_STATISTICS_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID,
+                                                             'streaming/statistics'))
 
 STANDALONE_SPARK_JOB_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'jobs'))
 STANDALONE_SPARK_STAGE_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'stages'))
 STANDALONE_SPARK_EXECUTOR_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'executors'))
 STANDALONE_SPARK_RDD_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'storage/rdd'))
+STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME,
+                                                                   'streaming/statistics'))
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
@@ -171,6 +179,11 @@ def yarn_requests_get_mock(*args, **kwargs):
 
     elif arg_url == YARN_SPARK_RDD_URL:
         with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'r') as f:
+            body = f.read()
+            return MockResponse(body, 200)
+
+    elif arg_url == YARN_SPARK_STREAMING_STATISTICS_URL:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
@@ -231,6 +244,11 @@ def mesos_requests_get_mock(*args, **kwargs):
             body = f.read()
             return MockMesosResponse(body, 200)
 
+    elif arg_url == MESOS_SPARK_STREAMING_STATISTICS_URL:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'r') as f:
+            body = f.read()
+            return MockMesosResponse(body, 200)
+
 
 def standalone_requests_get_mock(*args, **kwargs):
 
@@ -285,6 +303,11 @@ def standalone_requests_get_mock(*args, **kwargs):
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
+    elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
 
 def standalone_requests_pre20_get_mock(*args, **kwargs):
 
@@ -331,6 +354,9 @@ def standalone_requests_pre20_get_mock(*args, **kwargs):
     elif arg_url == STANDALONE_SPARK_RDD_URL:
         return MockStandaloneResponse("{}", 404)
 
+    elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
+        return MockStandaloneResponse("{}", 404)
+
     elif arg_url == STANDALONE_SPARK_JOB_URL_PRE20:
         with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'r') as f:
             body = f.read()
@@ -348,6 +374,11 @@ def standalone_requests_pre20_get_mock(*args, **kwargs):
 
     elif arg_url == STANDALONE_SPARK_RDD_URL_PRE20:
         with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+    elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'r') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
@@ -541,6 +572,22 @@ SPARK_RDD_METRIC_VALUES = {
     'spark.rdd.disk_used': 0,
 }
 
+SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
+    'spark.streaming.statistics.avg_input_rate': 1.0,
+    'spark.streaming.statistics.avg_processing_time': 175,
+    'spark.streaming.statistics.avg_scheduling_delay': 8,
+    'spark.streaming.statistics.avg_total_delay': 183,
+    'spark.streaming.statistics.batch_duration': 2000,
+    'spark.streaming.statistics.num_active_batches': 2,
+    'spark.streaming.statistics.num_active_receivers': 1,
+    'spark.streaming.statistics.num_inactive_receivers': 3,
+    'spark.streaming.statistics.num_processed_records': 7,
+    'spark.streaming.statistics.num_received_records': 9,
+    'spark.streaming.statistics.num_receivers': 10,
+    'spark.streaming.statistics.num_retained_completed_batches': 27,
+    'spark.streaming.statistics.num_total_completed_batches': 28,
+}
+
 SPARK_METRIC_TAGS = [
     'cluster_name:' + CLUSTER_NAME,
     'app_name:' + APP_NAME
@@ -600,6 +647,13 @@ def test_yarn(aggregator):
                 value=value,
                 tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
+        # Check the streaming statistics metrics
+        for metric, value in SPARK_STREAMING_STATISTICS_METRIC_VALUES.iteritems():
+            aggregator.assert_metric(
+                metric,
+                value=value,
+                tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
         tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
         tags.sort()
 
@@ -611,6 +665,9 @@ def test_yarn(aggregator):
             assert sc.status == SparkCheck.OK
             sc.tags.sort()
             assert sc.tags == tags
+
+        # Assert coverage for this check on this instance
+        aggregator.assert_all_metrics_covered()
 
 
 def test_auth_yarn(aggregator):
@@ -686,6 +743,13 @@ def test_mesos(aggregator):
                 value=value,
                 tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
+        # Check the streaming statistics metrics
+        for metric, value in SPARK_STREAMING_STATISTICS_METRIC_VALUES.iteritems():
+            aggregator.assert_metric(
+                metric,
+                value=value,
+                tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
         # Check the service tests
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
@@ -701,7 +765,8 @@ def test_mesos(aggregator):
             sc.tags.sort()
             assert sc.tags == tags
 
-        assert aggregator.metrics_asserted_pct == 100.0
+        # Assert coverage for this check on this instance
+        aggregator.assert_all_metrics_covered()
 
 
 def test_mesos_filter(aggregator):
@@ -777,6 +842,13 @@ def test_standalone(aggregator):
                 value=value,
                 tags=SPARK_METRIC_TAGS)
 
+        # Check the streaming statistics metrics
+        for metric, value in SPARK_STREAMING_STATISTICS_METRIC_VALUES.iteritems():
+            aggregator.assert_metric(
+                metric,
+                value=value,
+                tags=SPARK_METRIC_TAGS)
+
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
@@ -784,6 +856,9 @@ def test_standalone(aggregator):
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
             assert sc.tags == ['url:http://localhost:4040', 'cluster_name:SparkCluster']
+
+        # Assert coverage for this check on this instance
+        aggregator.assert_all_metrics_covered()
 
 
 def test_standalone_pre20(aggregator):
@@ -847,6 +922,13 @@ def test_standalone_pre20(aggregator):
                 value=value,
                 tags=SPARK_METRIC_TAGS)
 
+        # Check the streaming statistics metrics
+        for metric, value in SPARK_STREAMING_STATISTICS_METRIC_VALUES.iteritems():
+            aggregator.assert_metric(
+                metric,
+                value=value,
+                tags=SPARK_METRIC_TAGS)
+
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
@@ -854,6 +936,9 @@ def test_standalone_pre20(aggregator):
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
             assert sc.tags == ['url:http://localhost:4040', 'cluster_name:SparkCluster']
+
+        # Assert coverage for this check on this instance
+        aggregator.assert_all_metrics_covered()
 
 
 def test_ssl():
