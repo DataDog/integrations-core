@@ -48,7 +48,7 @@ def from_instance(instance, default_ca_certs=None):
     if not url:
         raise ConfigurationError("Bad configuration. You must specify a url")
     if not url.startswith("http"):
-        raise ConfigurationError("The url {} must start with the scheme http or https".format(url))
+        raise ConfigurationError(b"The url {} must start with the scheme http or https".format(url))
     include_content = is_affirmative(instance.get('include_content', False))
     disable_ssl_validation = is_affirmative(instance.get('disable_ssl_validation', True))
     ssl_expire = is_affirmative(instance.get('check_certificate_expiration', True))

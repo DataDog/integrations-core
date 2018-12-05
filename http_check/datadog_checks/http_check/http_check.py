@@ -65,7 +65,7 @@ class HTTPCheck(NetworkCheck):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.info(ensure_bytes(loginfo))
             if include_content:
-                down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
+                down_msg += '\nContent: {}'.format(ensure_unicode(content[:CONTENT_LENGTH]))
             service_checks.append((
                 self.SC_STATUS,
                 Status.DOWN,
@@ -78,7 +78,7 @@ class HTTPCheck(NetworkCheck):
         r = None
         try:
             parsed_uri = urlparse(addr)
-            self.log.debug("Connecting to {}".format(addr))
+            self.log.debug(b"Connecting to {}".format(addr))
 
             suppress_warning = False
             if disable_ssl_validation and parsed_uri.scheme == "https":
@@ -89,15 +89,17 @@ class HTTPCheck(NetworkCheck):
                 else:
                     # Log if we're skipping SSL validation for HTTPS URLs
                     if explicit_validation:
-                        self.log.debug("Skipping SSL certificate validation for {} based on configuration".format(addr))
+                        self.log.debug(
+                            b"Skipping SSL certificate validation for {} based on configuration".format(addr)
+                        )
 
                     # Emit a warning if disable_ssl_validation is not explicitly set and we're not ignoring warnings
                     else:
-                        self.warning("Parameter disable_ssl_validation for {} is not explicitly set, "
-                                     "defaults to true".format(addr))
+                        self.warning(b"Parameter disable_ssl_validation for {} is not explicitly set, "
+                                     b"defaults to true".format(addr))
 
             instance_proxy = self.get_instance_proxy(instance, addr)
-            self.log.debug("Proxies used for {} - {}".format(addr, instance_proxy))
+            self.log.debug(b"Proxies used for {} - {}".format(addr, instance_proxy))
 
             auth = None
             if password is not None:
@@ -109,9 +111,9 @@ class HTTPCheck(NetworkCheck):
             sess = requests.Session()
             sess.trust_env = False
             if weakcipher:
-                base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+                base_addr = b'{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
                 sess.mount(base_addr, WeakCiphersAdapter())
-                self.log.debug("Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
+                self.log.debug(b"Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
                                base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS))
 
             with warnings.catch_warnings():
@@ -131,31 +133,31 @@ class HTTPCheck(NetworkCheck):
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
+            self.log.info(b"{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
             service_checks.append((
                 self.SC_STATUS,
                 Status.DOWN,
-                "{}. Connection failed after {} ms".format(str(e), length)
+                b"{}. Connection failed after {} ms".format(str(e), length)
             ))
 
         except socket.error as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
+            self.log.info(b"{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
             service_checks.append((
                 self.SC_STATUS,
                 Status.DOWN,
-                "Socket error: {}. Connection failed after {} ms".format(repr(e), length)
+                b"Socket error: {}. Connection failed after {} ms".format(repr(e), length)
             ))
 
         except Exception as e:
             length = int((time.time() - start) * 1000)
-            self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
+            self.log.error(b"Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
             raise
 
         else:
             # Only add the URL tag if it's not already present
             if not any(filter(re.compile('^url:').match, tags_list)):
-                tags_list.append('url:{}'.format(addr))
+                tags_list.append(b'url:{}'.format(addr))
 
             # Only report this metric if the site is not down
             if response_time and not service_checks:
@@ -170,7 +172,7 @@ class HTTPCheck(NetworkCheck):
                 else:
                     expected_code = http_response_status_code
 
-                message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
+                message = b"Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
                         addr, expected_code, str(r.status_code))
 
                 if include_content:
@@ -206,7 +208,7 @@ class HTTPCheck(NetworkCheck):
                                              .format(ensure_unicode(content_match)))
 
                 else:
-                    send_status_up("{} is UP".format(addr))
+                    send_status_up(b"{} is UP".format(addr))
         finally:
             if r is not None:
                 r.close()
@@ -224,7 +226,7 @@ class HTTPCheck(NetworkCheck):
             status, days_left, seconds_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs,
                                                                               check_hostname, client_cert, client_key)
             tags_list = list(tags)
-            tags_list.append('url:{}'.format(addr))
+            tags_list.append(b'url:{}'.format(addr))
             self.gauge('http.ssl.days_left', days_left, tags=tags_list)
             self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
 
@@ -236,11 +238,11 @@ class HTTPCheck(NetworkCheck):
         instance_name = ensure_unicode(self.normalize(instance['name']))
         url = instance.get('url', None)
         tags = instance.get('tags', [])
-        tags.append("instance:{}".format(instance_name))
+        tags.append(b"instance:{}".format(instance_name))
 
         # Only add the URL tag if it's not already present
         if not any(filter(re.compile('^url:').match, tags)):
-            tags.append('url:{}'.format(url))
+            tags.append(b'url:{}'.format(url))
 
         if sc_name == self.SC_STATUS:
             # format the HTTP response body into the event
