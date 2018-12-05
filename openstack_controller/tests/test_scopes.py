@@ -122,7 +122,7 @@ PROJECT_RESPONSE = [
     ]
 
 
-def test_from_config_simple(*args):
+def test_from_config_simple():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
     instance_config = {'user': GOOD_USERS[0]['user']}
 
@@ -146,7 +146,7 @@ def test_from_config_simple(*args):
                 expected_tenant_id.remove(scope.tenant_id)
 
 
-def test_from_config_with_missing_name(*args):
+def test_from_config_with_missing_name():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     instance_config = {'user': GOOD_USERS[0]['user']}
@@ -165,7 +165,7 @@ def test_from_config_with_missing_name(*args):
             assert len(scope.project_scopes) == 0
 
 
-def test_from_config_with_missing_id(*args):
+def test_from_config_with_missing_id():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
 
     instance_config = {'user': GOOD_USERS[0]['user']}

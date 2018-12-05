@@ -2,13 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-ALL_IDS = ['server-1', 'server-2', 'other-1', 'other-2']
-EXCLUDED_NETWORK_IDS = ['server-1', 'other-.*']
-EXCLUDED_SERVER_IDS = ['server-2', 'other-.*']
-FILTERED_NETWORK_ID = 'server-2'
-FILTERED_SERVER_ID = 'server-1'
-FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
-
 EXAMPLE_AUTH_RESPONSE = {
     u'token': {
         u'methods': [
@@ -273,17 +266,3 @@ MOCK_NOVA_SERVERS = [
         "user_id": "fake"
     }
 ]
-
-# .. config
-MOCK_CONFIG = {
-    'init_config': {
-        'keystone_server_url': 'http://10.0.2.15:5000',
-        'ssl_verify': False,
-        'exclude_network_ids': EXCLUDED_NETWORK_IDS,
-    },
-    'instances': [
-        {
-            'name': 'test_name', 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}
-        }
-    ]
-}

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
+import conftest
 import simplejson as json
 from datadog_checks.openstack_controller.api import ComputeApi
 
@@ -30,7 +31,7 @@ def get_os_hypervisor_uptime_post_v2_53_response(url, header, params=None, timeo
     }""")
 
 
-def test_get_os_hypervisor_uptime():
+def test_get_os_hypervisor_uptime(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
                     side_effect=get_os_hypervisor_uptime_pre_v2_52_response):
         compute_api = ComputeApi(None, False, None, "foo", "foo")
@@ -67,7 +68,7 @@ def get_os_aggregates_response(url, headers, params=None, timeout=None):
     }""")
 
 
-def test_get_os_aggregates():
+def test_get_os_aggregates(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
                     side_effect=get_os_aggregates_response):
         compute_api = ComputeApi(None, False, None, "foo", "foo")
@@ -195,7 +196,7 @@ def get_os_hypervisors_detail_post_v2_53_response(url, headers, params=None, tim
     }""")  # noqa: E501
 
 
-def test_get_os_hypervisors_detail():
+def test_get_os_hypervisors_detail(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_33_response):
         compute_api = ComputeApi(None, False, None, "foo", "foo")
@@ -406,7 +407,7 @@ def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=No
     }""")  # noqa: E501
 
 
-def test_get_servers_detail():
+def test_get_servers_detail(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
                     side_effect=get_servers_detail_post_v2_63_response):
         compute_api = ComputeApi(None, False, None, "foo", "foo")
@@ -573,7 +574,7 @@ def get_server_diagnostics_post_v2_1_response(url, headers, params=None, timeout
     }""")
 
 
-def test_get_server_diagnostics():
+def test_get_server_diagnostics(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
                     side_effect=get_server_diagnostics_post_v2_48_response):
         compute_api = ComputeApi(None, False, None, "foo", "foo")
@@ -675,7 +676,7 @@ def get_project_limits_response(url, headers, params=None, timeout=None):
     }""")
 
 
-def test_get_project_limits():
+def test_get_project_limits(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
                     side_effect=get_project_limits_response):
         compute_api = ComputeApi(None, False, None, "foo", "foo")
