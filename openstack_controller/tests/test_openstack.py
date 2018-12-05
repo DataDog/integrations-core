@@ -4,15 +4,14 @@
 import copy
 import time
 import mock
-import conftest
 from . import common
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 
 def test_parse_uptime_string(aggregator):
-    instance = conftest.MOCK_CONFIG["instances"][0]
+    instance = common.MOCK_CONFIG["instances"][0]
     instance['tags'] = ['optional:tag1']
-    init_config = conftest.MOCK_CONFIG['init_config']
+    init_config = common.MOCK_CONFIG['init_config']
     check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
     uptime_parsed = check._parse_uptime_string(
         u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n')
@@ -20,9 +19,9 @@ def test_parse_uptime_string(aggregator):
 
 
 def test_cache_utils(aggregator):
-    instance = conftest.MOCK_CONFIG["instances"][0]
+    instance = common.MOCK_CONFIG["instances"][0]
     instance['tags'] = ['optional:tag1']
-    init_config = conftest.MOCK_CONFIG['init_config']
+    init_config = common.MOCK_CONFIG['init_config']
     check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
     check.CACHE_TTL['aggregates'] = 1
     expected_aggregates = {'hyp_1': ['aggregate:staging', 'availability_zone:test']}
@@ -46,8 +45,8 @@ def test_cache_between_runs(servers_detail, project_name_from_id, aggregator):
     check = OpenStackControllerCheck("test", {
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
-        'exclude_server_ids': conftest.EXCLUDED_SERVER_IDS
-    }, {}, instances=conftest.MOCK_CONFIG)
+        'exclude_server_ids': common.EXCLUDED_SERVER_IDS
+    }, {}, instances=common.MOCK_CONFIG)
 
     # Start off with a list of servers
     check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
@@ -70,8 +69,8 @@ def test_project_name_none(servers_detail, project_name_from_id, aggregator):
     check = OpenStackControllerCheck("test", {
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
-        'exclude_server_ids': conftest.EXCLUDED_SERVER_IDS
-    }, {}, instances=conftest.MOCK_CONFIG)
+        'exclude_server_ids': common.EXCLUDED_SERVER_IDS
+    }, {}, instances=common.MOCK_CONFIG)
 
     # Start off with a list of servers
     check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
@@ -99,9 +98,9 @@ def test_get_paginated_server(servers_detail, project_name_from_id, aggregator):
     check = OpenStackControllerCheck("test", {
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
-        'exclude_server_ids': conftest.EXCLUDED_SERVER_IDS,
+        'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
-    }, {}, instances=conftest.MOCK_CONFIG)
+    }, {}, instances=common.MOCK_CONFIG)
     check.get_all_servers(None, "test_instance")
     assert len(check.server_details_by_id) == 1
     assert 'server-1' in check.server_details_by_id
@@ -163,9 +162,9 @@ def test_get_stats_for_single_server_pre_2_48(server_diagnostics, os_aggregates,
     check = OpenStackControllerCheck("test", {
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
-        'exclude_server_ids': conftest.EXCLUDED_SERVER_IDS,
+        'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
-    }, {}, instances=conftest.MOCK_CONFIG)
+    }, {}, instances=common.MOCK_CONFIG)
 
     check.get_stats_for_single_server({})
 

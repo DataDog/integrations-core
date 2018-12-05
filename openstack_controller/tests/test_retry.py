@@ -3,13 +3,13 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import time
-import conftest
+from . import common
 
 from datadog_checks.openstack_controller.retry import BackOffRetry
 
 
 def test_retry():
-    instance = copy.deepcopy(conftest.MOCK_CONFIG["instances"][0])
+    instance = copy.deepcopy(common.MOCK_CONFIG["instances"][0])
     instance['tags'] = ['optional:tag1']
     retry = BackOffRetry()
     assert retry.should_run(instance) is True
