@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from contextlib import contextmanager
 
 from .agent import DEFAULT_AGENT_VERSION, FAKE_API_KEY, get_agent_exe, get_agent_conf_dir, get_rate_flag
 from .config import (
@@ -49,16 +50,34 @@ class DockerInterface(object):
             get_agent_exe(self.agent_version)
         )
 
-    def run_check(self, capture=False, rate=False):
-        command = '{} check {}{}'.format(
-            self.agent_command,
+    def exec_command(self, interactive=False):
+        return 'docker exec{} {}'.format(
+            ' -it' if interactive else '', self.container_name
+        )
+
+    def run_check(self, interactive=False, capture=False, rate=False):
+        command = '{} {} check {}{}'.format(
+            self.exec_command(interactive=interactive),
+            get_agent_exe(self.agent_version),
             self.check,
             ' {}'.format(get_rate_flag(self.agent_version)) if rate else ''
         )
+
         return run_command(command, capture=capture)
 
     def exists(self):
         return env_exists(self.check, self.env)
+
+    @contextmanager
+    def use_config(self, config):
+        if config != self.config:
+            try:
+                write_env_data(self.check, self.env, config, self.metadata)
+                yield
+            finally:
+                self.write_config()
+        else:
+            yield
 
     def remove_config(self):
         remove_env_data(self.check, self.env)
