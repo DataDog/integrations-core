@@ -5,9 +5,9 @@
 from .exceptions import IncompleteConfig
 
 
-def get_instance_key(instance):
-    i_key = instance.get('name')
-    if not i_key:
+def get_instance_name(instance):
+    name = instance.get('name')
+    if not name:
         # We need a name to identify this instance
         raise IncompleteConfig()
-    return i_key
+    return name

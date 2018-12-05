@@ -1,48 +1,34 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from six.moves.urllib.parse import urljoin
-import requests
-import simplejson as json
-
 from datadog_checks.config import is_affirmative
-
-from .settings import DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION
 from .exceptions import (IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
-                         MissingNeutronEndpoint, KeystoneUnreachable)
+                         MissingNeutronEndpoint)
+from .api import KeystoneApi
 
 
-UNSCOPED_AUTH = 'unscoped'
-
-
-class OpenStackScope(object):
-    def __init__(self, auth_token, project_scope_map):
-        self.auth_token = auth_token
-        self.project_scope_map = project_scope_map
+class ScopeFetcher(object):
+    def __init__(self):
+        pass
 
     @classmethod
-    def from_config(cls, init_config, instance_config, proxy_config=None):
+    def from_config(cls, logger, init_config, instance_config, proxy_config=None):
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
 
         ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
-        auth_token = cls._get_auth_response_from_config(init_config, instance_config, proxy_config)
-
+        auth_token = cls._get_auth_response_from_config(logger, init_config, instance_config, proxy_config=proxy_config)
+        keystone_api = KeystoneApi(logger, ssl_verify, proxy_config, keystone_server_url, auth_token)
         # list all projects
-        projects = KeystoneApi.get_auth_projects(auth_token, keystone_server_url, ssl_verify, proxy_config)
+        projects = keystone_api.get_auth_projects()
 
-        # for each project, we create an OpenStackProject object that we add to the `project_scope_map` dict
-        project_scope_map = {}
+        # for each project, we create an OpenStackProject object that we add to the `project_scopes` dict
+        project_scopes = {}
         for project in projects:
             identity = {"methods": ['token'], "token": {"id": auth_token}}
             scope = {'project': {'id': project.get('id')}}
-            token_resp = KeystoneApi.post_auth_token(keystone_server_url,
-                                                     identity,
-                                                     ssl_verify,
-                                                     scope=scope,
-                                                     proxy=proxy_config)
+            token_resp = keystone_api.post_auth_token(identity, scope=scope)
 
             project_auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json())
@@ -55,30 +41,30 @@ class OpenStackScope(object):
                 }
             }
 
-            project_scope = OpenStackProject(project_auth_token, project_auth_scope, nova_endpoint, neutron_endpoint)
+            project_scope = Project(project_auth_token, project_auth_scope, nova_endpoint, neutron_endpoint)
             project_name = project.get('name')
             project_id = project.get('id')
             if project_name is None or project_id is None:
                 break
             project_key = (project_name, project_id)
-            project_scope_map[project_key] = project_scope
+            project_scopes[project_key] = project_scope
 
-        return cls(auth_token, project_scope_map)
+        return Scope(auth_token, project_scopes)
 
     @classmethod
-    def _get_auth_response_from_config(cls, init_config, instance_config, proxy_config=None):
+    def _get_auth_response_from_config(cls, logger, init_config, instance_config, proxy_config=None):
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
-
         ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
-        identity = cls._get_user_identity(instance_config)
 
-        resp = KeystoneApi.post_auth_token(keystone_server_url, identity, ssl_verify, proxy=proxy_config)
+        identity = cls._get_user_identity(instance_config)
+        keystone_api = KeystoneApi(logger, ssl_verify, proxy_config, keystone_server_url, None)
+        resp = keystone_api.post_auth_token(identity)
         return resp.headers.get('X-Subject-Token')
 
-    @classmethod
-    def _get_user_identity(cls, instance_config):
+    @staticmethod
+    def _get_user_identity(instance_config):
         """
         Parse user identity out of init_config
 
@@ -120,8 +106,8 @@ class OpenStackScope(object):
             return valid_endpoint
         raise MissingNovaEndpoint()
 
-    @classmethod
-    def _get_valid_endpoint(cls, resp, name, type):
+    @staticmethod
+    def _get_valid_endpoint(resp, name, entry_type):
         """
         Parse the service catalog returned by the Identity API for an endpoint matching
         the Nova service with the requested version
@@ -129,7 +115,8 @@ class OpenStackScope(object):
         """
         catalog = resp.get('token', {}).get('catalog', [])
         for entry in catalog:
-            if entry.get('name') and entry.get('type') and entry.get('name') == name and entry.get('type') == type:
+            if entry.get('name') and entry.get('type') and entry.get('name') == name and \
+                            entry.get('type') == entry_type:
                 # Collect any endpoints on the public or internal interface
                 valid_endpoints = {}
                 for ep in entry.get('endpoints'):
@@ -144,7 +131,13 @@ class OpenStackScope(object):
         return None
 
 
-class OpenStackProject:
+class Scope(object):
+    def __init__(self, auth_token, project_scopes):
+        self.auth_token = auth_token
+        self.project_scopes = project_scopes
+
+
+class Project:
     """
     Container class for a single project's authorization scope
     Embeds the auth token to be included with API requests, and refreshes
@@ -154,62 +147,8 @@ class OpenStackProject:
     def __init__(self, auth_token, auth_scope, nova_endpoint, neutron_endpoint):
         self.auth_token = auth_token
         # Store some identifiers for this project
-        self.project_name = auth_scope["project"].get("name")
-        self.domain_id = auth_scope["project"].get("domain", {}).get("id")
-        self.tenant_id = auth_scope["project"].get("id")
+        self.name = auth_scope.get("project", {}).get("name")
+        self.domain_id = auth_scope.get("project", {}).get("domain", {}).get("id")
+        self.tenant_id = auth_scope.get("project", {}).get("id")
         self.nova_endpoint = nova_endpoint
         self.neutron_endpoint = neutron_endpoint
-
-
-class KeystoneApi:
-
-    def __init__(self):
-        pass
-
-    @classmethod
-    def post_auth_token(cls, keystone_server_url, identity, ssl_verify, scope=UNSCOPED_AUTH, proxy=None):
-        try:
-            payload = {'auth': {'identity': identity, 'scope': scope}}
-            auth_url = urljoin(keystone_server_url, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
-            headers = {'Content-Type': 'application/json'}
-
-            resp = requests.post(
-                auth_url,
-                headers=headers,
-                data=json.dumps(payload),
-                verify=ssl_verify,
-                timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=proxy,
-            )
-            resp.raise_for_status()
-            return resp
-
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            raise KeystoneUnreachable(
-                "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
-                    user=identity['password']['user']['name'],
-                    domain=identity['password']['user']['domain']['id'],
-                    scope=UNSCOPED_AUTH,
-                    url=keystone_server_url))
-
-    @classmethod
-    def get_auth_projects(cls, auth_token, keystone_server_url, ssl_verify, proxy=None):
-        try:
-            auth_url = urljoin(keystone_server_url, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
-            headers = {'X-Auth-Token': auth_token}
-
-            resp = requests.get(
-                auth_url,
-                headers=headers,
-                verify=ssl_verify,
-                timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=proxy
-            )
-            resp.raise_for_status()
-
-            return resp.json().get('projects')
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-            exception_msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
-                url=keystone_server_url, ex=e
-            )
-            raise KeystoneUnreachable(exception_msg)
