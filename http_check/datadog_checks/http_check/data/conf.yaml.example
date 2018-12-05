@@ -14,6 +14,7 @@ instances:
 
   ## @param url - string - required
   ## Url to check 
+  ## Non-standard ports are supported using http://hostname:port syntax
   #  
     url: http://some.url.example.com
     
