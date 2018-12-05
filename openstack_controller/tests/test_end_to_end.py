@@ -130,26 +130,26 @@ def test_check(aggregator):
                             side_effect=make_request_responses):
                 check.check(MOCK_CONFIG['instances'][0])
 
-                aggregator.assert_metric('openstack.nova.server.tapb488fc1e_3e_tx_errors', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute7.openstack.local', 'server_name:finalDestination-4',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tapb488fc1e_3e'],
                                          hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb')
 
-                aggregator.assert_metric('openstack.nova.server.tapc929a75b_94_tx_errors', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute8.openstack.local', 'server_name:finalDestination-7',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tapc929a75b_94'],
                                          hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4')
-                aggregator.assert_metric('openstack.nova.server.tapf3e5d7a2_94_rx_errors', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.rx_errors', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute4.openstack.local', 'server_name:server_take_zero-1',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tapf3e5d7a2_94'],
                                          hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a')
-                aggregator.assert_metric('openstack.nova.server.tapf3e5d7a2_94_rx', value=17286.0,
+                aggregator.assert_metric('openstack.nova.server.rx', value=17286.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute4.openstack.local', 'server_name:server_take_zero-1',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tapf3e5d7a2_94'],
                                          hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a')
                 aggregator.assert_metric('openstack.nova.limits.max_image_meta', value=128.0,
                                          tags=['tenant_id:***************************4bfc1', 'project_name:service'],
@@ -169,15 +169,15 @@ def test_check(aggregator):
                 aggregator.assert_metric('openstack.nova.limits.max_image_meta', value=128.0,
                                          tags=['tenant_id:***************************44736', 'project_name:abcde'],
                                          hostname='')
-                aggregator.assert_metric('openstack.nova.server.tap8880f875_12_tx', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute2.openstack.local', 'server_name:ReadyServerOne',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tap8880f875_12'],
                                          hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f')
-                aggregator.assert_metric('openstack.nova.server.tap9bff9e73_2f_tx_errors', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                          tags=['nova_managed_server', 'project_name:testProj1',
                                                'hypervisor:compute4.openstack.local', 'server_name:blacklistServer',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tap9bff9e73_2f'],
                                          hostname=u'57030997-f1b5-4f79-9429-8cb285318633')
                 aggregator.assert_metric('openstack.nova.limits.max_personality', value=5.0,
                                          tags=['tenant_id:***************************4bfc1', 'project_name:service'],
@@ -232,45 +232,46 @@ def test_check(aggregator):
                                                'hypervisor:compute4.openstack.local', 'server_name:server_take_zero-2',
                                                'availability_zone:nova'],
                                          hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f')
-                aggregator.assert_metric('openstack.nova.server.tapab9b23ee_c1_tx_drop', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx_drop', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute10.openstack.local', 'server_name:finalDestination-1',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tapab9b23ee_c1'],
                                          hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a')
-                aggregator.assert_metric('openstack.nova.server.tap702092ed_a5_tx_errors', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute7.openstack.local', 'server_name:blacklist',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tap702092ed_a5'],
                                          hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c')
-                aggregator.assert_metric('openstack.nova.server.tapc929a75b_94_tx_packets', value=9.0,
+                aggregator.assert_metric('openstack.nova.server.tx_packets', value=9.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute8.openstack.local', 'server_name:finalDestination-7',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tapc929a75b_94'],
                                          hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4')
-                aggregator.assert_metric('openstack.nova.server.tapf3e5d7a2_94_tx_packets', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx_packets', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute4.openstack.local', 'server_name:server_take_zero-1',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tapf3e5d7a2_94'],
                                          hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a')
-                aggregator.assert_metric('openstack.nova.server.tapad123605_18_tx', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute4.openstack.local', 'server_name:server_take_zero-2',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tapad123605_18'],
                                          hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f')
-                aggregator.assert_metric('openstack.nova.server.tap9ac4ed56_d2_tx_errors', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute2.openstack.local',
-                                               'server_name:HoneyIShrunkTheServer', 'availability_zone:nova'],
+                                               'server_name:HoneyIShrunkTheServer', 'availability_zone:nova'
+                                               'interface:tap9ac4ed56_d2'],
                                          hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d')
-                aggregator.assert_metric('openstack.nova.server.tap56f02c54_da_rx_drop', value=0.0,
+                aggregator.assert_metric('openstack.nova.server.rx_drop', value=0.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute10.openstack.local', 'server_name:anotherServer',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tap56f02c54_da'],
                                          hostname=u'30888944-fb39-4590-9073-ef977ac1f039')
-                aggregator.assert_metric('openstack.nova.server.tape690927f_80_rx', value=16542.0,
+                aggregator.assert_metric('openstack.nova.server.rx', value=16542.0,
                                          tags=['nova_managed_server', 'project_name:admin',
                                                'hypervisor:compute10.openstack.local', 'server_name:finalDestination-6',
-                                               'availability_zone:nova'],
+                                               'availability_zone:nova', 'interface:tape690927f_80'],
                                          hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117')
                 aggregator.assert_metric('openstack.nova.limits.total_security_groups_used', value=0.0,
                                          tags=['tenant_id:***************************4bfc1', 'project_name:service'],

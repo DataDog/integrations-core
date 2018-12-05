@@ -449,6 +449,9 @@ class OpenStackControllerCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
+        def _is_interface_metric(label):
+            return any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
+
         hypervisor_hostname = server_details.get('hypervisor_hostname')
         host_tags = self._get_host_aggregate_tag(hypervisor_hostname, use_shortname=use_shortname)
         host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
@@ -484,11 +487,24 @@ class OpenStackControllerCheck(AgentCheck):
                 tags.append("hypervisor:{}".format(hypervisor_hostname))
             if server_name:
                 tags.append("server_name:{}".format(server_name))
-            for st in server_stats:
-                if _is_valid_metric(st):
+
+            # microversion pre 2.48
+            for m in server_stats:
+                if _is_interface_metric(m):
+                    # Example of interface metric
+                    # tap123456_rx_errors
+                    metric_pre = re.split("(_rx|_tx)", m)
+                    interface = "interface:{}".format(metric_pre[0])
                     self.gauge(
-                        "openstack.nova.server.{}".format(st.replace("-", "_")),
-                        server_stats[st],
+                        "openstack.nova.server.{}{}".format(metric_pre[1].replace("_", ""), metric_pre[2]),
+                        server_stats[m],
+                        tags=tags+host_tags+[interface],
+                        hostname=server_id,
+                    )
+                elif _is_valid_metric(m):
+                    self.gauge(
+                        "openstack.nova.server.{}".format(m.replace("-", "_")),
+                        server_stats[m],
                         tags=tags+host_tags,
                         hostname=server_id,
                     )
