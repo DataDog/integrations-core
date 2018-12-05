@@ -23,7 +23,7 @@ def wait_on_docker_logs(container_name, max_wait, sentences):
     log.info("Waiting for {} to come up".format(container_name))
     for _ in range(max_wait):
         out = subprocess.check_output(args)
-        if any(s in out for s in sentences):
+        if any(str.encode(s) in out for s in sentences):
             log.info('{} is up!'.format(container_name))
             return True
         time.sleep(1)
@@ -53,7 +53,10 @@ def cassandra_cluster():
     env['CONTAINER_PORT'] = common.PORT
 
     # We need to restrict permission on the password file
-    os.chmod(os.path.join(common.HERE, 'compose', 'jmxremote.password'), stat.S_IRWXU)
+    # Reset permissions on teardown
+    jmx_pass_path = os.path.join(common.HERE, 'compose', 'jmxremote.password')
+    # jmx_file_perms = oct(os.stat(jmx_pass_path)[stat.ST_MODE])
+    os.chmod(jmx_pass_path, stat.S_IRWXU)
 
     docker_compose_args = [
         "docker-compose",
@@ -70,7 +73,7 @@ def cassandra_cluster():
         raise Exception("Cassandra cluster dd-test-cassandra boot timed out!")
 
     cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
-    env['CASSANDRA_SEEDS'] = cassandra_seed
+    env['CASSANDRA_SEEDS'] = cassandra_seed.decode('utf-8')
     subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME_2])
 
     if not wait_on_docker_logs(
@@ -84,15 +87,11 @@ def cassandra_cluster():
         "docker",
         "exec", common.CASSANDRA_CONTAINER_NAME,
         "cqlsh",
-        "-e", "CREATE KEYSPACE test WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}"
+        "-e", "CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}"
     ])
     yield
 
+    # Reset file permissions
+    # os.chmod(jmx_pass_path, jmx_file_perms)
+
     subprocess.check_call(docker_compose_args + ["down"])
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
