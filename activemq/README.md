@@ -104,7 +104,9 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 Need help? Contact [Datadog Support][107].
 
 ## Further Reading
+Additional helpful documentation, links, and articles:
 
+* [ActiveMQ architecture and key metrics][113]
 * [Monitor ActiveMQ metrics and performance][108]
 
 
@@ -119,3 +121,4 @@ Need help? Contact [Datadog Support][107].
 [110]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
 [111]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
 [112]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
+[113]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics/
