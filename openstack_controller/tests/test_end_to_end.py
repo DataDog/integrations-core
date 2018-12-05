@@ -4,6 +4,7 @@
 import mock
 import os
 import json
+from . import common
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 
@@ -86,19 +87,6 @@ def make_request_responses(url, header, params=None, timeout=None):
         return json.loads(f.read())
 
 
-MOCK_CONFIG = {
-    'init_config': {
-        'keystone_server_url': 'http://10.0.2.15:5000',
-        'ssl_verify': False,
-    },
-    'instances': [
-        {
-            'name': 'test_name', 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}
-        }
-    ]
-}
-
-
 class MockHTTPResponse(object):
     def __init__(self, response_dict, headers):
         self.response_dict = response_dict
@@ -111,8 +99,8 @@ class MockHTTPResponse(object):
 @mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
             side_effect=make_request_responses)
 def test_scenario(make_request, aggregator):
-    instance = MOCK_CONFIG["instances"][0]
-    init_config = MOCK_CONFIG['init_config']
+    instance = common.MOCK_CONFIG["instances"][0]
+    init_config = common.MOCK_CONFIG['init_config']
     check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
 
     auth_tokens_response_path = os.path.join(FIXTURES_DIR, "auth_tokens_response.json")
@@ -129,7 +117,7 @@ def test_scenario(make_request, aggregator):
                     return_value=auth_tokens_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=auth_projects_response):
-            check.check(MOCK_CONFIG['instances'][0])
+            check.check(common.MOCK_CONFIG['instances'][0])
 
             # for m in aggregator.not_asserted():
             #     print(m)
