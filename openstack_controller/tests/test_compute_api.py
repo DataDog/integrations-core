@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
-import conftest
 import simplejson as json
 from datadog_checks.openstack_controller.api import ComputeApi
 
