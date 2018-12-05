@@ -55,7 +55,7 @@ def cassandra_cluster():
     # We need to restrict permission on the password file
     # Reset permissions on teardown
     jmx_pass_path = os.path.join(common.HERE, 'compose', 'jmxremote.password')
-    # jmx_file_perms = oct(os.stat(jmx_pass_path)[stat.ST_MODE])
+    jmx_file_perms = oct(os.stat(jmx_pass_path)[stat.ST_MODE])
     os.chmod(jmx_pass_path, stat.S_IRWXU)
 
     docker_compose_args = [
@@ -92,6 +92,6 @@ def cassandra_cluster():
     yield
 
     # Reset file permissions
-    # os.chmod(jmx_pass_path, jmx_file_perms)
+    os.chmod(jmx_pass_path, jmx_file_perms)
 
     subprocess.check_call(docker_compose_args + ["down"])
