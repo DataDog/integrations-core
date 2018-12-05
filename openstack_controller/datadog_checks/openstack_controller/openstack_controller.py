@@ -131,23 +131,24 @@ class OpenStackControllerCheck(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
+        self.keystone_server_url = init_config.get("keystone_server_url")
+        if not self.keystone_server_url:
+            raise IncompleteConfig()
+        self.proxy_config = self.get_instance_proxy(init_config, self.keystone_server_url)
 
-        skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
-        self.proxy_config = None if skip_proxy else self.proxies
-
-        self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
+        self.ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
 
         self.paginated_server_limit = init_config.get('paginated_server_limit') or DEFAULT_PAGINATED_SERVER_LIMIT
         self.request_timeout = init_config.get('request_timeout') or DEFAULT_API_REQUEST_TIMEOUT
 
-        self.exclude_network_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_network_ids', [])])
-        self.exclude_server_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_server_ids', [])])
-        self.include_project_name_rules = set([re.compile(ex) for ex in init_config.get('whitelist_project_names', [])])
-        self.exclude_project_name_rules = set([re.compile(ex) for ex in init_config.get('blacklist_project_names', [])])
-
-        self.keystone_server_url = init_config.get("keystone_server_url")
-        if not self.keystone_server_url:
-            raise IncompleteConfig()
+        exclude_network_id_patterns = set(init_config.get('exclude_network_ids', []))
+        self.exclude_network_id_rules = [re.compile(ex) for ex in exclude_network_id_patterns]
+        exclude_server_id_patterns = set(init_config.get('exclude_server_ids', []))
+        self.exclude_server_id_rules = [re.compile(ex) for ex in exclude_server_id_patterns]
+        include_project_name_patterns = set(init_config.get('whitelist_project_names', []))
+        self.include_project_name_rules = [re.compile(ex) for ex in include_project_name_patterns]
+        exclude_project_name_patterns = set(init_config.get('blacklist_project_names', []))
+        self.exclude_project_name_rules = [re.compile(ex) for ex in exclude_project_name_patterns]
 
         self._keystone_api = None
         self._compute_api = None
@@ -561,7 +562,7 @@ class OpenStackControllerCheck(AgentCheck):
             requests.get(
                 project_scope.nova_endpoint,
                 headers=headers,
-                verify=self._ssl_verify,
+                verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
                 proxies=self.proxy_config,
             )
@@ -583,7 +584,7 @@ class OpenStackControllerCheck(AgentCheck):
             requests.get(
                 project_scope.neutron_endpoint,
                 headers=headers,
-                verify=self._ssl_verify,
+                verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
                 proxies=self.proxy_config,
             )
@@ -621,7 +622,7 @@ class OpenStackControllerCheck(AgentCheck):
                 instance_scope = ScopeFetcher.from_config(self.log, self.init_config, instance,
                                                           proxy_config=self.proxy_config)
                 # Set keystone api with proper token
-                self._keystone_api = KeystoneApi(self.log, self._ssl_verify, self.proxy_config,
+                self._keystone_api = KeystoneApi(self.log, self.ssl_verify, self.proxy_config,
                                                  self.keystone_server_url, instance_scope.auth_token)
                 self.service_check(
                     self.IDENTITY_API_SC,
@@ -703,12 +704,12 @@ class OpenStackControllerCheck(AgentCheck):
                 self.log.debug("Nova Url: %s", project_scope.nova_endpoint)
                 self.log.debug("Neutron Url: %s", project_scope.neutron_endpoint)
                 self._neutron_api = NeutronApi(self.log,
-                                               self._ssl_verify,
+                                               self.ssl_verify,
                                                self.proxy_config,
                                                project_scope.neutron_endpoint,
                                                project_scope.auth_token)
                 self._compute_api = ComputeApi(self.log,
-                                               self._ssl_verify,
+                                               self.ssl_verify,
                                                self.proxy_config,
                                                project_scope.nova_endpoint,
                                                project_scope.auth_token)

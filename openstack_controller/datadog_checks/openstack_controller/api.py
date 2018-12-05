@@ -34,7 +34,6 @@ class AbstractApi(object):
             self.logger.debug("Request found in cache. cache key %s", cache_key)
             return self.cache.get(cache_key)
 
-        resp = {}
         try:
             resp = requests.get(
                 url,
@@ -67,39 +66,34 @@ class ComputeApi(AbstractApi):
         super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config)
         self.endpoint = endpoint
         self.auth_token = auth_token
+        self.headers = {'X-Auth-Token': auth_token}
 
     def get_os_hypervisor_uptime(self, hyp_id):
         url = '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hyp_id)
-        headers = {'X-Auth-Token': self.auth_token}
-        resp = self._make_request(url, headers)
+        resp = self._make_request(url, self.headers)
         return resp.get('hypervisor', {}).get('uptime')
 
     def get_os_aggregates(self):
         url = '{}/os-aggregates'.format(self.endpoint)
-        headers = {'X-Auth-Token': self.auth_token}
-        aggregate_list = self._make_request(url, headers)
+        aggregate_list = self._make_request(url, self.headers)
         return aggregate_list.get('aggregates', [])
 
     def get_os_hypervisors_detail(self):
         url = '{}/os-hypervisors/detail'.format(self.endpoint)
-        headers = {'X-Auth-Token': self.auth_token}
-        return self._make_request(url, headers)
+        return self._make_request(url, self.headers)
 
     def get_servers_detail(self, query_params, timeout=None):
         url = '{}/servers/detail'.format(self.endpoint)
-        headers = {'X-Auth-Token': self.auth_token}
-        resp = self._make_request(url, headers, params=query_params, timeout=timeout)
+        resp = self._make_request(url, self.headers, params=query_params, timeout=timeout)
         return resp.get('servers', [])
 
     def get_server_diagnostics(self, server_id):
         url = '{}/servers/{}/diagnostics'.format(self.endpoint, server_id)
-        headers = {'X-Auth-Token': self.auth_token}
-        return self._make_request(url, headers)
+        return self._make_request(url, self.headers)
 
     def get_project_limits(self, tenant_id):
         url = '{}/limits'.format(self.endpoint)
-        headers = {'X-Auth-Token': self.auth_token}
-        server_stats = self._make_request(url, headers, params={"tenant_id": tenant_id})
+        server_stats = self._make_request(url, self.headers, params={"tenant_id": tenant_id})
         limits = server_stats.get('limits', {}).get('absolute', {})
         return limits
 
@@ -109,14 +103,14 @@ class NeutronApi(AbstractApi):
         super(NeutronApi, self).__init__(logger, ssl_verify, proxy_config)
         self.endpoint = endpoint
         self.auth_token = auth_token
+        self.headers = {'X-Auth-Token': auth_token}
 
     def get_network_ids(self):
         url = '{}/{}/networks'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION)
-        headers = {'X-Auth-Token': self.auth_token}
 
         network_ids = []
         try:
-            net_details = self._make_request(url, headers)
+            net_details = self._make_request(url, self.headers)
             for network in net_details['networks']:
                 network_ids.append(network['id'])
         except Exception as e:
@@ -127,8 +121,7 @@ class NeutronApi(AbstractApi):
 
     def get_network_details(self, network_id):
         url = '{}/{}/networks/{}'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION, network_id)
-        headers = {'X-Auth-Token': self.auth_token}
-        return self._make_request(url, headers)
+        return self._make_request(url, self.headers)
 
 
 class KeystoneApi(AbstractApi):
