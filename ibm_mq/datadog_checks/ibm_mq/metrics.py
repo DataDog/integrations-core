@@ -40,8 +40,19 @@ def queue_metrics():
         'retention_interval': pymqi.CMQC.MQIA_RETENTION_INTERVAL,
         'open_output_count': pymqi.CMQC.MQIA_OPEN_OUTPUT_COUNT,
         'trigger_type': pymqi.CMQC.MQIA_TRIGGER_TYPE,
-        'max_channels': pymqi.CMQC.MQIA_MAX_CHANNELS,
-        'oldest_message_age': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE,
+    }
+
+
+def failure_prone_queue_metrics():
+    return {
+        'max_channels': {
+            'value': pymqi.CMQC.MQIA_MAX_CHANNELS,
+            'default_value': 0,
+        },
+        'oldest_message_age': {
+            'value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE,
+            'default_value': 0,
+        }
     }
 
 

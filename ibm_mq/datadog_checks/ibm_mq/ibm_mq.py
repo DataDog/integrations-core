@@ -81,16 +81,26 @@ class IbmMqCheck(AgentCheck):
         """
         for mname, pymqi_value in iteritems(metrics.queue_metrics()):
             try:
-                m = queue.inquire(pymqi_value)
                 mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
+                m = queue.inquire(pymqi_value)
                 self.gauge(mname, m, tags=tags)
             except pymqi.Error as e:
                 self.warning("Error getting queue stats: {}".format(e))
 
         for mname, func in iteritems(metrics.queue_metrics_functions()):
             try:
-                m = func(queue)
                 mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
+                m = func(queue)
                 self.gauge(mname, m, tags=tags)
             except pymqi.Error as e:
                 self.warning("Error getting queue stats: {}".format(e))
+
+        for mname, value_dict in iteritems(metrics.failure_prone_queue_metrics()):
+            mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
+            pymqi_value = value_dict['value']
+            default_value = value_dict['value']
+            try:
+                m = queue.inquire(pymqi_value)
+            except pymqi.Error as e:
+                m = default_value
+            self.gauge(mname, m, tags=tags)
