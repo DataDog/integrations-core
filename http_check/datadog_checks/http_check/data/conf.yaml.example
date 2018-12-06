@@ -67,7 +67,9 @@ instances:
 
   ## @param ntlm_domain - string - optional
   ## If your service uses NTLM authentication, you can optionally
-  ## specify a domain that will be used in the check.
+  ## specify a domain that will be used in the check. For NTLM Auth,
+  ## append the username to domain, not as a seperate @param.
+  ## Example: example_ntlm_domain\example_username
   #
   #  ntlm_domain: <DOMAIN>
 
