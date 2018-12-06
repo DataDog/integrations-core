@@ -88,12 +88,17 @@ aws ecs run-task --cluster <CLUSTER_NAME> \
 11. **Auto Scaling** is optional based on your preference.
 12. Click the **Next step** button, then click the **Create service** button.
 
-#### Metric Collection
+### Metric Collection
 After the Datadog Agent is setup as described above, the [ecs_fargate check][6] collects metrics with autodiscovery enabled. Add Docker labels to your other containers in the same task to collect additional metrics.
 
 For details on collecting integration metrics, see [Integration Setup for ECS Fargate][19].
 
-#### Log Collection
+#### DogStatsD
+Metrics are collected with [DogStatsD][20] through UDP port 8125.
+
+To send custom metrics by listening to DogStatsD packets from other containers, set the environment variable `DD_DOGSTATSD_NON_LOCAL_TRAFFIC` to `true` within the Datadog Agent container.
+
+### Log Collection
 
 1. Define the Fargate AwsLogDriver in your task. [Consult the AWS Fargate developer guide][8] for instructions.
 
@@ -158,3 +163,4 @@ Need help? Contact [Datadog Support][3].
 [17]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html#service_scheduler_replica
 [18]: https://docs.datadoghq.com/json/datadog-agent-ecs-fargate.json
 [19]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/
+[20]: https://docs.datadoghq.com/developers/dogstatsd/
