@@ -59,11 +59,11 @@ RESOURCE_TYPE_METRICS = [
     vim.VirtualMachine,
     vim.Datacenter,
     vim.HostSystem,
-    vim.Datastore
+    vim.Datastore,
+    vim.ClusterComputeResource
 ]
 
 RESOURCE_TYPE_NO_METRIC = [
-    vim.Datacenter,
     vim.ComputeResource,
     vim.Folder
 ]
@@ -287,23 +287,29 @@ class VSphereCheck(AgentCheck):
         """ Compare the available metrics for one MOR we have computed and intersect them
         with the set of metrics we want to report
         """
-        if instance.get('all_metrics', False):
-            return available_metrics
-
         i_key = self._instance_key(instance)
-        wanted_metrics = []
-        # Get only the basic metrics
-        for metric in available_metrics:
-            counter_id = metric.counterId
-            # No cache yet, skip it for now
-            if not self.metadata_cache.contains(i_key, counter_id):
-                self.log.debug("No metadata found for counter {}, will not collect it".format(counter_id))
-                continue
-            metadata = self.metadata_cache.get_metadata(i_key, counter_id)
-            if metadata.get('name') in BASIC_METRICS:
-                wanted_metrics.append(metric)
+        if self.in_compatibility_mode(instance):
+            if instance.get('all_metrics', False):
+                return available_metrics
 
-        return wanted_metrics
+            wanted_metrics = []
+            # Get only the basic metrics
+            for counter_id in available_metrics:
+                # No cache yet, skip it for now
+                if not self.metadata_cache.contains(i_key, counter_id):
+                    self.log.debug("No metadata found for counter {}, will not collect it".format(counter_id))
+                    continue
+                metadata = self.metadata_cache.get_metadata(i_key, counter_id)
+                if metadata.get('name') in BASIC_METRICS:
+                    wanted_metrics.append(vim.PerformanceManager.MetricId(counterId=counter_id, instance="*"))
+
+            return wanted_metrics
+        else:
+            # The metadata cache contains only metrics of the desired level, so use it to filter the metrics to keep
+            return [
+                vim.PerformanceManager.MetricId(counterId=counter_id, instance="*")
+                for counter_id in available_metrics if self.metadata_cache.contains(i_key, counter_id)
+            ]
 
     def get_external_host_tags(self):
         """
@@ -477,7 +483,7 @@ class VSphereCheck(AgentCheck):
                     instance_tags += self._get_parent_tags(obj, all_objects)
 
                 if isinstance(obj, vim.VirtualMachine):
-                    vsphere_type = u'vsphere_type:vm'
+                    vsphere_type = 'vsphere_type:vm'
                     vimtype = vim.VirtualMachine
                     mor_type = "vm"
                     power_state = properties.get("runtime.powerState")
@@ -501,9 +507,16 @@ class VSphereCheck(AgentCheck):
                     mor_type = "datastore"
                 elif isinstance(obj, vim.Datacenter):
                     vsphere_type = 'vsphere_type:datacenter'
+                    instance_tags.append("vsphere_datacenter:{}".format(properties.get("name", "unknown")))
                     hostname = None
                     vimtype = vim.Datacenter
                     mor_type = "datacenter"
+                elif isinstance(obj, vim.ClusterComputeResource):
+                    vsphere_type = 'vsphere_type:cluster'
+                    instance_tags.append("vsphere_cluster:{}".format(properties.get("name", "unknown")))
+                    hostname = None
+                    vimtype = vim.ClusterComputeResource
+                    mor_type = "cluster"
                 else:
                     vsphere_type = None
 
@@ -602,7 +615,7 @@ class VSphereCheck(AgentCheck):
         self.cache_config.set_last(CacheConfig.Morlist, i_key, time.time())
 
     @trace_method
-    def _process_mor_objects_queue_async(self, instance, query_specs):
+    def _process_mor_objects_queue_async(self, instance, mors):
         """
         Process a batch of items popped from the objects queue by querying the available
         metrics for these MORs and then putting them in the Mor cache
@@ -612,15 +625,12 @@ class VSphereCheck(AgentCheck):
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
 
-        # With QueryPerf, we can get metric information about several MORs at once. Let's use it
-        # to avoid making one API call per object, even if we also get metrics values that are useless for now.
-        # See https://code.vmware.com/apis/358/vsphere#/doc/vim.PerformanceManager.html#queryStats
-        # query_specs is a list of QuerySpec objects.
-        # See https://code.vmware.com/apis/358/vsphere#/doc/vim.PerformanceManager.QuerySpec.html
-        res = perfManager.QueryPerf(query_specs)
-        for mor_perfs in res:
-            mor_name = str(mor_perfs.entity)
-            available_metrics = [value.id for value in mor_perfs.value]
+        # For non realtime metrics, we need to specifically ask which counters are available for which entity,
+        # so we call perfManager.QueryAvailablePerfMetric for each cluster, datacenter, datastore
+        # This should be okay since the number of such entities shouldn't be excessively large
+        for mor in mors:
+            mor_name = str(mor['mor'])
+            available_metrics = {m.counterId for m in perfManager.QueryAvailablePerfMetric(entity=mor["mor"])}
             try:
                 self.mor_cache.set_metrics(i_key, mor_name, self._compute_needed_metrics(instance, available_metrics))
             except MorNotFoundError:
@@ -648,7 +658,7 @@ class VSphereCheck(AgentCheck):
             # If batch size is set to 0, process everything at once
             batch_size = self.batch_morlist_size or self.mor_objects_queue.size(i_key, resource_type)
             while self.mor_objects_queue.size(i_key, resource_type):
-                query_specs = []
+                mors = []
                 for _ in xrange(batch_size):
                     mor = self.mor_objects_queue.pop(i_key, resource_type)
                     if mor is None:
@@ -661,18 +671,15 @@ class VSphereCheck(AgentCheck):
                     # in the meantime (e.g. a migrated VM).
                     self.mor_cache.set_mor(i_key, mor_name, mor)
 
-                    # Only do this for non real-time resources i.e. datacenter and datastores
+                    # Only do this for non real-time resources i.e. datacenter, datastore and cluster
                     # For hosts and VMs, we can rely on a precomputed list of metrics
-                    if mor["mor_type"] not in REALTIME_RESOURCES and not instance.get("collect_realtime_only", False):
-                        query_spec = vim.PerformanceManager.QuerySpec()
-                        query_spec.entity = mor["mor"]
-                        query_spec.intervalId = mor["interval"]
-                        query_spec.maxSample = 1
-                        query_specs.append(query_spec)
+                    realtime_only = is_affirmative(instance.get("collect_realtime_only", True))
+                    if mor["mor_type"] not in REALTIME_RESOURCES and not realtime_only:
+                        mors.append(mor)
 
                 # We will actually schedule jobs for non realtime resources only.
-                if query_specs:
-                    self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, query_specs))
+                if mors:
+                    self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, mors))
 
     def _cache_metrics_metadata(self, instance):
         """

@@ -41,19 +41,6 @@ class KubernetesState(OpenMetricsBaseCheck):
         generic_instances = [kubernetes_state_instance]
         super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
-        self.send_pod_phase_service_checks = is_affirmative(instance.get('send_pod_phase_service_checks', False))
-        if self.send_pod_phase_service_checks:
-            self.warning("DEPRECATION NOTICE: pod phase service checks are deprecated. Please set "
-                         "`send_pod_phase_service_checks` to false and rely on corresponding gauges instead")
-
-        self.pod_phase_to_status = {
-            'Pending':   self.WARNING,
-            'Running':   self.OK,
-            'Succeeded': self.OK,
-            'Failed':    self.CRITICAL,
-            'Unknown':   self.UNKNOWN
-        }
-
         self.condition_to_status_positive = {
             'true':      self.OK,
             'false':     self.CRITICAL,
@@ -248,6 +235,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'label_to_match': 'pod',
                     'labels_to_get': ['node']
                 },
+                'kube_pod_status_phase': {
+                    'label_to_match': 'pod',
+                    'labels_to_get': ['phase']
+                },
                 'kube_persistentvolume_info': {
                     'label_to_match': 'persistentvolume',
                     'labels_to_get': ['storageclass']
@@ -324,14 +315,9 @@ class KubernetesState(OpenMetricsBaseCheck):
         service_check_name = condition_map['service_check_name']
         mapping = condition_map['mapping']
 
-        if base_sc_name == 'kubernetes_state.pod.phase':
-            pod = self._label_to_tag('pod', sample[self.SAMPLE_LABELS], scraper_config)
-            phase = self._label_to_tag('phase', sample[self.SAMPLE_LABELS], scraper_config)
-            message = "{} is currently reporting {}".format(pod, phase)
-        else:
-            node = self._label_to_tag('node', sample[self.SAMPLE_LABELS], scraper_config)
-            condition = self._label_to_tag('condition', sample[self.SAMPLE_LABELS], scraper_config)
-            message = "{} is currently reporting {} = {}".format(node, condition, label_value)
+        node = self._label_to_tag('node', sample[self.SAMPLE_LABELS], scraper_config)
+        condition = self._label_to_tag('condition', sample[self.SAMPLE_LABELS], scraper_config)
+        message = "{} is currently reporting {} = {}".format(node, condition, label_value)
 
         if condition_map['service_check_name'] is None:
             self.log.debug("Unable to handle {} - unknown condition {}".format(service_check_name, label_value))
@@ -364,9 +350,6 @@ class KubernetesState(OpenMetricsBaseCheck):
             }
             return (labels.get('status'), switch.get(labels.get('condition'),
                     {'service_check_name': None, 'mapping': None}))
-
-        elif base_sc_name == 'kubernetes_state.pod.phase':
-            return labels.get('phase'), {'service_check_name': base_sc_name, 'mapping': self.pod_phase_to_status}
 
     def _format_tag(self, name, value, scraper_config):
         """
@@ -402,18 +385,9 @@ class KubernetesState(OpenMetricsBaseCheck):
     def kube_pod_status_phase(self, metric, scraper_config):
         """ Phase a pod is in. """
         metric_name = scraper_config['namespace'] + '.pod.status_phase'
-        # Will submit a service check which status is given by its phase.
-        # More details about the phase in the message of the check.
-        check_basename = scraper_config['namespace'] + '.pod.phase'
         status_phase_counter = Counter()
 
         for sample in metric.samples:
-            if self.send_pod_phase_service_checks:
-                pod_tag = self._label_to_tag('pod', sample[self.SAMPLE_LABELS], scraper_config)
-                namespace_tag = self._label_to_tag('namespace', sample[self.SAMPLE_LABELS], scraper_config)
-                self._condition_to_tag_check(sample, check_basename, self.pod_phase_to_status, scraper_config,
-                                             tags=[pod_tag, namespace_tag] + scraper_config['custom_tags'])
-
             # Counts aggregated cluster-wide to avoid no-data issues on pod churn,
             # pod granularity available in the service checks
             tags = [

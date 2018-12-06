@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 1.1.0 / 2018-11-21
+
+* [Added] Add --ssl option to cassandra_nodetool check. See [#2378](https://github.com/DataDog/integrations-core/pull/2378). Thanks [laurieodgers](https://github.com/laurieodgers).
+
 ## 1.0.0 / 2018-10-13
 
 * [Added] Add cassandra_nodetool check. See [#511](https://github.com/DataDog/integrations-core/pull/511).

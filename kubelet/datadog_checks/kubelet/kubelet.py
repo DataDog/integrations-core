@@ -50,6 +50,13 @@ FACTORS = {
     'Ei': 1024 * 1024 * 1024 * 1024 * 1024 * 1024,
 }
 
+
+WHITELISTED_CONTAINER_STATE_REASONS = {
+    'waiting': ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating'],
+    'terminated': ['oomkilled', 'containercannotrun', 'error']
+}
+
+
 log = logging.getLogger('collector')
 
 
@@ -99,6 +106,12 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 'kubelet_runtime_operations': 'kubelet.runtime.operations',
                 'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
                 'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+                'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
+                'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
+                'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
+                'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
+                'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
+                'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
             }],
             # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
             'send_monotonic_counter': instance.get('send_monotonic_counter', False),
@@ -152,6 +165,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self._report_node_metrics(self.instance_tags)
         self._report_pods_running(self.pod_list, self.instance_tags)
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
+        self._report_container_state_metrics(self.pod_list, self.instance_tags)
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
             self.log.debug('processing legacy cadvisor metrics')
@@ -337,6 +351,51 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                         self.gauge('{}.{}.limits'.format(self.NAMESPACE, resource), value, tags)
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container limits for %s: %s", c_name, e)
+
+    def _report_container_state_metrics(self, pod_list, instance_tags):
+        """Reports container state & reasons by looking at container statuses"""
+        for pod in pod_list['items']:
+            pod_name = pod.get('metadata', {}).get('name')
+            pod_uid = pod.get('metadata', {}).get('uid')
+
+            if not pod_name or not pod_uid:
+                continue
+
+            for ctr_status in pod['status'].get('containerStatuses', []):
+                c_name = ctr_status.get('name')
+                cid = ctr_status.get('containerID')
+                if not c_name or not cid:
+                    continue
+
+                if self.pod_list_utils.is_excluded(cid, pod_uid):
+                    continue
+
+                tags = get_tags('%s' % cid, True) + instance_tags
+
+                restart_count = ctr_status.get('restartCount', 0)
+                self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)
+
+                for (metric_name, field_name) in [('state', 'state'), ('last_state', 'lastState')]:
+                    c_state = ctr_status.get(field_name, {})
+
+                    for state_name in ['terminated', 'waiting']:
+                        state_reasons = WHITELISTED_CONTAINER_STATE_REASONS.get(state_name, [])
+                        self._submit_container_state_metric(metric_name, state_name, c_state, state_reasons, tags)
+
+    def _submit_container_state_metric(self, metric_name, state_name, c_state, state_reasons, tags):
+        reason_tags = []
+
+        state_value = c_state.get(state_name)
+        if state_value:
+            reason = state_value.get('reason', '')
+
+            if reason.lower() in state_reasons:
+                reason_tags.append('reason:%s' % (reason))
+            else:
+                return
+
+            gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
+            self.gauge(gauge_name, 1, tags + reason_tags)
 
     @staticmethod
     def parse_quantity(string):

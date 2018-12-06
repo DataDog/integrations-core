@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 2.0.0 / 2018-11-30
+
+* [Changed] Rework tagging to be consistent with the live container view and Autodiscovery. See [#2601](https://github.com/DataDog/integrations-core/pull/2601).
+
 ## 1.3.0 / 2018-09-11
 
 * [Added] Add cpu percent metric and fix container stopped behaviour. See [#2206](https://github.com/DataDog/integrations-core/pull/2206).

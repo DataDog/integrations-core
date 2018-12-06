@@ -1,26 +1,25 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # (C) Datadog, Inc. Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import re
 import traceback
-from contextlib import closing, contextmanager
 from collections import defaultdict
+from contextlib import closing, contextmanager
 
-# 3p
-from six import iteritems
 import pymysql
+from six import PY3, iteritems, itervalues, text_type
+
 try:
     import psutil
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
 
-# project
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
+
+if PY3:
+    long = int
 
 GAUGE = "gauge"
 RATE = "rate"
@@ -286,8 +285,9 @@ class MySql(AgentCheck):
         self.mysql_version = {}
         self.qcache_stats = {}
 
-    def get_library_versions(self):
-        return {"pymysql": pymysql.__version__}
+    @classmethod
+    def get_library_versions(cls):
+        return {'pymysql': pymysql.__version__}
 
     def check(self, instance):
         host, port, user, password, mysql_sock, \
@@ -297,17 +297,17 @@ class MySql(AgentCheck):
 
         self._set_qcache_stats()
 
-        if (not host or not user) and not defaults_file:
+        if not (host and user) and not defaults_file:
             raise Exception("Mysql host and user are needed.")
 
         with self._connect(host, port, mysql_sock, user,
                            password, defaults_file, ssl, connect_timeout, tags) as db:
             try:
                 # Metadata collection
-                self._collect_metadata(db, host)
+                self._collect_metadata(db)
 
                 # Metric collection
-                self._collect_metrics(host, db, tags, options, queries, max_custom_queries)
+                self._collect_metrics(db, tags, options, queries, max_custom_queries)
                 self._collect_system_metrics(host, db, tags)
 
                 # keeping track of these:
@@ -423,7 +423,7 @@ class MySql(AgentCheck):
             if db:
                 db.close()
 
-    def _collect_metrics(self, host, db, tags, options, queries, max_custom_queries):
+    def _collect_metrics(self, db, tags, options, queries, max_custom_queries):
 
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
@@ -432,7 +432,7 @@ class MySql(AgentCheck):
         results = self._get_stats_from_status(db)
         results.update(self._get_stats_from_variables(db))
 
-        if (not _is_affirmative(options.get('disable_innodb_metrics', False)) and self._is_innodb_engine_enabled(db)):
+        if not is_affirmative(options.get('disable_innodb_metrics', False)) and self._is_innodb_engine_enabled(db):
             results.update(self._get_stats_from_innodb_status(db))
 
             innodb_keys = [
@@ -477,7 +477,7 @@ class MySql(AgentCheck):
             except (KeyError, TypeError) as e:
                 self.log.error("Not all InnoDB buffer pool metrics are available, unable to compute: {0}".format(e))
 
-            if _is_affirmative(options.get('extra_innodb_metrics', False)):
+            if is_affirmative(options.get('extra_innodb_metrics', False)):
                 self.log.debug("Collecting Extra Innodb Metrics")
                 metrics.update(OPTIONAL_INNODB_VARS)
 
@@ -509,41 +509,40 @@ class MySql(AgentCheck):
         metrics.update(INNODB_VARS)
         metrics.update(BINLOG_VARS)
 
-        if _is_affirmative(options.get('extra_status_metrics', False)):
+        if is_affirmative(options.get('extra_status_metrics', False)):
             self.log.debug("Collecting Extra Status Metrics")
             metrics.update(OPTIONAL_STATUS_VARS)
 
-            if self._version_compatible(db, host, (5, 6, 6)):
+            if self._version_compatible(db, (5, 6, 6)):
                 metrics.update(OPTIONAL_STATUS_VARS_5_6_6)
 
-        if _is_affirmative(options.get('galera_cluster', False)):
+        if is_affirmative(options.get('galera_cluster', False)):
             # already in result-set after 'SHOW STATUS' just add vars to collect
             self.log.debug("Collecting Galera Metrics.")
             metrics.update(GALERA_VARS)
 
         performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
-        above_560 = self._version_compatible(db, host, (5, 6, 0))
-        if _is_affirmative(options.get('extra_performance_metrics', False)) and above_560 and \
-                performance_schema_enabled:
+        above_560 = self._version_compatible(db, (5, 6, 0))
+        if is_affirmative(options.get('extra_performance_metrics', False)) and above_560 and performance_schema_enabled:
             # report avg query response time per schema to Datadog
             results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
             results['query_run_time_avg'] = self._query_exec_time_per_schema(db)
             metrics.update(PERFORMANCE_VARS)
 
-        if _is_affirmative(options.get('schema_size_metrics', False)):
+        if is_affirmative(options.get('schema_size_metrics', False)):
             # report avg query response time per schema to Datadog
             results['information_schema_size'] = self._query_size_per_schema(db)
             metrics.update(SCHEMA_VARS)
 
-        if _is_affirmative(options.get('replication', False)):
+        if is_affirmative(options.get('replication', False)):
             # Get replica stats
-            is_mariadb = self._get_is_mariadb(db, host)
+            is_mariadb = self._get_is_mariadb(db)
             replication_channel = options.get('replication_channel')
             if replication_channel:
                 self.service_check_tags.append("channel:{0}".format(replication_channel))
                 tags.append("channel:{0}".format(replication_channel))
             results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
-            nonblocking = _is_affirmative(options.get('replication_non_blocking_status', False))
+            nonblocking = is_affirmative(options.get('replication_non_blocking_status', False))
             results.update(self._get_slave_status(db, above_560, nonblocking))
             metrics.update(REPLICA_VARS)
 
@@ -556,13 +555,13 @@ class MySql(AgentCheck):
             slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
             slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
             if slave_io_running:
-                slave_io_running = any(v.lower().strip() == 'yes' for v in slave_io_running.itervalues())
+                slave_io_running = any(v.lower().strip() == 'yes' for v in itervalues(slave_io_running))
             if slave_sql_running:
-                slave_sql_running = any(v.lower().strip() == 'yes' for v in slave_sql_running.itervalues())
+                slave_sql_running = any(v.lower().strip() == 'yes' for v in itervalues(slave_sql_running))
 
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
-            if self._version_compatible(db, host, (5, 7, 0)):
+            if self._version_compatible(db, (5, 7, 0)):
                 if not (slave_io_running is None and slave_sql_running is None):
                     if slave_io_running and slave_sql_running:
                         slave_running_status = AgentCheck.OK
@@ -590,7 +589,7 @@ class MySql(AgentCheck):
                         slave_running_status = AgentCheck.CRITICAL
 
             # deprecated in favor of service_check("mysql.replication.slave_running")
-            self.gauge(self.SLAVE_SERVICE_CHECK_NAME, (1 if slave_running_status == AgentCheck.OK else 0), tags=tags)
+            self.gauge(self.SLAVE_SERVICE_CHECK_NAME, 1 if slave_running_status == AgentCheck.OK else 0, tags=tags)
             self.service_check(self.SLAVE_SERVICE_CHECK_NAME, slave_running_status, tags=self.service_check_tags)
 
         # "synthetic" metrics
@@ -634,14 +633,14 @@ class MySql(AgentCheck):
 
         return False
 
-    def _collect_metadata(self, db, host):
-        version = self._get_version(db, host)
+    def _collect_metadata(self, db):
+        version = self._get_version(db)
         self.service_metadata('version', ".".join(version))
 
-    def _submit_metrics(self, variables, dbResults, tags):
-        for variable, metric in variables.iteritems():
+    def _submit_metrics(self, variables, db_results, tags):
+        for variable, metric in iteritems(variables):
             metric_name, metric_type = metric
-            for tag, value in self._collect_all_scalars(variable, dbResults):
+            for tag, value in self._collect_all_scalars(variable, db_results):
                 metric_tags = list(tags)
                 if tag:
                     metric_tags.append(tag)
@@ -655,12 +654,12 @@ class MySql(AgentCheck):
                     elif metric_type == MONOTONIC:
                         self.monotonic_count(metric_name, value, tags=metric_tags)
 
-    def _version_compatible(self, db, host, compat_version):
+    def _version_compatible(self, db, compat_version):
         # some patch version numbers contain letters (e.g. 5.0.51a)
         # so let's be careful when we compute the version number
 
         try:
-            mysql_version = self._get_version(db, host)
+            mysql_version = self._get_version(db)
         except Exception as e:
             self.warning("Cannot compute mysql version, assuming it's older.: %s"
                          % str(e))
@@ -672,7 +671,7 @@ class MySql(AgentCheck):
 
         return version >= compat_version
 
-    def _get_version(self, db, host):
+    def _get_version(self, db):
         hostkey = self._get_host_key()
         if hostkey in self.mysql_version:
             version = self.mysql_version[hostkey]
@@ -691,7 +690,8 @@ class MySql(AgentCheck):
             self.mysql_version[hostkey] = version
             return version
 
-    def _get_is_mariadb(self, db, host):
+    @classmethod
+    def _get_is_mariadb(cls, db):
         with closing(db.cursor()) as cursor:
             cursor.execute('SELECT VERSION() LIKE "%MariaDB%"')
             result = cursor.fetchone()
@@ -702,24 +702,24 @@ class MySql(AgentCheck):
         if key not in dictionary or dictionary[key] is None:
             yield None, None
         elif isinstance(dictionary[key], dict):
-            for tag, _ in dictionary[key].iteritems():
+            for tag, _ in iteritems(dictionary[key]):
                 yield tag, self._collect_type(tag, dictionary[key], float)
         else:
             yield None, self._collect_type(key, dictionary, float)
 
-    def _collect_scalar(self, key, dict):
-        return self._collect_type(key, dict, float)
+    def _collect_scalar(self, key, mapping):
+        return self._collect_type(key, mapping, float)
 
-    def _collect_string(self, key, dict):
-        return self._collect_type(key, dict, unicode)
+    def _collect_string(self, key, mapping):
+        return self._collect_type(key, mapping, text_type)
 
-    def _collect_type(self, key, dict, the_type):
+    def _collect_type(self, key, mapping, the_type):
         self.log.debug("Collecting data with %s" % key)
-        if key not in dict:
+        if key not in mapping:
             self.log.debug("%s returned None" % key)
             return None
-        self.log.debug("Collecting done, value %s" % dict[key])
-        return the_type(dict[key])
+        self.log.debug("Collecting done, value %s" % mapping[key])
+        return the_type(mapping[key])
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
         """
@@ -735,9 +735,7 @@ class MySql(AgentCheck):
                 cursor.execute(query)
                 result = cursor.fetchone()
                 if result is not None:
-                    for field in field_metric_map.keys():
-                        # Get the agent metric name from the column name
-                        metric = field_metric_map[field]
+                    for field, metric in list(iteritems(field_metric_map)):
                         # Find the column name in the cursor description to identify the column index
                         # http://www.python.org/dev/peps/pep-0249/
                         # cursor.description is a tuple of (column_name, ..., ...)
@@ -748,14 +746,11 @@ class MySql(AgentCheck):
                                 self.log.debug(
                                     "Collecting done, value %s" % result[col_idx])
                                 if metric_type == GAUGE:
-                                    self.gauge(metric, float(
-                                        result[col_idx]), tags=tags)
+                                    self.gauge(metric, float(result[col_idx]), tags=tags)
                                 elif metric_type == RATE:
-                                    self.rate(metric, float(
-                                        result[col_idx]), tags=tags)
+                                    self.rate(metric, float(result[col_idx]), tags=tags)
                                 else:
-                                    self.gauge(metric, float(
-                                        result[col_idx]), tags=tags)
+                                    self.gauge(metric, float(result[col_idx]), tags=tags)
                             else:
                                 self.log.debug(
                                     "Received value is None for index %d" % col_idx)
@@ -817,9 +812,8 @@ class MySql(AgentCheck):
         if pid_file is not None:
             self.log.debug("pid file: %s" % str(pid_file))
             try:
-                f = open(pid_file)
-                pid = int(f.readline())
-                f.close()
+                with open(pid_file, 'rb') as f:
+                    pid = int(f.readline())
             except IOError:
                 self.log.debug("Cannot read mysql pid file %s" % pid_file)
 
@@ -836,14 +830,16 @@ class MySql(AgentCheck):
 
         return pid
 
-    def _get_stats_from_status(self, db):
+    @classmethod
+    def _get_stats_from_status(cls, db):
         with closing(db.cursor()) as cursor:
             cursor.execute("SHOW /*!50002 GLOBAL */ STATUS;")
             results = dict(cursor.fetchall())
 
             return results
 
-    def _get_stats_from_variables(self, db):
+    @classmethod
+    def _get_stats_from_variables(cls, db):
         with closing(db.cursor()) as cursor:
             cursor.execute("SHOW GLOBAL VARIABLES;")
             results = dict(cursor.fetchall())
@@ -857,7 +853,7 @@ class MySql(AgentCheck):
                 master_logs = dict(cursor.fetchall())
 
                 binary_log_space = 0
-                for key, value in master_logs.iteritems():
+                for key, value in iteritems(master_logs):
                     binary_log_space += value
 
                 return binary_log_space
@@ -876,7 +872,7 @@ class MySql(AgentCheck):
                     support != 'no' and support != 'disabled'"
                 )
 
-                return (cursor.rowcount > 0)
+                return cursor.rowcount > 0
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
             self.warning("Possibly innodb stats unavailable - error querying engines table: %s" % str(e))
@@ -939,7 +935,7 @@ class MySql(AgentCheck):
                     cursor.execute("SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'")
                 slave_results = cursor.fetchall()
                 slaves = 0
-                for row in slave_results:
+                for _ in slave_results:
                     slaves += 1
 
                 return {'Slaves_connected': slaves}
@@ -948,8 +944,9 @@ class MySql(AgentCheck):
             self.warning("Privileges error accessing the process tables (must grant PROCESS): %s" % str(e))
             return {}
 
-    def _are_values_numeric(self, array):
-        return all([v.isdigit() for v in array])
+    @classmethod
+    def _are_values_numeric(cls, array):
+        return all(v.isdigit() for v in array)
 
     def _get_stats_from_innodb_status(self, db):
         # There are a number of important InnoDB metrics that are reported in
@@ -1268,14 +1265,14 @@ class MySql(AgentCheck):
 
         # Finally we change back the metrics values to string to make the values
         # consistent with how they are reported by SHOW GLOBAL STATUS
-        for metric, value in results.iteritems():
+        for metric, value in list(iteritems(results)):
             results[metric] = str(value)
 
         return results
 
     def _get_variable_enabled(self, results, var):
         enabled = self._collect_string(var, results)
-        return (enabled and enabled.lower().strip() == 'on')
+        return enabled and enabled.lower().strip() == 'on'
 
     def _get_query_exec_time_95th_us(self, db):
         # Fetches the 95th percentile query execution time and returns the value
@@ -1295,7 +1292,7 @@ class MySql(AgentCheck):
                 cursor.execute(sql_95th_percentile)
 
                 if cursor.rowcount < 1:
-                    self.warning("Failed to fetch records from the perf schema\
+                    self.warning("Failed to fetch records from the perf schema \
                                  'events_statements_summary_by_digest' table.")
                     return None
 
@@ -1311,7 +1308,8 @@ class MySql(AgentCheck):
         # Fetches the avg query execution time per schema and returns the
         # value in microseconds
 
-        sql_avg_query_run_time = """SELECT schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
+        sql_avg_query_run_time = """\
+            SELECT schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
             FROM performance_schema.events_statements_summary_by_digest
             WHERE schema_name IS NOT NULL
             GROUP BY schema_name"""
@@ -1385,7 +1383,7 @@ class MySql(AgentCheck):
                 if not (int(results['Qcache_hits']) - self._qcache_hits):
                     results['Qcache_instant_utilization'] = 0
                 else:
-                    top = (float(results['Qcache_hits']) - self._qcache_hits)
+                    top = float(results['Qcache_hits']) - self._qcache_hits
                     bottom = ((int(results['Qcache_inserts']) - self._qcache_inserts) +
                               (int(results['Qcache_not_cached']) - self._qcache_not_cached) +
                               (int(results['Qcache_hits']) - self._qcache_hits))

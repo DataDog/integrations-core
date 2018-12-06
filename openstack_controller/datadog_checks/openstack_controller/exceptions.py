@@ -37,3 +37,7 @@ class MissingNeutronEndpoint(MissingEndpoint):
 
 class KeystoneUnreachable(Exception):
     pass
+
+
+class AuthenticationNeeded(Exception):
+    pass

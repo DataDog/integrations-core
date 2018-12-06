@@ -16,6 +16,7 @@ DEFAULT_METRICS = {
     'coredns_proxy_request_count_total': 'proxy_request_count',
     'coredns_proxy_request_duration_seconds': 'proxy_request_duration.seconds',
     'coredns_cache_size': 'cache_size.count',
+    'coredns_panic_count_total': 'panic_count.count',
 }
 
 

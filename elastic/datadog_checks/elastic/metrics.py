@@ -778,6 +778,15 @@ ADDITIONAL_METRICS_5_x = {
     'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
         'gauge', 'breakers.in_flight_requests.estimated_size_in_bytes'
     ),
+    'elasticsearch.search.scroll.total': (
+        'gauge', 'indices.search.scroll_total'
+    ),
+    'elasticsearch.search.scroll.time': (
+        'gauge', 'indices.search.scroll_time_in_millis', lambda ms: ms_to_second(ms)
+    ),
+    'elasticsearch.search.scroll.current': (
+        'gauge', 'indices.search.scroll_current'
+    ),
 }
 
 ADDITIONAL_METRICS_PRE_6_3 = {

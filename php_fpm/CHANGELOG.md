@@ -1,5 +1,9 @@
 # CHANGELOG - php_fpm
 
+## 1.4.0 / 2018-11-27
+
+* [Added] Added unix socket support. See [#2636](https://github.com/DataDog/integrations-core/pull/2636). Thanks [pperegrina](https://github.com/pperegrina).
+
 ## 1.3.1 / 2018-10-12
 
 * [Fixed] Make the status route-agnostic when using fastcgi. See [#2282](https://github.com/DataDog/integrations-core/pull/2282).

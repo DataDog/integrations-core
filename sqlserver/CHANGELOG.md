@@ -1,5 +1,11 @@
 # CHANGELOG - sqlserver
 
+## 1.8.0 / 2018-11-30
+
+* [Added] Add linux as supported OS. See [#2614](https://github.com/DataDog/integrations-core/pull/2614).
+* [Fixed] Additional debug logging when calling a stored procedure. See [#2151](https://github.com/DataDog/integrations-core/pull/2151).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.7.0 / 2018-10-12
 
 * [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).

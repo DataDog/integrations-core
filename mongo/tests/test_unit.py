@@ -1,10 +1,12 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
 import mock
 import pytest
+from six import iteritems
+
 from datadog_checks.mongo import MongoDb
 
 log = logging.getLogger('test_mongo')
@@ -29,7 +31,7 @@ def test_build_metric_list(check):
         m_name: m_type for d in [
             check.BASE_METRICS, check.DURABILITY_METRICS,
             check.LOCKS_METRICS, check.WIREDTIGER_METRICS, ]
-        for m_name, m_type in d.iteritems()
+        for m_name, m_type in iteritems(d)
     }
 
     # No option
