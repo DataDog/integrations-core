@@ -8,6 +8,8 @@ try:
 except ImportError:
     from .stubs import datadog_agent
 
+from .utils.common import ensure_bytes
+
 
 class AgentLogHandler(logging.Handler):
     """
@@ -18,7 +20,7 @@ class AgentLogHandler(logging.Handler):
         msg = "({}:{}) | {}".format(
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
-            self.format(record)
+            ensure_bytes(self.format(record))
         )
         datadog_agent.log(msg, record.levelno)
 
