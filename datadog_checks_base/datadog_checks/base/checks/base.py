@@ -350,7 +350,7 @@ class AgentCheck(object):
         return normalized_tags
 
     def warning(self, warning_message):
-        warning_message = str(warning_message)
+        warning_message = ensure_bytes(warning_message)
 
         frame = inspect.currentframe().f_back
         lineno = frame.f_lineno
