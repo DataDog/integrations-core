@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 4.6.0 / 2018-12-07
+
+* [Added] Fix unicode handling of log messages. See [#2698](https://github.com/DataDog/integrations-core/pull/2698).
+* [Fixed] Ensure unicode for subprocess output. See [#2697](https://github.com/DataDog/integrations-core/pull/2697).
+
 ## 4.5.0 / 2018-12-02
 
 * [Added] Improve OpenMetrics label joins. See [#2624](https://github.com/DataDog/integrations-core/pull/2624).
