@@ -11,14 +11,14 @@ import time
 import warnings
 from datetime import datetime
 
-from six import string_types, text_type
+from six import string_types
 from six.moves.urllib.parse import urlparse
 
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests_ntlm import HttpNtlmAuth
 
-from datadog_checks.base import ensure_bytes, ensure_unicode
+from datadog_checks.base import ensure_unicode
 from datadog_checks.base.checks import NetworkCheck, Status
 from .config import from_instance, DEFAULT_EXPECTED_CODE
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
@@ -56,14 +56,14 @@ class HTTPCheck(NetworkCheck):
 
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
-            self.log.debug(ensure_bytes(logMsg))
+            self.log.debug(logMsg)
             service_checks.append((
                 self.SC_STATUS, Status.UP, "UP"
             ))
 
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
-            self.log.info(ensure_bytes(loginfo))
+            self.log.info(loginfo)
             if include_content:
                 down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
             service_checks.append((
@@ -163,6 +163,8 @@ class HTTPCheck(NetworkCheck):
                 running_time = time.time() - start
                 self.gauge('network.http.response_time', running_time, tags=tags_list)
 
+            content = r.text
+
             # Check HTTP response status code
             if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
                 if http_response_status_code == DEFAULT_EXPECTED_CODE:
@@ -174,7 +176,7 @@ class HTTPCheck(NetworkCheck):
                         addr, expected_code, str(r.status_code))
 
                 if include_content:
-                    message += '\nContent: {}'.format(r.content[:CONTENT_LENGTH])
+                    message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
 
                 self.log.info(message)
 
@@ -184,8 +186,6 @@ class HTTPCheck(NetworkCheck):
                 # Host is UP
                 # Check content matching is set
                 if content_match:
-                    # r.text is the response content decoded by `requests`, of type `unicode`
-                    content = r.text if isinstance(content_match, text_type) else r.content
                     if re.search(content_match, content, re.UNICODE):
                         if reverse_content_match:
                             send_status_down('{} is found in return content with the reverse_content_match option'
@@ -235,6 +235,8 @@ class HTTPCheck(NetworkCheck):
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         instance_name = ensure_unicode(self.normalize(instance['name']))
         url = instance.get('url', None)
+        if url is not None:
+            url = ensure_unicode(url)
         tags = instance.get('tags', [])
         tags.append("instance:{}".format(instance_name))
 
