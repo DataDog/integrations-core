@@ -45,14 +45,8 @@ def queue_metrics():
 
 def failure_prone_queue_metrics():
     return {
-        'max_channels': {
-            'value': pymqi.CMQC.MQIA_MAX_CHANNELS,
-            'default_value': 0,
-        },
-        'oldest_message_age': {
-            'value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE,
-            'default_value': 0,
-        }
+        'max_channels': pymqi.CMQC.MQIA_MAX_CHANNELS,
+        'oldest_message_age': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE,
     }
 
 

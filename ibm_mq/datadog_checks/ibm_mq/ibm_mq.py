@@ -95,12 +95,11 @@ class IbmMqCheck(AgentCheck):
             except pymqi.Error as e:
                 self.warning("Error getting queue stats: {}".format(e))
 
-        for mname, value_dict in iteritems(metrics.failure_prone_queue_metrics()):
+        for mname, pymqi_value in iteritems(metrics.failure_prone_queue_metrics()):
             mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
-            pymqi_value = value_dict['value']
-            default_value = value_dict['value']
             try:
                 m = queue.inquire(pymqi_value)
+                self.gauge(mname, m, tags=tags)
             except pymqi.Error as e:
-                m = default_value
-            self.gauge(mname, m, tags=tags)
+                # if these values cannot be collected, just skip them
+                pass
