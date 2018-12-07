@@ -20,6 +20,10 @@ instances:
     #
     # ssl_verify: false
 
+    # If ssl_verify is turned on and the SSL cert is invalid, it can be very noisy. This will reduce the noise in the logs.
+    #
+    #  ignore_ssl_warning: false
+
     # The (optional) skip_proxy parameter would bypass any proxy settings enabled
     # and attempt to reach the the URL directly.
     # If no proxy is defined at any level, this flag bears no effect.
