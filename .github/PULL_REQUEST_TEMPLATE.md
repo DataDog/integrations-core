@@ -12,7 +12,7 @@ What inspired you to submit this pull request?
 - [ ] Feature or bugfix has tests
 - [ ] Git history is clean
 - [ ] If PR impacts documentation, docs team has been notified or an issue has been opened on the [documentation repo](https://github.com/DataDog/documentation/issues/new)
-- [ ] If PR adds a configuration option, it should be added to the configuration file.
+- [ ] If PR adds a configuration option, it has been added to the configuration file.
 
 ### Additional Notes
 
