@@ -102,4 +102,4 @@ class IbmMqCheck(AgentCheck):
                 self.gauge(mname, m, tags=tags)
             except pymqi.Error as e:
                 # if these values cannot be collected, just skip them
-                pass
+                log.debug("skipping {} as it cannot be collected: {}".format(mname, e))
