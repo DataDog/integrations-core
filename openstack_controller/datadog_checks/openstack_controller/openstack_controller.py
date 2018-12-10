@@ -15,7 +15,7 @@ from datadog_checks.utils.common import pattern_filter
 from .scopes import ScopeFetcher
 from .api import ComputeApi, NeutronApi, KeystoneApi
 from .settings import DEFAULT_API_REQUEST_TIMEOUT
-from .utils import get_instance_name, traced, add_trace_check
+from .utils import get_instance_name, traced
 from .retry import BackOffRetry
 from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
                          MissingNeutronEndpoint, KeystoneUnreachable, AuthenticationNeeded)
@@ -131,9 +131,6 @@ class OpenStackControllerCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
         self.keystone_server_url = init_config.get("keystone_server_url")
-
-        if is_affirmative(self.init_config.get('trace_check')):
-            add_trace_check(self)
 
         if not self.keystone_server_url:
             raise IncompleteConfig()
