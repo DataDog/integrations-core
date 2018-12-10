@@ -1,19 +1,28 @@
 init_config:
 
 instances:
-    # url of the metrics endpoint of prometheus
-  - prometheus_endpoint: http://localhost:10055/metrics
-    # The histogram buckets can be noisy and generate a lot of tags.
-    # send_histograms_buckets controls whether or not you want to pull them.
-    #
-    # send_histograms_buckets: True
-    #
-    # Note that like all checks based on the PrometheusCheck class, you can add
-    # tags to the instance that will be added to all the metrics of this check
-    # instance.
-    #
-    # tags:
-    #   - 'mytag1:myValue1'
 
-    # Set a timeout for the prometheus query, defaults to 10
-    # prometheus_timeout: 10
+  ## @param prometheus_endpoint - string - required
+  ## The URL where your application metrics are exposed by Prometheus.
+  #
+  - prometheus_endpoint: http://localhost:10055/metrics
+
+  ## @param send_histograms_buckets - boolean - optional
+  ## The histogram buckets can be noisy and generate a lot of tags.
+  ## send_histograms_buckets controls whether or not you want to pull them.
+  #
+  #  send_histograms_buckets: true
+
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+  ## @param prometheus_timeout - integer - optional - default: 10
+  ## Set a timeout in second for the prometheus query.
+  #
+  #  prometheus_timeout: 10
