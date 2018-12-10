@@ -8,13 +8,14 @@ from . import common
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 
-FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
-
-
 def make_request_responses(url, header, params=None, timeout=None):
     mock_path = None
     if url == "http://10.0.2.15:5000/v3/projects":
         mock_path = "v3_projects.json"
+    elif url == "http://10.0.2.15:9696":
+        return
+    elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1":
+        return
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/limits":
         mock_path = "v2.1_4bfc1_limits"
         if params.get("tenant_id") == u'***************************d91a1':
@@ -35,10 +36,10 @@ def make_request_responses(url, header, params=None, timeout=None):
         mock_path = "v2.1_4bfc1_os-aggregates.json"
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/detail":
         mock_path = "v2.1_4bfc1_servers_detail.json"
-    elif url == "http://10.0.2.15:5000/v3/projects/***************************73dbe":
-        mock_path = "v3_projects_73dbe.json"
-    elif url == "http://10.0.2.15:5000/v3/projects/***************************3fb11":
-        mock_path = "v3_projects_3fb11.json"
+    # elif url == "http://10.0.2.15:5000/v3/projects/***************************73dbe":
+    #     mock_path = "v3_projects_73dbe.json"
+    # elif url == "http://10.0.2.15:5000/v3/projects/***************************3fb11":
+    #     mock_path = "v3_projects_3fb11.json"
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/ff2f581c-5d03-4a27-a0ba-f102603fe38f/diagnostics":  # noqa E501
         mock_path = "v2.1_4bfc1_servers_ff2f581c-5d03-4a27-a0ba-f102603fe38f_diagnostics.json"
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/acb4197c-f54e-488e-a40a-1b7f59cc9117/diagnostics":  # noqa E501
@@ -82,7 +83,8 @@ def make_request_responses(url, header, params=None, timeout=None):
     elif url == "http://10.0.2.15:9696/v2.0/networks/2755452c-4fe8-4ba1-9b26-8898665b0958":
         mock_path = "v2.0_networks_2755452c-4fe8-4ba1-9b26-8898665b0958.json"
 
-    mock_path = os.path.join(FIXTURES_DIR, mock_path)
+    print(url)
+    mock_path = os.path.join(common.FIXTURES_DIR, mock_path)
     with open(mock_path, 'r') as f:
         return json.loads(f.read())
 
@@ -103,13 +105,13 @@ def test_scenario(make_request, aggregator):
     init_config = common.MOCK_CONFIG['init_config']
     check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
 
-    auth_tokens_response_path = os.path.join(FIXTURES_DIR, "auth_tokens_response.json")
+    auth_tokens_response_path = os.path.join(common.FIXTURES_DIR, "auth_tokens_response.json")
     with open(auth_tokens_response_path, 'r') as f:
         auth_tokens_response = json.loads(f.read())
         auth_tokens_response = MockHTTPResponse(response_dict=auth_tokens_response,
                                                 headers={'X-Subject-Token': 'fake_token'})
 
-    auth_projects_response_path = os.path.join(FIXTURES_DIR, "auth_projects_response.json")
+    auth_projects_response_path = os.path.join(common.FIXTURES_DIR, "auth_projects_response.json")
     with open(auth_projects_response_path, 'r') as f:
         auth_projects_response = json.loads(f.read())
 

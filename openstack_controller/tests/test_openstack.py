@@ -13,9 +13,9 @@ def test_parse_uptime_string(aggregator):
     instance['tags'] = ['optional:tag1']
     init_config = common.MOCK_CONFIG['init_config']
     check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
-    uptime_parsed = check._parse_uptime_string(
-        u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n')
-    assert uptime_parsed.get('loads') == [0.04, 0.14, 0.19]
+    response = u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
+    uptime_parsed = check._parse_uptime_string(response)
+    assert uptime_parsed == [0.04, 0.14, 0.19]
 
 
 def test_cache_utils(aggregator):
@@ -35,9 +35,7 @@ def test_cache_utils(aggregator):
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
             return_value=common.MOCK_NOVA_SERVERS)
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
-            return_value="tenant-1")
-def test_cache_between_runs(servers_detail, project_name_from_id, aggregator):
+def test_get_all_servers_between_runs(servers_detail, aggregator):
     """
     Ensure the cache contains the expected VMs between check runs.
     """
@@ -51,7 +49,8 @@ def test_cache_between_runs(servers_detail, project_name_from_id, aggregator):
     # Start off with a list of servers
     check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers(None, "test_instance")
+    check.get_all_servers({'6f70656e737461636b20342065766572': 'new-server-test',
+                           '6f70656e737461636b20342065766573': 'server_newly_added'}, "test_instance")
 
     cached_servers = check.server_details_by_id
     assert 'server-1' not in cached_servers
@@ -60,9 +59,7 @@ def test_cache_between_runs(servers_detail, project_name_from_id, aggregator):
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
             return_value=common.MOCK_NOVA_SERVERS)
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
-            return_value="None")
-def test_project_name_none(servers_detail, project_name_from_id, aggregator):
+def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
     """
     Ensure the cache contains the expected VMs between check runs.
     """
@@ -75,7 +72,8 @@ def test_project_name_none(servers_detail, project_name_from_id, aggregator):
     # Start off with a list of servers
     check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers(None, "test_instance")
+    check.get_all_servers({'6f70656e737461636b20342065766573': "server_newly_added",
+                           '6f70656e737461636b20342065766572': None}, "test_instance")
     assert 'server_newly_added' in check.server_details_by_id
     assert 'server-1' not in check.server_details_by_id
 
@@ -88,9 +86,7 @@ def get_server_details_response(params, timeout=None):
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
             side_effect=get_server_details_response)
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
-            return_value="proj_name")
-def test_get_paginated_server(servers_detail, project_name_from_id, aggregator):
+def test_get_all_servers_with_paginated_server(servers_detail, aggregator):
     """
     Ensure the server cache is updated while using pagination
     """
@@ -101,7 +97,7 @@ def test_get_paginated_server(servers_detail, project_name_from_id, aggregator):
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
     }, {}, instances=common.MOCK_CONFIG)
-    check.get_all_servers(None, "test_instance")
+    check.get_all_servers({"6f70656e737461636b20342065766572": "server-1"}, "test_instance")
     assert len(check.server_details_by_id) == 1
     assert 'server-1' in check.server_details_by_id
 
