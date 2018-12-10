@@ -5,16 +5,21 @@ instances:
   ## The Prometheus endpoint to query.
   #
   - prometheus_url: http://localhost:8080/_status/vars
-    # Can either be only the path to the certificate and thus you should specify the private key
-      # or it can be the path to a file containing both the certificate & the private key
-    # ssl_cert: /path/to/cert.pem
-    
-    # Needed if the certificate does not include the private key
-      # Currently, Requests does not support using encrypted keys.
-    # ssl_private_key: /path/to/cert.key
-    
-    # The path to the trusted CA used for generating custom certificates
-    # ssl_ca_cert: /path/to/cert.pem
+  
+  ## @param ssl_cert - string - optional 
+  ## If the certificate contains the ssl_private_key you can use this optional param instead of ssl_private_key and ssl_ca_cert
+  #
+  # ssl_cert: <path_to_cert.pem>
+
+  ## @param ssl_private_key - string - required 
+  ## Needed if the certificate does not include the private key. Currently, Requests does not support using encrypted keys.
+  #
+   ssl_private_key: <path_to_cert.key>
+
+  ## @param ssl_ca_cert - string - required
+  ## The path to the trusted CA used for generating custom certificates
+  #
+   ssl_ca_cert: <path_to_cert.pem>
 
   ## @param prometheus_timeout - integer - optional - default: 10
   ## The timeout for connecting to the prometheus_url.
