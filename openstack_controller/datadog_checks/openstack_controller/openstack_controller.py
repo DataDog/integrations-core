@@ -205,43 +205,34 @@ class OpenStackControllerCheck(AgentCheck):
         """
         # FIXME: (aaditya) Check all networks defaults to true
         # until we can reliably assign agents to networks to monitor
-        if is_affirmative(self.init_config.get('check_all_networks', True)):
-            all_network_ids = set(self.get_network_ids())
+        networks = self.get_networks()
 
+        network_ids = self.init_config.get('network_ids', [])
+        if not network_ids:
             # Filter out excluded networks
             network_ids = [
-                network_id
-                for network_id in all_network_ids
-                if not any([re.match(exclude_id, network_id) for exclude_id in self.exclude_network_id_rules])
+                network.get('id')
+                for network in networks
+                if not any([re.match(exclude_id, network.get('id')) for exclude_id in self.exclude_network_id_rules])
             ]
-        else:
-            network_ids = self.init_config.get('network_ids', [])
 
-        if not network_ids:
-            self.warning(
-                "Your check is not configured to monitor any networks.\n"
-                + "Please list `network_ids` under your init_config"
-            )
+        for network in networks:
+            if network.get('id') in network_ids:
+                network_id = network.get('id')
+                service_check_tags = ['network:{}'.format(network_id)] + tags
 
-        for nid in network_ids:
-            self.get_stats_for_single_network(nid, tags)
+                network_name = network.get('name')
+                if network_name:
+                    service_check_tags.append('network_name:{}'.format(network_name))
 
-    def get_stats_for_single_network(self, network_id, tags):
-        net_details = self.get_network_details(network_id)
-        service_check_tags = ['network:{}'.format(network_id)] + tags
+                tenant_id = network.get('tenant_id')
+                if tenant_id:
+                    service_check_tags.append('tenant_id:{}'.format(tenant_id))
 
-        network_name = net_details.get('network', {}).get('name')
-        if network_name:
-            service_check_tags.append('network_name:{}'.format(network_name))
-
-        tenant_id = net_details.get('network', {}).get('tenant_id')
-        if tenant_id:
-            service_check_tags.append('tenant_id:{}'.format(tenant_id))
-
-        if net_details.get('network', {}).get('admin_state_up'):
-            self.service_check(self.NETWORK_SC, AgentCheck.OK, tags=service_check_tags)
-        else:
-            self.service_check(self.NETWORK_SC, AgentCheck.CRITICAL, tags=service_check_tags)
+                if network.get('admin_state_up'):
+                    self.service_check(self.NETWORK_SC, AgentCheck.OK, tags=service_check_tags)
+                else:
+                    self.service_check(self.NETWORK_SC, AgentCheck.CRITICAL, tags=service_check_tags)
 
     # Compute
     def _parse_uptime_string(self, uptime):
@@ -420,30 +411,6 @@ class OpenStackControllerCheck(AgentCheck):
                     del self.server_details_by_id[new_server['server_id']]
                 except KeyError:
                     self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
-
-    def filter_excluded_servers(self):
-        proj_list = set([])
-        if self.exclude_server_id_rules:
-            # Filter out excluded servers
-            for exclude_id_rule in self.exclude_server_id_rules:
-                for server_id in list(self.server_details_by_id):
-                    if re.match(exclude_id_rule, server_id):
-                        del self.server_details_by_id[server_id]
-
-        for _, server in iteritems(self.server_details_by_id):
-            proj_list.add(server.get('project_name'))
-
-        projects_filtered = pattern_filter(
-            proj_list,
-            whitelist=self.include_project_name_rules,
-            blacklist=self.exclude_project_name_rules
-        )
-
-        self.server_details_by_id = {
-                sid: server for (sid, server)
-                in iteritems(self.server_details_by_id)
-                if server.get('project_name') in projects_filtered
-        }
 
     def get_stats_for_single_server(self, server_details, tags=None, use_shortname=False):
         def _is_valid_metric(label):
@@ -656,7 +623,9 @@ class OpenStackControllerCheck(AgentCheck):
             self.log.info('Skipping run due to exponential backoff in effect')
             return
         custom_tags = instance.get("tags", [])
-        collect_limits_from_all_projects = is_affirmative(instance.get('collect_limits_from_all_projects', True))
+        collect_projects_limits = is_affirmative(instance.get('collect_project_limit', True))
+        collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
+        collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
         collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
         use_shortname = is_affirmative(instance.get('use_shortname', False))
 
@@ -700,17 +669,17 @@ class OpenStackControllerCheck(AgentCheck):
                 for name, p in iteritems(projects):
                     tenant_id_to_name[p.get('id')] = name
 
-                if collect_limits_from_all_projects:
+                if collect_projects_limits:
                     for name, project in iteritems(projects):
                         self.get_stats_for_single_project(project, custom_tags)
 
-                self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
-                                                   use_shortname=use_shortname,
-                                                   collect_hypervisor_load=collect_hypervisor_load)
+                if collect_projects_limits:
+                    self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
+                                                       use_shortname=use_shortname,
+                                                       collect_hypervisor_load=collect_hypervisor_load)
 
                 # This updates the server cache directly
                 self.get_all_servers(tenant_id_to_name, instance_name)
-                self.filter_excluded_servers()
 
                 # Deep copy the cache so we can remove things from the Original during the iteration
                 # Allows us to remove bad servers from the cache if need be
@@ -829,8 +798,5 @@ class OpenStackControllerCheck(AgentCheck):
     def get_neutron_endpoint(self):
         return self._neutron_api.get_endpoint()
 
-    def get_network_ids(self):
-        return self._neutron_api.get_network_ids()
-
-    def get_network_details(self, network_id):
-        return self._neutron_api.get_network_details(network_id)
+    def get_networks(self):
+        return self._neutron_api.get_networks()

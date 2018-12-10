@@ -114,23 +114,15 @@ class NeutronApi(AbstractApi):
         self._make_request(self.endpoint, self.headers)
         return
 
-    def get_network_ids(self):
+    def get_networks(self):
         url = '{}/{}/networks'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION)
 
-        network_ids = []
         try:
-            net_details = self._make_request(url, self.headers)
-            for network in net_details['networks']:
-                network_ids.append(network['id'])
+            networks = self._make_request(url, self.headers)
+            return networks.get('networks')
         except Exception as e:
             self.logger.warning('Unable to get the list of all network ids: {}'.format(e))
             raise e
-
-        return network_ids
-
-    def get_network_details(self, network_id):
-        url = '{}/{}/networks/{}'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION, network_id)
-        return self._make_request(url, self.headers)
 
 
 class KeystoneApi(AbstractApi):
