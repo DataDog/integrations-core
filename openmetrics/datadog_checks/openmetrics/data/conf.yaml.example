@@ -34,7 +34,7 @@ instances:
   ## @param label_to_hostname - string - optional
   ## Override the hostname with the value of one label.
   #
-  #  label_to_hostname: node
+  #  label_to_hostname: <LABEL>
 
   ## @param label_joins - custom - optional
   ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping
@@ -48,6 +48,7 @@ instances:
 
   ## @param labels_mapper - list of key:value elements - optional
   ## The label mapper allows you to rename labels.
+  ## Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
   #
   #  labels_mapper:
   #    flavor: origin

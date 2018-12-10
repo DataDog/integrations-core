@@ -13,19 +13,19 @@ instances:
     namespace: <SERVICE_NAME>
 
   ## @param metrics - list of key:value elements - required
-  ## List of metrics to be fetched from the prometheus endpoint, if there's a value it'll be renamed
-  ## The format is <METRIC_TO_FETCH>: <NEW_NAME>
+  ## List of `<METRIC_TO_FETCH>: <NEW_METRIC_NAME>` for metrics to be fetched from the prometheus endpoint.
+  ## <NEW_METRIC_NAME> is optional. It transforms the name in Datadog if set.
   ## This list should contain at least one metric
   #
     metrics:
-      - <METRIC_TO_FETCH>: <NEW_NAME>
+      - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
 
   ## @param prometheus_metrics_prefix - string - optional
   ## Prefix for exposed Prometheus metrics.
   #
   #  prometheus_metrics_prefix: <PREFIX>_
 
-  ## @param health_service_check - boolean - optional - default: true   
+  ## @param health_service_check - boolean - optional - default: true
   ## Send a service check reporting about the health of the prometheus endpoint
   ## It will be named <NAMESPACE>.prometheus.health
   #
@@ -36,7 +36,7 @@ instances:
   #
   #  label_to_hostname: <LABEL>
 
-  
+
   ## @param label_joins - custom - optional
   ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping
   #
@@ -57,13 +57,14 @@ instances:
   ## @param type_overrides - list of key:value element - optional
   ## Type override allows you to override a type in the prometheus the payload
   ## or type an untyped metrics (they're ignored by default)
+  ## Supported <METRIC_TYPE> are `gauge`, `count`, `rate`
   #
   #  type_overrides:
   #    <METRIC_NAME>: <METRIC_TYPE>
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
@@ -102,13 +103,13 @@ instances:
   #  ssl_private_key: "<KEY_PATH>"
 
   ## @param ssl_ca_cert - string - optional
-  ## The path to the trusted CA used for generating custom certificates. Set this to False to disable SSL
-  # 
+  ## The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL
+  #
   #  ssl_ca_cert: "<CA_CERT_PATH>"
 
   ## @param prometheus_timeout - integer - optional - default: 10
   ## Set a timeout in second for the prometheus query.
-  # 
+  #
   #  prometheus_timeout: 10
 
   ## @param max_returned_metrics - integer - optional - default: 2000

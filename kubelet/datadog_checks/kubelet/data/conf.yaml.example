@@ -2,9 +2,9 @@ init_config:
 
 instances:
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
@@ -39,17 +39,17 @@ instances:
 
   ## @param cadvisor_port - integer - optional
   ## Port to connect to, uncomment and set accordingly to enable collection.
-  # 
+  #
   #  cadvisor_port: 4194
 
-  ## @param enabled_rates - list of string - optional 
+  ## @param enabled_rates - list of string - optional
   ## Whitelist of rate type metrics to collect from cadvisor, these are the default
-  # 
+  #
   #  enabled_rates:
   #    - cpu.*
   #    - network.*
-  
-  ## @param enabled_gauges - list of string - optional 
+
+  ## @param enabled_gauges - list of string - optional
   ## Whitelist of gauge type metrics to collect from cadvisor, these are the default
   #
   #  enabled_gauges:

@@ -1,7 +1,7 @@
 init_config:
 
 instances:
-  
+
   ## @param prometheus_endpoint - string - required
   ## The URL where your application metrics are exposed by Prometheus.
   #
@@ -13,9 +13,9 @@ instances:
   #
   #  send_histograms_buckets: true
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
@@ -24,5 +24,5 @@ instances:
 
   ## @param prometheus_timeout - integer - optional - default: 10
   ## Set a timeout in second for the prometheus query.
-  # 
+  #
   #  prometheus_timeout: 10

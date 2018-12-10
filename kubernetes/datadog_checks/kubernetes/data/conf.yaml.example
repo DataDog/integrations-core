@@ -68,7 +68,7 @@ instances:
   ## are set, either for the kubelet or apiserver, they will be used instead. The recommended way to expose
   ## these files to the agent is by using Kubernetes Secrets.
 
-  ## @param bearer_token_path - string - optional
+  ## @param bearer_token_path - string - optional - default: /var/run/secrets/kubernetes.io/serviceaccount/token
   ## Path to your bearer token
   #
   #  bearer_token_path: /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -77,13 +77,13 @@ instances:
   ## Path to your apiserver certificate `.crt` file.
   #
   #  apiserver_client_crt: <API_SERVER_CERT_PATH>.crt
-  
+
   ## @param apiserver_client_key - string - optional
   ## Path to your apiserver key `.key` file.
   #
   #  apiserver_client_key: <API_SERVER_KEY_PATH>.key
 
-  ## @param kubelet_client_crt - string - optional 
+  ## @param kubelet_client_crt - string - optional
   ## Path to your kubelet certificate client.crt file.
   #
   #  kubelet_client_crt: <KUBELET_CERT_PATH>.crt
@@ -99,7 +99,7 @@ instances:
   #
   #  apiserver_ca_cert: <CA_CERT_PATH>.crt
 
-  ## @param kubelet_cert - string - optioanl 
+  ## @param kubelet_cert - string - optioanl
   ## Server Authentication for kubelet. Similarly we use the default CA cert of the agent's service account to verify the
   ## apiserver's identity, but custom ones can be specified here.
   #
@@ -113,7 +113,7 @@ instances:
   #
   #  kubelet_tls_verify: true
 
-  ## @param collect_events - boolean - optional 
+  ## @param collect_events - boolean - optional
   ## collect_events controls whether the agent should fetch events from the kubernetes API and ingest them in Datadog.
   ## To avoid duplicates, only one agent at a time across the entire cluster should have this feature enabled.
   ## If this is difficult to achieve in your deployment, see the following Leader election section.
@@ -126,7 +126,7 @@ instances:
   ## @param leader_candidate - boolean - optional - default: false
   ## Agents can perform leader election among themselves.
   ## The leader agent will collect events from the apiserver even if collect_events is false.
-  ## To perform the election it needs get, list, delete, create, and update rights on ConfigMaps 
+  ## To perform the election it needs get, list, delete, create, and update rights on ConfigMaps
   ## (this can be configured with a Cluster Role).
   ## This makes sure we don't overload the apiserver with redundant queries coming from every agent.
   #
@@ -144,7 +144,7 @@ instances:
   ## Set to true to tag pods data with Kubernetes services information.
   #
   #  collect_service_tags: true
-  
+
   ## @param service_tag_update_freq - integer - optional
   ## If collect_service_tags is set to true, the Agent requires to retrieve events regularly.
   ## To reduce the traffic to the apiserver, the Agent only query them every 5 minutes, adding a delay
@@ -183,14 +183,14 @@ instances:
   #
   #  use_histogram: false
 
-  ## @param enabled_rates - list of string - optional 
+  ## @param enabled_rates - list of string - optional
   ## Whitelist of rate type metrics to collect from cadvisor, these are the default
-  # 
+  #
   #  enabled_rates:
   #    - cpu.*
   #    - network.*
-  
-  ## @param enabled_gauges - list of string - optional 
+
+  ## @param enabled_gauges - list of string - optional
   ## Whitelist of gauge type metrics to collect from cadvisor, these are the default
   #
   #  enabled_gauges:
@@ -201,9 +201,9 @@ instances:
   #
   #  label_to_tag_prefix: "kube_"
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
