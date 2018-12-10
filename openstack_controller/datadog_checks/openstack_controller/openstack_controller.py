@@ -199,40 +199,41 @@ class OpenStackControllerCheck(AgentCheck):
         project_scopes = copy.deepcopy(instance_scope.project_scopes)
         return project_scopes
 
-    def get_network_stats(self, tags):
+    def collect_networks_metrics(self, tags):
         """
         Collect stats for all reachable networks
         """
-        # FIXME: (aaditya) Check all networks defaults to true
-        # until we can reliably assign agents to networks to monitor
         networks = self.get_networks()
-
         network_ids = self.init_config.get('network_ids', [])
+        filtered_networks = []
         if not network_ids:
             # Filter out excluded networks
-            network_ids = [
-                network.get('id')
+            filtered_networks = [
+                network
                 for network in networks
                 if not any([re.match(exclude_id, network.get('id')) for exclude_id in self.exclude_network_id_rules])
             ]
+        else:
+            for network in networks:
+                if network.get('id') in network_ids:
+                    filtered_networks.append(network)
 
-        for network in networks:
-            if network.get('id') in network_ids:
-                network_id = network.get('id')
-                service_check_tags = ['network:{}'.format(network_id)] + tags
+        for network in filtered_networks:
+            network_id = network.get('id')
+            service_check_tags = ['network:{}'.format(network_id)] + tags
 
-                network_name = network.get('name')
-                if network_name:
-                    service_check_tags.append('network_name:{}'.format(network_name))
+            network_name = network.get('name')
+            if network_name:
+                service_check_tags.append('network_name:{}'.format(network_name))
 
-                tenant_id = network.get('tenant_id')
-                if tenant_id:
-                    service_check_tags.append('tenant_id:{}'.format(tenant_id))
+            tenant_id = network.get('tenant_id')
+            if tenant_id:
+                service_check_tags.append('tenant_id:{}'.format(tenant_id))
 
-                if network.get('admin_state_up'):
-                    self.service_check(self.NETWORK_SC, AgentCheck.OK, tags=service_check_tags)
-                else:
-                    self.service_check(self.NETWORK_SC, AgentCheck.CRITICAL, tags=service_check_tags)
+            if network.get('admin_state_up'):
+                self.service_check(self.NETWORK_SC, AgentCheck.OK, tags=service_check_tags)
+            else:
+                self.service_check(self.NETWORK_SC, AgentCheck.CRITICAL, tags=service_check_tags)
 
     # Compute
     def _parse_uptime_string(self, uptime):
@@ -263,9 +264,9 @@ class OpenStackControllerCheck(AgentCheck):
         uptime = self.get_os_hypervisor_uptime(hyp_id)
         return self._parse_uptime_string(uptime)
 
-    def get_stats_for_all_hypervisors(self, instance, custom_tags=None,
-                                      use_shortname=False,
-                                      collect_hypervisor_load=False):
+    def collect_hypervisors_metrics(self, custom_tags=None,
+                                    use_shortname=False,
+                                    collect_hypervisor_metrics=False):
         """
         Submits stats for all hypervisors registered to this control plane
         Raises specific exceptions based on response code
@@ -273,16 +274,16 @@ class OpenStackControllerCheck(AgentCheck):
         resp = self.get_os_hypervisors_detail()
         hypervisors = resp.get('hypervisors', [])
         for hyp in hypervisors:
-            self.get_stats_for_single_hypervisor(hyp, instance, custom_tags=custom_tags,
+            self.get_stats_for_single_hypervisor(hyp, custom_tags=custom_tags,
                                                  use_shortname=use_shortname,
-                                                 collect_hypervisor_load=collect_hypervisor_load)
+                                                 collect_hypervisor_metrics=collect_hypervisor_metrics)
 
         if not hypervisors:
             self.log.warn("Unable to collect any hypervisors from Nova response: {}".format(resp))
 
-    def get_stats_for_single_hypervisor(self, hyp, instance, custom_tags=None,
+    def get_stats_for_single_hypervisor(self, hyp, custom_tags=None,
                                         use_shortname=False,
-                                        collect_hypervisor_load=False):
+                                        collect_hypervisor_metrics=False):
         hyp_hostname = hyp.get('hypervisor_hostname')
         custom_tags = custom_tags or []
         tags = [
@@ -295,22 +296,6 @@ class OpenStackControllerCheck(AgentCheck):
         tags.extend(host_tags)
         tags.extend(custom_tags)
         service_check_tags = list(custom_tags)
-
-        # This makes a request per hypervisor and only sends hypervisor_load 1/5/15
-        # Disable this by default for higher performance in a large environment
-        # If the Agent is installed on the hypervisors, system.load.1/5/15 is available
-        if collect_hypervisor_load:
-            try:
-                load_averages = self.get_uptime_for_single_hypervisor(hyp['id'])
-            except Exception as e:
-                self.warning('Unable to get loads averages for hypervisor {}: {}'.format(hyp['id'], e))
-                load_averages = []
-
-            if load_averages and len(load_averages) == 3:
-                for i, avg in enumerate([1, 5, 15]):
-                    self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
-            else:
-                self.log.debug("Load Averages didn't return expected values: {}".format(load_averages))
 
         hyp_state = hyp.get('state', None)
 
@@ -325,6 +310,22 @@ class OpenStackControllerCheck(AgentCheck):
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{}".format(label)
                 self.gauge(metric_label, val, tags=tags)
+
+        # This makes a request per hypervisor and only sends hypervisor_load 1/5/15
+        # Disable this by default for higher performance in a large environment
+        # If the Agent is installed on the hypervisors, system.load.1/5/15 is available
+        if collect_hypervisor_metrics:
+            try:
+                load_averages = self.get_uptime_for_single_hypervisor(hyp['id'])
+            except Exception as e:
+                self.warning('Unable to get loads averages for hypervisor {}: {}'.format(hyp['id'], e))
+                load_averages = []
+
+            if load_averages and len(load_averages) == 3:
+                for i, avg in enumerate([1, 5, 15]):
+                    self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
+            else:
+                self.log.debug("Load Averages didn't return expected values: {}".format(load_averages))
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
@@ -412,7 +413,7 @@ class OpenStackControllerCheck(AgentCheck):
                 except KeyError:
                     self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
 
-    def get_stats_for_single_server(self, server_details, tags=None, use_shortname=False):
+    def collect_server_metrics(self, server_details, tags=None, use_shortname=False):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
@@ -476,7 +477,7 @@ class OpenStackControllerCheck(AgentCheck):
                         hostname=server_id,
                     )
 
-    def get_stats_for_single_project(self, project, tags=None):
+    def collect_project_limit(self, project, tags=None):
         def _is_valid_metric(label):
             return label in PROJECT_METRICS
 
@@ -623,10 +624,10 @@ class OpenStackControllerCheck(AgentCheck):
             self.log.info('Skipping run due to exponential backoff in effect')
             return
         custom_tags = instance.get("tags", [])
-        collect_projects_limits = is_affirmative(instance.get('collect_project_limit', True))
-        collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
-        collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
-        collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
+        collect_project_metrics = is_affirmative(instance.get('collect_project_metrics', True))
+        collect_hypervisor_metrics = is_affirmative(instance.get('collect_hypervisor_metrics', False))
+        collect_network_metrics = is_affirmative(instance.get('collect_network_metrics', True))
+        collect_server_metrics = is_affirmative(instance.get('collect_server_metrics', True))
         use_shortname = is_affirmative(instance.get('use_shortname', False))
 
         try:
@@ -659,42 +660,39 @@ class OpenStackControllerCheck(AgentCheck):
                 # TODO: NOTE: During authentication we use /v3/auth/projects and here we use /v3/projects.
                 # TODO: These api don't seems to return the same thing however the latter contains the former.
                 # TODO: Is this expected or could we just have one call with proper config?
-                projects = self.get_projects(project_scope.auth_token)
-                filtered_project_names = pattern_filter([p for p in projects],
-                                                        whitelist=self.include_project_name_rules,
-                                                        blacklist=self.exclude_project_name_rules)
-                projects = {name: v for (name, v) in iteritems(projects) if name in filtered_project_names}
+                projects = self.get_projects(project_scope.auth_token,
+                                             self.include_project_name_rules,
+                                             self.exclude_project_name_rules)
 
-                tenant_id_to_name = {}
-                for name, p in iteritems(projects):
-                    tenant_id_to_name[p.get('id')] = name
-
-                if collect_projects_limits:
+                if collect_project_metrics:
                     for name, project in iteritems(projects):
-                        self.get_stats_for_single_project(project, custom_tags)
+                        self.collect_project_limit(project, custom_tags)
 
-                if collect_projects_limits:
-                    self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
-                                                       use_shortname=use_shortname,
-                                                       collect_hypervisor_load=collect_hypervisor_load)
+                self.collect_hypervisors_metrics(custom_tags=custom_tags,
+                                                 use_shortname=use_shortname,
+                                                 collect_hypervisor_metrics=collect_hypervisor_metrics)
 
-                # This updates the server cache directly
-                self.get_all_servers(tenant_id_to_name, instance_name)
+                if collect_server_metrics:
+                    # This updates the server cache directly
+                    tenant_id_to_name = {}
+                    for name, p in iteritems(projects):
+                        tenant_id_to_name[p.get('id')] = name
+                    self.get_all_servers(tenant_id_to_name, instance_name)
 
-                # Deep copy the cache so we can remove things from the Original during the iteration
-                # Allows us to remove bad servers from the cache if need be
-                server_cache_copy = copy.deepcopy(self.server_details_by_id)
+                    # Deep copy the cache so we can remove things from the Original during the iteration
+                    # Allows us to remove bad servers from the cache if need be
+                    server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
-                self.log.debug("Fetch stats from %s server(s)" % len(server_cache_copy))
-                for server in server_cache_copy:
-                    server_tags = copy.deepcopy(custom_tags)
-                    server_tags.append("nova_managed_server")
+                    self.log.debug("Fetch stats from %s server(s)" % len(server_cache_copy))
+                    for server in server_cache_copy:
+                        server_tags = copy.deepcopy(custom_tags)
+                        server_tags.append("nova_managed_server")
 
-                    self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags,
-                                                     use_shortname=use_shortname)
+                        self.collect_server_metrics(server_cache_copy[server], tags=server_tags,
+                                                    use_shortname=use_shortname)
 
-            # For now, monitor all networks
-            self.get_network_stats(custom_tags)
+            if collect_network_metrics:
+                self.collect_networks_metrics(custom_tags)
 
             if set_external_tags is not None:
                 set_external_tags(self.get_external_host_tags())
@@ -786,12 +784,16 @@ class OpenStackControllerCheck(AgentCheck):
         return self._compute_api.get_project_limits(tenant_id)
 
     # Keystone Proxy Methods
-    def get_projects(self, project_token):
+    def get_projects(self, project_token, include_project_name_rules, exclude_project_name_rules):
         projects = self._keystone_api.get_projects(project_token)
-        result = {}
+        project_by_name = {}
         for project in projects:
             name = project.get('name')
-            result[name] = project
+            project_by_name[name] = project
+        filtered_project_names = pattern_filter([p for p in project_by_name],
+                                                whitelist=include_project_name_rules,
+                                                blacklist=exclude_project_name_rules)
+        result = {name: v for (name, v) in iteritems(project_by_name) if name in filtered_project_names}
         return result
 
     # Neutron Proxy Methods

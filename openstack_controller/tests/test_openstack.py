@@ -154,7 +154,7 @@ def get_server_diagnostics_pre_2_48_response(server_id):
             side_effect=get_server_diagnostics_pre_2_48_response)
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_os_aggregates',
             return_value=OS_AGGREGATES_RESPONSE)
-def test_get_stats_for_single_server_pre_2_48(server_diagnostics, os_aggregates, aggregator):
+def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggregator):
     check = OpenStackControllerCheck("test", {
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
@@ -162,7 +162,7 @@ def test_get_stats_for_single_server_pre_2_48(server_diagnostics, os_aggregates,
         'paginated_server_limit': 1
     }, {}, instances=common.MOCK_CONFIG)
 
-    check.get_stats_for_single_server({})
+    check.collect_server_metrics({})
 
     aggregator.assert_metric('openstack.nova.server.vda_read_req', value=112.0,
                              tags=['availability_zone:NA'],
