@@ -74,10 +74,6 @@ def make_request_responses(url, header, params=None, timeout=None):
         mock_path = "v2.1_4bfc1_servers_57030997-f1b5-4f79-9429-8cb285318633_diagnostics.json"
     elif url == "http://10.0.2.15:9696/v2.0/networks":
         mock_path = "v2.0_networks.json"
-    # elif url == "http://10.0.2.15:9696/v2.0/networks/2fad0a98-4ba9-44f4-8f81-87c31c5eab10":
-    #     mock_path = "v2.0_networks_2fad0a98-4ba9-44f4-8f81-87c31c5eab10.json"
-    # elif url == "http://10.0.2.15:9696/v2.0/networks/2755452c-4fe8-4ba1-9b26-8898665b0958":
-    #     mock_path = "v2.0_networks_2755452c-4fe8-4ba1-9b26-8898665b0958.json"
 
     print(url)
     mock_path = os.path.join(common.FIXTURES_DIR, mock_path)
