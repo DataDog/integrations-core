@@ -36,10 +36,6 @@ def make_request_responses(url, header, params=None, timeout=None):
         mock_path = "v2.1_4bfc1_os-aggregates.json"
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/detail":
         mock_path = "v2.1_4bfc1_servers_detail.json"
-    # elif url == "http://10.0.2.15:5000/v3/projects/***************************73dbe":
-    #     mock_path = "v3_projects_73dbe.json"
-    # elif url == "http://10.0.2.15:5000/v3/projects/***************************3fb11":
-    #     mock_path = "v3_projects_3fb11.json"
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/ff2f581c-5d03-4a27-a0ba-f102603fe38f/diagnostics":  # noqa E501
         mock_path = "v2.1_4bfc1_servers_ff2f581c-5d03-4a27-a0ba-f102603fe38f_diagnostics.json"
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/acb4197c-f54e-488e-a40a-1b7f59cc9117/diagnostics":  # noqa E501

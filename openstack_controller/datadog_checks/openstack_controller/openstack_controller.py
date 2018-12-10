@@ -761,27 +761,6 @@ class OpenStackControllerCheck(AgentCheck):
         self.gauge("openstack.backoff.retries", retries, tags=tags)
         self.warning("There were some problems reaching the nova API - applying exponential backoff")
 
-    # def get_and_update_project_details(self, project_scope):
-    #     """
-    #     Returns the project that this instance of the check is scoped to
-    #     """
-    #     try:
-    #         project_details, tenant_id, project_name = self.get_project_details(
-    #             project_scope.tenant_id,
-    #             project_scope.name,
-    #             project_scope.domain_id)
-    #
-    #         # Set the tenant_id so we won't have to fetch it next time
-    #         if project_scope.tenant_id:
-    #             project_scope.tenant_id = tenant_id
-    #         if project_scope.name:
-    #             project_scope.name = project_name
-    #         return project_details
-    #
-    #     except Exception as e:
-    #         self.warning('Unable to get the project details: {}'.format(e))
-    #         raise e
-
     def _get_host_aggregate_tag(self, hyp_hostname, use_shortname=False):
         tags = []
         hyp_hostname = hyp_hostname.split('.')[0] if use_shortname else hyp_hostname
@@ -845,12 +824,6 @@ class OpenStackControllerCheck(AgentCheck):
             name = project.get('name')
             result[name] = project
         return result
-
-    # def get_project_name_from_id(self, project_token, project_id):
-    #     return self._keystone_api.get_project_name_from_id(project_token, project_id)
-
-    # def get_project_details(self, tenant_id, project_name, domain_id):
-    #     return self._keystone_api.get_project_details(tenant_id, project_name, domain_id)
 
     # Neutron Proxy Methods
     def get_neutron_endpoint(self):
