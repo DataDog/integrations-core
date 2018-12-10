@@ -1,9 +1,27 @@
 init_config:
-  # Any global configurable parameters should be added here
 
 instances:
-  # Change the time to wait on the Fargate metadata API
-  - timeout: 5
 
-    # Add additional custom tags to the metrics
-    # tags: ['custom:tag']
+  ## WARNING: This check has no required parameter, if you intend to use any of the parameter
+  ## below, remove '{}' from the instance definition and use any parameter instead.
+  - {}
+
+  ## @param timeout - integer - optional - default: 5
+  ## Time to wait on the Fargate metadata API before timeout in second
+  #
+  #  timeout: 5
+
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+  ## @param label_whitelist - list of string - optional
+  ## Whitelist containers label if you want to collect their corresponding metrics
+  #
+  #  label_whitelist:
+  #    - <LABEL>
