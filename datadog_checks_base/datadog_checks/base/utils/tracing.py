@@ -14,12 +14,19 @@ except ImportError:
     datadog_agent = None
 
 
+_tracing_config = set()
+
+
+def add_trace_check(check_object):
+    _tracing_config.add(check_object)
+
+
 @wrapt.decorator
 def traced(wrapped, instance, args, kwargs):
     if datadog_agent is None:
         return wrapped(*args, **kwargs)
 
-    trace_check = is_affirmative(instance.init_config.get('trace_check'))
+    trace_check = instance in _tracing_config
     integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
 
     if integration_tracing and trace_check:
