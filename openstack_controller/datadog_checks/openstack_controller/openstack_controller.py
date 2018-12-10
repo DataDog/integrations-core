@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
-from datadog_checks.utils.tracing import traced
+from datadog_checks.utils.tracing import traced, add_trace_check
 
 from .scopes import ScopeFetcher
 from .api import ComputeApi, NeutronApi, KeystoneApi
@@ -134,6 +134,10 @@ class OpenStackControllerCheck(AgentCheck):
         self.keystone_server_url = init_config.get("keystone_server_url")
         if not self.keystone_server_url:
             raise IncompleteConfig()
+
+        if is_affirmative(self.init_config.get('trace_check')):
+            add_trace_check(self)
+
         self.proxy_config = self.get_instance_proxy(init_config, self.keystone_server_url)
 
         self.ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
