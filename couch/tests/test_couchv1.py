@@ -7,7 +7,7 @@ import pytest
 import mock
 
 from datadog_checks.couch import CouchDb, errors
-import common
+from . import common
 
 pytestmark = pytest.mark.v1
 
