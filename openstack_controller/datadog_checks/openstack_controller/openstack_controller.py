@@ -266,7 +266,8 @@ class OpenStackControllerCheck(AgentCheck):
 
     def collect_hypervisors_metrics(self, custom_tags=None,
                                     use_shortname=False,
-                                    collect_hypervisor_metrics=False):
+                                    collect_hypervisor_metrics=True,
+                                    collect_hypervisor_load=False):
         """
         Submits stats for all hypervisors registered to this control plane
         Raises specific exceptions based on response code
@@ -276,14 +277,16 @@ class OpenStackControllerCheck(AgentCheck):
         for hyp in hypervisors:
             self.get_stats_for_single_hypervisor(hyp, custom_tags=custom_tags,
                                                  use_shortname=use_shortname,
-                                                 collect_hypervisor_metrics=collect_hypervisor_metrics)
+                                                 collect_hypervisor_metrics=collect_hypervisor_metrics,
+                                                 collect_hypervisor_load=collect_hypervisor_load)
 
         if not hypervisors:
             self.log.warn("Unable to collect any hypervisors from Nova response: {}".format(resp))
 
     def get_stats_for_single_hypervisor(self, hyp, custom_tags=None,
                                         use_shortname=False,
-                                        collect_hypervisor_metrics=False):
+                                        collect_hypervisor_metrics=True,
+                                        collect_hypervisor_load=False):
         hyp_hostname = hyp.get('hypervisor_hostname')
         custom_tags = custom_tags or []
         tags = [
@@ -306,6 +309,9 @@ class OpenStackControllerCheck(AgentCheck):
         else:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, hostname=hyp_hostname, tags=service_check_tags)
 
+        if not collect_hypervisor_metrics:
+            return
+
         for label, val in iteritems(hyp):
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{}".format(label)
@@ -314,7 +320,7 @@ class OpenStackControllerCheck(AgentCheck):
         # This makes a request per hypervisor and only sends hypervisor_load 1/5/15
         # Disable this by default for higher performance in a large environment
         # If the Agent is installed on the hypervisors, system.load.1/5/15 is available
-        if collect_hypervisor_metrics:
+        if collect_hypervisor_load:
             try:
                 load_averages = self.get_uptime_for_single_hypervisor(hyp['id'])
             except Exception as e:
@@ -625,7 +631,8 @@ class OpenStackControllerCheck(AgentCheck):
             return
         custom_tags = instance.get("tags", [])
         collect_project_metrics = is_affirmative(instance.get('collect_project_metrics', True))
-        collect_hypervisor_metrics = is_affirmative(instance.get('collect_hypervisor_metrics', False))
+        collect_hypervisor_metrics = is_affirmative(instance.get('collect_hypervisor_metrics', True))
+        collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
         collect_network_metrics = is_affirmative(instance.get('collect_network_metrics', True))
         collect_server_metrics = is_affirmative(instance.get('collect_server_metrics', True))
         use_shortname = is_affirmative(instance.get('use_shortname', False))
@@ -670,7 +677,8 @@ class OpenStackControllerCheck(AgentCheck):
 
                 self.collect_hypervisors_metrics(custom_tags=custom_tags,
                                                  use_shortname=use_shortname,
-                                                 collect_hypervisor_metrics=collect_hypervisor_metrics)
+                                                 collect_hypervisor_metrics=collect_hypervisor_metrics,
+                                                 collect_hypervisor_load=collect_hypervisor_load)
 
                 if collect_server_metrics:
                     # This updates the server cache directly

@@ -88,7 +88,13 @@ instances:
   ## With this enabled there is an extra N requests per check run (N = # of hypervisors)
   ## If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
   #
-  #  collect_hypervisor_metrics: false
+  #  collect_hypervisor_load: false
+
+
+  ## @param collect_hypervisor_metrics - optional - boolean - default:true
+  ## Collects hypervisor metrics (including hypervisor_load).
+  #
+  #  collect_hypervisor_metrics: true
 
 
   ## @param collect_project_metrics - optional - boolean - default:true
