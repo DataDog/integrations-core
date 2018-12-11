@@ -8,6 +8,7 @@ import os
 import logging
 import pytest
 import time
+import tempfile
 
 from . import common
 
@@ -54,9 +55,17 @@ def cassandra_cluster():
 
     # We need to restrict permission on the password file
     # Reset permissions on teardown
-    jmx_pass_path = os.path.join(common.HERE, 'compose', 'jmxremote.password')
-    jmx_file_perms = os.stat(jmx_pass_path)[stat.ST_MODE]
-    os.chmod(jmx_pass_path, stat.S_IRWXU)
+
+    temp_jmx_pass = tempfile.NamedTemporaryFile(dir="/tmp")
+    jmx_pass_file = os.path.join(common.HERE, "compose", 'jmxremote.password')
+    jmx_pass = open(jmx_pass_file, "r")
+
+    temp_jmx_pass.write(jmx_pass.read())
+
+    # shutil.copy2(os.path.join(common.HERE, 'compose', 'jmxremote.password'), temp_jmx_pass)
+
+    env['JMX_PASS_FILE'] = temp_jmx_pass.name
+    os.chmod(temp_jmx_pass.name, stat.S_IRWXU)
 
     docker_compose_args = [
         "docker-compose",
@@ -90,8 +99,5 @@ def cassandra_cluster():
         "-e", "CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}"
     ])
     yield
-
-    # Reset file permissions
-    os.chmod(jmx_pass_path, jmx_file_perms)
 
     subprocess.check_call(docker_compose_args + ["down"])
