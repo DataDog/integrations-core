@@ -181,7 +181,7 @@ jobs:
     - stage: test
       env: CHECK=nfsstat
     - stage: test
-      env: CHECK=nginx
+      env: CHECK=nginx PYTHON3=true
     - stage: test
       env: CHECK=ntp
     - stage: test
