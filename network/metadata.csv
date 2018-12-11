@@ -9,11 +9,11 @@ system.net.tcp.in_segs,gauge,,segment,second,The number of TCP segments received
 system.net.tcp.in_segs.count,count,,segment,,Total number of received TCP segments (Linux or Solaris only).,0,system,segs in
 system.net.tcp.out_segs,gauge,,segment,second,The number of TCP segments transmitted (Linux or Solaris only).,0,system,segs out
 system.net.tcp.out_segs.count,count,,segment,,Total number of transmitted TCP segments (Linux or Solaris only).,0,system,segs out
-system.net.tcp.rcv_packs,gauge,,packet,second,The number of TCP packets received (BDS only).,0,system,pkts rcvd
-system.net.tcp.retrans_packs,gauge,,packet,second,The number of TCP packets retransmitted (BDS only).,0,system,pkts retrans
+system.net.tcp.rcv_packs,gauge,,packet,second,The number of TCP packets received (BSD only).,0,system,pkts rcvd
+system.net.tcp.retrans_packs,gauge,,packet,second,The number of TCP packets retransmitted (BSD only).,0,system,pkts retrans
 system.net.tcp.retrans_segs,gauge,,segment,second,The number of TCP segments retransmitted (Linux or Solaris only).,0,system,segs retrans
 system.net.tcp.retrans_segs.count,count,,segment,,Total number of retransmitted TCP segments (Linux or Solaris only).,0,system,segs retrans
-system.net.tcp.sent_packs,gauge,,packet,second,The number of TCP packets transmitted (BDS only).,0,system,pkts sent
+system.net.tcp.sent_packs,gauge,,packet,second,The number of TCP packets transmitted (BSD only).,0,system,pkts sent
 system.net.tcp.listen_overflows,gauge,,,,The number of times connections have overflowed the accept buffer (Linux only). Available since Agent v5.14.0.,-1,system,tcp listen overflows
 system.net.tcp.listen_overflows.count,count,,,,Total number of times connections have overflowed the accept buffer (Linux only).,-1,system,tcp listen overflows
 system.net.tcp.listen_drops,gauge,,,,The number of times connections have dropped out of listen (Linux only). Available since Agent v5.14.0.,-1,system,tcp listen drops
