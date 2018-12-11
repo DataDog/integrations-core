@@ -171,15 +171,13 @@ class OpenStackControllerCheck(AgentCheck):
         # Mapping of Nova-managed servers to tags
         self.external_host_tags = {}
 
-        # ISO8601 date time: used to filter the call to get the list of nova servers
-        self.changes_since_time = {}
-
-        # Ex: server_details_by_id = {
-        #   UUID: {UUID: <value>, etc}
-        #   1: {id: 1, name: hostA},
-        #   2: {id: 2, name: hostB}
+        # Ex: servers_cache = {
+        #   <instance_name>: {
+        #       'servers': {<server_id>: <server_metadata>},
+        #       'changes_since': <ISO8601 date time>
+        #   }
         # }
-        self.server_details_by_id = {}
+        self.servers_cache = {}
 
     def delete_instance_scope(self):
         for instance_name, scope in list(iteritems(self.instance_scopes_cache)):
@@ -341,22 +339,13 @@ class OpenStackControllerCheck(AgentCheck):
                 metric_label = "openstack.nova.{}".format(label)
                 self.gauge(metric_label, val, tags=tags)
 
-    # Get all of the server IDs and their metadata and cache them
-    # After the first run, we will only get servers that have changed state since the last collection run
-    def get_all_servers(self, project_auth_token, instance_name):
-        query_params = {}
-
-        # If we don't have a timestamp for this instance, default to None
-        if instance_name in self.changes_since_time:
-            query_params['changes-since'] = self.changes_since_time.get(instance_name)
-
-        # Note this query param specifically requires admin user rights
-        query_params["all_tenants"] = True
+    def get_active_servers(self):
         servers = []
-
-        # Get a list of active servers using pagination
-        query_params['status'] = 'ACTIVE'
-        query_params['limit'] = self.paginated_server_limit
+        query_params = {
+            "all_tenants": True,
+            'status': 'ACTIVE',
+            'limit': self.paginated_server_limit
+        }
         resp = self.get_servers_detail(query_params, timeout=self.request_timeout)
         servers.extend(resp)
         # Avoid the extra request since we know we're done when the response has anywhere between
@@ -366,72 +355,82 @@ class OpenStackControllerCheck(AgentCheck):
             resp = self.get_servers_detail(query_params, timeout=self.request_timeout)
             servers.extend(resp)
 
-        query_params['limit'] = None
-        query_params['marker'] = None
+        return {server.get('id'): self.create_server_object(server) for server in servers}
 
-        # Don't collect Deleted or Shut off VMs on the first run:
-        if instance_name in self.changes_since_time:
+    def update_servers_cache(self, cached_servers, changes_since):
+        servers = copy.deepcopy(cached_servers)
 
-            # Get a list of deleted serversTimestamp used to filter the call to get the list
-            # Need to have admin perms for this to take affect
-            query_params['deleted'] = 'true'
-            del query_params['status']
-            resp = self.get_servers_detail(query_params)
-            servers.extend(resp)
+        updated_servers = []
+        query_params = {
+            "all_tenants": True,
+            'limit': self.paginated_server_limit,
+            'changes-since': changes_since
+        }
+        resp = self.get_servers_detail(query_params, timeout=self.request_timeout)
+        updated_servers.extend(resp)
+        # Avoid the extra request since we know we're done when the response has anywhere between
+        # 0 and paginated_server_limit servers
+        while len(resp) == self.paginated_server_limit:
+            query_params['marker'] = resp[-1]['id']
+            resp = self.get_servers_detail(query_params, timeout=self.request_timeout)
+            updated_servers.extend(resp)
 
-            query_params['deleted'] = 'false'
-            # Get a list of shut off servers
-            query_params['status'] = 'SHUTOFF'
-            resp = self.get_servers_detail(query_params)
-            servers.extend(resp)
+        # For each updated servers, we update the servers cache accordingly
+        for updated_server in updated_servers:
+            updated_server_status = updated_server.get('status')
+            updated_server_id = updated_server.get('id')
 
-        self.changes_since_time[instance_name] = datetime.utcnow().isoformat()
+            if updated_server_status == 'ACTIVE':
+                # Add or update the cache
+                if servers.get(updated_server_id):
+                    servers[updated_server_id] = self.create_server_object(updated_server)
+            else:
+                # Remove from the cache if it exists
+                if servers.get(updated_server_id):
+                    del servers[updated_server_id]
+        return servers
 
-        for server in servers:
-            new_server = dict()
-            new_server['server_id'] = server.get('id')
-            new_server['state'] = server.get('status')
-            new_server['server_name'] = server.get('name')
-            new_server['hypervisor_hostname'] = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
-            new_server['tenant_id'] = server.get('tenant_id')
-            new_server['availability_zone'] = server.get('OS-EXT-AZ:availability_zone')
+    def create_server_object(self, server):
+        s = dict()
+        s['server_id'] = server.get('id')
+        s['state'] = server.get('status')
+        s['server_name'] = server.get('name')
+        s['hypervisor_hostname'] = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
+        s['tenant_id'] = server.get('tenant_id')
+        s['availability_zone'] = server.get('OS-EXT-AZ:availability_zone')
+        return s
 
-            # Confirm that the new server has all the required fields
-            if not all(new_server[key] is not None for key in SERVER_FIELDS_REQ):
-                self.log.debug(
-                    "Server {} has None for one of the required keys."
-                    "Not collecting server metrics for this server."
-                    .format(new_server)
-                )
-                continue
+    # Get all of the server IDs and their metadata and cache them
+    # After the first run, we will only get servers that have changed state since the last collection run
+    def get_all_servers(self, incremental_servers_update, instance_name):
+        cached_servers = self.servers_cache.get(instance_name, {}).get('servers')
+        # NOTE: updated_time need to be set at the beginning of this method in order to no miss servers changes.
+        changes_since = datetime.utcnow().isoformat()
+        if not incremental_servers_update or cached_servers is None:
+            updated_servers = self.get_active_servers()
+        else:
+            previous_changes_since = self.servers_cache.get(instance_name, {}).get('changes_since')
+            updated_servers = self.update_servers_cache(cached_servers, previous_changes_since)
 
-            # Update our cached list of servers
-            if (new_server['server_id'] not in self.server_details_by_id and
-                    new_server['state'] in DIAGNOSTICABLE_STATES):
-                self.log.debug("Adding server to cache: %s", new_server)
-                # The project may not exist if the server isn't in an active state
-                # Query for the project name here to avoid 404s
-                # If the project name conversion fails, we won't add this server
-                new_server['project_name'] = self.get_project_name_from_id(project_auth_token, new_server['tenant_id'])
-                if new_server['project_name']:
-                    self.server_details_by_id[new_server['server_id']] = new_server
-            elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
-                self.log.debug("Removing server from cache: %s", new_server)
-                try:
-                    del self.server_details_by_id[new_server['server_id']]
-                except KeyError:
-                    self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
+        # Initialize or update cache for this instance
+        self.servers_cache[instance_name] = {
+            'servers': updated_servers,
+            'changes_since': changes_since
+        }
 
-    def filter_excluded_servers(self):
+    def filter_excluded_servers(self, instance_name):
         proj_list = set([])
+        filtered_servers = copy.deepcopy(self.servers_cache.get(instance_name, {}))
+        filtered_servers = filtered_servers.get('servers', {})
         if self.exclude_server_id_rules:
             # Filter out excluded servers
+            filtered_servers_copy = copy.deepcopy(filtered_servers)
             for exclude_id_rule in self.exclude_server_id_rules:
-                for server_id in list(self.server_details_by_id):
+                for server_id, _ in iteritems(filtered_servers_copy):
                     if re.match(exclude_id_rule, server_id):
-                        del self.server_details_by_id[server_id]
+                        del filtered_servers[server_id]
 
-        for _, server in iteritems(self.server_details_by_id):
+        for _, server in iteritems(filtered_servers):
             proj_list.add(server.get('project_name'))
 
         projects_filtered = pattern_filter(
@@ -440,11 +439,12 @@ class OpenStackControllerCheck(AgentCheck):
             blacklist=self.exclude_project_name_rules
         )
 
-        self.server_details_by_id = {
+        filtered_servers = {
                 sid: server for (sid, server)
-                in iteritems(self.server_details_by_id)
+                in iteritems(filtered_servers)
                 if server.get('project_name') in projects_filtered
         }
+        self.servers_cache[instance_name]['servers'] = filtered_servers
 
     def get_stats_for_single_server(self, server_details, tags=None, use_shortname=False):
         def _is_valid_metric(label):
@@ -463,19 +463,18 @@ class OpenStackControllerCheck(AgentCheck):
         hypervisor_hostname = server_details.get('hypervisor_hostname')
         project_name = server_details.get('project_name')
 
-        server_stats = {}
         try:
             server_stats = self.get_server_diagnostics(server_id)
+            print("boom", server_stats)
         except InstancePowerOffFailure:  # 409 response code came back fro nova
             self.log.debug("Server %s is powered off and cannot be monitored", server_id)
-            del self.server_details_by_id[server_id]
+            return
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
                 self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
-                del self.server_details_by_id[server_id]
             else:
                 self.log.debug("Received HTTP Error when reaching the nova endpoint")
-                return
+            return
         except Exception as e:
             self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
             return
@@ -686,6 +685,7 @@ class OpenStackControllerCheck(AgentCheck):
         collect_limits_from_all_projects = is_affirmative(instance.get('collect_limits_from_all_projects', True))
         collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
         use_shortname = is_affirmative(instance.get('use_shortname', False))
+        incremental_servers_update = is_affirmative(instance.get('incremental_servers_update', True))
 
         projects = {}
         try:
@@ -738,19 +738,16 @@ class OpenStackControllerCheck(AgentCheck):
                                                    collect_hypervisor_load=collect_hypervisor_load)
 
                 # This updates the server cache directly
-                self.get_all_servers(project_scope.auth_token, instance_name)
-                self.filter_excluded_servers()
+                self.get_all_servers(incremental_servers_update, instance_name)
+                self.filter_excluded_servers(instance_name)
 
-                # Deep copy the cache so we can remove things from the Original during the iteration
-                # Allows us to remove bad servers from the cache if need be
-                server_cache_copy = copy.deepcopy(self.server_details_by_id)
-
-                self.log.debug("Fetch stats from %s server(s)" % len(server_cache_copy))
-                for server in server_cache_copy:
+                servers = self.servers_cache[instance_name]['servers']
+                print('servers', servers)
+                self.log.debug("Fetch stats from %s server(s)" % len(servers))
+                for server_id, server in iteritems(servers):
                     server_tags = copy.deepcopy(custom_tags)
                     server_tags.append("nova_managed_server")
-
-                    self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags,
+                    self.get_stats_for_single_server(servers[server_id], tags=server_tags,
                                                      use_shortname=use_shortname)
 
             # For now, monitor all networks

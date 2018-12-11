@@ -21,9 +21,9 @@ def test_server_exclusion(network_ids):
     }, {}, instances=common.MOCK_CONFIG)
 
     # Retrieve servers
-    check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
-    check.filter_excluded_servers()
-    server_ids = check.server_details_by_id
+    check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
+    check.filter_excluded_servers('test_name')
+    server_ids = check.servers_cache['test_name']['servers']
     # Assert
     # .. 1 out of 4 server ids filtered
     assert len(server_ids) == 1
@@ -34,7 +34,7 @@ def test_server_exclusion(network_ids):
 
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_network_ids',
-            return_value=common.ALL_SERVER_DETAILS)
+            return_value=common.ALL_IDS)
 def test_server_exclusion_by_project(network_ids):
     """
     Exclude servers using regular expressions.
@@ -46,9 +46,9 @@ def test_server_exclusion_by_project(network_ids):
     }, {}, instances=common.MOCK_CONFIG)
 
     # Retrieve servers
-    check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
-    check.filter_excluded_servers()
-    server_ids = check.server_details_by_id
+    check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
+    check.filter_excluded_servers('test_name')
+    server_ids = check.servers_cache['test_name']['servers']
     # Assert
     # .. 2 out of 4 server ids filtered
     assert len(server_ids) == 2
@@ -59,7 +59,7 @@ def test_server_exclusion_by_project(network_ids):
 
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_network_ids',
-            return_value=common.ALL_SERVER_DETAILS)
+            return_value=common.ALL_IDS)
 def test_server_include_all_by_default(network_ids):
     """
     Exclude servers using regular expressions.
@@ -70,9 +70,9 @@ def test_server_include_all_by_default(network_ids):
     }, {}, instances=common.MOCK_CONFIG)
 
     # Retrieve servers
-    check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
-    check.filter_excluded_servers()
-    server_ids = check.server_details_by_id
+    check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
+    check.filter_excluded_servers('test_name')
+    server_ids = check.servers_cache['test_name']['servers']
     # Assert
     # All 4 servers should still be monitored
     assert len(server_ids) == 4

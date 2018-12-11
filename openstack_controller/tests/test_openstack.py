@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import copy
 import time
 import mock
 from . import common
@@ -33,53 +32,6 @@ def test_cache_utils(aggregator):
         assert check._is_expired('aggregates')
 
 
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
-            return_value=common.MOCK_NOVA_SERVERS)
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
-            return_value="tenant-1")
-def test_cache_between_runs(servers_detail, project_name_from_id, aggregator):
-    """
-    Ensure the cache contains the expected VMs between check runs.
-    """
-
-    check = OpenStackControllerCheck("test", {
-        'keystone_server_url': 'http://10.0.2.15:5000',
-        'ssl_verify': False,
-        'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=common.MOCK_CONFIG)
-
-    # Start off with a list of servers
-    check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
-    # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers(None, "test_instance")
-
-    cached_servers = check.server_details_by_id
-    assert 'server-1' not in cached_servers
-    assert 'server_newly_added' in cached_servers
-
-
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
-            return_value=common.MOCK_NOVA_SERVERS)
-@mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_project_name_from_id',
-            return_value="None")
-def test_project_name_none(servers_detail, project_name_from_id, aggregator):
-    """
-    Ensure the cache contains the expected VMs between check runs.
-    """
-    check = OpenStackControllerCheck("test", {
-        'keystone_server_url': 'http://10.0.2.15:5000',
-        'ssl_verify': False,
-        'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=common.MOCK_CONFIG)
-
-    # Start off with a list of servers
-    check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
-    # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers(None, "test_instance")
-    assert 'server_newly_added' in check.server_details_by_id
-    assert 'server-1' not in check.server_details_by_id
-
-
 def get_server_details_response(params, timeout=None):
     if 'marker' not in params:
         return common.MOCK_NOVA_SERVERS_PAGINATED
@@ -101,9 +53,9 @@ def test_get_paginated_server(servers_detail, project_name_from_id, aggregator):
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
     }, {}, instances=common.MOCK_CONFIG)
-    check.get_all_servers(None, "test_instance")
-    assert len(check.server_details_by_id) == 1
-    assert 'server-1' in check.server_details_by_id
+    check.get_all_servers(True, "test_name")
+    assert len(check.servers_cache) == 1
+    assert 'server-1' in check.servers_cache['test_name']['servers']
 
 
 OS_AGGREGATES_RESPONSE = [
