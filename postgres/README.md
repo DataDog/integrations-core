@@ -150,83 +150,15 @@ The PostgreSQL check does not include any events at this time.
 
 Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance. Returns `OK` otherwise.
 
-
-## Troubleshooting
-
+## Further Reading
+### FAQ
 * [PostgreSQL custom metric collection explained][19]
 
-## Further Reading
 ### Blog posts
 * To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts][20] about it.
 * [Key metrics for PostgreSQL monitoring][21]
 * [Collecting metrics with PostgreSQL monitoring tools][22]
 * [How to collect and monitor PostgreSQL data with Datadog][23]
-
-### Knowledge Base
-#### Custom metrics
-
-The Agent generates PostgreSQL metrics from custom query results. For each custom query, four components are required: `descriptors`, `metrics`, `query`, and `relation`.
-
-* **`query`** is where you'll construct a base SELECT statement to generate your custom metrics. Each column name in your SELECT query should have a corresponding item in the `descriptors` section. Each item in `metrics` will be substituted for the first `%s` in the query.
-* **`metrics`** are key-value pairs where the key is the query column name or column function and the value is a tuple containing the custom metric name and metric type (`RATE`, `GAUGE`, or `MONOTONIC`). In the example below, the results of the sum of the `idx_scan` column will appear in Datadog  with the metric name `postgresql.idx_scan_count_by_table`.
-* **`descriptors`** is used to add tags to your custom metrics. It's a list of lists each containing 2 strings. The first string is for documentation purposes and should be used to make clear what you are getting from the query. The second string will be the tag name. For multiple tags, include additional columns in your `query` string and a corresponding item in the `descriptors`. The order of items in `descriptors` must match the columns in `query`.
-* **`relation`** indicates whether to include schema relations specified in the [`relations` configuration option](#configuration-options). If set to `true`, the second `%s` in `query` will be set to the list of schema names specified in the `relations` configuration option.
-
-##### Example 1
-
-```
-custom_metrics:
-  # All index scans & reads
-  - descriptors:
-      - [relname, table]
-      - [schemaname, schema]
-    metrics:
-        SUM(idx_scan) as idx_scan_count: [postgresql.idx_scan_count_by_table, RATE]
-        SUM(idx_tup_read) as idx_read_count: [postgresql.idx_read_count_by_table, RATE]
-    query: SELECT relname, schemaname, %s FROM pg_stat_all_indexes GROUP BY relname, schemaname;
-    relation: false
-```
-
-The example above runs two queries in PostgreSQL:
-
-* `SELECT relname, SUM(idx_scan) as idx_scan_count FROM pg_stat_all_indexes GROUP BY relname;` will generate a rate metric `postgresql.idx_scan_count_by_table`.
-* `SELECT relname, SUM(idx_tup_read) as idx_read_count FROM pg_stat_all_indexes GROUP BY relname;` will generate a rate metric `postgresql.idx_read_count_by_table`.
-
-Both metrics use the tags `table` and `schema` with values from the results in the `relname` and `schemaname` columns respectively. e.g. `table: <relname>`
-
-N.B.: **If you're using Agent version 5**, `SUM()` needs to be mapped as `int` using `::bigint`. If not the metrics won't be collected. `SUM()` retrieves a numeric type which is mapped as Decimal type by Python so it has to be mapped as an `int` to be collected.
-
-##### Example 2
-
-The `postgres.yaml.example` file includes an example for the SkyTools 3 Londoniste replication tool:
-
-```
-custom_metrics:
-  # Londiste 3 replication lag
-  - descriptors:
-      - [consumer_name, consumer_name]
-    metrics:
-        GREATEST(0, EXTRACT(EPOCH FROM lag)) as lag: [postgresql.londiste_lag, GAUGE]
-        GREATEST(0, EXTRACT(EPOCH FROM lag)) as last_seen: [postgresql.londiste_last_seen, GAUGE]
-        pending_events: [postgresql.londiste_pending_events, GAUGE]
-    query:
-        SELECT consumer_name, %s from pgq.get_consumer_info() where consumer_name !~ 'watermark$';
-    relation: false
-```
-
-##### Debugging
-
-[Run the Agent's `status` subcommand][17] and look for `postgres` under the Checks section:
-
-```
-postgres
---------
-  - instance #0 [ERROR]: 'Missing relation parameter in custom metric'
-  - Collected 0 metrics, 0 events & 0 service checks
-```
-
-You should also check the `/var/log/datadog/collector.log` file for more information.
-
 
 [13]: https://app.datadoghq.com/account/settings#agent
 [14]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
