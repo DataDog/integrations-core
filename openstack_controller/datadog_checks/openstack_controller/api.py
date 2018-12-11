@@ -14,12 +14,19 @@ UNSCOPED_AUTH = 'unscoped'
 class AbstractApi(object):
     DEFAULT_API_REQUEST_TIMEOUT = 10  # seconds
 
-    def __init__(self, logger, ssl_verify, proxy_config):
+    def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
         self.logger = logger
         self.ssl_verify = ssl_verify
         self.proxy_config = proxy_config
+        self.endpoint = endpoint
+        self.auth_token = auth_token
+        self.headers = {'X-Auth-Token': auth_token}
         # Cache for the `_make_request` method
         self.cache = {}
+
+    def get_endpoint(self):
+        self._make_request(self.endpoint, self.headers)
+        return
 
     def _make_request(self, url, headers, params=None, timeout=DEFAULT_API_REQUEST_TIMEOUT):
         """
@@ -55,7 +62,6 @@ class AbstractApi(object):
                 raise e
         jresp = resp.json()
         self.logger.debug("url: %s || response: %s", url, jresp)
-        # print("url: %s || response: %s" %(url, jresp))
 
         # Adding response to the cache
         self.cache[cache_key] = jresp
@@ -64,10 +70,7 @@ class AbstractApi(object):
 
 class ComputeApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config)
-        self.endpoint = endpoint
-        self.auth_token = auth_token
-        self.headers = {'X-Auth-Token': auth_token}
+        super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
 
     def get_endpoint(self):
         self._make_request(self.endpoint, self.headers)
@@ -105,14 +108,7 @@ class ComputeApi(AbstractApi):
 
 class NeutronApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(NeutronApi, self).__init__(logger, ssl_verify, proxy_config)
-        self.endpoint = endpoint
-        self.auth_token = auth_token
-        self.headers = {'X-Auth-Token': auth_token}
-
-    def get_endpoint(self):
-        self._make_request(self.endpoint, self.headers)
-        return
+        super(NeutronApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
 
     def get_networks(self):
         url = '{}/{}/networks'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION)
@@ -127,9 +123,7 @@ class NeutronApi(AbstractApi):
 
 class KeystoneApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(KeystoneApi, self).__init__(logger, ssl_verify, proxy_config)
-        self.endpoint = endpoint
-        self.auth_token = auth_token
+        super(KeystoneApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
 
     def post_auth_token(self, identity, scope=UNSCOPED_AUTH):
         auth_url = urljoin(self.endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
@@ -161,11 +155,9 @@ class KeystoneApi(AbstractApi):
         auth_url = ""
         try:
             auth_url = urljoin(self.endpoint, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
-            headers = {'X-Auth-Token': self.auth_token}
-
             resp = requests.get(
                 auth_url,
-                headers=headers,
+                headers=self.headers,
                 verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
                 proxies=self.proxy_config
@@ -186,7 +178,6 @@ class KeystoneApi(AbstractApi):
         """
         Returns all projects in the domain
         """
-        # The project token (not keystone)
         url = urljoin(self.endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
         headers = {'X-Auth-Token': project_token}
         try:
