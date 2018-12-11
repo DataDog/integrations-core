@@ -121,7 +121,19 @@ queues:
 
 #### Logs
 
+To set up logs, you will want to point the config file to the proper log files. You can uncomment the lines at the bottom of the config file, and amend them as you see fit:
 
+```yaml
+logs:
+  - type: file
+    path: /var/mqm/log/<APPNAME>/active/AMQERR01.LOG
+    service: <APPNAME>
+    source: ibm_mq
+    log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_date
+        pattern: "\d{2}/\d{2}/\d{4}"
+```
 
 ### Validation
 
