@@ -54,25 +54,24 @@ def cassandra_cluster():
     env['CONTAINER_PORT'] = common.PORT
 
     # We need to restrict permission on the password file
-    # Reset permissions on teardown
-
+    # Create a temporary file so if we have to run tests more than once on a machine
+    # the original file's perms aren't modified
     temp_jmx_pass = tempfile.NamedTemporaryFile(dir="/tmp")
     jmx_pass_file = os.path.join(common.HERE, "compose", 'jmxremote.password')
-    jmx_pass = open(jmx_pass_file, "r")
+    jmx_pass = open(jmx_pass_file, "rb")
 
     temp_jmx_pass.write(jmx_pass.read())
-
-    # shutil.copy2(os.path.join(common.HERE, 'compose', 'jmxremote.password'), temp_jmx_pass)
+    temp_jmx_pass.flush()
+    os.fsync(temp_jmx_pass)
+    jmx_pass.close()
 
     env['JMX_PASS_FILE'] = temp_jmx_pass.name
     os.chmod(temp_jmx_pass.name, stat.S_IRWXU)
-
     docker_compose_args = [
         "docker-compose",
         "-f", os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     ]
     subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME])
-
     # wait for the cluster to be up before yielding
     if not wait_on_docker_logs(
             common.CASSANDRA_CONTAINER_NAME,
@@ -99,5 +98,10 @@ def cassandra_cluster():
         "-e", "CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}"
     ])
     yield
+
+    try:
+        temp_jmx_pass.close()
+    except OSError:
+        pass
 
     subprocess.check_call(docker_compose_args + ["down"])
