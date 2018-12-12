@@ -53,8 +53,6 @@ def check():
 
 
 def setup_sharding(compose_file):
-    run_command(['docker-compose', '-f', compose_file, 'logs'], check=True)
-
     service_commands = [
         ('config01', 'mongo --port 27017 < /scripts/init-configserver.js'),
         ('shard01a', 'mongo --port 27018 < /scripts/init-shard01.js'),
