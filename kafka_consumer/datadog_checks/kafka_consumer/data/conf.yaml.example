@@ -1,49 +1,56 @@
 init_config:
-  # Customize the ZooKeeper connection timeout here
-  # zk_timeout: 5
-  # Customize the Kafka connection timeout here
+  # Customize the Kafka connection timeout here (in seconds)
   # kafka_timeout: 5
-  # Customize max number of retries per failed query to Kafka
-  # kafka_retries: 3
+
+  # Customize the ZooKeeper connection timeout here (in seconds)
+  # zk_timeout: 5
+
   # Customize the number of seconds that must elapse between running this check.
-  # When checking Kafka offsets stored in Zookeeper, a single run of this check
+  # When checking Kafka consumer offsets stored in Zookeeper, a single run of this check
   # must stat zookeeper more than the number of consumers * topic_partitions
   # that you're monitoring. If that number is greater than 100, it's recommended
   # to increase this value to avoid hitting zookeeper too hard.
-  # https://docs.datadoghq.com/agent/faq/how-do-i-change-the-frequency-of-an-agent-check/
-  # min_collection_interval: 600
-  #
-  # Please note that to avoid blindly collecting offsets and lag for an
-  # unbounded number of partitions (as could be the case after introducing
-  # the self discovery of consumer groups, topics and partitions) the check
-  # will collect at metrics for at most 200 partitions.
-
+  # https://docs.datadoghq.com/developers/write_agent_check/?tab=agentv5#collection-interval
+  # min_collection_interval: 90
 
 instances:
+  # NOTE:
+  #   Old Kafka consumers store their offsets in Zookeeper.
+  #   New Kafka consumers store their offsets in Kafka itself.
+  #   This check can fetch offsets from either location (or both).
+  #   If consumer offsets exist in both Zookeeper and Kafka, they will
+  #   both be submitted and can be differentiated using the `source` tag.
+  #
+  #   For each check instance, you can explicitly list the consumer
+  #   groups / topics / partitions for which you want to fetch offsets,
+  #   or you can set the param `monitor_unlisted_consumer_groups` to True
+  #   and the check will attempt to fetch all known offsets.
+  #
+  # Here is the decision tree the check will use to decide which offsets to fetch from where:
+  #   Zookeeper:
+  #     - If `zk_connect_str` is specified, fetch consumer offsets from Zookeeper:
+  #       - If `monitor_unlisted_consumer_groups` is True:
+  #           Fetch all consumer offsets stored in Zookeeper
+  #       - Else:
+  #           Fetch the specified `consumer_groups` from Zookeeper. It will constrain itself
+  #           to whatever granularity you specify in consumer_groups/topics/partitions
+  #   Kafka:
+  #     - If `zk_connect_str` is not specified or `kafka_consumer_offsets` is True, fetch consumer offsets from Kafka:
+  #       - If `monitor_unlisted_consumer_groups` is True and broker >= 0.10.2:
+  #           Fetch all consumer offsets stored in Kafka
+  #       - If not `monitor_unlisted_consumer_groups` or broker < 0.10.2:
+  #           Fetch the specified `consumer_groups` from Kafka. It will constrain itself
+  #           to whatever granularity you specify in consumer_groups/topics/partitions.
+  #
   # In a production environment, it's often useful to specify multiple
   # Kafka / Zookeper nodes for a single check instance. This way you
   # only generate a single check process, but if one host goes down,
   # KafkaClient / KazooClient will try contacting the next host.
   # Details: https://github.com/DataDog/dd-agent/issues/2943
-  #
-  # If you wish to only collect consumer offsets from kafka, because
-  # you're using the new style consumers, you can comment out all
-  # zk_* configuration elements below.
-  # Please note that unlisted consumer groups are not supported at
-  # the moment when zookeeper consumer offset collection is disabled.
   - kafka_connect_str:
       - localhost:9092
       - another_kafka_broker:9092
-    zk_connect_str:
-      - localhost:2181
-      - another_zookeeper:2181
-    # zk_iteration_ival: 1  # how many seconds between ZK consumer offset
-                            # collections. If kafka consumer offsets disabled
-                            # this has no effect.
-    # zk_prefix: /0.8
-
-    # SSL Configuration
-
+    ## SSL Configuration ##
     # ssl_cafile: /path/to/pem/file
     # security_protocol: PLAINTEXT
     # ssl_check_hostname: True
@@ -51,25 +58,52 @@ instances:
     # ssl_keyfile: /path/to/key/file
     # ssl_password: password1
 
-    # kafka_consumer_offsets: false
+    # Explicitly pin the version of the Kafka protocol that this check
+    # uses when communicating with the Kafka cluster. If this is not set,
+    # the first few check iterations may throw transient errors while
+    # kafka-python probes your cluster to identify the version.
+    # kafka_client_api_version: [2, 1, 0]
+
+    # Uncomment this if you want to fetch consumer offsets from Zookeeper:
+    # zk_connect_str:
+    #   - localhost:2181
+    #   - another_zookeeper:2181
+    # zk_prefix: /0.8
+    # If you uncommented the above to enable fetching consumer offsets
+    # from Zookeeper and you want to simultaneously fetch consumer
+    # offsets from Kafka, you must set `kafka_consumer_offsets` to True.
+    # kafka_consumer_offsets: False
+
     consumer_groups:
       my_consumer:  # consumer group name
         my_topic: [0, 1, 4, 12]  # topic_name: list of partitions
-      # Note that each level of values is optional (this is currently only available
-      # when using zookeeper to store consumer groups). Any omitted values will be
-      # fetched from Zookeeper. You can omit partitions (example: myconsumer2),
+      # Note that each level of values is optional. Any omitted values will be
+      # fetched from Kafka / Zookeeper. You can omit partitions (example: myconsumer2),
       # topics (example: myconsumer3), and even consumer_groups. If you omit
       # consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
       # If a value is omitted, the parent value must still be it's expected type,
-      # which is typically a dict.
+      # which is typically a dictionary.
       myconsumer2:
         mytopic0:
       myconsumer3:
-    # Setting monitor_unlisted_consumer_groups to True will tell the check to
-    # discover and fetch all offsets for all consumer groups stored in zookeeper.
-    # While this is convenient, it can also put a lot of load on zookeeper, so
-    # use judiciously.
+
+    # To discover and fetch all offsets for all consumer groups, set
+    # `monitor_unlisted_consumer_groups` to True.
+    #
+    # NOTE:
+    # To avoid blindly collecting offsets and lag for an unbounded number of
+    # partitions (which can happen after enabling `monitor_unlisted_consumer_groups`)
+    # the check will collect metrics for at most 200 partitions.
+    #
+    # WARNING:
+    # If the Kafka cluster version < 0.10.2, `monitor_unlisted_consumer_groups`
+    # will be ignored when fetching consumer offsets stored in Kafka because it
+    # is impossible to determine the mapping of consumer groups to topics. You
+    # must list both the consumer group(s) and the topic(s) they consume.
+    # For details, see KIP-88.
+    # Consumer offsets that are stored in Zookeeper are not affected by this.
     monitor_unlisted_consumer_groups: False
+
     # Setting tags will allow custom tags to be sent with metrics.
     # tags:
     #   - optional:tag1
