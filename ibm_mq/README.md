@@ -119,7 +119,7 @@ queues:
   - ADMIN.QUEUE.1
 ```
 
-#### Logs
+#### Log Collection
 
 Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
