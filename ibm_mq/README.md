@@ -20,7 +20,7 @@ export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
 
 *Note*: Agent 6 uses Upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of /etc/init/datadog-agent.conf (Upstart) or /lib/systemd/system/datadog-agent.service (systemd). See documentation on Upstart or systemd for more information on how to configure these settings.
 
-Here's an example of the configuration that's used for Systemd:
+Here's an example of the configuration that's used for systemd:
 
 ```yaml
 [Unit]
