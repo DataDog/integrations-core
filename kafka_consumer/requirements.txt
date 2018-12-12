@@ -4,9 +4,9 @@
 #
 #    pip-compile --generate-hashes --output-file requirements.txt requirements.in
 #
-kafka-python==1.4.3 \
-    --hash=sha256:078acdcd1fc6eddacc46d437c664998b4cf7613b7e79ced66a460965f2648f88 \
-    --hash=sha256:0b56f286b674dcb331d80c1d39a01a753cc3acc962bee707da5f207db74f0a26
+kafka-python==1.4.4 ; sys_platform != "win32" \
+    --hash=sha256:2014bbbe618f3224e68b07cf9b44c702b28913c551e6f63246bf9b4477ca3add \
+    --hash=sha256:99c4ff3b69f6e959307d1184e6ece8276b5e3f52cab0e8919dbd61e79914ec1c
 kazoo==2.4.0 \
     --hash=sha256:a29fa579812a2c5dd8241eafb8328b8a8673f140903a6102e017129aa223d0c7 \
     --hash=sha256:a7c2d1d7ddb047c936d368e31b08a93bb327ffa46606fe85f550a37ce608c29b
