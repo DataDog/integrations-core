@@ -42,8 +42,8 @@ class KafkaCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'kafka'
 
-    def __init__(self, name, init_config, instances=None):
-        super(KafkaCheck, self).__init__(self, name, init_config, instances)
+    def __init__(self, name, init_config, instances):
+        super(KafkaCheck, self).__init__(name, init_config, instances)
         self._zk_timeout = int(init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self._kafka_timeout = int(init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
         self.context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
