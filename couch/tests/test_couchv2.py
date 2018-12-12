@@ -13,6 +13,8 @@ import threading
 import pytest
 import requests
 
+from six import PY2
+
 from datadog_checks.couch import CouchDb
 from . import common
 
@@ -22,10 +24,16 @@ pytestmark = pytest.mark.v2
 @pytest.fixture(scope="module")
 def gauges():
     res = defaultdict(list)
-    with open("{}/../metadata.csv".format(common.HERE), "rb") as csvfile:
+    if PY2:
+        mode = "rb"
+    else:
+        mode = "r"
+
+    with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             if row[0] == 'metric_name':
+                # skip the header
                 continue
             elif row[0] in ["couchdb.couchdb.request_time", "couchdb.by_db.disk_size"]:
                 # Skip CouchDB 1.x specific metrics
