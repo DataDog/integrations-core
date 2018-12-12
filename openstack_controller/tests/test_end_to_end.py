@@ -114,9 +114,6 @@ def test_scenario(make_request, aggregator):
                         return_value=auth_projects_response):
             check.check(common.MOCK_CONFIG['instances'][0])
 
-            for m in aggregator.not_asserted():
-                print(m)
-
             aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                      tags=['nova_managed_server', 'project_name:admin',
                                            'hypervisor:compute7.openstack.local', 'server_name:finalDestination-4',
