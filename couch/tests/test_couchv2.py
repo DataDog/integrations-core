@@ -24,9 +24,10 @@ def gauges():
     res = defaultdict(list)
     with open("{}/../metadata.csv".format(common.HERE), "rb") as csvfile:
         reader = csv.reader(csvfile)
-        next(reader)  # This one skips the headers
         for row in reader:
-            if row[0] in ["couchdb.couchdb.request_time", "couchdb.by_db.disk_size"]:
+            if row[0] == 'metric_name':
+                continue
+            elif row[0] in ["couchdb.couchdb.request_time", "couchdb.by_db.disk_size"]:
                 # Skip CouchDB 1.x specific metrics
                 continue
             elif row[0].startswith("couchdb.by_db."):
