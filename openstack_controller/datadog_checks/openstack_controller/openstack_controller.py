@@ -718,40 +718,40 @@ class OpenStackControllerCheck(AgentCheck):
                 if project and project.get('name'):
                     projects[project.get('name')] = project
 
-                if collect_limits_from_all_projects:
-                    scope_projects = self.get_projects(project_scope.auth_token)
-                    if scope_projects:
-                        for proj in scope_projects:
-                            projects[proj['name']] = proj
+            if collect_limits_from_all_projects:
+                scope_projects = self.get_projects(project_scope.auth_token)
+                if scope_projects:
+                    for proj in scope_projects:
+                        projects[proj['name']] = proj
 
-                filtered_projects = pattern_filter([p for p in projects],
-                                                   whitelist=self.include_project_name_rules,
-                                                   blacklist=self.exclude_project_name_rules)
+            filtered_projects = pattern_filter([p for p in projects],
+                                               whitelist=self.include_project_name_rules,
+                                               blacklist=self.exclude_project_name_rules)
 
-                projects = {name: v for (name, v) in iteritems(projects) if name in filtered_projects}
+            projects = {name: v for (name, v) in iteritems(projects) if name in filtered_projects}
 
-                for name, project in iteritems(projects):
-                    self.get_stats_for_single_project(project, custom_tags)
+            for name, project in iteritems(projects):
+                self.get_stats_for_single_project(project, custom_tags)
 
-                self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
-                                                   use_shortname=use_shortname,
-                                                   collect_hypervisor_load=collect_hypervisor_load)
+            self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
+                                               use_shortname=use_shortname,
+                                               collect_hypervisor_load=collect_hypervisor_load)
 
-                # This updates the server cache directly
-                self.get_all_servers(project_scope.auth_token, instance_name)
-                self.filter_excluded_servers()
+            # This updates the server cache directly
+            self.get_all_servers(project_scope.auth_token, instance_name)
+            self.filter_excluded_servers()
 
-                # Deep copy the cache so we can remove things from the Original during the iteration
-                # Allows us to remove bad servers from the cache if need be
-                server_cache_copy = copy.deepcopy(self.server_details_by_id)
+            # Deep copy the cache so we can remove things from the Original during the iteration
+            # Allows us to remove bad servers from the cache if need be
+            server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
-                self.log.debug("Fetch stats from %s server(s)" % len(server_cache_copy))
-                for server in server_cache_copy:
-                    server_tags = copy.deepcopy(custom_tags)
-                    server_tags.append("nova_managed_server")
+            self.log.debug("Fetch stats from %s server(s)" % len(server_cache_copy))
+            for server in server_cache_copy:
+                server_tags = copy.deepcopy(custom_tags)
+                server_tags.append("nova_managed_server")
 
-                    self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags,
-                                                     use_shortname=use_shortname)
+                self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags,
+                                                 use_shortname=use_shortname)
 
             # For now, monitor all networks
             self.get_network_stats(custom_tags)
