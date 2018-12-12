@@ -406,7 +406,7 @@ def test_view_compaction_metrics(aggregator, check, gauges, couch_cluster):
                     self.compact_views()
                 theid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
                 docs.append(self.post_doc(theid))
-                docs = map(lambda x: self.update_doc(x), docs)
+                docs = list(map(lambda x: self.update_doc(x), docs))
                 self.generate_views()
 
         def generate_views(self):
@@ -481,7 +481,7 @@ def test_view_compaction_metrics(aggregator, check, gauges, couch_cluster):
                 check.check(config)
 
             for m_name in aggregator._metrics:
-                if re.search(r'view_compaction\.progress', m_name) is not None:
+                if re.search(r'view_compaction\.progress', str(m_name)) is not None:
                     metric_found = True
                     for gauge in gauges["view_compaction_tasks_gauges"]:
                         aggregator.assert_metric(gauge)
