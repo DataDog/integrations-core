@@ -11,12 +11,11 @@ from datetime import datetime, timedelta
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.utils.common import pattern_filter
-from datadog_checks.utils.tracing import traced
 
 from .scopes import ScopeFetcher
 from .api import ComputeApi, NeutronApi, KeystoneApi
 from .settings import DEFAULT_API_REQUEST_TIMEOUT
-from .utils import get_instance_name
+from .utils import get_instance_name, traced
 from .retry import BackOffRetry
 from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
                          MissingNeutronEndpoint, KeystoneUnreachable, AuthenticationNeeded)
@@ -132,6 +131,7 @@ class OpenStackControllerCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
         self.keystone_server_url = init_config.get("keystone_server_url")
+
         if not self.keystone_server_url:
             raise IncompleteConfig()
         self.proxy_config = self.get_instance_proxy(init_config, self.keystone_server_url)
@@ -646,58 +646,67 @@ class OpenStackControllerCheck(AgentCheck):
             # Init instance_scope
             self.instance_scope = self.get_instance_scope(instance)
             project_scopes = self.get_project_scopes(instance)
-            for _, project_scope in iteritems(project_scopes):
-                self.log.debug("Running check with credentials: \n")
-                self.log.debug("Nova Url: %s", project_scope.nova_endpoint)
-                self.log.debug("Neutron Url: %s", project_scope.neutron_endpoint)
-                self._neutron_api = NeutronApi(self.log,
-                                               self.ssl_verify,
-                                               self.proxy_config,
-                                               project_scope.neutron_endpoint,
-                                               project_scope.auth_token)
-                self._compute_api = ComputeApi(self.log,
-                                               self.ssl_verify,
-                                               self.proxy_config,
-                                               project_scope.nova_endpoint,
-                                               project_scope.auth_token)
 
-                self._send_api_service_checks(project_scope, custom_tags)
+            # TODO: The way we fetch projects will be changed in another PR.
+            # Having this for loop result may result (depending on how permission arr set) on duplicate metrics.
+            # This is a temporary hack, instead we will just pop the first element
+            # for _, project_scope in iteritems(project_scopes):
+            _, project_scope = project_scopes.popitem()
+            if not project_scope:
+                self.log.info("Not project found, make sure you admin user has access to your OpenStack projects: \n")
+                return
 
-                # List projects and filter them
-                # TODO: NOTE: During authentication we use /v3/auth/projects and here we use /v3/projects.
-                # TODO: These api don't seems to return the same thing however the latter contains the former.
-                # TODO: Is this expected or could we just have one call with proper config?
-                projects = self.get_projects(project_scope.auth_token,
-                                             self.include_project_name_rules,
-                                             self.exclude_project_name_rules)
+            self.log.debug("Running check with credentials: \n")
+            self.log.debug("Nova Url: %s", project_scope.nova_endpoint)
+            self.log.debug("Neutron Url: %s", project_scope.neutron_endpoint)
+            self._neutron_api = NeutronApi(self.log,
+                                           self.ssl_verify,
+                                           self.proxy_config,
+                                           project_scope.neutron_endpoint,
+                                           project_scope.auth_token)
+            self._compute_api = ComputeApi(self.log,
+                                           self.ssl_verify,
+                                           self.proxy_config,
+                                           project_scope.nova_endpoint,
+                                           project_scope.auth_token)
 
-                if collect_project_metrics:
-                    for name, project in iteritems(projects):
-                        self.collect_project_limit(project, custom_tags)
+            self._send_api_service_checks(project_scope, custom_tags)
 
-                self.collect_hypervisors_metrics(custom_tags=custom_tags,
-                                                 use_shortname=use_shortname,
-                                                 collect_hypervisor_metrics=collect_hypervisor_metrics,
-                                                 collect_hypervisor_load=collect_hypervisor_load)
+            # List projects and filter them
+            # TODO: NOTE: During authentication we use /v3/auth/projects and here we use /v3/projects.
+            # TODO: These api don't seems to return the same thing however the latter contains the former.
+            # TODO: Is this expected or could we just have one call with proper config?
+            projects = self.get_projects(project_scope.auth_token,
+                                         self.include_project_name_rules,
+                                         self.exclude_project_name_rules)
 
-                if collect_server_metrics:
-                    # This updates the server cache directly
-                    tenant_id_to_name = {}
-                    for name, p in iteritems(projects):
-                        tenant_id_to_name[p.get('id')] = name
-                    self.get_all_servers(tenant_id_to_name, instance_name)
+            if collect_project_metrics:
+                for name, project in iteritems(projects):
+                    self.collect_project_limit(project, custom_tags)
 
-                    # Deep copy the cache so we can remove things from the Original during the iteration
-                    # Allows us to remove bad servers from the cache if need be
-                    server_cache_copy = copy.deepcopy(self.server_details_by_id)
+            self.collect_hypervisors_metrics(custom_tags=custom_tags,
+                                             use_shortname=use_shortname,
+                                             collect_hypervisor_metrics=collect_hypervisor_metrics,
+                                             collect_hypervisor_load=collect_hypervisor_load)
 
-                    self.log.debug("Fetch stats from %s server(s)" % len(server_cache_copy))
-                    for server in server_cache_copy:
-                        server_tags = copy.deepcopy(custom_tags)
-                        server_tags.append("nova_managed_server")
+            if collect_server_metrics:
+                # This updates the server cache directly
+                tenant_id_to_name = {}
+                for name, p in iteritems(projects):
+                    tenant_id_to_name[p.get('id')] = name
+                self.get_all_servers(tenant_id_to_name, instance_name)
 
-                        self.collect_server_metrics(server_cache_copy[server], tags=server_tags,
-                                                    use_shortname=use_shortname)
+                # Deep copy the cache so we can remove things from the Original during the iteration
+                # Allows us to remove bad servers from the cache if need be
+                server_cache_copy = copy.deepcopy(self.server_details_by_id)
+
+                self.log.debug("Fetch stats from %s server(s)" % len(server_cache_copy))
+                for server in server_cache_copy:
+                    server_tags = copy.deepcopy(custom_tags)
+                    server_tags.append("nova_managed_server")
+
+                    self.collect_server_metrics(server_cache_copy[server], tags=server_tags,
+                                                use_shortname=use_shortname)
 
             if collect_network_metrics:
                 self.collect_networks_metrics(custom_tags)
