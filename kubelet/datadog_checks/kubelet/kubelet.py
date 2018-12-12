@@ -125,6 +125,14 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         if endpoint is None:
             raise CheckException("Unable to detect the kubelet URL automatically.")
 
+        self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
+        self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
+        self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
+        self.instance_tags = instance.get('tags', [])
+
+        # Test the kubelet health ASAP
+        self._perform_kubelet_check(self.instance_tags)
+
         if 'cadvisor_metrics_endpoint' in instance:
             self.cadvisor_scraper_config['prometheus_url'] = \
                 instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
@@ -137,10 +145,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         self.kubelet_scraper_config['prometheus_url'] = instance.get('kubelet_metrics_endpoint',
                                                                      urljoin(endpoint, KUBELET_METRICS_PATH))
-
-        self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
-        self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
-        self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
 
         # Kubelet credentials handling
         self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
@@ -160,8 +164,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.pod_list = self.retrieve_pod_list()
         self.pod_list_utils = PodListUtils(self.pod_list)
 
-        self.instance_tags = instance.get('tags', [])
-        self._perform_kubelet_check(self.instance_tags)
         self._report_node_metrics(self.instance_tags)
         self._report_pods_running(self.pod_list, self.instance_tags)
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
