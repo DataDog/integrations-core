@@ -18,18 +18,22 @@ class ScopeFetcher(object):
             raise IncompleteConfig()
 
         ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
+        # Make Token authentication with explicit unscoped authorization
         auth_token = cls._get_auth_response_from_config(logger, init_config, instance_config, proxy_config=proxy_config)
         keystone_api = KeystoneApi(logger, ssl_verify, proxy_config, keystone_server_url, auth_token)
-        # list all projects
+
+        # List all projects using retrieved auth token
         projects = keystone_api.get_auth_projects()
 
-        # for each project, we create an OpenStackProject object that we add to the `project_scopes` dict
+        # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict
         project_scopes = {}
         for project in projects:
             identity = {"methods": ['token'], "token": {"id": auth_token}}
             scope = {'project': {'id': project.get('id')}}
+            # Make Token authentication with project id scoped authorization
             token_resp = keystone_api.post_auth_token(identity, scope=scope)
 
+            # Retrieved token, nova and neutron endpoints
             project_auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json())
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json())
