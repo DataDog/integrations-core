@@ -4,5 +4,6 @@
 #
 #    pip-compile --generate-hashes --output-file requirements.txt requirements.in
 #
-dnspython==1.12.0 \
-    --hash=sha256:63bd1fae61809eedb91f84b2185816fac1270ae51494fbdd36ea25f904a8502f
+dnspython==1.16.0 \
+    --hash=sha256:36c5e8e38d4369a08b6780b7f27d790a292b2b08eea01607865bf0936c558e01 \
+    --hash=sha256:f69c21288a962f4da86e56c4905b49d11aba7938d3d740e80d9e366ee4f1632d
