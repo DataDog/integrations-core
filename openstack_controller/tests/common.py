@@ -286,7 +286,7 @@ MOCK_NOVA_SERVERS = [
         "name": "newly_added_server",
         "status": "ACTIVE",
         "tags": [],
-        "tenant_id": "6f70656e737461636b20342065766573",
+        "tenant_id": "6f70656e737461636b20342065766572",
         "updated": "2017-02-14T19:24:43Z",
         "user_id": "fake"
     }

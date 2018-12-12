@@ -49,12 +49,16 @@ def test_get_all_servers_between_runs(servers_detail, aggregator):
     # Start off with a list of servers
     check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers({'6f70656e737461636b20342065766572': 'new-server-test',
-                           '6f70656e737461636b20342065766573': 'server_newly_added'}, "test_instance")
+    check.get_all_servers({'6f70656e737461636b20342065766572': 'testproj',
+                           'blacklist_1': 'blacklist_1',
+                           'blacklist_2': 'blacklist_2'}, "test_instance")
 
     cached_servers = check.server_details_by_id
+    print(cached_servers)
     assert 'server-1' not in cached_servers
     assert 'server_newly_added' in cached_servers
+    assert 'other-1' in cached_servers
+    assert 'other-2' in cached_servers
 
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
@@ -72,10 +76,13 @@ def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
     # Start off with a list of servers
     check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers({'6f70656e737461636b20342065766573': "server_newly_added",
-                           '6f70656e737461636b20342065766572': None}, "test_instance")
-    assert 'server_newly_added' in check.server_details_by_id
+    check.get_all_servers({'6f70656e737461636b20342065766572': None,
+                           'blacklist_1': 'blacklist_1',
+                           'blacklist_2': 'blacklist_2'}, "test_instance")
+    assert 'server_newly_added' not in check.server_details_by_id
     assert 'server-1' not in check.server_details_by_id
+    assert 'other-1' in check.server_details_by_id
+    assert 'other-2' in check.server_details_by_id
 
 
 def get_server_details_response(params, timeout=None):
@@ -97,9 +104,11 @@ def test_get_all_servers_with_paginated_server(servers_detail, aggregator):
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
     }, {}, instances=common.MOCK_CONFIG)
-    check.get_all_servers({"6f70656e737461636b20342065766572": "server-1"}, "test_instance")
+    check.get_all_servers({"6f70656e737461636b20342065766572": "testproj"}, "test_instance")
     assert len(check.server_details_by_id) == 1
     assert 'server-1' in check.server_details_by_id
+    assert 'other-1' not in check.server_details_by_id
+    assert 'other-2' not in check.server_details_by_id
 
 
 OS_AGGREGATES_RESPONSE = [
