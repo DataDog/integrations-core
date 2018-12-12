@@ -725,8 +725,8 @@ class OpenStackControllerCheck(AgentCheck):
                         projects[proj['name']] = proj
 
             filtered_projects = pattern_filter([p for p in projects],
-                                                whitelist=self.include_project_name_rules,
-                                                blacklist=self.exclude_project_name_rules)
+                                               whitelist=self.include_project_name_rules,
+                                               blacklist=self.exclude_project_name_rules)
 
             projects = {name: v for (name, v) in iteritems(projects) if name in filtered_projects}
 
@@ -734,8 +734,8 @@ class OpenStackControllerCheck(AgentCheck):
                 self.get_stats_for_single_project(project, custom_tags)
 
             self.get_stats_for_all_hypervisors(instance, custom_tags=custom_tags,
-                                                use_shortname=use_shortname,
-                                                collect_hypervisor_load=collect_hypervisor_load)
+                                               use_shortname=use_shortname,
+                                               collect_hypervisor_load=collect_hypervisor_load)
 
             # This updates the server cache directly
             self.get_all_servers(project_scope.auth_token, instance_name)
@@ -751,7 +751,7 @@ class OpenStackControllerCheck(AgentCheck):
                 server_tags.append("nova_managed_server")
 
                 self.get_stats_for_single_server(server_cache_copy[server], tags=server_tags,
-                                                    use_shortname=use_shortname)
+                                                 use_shortname=use_shortname)
 
             # For now, monitor all networks
             self.get_network_stats(custom_tags)
