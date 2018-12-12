@@ -1,7 +1,15 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+# flake8: noqa
 import shutil
+
+# NOTE: Set one minute for any GPG subprocess to timeout in in-toto.  Should be
+# enough time for developers to find and enter their PIN and / or touch their
+# Yubikey. We do this before we load the rest of in-toto, so that this setting
+# takes effect.
+import in_toto.settings
+in_toto.settings.SUBPROCESS_TIMEOUT = 60
 
 from in_toto import runlib
 from in_toto.gpg.constants import GPG_COMMAND
@@ -14,6 +22,10 @@ from ..utils import (
 
 LINK_DIR = '.links'
 STEP_NAME = 'tag'
+
+
+class YubikeyException(Exception):
+    pass
 
 
 def read_gitignore_patterns():
@@ -34,7 +46,7 @@ def get_key_id(gpg_exe):
         if line.startswith('Signature key ....:'):
             return line.split(':')[1].replace(' ', '')
     else:
-        raise Exception('Could not find private signing key on Yubikey!')
+        raise YubikeyException('Could not find private signing key on Yubikey!')
 
 
 def run_in_toto(key_id, products):

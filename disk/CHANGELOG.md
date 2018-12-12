@@ -1,5 +1,13 @@
 # CHANGELOG - disk
 
+## 2.0.0 / 2018-11-30
+
+* [Added] Update psutil. See [#2576](https://github.com/DataDog/integrations-core/pull/2576).
+* [Added] Add new filtering options, continue deprecations. See [#2483](https://github.com/DataDog/integrations-core/pull/2483).
+* [Changed] Removed deprecated agentConfig option locations. See [#2488](https://github.com/DataDog/integrations-core/pull/2488).
+* [Added] Support Python 3. See [#2468](https://github.com/DataDog/integrations-core/pull/2468).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.4.0 / 2018-10-12
 
 * [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).

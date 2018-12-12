@@ -90,6 +90,9 @@ class PodListUtils(object):
         self.pod_uid_by_name_tuple = {}
         self.container_id_by_name_tuple = {}
 
+        if podlist is None:
+            return
+
         pods = podlist.get('items') or []
 
         for pod in pods:

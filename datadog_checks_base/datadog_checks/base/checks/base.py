@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
+from os.path import basename
 import logging
 import re
 import json
 import copy
 import traceback
 import unicodedata
+import inspect
 
 from six import iteritems, text_type
 
@@ -348,8 +350,15 @@ class AgentCheck(object):
         return normalized_tags
 
     def warning(self, warning_message):
-        warning_message = str(warning_message)
-        self.log.warning(warning_message)
+        warning_message = ensure_bytes(warning_message)
+
+        frame = inspect.currentframe().f_back
+        lineno = frame.f_lineno
+        filename = frame.f_code.co_filename
+        # only log the last part of the filename, not the full path
+        filename = basename(filename)
+
+        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
         self.warnings.append(warning_message)
 
     def get_warnings(self):

@@ -119,7 +119,6 @@ for a list of metrics provided by this check.
 Following metrics are still sent but will be removed eventually:
  * `zookeeper.bytes_received`
  * `zookeeper.bytes_sent`
- * `zookeeper.bytes_outstanding`
 
 ### Events
 The Zookeeper check does not include any events at this time.

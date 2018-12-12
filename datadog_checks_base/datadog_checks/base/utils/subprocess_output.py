@@ -19,6 +19,8 @@ except ImportError:
         from ..stubs._util import subprocess_output
         from ..stubs._util import SubprocessOutputEmptyError  # noqa
 
+from .. import ensure_unicode
+
 log = logging.getLogger(__name__)
 
 
@@ -61,5 +63,10 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
             len(out), len(err), returncode
         )
     )
+
+    if out:
+        out = ensure_unicode(out)
+    if err:
+        err = ensure_unicode(err)
 
     return out, err, returncode

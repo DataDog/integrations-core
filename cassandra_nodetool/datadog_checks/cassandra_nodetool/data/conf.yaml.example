@@ -1,7 +1,7 @@
 init_config:
 
   ## @param nodetool - string - required
-  ## command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool) 
+  ## command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
   ## can be overwritten on an instance
   #
   #  nodetool: /usr/bin/nodetool
@@ -16,7 +16,7 @@ instances:
       - <KEYSPACE_1>
       - <KEYSPACE_2>
 
-  ## @param host - string - optional 
+  ## @param host - string - optional
   ## Host that the Datadog Cassandra Nodetool check connects to.
   #
   #  host: localhost
@@ -34,13 +34,18 @@ instances:
 
   ## @param password - string - optional
   ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
-  ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool check can execute the `status` command 
+  ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool check can execute the `status` command
   #
   #  password: <PASSWORD>
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param ssl - boolean - optional - default:false
+  ## Whether or not to use the --ssl parameter to nodetool to initiate a connection over SSL to the JMX server.
+  #
+  #  ssl: false
+
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:

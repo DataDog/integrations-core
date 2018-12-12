@@ -52,11 +52,11 @@ def test_stats_for_version():
 
     # v5
     metrics = stats_for_version([5, 0, 0])
-    assert len(metrics) == 167
+    assert len(metrics) == 170
 
     # v6.3.0
     metrics = stats_for_version([6, 3, 0])
-    assert len(metrics) == 167
+    assert len(metrics) == 170
 
 
 @pytest.mark.unit

@@ -221,11 +221,12 @@ class AggregatorStub(object):
         assert self.metrics_asserted_pct >= 100.0
 
     def not_asserted(self):
-        not_asserted = []
-        for mname, metric in iteritems(self._metrics):
-            if mname not in self._asserted:
-                not_asserted.append(metric)
-        return not_asserted
+        metrics_not_asserted = []
+        for metric in self._metrics:
+            metric = ensure_unicode(metric)
+            if metric not in self._asserted:
+                metrics_not_asserted.append(metric)
+        return metrics_not_asserted
 
     def assert_metric_has_tag_prefix(self, metric_name, tag_prefix, count=None, at_least=1):
         candidates = []

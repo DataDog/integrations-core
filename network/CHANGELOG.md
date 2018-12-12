@@ -1,5 +1,10 @@
 # CHANGELOG - network
 
+## 1.8.0 / 2018-11-30
+
+* [Added] Update psutil. See [#2576](https://github.com/DataDog/integrations-core/pull/2576).
+* [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).
+
 ## 1.7.0 / 2018-10-12
 
 * [Added] Upgrade psutil. See [#2190](https://github.com/DataDog/integrations-core/pull/2190).

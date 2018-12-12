@@ -82,7 +82,6 @@ instances:
         domain:
             id: <DOMAIN_ID>
 
-
   ## @param collect_hypervisor_load - optional - boolean - default:false
   ## Collects hypervisor_load.1/5/15 for each hypervisor
   ## Disabled by default to increase performance of the check.
@@ -90,6 +89,30 @@ instances:
   ## If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
   #
   #  collect_hypervisor_load: false
+
+
+  ## @param collect_hypervisor_metrics - optional - boolean - default:true
+  ## Collects hypervisor metrics (including hypervisor_load).
+  #
+  #  collect_hypervisor_metrics: true
+
+
+  ## @param collect_project_metrics - optional - boolean - default:true
+  ## Collects project limits.
+  #
+  #  collect_project_metrics: true
+
+
+  ## @param collect_network_metrics - optional - boolean - default:true
+  ## Collects network metrics.
+  #
+  #  collect_network_metrics: true
+
+
+  ## @param collect_server_metrics - optional - boolean - default:true
+  ## Collects server diagnostic metrics.
+  #
+  #  collect_server_metrics: true
 
 
   ## @param use_shortname - optional - boolean - default:false

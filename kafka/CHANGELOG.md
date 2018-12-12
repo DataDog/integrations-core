@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 1.2.1 / 2018-11-30
+
+* [Fixed] Updated kafka.producer.record_error_rate to gauge. See [#2253](https://github.com/DataDog/integrations-core/pull/2253).
+
 ## 1.2.0 / 2018-10-12
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371](https://github.com/DataDog/integrations-core/pull/2371).

@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 1.9.1 / 2018-11-30
+
+* [Fixed] Add elasticsearch-oss as an auto_conf.yaml Elasticsearch identifier. See [#2644](https://github.com/DataDog/integrations-core/pull/2644). Thanks [jcassee](https://github.com/jcassee).
+
 ## 1.9.0 / 2018-10-23
 
 * [Added] Add option to prevent duplicate hostnames. See [#2453](https://github.com/DataDog/integrations-core/pull/2453).

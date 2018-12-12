@@ -11,14 +11,14 @@ import time
 import warnings
 from datetime import datetime
 
-from six import string_types, text_type
+from six import string_types
 from six.moves.urllib.parse import urlparse
 
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests_ntlm import HttpNtlmAuth
 
-from datadog_checks.base import ensure_bytes, ensure_unicode
+from datadog_checks.base import ensure_unicode
 from datadog_checks.base.checks import NetworkCheck, Status
 from .config import from_instance, DEFAULT_EXPECTED_CODE
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
@@ -50,20 +50,20 @@ class HTTPCheck(NetworkCheck):
         addr, ntlm_domain, username, password, client_cert, client_key, method, data, http_response_status_code, \
             timeout, include_content, headers, response_time, content_match, reverse_content_match, tags, \
             disable_ssl_validation, ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, \
-            skip_proxy, allow_redirects = from_instance(instance, self.ca_certs)
+            skip_proxy, allow_redirects, stream = from_instance(instance, self.ca_certs)
 
         start = time.time()
 
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
-            self.log.debug(ensure_bytes(logMsg))
+            self.log.debug(logMsg)
             service_checks.append((
                 self.SC_STATUS, Status.UP, "UP"
             ))
 
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
-            self.log.info(ensure_bytes(loginfo))
+            self.log.info(loginfo)
             if include_content:
                 down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
             service_checks.append((
@@ -72,7 +72,10 @@ class HTTPCheck(NetworkCheck):
                 down_msg
             ))
 
+        # Store tags in a temporary list so that we don't modify the global tags data structure
+        tags_list = list(tags)
         service_checks = []
+        r = None
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to {}".format(addr))
@@ -119,7 +122,7 @@ class HTTPCheck(NetworkCheck):
 
                 r = sess.request(
                     method.upper(), addr, auth=auth, timeout=timeout, headers=headers,
-                    proxies=instance_proxy, allow_redirects=allow_redirects,
+                    proxies=instance_proxy, allow_redirects=allow_redirects, stream=stream,
                     verify=False if disable_ssl_validation else instance_ca_certs,
                     json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
                     data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
@@ -149,60 +152,64 @@ class HTTPCheck(NetworkCheck):
             self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
             raise
 
-        # Store tags in a temporary list so that we don't modify the global tags data structure
-        tags_list = list(tags)
-        # Only add the URL tag if it's not already present
-        if not any(filter(re.compile('^url:').match, tags_list)):
-            tags_list.append('url:{}'.format(addr))
+        else:
+            # Only add the URL tag if it's not already present
+            if not any(filter(re.compile('^url:').match, tags_list)):
+                tags_list.append('url:{}'.format(addr))
 
-        # Only report this metric if the site is not down
-        if response_time and not service_checks:
-            # Stop the timer as early as possible
-            running_time = time.time() - start
-            self.gauge('network.http.response_time', running_time, tags=tags_list)
+            # Only report this metric if the site is not down
+            if response_time and not service_checks:
+                # Stop the timer as early as possible
+                running_time = time.time() - start
+                self.gauge('network.http.response_time', running_time, tags=tags_list)
 
-        # Check HTTP response status code
-        if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
-            if http_response_status_code == DEFAULT_EXPECTED_CODE:
-                expected_code = "1xx or 2xx or 3xx"
-            else:
-                expected_code = http_response_status_code
+            content = r.text
 
-            message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
-                      addr, expected_code, str(r.status_code))
+            # Check HTTP response status code
+            if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
+                if http_response_status_code == DEFAULT_EXPECTED_CODE:
+                    expected_code = "1xx or 2xx or 3xx"
+                else:
+                    expected_code = http_response_status_code
 
-            if include_content:
-                message += '\nContent: {}'.format(r.content[:CONTENT_LENGTH])
+                message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
+                        addr, expected_code, str(r.status_code))
 
-            self.log.info(message)
+                if include_content:
+                    message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
 
-            service_checks.append((self.SC_STATUS, Status.DOWN, message))
+                self.log.info(message)
 
-        if not service_checks:
-            # Host is UP
-            # Check content matching is set
-            if content_match:
-                # r.text is the response content decoded by `requests`, of type `unicode`
-                content = r.text if isinstance(content_match, text_type) else r.content
-                if re.search(content_match, content, re.UNICODE):
-                    if reverse_content_match:
-                        send_status_down('{} is found in return content with the reverse_content_match option'
-                                         .format(ensure_unicode(content_match)),
-                                         'Content "{}" found in response with the reverse_content_match'
-                                         .format(ensure_unicode(content_match)))
+                service_checks.append((self.SC_STATUS, Status.DOWN, message))
+
+            if not service_checks:
+                # Host is UP
+                # Check content matching is set
+                if content_match:
+                    if re.search(content_match, content, re.UNICODE):
+                        if reverse_content_match:
+                            send_status_down('{} is found in return content with the reverse_content_match option'
+                                             .format(ensure_unicode(content_match)),
+                                             'Content "{}" found in response with the reverse_content_match'
+                                             .format(ensure_unicode(content_match)))
+                        else:
+                            send_status_up("{} is found in return content".format(ensure_unicode(content_match)))
+
                     else:
-                        send_status_up("{} is found in return content".format(ensure_unicode(content_match)))
+                        if reverse_content_match:
+                            send_status_up("{} is not found in return content with the reverse_content_match option"
+                                           .format(ensure_unicode(content_match)))
+                        else:
+                            send_status_down("{} is not found in return content"
+                                             .format(ensure_unicode(content_match)),
+                                             'Content "{}" not found in response.'
+                                             .format(ensure_unicode(content_match)))
 
                 else:
-                    if reverse_content_match:
-                        send_status_up("{} is not found in return content with the reverse_content_match option"
-                                       .format(ensure_unicode(content_match)))
-                    else:
-                        send_status_down("{} is not found in return content".format(ensure_unicode(content_match)),
-                                         'Content "{}" not found in response.'.format(ensure_unicode(content_match)))
-
-            else:
-                send_status_up("{} is UP".format(addr))
+                    send_status_up("{} is UP".format(addr))
+        finally:
+            if r is not None:
+                r.close()
 
         # Report status metrics as well
         if service_checks:
@@ -228,6 +235,8 @@ class HTTPCheck(NetworkCheck):
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         instance_name = ensure_unicode(self.normalize(instance['name']))
         url = instance.get('url', None)
+        if url is not None:
+            url = ensure_unicode(url)
         tags = instance.get('tags', [])
         tags.append("instance:{}".format(instance_name))
 

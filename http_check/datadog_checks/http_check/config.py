@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
-from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base import ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.utils.headers import headers as agent_headers
 
 
@@ -17,7 +17,7 @@ Config = namedtuple('Config',
                     'content_match, reverse_content_match, tags,'
                     'disable_ssl_validation, ssl_expire, instance_ca_certs,'
                     'weakcipher, check_hostname, ignore_ssl_warning,'
-                    'skip_proxy, allow_redirects')
+                    'skip_proxy, allow_redirects, stream')
 
 
 def from_instance(instance, default_ca_certs=None):
@@ -42,7 +42,11 @@ def from_instance(instance, default_ca_certs=None):
         headers = {}
     headers.update(config_headers)
     url = instance.get('url')
+    if url is not None:
+        url = ensure_unicode(url)
     content_match = instance.get('content_match')
+    if content_match is not None:
+        content_match = ensure_unicode(content_match)
     reverse_content_match = is_affirmative(instance.get('reverse_content_match', False))
     response_time = is_affirmative(instance.get('collect_response_time', True))
     if not url:
@@ -59,10 +63,11 @@ def from_instance(instance, default_ca_certs=None):
     skip_proxy = is_affirmative(
         instance.get('skip_proxy', instance.get('no_proxy', False)))
     allow_redirects = is_affirmative(instance.get('allow_redirects', True))
+    stream = is_affirmative(instance.get('stream', False))
 
     return Config(url, ntlm_domain, username, password, client_cert, client_key,
                   method, data, http_response_status_code, timeout,
                   include_content, headers, response_time, content_match,
                   reverse_content_match, tags, disable_ssl_validation,
                   ssl_expire, instance_ca_certs, weakcipher, check_hostname,
-                  ignore_ssl_warning, skip_proxy, allow_redirects)
+                  ignore_ssl_warning, skip_proxy, allow_redirects, stream)

@@ -1,12 +1,22 @@
 init_config:
-  # Leave empty
 
 instances:
-  #   A typical instance configuration might include a hostname and port
-  #   a set of customizable tags and other parameters we might need to
-  #   configure the behavior of our check.
-  #
-  # - prometheus_url: http://127.0.0.1:10249/metrics
 
-  # Set a timeout for the prometheus query, defaults to 10
-  # prometheus_timeout: 10
+  ## @param prometheus_url - string - required
+  ## The URL where your application metrics are exposed by Prometheus.
+  #
+  - prometheus_url: http://127.0.0.1:10249/metrics
+
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+  ## @param prometheus_timeout - integer - optional - default: 10
+  ## Set a timeout in second for the prometheus query.
+  #
+  #  prometheus_timeout: 10

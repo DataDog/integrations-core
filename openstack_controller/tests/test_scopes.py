@@ -4,54 +4,59 @@
 import copy
 import mock
 import pytest
+import logging
 from six import iteritems
 
-from datadog_checks.openstack_controller.scopes import (OpenStackProject, OpenStackScope)
+from datadog_checks.openstack_controller.scopes import (Project, Scope, ScopeFetcher)
 from datadog_checks.openstack_controller.exceptions import (IncompleteIdentity, MissingNovaEndpoint,
                                                             MissingNeutronEndpoint)
 
 from . import common
 
 
+log = logging.getLogger('test_openstack_controller')
+
+
 def test_get_endpoint():
-    assert OpenStackScope._get_nova_endpoint(
+    scope_fetcher = ScopeFetcher()
+    assert scope_fetcher._get_nova_endpoint(
         common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
     with pytest.raises(MissingNovaEndpoint):
-        OpenStackScope._get_nova_endpoint({})
+        scope_fetcher._get_nova_endpoint({})
 
-    assert OpenStackScope._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
+    assert scope_fetcher._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
     with pytest.raises(MissingNeutronEndpoint):
-        OpenStackScope._get_neutron_endpoint({})
+        scope_fetcher._get_neutron_endpoint({})
 
-    assert OpenStackScope._get_valid_endpoint({}, None, None) is None
-    assert OpenStackScope._get_valid_endpoint({'token': {}}, None, None) is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{}]}}, None, None) is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+    assert scope_fetcher._get_valid_endpoint({}, None, None) is None
+    assert scope_fetcher._get_valid_endpoint({'token': {}}, None, None) is None
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{}]}}, None, None) is None
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
         u'type': u'compute',
         u'name': u'nova'}]}}, None, None) is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [],
         u'type': u'compute',
         u'name': u'nova'}]}}, None, None) is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{u'url': u'dummy_url', u'interface': u'dummy'}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{u'url': u'dummy_url'}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{u'interface': u'public'}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') is None
-    assert OpenStackScope._get_valid_endpoint({'token': {"catalog": [{
+    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{u'url': u'dummy_url', u'interface': u'internal'}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') == 'dummy_url'
@@ -71,16 +76,18 @@ GOOD_USERS = [
 
 
 def _test_bad_user(user):
+    scope_fetcher = ScopeFetcher()
     with pytest.raises(IncompleteIdentity):
-        OpenStackScope._get_user_identity(user)
+        scope_fetcher._get_user_identity(user)
 
 
 def test_get_user_identity():
+    scope_fetcher = ScopeFetcher()
     for user in BAD_USERS:
         _test_bad_user(user)
 
     for user in GOOD_USERS:
-        parsed_user = OpenStackScope._get_user_identity(user)
+        parsed_user = scope_fetcher._get_user_identity(user)
         assert parsed_user == {'methods': ['password'], 'password': user}
 
 
@@ -117,7 +124,6 @@ PROJECT_RESPONSE = [
 
 def test_from_config_simple():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
-
     instance_config = {'user': GOOD_USERS[0]['user']}
 
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
@@ -127,14 +133,14 @@ def test_from_config_simple():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=PROJECTS_RESPONSE):
-            scope = OpenStackScope.from_config(init_config, instance_config)
-            assert isinstance(scope, OpenStackScope)
+            scope = ScopeFetcher.from_config(log, init_config, instance_config)
+            assert isinstance(scope, Scope)
 
             assert scope.auth_token == 'fake_token'
-            assert len(scope.project_scope_map) == 2
+            assert len(scope.project_scopes) == 2
             expected_tenant_id = ['3333', '4444']
-            for index, scope in iteritems(scope.project_scope_map):
-                assert isinstance(scope, OpenStackProject)
+            for index, scope in iteritems(scope.project_scopes):
+                assert isinstance(scope, Project)
                 assert scope.auth_token == 'fake_token'
                 assert scope.tenant_id in expected_tenant_id
                 expected_tenant_id.remove(scope.tenant_id)
@@ -155,8 +161,8 @@ def test_from_config_with_missing_name():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=project_response_without_name):
-            scope = OpenStackScope.from_config(init_config, instance_config)
-            assert len(scope.project_scope_map) == 0
+            scope = ScopeFetcher.from_config(log, init_config, instance_config, proxy_config=None)
+            assert len(scope.project_scopes) == 0
 
 
 def test_from_config_with_missing_id():
@@ -174,5 +180,5 @@ def test_from_config_with_missing_id():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=project_response_without_name):
-            scope = OpenStackScope.from_config(init_config, instance_config)
-            assert len(scope.project_scope_map) == 0
+            scope = ScopeFetcher.from_config(log, init_config, instance_config, proxy_config=None)
+            assert len(scope.project_scopes) == 0
