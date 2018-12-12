@@ -85,7 +85,7 @@ sudo sh -c "echo /opt/mqm/lib > /etc/ld.so.conf.d/mqm.conf"
 sudo ldconfig
 ```
 
-#### Permissions
+#### Permissions and Authentication
 
 There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, you will want to create a datadog user within MQ with read only permissions.
 
