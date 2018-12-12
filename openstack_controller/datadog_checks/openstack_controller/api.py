@@ -26,7 +26,6 @@ class AbstractApi(object):
 
     def get_endpoint(self):
         self._make_request(self.endpoint, self.headers)
-        return
 
     def _make_request(self, url, headers, params=None, timeout=DEFAULT_API_REQUEST_TIMEOUT):
         """
@@ -71,10 +70,6 @@ class AbstractApi(object):
 class ComputeApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
         super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
-
-    def get_endpoint(self):
-        self._make_request(self.endpoint, self.headers)
-        return
 
     def get_os_hypervisor_uptime(self, hyp_id):
         url = '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hyp_id)
