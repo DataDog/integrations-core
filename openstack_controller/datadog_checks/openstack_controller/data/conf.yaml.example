@@ -91,6 +91,10 @@ instances:
   #
   #  collect_hypervisor_load: false
 
+  ## @param collect_server_flavor_metrics - optional - boolean - default:true
+  ## Collect server flavor metrics
+  #
+  #  collect_server_flavor_metrics: true
 
   ## @param incremental_servers_update - optional - boolean - default:true
   ## When incremental_servers_update is set to true, instead of fetching all active servers on every check runs, it will

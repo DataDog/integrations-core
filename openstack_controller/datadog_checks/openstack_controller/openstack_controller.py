@@ -398,6 +398,7 @@ class OpenStackControllerCheck(AgentCheck):
         s['hypervisor_hostname'] = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
         s['tenant_id'] = server.get('tenant_id')
         s['availability_zone'] = server.get('OS-EXT-AZ:availability_zone')
+        s['flavor_id'] = server.get('flavor', {}).get('id')
         return s
 
     # Get all of the server IDs and their metadata and cache them
@@ -453,6 +454,9 @@ class OpenStackControllerCheck(AgentCheck):
         def _is_interface_metric(label):
             return any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
+        tags = tags or []
+        tags = copy.deepcopy(tags)
+        tags.append("nova_managed_server")
         hypervisor_hostname = server_details.get('hypervisor_hostname')
         host_tags = self._get_host_aggregate_tag(hypervisor_hostname, use_shortname=use_shortname)
         host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
@@ -465,7 +469,6 @@ class OpenStackControllerCheck(AgentCheck):
 
         try:
             server_stats = self.get_server_diagnostics(server_id)
-            print("boom", server_stats)
         except InstancePowerOffFailure:  # 409 response code came back fro nova
             self.log.debug("Server %s is powered off and cannot be monitored", server_id)
             return
@@ -480,7 +483,6 @@ class OpenStackControllerCheck(AgentCheck):
             return
 
         if server_stats:
-            tags = tags or []
             if project_name:
                 tags.append("project_name:{}".format(project_name))
             if hypervisor_hostname:
@@ -513,8 +515,7 @@ class OpenStackControllerCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in PROJECT_METRICS
 
-        if tags is None:
-            tags = []
+        tags = tags or []
 
         server_tags = copy.deepcopy(tags)
         project_name = project.get('name')
@@ -538,6 +539,60 @@ class OpenStackControllerCheck(AgentCheck):
                     )
         except KeyError:
             self.log.warn("Unexpected response, not submitting limits metrics for project id".format(project['id']))
+
+    def get_flavors(self):
+        flavors = []
+        query_params = {
+            'limit': self.paginated_server_limit
+        }
+        resp = self.get_flavors_detail(query_params, timeout=self.request_timeout)
+        flavors.extend(resp)
+        # Avoid the extra request since we know we're done when the response has anywhere between
+        # 0 and paginated_server_limit servers
+        while len(resp) == self.paginated_server_limit:
+            query_params['marker'] = resp[-1]['id']
+            resp = self.get_flavors_detail(query_params, timeout=self.request_timeout)
+            flavors.extend(resp)
+
+        return {flavor.get('id'): self.create_flavor_object(flavor) for flavor in flavors}
+
+    def create_flavor_object(self, flavor):
+        f = dict()
+        f['id'] = flavor.get('id')
+        f['disk'] = flavor.get('disk')
+        f['vcpus'] = flavor.get('vcpus')
+        f['ram'] = flavor.get('ram')
+        return f
+
+    def get_flavor_for_single_server(self, server_details, flavors, tags=[], use_shortname=False):
+        tags = tags or []
+        tags = copy.deepcopy(tags)
+        tags.append("nova_managed_server")
+        hypervisor_hostname = server_details.get('hypervisor_hostname')
+        host_tags = self._get_host_aggregate_tag(hypervisor_hostname, use_shortname=use_shortname)
+        host_tags.append('availability_zone:{}'.format(server_details.get('availability_zone', 'NA')))
+        self.external_host_tags[server_details.get('server_name')] = host_tags
+
+        server_id = server_details.get('server_id')
+        server_name = server_details.get('server_name')
+        hypervisor_hostname = server_details.get('hypervisor_hostname')
+        project_name = server_details.get('project_name')
+        flavor_id = server_details.get('flavor_id')
+
+        flavor = flavors.get(flavor_id)
+        if not flavor:
+            return
+
+        if project_name:
+            tags.append("project_name:{}".format(project_name))
+        if hypervisor_hostname:
+            tags.append("hypervisor:{}".format(hypervisor_hostname))
+        if server_name:
+            tags.append("server_name:{}".format(server_name))
+
+        self.gauge("openstack.nova.server.flavor.disk", flavor.get('disk'), tags=tags + host_tags, hostname=server_id)
+        self.gauge("openstack.nova.server.flavor.vcpus", flavor.get('vcpus'), tags=tags + host_tags, hostname=server_id)
+        self.gauge("openstack.nova.server.flavor.ram", flavor.get('ram'), tags=tags + host_tags, hostname=server_id)
 
     # Cache util
     def _is_expired(self, entry):
@@ -686,6 +741,7 @@ class OpenStackControllerCheck(AgentCheck):
         collect_hypervisor_load = is_affirmative(instance.get('collect_hypervisor_load', False))
         use_shortname = is_affirmative(instance.get('use_shortname', False))
         incremental_servers_update = is_affirmative(instance.get('incremental_servers_update', True))
+        collect_server_flavor_metrics = is_affirmative(instance.get('collect_server_flavor_metrics', True))
 
         projects = {}
         try:
@@ -742,13 +798,18 @@ class OpenStackControllerCheck(AgentCheck):
                 self.filter_excluded_servers(instance_name)
 
                 servers = self.servers_cache[instance_name]['servers']
-                print('servers', servers)
                 self.log.debug("Fetch stats from %s server(s)" % len(servers))
                 for server_id, server in iteritems(servers):
-                    server_tags = copy.deepcopy(custom_tags)
-                    server_tags.append("nova_managed_server")
-                    self.get_stats_for_single_server(servers[server_id], tags=server_tags,
+                    self.get_stats_for_single_server(servers[server_id], tags=custom_tags,
                                                      use_shortname=use_shortname)
+                if collect_server_flavor_metrics:
+                    self.log.debug("Fetch server flavors")
+                    # TODO starting from version 2.47, flavors can be fetched as part of `get_servers_detail`.
+                    # This would prevent making additional api calls
+                    flavors = self.get_flavors()
+                    for server_id, server in iteritems(servers):
+                        self.get_flavor_for_single_server(servers[server_id], flavors, tags=custom_tags,
+                                                          use_shortname=use_shortname)
 
             # For now, monitor all networks
             self.get_network_stats(custom_tags)
@@ -864,6 +925,9 @@ class OpenStackControllerCheck(AgentCheck):
 
     def get_project_limits(self, tenant_id):
         return self._compute_api.get_project_limits(tenant_id)
+
+    def get_flavors_detail(self, query_params, timeout=None):
+        return self._compute_api.get_flavors_detail(query_params, timeout=timeout)
 
     # Keystone Proxy Methods
     def get_projects(self, project_token):

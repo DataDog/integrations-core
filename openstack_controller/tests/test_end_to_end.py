@@ -35,6 +35,8 @@ def make_request_responses(url, header, params=None, timeout=None):
         mock_path = "v2.1_4bfc1_os-aggregates.json"
     elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/detail":
         mock_path = "v2.1_4bfc1_servers_detail.json"
+    elif url == "http://10.0.2.15:8774/v2.1/***************************4bfc1/flavors/detail":
+        mock_path = "v2.1_4bfc1_flavors_detail.json"
     elif url == "http://10.0.2.15:5000/v3/projects/***************************73dbe":
         mock_path = "v3_projects_73dbe.json"
     elif url == "http://10.0.2.15:5000/v3/projects/***************************3fb11":
@@ -119,6 +121,8 @@ def test_scenario(make_request, aggregator):
                         return_value=auth_projects_response):
             check.check(common.MOCK_CONFIG['instances'][0])
 
+            # for m in aggregator.not_asserted():
+            #     print(m)
             # TODO: Removed project_name from this PR but it will be brought back when merging with
             # https://github.com/DataDog/integrations-core/pull/2709
             aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
@@ -2313,6 +2317,225 @@ def test_scenario(make_request, aggregator):
                                            'hypervisor:compute7.openstack.local', 'server_name:finalDestination-4',
                                            'availability_zone:nova', 'interface:tapb488fc1e-3e'],
                                      hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb')
+
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:server_take_zero-1', 'availability_zone:nova'],
+                                     hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute8.openstack.local',
+                                           'server_name:finalDestination-2', 'availability_zone:nova'],
+                                     hostname=u'52561f29-e479-43d7-85de-944d29ef178d')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:ReadyServerOne', 'availability_zone:nova'],
+                                     hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:finalDestination-6', 'availability_zone:nova'],
+                                     hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:finalDestination-4', 'availability_zone:nova'],
+                                     hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute8.openstack.local',
+                                           'server_name:finalDestination-7', 'availability_zone:nova'],
+                                     hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute1.openstack.local',
+                                           'server_name:jenga',
+                                           'availability_zone:nova'], hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute5.openstack.local',
+                                           'server_name:moarserver-13',
+                                           'availability_zone:nova'], hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:finalDestination-8', 'availability_zone:nova'],
+                                     hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:HoneyIShrunkTheServer', 'availability_zone:nova'],
+                                     hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:server_take_zero-2', 'availability_zone:nova'],
+                                     hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:finalDestination-1', 'availability_zone:nova'],
+                                     hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute5.openstack.local',
+                                           'server_name:finalDestination-5', 'availability_zone:nova'],
+                                     hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:blacklist',
+                                           'availability_zone:nova'], hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:anotherServer', 'availability_zone:nova'],
+                                     hostname=u'30888944-fb39-4590-9073-ef977ac1f039')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:blacklistServer', 'availability_zone:nova'],
+                                     hostname=u'57030997-f1b5-4f79-9429-8cb285318633')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute1.openstack.local',
+                                           'server_name:Rocky',
+                                           'availability_zone:nova'], hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18')
+            aggregator.assert_metric('openstack.nova.server.flavor.disk', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:jnrgjoner',
+                                           'availability_zone:nova'], hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe')
+
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:server_take_zero-1', 'availability_zone:nova'],
+                                     hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute8.openstack.local',
+                                           'server_name:finalDestination-2', 'availability_zone:nova'],
+                                     hostname=u'52561f29-e479-43d7-85de-944d29ef178d')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:ReadyServerOne', 'availability_zone:nova'],
+                                     hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:finalDestination-6', 'availability_zone:nova'],
+                                     hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:finalDestination-4', 'availability_zone:nova'],
+                                     hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute8.openstack.local',
+                                           'server_name:finalDestination-7', 'availability_zone:nova'],
+                                     hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute1.openstack.local',
+                                           'server_name:jenga',
+                                           'availability_zone:nova'], hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute5.openstack.local',
+                                           'server_name:moarserver-13',
+                                           'availability_zone:nova'], hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:finalDestination-8', 'availability_zone:nova'],
+                                     hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:HoneyIShrunkTheServer', 'availability_zone:nova'],
+                                     hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:server_take_zero-2', 'availability_zone:nova'],
+                                     hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:finalDestination-1', 'availability_zone:nova'],
+                                     hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute5.openstack.local',
+                                           'server_name:finalDestination-5', 'availability_zone:nova'],
+                                     hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:blacklist',
+                                           'availability_zone:nova'], hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:anotherServer', 'availability_zone:nova'],
+                                     hostname=u'30888944-fb39-4590-9073-ef977ac1f039')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:blacklistServer', 'availability_zone:nova'],
+                                     hostname=u'57030997-f1b5-4f79-9429-8cb285318633')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute1.openstack.local',
+                                           'server_name:Rocky',
+                                           'availability_zone:nova'], hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18')
+            aggregator.assert_metric('openstack.nova.server.flavor.ram', value=512.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:jnrgjoner',
+                                           'availability_zone:nova'], hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe')
+
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:server_take_zero-1', 'availability_zone:nova'],
+                                     hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute8.openstack.local',
+                                           'server_name:finalDestination-2', 'availability_zone:nova'],
+                                     hostname=u'52561f29-e479-43d7-85de-944d29ef178d')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:ReadyServerOne', 'availability_zone:nova'],
+                                     hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:finalDestination-6', 'availability_zone:nova'],
+                                     hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:finalDestination-4', 'availability_zone:nova'],
+                                     hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute8.openstack.local',
+                                           'server_name:finalDestination-7', 'availability_zone:nova'],
+                                     hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute1.openstack.local',
+                                           'server_name:jenga',
+                                           'availability_zone:nova'], hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute5.openstack.local',
+                                           'server_name:moarserver-13',
+                                           'availability_zone:nova'], hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:finalDestination-8', 'availability_zone:nova'],
+                                     hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:HoneyIShrunkTheServer', 'availability_zone:nova'],
+                                     hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:server_take_zero-2', 'availability_zone:nova'],
+                                     hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:finalDestination-1', 'availability_zone:nova'],
+                                     hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute5.openstack.local',
+                                           'server_name:finalDestination-5', 'availability_zone:nova'],
+                                     hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute7.openstack.local',
+                                           'server_name:blacklist',
+                                           'availability_zone:nova'], hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute10.openstack.local',
+                                           'server_name:anotherServer', 'availability_zone:nova'],
+                                     hostname=u'30888944-fb39-4590-9073-ef977ac1f039')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute4.openstack.local',
+                                           'server_name:blacklistServer', 'availability_zone:nova'],
+                                     hostname=u'57030997-f1b5-4f79-9429-8cb285318633')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute1.openstack.local',
+                                           'server_name:Rocky',
+                                           'availability_zone:nova'], hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18')
+            aggregator.assert_metric('openstack.nova.server.flavor.vcpus', value=1.0,
+                                     tags=['nova_managed_server', 'hypervisor:compute2.openstack.local',
+                                           'server_name:jnrgjoner',
+                                           'availability_zone:nova'], hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe')
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
