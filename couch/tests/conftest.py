@@ -13,11 +13,6 @@ import requests
 from . import common
 from datadog_checks.couch import CouchDb
 
-try:
-    zrange = xrange
-except NameError:
-    zrange = range
-
 
 @pytest.fixture
 def aggregator():
@@ -103,7 +98,7 @@ def generate_data(couch_version):
     ]
 
     ready = defaultdict(bool)
-    for i in zrange(60):
+    for i in range(60):
         print("Waiting for stats to be generated on the nodes...")
         try:
             for url in urls:
@@ -122,7 +117,7 @@ def wait_for_couch():
     """
     Wait for the couchdb container to be reachable
     """
-    for i in zrange(60):
+    for i in range(60):
         print("Waiting for service to come up")
         try:
             requests.get(common.URL).raise_for_status()
