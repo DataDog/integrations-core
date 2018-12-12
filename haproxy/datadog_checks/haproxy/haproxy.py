@@ -588,6 +588,8 @@ class HAProxy(AgentCheck):
 
         if back_or_front == Services.BACKEND:
             tags.append('backend:%s' % hostname)
+            if data.get('addr'):
+                tags.append('server_address:{}'.format(data.get('addr')))
 
         for key, value in data.items():
             if HAProxy.METRICS.get(key):
