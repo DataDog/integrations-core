@@ -17,7 +17,7 @@ The SNMP check doesn't collect anything by default. Specify metrics to collect b
 
 ```
 init_config:
-   - mibs_folder: /path/to/your/additional/mibs
+  mibs_folder: /path/to/your/additional/mibs
 
 instances:
    - ip_address: localhost
@@ -101,7 +101,7 @@ metrics:
 
 #### MIB and table
 
-The example below collects metrics on all rows in a table (`symbols`) and specifies how to tag each metric (`metric_tags`). The Agent would gather the rate of octets received on each interface and tag it with the interface name (found in the `ifDescr` column), resulting in a tag such as `interface:eth0`.
+The example below collects metrics on all rows in a table (`symbols`) and specifies how to tag each metric (`metric_tags`). The Agent gathers the rate of octets received on each interface and tag it with the interface name (found in the `ifDescr` column), resulting in a tag such as `interface:eth0`.
 
 ```
 metrics:
@@ -130,9 +130,9 @@ metrics:
 
 #### Use your own MIB
 
-To use your own MIB with the Datadog Agent, convert it to the pysnmp format. This can be done using the `build-pysnmp-mibs` script that ships with pysnmp < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in pysnmp 4.3+ ([reference][9]).
+To use your own MIB with the Datadog Agent, convert it to the PySNMP format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][9].
 
-Since Datadog Agent version 5.14, our PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (reference our [changelog][8]). Meaning the `build-pysnmp-mib` which shipped with our Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
+Since Datadog Agent version 5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][8]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
  
 To find the location of `mibdump.py`, run:
 
@@ -142,6 +142,7 @@ $ find /opt/datadog-agent/ -type f -name build-pysnmp-mib.py -o -name mibdump.py
 ```
 
 Windows example:
+
 ```
 C:\>dir mibdump.py /s
 
@@ -188,7 +189,7 @@ CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
 
 ```
 
-The Agent looks for the converted MIB Python files by specifying the destination path with `mibs_folder` in the [SNMP yaml configuration][10].
+The Agent looks for the converted MIB Python files by specifying the destination path with `mibs_folder` in the [SNMP YAML configuration][10].
 
 ---
 
@@ -204,12 +205,13 @@ The Agent looks for the converted MIB Python files by specifying the destination
 The SNMP check submits specified metrics under the `snmp.*` namespace.
 
 ### Events
+
 The SNMP check does not include any events at this time.
 
 ### Service Checks
 
 **snmp.can_check**:  
-Returns CRITICAL if the Agent cannot collect SNMP metrics, otherwise returns OK.
+Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][5].
