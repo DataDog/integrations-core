@@ -7,6 +7,7 @@ services:
       - ${HAPROXY_CONFIG}:/usr/local/etc/haproxy/haproxy.cfg
       - ${HAPROXY_SOCKET_DIR}:/tmp
     ports:
+      - "13834:13834"
       - "13835:13835"
     networks:
       - network1

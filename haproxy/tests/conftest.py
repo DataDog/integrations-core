@@ -67,6 +67,8 @@ def haproxy_container():
 
         env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
         env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
+        if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '7']:
+            env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy-1_7.cfg')
         env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
         env['HAPROXY_SOCKET_DIR'] = host_socket_dir
 

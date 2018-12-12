@@ -140,6 +140,23 @@ def test_open_config(aggregator, haproxy_container):
 
 
 @pytest.mark.integration
+@pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'],
+                    reason='Sockets with operator level are only available with haproxy 1.7')
+def test_tcp_socket(aggregator, haproxy_container):
+    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+    config = copy.deepcopy(common.CONFIG_TCPSOCKET)
+    haproxy_check.check(config)
+
+    shared_tag = ["instance_url:{0}".format(common.STATS_SOCKET)]
+
+    _test_frontend_metrics(aggregator, shared_tag)
+    _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
+    _test_service_checks(aggregator)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
 @pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
 def test_unixsocket_config(aggregator, haproxy_container):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})

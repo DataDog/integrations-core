@@ -20,16 +20,24 @@ CHECK_NAME = 'haproxy'
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 HOST = get_docker_hostname()
+SOCKET_PORT = '13834'
 PORT = '13835'
 PORT_OPEN = '13836'
 BASE_URL = "http://{0}:{1}".format(HOST, PORT)
 BASE_URL_OPEN = "http://{0}:{1}".format(HOST, PORT_OPEN)
 STATS_URL = "{0}/stats".format(BASE_URL)
 STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
+STATS_SOCKET = "tcp://{0}:{1}".format(HOST, SOCKET_PORT)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
 
 CONFIG_UNIXSOCKET = {
+    'collect_aggregates_only': False,
+}
+
+
+CONFIG_TCPSOCKET = {
+    'url': STATS_SOCKET,
     'collect_aggregates_only': False,
 }
 
