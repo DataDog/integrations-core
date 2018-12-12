@@ -2,8 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from six.moves.urllib.parse import quote
-from six.moves.urllib.parse import urljoin
+from six.moves.urllib.parse import quote, urljoin
 from six import iteritems
 
 import requests
