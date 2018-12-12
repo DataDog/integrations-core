@@ -14,12 +14,18 @@ UNSCOPED_AUTH = 'unscoped'
 class AbstractApi(object):
     DEFAULT_API_REQUEST_TIMEOUT = 10  # seconds
 
-    def __init__(self, logger, ssl_verify, proxy_config):
+    def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
         self.logger = logger
         self.ssl_verify = ssl_verify
         self.proxy_config = proxy_config
+        self.endpoint = endpoint
+        self.auth_token = auth_token
+        self.headers = {'X-Auth-Token': auth_token}
         # Cache for the `_make_request` method
         self.cache = {}
+
+    def get_endpoint(self):
+        self._make_request(self.endpoint, self.headers)
 
     def _make_request(self, url, headers, params=None, timeout=DEFAULT_API_REQUEST_TIMEOUT):
         """
@@ -63,10 +69,7 @@ class AbstractApi(object):
 
 class ComputeApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config)
-        self.endpoint = endpoint
-        self.auth_token = auth_token
-        self.headers = {'X-Auth-Token': auth_token}
+        super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
 
     def get_os_hypervisor_uptime(self, hyp_id):
         url = '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hyp_id)
@@ -100,35 +103,22 @@ class ComputeApi(AbstractApi):
 
 class NeutronApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(NeutronApi, self).__init__(logger, ssl_verify, proxy_config)
-        self.endpoint = endpoint
-        self.auth_token = auth_token
-        self.headers = {'X-Auth-Token': auth_token}
+        super(NeutronApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
 
-    def get_network_ids(self):
+    def get_networks(self):
         url = '{}/{}/networks'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION)
 
-        network_ids = []
         try:
-            net_details = self._make_request(url, self.headers)
-            for network in net_details['networks']:
-                network_ids.append(network['id'])
+            networks = self._make_request(url, self.headers)
+            return networks.get('networks')
         except Exception as e:
             self.logger.warning('Unable to get the list of all network ids: {}'.format(e))
             raise e
 
-        return network_ids
-
-    def get_network_details(self, network_id):
-        url = '{}/{}/networks/{}'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION, network_id)
-        return self._make_request(url, self.headers)
-
 
 class KeystoneApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(KeystoneApi, self).__init__(logger, ssl_verify, proxy_config)
-        self.endpoint = endpoint
-        self.auth_token = auth_token
+        super(KeystoneApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
 
     def post_auth_token(self, identity, scope=UNSCOPED_AUTH):
         auth_url = urljoin(self.endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
@@ -160,19 +150,18 @@ class KeystoneApi(AbstractApi):
         auth_url = ""
         try:
             auth_url = urljoin(self.endpoint, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
-            headers = {'X-Auth-Token': self.auth_token}
-
             resp = requests.get(
                 auth_url,
-                headers=headers,
+                headers=self.headers,
                 verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
                 proxies=self.proxy_config
             )
             resp.raise_for_status()
-            jresp = resp.json().get('projects')
+            jresp = resp.json()
             self.logger.debug("url: %s || response: %s", auth_url, jresp)
-            return jresp
+            projects = jresp.get('projects')
+            return projects
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
                     url=auth_url,
@@ -184,53 +173,12 @@ class KeystoneApi(AbstractApi):
         """
         Returns all projects in the domain
         """
-        # TODO: Is this call needed, we loop over all project and then call keystone for projects by giving
-        # the project token (not keystone)
         url = urljoin(self.endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
         headers = {'X-Auth-Token': project_token}
         try:
             r = self._make_request(url, headers)
-            return r['projects']
+            return r.get('projects', [])
 
         except Exception as e:
             self.logger.warning('Unable to get projects: {}'.format(e))
             raise e
-
-    def get_project_name_from_id(self, project_token, project_id):
-        url = urljoin(self.endpoint, "{}/{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects", project_id))
-        self.logger.debug("Project URL is %s", url)
-        headers = {'X-Auth-Token': project_token}
-        try:
-            r = self._make_request(url, headers)
-            return r.get('project', {})['name']
-
-        except Exception as e:
-            self.logger.warning('Unable to get project name: {}'.format(e))
-            return None
-
-    def get_project_details(self, tenant_id, project_name, domain_id):
-        """
-        Returns the project that this instance of the check is scoped to
-        """
-        filter_params = {}
-        url = urljoin(self.endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
-        if tenant_id:
-            if project_name:
-                return {"id": tenant_id, "name": project_name}, None, None
-
-            url = "{}/{}".format(url, tenant_id)
-        else:
-            filter_params = {"name": project_name, "domain_id": domain_id}
-
-        headers = {'X-Auth-Token': self.auth_token}
-        project_details = self._make_request(url, headers, params=filter_params)
-
-        if filter_params:
-            if len(project_details["projects"]) > 1:
-                self.logger.error("Non-unique project credentials for filter_params: %s", filter_params)
-                raise RuntimeError("Non-unique project credentials")
-            project = project_details["projects"][0]
-        else:
-            project = project_details["project"]
-
-        return project, project.get("id"), project.get("name")
