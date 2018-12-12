@@ -6,6 +6,6 @@ from .conditions import WaitFor
 from .docker import docker_run, get_docker_hostname
 from .env import environment_run
 from .errors import RetryError
-from .structures import EnvVars, LazyFunction
+from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
 from .utils import chdir, temp_chdir, temp_dir

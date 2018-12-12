@@ -46,7 +46,7 @@ def stop(check, env):
             echo_success('success!')
 
             echo_waiting('Stopping the environment... ', nl=False, indent=status_indent)
-            _, _, error = stop_environment(check, env)
+            _, _, error = stop_environment(check, env, metadata=environment.metadata)
             if error:
                 echo_failure('failed!')
                 abort(error)
