@@ -127,7 +127,7 @@ Here's an example of configuration that would check the current machine and a re
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample iis.d/conf.yaml][2] for all available configuration options.
+  See the [sample iis.d/conf.yaml][3] for all available configuration options.
 
   * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
