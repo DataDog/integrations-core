@@ -18,11 +18,6 @@ from . import common
 
 pytestmark = pytest.mark.v2
 
-try:
-    zrange = xrange
-except NameError:
-    zrange = range
-
 
 @pytest.fixture(scope="module")
 def gauges():
@@ -311,7 +306,7 @@ def test_compaction_metrics(aggregator, check, gauges, couch_cluster):
 
     update_url = '{}/{}'.format(url, body['_id'])
 
-    for _ in zrange(50):
+    for _ in range(50):
         rev = r.json()['rev']
         body['data'] = str(time.time())
         body['_rev'] = rev
