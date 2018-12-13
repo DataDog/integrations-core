@@ -71,7 +71,7 @@ def start(ctx, check, env, agent, dev, base):
     if error:
         echo_failure('failed!')
         echo_waiting('Stopping the environment...')
-        stop_environment(check, env)
+        stop_environment(check, env, metadata=metadata)
         abort(error)
     echo_success('success!')
 
@@ -80,13 +80,13 @@ def start(ctx, check, env, agent, dev, base):
     if interface is None:
         echo_failure('`{}` is an unsupported environment type.'.format(env_type))
         echo_waiting('Stopping the environment...')
-        stop_environment(check, env)
+        stop_environment(check, env, metadata=metadata)
         abort()
 
     if env_type != 'docker' and agent.isdigit():
         echo_failure('Configuration for default Agents are only for Docker. You must specify the full build.')
         echo_waiting('Stopping the environment...')
-        stop_environment(check, env)
+        stop_environment(check, env, metadata=metadata)
         abort()
 
     environment = interface(check, env, base_package, config, metadata, agent_build, api_key)
@@ -110,7 +110,7 @@ def start(ctx, check, env, agent, dev, base):
         echo_info(result.stdout + result.stderr)
         echo_failure('An error occurred.')
         echo_waiting('Stopping the environment...')
-        stop_environment(check, env)
+        stop_environment(check, env, metadata=metadata)
         environment.remove_config()
         abort()
     echo_success('success!')

@@ -7,7 +7,7 @@ from base64 import urlsafe_b64encode
 
 import pytest
 
-from .._env import E2E_FIXTURE_NAME, TESTING_PLUGIN
+from .._env import E2E_FIXTURE_NAME, TESTING_PLUGIN, e2e_active, get_env_vars
 
 try:
     from datadog_checks.base.stubs import aggregator as __aggregator
@@ -31,7 +31,7 @@ def dd_environment_runner(request):
     testing_plugin = os.getenv(TESTING_PLUGIN) == 'true'
 
     # Do nothing if no e2e action is triggered and continue with tests
-    if not testing_plugin and not any(ev.startswith('DDEV_E2E_') for ev in os.environ):  # no cov
+    if not testing_plugin and not e2e_active():  # no cov
         return
 
     try:
@@ -58,6 +58,10 @@ def dd_environment_runner(request):
 
     # Default to Docker as that is the most common
     metadata.setdefault('env_type', 'docker')
+
+    # Save any environment variables
+    metadata.setdefault('env_vars', {})
+    metadata['env_vars'].update(get_env_vars(raw=True))
 
     data = {
         'config': config,
