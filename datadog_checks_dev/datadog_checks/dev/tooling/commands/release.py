@@ -16,7 +16,7 @@ from .utils import (
     echo_warning
 )
 from ..constants import (
-    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP, get_root
+    AGENT_RELEASE_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP, get_root
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
@@ -669,8 +669,8 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
 
         # update the list of integrations to be shipped with the Agent
         if check not in NOT_CHECKS:
-            commit_targets.append(AGENT_REQ_FILE)
-            req_file = os.path.join(root, AGENT_REQ_FILE)
+            commit_targets.append(AGENT_RELEASE_REQ_FILE)
+            req_file = os.path.join(root, AGENT_RELEASE_REQ_FILE)
             echo_waiting('Updating the Agent requirements file... ', nl=False)
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
             echo_success('success!')
@@ -885,7 +885,7 @@ def agent_req_file(ctx):
 
     lines = sorted(entries)
 
-    req_file = os.path.join(get_root(), AGENT_REQ_FILE)
+    req_file = os.path.join(get_root(), AGENT_RELEASE_REQ_FILE)
     write_file_lines(req_file, lines)
     echo_success('Successfully wrote to `{}`!'.format(req_file))
 
@@ -925,10 +925,10 @@ def agent_changelog(since, to, output, force):
     changes_per_agent = OrderedDict()
 
     for i in range(1, len(agent_tags)):
-        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i - 1])
+        contents_from = git_show_file(AGENT_RELEASE_REQ_FILE, agent_tags[i - 1])
         catalog_from = parse_agent_req_file(contents_from)
 
-        contents_to = git_show_file(AGENT_REQ_FILE, agent_tags[i])
+        contents_to = git_show_file(AGENT_RELEASE_REQ_FILE, agent_tags[i])
         catalog_to = parse_agent_req_file(contents_to)
 
         version_changes = OrderedDict()

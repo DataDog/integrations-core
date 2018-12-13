@@ -5,7 +5,7 @@ import click
 import os
 
 from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
-from ...constants import get_root, AGENT_REQ_FILE, AGENT_V5_ONLY, NOT_CHECKS
+from ...constants import get_root, AGENT_RELEASE_REQ_FILE, AGENT_V5_ONLY, NOT_CHECKS
 from ...utils import get_valid_checks, parse_agent_req_file, get_version_string
 from ...release import get_package_name
 from ....utils import read_file
@@ -21,7 +21,7 @@ def agent_reqs():
 
     root = get_root()
     echo_info("Validating requirements-agent-release.txt...")
-    agent_reqs_content = parse_agent_req_file(read_file(os.path.join(root, AGENT_REQ_FILE)))
+    agent_reqs_content = parse_agent_req_file(read_file(os.path.join(root, AGENT_RELEASE_REQ_FILE)))
     ok_checks = 0
     unreleased_checks = 0
     failed_checks = 0

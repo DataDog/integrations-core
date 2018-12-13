@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from collections import OrderedDict
 
 import semver
@@ -25,8 +26,10 @@ VERSION_BUMP = OrderedDict([
     ('beta', lambda v: semver.bump_prerelease(v, 'beta')),
 ])
 
-# The checks requirement file used by the agent
-AGENT_REQ_FILE = 'requirements-agent-release.txt'
+# The requirements file listing integrations to be included in the Agent package
+AGENT_RELEASE_REQ_FILE = 'requirements-agent-release.txt'
+# The requirements file listing dependencies needed by the embedded Python environment
+AGENT_REQUIREMENTS = 'agent_requirements.in'
 
 AGENT_V5_ONLY = {
     'agent_metrics',
