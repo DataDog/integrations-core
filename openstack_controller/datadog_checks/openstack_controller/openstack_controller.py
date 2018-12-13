@@ -850,8 +850,23 @@ class OpenStackControllerCheck(AgentCheck):
         # 0 and paginated_server_limit servers
         while len(resp) == self.paginated_server_limit:
             query_params['marker'] = resp[-1]['id']
-            resp = self._compute_api.get_servers_detail(query_params, timeout=timeout)
-            servers.extend(resp)
+            query_params['limit'] = self.paginated_server_limit
+            retry = 0
+            while retry < 3:
+                # get_flavors_detail is an expensive call, if it fails,
+                # If it fails, we retry 3 times while reducing the `limit` param
+                # otherwise we will backoff
+                try:
+                    resp = self._compute_api.get_servers_detail(query_params, timeout=timeout)
+                    servers.extend(resp)
+
+                    break
+                except Exception as e:
+                    query_params['limit'] = self.paginated_server_limit // 2
+                    retry += 1
+                    if retry == 3:
+                        raise e
+
         return servers
 
     def get_server_diagnostics(self, server_id):
@@ -870,8 +885,23 @@ class OpenStackControllerCheck(AgentCheck):
         # 0 and paginated_server_limit servers
         while len(resp) == self.paginated_server_limit:
             query_params['marker'] = resp[-1]['id']
-            resp = self._compute_api.get_flavors_detail(query_params, timeout=timeout)
-            flavors.extend(resp)
+            query_params['limit'] = self.paginated_server_limit
+            retry = 0
+            while retry < 3:
+                # get_flavors_detail is an expensive call, if it fails,
+                # If it fails, we retry 3 times while reducing the `limit` param
+                # otherwise we will backoff
+                try:
+                    resp = self._compute_api.get_flavors_detail(query_params, timeout=timeout)
+                    flavors.extend(resp)
+
+                    break
+                except Exception as e:
+                    query_params['limit'] = self.paginated_server_limit // 2
+                    retry += 1
+                    if retry == 3:
+                        raise e
+
         return flavors
 
     # Keystone Proxy Methods
