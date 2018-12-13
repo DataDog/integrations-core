@@ -2,10 +2,10 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 openstack.nova.current_workload,gauge,,,,Current workload on the Nova hypervisor,-1,openstack_controller,nova workload
 openstack.nova.disk_available_least,gauge,,gibibyte,,Disk available for the Nova hypervisor,1,openstack_controller,nova disk available
 openstack.nova.flavor.disk,gauge,,gibibyte,,The size of the root disk that was created for this server in GiB,1,openstack_controller,server disk available
-openstack.nova.flavor.ephemeral,gauge,,gibibyte,The size of the ephemeral disk that was created for this server, in GiB,1,openstack_controller,server flavor ephemeral disk
-openstack.nova.flavor.ram,gauge,,mebibyte,,The amount of RAM this server flavor has, in MiB,0,openstack_controller,server flavor ram
-openstack.nova.flavor.swap,gauge,,mebibyte,,The size of a dedicated swap disk that was allocated for this server, in MiB,0,openstack_controller,server flavor swap
-openstack.nova.flavor.vcpus,gauge,,,,The number of virtual CPUs that were allocated to the server.,0,openstack_controller,server flavor vcpus
+openstack.nova.flavor.ephemeral,gauge,,gibibyte,The size of the ephemeral disk that was created for this server in GiB,1,openstack_controller,server flavor ephemeral disk
+openstack.nova.flavor.ram,gauge,,mebibyte,,The amount of RAM this server flavor has in MiB,0,openstack_controller,server flavor ram
+openstack.nova.flavor.swap,gauge,,mebibyte,,The size of a dedicated swap disk that was allocated for this server in MiB,0,openstack_controller,server flavor swap
+openstack.nova.flavor.vcpus,gauge,,,,The number of virtual CPUs that were allocated to the server,0,openstack_controller,server flavor vcpus
 openstack.nova.free_disk_gb,gauge,,gibibyte,,Free disk on the Nova hypervisor,1,openstack_controller,nova free disk
 openstack.nova.free_ram_mb,gauge,,mebibyte,,Free RAM on the Nova hypervisor,1,openstack_controller,nova free ram
 openstack.nova.hypervisor_load.1,gauge,,,,The average hypervisor load over one minute.,-1,openstack_controller,hypervisor load 1
