@@ -378,6 +378,9 @@ class OpenStackControllerCheck(AgentCheck):
         if 'disk' in flavor:
             # New in version 2.47
             result['flavor'] = self.create_flavor_object(flavor)
+        if not all(key in result for key in SERVER_FIELDS_REQ):
+            self.warning("Server {} is missing a required field. Unable to collect all metrics for this server"
+                         .format(result))
         return result
 
     # Get all of the server IDs and their metadata and cache them
