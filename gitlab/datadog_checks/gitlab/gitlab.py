@@ -95,7 +95,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         return ssl_ca_certs if ssl_cert_validation else False
 
     def _service_check_tags(self, url):
-        parsed_url = urlparse.urlparse(url)
+        parsed_url = urlparse(url)
         gitlab_host = parsed_url.hostname
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)]
