@@ -17,8 +17,8 @@ Agent itself.
 ## Problem
 
 *If necessary, add a more detailed sketch of the problem. Add any notes,
-pictures, text, or details that illuminate why this is a problem Datadog Agent 
-integrations community needs to solve. Keep it as concise as possible.*
+pictures, text, or details that illuminate why this is a problem that needs to be 
+solved. Keep it as concise as possible.*
 
 ## Constraints
 
