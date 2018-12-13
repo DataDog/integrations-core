@@ -350,7 +350,7 @@ class OpenStackControllerCheck(AgentCheck):
 
             if updated_server_status == 'ACTIVE':
                 # Add or update the cache
-                if tenant_to_name[updated_server.get('tenant_id')]:
+                if tenant_to_name.get(updated_server.get('tenant_id')):
                     servers[updated_server_id] = self.create_server_object(updated_server, tenant_to_name)
             else:
                 # Remove from the cache if it exists
