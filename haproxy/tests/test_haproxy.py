@@ -29,29 +29,34 @@ def _test_frontend_metrics(aggregator, shared_tag):
             aggregator.assert_metric(rate, tags=frontend_tags, count=1)
 
 
-def _test_backend_metrics(aggregator, shared_tag, services=None):
+def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=False):
     backend_tags = shared_tag + ['type:BACKEND']
+    haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
     if not services:
         services = common.BACKEND_SERVICES
     for service in services:
         for backend in common.BACKEND_LIST:
             tags = backend_tags + ['service:' + service, 'backend:' + backend]
 
+            if add_addr_tag and haproxy_version >= ['1', '7']:
+                tags.append('server_address:{}'.format(
+                    common.BACKEND_TO_ADDR[backend]))
+
             for gauge in common.BACKEND_CHECK_GAUGES:
                 aggregator.assert_metric(gauge, tags=tags, count=1)
 
-            if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '5']:
+            if haproxy_version >= ['1', '5']:
                 for gauge in common.BACKEND_CHECK_GAUGES_POST_1_5:
                     aggregator.assert_metric(gauge, tags=tags, count=1)
 
-            if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '7']:
+            if haproxy_version >= ['1', '7']:
                 for gauge in common.BACKEND_CHECK_GAUGES_POST_1_7:
                     aggregator.assert_metric(gauge, tags=tags, count=1)
 
             for rate in common.BACKEND_CHECK_RATES:
                 aggregator.assert_metric(rate, tags=tags, count=1)
 
-            if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '4']:
+            if haproxy_version >= ['1', '4']:
                 for rate in common.BACKEND_CHECK_RATES_POST_1_4:
                     aggregator.assert_metric(rate, tags=tags, count=1)
 
@@ -146,7 +151,7 @@ def test_unixsocket_config(aggregator, haproxy_container):
     shared_tag = ["instance_url:{0}".format(unixsocket_url)]
 
     _test_frontend_metrics(aggregator, shared_tag)
-    _test_backend_metrics(aggregator, shared_tag)
+    _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
     _test_service_checks(aggregator)
 
     aggregator.assert_all_metrics_covered()
