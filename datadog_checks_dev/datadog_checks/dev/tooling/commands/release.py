@@ -668,7 +668,7 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
 
         commit_targets = [check]
 
-        # update the global requirements file
+        # update the list of integrations to be shipped with the Agent
         if check not in NOT_CHECKS:
             commit_targets.append(AGENT_REQ_FILE)
             req_file = os.path.join(root, AGENT_REQ_FILE)
@@ -859,14 +859,13 @@ def upload(ctx, check, dry_run):
 
 @release.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help="Update the Agent's release and static dependency files"
+    short_help="Generate the list of integrations to ship with the Agent and save it to '{}'".format(AGENT_REQ_FILE)
 )
-@click.option('--no-deps', is_flag=True, help='Do not create the static dependency file')
 @click.pass_context
-def freeze(ctx, no_deps):
+def agent_req_file(ctx):
     """Write the `requirements-agent-release.txt` file at the root of the repo
     listing all the Agent-based integrations pinned at the version they currently
-    have in HEAD. Also by default will create the Agent's static dependency file.
+    have in HEAD.
     """
     echo_info('Freezing check releases')
     checks = get_valid_checks()
@@ -890,9 +889,6 @@ def freeze(ctx, no_deps):
     req_file = os.path.join(get_root(), AGENT_REQ_FILE)
     write_file_lines(req_file, lines)
     echo_success('Successfully wrote to `{}`!'.format(req_file))
-
-    if not no_deps:
-        ctx.invoke(dep_freeze)
 
 
 @release.command(
