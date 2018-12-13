@@ -33,7 +33,7 @@ fulfill. For example:*
 ## Recommended Solution
 
 *Describe your solution in the bare minimum detail to be understood. Explain
-why it's better than what Datadog Agent has and better than other options. Address
+why it's better than the current implementation and better than other options. Address
 any critical operational issues (failure modes, failover, redudancy, performance, cost).
 For example:*
 
