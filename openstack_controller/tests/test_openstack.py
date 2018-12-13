@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import copy
 import time
 import mock
+import copy
 from . import common
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
@@ -47,18 +47,16 @@ def test_get_all_servers_between_runs(servers_detail, aggregator):
     }, {}, instances=common.MOCK_CONFIG)
 
     # Start off with a list of servers
-    check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
+    check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
     # Update the cached list of servers based on what the endpoint returns
     check.get_all_servers({'6f70656e737461636b20342065766572': 'testproj',
                            'blacklist_1': 'blacklist_1',
-                           'blacklist_2': 'blacklist_2'}, "test_instance")
-
-    cached_servers = check.server_details_by_id
-    print(cached_servers)
-    assert 'server-1' not in cached_servers
-    assert 'server_newly_added' in cached_servers
-    assert 'other-1' in cached_servers
-    assert 'other-2' in cached_servers
+                           'blacklist_2': 'blacklist_2'}, "test_name")
+    servers = check.servers_cache['test_name']['servers']
+    assert 'server-1' not in servers
+    assert 'server_newly_added' in servers
+    assert 'other-1' in servers
+    assert 'other-2' in servers
 
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
@@ -74,15 +72,16 @@ def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
     }, {}, instances=common.MOCK_CONFIG)
 
     # Start off with a list of servers
-    check.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
+    check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
     # Update the cached list of servers based on what the endpoint returns
     check.get_all_servers({'6f70656e737461636b20342065766572': None,
                            'blacklist_1': 'blacklist_1',
-                           'blacklist_2': 'blacklist_2'}, "test_instance")
-    assert 'server_newly_added' not in check.server_details_by_id
-    assert 'server-1' not in check.server_details_by_id
-    assert 'other-1' in check.server_details_by_id
-    assert 'other-2' in check.server_details_by_id
+                           'blacklist_2': 'blacklist_2'}, "test_name")
+    servers = check.servers_cache['test_name']['servers']
+    assert 'server_newly_added' not in servers
+    assert 'server-1' not in servers
+    assert 'other-1' in servers
+    assert 'other-2' in servers
 
 
 def get_server_details_response(params, timeout=None):
@@ -93,7 +92,7 @@ def get_server_details_response(params, timeout=None):
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
             side_effect=get_server_details_response)
-def test_get_all_servers_with_paginated_server(servers_detail, aggregator):
+def test_get_paginated_server(servers_detail, aggregator):
     """
     Ensure the server cache is updated while using pagination
     """
@@ -104,11 +103,12 @@ def test_get_all_servers_with_paginated_server(servers_detail, aggregator):
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
     }, {}, instances=common.MOCK_CONFIG)
-    check.get_all_servers({"6f70656e737461636b20342065766572": "testproj"}, "test_instance")
-    assert len(check.server_details_by_id) == 1
-    assert 'server-1' in check.server_details_by_id
-    assert 'other-1' not in check.server_details_by_id
-    assert 'other-2' not in check.server_details_by_id
+    check.get_all_servers({"6f70656e737461636b20342065766572": "testproj"}, "test_name")
+    assert len(check.servers_cache) == 1
+    servers = check.servers_cache['test_name']['servers']
+    assert 'server-1' in servers
+    assert 'other-1' not in servers
+    assert 'other-2' not in servers
 
 
 OS_AGGREGATES_RESPONSE = [
@@ -171,76 +171,76 @@ def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggr
         'paginated_server_limit': 1
     }, {}, instances=common.MOCK_CONFIG)
 
-    check.collect_server_metrics({})
+    check.collect_server_diagnostic_metrics({})
 
     aggregator.assert_metric('openstack.nova.server.vda_read_req', value=112.0,
-                             tags=['availability_zone:NA'],
+                             tags=['nova_managed_server', 'availability_zone:NA'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.vda_read', value=262144.0,
-                             tags=['availability_zone:NA'],
+                             tags=['nova_managed_server', 'availability_zone:NA'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.memory', value=524288.0,
-                             tags=['availability_zone:NA'],
+                             tags=['nova_managed_server', 'availability_zone:NA'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.cpu0_time', value=17300000000.0,
-                             tags=['availability_zone:NA'],
+                             tags=['nova_managed_server', 'availability_zone:NA'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.vda_errors', value=-1.0,
-                             tags=['availability_zone:NA'],
+                             tags=['nova_managed_server', 'availability_zone:NA'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.vda_write_req', value=488.0,
-                             tags=['availability_zone:NA'],
+                             tags=['nova_managed_server', 'availability_zone:NA'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.vda_write', value=5778432.0,
-                             tags=['availability_zone:NA'],
+                             tags=['nova_managed_server', 'availability_zone:NA'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.tx_drop', value=0.0,
-                             tags=['availability_zone:NA', 'interface:vnet1'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
-                             tags=['availability_zone:NA', 'interface:vnet1'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.rx_drop', value=0.0,
-                             tags=['availability_zone:NA', 'interface:vnet1'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.rx', value=2070139.0,
-                             tags=['availability_zone:NA', 'interface:vnet1'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.tx_packets', value=662.0,
-                             tags=['availability_zone:NA', 'interface:vnet1'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
-                             tags=['availability_zone:NA', 'interface:vnet1'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.rx_packets', value=26701.0,
-                             tags=['availability_zone:NA', 'interface:vnet1'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.rx_errors', value=0.0,
-                             tags=['availability_zone:NA', 'interface:vnet1'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.tx_drop', value=0.0,
-                             tags=['availability_zone:NA', 'interface:vnet2'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.tx', value=140208.0,
-                             tags=['availability_zone:NA', 'interface:vnet2'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.rx_drop', value=0.0,
-                             tags=['availability_zone:NA', 'interface:vnet2'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.rx', value=2070139.0,
-                             tags=['availability_zone:NA', 'interface:vnet2'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.tx_packets', value=662.0,
-                             tags=['availability_zone:NA', 'interface:vnet2'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
-                             tags=['availability_zone:NA', 'interface:vnet2'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.rx_packets', value=26701.0,
-                             tags=['availability_zone:NA', 'interface:vnet2'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
                              hostname='')
     aggregator.assert_metric('openstack.nova.server.rx_errors', value=0.0,
-                             tags=['availability_zone:NA', 'interface:vnet2'],
+                             tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
                              hostname='')
 
     aggregator.assert_all_metrics_covered()
