@@ -14,6 +14,7 @@ from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_te
 CHECK_NAME = 'pdh_check'
 
 INSTANCE = {
+    'cache_counter_instances': False,
     'countersetname': 'System',
     'metrics': [
         ['File Read Operations/sec', 'pdh.system.file_read_per_sec', 'gauge'],

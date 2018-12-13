@@ -20,10 +20,12 @@ def Aggregator():
 
 CHECK_NAME = 'iis'
 MINIMAL_INSTANCE = {
+    'cache_counter_instances': False,
     'host': '.',
 }
 
 INSTANCE = {
+    'cache_counter_instances': False,
     'host': '.',
     'sites': ['Default Web Site', 'Exchange Back End', 'Non Existing Website'],
 }

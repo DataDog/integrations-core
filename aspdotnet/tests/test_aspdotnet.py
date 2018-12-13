@@ -13,10 +13,12 @@ from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_te
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 MINIMAL_INSTANCE = {
+    'cache_counter_instances': False,
     'host': '.',
 }
 
 INSTANCE_WITH_TAGS = {
+    'cache_counter_instances': False,
     'host': '.',
     'tags': ['tag1', 'another:tag']
 }
