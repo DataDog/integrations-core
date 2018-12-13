@@ -346,6 +346,19 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.net.bytes_rejected.rate
+    
+    #
+    # Per Topic Broker Stats
+    #
+    - include:
+        domain: '"kafka.server"'
+        bean_regex: '"kafka.server":type="BrokerTopicMetrics",name="(.*?)-MessagesInPerSec"'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topic.messages_in.rate
+        tags:
+          topic: $1
 
     #
     # Request timings
