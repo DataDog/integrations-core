@@ -25,7 +25,7 @@ integrations community needs to solve. Keep it as concise as possible.*
 *If necessary, note any constraints or requirements that any solution must
 fulfill. For example:*
 
-    1. Datadog Agent has to target Python 2.7.
+    1. Target is Python 2.7.
     2. Memory footprint should not increase more than 10%.
     3. Every check in `integrations-core` and `integrations-extra` should be
        supported.
