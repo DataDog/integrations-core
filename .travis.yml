@@ -117,7 +117,7 @@ jobs:
     - stage: test
       env: CHECK=exchange_server
     - stage: test
-      env: CHECK=fluentd
+      env: CHECK=fluentd PYTHON3=true
     - stage: test
       env: CHECK=gearmand PYTHON3=true
     - stage: test
