@@ -11,6 +11,7 @@ import time
 import tempfile
 
 from . import common
+from datadog_checks.dev import temp_dir
 
 log = logging.getLogger(__file__)
 
@@ -56,52 +57,49 @@ def cassandra_cluster():
     # We need to restrict permission on the password file
     # Create a temporary file so if we have to run tests more than once on a machine
     # the original file's perms aren't modified
-    temp_jmx_pass = tempfile.NamedTemporaryFile(dir="/tmp")
-    jmx_pass_file = os.path.join(common.HERE, "compose", 'jmxremote.password')
-    jmx_pass = open(jmx_pass_file, "rb")
+    with temp_dir() as tmpdir:
+        temp_jmx_pass = tempfile.NamedTemporaryFile(dir=tmpdir)
+        jmx_pass_file = os.path.join(common.HERE, "compose", 'jmxremote.password')
+        jmx_pass = open(jmx_pass_file, "rb")
 
-    temp_jmx_pass.write(jmx_pass.read())
-    temp_jmx_pass.flush()
-    os.fsync(temp_jmx_pass)
-    jmx_pass.close()
+        temp_jmx_pass.write(jmx_pass.read())
+        temp_jmx_pass.flush()
+        os.fsync(temp_jmx_pass)
+        jmx_pass.close()
 
-    env['JMX_PASS_FILE'] = temp_jmx_pass.name
-    os.chmod(temp_jmx_pass.name, stat.S_IRWXU)
-    docker_compose_args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
-    ]
-    subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME])
-    # wait for the cluster to be up before yielding
-    if not wait_on_docker_logs(
-            common.CASSANDRA_CONTAINER_NAME,
-            20,
-            ['Listening for thrift clients', "Created default superuser role 'cassandra'"]
-    ):
-        raise Exception("Cassandra cluster dd-test-cassandra boot timed out!")
+        env['JMX_PASS_FILE'] = temp_jmx_pass.name
+        os.chmod(temp_jmx_pass.name, stat.S_IRWXU)
+        docker_compose_args = [
+            "docker-compose",
+            "-f", os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+        ]
+        subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME])
+        # wait for the cluster to be up before yielding
+        if not wait_on_docker_logs(
+                common.CASSANDRA_CONTAINER_NAME,
+                20,
+                ['Listening for thrift clients', "Created default superuser role 'cassandra'"]
+        ):
+            raise Exception("Cassandra cluster dd-test-cassandra boot timed out!")
 
-    cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
-    env['CASSANDRA_SEEDS'] = cassandra_seed.decode('utf-8')
-    subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME_2])
+        cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
+        env['CASSANDRA_SEEDS'] = cassandra_seed.decode('utf-8')
+        subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME_2])
 
-    if not wait_on_docker_logs(
-            common.CASSANDRA_CONTAINER_NAME_2,
-            50,
-            ['Listening for thrift clients', 'Not starting RPC server as requested']
-    ):
-        raise Exception("Cassandra cluster {} boot timed out!".format(common.CASSANDRA_CONTAINER_NAME_2))
+        if not wait_on_docker_logs(
+                common.CASSANDRA_CONTAINER_NAME_2,
+                50,
+                ['Listening for thrift clients', 'Not starting RPC server as requested']
+        ):
+            raise Exception("Cassandra cluster {} boot timed out!".format(common.CASSANDRA_CONTAINER_NAME_2))
 
-    subprocess.check_call([
-        "docker",
-        "exec", common.CASSANDRA_CONTAINER_NAME,
-        "cqlsh",
-        "-e", "CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}"
-    ])
-    yield
-
-    try:
-        temp_jmx_pass.close()
-    except OSError:
-        pass
+        subprocess.check_call([
+            "docker",
+            "exec", common.CASSANDRA_CONTAINER_NAME,
+            "cqlsh",
+            "-e",
+            "CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}"
+        ])
+        yield
 
     subprocess.check_call(docker_compose_args + ["down"])
