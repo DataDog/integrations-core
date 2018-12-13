@@ -4,10 +4,12 @@
 import pytest
 
 from datadog_checks.pdh_check import PDHCheck
+from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_cache(benchmark):
+    initialize_pdh_tests()
     instance = {
         'cache_counter_instances': True,
         'countersetname': 'System',
@@ -26,6 +28,7 @@ def test_cache(benchmark):
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_no_cache(benchmark):
+    initialize_pdh_tests()
     instance = {
         'cache_counter_instances': False,
         'countersetname': 'System',
