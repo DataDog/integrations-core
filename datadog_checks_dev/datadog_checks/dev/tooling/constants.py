@@ -30,7 +30,7 @@ VERSION_BUMP = OrderedDict([
 AGENT_RELEASE_REQ_FILE = 'requirements-agent-release.txt'
 # The requirements file listing dependencies needed by the embedded Python environment
 AGENT_REQUIREMENTS = os.path.join(
-    'datadog_checks_base', 'base', 'data', 'agent_requirements.in'
+    'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in'
 )
 AGENT_V5_ONLY = {
     'agent_metrics',
