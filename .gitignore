@@ -14,7 +14,7 @@ __pycache__/
 .Python
 venv/
 embedded/
-env/
+/env/
 build/
 develop-eggs/
 dist/
