@@ -84,7 +84,7 @@ def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
     assert 'other-2' in servers
 
 
-def get_server_details_response(params, timeout=None):
+def get_server_details_response(params):
     if 'marker' not in params:
         return common.MOCK_NOVA_SERVERS_PAGINATED
     return common.EMPTY_NOVA_SERVERS
@@ -103,6 +103,7 @@ def test_get_paginated_server(servers_detail, aggregator):
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
     }, {}, instances=common.MOCK_CONFIG)
+    check.paginated_server_limit = None
     check.get_all_servers({"6f70656e737461636b20342065766572": "testproj"}, "test_name")
     assert len(check.servers_cache) == 1
     servers = check.servers_cache['test_name']['servers']

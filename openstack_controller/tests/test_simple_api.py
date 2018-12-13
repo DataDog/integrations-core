@@ -2,12 +2,141 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
-import simplejson as json
-from datadog_checks.openstack_controller.api import ComputeApi
+import pytest
+import logging
+import simplejson
+from datadog_checks.openstack_controller.api import SimpleApi
+from datadog_checks.openstack_controller.exceptions import (IncompleteIdentity, MissingNovaEndpoint,
+                                                            MissingNeutronEndpoint, IncompleteConfig)
+
+from . import common
+
+
+log = logging.getLogger('test_openstack_controller')
+
+
+def test_get_endpoint():
+    assert SimpleApi._get_compute_endpoint(
+        common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
+    with pytest.raises(MissingNovaEndpoint):
+        SimpleApi._get_compute_endpoint({})
+
+    assert SimpleApi._get_network_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
+    with pytest.raises(MissingNeutronEndpoint):
+        SimpleApi._get_network_endpoint({})
+
+    assert SimpleApi._get_valid_endpoint({}, None, None) is None
+    assert SimpleApi._get_valid_endpoint({'token': {}}, None, None) is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": [{}]}}, None, None) is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": [{
+        u'type': u'compute',
+        u'name': u'nova'}]}}, None, None) is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, None, None) is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{u'url': u'dummy_url', u'interface': u'dummy'}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{u'url': u'dummy_url'}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{u'interface': u'public'}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') is None
+    assert SimpleApi._get_valid_endpoint({'token': {"catalog": [{
+        u'endpoints': [{u'url': u'dummy_url', u'interface': u'internal'}],
+        u'type': u'compute',
+        u'name': u'nova'}]}}, 'nova', 'compute') == 'dummy_url'
+
+
+BAD_USERS = [
+    {'user': {}},
+    {'user': {'name': ''}},
+    {'user': {'name': 'test_name', 'password': ''}},
+    {'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {}}},
+    {'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': ''}}},
+]
+
+
+def _test_bad_user(user):
+    with pytest.raises(IncompleteIdentity):
+        SimpleApi._get_user_identity(user)
+
+
+def test_get_user_identity():
+    for user in BAD_USERS:
+        _test_bad_user(user)
+
+    for user in common.GOOD_USERS:
+        parsed_user = SimpleApi._get_user_identity(user)
+        assert parsed_user == {'methods': ['password'], 'password': user}
+
+
+class MockHTTPResponse(object):
+    def __init__(self, response_dict, headers):
+        self.response_dict = response_dict
+        self.headers = headers
+
+    def json(self):
+        return self.response_dict
+
+
+PROJECTS_RESPONSE = [
+        {
+            "domain_id": "1111",
+            "id": "3333",
+            "name": "name 1"
+        },
+        {
+            "domain_id": "22222",
+            "id": "4444",
+            "name": "name 2"
+        },
+    ]
+
+PROJECT_RESPONSE = [
+        {
+            "domain_id": "1111",
+            "id": "3333",
+            "name": "name 1"
+        }
+    ]
+
+
+def test_simple_api_no_conf():
+    with pytest.raises(IncompleteConfig):
+        SimpleApi(log, None, {})
+
+
+def test_simple_api_no_user():
+    with pytest.raises(IncompleteConfig):
+        SimpleApi(log, None, {'keystone_server_url': 'http://10.0.2.15:5000'})
+
+
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_token_endpoints',
+            return_value=('fake_token', 'http://10.0.2.15:5000', 'http://10.0.2.15:6000'))
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_projects', return_value=PROJECTS_RESPONSE)
+def test_simple_api(_get_auth_token_endpoints, _get_auth_projects):
+    instance_config = {'user': common.GOOD_USERS[0]['user'], 'keystone_server_url': 'http://10.0.2.15:5000'}
+
+    api = SimpleApi(log, None, instance_config)
+    assert api.auth_token == 'fake_token'
+    assert api.compute_endpoint == 'http://10.0.2.15:5000'
+    assert api.network_endpoint == 'http://10.0.2.15:6000'
 
 
 def get_os_hypervisor_uptime_pre_v2_52_response(url, header, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "hypervisor": {
             "hypervisor_hostname": "fake-mini",
             "id": 1,
@@ -19,7 +148,7 @@ def get_os_hypervisor_uptime_pre_v2_52_response(url, header, params=None, timeou
 
 
 def get_os_hypervisor_uptime_post_v2_53_response(url, header, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "hypervisor": {
             "hypervisor_hostname": "fake-mini",
             "id": "b1e43b5f-eec1-44e0-9f10-7b4945c0226d",
@@ -30,22 +159,27 @@ def get_os_hypervisor_uptime_post_v2_53_response(url, header, params=None, timeo
     }""")
 
 
-def test_get_os_hypervisor_uptime(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_token_endpoints',
+            return_value=('fake_token', 'http://10.0.2.15:5000', 'http://10.0.2.15:6000'))
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_projects', return_value=[{"id": "123"}])
+def test_get_os_hypervisor_uptime(auth_token_endpoints, auth_projects, aggregator):
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisor_uptime_pre_v2_52_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisor_uptime(1) == \
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_os_hypervisor_uptime(1) == \
             " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
 
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisor_uptime_post_v2_53_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisor_uptime(1) == \
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_os_hypervisor_uptime(1) == \
             " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
 
 
 def get_os_aggregates_response(url, headers, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "aggregates": [
             {
                 "availability_zone": "london",
@@ -67,11 +201,15 @@ def get_os_aggregates_response(url, headers, params=None, timeout=None):
     }""")
 
 
-def test_get_os_aggregates(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_token_endpoints',
+            return_value=('fake_token', 'http://10.0.2.15:5000', 'http://10.0.2.15:6000'))
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_projects', return_value=[{"id": "123"}])
+def test_get_os_aggregates(auth_token_endpoints, auth_projects, aggregator):
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_aggregates_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_aggregates() == [
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_os_aggregates() == [
             {
                 "availability_zone": "london",
                 "created_at": "2016-12-27T23:47:32.911515",
@@ -92,7 +230,7 @@ def test_get_os_aggregates(aggregator):
 
 
 def get_os_hypervisors_detail_post_v2_33_response(url, headers, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "hypervisors": [
             {
                 "cpu_info": {
@@ -144,7 +282,7 @@ def get_os_hypervisors_detail_post_v2_33_response(url, headers, params=None, tim
 
 
 def get_os_hypervisors_detail_post_v2_53_response(url, headers, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "hypervisors": [
             {
                 "cpu_info": {
@@ -195,11 +333,15 @@ def get_os_hypervisors_detail_post_v2_53_response(url, headers, params=None, tim
     }""")  # noqa: E501
 
 
-def test_get_os_hypervisors_detail(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_token_endpoints',
+            return_value=('fake_token', 'http://10.0.2.15:5000', 'http://10.0.2.15:6000'))
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_projects', return_value=[{"id": "123"}])
+def test_get_os_hypervisors_detail(auth_token_endpoints, auth_projects, aggregator):
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_33_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisors_detail() == {
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_os_hypervisors_detail() == {
             "hypervisors": [
                 {
                     "cpu_info": {
@@ -249,10 +391,11 @@ def test_get_os_hypervisors_detail(aggregator):
             ]
         }
 
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_53_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisors_detail() == {
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_os_hypervisors_detail() == {
             "hypervisors": [
                 {
                     "cpu_info": {
@@ -304,7 +447,7 @@ def test_get_os_hypervisors_detail(aggregator):
 
 
 def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "servers": [
             {
                 "OS-DCF:diskConfig": "AUTO",
@@ -406,11 +549,15 @@ def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=No
     }""")  # noqa: E501
 
 
-def test_get_servers_detail(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_token_endpoints',
+            return_value=('fake_token', 'http://10.0.2.15:5000', 'http://10.0.2.15:6000'))
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_projects', return_value=[{"id": "123"}])
+def test_get_servers_detail(auth_token_endpoints, auth_projects, aggregator):
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_servers_detail_post_v2_63_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_servers_detail(None) == [
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_servers_detail(None) == [
             {
                 "OS-DCF:diskConfig": "AUTO",
                 "OS-EXT-AZ:availability_zone": "nova",
@@ -505,7 +652,7 @@ def test_get_servers_detail(aggregator):
 
 
 def get_server_diagnostics_post_v2_48_response(url, headers, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "config_drive": true,
         "cpu_details": [
             {
@@ -554,7 +701,7 @@ def get_server_diagnostics_post_v2_48_response(url, headers, params=None, timeou
 
 
 def get_server_diagnostics_post_v2_1_response(url, headers, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "cpu0_time": 17300000000,
         "memory": 524288,
         "vda_errors": -1,
@@ -573,11 +720,15 @@ def get_server_diagnostics_post_v2_1_response(url, headers, params=None, timeout
     }""")
 
 
-def test_get_server_diagnostics(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_token_endpoints',
+            return_value=('fake_token', 'http://10.0.2.15:5000', 'http://10.0.2.15:6000'))
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_projects', return_value=[{"id": "123"}])
+def test_get_server_diagnostics(auth_token_endpoints, auth_projects, aggregator):
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_server_diagnostics_post_v2_48_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_server_diagnostics(None) == {
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_server_diagnostics(None) == {
             "config_drive": True,
             "cpu_details": [
                 {
@@ -624,10 +775,11 @@ def test_get_server_diagnostics(aggregator):
             "uptime": 46664
         }
 
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_server_diagnostics_post_v2_1_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_server_diagnostics(None) == {
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_server_diagnostics(None) == {
             "cpu0_time": 17300000000,
             "memory": 524288,
             "vda_errors": -1,
@@ -647,7 +799,7 @@ def test_get_server_diagnostics(aggregator):
 
 
 def get_project_limits_response(url, headers, params=None, timeout=None):
-    return json.loads("""{
+    return simplejson.loads("""{
         "limits": {
             "absolute": {
                 "maxImageMeta": 128,
@@ -675,11 +827,15 @@ def get_project_limits_response(url, headers, params=None, timeout=None):
     }""")
 
 
-def test_get_project_limits(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_token_endpoints',
+            return_value=('fake_token', 'http://10.0.2.15:5000', 'http://10.0.2.15:6000'))
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._get_auth_projects', return_value=[{"id": "123"}])
+def test_get_project_limits(auth_token_endpoints, auth_projects, aggregator):
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_project_limits_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_project_limits(None) == {
+        api = SimpleApi(log, None, {'user': common.GOOD_USERS[0]['user'],
+                                    'keystone_server_url': 'http://10.0.2.15:5000'})
+        assert api.get_project_limits(None) == {
                 "maxImageMeta": 128,
                 "maxPersonality": 5,
                 "maxPersonalitySize": 10240,
