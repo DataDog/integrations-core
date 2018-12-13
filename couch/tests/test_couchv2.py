@@ -13,8 +13,10 @@ import threading
 import pytest
 import requests
 
+from six import PY2
+
 from datadog_checks.couch import CouchDb
-import common
+from . import common
 
 pytestmark = pytest.mark.v2
 
@@ -22,11 +24,18 @@ pytestmark = pytest.mark.v2
 @pytest.fixture(scope="module")
 def gauges():
     res = defaultdict(list)
-    with open("{}/../metadata.csv".format(common.HERE), "rb") as csvfile:
+    if PY2:
+        mode = "rb"
+    else:
+        mode = "r"
+
+    with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)
-        reader.next()  # This one skips the headers
         for row in reader:
-            if row[0] in ["couchdb.couchdb.request_time", "couchdb.by_db.disk_size"]:
+            if row[0] == 'metric_name':
+                # skip the header
+                continue
+            elif row[0] in ["couchdb.couchdb.request_time", "couchdb.by_db.disk_size"]:
                 # Skip CouchDB 1.x specific metrics
                 continue
             elif row[0].startswith("couchdb.by_db."):
@@ -306,7 +315,7 @@ def test_compaction_metrics(aggregator, check, gauges, couch_cluster):
 
     update_url = '{}/{}'.format(url, body['_id'])
 
-    for _ in xrange(50):
+    for _ in range(50):
         rev = r.json()['rev']
         body['data'] = str(time.time())
         body['_rev'] = rev
@@ -397,7 +406,7 @@ def test_view_compaction_metrics(aggregator, check, gauges, couch_cluster):
                     self.compact_views()
                 theid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
                 docs.append(self.post_doc(theid))
-                docs = map(lambda x: self.update_doc(x), docs)
+                docs = list(map(lambda x: self.update_doc(x), docs))
                 self.generate_views()
 
         def generate_views(self):
@@ -472,7 +481,7 @@ def test_view_compaction_metrics(aggregator, check, gauges, couch_cluster):
                 check.check(config)
 
             for m_name in aggregator._metrics:
-                if re.search(r'view_compaction\.progress', m_name) is not None:
+                if re.search(r'view_compaction\.progress', str(m_name)) is not None:
                     metric_found = True
                     for gauge in gauges["view_compaction_tasks_gauges"]:
                         aggregator.assert_metric(gauge)

@@ -93,7 +93,7 @@ jobs:
     - stage: test
       env: CHECK=coredns PYTHON3=true
     - stage: test
-      env: CHECK=couch
+      env: CHECK=couch PYTHON3=true
     - stage: test
       env: CHECK=couchbase
     - stage: test
