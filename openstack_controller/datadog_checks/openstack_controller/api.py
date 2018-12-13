@@ -83,7 +83,8 @@ class ComputeApi(AbstractApi):
 
     def get_os_hypervisors_detail(self):
         url = '{}/os-hypervisors/detail'.format(self.endpoint)
-        return self._make_request(url, self.headers)
+        hypervisors = self._make_request(url, self.headers)
+        return hypervisors.get('hypervisors', [])
 
     def get_servers_detail(self, query_params, timeout=None):
         url = '{}/servers/detail'.format(self.endpoint)

@@ -270,16 +270,14 @@ class OpenStackControllerCheck(AgentCheck):
         Submits stats for all hypervisors registered to this control plane
         Raises specific exceptions based on response code
         """
-        resp = self.get_os_hypervisors_detail()
-        hypervisors = resp.get('hypervisors', [])
+        hypervisors = self.get_os_hypervisors_detail()
         for hyp in hypervisors:
             self.get_stats_for_single_hypervisor(hyp, custom_tags=custom_tags,
                                                  use_shortname=use_shortname,
                                                  collect_hypervisor_metrics=collect_hypervisor_metrics,
                                                  collect_hypervisor_load=collect_hypervisor_load)
-
-        if not hypervisors:
-            self.log.warn("Unable to collect any hypervisors from Nova response: {}".format(resp))
+        else:
+            self.log.warn("Unable to collect any hypervisors from Nova response.")
 
     def get_stats_for_single_hypervisor(self, hyp, custom_tags=None,
                                         use_shortname=False,
@@ -380,6 +378,9 @@ class OpenStackControllerCheck(AgentCheck):
         if 'disk' in flavor:
             # New in version 2.47
             result['flavor'] = self.create_flavor_object(flavor)
+        if not all(key in result for key in SERVER_FIELDS_REQ):
+            self.warning("Server {} is missing a required field. Unable to collect all metrics for this server"
+                         .format(result))
         return result
 
     # Get all of the server IDs and their metadata and cache them
@@ -796,6 +797,9 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _get_host_aggregate_tag(self, hyp_hostname, use_shortname=False):
         tags = []
+        if not hyp_hostname:
+            return tags
+
         hyp_hostname = hyp_hostname.split('.')[0] if use_shortname else hyp_hostname
         if hyp_hostname in self._get_and_set_aggregate_list():
             tags.append('aggregate:{}'.format(self._aggregate_list[hyp_hostname].get('aggregate', "unknown")))
