@@ -284,7 +284,7 @@ class OpenStackControllerCheck(AgentCheck):
     def get_stats_for_single_hypervisor(self, hyp, custom_tags=None,
                                         use_shortname=False,
                                         collect_hypervisor_metrics=True,
-                                        collect_hypervisor_load=False):
+                                        collect_hypervisor_load=True):
         hyp_hostname = hyp.get('hypervisor_hostname')
         custom_tags = custom_tags or []
         tags = [
@@ -314,6 +314,21 @@ class OpenStackControllerCheck(AgentCheck):
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{}".format(label)
                 self.gauge(metric_label, val, tags=tags)
+
+        # This makes a request per hypervisor and only sends hypervisor_load 1/5/15
+        # Disable this by default for higher performance in a large environment
+        # If the Agent is installed on the hypervisors, system.load.1/5/15 is available
+        if collect_hypervisor_load:
+            try:
+                load_averages = self.get_loads_for_single_hypervisor(hyp['id'])
+            except Exception as e:
+                self.warning('Unable to get loads averages for hypervisor {}: {}'.format(hyp['id'], e))
+                load_averages = []
+            if load_averages and len(load_averages) == 3:
+                for i, avg in enumerate([1, 5, 15]):
+                    self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
+            else:
+                self.log.debug("Load Averages didn't return expected values: {}".format(load_averages))
 
     def get_active_servers(self, tenant_to_name):
         servers = []
