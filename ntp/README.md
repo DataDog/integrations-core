@@ -22,7 +22,7 @@ The NTP check is included in the [Datadog Agent][1] package, so you don't need t
 
 ### Configuration
 
-The Agent enables the NTP check by default, but if you want to configure the check yourself, edit the file `ntp.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. See the [sample ntp.d/conf.yaml][2] for all available configuration options:
+The Agent enables the NTP check by default, but if you want to configure the check yourself, edit the file `ntp.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample ntp.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -42,15 +42,15 @@ Configuration Options:
 * `version` (Optional) - ntp version
 * `timeout` (Optional) - Response timeout
 
-[Restart the Agent][3] to effect any configuration changes.
+[Restart the Agent][4] to effect any configuration changes.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `ntp` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `ntp` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][5] for a list of metrics provided by this check.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
 The NTP check does not include any events at this time.
@@ -62,12 +62,12 @@ The NTP check does not include any events at this time.
 Returns CRITICAL if the NTP offset is greater than the threshold specified in `ntp.yaml`, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/ntp/datadog_checks/ntp/data/conf.yaml.default
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/ntp/datadog_checks/ntp/data/conf.yaml.default
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv
+[7]: https://docs.datadoghq.com/help

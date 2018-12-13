@@ -11,8 +11,8 @@ The Kong check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-1. Edit the `kong.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][8].
-    See the [sample kong.d/conf.yaml][2] for all available configuration options:
+1. Edit the `kong.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2].
+    See the [sample kong.d/conf.yaml][3] for all available configuration options:
     ```yaml
     init_config:
 
@@ -26,16 +26,16 @@ The Kong check is included in the [Datadog Agent][1] package, so you don't need 
         #    - instance:bar
     ```
 
-2. [Restart the Agent][3] to begin sending Kong metrics to Datadog.
+2. [Restart the Agent][4] to begin sending Kong metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `kong` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `kong` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 The Kong check does not include any events at this time.
@@ -47,18 +47,18 @@ The Kong check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to Kong to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][7].
 
 ## Further Reading
 
-* [Monitor Kong with our new Datadog integration][7]
+* [Monitor Kong with our new Datadog integration][8]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/kong/datadog_checks/kong/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/monitor-kong-datadog/
-[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/kong/datadog_checks/kong/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv
+[7]: https://docs.datadoghq.com/help
+[8]: https://www.datadoghq.com/blog/monitor-kong-datadog

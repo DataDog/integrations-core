@@ -1,6 +1,6 @@
 # Agent Check: Zookeeper
 
-![Zookeeper Dashboard][20]
+![Zookeeper Dashboard][1]
 
 ## Overview
 
@@ -9,17 +9,17 @@ The Zookeeper check tracks client connections and latencies, monitors the number
 ## Setup
 ### Installation
 
-The Zookeeper check is included in the [Datadog Agent][13] package, so you don't need to install anything else on your Zookeeper servers.
+The Zookeeper check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Zookeeper servers.
 
 ### Configuration
 
-1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][21] to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
-  See the [sample zk.d/conf.yaml][14] for all available configuration options.
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample zk.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][15]
+2. [Restart the Agent][5]
 
 ### Zookeepr Whitelist
-As of version 3.5, Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][22]) that whitelists [4 letter word commands][23]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
+As of version 3.5, Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][6]) that whitelists [4 letter word commands][7]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
 
 #### Metric Collection
 
@@ -34,9 +34,9 @@ instances:
     timeout: 3
 ```
 
-* See the [sample zk.yaml][14] for all available configuration options.
+* See the [sample zk.yaml][4] for all available configuration options.
 
-* [Restart the Agent][15] to start sending Zookeeper metrics to Datadog.
+* [Restart the Agent][5] to start sending Zookeeper metrics to Datadog.
 
 #### Log Collection
 
@@ -83,13 +83,13 @@ Make sure you clone and edit the integration pipeline if you have a different fo
       #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
   ```
 
-* See the [sample zk.yaml][14] for all available configuration options.
+* See the [sample zk.yaml][4] for all available configuration options.
 
-* [Restart the Agent][15] to start sending Zookeeper Logs to Datadog.
+* [Restart the Agent][5] to start sending Zookeeper Logs to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][16] and look for `zk` under the Checks section.
+[Run the Agent's `status` subcommand][8] and look for `zk` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -111,7 +111,7 @@ Duplicate information is being reported by both `mntr` and `stat`: the duplicate
 | `zookeeper.num_alive_connections` | `zookeeper.connections` |
 | `zookeeper.znode_count` | `zookeeper.nodes` |
 
-See [metadata.csv][17]
+See [metadata.csv][9]
 for a list of metrics provided by this check.
 
 #### Deprecated metrics
@@ -134,15 +134,15 @@ Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN`
 The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise `CRITICAL`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][18].
+Need help? Contact [Datadog Support][10].
 
-[13]: https://app.datadoghq.com/account/settings#agent
-[14]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
-[15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[16]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
-[18]: https://docs.datadoghq.com/help/
-[20]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
-[21]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
-[22]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
-[23]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
+[7]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw
+[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
+[10]: https://docs.datadoghq.com/help

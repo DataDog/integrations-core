@@ -12,7 +12,7 @@ The HTTP check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-Edit the `http_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [sample http_check.d/conf.yaml][2] for all available configuration options:
+Edit the `http_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample http_check.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -32,7 +32,7 @@ instances:
 
 The HTTP check has more configuration options than many checks - many more than are shown above. Most options are opt-in, e.g. the Agent will not check SSL validation unless you configure the requisite options. Notably, the Agent _will_ check for soon-to-expire SSL certificates by default.
 
-See the [sample http_check.d/conf.yaml][2] for a full list and description of available options, here is a list of them:
+See the [sample http_check.d/conf.yaml][3] for a full list and description of available options, here is a list of them:
 
 | Setting                          | Description                                                                                                                                                                                                                                                                                                                 |
 | ---                              | ---                                                                                                                                                                                                                                                                                                                         |
@@ -54,23 +54,23 @@ See the [sample http_check.d/conf.yaml][2] for a full list and description of av
 | `days_warning` & `days_critical` | When `check_certificate_expiration` is enabled, these settings will raise a warning or critical alert when the SSL certificate is within the specified number of days from expiration.                                                                                                                                      |
 | `check_hostname`                 | When `check_certificate_expiration` is enabled, this setting will raise a warning if the hostname on the SSL certificate does not match the host of the given URL.                                                                                                                                                          |
 | `ssl_server_name`                | When `check_certificate_expiration` is enabled, this setting specifies the hostname of the service to connect to and it also overrides the host to match with if check_hostname is enabled.                                                                                                                                 |
-| `headers`                        | This parameter allows you to send additional headers with the request. See the [example YAML file](https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example) for additional information and caveats.                                                     |
+| `headers`                        | This parameter allows you to send additional headers with the request. See the [example YAML file][4] for additional information and caveats.                                                     |
 | `skip_proxy`                     | If set, the check will bypass proxy settings and attempt to reach the check url directly. This defaults to `false`.                                                                                                                                                                                                         |
 | `allow_redirects`                | This setting allows the service check to follow HTTP redirects and defaults to `true`.                                                                                                                                                                                                                                      |
-| `tags`                           | A list of arbitrary tags that will be associated with the check. For more information about tags, see our [Guide to tagging][3] and blog post, [The power of tagged metrics][4]                                                                                                                                      |
+| `tags`                           | A list of arbitrary tags that will be associated with the check. For more information about tags, see our [Guide to tagging][5] and blog post, [The power of tagged metrics][6]                                                                                                                                      |
 
 
-When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent][5] to begin sending HTTP service checks and response times to Datadog.
+When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent][7] to begin sending HTTP service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `http_check` under the Checks section.
+[Run the Agent's `status` subcommand][8] and look for `http_check` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -78,7 +78,7 @@ The HTTP check does not include any events at this time.
 
 ### Service Checks
 
-To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][8] page, not 'Integration'.
+To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][10] page, not 'Integration'.
 
 **`http.can_connect`**:
 
@@ -105,15 +105,16 @@ Otherwise, returns `UP`.
 To disable this check, set `check_certificate_expiration` to false.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][9].
+Need help? Contact [Datadog Support][11].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/getting_started/tagging/
-[4]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics/
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
-[8]: https://app.datadoghq.com/monitors#/create
-[9]: https://docs.datadoghq.com/help/
-[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/getting_started/tagging
+[6]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
+[10]: https://app.datadoghq.com/monitors#/create
+[11]: https://docs.datadoghq.com/help

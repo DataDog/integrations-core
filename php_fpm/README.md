@@ -1,6 +1,6 @@
 # PHP-FPM Check
 
-![PHP overview][8]
+![PHP overview][1]
 
 ## Overview
 
@@ -9,11 +9,11 @@ The PHP-FPM check monitors the state of your FPM pool and tracks request perform
 ## Setup
 ### Installation
 
-The PHP-FPM check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers that use PHP-FPM.
+The PHP-FPM check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers that use PHP-FPM.
 
 ### Configuration
 
-Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample php_fpm.d/conf.yaml][2] for all available configuration options:
+Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample php_fpm.d/conf.yaml][4] for all available configuration options:
 
 ```
 init_config:
@@ -39,7 +39,7 @@ Configuration Options:
 * `password` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
 
-[Restart the Agent][3] to start sending PHP-FPM metrics to Datadog.
+[Restart the Agent][5] to start sending PHP-FPM metrics to Datadog.
 
 #### Multiple pools
 
@@ -85,12 +85,12 @@ instances:
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `php_fpm` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `php_fpm` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 The PHP-FPM check does not include any events at this time.
@@ -102,13 +102,13 @@ The PHP-FPM check does not include any events at this time.
 Returns CRITICAL if the Agent cannot ping PHP-FPM at the configured `ping_url`, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][8].
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/datadog_checks/php_fpm/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/php_fpm/images/phpfpmoverview.png
-[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/php_fpm/images/phpfpmoverview.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/datadog_checks/php_fpm/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
+[8]: https://docs.datadoghq.com/help

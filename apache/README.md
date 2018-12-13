@@ -1,6 +1,6 @@
 # Agent Check: Apache Web Server
 
-![Apache Dashboard][12]
+![Apache Dashboard][1]
 
 ## Overview
 
@@ -11,16 +11,16 @@ The Apache check tracks requests per second, bytes served, number of worker thre
 
 The Apache check is packaged with the Agent. To start gathering your Apache metrics and logs, you need to:
 
-1. [Install the Agent][1] on your Apache servers.
+1. [Install the Agent][2] on your Apache servers.
 
 2. Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
 ### Configuration
 
-1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][13] to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
-  See the [sample apache.d/conf.yaml][2] for all available configuration options.
+1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][3]
+2. [Restart the Agent][5]
 
 #### Metric Collection
 
@@ -35,9 +35,9 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
           #  disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
 
     Change the `apache_status_url` parameter value and configure it for your environment.
-    See the [sample apache.d/conf.yaml][2] for all available configuration options.
+    See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
-2.  [Restart the Agent][3].
+2.  [Restart the Agent][5].
 
 #### Log Collection
 
@@ -67,20 +67,20 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
     ```
 
     Change the `path` and `service` parameter values and configure them for your environment.
-    See the [sample apache.d/conf.yaml][2] for all available configuration options.
+    See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
-3. [Restart the Agent][3].
+3. [Restart the Agent][5].
 
-**Learn more about log collection [in the log documentation][4]**
+**Learn more about log collection [in the log documentation][6]**
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `apache` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `apache` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 The Apache check does not include any events at this time.
@@ -93,26 +93,26 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 
 ## Troubleshooting
 
-* [Issues with Apache Integration][7]
-* [Apache SSL certificate issues][8]
+* [Issues with Apache Integration][9]
+* [Apache SSL certificate issues][10]
 
 ## Further Reading
 
-* [Monitoring Apache web server performance][9]
-* [How to collect Apache performance metrics][10]
-* [How to monitor Apache web server with Datadog][11]
+* [Monitoring Apache web server performance][11]
+* [How to collect Apache performance metrics][12]
+* [How to monitor Apache web server with Datadog][13]
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/logs
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
-[7]: https://docs.datadoghq.com/integrations/faq/issues-with-apache-integration
-[8]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues
-[9]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/
-[10]: https://www.datadoghq.com/blog/collect-apache-performance-metrics/
-[11]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/
-[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
-[13]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/logs
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
+[9]: https://docs.datadoghq.com/integrations/faq/issues-with-apache-integration
+[10]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues
+[11]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
+[12]: https://www.datadoghq.com/blog/collect-apache-performance-metrics
+[13]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog

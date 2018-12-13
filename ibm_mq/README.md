@@ -45,4 +45,4 @@ Need help? Contact [Datadog Support][6].
 [3]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help

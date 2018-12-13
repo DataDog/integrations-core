@@ -14,7 +14,7 @@ The Windows Event Log check is included in the [Datadog Agent][1] package. There
 
 ### Configuration
 
-Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. This minimal file captures all events from localhost:
+Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. This minimal file captures all events from localhost:
 
 ```yaml
 init_config:
@@ -23,9 +23,9 @@ instances:
   - host: localhost
 ```
 
-See the [sample win32_event_log.d/conf.yaml][2] for all available configuration options.
+See the [sample win32_event_log.d/conf.yaml][3] for all available configuration options.
 
-[Restart the Agent][3] to start sending Windows events to Datadog.
+[Restart the Agent][4] to start sending Windows events to Datadog.
 
 ### Log collection
 
@@ -61,9 +61,9 @@ logs:
 ```
 
 Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from. 
-Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][11].
+Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][5].
 
-Finally, [restart the Agent][3].
+Finally, [restart the Agent][4].
 
 
 ### Filters
@@ -124,11 +124,11 @@ instances:
             - System
 ```
 
-2 - [Restart the Agent][3] using the Agent Manager (or restart the service)
+2 - [Restart the Agent][4] using the Agent Manager (or restart the service)
 
 ### Validation
 
-Check the info page in the Datadog Agent Manager or run the [Agent's `status` subcommand][4] and look for `win32_event_log` under the Checks section. It should display a section similar to the following:
+Check the info page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Checks section. It should display a section similar to the following:
 
 ```shell
 Checks
@@ -154,28 +154,28 @@ The Win32 Event log check does not include any service checks at this time.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][7].
 
 ## Further Reading
 ### Documentation
 
-* [How to add event log files to the `Win32_NTLogEvent` WMI class][6]
+* [How to add event log files to the `Win32_NTLogEvent` WMI class][8]
 
 ### Blog
 
-* [Monitoring Windows Server 2012][7]
-* [How to collect Windows Server 2012 metrics][8]
-* [Monitoring Windows Server 2012 with Datadog][9]
+* [Monitoring Windows Server 2012][9]
+* [How to collect Windows Server 2012 metrics][10]
+* [Monitoring Windows Server 2012 with Datadog][11]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent/windows
-[2]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://docs.datadoghq.com/help/
-[6]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class/
-[7]: https://www.datadoghq.com/blog/monitoring-windows-server-2012/
-[8]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/
-[9]: https://www.datadoghq.com/blog/windows-server-monitoring/
-[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
-[11]: https://docs.datadoghq.com/logs/processing/pipelines/#integration-pipelines
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/logs/processing/pipelines/#integration-pipelines
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class
+[9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
+[10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
+[11]: https://www.datadoghq.com/blog/windows-server-monitoring

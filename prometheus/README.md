@@ -28,13 +28,13 @@ Each instance is at least composed of:
 
 When listing metrics, it's possible to use the wildcard `*` like this `- <METRIC_NAME>*` to retrieve all matching metrics. **Note:** use wildcards with caution as it can potentially send a lot of custom metrics.
 
-More advanced settings (ssl, labels joining, custom tags,...) are documented in the [sample prometheus.d/conf.yaml][2]
+More advanced settings (ssl, labels joining, custom tags,...) are documented in the [sample prometheus.d/conf.yaml][1]
 
 Due to the nature of this integration, it's possible to submit a high number of custom metrics to Datadog. To provide users control over the maximum number of metrics sent in the case of configuration errors or input changes, the check has a default limit of 2000 metrics. If needed, this limit can be increased by setting the option `max_returned_metrics` in the `prometheus.d/conf.yaml` file.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][1] and look for `prometheus` under the Checks section.
+[Run the Agent's `status` subcommand][2] and look for `prometheus` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -57,9 +57,9 @@ Need help? Contact [Datadog Support][3].
 * [Configuring a Prometheus Check][5]
 * [Writing a custom Prometheus Check][6]
 
-[1]: https://docs.datadoghq.com/agent/faq/agent-status-and-information/
-[2]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/help/
-[4]: https://www.datadoghq.com/blog/monitor-prometheus-metrics/
-[5]: https://docs.datadoghq.com/agent/prometheus/
-[6]: https://docs.datadoghq.com/developers/prometheus/
+[1]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
+[2]: https://docs.datadoghq.com/agent/faq/agent-status-and-information
+[3]: https://docs.datadoghq.com/help
+[4]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
+[5]: https://docs.datadoghq.com/agent/prometheus
+[6]: https://docs.datadoghq.com/developers/prometheus

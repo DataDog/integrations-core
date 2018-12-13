@@ -48,7 +48,7 @@ Need help? Contact [Datadog Support][6].
 
 [1]: **LINK_TO_INTEGERATION_SITE**
 [2]: https://github.com/DataDog/integrations-core/blob/master/{check_name}/datadog_checks/{check_name}/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/integrations/java/
+[3]: https://docs.datadoghq.com/integrations/java
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help

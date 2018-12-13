@@ -1,12 +1,12 @@
 # Datadog Checks Base
 
-[![Latest PyPI version][5]][6]
-[![Supported Python versions][9]][6]
-[![Documentation Status][7]][8]
+[![Latest PyPI version][1]][6]
+[![Supported Python versions][2]][6]
+[![Documentation Status][3]][8]
 
 ## Overview
 
-This package provides the Python bits needed by the [Datadog Agent][1]
+This package provides the Python bits needed by the [Datadog Agent][4]
 to run Agent-based Integrations (also known as _Checks_).
 
 This package is used in two scenarios:
@@ -18,11 +18,11 @@ This package is used in two scenarios:
  mocks the presence of a running Agent so checks can work in standalone mode,
  mostly useful for testing and development.
 
- Please refer to the [API docs][8] for details.
+ Please refer to the [API docs][5] for details.
 
 ## Installation
 
-Checks from [integrations-core][2] already
+Checks from [integrations-core][6] already
 use the toolkit in a transparent way when you run the tests with Tox but you can
 install the toolkit locally and play with it:
 
@@ -47,7 +47,7 @@ To build the wheel package:
 python setup.py bdist_wheel
 ```
 
-To run the tests, [install tox][3] and just run:
+To run the tests, [install tox][7] and just run:
 
 ```shell
 tox
@@ -55,14 +55,13 @@ tox
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][4].
+Need help? Contact [Datadog Support][8].
 
-[1]: https://github.com/DataDog/datadog-agent
-[2]: https://github.com/DataDog/integrations-core
-[3]: https://tox.readthedocs.io/en/latest/install.html
-[4]: https://docs.datadoghq.com/help/
-[5]: https://img.shields.io/pypi/v/datadog-checks-base.svg
-[6]: https://pypi.org/project/datadog-checks-base
-[7]: https://readthedocs.org/projects/datadog-checks-base/badge/?version=latest
-[8]: https://datadog-checks-base.readthedocs.io/en/latest/?badge=latest
-[9]: https://img.shields.io/pypi/pyversions/datadog-checks-base.svg
+[1]: https://img.shields.io/pypi/v/datadog-checks-base.svg
+[2]: https://img.shields.io/pypi/pyversions/datadog-checks-base.svg
+[3]: https://readthedocs.org/projects/datadog-checks-base/badge/?version=latest
+[4]: https://github.com/DataDog/datadog-agent
+[5]: https://datadog-checks-base.readthedocs.io/en/latest/?badge=latest
+[6]: https://github.com/DataDog/integrations-core
+[7]: https://tox.readthedocs.io/en/latest/install.html
+[8]: https://docs.datadoghq.com/help

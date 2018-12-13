@@ -1,10 +1,10 @@
 # Kong in Docker Compose
 
-This is the official Docker Compose template for [Kong][kong-site-url].
+This is the official Docker Compose template for [Kong][1].
 
 # What is Kong?
 
-You can find the official Docker distribution for Kong at [https://store.docker.com/images/kong](https://store.docker.com/images/kong).
+You can find the official Docker distribution for Kong at [https://store.docker.com/images/kong][2].
 
 # How to use this template
 
@@ -24,18 +24,19 @@ $ docker-compose scale kong=3
 
 Kong will be available through the `nginx-lb` instance on port `8000`, `8443` and `8001`. You can customize the template with your own environment variables or datastore configuration.
 
-Kong's documentation can be found at [getkong.org/docs][kong-docs-url].
+Kong's documentation can be found at [getkong.org/docs][3].
 
 ## Issues
 
-If you have any problems with or questions about this image, please contact us through a [GitHub issue][github-new-issue].
+If you have any problems with or questions about this image, please contact us through a [GitHub issue][4].
 
 ## Contributing
 
 You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
 
-Before you start to code, we recommend discussing your plans through a [GitHub issue][github-new-issue], especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
+Before you start to code, we recommend discussing your plans through a [GitHub issue][4], especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
 
-[kong-site-url]: https://konghq.com/
-[kong-docs-url]: https://docs.konghq.com/
-[github-new-issue]: https://github.com/Mashape/docker-kong/issues/new
+[1]: https://konghq.com
+[2]: https://store.docker.com/images/kong
+[3]: https://docs.konghq.com
+[4]: https://github.com/Mashape/docker-kong/issues/new
