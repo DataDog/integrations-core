@@ -48,10 +48,8 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
     packages=['datadog_checks.openldap'],
-
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-
     # Extra files to ship with the wheel package
     package_data={'datadog_checks.openldap': ['conf.yaml.example']},
     include_package_data=True,

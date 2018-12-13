@@ -8,8 +8,18 @@ import os
 
 from datadog_checks.utils.platform import Platform
 
-from common import (PORT, SERVICE_CHECK, HOST, GAUGES, RATES, ITEMS_RATES, ITEMS_GAUGES, SLABS_RATES, SLABS_GAUGES,
-                    SLABS_AGGREGATES)
+from common import (
+    PORT,
+    SERVICE_CHECK,
+    HOST,
+    GAUGES,
+    RATES,
+    ITEMS_RATES,
+    ITEMS_GAUGES,
+    SLABS_RATES,
+    SLABS_GAUGES,
+    SLABS_AGGREGATES,
+)
 
 
 def count_connections(port):
@@ -60,12 +70,7 @@ def test_metrics(client, check, instance, aggregator, memcached):
         assert client.set("foo", "bar") is True
         assert client.get("foo") == "bar"
 
-    instance.update({
-        'options': {
-            'items': True,
-            'slabs': True,
-        }
-    })
+    instance.update({'options': {'items': True, 'slabs': True}})
     check.check(instance)
 
     expected_tags = ["url:{}:{}".format(HOST, PORT), 'foo:bar']
@@ -107,12 +112,7 @@ def test_metrics_with_socket(client_socket, check, instance_socket, aggregator, 
         assert client_socket.set("foo", "bar") is True
         assert client_socket.get("foo") == "bar"
 
-    instance_socket.update({
-        'options': {
-            'items': True,
-            'slabs': True,
-        }
-    })
+    instance_socket.update({'options': {'items': True, 'slabs': True}})
     check.check(instance_socket)
 
     expected_tags = ["url:unix:{}".format(memcached_socket[1]), 'foo:bar']

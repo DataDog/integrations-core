@@ -16,11 +16,12 @@ class AgentLogHandler(logging.Handler):
     This handler forwards every log to the Go backend allowing python checks to
     log message within the main agent logging system.
     """
+
     def emit(self, record):
         msg = "({}:{}) | {}".format(
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
-            ensure_bytes(self.format(record))
+            ensure_bytes(self.format(record)),
         )
         datadog_agent.log(msg, record.levelno)
 

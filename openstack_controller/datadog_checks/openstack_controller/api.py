@@ -5,7 +5,7 @@ import requests
 import simplejson as json
 from six.moves.urllib.parse import urljoin
 from .settings import DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION, DEFAULT_NEUTRON_API_VERSION
-from .exceptions import (InstancePowerOffFailure, AuthenticationNeeded, KeystoneUnreachable)
+from .exceptions import InstancePowerOffFailure, AuthenticationNeeded, KeystoneUnreachable
 
 
 UNSCOPED_AUTH = 'unscoped'
@@ -42,12 +42,7 @@ class AbstractApi(object):
 
         try:
             resp = requests.get(
-                url,
-                headers=headers,
-                verify=self.ssl_verify,
-                params=params,
-                timeout=timeout,
-                proxies=self.proxy_config,
+                url, headers=headers, verify=self.ssl_verify, params=params, timeout=timeout, proxies=self.proxy_config
             )
             resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -140,9 +135,8 @@ class KeystoneApi(AbstractApi):
 
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             msg = "Failed keystone auth with identity:{identity} scope:{scope} @{url}".format(
-                identity=identity,
-                scope=scope,
-                url=auth_url)
+                identity=identity, scope=scope, url=auth_url
+            )
             self.logger.debug(msg)
             raise KeystoneUnreachable(msg)
 
@@ -155,7 +149,7 @@ class KeystoneApi(AbstractApi):
                 headers=self.headers,
                 verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=self.proxy_config
+                proxies=self.proxy_config,
             )
             resp.raise_for_status()
             jresp = resp.json()
@@ -164,8 +158,8 @@ class KeystoneApi(AbstractApi):
             return projects
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
-                    url=auth_url,
-                    ex=e)
+                url=auth_url, ex=e
+            )
             self.logger.debug(msg)
             raise KeystoneUnreachable(msg)
 

@@ -35,7 +35,7 @@ def test_set_mor(cache):
     creation_time = cache._mor['foo_instance']['mor_name']['creation_time']
     assert creation_time > 0
     cache.set_mor('foo_instance', 'mor_name', {})
-    time.sleep(.1)  # be sure timestamp is different
+    time.sleep(0.1)  # be sure timestamp is different
     assert cache._mor['foo_instance']['mor_name']['creation_time'] > creation_time
 
     with pytest.raises(KeyError):
@@ -46,9 +46,7 @@ def test_get_mor(cache):
     with pytest.raises(KeyError):
         cache.get_mor('instance', 'mor_name')
 
-    cache._mor['foo_instance'] = {
-        'my_mor_name': {'foo': 'bar'}
-    }
+    cache._mor['foo_instance'] = {'my_mor_name': {'foo': 'bar'}}
 
     assert cache.get_mor('foo_instance', 'my_mor_name')['foo'] == 'bar'
 
@@ -60,9 +58,7 @@ def test_set_metrics(cache):
     with pytest.raises(KeyError):
         cache.set_metrics('instance', 'mor_name', [])
 
-    cache._mor['foo_instance'] = {
-        'my_mor_name': {}
-    }
+    cache._mor['foo_instance'] = {'my_mor_name': {}}
 
     cache.set_metrics('foo_instance', 'my_mor_name', range(3))
     assert len(cache._mor['foo_instance']['my_mor_name']['metrics']) == 3

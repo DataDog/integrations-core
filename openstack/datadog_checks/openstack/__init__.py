@@ -4,7 +4,4 @@
 from .openstack import OpenStackCheck
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'OpenStackCheck'
-]
+__all__ = ['__version__', 'OpenStackCheck']

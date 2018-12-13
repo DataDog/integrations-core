@@ -269,7 +269,7 @@ def test_submit_gauge_with_custom_tags(
         'prometheus.process.vm.bytes',
         54927360.0,
         tags=mocked_prometheus_scraper_config['custom_tags'] + mocked_prometheus_scraper_config['_metric_tags'],
-        count=1
+        count=1,
     )
 
 
@@ -1449,14 +1449,8 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
-        'kube_pod_info': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['node']
-        },
-        'kube_pod_status_phase': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['phase']
-        }
+        'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        'kube_pod_status_phase': {'label_to_match': 'pod', 'labels_to_get': ['phase']},
     }
     mocked_prometheus_scraper_config['metrics_mapper'] = {'kube_pod_status_ready': 'pod.ready'}
     # dry run to build mapping
@@ -1471,7 +1465,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
 
     text_data = mock_get.replace(
         'kube_pod_status_phase{namespace="default",phase="Running",pod="dd-agent-62bgh"} 1',
-        'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1'
+        'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1',
     )
 
     mock_response = mock.MagicMock(

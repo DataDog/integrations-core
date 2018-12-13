@@ -16,10 +16,7 @@ CHECK_RATES_CUSTOM = {'go_expvar.num_calls': 10}
 def test_go_expvar(check, spin_up_go_expvar, aggregator):
     check.check(common.INSTANCE)
 
-    shared_tags = [
-        'my_tag',
-        'expvar_url:{0}{1}'.format(common.INSTANCE['expvar_url'], common.GO_EXPVAR_URL_PATH)
-    ]
+    shared_tags = ['my_tag', 'expvar_url:{0}{1}'.format(common.INSTANCE['expvar_url'], common.GO_EXPVAR_URL_PATH)]
 
     for gauge in common.CHECK_GAUGES + common.CHECK_GAUGES_DEFAULT:
         aggregator.assert_metric(gauge, count=1, tags=shared_tags)

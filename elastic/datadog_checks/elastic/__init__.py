@@ -4,7 +4,4 @@
 from .elastic import ESCheck
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'ESCheck'
-]
+__all__ = ['__version__', 'ESCheck']

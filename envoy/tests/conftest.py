@@ -15,8 +15,6 @@ def dd_environment():
     instance = INSTANCES['main']
 
     with docker_run(
-        os.path.join(DOCKER_DIR, flavor, 'docker-compose.yaml'),
-        build=True,
-        endpoints=instance['stats_url']
+        os.path.join(DOCKER_DIR, flavor, 'docker-compose.yaml'), build=True, endpoints=instance['stats_url']
     ):
         yield instance

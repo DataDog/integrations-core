@@ -7,9 +7,7 @@ from collections import defaultdict, namedtuple
 
 from .constants import get_root
 from ..subprocess import run_command
-from ..utils import (
-    chdir, resolve_path, stream_file_lines, write_file_lines
-)
+from ..utils import chdir, resolve_path, stream_file_lines, write_file_lines
 
 DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
 Package = namedtuple('Package', ('name', 'version', 'marker'))
@@ -56,17 +54,14 @@ def read_packages(reqs_file):
 
 
 def write_packages(packages, reqs_file):
-    write_file_lines(
-        reqs_file,
-        ('{}\n'.format(format_package(package)) for package in sorted(packages))
-    )
+    write_file_lines(reqs_file, ('{}\n'.format(format_package(package)) for package in sorted(packages)))
 
 
 def format_package(package):
     return '{}{}{}'.format(
         package.name,
         '=={}'.format(package.version) if package.version else '',
-        '; {}'.format(package.marker) if package.marker else ''
+        '; {}'.format(package.marker) if package.marker else '',
     )
 
 

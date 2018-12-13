@@ -17,10 +17,7 @@ def test_bad_config(check):
 
 
 def test_bad_status(check, aggregator):
-    instance = {
-        'status_url': 'http://foo:9001/status',
-        'tags': ['expectedbroken']
-    }
+    instance = {'status_url': 'http://foo:9001/status', 'tags': ['expectedbroken']}
     check.check(instance)
     assert len(aggregator.metric_names) == 0
 

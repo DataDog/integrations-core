@@ -36,9 +36,7 @@ def parse_pr_number(log_line):
 
 
 def get_current_agent_version():
-    release_data = requests.get(
-        'https://raw.githubusercontent.com/DataDog/datadog-agent/master/release.json'
-    ).json()
+    release_data = requests.get('https://raw.githubusercontent.com/DataDog/datadog-agent/master/release.json').json()
     versions = set()
 
     for version in release_data:

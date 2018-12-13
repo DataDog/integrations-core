@@ -21,21 +21,48 @@ def test_check(mock_output, aggregator):
 
     # test per datacenter metrics
     args = [
-        'docker', 'exec', common.CASSANDRA_CONTAINER_NAME, 'nodetool', '-h', 'localhost', '-p', '7199', '-u',
-        'controlRole', '-pw', 'QED', 'status', '--', 'test'
+        'docker',
+        'exec',
+        common.CASSANDRA_CONTAINER_NAME,
+        'nodetool',
+        '-h',
+        'localhost',
+        '-p',
+        '7199',
+        '-u',
+        'controlRole',
+        '-pw',
+        'QED',
+        'status',
+        '--',
+        'test',
     ]
     assert all([a == b for a, b in zip(mock_output.call_args[0][0], args)])
-    aggregator.assert_metric('cassandra.nodetool.status.replication_availability', value=64.5,
-                             tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
-    aggregator.assert_metric('cassandra.nodetool.status.replication_availability', value=200,
-                             tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar'])
-    aggregator.assert_metric('cassandra.nodetool.status.replication_factor', value=1,
-                             tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
-    aggregator.assert_metric('cassandra.nodetool.status.replication_factor', value=2,
-                             tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar'])
+    aggregator.assert_metric(
+        'cassandra.nodetool.status.replication_availability',
+        value=64.5,
+        tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'],
+    )
+    aggregator.assert_metric(
+        'cassandra.nodetool.status.replication_availability',
+        value=200,
+        tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar'],
+    )
+    aggregator.assert_metric(
+        'cassandra.nodetool.status.replication_factor', value=1, tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar']
+    )
+    aggregator.assert_metric(
+        'cassandra.nodetool.status.replication_factor', value=2, tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar']
+    )
     # test per node metrics
-    tags = ['datacenter:dc2', 'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
-            'node_address:172.21.0.4', 'rack:RAC1', 'foo', 'bar']
+    tags = [
+        'datacenter:dc2',
+        'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
+        'node_address:172.21.0.4',
+        'rack:RAC1',
+        'foo',
+        'bar',
+    ]
     aggregator.assert_metric('cassandra.nodetool.status.status', value=1, tags=tags)
     aggregator.assert_metric('cassandra.nodetool.status.owns', value=100, tags=tags + ['keyspace:test'])
     aggregator.assert_metric('cassandra.nodetool.status.load', value=223340, tags=tags)
@@ -50,9 +77,28 @@ def test_check(mock_output, aggregator):
     integration = CassandraNodetoolCheck(common.CHECK_NAME, {}, {})
     integration.check(common.CONFIG_INSTANCE)
 
-    assert all([a == b for a, b in zip(mock_output.call_args[0][0],
-                                       ['docker', 'exec', common.CASSANDRA_CONTAINER_NAME, 'nodetool', '-h',
-                                        'localhost', '-p', '7199', '-u', 'controlRole', '-pw', 'QED',
-                                        'status', '--', 'test']
-                                       )
-                ])
+    assert all(
+        [
+            a == b
+            for a, b in zip(
+                mock_output.call_args[0][0],
+                [
+                    'docker',
+                    'exec',
+                    common.CASSANDRA_CONTAINER_NAME,
+                    'nodetool',
+                    '-h',
+                    'localhost',
+                    '-p',
+                    '7199',
+                    '-u',
+                    'controlRole',
+                    '-pw',
+                    'QED',
+                    'status',
+                    '--',
+                    'test',
+                ],
+            )
+        ]
+    )

@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .agent_metrics import AgentMetrics
 
-__all__ = [
-    '__version__',
-    'AgentMetrics'
-]
+__all__ = ['__version__', 'AgentMetrics']

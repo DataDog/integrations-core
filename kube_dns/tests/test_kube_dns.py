@@ -14,10 +14,7 @@ from datadog_checks.kube_dns import KubeDNSCheck
 
 customtag = "custom:tag"
 
-instance = {
-    'prometheus_endpoint': 'http://localhost:10055/metrics',
-    'tags': [customtag]
-}
+instance = {'prometheus_endpoint': 'http://localhost:10055/metrics', 'tags': [customtag]}
 
 
 class MockResponse:
@@ -61,6 +58,7 @@ def mock_get():
 
 class TestKubeDNS:
     """Basic Test for kube_dns integration."""
+
     CHECK_NAME = 'kube_dns'
     NAMESPACE = 'kubedns'
     METRICS = [

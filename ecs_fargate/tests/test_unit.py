@@ -17,10 +17,7 @@ INSTANCE_TAGS = ['foo:bar']
 
 @pytest.fixture
 def instance():
-    return {
-        'timeout': '2',
-        'tags': INSTANCE_TAGS,
-    }
+    return {'timeout': '2', 'tags': INSTANCE_TAGS}
 
 
 @pytest.fixture
@@ -151,7 +148,7 @@ def test_successful_check(check, instance, aggregator):
             "container_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601",
             "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
             # Compat
-            'docker_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601'
+            'docker_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601',
         ],
         [
             # Tagger
@@ -164,7 +161,7 @@ def test_successful_check(check, instance, aggregator):
             "container_name:ecs-redis-datadog-1-redis-ce99d29f8ce998ed4a00",
             "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
             # Compat
-            'docker_name:ecs-redis-datadog-1-redis-ce99d29f8ce998ed4a00'
+            'docker_name:ecs-redis-datadog-1-redis-ce99d29f8ce998ed4a00',
         ],
         [
             # Tagger
@@ -177,29 +174,45 @@ def test_successful_check(check, instance, aggregator):
             "container_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01",
             "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
             # Compat
-            'docker_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01'
-        ]
+            'docker_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01',
+        ],
     ]
 
     expected_container_metrics = [
-        'ecs.fargate.io.ops.write', 'ecs.fargate.io.bytes.write', 'ecs.fargate.io.ops.read',
-        'ecs.fargate.io.bytes.read', 'ecs.fargate.cpu.user', 'ecs.fargate.cpu.system', 'ecs.fargate.cpu.percent',
-        'ecs.fargate.mem.cache', 'ecs.fargate.mem.active_file', 'ecs.fargate.mem.inactive_file',
-        'ecs.fargate.mem.pgpgout', 'ecs.fargate.mem.limit', 'ecs.fargate.mem.pgfault', 'ecs.fargate.mem.active_anon',
-        'ecs.fargate.mem.usage', 'ecs.fargate.mem.rss', 'ecs.fargate.mem.pgpgin', 'ecs.fargate.mem.pgmajfault',
-        'ecs.fargate.mem.mapped_file', 'ecs.fargate.mem.max_usage'
+        'ecs.fargate.io.ops.write',
+        'ecs.fargate.io.bytes.write',
+        'ecs.fargate.io.ops.read',
+        'ecs.fargate.io.bytes.read',
+        'ecs.fargate.cpu.user',
+        'ecs.fargate.cpu.system',
+        'ecs.fargate.cpu.percent',
+        'ecs.fargate.mem.cache',
+        'ecs.fargate.mem.active_file',
+        'ecs.fargate.mem.inactive_file',
+        'ecs.fargate.mem.pgpgout',
+        'ecs.fargate.mem.limit',
+        'ecs.fargate.mem.pgfault',
+        'ecs.fargate.mem.active_anon',
+        'ecs.fargate.mem.usage',
+        'ecs.fargate.mem.rss',
+        'ecs.fargate.mem.pgpgin',
+        'ecs.fargate.mem.pgmajfault',
+        'ecs.fargate.mem.mapped_file',
+        'ecs.fargate.mem.max_usage',
     ]
 
     extra_expected_metrics_for_container = [
         [
-            'ecs.fargate.cpu.limit', 'ecs.fargate.mem.hierarchical_memory_limit',
-            'ecs.fargate.mem.hierarchical_memsw_limit'
+            'ecs.fargate.cpu.limit',
+            'ecs.fargate.mem.hierarchical_memory_limit',
+            'ecs.fargate.mem.hierarchical_memsw_limit',
         ],
         [
-            'ecs.fargate.cpu.limit', 'ecs.fargate.mem.hierarchical_memory_limit',
-            'ecs.fargate.mem.hierarchical_memsw_limit'
+            'ecs.fargate.cpu.limit',
+            'ecs.fargate.mem.hierarchical_memory_limit',
+            'ecs.fargate.mem.hierarchical_memsw_limit',
         ],
-        []  # pause container get fewer metrics
+        [],  # pause container get fewer metrics
     ]
 
     for i in range(3):

@@ -8,25 +8,28 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 
-ESInstanceConfig = namedtuple('ESInstanceConfig', [
-    'admin_forwarder',
-    'pshard_stats',
-    'pshard_graceful_to',
-    'node_name_as_host',
-    'cluster_stats',
-    'index_stats',
-    'password',
-    'service_check_tags',
-    'health_tags',
-    'tags',
-    'timeout',
-    'url',
-    'username',
-    'pending_task_stats',
-    'ssl_verify',
-    'ssl_cert',
-    'ssl_key',
-])
+ESInstanceConfig = namedtuple(
+    'ESInstanceConfig',
+    [
+        'admin_forwarder',
+        'pshard_stats',
+        'pshard_graceful_to',
+        'node_name_as_host',
+        'cluster_stats',
+        'index_stats',
+        'password',
+        'service_check_tags',
+        'health_tags',
+        'tags',
+        'timeout',
+        'url',
+        'username',
+        'pending_task_stats',
+        'ssl_verify',
+        'ssl_cert',
+        'ssl_key',
+    ],
+)
 
 
 DEFAULT_TIMEOUT = 5
@@ -59,10 +62,7 @@ def from_instance(instance):
     host = parsed.hostname
 
     custom_tags = instance.get('tags', [])
-    service_check_tags = [
-        'host:{}'.format(host),
-        'port:{}'.format(port),
-    ]
+    service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)]
     service_check_tags.extend(custom_tags)
 
     # Tag by URL so we can differentiate the metrics
@@ -89,6 +89,6 @@ def from_instance(instance):
         timeout=timeout,
         url=url,
         username=instance.get('username'),
-        pending_task_stats=pending_task_stats
+        pending_task_stats=pending_task_stats,
     )
     return config

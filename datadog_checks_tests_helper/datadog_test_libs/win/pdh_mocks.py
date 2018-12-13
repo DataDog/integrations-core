@@ -32,9 +32,7 @@ def pdh_mocks_fixture():
     pdhgetformattedcountervalue = mock.patch('win32pdh.GetFormattedCounterValue', mock_GetFormattedCounterValue)
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
 
-    yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
-        pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
-        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(), pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -59,9 +57,7 @@ def pdh_mocks_fixture_bad_perf_strings():
     pdhgetformattedcountervalue = mock.patch('win32pdh.GetFormattedCounterValue', mock_GetFormattedCounterValue)
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
 
-    yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
-        pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
-        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(), pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -154,7 +150,7 @@ def load_registry_values(fname):
     idx = 0
     idx_max = len(idx_array)
     while idx < idx_max:
-        ctr_index[int(idx_array[idx])] = idx_array[idx+1]
+        ctr_index[int(idx_array[idx])] = idx_array[idx + 1]
         idx += 2
     return idx_array, ctr_index
 

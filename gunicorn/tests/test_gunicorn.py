@@ -15,14 +15,8 @@ def test_gunicorn(aggregator, setup_gunicorn):
     check = GUnicornCheck(CHECK_NAME, {}, {})
     check.check(INSTANCE)
 
-    aggregator.assert_metric("gunicorn.workers",
-                             tags=['app:dd-test-gunicorn', 'state:idle'],
-                             value=4,
-                             count=1)
-    aggregator.assert_metric("gunicorn.workers",
-                             tags=['app:dd-test-gunicorn', 'state:working'],
-                             value=0,
-                             count=1)
+    aggregator.assert_metric("gunicorn.workers", tags=['app:dd-test-gunicorn', 'state:idle'], value=4, count=1)
+    aggregator.assert_metric("gunicorn.workers", tags=['app:dd-test-gunicorn', 'state:working'], value=0, count=1)
 
     aggregator.assert_service_check("gunicorn.is_running", count=1)
 

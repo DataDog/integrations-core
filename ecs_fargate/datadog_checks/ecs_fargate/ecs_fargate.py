@@ -11,11 +11,13 @@ try:
     from tagger import get_tags
 except ImportError:
     import logging
+
     log = logging.getLogger(__name__)
     log.warning('This check is only supported on Agent 6')
 
     def get_tags(name, card):
         return []
+
 
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
@@ -25,20 +27,24 @@ STATS_ROUTE = '/stats'
 DEFAULT_TIMEOUT = 5
 
 # Default value is maxed out for some cgroup metrics
-CGROUP_NO_VALUE = 0x7ffffffffffff000
+CGROUP_NO_VALUE = 0x7FFFFFFFFFFFF000
 
 # Metrics constants
-MEMORY_GAUGE_METRICS = ['cache', 'mapped_file', 'rss', 'hierarchical_memory_limit', 'active_anon',
-                        'active_file', 'inactive_file', 'hierarchical_memsw_limit']
+MEMORY_GAUGE_METRICS = [
+    'cache',
+    'mapped_file',
+    'rss',
+    'hierarchical_memory_limit',
+    'active_anon',
+    'active_file',
+    'inactive_file',
+    'hierarchical_memsw_limit',
+]
 MEMORY_RATE_METRICS = ['pgpgin', 'pgpgout', 'pgmajfault', 'pgfault']
-IO_METRICS = {
-    'io_service_bytes_recursive': 'ecs.fargate.io.bytes.',
-    'io_serviced_recursive': 'ecs.fargate.io.ops.'
-}
+IO_METRICS = {'io_service_bytes_recursive': 'ecs.fargate.io.bytes.', 'io_serviced_recursive': 'ecs.fargate.io.ops.'}
 
 
 class FargateCheck(AgentCheck):
-
     def check(self, instance):
         timeout = float(instance.get('timeout', DEFAULT_TIMEOUT))
         metadata_endpoint = API_ENDPOINT + METADATA_ROUTE

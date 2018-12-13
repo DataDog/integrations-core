@@ -4,7 +4,4 @@
 from .hdfs_datanode import HDFSDataNode
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'HDFSDataNode'
-]
+__all__ = ['__version__', 'HDFSDataNode']

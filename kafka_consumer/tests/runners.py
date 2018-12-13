@@ -64,9 +64,9 @@ class KConsumer(StoppableThread):
         self.topics = topics
 
     def run(self):
-        consumer = KafkaConsumer(bootstrap_servers=self.kafka_connect_str,
-                                 group_id="my_consumer",
-                                 auto_offset_reset='earliest')
+        consumer = KafkaConsumer(
+            bootstrap_servers=self.kafka_connect_str, group_id="my_consumer", auto_offset_reset='earliest'
+        )
         consumer.subscribe(self.topics)
 
         iteration = 0
@@ -98,10 +98,12 @@ class ZKConsumer(StoppableThread):
                     zk_conn.ensure_path(node_path)
                     zk_conn.set(node_path, str(0))
 
-        consumer = KafkaConsumer(bootstrap_servers=[self.kafka_connect_str],
-                                 group_id="my_consumer",
-                                 auto_offset_reset='earliest',
-                                 enable_auto_commit=False)
+        consumer = KafkaConsumer(
+            bootstrap_servers=[self.kafka_connect_str],
+            group_id="my_consumer",
+            auto_offset_reset='earliest',
+            enable_auto_commit=False,
+        )
         consumer.subscribe(self.topics)
 
         iteration = 0
@@ -118,10 +120,7 @@ class ZKConsumer(StoppableThread):
                         offset = record.offset
 
                 if offset:
-                    zk_trans.set_data(
-                        os.path.join(zk_path_topic_tmpl.format(topic), str(partition)),
-                        str(offset)
-                    )
+                    zk_trans.set_data(os.path.join(zk_path_topic_tmpl.format(topic), str(partition)), str(offset))
 
             zk_trans.commit()
             iteration += 1

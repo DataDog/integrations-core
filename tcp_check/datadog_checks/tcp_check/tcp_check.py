@@ -81,13 +81,20 @@ class TCPCheck(NetworkCheck):
             if "timed out" in str(e):
 
                 # The connection timed out becase it took more time than the system tcp stack allows
-                self.log.warning('The connection timed out because it took more time '
-                                 'than the system tcp stack allows. You might want to '
-                                 'change this setting to allow longer timeouts')
+                self.log.warning(
+                    'The connection timed out because it took more time '
+                    'than the system tcp stack allows. You might want to '
+                    'change this setting to allow longer timeouts'
+                )
                 self.log.info("System tcp timeout. Assuming that the checked system is down")
-                return Status.DOWN, """Socket error: {}.
+                return (
+                    Status.DOWN,
+                    """Socket error: {}.
                  The connection timed out after {} ms because it took more time than the system tcp stack allows.
-                 You might want to change this setting to allow longer timeouts""".format(str(e), length)
+                 You might want to change this setting to allow longer timeouts""".format(
+                        str(e), length
+                    ),
+                )
             else:
                 self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(addr, port, str(e), length))
                 return Status.DOWN, "{}. Connection failed after {} ms".format(str(e), length)
@@ -98,9 +105,12 @@ class TCPCheck(NetworkCheck):
             return Status.DOWN, "{}. Connection failed after {} ms".format(str(e), length)
 
         if response_time:
-            self.gauge('network.tcp.response_time', time.time() - start,
-                       tags=['url:{}:{}'.format(instance.get('host', None), port),
-                             'instance:{}'.format(instance.get('name'))] + custom_tags)
+            self.gauge(
+                'network.tcp.response_time',
+                time.time() - start,
+                tags=['url:{}:{}'.format(instance.get('host', None), port), 'instance:{}'.format(instance.get('name'))]
+                + custom_tags,
+            )
 
         self.log.debug("{}:{} is UP".format(addr, port))
         return Status.UP, "UP"
@@ -114,14 +124,14 @@ class TCPCheck(NetworkCheck):
         if status == Status.UP:
             msg = None
 
-        tags = custom_tags + ['target_host:{}'.format(host),
-                              'port:{}'.format(port),
-                              'instance:{}'.format(instance_name)]
+        tags = custom_tags + [
+            'target_host:{}'.format(host),
+            'port:{}'.format(port),
+            'instance:{}'.format(instance_name),
+        ]
 
-        self.service_check(self.SERVICE_CHECK_NAME,
-                           NetworkCheck.STATUS_TO_SERVICE_CHECK[status],
-                           tags=tags,
-                           message=msg
-                           )
+        self.service_check(
+            self.SERVICE_CHECK_NAME, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg
+        )
         # Report as a metric as well
         self.gauge("network.tcp.can_connect", 1 if status == Status.UP else 0, tags=tags)

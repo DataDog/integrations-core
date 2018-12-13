@@ -9,14 +9,13 @@ from time import sleep
 import pytest
 import requests
 
-from common import (
-    HERE, URL
-)
+from common import HERE, URL
 
 
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -26,10 +25,7 @@ def kyototycoon():
     """
     Spin up a kyototycoon docker image
     """
-    args = [
-        'docker-compose',
-        '-f', os.path.join(HERE, 'compose', 'compose_kyototycoon.yaml')
-    ]
+    args = ['docker-compose', '-f', os.path.join(HERE, 'compose', 'compose_kyototycoon.yaml')]
 
     subprocess.check_call(args + ["up", "-d"])
 
@@ -38,12 +34,8 @@ def kyototycoon():
         raise Exception("kyototycoon container boot timed out!")
 
     # Generate a test database
-    data = {
-        'dddd': 'dddd'
-    }
-    headers = {
-        'X-Kt-Mode': 'set'
-    }
+    data = {'dddd': 'dddd'}
+    headers = {'X-Kt-Mode': 'set'}
 
     for i in xrange(100):
         requests.put(URL, data=data, headers=headers)

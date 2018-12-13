@@ -5,7 +5,4 @@
 from .coredns import CoreDNSCheck
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'CoreDNSCheck'
-]
+__all__ = ['__version__', 'CoreDNSCheck']

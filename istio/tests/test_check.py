@@ -21,7 +21,7 @@ MESH_METRICS = [
     'istio.mesh.request.size.count',
     'istio.mesh.request.size.sum',
     'istio.mesh.response.size.count',
-    'istio.mesh.response.size.sum'
+    'istio.mesh.response.size.sum',
 ]
 
 
@@ -80,7 +80,7 @@ MIXER_METRICS = [
     'istio.mixer.process.open_fds',
     'istio.mixer.process.resident_memory_bytes',
     'istio.mixer.process.start_time_seconds',
-    'istio.mixer.process.virtual_memory_bytes'
+    'istio.mixer.process.virtual_memory_bytes',
 ]
 
 MESH_METRICS_MAPPER = {
@@ -148,7 +148,7 @@ MESH_MIXER_MAPPER = {
 
 MOCK_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:42422/metrics',
-    'mixer_endpoint': 'http://localhost:9093/metrics'
+    'mixer_endpoint': 'http://localhost:9093/metrics',
 }
 
 

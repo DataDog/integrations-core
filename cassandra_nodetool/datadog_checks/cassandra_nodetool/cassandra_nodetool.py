@@ -18,7 +18,6 @@ TO_BYTES = {
     'MB': 1e6,
     'GB': 1e9,
     'TB': 1e12,
-
     # only available in cassandra 3.11 or later
     'iB': 1,
     'KiB': 1e3,
@@ -31,9 +30,11 @@ TO_BYTES = {
 class CassandraNodetoolCheck(AgentCheck):
 
     datacenter_name_re = re.compile('^Datacenter: (.*)')
-    node_status_re = re.compile(r'^(?P<status>[UD])[NLJM] +(?P<address>\d+\.\d+\.\d+\.\d+) +'
-                                r'(?P<load>\d+(\.\d*)?) (?P<load_unit>(K|M|G|T)?i?B) +\d+ +'
-                                r'(?P<owns>(\d+(\.\d+)?)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(?P<rack>.*)')
+    node_status_re = re.compile(
+        r'^(?P<status>[UD])[NLJM] +(?P<address>\d+\.\d+\.\d+\.\d+) +'
+        r'(?P<load>\d+(\.\d*)?) (?P<load_unit>(K|M|G|T)?i?B) +\d+ +'
+        r'(?P<owns>(\d+(\.\d+)?)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(?P<rack>.*)'
+    )
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -78,10 +79,12 @@ class CassandraNodetoolCheck(AgentCheck):
             # Send the stats per node and compute the stats per datacenter
             for node in nodes:
 
-                node_tags = ['node_address:%s' % node['address'],
-                             'node_id:%s' % node['id'],
-                             'datacenter:%s' % node['datacenter'],
-                             'rack:%s' % node['rack']]
+                node_tags = [
+                    'node_address:%s' % node['address'],
+                    'node_id:%s' % node['id'],
+                    'datacenter:%s' % node['datacenter'],
+                    'rack:%s' % node['rack'],
+                ]
 
                 # nodetool prints `?` when it can't compute the value of `owns` for certain keyspaces (e.g. system)
                 # don't send metric in this case
@@ -90,29 +93,38 @@ class CassandraNodetoolCheck(AgentCheck):
                     if node['status'] == 'U':
                         percent_up_by_dc[node['datacenter']] += owns
                     percent_total_by_dc[node['datacenter']] += owns
-                    self.gauge('cassandra.nodetool.status.owns', owns,
-                               tags=tags + node_tags + ['keyspace:%s' % keyspace])
+                    self.gauge(
+                        'cassandra.nodetool.status.owns', owns, tags=tags + node_tags + ['keyspace:%s' % keyspace]
+                    )
 
                 # Send service check only once for each node
                 if send_service_checks:
                     status = AgentCheck.OK if node['status'] == 'U' else AgentCheck.CRITICAL
                     self.service_check('cassandra.nodetool.node_up', status, tags + node_tags)
 
-                self.gauge('cassandra.nodetool.status.status', 1 if node['status'] == 'U' else 0,
-                           tags=tags + node_tags)
-                self.gauge('cassandra.nodetool.status.load', float(node['load']) * TO_BYTES[node['load_unit']],
-                           tags=tags + node_tags)
+                self.gauge('cassandra.nodetool.status.status', 1 if node['status'] == 'U' else 0, tags=tags + node_tags)
+                self.gauge(
+                    'cassandra.nodetool.status.load',
+                    float(node['load']) * TO_BYTES[node['load_unit']],
+                    tags=tags + node_tags,
+                )
 
             # All service checks have been sent, don't resend
             send_service_checks = False
 
             # Send the stats per datacenter
             for datacenter, percent_up in percent_up_by_dc.items():
-                self.gauge('cassandra.nodetool.status.replication_availability', percent_up,
-                           tags=tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter])
+                self.gauge(
+                    'cassandra.nodetool.status.replication_availability',
+                    percent_up,
+                    tags=tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter],
+                )
             for datacenter, percent_total in percent_total_by_dc.items():
-                self.gauge('cassandra.nodetool.status.replication_factor', int(round(percent_total / 100)),
-                           tags=tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter])
+                self.gauge(
+                    'cassandra.nodetool.status.replication_factor',
+                    int(round(percent_total / 100)),
+                    tags=tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter],
+                )
 
     def _process_nodetool_output(self, output):
         nodes = []
@@ -142,7 +154,7 @@ class CassandraNodetoolCheck(AgentCheck):
                     'owns': match.group('owns'),
                     'id': match.group('id'),
                     'rack': match.group('rack'),
-                    'datacenter': datacenter_name
+                    'datacenter': datacenter_name,
                 }
                 nodes.append(node)
 

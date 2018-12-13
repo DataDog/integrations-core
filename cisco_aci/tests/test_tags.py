@@ -55,7 +55,8 @@ def test_app_tags():
     assert tags._app_tags({"attributes": {"dn": "test"}}) == []
     assert tags._app_tags({"attributes": {"dn": "1234"}}) == []
     assert tags._app_tags({"attributes": {"dn": "/tn-qwertyQWERTY1234567890-_/"}}) == [
-        "tenant:qwertyQWERTY1234567890-_"]
+        "tenant:qwertyQWERTY1234567890-_"
+    ]
     assert tags._app_tags({"attributes": {"dn": "/tn-aa!a/"}}) == ["tenant:aa!a"]
     assert tags._app_tags({"attributes": {"dn": "a/tn-aaa/a"}}) == ["tenant:aaa"]
     assert tags._app_tags({"attributes": {"dn": "a/tn-tn-/a"}}) == ["tenant:tn-"]
@@ -109,7 +110,8 @@ def test_edpt_tags_map():
         assert tags._edpt_tags_map({"attributes": {"dn": 1234}}) == {}
 
     assert tags._edpt_tags_map({"attributes": {"dn": "/tn-qwertyQWERTY1234567890-_/"}}) == {
-        "tenant": "qwertyQWERTY1234567890-_"}
+        "tenant": "qwertyQWERTY1234567890-_"
+    }
 
     assert tags._edpt_tags_map({"attributes": {"dn": "/tn-aa!a/"}}) == {"tenant": "aa!a"}
     assert tags._edpt_tags_map({"attributes": {"dn": "/tn-aaa/"}}) == {"tenant": "aaa"}
@@ -118,7 +120,8 @@ def test_edpt_tags_map():
     assert tags._edpt_tags_map({"attributes": {"dn": "a/tn-aaa/tn-bbb/a"}}) == {"tenant": "aaa"}
 
     assert tags._edpt_tags_map({"attributes": {"dn": "a/ap-qwertyQWERTY1234567890-_/a"}}) == {
-        "application": "qwertyQWERTY1234567890-_"}
+        "application": "qwertyQWERTY1234567890-_"
+    }
 
     assert tags._edpt_tags_map({"attributes": {"dn": "/ap-aa!a/"}}) == {"application": "aa!a"}
     assert tags._edpt_tags_map({"attributes": {"dn": "/ap-aaa/"}}) == {"application": "aaa"}
@@ -126,9 +129,11 @@ def test_edpt_tags_map():
     assert tags._edpt_tags_map({"attributes": {"dn": "a/ap-ap-/a"}}) == {"application": "ap-"}
     assert tags._edpt_tags_map({"attributes": {"dn": "a/ap-aaa/ap-bbb/a"}}) == {"application": "aaa"}
 
-    assert tags._edpt_tags_map({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}}) == {"endpoint_group": "aaa",
-                                                                                               "tenant": "bbb",
-                                                                                               "application": "ccc"}
+    assert tags._edpt_tags_map({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}}) == {
+        "endpoint_group": "aaa",
+        "tenant": "bbb",
+        "application": "ccc",
+    }
 
 
 def test_epg_meta_tags_map():
@@ -171,7 +176,10 @@ def test_epg_meta_tags_map():
 
     # all
     assert tags._epg_meta_tags_map({"attributes": {"other": "", "ip": "aaa", "mac": "bbb", "encap": "ccc"}}) == {
-        "ip": "aaa", "mac": "bbb", "encap": "ccc"}
+        "ip": "aaa",
+        "mac": "bbb",
+        "encap": "ccc",
+    }
 
 
 class ApiMock1:
@@ -204,16 +212,17 @@ class ApiMock3:
         return [{"fvCEp": {"attributes": {"other": "", "ip": "ddd", "mac": "eee", "encap": "fff"}}}]
 
     def get_eth_list_for_epg(self, tenant, app, epg):
-        return [{"fvRsCEpToPathEp": {"attributes": {"tDn": ""}}},
-                {"fvRsCEpToPathEp": {"attributes": {"tDn": "aaa"}}},
-                {"fvRsCEpToPathEp": {"attributes": {"tDn": "/pathep-[bbb]/"}}},
-                {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/pathep-[ccc]/a"}}},
-                {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/pathep-[ddd]/pathep-[eee]/a"}}},
-                {"fvRsCEpToPathEp": {"attributes": {"tDn": "/paths-[fff]/"}}},
-                {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/paths-[ggg]/a"}}},
-                {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/paths-[hhh]/paths-[iii]/a"}}},
-                {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/paths-[jjj]/pathep-[kkk]/a"}}},
-                ]
+        return [
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": ""}}},
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": "aaa"}}},
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": "/pathep-[bbb]/"}}},
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/pathep-[ccc]/a"}}},
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/pathep-[ddd]/pathep-[eee]/a"}}},
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": "/paths-[fff]/"}}},
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/paths-[ggg]/a"}}},
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/paths-[hhh]/paths-[iii]/a"}}},
+            {"fvRsCEpToPathEp": {"attributes": {"tDn": "a/paths-[jjj]/pathep-[kkk]/a"}}},
+        ]
 
 
 def test_tenant_mapper():
@@ -228,35 +237,87 @@ def test_tenant_mapper():
     assert tags._tenant_mapper(["aaa"]) == []
     assert tags._tenant_mapper({}) == []
     assert tags._tenant_mapper({"aaa": "aaa"}) == []
-    assert all([a == b for a, b in zip(sorted(tags._tenant_mapper({"attributes": {"name": "aaa",
-                                                                                  "dn": "a/tn-bbb/ap-ccc/a"}})),
-                                       sorted(['tenant:bbb', 'endpoint_group:aaa', 'application:ccc']))])
+    assert all(
+        [
+            a == b
+            for a, b in zip(
+                sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
+                sorted(['tenant:bbb', 'endpoint_group:aaa', 'application:ccc']),
+            )
+        ]
+    )
 
     api2 = ApiMock2()
     tags.api = api2
-    assert all([a == b for a, b in zip(sorted(tags._tenant_mapper({"attributes": {"name": "aaa",
-                                                                                  "dn": "a/tn-bbb/ap-ccc/a"}})),
-                                       sorted(['tenant:bbb', 'application:ccc', 'endpoint_group:aaa',
-                                               "ip:ddd", "mac:eee", "encap:fff"]))])
+    assert all(
+        [
+            a == b
+            for a, b in zip(
+                sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
+                sorted(['tenant:bbb', 'application:ccc', 'endpoint_group:aaa', "ip:ddd", "mac:eee", "encap:fff"]),
+            )
+        ]
+    )
 
-    context_hash = hash_mutable(['tenant:bbb', 'application:ccc', 'endpoint_group:aaa', "ip:ddd", "mac:eee",
-                                 "encap:fff"])
+    context_hash = hash_mutable(
+        ['tenant:bbb', 'application:ccc', 'endpoint_group:aaa', "ip:ddd", "mac:eee", "encap:fff"]
+    )
     api3 = ApiMock3()
     tags.api = api3
     tags.tenant_tags = {context_hash: ["test:ggg"]}
-    assert all([a == b for a, b in zip(sorted(tags._tenant_mapper({"attributes": {"name": "aaa",
-                                                                                  "dn": "a/tn-bbb/ap-ccc/a"}})),
-                                       sorted(['tenant:bbb', 'application:ccc', 'endpoint_group:aaa',
-                                               "ip:ddd", "mac:eee", "encap:fff", "test:ggg"]))])
+    assert all(
+        [
+            a == b
+            for a, b in zip(
+                sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
+                sorted(
+                    [
+                        'tenant:bbb',
+                        'application:ccc',
+                        'endpoint_group:aaa',
+                        "ip:ddd",
+                        "mac:eee",
+                        "encap:fff",
+                        "test:ggg",
+                    ]
+                ),
+            )
+        ]
+    )
     assert tags.tenant_farbic_mapper == {}
 
     api3 = ApiMock3()
     tags.api = api3
     tags.tenant_tags = {}
-    assert all([a == b for a, b in zip(sorted(tags._tenant_mapper({"attributes": {"name": "aaa",
-                                                                                  "dn": "a/tn-bbb/ap-ccc/a"}})),
-                                       sorted(['ip:ddd', 'mac:eee', 'encap:fff', 'endpoint_group:aaa',
-                                               'application:ccc', 'tenant:bbb', 'port:bbb',
-                                               'port:ccc', 'port:ddd', 'port:kkk', 'node_id:[jjj]']))])
-    assert all([a == b for a, b in zip(sorted(tags.tenant_farbic_mapper.get('[jjj]:kkk', [])),
-                                       sorted(['application:ccc', 'endpoint_group:aaa', 'tenant:bbb']))])
+    assert all(
+        [
+            a == b
+            for a, b in zip(
+                sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
+                sorted(
+                    [
+                        'ip:ddd',
+                        'mac:eee',
+                        'encap:fff',
+                        'endpoint_group:aaa',
+                        'application:ccc',
+                        'tenant:bbb',
+                        'port:bbb',
+                        'port:ccc',
+                        'port:ddd',
+                        'port:kkk',
+                        'node_id:[jjj]',
+                    ]
+                ),
+            )
+        ]
+    )
+    assert all(
+        [
+            a == b
+            for a, b in zip(
+                sorted(tags.tenant_farbic_mapper.get('[jjj]:kkk', [])),
+                sorted(['application:ccc', 'endpoint_group:aaa', 'tenant:bbb']),
+            )
+        ]
+    )

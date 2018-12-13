@@ -24,7 +24,7 @@ def get_container_ip(container_id_or_name):
         'inspect',
         '-f',
         '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}',
-        container_id_or_name
+        container_id_or_name,
     ]
 
     return run_command(command, capture='out', check=True).stdout.strip()
@@ -53,7 +53,7 @@ def docker_run(
     log_patterns=None,
     conditions=None,
     env_vars=None,
-    wrapper=None
+    wrapper=None,
 ):
     """This utility provides a convenient way to safely set up and tear down Docker environments.
 

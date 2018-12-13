@@ -14,6 +14,7 @@ class MorCache:
     Implements a thread safe storage for Mor objects.
     For each instance key, the cache maps: mor_name --> mor_dict_object
     """
+
     def __init__(self):
         self._mor = {}
         self._mor_lock = threading.RLock()
@@ -104,7 +105,7 @@ class MorCache:
             mor_names.sort()
             total = len(mor_names)
             for idx in range(0, total, batch_size):
-                names_chunk = mor_names[idx:min(idx + batch_size, total)]
+                names_chunk = mor_names[idx : min(idx + batch_size, total)]
                 yield {name: mors_dict[name] for name in names_chunk}
 
     def purge(self, key, ttl):

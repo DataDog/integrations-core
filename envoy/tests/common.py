@@ -1,4 +1,5 @@
 import os
+
 try:
     from functools import lru_cache
 except ImportError:
@@ -12,29 +13,13 @@ FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 HOST = get_docker_hostname()
 PORT = '8001'
 INSTANCES = {
-    'main': {
-        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
-    },
-    'whitelist': {
-        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
-        'metric_whitelist': [
-            r'envoy\.cluster\..*',
-        ],
-    },
-    'blacklist': {
-        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
-        'metric_blacklist': [
-            r'envoy\.cluster\..*',
-        ],
-    },
+    'main': {'stats_url': 'http://{}:{}/stats'.format(HOST, PORT)},
+    'whitelist': {'stats_url': 'http://{}:{}/stats'.format(HOST, PORT), 'metric_whitelist': [r'envoy\.cluster\..*']},
+    'blacklist': {'stats_url': 'http://{}:{}/stats'.format(HOST, PORT), 'metric_blacklist': [r'envoy\.cluster\..*']},
     'whitelist_blacklist': {
         'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
-        'metric_whitelist': [
-            r'envoy\.cluster\.',
-        ],
-        'metric_blacklist': [
-            r'envoy\.cluster\.out',
-        ],
+        'metric_whitelist': [r'envoy\.cluster\.'],
+        'metric_blacklist': [r'envoy\.cluster\.out'],
     },
 }
 

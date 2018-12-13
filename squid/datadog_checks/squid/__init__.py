@@ -4,7 +4,4 @@
 from .squid import SquidCheck
 from .__about__ import __version__
 
-__all__ = [
-    'SquidCheck',
-    '__version__'
-]
+__all__ = ['SquidCheck', '__version__']

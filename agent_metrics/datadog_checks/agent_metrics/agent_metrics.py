@@ -34,6 +34,7 @@ class UnsupportedMetricType(Exception):
     Raised by :class:`AgentMetrics` when a metric type outside outside of AgentMetrics.ALLOWED_METRIC_TYPES
     is requested for measurement of a particular statistic
     """
+
     def __init__(self, metric_name, metric_type):
         message = 'Unsupported Metric Type for {0} : {1}'.format(metric_name, metric_type)
         Exception.__init__(self, message)
@@ -63,8 +64,7 @@ class AgentMetrics(AgentCheck):
             return {}
 
         methods, metric_types = zip(
-            *[(p['name'], p.get('type', GAUGE))
-                for p in process_metrics if _is_affirmative(p.get('active'))]
+            *[(p['name'], p.get('type', GAUGE)) for p in process_metrics if _is_affirmative(p.get('active'))]
         )
 
         names_to_metric_types = {}
@@ -140,32 +140,43 @@ class AgentMetrics(AgentCheck):
             self.log.info("Thread count is high: %d" % threading.activeCount())
 
         collect_time_exceeds_threshold = collection_time > MAX_COLLECTION_TIME
-        if collection_time is not None and \
-                (collect_time_exceeds_threshold or self.in_developer_mode):
+        if collection_time is not None and (collect_time_exceeds_threshold or self.in_developer_mode):
 
             self.gauge('datadog.agent.collector.collection.time', collection_time, tags=tags)
             if collect_time_exceeds_threshold:
-                self.log.info("Collection time (s) is high: %.1f, metrics count: %d, events count: %d",
-                              collection_time, len(payload['metrics']), len(payload['events']))
+                self.log.info(
+                    "Collection time (s) is high: %.1f, metrics count: %d, events count: %d",
+                    collection_time,
+                    len(payload['metrics']),
+                    len(payload['events']),
+                )
 
         emit_time_exceeds_threshold = emit_time > MAX_EMIT_TIME
-        if emit_time is not None and \
-                (emit_time_exceeds_threshold or self.in_developer_mode):
+        if emit_time is not None and (emit_time_exceeds_threshold or self.in_developer_mode):
             self.gauge('datadog.agent.emitter.emit.time', emit_time, tags=tags)
             if emit_time_exceeds_threshold:
-                self.log.info("Emit time (s) is high: %.1f, metrics count: %d, events count: %d",
-                              emit_time, len(payload['metrics']), len(payload['events']))
+                self.log.info(
+                    "Emit time (s) is high: %.1f, metrics count: %d, events count: %d",
+                    emit_time,
+                    len(payload['metrics']),
+                    len(payload['events']),
+                )
 
         if cpu_time is not None:
             try:
-                cpu_used_pct = 100.0 * float(cpu_time)/float(collection_time)
+                cpu_used_pct = 100.0 * float(cpu_time) / float(collection_time)
                 if cpu_used_pct > MAX_CPU_PCT:
                     self.gauge('datadog.agent.collector.cpu.used', cpu_used_pct, tags=tags)
-                    self.log.info("CPU consumed (%%) is high: %.1f, metrics count: %d, events count: %d",
-                                  cpu_used_pct, len(payload['metrics']), len(payload['events']))
+                    self.log.info(
+                        "CPU consumed (%%) is high: %.1f, metrics count: %d, events count: %d",
+                        cpu_used_pct,
+                        len(payload['metrics']),
+                        len(payload['events']),
+                    )
             except Exception as e:
-                self.log.debug("Couldn't compute cpu used by collector with values %s %s %s",
-                               cpu_time, collection_time, str(e))
+                self.log.debug(
+                    "Couldn't compute cpu used by collector with values %s %s %s", cpu_time, collection_time, str(e)
+                )
 
     @staticmethod
     def _get_statistic_name_from_method(method_name):

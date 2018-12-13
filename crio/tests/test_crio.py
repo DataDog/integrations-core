@@ -7,9 +7,7 @@ import mock
 
 from datadog_checks.crio import CrioCheck
 
-instance = {
-    'prometheus_url': 'http://localhost:10249/metrics',
-}
+instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 
 CHECK_NAME = 'crio'
 NAMESPACE = 'crio'
@@ -23,10 +21,8 @@ def mock_data():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"}
-        )
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
     ):
         yield
 
@@ -39,10 +35,8 @@ def mock_userspace():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"}
-        )
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
     ):
         yield
 

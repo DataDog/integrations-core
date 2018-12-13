@@ -4,7 +4,4 @@
 from .mapreduce import MapReduceCheck
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'MapReduceCheck'
-]
+__all__ = ['__version__', 'MapReduceCheck']

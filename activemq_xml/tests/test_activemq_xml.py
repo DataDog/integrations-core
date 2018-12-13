@@ -34,7 +34,7 @@ def test_check(aggregator):
             "subscriptionName:my_subscriber",
             "destinationName:my_topic",
             "selector:jms_selector",
-            "active:no"
+            "active:no",
         ]
         aggregator.assert_metric(mname, count=1, tags=subscriber_tags)
 

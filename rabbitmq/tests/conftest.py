@@ -29,9 +29,7 @@ def spin_up_rabbitmq(request):
 
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
-    with docker_run(compose_file,
-                    log_patterns='Server startup complete',
-                    env_vars=env):
+    with docker_run(compose_file, log_patterns='Server startup complete', env_vars=env):
         yield
 
 
@@ -53,10 +51,7 @@ def setup_rabbitmq():
         # Set cluster name
         url = "http://{}:{}/api/cluster-name".format(HOST, PORT)
         res = requests.put(
-            url,
-            data='{"name": "rabbitmqtest"}',
-            auth=("guest", "guest"),
-            headers={"Content-Type": "application/json"}
+            url, data='{"name": "rabbitmqtest"}', auth=("guest", "guest"), headers={"Content-Type": "application/json"}
         )
         res.raise_for_status()
         yield
@@ -64,87 +59,86 @@ def setup_rabbitmq():
 
 def setup_vhosts(rabbitmq_admin_script):
     for vhost in ['myvhost', 'myothervhost']:
-        cmd = ['python',
-               rabbitmq_admin_script,
-               'declare',
-               'vhost',
-               'name={}'.format(vhost)]
+        cmd = ['python', rabbitmq_admin_script, 'declare', 'vhost', 'name={}'.format(vhost)]
         subprocess.check_call(cmd)
 
-        cmd = ['python',
-               rabbitmq_admin_script,
-               'declare',
-               'permission',
-               'vhost={}'.format(vhost),
-               'user=guest',
-               'write=.*',
-               'read=.*',
-               'configure=.*']
+        cmd = [
+            'python',
+            rabbitmq_admin_script,
+            'declare',
+            'permission',
+            'vhost={}'.format(vhost),
+            'user=guest',
+            'write=.*',
+            'read=.*',
+            'configure=.*',
+        ]
         subprocess.check_call(cmd)
 
 
 def setup_more(rabbitmq_admin_script):
     for name in ['test1', 'test5', 'tralala']:
-        cmd = ['python',
-               rabbitmq_admin_script,
-               'declare',
-               'queue',
-               'name={}'.format(name)]
+        cmd = ['python', rabbitmq_admin_script, 'declare', 'queue', 'name={}'.format(name)]
         subprocess.check_call(cmd)
 
-        cmd = ['python',
-               rabbitmq_admin_script,
-               'declare',
-               'exchange',
-               'name={}'.format(name),
-               'type=topic']
+        cmd = ['python', rabbitmq_admin_script, 'declare', 'exchange', 'name={}'.format(name), 'type=topic']
         subprocess.check_call(cmd)
 
-        cmd = ['python',
-               rabbitmq_admin_script,
-               'declare',
-               'binding',
-               'source={}'.format(name),
-               'destination_type=queue',
-               'destination={}'.format(name),
-               'routing_key={}'.format(name)]
+        cmd = [
+            'python',
+            rabbitmq_admin_script,
+            'declare',
+            'binding',
+            'source={}'.format(name),
+            'destination_type=queue',
+            'destination={}'.format(name),
+            'routing_key={}'.format(name),
+        ]
         subprocess.check_call(cmd)
 
-        cmd = ['python',
-               rabbitmq_admin_script,
-               'publish',
-               'exchange={}'.format(name),
-               'routing_key={}'.format(name),
-               'payload="hello, world"']
+        cmd = [
+            'python',
+            rabbitmq_admin_script,
+            'publish',
+            'exchange={}'.format(name),
+            'routing_key={}'.format(name),
+            'payload="hello, world"',
+        ]
         subprocess.check_call(cmd)
 
-        cmd = ['python',
-               rabbitmq_admin_script,
-               'publish',
-               'exchange={}'.format(name),
-               'routing_key=bad_key',
-               'payload="unroutable"']
+        cmd = [
+            'python',
+            rabbitmq_admin_script,
+            'publish',
+            'exchange={}'.format(name),
+            'routing_key=bad_key',
+            'payload="unroutable"',
+        ]
         subprocess.check_call(cmd)
 
 
 def setup_more_with_vhosts(rabbitmq_admin_script):
     for name in ['test1', 'test5', 'tralala', 'testaaaaa', 'bbbbbbbb']:
         for vhost in ['myvhost', 'myothervhost']:
-            cmd = ['python',
-                   rabbitmq_admin_script,
-                   '--vhost={}'.format(vhost),
-                   'declare',
-                   'queue',
-                   'name={}'.format(name)]
+            cmd = [
+                'python',
+                rabbitmq_admin_script,
+                '--vhost={}'.format(vhost),
+                'declare',
+                'queue',
+                'name={}'.format(name),
+            ]
             subprocess.check_call(cmd)
 
-            cmd = ['python',
-                   rabbitmq_admin_script,
-                   '--vhost={}'.format(vhost),
-                   'publish',
-                   'exchange=amq.default',
-                   'routing_key={}'.format(name),
-                   'payload="hello, world"']
+            cmd = [
+                'python',
+                rabbitmq_admin_script,
+                '--vhost={}'.format(vhost),
+                'publish',
+                'exchange=amq.default',
+                'routing_key={}'.format(name),
+                'payload="hello, world"',
+            ]
             subprocess.check_call(cmd)
 
 

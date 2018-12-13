@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .pdh_check import PDHCheck
 
-__all__ = [
-    '__version__',
-    'PDHCheck'
-]
+__all__ = ['__version__', 'PDHCheck']

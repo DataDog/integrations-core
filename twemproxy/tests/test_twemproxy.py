@@ -23,34 +23,26 @@ TESTS_HELPER_DIR = os.path.join(ROOT, 'datadog_checks_tests_helper')
 HOST = get_docker_hostname()
 PORT = 6222
 
-GLOBAL_STATS = set([
-    'curr_connections',
-    'total_connections'
-])
+GLOBAL_STATS = set(['curr_connections', 'total_connections'])
 
-POOL_STATS = set([
-    'client_eof',
-    'client_err',
-    'client_connections',
-    'server_ejects',
-    'forward_error',
-    'fragments'
-])
+POOL_STATS = set(['client_eof', 'client_err', 'client_connections', 'server_ejects', 'forward_error', 'fragments'])
 
-SERVER_STATS = set([
-    'in_queue',
-    'out_queue',
-    'in_queue_bytes',
-    'out_queue_bytes',
-    'server_connections',
-    'server_timedout',
-    'server_err',
-    'server_eof',
-    'requests',
-    'request_bytes',
-    'responses',
-    'response_bytes',
-])
+SERVER_STATS = set(
+    [
+        'in_queue',
+        'out_queue',
+        'in_queue_bytes',
+        'out_queue_bytes',
+        'server_connections',
+        'server_timedout',
+        'server_err',
+        'server_eof',
+        'requests',
+        'request_bytes',
+        'responses',
+        'response_bytes',
+    ]
+)
 
 SC_TAGS = ['host:{}'.format(HOST), 'port:{}'.format(PORT), 'optional:tag1']
 
@@ -121,11 +113,7 @@ def setup_request():
 
 
 def test_check(check, spin_up_twemproxy, setup_request, aggregator):
-    instance = {
-        'host': get_docker_hostname(),
-        'port': 6222,
-        'tags': ['optional:tag1']
-    }
+    instance = {'host': get_docker_hostname(), 'port': 6222, 'tags': ['optional:tag1']}
 
     check.check(instance)
 
@@ -137,8 +125,7 @@ def test_check(check, spin_up_twemproxy, setup_request, aggregator):
         aggregator.assert_metric("twemproxy.{}".format(stat), count=2)
 
     # Test service check
-    aggregator.assert_service_check('twemproxy.can_connect', status=Twemproxy.OK,
-                                    tags=SC_TAGS, count=1)
+    aggregator.assert_service_check('twemproxy.can_connect', status=Twemproxy.OK, tags=SC_TAGS, count=1)
 
     # Raises when COVERAGE=true and coverage < 100%
     aggregator.assert_all_metrics_covered()

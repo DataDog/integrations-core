@@ -33,10 +33,7 @@ def spin_up_go_expvar():
     Spin up a simple container that contains a simple go expvar app
     """
 
-    with docker_run(
-        os.path.join(common.HERE, 'compose', 'docker-compose.yaml'),
-        endpoints=[common.URL]
-    ):
+    with docker_run(os.path.join(common.HERE, 'compose', 'docker-compose.yaml'), endpoints=[common.URL]):
         for _ in range(9):
             requests.get(common.URL + "?user=123456")
         yield

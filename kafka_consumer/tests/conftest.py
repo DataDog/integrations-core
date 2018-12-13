@@ -31,7 +31,7 @@ def dd_environment(e2e_instance):
             # Advertising the hostname doesn't work on docker:dind so we manually
             # resolve the IP address. This seems to also work outside docker:dind
             # so we got that goin for us.
-            'KAFKA_HOST': HOST_IP,
+            'KAFKA_HOST': HOST_IP
         },
     ):
         yield e2e_instance
@@ -63,11 +63,7 @@ def zk_instance():
     return {
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'zk_connect_str': ZK_CONNECT_STR,
-        'consumer_groups': {
-            'my_consumer': {
-                'marvel': [0]
-            }
-        }
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
     }
 
 
@@ -77,11 +73,7 @@ def kafka_instance():
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'kafka_consumer_offsets': True,
         'tags': ['optional:tag1'],
-        'consumer_groups': {
-            'my_consumer': {
-                'marvel': [0]
-            }
-        }
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
     }
 
 

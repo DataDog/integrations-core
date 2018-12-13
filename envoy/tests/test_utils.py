@@ -3,21 +3,9 @@ from datadog_checks.envoy.utils import make_metric_tree
 
 def test_make_metric_tree():
     metrics = {
-        'http.dynamodb.error': {
-            'tags': (
-                ('stat_prefix', ),
-                (),
-                ('table_name', 'error_type', ),
-            ),
-            'method': 'count',
-        },
+        'http.dynamodb.error': {'tags': (('stat_prefix',), (), ('table_name', 'error_type')), 'method': 'count'},
         'http.dynamodb.error.BatchFailureUnprocessedKeys': {
-            'tags': (
-                ('stat_prefix', ),
-                (),
-                ('table_name', ),
-                (),
-            ),
+            'tags': (('stat_prefix',), (), ('table_name',), ()),
             'method': 'count',
         },
     }
@@ -26,22 +14,11 @@ def test_make_metric_tree():
         'http': {
             'dynamodb': {
                 'error': {
-                    'BatchFailureUnprocessedKeys': {
-                        '|_tags_|': [
-                            (),
-                        ],
-                    },
-                    '|_tags_|': [
-                        ('table_name', 'error_type', ),
-                        ('table_name', ),
-                    ],
+                    'BatchFailureUnprocessedKeys': {'|_tags_|': [()]},
+                    '|_tags_|': [('table_name', 'error_type'), ('table_name',)],
                 },
-                '|_tags_|': [
-                    (),
-                ],
+                '|_tags_|': [()],
             },
-            '|_tags_|': [
-                ('stat_prefix', ),
-            ],
-        },
+            '|_tags_|': [('stat_prefix',)],
+        }
     }

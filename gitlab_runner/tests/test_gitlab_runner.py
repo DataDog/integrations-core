@@ -25,10 +25,7 @@ def test_check(aggregator):
     )
 
     aggregator.assert_service_check(
-        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME,
-        status=GitlabRunnerCheck.OK,
-        tags=CUSTOM_TAGS,
-        count=1,
+        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.OK, tags=CUSTOM_TAGS, count=1
     )
 
     for metric in ALLOWED_METRICS:
@@ -57,8 +54,5 @@ def test_connection_failure(aggregator):
     )
 
     aggregator.assert_service_check(
-        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME,
-        status=GitlabRunnerCheck.CRITICAL,
-        tags=CUSTOM_TAGS,
-        count=1,
+        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.CRITICAL, tags=CUSTOM_TAGS, count=1
     )

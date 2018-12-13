@@ -10,7 +10,13 @@ import pytest
 from mock import patch
 
 from .common import (
-    HERE, YARN_CLUSTER_METRICS_URL, YARN_APPS_URL, YARN_NODES_URL, YARN_SCHEDULER_URL, TEST_USERNAME, TEST_PASSWORD
+    HERE,
+    YARN_CLUSTER_METRICS_URL,
+    YARN_APPS_URL,
+    YARN_NODES_URL,
+    YARN_SCHEDULER_URL,
+    TEST_USERNAME,
+    TEST_PASSWORD,
 )
 
 
@@ -49,6 +55,7 @@ def mocked_bad_cert_request():
     """
     Mock request.get to an endpoint with a badly configured ssl cert
     """
+
     def requests_bad_cert_get(*args, **kwargs):
         # Make sure we're passing in the 'verify' argument
         assert 'verify' in kwargs, 'Missing "verify" argument in requests.get(...) call'

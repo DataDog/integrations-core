@@ -29,6 +29,7 @@ CHECK_GAUGES = [
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -72,11 +73,7 @@ def lighttpd():
 def test_lighttpd(aggregator, instance, lighttpd):
     """
     """
-    tags = [
-        'host:{}'.format(HOST),
-        'port:9449',
-        'instance:first'
-    ]
+    tags = ['host:{}'.format(HOST), 'port:9449', 'instance:first']
     check = Lighttpd("lighttpd", {}, {})
     check.check(instance)
 
@@ -91,11 +88,7 @@ def test_service_check_ko(instance, aggregator):
     """
     """
     instance['lighttpd_status_url'] = 'http://localhost:1337'
-    tags = [
-        'host:localhost',
-        'port:1337',
-        'instance:first'
-    ]
+    tags = ['host:localhost', 'port:1337', 'instance:first']
     check = Lighttpd("lighttpd", {}, {})
     with pytest.raises(Exception):
         check.check(instance)

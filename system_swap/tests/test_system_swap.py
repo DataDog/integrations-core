@@ -44,9 +44,7 @@ def test_system_swap(check, mock_psutil, aggregator):
 
     tags = ["optional:tags"]
 
-    check.check({
-        "tags": tags
-    })
+    check.check({"tags": tags})
 
     aggregator.assert_metric('system.swap.swapped_in', value=ORIG_SWAP_IN, count=1, tags=tags)
     aggregator.assert_metric('system.swap.swapped_out', value=ORIG_SWAP_OUT, count=1, tags=tags)

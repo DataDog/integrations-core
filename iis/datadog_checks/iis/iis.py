@@ -17,7 +17,6 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Files Received/sec", "iis.net.files_rcvd", "gauge"],
     ["Web Service", None, "Total Connection Attempts (all instances)", "iis.net.connection_attempts", "gauge"],
     ["Web Service", None, "Connection Attempts/sec", "iis.net.connection_attempts_sec", "gauge"],
-
     # HTTP Methods
     ["Web Service", None, "Get Requests/sec", "iis.httpd_request_method.get", "gauge"],
     ["Web Service", None, "Post Requests/sec", "iis.httpd_request_method.post", "gauge"],
@@ -26,15 +25,12 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Delete Requests/sec", "iis.httpd_request_method.delete", "gauge"],
     ["Web Service", None, "Options Requests/sec", "iis.httpd_request_method.options", "gauge"],
     ["Web Service", None, "Trace Requests/sec", "iis.httpd_request_method.trace", "gauge"],
-
     # Errors
     ["Web Service", None, "Not Found Errors/sec", "iis.errors.not_found", "gauge"],
     ["Web Service", None, "Locked Errors/sec", "iis.errors.locked", "gauge"],
-
     # Users
     ["Web Service", None, "Anonymous Users/sec", "iis.users.anon", "gauge"],
     ["Web Service", None, "NonAnonymous Users/sec", "iis.users.nonanon", "gauge"],
-
     # Requests
     ["Web Service", None, "CGI Requests/sec", "iis.requests.cgi", "gauge"],
     ["Web Service", None, "ISAPI Extension Requests/sec", "iis.requests.isapi", "gauge"],

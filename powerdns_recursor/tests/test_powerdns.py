@@ -43,10 +43,7 @@ def spin_up_powerdns():
     env['POWERDNS_IMAGE'] = powerdns_image
 
     env['POWERDNS_CONFIG'] = os.path.join(common.HERE, 'compose', 'recursor.conf')
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'powerdns.yaml')
-    ]
+    args = ["docker-compose", "-f", os.path.join(common.HERE, 'compose', 'powerdns.yaml')]
     subprocess.check_call(args + ["up", "-d", "--build"], env=env)
     wait_for_powerdns()
     time.sleep(20)
@@ -57,6 +54,7 @@ def spin_up_powerdns():
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -87,9 +85,9 @@ def test_check(aggregator, spin_up_powerdns):
         for metric in metrics.RATE_METRICS:
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=[], count=1)
 
-        aggregator.assert_service_check('powerdns.recursor.can_connect',
-                                        status=PowerDNSRecursorCheck.OK,
-                                        tags=service_check_tags)
+        aggregator.assert_service_check(
+            'powerdns.recursor.can_connect', status=PowerDNSRecursorCheck.OK, tags=service_check_tags
+        )
         assert aggregator.metrics_asserted_pct == 100.0
 
     elif version == 4:
@@ -102,15 +100,15 @@ def test_check(aggregator, spin_up_powerdns):
         for metric in metrics.RATE_METRICS + metrics.RATE_METRICS_V4:
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=[], count=1)
 
-        aggregator.assert_service_check('powerdns.recursor.can_connect',
-                                        status=PowerDNSRecursorCheck.OK,
-                                        tags=service_check_tags)
+        aggregator.assert_service_check(
+            'powerdns.recursor.can_connect', status=PowerDNSRecursorCheck.OK, tags=service_check_tags
+        )
         assert aggregator.metrics_asserted_pct == 100.0
     else:
         print("powerdns_recursor unknown version.")
-        aggregator.assert_service_check('powerdns.recursor.can_connect',
-                                        status=PowerDNSRecursorCheck.CRITICAL,
-                                        tags=service_check_tags)
+        aggregator.assert_service_check(
+            'powerdns.recursor.can_connect', status=PowerDNSRecursorCheck.CRITICAL, tags=service_check_tags
+        )
 
 
 def test_tags(aggregator, spin_up_powerdns):
@@ -143,9 +141,9 @@ def test_tags(aggregator, spin_up_powerdns):
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=tags, count=1)
 
     service_check_tags = common._config_sc_tags(common.CONFIG)
-    aggregator.assert_service_check('powerdns.recursor.can_connect',
-                                    status=PowerDNSRecursorCheck.OK,
-                                    tags=service_check_tags+tags)
+    aggregator.assert_service_check(
+        'powerdns.recursor.can_connect', status=PowerDNSRecursorCheck.OK, tags=service_check_tags + tags
+    )
 
     aggregator.assert_all_metrics_covered()
 
@@ -156,9 +154,9 @@ def test_bad_config(aggregator):
         pdns_check.check(common.BAD_CONFIG)
 
     service_check_tags = common._config_sc_tags(common.BAD_CONFIG)
-    aggregator.assert_service_check('powerdns.recursor.can_connect',
-                                    status=PowerDNSRecursorCheck.CRITICAL,
-                                    tags=service_check_tags)
+    aggregator.assert_service_check(
+        'powerdns.recursor.can_connect', status=PowerDNSRecursorCheck.CRITICAL, tags=service_check_tags
+    )
     assert len(aggregator._metrics) == 0
 
 
@@ -168,9 +166,9 @@ def test_bad_api_key(aggregator, spin_up_powerdns):
         pdns_check.check(common.BAD_API_KEY_CONFIG)
 
     service_check_tags = common._config_sc_tags(common.BAD_API_KEY_CONFIG)
-    aggregator.assert_service_check('powerdns.recursor.can_connect',
-                                    status=PowerDNSRecursorCheck.CRITICAL,
-                                    tags=service_check_tags)
+    aggregator.assert_service_check(
+        'powerdns.recursor.can_connect', status=PowerDNSRecursorCheck.CRITICAL, tags=service_check_tags
+    )
     assert len(aggregator._metrics) == 0
 
 

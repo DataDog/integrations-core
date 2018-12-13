@@ -15,27 +15,17 @@ CHECK_NAME = 'ceph'
 HERE = os.path.abspath(os.path.dirname(__file__))
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
-BASIC_CONFIG = {
-    'host': 'foo',
-    'tags': ['optional:tag1'],
-}
+BASIC_CONFIG = {'host': 'foo', 'tags': ['optional:tag1']}
 
-EXPECTED_TAGS = [
-    'ceph_fsid:e0efcf84-e8ed-4916-8ce1-9c70242d390a',
-    'ceph_mon_state:peon',
-    'optional:tag1'
-]
-EXPECTED_METRICS = [
-    'ceph.num_mons',
-    'ceph.total_objects',
-    'ceph.pgstate.active_clean'
-]
+EXPECTED_TAGS = ['ceph_fsid:e0efcf84-e8ed-4916-8ce1-9c70242d390a', 'ceph_mon_state:peon', 'optional:tag1']
+EXPECTED_METRICS = ['ceph.num_mons', 'ceph.total_objects', 'ceph.pgstate.active_clean']
 EXPECTED_SERVICE_TAGS = ['optional:tag1']
 
 
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -129,11 +119,7 @@ def test_osd_status_metrics(_, aggregator):
     ceph_check = Ceph(CHECK_NAME, {}, {})
     ceph_check.check(copy.deepcopy(BASIC_CONFIG))
 
-    expected_metrics = [
-        'ceph.read_op_per_sec',
-        'ceph.write_op_per_sec',
-        'ceph.op_per_sec'
-    ]
+    expected_metrics = ['ceph.read_op_per_sec', 'ceph.write_op_per_sec', 'ceph.op_per_sec']
 
     for osd, pct_used in [('osd1', 94), ('osd2', 95)]:
         expected_tags = EXPECTED_TAGS + ['ceph_osd:%s' % osd]

@@ -11,50 +11,29 @@ CHECK_NAME = 'agent_metrics'
 
 MOCK_CONFIG = {
     'process_metrics': [
-        {
-            'name': 'memory_info',
-            'type': 'gauge',
-            'active': 'yes'
-        },
-        {
-            'name': 'cpu_times',
-            'type': 'rate',
-            'active': 'yes'
-        },
+        {'name': 'memory_info', 'type': 'gauge', 'active': 'yes'},
+        {'name': 'cpu_times', 'type': 'rate', 'active': 'yes'},
     ],
-    'tags': ['optional:tags']
+    'tags': ['optional:tags'],
 }
 
 MOCK_CONFIG_2 = {
     'process_metrics': [
-        {
-            'name': 'memory_info',
-            'type': 'gauge',
-            'active': 'yes'
-        },
-        {
-            'name': 'get_non_existent_stat',
-            'type': 'gauge',
-            'active': 'yes'
-        },
+        {'name': 'memory_info', 'type': 'gauge', 'active': 'yes'},
+        {'name': 'get_non_existent_stat', 'type': 'gauge', 'active': 'yes'},
     ]
 }
 
-AGENT_CONFIG_DEV_MODE = {
-    'developer_mode': True
-}
+AGENT_CONFIG_DEV_MODE = {'developer_mode': True}
 
 AGENT_CONFIG_DEFAULT_MODE = {}
 
 MOCK_STATS = {
     'memory_info': dict([('rss', 16814080), ('vms', 74522624)]),
-    'cpu_times': dict([('user', 0.041733968), ('system', 0.022306718)])
+    'cpu_times': dict([('user', 0.041733968), ('system', 0.022306718)]),
 }
 
-MOCK_NAMES_TO_METRIC_TYPES = {
-    'memory_info': 'gauge',
-    'cpu_times': 'gauge'
-}
+MOCK_NAMES_TO_METRIC_TYPES = {'memory_info': 'gauge', 'cpu_times': 'gauge'}
 
 
 @pytest.fixture

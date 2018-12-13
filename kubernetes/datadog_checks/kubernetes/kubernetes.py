@@ -29,10 +29,7 @@ LEADER_CANDIDATE = 'leader_candidate'
 
 DEFAULT_USE_HISTOGRAM = False
 DEFAULT_PUBLISH_ALIASES = False
-DEFAULT_ENABLED_RATES = [
-    'diskio.io_service_bytes.stats.total',
-    'network.??_bytes',
-    'cpu.*.total']
+DEFAULT_ENABLED_RATES = ['diskio.io_service_bytes.stats.total', 'network.??_bytes', 'cpu.*.total']
 DEFAULT_COLLECT_EVENTS = False
 DEFAULT_NAMESPACES = ['default']
 
@@ -40,46 +37,38 @@ DEFAULT_SERVICE_EVENT_FREQ = 5 * 60  # seconds
 
 NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
 
-DEFAULT_ENABLED_GAUGES = [
-    'memory.usage',
-    'filesystem.usage']
+DEFAULT_ENABLED_GAUGES = ['memory.usage', 'filesystem.usage']
 
 GAUGE = AgentCheck.gauge
 RATE = AgentCheck.rate
 HISTORATE = AgentCheck.generate_historate_func(["container_name"])
 HISTO = AgentCheck.generate_histogram_func(["container_name"])
-FUNC_MAP = {
-    GAUGE: {True: HISTO, False: GAUGE},
-    RATE: {True: HISTORATE, False: RATE}
-}
+FUNC_MAP = {GAUGE: {True: HISTO, False: GAUGE}, RATE: {True: HISTORATE, False: RATE}}
 
 EVENT_TYPE = 'kubernetes'
 
 # Mapping between k8s events and ddog alert types per
 # https://github.com/kubernetes/kubernetes/blob/adb75e1fd17b11e6a0256a4984ef9b18957d94ce/staging/src/k8s.io/client-go/1.4/tools/record/event.go#L59
-K8S_ALERT_MAP = {
-    'Warning': 'warning',
-    'Normal': 'info'
-}
+K8S_ALERT_MAP = {'Warning': 'warning', 'Normal': 'info'}
 
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
 FACTORS = {
-    'n': float(1)/(1000*1000*1000),
-    'u': float(1)/(1000*1000),
-    'm': float(1)/1000,
+    'n': float(1) / (1000 * 1000 * 1000),
+    'u': float(1) / (1000 * 1000),
+    'm': float(1) / 1000,
     'k': 1000,
-    'M': 1000*1000,
-    'G': 1000*1000*1000,
-    'T': 1000*1000*1000*1000,
-    'P': 1000*1000*1000*1000*1000,
-    'E': 1000*1000*1000*1000*1000*1000,
+    'M': 1000 * 1000,
+    'G': 1000 * 1000 * 1000,
+    'T': 1000 * 1000 * 1000 * 1000,
+    'P': 1000 * 1000 * 1000 * 1000 * 1000,
+    'E': 1000 * 1000 * 1000 * 1000 * 1000 * 1000,
     'Ki': 1024,
-    'Mi': 1024*1024,
-    'Gi': 1024*1024*1024,
-    'Ti': 1024*1024*1024*1024,
-    'Pi': 1024*1024*1024*1024*1024,
-    'Ei': 1024*1024*1024*1024*1024*1024,
+    'Mi': 1024 * 1024,
+    'Gi': 1024 * 1024 * 1024,
+    'Ti': 1024 * 1024 * 1024 * 1024,
+    'Pi': 1024 * 1024 * 1024 * 1024 * 1024,
+    'Ei': 1024 * 1024 * 1024 * 1024 * 1024 * 1024,
 }
 
 QUANTITY_EXP = re.compile(r'[-+]?\d+[\.]?\d*[numkMGTPE]?i?')
@@ -103,10 +92,11 @@ class Kubernetes(AgentCheck):
             if self.kubeutil.left_init_retries > 0:
                 self.log.warning("Kubelet client failed to initialized for now, pausing the Kubernetes check.")
             else:
-                raise Exception('Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.')
+                raise Exception(
+                    'Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.'
+                )
 
-        if agentConfig.get('service_discovery') and \
-                agentConfig.get('service_discovery_backend') == 'docker':
+        if agentConfig.get('service_discovery') and agentConfig.get('service_discovery_backend') == 'docker':
             self._sd_backend = get_sd_backend(agentConfig)
         else:
             self._sd_backend = None
@@ -122,7 +112,9 @@ class Kubernetes(AgentCheck):
                 try:
                     self.k8s_namespace_regexp = re.compile(regexp)
                 except re.error as e:
-                    self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
+                    self.log.warning(
+                        'Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e)
+                    )
 
             self.event_retriever = None
             self._configure_event_collection(inst)
@@ -152,8 +144,12 @@ class Kubernetes(AgentCheck):
 
         except Exception as e:
             self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
-            self.service_check(service_check_base, AgentCheck.CRITICAL,
-                               message='Kubelet check %s failed: %s' % (url, str(e)), tags=instance.get('tags', []))
+            self.service_check(
+                service_check_base,
+                AgentCheck.CRITICAL,
+                message='Kubelet check %s failed: %s' % (url, str(e)),
+                tags=instance.get('tags', []),
+            )
         else:
             if is_ok:
                 self.service_check(service_check_base, AgentCheck.OK, tags=instance.get('tags', []))
@@ -161,7 +157,9 @@ class Kubernetes(AgentCheck):
                 self.service_check(service_check_base, AgentCheck.CRITICAL, tags=instance.get('tags', []))
 
     def _configure_event_collection(self, instance):
-        self._collect_events = self.kubeutil.is_leader or _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS))
+        self._collect_events = self.kubeutil.is_leader or _is_affirmative(
+            instance.get('collect_events', DEFAULT_COLLECT_EVENTS)
+        )
         if self._collect_events:
             if self.event_retriever:
                 self.event_retriever.set_kinds(None)
@@ -175,8 +173,7 @@ class Kubernetes(AgentCheck):
                 self.event_retriever.set_kinds(['Service', 'Pod'])
                 self.event_retriever.set_delay(event_delay)
             else:
-                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'],
-                                                                         delay=event_delay)
+                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'], delay=event_delay)
         else:
             self.event_retriever = None
 
@@ -187,7 +184,9 @@ class Kubernetes(AgentCheck):
                 self.log.warning("Kubelet client is not initialized, Kubernetes check is paused.")
                 return
             else:
-                raise Exception("Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.")
+                raise Exception(
+                    "Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently."
+                )
 
         # Leader election
         self.refresh_leader_status(instance)
@@ -221,10 +220,12 @@ class Kubernetes(AgentCheck):
                 if int(instance.get('port', KubeUtil.DEFAULT_CADVISOR_PORT)) > 0:
                     self._update_metrics(instance, pods_list)
             except ConnectionError:
-                self.warning('''Can't access the cAdvisor metrics, performance metrics and'''
-                             ''' limits/requests will not be collected. Please setup'''
-                             ''' your kubelet with the --cadvisor-port=4194 option, or set port to 0'''
-                             ''' in this check's configuration to disable cAdvisor lookup.''')
+                self.warning(
+                    '''Can't access the cAdvisor metrics, performance metrics and'''
+                    ''' limits/requests will not be collected. Please setup'''
+                    ''' your kubelet with the --cadvisor-port=4194 option, or set port to 0'''
+                    ''' in this check's configuration to disable cAdvisor lookup.'''
+                )
             except Exception as err:
                 self.log.warning("Error while getting performance metrics: %s" % str(err))
 
@@ -233,7 +234,7 @@ class Kubernetes(AgentCheck):
             try:
                 events = self.event_retriever.get_event_array()
                 changed_cids = self.kubeutil.process_events(events, podlist=pods_list)
-                if (changed_cids and self._sd_backend):
+                if changed_cids and self._sd_backend:
                     self._sd_backend.update_checks(changed_cids)
                 if events and self._collect_events:
                     self._update_kube_events(instance, pods_list, events)
@@ -377,16 +378,14 @@ class Kubernetes(AgentCheck):
         if subcontainer.get("spec", {}).get("has_filesystem") and stats.get('filesystem', []) != []:
             fs = stats['filesystem'][-1]
             if fs['capacity'] > 0:
-                fs_utilization = float(fs['usage'])/float(fs['capacity'])
+                fs_utilization = float(fs['usage']) / float(fs['capacity'])
                 self.publish_gauge(self, NAMESPACE + '.filesystem.usage_pct', fs_utilization, tags)
             else:
                 self.log.debug("Filesystem capacity is 0: cannot report usage metrics.")
 
         if subcontainer.get("spec", {}).get("has_network"):
             net = stats['network']
-            self.publish_rate(self, NAMESPACE + '.network_errors',
-                              sum(float(net[x]) for x in NET_ERRORS),
-                              tags)
+            self.publish_rate(self, NAMESPACE + '.network_errors', sum(float(net[x]) for x in NET_ERRORS), tags)
 
         return tags
 
@@ -527,8 +526,10 @@ class Kubernetes(AgentCheck):
 
         # handle old config value
         if 'namespace' in instance and instance.get('namespace') not in (None, 'default'):
-            self.log.warning('''The 'namespace' parameter is deprecated and will stop being supported starting '''
-                             '''from 5.13. Please use 'namespaces' and/or 'namespace_name_regexp' instead.''')
+            self.log.warning(
+                '''The 'namespace' parameter is deprecated and will stop being supported starting '''
+                '''from 5.13. Please use 'namespaces' and/or 'namespace_name_regexp' instead.'''
+            )
             k8s_namespaces.append(instance.get('namespace'))
 
         if self.k8s_namespace_regexp:

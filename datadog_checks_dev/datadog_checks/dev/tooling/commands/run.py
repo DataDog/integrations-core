@@ -9,10 +9,7 @@ from ...subprocess import run_command
 from ...utils import chdir
 
 
-@click.command(
-    context_settings=UNKNOWN_OPTIONS,
-    short_help='Run commands in the proper repo'
-)
+@click.command(context_settings=UNKNOWN_OPTIONS, short_help='Run commands in the proper repo')
 @click.argument('args', nargs=-1)
 @click.pass_context
 def run(ctx, args):

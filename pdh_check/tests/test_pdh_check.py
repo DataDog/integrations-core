@@ -18,13 +18,10 @@ INSTANCE = {
     'metrics': [
         ['File Read Operations/sec', 'pdh.system.file_read_per_sec', 'gauge'],
         ['File Write Bytes/sec', 'pdh.system.file_write_bytes_sec', 'gauge'],
-    ]
+    ],
 }
 
-INSTANCE_METRICS = [
-    'pdh.system.file_read_per_sec',
-    'pdh.system.file_write_bytes_sec',
-]
+INSTANCE_METRICS = ['pdh.system.file_read_per_sec', 'pdh.system.file_write_bytes_sec']
 
 
 @pytest.fixture
@@ -40,9 +37,7 @@ def test_basic_check(Aggregator, pdh_mocks_fixture):
     Returns the right metrics and service checks
     """
     # Set up & run the check
-    config = {
-        'instances': [INSTANCE]
-    }
+    config = {'instances': [INSTANCE]}
     initialize_pdh_tests()
     c = PDHCheck(CHECK_NAME, {}, {}, config['instances'])
     c.check(config['instances'][0])

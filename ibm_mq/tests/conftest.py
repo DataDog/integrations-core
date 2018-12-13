@@ -97,14 +97,7 @@ def spin_up_ibmmq():
     elif common.MQ_VERSION == '8':
         log_pattern = r".*QMNAME\(datadog\)\s*STATUS\(Running\).*"
 
-    env = {
-        'COMPOSE_DIR': common.COMPOSE_DIR,
-    }
+    env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
-    with docker_run(
-        common.COMPOSE_FILE_PATH,
-        env_vars=env,
-        log_patterns=log_pattern,
-        sleep=10
-    ):
+    with docker_run(common.COMPOSE_FILE_PATH, env_vars=env, log_patterns=log_pattern, sleep=10):
         yield

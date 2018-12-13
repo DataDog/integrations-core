@@ -30,14 +30,12 @@ def couchbase_service(request):
     env = os.environ
     env['CB_CONTAINER_NAME'] = CB_CONTAINER_NAME
 
-    args = [
-        'docker-compose',
-        '-f', os.path.join(HERE, 'compose', 'standalone.compose')
-    ]
+    args = ['docker-compose', '-f', os.path.join(HERE, 'compose', 'standalone.compose')]
 
     # always stop and remove the container even if there's an exception at setup
     def teardown():
         subprocess.check_call(args + ["down"], env=env)
+
     request.addfinalizer(teardown)
 
     # spin up the docker container
@@ -72,10 +70,7 @@ def get_container_ip(container_id_or_name):
     """
     Get a docker container's IP address from its id or name
     """
-    args = [
-        'docker', 'inspect',
-        '-f', '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', container_id_or_name
-    ]
+    args = ['docker', 'inspect', '-f', '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', container_id_or_name]
 
     return subprocess.check_output(args).rstrip('\r\n')
 
@@ -87,16 +82,24 @@ def setup_couchbase():
 
     # Resources used:
     #   https://developer.couchbase.com/documentation/server/5.1/install/init-setup.html
-    args = [
-        'docker', 'exec', CB_CONTAINER_NAME
-    ]
+    args = ['docker', 'exec', CB_CONTAINER_NAME]
 
     # initialize the database
     init_args = args + [
-        'couchbase-cli', 'cluster-init', '-c', 'localhost:{}'.format(PORT),
-        '--cluster-username={}'.format(USER), '--cluster-password={}'.format(PASSWORD),
-        '--services', 'data,index,fts,query',
-        '--cluster-ramsize', '256', '--cluster-index-ramsize', '256', '--cluster-fts-ramsize', '256'
+        'couchbase-cli',
+        'cluster-init',
+        '-c',
+        'localhost:{}'.format(PORT),
+        '--cluster-username={}'.format(USER),
+        '--cluster-password={}'.format(PASSWORD),
+        '--services',
+        'data,index,fts,query',
+        '--cluster-ramsize',
+        '256',
+        '--cluster-index-ramsize',
+        '256',
+        '--cluster-fts-ramsize',
+        '256',
     ]
     subprocess.check_call(init_args)
 
@@ -105,9 +108,20 @@ def setup_couchbase():
 
     # create bucket
     create_bucket_args = args + [
-        'couchbase-cli', 'bucket-create', '-c', 'localhost:{}'.format(PORT),
-        '-u', USER, '-p', PASSWORD,
-        '--bucket', BUCKET_NAME, '--bucket-type', 'couchbase', '--bucket-ramsize', '100'
+        'couchbase-cli',
+        'bucket-create',
+        '-c',
+        'localhost:{}'.format(PORT),
+        '-u',
+        USER,
+        '-p',
+        PASSWORD,
+        '--bucket',
+        BUCKET_NAME,
+        '--bucket-type',
+        'couchbase',
+        '--bucket-ramsize',
+        '100',
     ]
     subprocess.check_call(create_bucket_args)
 
@@ -119,9 +133,17 @@ def wait_for_couchbase_container(container_name):
 
     for i in xrange(15):
         status_args = [
-            'docker', 'exec', container_name,
-            'couchbase-cli', 'server-info', '-c', 'localhost:{}'.format(PORT),
-            '-u', USER, '-p', PASSWORD
+            'docker',
+            'exec',
+            container_name,
+            'couchbase-cli',
+            'server-info',
+            '-c',
+            'localhost:{}'.format(PORT),
+            '-u',
+            USER,
+            '-p',
+            PASSWORD,
         ]
 
         if subprocess.call(status_args) == 0:

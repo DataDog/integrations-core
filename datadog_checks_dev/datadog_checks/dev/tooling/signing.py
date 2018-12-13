@@ -9,6 +9,7 @@ import shutil
 # Yubikey. We do this before we load the rest of in-toto, so that this setting
 # takes effect.
 import in_toto.settings
+
 in_toto.settings.SUBPROCESS_TIMEOUT = 60
 
 from in_toto import runlib
@@ -16,9 +17,7 @@ from in_toto.gpg.constants import GPG_COMMAND
 
 from .constants import get_root
 from ..subprocess import run_command
-from ..utils import (
-    chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
-)
+from ..utils import chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
 
 LINK_DIR = '.links'
 STEP_NAME = 'tag'

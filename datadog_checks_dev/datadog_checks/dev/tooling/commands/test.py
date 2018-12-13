@@ -19,10 +19,7 @@ def display_envs(check_envs):
             echo_info('    {}'.format(e))
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Run tests'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Run tests')
 @click.argument('checks', nargs=-1)
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
@@ -54,11 +51,7 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
     testing_on_ci = running_on_ci()
 
     pytest_options = construct_pytest_options(
-        verbose=verbose,
-        enter_pdb=enter_pdb,
-        debug=debug,
-        bench=bench,
-        coverage=coverage
+        verbose=verbose, enter_pdb=enter_pdb, debug=debug, bench=bench, coverage=coverage
     )
     coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 
@@ -136,13 +129,7 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
                         abort('\nFailed!', code=result.code)
 
                     fix_coverage_report(check, 'coverage.xml')
-                    run_command([
-                        'codecov',
-                        '-X', 'gcov',
-                        '--root', root,
-                        '-F', check,
-                        '-f', 'coverage.xml'
-                    ])
+                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')

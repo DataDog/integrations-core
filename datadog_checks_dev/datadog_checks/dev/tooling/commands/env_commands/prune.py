@@ -7,10 +7,7 @@ from ..utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiti
 from ...e2e.config import get_configured_checks, get_configured_envs, remove_env_data, remove_env_root
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Remove all configuration for environments'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Remove all configuration for environments')
 @click.option('--force', '-f', is_flag=True)
 def prune(force):
     """Remove all configuration for environments."""

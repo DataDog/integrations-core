@@ -20,11 +20,9 @@ def test_check(check, aggregator, mocker):
     conn_mock.strategy.entries_from_json(os.path.join(HERE, "fixtures", "monitor.json"))
     instance = {
         "url": "fake_server",
-        "custom_queries": [{
-            "name": "stats",
-            "search_base": "cn=statistics,cn=monitor",
-            "search_filter": "(!(cn=Statistics))",
-        }]
+        "custom_queries": [
+            {"name": "stats", "search_base": "cn=statistics,cn=monitor", "search_filter": "(!(cn=Statistics))"}
+        ],
     }
 
     mocker.patch("datadog_checks.openldap.openldap.ldap3.Server", return_value=server_mock)
@@ -86,12 +84,7 @@ def test__get_tls_object(check, mocker):
     assert check._get_tls_object(None) is None
 
     # Check emission of warning, ssl validation none, and ca_certs_file
-    ssl_params = {
-        "key": None,
-        "cert": None,
-        "ca_certs": "foo",
-        "verify": False,
-    }
+    ssl_params = {"key": None, "cert": None, "ca_certs": "foo", "verify": False}
     os_mock.path.isdir.return_value = False
     os_mock.path.isfile.return_value = True
     log_mock = mocker.MagicMock()
@@ -110,12 +103,7 @@ def test__get_tls_object(check, mocker):
     # Check no warning, ssl validation required, and ca_certs_file none
     log_mock.reset_mock()
     ldap3_tls_mock.reset_mock()
-    ssl_params = {
-        "key": "foo",
-        "cert": "bar",
-        "ca_certs": None,
-        "verify": True,
-    }
+    ssl_params = {"key": "foo", "cert": "bar", "ca_certs": None, "verify": True}
     check._get_tls_object(ssl_params)
     log_mock.warning.assert_not_called()
     ldap3_tls_mock.assert_called_once_with(
@@ -130,12 +118,7 @@ def test__get_tls_object(check, mocker):
     os_mock.path.isdir.return_value = True
     os_mock.path.isfile.return_value = False
     ldap3_tls_mock.reset_mock()
-    ssl_params = {
-        "key": "foo",
-        "cert": "bar",
-        "ca_certs": "foo",
-        "verify": True,
-    }
+    ssl_params = {"key": "foo", "cert": "bar", "ca_certs": "foo", "verify": True}
     check._get_tls_object(ssl_params)
     ldap3_tls_mock.assert_called_once_with(
         local_private_key_file="foo",
@@ -149,20 +132,13 @@ def test__get_tls_object(check, mocker):
     with pytest.raises(CheckException):
         os_mock.path.isdir.return_value = False
         os_mock.path.isfile.return_value = False
-        ssl_params = {
-            "key": "foo",
-            "cert": "bar",
-            "ca_certs": "foo",
-            "verify": True,
-        }
+        ssl_params = {"key": "foo", "cert": "bar", "ca_certs": "foo", "verify": True}
         check._get_tls_object(ssl_params)
 
 
 def test__get_instance_params(check):
     # Check default values
-    instance = {
-        "url": "foo",
-    }
+    instance = {"url": "foo"}
     assert check._get_instance_params(instance) == ("foo", None, None, None, [], ["url:foo"])
 
     # Check instance with no url raises
@@ -170,11 +146,7 @@ def test__get_instance_params(check):
         check._get_instance_params({})
 
     # Check ssl_params is None with non ldaps scheme
-    instance = {
-        "url": "ldap://foo",
-        "ssl_key": "bar",
-        "ssl_cert": "baz",
-    }
+    instance = {"url": "ldap://foo", "ssl_key": "bar", "ssl_cert": "baz"}
     assert check._get_instance_params(instance) == ("ldap://foo", None, None, None, [], ["url:ldap://foo"])
 
     # Check all params ok
@@ -187,12 +159,7 @@ def test__get_instance_params(check):
     verify = False
     queries = ["query1", "query2"]
     tags = ["custom:tag"]
-    ssl_params = {
-        "key": key,
-        "cert": cert,
-        "ca_certs": ca_certs,
-        "verify": verify,
-    }
+    ssl_params = {"key": key, "cert": cert, "ca_certs": ca_certs, "verify": verify}
     instance = {
         "url": url,
         "username": user,
@@ -204,29 +171,25 @@ def test__get_instance_params(check):
         "custom_queries": queries,
         "tags": tags,
     }
-    assert check._get_instance_params(instance) == (url, user, password, ssl_params,
-                                                    queries, tags + ["url:ldaps://url"])
+    assert check._get_instance_params(instance) == (
+        url,
+        user,
+        password,
+        ssl_params,
+        queries,
+        tags + ["url:ldaps://url"],
+    )
 
     # Check ssl_params default values
     url = "ldaps://url"
-    ssl_params = {
-        "key": None,
-        "cert": None,
-        "ca_certs": None,
-        "verify": True,
-    }
-    instance = {
-        "url": url,
-    }
+    ssl_params = {"key": None, "cert": None, "ca_certs": None, "verify": True}
+    instance = {"url": url}
     assert check._get_instance_params(instance) == (url, None, None, ssl_params, [], ["url:ldaps://url"])
 
 
 def test__perform_custom_queries(check, mocker):
     # Check name mandatory
-    instance = {
-        "url": "foo",
-        "custom_queries": [{}]
-    }
+    instance = {"url": "foo", "custom_queries": [{}]}
     log_mock = mocker.MagicMock()
     check.log = log_mock
     conn_mock = mocker.MagicMock()
@@ -236,10 +199,7 @@ def test__perform_custom_queries(check, mocker):
     log_mock.error.assert_called_once()  # Error logged
 
     # Check search_base mandatory
-    instance = {
-        "url": "foo",
-        "custom_queries": [{"name": "foo"}]
-    }
+    instance = {"url": "foo", "custom_queries": [{"name": "foo"}]}
     log_mock.reset_mock()
     _, _, _, _, queries, tags = check._get_instance_params(instance)
     check._perform_custom_queries(conn_mock, queries, tags, instance)
@@ -247,10 +207,7 @@ def test__perform_custom_queries(check, mocker):
     log_mock.error.assert_called_once()  # Error logged
 
     # Check search_filter mandatory
-    instance = {
-        "url": "foo",
-        "custom_queries": [{"name": "foo", "search_base": "bar"}]
-    }
+    instance = {"url": "foo", "custom_queries": [{"name": "foo", "search_base": "bar"}]}
     log_mock.reset_mock()
     _, _, _, _, queries, tags = check._get_instance_params(instance)
     check._perform_custom_queries(conn_mock, queries, tags, instance)
@@ -262,7 +219,7 @@ def test__perform_custom_queries(check, mocker):
         "url": "url",
         "username": "user",
         "password": "pass",
-        "custom_queries": [{"name": "name", "search_base": "base", "search_filter": "filter"}]
+        "custom_queries": [{"name": "name", "search_base": "base", "search_filter": "filter"}],
     }
     log_mock.reset_mock()
     _, _, _, _, queries, tags = check._get_instance_params(instance)
@@ -276,10 +233,16 @@ def test__perform_custom_queries(check, mocker):
         "url": "url",
         "username": "user",
         "password": "pass",
-        "custom_queries": [{
-            "name": "name", "search_base": "base", "search_filter": "filter",
-            "username": "user2", "password": "pass2", "attributes": ["*"]
-        }]
+        "custom_queries": [
+            {
+                "name": "name",
+                "search_base": "base",
+                "search_filter": "filter",
+                "username": "user2",
+                "password": "pass2",
+                "attributes": ["*"],
+            }
+        ],
     }
     conn_mock.reset_mock()
     _, _, _, _, queries, tags = check._get_instance_params(instance)

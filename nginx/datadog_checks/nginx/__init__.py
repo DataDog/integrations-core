@@ -4,8 +4,4 @@
 from .__about__ import __version__
 from .nginx import Nginx, VTS_METRIC_MAP
 
-__all__ = [
-    '__version__',
-    'Nginx',
-    'VTS_METRIC_MAP',
-]
+__all__ = ['__version__', 'Nginx', 'VTS_METRIC_MAP']

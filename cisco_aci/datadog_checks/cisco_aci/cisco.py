@@ -30,7 +30,6 @@ SERVICE_CHECK_NAME = 'cisco_aci.can_connect'
 
 
 class CiscoACICheck(AgentCheck):
-
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.tenant_metrics = aci_metrics.make_tenant_metrics()
@@ -74,10 +73,18 @@ class CiscoACICheck(AgentCheck):
         if instance_hash in self._api_cache:
             api = self._api_cache.get(instance_hash)
         else:
-            api = Api(aci_urls, username,
-                      password=pwd, cert_name=cert_name, cert_key=cert_key,
-                      verify=ssl_verify, timeout=timeout, log=self.log,
-                      appcenter=appcenter, cert_key_password=cert_key_password)
+            api = Api(
+                aci_urls,
+                username,
+                password=pwd,
+                cert_name=cert_name,
+                cert_key=cert_key,
+                verify=ssl_verify,
+                timeout=timeout,
+                log=self.log,
+                appcenter=appcenter,
+                cert_key_password=cert_key_password,
+            )
             self._api_cache[instance_hash] = api
 
         service_check_tags = []
@@ -90,10 +97,12 @@ class CiscoACICheck(AgentCheck):
             api.login()
         except Exception as e:
             self.log.error("Cannot login to the Cisco ACI: {}".format(e))
-            self.service_check(SERVICE_CHECK_NAME,
-                               AgentCheck.CRITICAL,
-                               message="aci login returned a status of {}".format(e),
-                               tags=service_check_tags)
+            self.service_check(
+                SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="aci login returned a status of {}".format(e),
+                tags=service_check_tags,
+            )
             raise
 
         self.tagger.api = api
@@ -103,10 +112,12 @@ class CiscoACICheck(AgentCheck):
             tenant.collect()
         except Exception as e:
             self.log.error('tenant collection failed: {}'.format(e))
-            self.service_check(SERVICE_CHECK_NAME,
-                               AgentCheck.CRITICAL,
-                               message="aci tenant operations failed, returning a status of {}".format(e),
-                               tags=service_check_tags)
+            self.service_check(
+                SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="aci tenant operations failed, returning a status of {}".format(e),
+                tags=service_check_tags,
+            )
             api.close()
             raise
 
@@ -115,10 +126,12 @@ class CiscoACICheck(AgentCheck):
             fabric.collect()
         except Exception as e:
             self.log.error('fabric collection failed: {}'.format(e))
-            self.service_check(SERVICE_CHECK_NAME,
-                               AgentCheck.CRITICAL,
-                               message="aci fabric operations failed, returning a status of {}".format(e),
-                               tags=service_check_tags)
+            self.service_check(
+                SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="aci fabric operations failed, returning a status of {}".format(e),
+                tags=service_check_tags,
+            )
             api.close()
             raise
 
@@ -127,16 +140,16 @@ class CiscoACICheck(AgentCheck):
             capacity.collect()
         except Exception as e:
             self.log.error('capacity collection failed: {}'.format(e))
-            self.service_check(SERVICE_CHECK_NAME,
-                               AgentCheck.CRITICAL,
-                               message="aci capacity operations failed, returning a status of {}".format(e),
-                               tags=service_check_tags)
+            self.service_check(
+                SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="aci capacity operations failed, returning a status of {}".format(e),
+                tags=service_check_tags,
+            )
             api.close()
             raise
 
-        self.service_check(SERVICE_CHECK_NAME,
-                           AgentCheck.OK,
-                           tags=service_check_tags)
+        self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         if set_external_tags:
             set_external_tags(self.get_external_host_tags())

@@ -48,10 +48,7 @@ def ping_url_tag_fastcgi():
 
 @pytest.fixture(scope='session')
 def php_fpm_instance():
-    with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yml'),
-        endpoints='http://{}:8080'.format(HOST)
-    ):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), endpoints='http://{}:8080'.format(HOST)):
         yield
 
 
@@ -60,7 +57,8 @@ def payload():
     """
     example payload from /status?json
     """
-    return json.loads("""{
+    return json.loads(
+        """{
         "pool":"www",
         "process manager":"dynamic",
         "start time":1530722898,
@@ -75,4 +73,5 @@ def payload():
         "max active processes":1,
         "max children reached":0,
         "slow requests":0
-    }""")
+    }"""
+    )

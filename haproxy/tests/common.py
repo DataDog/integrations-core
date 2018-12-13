@@ -7,13 +7,10 @@ AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:b'], 4),
     (['status:unavailable', 'service:b'], 2),
     (['status:available', 'service:be_edge_http_sre-production_elk-kibana'], 1),
-    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2)
+    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2),
 )
 
-AGG_STATUSES = (
-    (['status:available'], 6),
-    (['status:unavailable'], 4)
-)
+AGG_STATUSES = ((['status:available'], 6), (['status:unavailable'], 4))
 
 CHECK_NAME = 'haproxy'
 
@@ -29,9 +26,7 @@ STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
 
-CONFIG_UNIXSOCKET = {
-    'collect_aggregates_only': False,
-}
+CONFIG_UNIXSOCKET = {'collect_aggregates_only': False}
 
 
 CHECK_CONFIG = {
@@ -44,10 +39,7 @@ CHECK_CONFIG = {
     'active_tag': True,
 }
 
-CHECK_CONFIG_OPEN = {
-    'url': STATS_URL_OPEN,
-    'collect_aggregates_only': False,
-}
+CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': False}
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
 
@@ -59,14 +51,9 @@ FRONTEND_CHECK_GAUGES = [
     'haproxy.frontend.session.pct',
 ]
 
-FRONTEND_CHECK_GAUGES_POST_1_4 = [
-    'haproxy.frontend.requests.rate',
-]
+FRONTEND_CHECK_GAUGES_POST_1_4 = ['haproxy.frontend.requests.rate']
 
-BACKEND_CHECK_GAUGES = [
-    'haproxy.backend.queue.current',
-    'haproxy.backend.session.current',
-]
+BACKEND_CHECK_GAUGES = ['haproxy.backend.queue.current', 'haproxy.backend.session.current']
 
 BACKEND_CHECK_GAUGES_POST_1_5 = [
     'haproxy.backend.queue.time',
@@ -113,8 +100,6 @@ BACKEND_CHECK_RATES_POST_1_4 = [
     'haproxy.backend.response.other',
 ]
 
-BACKEND_CHECK_GAUGES_POST_1_7 = [
-    'haproxy.backend.uptime'
-]
+BACKEND_CHECK_GAUGES_POST_1_7 = ['haproxy.backend.uptime']
 
 SERVICE_CHECK_NAME = 'haproxy.backend_up'

@@ -19,6 +19,7 @@ class Kong(AgentCheck):
     METRIC_PREFIX = 'kong.'
 
     """ collects metrics for Kong """
+
     def check(self, instance):
         metrics = self._fetch_data(instance)
         for row in metrics:
@@ -47,16 +48,13 @@ class Kong(AgentCheck):
             self.log.debug(u"Kong status `response`: {0}".format(response))
             response.raise_for_status()
         except Exception:
-            self.service_check(service_check_name, Kong.CRITICAL,
-                               tags=service_check_tags)
+            self.service_check(service_check_name, Kong.CRITICAL, tags=service_check_tags)
             raise
         else:
             if response.status_code == 200:
-                self.service_check(service_check_name, Kong.OK,
-                                   tags=service_check_tags)
+                self.service_check(service_check_name, Kong.OK, tags=service_check_tags)
             else:
-                self.service_check(service_check_name, Kong.CRITICAL,
-                                   tags=service_check_tags)
+                self.service_check(service_check_name, Kong.CRITICAL, tags=service_check_tags)
 
         return self._parse_json(response.content, tags)
 

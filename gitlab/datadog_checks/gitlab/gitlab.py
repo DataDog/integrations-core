@@ -77,13 +77,15 @@ class GitlabCheck(OpenMetricsBaseCheck):
         # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
         gitlab_instance['prometheus_url'] = instance.get('prometheus_endpoint')
 
-        gitlab_instance.update({
-            'namespace': 'gitlab',
-            'metrics': allowed_metrics,
-            # Defaults that were set when gitlab was based on PrometheusCheck
-            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
-            'health_service_check': instance.get('health_service_check', False)
-        })
+        gitlab_instance.update(
+            {
+                'namespace': 'gitlab',
+                'metrics': allowed_metrics,
+                # Defaults that were set when gitlab was based on PrometheusCheck
+                'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+                'health_service_check': instance.get('health_service_check', False),
+            }
+        )
 
         return gitlab_instance
 

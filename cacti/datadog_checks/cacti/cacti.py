@@ -180,8 +180,7 @@ class Cacti(AgentCheck):
         and_parameters = " OR ".join(["hsc.field_name = '%s'" % field_name for field_name in field_names])
 
         # Check for the existence of the `host_snmp_cache` table
-        rrd_query = (
-            """
+        rrd_query = """
             SELECT
                 h.hostname as hostname,
                 hsc.field_value as device_name,
@@ -193,7 +192,8 @@ class Cacti(AgentCheck):
                     AND dl.snmp_index = hsc.snmp_index
             WHERE dt.data_source_path IS NOT NULL
             AND dt.data_source_path != ''
-            AND ({} OR hsc.field_name is NULL) """.format(and_parameters)
+            AND ({} OR hsc.field_name is NULL) """.format(
+            and_parameters
         )
 
         c.execute(rrd_query)

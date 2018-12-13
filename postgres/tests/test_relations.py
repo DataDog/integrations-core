@@ -14,7 +14,6 @@ RELATION_METRICS = [
     'postgresql.rows_hot_updated',
     'postgresql.live_rows',
     'postgresql.dead_rows',
-
     'postgresql.heap_blocks_read',
     'postgresql.heap_blocks_hit',
     'postgresql.toast_blocks_read',
@@ -23,11 +22,7 @@ RELATION_METRICS = [
     'postgresql.toast_index_blocks_hit',
 ]
 
-RELATION_SIZE_METRICS = [
-    'postgresql.table_size',
-    'postgresql.total_size',
-    'postgresql.index_size',
-]
+RELATION_SIZE_METRICS = ['postgresql.table_size', 'postgresql.total_size', 'postgresql.index_size']
 
 RELATION_INDEX_METRICS = [
     'postgresql.index_scans',
@@ -37,11 +32,7 @@ RELATION_INDEX_METRICS = [
     'postgresql.index_blocks_hit',
 ]
 
-IDX_METRICS = [
-    'postgresql.index_scans',
-    'postgresql.index_rows_read',
-    'postgresql.index_rows_fetched',
-]
+IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgresql.index_rows_fetched']
 
 
 @pytest.mark.integration

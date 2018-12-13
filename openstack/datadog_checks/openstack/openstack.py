@@ -757,7 +757,7 @@ class OpenStackCheck(AgentCheck):
     def _parse_uptime_string(self, uptime):
         """ Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n' """
         uptime = uptime.strip()
-        load_averages = uptime[uptime.find('load average:'):].split(':')[1].split(',')
+        load_averages = uptime[uptime.find('load average:') :].split(':')[1].split(',')
         uptime_sec = uptime.split(',')[0]
 
         return {'loads': map(float, load_averages), 'uptime_sec': uptime_sec}
@@ -1235,7 +1235,7 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
                 servers = self.get_servers_managed_by_hypervisor(
-                    i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
+                    i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period
                 )
 
                 host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
@@ -1382,8 +1382,9 @@ class OpenStackCheck(AgentCheck):
 
     def get_servers_managed_by_hypervisor(self, i_key, collect_all_tenants, split_hostname_on_first_period=False):
         servers = self.get_all_servers(
-            i_key, collect_all_tenants,
-            filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
+            i_key,
+            collect_all_tenants,
+            filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period),
         )
         if self.exclude_server_id_rules:
             # Filter out excluded servers

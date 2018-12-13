@@ -4,9 +4,7 @@
 
 from datadog_checks.kyototycoon import KyotoTycoonCheck
 
-from .common import (
-    URL
-)
+from .common import URL
 
 
 def test_check(aggregator, kyototycoon):
@@ -17,10 +15,7 @@ def test_check(aggregator, kyototycoon):
 
     TAGS = ['optional:tag1']
 
-    instance = {
-        'report_url': '{0}/rpc/report'.format(URL),
-        'tags': TAGS
-    }
+    instance = {'report_url': '{0}/rpc/report'.format(URL), 'tags': TAGS}
 
     # run the check
     kt.check(instance)
@@ -46,7 +41,6 @@ def test_check(aggregator, kyototycoon):
         aggregator.assert_metric('kyototycoon.{0}_per_s'.format(mname), tags=TAGS, count=1)
 
     # service check
-    aggregator.assert_service_check(
-        KyotoTycoonCheck.SERVICE_CHECK_NAME, status=KyotoTycoonCheck.OK, tags=TAGS, count=1)
+    aggregator.assert_service_check(KyotoTycoonCheck.SERVICE_CHECK_NAME, status=KyotoTycoonCheck.OK, tags=TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()

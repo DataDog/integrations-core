@@ -17,12 +17,10 @@ def instance():
         "url": "ldap://{}:3890".format(get_docker_hostname()),
         "username": "cn=monitor,dc=example,dc=org",
         "password": "monitor",
-        "custom_queries": [{
-            "name": "stats",
-            "search_base": "cn=statistics,cn=monitor",
-            "search_filter": "(!(cn=Statistics))",
-        }],
-        "tags": ["test:integration"]
+        "custom_queries": [
+            {"name": "stats", "search_base": "cn=statistics,cn=monitor", "search_filter": "(!(cn=Statistics))"}
+        ],
+        "tags": ["test:integration"],
     }
 
 

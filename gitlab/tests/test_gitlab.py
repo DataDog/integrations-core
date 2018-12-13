@@ -48,5 +48,5 @@ def test_connection_failure(aggregator):
         'gitlab.{}'.format(GitlabCheck.ALLOWED_SERVICE_CHECKS[0]),
         status=GitlabCheck.CRITICAL,
         tags=['gitlab_host:{}'.format(HOST), 'gitlab_port:1234'] + CUSTOM_TAGS,
-        count=1
+        count=1,
     )

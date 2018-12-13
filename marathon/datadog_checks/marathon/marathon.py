@@ -27,7 +27,7 @@ class Marathon(AgentCheck):
         'tasksRunning',
         'tasksStaged',
         'tasksHealthy',
-        'tasksUnhealthy'
+        'tasksUnhealthy',
     ]
 
     QUEUE_METRICS = {
@@ -38,15 +38,16 @@ class Marathon(AgentCheck):
             ('unusedOffersCount', 'offers.unused'),
             ('rejectSummaryLastOffers', 'offers.reject.last'),
             ('rejectSummaryLaunchAttempt', 'offers.reject.launch'),
-        ]
+        ],
     }
 
     QUEUE_PREFIX = 'marathon.queue'
 
     def check(self, instance):
         try:
-            (url, auth, acs_url, ssl_verify, group,
-                instance_tags, label_tags, timeout) = self.get_instance_config(instance)
+            (url, auth, acs_url, ssl_verify, group, instance_tags, label_tags, timeout) = self.get_instance_config(
+                instance
+            )
         except Exception as e:
             self.log.error("Invalid instance configuration.")
             raise e
@@ -61,31 +62,26 @@ class Marathon(AgentCheck):
             tags = []
 
         try:
-            auth_body = {
-                'uid': auth[0],
-                'password': auth[1]
-            }
+            auth_body = {'uid': auth[0], 'password': auth[1]}
             r = requests.post(urljoin(acs_url, "acs/api/v1/auth/login"), json=auth_body, verify=False)
             r.raise_for_status()
             token = r.json()['token']
             self.ACS_TOKEN = token
             return token
         except requests.exceptions.HTTPError:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message="acs auth url {} returned a status of {}".format(acs_url, r.status_code),
-                               tags=["url:{}".format(acs_url)] + tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="acs auth url {} returned a status of {}".format(acs_url, r.status_code),
+                tags=["url:{}".format(acs_url)] + tags,
+            )
             raise Exception("Got %s when hitting %s" % (r.status_code, acs_url))
 
     def get_json(self, url, timeout, auth, acs_url, verify, tags=None):
         if tags is None:
             tags = []
 
-        params = {
-            'timeout': timeout,
-            'headers': {},
-            'auth': auth,
-            'verify': verify
-        }
+        params = {'timeout': timeout, 'headers': {}, 'auth': auth, 'verify': verify}
         if acs_url:
             # If the ACS token has not been set, go get it
             if not self.ACS_TOKEN:
@@ -102,26 +98,34 @@ class Marathon(AgentCheck):
             r.raise_for_status()
         except requests.exceptions.Timeout:
             # If there's a timeout
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message="{} timed out after {} seconds.".format(url, timeout),
-                               tags=["url:{}".format(url)] + tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="{} timed out after {} seconds.".format(url, timeout),
+                tags=["url:{}".format(url)] + tags,
+            )
             raise Exception("Timeout when hitting {}".format(url))
 
         except requests.exceptions.HTTPError:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message="{} returned a status of {}".format(url, r.status_code),
-                               tags=["url:{}".format(url)] + tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="{} returned a status of {}".format(url, r.status_code),
+                tags=["url:{}".format(url)] + tags,
+            )
             raise Exception("Got {} when hitting {}".format(r.status_code, url))
 
         except requests.exceptions.ConnectionError:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message="{} Connection Refused.".format(url),
-                               tags=["url:{}".format(url)] + tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="{} Connection Refused.".format(url),
+                tags=["url:{}".format(url)] + tags,
+            )
             raise Exception("Connection refused when hitting {}".format(url))
 
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=["url:{}".format(url)] + tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=["url:{}".format(url)] + tags)
 
         return r.json()
 
@@ -162,8 +166,9 @@ class Marathon(AgentCheck):
             # http://mesosphere.github.io/marathon/1.4/docs/rest-api.html#get-v2apps
             marathon_path = urljoin(url, "v2/apps?embed=apps.counts")
         else:
-            marathon_path = urljoin(url, "v2/groups/{}?embed=group.groups".format(group) +
-                                    "&embed=group.apps&embed=group.apps.counts")
+            marathon_path = urljoin(
+                url, "v2/groups/{}?embed=group.groups".format(group) + "&embed=group.apps&embed=group.apps.counts"
+            )
 
         self.apps_response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify, tags)
         return self.apps_response
@@ -254,8 +259,9 @@ class Marathon(AgentCheck):
 
         return basic_tags
 
-    def ensure_queue_count(self, queued, url, timeout, auth, acs_url, ssl_verify,
-                           tags=None, label_tags=None, group=None):
+    def ensure_queue_count(
+        self, queued, url, timeout, auth, acs_url, ssl_verify, tags=None, label_tags=None, group=None
+    ):
         """
         Ensure `marathon.queue.count` is reported as zero for apps without queued instances.
         """

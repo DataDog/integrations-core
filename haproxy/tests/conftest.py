@@ -17,6 +17,7 @@ log = logging.getLogger('test_haproxy')
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -70,10 +71,7 @@ def haproxy_container():
         env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
         env['HAPROXY_SOCKET_DIR'] = host_socket_dir
 
-        args = [
-            "docker-compose",
-            "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
-        ]
+        args = ["docker-compose", "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')]
         subprocess.check_call(args + ["down"], env=env)
         subprocess.check_call(args + ["up", "-d"], env=env)
         wait_for_haproxy()

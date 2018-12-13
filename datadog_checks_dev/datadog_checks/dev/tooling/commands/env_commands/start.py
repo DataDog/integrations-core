@@ -6,28 +6,25 @@ import os
 import click
 import pyperclip
 
-from ..utils import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-)
+from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 from ...e2e import derive_interface, start_environment, stop_environment
 from ...test import get_available_tox_envs
 from ...utils import get_tox_file
 from ....utils import dir_exists, file_exists, path_join
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Start an environment'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Start an environment')
 @click.argument('check')
 @click.argument('env')
 @click.option(
-    '--agent', '-a', default='6',
+    '--agent',
+    '-a',
+    default='6',
     help=(
         'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
         'Docker environments you can use an integer corresponding to fields in the '
         'config (agent5, agent6, etc.)'
-    )
+    ),
 )
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')

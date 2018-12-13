@@ -10,7 +10,12 @@ import pytest
 import requests
 
 from .common import (
-    HERE, GITLAB_URL, PROMETHEUS_ENDPOINT, GITLAB_TEST_PASSWORD, GITLAB_LOCAL_PORT, GITLAB_LOCAL_PROMETHEUS_PORT
+    HERE,
+    GITLAB_URL,
+    PROMETHEUS_ENDPOINT,
+    GITLAB_TEST_PASSWORD,
+    GITLAB_LOCAL_PORT,
+    GITLAB_LOCAL_PROMETHEUS_PORT,
 )
 
 
@@ -34,14 +39,12 @@ def gitlab_service(request):
     env['GITLAB_LOCAL_PORT'] = str(GITLAB_LOCAL_PORT)
     env['GITLAB_LOCAL_PROMETHEUS_PORT'] = str(GITLAB_LOCAL_PROMETHEUS_PORT)
 
-    args = [
-        'docker-compose',
-        '-f', os.path.join(HERE, 'compose', 'docker-compose.yml')
-    ]
+    args = ['docker-compose', '-f', os.path.join(HERE, 'compose', 'docker-compose.yml')]
 
     # always stop and remove the container even if there's an exception at setup
     def teardown():
         subprocess.check_call(args + ["down"], env=env)
+
     request.addfinalizer(teardown)
 
     # spin up the docker container

@@ -9,9 +9,7 @@ from time import sleep
 import pytest
 import requests
 
-from .common import (
-    HERE, GITLAB_TEST_TOKEN, GITLAB_RUNNER_URL, GITLAB_LOCAL_RUNNER_PORT, GITLAB_LOCAL_MASTER_PORT
-)
+from .common import HERE, GITLAB_TEST_TOKEN, GITLAB_RUNNER_URL, GITLAB_LOCAL_RUNNER_PORT, GITLAB_LOCAL_MASTER_PORT
 
 
 @pytest.fixture
@@ -34,14 +32,12 @@ def gitlab_runner_service(request):
     env['GITLAB_LOCAL_MASTER_PORT'] = str(GITLAB_LOCAL_MASTER_PORT)
     env['GITLAB_LOCAL_RUNNER_PORT'] = str(GITLAB_LOCAL_RUNNER_PORT)
 
-    args = [
-        'docker-compose',
-        '-f', os.path.join(HERE, 'compose', 'docker-compose.yml')
-    ]
+    args = ['docker-compose', '-f', os.path.join(HERE, 'compose', 'docker-compose.yml')]
 
     # always stop and remove the container even if there's an exception at setup
     def teardown():
         subprocess.check_call(args + ["down"], env=env)
+
     request.addfinalizer(teardown)
 
     # spin up the docker container

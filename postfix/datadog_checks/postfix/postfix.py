@@ -157,12 +157,17 @@ class PostfixCheck(AgentCheck):
 
         self.log.debug('Postfix Version: %s' % postfix_version)
 
-        self.gauge('postfix.queue.size', active_count,
-                   tags=tags + ['queue:active', 'instance:{}'.format(postfix_config_dir)])
-        self.gauge('postfix.queue.size', hold_count,
-                   tags=tags + ['queue:hold', 'instance:{}'.format(postfix_config_dir)])
-        self.gauge('postfix.queue.size', deferred_count,
-                   tags=tags + ['queue:deferred', 'instance:{}'.format(postfix_config_dir)])
+        self.gauge(
+            'postfix.queue.size', active_count, tags=tags + ['queue:active', 'instance:{}'.format(postfix_config_dir)]
+        )
+        self.gauge(
+            'postfix.queue.size', hold_count, tags=tags + ['queue:hold', 'instance:{}'.format(postfix_config_dir)]
+        )
+        self.gauge(
+            'postfix.queue.size',
+            deferred_count,
+            tags=tags + ['queue:deferred', 'instance:{}'.format(postfix_config_dir)],
+        )
 
     def _get_queue_count(self, directory, queues, tags):
         for queue in queues:
@@ -188,8 +193,11 @@ class PostfixCheck(AgentCheck):
                     raise Exception('The dd-agent user does not have sudo access')
 
             # emit an individually tagged metric
-            self.gauge('postfix.queue.size', count,
-                       tags=tags + ['queue:{}'.format(queue), 'instance:{}'.format(os.path.basename(directory))])
+            self.gauge(
+                'postfix.queue.size',
+                count,
+                tags=tags + ['queue:{}'.format(queue), 'instance:{}'.format(os.path.basename(directory))],
+            )
             # these can be retrieved in a single graph statement
             # for example:
             #     sum:postfix.queue.size{instance:postfix-2,queue:incoming,host:hostname.domain.tld}

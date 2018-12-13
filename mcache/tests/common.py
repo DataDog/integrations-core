@@ -30,7 +30,7 @@ GAUGES = [
     # Computed metrics
     "memcache.get_hit_percent",
     "memcache.fill_percent",
-    "memcache.avg_item_size"
+    "memcache.avg_item_size",
 ]
 
 RATES = [
@@ -50,7 +50,7 @@ RATES = [
     "memcache.cas_hits_rate",
     "memcache.cas_badval_rate",
     "memcache.total_connections_rate",
-    "memcache.listen_disabled_num_rate"
+    "memcache.listen_disabled_num_rate",
 ]
 
 # Not all rates/gauges reported by memcached test instance.
@@ -103,7 +103,4 @@ SLABS_GAUGES = [
     "memcache.slabs.mem_requested",
 ]
 
-SLABS_AGGREGATES = [
-    "memcache.slabs.active_slabs",
-    "memcache.slabs.total_malloced",
-]
+SLABS_AGGREGATES = ["memcache.slabs.active_slabs", "memcache.slabs.total_malloced"]

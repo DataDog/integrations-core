@@ -45,8 +45,7 @@ def test_type_support(aggregator, check):
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -70,8 +69,7 @@ def test_snmpget(aggregator, check):
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -107,8 +105,7 @@ def test_custom_mib(aggregator):
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
 
 def test_scalar(aggregator, check):
@@ -125,10 +122,7 @@ def test_scalar(aggregator, check):
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -159,10 +153,7 @@ def test_enforce_constraint(aggregator, check):
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -186,10 +177,7 @@ def test_table(aggregator, check):
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -210,7 +198,7 @@ def test_table_v3_MD5_DES(aggregator, check):
         auth=common.AUTH_PROTOCOLS[auth],
         auth_key=common.AUTH_KEY,
         priv=common.PRIV_PROTOCOLS[priv],
-        priv_key=common.PRIV_KEY
+        priv_key=common.PRIV_KEY,
     )
 
     check.check(instance)
@@ -226,10 +214,7 @@ def test_table_v3_MD5_DES(aggregator, check):
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -250,7 +235,7 @@ def test_table_v3_MD5_AES(aggregator, check):
         auth=common.AUTH_PROTOCOLS[auth],
         auth_key=common.AUTH_KEY,
         priv=common.PRIV_PROTOCOLS[priv],
-        priv_key=common.PRIV_KEY
+        priv_key=common.PRIV_KEY,
     )
 
     check.check(instance)
@@ -266,10 +251,7 @@ def test_table_v3_MD5_AES(aggregator, check):
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -289,7 +271,7 @@ def test_table_v3_SHA_DES(aggregator, check):
         auth=common.AUTH_PROTOCOLS[auth],
         auth_key=common.AUTH_KEY,
         priv=common.PRIV_PROTOCOLS[priv],
-        priv_key=common.PRIV_KEY
+        priv_key=common.PRIV_KEY,
     )
 
     check.check(instance)
@@ -305,10 +287,7 @@ def test_table_v3_SHA_DES(aggregator, check):
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -328,7 +307,7 @@ def test_table_v3_SHA_AES(aggregator, check):
         auth=common.AUTH_PROTOCOLS[auth],
         auth_key=common.AUTH_KEY,
         priv=common.PRIV_PROTOCOLS[priv],
-        priv_key=common.PRIV_KEY
+        priv_key=common.PRIV_KEY,
     )
 
     check.check(instance)
@@ -344,10 +323,7 @@ def test_table_v3_SHA_AES(aggregator, check):
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -361,10 +337,7 @@ def test_invalid_metric(aggregator, check):
     check.check(instance)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.CRITICAL,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
 
 
 def test_forcedtype_metric(aggregator, check):
@@ -378,17 +351,12 @@ def test_forcedtype_metric(aggregator, check):
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
         if metric.get('forced_type') == 'counter':
             # rate will be flushed as a gauge, so count should be 0.
-            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS,
-                                     count=0, metric_type=aggregator.GAUGE)
+            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0, metric_type=aggregator.GAUGE)
         elif metric.get('forced_type') == 'gauge':
-            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS,
-                                     at_least=1, metric_type=aggregator.GAUGE)
+            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -403,10 +371,7 @@ def test_invalid_forcedtype_metric(aggregator, check):
     check.check(instance)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.CRITICAL,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
 
 
 def test_scalar_with_tags(aggregator, check):
@@ -424,10 +389,7 @@ def test_scalar_with_tags(aggregator, check):
         aggregator.assert_metric(metric_name, tags=tags, count=1)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.OK,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
 
@@ -444,9 +406,6 @@ def test_network_failure(aggregator, check):
     check.check(instance)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check",
-                                    status=SnmpCheck.CRITICAL,
-                                    tags=common.CHECK_TAGS,
-                                    at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()

@@ -34,24 +34,23 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/leader':
-                return MockResponse({
-                    'ha_enabled': False,
-                    'is_self': True,
-                    'leader_address': '',
-                    'leader_cluster_address': ''
-                })
+                return MockResponse(
+                    {'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                )
             elif url == config['api_url'] + '/sys/health':
-                return MockResponse({
-                    'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
-                    'cluster_name': 'vault-cluster-f5f44063',
-                    'initialized': True,
-                    'replication_dr_mode': 'disabled',
-                    'replication_performance_mode': 'disabled',
-                    'sealed': False,
-                    'server_time_utc': 1529357080,
-                    'standby': False,
-                    'version': '0.10.2'
-                })
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': True,
+                        'replication_dr_mode': 'disabled',
+                        'replication_performance_mode': 'disabled',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': False,
+                        'version': '0.10.2',
+                    }
+                )
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
@@ -61,14 +60,9 @@ class TestVault:
             'instance:foobar',
             'is_leader:true',
             'cluster_name:vault-cluster-f5f44063',
-            'vault_version:0.10.2'
+            'vault_version:0.10.2',
         ]
-        aggregator.assert_service_check(
-            Vault.SERVICE_CHECK_CONNECT,
-            status=Vault.OK,
-            tags=expected_tags,
-            count=1
-        )
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, tags=expected_tags, count=1)
 
     def test_service_check_connect_fail(self, aggregator):
         instance = INSTANCES['bad_url']
@@ -76,10 +70,7 @@ class TestVault:
         c.check(instance)
 
         aggregator.assert_service_check(
-            Vault.SERVICE_CHECK_CONNECT,
-            status=Vault.CRITICAL,
-            tags=['instance:foobar'],
-            count=1
+            Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=['instance:foobar'], count=1
         )
 
     def test_service_check_unsealed_ok(self, aggregator):
@@ -100,24 +91,23 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/leader':
-                return MockResponse({
-                    'ha_enabled': False,
-                    'is_self': True,
-                    'leader_address': '',
-                    'leader_cluster_address': ''
-                })
+                return MockResponse(
+                    {'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                )
             elif url == config['api_url'] + '/sys/health':
-                return MockResponse({
-                    'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
-                    'cluster_name': 'vault-cluster-f5f44063',
-                    'initialized': True,
-                    'replication_dr_mode': 'disabled',
-                    'replication_performance_mode': 'disabled',
-                    'sealed': False,
-                    'server_time_utc': 1529357080,
-                    'standby': False,
-                    'version': '0.10.2'
-                })
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': True,
+                        'replication_dr_mode': 'disabled',
+                        'replication_performance_mode': 'disabled',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': False,
+                        'version': '0.10.2',
+                    }
+                )
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
@@ -127,14 +117,9 @@ class TestVault:
             'instance:foobar',
             'is_leader:true',
             'cluster_name:vault-cluster-f5f44063',
-            'vault_version:0.10.2'
+            'vault_version:0.10.2',
         ]
-        aggregator.assert_service_check(
-            Vault.SERVICE_CHECK_UNSEALED,
-            status=Vault.OK,
-            tags=expected_tags,
-            count=1
-        )
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.OK, tags=expected_tags, count=1)
 
     def test_service_check_unsealed_fail(self, aggregator):
         instance = INSTANCES['main']
@@ -147,17 +132,19 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/health':
-                return MockResponse({
-                    'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
-                    'cluster_name': 'vault-cluster-f5f44063',
-                    'initialized': False,
-                    'replication_dr_mode': 'disabled',
-                    'replication_performance_mode': 'disabled',
-                    'sealed': True,
-                    'server_time_utc': 1529357080,
-                    'standby': False,
-                    'version': '0.10.2'
-                })
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': False,
+                        'replication_dr_mode': 'disabled',
+                        'replication_performance_mode': 'disabled',
+                        'sealed': True,
+                        'server_time_utc': 1529357080,
+                        'standby': False,
+                        'version': '0.10.2',
+                    }
+                )
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
@@ -183,24 +170,23 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/leader':
-                return MockResponse({
-                    'ha_enabled': False,
-                    'is_self': True,
-                    'leader_address': '',
-                    'leader_cluster_address': ''
-                })
+                return MockResponse(
+                    {'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                )
             elif url == config['api_url'] + '/sys/health':
-                return MockResponse({
-                    'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
-                    'cluster_name': 'vault-cluster-f5f44063',
-                    'initialized': True,
-                    'replication_dr_mode': 'disabled',
-                    'replication_performance_mode': 'disabled',
-                    'sealed': False,
-                    'server_time_utc': 1529357080,
-                    'standby': False,
-                    'version': '0.10.2'
-                })
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': True,
+                        'replication_dr_mode': 'disabled',
+                        'replication_performance_mode': 'disabled',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': False,
+                        'version': '0.10.2',
+                    }
+                )
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
@@ -210,14 +196,9 @@ class TestVault:
             'instance:foobar',
             'is_leader:true',
             'cluster_name:vault-cluster-f5f44063',
-            'vault_version:0.10.2'
+            'vault_version:0.10.2',
         ]
-        aggregator.assert_service_check(
-            Vault.SERVICE_CHECK_INITIALIZED,
-            status=Vault.OK,
-            tags=expected_tags,
-            count=1
-        )
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, tags=expected_tags, count=1)
 
     def test_service_check_initialized_fail(self, aggregator):
         instance = INSTANCES['main']
@@ -230,17 +211,19 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/health':
-                return MockResponse({
-                    'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
-                    'cluster_name': 'vault-cluster-f5f44063',
-                    'initialized': False,
-                    'replication_dr_mode': 'disabled',
-                    'replication_performance_mode': 'disabled',
-                    'sealed': False,
-                    'server_time_utc': 1529357080,
-                    'standby': False,
-                    'version': '0.10.2'
-                })
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': False,
+                        'replication_dr_mode': 'disabled',
+                        'replication_performance_mode': 'disabled',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': False,
+                        'version': '0.10.2',
+                    }
+                )
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
@@ -260,12 +243,9 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/leader':
-                return MockResponse({
-                    'ha_enabled': False,
-                    'is_self': True,
-                    'leader_address': 'bar',
-                    'leader_cluster_address': ''
-                })
+                return MockResponse(
+                    {'ha_enabled': False, 'is_self': True, 'leader_address': 'bar', 'leader_cluster_address': ''}
+                )
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
@@ -293,12 +273,9 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/leader':
-                return MockResponse({
-                    'ha_enabled': False,
-                    'is_self': True,
-                    'leader_address': 'bar',
-                    'leader_cluster_address': ''
-                })
+                return MockResponse(
+                    {'ha_enabled': False, 'is_self': True, 'leader_address': 'bar', 'leader_cluster_address': ''}
+                )
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
@@ -317,12 +294,9 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/leader':
-                return MockResponse({
-                    'ha_enabled': False,
-                    'is_self': False,
-                    'leader_address': 'bar',
-                    'leader_cluster_address': ''
-                })
+                return MockResponse(
+                    {'ha_enabled': False, 'is_self': False, 'leader_address': 'bar', 'leader_cluster_address': ''}
+                )
             return requests_get(url, *args, **kwargs)
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):

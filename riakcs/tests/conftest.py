@@ -29,12 +29,9 @@ def check():
 @pytest.fixture
 def mocked_check21():
     check = RiakCs(common.CHECK_NAME, None, {}, [{}])
-    check._connect = mock.Mock(return_value=(
-        None,
-        None,
-        ["aggregation_key:localhost:8080"],
-        common.CONFIG_21["metrics"],
-    ))
+    check._connect = mock.Mock(
+        return_value=(None, None, ["aggregation_key:localhost:8080"], common.CONFIG_21["metrics"])
+    )
 
     file_contents = common.read_fixture('riakcs21_in.json')
 

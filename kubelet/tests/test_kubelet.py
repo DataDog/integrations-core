@@ -14,13 +14,7 @@ pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux
 
 # Constants
 HERE = os.path.abspath(os.path.dirname(__file__))
-QUANTITIES = {
-    '12k': 12 * 1000,
-    '12M': 12 * (1000 * 1000),
-    '12Ki': 12. * 1024,
-    '12K': 12.,
-    '12test': 12.,
-}
+QUANTITIES = {'12k': 12 * 1000, '12M': 12 * (1000 * 1000), '12Ki': 12.0 * 1024, '12K': 12.0, '12test': 12.0}
 
 NODE_SPEC = {
     u'cloud_provider': u'GCE',
@@ -33,7 +27,7 @@ NODE_SPEC = {
     u'instance_id': u'8153046835786593062',
     u'boot_id': u'789bf9ff-77be-4f43-8352-62f84d5e4356',
     u'cpu_frequency_khz': 2600000,
-    u'machine_id': u'5556dc4fc19807c8be37acb98b1ba490'
+    u'machine_id': u'5556dc4fc19807c8be37acb98b1ba490',
 }
 
 EXPECTED_METRICS_COMMON = [
@@ -89,6 +83,7 @@ EXPECTED_METRICS_PROMETHEUS = [
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -112,13 +107,13 @@ def mock_kubelet_check(monkeypatch, instances):
             # Mock response for "/metrics/cadvisor"
             attrs = {
                 'close.return_value': True,
-                'iter_lines.return_value': mock_from_file('cadvisor_metrics.txt').split('\n')
+                'iter_lines.return_value': mock_from_file('cadvisor_metrics.txt').split('\n'),
             }
         elif prometheus_url.endswith('/metrics'):
             # Mock response for "/metrics"
             attrs = {
                 'close.return_value': True,
-                'iter_lines.return_value': mock_from_file('kubelet_metrics.txt').split('\n')
+                'iter_lines.return_value': mock_from_file('kubelet_metrics.txt').split('\n'),
             }
         else:
             raise Exception("Must be a valid endpoint")
@@ -205,24 +200,27 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
     # - demo-app-success-c485bc67b-klj45 is mono-threaded, we submit 7.756358313 * 10**9 = 7756358313
     #
     calls = [
-        mock.call('kubernetes.cpu.usage.total', 2053640000000.0, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ]),
+        mock.call(
+            'kubernetes.cpu.usage.total',
+            2053640000000.0,
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+        ),
         mock.call('kubernetes.cpu.usage.total', 7756358313.0, ['pod_name=demo-app-success-c485bc67b-klj45']),
     ]
     check.rate.assert_has_calls(calls, any_order=True)
 
     # Make sure the per-core metrics are not submitted
     bad_calls = [
-        mock.call('kubernetes.cpu.usage.total', 1228320000000.0, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ]),
-        mock.call('kubernetes.cpu.usage.total', 825320000000.0, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ]),
+        mock.call(
+            'kubernetes.cpu.usage.total',
+            1228320000000.0,
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+        ),
+        mock.call(
+            'kubernetes.cpu.usage.total',
+            825320000000.0,
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+        ),
     ]
     for c in bad_calls:
         assert c not in check.rate.mock_calls
@@ -250,12 +248,17 @@ def test_prometheus_net_summed(monkeypatch, aggregator):
         mock.call('kubernetes.network.rx_bytes', 12638051777.0, ['pod_name:dd-agent-q6hpw']),
         mock.call('kubernetes.network.rx_bytes', 22638051777.0, ['pod_name:dd-agent-q6hpw']),
         # Make sure hostNetwork pod metrics are not submitted, test with and without sum to be sure
-        mock.call('kubernetes.network.rx_bytes', (4917138204.0 + 698882782.0),
-                  ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn']),
-        mock.call('kubernetes.network.rx_bytes', 4917138204.0,
-                  ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn']),
-        mock.call('kubernetes.network.rx_bytes', 698882782.0,
-                  ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn']),
+        mock.call(
+            'kubernetes.network.rx_bytes',
+            (4917138204.0 + 698882782.0),
+            ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'],
+        ),
+        mock.call(
+            'kubernetes.network.rx_bytes', 4917138204.0, ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn']
+        ),
+        mock.call(
+            'kubernetes.network.rx_bytes', 698882782.0, ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn']
+        ),
     ]
     for c in bad_calls:
         assert c not in check.rate.mock_calls
@@ -303,40 +306,32 @@ def test_kubelet_check_instance_config(monkeypatch):
 
 def mocked_get_tags(entity, _):
     tag_store = {
-        "kubernetes_pod://2edfd4d9-10ce-11e8-bd5a-42010af00137": [
-            "pod_name:fluentd-gcp-v2.0.10-9q9t4"
-        ],
-        "kubernetes_pod://2fdfd4d9-10ce-11e8-bd5a-42010af00137": [
-            "pod_name:fluentd-gcp-v2.0.10-fkeuj"
-        ],
+        "kubernetes_pod://2edfd4d9-10ce-11e8-bd5a-42010af00137": ["pod_name:fluentd-gcp-v2.0.10-9q9t4"],
+        "kubernetes_pod://2fdfd4d9-10ce-11e8-bd5a-42010af00137": ["pod_name:fluentd-gcp-v2.0.10-fkeuj"],
         'docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
             'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
+            'kube_deployment:fluentd-gcp-v2.0.10',
         ],
         "docker://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
             'kube_container_name:prometheus-to-sd-exporter',
-            'kube_deployment:fluentd-gcp-v2.0.10'
+            'kube_deployment:fluentd-gcp-v2.0.10',
         ],
         'docker://6941ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
             'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
+            'kube_deployment:fluentd-gcp-v2.0.10',
         ],
         "docker://690cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
             'kube_container_name:prometheus-to-sd-exporter',
-            'kube_deployment:fluentd-gcp-v2.0.10'
+            'kube_deployment:fluentd-gcp-v2.0.10',
         ],
         "docker://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
             "pod_name=demo-app-success-c485bc67b-klj45"
         ],
-        "kubernetes_pod://d2e71e36-10d0-11e8-bd5a-42010af00137": [
-            'pod_name:dd-agent-q6hpw'
-        ],
+        "kubernetes_pod://d2e71e36-10d0-11e8-bd5a-42010af00137": ['pod_name:dd-agent-q6hpw'],
         "kubernetes_pod://260c2b1d43b094af6d6b4ccba082c2db": [
             'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
         ],
-        "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": [
-            'pod_name:pi-kff76'
-        ]
+        "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": ['pod_name:pi-kff76'],
     }
     # Match agent 6.5 behaviour of not accepting None
     if entity is None:
@@ -356,14 +351,16 @@ def test_report_pods_running(monkeypatch):
     calls = [
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-fkeuj"]),
-        mock.call('kubernetes.containers.running', 2, [
-            "kube_container_name:fluentd-gcp",
-            "kube_deployment:fluentd-gcp-v2.0.10"
-        ]),
-        mock.call('kubernetes.containers.running', 2, [
-            "kube_container_name:prometheus-to-sd-exporter",
-            "kube_deployment:fluentd-gcp-v2.0.10"
-        ]),
+        mock.call(
+            'kubernetes.containers.running',
+            2,
+            ["kube_container_name:fluentd-gcp", "kube_deployment:fluentd-gcp-v2.0.10"],
+        ),
+        mock.call(
+            'kubernetes.containers.running',
+            2,
+            ["kube_container_name:prometheus-to-sd-exporter", "kube_deployment:fluentd-gcp-v2.0.10"],
+        ),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -384,10 +381,11 @@ def test_report_pods_running_none_ids(monkeypatch):
 
     calls = [
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
-        mock.call('kubernetes.containers.running', 2, [
-            "kube_container_name:prometheus-to-sd-exporter",
-            "kube_deployment:fluentd-gcp-v2.0.10"
-        ]),
+        mock.call(
+            'kubernetes.containers.running',
+            2,
+            ["kube_container_name:prometheus-to-sd-exporter", "kube_deployment:fluentd-gcp-v2.0.10"],
+        ),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -406,18 +404,21 @@ def test_report_container_spec_metrics(monkeypatch):
         check._report_container_spec_metrics(pod_list, instance_tags)
 
     calls = [
-        mock.call('kubernetes.cpu.requests', 0.1, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags),
-        mock.call('kubernetes.memory.requests', 209715200.0, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags),
-        mock.call('kubernetes.memory.limits', 314572800.0, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags),
+        mock.call(
+            'kubernetes.cpu.requests',
+            0.1,
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+        ),
+        mock.call(
+            'kubernetes.memory.requests',
+            209715200.0,
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+        ),
+        mock.call(
+            'kubernetes.memory.limits',
+            314572800.0,
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+        ),
         mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
         mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
         mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
@@ -432,8 +433,9 @@ def test_report_container_spec_metrics(monkeypatch):
 
 def test_report_container_state_metrics(monkeypatch):
     check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list',
-                        mock.Mock(return_value=json.loads(mock_from_file('pods_crashed.json'))))
+    monkeypatch.setattr(
+        check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_crashed.json')))
+    )
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
     attrs = {'is_excluded.return_value': False}
@@ -446,27 +448,36 @@ def test_report_container_state_metrics(monkeypatch):
         check._report_container_state_metrics(pod_list, instance_tags)
 
     calls = [
-        mock.call('kubernetes.containers.last_state.terminated', 1, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags + ['reason:OOMKilled']),
-        mock.call('kubernetes.containers.state.waiting', 1, [
-            'kube_container_name:prometheus-to-sd-exporter',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags + ['reason:CrashLoopBackOff']),
-        mock.call('kubernetes.containers.restarts', 1, [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags),
-        mock.call('kubernetes.containers.restarts', 0, [
-            'kube_container_name:prometheus-to-sd-exporter',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ] + instance_tags),
+        mock.call(
+            'kubernetes.containers.last_state.terminated',
+            1,
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
+            + instance_tags
+            + ['reason:OOMKilled'],
+        ),
+        mock.call(
+            'kubernetes.containers.state.waiting',
+            1,
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
+            + instance_tags
+            + ['reason:CrashLoopBackOff'],
+        ),
+        mock.call(
+            'kubernetes.containers.restarts',
+            1,
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+        ),
+        mock.call(
+            'kubernetes.containers.restarts',
+            0,
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+        ),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
-    container_state_gauges = [x[0][2] for x in check.gauge.call_args_list
-                              if x[0][0].startswith('kubernetes.containers.state')]
+    container_state_gauges = [
+        x[0][2] for x in check.gauge.call_args_list if x[0][0].startswith('kubernetes.containers.state')
+    ]
     if any(map(lambda e: 'reason:TransientReason' in e, container_state_gauges)):
         raise AssertionError('kubernetes.containers.state.* was submitted with a transient reason')
     if any(map(lambda e: not any(x for x in e if x.startswith('reason:')), container_state_gauges)):
@@ -490,9 +501,18 @@ def test_perform_kubelet_check(monkeypatch):
     with mock.patch("requests.get", side_effect=get):
         check._perform_kubelet_check(instance_tags)
 
-    get.assert_has_calls([
-        mock.call('http://127.0.0.1:10255/healthz', cert=None, headers=None, params={'verbose': True}, timeout=10,
-                  verify=None)])
+    get.assert_has_calls(
+        [
+            mock.call(
+                'http://127.0.0.1:10255/healthz',
+                cert=None,
+                headers=None,
+                params={'verbose': True},
+                timeout=10,
+                verify=None,
+            )
+        ]
+    )
     calls = [mock.call('kubernetes.kubelet.check', 0, tags=instance_tags)]
     check.service_check.assert_has_calls(calls)
 
@@ -504,7 +524,7 @@ def test_report_node_metrics(monkeypatch):
     check._report_node_metrics(['foo:bar'])
     calls = [
         mock.call('kubernetes.cpu.capacity', 4.0, ['foo:bar']),
-        mock.call('kubernetes.memory.capacity', 512.0, ['foo:bar'])
+        mock.call('kubernetes.memory.capacity', 512.0, ['foo:bar']),
     ]
     check.gauge.assert_has_calls(calls, any_order=False)
 
@@ -515,16 +535,17 @@ def test_retrieve_pod_list_success(monkeypatch):
             self.json_data = json_data
 
         def json(self):
-            return (json.loads(self.json_data))
+            return json.loads(self.json_data)
 
     check = KubeletCheck('kubelet', None, {}, [{}])
     check.pod_list_url = "dummyurl"
-    monkeypatch.setattr(check, 'perform_kubelet_query',
-                        mock.Mock(return_value=MockResponse(mock_from_file('pod_list_raw.dat'))))
+    monkeypatch.setattr(
+        check, 'perform_kubelet_query', mock.Mock(return_value=MockResponse(mock_from_file('pod_list_raw.dat')))
+    )
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("pod_list_raw.json"))
-    assert (json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True))
+    assert json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True)
 
 
 def test_retrieved_pod_list_failure(monkeypatch):

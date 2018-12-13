@@ -15,7 +15,6 @@ METRIC_TIMESTAMP = 1337404007
 
 
 class TestGaugeWrapper:
-
     def test_gauge_without_timestamp(self):
         """
         Test the 'gauge' wrapper to see if it strips the 'timestamp' arg for gauge functions that do not accept it

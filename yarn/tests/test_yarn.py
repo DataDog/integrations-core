@@ -5,9 +5,7 @@
 from requests.exceptions import SSLError
 from datadog_checks.yarn import YarnCheck
 
-from datadog_checks.yarn.yarn import (
-    SERVICE_CHECK_NAME, YARN_QUEUE_METRICS, YARN_APP_METRICS
-)
+from datadog_checks.yarn.yarn import SERVICE_CHECK_NAME, YARN_QUEUE_METRICS, YARN_APP_METRICS
 
 from .common import (
     YARN_CONFIG,
@@ -119,7 +117,7 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
             SERVICE_CHECK_NAME,
             status=YarnCheck.CRITICAL,
             tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
-            count=1
+            count=1,
         )
         pass
     else:

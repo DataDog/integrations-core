@@ -9,8 +9,14 @@ from . import common
 
 def test_check(instance, aggregator):
     # add some stats
-    connection = psycopg2.connect(host=common.HOST, port=common.PORT, user=common.USER, password=common.PASS,
-                                  database=common.DB, connect_timeout=1)
+    connection = psycopg2.connect(
+        host=common.HOST,
+        port=common.PORT,
+        user=common.USER,
+        password=common.PASS,
+        database=common.DB,
+        connect_timeout=1,
+    )
     connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = connection.cursor()
     cur.execute('SELECT * FROM persons;')
@@ -53,10 +59,5 @@ def test_check(instance, aggregator):
     aggregator.assert_metric('pgbouncer.stats.bytes_sent_per_second')
 
     # Service checks
-    sc_tags = [
-        'host:{}'.format(common.HOST),
-        'port:{}'.format(common.PORT),
-        'db:pgbouncer',
-        'optional:tag1',
-    ]
+    sc_tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'db:pgbouncer', 'optional:tag1']
     aggregator.assert_service_check('pgbouncer.can_connect', status=PgBouncer.OK, tags=sc_tags)

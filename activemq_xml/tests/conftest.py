@@ -19,6 +19,7 @@ from .common import HERE, URL
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -40,10 +41,7 @@ def activemq_xml_container():
     env = os.environ
     env["ACTIVEMQ_DATA_DIR"] = activemq_data_dir
 
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'compose', 'docker-compose.yaml')
-    ]
+    args = ["docker-compose", "-f", os.path.join(HERE, 'compose', 'docker-compose.yaml')]
 
     subprocess.check_call(args + ["down"])
     subprocess.check_call(args + ["up", "-d"])

@@ -13,7 +13,7 @@ from bmemcached.exceptions import MemcachedException
 
 from datadog_checks.mcache import Memcache
 
-from common import (HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH)
+from common import HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH
 
 
 @pytest.fixture(scope="session")
@@ -107,27 +107,17 @@ def check():
 
 @pytest.fixture
 def instance():
-    return {
-        'url': "{}".format(HOST),
-        'port': PORT,
-        'tags': ["foo:bar"],
-        'username': USERNAME,
-        'password': PASSWORD,
-    }
+    return {'url': "{}".format(HOST), 'port': PORT, 'tags': ["foo:bar"], 'username': USERNAME, 'password': PASSWORD}
 
 
 @pytest.fixture
 def instance_socket(memcached_socket):
-    return {
-        'socket': memcached_socket[1],
-        'tags': ["foo:bar"],
-        'username': USERNAME,
-        'password': PASSWORD,
-    }
+    return {'socket': memcached_socket[1], 'tags': ["foo:bar"], 'username': USERNAME, 'password': PASSWORD}
 
 
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator

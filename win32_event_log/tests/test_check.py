@@ -51,8 +51,7 @@ def mock_get_wmi_sampler():
         yield
 
 
-def from_time(year=0, month=0, day=0, hours=0, minutes=0,
-              seconds=0, microseconds=0, timezone=0):
+def from_time(year=0, month=0, day=0, hours=0, minutes=0, seconds=0, microseconds=0, timezone=0):
     "Just return any WMI date"
     return "20151224113047.000000-480"
 
@@ -87,14 +86,18 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
         'sites': ["Default Web Site", "Failing site"],
         'logfile': ["Application"],
         'type': ["Error", "Warning"],
-        'source_name': ["MSSQLSERVER"]
+        'source_name': ["MSSQLSERVER"],
     }
 
     check.check(instance)
     check.check(instance)
 
-    aggregator.assert_event('SomeMessage', count=1,
-                            tags=instance['tags'],
-                            msg_title='Application/MSQLSERVER',
-                            event_type='win32_log_event', alert_type='error',
-                            source_type_name='event viewer')
+    aggregator.assert_event(
+        'SomeMessage',
+        count=1,
+        tags=instance['tags'],
+        msg_title='Application/MSQLSERVER',
+        event_type='win32_log_event',
+        alert_type='error',
+        source_type_name='event viewer',
+    )

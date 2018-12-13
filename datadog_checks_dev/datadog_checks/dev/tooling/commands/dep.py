@@ -6,13 +6,9 @@ import os
 import click
 from six import iteritems, itervalues
 
-from .utils import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-)
+from .utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 from ..constants import get_root
-from ..dep import (
-    Package, collect_packages, format_package, read_packages, resolve_requirements, write_packages
-)
+from ..dep import Package, collect_packages, format_package, read_packages, resolve_requirements, write_packages
 from ...utils import get_next
 
 
@@ -29,8 +25,7 @@ def display_package_changes(pre_packages, post_packages, indent=''):
     added = post_packages_set - pre_packages_set
     removed = pre_packages_set - post_packages_set
     changed = {
-        package for package in pre_packages_set & post_packages_set
-        if pre_packages[package] != post_packages[package]
+        package for package in pre_packages_set & post_packages_set if pre_packages[package] != post_packages[package]
     }
 
     if not (added or removed or changed):
@@ -49,11 +44,11 @@ def display_package_changes(pre_packages, post_packages, indent=''):
     if changed:
         echo_warning('{}Changed packages:'.format(indent))
         for package in sorted(changed):
-            echo_info('{}    {} -> {}'.format(
-                indent,
-                format_package(pre_packages[package]),
-                format_package(post_packages[package])
-            ))
+            echo_info(
+                '{}    {} -> {}'.format(
+                    indent, format_package(pre_packages[package]), format_package(post_packages[package])
+                )
+            )
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -61,10 +56,7 @@ def dep():
     pass
 
 
-@dep.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Resolve dependencies for any number of checks'
-)
+@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Resolve dependencies for any number of checks')
 @click.argument('checks', nargs=-1, required=True)
 @click.option('--lazy', '-l', is_flag=True, help='Do not attempt to upgrade transient dependencies')
 @click.option('--quiet', '-q', is_flag=True)
@@ -97,10 +89,7 @@ def resolve(checks, lazy, quiet):
                 display_package_changes(pre_packages, post_packages, indent='    ')
 
 
-@dep.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Pin a dependency for all checks that require it'
-)
+@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Pin a dependency for all checks that require it')
 @click.argument('package')
 @click.argument('version')
 @click.argument('checks', nargs=-1)
@@ -158,8 +147,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
 
 
 @dep.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help="Combine all dependencies for the Agent's static environment"
+    context_settings=CONTEXT_SETTINGS, short_help="Combine all dependencies for the Agent's static environment"
 )
 def freeze():
     """Combine all dependencies for the Agent's static environment."""
@@ -169,9 +157,7 @@ def freeze():
         abort(errors[0])
 
     root = get_root()
-    static_file = os.path.join(
-        root, 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in'
-    )
+    static_file = os.path.join(root, 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in')
 
     echo_info('Static file: {}'.format(static_file))
 
@@ -182,7 +168,7 @@ def freeze():
             Package(package, get_next(data['versions']), get_next(data['markers']))
             for package, data in sorted(iteritems(pinned_packages))
         ),
-        static_file
+        static_file,
     )
 
     post_packages = list(read_packages(static_file))

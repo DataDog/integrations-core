@@ -48,11 +48,7 @@ def pattern_filter(items, whitelist=None, blacklist=None, key=None):
 
 
 def _filter(items, pattern_list, key):
-    return {
-        key(item) for pattern in pattern_list
-        for item in items
-        if re.search(pattern, key(item))
-    }
+    return {key(item) for pattern in pattern_list for item in items if re.search(pattern, key(item))}
 
 
 def __return_self(obj):

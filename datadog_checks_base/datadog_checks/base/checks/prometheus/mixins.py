@@ -26,6 +26,7 @@ class PrometheusFormat:
     Used to specify if you want to use the protobuf format or the text format when
     querying prometheus metrics
     """
+
     PROTOBUF = "PROTOBUF"
     TEXT = "TEXT"
 
@@ -184,7 +185,7 @@ class PrometheusScraperMixin(object):
             while n < len(buf):
                 msg_len, new_pos = _DecodeVarint32(buf, n)
                 n = new_pos
-                msg_buf = buf[n:n + msg_len]
+                msg_buf = buf[n : n + msg_len]
                 n += msg_len
 
                 message = metrics_pb2.MetricFamily()
@@ -218,8 +219,10 @@ class PrometheusScraperMixin(object):
                     continue
 
                 for sample in metric.samples:
-                    if (sample[0].endswith("_sum") or sample[0].endswith("_count")) and \
-                            metric_type in ["histogram", "summary"]:
+                    if (sample[0].endswith("_sum") or sample[0].endswith("_count")) and metric_type in [
+                        "histogram",
+                        "summary",
+                    ]:
                         messages[sample[0]].append({"labels": sample[1], 'value': sample[2]})
                     else:
                         messages[metric_name].append({"labels": sample[1], 'value': sample[2]})
@@ -231,8 +234,7 @@ class PrometheusScraperMixin(object):
                 if _m in messages or (obj_map[_m] == 'histogram' and ('{}_bucket'.format(_m) in messages)):
                     yield self._extract_metric_from_map(_m, messages, obj_map, obj_help)
         else:
-            raise UnknownFormatError('Unsupported content-type provided: {}'.format(
-                response.headers['Content-Type']))
+            raise UnknownFormatError('Unsupported content-type provided: {}'.format(response.headers['Content-Type']))
 
     def _text_filter_input(self, input_gen):
         """
@@ -252,7 +254,7 @@ class PrometheusScraperMixin(object):
 
     def remove_metric_prefix(self, metric):
         if metric.startswith(self.prometheus_metrics_prefix):
-            return metric[len(self.prometheus_metrics_prefix):]
+            return metric[len(self.prometheus_metrics_prefix) :]
         return metric
 
     @staticmethod
@@ -265,11 +267,13 @@ class PrometheusScraperMixin(object):
         :return: value of the metric_name matched by the labels
         """
         metric_name = '{}_{}'.format(_m, metric_suffix)
-        expected_labels = set([(k, v) for k, v in iteritems(_metric["labels"])
-                               if k not in PrometheusScraperMixin.UNWANTED_LABELS])
+        expected_labels = set(
+            [(k, v) for k, v in iteritems(_metric["labels"]) if k not in PrometheusScraperMixin.UNWANTED_LABELS]
+        )
         for elt in messages[metric_name]:
-            current_labels = set([(k, v) for k, v in iteritems(elt["labels"])
-                                  if k not in PrometheusScraperMixin.UNWANTED_LABELS])
+            current_labels = set(
+                [(k, v) for k, v in iteritems(elt["labels"]) if k not in PrometheusScraperMixin.UNWANTED_LABELS]
+            )
             # As we have two hashable objects we can compare them without any side effects
             if current_labels == expected_labels:
                 return float(elt["value"])
@@ -458,8 +462,13 @@ class PrometheusScraperMixin(object):
         try:
             if not self._dry_run:
                 try:
-                    self._submit(self.metrics_mapper[message.name], message, send_histograms_buckets,
-                                 send_monotonic_counter, custom_tags)
+                    self._submit(
+                        self.metrics_mapper[message.name],
+                        message,
+                        send_histograms_buckets,
+                        send_monotonic_counter,
+                        custom_tags,
+                    )
                 except KeyError:
                     if not ignore_unmapped:
                         # call magic method (non-generic check)
@@ -475,8 +484,9 @@ class PrometheusScraperMixin(object):
                         # try matching wildcard (generic check)
                         for wildcard in self._metrics_wildcards:
                             if fnmatchcase(message.name, wildcard):
-                                self._submit(message.name, message, send_histograms_buckets, send_monotonic_counter,
-                                             custom_tags)
+                                self._submit(
+                                    message.name, message, send_histograms_buckets, send_monotonic_counter, custom_tags
+                                )
 
         except AttributeError as err:
             self.log.debug("Unable to handle metric: {} - error: {}".format(message.name, err))
@@ -503,9 +513,9 @@ class PrometheusScraperMixin(object):
         if 'accept-encoding' not in headers:
             headers['accept-encoding'] = 'gzip'
         if pFormat == PrometheusFormat.PROTOBUF:
-            headers['accept'] = 'application/vnd.google.protobuf; ' \
-                                'proto=io.prometheus.client.MetricFamily; ' \
-                                'encoding=delimited'
+            headers['accept'] = (
+                'application/vnd.google.protobuf; ' 'proto=io.prometheus.client.MetricFamily; ' 'encoding=delimited'
+            )
         headers.update(self.extra_headers)
         cert = None
         if isinstance(self.ssl_cert, string_types):
@@ -519,8 +529,9 @@ class PrometheusScraperMixin(object):
             disable_warnings(InsecureRequestWarning)
             verify = False
         try:
-            response = requests.get(endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert,
-                                    verify=verify)
+            response = requests.get(
+                endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify
+            )
         except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
             raise
@@ -529,16 +540,14 @@ class PrometheusScraperMixin(object):
                 self._submit_service_check(
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"),
                     AgentCheck.CRITICAL,
-                    tags=["endpoint:" + endpoint]
+                    tags=["endpoint:" + endpoint],
                 )
             raise
         try:
             response.raise_for_status()
             if self.health_service_check:
                 self._submit_service_check(
-                    "{}{}".format(self.NAMESPACE, ".prometheus.health"),
-                    AgentCheck.OK,
-                    tags=["endpoint:" + endpoint]
+                    "{}{}".format(self.NAMESPACE, ".prometheus.health"), AgentCheck.OK, tags=["endpoint:" + endpoint]
                 )
             return response
         except requests.HTTPError:
@@ -547,12 +556,19 @@ class PrometheusScraperMixin(object):
                 self._submit_service_check(
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"),
                     AgentCheck.CRITICAL,
-                    tags=["endpoint:" + endpoint]
+                    tags=["endpoint:" + endpoint],
                 )
             raise
 
-    def _submit(self, metric_name, message, send_histograms_buckets=True, send_monotonic_counter=False,
-                custom_tags=None, hostname=None):
+    def _submit(
+        self,
+        metric_name,
+        message,
+        send_histograms_buckets=True,
+        send_monotonic_counter=False,
+        custom_tags=None,
+        hostname=None,
+    ):
         """
         For each metric in the message, report it as a gauge with all labels as tags
         except if a labels dict is passed, in which case keys are label names we'll extract
@@ -578,8 +594,9 @@ class PrometheusScraperMixin(object):
                     else:
                         self.log.debug("Metric value is not supported for metric {}.".format(metric_name))
                 elif message.type == 4:
-                    self._submit_gauges_from_histogram(metric_name, metric, send_histograms_buckets, custom_tags,
-                                                       custom_hostname)
+                    self._submit_gauges_from_histogram(
+                        metric_name, metric, send_histograms_buckets, custom_tags, custom_hostname
+                    )
                 elif message.type == 2:
                     self._submit_gauges_from_summary(metric_name, metric, custom_tags, custom_hostname)
                 else:
@@ -602,7 +619,7 @@ class PrometheusScraperMixin(object):
         if hostname is None and self.label_to_hostname is not None:
             for label in metric.label:
                 if label.name == self.label_to_hostname:
-                    return (label.value + self.label_to_hostname_suffix)
+                    return label.value + self.label_to_hostname_suffix
 
         return hostname
 
@@ -634,13 +651,19 @@ class PrometheusScraperMixin(object):
             val = quantile.value
             limit = quantile.quantile
             if self._is_value_valid(val):
-                self._submit_gauge("{}.quantile".format(name), val, metric,
-                                   custom_tags=custom_tags + ["quantile:{}".format(limit)], hostname=hostname)
+                self._submit_gauge(
+                    "{}.quantile".format(name),
+                    val,
+                    metric,
+                    custom_tags=custom_tags + ["quantile:{}".format(limit)],
+                    hostname=hostname,
+                )
             else:
                 self.log.debug("Metric value is not supported for metric {}.quantile.".format(name))
 
-    def _submit_gauges_from_histogram(self, name, metric, send_histograms_buckets=True, custom_tags=None,
-                                      hostname=None):
+    def _submit_gauges_from_histogram(
+        self, name, metric, send_histograms_buckets=True, custom_tags=None, hostname=None
+    ):
         """
         Extracts metrics from a prometheus histogram and sends them as gauges
         """
@@ -662,8 +685,13 @@ class PrometheusScraperMixin(object):
                 val = bucket.cumulative_count
                 limit = bucket.upper_bound
                 if self._is_value_valid(val):
-                    self._submit_gauge("{}.count".format(name), val, metric,
-                                       custom_tags=custom_tags + ["upper_bound:{}".format(limit)], hostname=hostname)
+                    self._submit_gauge(
+                        "{}.count".format(name),
+                        val,
+                        metric,
+                        custom_tags=custom_tags + ["upper_bound:{}".format(limit)],
+                        hostname=hostname,
+                    )
                 else:
                     self.log.debug("Metric value is not supported for metric {}.count.".format(name))
 

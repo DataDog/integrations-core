@@ -129,7 +129,7 @@ class HDFSDataNode(AgentCheck):
                 delegate=is_affirmative(instance.get('kerberos_delegate', False)),
                 force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
                 hostname_override=instance.get('kerberos_hostname'),
-                principal=instance.get('kerberos_principal')
+                principal=instance.get('kerberos_principal'),
             )
 
         disable_ssl_validation = is_affirmative(instance.get('disable_ssl_validation', False))

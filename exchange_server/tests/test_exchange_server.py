@@ -13,14 +13,9 @@ from datadog_checks.exchange_server.exchange_server import DEFAULT_COUNTERS
 from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-MINIMAL_INSTANCE = {
-    'host': '.',
-}
+MINIMAL_INSTANCE = {'host': '.'}
 
-INSTANCE_WITH_TAGS = {
-    'host': '.',
-    'tags': ['tag1', 'another:tag']
-}
+INSTANCE_WITH_TAGS = {'host': '.', 'tags': ['tag1', 'another:tag']}
 
 
 @pytest.fixture
@@ -107,15 +102,10 @@ PROXY_INSTANCES = [
     'owa',
     'unknown',
     'win-k2olfvr52p5',
-    'rpchttp'
-
+    'rpchttp',
 ]
 
-WEB_SITE_INSTANCES = [
-    '_Total',
-    'Default Web Site',
-    'Exchange Back End',
-]
+WEB_SITE_INSTANCES = ['_Total', 'Default Web Site', 'Exchange Back End']
 
 WORKLOAD_INSTANCES = [
     'msexchangemailboxreplication_mailboxreplicationservicehighpriority',
@@ -176,26 +166,21 @@ METRIC_INSTANCES = {
     'exchange.adaccess_domain_controllers.ldap_search': ['win-k2olfvr52p5.croissant.datad0g.com'],
     'exchange.adaccess_processes.ldap_read': EXCHANGE_PROCESSES,
     'exchange.adaccess_processes.ldap_search': EXCHANGE_PROCESSES,
-
     'exchange.processor.cpu_time': None,
     'exchange.processor.cpu_user': None,
     'exchange.processor.cpu_privileged': None,
     'exchange.processor.queue_length': None,
-
     'exchange.memory.available': None,
     'exchange.memory.committed': None,
-
     'exchange.network.outbound_errors': ['AWS PV Network Device', 'isatap.{C7BAFAFE-DBF4-4C76-B406-8A25283E4CF9}'],
     'exchange.network.tcpv6.connection_failures': None,
     'exchange.network.tcpv4.conns_reset': None,
     'exchange.network.tcpv4.conns_reset': None,
-
     'exchange.netlogon.semaphore_waiters': ['_Total'],
     'exchange.netlogon.semaphore_holders': ['_Total'],
     'exchange.netlogon.semaphore_acquires': ['_Total'],
     'exchange.netlogon.semaphore_timeouts': ['_Total'],
     'exchange.netlogon.semaphore_hold_time': ['_Total'],
-
     # Database counters
     'exchange.database.io_reads_avg_latency': DATABASE_INSTANCES,
     'exchange.database.io_writes_avg_latency': DATABASE_INSTANCES,
@@ -206,7 +191,6 @@ METRIC_INSTANCES = {
     'exchange.database.io_db_writes_attached_persec': DATABASE_INSTANCES,
     'exchange.database.io_log_writes_persec': DATABASE_INSTANCES,
     'exchange.activemanager.database_mounted': None,
-
     # RPC Client Access Counters
     'exchange.rpc.averaged_latency': None,
     'exchange.rpc.requests': None,
@@ -214,7 +198,6 @@ METRIC_INSTANCES = {
     'exchange.rpc.conn_count': None,
     'exchange.rpc.ops_persec': None,
     'exchange.rpc.user_count': None,
-
     # HTTP Proxy Counters
     'exchange.httpproxy.server_locator_latency': PROXY_INSTANCES,
     'exchange.httpproxy.avg_auth_latency': PROXY_INSTANCES,
@@ -223,14 +206,12 @@ METRIC_INSTANCES = {
     'exchange.httpproxy.outstanding_requests': PROXY_INSTANCES,
     'exchange.httpproxy.proxy_requests_persec': PROXY_INSTANCES,
     'exchange.httpproxy.requests_persec': PROXY_INSTANCES,
-
     # Information Store Counters
     'exchange.is.store.rpc_requests': ['mailbox database 1266275882', '_total'],
     'exchange.is.clienttype.rpc_latency': CLIENT_TYPE_INSTANCES,
     'exchange.is.store.rpc_latency': ['mailbox database 1266275882', '_total'],
     'exchange.is.store.rpc_ops_persec': ['mailbox database 1266275882', '_total'],
     'exchange.is.clienttype.rpc_ops_persec': CLIENT_TYPE_INSTANCES,
-
     # Client Access Server Counters
     'exchange.activesync.requests_persec': None,
     'exchange.activesync.ping_pending': None,
@@ -239,12 +220,10 @@ METRIC_INSTANCES = {
     'exchange.owa.requests_persec': None,
     'exchange.autodiscover.requests_persec': None,
     'exchange.ws.requests_persec': None,
-
     'exchange.ws.current_connections_total': None,
     'exchange.ws.current_connections_default_website': WEB_SITE_INSTANCES,
     'exchange.ws.connection_attempts': None,
     'exchange.ws.other_attempts': None,
-
     # Workload Management Counters
     'exchange.workload_management.active_tasks': WORKLOAD_INSTANCES,
     'exchange.workload_management.completed_tasks': WORKLOAD_INSTANCES,

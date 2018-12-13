@@ -8,38 +8,38 @@ import os
 # the check gather metrics. This the check return everything from varnish
 # without any selection/rename, their is no point in having a complete list.
 COMMON_METRICS = [
-    "varnish.uptime",              # metrics where the "MAIN" prefix was removed
-    "varnish.sess_conn",           # metrics where the "MAIN" prefix was removed
-    "varnish.sess_drop",           # metrics where the "MAIN" prefix was removed
-    "varnish.sess_fail",           # metrics where the "MAIN" prefix was removed
-    "varnish.client_req_400",      # metrics where the "MAIN" prefix was removed
-    "varnish.client_req_417",      # metrics where the "MAIN" prefix was removed
-    "varnish.client_req",          # metrics where the "MAIN" prefix was removed
-    "varnish.cache_hit",           # metrics where the "MAIN" prefix was removed
-    "varnish.cache_hitpass",       # metrics where the "MAIN" prefix was removed
-    "varnish.cache_miss",          # metrics where the "MAIN" prefix was removed
-    "varnish.backend_conn",        # metrics where the "MAIN" prefix was removed
-    "varnish.backend_unhealthy",   # metrics where the "MAIN" prefix was removed
-    "varnish.backend_busy",        # metrics where the "MAIN" prefix was removed
-    "varnish.fetch_eof",           # metrics where the "MAIN" prefix was removed
-    "varnish.fetch_bad",           # metrics where the "MAIN" prefix was removed
-    "varnish.fetch_none",          # metrics where the "MAIN" prefix was removed
-    "varnish.fetch_1xx",           # metrics where the "MAIN" prefix was removed
-    "varnish.pools",               # metrics where the "MAIN" prefix was removed
-    "varnish.busy_sleep",          # metrics where the "MAIN" prefix was removed
-    "varnish.busy_wakeup",         # metrics where the "MAIN" prefix was removed
-    "varnish.busy_killed",         # metrics where the "MAIN" prefix was removed
-    "varnish.sess_queued",         # metrics where the "MAIN" prefix was removed
-    "varnish.sess_dropped",        # metrics where the "MAIN" prefix was removed
-    "varnish.n_object",            # metrics where the "MAIN" prefix was removed
-    "varnish.n_vampireobject",     # metrics where the "MAIN" prefix was removed
-    "varnish.n_vcl",               # metrics where the "MAIN" prefix was removed
-    "varnish.n_vcl_avail",         # metrics where the "MAIN" prefix was removed
-    "varnish.n_vcl_discard",       # metrics where the "MAIN" prefix was removed
-    "varnish.bans",                # metrics where the "MAIN" prefix was removed
-    "varnish.bans_completed",      # metrics where the "MAIN" prefix was removed
-    "varnish.bans_obj",            # metrics where the "MAIN" prefix was removed
-    "varnish.bans_req",            # metrics where the "MAIN" prefix was removed
+    "varnish.uptime",  # metrics where the "MAIN" prefix was removed
+    "varnish.sess_conn",  # metrics where the "MAIN" prefix was removed
+    "varnish.sess_drop",  # metrics where the "MAIN" prefix was removed
+    "varnish.sess_fail",  # metrics where the "MAIN" prefix was removed
+    "varnish.client_req_400",  # metrics where the "MAIN" prefix was removed
+    "varnish.client_req_417",  # metrics where the "MAIN" prefix was removed
+    "varnish.client_req",  # metrics where the "MAIN" prefix was removed
+    "varnish.cache_hit",  # metrics where the "MAIN" prefix was removed
+    "varnish.cache_hitpass",  # metrics where the "MAIN" prefix was removed
+    "varnish.cache_miss",  # metrics where the "MAIN" prefix was removed
+    "varnish.backend_conn",  # metrics where the "MAIN" prefix was removed
+    "varnish.backend_unhealthy",  # metrics where the "MAIN" prefix was removed
+    "varnish.backend_busy",  # metrics where the "MAIN" prefix was removed
+    "varnish.fetch_eof",  # metrics where the "MAIN" prefix was removed
+    "varnish.fetch_bad",  # metrics where the "MAIN" prefix was removed
+    "varnish.fetch_none",  # metrics where the "MAIN" prefix was removed
+    "varnish.fetch_1xx",  # metrics where the "MAIN" prefix was removed
+    "varnish.pools",  # metrics where the "MAIN" prefix was removed
+    "varnish.busy_sleep",  # metrics where the "MAIN" prefix was removed
+    "varnish.busy_wakeup",  # metrics where the "MAIN" prefix was removed
+    "varnish.busy_killed",  # metrics where the "MAIN" prefix was removed
+    "varnish.sess_queued",  # metrics where the "MAIN" prefix was removed
+    "varnish.sess_dropped",  # metrics where the "MAIN" prefix was removed
+    "varnish.n_object",  # metrics where the "MAIN" prefix was removed
+    "varnish.n_vampireobject",  # metrics where the "MAIN" prefix was removed
+    "varnish.n_vcl",  # metrics where the "MAIN" prefix was removed
+    "varnish.n_vcl_avail",  # metrics where the "MAIN" prefix was removed
+    "varnish.n_vcl_discard",  # metrics where the "MAIN" prefix was removed
+    "varnish.bans",  # metrics where the "MAIN" prefix was removed
+    "varnish.bans_completed",  # metrics where the "MAIN" prefix was removed
+    "varnish.bans_obj",  # metrics where the "MAIN" prefix was removed
+    "varnish.bans_req",  # metrics where the "MAIN" prefix was removed
     "varnish.MGT.child_start",
     "varnish.MGT.child_exit",
     "varnish.MGT.child_stop",
@@ -79,10 +79,7 @@ CHECK_NAME = "varnish"
 
 
 def get_config_by_version(name=None):
-    config = {
-        "varnishstat": get_varnish_stat_path(),
-        "tags": ["cluster:webs"]
-    }
+    config = {"varnishstat": get_varnish_stat_path(), "tags": ["cluster:webs"]}
 
     if name:
         config["name"] = name

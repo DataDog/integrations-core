@@ -4,7 +4,11 @@
 
 import os
 from datadog_checks.yarn.yarn import (
-    YARN_CLUSTER_METRICS_PATH, YARN_APPS_PATH, YARN_APPLICATION_STATES, YARN_NODES_PATH, YARN_SCHEDULER_PATH
+    YARN_CLUSTER_METRICS_PATH,
+    YARN_APPS_PATH,
+    YARN_APPLICATION_STATES,
+    YARN_NODES_PATH,
+    YARN_SCHEDULER_PATH,
 )
 
 HERE = os.path.dirname(os.path.abspath(__file__))

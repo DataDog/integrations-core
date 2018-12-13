@@ -13,6 +13,7 @@ import common
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -21,10 +22,7 @@ def aggregator():
 def spin_up_varnish():
     env = os.environ
     target = "varnish{}".format(env["VARNISH_VERSION"].split(".")[0])
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
-    ]
+    args = ["docker-compose", "-f", os.path.join(common.HERE, 'compose', 'docker-compose.yaml')]
     subprocess.check_call(args + ["down"], env=env)
     subprocess.check_call(args + ["up", "-d", target], env=env)
     time.sleep(2)

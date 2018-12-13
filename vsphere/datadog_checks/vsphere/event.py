@@ -44,11 +44,7 @@ class VSphereEvent(object):
             self.event_type = VSphereEvent.UNKNOWN
 
         self.timestamp = int((self.raw_event.createdTime.replace(tzinfo=None) - datetime(1970, 1, 1)).total_seconds())
-        self.payload = {
-            "timestamp": self.timestamp,
-            "event_type": SOURCE_TYPE,
-            "source_type_name": SOURCE_TYPE,
-        }
+        self.payload = {"timestamp": self.timestamp, "event_type": SOURCE_TYPE, "source_type_name": SOURCE_TYPE}
         if event_config is None:
             self.event_config = {}
         else:
@@ -83,7 +79,8 @@ class VSphereEvent(object):
     def transform_vmbeinghotmigratedevent(self):
         self.payload["msg_title"] = "VM {} is being migrated".format(self.raw_event.vm.name)
         self.payload["msg_text"] = "{user} has launched a hot migration of this virtual machine:\n".format(
-            user=self.raw_event.userName)
+            user=self.raw_event.userName
+        )
         changes = []
         pre_host = self.raw_event.host.name
         new_host = self.raw_event.destHost.name
@@ -123,12 +120,7 @@ class VSphereEvent(object):
             return None
 
         def get_transition(before, after):
-            vals = {
-                'gray': -1,
-                'green': 0,
-                'yellow': 1,
-                'red': 2
-            }
+            vals = {'gray': -1, 'green': 0, 'yellow': 1, 'red': 2}
             before = before.lower()
             after = after.lower()
             if before not in vals or after not in vals:
@@ -138,17 +130,13 @@ class VSphereEvent(object):
             else:
                 return 'Recovered'
 
-        TO_ALERT_TYPE = {
-            'green': 'success',
-            'yellow': 'warning',
-            'red': 'error'
-        }
+        TO_ALERT_TYPE = {'green': 'success', 'yellow': 'warning', 'red': 'error'}
 
         def get_agg_key(alarm_event):
             return 'h:{0}|dc:{1}|a:{2}'.format(
                 md5(alarm_event.entity.name).hexdigest()[:10],
                 md5(alarm_event.datacenter.name).hexdigest()[:10],
-                md5(alarm_event.alarm.name).hexdigest()[:10]
+                md5(alarm_event.alarm.name).hexdigest()[:10],
             )
 
         # Get the entity type/name
@@ -173,14 +161,13 @@ class VSphereEvent(object):
             monitor=self.raw_event.alarm.name,
             host_type=host_type,
             host_name=host_name,
-            status=trans_after
+            status=trans_after,
         )
         self.payload['alert_type'] = TO_ALERT_TYPE[trans_after]
         self.payload['event_object'] = get_agg_key(self.raw_event)
-        self.payload['msg_text'] = "vCenter monitor status changed on this alarm, "\
-                                   "it was {before} and it's now {after}.".format(
-            before=trans_before,
-            after=trans_after
+        self.payload['msg_text'] = (
+            "vCenter monitor status changed on this alarm, "
+            "it was {before} and it's now {after}.".format(before=trans_before, after=trans_after)
         )
         self.payload['host'] = host_name
         return self.payload
@@ -199,26 +186,26 @@ class VSphereEvent(object):
 
     def transform_vmpoweredoffevent(self):
         self.payload["msg_title"] = u"VM {0} has been powered OFF".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"""{user} has powered off this virtual machine. It was running on:
+        self.payload[
+            "msg_text"
+        ] = u"""{user} has powered off this virtual machine. It was running on:
 - datacenter: {dc}
 - host: {host}
 """.format(
-            user=self.raw_event.userName,
-            dc=self.raw_event.datacenter.name,
-            host=self.raw_event.host.name
+            user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name
         )
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
 
     def transform_vmpoweredonevent(self):
         self.payload["msg_title"] = u"VM {0} has been powered ON".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"""{user} has powered on this virtual machine. It is running on:
+        self.payload[
+            "msg_text"
+        ] = u"""{user} has powered on this virtual machine. It is running on:
 - datacenter: {dc}
 - host: {host}
 """.format(
-            user=self.raw_event.userName,
-            dc=self.raw_event.datacenter.name,
-            host=self.raw_event.host.name
+            user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name
         )
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
@@ -226,21 +213,20 @@ class VSphereEvent(object):
     def transform_vmresumingevent(self):
         self.payload["msg_title"] = u"VM {0} is RESUMING".format(self.raw_event.vm.name)
         self.payload["msg_text"] = u"""{user} has resumed {vm}. It will soon be powered on.""".format(
-            user=self.raw_event.userName,
-            vm=self.raw_event.vm.name
+            user=self.raw_event.userName, vm=self.raw_event.vm.name
         )
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
 
     def transform_vmsuspendedevent(self):
         self.payload["msg_title"] = u"VM {0} has been SUSPENDED".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"""{user} has suspended this virtual machine. It was running on:
+        self.payload[
+            "msg_text"
+        ] = u"""{user} has suspended this virtual machine. It was running on:
 - datacenter: {dc}
 - host: {host}
 """.format(
-            user=self.raw_event.userName,
-            dc=self.raw_event.datacenter.name,
-            host=self.raw_event.host.name
+            user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name
         )
         self.payload['host'] = self.raw_event.vm.name
         return self.payload

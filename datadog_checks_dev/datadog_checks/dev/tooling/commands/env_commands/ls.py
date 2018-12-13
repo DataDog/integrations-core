@@ -9,10 +9,7 @@ from ...test import get_available_tox_envs
 from ...utils import get_testable_checks
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='List active or available environments'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='List active or available environments')
 @click.argument('checks', nargs=-1)
 def ls(checks):
     """List active or available environments."""

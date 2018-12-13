@@ -7,9 +7,7 @@ from .utils import get_testable_checks
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
 
-STYLE_ENVS = {
-    'flake8',
-}
+STYLE_ENVS = {'flake8'}
 
 
 def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only=False, sort=False):
@@ -24,11 +22,7 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
     for check in checks:
         check, _, envs_selected = check.partition(':')
 
-        if (
-            check in checks_seen
-            or check not in testable_checks
-            or (changed_only and check not in changed_checks)
-        ):
+        if check in checks_seen or check not in testable_checks or (changed_only and check not in changed_checks):
             continue
         else:
             checks_seen.add(check)
@@ -37,15 +31,9 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
         envs_available = get_available_tox_envs(check, sort=sort)
 
         if style:
-            envs_selected[:] = [
-                e for e in envs_available
-                if e in STYLE_ENVS
-            ]
+            envs_selected[:] = [e for e in envs_available if e in STYLE_ENVS]
         elif benchmark:
-            envs_selected[:] = [
-                e for e in envs_available
-                if 'bench' in e
-            ]
+            envs_selected[:] = [e for e in envs_available if 'bench' in e]
         else:
             if every:
                 envs_selected[:] = envs_available
@@ -62,10 +50,7 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
 
                 envs_selected[:] = selected
             else:
-                envs_selected[:] = [
-                    e for e in envs_available
-                    if 'bench' not in e
-                ]
+                envs_selected[:] = [e for e in envs_available if 'bench' not in e]
 
         yield check, envs_selected
 
@@ -171,12 +156,7 @@ def construct_pytest_options(verbose=0, enter_pdb=False, debug=False, bench=Fals
 
 
 def pytest_coverage_sources(*checks):
-    return ' '.join(
-        ' '.join(
-            '--cov={}'.format(source) for source in coverage_sources(check)
-        )
-        for check in checks
-    )
+    return ' '.join(' '.join('--cov={}'.format(source) for source in coverage_sources(check)) for check in checks)
 
 
 def testable_files(files):

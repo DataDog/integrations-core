@@ -4,7 +4,4 @@
 from .marathon import Marathon
 from .__about__ import __version__
 
-__all__ = [
-    'Marathon',
-    '__version__'
-]
+__all__ = ['Marathon', '__version__']

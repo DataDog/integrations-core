@@ -12,10 +12,7 @@ from .common import CONFIG, HERE
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield dict(
-        init_config={'ca_certs': 'no thanks'},
-        **CONFIG
-    )
+    yield dict(init_config={'ca_certs': 'no thanks'}, **CONFIG)
 
 
 @pytest.fixture(scope='session')

@@ -35,9 +35,9 @@ def test_service_checks(check, aggregator):
     scs = aggregator.service_checks(common.SERVICE_CHECK_NAME)
     assert len(scs) == 1
 
-    aggregator.assert_service_check(common.SERVICE_CHECK_NAME,
-                                    status=RiakCs.CRITICAL,
-                                    tags=['aggregation_key:localhost:8080', 'optional:tag1'])
+    aggregator.assert_service_check(
+        common.SERVICE_CHECK_NAME, status=RiakCs.CRITICAL, tags=['aggregation_key:localhost:8080', 'optional:tag1']
+    )
 
 
 def test_21_parser(mocked_check21):

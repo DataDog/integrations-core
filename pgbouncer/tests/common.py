@@ -19,8 +19,7 @@ def get_version():
     Retrieve PgBouncer version
     """
     regex = r'\d\.\d\.\d'
-    conn = psycopg2.connect(host=HOST, port=PORT, user=USER, password=PASS,
-                            database='pgbouncer', connect_timeout=1)
+    conn = psycopg2.connect(host=HOST, port=PORT, user=USER, password=PASS, database='pgbouncer', connect_timeout=1)
     conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
     cur.execute('SHOW VERSION;')

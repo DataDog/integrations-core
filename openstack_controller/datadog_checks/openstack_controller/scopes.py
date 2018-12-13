@@ -2,8 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.config import is_affirmative
-from .exceptions import (IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
-                         MissingNeutronEndpoint)
+from .exceptions import IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint, MissingNeutronEndpoint
 from .api import KeystoneApi
 
 
@@ -80,8 +79,9 @@ class ScopeFetcher(object):
         """
         user = instance_config.get('user')
 
-        if not (user and user.get('name') and user.get('password') and user.get("domain")
-                and user.get("domain").get("id")):
+        if not (
+            user and user.get('name') and user.get('password') and user.get("domain") and user.get("domain").get("id")
+        ):
             raise IncompleteIdentity()
 
         identity = {"methods": ['password'], "password": {"user": user}}
@@ -119,8 +119,12 @@ class ScopeFetcher(object):
         """
         catalog = resp.get('token', {}).get('catalog', [])
         for entry in catalog:
-            if entry.get('name') and entry.get('type') and entry.get('name') == name and \
-                            entry.get('type') == entry_type:
+            if (
+                entry.get('name')
+                and entry.get('type')
+                and entry.get('name') == name
+                and entry.get('type') == entry_type
+            ):
                 # Collect any endpoints on the public or internal interface
                 valid_endpoints = {}
                 for ep in entry.get('endpoints'):

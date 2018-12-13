@@ -24,19 +24,11 @@ BASE_URL = "http://{0}:{1}".format(HOST, PORT)
 STATUS_URL = "{0}/server-status".format(BASE_URL)
 AUTO_STATUS_URL = "{0}?auto".format(STATUS_URL)
 
-STATUS_CONFIG = {
-    'apache_status_url': STATUS_URL,
-    'tags': ['instance:first']
-}
+STATUS_CONFIG = {'apache_status_url': STATUS_URL, 'tags': ['instance:first']}
 
-AUTO_CONFIG = {
-    'apache_status_url': AUTO_STATUS_URL,
-    'tags': ['instance:second']
-}
+AUTO_CONFIG = {'apache_status_url': AUTO_STATUS_URL, 'tags': ['instance:second']}
 
-BAD_CONFIG = {
-    'apache_status_url': 'http://localhost:1234/server-status',
-}
+BAD_CONFIG = {'apache_status_url': 'http://localhost:1234/server-status'}
 
 APACHE_GAUGES = [
     'apache.performance.idle_workers',
@@ -48,13 +40,10 @@ APACHE_GAUGES = [
     'apache.conns_total',
     'apache.conns_async_writing',
     'apache.conns_async_keep_alive',
-    'apache.conns_async_closing'
+    'apache.conns_async_closing',
 ]
 
-APACHE_RATES = [
-    'apache.net.bytes_per_s',
-    'apache.net.request_per_s'
-]
+APACHE_RATES = ['apache.net.bytes_per_s', 'apache.net.request_per_s']
 
 
 def wait_for_apache():
@@ -75,10 +64,7 @@ def spin_up_apache():
     env = os.environ
     env['APACHE_CONFIG'] = os.path.join(HERE, 'compose', 'httpd.conf')
     env['APACHE_DOCKERFILE'] = os.path.join(HERE, 'compose', 'Dockerfile')
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'compose', 'apache.yaml')
-    ]
+    args = ["docker-compose", "-f", os.path.join(HERE, 'compose', 'apache.yaml')]
     subprocess.check_call(args + ["up", "-d", "--build"], env=env)
     wait_for_apache()
     for _ in range(0, 100):
@@ -91,6 +77,7 @@ def spin_up_apache():
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 

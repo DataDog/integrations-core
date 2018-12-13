@@ -11,6 +11,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
     """
     Collect kube-dns metrics from Prometheus
     """
+
     DEFAULT_METRIC_LIMIT = 0
 
     # Set up metric_transformers
@@ -24,7 +25,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
             'kubedns_kubedns_dns_cachemiss_count_total': self.kubedns_kubedns_dns_cachemiss_count_total,
             'skydns_skydns_dns_request_count_total': self.skydns_skydns_dns_request_count_total,
             'skydns_skydns_dns_error_count_total': self.skydns_skydns_dns_error_count_total,
-            'skydns_skydns_dns_cachemiss_count_total': self.skydns_skydns_dns_cachemiss_count_total
+            'skydns_skydns_dns_cachemiss_count_total': self.skydns_skydns_dns_cachemiss_count_total,
         }
 
         # Create instances we can use in OpenMetricsBaseCheck
@@ -59,24 +60,26 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
         # kube_dns uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
         kube_dns_instance['prometheus_url'] = instance.get('prometheus_endpoint', None)
 
-        kube_dns_instance.update({
-            'namespace': 'kubedns',
-
-            # Note: the count metrics were moved to specific functions list below to be submitted
-            # as both gauges and monotonic_counts
-            'metrics': [{
-                # metrics have been renamed to kubedns in kubernetes 1.6.0
-                'kubedns_kubedns_dns_response_size_bytes': 'response_size.bytes',
-                'kubedns_kubedns_dns_request_duration_seconds': 'request_duration.seconds',
-                # metrics names for kubernetes < 1.6.0
-                'skydns_skydns_dns_response_size_bytes': 'response_size.bytes',
-                'skydns_skydns_dns_request_duration_seconds': 'request_duration.seconds',
-            }],
-
-            # Defaults that were set when kube_dns was based on PrometheusCheck
-            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
-            'health_service_check': instance.get('health_service_check', False)
-        })
+        kube_dns_instance.update(
+            {
+                'namespace': 'kubedns',
+                # Note: the count metrics were moved to specific functions list below to be submitted
+                # as both gauges and monotonic_counts
+                'metrics': [
+                    {
+                        # metrics have been renamed to kubedns in kubernetes 1.6.0
+                        'kubedns_kubedns_dns_response_size_bytes': 'response_size.bytes',
+                        'kubedns_kubedns_dns_request_duration_seconds': 'request_duration.seconds',
+                        # metrics names for kubernetes < 1.6.0
+                        'skydns_skydns_dns_response_size_bytes': 'response_size.bytes',
+                        'skydns_skydns_dns_request_duration_seconds': 'request_duration.seconds',
+                    }
+                ],
+                # Defaults that were set when kube_dns was based on PrometheusCheck
+                'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+                'health_service_check': instance.get('health_service_check', False),
+            }
+        )
 
         return kube_dns_instance
 

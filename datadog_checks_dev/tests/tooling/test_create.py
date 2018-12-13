@@ -20,22 +20,14 @@ def test_new_check_test():
         run_command(
             [sys.executable, '-m', 'datadog_checks.dev', 'create', '-q', '-l', CORE_ROOT, 'my-check'],
             capture=True,
-            check=True
+            check=True,
         )
-        run_command(
-            [sys.executable, '-m', 'pip', 'install', check_path],
-            capture=True,
-            check=True
-        )
+        run_command([sys.executable, '-m', 'pip', 'install', check_path], capture=True, check=True)
 
         with chdir(check_path):
             with EnvVars(ignore=[TESTING_PLUGIN]):
                 run_command([sys.executable, '-m', 'pytest'], capture=True, check=True)
 
-        run_command(
-            [sys.executable, '-m', 'pip', 'uninstall', '-y', 'my-check'],
-            capture=True,
-            check=True
-        )
+        run_command([sys.executable, '-m', 'pip', 'uninstall', '-y', 'my-check'], capture=True, check=True)
     finally:
         remove_path(check_path)

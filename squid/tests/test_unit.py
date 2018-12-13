@@ -23,11 +23,8 @@ def test_parse_counter(aggregator, squid_check):
 @pytest.mark.unit
 def test_parse_instance(aggregator, squid_check):
     # instance with defaults
-    instance = {
-        "name": "ok_instance"
-    }
-    name, host, port, cachemgr_user, \
-        cachemgr_passwd, custom_tags = squid_check.parse_instance(instance)
+    instance = {"name": "ok_instance"}
+    name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = squid_check.parse_instance(instance)
     assert name == "ok_instance"
     assert host == "localhost"
     assert port == 3128
@@ -44,8 +41,7 @@ def test_parse_instance(aggregator, squid_check):
         "cachemgr_password": "pass",
         "tags": ["foo:bar"],
     }
-    name, host, port, cachemgr_user,\
-        cachemgr_passwd, custom_tags = squid_check.parse_instance(instance)
+    name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = squid_check.parse_instance(instance)
     assert name == "ok_instance"
     assert host == "host"
     assert port == 1234
@@ -54,9 +50,7 @@ def test_parse_instance(aggregator, squid_check):
     assert custom_tags == ["foo:bar"]
 
     # instance with no name
-    instance = {
-        "host": "host"
-    }
+    instance = {"host": "host"}
     with pytest.raises(Exception):
         squid_check.parse_instance(instance)
 

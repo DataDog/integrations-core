@@ -19,19 +19,11 @@ PORT = 8001
 STATUS_URL = 'http://{0}:{1}/status/'.format(HOST, PORT)
 
 CONFIG_STUBS = [
-    {
-        'kong_status_url': STATUS_URL,
-        'tags': ['first_instance']
-    },
-    {
-        'kong_status_url': STATUS_URL,
-        'tags': ['second_instance']
-    }
+    {'kong_status_url': STATUS_URL, 'tags': ['first_instance']},
+    {'kong_status_url': STATUS_URL, 'tags': ['second_instance']},
 ]
 
-BAD_CONFIG = {
-    'kong_status_url': 'http://localhost:1111/status/'
-}
+BAD_CONFIG = {'kong_status_url': 'http://localhost:1111/status/'}
 
 GAUGES = [
     'kong.total_requests',
@@ -43,9 +35,7 @@ GAUGES = [
     'kong.connections_handled',
 ]
 
-DATABASES = [
-    'reachable'
-]
+DATABASES = ['reachable']
 
 
 def wait_for_cluster():
@@ -70,10 +60,7 @@ def kong_cluster():
     compose_directory = os.path.join(HERE, 'compose')
     os.environ['COMPOSE_DIRECTORY_PATH'] = compose_directory
 
-    args = [
-        "docker-compose",
-        "-f", os.path.join(compose_directory, 'docker-compose.yml')
-    ]
+    args = ["docker-compose", "-f", os.path.join(compose_directory, 'docker-compose.yml')]
     subprocess.check_call(args + ["up", "-d"])
     if not wait_for_cluster():
         subprocess.check_call(args + ["down"])
@@ -90,6 +77,7 @@ def check():
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -108,8 +96,9 @@ def test_check(aggregator, check):
             tags = expected_tags + ['table:{}'.format(name)]
             aggregator.assert_metric('kong.table.items', tags=tags, count=1)
 
-        aggregator.assert_service_check('kong.can_connect', status=Kong.OK,
-                                        tags=['kong_host:localhost', 'kong_port:8001'] + expected_tags, count=1)
+        aggregator.assert_service_check(
+            'kong.can_connect', status=Kong.OK, tags=['kong_host:localhost', 'kong_port:8001'] + expected_tags, count=1
+        )
 
         aggregator.all_metrics_asserted()
 
@@ -117,7 +106,8 @@ def test_check(aggregator, check):
 def test_connection_failure(aggregator, check):
     with pytest.raises(Exception):
         check.check(BAD_CONFIG)
-    aggregator.assert_service_check('kong.can_connect', status=Kong.CRITICAL,
-                                    tags=['kong_host:localhost', 'kong_port:1111'], count=1)
+    aggregator.assert_service_check(
+        'kong.can_connect', status=Kong.CRITICAL, tags=['kong_host:localhost', 'kong_port:1111'], count=1
+    )
 
     aggregator.all_metrics_asserted()

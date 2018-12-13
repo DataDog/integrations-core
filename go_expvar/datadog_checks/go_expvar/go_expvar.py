@@ -26,11 +26,7 @@ COUNTER = "counter"
 DEFAULT_TYPE = GAUGE
 
 
-SUPPORTED_TYPES = {
-    GAUGE: AgentCheck.gauge,
-    RATE: AgentCheck.rate,
-    COUNTER: AgentCheck.increment,
-}
+SUPPORTED_TYPES = {GAUGE: AgentCheck.gauge, RATE: AgentCheck.rate, COUNTER: AgentCheck.increment}
 
 DEFAULT_METRIC_NAMESPACE = "go_expvar"
 
@@ -38,30 +34,35 @@ DEFAULT_METRIC_NAMESPACE = "go_expvar"
 # See http://golang.org/pkg/runtime/#MemStats
 DEFAULT_GAUGE_MEMSTAT_METRICS = [
     # General statistics
-    "Alloc", "TotalAlloc",
-
+    "Alloc",
+    "TotalAlloc",
     # Main allocation heap statistics
-    "HeapAlloc", "HeapSys", "HeapIdle", "HeapInuse",
-    "HeapReleased", "HeapObjects",
-
+    "HeapAlloc",
+    "HeapSys",
+    "HeapIdle",
+    "HeapInuse",
+    "HeapReleased",
+    "HeapObjects",
 ]
 
 DEFAULT_RATE_MEMSTAT_METRICS = [
     # General statistics
-    "Lookups", "Mallocs", "Frees",
-
+    "Lookups",
+    "Mallocs",
+    "Frees",
     # Garbage collector statistics
-    "PauseTotalNs", "NumGC",
+    "PauseTotalNs",
+    "NumGC",
 ]
 
-DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] +\
-    [{PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS]
+DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] + [
+    {PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS
+]
 
 GO_EXPVAR_URL_PATH = "/debug/vars"
 
 
 class GoExpvar(AgentCheck):
-
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._last_gc_count = defaultdict(int)
@@ -90,12 +91,7 @@ class GoExpvar(AgentCheck):
         else:
             cert = None
 
-        resp = requests.get(
-            url,
-            timeout=10,
-            verify=verify,
-            cert=cert
-        )
+        resp = requests.get(url, timeout=10, verify=verify, cert=cert)
         resp.raise_for_status()
         return resp.json()
 
@@ -137,9 +133,7 @@ class GoExpvar(AgentCheck):
         self._last_gc_count[url] = num_gc
 
         for value in values:
-            self.histogram(
-                self.normalize("memstats.PauseNs", namespace, fix_case=True),
-                value, tags=tags)
+            self.histogram(self.normalize("memstats.PauseNs", namespace, fix_case=True), value, tags=tags)
 
     def check(self, instance):
         data, tags, metrics, max_metrics, url, namespace = self._load(instance)
@@ -190,8 +184,10 @@ class GoExpvar(AgentCheck):
                     continue
 
                 if count >= max_metrics:
-                    self.warning("Reporting more metrics than the allowed maximum. "
-                                 "Please contact support@datadoghq.com for more information.")
+                    self.warning(
+                        "Reporting more metrics than the allowed maximum. "
+                        "Please contact support@datadoghq.com for more information."
+                    )
                     return
 
                 SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags + path_tag)
@@ -254,5 +250,4 @@ class GoExpvar(AgentCheck):
             for new_key, new_content in object.iteritems():
                 yield str(new_key), new_content
         else:
-            self.log.warning("Could not parse this object, check the json"
-                             "served by the expvar")
+            self.log.warning("Could not parse this object, check the json" "served by the expvar")

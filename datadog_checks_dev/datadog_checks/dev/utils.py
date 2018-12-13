@@ -18,10 +18,7 @@ __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 
-CI_IDENTIFIERS = (
-    'APPVEYOR_',
-    'TRAVIS_',
-)
+CI_IDENTIFIERS = ('APPVEYOR_', 'TRAVIS_')
 
 
 def running_on_ci():
@@ -29,6 +26,7 @@ def running_on_ci():
 
 
 if PY3:
+
     def write_file(file, contents, encoding='utf-8'):
         with open(file, 'w', encoding=encoding) as f:
             f.write(contents)
@@ -36,7 +34,10 @@ if PY3:
     def write_file_lines(file, lines, encoding='utf-8'):
         with open(file, 'w', encoding=encoding) as f:
             f.writelines(lines)
+
+
 else:
+
     def write_file(file, contents, encoding='utf-8'):
         with open(file, 'w', encoding=encoding) as f:
             f.write(text_type(contents))

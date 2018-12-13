@@ -29,9 +29,7 @@ def spin_up_fluentd(request):
 
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
-    with docker_run(compose_file,
-                    log_patterns="type monitor_agent",
-                    env_vars=env):
+    with docker_run(compose_file, log_patterns="type monitor_agent", env_vars=env):
         yield
 
 

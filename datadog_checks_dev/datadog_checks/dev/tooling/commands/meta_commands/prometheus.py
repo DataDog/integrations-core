@@ -16,11 +16,7 @@ from ...constants import get_root
 from ....utils import dir_exists, ensure_unicode, path_join, write_file_lines
 
 METRIC_SEPARATORS = ('.', '_')
-TYPE_MAP = {
-    'gauge': 'gauge',
-    'counter': 'count',
-    'histogram': 'gauge',
-}
+TYPE_MAP = {'gauge': 'gauge', 'counter': 'count', 'histogram': 'gauge'}
 METADATA_CSV_HEADER = (
     'metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name'
 )
@@ -28,10 +24,7 @@ METADATA_CSV_HEADER = (
 
 def sanitize_endpoint(endpoint):
     if not endpoint.startswith('http'):
-        endpoint = 'http://{}{}'.format(
-            'localhost' if endpoint.startswith(':') else '',
-            endpoint
-        )
+        endpoint = 'http://{}{}'.format('localhost' if endpoint.startswith(':') else '', endpoint)
 
     return endpoint
 
@@ -60,29 +53,15 @@ def parse_metrics(endpoint):
 
 
 def get_options_text(options):
-    return (
-        '\n{}\n'
-        'q - Quit'
-        .format(
-            '\n'.join(
-                '{} - {}'.format(n, option) for n, option in enumerate(options, 1)
-            )
-        )
-    )
+    return '\n{}\n' 'q - Quit'.format('\n'.join('{} - {}'.format(n, option) for n, option in enumerate(options, 1)))
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Prometheus utilities'
-)
+@click.group(context_settings=CONTEXT_SETTINGS, short_help='Prometheus utilities')
 def prom():
     pass
 
 
-@prom.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Show metric info from a Prometheus endpoint'
-)
+@prom.command(context_settings=CONTEXT_SETTINGS, short_help='Show metric info from a Prometheus endpoint')
 @click.argument('endpoint')
 def info(endpoint):
     """Show metric info from a Prometheus endpoint.
@@ -126,8 +105,7 @@ def info(endpoint):
 
 
 @prom.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Interactively parse metric info from a Prometheus endpoint'
+    context_settings=CONTEXT_SETTINGS, short_help='Interactively parse metric info from a Prometheus endpoint'
 )
 @click.argument('endpoint')
 @click.argument('check')
@@ -142,8 +120,7 @@ def parse(ctx, endpoint, check, here):
         if not dir_exists(output_dir):
             abort(
                 'Check `{check}` does not exist; try `ddev create{repo_flag} {check}`.'.format(
-                    check=check,
-                    repo_flag=' -e' if ctx.obj['repo_choice'] == 'extras' else ''
+                    check=check, repo_flag=' -e' if ctx.obj['repo_choice'] == 'extras' else ''
                 )
             )
 
@@ -257,10 +234,7 @@ def parse(ctx, endpoint, check, here):
 
         output_lines.append(
             '{check}.{metric_name},{metric_type},,,,{metric_description},0,{check},\n'.format(
-                check=check,
-                metric_name=metric_name,
-                metric_type=metric_type,
-                metric_description=metric_description,
+                check=check, metric_name=metric_name, metric_type=metric_type, metric_description=metric_description
             )
         )
 
@@ -270,15 +244,8 @@ def parse(ctx, endpoint, check, here):
     metric_map = (
         'METRIC_MAP = {{\n'
         '{}\n'
-        '}}'.format(
-            '\n'.join(
-                "    '{}': '{}',".format(metric, data['dd_name'])
-                for metric, data in metric_items
-            )
-        )
+        '}}'.format('\n'.join("    '{}': '{}',".format(metric, data['dd_name']) for metric, data in metric_items))
     )
 
     pyperclip.copy(metric_map)
-    echo_success(
-        '\nThe metric map has been copied to your clipboard, paste it to any file you want!'
-    )
+    echo_success('\nThe metric map has been copied to your clipboard, paste it to any file you want!')

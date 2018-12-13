@@ -15,18 +15,9 @@ from .common import PORT, PASSWORD, HOST
 
 
 # Following metrics are tagged by db
-DB_TAGGED_METRICS = [
-    'redis.persist.percent',
-    'redis.expires.percent',
-    'redis.persist',
-    'redis.keys',
-    'redis.expires',
-]
+DB_TAGGED_METRICS = ['redis.persist.percent', 'redis.expires.percent', 'redis.persist', 'redis.keys', 'redis.expires']
 
-STAT_METRICS = [
-    'redis.command.calls',
-    'redis.command.usec_per_call'
-]
+STAT_METRICS = ['redis.command.calls', 'redis.command.usec_per_call']
 
 
 @pytest.mark.integration

@@ -6,9 +6,7 @@ import sys
 
 import pytest
 
-from datadog_checks.dev.conditions import (
-    CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
-)
+from datadog_checks.dev.conditions import CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
 
@@ -38,9 +36,7 @@ class TestWaitFor:
 class TestCheckCommandOutput:
     def test_no_matches(self):
         check_command_output = CheckCommandOutput(
-            '{} -c "import os;print(\'foo\')"'.format(sys.executable),
-            ['bar'],
-            attempts=1
+            '{} -c "import os;print(\'foo\')"'.format(sys.executable), ['bar'], attempts=1
         )
 
         with pytest.raises(RetryError):
@@ -48,8 +44,7 @@ class TestCheckCommandOutput:
 
     def test_matches(self):
         check_command_output = CheckCommandOutput(
-            '{} -c "import os;print(\'foo\')"'.format(sys.executable),
-            ['foo', 'bar']
+            '{} -c "import os;print(\'foo\')"'.format(sys.executable), ['foo', 'bar']
         )
 
         matches = check_command_output()
@@ -57,10 +52,7 @@ class TestCheckCommandOutput:
 
     def test_matches_all_fail(self):
         check_command_output = CheckCommandOutput(
-            '{} -c "import os;print(\'foo\')"'.format(sys.executable),
-            ['foo', 'bar'],
-            matches='all',
-            attempts=1
+            '{} -c "import os;print(\'foo\')"'.format(sys.executable), ['foo', 'bar'], matches='all', attempts=1
         )
 
         with pytest.raises(RetryError):
@@ -68,9 +60,7 @@ class TestCheckCommandOutput:
 
     def test_matches_all_success(self):
         check_command_output = CheckCommandOutput(
-            '{} -c "import os;print(\'foobar\')"'.format(sys.executable),
-            ['foo', 'bar'],
-            matches='all'
+            '{} -c "import os;print(\'foobar\')"'.format(sys.executable), ['foo', 'bar'], matches='all'
         )
 
         matches = check_command_output()

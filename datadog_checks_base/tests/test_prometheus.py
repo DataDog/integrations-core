@@ -1232,7 +1232,7 @@ def test_parse_one_summary_with_none_values(p_check):
 
     # Root summary sample
     summary_metric.summary.sample_count = 0
-    summary_metric.summary.sample_sum = 0.
+    summary_metric.summary.sample_sum = 0.0
 
     # Create quantiles 0.5, 0.9, 0.99
     quantile_05 = summary_metric.summary.quantile.add()

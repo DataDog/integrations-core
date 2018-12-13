@@ -19,10 +19,7 @@ def test_couch(aggregator, check, couch_cluster):
     # Metrics should have been emitted for any publicly readable databases.
     for db_name in common.DB_NAMES:
         for gauge in common.CHECK_GAUGES:
-            expected_tags = common.BASIC_CONFIG_TAGS + [
-                "db:{}".format(db_name),
-                "device:{}".format(db_name)
-            ]
+            expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
             aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
     # Check global metrics
@@ -30,8 +27,9 @@ def test_couch(aggregator, check, couch_cluster):
         aggregator.assert_metric(gauge, tags=common.BASIC_CONFIG_TAGS, at_least=0)
 
     # 2 service checks: 1 per DB + 1 to get the version
-    aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK,
-                                    tags=common.BASIC_CONFIG_TAGS, count=2)
+    aggregator.assert_service_check(
+        CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=common.BASIC_CONFIG_TAGS, count=2
+    )
 
 
 def test_bad_config(aggregator, check):
@@ -45,15 +43,17 @@ def test_bad_config(aggregator, check):
     with pytest.raises(errors.ConnectionError):
         # the server instance is invalid
         check.check(common.BAD_CONFIG)
-        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL,
-                                        tags=common.BAD_CONFIG_TAGS, count=1)
+        aggregator.assert_service_check(
+            CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
+        )
 
     check.get = mock.MagicMock(return_value={'version': '0.1.0'})
     with pytest.raises(errors.BadVersionError):
         # the server has an unsupported version
         check.check(common.BAD_CONFIG)
-        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL,
-                                        tags=common.BAD_CONFIG_TAGS, count=1)
+        aggregator.assert_service_check(
+            CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL, tags=common.BAD_CONFIG_TAGS, count=1
+        )
 
 
 def test_couch_whitelist(aggregator, check, couch_cluster):
@@ -64,10 +64,7 @@ def test_couch_whitelist(aggregator, check, couch_cluster):
     check.check(config)
 
     for db_name in common.DB_NAMES:
-        expected_tags = common.BASIC_CONFIG_TAGS + [
-            "db:{}".format(db_name),
-            "device:{}".format(db_name)
-        ]
+        expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
         for gauge in common.CHECK_GAUGES:
             if db_name in DB_WHITELIST:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)
@@ -83,10 +80,7 @@ def test_couch_blacklist(aggregator, check, couch_cluster):
     check.check(config)
 
     for db_name in common.DB_NAMES:
-        expected_tags = common.BASIC_CONFIG_TAGS + [
-            "db:{}".format(db_name),
-            "device:{}".format(db_name)
-        ]
+        expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
         for gauge in common.CHECK_GAUGES:
             if db_name in DB_BLACKLIST:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)

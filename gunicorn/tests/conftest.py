@@ -35,6 +35,7 @@ def setup_gunicorn(request):
 
         def fin():
             proc.terminate()
+
         request.addfinalizer(fin)
 
         time.sleep(15)
@@ -87,9 +88,6 @@ def copy_config_files(conf_file, app_dir):
 
 def start_gunicorn(venv_bin_path, conf_file):
     gunicorn_file_path = os.path.join(venv_bin_path, 'gunicorn')
-    args = [gunicorn_file_path,
-            '--config={}'.format(conf_file),
-            '--name={}'.format(PROC_NAME),
-            'app:app']
+    args = [gunicorn_file_path, '--config={}'.format(conf_file), '--name={}'.format(PROC_NAME), 'app:app']
 
     return subprocess.Popen(args)

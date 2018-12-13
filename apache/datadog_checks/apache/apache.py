@@ -6,6 +6,7 @@ from six.moves.urllib.parse import urlparse
 import requests
 
 from datadog_checks.checks import AgentCheck
+
 # compatability layer
 try:
     from config import _is_affirmative
@@ -24,6 +25,7 @@ class Apache(AgentCheck):
 
     See http://httpd.apache.org/docs/2.2/mod/mod_status.html for more details
     """
+
     GAUGES = {
         'IdleWorkers': 'apache.performance.idle_workers',
         'BusyWorkers': 'apache.performance.busy_workers',
@@ -34,13 +36,10 @@ class Apache(AgentCheck):
         'ConnsTotal': 'apache.conns_total',
         'ConnsAsyncWriting': 'apache.conns_async_writing',
         'ConnsAsyncKeepAlive': 'apache.conns_async_keep_alive',
-        'ConnsAsyncClosing': 'apache.conns_async_closing'
+        'ConnsAsyncClosing': 'apache.conns_async_closing',
     }
 
-    RATES = {
-        'Total kBytes': 'apache.net.bytes_per_s',
-        'Total Accesses': 'apache.net.request_per_s'
-    }
+    RATES = {'Total kBytes': 'apache.net.bytes_per_s', 'Total Accesses': 'apache.net.request_per_s'}
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -70,20 +69,24 @@ class Apache(AgentCheck):
         service_check_name = 'apache.can_connect'
         service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
-            self.log.debug('apache check initiating request, connect timeout %d receive %d' %
-                           (connect_timeout, receive_timeout))
-            r = requests.get(url, auth=auth, headers=headers(self.agentConfig),
-                             verify=not disable_ssl_validation, timeout=(connect_timeout, receive_timeout))
+            self.log.debug(
+                'apache check initiating request, connect timeout %d receive %d' % (connect_timeout, receive_timeout)
+            )
+            r = requests.get(
+                url,
+                auth=auth,
+                headers=headers(self.agentConfig),
+                verify=not disable_ssl_validation,
+                timeout=(connect_timeout, receive_timeout),
+            )
             r.raise_for_status()
 
         except Exception as e:
             self.log.warning("Caught exception %s" % str(e))
-            self.service_check(service_check_name, AgentCheck.CRITICAL,
-                               tags=service_check_tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
         else:
-            self.service_check(service_check_name, AgentCheck.OK,
-                               tags=service_check_tags)
+            self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
         self.log.debug("apache check succeeded")
         metric_count = 0
         # Loop through and extract the numerical values
@@ -118,7 +121,7 @@ class Apache(AgentCheck):
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
                 self.check(instance)
             else:
-                raise Exception((
-                    "No metrics were fetched for this instance. "
-                    "Make sure that %s is the proper url.")
-                     % instance['apache_status_url'])
+                raise Exception(
+                    ("No metrics were fetched for this instance. " "Make sure that %s is the proper url.")
+                    % instance['apache_status_url']
+                )

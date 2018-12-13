@@ -26,23 +26,17 @@ CUSTOM_TAGS = ['optional:tag1']
 CHECK_TAGS = CUSTOM_TAGS + ['instance:http://{}:{}'.format(HOST, PORT)]
 BUCKET_NAME = 'cb_bucket'
 
-CONFIG = {
-    'instances': [{
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 0.5,
-        'tags': list(CUSTOM_TAGS),
-    }]
-}
+CONFIG = {'instances': [{'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 0.5, 'tags': list(CUSTOM_TAGS)}]}
 
 CONFIG_QUERY = {
-    'instances': [{
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 0.5,
-        'tags': list(CUSTOM_TAGS),
-        'query_monitoring_url': SYSTEM_VITALS_URL,
-    }]
+    'instances': [
+        {
+            'server': URL,
+            'user': USER,
+            'password': PASSWORD,
+            'timeout': 0.5,
+            'tags': list(CUSTOM_TAGS),
+            'query_monitoring_url': SYSTEM_VITALS_URL,
+        }
+    ]
 }

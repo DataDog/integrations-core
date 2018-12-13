@@ -7,26 +7,13 @@ import mock
 
 @pytest.mark.unit
 def test_get_app_tags(check):
-    app = {
-        'id': 'my_app_id',
-        'version': 'my_app_version',
-        'labels': {
-            'label_foo': 'foo_value',
-        },
-    }
+    app = {'id': 'my_app_id', 'version': 'my_app_version', 'labels': {'label_foo': 'foo_value'}}
 
     # call with default params
-    assert check.get_app_tags(app) == [
-        'app_id:my_app_id',
-        'version:my_app_version'
-    ]
+    assert check.get_app_tags(app) == ['app_id:my_app_id', 'version:my_app_version']
 
     # call with tags
-    assert check.get_app_tags(app, ['foo:bar']) == [
-        'app_id:my_app_id',
-        'version:my_app_version',
-        'foo:bar'
-    ]
+    assert check.get_app_tags(app, ['foo:bar']) == ['app_id:my_app_id', 'version:my_app_version', 'foo:bar']
 
     # call with labels (one label doesn't exist in app)
     assert check.get_app_tags(app, ['foo:bar'], ['label_foo', 'label_bar']) == [
@@ -37,14 +24,8 @@ def test_get_app_tags(check):
     ]
 
     # call with empty values
-    app = {
-        'id': '',
-        'version': '',
-    }
-    assert check.get_app_tags(app) == [
-        'app_id:',
-        'version:',
-    ]
+    app = {'id': '', 'version': ''}
+    assert check.get_app_tags(app) == ['app_id:', 'version:']
 
 
 @pytest.mark.unit
@@ -60,17 +41,14 @@ def test_process_apps_ko(check, aggregator):
 
 @pytest.mark.unit
 def test_process_apps(check, aggregator):
-    check.get_apps_json = mock.MagicMock(return_value={
-        'apps': [{
-            'id': '/',
-            'version': '',
-            'backoffSeconds': 99
-        }, {
-            'id': '/',
-            'version': '',
-            'backoffSeconds': 101
-        }]
-    })
+    check.get_apps_json = mock.MagicMock(
+        return_value={
+            'apps': [
+                {'id': '/', 'version': '', 'backoffSeconds': 99},
+                {'id': '/', 'version': '', 'backoffSeconds': 101},
+            ]
+        }
+    )
 
     check.process_apps('url', 10, 'auth', 'acs_url', False, [], [], None)
     aggregator.assert_metric('marathon.apps', value=2, count=1)
@@ -87,9 +65,7 @@ def test_get_instance_config(check):
         assert str(e) == 'Marathon instance missing "url" value.'
 
     # test defaults
-    instance = {
-        'url': 'http://foo',
-    }
+    instance = {'url': 'http://foo'}
     url, auth, acs_url, ssl_verify, group, tags, label_tags, timeout = check.get_instance_config(instance)
     assert url == 'http://foo'
     assert auth is None
@@ -101,10 +77,7 @@ def test_get_instance_config(check):
     assert timeout == 5
 
     # test auth
-    instance = {
-        'url': 'http://foo',
-        'user': 'user',
-    }
+    instance = {'url': 'http://foo', 'user': 'user'}
     _, auth, _, _, _, _, _, _ = check.get_instance_config(instance)
     assert auth is None
 
@@ -113,12 +86,7 @@ def test_get_instance_config(check):
     assert auth == ('user', 'mypass')
 
     # test misc
-    instance = {
-        'url': 'http://foo',
-        'disable_ssl_validation': True,
-        'tags': ['foo:bar'],
-        'label_tags': ['label_foo'],
-    }
+    instance = {'url': 'http://foo', 'disable_ssl_validation': True, 'tags': ['foo:bar'], 'label_tags': ['label_foo']}
     _, _, acs_url, ssl_verify, _, tags, label_tags, _ = check.get_instance_config(instance)
     assert ssl_verify is False
     assert tags == ['foo:bar']

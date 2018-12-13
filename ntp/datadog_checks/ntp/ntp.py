@@ -57,8 +57,7 @@ class NtpCheck(AgentCheck):
         try:
             ntp_stats = ntplib.NTPClient().request(**req_args)
         except ntplib.NTPException:
-            self.log.debug("Could not connect to NTP Server {}".format(
-                req_args['host']))
+            self.log.debug("Could not connect to NTP Server {}".format(req_args['host']))
             status = AgentCheck.UNKNOWN
             ntp_ts = None
         else:
@@ -71,8 +70,9 @@ class NtpCheck(AgentCheck):
 
             if abs(ntp_offset) > offset_threshold:
                 status = AgentCheck.CRITICAL
-                service_check_msg = "Offset {} secs higher than offset threshold ({} secs)".format(ntp_offset,
-                                                                                                   offset_threshold)
+                service_check_msg = "Offset {} secs higher than offset threshold ({} secs)".format(
+                    ntp_offset, offset_threshold
+                )
             else:
                 status = AgentCheck.OK
 

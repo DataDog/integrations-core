@@ -37,17 +37,14 @@ REQUIRES = [
 setup(
     name='datadog_checks_dev',
     version=VERSION,
-
     description='The Datadog Checks Developer Tools',
     long_description=README,
     long_description_content_type='text/markdown',
     keywords='datadog agent checks dev tools tests',
-
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
-
     # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -61,11 +58,9 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-
     packages=['datadog_checks', 'datadog_checks.dev'],
     install_requires=REQUIRES,
     include_package_data=True,
-
     extras_require={
         'cli': [
             'appdirs',
@@ -83,13 +78,10 @@ setup(
             'tox',
             'twine>=1.11.0',
             'wheel>=0.31.0',
-        ],
+        ]
     },
-
     entry_points={
         'pytest11': ['datadog_checks = datadog_checks.dev.plugin.plugin'],
-        'console_scripts': [
-            'ddev = datadog_checks.dev.tooling.cli:ddev',
-        ],
+        'console_scripts': ['ddev = datadog_checks.dev.tooling.cli:ddev'],
     },
 )

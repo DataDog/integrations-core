@@ -6,6 +6,7 @@ import time
 import sys
 
 import pytest
+
 try:
     import pyodbc
 except ImportError:
@@ -34,11 +35,7 @@ def lib_tds_path():
 def init_config():
     return {
         'custom_metrics': [
-            {
-                'name': 'sqlserver.clr.execution',
-                'type': 'gauge',
-                'counter_name': 'CLR Execution',
-            },
+            {'name': 'sqlserver.clr.execution', 'type': 'gauge', 'counter_name': 'CLR Execution'},
             {
                 'name': 'sqlserver.exec.in_progress',
                 'type': 'gauge',
@@ -52,17 +49,13 @@ def init_config():
                 'instance_name': 'ALL',
                 'tag_by': 'db',
             },
-        ],
+        ]
     }
 
 
 @pytest.fixture
 def instance_sql2008():
-    return {
-        'host': r'(local)\SQL2008R2SP2',
-        'username': 'sa',
-        'password': 'Password12!',
-    }
+    return {'host': r'(local)\SQL2008R2SP2', 'username': 'sa', 'password': 'Password12!'}
 
 
 @pytest.fixture
@@ -94,7 +87,7 @@ def sqlserver():
                 pyodbc.connect(conn, timeout=30)
                 booted = True
             except pyodbc.Error as e:
-                sys.stderr.write(str(e)+'\n')
+                sys.stderr.write(str(e) + '\n')
                 time.sleep(3)
 
         if not booted:

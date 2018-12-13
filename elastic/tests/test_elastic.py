@@ -10,8 +10,13 @@ from six import iteritems
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
-    CLUSTER_PENDING_TASKS, ADDITIONAL_METRICS_1_x, STATS_METRICS, index_stats_for_version,
-    stats_for_version, pshard_stats_for_version, health_stats_for_version
+    CLUSTER_PENDING_TASKS,
+    ADDITIONAL_METRICS_1_x,
+    STATS_METRICS,
+    index_stats_for_version,
+    stats_for_version,
+    pshard_stats_for_version,
+    health_stats_for_version,
 )
 from .common import CLUSTER_TAG, PASSWORD, URL, USER
 
@@ -22,9 +27,7 @@ log = logging.getLogger('test_elastic')
 @pytest.mark.unit
 def test__join_url(elastic_check):
     adm_forwarder_joined_url = elastic_check._join_url(
-        "https://localhost:9444/elasticsearch-admin",
-        "/stats",
-        admin_forwarder=True
+        "https://localhost:9444/elasticsearch-admin", "/stats", admin_forwarder=True
     )
     assert adm_forwarder_joined_url == "https://localhost:9444/elasticsearch-admin/stats"
 
@@ -78,9 +81,7 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
     elastic_check.check(instance)
 
     # node stats, blacklist metrics that can't be tested in a small, single node instance
-    blacklist = [
-        'elasticsearch.indices.segments.index_writer_max_memory_in_bytes',
-    ]
+    blacklist = ['elasticsearch.indices.segments.index_writer_max_memory_in_bytes']
     blacklist.extend(ADDITIONAL_METRICS_1_x)
     for m_name, desc in iteritems(stats_for_version(es_version)):
         if m_name in blacklist:
@@ -158,8 +159,6 @@ def test_health_event(dd_environment, aggregator, elastic_check):
 
     if es_version < [2, 0, 0]:
         assert len(aggregator.events) == 1
-        assert sorted(aggregator.events[0]['tags']) == sorted(
-            set(['url:{}'.format(URL)] + dummy_tags + CLUSTER_TAG)
-        )
+        assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:{}'.format(URL)] + dummy_tags + CLUSTER_TAG))
     else:
         aggregator.assert_service_check('elasticsearch.cluster_health')

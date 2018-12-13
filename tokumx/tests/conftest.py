@@ -23,13 +23,9 @@ def spin_up_tokumx(request):
 
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     compose_dir = os.path.join(common.HERE, 'compose')
-    env = {
-        'COMPOSE_DIR': compose_dir
-    }
+    env = {'COMPOSE_DIR': compose_dir}
 
-    with docker_run(compose_file,
-                    log_patterns='admin web console waiting for connections',
-                    env_vars=env):
+    with docker_run(compose_file, log_patterns='admin web console waiting for connections', env_vars=env):
         yield
 
 
@@ -41,9 +37,8 @@ def check():
 @pytest.fixture(scope="session")
 def set_up_tokumx():
     cli = pymongo.mongo_client.MongoClient(
-        common.TOKUMX_SERVER,
-        socketTimeoutMS=30000,
-        read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)
+        common.TOKUMX_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+    )
 
     foos = []
     for _ in range(70):
@@ -71,9 +66,8 @@ def set_up_tokumx():
 
 def tear_down_tokumx():
     cli = pymongo.mongo_client.MongoClient(
-        common.TOKUMX_SERVER,
-        socketTimeoutMS=30000,
-        read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)
+        common.TOKUMX_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+    )
 
     db = cli['test']
     db.drop_collection("foo")

@@ -13,14 +13,9 @@ from datadog_checks.dotnetclr.dotnetclr import DEFAULT_COUNTERS
 from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-MINIMAL_INSTANCE = {
-    'host': '.',
-}
+MINIMAL_INSTANCE = {'host': '.'}
 
-INSTANCE_WITH_TAGS = {
-    'host': '.',
-    'tags': ['tag1', 'another:tag']
-}
+INSTANCE_WITH_TAGS = {'host': '.', 'tags': ['tag1', 'another:tag']}
 
 
 @pytest.fixture

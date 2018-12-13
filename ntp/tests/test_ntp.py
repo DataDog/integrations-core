@@ -9,12 +9,7 @@ from datadog_checks.ntp import NtpCheck
 
 @pytest.fixture
 def instance():
-    return {
-        'host': 'foo.com',
-        'version': 42,
-        'timeout': 13.37,
-        'tags': ['mytag'],
-    }
+    return {'host': 'foo.com', 'version': 42, 'timeout': 13.37, 'tags': ['mytag']}
 
 
 @pytest.fixture
@@ -85,8 +80,9 @@ def test_service_check_unknown(check, ntp_client, instance):
         c.return_value = ntp_client
         ntp_client.request.side_effect = ntplib.NTPException
         check.check(instance)
-        check.service_check.assert_called_once_with('ntp.in_sync', NtpCheck.UNKNOWN,
-                                                    message=None, tags=['mytag'], timestamp=None)
+        check.service_check.assert_called_once_with(
+            'ntp.in_sync', NtpCheck.UNKNOWN, message=None, tags=['mytag'], timestamp=None
+        )
 
 
 def test_service_check_ok(check, ntp_client, instance):
@@ -97,8 +93,9 @@ def test_service_check_ok(check, ntp_client, instance):
     with mock.patch('datadog_checks.ntp.ntp.ntplib.NTPClient') as c:
         c.return_value = ntp_client
         check.check(instance)
-        check.service_check.assert_called_once_with('ntp.in_sync', NtpCheck.OK,
-                                                    message=None, tags=['mytag'], timestamp=4242)
+        check.service_check.assert_called_once_with(
+            'ntp.in_sync', NtpCheck.OK, message=None, tags=['mytag'], timestamp=4242
+        )
 
 
 def test_service_check_ko(check, ntp_client, instance):
@@ -108,9 +105,13 @@ def test_service_check_ko(check, ntp_client, instance):
     with mock.patch('datadog_checks.ntp.ntp.ntplib.NTPClient') as c:
         c.return_value = ntp_client
         check.check(instance)
-        check.service_check.assert_called_once_with('ntp.in_sync', NtpCheck.CRITICAL,
-                                                    message='Offset 1042 secs higher than offset threshold (60 secs)',
-                                                    tags=['mytag'], timestamp=4242)
+        check.service_check.assert_called_once_with(
+            'ntp.in_sync',
+            NtpCheck.CRITICAL,
+            message='Offset 1042 secs higher than offset threshold (60 secs)',
+            tags=['mytag'],
+            timestamp=4242,
+        )
 
 
 def test__get_service_port(check, instance):

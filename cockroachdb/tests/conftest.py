@@ -14,15 +14,10 @@ DOCKER_DIR = os.path.join(HERE, 'docker')
 
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment(instance):
-    with docker_run(
-        os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
-        endpoints=instance['prometheus_url'],
-    ):
+    with docker_run(os.path.join(DOCKER_DIR, 'docker-compose.yaml'), endpoints=instance['prometheus_url']):
         yield instance
 
 
 @pytest.fixture(scope='session')
 def instance():
-    return {
-        'prometheus_url': 'http://{}:{}/_status/vars'.format(HOST, PORT),
-    }
+    return {'prometheus_url': 'http://{}:{}/_status/vars'.format(HOST, PORT)}

@@ -29,6 +29,7 @@ class AggregatorStub(object):
     Mainly used for unit testing checks, this stub makes possible to execute
     a check without a running Agent.
     """
+
     # Replicate the Enum we have on the Agent
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = range(7)
 
@@ -57,7 +58,7 @@ class AggregatorStub(object):
                 stub.type,
                 stub.value,
                 normalize_tags(stub.tags),
-                ensure_unicode(stub.hostname)
+                ensure_unicode(stub.hostname),
             )
             for stub in self._metrics.get(ensure_bytes(name), [])
         ]
@@ -73,7 +74,7 @@ class AggregatorStub(object):
                 stub.status,
                 normalize_tags(stub.tags),
                 ensure_unicode(stub.hostname),
-                ensure_unicode(stub.message)
+                ensure_unicode(stub.message),
             )
             for stub in self._service_checks.get(ensure_bytes(name), [])
         ]
@@ -83,10 +84,7 @@ class AggregatorStub(object):
         """
         Return all events
         """
-        all_events = [
-            {ensure_unicode(key): value for key, value in iteritems(ev)}
-            for ev in self._events
-        ]
+        all_events = [{ensure_unicode(key): value for key, value in iteritems(ev)} for ev in self._events]
 
         for ev in all_events:
             to_decode = []
@@ -119,12 +117,10 @@ class AggregatorStub(object):
 
     # Potential kwargs: aggregation_key, alert_type, event_type,
     # msg_title, source_type_name
-    def assert_event(self, msg_text, count=None, at_least=1, exact_match=True,
-                     tags=None, **kwargs):
+    def assert_event(self, msg_text, count=None, at_least=1, exact_match=True, tags=None, **kwargs):
         candidates = []
         for e in self.events:
-            if exact_match and msg_text != e['msg_text'] or \
-                    msg_text not in e['msg_text']:
+            if exact_match and msg_text != e['msg_text'] or msg_text not in e['msg_text']:
                 continue
             if tags and set(tags) != set(e['tags']):
                 continue
@@ -134,15 +130,15 @@ class AggregatorStub(object):
             else:
                 candidates.append(e)
 
-        msg = ("Candidates size assertion for {0}, count: {1}, "
-               "at_least: {2}) failed").format(msg_text, count, at_least)
+        msg = ("Candidates size assertion for {0}, count: {1}, " "at_least: {2}) failed").format(
+            msg_text, count, at_least
+        )
         if count is not None:
             assert len(candidates) == count, msg
         else:
             assert len(candidates) >= at_least, msg
 
-    def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
-                      hostname=None, metric_type=None):
+    def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None):
         """
         Assert a metric was processed by this stub
         """

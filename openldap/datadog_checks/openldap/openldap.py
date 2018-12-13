@@ -65,9 +65,11 @@ class OpenLDAP(AgentCheck):
             return None
 
         if not ssl_params["verify"] and ssl_params["ca_certs"]:
-            self.warning("Incorrect configuration: trying to disable server certificate validation, "
-                         "while also specifying a capath. No validation will be performed. Fix your "
-                         "configuration to remove this warning")
+            self.warning(
+                "Incorrect configuration: trying to disable server certificate validation, "
+                "while also specifying a capath. No validation will be performed. Fix your "
+                "configuration to remove this warning"
+            )
 
         validate = ssl.CERT_REQUIRED if ssl_params["verify"] else ssl.CERT_NONE
 
@@ -88,8 +90,9 @@ class OpenLDAP(AgentCheck):
                 validate=validate,
             )
         else:
-            raise CheckException("Invalid path {} for ssl_ca_certs: no such file or directory"
-                                 .format(ssl_params["ca_certs"]))
+            raise CheckException(
+                "Invalid path {} for ssl_ca_certs: no such file or directory".format(ssl_params["ca_certs"])
+            )
         return tls
 
     def _get_instance_params(self, instance):
@@ -107,7 +110,7 @@ class OpenLDAP(AgentCheck):
                 "key": instance.get("ssl_key"),
                 "cert": instance.get("ssl_cert"),
                 "ca_certs": instance.get("ssl_ca_certs"),
-                "verify": is_affirmative(instance.get("ssl_verify", True))
+                "verify": is_affirmative(instance.get("ssl_verify", True)),
             }
         custom_queries = instance.get("custom_queries", [])
         tags = copy(instance.get("tags", []))
@@ -194,8 +197,9 @@ class OpenLDAP(AgentCheck):
         if cn in ["max_file_descriptors", "current"]:
             self.gauge("{}.connections.{}".format(METRIC_PREFIX, cn), entry["monitorCounter"].value, tags=tags)
         elif cn == "total":
-            self.monotonic_count("{}.connections.{}".format(METRIC_PREFIX, cn),
-                                 entry["monitorCounter"].value, tags=tags)
+            self.monotonic_count(
+                "{}.connections.{}".format(METRIC_PREFIX, cn), entry["monitorCounter"].value, tags=tags
+            )
 
     def _handle_operations_entry(self, entry, tags):
         cn = self._extract_common_name(entry.entry_dn)
@@ -206,10 +210,12 @@ class OpenLDAP(AgentCheck):
             self.monotonic_count("{}.operations.initiated.total".format(METRIC_PREFIX), initiated, tags=tags)
             self.monotonic_count("{}.operations.completed.total".format(METRIC_PREFIX), completed, tags=tags)
         else:
-            self.monotonic_count("{}.operations.initiated".format(METRIC_PREFIX),
-                                 initiated, tags=tags + ["operation:{}".format(cn)])
-            self.monotonic_count("{}.operations.completed".format(METRIC_PREFIX),
-                                 completed, tags=tags + ["operation:{}".format(cn)])
+            self.monotonic_count(
+                "{}.operations.initiated".format(METRIC_PREFIX), initiated, tags=tags + ["operation:{}".format(cn)]
+            )
+            self.monotonic_count(
+                "{}.operations.completed".format(METRIC_PREFIX), completed, tags=tags + ["operation:{}".format(cn)]
+            )
 
     def _handle_statistics_entry(self, entry, tags):
         cn = self._extract_common_name(entry.entry_dn)

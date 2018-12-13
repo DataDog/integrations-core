@@ -68,7 +68,6 @@ SQUID_COUNTERS = [
 
 
 class SquidCheck(AgentCheck):
-
     def check(self, instance):
 
         name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = self.parse_instance(instance)

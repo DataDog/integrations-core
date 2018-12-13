@@ -84,10 +84,7 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
     if unknown_tags:
         raise UnknownTags('{}'.format('|||'.join(unknown_tags)))
 
-    tags = [
-        '{}:{}'.format(tag_name, tag_value)
-        for tag_name, tag_value in zip(tag_names, tag_values)
-    ]
+    tags = ['{}:{}'.format(tag_name, tag_value) for tag_name, tag_value in zip(tag_names, tag_values)]
 
     return METRIC_PREFIX + metric, tags, METRICS[metric]['method']
 

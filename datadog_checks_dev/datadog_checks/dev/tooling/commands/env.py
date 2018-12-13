@@ -7,10 +7,7 @@ from .env_commands import ALL_COMMANDS
 from .utils import CONTEXT_SETTINGS
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Manage environments'
-)
+@click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage environments')
 def env():
     pass
 

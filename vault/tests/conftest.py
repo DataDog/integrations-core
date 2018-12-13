@@ -17,7 +17,6 @@ def dd_environment():
     instance = INSTANCES['main']
 
     with docker_run(
-        os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
-        endpoints='{}/sys/health'.format(instance['api_url'])
+        os.path.join(DOCKER_DIR, 'docker-compose.yaml'), endpoints='{}/sys/health'.format(instance['api_url'])
     ):
         yield instance

@@ -18,19 +18,14 @@ def display_multiple_attributes(attributes, message):
             echo_info('    {}: {} and {}'.format(attribute, checks[0], checks[1]))
         else:
             remaining = len(checks) - 2
-            echo_info('    {}: {}, {}, and {} other{}'.format(
-                attribute,
-                checks[0],
-                checks[1],
-                remaining,
-                's' if remaining > 1 else ''
-            ))
+            echo_info(
+                '    {}: {}, {}, and {} other{}'.format(
+                    attribute, checks[0], checks[1], remaining, 's' if remaining > 1 else ''
+                )
+            )
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Verify the uniqueness of dependency versions'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Verify the uniqueness of dependency versions')
 def dep():
     """Verify the uniqueness of dependency versions across all checks."""
     all_packages, _ = collect_packages()

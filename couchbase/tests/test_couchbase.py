@@ -21,10 +21,12 @@ def test_service_check(aggregator, couchbase_container_ip):
     NODE_TAGS = ['node:{}'.format(NODE_HOST)]
 
     aggregator.assert_service_check(Couchbase.SERVICE_CHECK_NAME, tags=CHECK_TAGS, status=Couchbase.OK, count=1)
-    aggregator.assert_service_check(Couchbase.NODE_CLUSTER_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS,
-                                    status=Couchbase.OK, count=1)
-    aggregator.assert_service_check(Couchbase.NODE_HEALTH_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS,
-                                    status=Couchbase.OK, count=1)
+    aggregator.assert_service_check(
+        Couchbase.NODE_CLUSTER_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS, status=Couchbase.OK, count=1
+    )
+    aggregator.assert_service_check(
+        Couchbase.NODE_HEALTH_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS, status=Couchbase.OK, count=1
+    )
 
 
 @pytest.mark.integration
@@ -72,7 +74,7 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
             aggregator.assert_metric(bucket_metric, tags=CHECK_TAGS + BUCKET_TAGS, count=1)
             bucket_metric_count += 1
 
-    assert(bucket_metric_count > 10)
+    assert bucket_metric_count > 10
 
     # Assert 'couchbase.by_node.' metrics
     NODE_HOST = '{}:{}'.format(couchbase_container_ip, PORT)
@@ -84,7 +86,7 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
         'couch_docs_actual_disk_size',
         'couch_views_data_size',
         'couch_views_actual_disk_size',
-        'vb_replica_curr_items'
+        'vb_replica_curr_items',
     ]
     for mname in NODE_STATS:
         aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=CHECK_TAGS + NODE_TAGS, count=1)
@@ -99,7 +101,7 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
         'ram.used',
         'ram.total',
         'ram.quota_total',
-        'ram.used_by_data'
+        'ram.used_by_data',
     ]
     for mname in TOTAL_STATS:
         aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)

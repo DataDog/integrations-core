@@ -14,14 +14,8 @@ COMPOSE_DIR = os.path.join(HERE, 'compose')
 
 @pytest.fixture(scope='session', autouse=True)
 def spin_up_snmp():
-    env = {
-        'COMPOSE_DIR': COMPOSE_DIR
-    }
-    with docker_run(
-        os.path.join(COMPOSE_DIR, 'docker-compose.yaml'),
-        env_vars=env,
-        log_patterns="Listening at"
-    ):
+    env = {'COMPOSE_DIR': COMPOSE_DIR}
+    with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
         yield
 
 

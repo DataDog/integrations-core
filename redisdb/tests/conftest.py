@@ -44,14 +44,7 @@ class CheckCluster(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError(
-                'Redis cluster boot timed out!\n'
-                'Master: {}\n'
-                'Replica: {}'.format(
-                    master,
-                    replica
-                )
-            )
+            raise RetryError('Redis cluster boot timed out!\n' 'Master: {}\n' 'Replica: {}'.format(master, replica))
 
 
 @pytest.fixture(scope='session')
@@ -64,7 +57,7 @@ def redis_auth():
     """
     with docker_run(
         os.path.join(HERE, 'compose', 'standalone.compose'),
-        env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf')}
+        env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf')},
     ):
         yield
 
@@ -77,42 +70,25 @@ def dd_environment(master_instance):
     with docker_run(
         os.path.join(HERE, 'compose', '1m-2s.compose'),
         conditions=[
-            CheckCluster(
-                {'port': MASTER_PORT, 'db': 14, 'host': HOST},
-                {'port': REPLICA_PORT, 'db': 14, 'host': HOST},
-            )
-        ]
+            CheckCluster({'port': MASTER_PORT, 'db': 14, 'host': HOST}, {'port': REPLICA_PORT, 'db': 14, 'host': HOST})
+        ],
     ):
         yield master_instance
 
 
 @pytest.fixture
 def redis_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'password': PASSWORD,
-        'keys': ['test_*'],
-        'tags': ["foo:bar"]
-    }
+    return {'host': HOST, 'port': PORT, 'password': PASSWORD, 'keys': ['test_*'], 'tags': ["foo:bar"]}
 
 
 @pytest.fixture
 def replica_instance():
-    return {
-        'host': HOST,
-        'port': REPLICA_PORT,
-        'tags': ["bar:baz"]
-    }
+    return {'host': HOST, 'port': REPLICA_PORT, 'tags': ["bar:baz"]}
 
 
 @pytest.fixture(scope='session')
 def master_instance():
-    return {
-        'host': HOST,
-        'port': MASTER_PORT,
-        'keys': ['test_*'],
-    }
+    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*']}
 
 
 @pytest.fixture

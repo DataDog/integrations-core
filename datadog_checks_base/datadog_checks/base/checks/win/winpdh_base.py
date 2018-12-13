@@ -12,16 +12,9 @@ except ImportError:
 from .. import AgentCheck
 from ...utils.containers import hash_mutable
 
-int_types = [
-    "int",
-    "long",
-    "uint",
-]
+int_types = ["int", "long", "uint"]
 
-double_types = [
-    "double",
-    "float",
-]
+double_types = ["double", "float"]
 
 
 class PDHBaseCheck(AgentCheck):
@@ -30,6 +23,7 @@ class PDHBaseCheck(AgentCheck):
 
     Windows only.
     """
+
     def __init__(self, name, init_config, agentConfig, instances, counter_list):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._countersettypes = {}
@@ -111,7 +105,7 @@ class PDHBaseCheck(AgentCheck):
                             self.log,
                             inst_name,
                             machine_name=remote_machine,
-                            precision=precision
+                            precision=precision,
                         )
                     except Exception as e:
                         self.log.warning("Couldn't create counter {}\\{} due to {}".format(counterset, counter_name, e))
@@ -127,10 +121,10 @@ class PDHBaseCheck(AgentCheck):
                 if addl_metrics is not None:
                     for counterset, inst_name, counter_name, dd_name, mtype in addl_metrics:
                         if (
-                            inst_name.lower() == "none" or
-                            len(inst_name) == 0 or
-                            inst_name == "*" or
-                            inst_name.lower() == "all"
+                            inst_name.lower() == "none"
+                            or len(inst_name) == 0
+                            or inst_name == "*"
+                            or inst_name.lower() == "all"
                         ):
                             inst_name = None
                         m = getattr(self, mtype.lower())
@@ -144,7 +138,7 @@ class PDHBaseCheck(AgentCheck):
                                 self.log,
                                 inst_name,
                                 machine_name=remote_machine,
-                                precision=precision
+                                precision=precision,
                             )
                         except Exception as e:
                             self.log.warning(

@@ -14,10 +14,20 @@ from .exceptions import APIParsingException, ConfigurationException, APIConnecti
 
 
 class SessionWrapper:
-    def __init__(self, aci_url, session,
-                 apic_cookie=None, username=None, cert_name=None,
-                 cert_key=None, verify=None, timeout=None, log=None, appcenter=False,
-                 cert_key_password=None):
+    def __init__(
+        self,
+        aci_url,
+        session,
+        apic_cookie=None,
+        username=None,
+        cert_name=None,
+        cert_key=None,
+        verify=None,
+        timeout=None,
+        log=None,
+        appcenter=False,
+        cert_key_password=None,
+    ):
         self.session = session
         self.aci_url = aci_url
         self.verify = verify
@@ -33,7 +43,9 @@ class SessionWrapper:
 
         self.cert_key = cert_key
         if cert_key:
-            self.cert_key = serialization.load_pem_private_key(cert_key, password=cert_key_password, backend=default_backend())
+            self.cert_key = serialization.load_pem_private_key(
+                cert_key, password=cert_key_password, backend=default_backend()
+            )
 
     def send(self, req):
         req.headers['Cookie'] = self.apic_cookie
@@ -53,15 +65,15 @@ class SessionWrapper:
         if self.apic_cookie:
             prepped_request.headers['Cookie'] = self.apic_cookie
         elif self.cert_key:
-            signature = self.cert_key.sign(payload,
-                                           padding.PKCS1v15(),
-                                           hashes.SHA256())
+            signature = self.cert_key.sign(payload, padding.PKCS1v15(), hashes.SHA256())
 
             signature = base64.b64encode(signature)
-            cookie = ('APIC-Request-Signature={}; '
-                      'APIC-Certificate-Algorithm=v1.0; '
-                      'APIC-Certificate-Fingerprint=fingerprint; '
-                      'APIC-Certificate-DN={}').format(signature, self.certDn)
+            cookie = (
+                'APIC-Request-Signature={}; '
+                'APIC-Certificate-Algorithm=v1.0; '
+                'APIC-Certificate-Fingerprint=fingerprint; '
+                'APIC-Certificate-DN={}'
+            ).format(signature, self.certDn)
             prepped_request.headers['Cookie'] = cookie
         else:
             self.warning("The Cisco ACI Integration requires either a cert or a username and password")
@@ -81,10 +93,20 @@ class SessionWrapper:
 
 
 class Api:
-    def __init__(self, aci_urls, username,
-                 cert_name=None, cert_key=None, password=None,
-                 verify=False, timeout=10, log=None, sessions=None,
-                 cert_key_password=None, appcenter=False):
+    def __init__(
+        self,
+        aci_urls,
+        username,
+        cert_name=None,
+        cert_key=None,
+        password=None,
+        verify=False,
+        timeout=10,
+        log=None,
+        sessions=None,
+        cert_key_password=None,
+        appcenter=False,
+    ):
         self.aci_urls = aci_urls
         self.username = username
         self.timeout = timeout
@@ -98,6 +120,7 @@ class Api:
             self.log = log
         else:
             import logging
+
             self.log = logging.getLogger('cisco_api')
         # This is used in testing
         self._refresh_sessions = True
@@ -133,15 +156,18 @@ class Api:
                 session = Session()
 
             if self._refresh_sessions:
-                session_wrapper = SessionWrapper(aci_url, session,
-                                                 cert_name=self.cert_name,
-                                                 cert_key=self.cert_key,
-                                                 verify=self.verify,
-                                                 timeout=self.timeout,
-                                                 appcenter=self.appcenter,
-                                                 username=self.username,
-                                                 cert_key_password=self.cert_key_password,
-                                                 log=self.log)
+                session_wrapper = SessionWrapper(
+                    aci_url,
+                    session,
+                    cert_name=self.cert_name,
+                    cert_key=self.cert_key,
+                    verify=self.verify,
+                    timeout=self.timeout,
+                    appcenter=self.appcenter,
+                    username=self.username,
+                    cert_key_password=self.cert_key_password,
+                    log=self.log,
+                )
                 self.sessions.append(session_wrapper)
 
     def password_login(self):
@@ -166,11 +192,9 @@ class Api:
             response.raise_for_status()
             apic_cookie = 'APIC-Cookie={}'.format(response.cookies.get('APIC-cookie'))
             if self._refresh_sessions:
-                session_wrapper = SessionWrapper(aci_url, session,
-                                                 apic_cookie=apic_cookie,
-                                                 verify=self.verify,
-                                                 timeout=self.timeout,
-                                                 log=self.log)
+                session_wrapper = SessionWrapper(
+                    aci_url, session, apic_cookie=apic_cookie, verify=self.verify, timeout=self.timeout, log=self.log
+                )
                 self.sessions.append(session_wrapper)
             else:
                 session_wrapper.apic_cookie = apic_cookie

@@ -20,8 +20,14 @@ def wait_for(service_name, port):
     """
     for _ in range(10):
         try:
-            psycopg2.connect(host=common.HOST, port=port, user=common.USER, password=common.PASS,
-                             database=common.DB, connect_timeout=2)
+            psycopg2.connect(
+                host=common.HOST,
+                port=port,
+                user=common.USER,
+                password=common.PASS,
+                database=common.DB,
+                connect_timeout=2,
+            )
             print("{} started".format(service_name))
             return True
         except Exception:
@@ -39,10 +45,7 @@ def pgb_service():
     """
     env = os.environ
     env['TEST_RESOURCES_PATH'] = os.path.join(HERE, 'resources')
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'docker-compose.yml')
-    ]
+    args = ["docker-compose", "-f", os.path.join(HERE, 'docker-compose.yml')]
 
     subprocess.check_call(args + ["up", "-d"], env=env)
 
@@ -68,20 +71,18 @@ def instance():
         'port': common.PORT,
         'username': common.USER,
         'password': common.PASS,
-        'tags': ['optional:tag1']
+        'tags': ['optional:tag1'],
     }
 
 
 @pytest.fixture
 def instance_with_url():
-    return {
-        'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test',
-        'tags': ['optional:tag1']
-    }
+    return {'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test', 'tags': ['optional:tag1']}
 
 
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator

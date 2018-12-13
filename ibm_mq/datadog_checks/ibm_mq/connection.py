@@ -29,19 +29,11 @@ def get_normal_connection(config):
     if config.username and config.password:
         log.debug("connecting with username and password")
         queue_manager = pymqi.connect(
-            config.queue_manager_name,
-            config.channel,
-            config.host_and_port,
-            config.username,
-            config.password
+            config.queue_manager_name, config.channel, config.host_and_port, config.username, config.password
         )
     else:
         log.debug("connecting without a username and password")
-        queue_manager = pymqi.connect(
-            config.queue_manager_name,
-            config.channel,
-            config.host_and_port,
-        )
+        queue_manager = pymqi.connect(config.queue_manager_name, config.channel, config.host_and_port)
 
     return queue_manager
 

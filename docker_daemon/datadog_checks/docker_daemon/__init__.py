@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .docker_daemon import DockerDaemon
 
-__all__ = [
-    '__version__',
-    'DockerDaemon'
-]
+__all__ = ['__version__', 'DockerDaemon']

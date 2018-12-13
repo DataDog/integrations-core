@@ -33,26 +33,18 @@ class Etcd(OpenMetricsBaseCheck):
         'compareAndSwapFail': 'etcd.store.compareandswap.fail',
         'compareAndDeleteSuccess': 'etcd.store.compareanddelete.success',
         'compareAndDeleteFail': 'etcd.store.compareanddelete.fail',
-        'expireCount': 'etcd.store.expire.count'
+        'expireCount': 'etcd.store.expire.count',
     }
 
-    STORE_GAUGES = {
-        'watchers': 'etcd.store.watchers'
-    }
+    STORE_GAUGES = {'watchers': 'etcd.store.watchers'}
 
-    LEADER_GAUGES = {
-        'sendPkgRate': 'etcd.self.send.pkgrate',
-        'sendBandwidthRate': 'etcd.self.send.bandwidthrate'
-    }
+    LEADER_GAUGES = {'sendPkgRate': 'etcd.self.send.pkgrate', 'sendBandwidthRate': 'etcd.self.send.bandwidthrate'}
 
-    FOLLOWER_GAUGES = {
-        'recvPkgRate': 'etcd.self.recv.pkgrate',
-        'recvBandwidthRate': 'etcd.self.recv.bandwidthrate'
-    }
+    FOLLOWER_GAUGES = {'recvPkgRate': 'etcd.self.recv.pkgrate', 'recvBandwidthRate': 'etcd.self.recv.bandwidthrate'}
 
     SELF_RATES = {
         'recvAppendRequestCnt': 'etcd.self.recv.appendrequest.count',
-        'sendAppendRequestCnt': 'etcd.self.send.appendrequest.count'
+        'sendAppendRequestCnt': 'etcd.self.send.appendrequest.count',
     }
 
     LEADER_COUNTS = {
@@ -156,9 +148,7 @@ class Etcd(OpenMetricsBaseCheck):
         scraper_config = self.get_scraper_config(instance)
 
         if 'prometheus_url' not in scraper_config:
-            raise ConfigurationError(
-                'You have to define at least one `prometheus_url`.'
-            )
+            raise ConfigurationError('You have to define at least one `prometheus_url`.')
 
         if not scraper_config.get('metrics_mapper'):
             raise ConfigurationError(
@@ -257,19 +247,22 @@ class Etcd(OpenMetricsBaseCheck):
                 for fol in followers:
                     # counts
                     for key in self.LEADER_COUNTS:
-                        self.rate(self.LEADER_COUNTS[key],
-                                  followers[fol].get("counts").get(key),
-                                  tags=instance_tags + ['follower:{}'.format(fol)])
+                        self.rate(
+                            self.LEADER_COUNTS[key],
+                            followers[fol].get("counts").get(key),
+                            tags=instance_tags + ['follower:{}'.format(fol)],
+                        )
                     # latency
                     for key in self.LEADER_LATENCY:
-                        self.gauge(self.LEADER_LATENCY[key],
-                                   followers[fol].get("latency").get(key),
-                                   tags=instance_tags + ['follower:{}'.format(fol)])
+                        self.gauge(
+                            self.LEADER_LATENCY[key],
+                            followers[fol].get("latency").get(key),
+                            tags=instance_tags + ['follower:{}'.format(fol)],
+                        )
 
         # Service check
         if self_response is not None and store_response is not None:
-            self.service_check(self.SERVICE_CHECK_NAME, self.OK,
-                               tags=instance_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=instance_tags)
 
     def _get_health_status(self, url, ssl_params, timeout):
         """
@@ -307,20 +300,29 @@ class Etcd(OpenMetricsBaseCheck):
         try:
             r = self._perform_request(url, path, ssl_params, timeout)
         except requests.exceptions.Timeout:
-            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL,
-                               message='Timeout when hitting {}'.format(url),
-                               tags=tags + ['url:{}'.format(url)])
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                self.CRITICAL,
+                message='Timeout when hitting {}'.format(url),
+                tags=tags + ['url:{}'.format(url)],
+            )
             raise
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL,
-                               message='Error hitting {}. Error: {}'.format(url, str(e)),
-                               tags=tags + ['url:{}'.format(url)])
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                self.CRITICAL,
+                message='Error hitting {}. Error: {}'.format(url, str(e)),
+                tags=tags + ['url:{}'.format(url)],
+            )
             raise
 
         if r.status_code != 200:
-            self.service_check(self.SERVICE_CHECK_NAME, self.CRITICAL,
-                               message='Got {} when hitting {}'.format(r.status_code, url),
-                               tags=tags + ['url:{}'.format(url)])
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                self.CRITICAL,
+                message='Got {} when hitting {}'.format(r.status_code, url),
+                tags=tags + ['url:{}'.format(url)],
+            )
             raise Exception('Http status code {} on url {}'.format(r.status_code, url))
 
         return r.json()

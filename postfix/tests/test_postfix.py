@@ -18,13 +18,7 @@ def setup_postfix():
     with temp_dir() as tempdir:
         queue_root = os.path.join(tempdir, 'var', 'spool', 'postfix')
 
-        queues = [
-            'active',
-            'maildrop',
-            'bounce',
-            'incoming',
-            'deferred'
-        ]
+        queues = ['active', 'maildrop', 'bounce', 'incoming', 'deferred']
 
         in_count = {}
 
@@ -35,11 +29,7 @@ def setup_postfix():
             except Exception:
                 pass
 
-        return_value = {
-            'queue_root': queue_root,
-            'queues': queues,
-            'in_count': in_count
-        }
+        return_value = {'queue_root': queue_root, 'queues': queues, 'in_count': in_count}
 
         add_messages(queue_root, queues, in_count)
 
@@ -69,16 +59,10 @@ def test_check(setup_postfix, check, aggregator):
     queues = setup_postfix['queues']
     in_count = setup_postfix['in_count']
 
-    instance = {
-        'directory': queue_root,
-        'queues': queues,
-        'postfix_user': getpass.getuser()
-    }
+    instance = {'directory': queue_root, 'queues': queues, 'postfix_user': getpass.getuser()}
 
     check.check(instance)
 
     for queue, count in in_count.iteritems():
         tags = ['instance:postfix', 'queue:{}'.format(queue)]
-        aggregator.assert_metric('postfix.queue.size',
-                                 value=count[0],
-                                 tags=tags)
+        aggregator.assert_metric('postfix.queue.size', value=count[0], tags=tags)

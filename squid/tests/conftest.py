@@ -16,6 +16,7 @@ from . import common
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -28,10 +29,7 @@ def squid_check():
 @pytest.fixture(scope="session")
 def spin_up_squid():
     env = os.environ
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'squid.yaml')
-    ]
+    args = ["docker-compose", "-f", os.path.join(common.HERE, 'compose', 'squid.yaml')]
     subprocess.check_call(args + ["up", "-d"], env=env)
     for _ in xrange(10):
         try:
@@ -51,9 +49,5 @@ def spin_up_squid():
 
 @pytest.fixture
 def instance():
-    instance = {
-        "name": "ok_instance",
-        "tags": ["custom_tag"],
-        "host": common.HOST
-    }
+    instance = {"name": "ok_instance", "tags": ["custom_tag"], "host": common.HOST}
     return instance

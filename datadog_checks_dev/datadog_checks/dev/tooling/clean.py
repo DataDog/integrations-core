@@ -9,24 +9,8 @@ from os.path import join
 from .utils import is_package
 from ..utils import dir_exists, remove_path
 
-DELETE_IN_ROOT = {
-    '.cache',
-    '.coverage',
-    '.eggs',
-    '.pytest_cache',
-    '.tox',
-    'build',
-    'dist',
-    '*.egg-info',
-    '.benchmarks'
-}
-DELETE_EVERYWHERE = {
-    '__pycache__',
-    '*.pyc',
-    '*.pyd',
-    '*.pyo',
-    '*.whl',
-}
+DELETE_IN_ROOT = {'.cache', '.coverage', '.eggs', '.pytest_cache', '.tox', 'build', 'dist', '*.egg-info', '.benchmarks'}
+DELETE_EVERYWHERE = {'__pycache__', '*.pyc', '*.pyd', '*.pyo', '*.whl'}
 ALL_PATTERNS = DELETE_IN_ROOT | DELETE_EVERYWHERE
 
 

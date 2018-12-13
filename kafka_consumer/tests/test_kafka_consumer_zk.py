@@ -10,19 +10,13 @@ from datadog_checks.kafka_consumer import KafkaCheck
 from .common import HOST, PARTITIONS, TOPICS, is_supported
 
 pytestmark = pytest.mark.skipif(
-    not is_supported('zookeeper'),
-    reason='zookeeper consumer offsets not supported in current environment'
+    not is_supported('zookeeper'), reason='zookeeper consumer offsets not supported in current environment'
 )
 
 
-BROKER_METRICS = [
-    'kafka.broker_offset',
-]
+BROKER_METRICS = ['kafka.broker_offset']
 
-CONSUMER_METRICS = [
-    'kafka.consumer_offset',
-    'kafka.consumer_lag',
-]
+CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
 
 @pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
@@ -36,13 +30,13 @@ def test_check_zk(aggregator, zk_instance):
     for name, consumer_group in iteritems(zk_instance['consumer_groups']):
         for topic, partitions in iteritems(consumer_group):
             for partition in partitions:
-                tags = ["topic:{}".format(topic),
-                        "partition:{}".format(partition)]
+                tags = ["topic:{}".format(topic), "partition:{}".format(partition)]
                 for mname in BROKER_METRICS:
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
-                    aggregator.assert_metric(mname, tags=tags +
-                                             ["source:zk", "consumer_group:{}".format(name)], at_least=1)
+                    aggregator.assert_metric(
+                        mname, tags=tags + ["source:zk", "consumer_group:{}".format(name)], at_least=1
+                    )
 
     # let's reassert for the __consumer_offsets - multiple partitions
     aggregator.assert_metric('kafka.broker_offset', at_least=1)
@@ -56,7 +50,8 @@ def test_multiple_servers_zk(aggregator, zk_instance):
     multiple_server_zk_instance = copy.deepcopy(zk_instance)
     multiple_server_zk_instance['kafka_connect_str'] = [
         multiple_server_zk_instance['kafka_connect_str'],
-        '{}:9092'.format(HOST)]
+        '{}:9092'.format(HOST),
+    ]
 
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
     kafka_consumer_check.check(multiple_server_zk_instance)
@@ -64,13 +59,13 @@ def test_multiple_servers_zk(aggregator, zk_instance):
     for name, consumer_group in iteritems(multiple_server_zk_instance['consumer_groups']):
         for topic, partitions in iteritems(consumer_group):
             for partition in partitions:
-                tags = ["topic:{}".format(topic),
-                        "partition:{}".format(partition)]
+                tags = ["topic:{}".format(topic), "partition:{}".format(partition)]
                 for mname in BROKER_METRICS:
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
-                    aggregator.assert_metric(mname, tags=tags +
-                                             ["source:zk", "consumer_group:{}".format(name)], at_least=1)
+                    aggregator.assert_metric(
+                        mname, tags=tags + ["source:zk", "consumer_group:{}".format(name)], at_least=1
+                    )
 
 
 @pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
@@ -88,8 +83,7 @@ def test_check_nogroups_zk(aggregator, zk_instance):
     for topic in TOPICS:
         if topic is not '__consumer_offsets':
             for partition in PARTITIONS:
-                tags = ["topic:{}".format(topic),
-                        "partition:{}".format(partition)]
+                tags = ["topic:{}".format(topic), "partition:{}".format(partition)]
                 for mname in BROKER_METRICS:
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:

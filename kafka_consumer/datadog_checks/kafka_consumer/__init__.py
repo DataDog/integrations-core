@@ -6,7 +6,4 @@ from .kafka_consumer import KafkaCheck
 from .__about__ import __version__
 
 
-__all__ = [
-    '__version__',
-    'KafkaCheck'
-]
+__all__ = ['__version__', 'KafkaCheck']

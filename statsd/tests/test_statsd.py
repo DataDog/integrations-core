@@ -26,24 +26,18 @@ METRICS = [
     'statsd.graphite.flush_time',
     'statsd.graphite.last_flush',
     'statsd.uptime',
-    'statsd.timers.count'
+    'statsd.timers.count',
 ]
 
 
 @pytest.fixture
 def get_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-    }
+    return {'host': HOST, 'port': PORT}
 
 
 @pytest.fixture(scope='session', autouse=True)
 def spin_up_statsd():
-    with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'),
-        endpoints=URL
-    ):
+    with docker_run(compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'), endpoints=URL):
         yield
 
 

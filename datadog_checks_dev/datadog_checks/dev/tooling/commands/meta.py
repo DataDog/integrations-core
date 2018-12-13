@@ -7,10 +7,7 @@ from .meta_commands import ALL_COMMANDS
 from .utils import CONTEXT_SETTINGS
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Collection of useful utilities'
-)
+@click.group(context_settings=CONTEXT_SETTINGS, short_help='Collection of useful utilities')
 def meta():
     """Anything here should be considered experimental.
 

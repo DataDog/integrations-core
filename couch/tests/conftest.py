@@ -17,6 +17,7 @@ from datadog_checks.couch import CouchDb
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -47,10 +48,7 @@ def couch_cluster():
     env['COUCH_PORT'] = common.PORT
     couch_version = env["COUCH_VERSION"][0]
 
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version))
-    ]
+    args = ["docker-compose", "-f", os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version))]
 
     subprocess.check_call(args + ["down"])
     subprocess.check_call(args + ["up", "-d"])
@@ -81,20 +79,16 @@ def generate_data(couch_version):
     data = {
         "language": "javascript",
         "views": {
-            "all": {
-                "map": "function(doc) { emit(doc._id); }"
-            },
-            "by_data": {
-                "map": "function(doc) { emit(doc.data, doc); }"
-            }
-        }
+            "all": {"map": "function(doc) { emit(doc._id); }"},
+            "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
+        },
     }
     requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth)
 
     urls = [
         "{}/_node/node1@127.0.0.1/_stats".format(common.URL),
         "{}/_node/node2@127.0.0.1/_stats".format(common.URL),
-        "{}/_node/node3@127.0.0.1/_stats".format(common.URL)
+        "{}/_node/node3@127.0.0.1/_stats".format(common.URL),
     ]
 
     ready = defaultdict(bool)

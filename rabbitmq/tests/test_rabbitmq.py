@@ -22,15 +22,13 @@ def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
         aggregator.assert_metric_has_tag_prefix(mname, 'rabbitmq_node', count=1)
 
     aggregator.assert_metric('rabbitmq.node.partitions', value=0, count=1)
-    aggregator.assert_metric('rabbitmq.connections',
-                             tags=['rabbitmq_vhost:/', "tag1:1", "tag2"],
-                             value=0, count=1)
-    aggregator.assert_metric('rabbitmq.connections',
-                             tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"],
-                             value=0, count=1)
-    aggregator.assert_metric('rabbitmq.connections',
-                             tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"],
-                             value=0, count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=0, count=1)
+    aggregator.assert_metric(
+        'rabbitmq.connections', tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"], value=0, count=1
+    )
+    aggregator.assert_metric(
+        'rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"], value=0, count=1
+    )
 
     # Queue attributes, should be only one queue fetched
     for mname in metrics.Q_METRICS:
@@ -45,15 +43,11 @@ def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
         # All messages metrics are not always present, so we assert with at_least=0
         aggregator.assert_metric_has_tag(mname, 'rabbitmq_cluster:rabbitmqtest', at_least=0)
 
-    aggregator.assert_service_check('rabbitmq.aliveness',
-                                    tags=['vhost:/', "tag1:1", "tag2"],
-                                    status=RabbitMQ.OK)
-    aggregator.assert_service_check('rabbitmq.aliveness',
-                                    tags=['vhost:myvhost', "tag1:1", "tag2"],
-                                    status=RabbitMQ.OK)
-    aggregator.assert_service_check('rabbitmq.aliveness',
-                                    tags=['vhost:myothervhost', "tag1:1", "tag2"],
-                                    status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:/', "tag1:1", "tag2"], status=RabbitMQ.OK)
+    aggregator.assert_service_check('rabbitmq.aliveness', tags=['vhost:myvhost', "tag1:1", "tag2"], status=RabbitMQ.OK)
+    aggregator.assert_service_check(
+        'rabbitmq.aliveness', tags=['vhost:myothervhost', "tag1:1", "tag2"], status=RabbitMQ.OK
+    )
 
     aggregator.assert_service_check('rabbitmq.status', tags=["tag1:1", "tag2"], status=RabbitMQ.OK)
 
@@ -168,15 +162,13 @@ def test_family_tagging(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
 def test_connections(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     # no connections and no 'vhosts' list in the conf don't produce 'connections' metric
     check.check(common.CONFIG)
-    aggregator.assert_metric('rabbitmq.connections',
-                             tags=['rabbitmq_vhost:/', "tag1:1", "tag2"],
-                             value=0, count=1)
-    aggregator.assert_metric('rabbitmq.connections',
-                             tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"],
-                             value=0, count=1)
-    aggregator.assert_metric('rabbitmq.connections',
-                             tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"],
-                             value=0, count=1)
+    aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=0, count=1)
+    aggregator.assert_metric(
+        'rabbitmq.connections', tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"], value=0, count=1
+    )
+    aggregator.assert_metric(
+        'rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"], value=0, count=1
+    )
 
     # no connections with a 'vhosts' list in the conf produce one metrics per vhost
     aggregator.reset()
@@ -188,36 +180,22 @@ def test_connections(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     with closing(pika.BlockingConnection()), closing(pika.BlockingConnection()):
         aggregator.reset()
         check.check(common.CONFIG)
-        aggregator.assert_metric('rabbitmq.connections',
-                                 tags=['rabbitmq_vhost:/', "tag1:1", "tag2"],
-                                 value=2, count=1)
+        aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=2, count=1)
         aggregator.assert_metric('rabbitmq.connections', count=3)
-        aggregator.assert_metric('rabbitmq.connections.state',
-                                 tags=['rabbitmq_conn_state:running', "tag1:1", "tag2"],
-                                 value=2, count=1)
+        aggregator.assert_metric(
+            'rabbitmq.connections.state', tags=['rabbitmq_conn_state:running', "tag1:1", "tag2"], value=2, count=1
+        )
 
         aggregator.reset()
         check.check(common.CONFIG_DEFAULT_VHOSTS)
-        aggregator.assert_metric('rabbitmq.connections',
-                                 tags=['rabbitmq_vhost:/'],
-                                 value=2, count=1)
-        aggregator.assert_metric('rabbitmq.connections',
-                                 tags=['rabbitmq_vhost:test'],
-                                 value=0, count=1)
+        aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
+        aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
         aggregator.assert_metric('rabbitmq.connections', count=2)
-        aggregator.assert_metric('rabbitmq.connections.state',
-                                 tags=['rabbitmq_conn_state:running'],
-                                 value=0, count=0)
+        aggregator.assert_metric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
 
         aggregator.reset()
         check.check(common.CONFIG_TEST_VHOSTS)
-        aggregator.assert_metric('rabbitmq.connections',
-                                 tags=['rabbitmq_vhost:test'],
-                                 value=0, count=1)
-        aggregator.assert_metric('rabbitmq.connections',
-                                 tags=['rabbitmq_vhost:test2'],
-                                 value=0, count=1)
+        aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
+        aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
         aggregator.assert_metric('rabbitmq.connections', count=2)
-        aggregator.assert_metric('rabbitmq.connections.state',
-                                 tags=['rabbitmq_conn_state:running'],
-                                 value=0, count=0)
+        aggregator.assert_metric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)

@@ -18,22 +18,13 @@ USERNAME = 'datadog'
 PASSWORD = 'datadog'
 ACI_URL = 'https://datadoghq.com'
 ACI_URLS = [ACI_URL]
-CONFIG = {
-    'aci_urls': ACI_URLS,
-    'username': USERNAME,
-    'pwd': PASSWORD,
-    'tenant': [
-        'DataDog',
-    ]
-}
+CONFIG = {'aci_urls': ACI_URLS, 'username': USERNAME, 'pwd': PASSWORD, 'tenant': ['DataDog']}
 
 CONFIG_WITH_TAGS = {
     'aci_urls': ACI_URLS,
     'username': USERNAME,
     'pwd': PASSWORD,
-    'tenant': [
-        'DataDog',
-    ],
+    'tenant': ['DataDog'],
     "tags": ["project:cisco_aci"],
 }
 
@@ -41,6 +32,7 @@ CONFIG_WITH_TAGS = {
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 

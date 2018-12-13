@@ -4,9 +4,7 @@
 import re
 
 from .agent import DEFAULT_AGENT_VERSION, FAKE_API_KEY, get_agent_exe, get_agent_conf_dir, get_rate_flag
-from .config import (
-    config_file_name, env_exists, locate_config_dir, locate_config_file, remove_env_data, write_env_data
-)
+from .config import config_file_name, env_exists, locate_config_dir, locate_config_file, remove_env_data, write_env_data
 from ..constants import get_root
 from ...subprocess import run_command
 from ...utils import path_join
@@ -44,16 +42,11 @@ class DockerInterface(object):
 
     @property
     def agent_command(self):
-        return 'docker exec {} {}'.format(
-            self.container_name,
-            get_agent_exe(self.agent_version)
-        )
+        return 'docker exec {} {}'.format(self.container_name, get_agent_exe(self.agent_version))
 
     def run_check(self, capture=False, rate=False):
         command = '{} check {}{}'.format(
-            self.agent_command,
-            self.check,
-            ' {}'.format(get_rate_flag(self.agent_version)) if rate else ''
+            self.agent_command, self.check, ' {}'.format(get_rate_flag(self.agent_version)) if rate else ''
         )
         return run_command(command, capture=capture)
 
@@ -69,8 +62,14 @@ class DockerInterface(object):
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:
             command = [
-                'docker', 'run', '-e', 'DD_API_KEY={}'.format(self.api_key), self.agent_build,
-                'head', '--lines=1', '/opt/datadog-agent/version-manifest.txt'
+                'docker',
+                'run',
+                '-e',
+                'DD_API_KEY={}'.format(self.api_key),
+                self.agent_build,
+                'head',
+                '--lines=1',
+                '/opt/datadog-agent/version-manifest.txt',
             ]
             result = run_command(command, capture=True)
             match = re.search(MANIFEST_VERSION_PATTERN, result.stdout)
@@ -80,15 +79,11 @@ class DockerInterface(object):
             self.metadata['agent_version'] = self.agent_version
 
     def update_check(self):
-        command = [
-            'docker', 'exec', self.container_name, 'pip', 'install', '-e', self.check_mount_dir
-        ]
+        command = ['docker', 'exec', self.container_name, 'pip', 'install', '-e', self.check_mount_dir]
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
-        command = [
-            'docker', 'exec', self.container_name, 'pip', 'install', '-e', self.base_mount_dir
-        ]
+        command = ['docker', 'exec', self.container_name, 'pip', 'install', '-e', self.base_mount_dir]
         run_command(command, capture=True, check=True)
 
     def update_agent(self):
@@ -98,20 +93,26 @@ class DockerInterface(object):
     def start_agent(self):
         if self.agent_build:
             command = [
-                'docker', 'run',
+                'docker',
+                'run',
                 # Keep it up
                 '-d',
                 # Ensure consistent naming
-                '--name', self.container_name,
+                '--name',
+                self.container_name,
                 # Ensure access to host network
-                '--network', 'host',
+                '--network',
+                'host',
                 # Agent 6 will simply fail without an API key
-                '-e', 'DD_API_KEY={}'.format(self.api_key),
+                '-e',
+                'DD_API_KEY={}'.format(self.api_key),
                 # Mount the config directory, not the file, to ensure updates are propagated
                 # https://github.com/moby/moby/issues/15793#issuecomment-135411504
-                '-v', '{}:{}'.format(self.config_dir, get_agent_conf_dir(self.check, self.agent_version)),
+                '-v',
+                '{}:{}'.format(self.config_dir, get_agent_conf_dir(self.check, self.agent_version)),
                 # Mount the check directory
-                '-v', '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
+                '-v',
+                '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
             ]
 
             if self.base_package:

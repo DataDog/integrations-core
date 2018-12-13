@@ -63,9 +63,7 @@ class PowerDNSRecursorCheck(AgentCheck):
         'unexpected-packets',
         'unreachables',
     ]
-    GAUGE_METRICS_V4 = [
-        'fd-usage',
-    ]
+    GAUGE_METRICS_V4 = ['fd-usage']
     RATE_METRICS_V4 = [
         'auth4-answers-slow',
         'auth4-answers0-1',
@@ -143,13 +141,7 @@ class PowerDNSRecursorCheck(AgentCheck):
         tags = instance.get('tags', [])
         if tags is None:
             tags = []
-        Config = namedtuple('Config', [
-            'host',
-            'port',
-            'api_key',
-            'version'
-        ]
-        )
+        Config = namedtuple('Config', ['host', 'port', 'api_key', 'version'])
 
         return Config(host, port, api_key, version), tags
 
@@ -172,9 +164,7 @@ class PowerDNSRecursorCheck(AgentCheck):
                 request = requests.get(fallback_url, headers=headers)
                 request.raise_for_status()
             except Exception:
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                   tags=service_check_tags)
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
                 raise
-        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                           tags=service_check_tags)
+        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
         return request.json()

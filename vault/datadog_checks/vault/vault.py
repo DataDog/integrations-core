@@ -25,12 +25,7 @@ class Vault(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(Vault, self).__init__(name, init_config, agentConfig, instances)
         self.api_versions = {
-            '1': {
-                'functions': {
-                    'check_leader': self.check_leader_v1,
-                    'check_health': self.check_health_v1,
-                }
-            },
+            '1': {'functions': {'check_leader': self.check_leader_v1, 'check_health': self.check_health_v1}}
         }
         self.config = {}
 
@@ -63,16 +58,18 @@ class Vault(AgentCheck):
         previous_leader = config['leader']
         if config['detect_leader'] and current_leader:
             if previous_leader is not None and current_leader != previous_leader:
-                self.event({
-                    'timestamp': timestamp(),
-                    'event_type': self.EVENT_LEADER_CHANGE,
-                    'msg_title': 'Leader change',
-                    'msg_text': 'Leader changed from `{}` to `{}`.'.format(previous_leader, current_leader),
-                    'alert_type': 'info',
-                    'source_type_name': self.CHECK_NAME,
-                    'host': self.hostname,
-                    'tags': tags,
-                })
+                self.event(
+                    {
+                        'timestamp': timestamp(),
+                        'event_type': self.EVENT_LEADER_CHANGE,
+                        'msg_title': 'Leader change',
+                        'msg_text': 'Leader changed from `{}` to `{}`.'.format(previous_leader, current_leader),
+                        'alert_type': 'info',
+                        'source_type_name': self.CHECK_NAME,
+                        'host': self.hostname,
+                        'tags': tags,
+                    }
+                )
             config['leader'] = current_leader
 
     def check_health_v1(self, config, tags):
@@ -168,26 +165,16 @@ class Vault(AgentCheck):
                     verify=config['ssl_verify'],
                     proxies=config['proxies'],
                     timeout=config['timeout'],
-                    headers=config['headers']
+                    headers=config['headers'],
                 )
         except requests.exceptions.Timeout:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, config['timeout'])
-            self.service_check(
-                self.SERVICE_CHECK_CONNECT,
-                AgentCheck.CRITICAL,
-                message=msg,
-                tags=tags
-            )
+            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
         except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
             msg = 'Error accessing Vault endpoint `{}`'.format(url)
-            self.service_check(
-                self.SERVICE_CHECK_CONNECT,
-                AgentCheck.CRITICAL,
-                message=msg,
-                tags=tags
-            )
+            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
 

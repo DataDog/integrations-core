@@ -11,36 +11,15 @@ from six import PY2, iteritems
 from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
 from ...utils import get_metadata_file, get_metric_sources, load_manifest
 
-REQUIRED_HEADERS = {
-    'metric_name',
-    'metric_type',
-    'orientation',
-    'integration',
-}
+REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
-OPTIONAL_HEADERS = {
-    'description',
-    'interval',
-    'unit_name',
-    'per_unit_name',
-    'short_name',
-}
+OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name'}
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
-VALID_METRIC_TYPE = {
-    'count',
-    'counter',
-    'distribution',
-    'gauge',
-    'rate',
-}
+VALID_METRIC_TYPE = {'count', 'counter', 'distribution', 'gauge', 'rate'}
 
-VALID_ORIENTATION = {
-    '0',
-    '1',
-    '-1'
-}
+VALID_ORIENTATION = {'0', '1', '-1'}
 
 # To easily derive these again in future, copy the contents of `integration/system/units_catalog.csv` then run:
 #
@@ -183,16 +162,10 @@ VALID_UNIT_NAMES = {
     'volume',
 }
 
-PROVIDER_INTEGRATIONS = {
-    'openmetrics',
-    'prometheus',
-}
+PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate `metadata.csv` files'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
 @click.argument('check', required=False)
 def metadata(check):
     """Validates metadata.csv files
@@ -204,9 +177,7 @@ def metadata(check):
 
     if check:
         if check not in metric_sources:
-            abort(
-                'Metadata file `{}` does not exist.'.format(get_metadata_file(check))
-            )
+            abort('Metadata file `{}` does not exist.'.format(get_metadata_file(check)))
         metric_sources = [check]
     else:
         metric_sources = sorted(metric_sources)
@@ -234,11 +205,7 @@ def metadata(check):
         metric_prefix_error_shown = False
 
         # Python 2 csv module does not support unicode
-        with open(
-            metadata_file,
-            'rb' if PY2 else 'r',
-            encoding=None if PY2 else 'utf-8',
-        ) as f:
+        with open(metadata_file, 'rb' if PY2 else 'r', encoding=None if PY2 else 'utf-8') as f:
             reader = csv.DictReader(f, delimiter=',')
 
             # Read header

@@ -5,7 +5,4 @@
 from .http_check import HTTPCheck
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'HTTPCheck'
-]
+__all__ = ['__version__', 'HTTPCheck']

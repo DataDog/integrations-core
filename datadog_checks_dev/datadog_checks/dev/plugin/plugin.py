@@ -18,6 +18,7 @@ try:
         __aggregator.reset()
         return __aggregator
 
+
 except ImportError:
     __aggregator = None
 
@@ -59,10 +60,7 @@ def dd_environment_runner(request):
     # Default to Docker as that is the most common
     metadata.setdefault('env_type', 'docker')
 
-    data = {
-        'config': config,
-        'metadata': metadata,
-    }
+    data = {'config': config, 'metadata': metadata}
 
     # Serialize to json
     data = json.dumps(data, separators=(',', ':'))

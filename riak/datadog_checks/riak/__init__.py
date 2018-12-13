@@ -4,7 +4,4 @@
 from .riak import Riak
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'Riak'
-]
+__all__ = ['__version__', 'Riak']

@@ -31,7 +31,7 @@ STAT_METRICS = [
     'zookeeper.nodes',
     'zookeeper.instances',
     'zookeeper.packets.received',
-    'zookeeper.packets.sent'
+    'zookeeper.packets.sent',
 ]
 
 MNTR_METRICS = [
@@ -50,45 +50,22 @@ MNTR_METRICS = [
     'zookeeper.max_latency',
 ]
 
-STATUS_TYPES = [
-    'leader',
-    'follower',
-    'observer',
-    'standalone',
-    'down',
-    'inactive',
-    'unknown',
-]
+STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
 
 
 @pytest.fixture
 def get_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'expected_mode': "standalone",
-        'tags': ["mytag"]
-    }
+    return {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
 
 
 @pytest.fixture
 def get_invalid_mode_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'expected_mode': "follower",
-        'tags': []
-    }
+    return {'host': HOST, 'port': PORT, 'expected_mode': "follower", 'tags': []}
 
 
 @pytest.fixture
 def get_conn_failure_config():
-    return {
-        'host': HOST,
-        'port': 2182,
-        'expected_mode': "down",
-        'tags': []
-    }
+    return {'host': HOST, 'port': 2182, 'expected_mode': "down", 'tags': []}
 
 
 def get_version():

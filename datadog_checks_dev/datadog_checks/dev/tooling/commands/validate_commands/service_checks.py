@@ -14,22 +14,10 @@ from ...utils import parse_version_parts
 from ....compat import JSONDecodeError
 from ....utils import file_exists, read_file
 
-REQUIRED_ATTRIBUTES = {
-    'agent_version',
-    'check',
-    'description',
-    'groups',
-    'integration',
-    'name',
-    'statuses',
-}
+REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
 
 
-@click.command(
-    'service-checks',
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate `service_checks.json` files'
-)
+@click.command('service-checks', context_settings=CONTEXT_SETTINGS, short_help='Validate `service_checks.json` files')
 def service_checks():
     """Validate all `service_checks.json` files."""
     root = get_root()

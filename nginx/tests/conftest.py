@@ -33,24 +33,14 @@ def check():
 
 @pytest.fixture(scope='session')
 def instance():
-    return {
-        'nginx_status_url': 'http://{}:{}/nginx_status'.format(HOST, PORT),
-        'tags': TAGS,
-    }
+    return {'nginx_status_url': 'http://{}:{}/nginx_status'.format(HOST, PORT), 'tags': TAGS}
 
 
 @pytest.fixture
 def instance_ssl():
-    return {
-        'nginx_status_url': 'https://{}:{}/nginx_status'.format(HOST, PORT_SSL),
-        'tags': TAGS,
-    }
+    return {'nginx_status_url': 'https://{}:{}/nginx_status'.format(HOST, PORT_SSL), 'tags': TAGS}
 
 
 @pytest.fixture(scope='session')
 def instance_vts():
-    return {
-        'nginx_status_url': 'http://{}:{}/vts_status'.format(HOST, PORT),
-        'tags': TAGS,
-        'use_vts': True,
-    }
+    return {'nginx_status_url': 'http://{}:{}/vts_status'.format(HOST, PORT), 'tags': TAGS, 'use_vts': True}

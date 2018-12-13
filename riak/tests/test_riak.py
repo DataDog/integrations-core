@@ -297,9 +297,7 @@ CHECK_GAUGES_STATS = [
     'riak.riak_pipe_vnodeq_total',
 ]
 
-GAUGE_OTHER = [
-    'riak.coord_redirs',
-]
+GAUGE_OTHER = ['riak.coord_redirs']
 
 # The below metrics for leveldb and read repair
 # appear when they have no values, however they
@@ -351,10 +349,7 @@ BASE_URL = "http://{0}:{1}".format(HOST, PORT)
 def spin_up_riak():
     env = os.environ
     env['RIAK_CONFIG'] = os.path.join(HERE, 'config')
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'compose', 'riak.yaml')
-    ]
+    args = ["docker-compose", "-f", os.path.join(HERE, 'compose', 'riak.yaml')]
     subprocess.check_call(args + ["up", "-d"], env=env)
     can_access = False
     for _ in xrange(0, 10):
@@ -375,10 +370,7 @@ def spin_up_riak():
     data = 'herzlich willkommen'
     headers = {"Content-Type": "text/plain"}
     for _ in xrange(0, 10):
-        res = requests.post(
-            "{0}/riak/bucket/german".format(BASE_URL),
-            headers=headers,
-            data=data)
+        res = requests.post("{0}/riak/bucket/german".format(BASE_URL), headers=headers, data=data)
         res.raise_for_status
         res = requests.get("{0}/riak/bucket/german".format(BASE_URL))
         res.raise_for_status
@@ -392,16 +384,14 @@ def spin_up_riak():
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
 
 def test_check(aggregator, spin_up_riak):
     riak_check = Riak(CHECK_NAME, {}, {})
-    config = {
-            "url": "{0}/stats".format(BASE_URL),
-            "tags": ["my_tag"]
-    }
+    config = {"url": "{0}/stats".format(BASE_URL), "tags": ["my_tag"]}
     riak_check.check(config)
     riak_check.check(config)
     tags = ['my_tag']

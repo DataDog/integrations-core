@@ -35,8 +35,7 @@ class IBMMQConfig:
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')
 
         self.key_repository_location = instance.get(
-            'ssl_key_repository_location',
-            '/var/mqm/ssl-db/client/KeyringClient'
+            'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
@@ -52,5 +51,5 @@ class IBMMQConfig:
             "queue_manager:{}".format(self.queue_manager_name),
             "host:{}".format(self.host),
             "port:{}".format(self.port),
-            "channel:{}".format(self.channel)
+            "channel:{}".format(self.channel),
         ] + self.custom_tags

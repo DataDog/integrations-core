@@ -5,7 +5,4 @@ from .__about__ import __version__
 from .haproxy import HAProxy
 
 
-__all__ = [
-    '__version__',
-    'HAProxy'
-]
+__all__ = ['__version__', 'HAProxy']

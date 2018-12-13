@@ -252,15 +252,15 @@ class Ceph(AgentCheck):
             self.log.debug('Error retrieving df_detail metrics')
 
     def _osd_pct_used(self, health):
-            """Take a single health check string, return (OSD name, percentage used)"""
-            # Full string looks like: osd.2 is full at 95%
-            # Near full string: osd.1 is near full at 94%
-            pct = re.compile(r'\d+%').findall(health)
-            osd = re.compile(r'osd.\d+').findall(health)
-            if len(pct) > 0 and len(osd) > 0:
-                return osd[0], int(pct[0][:-1])
-            else:
-                return None, None
+        """Take a single health check string, return (OSD name, percentage used)"""
+        # Full string looks like: osd.2 is full at 95%
+        # Near full string: osd.1 is near full at 94%
+        pct = re.compile(r'\d+%').findall(health)
+        osd = re.compile(r'osd.\d+').findall(health)
+        if len(pct) > 0 and len(osd) > 0:
+            return osd[0], int(pct[0][:-1])
+        else:
+            return None, None
 
     def _perform_service_checks(self, raw, tags, health_checks):
         if 'status' in raw:

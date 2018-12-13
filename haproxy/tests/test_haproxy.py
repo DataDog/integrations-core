@@ -62,15 +62,9 @@ def _test_service_checks(aggregator, services=None):
     for service in services:
         for backend in common.BACKEND_LIST:
             tags = ['service:' + service, 'backend:' + backend]
-            aggregator.assert_service_check(common.SERVICE_CHECK_NAME,
-                                            status=HAProxy.UNKNOWN,
-                                            count=1,
-                                            tags=tags)
+            aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=HAProxy.UNKNOWN, count=1, tags=tags)
         tags = ['service:' + service, 'backend:BACKEND']
-        aggregator.assert_service_check(common.SERVICE_CHECK_NAME,
-                                        status=HAProxy.OK,
-                                        count=1,
-                                        tags=tags)
+        aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=HAProxy.OK, count=1, tags=tags)
 
 
 @pytest.mark.integration

@@ -33,7 +33,5 @@ INSTANCE = {
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queues': [
-        QUEUE
-    ]
+    'queues': [QUEUE],
 }

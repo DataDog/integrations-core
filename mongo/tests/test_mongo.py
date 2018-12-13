@@ -40,7 +40,7 @@ METRIC_VAL_CHECKS_OLD = {
     'mongodb.connections.available': lambda x: x >= 1,
     'mongodb.uptime': lambda x: x >= 0,
     'mongodb.mem.resident': lambda x: x > 0,
-    'mongodb.mem.virtual': lambda x: x > 0
+    'mongodb.mem.virtual': lambda x: x > 0,
 }
 
 

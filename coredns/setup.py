@@ -29,7 +29,6 @@ setup(
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
-
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -40,13 +39,9 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-
-
     # Run-time dependencies
-    install_requires=[CHECKS_BASE_REQ, ],
-
+    install_requires=[CHECKS_BASE_REQ],
     # The package we're going to ship
     packages=['datadog_checks.coredns'],
-
     include_package_data=True,
 )

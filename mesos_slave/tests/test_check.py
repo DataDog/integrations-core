@@ -15,11 +15,7 @@ from datadog_checks.mesos_slave import MesosSlave
 CHECK_NAME = 'mesos_master'
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 
-INSTANCE = {
-    'url': 'http://localhost:5051',
-    'tasks': ['hello'],
-    'tags': ['instance:mytag1']
-}
+INSTANCE = {'url': 'http://localhost:5051', 'tasks': ['hello'], 'tags': ['instance:mytag1']}
 
 
 def read_fixture(name):
@@ -39,8 +35,13 @@ def check():
 def test_check(check, aggregator):
     check.check(INSTANCE)
     metrics = {}
-    for d in (check.SLAVE_TASKS_METRICS, check.SYSTEM_METRICS, check.SLAVE_RESOURCE_METRICS,
-              check.SLAVE_EXECUTORS_METRICS, check.STATS_METRICS):
+    for d in (
+        check.SLAVE_TASKS_METRICS,
+        check.SYSTEM_METRICS,
+        check.SLAVE_RESOURCE_METRICS,
+        check.SLAVE_EXECUTORS_METRICS,
+        check.STATS_METRICS,
+    ):
         metrics.update(d)
 
     for _, v in check.TASK_METRICS.iteritems():
@@ -48,12 +49,11 @@ def test_check(check, aggregator):
     for _, v in metrics.iteritems():
         aggregator.assert_metric(v[0])
 
-    service_check_tags = ['instance:mytag1',
-                          'mesos_cluster:test',
-                          'mesos_node:slave',
-                          'mesos_pid:slave(1)@127.0.0.1:5051',
-                          'task_name:hello']
-    aggregator.assert_service_check('hello.ok',
-                                    tags=service_check_tags,
-                                    count=1,
-                                    status=MesosSlave.OK)
+    service_check_tags = [
+        'instance:mytag1',
+        'mesos_cluster:test',
+        'mesos_node:slave',
+        'mesos_pid:slave(1)@127.0.0.1:5051',
+        'task_name:hello',
+    ]
+    aggregator.assert_service_check('hello.ok', tags=service_check_tags, count=1, status=MesosSlave.OK)

@@ -27,22 +27,14 @@ def construct_output_info(path, depth, last, is_dir=False):
         return u'', path, is_dir
     else:
         if depth == 1:
-            return (
-                u'{}{} '.format(
-                    PIPE_END if last else PIPE_MIDDLE, HYPHEN
-                ),
-                path,
-                is_dir
-            )
+            return (u'{}{} '.format(PIPE_END if last else PIPE_MIDDLE, HYPHEN), path, is_dir)
         else:
             return (
                 u'{}   {}{}'.format(
-                    PIPE,
-                    u' ' * 4 * (depth - 2),
-                    u'{}{} '.format(PIPE_END if last or is_dir else PIPE_MIDDLE, HYPHEN)
+                    PIPE, u' ' * 4 * (depth - 2), u'{}{} '.format(PIPE_END if last or is_dir else PIPE_MIDDLE, HYPHEN)
                 ),
                 path,
-                is_dir
+                is_dir,
             )
 
 
@@ -88,10 +80,12 @@ def display_path_tree(path_tree):
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create scaffolding for a new integration')
 @click.argument('name')
 @click.option(
-    '--type', '-t', 'integration_type',
+    '--type',
+    '-t',
+    'integration_type',
     type=click.Choice(get_valid_templates()),
     default='check',
-    help='The type of integration to create'
+    help='The type of integration to create',
 )
 @click.option('--location', '-l', help='The directory where files will be written')
 @click.option('--non-interactive', '-ni', is_flag=True, help='Disable prompting for fields')

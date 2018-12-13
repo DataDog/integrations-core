@@ -15,30 +15,19 @@ CHECK_NAME = 'linux_proc_extras'
 HERE = os.path.abspath(os.path.dirname(__file__))
 FIXTURE_DIR = os.path.join(HERE, "fixtures")
 
-INODE_GAUGES = [
-    'system.inodes.total',
-    'system.inodes.used'
-]
+INODE_GAUGES = ['system.inodes.total', 'system.inodes.used']
 
-PROC_COUNTS = [
-    'system.linux.context_switches',
-    'system.linux.processes_created',
-    'system.linux.interrupts'
-]
+PROC_COUNTS = ['system.linux.context_switches', 'system.linux.processes_created', 'system.linux.interrupts']
 
-ENTROPY_GAUGES = [
-    'system.entropy.available'
-]
+ENTROPY_GAUGES = ['system.entropy.available']
 
-PROCESS_STATS_GAUGES = [
-    'system.processes.states',
-    'system.processes.priorities'
-]
+PROCESS_STATS_GAUGES = ['system.processes.states', 'system.processes.priorities']
 
 
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -71,8 +60,7 @@ def test_check(aggregator, check):
 
     with open(os.path.join(FIXTURE_DIR, "process_stats")) as f:
         with patch(
-            'datadog_checks.linux_proc_extras.linux_proc_extras.get_subprocess_output',
-            return_value=(f.read(), "", 0)
+            'datadog_checks.linux_proc_extras.linux_proc_extras.get_subprocess_output', return_value=(f.read(), "", 0)
         ):
             check.get_process_states()
 

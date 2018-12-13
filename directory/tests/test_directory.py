@@ -17,19 +17,16 @@ CHECK_NAME = 'directory'
 FILE_METRICS = [
     "system.disk.directory.file.bytes",
     "system.disk.directory.file.modified_sec_ago",
-    "system.disk.directory.file.created_sec_ago"
+    "system.disk.directory.file.created_sec_ago",
 ]
 
 DIRECTORY_METRICS = [
     "system.disk.directory.file.bytes",
     "system.disk.directory.file.modified_sec_ago",
-    "system.disk.directory.file.created_sec_ago"
+    "system.disk.directory.file.created_sec_ago",
 ]
 
-COMMON_METRICS = [
-    "system.disk.directory.files",
-    "system.disk.directory.bytes"
-]
+COMMON_METRICS = ["system.disk.directory.files", "system.disk.directory.bytes"]
 
 temp_dir = None
 dir_check = DirectoryCheck('directory', {}, {})
@@ -40,44 +37,41 @@ def get_config_stubs(dir_name, filegauges=False):
     Helper to generate configs from a directory name
     """
     return [
+        {'directory': dir_name, 'filegauges': filegauges, 'tags': ['optional:tag1']},
+        {'directory': dir_name, 'name': "my_beloved_directory", 'filegauges': filegauges, 'tags': ['optional:tag1']},
         {
-            'directory': dir_name,
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
-            'directory': dir_name,
-            'name': "my_beloved_directory",
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
             'directory': dir_name,
             'dirtagname': "directory_custom_tagname",
             'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
+            'tags': ['optional:tag1'],
+        },
+        {
             'directory': dir_name,
             'filetagname': "file_custom_tagname",
             'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
+            'tags': ['optional:tag1'],
+        },
+        {
             'directory': dir_name,
             'dirtagname': "recursive_check",
             'recursive': True,
             'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
+            'tags': ['optional:tag1'],
+        },
+        {
             'directory': dir_name,
             'dirtagname': "glob_pattern_check",
             'pattern': "*.log",
             'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
+            'tags': ['optional:tag1'],
+        },
+        {
             'directory': dir_name,
             'dirtagname': "relative_pattern_check",
             'pattern': "file_*",
             'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }
+            'tags': ['optional:tag1'],
+        },
     ]
 
 
@@ -141,24 +135,16 @@ def test_directory_metrics(aggregator):
         # 'recursive' and 'pattern' parameters
         if config.get('pattern') == "*.log":
             # 2 '*.log' files in 'temp_dir'
-            aggregator.assert_metric(
-                "system.disk.directory.files",
-                tags=dir_tags, count=1, value=2)
+            aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=2)
         elif config.get('pattern') == "file_*":
             # 10 'file_*' files in 'temp_dir'
-            aggregator.assert_metric(
-                "system.disk.directory.files",
-                tags=dir_tags, count=1, value=10)
+            aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=10)
         elif config.get('recursive'):
             # 12 files in 'temp_dir' + 5 files in 'tempdir/subfolder'
-            aggregator.assert_metric(
-                "system.disk.directory.files",
-                tags=dir_tags, count=1, value=17)
+            aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=17)
         else:
             # 12 files in 'temp_dir'
-            aggregator.assert_metric(
-                "system.disk.directory.files",
-                tags=dir_tags, count=1, value=12)
+            aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=12)
 
     # Raises when coverage < 100%
     aggregator.metrics_asserted_pct == 100.0
@@ -183,39 +169,21 @@ def test_file_metrics(aggregator):
             if config.get('pattern') != "file_*":
                 # 2 '*.log' files in 'temp_dir'
                 for i in range(1, 3):
-                    file_tag = [
-                        filetagname + ":%s" % os.path.normpath(
-                            temp_dir + "/log_" + str(i) + ".log")
-                               ]
-                    aggregator.assert_metric(
-                        mname,
-                        tags=dir_tags + file_tag,
-                        count=1)
+                    file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/log_" + str(i) + ".log")]
+                    aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
 
             if config.get('pattern') != "*.log":
                 # Files in 'temp_dir'
                 for i in range(0, 10):
-                    file_tag = [
-                        filetagname + ":%s" % os.path.normpath(
-                            temp_dir + "/file_" + str(i))
-                               ]
-                    aggregator.assert_metric(
-                        mname,
-                        tags=dir_tags + file_tag,
-                        count=1)
+                    file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/file_" + str(i))]
+                    aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
 
             if not config.get('pattern'):
                 # Files in 'temp_dir/subfolder'
                 if config.get('recursive'):
                     for i in range(0, 5):
-                        file_tag = [
-                            filetagname + ":%s" % os.path.normpath(
-                                temp_dir + "/subfolder" + "/file_" + str(i))
-                                   ]
-                        aggregator.assert_metric(
-                            mname,
-                            tags=dir_tags + file_tag,
-                            count=1)
+                        file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/subfolder" + "/file_" + str(i))]
+                        aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
 
         # Common metrics
         for mname in COMMON_METRICS:
@@ -234,8 +202,7 @@ def test_non_existent_directory():
 
 
 def test_non_existent_directory_ignore_missing():
-    config = {'directory': '/non-existent/directory',
-              'ignore_missing': True}
+    config = {'directory': '/non-existent/directory', 'ignore_missing': True}
     dir_check._get_stats = mock.MagicMock()
     dir_check.check(config)
     dir_check._get_stats.assert_called_once()

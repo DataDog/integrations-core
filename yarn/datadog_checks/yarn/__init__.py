@@ -4,7 +4,4 @@
 from .yarn import YarnCheck
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'YarnCheck'
-]
+__all__ = ['__version__', 'YarnCheck']

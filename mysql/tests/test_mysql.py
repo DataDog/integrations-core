@@ -20,12 +20,17 @@ def test_minimal_config(aggregator, instance_basic):
     mysql_check.check(instance_basic)
 
     # Test service check
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK,
-                                    tags=tags.SC_TAGS_MIN, count=1)
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_MIN, count=1)
 
     # Test metrics
-    testable_metrics = (variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS +
-                        variables.BINLOG_VARS + variables.SYSTEM_METRICS + variables.SYNTHETIC_VARS)
+    testable_metrics = (
+        variables.STATUS_VARS
+        + variables.VARIABLES_VARS
+        + variables.INNODB_VARS
+        + variables.BINLOG_VARS
+        + variables.SYSTEM_METRICS
+        + variables.SYNTHETIC_VARS
+    )
 
     for mname in testable_metrics:
         aggregator.assert_metric(mname, at_least=0)
@@ -37,19 +42,22 @@ def test_complex_config(aggregator, instance_complex):
     mysql_check.check(instance_complex)
 
     # Test service check
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK,
-                                    tags=tags.SC_TAGS, count=1)
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=1)
 
-    aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK,
-                                    tags=tags.SC_TAGS, at_least=1)
+    aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS, at_least=1)
 
     ver = map(lambda x: int(x), mysql_check.mysql_version[mysql_check._get_host_key()])
     ver = tuple(ver)
 
-    testable_metrics = (variables.STATUS_VARS + variables.VARIABLES_VARS +
-                        variables.INNODB_VARS + variables.BINLOG_VARS +
-                        variables.SYSTEM_METRICS + variables.SCHEMA_VARS +
-                        variables.SYNTHETIC_VARS)
+    testable_metrics = (
+        variables.STATUS_VARS
+        + variables.VARIABLES_VARS
+        + variables.INNODB_VARS
+        + variables.BINLOG_VARS
+        + variables.SYSTEM_METRICS
+        + variables.SCHEMA_VARS
+        + variables.SYNTHETIC_VARS
+    )
 
     if ver >= (5, 6, 0) and environ.get('MYSQL_FLAVOR') != 'mariadb':
         testable_metrics.extend(variables.PERFORMANCE_VARS)
@@ -66,26 +74,14 @@ def test_complex_config(aggregator, instance_complex):
             continue
 
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:testdb'],
-                                     count=1)
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:mysql'],
-                                     count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:mysql'], count=1)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:testdb'],
-                                     count=1)
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:information_schema'],
-                                     count=1)
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:performance_schema'],
-                                     count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:performance_schema'], count=1)
         else:
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS,
-                                     at_least=0)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=0)
 
     # TODO: test this if it is implemented
     # Assert service metadata
@@ -97,10 +93,12 @@ def test_complex_config(aggregator, instance_complex):
     aggregator.assert_metric('bob.age', value=20)
 
     # test optional metrics
-    optional_metrics = (variables.OPTIONAL_REPLICATION_METRICS +
-                        variables.OPTIONAL_INNODB_VARS +
-                        variables.OPTIONAL_STATUS_VARS +
-                        variables.OPTIONAL_STATUS_VARS_5_6_6)
+    optional_metrics = (
+        variables.OPTIONAL_REPLICATION_METRICS
+        + variables.OPTIONAL_INNODB_VARS
+        + variables.OPTIONAL_STATUS_VARS
+        + variables.OPTIONAL_STATUS_VARS_5_6_6
+    )
     _test_optional_metrics(aggregator, optional_metrics, 1)
 
     # Raises when coverage < 100%
@@ -117,8 +115,7 @@ def test_connection_failure(aggregator, instance_error):
     with pytest.raises(Exception):
         mysql_check.check(instance_error)
 
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL,
-                                    tags=tags.SC_FAILURE_TAGS, count=1)
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL, tags=tags.SC_FAILURE_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
 
@@ -133,17 +130,22 @@ def test_complex_config_replica(aggregator, instance_complex):
     # self.assertMetricTag('mysql.replication.seconds_behind_master', 'channel:default')
 
     # Test service check
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK,
-                                    tags=tags.SC_TAGS_REPLICA, count=1)
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, count=1)
 
     # Travis MySQL not running replication - FIX in flavored test.
-    aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK,
-                                    tags=tags.SC_TAGS_REPLICA, at_least=1)
+    aggregator.assert_service_check(
+        'mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS_REPLICA, at_least=1
+    )
 
-    testable_metrics = (variables.STATUS_VARS + variables.VARIABLES_VARS +
-                        variables.INNODB_VARS + variables.BINLOG_VARS +
-                        variables.SYSTEM_METRICS + variables.SCHEMA_VARS +
-                        variables.SYNTHETIC_VARS)
+    testable_metrics = (
+        variables.STATUS_VARS
+        + variables.VARIABLES_VARS
+        + variables.INNODB_VARS
+        + variables.BINLOG_VARS
+        + variables.SYSTEM_METRICS
+        + variables.SCHEMA_VARS
+        + variables.SYNTHETIC_VARS
+    )
 
     # Test metrics
     for mname in testable_metrics:
@@ -157,28 +159,25 @@ def test_complex_config_replica(aggregator, instance_complex):
             continue
 
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:testdb'], count=1)
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:information_schema'], count=1)
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS+['schema:performance_schema'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:performance_schema'], count=1)
         else:
-            aggregator.assert_metric(mname,
-                                     tags=tags.METRIC_TAGS, at_least=0)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=0)
 
     # test custom query metrics
     aggregator.assert_metric('alice.age', value=25)
     aggregator.assert_metric('bob.age', value=20)
 
     # test optional metrics
-    optional_metrics = (variables.OPTIONAL_REPLICATION_METRICS +
-                        variables.OPTIONAL_INNODB_VARS +
-                        variables.OPTIONAL_STATUS_VARS +
-                        variables.OPTIONAL_STATUS_VARS_5_6_6)
+    optional_metrics = (
+        variables.OPTIONAL_REPLICATION_METRICS
+        + variables.OPTIONAL_INNODB_VARS
+        + variables.OPTIONAL_STATUS_VARS
+        + variables.OPTIONAL_STATUS_VARS_5_6_6
+    )
     _test_optional_metrics(aggregator, optional_metrics, 1)
 
     # Raises when coverage < 100%

@@ -31,17 +31,13 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent linkerd check',
-
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
-
     # Author details
     author='Datadog',
     author_email='packages@datadoghq.com',
-
     # License
     license='BSD',
-
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -52,13 +48,10 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-
     # The package we're going to ship
     packages=['datadog_checks.linkerd'],
-
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

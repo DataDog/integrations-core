@@ -7,10 +7,7 @@ from .utils import CONTEXT_SETTINGS
 from .validate_commands import ALL_COMMANDS
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Verify certain aspects of the repo'
-)
+@click.group(context_settings=CONTEXT_SETTINGS, short_help='Verify certain aspects of the repo')
 def validate():
     pass
 

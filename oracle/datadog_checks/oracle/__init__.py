@@ -5,8 +5,4 @@
 from .oracle import Oracle, OracleConfigError
 from .__about__ import __version__
 
-__all__ = [
-    "__version__",
-    'Oracle',
-    'OracleConfigError'
-]
+__all__ = ["__version__", 'Oracle', 'OracleConfigError']

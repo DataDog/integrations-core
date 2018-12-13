@@ -13,34 +13,19 @@ from collections import defaultdict
 # project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.platform import Platform
-from datadog_checks.utils.subprocess_output import (
-    get_subprocess_output,
-    SubprocessOutputEmptyError,
-)
+from datadog_checks.utils.subprocess_output import get_subprocess_output, SubprocessOutputEmptyError
 import psutil
 
 BSD_TCP_METRICS = [
-    (re.compile(
-        r"^\s*(\d+) data packets \(\d+ bytes\) retransmitted\s*$"
-    ), 'system.net.tcp.retrans_packs'),
-    (re.compile(
-        r"^\s*(\d+) packets sent\s*$"
-    ), 'system.net.tcp.sent_packs'),
-    (re.compile(
-        r"^\s*(\d+) packets received\s*$"
-    ), 'system.net.tcp.rcv_packs')
+    (re.compile(r"^\s*(\d+) data packets \(\d+ bytes\) retransmitted\s*$"), 'system.net.tcp.retrans_packs'),
+    (re.compile(r"^\s*(\d+) packets sent\s*$"), 'system.net.tcp.sent_packs'),
+    (re.compile(r"^\s*(\d+) packets received\s*$"), 'system.net.tcp.rcv_packs'),
 ]
 
 SOLARIS_TCP_METRICS = [
-    (re.compile(
-        r"\s*tcpRetransSegs\s*=\s*(\d+)\s*"
-    ), 'system.net.tcp.retrans_segs'),
-    (re.compile(
-        r"\s*tcpOutDataSegs\s*=\s*(\d+)\s*"
-    ), 'system.net.tcp.in_segs'),
-    (re.compile(
-        r"\s*tcpInSegs\s*=\s*(\d+)\s*"
-    ), 'system.net.tcp.out_segs')
+    (re.compile(r"\s*tcpRetransSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.retrans_segs'),
+    (re.compile(r"\s*tcpOutDataSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.in_segs'),
+    (re.compile(r"\s*tcpInSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.out_segs'),
 ]
 
 
@@ -48,20 +33,12 @@ class Network(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'
 
-    PSUTIL_TYPE_MAPPING = {
-        socket.SOCK_STREAM: 'tcp',
-        socket.SOCK_DGRAM: 'udp',
-    }
+    PSUTIL_TYPE_MAPPING = {socket.SOCK_STREAM: 'tcp', socket.SOCK_DGRAM: 'udp'}
 
-    PSUTIL_FAMILY_MAPPING = {
-        socket.AF_INET: '4',
-        socket.AF_INET6: '6',
-    }
+    PSUTIL_FAMILY_MAPPING = {socket.AF_INET: '4', socket.AF_INET6: '6'}
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(
-            self, name, init_config,
-            agentConfig, instances=instances)
+        AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
         if instances is not None and len(instances) > 1:
             raise Exception("Network check only supports one configured instance.")
 
@@ -70,12 +47,9 @@ class Network(AgentCheck):
             instance = {}
 
         self._excluded_ifaces = instance.get('excluded_interfaces', [])
-        self._collect_cx_state = instance.get(
-            'collect_connection_state', False)
-        self._collect_rate_metrics = instance.get(
-            'collect_rate_metrics', True)
-        self._collect_count_metrics = instance.get(
-            'collect_count_metrics', False)
+        self._collect_cx_state = instance.get('collect_connection_state', False)
+        self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
+        self._collect_count_metrics = instance.get('collect_count_metrics', False)
 
         # This decides whether we should split or combine connection states,
         # along with a few other things
@@ -155,13 +129,12 @@ class Network(AgentCheck):
                     psutil.CONN_LISTEN: "listening",
                     psutil.CONN_CLOSING: "closing",
                     psutil.CONN_NONE: "connections",  # CONN_NONE is always returned for udp connections
-                }
+                },
             }
         else:
             self.cx_state_gauge = {
                 ('udp4', 'connections'): 'system.net.udp4.connections',
                 ('udp6', 'connections'): 'system.net.udp6.connections',
-
                 ('tcp4', 'estab'): 'system.net.tcp4.estab',
                 ('tcp4', 'syn_sent'): 'system.net.tcp4.syn_sent',
                 ('tcp4', 'syn_recv'): 'system.net.tcp4.syn_recv',
@@ -174,7 +147,6 @@ class Network(AgentCheck):
                 ('tcp4', 'closing'): 'system.net.tcp4.closing',
                 ('tcp4', 'listen'): 'system.net.tcp4.listen',
                 ('tcp4', 'last_ack'): 'system.net.tcp4.time_wait',
-
                 ('tcp6', 'estab'): 'system.net.tcp6.estab',
                 ('tcp6', 'syn_sent'): 'system.net.tcp6.syn_sent',
                 ('tcp6', 'syn_recv'): 'system.net.tcp6.syn_recv',
@@ -229,7 +201,7 @@ class Network(AgentCheck):
                     psutil.CONN_LISTEN: "listen",
                     psutil.CONN_CLOSING: "closing",
                     psutil.CONN_NONE: "connections",  # CONN_NONE is always returned for udp connections
-                }
+                },
             }
 
     def _submit_netmetric(self, metric, value, tags=None):
@@ -314,8 +286,9 @@ class Network(AgentCheck):
                         # between the IP versions in the output
                         # Also calls `ss` for each protocol, because on some systems (e.g. Ubuntu 14.04), there is a
                         # bug that print `tcp` even if it's `udp`
-                        output, _, _ = get_subprocess_output(["ss", "-n", "-{0}".format(protocol[0]),
-                                                              "-a", "-{0}".format(ip_version)], self.log)
+                        output, _, _ = get_subprocess_output(
+                            ["ss", "-n", "-{0}".format(protocol[0]), "-a", "-{0}".format(ip_version)], self.log
+                        )
                         lines = output.splitlines()
 
                         # State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
@@ -326,8 +299,9 @@ class Network(AgentCheck):
                         # LISTEN     0      0       ::ffff:127.0.0.1:33217  ::ffff:127.0.0.1:7199
                         # ESTAB      0      0       ::ffff:127.0.0.1:58975  ::ffff:127.0.0.1:2181
 
-                        metrics = self._parse_linux_cx_state(lines[1:], self.tcp_states['ss'], 0, protocol=protocol,
-                                                             ip_version=ip_version)
+                        metrics = self._parse_linux_cx_state(
+                            lines[1:], self.tcp_states['ss'], 0, protocol=protocol, ip_version=ip_version
+                        )
                         # Only send the metrics which match the loop iteration's ip version
                         for stat, metric in self.cx_state_gauge.iteritems():
                             if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
@@ -418,16 +392,17 @@ class Network(AgentCheck):
                 'OutDatagrams': 'system.net.udp.out_datagrams',
                 'RcvbufErrors': 'system.net.udp.rcv_buf_errors',
                 'SndbufErrors': 'system.net.udp.snd_buf_errors',
-                'InCsumErrors': 'system.net.udp.in_csum_errors'
-            }
+                'InCsumErrors': 'system.net.udp.in_csum_errors',
+            },
         }
 
         # Skip the first line, as it's junk
         for k in nstat_metrics_names:
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
-                    self._submit_netmetric(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]),
-                                           tags=custom_tags)
+                    self._submit_netmetric(
+                        nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
+                    )
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """

@@ -7,10 +7,7 @@ from ..utils import CONTEXT_SETTINGS, DEFAULT_INDENT, abort, echo_failure, echo_
 from ...e2e import create_interface, get_configured_checks, get_configured_envs, stop_environment
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Stop environments'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Stop environments')
 @click.argument('check')
 @click.argument('env', required=False)
 def stop(check, env):

@@ -10,6 +10,7 @@ CHECK_NAME = 'tcp_check'
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -21,24 +22,12 @@ def check():
 
 @pytest.fixture
 def instance_ko():
-    return {
-        'host': '127.0.0.1',
-        'port': 65530,
-        'timeout': 1.5,
-        'name': 'DownService',
-        'tags': ["foo:bar"],
-    }
+    return {'host': '127.0.0.1', 'port': 65530, 'timeout': 1.5, 'name': 'DownService', 'tags': ["foo:bar"]}
 
 
 @pytest.fixture
 def instance():
-    return {
-        'host': 'datadoghq.com',
-        'port': 80,
-        'timeout': 1.5,
-        'name': 'UpService',
-        'tags': ["foo:bar"]
-    }
+    return {'host': 'datadoghq.com', 'port': 80, 'timeout': 1.5, 'name': 'UpService', 'tags': ["foo:bar"]}
 
 
 def test_down(aggregator, check, instance_ko):

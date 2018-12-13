@@ -14,7 +14,7 @@ from ....utils import read_file
 @click.command(
     'agent-reqs',
     context_settings=CONTEXT_SETTINGS,
-    short_help="Verify that the checks versions are in sync with the requirements-agent-release.txt file"
+    short_help="Verify that the checks versions are in sync with the requirements-agent-release.txt file",
 )
 def agent_reqs():
     """Verify that the checks versions are in sync with the requirements-agent-release.txt file"""
@@ -35,9 +35,7 @@ def agent_reqs():
                 echo_warning('{} has not yet been released'.format(check_name))
             elif check_version != pinned_version:
                 failed_checks += 1
-                echo_failure("{} has version {} but is pinned to {}".format(
-                    check_name, check_version, pinned_version
-                ))
+                echo_failure("{} has version {} but is pinned to {}".format(check_name, check_version, pinned_version))
             else:
                 ok_checks += 1
 

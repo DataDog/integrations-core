@@ -8,6 +8,7 @@ class Timer(object):
     """
     Helper class
     """
+
     def __init__(self):
         self.start()
 

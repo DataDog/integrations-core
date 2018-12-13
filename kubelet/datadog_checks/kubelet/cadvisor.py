@@ -20,17 +20,9 @@ from tagger import get_tags
 
 NAMESPACE = "kubernetes"
 DEFAULT_MAX_DEPTH = 10
-DEFAULT_ENABLED_RATES = [
-    'diskio.io_service_bytes.stats.total',
-    'network.??_bytes',
-    'cpu.*.total']
-DEFAULT_ENABLED_GAUGES = [
-    'memory.usage',
-    'memory.working_set',
-    'memory.rss',
-    'filesystem.usage']
-DEFAULT_POD_LEVEL_METRICS = [
-    'network.*']
+DEFAULT_ENABLED_RATES = ['diskio.io_service_bytes.stats.total', 'network.??_bytes', 'cpu.*.total']
+DEFAULT_ENABLED_GAUGES = ['memory.usage', 'memory.working_set', 'memory.rss', 'filesystem.usage']
+DEFAULT_POD_LEVEL_METRICS = ['network.*']
 
 NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
 
@@ -43,6 +35,7 @@ class CadvisorScraper(object):
     class, as it uses its AgentCheck facilities and class members.
     It is not possible to run it standalone.
     """
+
     def __init__(self, *args, **kwargs):
         super(CadvisorScraper, self).__init__(*args, **kwargs)
 
@@ -60,8 +53,7 @@ class CadvisorScraper(object):
         kubelet_hostname = urlparse(kubelet_url).hostname
         if not kubelet_hostname:
             raise ValueError("kubelet hostname empty")
-        url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port,
-                                      LEGACY_CADVISOR_METRICS_PATH)
+        url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port, LEGACY_CADVISOR_METRICS_PATH)
 
         # Test the endpoint is present
         r = requests.head(url, timeout=1)
@@ -172,8 +164,12 @@ class CadvisorScraper(object):
             tags.append("kube_container_name:%s" % k_container_name)
         else:  # Standard container
             cid = pod_list_utils.get_cid_by_name_tuple(
-                (pod.get('metadata', {}).get('namespace', ""),
-                 pod.get('metadata', {}).get('name', ""), k_container_name))
+                (
+                    pod.get('metadata', {}).get('namespace', ""),
+                    pod.get('metadata', {}).get('name', ""),
+                    k_container_name,
+                )
+            )
             if pod_list_utils.is_excluded(cid):
                 self.log.debug("Filtering out " + cid)
                 return

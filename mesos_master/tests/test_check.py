@@ -12,10 +12,7 @@ from datadog_checks.mesos_master import MesosMaster
 CHECK_NAME = 'mesos_master'
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 
-INSTANCE = {
-    'url': 'http://localhost:5050',
-    'tags': ['instance:mytag1']
-}
+INSTANCE = {'url': 'http://localhost:5050', 'tags': ['instance:mytag1']}
 
 
 def read_fixture(name):
@@ -36,9 +33,15 @@ def check():
 def test_check(check, aggregator):
     check.check(INSTANCE)
     metrics = {}
-    for d in (check.CLUSTER_TASKS_METRICS, check.CLUSTER_SLAVES_METRICS,
-              check.CLUSTER_RESOURCES_METRICS, check.CLUSTER_REGISTRAR_METRICS,
-              check.CLUSTER_FRAMEWORK_METRICS, check.SYSTEM_METRICS, check.STATS_METRICS):
+    for d in (
+        check.CLUSTER_TASKS_METRICS,
+        check.CLUSTER_SLAVES_METRICS,
+        check.CLUSTER_RESOURCES_METRICS,
+        check.CLUSTER_REGISTRAR_METRICS,
+        check.CLUSTER_FRAMEWORK_METRICS,
+        check.SYSTEM_METRICS,
+        check.STATS_METRICS,
+    ):
         metrics.update(d)
 
     for _, v in check.FRAMEWORK_METRICS.iteritems():

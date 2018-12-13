@@ -37,8 +37,9 @@ def test__get_process_metrics(aggregator, check):
     cur.execute.assert_called_with(query)
     for i, metric_name in enumerate(check.PROCESS_METRICS.values()):
         expected_program = programs[i]
-        aggregator.assert_metric(metric_name, count=1, value=0,
-                                 tags=['custom_tag', 'program:{}'.format(expected_program)])
+        aggregator.assert_metric(
+            metric_name, count=1, value=0, tags=['custom_tag', 'program:{}'.format(expected_program)]
+        )
 
 
 def test__get_tablespace_metrics(aggregator, check):
@@ -46,12 +47,7 @@ def test__get_tablespace_metrics(aggregator, check):
 
     con = mock.MagicMock()
     cur = mock.MagicMock()
-    cur.fetchall.return_value = [
-        ["offline", None, 100],
-        ["normal", 50, 100],
-        ["full", 100, 100],
-        ["size_0", 1, None]
-    ]
+    cur.fetchall.return_value = [["offline", None, 100], ["normal", 50, 100], ["full", 100, 100], ["size_0", 1, None]]
     con.cursor.return_value = cur
 
     check._get_tablespace_metrics(con, ["custom_tag"])
@@ -163,53 +159,43 @@ def test__get_custom_metrics_misconfigured(check):
 def test__get_custom_metrics(aggregator, check):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
-    cursor.fetchone.side_effect = [
-        ["tag_value1", "1"],
-        [1, 2, "tag_value2"]
-    ]
+    cursor.fetchone.side_effect = [["tag_value1", "1"], [1, 2, "tag_value2"]]
     con.cursor.return_value = cursor
 
     custom_queries = [
         {
             "metric_prefix": "oracle.test1",
             "query": "mocked",
-            "columns": [
-                {
-                    "name": "tag_name",
-                    "type": "tag"
-                },
-                {
-                    "name": "metric",
-                    "type": "gauge"
-                }
-            ],
-            "tags": ["query_tags1"]
+            "columns": [{"name": "tag_name", "type": "tag"}, {"name": "metric", "type": "gauge"}],
+            "tags": ["query_tags1"],
         },
         {
             "metric_prefix": "oracle.test2",
             "query": "mocked",
             "columns": [
-                {
-                    "name": "rate",
-                    "type": "rate"
-                },
-                {
-                    "name": "gauge",
-                    "type": "gauge"
-                },
-                {
-                    "name": "tag_name",
-                    "type": "tag"
-                }
+                {"name": "rate", "type": "rate"},
+                {"name": "gauge", "type": "gauge"},
+                {"name": "tag_name", "type": "tag"},
             ],
-            "tags": ["query_tags2"]
-        }
+            "tags": ["query_tags2"],
+        },
     ]
 
     check._get_custom_metrics(con, custom_queries, ["custom_tag"])
-    aggregator.assert_metric("oracle.test1.metric", value=1, count=1,
-                             tags=["tag_name:tag_value1", "query_tags1", "custom_tag"])
-    aggregator.assert_metric("oracle.test2.gauge", value=2, count=1, metric_type=aggregator.GAUGE,
-                             tags=["tag_name:tag_value2", "query_tags2", "custom_tag"])
-    aggregator.assert_metric("oracle.test2.rate", value=1, count=1, metric_type=aggregator.RATE,
-                             tags=["tag_name:tag_value2", "query_tags2", "custom_tag"])
+    aggregator.assert_metric(
+        "oracle.test1.metric", value=1, count=1, tags=["tag_name:tag_value1", "query_tags1", "custom_tag"]
+    )
+    aggregator.assert_metric(
+        "oracle.test2.gauge",
+        value=2,
+        count=1,
+        metric_type=aggregator.GAUGE,
+        tags=["tag_name:tag_value2", "query_tags2", "custom_tag"],
+    )
+    aggregator.assert_metric(
+        "oracle.test2.rate",
+        value=1,
+        count=1,
+        metric_type=aggregator.RATE,
+        tags=["tag_name:tag_value2", "query_tags2", "custom_tag"],
+    )

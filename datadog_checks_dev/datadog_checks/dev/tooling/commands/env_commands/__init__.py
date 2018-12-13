@@ -7,10 +7,4 @@ from .prune import prune
 from .start import start
 from .stop import stop
 
-ALL_COMMANDS = (
-    check_run,
-    ls,
-    prune,
-    start,
-    stop,
-)
+ALL_COMMANDS = (check_run, ls, prune, start, stop)

@@ -16,9 +16,11 @@ def test_get_nodes_with_service(aggregator):
     consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
     consul_check.check(consul_mocks.MOCK_CONFIG)
 
-    expected_tags = ['consul_datacenter:dc1',
-                     'consul_service_id:service-1',
-                     'consul_service-1_service_tag:az-us-east-1a']
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'consul_service_id:service-1',
+        'consul_service-1_service_tag:az-us-east-1a',
+    ]
 
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=1, tags=expected_tags)
@@ -68,17 +70,14 @@ def test_get_nodes_with_service_warning(aggregator):
     expected_tags = [
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
-        'consul_service-1_service_tag:az-us-east-1a'
+        'consul_service-1_service_tag:az-us-east-1a',
     ]
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_warning', value=1, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_critical', value=0, tags=expected_tags)
 
-    expected_tags = [
-        'consul_datacenter:dc1',
-        'consul_node_id:node-1'
-    ]
+    expected_tags = ['consul_datacenter:dc1', 'consul_node_id:node-1']
     aggregator.assert_metric('consul.catalog.services_up', value=6, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_warning', value=6, tags=expected_tags)
@@ -95,17 +94,14 @@ def test_get_nodes_with_service_critical(aggregator):
     expected_tags = [
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
-        'consul_service-1_service_tag:az-us-east-1a'
+        'consul_service-1_service_tag:az-us-east-1a',
     ]
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_warning', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_critical', value=1, tags=expected_tags)
 
-    expected_tags = [
-        'consul_datacenter:dc1',
-        'consul_node_id:node-1'
-    ]
+    expected_tags = ['consul_datacenter:dc1', 'consul_node_id:node-1']
     aggregator.assert_metric('consul.catalog.services_up', value=6, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_warning', value=0, tags=expected_tags)
@@ -123,7 +119,7 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-loadbalancer",
         "consul_service_id:server-loadbalancer",
-        "service:server-loadbalancer"
+        "service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
@@ -131,29 +127,21 @@ def test_service_checks(aggregator):
         "consul_datacenter:dc1",
         "check:server-api",
         "consul_service_id:server-loadbalancer",
-        "service:server-loadbalancer"
+        "service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = [
-        "consul_datacenter:dc1",
-        "check:server-api",
-        "service:server-loadbalancer"
-    ]
+    expected_tags = ["consul_datacenter:dc1", "check:server-api", "service:server-loadbalancer"]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = [
-        "consul_datacenter:dc1",
-        "check:server-api",
-        "consul_service_id:server-loadbalancer"
-    ]
+    expected_tags = ["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer"]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
     expected_tags = [
         "consul_datacenter:dc1",
         "check:server-status-empty",
         "consul_service_id:server-empty",
-        "service:server-empty"
+        "service:server-empty",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
 

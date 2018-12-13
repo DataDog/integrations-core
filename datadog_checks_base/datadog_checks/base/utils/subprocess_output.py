@@ -59,9 +59,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
 
     log.debug(
         'get_subprocess_output returned '
-        '(len(out): {} ; len(err): {} ; returncode: {})'.format(
-            len(out), len(err), returncode
-        )
+        '(len(out): {} ; len(err): {} ; returncode: {})'.format(len(out), len(err), returncode)
     )
 
     if out:

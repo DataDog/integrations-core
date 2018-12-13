@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .windows_service import WindowsService
 
-__all__ = [
-    '__version__',
-    'WindowsService'
-]
+__all__ = ['__version__', 'WindowsService']

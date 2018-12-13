@@ -8,5 +8,5 @@ __all__ = [
     'PodListUtils',
     'KubeletCredentials',
     'get_pod_by_uid',
-    'is_static_pending_pod'
+    'is_static_pending_pod',
 ]

@@ -4,7 +4,4 @@
 from .redisdb import Redis
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'Redis'
-]
+__all__ = ['__version__', 'Redis']

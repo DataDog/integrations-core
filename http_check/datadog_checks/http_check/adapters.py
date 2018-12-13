@@ -49,28 +49,33 @@ class WeakCiphersHTTPSConnection(urllib3.connection.VerifiedHTTPSConnection):
             hostname = self._tunnel_host
 
         # Wrap socket using verification with the root certs in trusted_root_certs
-        self.sock = ssl_.ssl_wrap_socket(conn, self.key_file, self.cert_file,
-                                         cert_reqs=resolved_cert_reqs,
-                                         ca_certs=self.ca_certs,
-                                         server_hostname=hostname,
-                                         ssl_version=resolved_ssl_version,
-                                         ciphers=self.ciphers)
+        self.sock = ssl_.ssl_wrap_socket(
+            conn,
+            self.key_file,
+            self.cert_file,
+            cert_reqs=resolved_cert_reqs,
+            ca_certs=self.ca_certs,
+            server_hostname=hostname,
+            ssl_version=resolved_ssl_version,
+            ciphers=self.ciphers,
+        )
 
         if self.assert_fingerprint:
             ssl_.assert_fingerprint(self.sock.getpeercert(binary_form=True), self.assert_fingerprint)
-        elif resolved_cert_reqs != ssl.CERT_NONE \
-                and self.assert_hostname is not False:
+        elif resolved_cert_reqs != ssl.CERT_NONE and self.assert_hostname is not False:
             cert = self.sock.getpeercert()
             if not cert.get('subjectAltName', ()):
-                warnings.warn((
-                    'Certificate has no `subjectAltName`, falling back to check for a `commonName` for now. '
-                    'This feature is being removed by major browsers and deprecated by RFC 2818. '
-                    '(See https://github.com/shazow/urllib3/issues/497 for details.)'),
-                    SecurityWarning
+                warnings.warn(
+                    (
+                        'Certificate has no `subjectAltName`, falling back to check for a `commonName` for now. '
+                        'This feature is being removed by major browsers and deprecated by RFC 2818. '
+                        '(See https://github.com/shazow/urllib3/issues/497 for details.)'
+                    ),
+                    SecurityWarning,
                 )
             match_hostname(cert, self.assert_hostname or hostname)
 
-        self.is_verified = (resolved_cert_reqs == ssl.CERT_REQUIRED or self.assert_fingerprint is not None)
+        self.is_verified = resolved_cert_reqs == ssl.CERT_REQUIRED or self.assert_fingerprint is not None
 
 
 class WeakCiphersHTTPSConnectionPool(urllib3.connectionpool.HTTPSConnectionPool):
@@ -79,7 +84,6 @@ class WeakCiphersHTTPSConnectionPool(urllib3.connectionpool.HTTPSConnectionPool)
 
 
 class WeakCiphersPoolManager(urllib3.poolmanager.PoolManager):
-
     def _new_pool(self, scheme, host, port):
         if scheme == 'https':
             return WeakCiphersHTTPSConnectionPool(host, port, **(self.connection_pool_kw))
@@ -98,5 +102,6 @@ class WeakCiphersAdapter(HTTPAdapter):
         self._pool_maxsize = maxsize
         self._pool_block = block
 
-        self.poolmanager = WeakCiphersPoolManager(num_pools=connections,
-                                                  maxsize=maxsize, block=block, strict=True, **pool_kwargs)
+        self.poolmanager = WeakCiphersPoolManager(
+            num_pools=connections, maxsize=maxsize, block=block, strict=True, **pool_kwargs
+        )

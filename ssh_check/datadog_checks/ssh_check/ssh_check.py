@@ -24,16 +24,19 @@ class CheckSSH(AgentCheck):
         ('add_missing_keys', False, False, bool),
     ]
 
-    Config = namedtuple('Config', [
-        'host',
-        'port',
-        'username',
-        'password',
-        'private_key_file',
-        'private_key_type',
-        'sftp_check',
-        'add_missing_keys',
-    ])
+    Config = namedtuple(
+        'Config',
+        [
+            'host',
+            'port',
+            'username',
+            'password',
+            'private_key_file',
+            'private_key_type',
+            'sftp_check',
+            'add_missing_keys',
+        ],
+    )
 
     def _load_conf(self, instance):
         params = []
@@ -79,23 +82,16 @@ class CheckSSH(AgentCheck):
             # Try to connect to check status of SSH
             try:
                 client.connect(
-                    conf.host, port=conf.port, username=conf.username,
-                    password=conf.password, pkey=private_key
+                    conf.host, port=conf.port, username=conf.username, password=conf.password, pkey=private_key
                 )
-                self.service_check(
-                    self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags, message=exception_message
-                )
+                self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags, message=exception_message)
 
             except Exception as e:
                 exception_message = str(e)
                 status = AgentCheck.CRITICAL
-                self.service_check(
-                    self.SSH_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message
-                )
+                self.service_check(self.SSH_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message)
                 if conf.sftp_check:
-                    self.service_check(
-                        self.SFTP_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message
-                    )
+                    self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message)
                 raise
 
             # Open sftp session on the existing connection to check status of SFTP
@@ -117,9 +113,7 @@ class CheckSSH(AgentCheck):
                 if exception_message is None:
                     exception_message = "No errors occured"
 
-                self.service_check(
-                    self.SFTP_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message
-                )
+                self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message)
         finally:
             # Always close the client, failure to do so leaks one thread per connection left open
             client.close()

@@ -4,7 +4,4 @@
 from .couchbase import Couchbase
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'Couchbase'
-]
+__all__ = ['__version__', 'Couchbase']

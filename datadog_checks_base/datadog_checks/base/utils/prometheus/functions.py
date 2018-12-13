@@ -20,7 +20,7 @@ def parse_metric_family(buf):
     while n < len(buf):
         msg_len, new_pos = _DecodeVarint32(buf, n)
         n = new_pos
-        msg_buf = buf[n:n + msg_len]
+        msg_buf = buf[n : n + msg_len]
         n += msg_len
 
         message = metrics_pb2.MetricFamily()

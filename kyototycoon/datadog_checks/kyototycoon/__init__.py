@@ -5,7 +5,4 @@
 from .kyototycoon import KyotoTycoonCheck
 from .__about__ import __version__
 
-__all__ = [
-    '__version__',
-    'KyotoTycoonCheck'
-]
+__all__ = ['__version__', 'KyotoTycoonCheck']

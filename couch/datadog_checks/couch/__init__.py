@@ -5,8 +5,4 @@ from .__about__ import __version__
 from .couch import CouchDb
 from . import errors
 
-__all__ = [
-    '__version__',
-    'CouchDb',
-    'errors',
-]
+__all__ = ['__version__', 'CouchDb', 'errors']

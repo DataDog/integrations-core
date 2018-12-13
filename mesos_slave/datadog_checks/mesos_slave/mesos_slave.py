@@ -157,12 +157,10 @@ class MesosSlave(AgentCheck):
 
                 if 'master_hostname' in state_metrics:
                     master_state = self._get_state(
-                        '{0}://{1}:{2}'.format(parsed_url.scheme,
-                                               state_metrics['master_hostname'],
-                                               master_port),
+                        '{0}://{1}:{2}'.format(parsed_url.scheme, state_metrics['master_hostname'], master_port),
                         timeout,
                         verify,
-                        tags
+                        tags,
                     )
                     if master_state is not None:
                         self.cluster_name = master_state.get('cluster')
@@ -189,10 +187,7 @@ class MesosSlave(AgentCheck):
         if state_metrics is None:
             state_metrics = self._get_state(url, timeout, ssl_verify, instance_tags)
         if state_metrics:
-            tags = [
-                'mesos_pid:{0}'.format(state_metrics['pid']),
-                'mesos_node:slave',
-            ]
+            tags = ['mesos_pid:{0}'.format(state_metrics['pid']), 'mesos_node:slave']
             if self.cluster_name:
                 tags.append('mesos_cluster:{0}'.format(self.cluster_name))
 
@@ -210,8 +205,13 @@ class MesosSlave(AgentCheck):
         stats_metrics = self._get_stats(url, timeout, ssl_verify, instance_tags)
         if stats_metrics:
             tags = tags if tags else instance_tags
-            metrics = [self.SLAVE_TASKS_METRICS, self.SYSTEM_METRICS, self.SLAVE_RESOURCE_METRICS,
-                       self.SLAVE_EXECUTORS_METRICS, self.STATS_METRICS]
+            metrics = [
+                self.SLAVE_TASKS_METRICS,
+                self.SYSTEM_METRICS,
+                self.SLAVE_RESOURCE_METRICS,
+                self.SLAVE_EXECUTORS_METRICS,
+                self.STATS_METRICS,
+            ]
             for m in metrics:
                 for key_name, (metric_name, metric_func) in m.iteritems():
                     if key_name in stats_metrics:

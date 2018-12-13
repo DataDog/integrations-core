@@ -53,14 +53,13 @@ class NfsStatCheck(AgentCheck):
 
         # Disregard the first half of device stats (report 1 of 2)
         # as that is the moving average
-        all_devices = all_devices[len(all_devices) // 2:]
+        all_devices = all_devices[len(all_devices) // 2 :]
 
         for device in all_devices:
             device.send_metrics(self.gauge, custom_tags)
 
 
 class Device(object):
-
     def __init__(self, device_data, log):
         self.log = log
 

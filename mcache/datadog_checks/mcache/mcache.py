@@ -31,7 +31,7 @@ class Memcache(AgentCheck):
         "curr_connections",
         "connection_structures",
         "threads",
-        "pointer_size"
+        "pointer_size",
     ]
 
     RATES = [
@@ -51,7 +51,7 @@ class Memcache(AgentCheck):
         "cas_hits",
         "cas_badval",
         "total_connections",
-        "listen_disabled_num"
+        "listen_disabled_num",
     ]
 
     ITEMS_RATES = [
@@ -70,15 +70,7 @@ class Memcache(AgentCheck):
         "direct_reclaims",
     ]
 
-    ITEMS_GAUGES = [
-        "number",
-        "number_hot",
-        "number_warm",
-        "number_cold",
-        "number_noexp",
-        "age",
-        "evicted_time",
-    ]
+    ITEMS_GAUGES = ["number", "number_hot", "number_warm", "number_cold", "number_noexp", "age", "evicted_time"]
 
     SLABS_RATES = [
         "get_hits",
@@ -106,17 +98,12 @@ class Memcache(AgentCheck):
     ]
 
     # format - "key": (rates, gauges, handler)
-    OPTIONAL_STATS = {
-        "items": [ITEMS_RATES, ITEMS_GAUGES, None],
-        "slabs": [SLABS_RATES, SLABS_GAUGES, None],
-    }
+    OPTIONAL_STATS = {"items": [ITEMS_RATES, ITEMS_GAUGES, None], "slabs": [SLABS_RATES, SLABS_GAUGES, None]}
 
     SERVICE_CHECK = 'memcache.can_connect'
 
     def get_library_versions(self):
-        return {
-            "memcache": pkg_resources.get_distribution("python-binary-memcached").version
-        }
+        return {"memcache": pkg_resources.get_distribution("python-binary-memcached").version}
 
     def _process_response(self, response):
         """
@@ -143,8 +130,7 @@ class Memcache(AgentCheck):
                 # Tweak the name if it's a rate so that we don't use the exact
                 # same metric name as the memcache documentation
                 if metric in self.RATES:
-                    our_metric = self.normalize(
-                        "{0}_rate".format(metric.lower()), 'memcache')
+                    our_metric = self.normalize("{0}_rate".format(metric.lower()), 'memcache')
                     self.rate(our_metric, float(stats[metric]), tags=tags)
 
             # calculate some metrics based on other metrics.
@@ -152,36 +138,30 @@ class Memcache(AgentCheck):
             # and log an exception just in case.
             try:
                 self.gauge(
-                    "memcache.get_hit_percent",
-                    100.0 * float(stats["get_hits"]) / float(stats["cmd_get"]),
-                    tags=tags,
+                    "memcache.get_hit_percent", 100.0 * float(stats["get_hits"]) / float(stats["cmd_get"]), tags=tags
                 )
             except ZeroDivisionError:
                 pass
 
             try:
                 self.gauge(
-                    "memcache.fill_percent",
-                    100.0 * float(stats["bytes"]) / float(stats["limit_maxbytes"]),
-                    tags=tags,
+                    "memcache.fill_percent", 100.0 * float(stats["bytes"]) / float(stats["limit_maxbytes"]), tags=tags
                 )
             except ZeroDivisionError:
                 pass
 
             try:
-                self.gauge(
-                    "memcache.avg_item_size",
-                    float(stats["bytes"]) / float(stats["curr_items"]),
-                    tags=tags,
-                )
+                self.gauge("memcache.avg_item_size", float(stats["bytes"]) / float(stats["curr_items"]), tags=tags)
             except ZeroDivisionError:
                 pass
 
             uptime = stats.get("uptime", 0)
             self.service_check(
-                self.SERVICE_CHECK, AgentCheck.OK,
+                self.SERVICE_CHECK,
+                AgentCheck.OK,
                 tags=service_check_tags,
-                message="Server has been up for %s seconds" % uptime)
+                message="Server has been up for %s seconds" % uptime,
+            )
         except BadResponseError:
             raise
 
@@ -204,21 +184,19 @@ class Memcache(AgentCheck):
 
                         if optional_gauges and metric in optional_gauges:
                             our_metric = self.normalize(metric.lower(), prefix)
-                            self.gauge(our_metric, float(val), tags=tags+metric_tags)
+                            self.gauge(our_metric, float(val), tags=tags + metric_tags)
 
                         if optional_rates and metric in optional_rates:
-                            our_metric = self.normalize(
-                                "{0}_rate".format(metric.lower()), prefix)
-                            self.rate(our_metric, float(val), tags=tags+metric_tags)
+                            our_metric = self.normalize("{0}_rate".format(metric.lower()), prefix)
+                            self.rate(our_metric, float(val), tags=tags + metric_tags)
                 except BadResponseError:
                     self.log.warning(
                         "Unable to retrieve optional stats from memcache instance, "
-                        "running 'stats %s' they could be empty or bad configuration.", arg
+                        "running 'stats %s' they could be empty or bad configuration.",
+                        arg,
                     )
                 except Exception as e:
-                    self.log.exception(
-                        "Unable to retrieve optional stats from memcache instance: {}".format(e)
-                    )
+                    self.log.exception("Unable to retrieve optional stats from memcache instance: {}".format(e))
 
     @staticmethod
     def get_items_stats(key, value):
@@ -294,12 +272,15 @@ class Memcache(AgentCheck):
                 self._get_optional_metrics(mc, tags, options)
         except BadResponseError as e:
             self.service_check(
-                self.SERVICE_CHECK, AgentCheck.CRITICAL,
+                self.SERVICE_CHECK,
+                AgentCheck.CRITICAL,
                 tags=service_check_tags,
-                message="Unable to fetch stats from server")
+                message="Unable to fetch stats from server",
+            )
             raise CheckException(
                 "Unable to retrieve stats from memcache instance: {}:{}."
-                "Please check your configuration. ({})".format(server, port, e))
+                "Please check your configuration. ({})".format(server, port, e)
+            )
 
         if mc is not None:
             mc.disconnect_all()

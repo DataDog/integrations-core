@@ -7,11 +7,7 @@ from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_succe
 from ...e2e import create_interface, get_configured_envs
 
 
-@click.command(
-    'check',
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Run an Agent check'
-)
+@click.command('check', context_settings=CONTEXT_SETTINGS, short_help='Run an Agent check')
 @click.argument('check')
 @click.argument('env', required=False)
 @click.option('--rate', '-r', is_flag=True)
