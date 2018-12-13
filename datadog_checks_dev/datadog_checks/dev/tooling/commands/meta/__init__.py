@@ -3,8 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from .meta_commands import ALL_COMMANDS
-from .utils import CONTEXT_SETTINGS
+from ..utils import CONTEXT_SETTINGS
+from .prometheus import prom
+
+
+ALL_COMMANDS = (
+    prom,
+)
 
 
 @click.group(
