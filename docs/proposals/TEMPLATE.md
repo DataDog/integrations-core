@@ -17,15 +17,15 @@ Agent itself.
 ## Problem
 
 *If necessary, add a more detailed sketch of the problem. Add any notes,
-pictures, text or details that illuminate why this is a problem we need to
-solve. Keep it as concise as possible.*
+pictures, text, or details that illuminate why this is a problem that needs to be 
+solved. Keep it as concise as possible.*
 
 ## Constraints
 
 *If necessary, note any constraints or requirements that any solution must
 fulfill. For example:*
 
-    1. We have to target Python 2.7.
+    1. Target is Python 2.7.
     2. Memory footprint should not increase more than 10%.
     3. Every check in `integrations-core` and `integrations-extra` should be
        supported.
@@ -33,31 +33,31 @@ fulfill. For example:*
 ## Recommended Solution
 
 *Describe your solution in the bare minimum detail to be understood. Explain
-why it's better than what we have and better than other options. Address
+why it's better than the current implementation and better than other options. Address
 any critical operational issues (failure modes, failover, redudancy, performance, cost).
 For example:*
 
 Embedding CPython is a well known, documented and supported practice which is quite
-common for C applications. We can leverage the same C api using cgo...
+common for C applications. The same C api can be leveraged using cgo...
 
 - Strengths
   - easily share memory between Go and Python
 - Weaknesses
   - adapt Go's concurrency model to Python threading execution model might cause
     issues
-  - we can't cross compile anymore
+  - cross compiling isn't available anymore
   - a Python crash would bring down the Agent
 - Performance
   - ...
 - Cost
-  - we add about 4Mb of memory footprint
+  - 4Mb of memory footprint are added
     - ...
 
 ## Other Solutions
 
 *Describe a few other options to solve problem.*
 
-- Spawn a Python process for each check and use gRPC to communicate
+- Spawn a Python process for each check and use gRPC to communicate.
   - At each collection cycle the Agent would fork a Python process running a check...
 
 ## Open Questions
