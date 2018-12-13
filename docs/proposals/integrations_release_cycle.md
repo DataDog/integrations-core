@@ -3,7 +3,7 @@
 - Authors: Massimiliano Pippi
 - Date: 2018-12-12
 - Status: draft
-- [Discussion](https://github.com/DataDog/datadog-agent/pull/0)
+- [Discussion](https://github.com/DataDog/integrations-core/pull/2741)
 
 ## Overview
 
