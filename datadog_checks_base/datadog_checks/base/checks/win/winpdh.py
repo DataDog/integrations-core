@@ -185,7 +185,6 @@ class WinPDHCounter(object):
             # see if we can create a counter
             try:
                 path = win32pdh.MakeCounterPath((machine_name, self._class_name, instance_name, None, 0, c))
-                self.logger.debug("Successfully created path %s" % index)
                 break
             except:  # noqa: E722
                 try:
@@ -208,19 +207,15 @@ class WinPDHCounter(object):
 
                 try:
                     if inst not in self.counterdict:
+                        self.logger.debug('Adding instance `{}`'.format(inst))
                         self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
                 except:  # noqa: E722
                     self.logger.fatal("Failed to create counter.  No instances of %s\\%s" % (
                         self._class_name, self._counter_name))
-                try:
-                    self.logger.debug("Path: %s\n" % text_type(path))
-                except:  # noqa: E722
-                    # some unicode characters are not translatable here.  Don't fail just
-                    # because we couldn't log
-                    self.logger.debug("Failed to log path")
 
             expired_instances = set(self.counterdict) - all_instances
             for inst in expired_instances:
+                self.logger.debug('Removing expired instance `{}`'.format(inst))
                 del self.counterdict[inst]
         else:
             if self._instance_name is not None:
@@ -237,18 +232,14 @@ class WinPDHCounter(object):
                         self._instance_name, self._class_name
                     ))
                     raise AttributeError("%s is not an instance of %s" % (self._instance_name, self._class_name))
+
             path = self._make_counter_path(self._machine_name, self._counter_name, self._instance_name, counters)
             if not path:
                 self.logger.warning("Empty path returned")
             else:
                 try:
-                    self.logger.debug("Path: %s\n" % text_type(path))
-                except:  # noqa: E722
-                    # some unicode characters are not translatable here.  Don't fail just
-                    # because we couldn't log
-                    self.logger.debug("Failed to log path")
-                try:
                     if SINGLE_INSTANCE_KEY not in self.counterdict:
+                        self.logger.debug('Adding single instance for path `{}`'.format(path))
                         self.counterdict[SINGLE_INSTANCE_KEY] = win32pdh.AddCounter(self.hq, path)
                 except:  # noqa: E722
                     self.logger.fatal("Failed to create counter.  No instances of %s\\%s" % (
