@@ -100,6 +100,11 @@ class ComputeApi(AbstractApi):
         limits = server_stats.get('limits', {}).get('absolute', {})
         return limits
 
+    def get_flavors_detail(self, query_params, timeout=None):
+        url = '{}/flavors/detail'.format(self.endpoint)
+        flavors = self._make_request(url, self.headers, params=query_params, timeout=timeout)
+        return flavors.get('flavors', [])
+
 
 class NeutronApi(AbstractApi):
     def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
