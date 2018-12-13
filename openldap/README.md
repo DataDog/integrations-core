@@ -123,11 +123,11 @@ Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP serv
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][7].
+Need help? Contact [Datadog Support][6].
 
 ## Development
 
-Please refer to the [main documentation][6]
+Please refer to the [main documentation][7]
 for more details about how to test and develop Agent based integrations.
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -135,5 +135,5 @@ for more details about how to test and develop Agent based integrations.
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
-[6]: https://docs.datadoghq.com/developers/
-[7]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/developers

@@ -38,8 +38,8 @@ Restart the recursor to enable the statistics API.
 
 #### Connect the Agent
 
-1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7].
-	See the [sample powerdns_recursor.d/conf.yaml][2] for all available configuration options:
+1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2].
+	See the [sample powerdns_recursor.d/conf.yaml][3] for all available configuration options:
 
     ```yaml
 	    init_config:
@@ -51,15 +51,15 @@ Restart the recursor to enable the statistics API.
 	        version: 4 # omit this line if you're running pdns_recursor version 3.x
     ```
 
-2. [Restart the Agent][3] to begin sending PowerDNS Recursor metrics to Datadog.
+2. [Restart the Agent][4] to begin sending PowerDNS Recursor metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `powerdns_recursor` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `powerdns_recursor` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 The PowerDNS Recursor check does not include any events at this time.### Service Checks
@@ -70,12 +70,12 @@ The PowerDNS Recursor check does not include any events at this time.### Service
 Returns CRITICAL if the Agent is unable to connect to the recursor's statistics API, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/datadog_checks/powerdns_recursor/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/datadog_checks/powerdns_recursor/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
+[7]: https://docs.datadoghq.com/help

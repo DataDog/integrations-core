@@ -1,16 +1,16 @@
 # Datadog Checks Dev
 
-[![Latest PyPI version](https://img.shields.io/pypi/v/datadog-checks-dev.svg)](https://pypi.org/project/datadog-checks-dev)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/datadog-checks-dev.svg)](https://pypi.org/project/datadog-checks-dev)
-[![License](https://img.shields.io/pypi/l/datadog-checks-dev.svg)](https://choosealicense.com/licenses)
+[![Latest PyPI version][1]](https://pypi.org/project/datadog-checks-dev)
+[![Supported Python versions][2]](https://pypi.org/project/datadog-checks-dev)
+[![License][3]](https://choosealicense.com/licenses)
 
 -----
 
-This is the developer toolkit designed for use by any [Agent-based][1] check or
+This is the developer toolkit designed for use by any [Agent-based][4] check or
 integration repository. There are 2 layers: one purely for development/testing,
 and the other for high level tasks such as releasing, dependency management, etc.
 
-`datadog-checks-dev` is distributed on [PyPI](https://pypi.org) as a universal wheel
+`datadog-checks-dev` is distributed on [PyPI][5] as a universal wheel
 and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and PyPy.
 
 **Table of Contents**
@@ -573,7 +573,7 @@ utilities and global `pytest` fixtures to avoid re-inventing the wheel.
 
 ##### Aggregator
 
-The `aggregator` fixture returns a [mocked Agent aggregator][2] with state cleared.
+The `aggregator` fixture returns a [mocked Agent aggregator][6] with state cleared.
 
 ```python
 from datadog_checks.vault import Vault
@@ -592,7 +592,7 @@ def test_service_check_connect_fail(aggregator):
 
 ##### Mocker
 
-The `mocker` fixture, provided by [pytest-mock](https://github.com/pytest-dev/pytest-mock),
+The `mocker` fixture, provided by [pytest-mock][7],
 is a thin-wrapper around `mock`'s patching API with the benefit of not having to worry
 about undoing patches at the end of a test or nesting `with` statements.
 
@@ -615,7 +615,7 @@ def test_unix_fs(mocker):
 
 #### Utilities
 
-Utilities live under the `datadog_checks.dev` namespace and can be found [here][3].
+Utilities live under the `datadog_checks.dev` namespace and can be found [here][8].
 
 Some examples:
 
@@ -653,6 +653,11 @@ Some examples:
 - If you see branches or functions that are unlikely to be executed or would be nearly impossible to
   test, exclude them from code coverage consideration by adding 2 spaces followed by `# no cov`.
 
-[1]: https://github.com/DataDog/datadog-agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/stubs/aggregator.py
-[3]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev
+[1]: https://img.shields.io/pypi/v/datadog-checks-dev.svg
+[2]: https://img.shields.io/pypi/pyversions/datadog-checks-dev.svg
+[3]: https://img.shields.io/pypi/l/datadog-checks-dev.svg
+[4]: https://github.com/DataDog/datadog-agent
+[5]: https://pypi.org
+[6]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/stubs/aggregator.py
+[7]: https://github.com/pytest-dev/pytest-mock
+[8]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev

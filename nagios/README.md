@@ -13,7 +13,7 @@ The Nagios check is included in the [Datadog Agent][1] package, so you don't nee
 
 ### Configuration
 
-Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. See the [sample nagios.d/conf.yaml][2] for all available configuration options:
+Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample nagios.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -31,11 +31,11 @@ The Agent reads the main Nagios configuration file to get the locations of the N
 
 This check also works with Icinga, a popular fork of Nagios. If you use Icinga, just set `nagios_conf` to the location of your Icinga configuration file.
 
-[Restart the Agent][3] to start sending Nagios events and (optionally) performance data metrics to Datadog.
+[Restart the Agent][4] to start sending Nagios events and (optionally) performance data metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `nagios` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `nagios` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -63,17 +63,17 @@ The check watches the Nagios events log for log lines containing these strings, 
 The Nagios check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Understand your Nagios alerts with Datadog][6]
+* [Understand your Nagios alerts with Datadog][7]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/nagios/datadog_checks/nagios/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://docs.datadoghq.com/help/
-[6]: https://www.datadoghq.com/blog/nagios-monitoring/
-[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/nagios/datadog_checks/nagios/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://docs.datadoghq.com/help
+[7]: https://www.datadoghq.com/blog/nagios-monitoring

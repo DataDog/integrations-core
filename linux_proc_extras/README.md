@@ -13,11 +13,11 @@ The Linux_proc_extras check is included in the [Datadog Agent][1] package, so yo
 
 ### Configuration
 
-Edit the `linux_proc_extras.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample linux_proc_extras.d/conf.yaml][2] for all available configuration options.
+Edit the `linux_proc_extras.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample linux_proc_extras.d/conf.yaml][3] for all available configuration options.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][3] and look for `linux_proc_extras` under the Checks section.
+[Run the Agent's `status` subcommand][4] and look for `linux_proc_extras` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -31,10 +31,10 @@ The Linux proc extras check does not include any service checks at this time.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][4].
+Need help? Contact [Datadog Support][5].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/datadog_checks/linux_proc_extras/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[4]: https://docs.datadoghq.com/help/
-[5]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/datadog_checks/linux_proc_extras/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/help

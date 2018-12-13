@@ -13,7 +13,7 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
 
 ### Configuration
 
-1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your Exchange Server performance data.  
+1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Exchange Server performance data.  
   ```yaml
   init_config:
 
@@ -41,15 +41,15 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
     #       - gauge
   ```
 
-2. [Restart the Agent][5]
+2. [Restart the Agent][3]
 
 ### Validation
 
-[Run the Agent's `status` subcommand][3] and look for `exchange_server` under the Checks section.
+[Run the Agent's `status` subcommand][4] and look for `exchange_server` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The Exchange server check does not include any events at this time.
@@ -59,8 +59,7 @@ The Exchange server check does not include any service checks at this time.
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/datadog_checks/exchange_server/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[4]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv

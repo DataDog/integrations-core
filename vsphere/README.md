@@ -1,6 +1,6 @@
 # Agent Check: VMWare vSphere
 
-![Vsphere Graph][8]
+![Vsphere Graph][1]
 
 ## Overview
 
@@ -9,13 +9,13 @@ This check collects resource usage metrics from your vSphere cluster-CPU, disk, 
 ## Setup
 ### Installation
 
-The vSphere check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your vCenter server.
+The vSphere check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your vCenter server.
 
 ### Configuration
 
 In the Administration section of vCenter, add a read-only user called datadog-readonly.
 
-Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample vsphere.d/conf.yaml][2] for all available configuration options:
+Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample vsphere.d/conf.yaml][4] for all available configuration options:
 
 ```
 init_config:
@@ -27,7 +27,7 @@ instances:
     password: <PASSWORD>
 ```
 
-[Restart the Agent][3] to start sending vSphere metrics and events to Datadog.
+[Restart the Agent][5] to start sending vSphere metrics and events to Datadog.
 
 **Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up -no matter what OS it's running on- to point to a vSphere appliance server. You will have to update your `<VCENTER_HOSTNAME>` accordingly.
 
@@ -43,12 +43,12 @@ instances:
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `vsphere` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `vsphere` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 
@@ -79,18 +79,18 @@ Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, othe
 
 ## Troubleshooting
 
-* [Can I limit the number of VMs that are pulled in via the VMWare integration?][6]
+* [Can I limit the number of VMs that are pulled in via the VMWare integration?][8]
 
 ## Further Reading
-See our [blog post][7] on monitoring vSphere environments with Datadog.
+See our [blog post][9] on monitoring vSphere environments with Datadog.
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
-[6]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
-[7]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
-[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
-[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
+[8]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
+[9]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers

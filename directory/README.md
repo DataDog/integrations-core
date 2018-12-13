@@ -15,8 +15,8 @@ The directory check is included in the [Datadog Agent][1] package, so you don't 
 
 ### Configuration
 
-1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting Directory performance data.
-  See the [sample directory.d/conf.yaml][2] for all available configuration options.
+1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting Directory performance data.
+  See the [sample directory.d/conf.yaml][3] for all available configuration options.
 
     ```yaml
       init_config:
@@ -32,16 +32,16 @@ The directory check is included in the [Datadog Agent][1] package, so you don't 
 
     Ensure that the user running the Agent process (usually `datadog-agent`) has read access to the directories, subdirectories, and files you configure.
 
-2. [Restart the Agent][3].
+2. [Restart the Agent][4].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `directory` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `directory` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 The Directory check does not include any events at this time.
@@ -50,12 +50,12 @@ The Directory check does not include any events at this time.
 The Directory check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/directory/datadog_checks/directory/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/directory/datadog_checks/directory/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv
+[7]: https://docs.datadoghq.com/help

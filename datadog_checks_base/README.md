@@ -49,4 +49,4 @@ Need help? Contact [Datadog Support][4].
 [1]: https://github.com/DataDog/datadog-agent
 [2]: https://github.com/DataDog/integrations-core
 [3]: https://tox.readthedocs.io/en/latest/install.html
-[4]: https://docs.datadoghq.com/help/
+[4]: https://docs.datadoghq.com/help

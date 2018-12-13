@@ -1,6 +1,6 @@
 # Agent Check: Supervisor
 
-![Supervisor Event][8]
+![Supervisor Event][1]
 
 ## Overview
 
@@ -10,7 +10,7 @@ This check monitors the uptime, status, and number of processes running under su
 
 ### Installation
 
-The Supervisor check is included in the [Datadog Agent][1] package, so you don't need to install anything else on servers where Supervisor is running.
+The Supervisor check is included in the [Datadog Agent][2] package, so you don't need to install anything else on servers where Supervisor is running.
 
 ### Configuration
 
@@ -50,7 +50,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
+Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample supervisord.d/conf.yaml][4] for all available configuration options:
 
 ```
 init_config:
@@ -79,19 +79,19 @@ Configuration Options
 * `server_check` (Optional) - Defaults to true. Service check for connection to supervisord server.
 * `socket` (Optional) - If using supervisorctl to communicate with supervisor, a socket is needed.
 
-See the [example check configuration][2] for comprehensive descriptions of other check options.
+See the [example check configuration][4] for comprehensive descriptions of other check options.
 
-[Restart the Agent][3] to start sending Supervisor metrics to Datadog.
+[Restart the Agent][5] to start sending Supervisor metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `supervisord` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `supervisord` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 The Supervisord check does not include any events at this time.
@@ -120,19 +120,19 @@ This table shows the `supervisord.process.status` that results from each supervi
 |UNKNOWN|UNKNOWN|
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog Support][8].
 
 ## Further Reading
 
-* [Supervisor monitors your processes. Datadog monitors Supervisor.][7]
+* [Supervisor monitors your processes. Datadog monitors Supervisor.][9]
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/supervisord/datadog_checks/supervisord/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/
-[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png
-[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/supervisord/datadog_checks/supervisord/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
+[8]: https://docs.datadoghq.com/help
+[9]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor

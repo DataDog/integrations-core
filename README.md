@@ -1,19 +1,19 @@
 # Datadog Agent Integrations - Core
 
 [![Build status][1]][2]
-[![Build status][3]][4]
-[![Coverage status][17]][18]
+[![Build status][2]][4]
+[![Coverage status][3]][18]
 
 This repository contains the Agent Integrations (also known as checks) that Datadog
-officially develops and supports. To add a new integration, please see the [Integrations Extras][5]
-repository and the [accompanying documentation][6].
+officially develops and supports. To add a new integration, please see the [Integrations Extras][4]
+repository and the [accompanying documentation][5].
 
-The [Datadog Agent][7] packages are equipped
+The [Datadog Agent][6] packages are equipped
 with all the checks from this repository, so to get started using them, you can
-simply [install the Agent][8] for your operating
+simply [install the Agent][7] for your operating
 system.
 
-General documentation about the project can be [found here](docs/README.md)
+General documentation about the project can be [found here][8]
 
 ## Integrations as Python wheels
 
@@ -45,40 +45,37 @@ Each Datadog Agent release will continue to ship a set of the most up to date st
 
 | Agent Version   | List of Shipped Integration Versions   |
 | --------------- | -------------------------------------- |
-| 6.2.1           | [Link][15]                             |
-| 6.3.0           | [Link][16]                             |
+| 6.2.1           | [Link][9]                             |
+| 6.3.0           | [Link][10]                             |
 
 ## Quick Start
 
-Working with integrations is easy, the main page of the [development docs](docs/dev/README.md)
+Working with integrations is easy, the main page of the [development docs][11]
 contains all the info you need to get your dev enviroment up and running in minutes
 to run, test and build a Check.
 
 **Important:** the instructions are only valid for a subset of the Checks in this
 repository. Making all the checks work with the new build and test strategy is
-a work in progress. You can find the list of the checks already updated [here][14]
+a work in progress. You can find the list of the checks already updated [here][12]
 
 ## Reporting Issues
 
-For more information on integrations, please reference our [documentation][11]
-and [knowledge base][12]. You can also visit our
-[help page][13] to connect with us.
+For more information on integrations, please reference our [documentation][13]
+and [knowledge base][14]. You can also visit our
+[help page][15] to connect with us.
 
 [1]: https://travis-ci.org/DataDog/integrations-core.svg?branch=master
-[2]: https://travis-ci.org/DataDog/integrations-core
-[3]: https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true
-[4]: https://ci.appveyor.com/project/Datadog/integrations-core
-[5]: https://github.com/DataDog/integrations-extras
-[6]: https://docs.datadoghq.com/developers/integrations/integration_sdk/
-[7]: https://github.com/DataDog/datadog-agent
-[8]: https://docs.datadoghq.com/agent/
-[9]: https://docs.pytest.org/en/latest/
-[10]: https://packaging.python.org/tutorials/distributing-packages/
-[11]: https://docs.datadoghq.com
-[12]: https://help.datadoghq.com/hc/en-us
-[13]: https://docs.datadoghq.com/help/
-[14]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15
-[15]: https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt
-[16]: https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt
-[17]: https://codecov.io/github/DataDog/integrations-core/coverage.svg?branch=master
-[18]: https://codecov.io/github/DataDog/integrations-core?branch=master
+[2]: https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true
+[3]: https://codecov.io/github/DataDog/integrations-core/coverage.svg?branch=master
+[4]: https://github.com/DataDog/integrations-extras
+[5]: https://docs.datadoghq.com/developers/integrations/integration_sdk
+[6]: https://github.com/DataDog/datadog-agent
+[7]: https://docs.datadoghq.com/agent
+[8]: docs/README.md
+[9]: https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt
+[10]: https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt
+[11]: docs/dev/README.md
+[12]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15
+[13]: https://docs.datadoghq.com
+[14]: https://help.datadoghq.com/hc/en-us
+[15]: https://docs.datadoghq.com/help

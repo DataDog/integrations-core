@@ -13,20 +13,20 @@ The Dotnetclr check is included in the [Datadog Agent][1] package, so you don't 
 
 ## Configuration
 
-1. Edit the `dotnetclr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your Dotnetclr performance data.
-    See the [sample dotnetclr.d/conf.yaml][2] for all available configuration options.
+1. Edit the `dotnetclr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Dotnetclr performance data.
+    See the [sample dotnetclr.d/conf.yaml][3] for all available configuration options.
 
-2. [Restart the Agent][5]
+2. [Restart the Agent][4]
 
 ## Validation
 
-[Run the Agent's `status` subcommand][2] and look for `dotnetclr` under the Checks section.
+[Run the Agent's `status` subcommand][3] and look for `dotnetclr` under the Checks section.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][3].
+Need help? Contact [Datadog Support][5].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[3]: https://docs.datadoghq.com/help/
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/help

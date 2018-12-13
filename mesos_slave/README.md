@@ -1,6 +1,6 @@
 # Mesos_slave Integration
 
-![Mesos Slave Dashboard][5]
+![Mesos Slave Dashboard][1]
 
 ## Overview
 
@@ -17,7 +17,7 @@ This check also creates a service check for every executor task.
 ## Setup
 ### Installation
 
-Follow the instructions in our [blog post][1] to install the Datadog Agent on each Mesos agent node via the DC/OS web UI.
+Follow the instructions in our [blog post][2] to install the Datadog Agent on each Mesos agent node via the DC/OS web UI.
 
 ### Configuration
 #### DC/OS
@@ -30,7 +30,7 @@ Follow the instructions in our [blog post][1] to install the Datadog Agent on ea
 
 #### Marathon
 
-If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change `<YOUR_DATADOG_API_KEY>` with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][2]
+If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change `<YOUR_DATADOG_API_KEY>` with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][3]
 
 ```json
 {
@@ -96,7 +96,7 @@ If you are not using DC/OS, then datadog-agent is in the list of running applica
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][3] for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
 The Mesos-slave check does not include any events at this time.
@@ -124,15 +124,15 @@ The mesos_slave check creates a service check for each executor task, giving it 
 |TASK_ERROR|AgentCheck.CRITICAL
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][4].
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
 
-* [Installing Datadog on Mesos with DC/OS][1]
+* [Installing Datadog on Mesos with DC/OS][2]
 
 
-[1]: https://www.datadoghq.com/blog/deploy-datadog-dcos/
-[2]: https://hub.docker.com/r/datadog/agent/tags/
-[3]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/metadata.csv
-[4]: https://docs.datadoghq.com/help/
-[5]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_slave/images/mesos_dashboard.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_slave/images/mesos_dashboard.png
+[2]: https://www.datadoghq.com/blog/deploy-datadog-dcos
+[3]: https://hub.docker.com/r/datadog/agent/tags
+[4]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/metadata.csv
+[5]: https://docs.datadoghq.com/help
