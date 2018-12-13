@@ -125,7 +125,7 @@ jobs:
     - stage: test
       env: CHECK=go_expvar
     - stage: test
-      env: CHECK=gunicorn
+      env: CHECK=gunicorn PYTHON3=true
     - stage: test
       env: CHECK=haproxy
     - stage: test
