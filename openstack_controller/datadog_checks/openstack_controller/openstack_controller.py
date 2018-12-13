@@ -332,7 +332,7 @@ class OpenStackControllerCheck(AgentCheck):
             servers.extend(resp)
 
         return {server.get('id'): self.create_server_object(server, tenant_to_name) for server in servers
-                if tenant_to_name[server.get('tenant_id')]}
+                if tenant_to_name.get(server.get('tenant_id'))}
 
     def update_servers_cache(self, cached_servers, tenant_to_name, changes_since):
         servers = copy.deepcopy(cached_servers)
@@ -350,7 +350,7 @@ class OpenStackControllerCheck(AgentCheck):
 
             if updated_server_status == 'ACTIVE':
                 # Add or update the cache
-                if tenant_to_name[updated_server.get('tenant_id')]:
+                if tenant_to_name.get(updated_server.get('tenant_id')):
                     servers[updated_server_id] = self.create_server_object(updated_server, tenant_to_name)
             else:
                 # Remove from the cache if it exists
@@ -366,7 +366,7 @@ class OpenStackControllerCheck(AgentCheck):
             'hypervisor_hostname': server.get('OS-EXT-SRV-ATTR:hypervisor_hostname'),
             'tenant_id': server.get('tenant_id'),
             'availability_zone': server.get('OS-EXT-AZ:availability_zone'),
-            'project_name': tenant_to_name[server.get('tenant_id')]
+            'project_name': tenant_to_name.get(server.get('tenant_id'))
         }
         # starting version 2.47, flavors infos are contained within the `servers/detail` endpoint
         # See https://developer.openstack.org/api-ref/compute/
