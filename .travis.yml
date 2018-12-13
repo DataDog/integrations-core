@@ -119,7 +119,7 @@ jobs:
     - stage: test
       env: CHECK=fluentd
     - stage: test
-      env: CHECK=gearmand
+      env: CHECK=gearmand PYTHON3=true
     - stage: test
       env: CHECK=gitlab
     - stage: test

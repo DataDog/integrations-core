@@ -3,12 +3,17 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# 3rd party
-import gearman
+from six import PY2
 
-# project
 from datadog_checks.checks import AgentCheck
 
+# Python 3 compatability is a different library
+# It's a drop in replacement but has a different name
+# This will enable the check to use the new library
+if PY2:
+    import gearman
+else:
+    import python3_gearman as gearman
 
 MAX_NUM_TASKS = 200
 
