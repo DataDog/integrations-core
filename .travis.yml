@@ -121,7 +121,7 @@ jobs:
     - stage: test
       env: CHECK=gearmand PYTHON3=true
     - stage: test
-      env: CHECK=gitlab
+      env: CHECK=gitlab PYTHON3=true
     - stage: test
       env: CHECK=go_expvar
     - stage: test
