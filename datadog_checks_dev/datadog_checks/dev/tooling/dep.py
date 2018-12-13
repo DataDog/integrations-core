@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 
 from .constants import get_root
 from ..subprocess import run_command
@@ -12,7 +12,125 @@ from ..utils import (
 )
 
 DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
-Package = namedtuple('Package', ('name', 'version', 'marker'))
+
+
+class Package:
+    def __init__(self, name, version, marker):
+        self.name = name
+        self.version = version
+        self.marker = marker
+
+    def __str__(self):
+        return '{}{}{}'.format(
+            self.name,
+            '=={}'.format(self.version) if self.version else '',
+            '; {}'.format(self.marker) if self.marker else ''
+        )
+
+    def __lt__(self, other):
+        if self.name < other.name:
+            return True
+        elif self.version < other.version:
+            return True
+        else:
+            return self.marker < other.marker
+
+    def __eq__(self, other):
+        return (
+            self.name == other.name and
+            self.version == other.version and
+            self.marker == other.marker
+        )
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash((self.name, self.version, self.marker))
+
+
+class PackageCatalog:
+    def __init__(self):
+        """
+        self._packages has this format:
+        {
+            '<package_name>': {
+                'versions': {
+                    '<version_number_1>': ['<a_check_name>'],
+                    '<version_number_2>': ['<another_check_name'>],
+                },
+                'markers': {
+                    '<marker_1>': ['<a_check_name>'],
+                    '<marker_2>': ['<another_check_name'>],
+                }
+            },
+        }
+        """
+        self._packages = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+        self._checks_deps = defaultdict(list)
+        self._package_set = set()
+        self._errors = []
+
+    @property
+    def errors(self):
+        return self._errors
+
+    @property
+    def packages(self):
+        return sorted(list(self._package_set))
+
+    def get_package_versions(self, package):
+        if package.name not in self._packages:
+            return {}
+
+        return self._packages[package.name].get('versions')
+
+    def get_check_packages(self, check_name):
+        return self._checks_deps.get(check_name, [])
+
+    def get_package_markers(self, package):
+        if package.name not in self._packages:
+            return {}
+
+        return self._packages[package.name].get('markers')
+
+    def write_packages(self, reqs_file):
+        """
+        Dump the packages in the catalog in a requirements file
+        """
+        write_file_lines(reqs_file, ('{}\n'.format(package) for package in sorted(self._package_set)))
+
+    def add_package(self, check_name, package):
+        """
+        Add a Package to the catalog for the given check
+        """
+        self._package_set.add(package)
+        package_data = self._packages[package.name]
+        self._checks_deps[check_name].append(package)
+
+        # Versions
+        if package.version is None:
+            self._errors.append('Unpinned dependency `{}` in the `{}` check.'.format(package.name, check_name))
+        else:
+            versions = package_data['versions']
+            versions[package.version].append(check_name)
+            if len(versions) > 1:
+                self._errors.append(
+                    'Multiple dependency versions for `{}` in the {} and {} checks.'.format(
+                        package.name, versions.popitem()[1], versions.popitem()[1]
+                    )
+                )
+
+        # Marker section
+        markers = package_data['markers']
+        markers[package.marker].append(check_name)
+
+        if len(markers) > 1:
+            self._errors.append(
+                'Multiple environment marker definitions for `{}` in the {} and {} checks.'.format(
+                    package.name, versions.popitem()[1], versions.popitem()[1]
+                )
+            )
 
 
 def resolve_requirements(pinned_file, resolved_file, lazy=True):
@@ -55,54 +173,13 @@ def read_packages(reqs_file):
                 yield Package(package.lower(), version, marker)
 
 
-def write_packages(packages, reqs_file):
-    write_file_lines(
-        reqs_file,
-        ('{}\n'.format(format_package(package)) for package in sorted(packages))
-    )
-
-
-def format_package(package):
-    return '{}{}{}'.format(
-        package.name,
-        '=={}'.format(package.version) if package.version else '',
-        '; {}'.format(package.marker) if package.marker else ''
-    )
-
-
 def collect_packages(verify=False, checks=None):
     root = get_root()
+    catalog = PackageCatalog()
     checks = checks if checks else os.listdir(root)
-    packages = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
-    errors = []
 
     for check_name in sorted(checks):
         for package in read_packages(os.path.join(root, check_name, 'requirements.in')):
-            package_data = packages[package.name]
+            catalog.add_package(check_name, package)
 
-            # Versions
-            if verify and package.version is None:
-                errors.append('Unpinned dependency `{}` in the `{}` check.'.format(package.name, check_name))
-
-            versions = package_data['versions']
-            versions[package.version].append(check_name)
-
-            if verify and len(versions) > 1:
-                errors.append(
-                    'Multiple dependency versions for `{}` in the {} and {} checks.'.format(
-                        package.name, versions.popitem()[1], versions.popitem()[1]
-                    )
-                )
-
-            # Marker section
-            markers = package_data['markers']
-            markers[package.marker].append(check_name)
-
-            if verify and len(markers) > 1:
-                errors.append(
-                    'Multiple environment marker definitions for `{}` in the {} and {} checks.'.format(
-                        package.name, versions.popitem()[1], versions.popitem()[1]
-                    )
-                )
-
-    return packages, errors
+    return catalog

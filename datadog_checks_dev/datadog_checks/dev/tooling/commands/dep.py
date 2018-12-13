@@ -4,16 +4,16 @@
 import os
 
 import click
-from six import iteritems, itervalues
+from six import itervalues
 
 from .utils import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 )
-from ..constants import get_root
+from ..constants import get_root, AGENT_REQUIREMENTS
 from ..dep import (
-    Package, collect_packages, format_package, read_packages, resolve_requirements, write_packages
+    Package, collect_packages, read_packages, resolve_requirements
 )
-from ...utils import get_next
+from ...utils import write_file_lines
 
 
 def transform_package_data(packages):
@@ -21,39 +21,39 @@ def transform_package_data(packages):
 
 
 def display_package_changes(pre_packages, post_packages, indent=''):
-    pre_packages = transform_package_data(pre_packages)
-    post_packages = transform_package_data(post_packages)
-    pre_packages_set = set(pre_packages)
-    post_packages_set = set(post_packages)
+    """
+    Print packages that've been added, removed or changed
+    """
+    # use package name to determine what's changed
+    pre_package_names = {p.name: p for p in pre_packages}
+    post_package_names = {p.name: p for p in post_packages}
 
-    added = post_packages_set - pre_packages_set
-    removed = pre_packages_set - post_packages_set
-    changed = {
-        package for package in pre_packages_set & post_packages_set
-        if pre_packages[package] != post_packages[package]
-    }
+    added = set(post_package_names.keys()) - set(pre_package_names.keys())
+    removed = set(pre_package_names.keys()) - set(post_package_names.keys())
+    changed_maybe = set(pre_package_names.keys()) & set(post_package_names.keys())
+
+    changed = []
+    for package_name in sorted(changed_maybe):
+        if pre_package_names[package_name] != post_package_names[package_name]:
+            changed.append((pre_package_names[package_name], post_package_names[package_name]))
 
     if not (added or removed or changed):
         echo_info('{}No changes'.format(indent))
 
     if added:
         echo_success('{}Added packages:'.format(indent))
-        for package in sorted(added):
-            echo_info('{}    {}'.format(indent, format_package(post_packages[package])))
+        for package_name in sorted(added):
+            echo_info('{}    {}'.format(indent, post_package_names[package_name]))
 
     if removed:
         echo_failure('{}Removed packages:'.format(indent))
-        for package in sorted(removed):
-            echo_info('{}    {}'.format(indent, format_package(pre_packages[package])))
+        for package_name in sorted(removed):
+            echo_info('{}    {}'.format(indent, pre_package_names[package_name]))
 
     if changed:
         echo_warning('{}Changed packages:'.format(indent))
-        for package in sorted(changed):
-            echo_info('{}    {} -> {}'.format(
-                indent,
-                format_package(pre_packages[package]),
-                format_package(post_packages[package])
-            ))
+        for pre, post in changed:
+            echo_info('{}    {} -> {}'.format(indent, pre, post))
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -142,7 +142,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
             else:
                 pinned_packages[package] = Package(package, version, marker)
 
-            write_packages(itervalues(pinned_packages), pinned_reqs_file)
+            write_file_lines(pinned_reqs_file, ('{}\n'.format(package) for package in sorted(pinned_packages)))
 
             if not quiet:
                 echo_waiting('    Resolving dependencies...')
@@ -164,26 +164,17 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
 def freeze():
     """Combine all dependencies for the Agent's static environment."""
     echo_waiting('Verifying collected packages...')
-    pinned_packages, errors = collect_packages(verify=True)
-    if errors:
-        abort(errors[0])
+    catalog = collect_packages()
+    if catalog.errors:
+        abort(catalog.errors[0])
 
-    root = get_root()
-    static_file = os.path.join(
-        root, 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in'
-    )
+    static_file = os.path.join(get_root(), AGENT_REQUIREMENTS)
 
     echo_info('Static file: {}'.format(static_file))
 
     pre_packages = list(read_packages(static_file))
 
-    write_packages(
-        (
-            Package(package, get_next(data['versions']), get_next(data['markers']))
-            for package, data in sorted(iteritems(pinned_packages))
-        ),
-        static_file
-    )
+    catalog.write_packages(static_file)
 
     post_packages = list(read_packages(static_file))
     display_package_changes(pre_packages, post_packages)
