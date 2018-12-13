@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.active_directory import ActiveDirectoryCheck
 
 
-def test_cache(benchmark):
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_cache(benchmark, pdh_mocks_fixture):
     instance = {
         'cache_counter_instances': True,
         'host': '.',
@@ -17,6 +20,7 @@ def test_cache(benchmark):
     benchmark(check.check, instance)
 
 
+@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_no_cache(benchmark):
     instance = {
         'cache_counter_instances': False,

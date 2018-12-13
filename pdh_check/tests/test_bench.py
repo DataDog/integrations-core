@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.pdh_check import PDHCheck
 
 
+@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_cache(benchmark):
     instance = {
         'cache_counter_instances': True,
@@ -21,6 +24,7 @@ def test_cache(benchmark):
     benchmark(check.check, instance)
 
 
+@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_no_cache(benchmark):
     instance = {
         'cache_counter_instances': False,
