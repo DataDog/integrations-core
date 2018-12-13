@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
-import urlparse
 from copy import deepcopy
 
 # 3rd party
+from six.moves.urllib.parse import urlparse
 import requests
 
 from datadog_checks.errors import CheckException
