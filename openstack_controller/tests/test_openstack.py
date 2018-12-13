@@ -49,8 +49,7 @@ def test_get_all_servers_between_runs(servers_detail, aggregator):
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers(True,
-                          {'6f70656e737461636b20342065766572': 'testproj',
+    check.get_all_servers({'6f70656e737461636b20342065766572': 'testproj',
                            'blacklist_1': 'blacklist_1',
                            'blacklist_2': 'blacklist_2'}, "test_name")
     servers = check.servers_cache['test_name']['servers']
@@ -75,8 +74,7 @@ def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers(True,
-                          {'6f70656e737461636b20342065766572': None,
+    check.get_all_servers({'6f70656e737461636b20342065766572': None,
                            'blacklist_1': 'blacklist_1',
                            'blacklist_2': 'blacklist_2'}, "test_name")
     servers = check.servers_cache['test_name']['servers']
@@ -105,7 +103,7 @@ def test_get_paginated_server(servers_detail, aggregator):
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
     }, {}, instances=common.MOCK_CONFIG)
-    check.get_all_servers(True, {"6f70656e737461636b20342065766572": "testproj"}, "test_name")
+    check.get_all_servers({"6f70656e737461636b20342065766572": "testproj"}, "test_name")
     assert len(check.servers_cache) == 1
     servers = check.servers_cache['test_name']['servers']
     assert 'server-1' in servers

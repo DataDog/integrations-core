@@ -5,7 +5,7 @@ import re
 import copy
 import requests
 
-from six import iteritems
+from six import iteritems, itervalues, next
 from datetime import datetime, timedelta
 
 from datadog_checks.checks import AgentCheck
@@ -337,20 +337,11 @@ class OpenStackControllerCheck(AgentCheck):
     def update_servers_cache(self, cached_servers, tenant_to_name, changes_since):
         servers = copy.deepcopy(cached_servers)
 
-        updated_servers = []
         query_params = {
             "all_tenants": True,
-            'limit': self.paginated_server_limit,
             'changes-since': changes_since
         }
-        resp = self.get_servers_detail(query_params, timeout=self.request_timeout)
-        updated_servers.extend(resp)
-        # Avoid the extra request since we know we're done when the response has anywhere between
-        # 0 and paginated_server_limit servers
-        while len(resp) == self.paginated_server_limit:
-            query_params['marker'] = resp[-1]['id']
-            resp = self.get_servers_detail(query_params, timeout=self.request_timeout)
-            updated_servers.extend(resp)
+        updated_servers = self.get_servers_detail(query_params, timeout=self.request_timeout)
 
         # For each updated servers, we update the servers cache accordingly
         for updated_server in updated_servers:
@@ -363,29 +354,41 @@ class OpenStackControllerCheck(AgentCheck):
                     servers[updated_server_id] = self.create_server_object(updated_server, tenant_to_name)
             else:
                 # Remove from the cache if it exists
-                if servers.get(updated_server_id):
+                if updated_server_id in servers:
                     del servers[updated_server_id]
         return servers
 
     def create_server_object(self, server, tenant_to_name):
-        s = dict()
-        s['server_id'] = server.get('id')
-        s['state'] = server.get('status')
-        s['server_name'] = server.get('name')
-        s['hypervisor_hostname'] = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
-        s['tenant_id'] = server.get('tenant_id')
-        s['availability_zone'] = server.get('OS-EXT-AZ:availability_zone')
-        s['flavor_id'] = server.get('flavor', {}).get('id')
-        s['project_name'] = tenant_to_name[server.get('tenant_id')]
-        return s
+        result = {
+            'server_id': server.get('id'),
+            'state': server.get('status'),
+            'server_name': server.get('name'),
+            'hypervisor_hostname': server.get('OS-EXT-SRV-ATTR:hypervisor_hostname'),
+            'tenant_id': server.get('tenant_id'),
+            'availability_zone': server.get('OS-EXT-AZ:availability_zone'),
+            'project_name': tenant_to_name[server.get('tenant_id')]
+        }
+        # starting version 2.47, flavors infos are contained within the `servers/detail` endpoint
+        # See https://developer.openstack.org/api-ref/compute/
+        # ?expanded=list-servers-detailed-detail#list-servers-detailed-detail
+        # TODO: Instead of relying on the structure of the response, we could use specified versions
+        # provided in the config. Both have pros and cons.
+        flavor = server.get('flavor', {})
+        if 'id' in flavor:
+            # Available until version 2.46
+            result['flavor_id'] = flavor.get('id')
+        if 'disk' in flavor:
+            # New in version 2.47
+            result['flavor'] = self.create_flavor_object(flavor)
+        return result
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
-    def get_all_servers(self, incremental_servers_update, tenant_to_name, instance_name):
+    def get_all_servers(self, tenant_to_name, instance_name):
         cached_servers = self.servers_cache.get(instance_name, {}).get('servers')
         # NOTE: updated_time need to be set at the beginning of this method in order to no miss servers changes.
         changes_since = datetime.utcnow().isoformat()
-        if not incremental_servers_update or cached_servers is None:
+        if cached_servers is None:
             updated_servers = self.get_active_servers(tenant_to_name)
         else:
             previous_changes_since = self.servers_cache.get(instance_name, {}).get('changes_since')
@@ -462,6 +465,8 @@ class OpenStackControllerCheck(AgentCheck):
                     )
 
     def collect_project_limit(self, project, tags=None):
+        # NOTE: starting from Version 3.10 (Queens)
+        # We can use /v3/limits (Unified Limits API) if not experimental any more.
         def _is_valid_metric(label):
             return label in PROJECT_METRICS
 
@@ -491,30 +496,25 @@ class OpenStackControllerCheck(AgentCheck):
             self.log.warn("Unexpected response, not submitting limits metrics for project id".format(project['id']))
 
     def get_flavors(self):
-        flavors = []
         query_params = {
             'limit': self.paginated_server_limit
         }
-        resp = self.get_flavors_detail(query_params, timeout=self.request_timeout)
-        flavors.extend(resp)
-        # Avoid the extra request since we know we're done when the response has anywhere between
-        # 0 and paginated_server_limit servers
-        while len(resp) == self.paginated_server_limit:
-            query_params['marker'] = resp[-1]['id']
-            resp = self.get_flavors_detail(query_params, timeout=self.request_timeout)
-            flavors.extend(resp)
+        flavors = self.get_flavors_detail(query_params, timeout=self.request_timeout)
 
         return {flavor.get('id'): self.create_flavor_object(flavor) for flavor in flavors}
 
-    def create_flavor_object(self, flavor):
-        f = dict()
-        f['id'] = flavor.get('id')
-        f['disk'] = flavor.get('disk')
-        f['vcpus'] = flavor.get('vcpus')
-        f['ram'] = flavor.get('ram')
-        return f
+    @staticmethod
+    def create_flavor_object(flavor):
+        return {
+            'id': flavor.get('id'),
+            'disk': flavor.get('disk'),
+            'vcpus': flavor.get('vcpus'),
+            'ram': flavor.get('ram'),
+            'ephemeral': flavor.get('OS-FLV-EXT-DATA:ephemeral'),
+            'swap': 0 if flavor.get('swap') == '' else flavor.get('swap')
+        }
 
-    def collect_server_flavor_metrics(self, server_details, flavors, tags=[], use_shortname=False):
+    def collect_server_flavor_metrics(self, server_details, flavors, tags=None, use_shortname=False):
         tags = tags or []
         tags = copy.deepcopy(tags)
         tags.append("nova_managed_server")
@@ -527,9 +527,14 @@ class OpenStackControllerCheck(AgentCheck):
         server_name = server_details.get('server_name')
         hypervisor_hostname = server_details.get('hypervisor_hostname')
         project_name = server_details.get('project_name')
-        flavor_id = server_details.get('flavor_id')
 
-        flavor = flavors.get(flavor_id)
+        flavor_id = server_details.get('flavor_id')
+        if flavor_id and flavors:
+            # Available until version 2.46
+            flavor = flavors.get(flavor_id)
+        else:
+            # New in version 2.47
+            flavor = server_details.get('flavor')
         if not flavor:
             return
 
@@ -540,9 +545,16 @@ class OpenStackControllerCheck(AgentCheck):
         if server_name:
             tags.append("server_name:{}".format(server_name))
 
-        self.gauge("openstack.nova.server.flavor.disk", flavor.get('disk'), tags=tags + host_tags, hostname=server_id)
-        self.gauge("openstack.nova.server.flavor.vcpus", flavor.get('vcpus'), tags=tags + host_tags, hostname=server_id)
-        self.gauge("openstack.nova.server.flavor.ram", flavor.get('ram'), tags=tags + host_tags, hostname=server_id)
+        self.gauge("openstack.nova.server.flavor.disk", flavor.get('disk'),
+                   tags=tags + host_tags, hostname=server_id)
+        self.gauge("openstack.nova.server.flavor.vcpus", flavor.get('vcpus'),
+                   tags=tags + host_tags, hostname=server_id)
+        self.gauge("openstack.nova.server.flavor.ram", flavor.get('ram'),
+                   tags=tags + host_tags, hostname=server_id)
+        self.gauge("openstack.nova.server.flavor.ephemeral", flavor.get('ephemeral'),
+                   tags=tags + host_tags, hostname=server_id)
+        self.gauge("openstack.nova.server.flavor.swap", flavor.get('swap'),
+                   tags=tags + host_tags, hostname=server_id)
 
     # Cache util
     def _is_expired(self, entry):
@@ -668,7 +680,6 @@ class OpenStackControllerCheck(AgentCheck):
         collect_server_diagnostic_metrics = is_affirmative(instance.get('collect_server_diagnostic_metrics', True))
         collect_server_flavor_metrics = is_affirmative(instance.get('collect_server_flavor_metrics', True))
         use_shortname = is_affirmative(instance.get('use_shortname', False))
-        incremental_servers_update = is_affirmative(instance.get('incremental_servers_update', True))
 
         try:
             instance_name = get_instance_name(instance)
@@ -727,7 +738,7 @@ class OpenStackControllerCheck(AgentCheck):
                 tenant_id_to_name = {}
                 for name, p in iteritems(projects):
                     tenant_id_to_name[p.get('id')] = name
-                self.get_all_servers(incremental_servers_update, tenant_id_to_name, instance_name)
+                self.get_all_servers(tenant_id_to_name, instance_name)
 
                 servers = self.servers_cache[instance_name]['servers']
                 if collect_server_diagnostic_metrics:
@@ -736,10 +747,12 @@ class OpenStackControllerCheck(AgentCheck):
                         self.collect_server_diagnostic_metrics(server, tags=custom_tags,
                                                                use_shortname=use_shortname)
                 if collect_server_flavor_metrics:
-                    self.log.debug("Fetch server flavors")
-                    # TODO starting from version 2.47, flavors can be fetched as part of `get_servers_detail`.
-                    # This would prevent making additional api calls
-                    flavors = self.get_flavors()
+                    if len(servers) >= 1 and 'flavor_id' in next(itervalues(servers)):
+                        self.log.debug("Fetch server flavors")
+                        # If flavors are not part of servers detail (new in version 2.47) then we need to fetch them
+                        flavors = self.get_flavors()
+                    else:
+                        flavors = None
                     for _, server in iteritems(servers):
                         self.collect_server_flavor_metrics(server, flavors, tags=custom_tags,
                                                            use_shortname=use_shortname)
@@ -828,7 +841,18 @@ class OpenStackControllerCheck(AgentCheck):
         return self._compute_api.get_os_hypervisors_detail()
 
     def get_servers_detail(self, query_params, timeout=None):
-        return self._compute_api.get_servers_detail(query_params, timeout=timeout)
+        servers = []
+        query_params = query_params or {}
+        query_params['limit'] = self.paginated_server_limit
+        resp = self._compute_api.get_servers_detail(query_params, timeout=timeout)
+        servers.extend(resp)
+        # Avoid the extra request since we know we're done when the response has anywhere between
+        # 0 and paginated_server_limit servers
+        while len(resp) == self.paginated_server_limit:
+            query_params['marker'] = resp[-1]['id']
+            resp = self._compute_api.get_servers_detail(query_params, timeout=timeout)
+            servers.extend(resp)
+        return servers
 
     def get_server_diagnostics(self, server_id):
         return self._compute_api.get_server_diagnostics(server_id)
@@ -837,7 +861,18 @@ class OpenStackControllerCheck(AgentCheck):
         return self._compute_api.get_project_limits(tenant_id)
 
     def get_flavors_detail(self, query_params, timeout=None):
-        return self._compute_api.get_flavors_detail(query_params, timeout=timeout)
+        flavors = []
+        query_params = query_params or {}
+        query_params['limit'] = self.paginated_server_limit
+        resp = self._compute_api.get_flavors_detail(query_params, timeout=timeout)
+        flavors.extend(resp)
+        # Avoid the extra request since we know we're done when the response has anywhere between
+        # 0 and paginated_server_limit servers
+        while len(resp) == self.paginated_server_limit:
+            query_params['marker'] = resp[-1]['id']
+            resp = self._compute_api.get_flavors_detail(query_params, timeout=timeout)
+            flavors.extend(resp)
+        return flavors
 
     # Keystone Proxy Methods
     def get_projects(self, project_token, include_project_name_rules, exclude_project_name_rules):

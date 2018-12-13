@@ -90,14 +90,6 @@ instances:
   #
   #  collect_hypervisor_load: true
 
-  ## @param incremental_servers_update - optional - boolean - default:true
-  ## When incremental_servers_update is set to true, instead of fetching all active servers on every check runs, it will
-  ## keep all servers in a cache and only perform incremental changes based on servers status. This is to limit the
-  ## number of HTTP calls to the nova API. This is setting can improve performances. Especially on large OpenStack
-  ## deployments with stable VMs.
-  #
-  #  incremental_servers_update: true
-
   ## @param collect_hypervisor_metrics - optional - boolean - default:true
   ## Collects hypervisor metrics (including hypervisor_load).
   #
