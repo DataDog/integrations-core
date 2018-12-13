@@ -8,10 +8,10 @@ import os
 import logging
 import pytest
 import time
-import tempfile
 
 from . import common
-from datadog_checks.dev import temp_dir
+from datadog_checks.dev import TempDir
+from datadog_checks.dev.utils import copy_path
 
 log = logging.getLogger(__file__)
 
@@ -57,18 +57,13 @@ def cassandra_cluster():
     # We need to restrict permission on the password file
     # Create a temporary file so if we have to run tests more than once on a machine
     # the original file's perms aren't modified
-    with temp_dir() as tmpdir:
-        temp_jmx_pass = tempfile.NamedTemporaryFile(dir=tmpdir)
+    with TempDir() as tmpdir:
         jmx_pass_file = os.path.join(common.HERE, "compose", 'jmxremote.password')
-        jmx_pass = open(jmx_pass_file, "rb")
+        copy_path(jmx_pass_file, tmpdir)
+        temp_jmx_file = os.path.join(tmpdir, 'jmxremote.password')
+        env['JMX_PASS_FILE'] = temp_jmx_file
+        os.chmod(temp_jmx_file, stat.S_IRWXU)
 
-        temp_jmx_pass.write(jmx_pass.read())
-        temp_jmx_pass.flush()
-        os.fsync(temp_jmx_pass)
-        jmx_pass.close()
-
-        env['JMX_PASS_FILE'] = temp_jmx_pass.name
-        os.chmod(temp_jmx_pass.name, stat.S_IRWXU)
         docker_compose_args = [
             "docker-compose",
             "-f", os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
