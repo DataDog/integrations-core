@@ -98,7 +98,7 @@ There are a number of ways to set up permissions in IBM MQ. Depending on how you
 
 2. [Restart the Agent][5]
 
-#### Metrics
+#### Metric Collection
 
 There are a number of options to configure IBM MQ, depending on how you're using it.
 
