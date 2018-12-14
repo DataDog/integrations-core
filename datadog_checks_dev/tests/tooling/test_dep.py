@@ -136,8 +136,7 @@ def test_package_catalog_add_package(catalog, package):
     assert len(catalog.errors) is 3
     assert catalog.errors[0] == "Unpinned dependency `foo` in the `a_check` check."
     assert catalog.errors[1] == "Unpinned dependency `foo` in the `another_check` check."
-    exp = "Multiple environment marker definitions for `foo` in checks ['another_check'] and ['a_check', 'a_check']."
-    assert catalog.errors[2] == exp
+    assert "Multiple environment marker definitions for `foo` in checks" in catalog.errors[2]
 
 
 def test_read_packages(catalog, package, tmp_path):

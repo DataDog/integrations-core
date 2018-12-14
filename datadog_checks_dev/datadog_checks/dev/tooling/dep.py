@@ -60,6 +60,24 @@ class Package:
         except (AttributeError, TypeError):
             return NotImplemented
 
+    def __cmp__(self, other):
+        """
+        This is here only to provide Python2 backward compat
+        """
+        eq = self.__eq__(other)
+        if eq != NotImplemented and eq:
+            return 0
+
+        lt = self.__lt__(other)
+        if lt != NotImplemented and lt:
+            return -1
+
+        gt = self.__gt__(other)
+        if gt != NotImplemented and gt:
+            return 1
+
+        return NotImplemented
+
     def __hash__(self):
         return hash((self.name, self.version, self.marker))
 
