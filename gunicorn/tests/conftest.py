@@ -12,7 +12,7 @@ import time
 
 from datadog_checks.dev import temp_dir
 
-from common import FIXTURES, PROC_NAME
+from .common import FIXTURES, PROC_NAME
 
 log = logging.getLogger('test_gunicorn')
 
