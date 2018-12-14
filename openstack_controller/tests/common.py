@@ -23,7 +23,8 @@ MOCK_CONFIG = {
     },
     'instances': [
         {
-            'name': 'test_name', 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}
+            'name': 'test_name',
+            'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}
         }
     ]
 }
