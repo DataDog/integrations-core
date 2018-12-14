@@ -81,7 +81,7 @@ jobs:
     - stage: test
       env: CHECK=cacti PYTHON3=true
     - stage: test
-      env: CHECK=cassandra_nodetool
+      env: CHECK=cassandra_nodetool PYTHON3=true
     - stage: test
       env: CHECK=ceph
     - stage: test
