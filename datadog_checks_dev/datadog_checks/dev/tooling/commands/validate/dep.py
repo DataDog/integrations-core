@@ -8,7 +8,7 @@ from six import iteritems
 
 from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 from ...constants import get_root, AGENT_REQUIREMENTS
-from ...dep import collect_packages, read_packages
+from ...dep import make_catalog, read_packages
 from ....utils import get_next
 
 
@@ -43,7 +43,7 @@ def dep():
     * Verify the embedded Python environment defined in the base check and requirements
       listed in every integration are compatible.
     """
-    catalog = collect_packages()
+    catalog = make_catalog()
     failed = False
 
     # Check uniqueness and unpinned

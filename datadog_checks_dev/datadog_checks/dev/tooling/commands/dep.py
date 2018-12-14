@@ -11,7 +11,7 @@ from .utils import (
 )
 from ..constants import get_root, AGENT_REQUIREMENTS
 from ..dep import (
-    Package, collect_packages, read_packages, resolve_requirements
+    Package, make_catalog, read_packages, resolve_requirements
 )
 from ...utils import write_file_lines
 
@@ -164,7 +164,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
 def freeze():
     """Combine all dependencies for the Agent's static environment."""
     echo_waiting('Verifying collected packages...')
-    catalog = collect_packages()
+    catalog = make_catalog()
     if catalog.errors:
         abort(catalog.errors[0])
 

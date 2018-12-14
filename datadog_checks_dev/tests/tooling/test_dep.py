@@ -4,8 +4,8 @@
 import pytest
 import six
 
-from datadog_checks.dev.tooling.dep import Package, PackageCatalog
-from datadog_checks.dev.utils import read_file_lines
+from datadog_checks.dev.tooling.dep import Package, PackageCatalog, read_packages
+from datadog_checks.dev.utils import read_file_lines, write_file_lines
 
 
 @pytest.fixture
@@ -138,3 +138,22 @@ def test_package_catalog_add_package(catalog, package):
     assert catalog.errors[1] == "Unpinned dependency `foo` in the `another_check` check."
     exp = "Multiple environment marker definitions for `foo` in checks ['another_check'] and ['a_check', 'a_check']."
     assert catalog.errors[2] == exp
+
+
+def test_read_packages(catalog, package, tmp_path):
+    in_file = tmp_path / "in.txt"
+    if six.PY2:
+        in_file = str(in_file)
+
+    another = Package("Bar", "4.0", None)
+    lines = [
+        "{}\n".format(package),
+        "{}\n".format(another),
+        "# a comment\n",
+        "   --hash fooBarBaz\n\n",
+    ]
+    write_file_lines(in_file, lines)
+    result = list(read_packages(in_file))
+    assert len(result) is 2
+    assert result[0].name == "foo"
+    assert result[1].name == "bar"

@@ -168,6 +168,10 @@ def resolve_requirements(pinned_file, resolved_file, lazy=True):
 
 
 def read_packages(reqs_file):
+    """
+    Generator yielding one Package instance for every corresponing line in a
+    requirements file
+    """
     for line in stream_file_lines(reqs_file):
         line = line.strip()
         if not line.startswith(('#', '--hash')):
@@ -177,7 +181,7 @@ def read_packages(reqs_file):
                 yield Package(package.lower(), version, marker)
 
 
-def collect_packages(verify=False, checks=None):
+def make_catalog(verify=False, checks=None):
     root = get_root()
     catalog = PackageCatalog()
     checks = checks if checks else os.listdir(root)
