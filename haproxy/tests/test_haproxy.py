@@ -29,29 +29,34 @@ def _test_frontend_metrics(aggregator, shared_tag):
             aggregator.assert_metric(rate, tags=frontend_tags, count=1)
 
 
-def _test_backend_metrics(aggregator, shared_tag, services=None):
+def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=False):
     backend_tags = shared_tag + ['type:BACKEND']
+    haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
     if not services:
         services = common.BACKEND_SERVICES
     for service in services:
         for backend in common.BACKEND_LIST:
             tags = backend_tags + ['service:' + service, 'backend:' + backend]
 
+            if add_addr_tag and haproxy_version >= ['1', '7']:
+                tags.append('server_address:{}'.format(
+                    common.BACKEND_TO_ADDR[backend]))
+
             for gauge in common.BACKEND_CHECK_GAUGES:
                 aggregator.assert_metric(gauge, tags=tags, count=1)
 
-            if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '5']:
+            if haproxy_version >= ['1', '5']:
                 for gauge in common.BACKEND_CHECK_GAUGES_POST_1_5:
                     aggregator.assert_metric(gauge, tags=tags, count=1)
 
-            if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '7']:
+            if haproxy_version >= ['1', '7']:
                 for gauge in common.BACKEND_CHECK_GAUGES_POST_1_7:
                     aggregator.assert_metric(gauge, tags=tags, count=1)
 
             for rate in common.BACKEND_CHECK_RATES:
                 aggregator.assert_metric(rate, tags=tags, count=1)
 
-            if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '4']:
+            if haproxy_version >= ['1', '4']:
                 for rate in common.BACKEND_CHECK_RATES_POST_1_4:
                     aggregator.assert_metric(rate, tags=tags, count=1)
 
@@ -135,6 +140,23 @@ def test_open_config(aggregator, haproxy_container):
 
 
 @pytest.mark.integration
+@pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'],
+                    reason='Sockets with operator level are only available with haproxy 1.7')
+def test_tcp_socket(aggregator, haproxy_container):
+    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+    config = copy.deepcopy(common.CONFIG_TCPSOCKET)
+    haproxy_check.check(config)
+
+    shared_tag = ["instance_url:{0}".format(common.STATS_SOCKET)]
+
+    _test_frontend_metrics(aggregator, shared_tag)
+    _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
+    _test_service_checks(aggregator)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
 @pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
 def test_unixsocket_config(aggregator, haproxy_container):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
@@ -146,7 +168,7 @@ def test_unixsocket_config(aggregator, haproxy_container):
     shared_tag = ["instance_url:{0}".format(unixsocket_url)]
 
     _test_frontend_metrics(aggregator, shared_tag)
-    _test_backend_metrics(aggregator, shared_tag)
+    _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
     _test_service_checks(aggregator)
 
     aggregator.assert_all_metrics_covered()
