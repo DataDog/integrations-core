@@ -20,7 +20,7 @@ export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
 
 *Note*: Agent 6 uses Upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of /etc/init/datadog-agent.conf (Upstart) or /lib/systemd/system/datadog-agent.service (systemd). See documentation on Upstart or systemd for more information on how to configure these settings.
 
-Here's an example of the configuration that's used for Systemd:
+Here's an example of the configuration that's used for systemd:
 
 ```yaml
 [Unit]
@@ -87,9 +87,9 @@ sudo sh -c "echo /opt/mqm/lib > /etc/ld.so.conf.d/mqm.conf"
 sudo ldconfig
 ```
 
-#### Permissions
+#### Permissions and Authentication
 
-There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, you will want to create a datadog user with read only permissions.
+There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
 
 
 ### Configuration
@@ -100,7 +100,7 @@ There are a number of ways to set up permissions in IBM MQ. Depending on how you
 
 2. [Restart the Agent][5]
 
-#### Metrics
+#### Metric Collection
 
 There are a number of options to configure IBM MQ, depending on how you're using it.
 
@@ -113,7 +113,7 @@ If you're using a username and password setup, you can set the username and pass
 
 If you're using SSL Authentication, you can setup SSL Authentication.
 
-And finally, the check will only monitor the queues you have set in the config:
+And finally, the check only monitors the queues you have set in the config:
 
 ```yaml
 queues:
@@ -121,9 +121,15 @@ queues:
   - ADMIN.QUEUE.1
 ```
 
-#### Logs
+#### Log Collection
 
-To set up logs, you will want to point the config file to the proper log files. You can uncomment the lines at the bottom of the config file, and amend them as you see fit:
+Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+Next, point the config file to the proper MQ log files. You can uncomment the lines at the bottom of the MQ integration's config file, and amend them as you see fit:
 
 ```yaml
 logs:
