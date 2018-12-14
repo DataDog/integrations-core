@@ -127,7 +127,7 @@ Collecting logs is disabled by default in the Datadog Agent, you need to enable 
     logs_enabled: true
     ```
 
-Next, you will want to point the config file to the proper MQ log files. You can uncomment the lines at the bottom of the MQ integration's config file, and amend them as you see fit:
+Next, point the config file to the proper MQ log files. You can uncomment the lines at the bottom of the MQ integration's config file, and amend them as you see fit:
 
 ```yaml
 logs:
