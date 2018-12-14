@@ -16,9 +16,12 @@ DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
 
 class Package:
     def __init__(self, name, version, marker):
-        self.name = name
-        self.version = version
-        self.marker = marker
+        if not name:
+            raise ValueError("Package must have a valid name")
+
+        self.name = name.lower()
+        self.version = version or ""
+        self.marker = marker or ""
 
     def __str__(self):
         return '{}{}{}'.format(
@@ -29,12 +32,21 @@ class Package:
 
     def __lt__(self, other):
         try:
-            if self.name < other.name:
-                return True
-            elif self.version < other.version:
-                return True
-            else:
-                return self.marker < other.marker
+            if self.name == other.name:
+                if self.version == other.version:
+                    return self.marker < other.marker
+                return self.version < other.version
+            return self.name < other.name
+        except (AttributeError, TypeError):
+            return NotImplemented
+
+    def __gt__(self, other):
+        try:
+            if self.name == other.name:
+                if self.version == other.version:
+                    return self.marker > other.marker
+                return self.version > other.version
+            return self.name > other.name
         except (AttributeError, TypeError):
             return NotImplemented
 
@@ -47,12 +59,6 @@ class Package:
             )
         except (AttributeError, TypeError):
             return NotImplemented
-
-    def __ne__(self, other):
-        retval = self.__eq__(other)
-        if retval == NotImplemented:
-            return retval
-        return not retval
 
     def __hash__(self):
         return hash((self.name, self.version, self.marker))
@@ -107,7 +113,7 @@ class PackageCatalog:
         """
         Dump the packages in the catalog in a requirements file
         """
-        write_file_lines(reqs_file, ('{}\n'.format(package) for package in sorted(self._package_set)))
+        write_file_lines(reqs_file, ('{}\n'.format(package) for package in self.packages))
 
     def add_package(self, check_name, package):
         """
@@ -118,7 +124,7 @@ class PackageCatalog:
         self._checks_deps[check_name].append(package)
 
         # Versions
-        if package.version is None:
+        if package.version == '':
             self._errors.append('Unpinned dependency `{}` in the `{}` check.'.format(package.name, check_name))
         else:
             versions = package_data['versions']
@@ -136,8 +142,8 @@ class PackageCatalog:
 
         if len(markers) > 1:
             self._errors.append(
-                'Multiple environment marker definitions for `{}` in the {} and {} checks.'.format(
-                    package.name, versions.popitem()[1], versions.popitem()[1]
+                'Multiple environment marker definitions for `{}` in checks {} and {}.'.format(
+                    package.name, markers.popitem()[1], markers.popitem()[1]
                 )
             )
 
