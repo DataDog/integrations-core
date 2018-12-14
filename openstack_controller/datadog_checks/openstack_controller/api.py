@@ -5,7 +5,7 @@ import requests
 import simplejson as json
 from six.moves.urllib.parse import urljoin
 from .settings import (DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION, DEFAULT_NEUTRON_API_VERSION,
-                       DEFAULT_PAGINATED_LIMIT, DEFAULT_RETRY)
+                       DEFAULT_PAGINATED_LIMIT, DEFAULT_MAX_RETRY)
 from .exceptions import (InstancePowerOffFailure, AuthenticationNeeded, KeystoneUnreachable)
 
 
@@ -121,8 +121,8 @@ class ComputeApi(AbstractApi):
             query_params['marker'] = resp[-1]['id']
             query_params['limit'] = self.paginated_limit
             retry = 0
-            while retry < DEFAULT_RETRY:
-                # get_flavors_detail is an expensive call, if it fails,
+            while retry < DEFAULT_MAX_RETRY:
+                # `details` endpoints are typically expensive calls, if it fails,
                 # If it fails, we retry DEFAULT_RETRY times while reducing the `limit` param
                 # otherwise we will backoff
                 try:
@@ -133,7 +133,7 @@ class ComputeApi(AbstractApi):
                 except Exception as e:
                     query_params['limit'] /= 2
                     retry += 1
-                    if retry == DEFAULT_RETRY:
+                    if retry == DEFAULT_MAX_RETRY:
                         raise e
 
         return result
