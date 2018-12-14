@@ -75,7 +75,7 @@ setup(
             'docker-compose>=1.23.1,<1.24.0',
             'in-toto==0.2.3',
             'pip-tools',
-            'pylint<2.0.0',
+            'pylint',
             'pyperclip>=1.7.0',
             'PyYAML>=3.13',
             'semver',
@@ -83,7 +83,7 @@ setup(
             'toml>=0.9.4, <1.0.0',
             'tox',
             'twine>=1.11.0',
-            'wheel>=0.31.0'
+            'wheel>=0.31.0',
         ],
     },
 

@@ -11,11 +11,10 @@ from ...utils import get_valid_checks
 
 
 @click.command(
-    'py3',
     context_settings=CONTEXT_SETTINGS,
     short_help="Verify if a custom check or integration will run on python 3"
 )
-@click.argument('check', required=True)
+@click.argument('check')
 def py3(check):
     """Verify if a custom check or integration will run on python 3"""
 
