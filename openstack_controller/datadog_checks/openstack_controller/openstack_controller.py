@@ -647,6 +647,7 @@ class OpenStackControllerCheck(AgentCheck):
         if not instance_name:
             # We need a instance_name to identify this instance
             raise IncompleteConfig()
+
         # have we been backed off
         if not self._backoff.should_run(instance_name):
             self.log.info('Skipping run due to exponential backoff in effect')
