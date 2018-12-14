@@ -11,12 +11,12 @@ instances:
   #
   # ssl_cert: <path_to_cert.pem>
 
-  ## @param ssl_private_key - string - required 
+  ## @param ssl_private_key - string - optional
   ## Needed if the certificate does not include the private key. Currently, Requests does not support using encrypted keys.
   #
    ssl_private_key: <path_to_cert.key>
 
-  ## @param ssl_ca_cert - string - required
+  ## @param ssl_ca_cert - string - optional
   ## The path to the trusted CA used for generating custom certificates
   #
    ssl_ca_cert: <path_to_cert.pem>
