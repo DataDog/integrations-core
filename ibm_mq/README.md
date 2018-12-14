@@ -72,6 +72,8 @@ post-stop script
 end script
 ```
 
+Each time there is an agent update, these files are wiped and will need to be updated again.
+
 Alternatively, if you are using Linux, after the MQ Client is installed ensure the runtime linker can find the libraries. For example, using ldconfig:
 
 ```
