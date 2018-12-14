@@ -111,7 +111,7 @@ If you're using a username and password setup, you can set the username and pass
 
 If you're using SSL Authentication, you can setup SSL Authentication.
 
-And finally, the check will only monitor the queues you have set in the config:
+And finally, the check only monitors the queues you have set in the config:
 
 ```yaml
 queues:
