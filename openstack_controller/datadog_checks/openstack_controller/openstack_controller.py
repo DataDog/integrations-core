@@ -279,7 +279,7 @@ class OpenStackControllerCheck(AgentCheck):
                                                  collect_hypervisor_load=collect_hypervisor_load)
 
         if not hypervisors:
-            self.log.warn("Unable to collect any hypervisors from Nova response: {}".format(resp))
+            self.warning("Unable to collect any hypervisors from Nova response: {}".format(resp))
 
     def get_stats_for_single_hypervisor(self, hyp, custom_tags=None,
                                         use_shortname=False,
@@ -317,7 +317,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         # This makes a request per hypervisor and only sends hypervisor_load 1/5/15
         # Disable this by default for higher performance in a large environment
-        # If the Agent is installed on the hypervisors, system.load.1/5/15 is available
+        # If the Agent is installed on the hypervisors, system.load.1/5/15 is available as a system metric
         if collect_hypervisor_load:
             try:
                 load_averages = self.get_loads_for_single_hypervisor(hyp['id'])
@@ -328,7 +328,7 @@ class OpenStackControllerCheck(AgentCheck):
                 for i, avg in enumerate([1, 5, 15]):
                     self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
             else:
-                self.log.debug("Load Averages didn't return expected values: {}".format(load_averages))
+                self.warning("Load Averages didn't return expected values: {}".format(load_averages))
 
     def get_active_servers(self, tenant_to_name):
         servers = []
@@ -508,7 +508,7 @@ class OpenStackControllerCheck(AgentCheck):
                         tags=server_tags,
                     )
         except KeyError:
-            self.log.warn("Unexpected response, not submitting limits metrics for project id".format(project['id']))
+            self.warning("Unexpected response, not submitting limits metrics for project id {}".format(project['id']))
 
     def get_flavors(self):
         query_params = {
@@ -635,8 +635,8 @@ class OpenStackControllerCheck(AgentCheck):
                     tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
                 )
             except KeystoneUnreachable as e:
-                self.log.warning("The agent could not contact the specified identity server at {} . "
-                                 "Are you sure it is up at that address?".format(self.keystone_server_url))
+                self.warning("The agent could not contact the specified identity server at {} . "
+                             "Are you sure it is up at that address?".format(self.keystone_server_url))
                 self.log.debug("Problem grabbing auth token: %s", e)
                 self.service_check(
                     self.IDENTITY_API_SC,
