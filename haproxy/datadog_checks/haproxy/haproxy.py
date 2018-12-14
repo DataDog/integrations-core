@@ -108,8 +108,8 @@ class HAProxy(AgentCheck):
 
         parsed_url = urlparse.urlparse(url)
 
-        if parsed_url.scheme == 'unix':
-            data = self._fetch_socket_data(parsed_url.path)
+        if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
+            data = self._fetch_socket_data(parsed_url)
 
         else:
             username = instance.get('username')
@@ -192,13 +192,20 @@ class HAProxy(AgentCheck):
 
         return response.content.splitlines()
 
-    def _fetch_socket_data(self, socket_path):
+    def _fetch_socket_data(self, parsed_url):
         ''' Hit a given stats socket and return the stats lines '''
 
-        self.log.debug("Fetching haproxy stats from socket: %s" % socket_path)
+        self.log.debug("Fetching haproxy stats from socket: %s" % parsed_url.geturl())
 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.connect(socket_path)
+        if parsed_url.scheme == 'tcp':
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            splitted_loc = parsed_url.netloc.split(':')
+            host = splitted_loc[0]
+            port = int(splitted_loc[1])
+            sock.connect((host, port))
+        else:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.connect(parsed_url.path)
         sock.send("show stat\r\n")
 
         response = ""
