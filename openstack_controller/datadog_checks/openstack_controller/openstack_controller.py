@@ -277,7 +277,7 @@ class OpenStackControllerCheck(AgentCheck):
                                                  collect_hypervisor_metrics=collect_hypervisor_metrics,
                                                  collect_hypervisor_load=collect_hypervisor_load)
         if not hypervisors:
-            self.warning("Unable to collect any hypervisors from Nova response")
+            self.warning("Unable to collect any hypervisors from Nova response.")
 
     def get_stats_for_single_hypervisor(self, hyp, custom_tags=None,
                                         use_shortname=False,
