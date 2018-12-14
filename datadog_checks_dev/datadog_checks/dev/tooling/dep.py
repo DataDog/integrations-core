@@ -28,22 +28,31 @@ class Package:
         )
 
     def __lt__(self, other):
-        if self.name < other.name:
-            return True
-        elif self.version < other.version:
-            return True
-        else:
-            return self.marker < other.marker
+        try:
+            if self.name < other.name:
+                return True
+            elif self.version < other.version:
+                return True
+            else:
+                return self.marker < other.marker
+        except (AttributeError, TypeError):
+            return NotImplemented
 
     def __eq__(self, other):
-        return (
-            self.name == other.name and
-            self.version == other.version and
-            self.marker == other.marker
-        )
+        try:
+            return (
+                self.name == other.name and
+                self.version == other.version and
+                self.marker == other.marker
+            )
+        except (AttributeError, TypeError):
+            return NotImplemented
 
     def __ne__(self, other):
-        return not self.__eq__(other)
+        retval = self.__eq__(other)
+        if retval == NotImplemented:
+            return retval
+        return not retval
 
     def __hash__(self):
         return hash((self.name, self.version, self.marker))
