@@ -53,6 +53,12 @@ BACKEND_SERVICES = ['anotherbackend', 'datadog']
 
 BACKEND_LIST = ['singleton:8080', 'singleton:8081', 'otherserver']
 
+BACKEND_TO_ADDR = {
+    'singleton:8080': '127.0.0.1:8080',
+    'singleton:8081': '127.0.0.1:8081',
+    'otherserver': '127.0.0.1:1234'
+}
+
 FRONTEND_CHECK_GAUGES = [
     'haproxy.frontend.session.current',
     'haproxy.frontend.session.limit',
