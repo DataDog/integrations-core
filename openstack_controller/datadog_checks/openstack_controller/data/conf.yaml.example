@@ -63,15 +63,15 @@ instances:
   #
   #  use_agent_proxy: true
 
-  ##
-  ##
+  ## @param paginated_limit - optional - integer - default:1000
+  ## paginated_limit set the number of items some api calls should return
   #
-  #  paginated_limit
+  #  paginated_limit: 1000
 
-  ##
-  ##
+  ## @param request_timeout - optional - integer - default:10
+  ## request_timeout set the timeout in second used when making api calls
   #
-  #  request_timeout
+  #  request_timeout: 10
 
   ## @param user - required - user_object
   ## Password authentication is the only auth method supported
