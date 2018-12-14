@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   openldap:
-    image: "datadog/docker-library:openldap_2_4_44"
+    image: "datadog/docker-library:openldap_${OPENLDAP_VERSION}"
     ports:
       - "3890:389"
       - "6360:636"

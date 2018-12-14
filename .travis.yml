@@ -187,7 +187,7 @@ jobs:
     - stage: test
       env: CHECK=ntp
     - stage: test
-      env: CHECK=openldap
+      env: CHECK=openldap PYTHON3=true
     - stage: test
       env: CHECK=openstack
     - stage: test

@@ -216,7 +216,9 @@ class OpenLDAP(AgentCheck):
     def _handle_statistics_entry(self, entry, tags):
         cn = self._extract_common_name(entry.entry_dn)
         if cn != "statistics":
-            self.monotonic_count("{}.statistics.{}".format(self.METRIC_PREFIX, cn), entry["monitorCounter"].value, tags=tags)
+            self.monotonic_count(
+                '{}.statistics.{}'.format(self.METRIC_PREFIX, cn), entry['monitorCounter'].value, tags=tags
+            )
 
     def _handle_threads_entry(self, entry, tags):
         cn = self._extract_common_name(entry.entry_dn)
@@ -239,12 +241,14 @@ class OpenLDAP(AgentCheck):
         if cn != "waiters":
             self.gauge("{}.waiter.{}".format(self.METRIC_PREFIX, cn), entry["monitorCounter"].value, tags=tags)
 
-    def _extract_common_name(self, dn):
+    @classmethod
+    def _extract_common_name(cls, dn):
         """
         extract first common name (cn) from DN that looks like "cn=max file descriptors,cn=connections,cn=monitor"
         """
         dn = dn.lower().replace(" ", "_")
         return dn.split(",")[0].split("=")[1]
 
-    def _get_query_time(self, conn):
+    @classmethod
+    def _get_query_time(cls, conn):
         return (conn.usage.last_received_time - conn.usage.last_transmitted_time).total_seconds()
