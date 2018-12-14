@@ -20,8 +20,8 @@ class Package:
             raise ValueError("Package must have a valid name")
 
         self.name = name.lower()
-        self.version = version or ""
-        self.marker = marker or ""
+        self.version = version.lower() if version else ""
+        self.marker = marker.lower().replace('"', "'") if marker else ""
 
     def __str__(self):
         return '{}{}{}'.format(
@@ -174,17 +174,6 @@ def read_packages(reqs_file):
             match = DEP_PATTERN.match(line)
             if match:
                 package, version, marker = match.groups()
-
-                if version:
-                    version = version.lower()
-                else:
-                    version = None
-
-                if marker:
-                    marker = marker.lower().replace('"', "'")
-                else:
-                    marker = None
-
                 yield Package(package.lower(), version, marker)
 
 

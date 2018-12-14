@@ -25,10 +25,16 @@ def test_package_init(package):
 
     with pytest.raises(ValueError):
         p = Package("", "3.0", "marker")
+
     p = Package("FOO", None, None)
     assert p.name == "foo"
     assert p.version == ""
     assert p.marker == ""
+
+    p = Package("FOO", "3.0-DEV", 'sys_platform == "WIN32"')
+    assert p.name == "foo"
+    assert p.version == "3.0-dev"
+    assert p.marker == "sys_platform == 'win32'"
 
 
 def test_package__str__(package):
