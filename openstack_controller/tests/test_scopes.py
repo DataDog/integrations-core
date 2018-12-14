@@ -78,7 +78,7 @@ GOOD_USERS = [
 def _test_bad_user(user):
     scope_fetcher = ScopeFetcher()
     with pytest.raises(IncompleteIdentity):
-        scope_fetcher._get_user_identity(user)
+        scope_fetcher._get_user_identity(user['user'])
 
 
 def test_get_user_identity():
@@ -87,7 +87,7 @@ def test_get_user_identity():
         _test_bad_user(user)
 
     for user in GOOD_USERS:
-        parsed_user = scope_fetcher._get_user_identity(user)
+        parsed_user = scope_fetcher._get_user_identity(user['user'])
         assert parsed_user == {'methods': ['password'], 'password': user}
 
 
@@ -123,9 +123,6 @@ PROJECT_RESPONSE = [
 
 
 def test_from_config_simple():
-    init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
-    instance_config = {'user': GOOD_USERS[0]['user']}
-
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -133,7 +130,7 @@ def test_from_config_simple():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=PROJECTS_RESPONSE):
-            scope = ScopeFetcher.from_config(log, init_config, instance_config)
+            scope = ScopeFetcher.from_config(log, 'http://10.0.2.15:5000', True, GOOD_USERS[0]['user'])
             assert isinstance(scope, Scope)
 
             assert scope.auth_token == 'fake_token'
@@ -147,10 +144,6 @@ def test_from_config_simple():
 
 
 def test_from_config_with_missing_name():
-    init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
-
-    instance_config = {'user': GOOD_USERS[0]['user']}
-
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -161,15 +154,11 @@ def test_from_config_with_missing_name():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=project_response_without_name):
-            scope = ScopeFetcher.from_config(log, init_config, instance_config, proxy_config=None)
+            scope = ScopeFetcher.from_config(log, 'http://10.0.2.15:5000', True, GOOD_USERS[0]['user'])
             assert len(scope.project_scopes) == 0
 
 
 def test_from_config_with_missing_id():
-    init_config = {'keystone_server_url': 'http://10.0.2.15:5000'}
-
-    instance_config = {'user': GOOD_USERS[0]['user']}
-
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -180,5 +169,5 @@ def test_from_config_with_missing_id():
                     return_value=mock_response):
         with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
                         return_value=project_response_without_name):
-            scope = ScopeFetcher.from_config(log, init_config, instance_config, proxy_config=None)
+            scope = ScopeFetcher.from_config(log, 'http://10.0.2.15:5000', True, GOOD_USERS[0]['user'])
             assert len(scope.project_scopes) == 0

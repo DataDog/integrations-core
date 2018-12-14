@@ -76,6 +76,10 @@ def make_request_responses(url, header, params=None, timeout=None):
         mock_path = "v2.1_4bfc1_servers_57030997-f1b5-4f79-9429-8cb285318633_diagnostics.json"
     elif url == "http://10.0.2.15:9696/v2.0/networks":
         mock_path = "v2.0_networks.json"
+    # else:
+    #     raise RuntimeError()
+
+    print(url, mock_path)
 
     mock_path = os.path.join(common.FIXTURES_DIR, mock_path)
     with open(mock_path, 'r') as f:

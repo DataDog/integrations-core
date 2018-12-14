@@ -14,8 +14,7 @@ from datadog_checks.utils.common import pattern_filter
 
 from .scopes import ScopeFetcher
 from .api import ComputeApi, NeutronApi, KeystoneApi
-from .settings import DEFAULT_API_REQUEST_TIMEOUT
-from .utils import get_instance_name, traced
+from .utils import traced
 from .retry import BackOffRetry
 from .exceptions import (InstancePowerOffFailure, IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
                          MissingNeutronEndpoint, KeystoneUnreachable, AuthenticationNeeded)
@@ -30,7 +29,6 @@ except ImportError:
 
 
 SOURCE_TYPE = 'openstack'
-DEFAULT_PAGINATED_SERVER_LIMIT = 1000
 
 NOVA_HYPERVISOR_METRICS = [
     'current_workload',
@@ -130,25 +128,6 @@ class OpenStackControllerCheck(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
-        self.keystone_server_url = init_config.get("keystone_server_url")
-
-        if not self.keystone_server_url:
-            raise IncompleteConfig()
-        self.proxy_config = self.get_instance_proxy(init_config, self.keystone_server_url)
-
-        self.ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
-
-        self.paginated_server_limit = init_config.get('paginated_server_limit') or DEFAULT_PAGINATED_SERVER_LIMIT
-        self.request_timeout = init_config.get('request_timeout') or DEFAULT_API_REQUEST_TIMEOUT
-
-        exclude_network_id_patterns = set(init_config.get('exclude_network_ids', []))
-        self.exclude_network_id_rules = [re.compile(ex) for ex in exclude_network_id_patterns]
-        exclude_server_id_patterns = set(init_config.get('exclude_server_ids', []))
-        self.exclude_server_id_rules = [re.compile(ex) for ex in exclude_server_id_patterns]
-        include_project_name_patterns = set(init_config.get('whitelist_project_names', []))
-        self.include_project_name_rules = [re.compile(ex) for ex in include_project_name_patterns]
-        exclude_project_name_patterns = set(init_config.get('blacklist_project_names', []))
-        self.exclude_project_name_rules = [re.compile(ex) for ex in exclude_project_name_patterns]
 
         self._keystone_api = None
         self._compute_api = None
@@ -182,34 +161,31 @@ class OpenStackControllerCheck(AgentCheck):
                 self.log.debug("Deleting instance scope for instance: %s", instance_name)
                 del self.instance_scopes_cache[instance_name]
 
-    def get_instance_scope(self, instance):
-        instance_name = get_instance_name(instance)
+    def get_instance_scope(self, instance_name):
         self.log.debug("Getting scope for instance %s", instance_name)
         return self.instance_scopes_cache[instance_name]
 
-    def set_scopes_cache(self, instance, scope):
-        instance_name = get_instance_name(instance)
+    def set_scopes_cache(self, instance_name, scope):
         self.log.debug("Setting scope for instance %s", instance_name)
         self.instance_scopes_cache[instance_name] = scope
 
-    def get_project_scopes(self, instance):
-        instance_scope = self.get_instance_scope(instance)
+    def get_project_scopes(self, instance_name):
+        instance_scope = self.get_instance_scope(instance_name)
         project_scopes = copy.deepcopy(instance_scope.project_scopes)
         return project_scopes
 
-    def collect_networks_metrics(self, tags):
+    def collect_networks_metrics(self, tags, network_ids, exclude_network_id_rules):
         """
         Collect stats for all reachable networks
         """
         networks = self.get_networks()
-        network_ids = self.init_config.get('network_ids', [])
         filtered_networks = []
         if not network_ids:
             # Filter out excluded networks
             filtered_networks = [
                 network
                 for network in networks
-                if not any([re.match(exclude_id, network.get('id')) for exclude_id in self.exclude_network_id_rules])
+                if not any([re.match(exclude_id, network.get('id')) for exclude_id in exclude_network_id_rules])
             ]
         else:
             for network in networks:
@@ -314,20 +290,11 @@ class OpenStackControllerCheck(AgentCheck):
                 self.gauge(metric_label, val, tags=tags)
 
     def get_active_servers(self, tenant_to_name):
-        servers = []
         query_params = {
             "all_tenants": True,
             'status': 'ACTIVE',
-            'limit': self.paginated_server_limit
         }
-        resp = self.get_servers_detail(query_params, timeout=self.request_timeout)
-        servers.extend(resp)
-        # Avoid the extra request since we know we're done when the response has anywhere between
-        # 0 and paginated_server_limit servers
-        while len(resp) == self.paginated_server_limit:
-            query_params['marker'] = resp[-1]['id']
-            resp = self.get_servers_detail(query_params, timeout=self.request_timeout)
-            servers.extend(resp)
+        servers = self.get_servers_detail(query_params)
 
         return {server.get('id'): self.create_server_object(server, tenant_to_name) for server in servers
                 if tenant_to_name.get(server.get('tenant_id'))}
@@ -339,7 +306,7 @@ class OpenStackControllerCheck(AgentCheck):
             "all_tenants": True,
             'changes-since': changes_since
         }
-        updated_servers = self.get_servers_detail(query_params, timeout=self.request_timeout)
+        updated_servers = self.get_servers_detail(query_params)
 
         # For each updated servers, we update the servers cache accordingly
         for updated_server in updated_servers:
@@ -385,7 +352,7 @@ class OpenStackControllerCheck(AgentCheck):
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
-    def get_all_servers(self, tenant_to_name, instance_name):
+    def get_all_servers(self, tenant_to_name, instance_name, exclude_server_id_rules):
         cached_servers = self.servers_cache.get(instance_name, {}).get('servers')
         # NOTE: updated_time need to be set at the beginning of this method in order to no miss servers changes.
         changes_since = datetime.utcnow().isoformat()
@@ -395,9 +362,15 @@ class OpenStackControllerCheck(AgentCheck):
             previous_changes_since = self.servers_cache.get(instance_name, {}).get('changes_since')
             updated_servers = self.update_servers_cache(cached_servers, tenant_to_name, previous_changes_since)
 
+        # Filter out excluded servers
+        servers = {}
+        for updated_server_id, updated_server in iteritems(updated_servers):
+            if not any([re.match(rule, updated_server_id) for rule in exclude_server_id_rules]):
+                servers[updated_server_id] = updated_server
+
         # Initialize or update cache for this instance
         self.servers_cache[instance_name] = {
-            'servers': updated_servers,
+            'servers': servers,
             'changes_since': changes_since
         }
 
@@ -497,10 +470,8 @@ class OpenStackControllerCheck(AgentCheck):
             self.log.warn("Unexpected response, not submitting limits metrics for project id".format(project['id']))
 
     def get_flavors(self):
-        query_params = {
-            'limit': self.paginated_server_limit
-        }
-        flavors = self.get_flavors_detail(query_params, timeout=self.request_timeout)
+        query_params = {}
+        flavors = self.get_flavors_detail(query_params)
 
         return {flavor.get('id'): self.create_flavor_object(flavor) for flavor in flavors}
 
@@ -571,9 +542,9 @@ class OpenStackControllerCheck(AgentCheck):
 
         return self._aggregate_list
 
-    def _send_api_service_checks(self, project_scope, tags):
+    def _send_api_service_checks(self, keystone_server_url, project_scope, tags):
         # Nova
-        service_check_tags = ["keystone_server: {}".format(self.keystone_server_url)] + tags
+        service_check_tags = ["keystone_server: {}".format(keystone_server_url)] + tags
         try:
             self.log.debug("Nova endpoint: {}".format(project_scope.nova_endpoint))
             self.get_nova_endpoint()
@@ -591,7 +562,8 @@ class OpenStackControllerCheck(AgentCheck):
                 AuthenticationNeeded, InstancePowerOffFailure):
             self.service_check(self.NETWORK_API_SC, AgentCheck.CRITICAL, tags=service_check_tags)
 
-    def init_instance_scope_cache(self, instance):
+    def init_instance_scope_cache(self, instance_name, keystone_server_url, proxy_config, ssl_verify, request_timeout,
+                                  user, custom_tags):
         """
         Guarantees a valid auth scope for this instance, and returns it
 
@@ -599,35 +571,37 @@ class OpenStackControllerCheck(AgentCheck):
         removed due to token expiry
         """
         instance_scope = None
-        custom_tags = instance.get('tags', [])
-        if custom_tags is None:
-            custom_tags = []
+        custom_tags = custom_tags or []
         try:
-            instance_scope = self.get_instance_scope(instance)
+            instance_scope = self.get_instance_scope(instance_name)
         except KeyError:
             # We are missing the entire instance scope either because it is the first time we initialize it or because
             # authentication previously failed and got removed from the cache
             # Let's populate it now
             try:
-                self.log.debug("Fetch scope for instance {}".format(instance))
-                instance_scope = ScopeFetcher.from_config(self.log, self.init_config, instance,
-                                                          proxy_config=self.proxy_config)
+                self.log.debug("Fetch scope for instance {}".format(instance_name))
+                instance_scope = ScopeFetcher.from_config(self.log, keystone_server_url, ssl_verify, user,
+                                                          proxy_config=proxy_config)
                 # Set keystone api with proper token
-                self._keystone_api = KeystoneApi(self.log, self.ssl_verify, self.proxy_config,
-                                                 self.keystone_server_url, instance_scope.auth_token)
+                self._keystone_api = KeystoneApi(self.log,
+                                                 keystone_server_url,
+                                                 instance_scope.auth_token,
+                                                 timeout=request_timeout,
+                                                 ssl_verify=ssl_verify,
+                                                 proxies=proxy_config)
                 self.service_check(
                     self.IDENTITY_API_SC,
                     AgentCheck.OK,
-                    tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
+                    tags=["keystone_server: {}".format(keystone_server_url)] + custom_tags,
                 )
             except KeystoneUnreachable as e:
                 self.log.warning("The agent could not contact the specified identity server at {} . "
-                                 "Are you sure it is up at that address?".format(self.keystone_server_url))
+                                 "Are you sure it is up at that address?".format(keystone_server_url))
                 self.log.debug("Problem grabbing auth token: %s", e)
                 self.service_check(
                     self.IDENTITY_API_SC,
                     AgentCheck.CRITICAL,
-                    tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
+                    tags=["keystone_server: {}".format(keystone_server_url)] + custom_tags,
                 )
 
                 # If Keystone is down/unreachable, we default the
@@ -635,12 +609,12 @@ class OpenStackControllerCheck(AgentCheck):
                 self.service_check(
                     self.NETWORK_API_SC,
                     AgentCheck.UNKNOWN,
-                    tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
+                    tags=["keystone_server: {}".format(keystone_server_url)] + custom_tags,
                 )
                 self.service_check(
                     self.COMPUTE_API_SC,
                     AgentCheck.UNKNOWN,
-                    tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
+                    tags=["keystone_server: {}".format(keystone_server_url)] + custom_tags,
                 )
 
             except MissingNovaEndpoint as e:
@@ -649,7 +623,7 @@ class OpenStackControllerCheck(AgentCheck):
                 self.service_check(
                     self.COMPUTE_API_SC,
                     AgentCheck.CRITICAL,
-                    tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
+                    tags=["keystone_server: {}".format(keystone_server_url)] + custom_tags,
                 )
 
             except MissingNeutronEndpoint:
@@ -657,22 +631,49 @@ class OpenStackControllerCheck(AgentCheck):
                 self.service_check(
                     self.NETWORK_API_SC,
                     AgentCheck.CRITICAL,
-                    tags=["keystone_server: {}".format(self.keystone_server_url)] + custom_tags,
+                    tags=["keystone_server: {}".format(keystone_server_url)] + custom_tags,
                 )
 
         if not instance_scope:
             # Fast fail in the absence of an instance_scope
             raise IncompleteConfig()
 
-        self.set_scopes_cache(instance, instance_scope)
+        self.set_scopes_cache(instance_name, instance_scope)
         return instance_scope
 
     @traced
     def check(self, instance):
+        instance_name = instance.get('name')
+        if not instance_name:
+            # We need a instance_name to identify this instance
+            raise IncompleteConfig()
         # have we been backed off
-        if not self._backoff.should_run(instance):
+        if not self._backoff.should_run(instance_name):
             self.log.info('Skipping run due to exponential backoff in effect')
             return
+
+        # Fetch instance configs
+        keystone_server_url = instance.get("keystone_server_url")
+
+        if not keystone_server_url:
+            raise IncompleteConfig()
+
+        proxy_config = self.get_instance_proxy(instance, keystone_server_url)
+        ssl_verify = is_affirmative(instance.get("ssl_verify", True))
+        paginated_limit = instance.get('paginated_limit')
+        request_timeout = instance.get('request_timeout')
+        user = instance.get("user")
+
+        network_ids = instance.get('network_ids', [])
+        exclude_network_id_patterns = set(instance.get('exclude_network_ids', []))
+        exclude_network_id_rules = [re.compile(ex) for ex in exclude_network_id_patterns]
+        exclude_server_id_patterns = set(instance.get('exclude_server_ids', []))
+        exclude_server_id_rules = [re.compile(ex) for ex in exclude_server_id_patterns]
+        include_project_name_patterns = set(instance.get('whitelist_project_names', []))
+        include_project_name_rules = [re.compile(ex) for ex in include_project_name_patterns]
+        exclude_project_name_patterns = set(instance.get('blacklist_project_names', []))
+        exclude_project_name_rules = [re.compile(ex) for ex in exclude_project_name_patterns]
+
         custom_tags = instance.get("tags", [])
         collect_project_metrics = is_affirmative(instance.get('collect_project_metrics', True))
         collect_hypervisor_metrics = is_affirmative(instance.get('collect_hypervisor_metrics', True))
@@ -683,14 +684,13 @@ class OpenStackControllerCheck(AgentCheck):
         use_shortname = is_affirmative(instance.get('use_shortname', False))
 
         try:
-            instance_name = get_instance_name(instance)
-
             # Authenticate and add the instance scope to instance_scopes cache
-            self.init_instance_scope_cache(instance)
+            self.init_instance_scope_cache(instance_name, keystone_server_url, proxy_config, ssl_verify,
+                                           request_timeout, user, custom_tags)
 
             # Init instance_scope
-            self.instance_scope = self.get_instance_scope(instance)
-            project_scopes = self.get_project_scopes(instance)
+            self.instance_scope = self.get_instance_scope(instance_name)
+            project_scopes = self.get_project_scopes(instance_name)
 
             # TODO: The way we fetch projects will be changed in another PR.
             # Having this for loop result may result (depending on how permission arr set) on duplicate metrics.
@@ -705,25 +705,28 @@ class OpenStackControllerCheck(AgentCheck):
             self.log.debug("Nova Url: %s", project_scope.nova_endpoint)
             self.log.debug("Neutron Url: %s", project_scope.neutron_endpoint)
             self._neutron_api = NeutronApi(self.log,
-                                           self.ssl_verify,
-                                           self.proxy_config,
                                            project_scope.neutron_endpoint,
-                                           project_scope.auth_token)
+                                           project_scope.auth_token,
+                                           timeout=request_timeout,
+                                           ssl_verify=ssl_verify,
+                                           proxies=proxy_config)
             self._compute_api = ComputeApi(self.log,
-                                           self.ssl_verify,
-                                           self.proxy_config,
                                            project_scope.nova_endpoint,
-                                           project_scope.auth_token)
+                                           project_scope.auth_token,
+                                           timeout=request_timeout,
+                                           ssl_verify=ssl_verify,
+                                           proxies=proxy_config,
+                                           limit=paginated_limit)
 
-            self._send_api_service_checks(project_scope, custom_tags)
+            self._send_api_service_checks(keystone_server_url, project_scope, custom_tags)
 
             # List projects and filter them
             # TODO: NOTE: During authentication we use /v3/auth/projects and here we use /v3/projects.
             # TODO: These api don't seems to return the same thing however the latter contains the former.
             # TODO: Is this expected or could we just have one call with proper config?
             projects = self.get_projects(project_scope.auth_token,
-                                         self.include_project_name_rules,
-                                         self.exclude_project_name_rules)
+                                         include_project_name_rules,
+                                         exclude_project_name_rules)
 
             if collect_project_metrics:
                 for name, project in iteritems(projects):
@@ -739,7 +742,7 @@ class OpenStackControllerCheck(AgentCheck):
                 tenant_id_to_name = {}
                 for name, p in iteritems(projects):
                     tenant_id_to_name[p.get('id')] = name
-                self.get_all_servers(tenant_id_to_name, instance_name)
+                self.get_all_servers(tenant_id_to_name, instance_name, exclude_server_id_rules)
 
                 servers = self.servers_cache[instance_name]['servers']
                 if collect_server_diagnostic_metrics:
@@ -759,7 +762,7 @@ class OpenStackControllerCheck(AgentCheck):
                                                            use_shortname=use_shortname)
 
             if collect_network_metrics:
-                self.collect_networks_metrics(custom_tags)
+                self.collect_networks_metrics(custom_tags, network_ids, exclude_network_id_rules)
 
             if set_external_tags is not None:
                 set_external_tags(self.get_external_host_tags())
@@ -782,14 +785,13 @@ class OpenStackControllerCheck(AgentCheck):
                 self.warning("Error reaching nova API: %s" % e)
             else:
                 # exponential backoff
-                self.do_backoff(instance)
+                self.do_backoff(instance_name, custom_tags)
                 return
 
-        self._backoff.reset_backoff(instance)
+        self._backoff.reset_backoff(instance_name)
 
-    def do_backoff(self, instance):
-        backoff_interval, retries = self._backoff.do_backoff(instance)
-        tags = instance.get('tags', [])
+    def do_backoff(self, instance_name, tags):
+        backoff_interval, retries = self._backoff.do_backoff(instance_name)
 
         self.gauge("openstack.backoff.interval", backoff_interval, tags=tags)
         self.gauge("openstack.backoff.retries", retries, tags=tags)
@@ -844,34 +846,8 @@ class OpenStackControllerCheck(AgentCheck):
     def get_os_hypervisors_detail(self):
         return self._compute_api.get_os_hypervisors_detail()
 
-    def get_servers_detail(self, query_params, timeout=None):
-        servers = []
-        query_params = query_params or {}
-        query_params['limit'] = self.paginated_server_limit
-        resp = self._compute_api.get_servers_detail(query_params, timeout=timeout)
-        servers.extend(resp)
-        # Avoid the extra request since we know we're done when the response has anywhere between
-        # 0 and paginated_server_limit servers
-        while len(resp) == self.paginated_server_limit:
-            query_params['marker'] = resp[-1]['id']
-            query_params['limit'] = self.paginated_server_limit
-            retry = 0
-            while retry < 3:
-                # get_flavors_detail is an expensive call, if it fails,
-                # If it fails, we retry 3 times while reducing the `limit` param
-                # otherwise we will backoff
-                try:
-                    resp = self._compute_api.get_servers_detail(query_params, timeout=timeout)
-                    servers.extend(resp)
-
-                    break
-                except Exception as e:
-                    query_params['limit'] = self.paginated_server_limit // 2
-                    retry += 1
-                    if retry == 3:
-                        raise e
-
-        return servers
+    def get_servers_detail(self, query_params):
+        return self._compute_api.get_servers_detail(query_params)
 
     def get_server_diagnostics(self, server_id):
         return self._compute_api.get_server_diagnostics(server_id)
@@ -879,34 +855,8 @@ class OpenStackControllerCheck(AgentCheck):
     def get_project_limits(self, tenant_id):
         return self._compute_api.get_project_limits(tenant_id)
 
-    def get_flavors_detail(self, query_params, timeout=None):
-        flavors = []
-        query_params = query_params or {}
-        query_params['limit'] = self.paginated_server_limit
-        resp = self._compute_api.get_flavors_detail(query_params, timeout=timeout)
-        flavors.extend(resp)
-        # Avoid the extra request since we know we're done when the response has anywhere between
-        # 0 and paginated_server_limit servers
-        while len(resp) == self.paginated_server_limit:
-            query_params['marker'] = resp[-1]['id']
-            query_params['limit'] = self.paginated_server_limit
-            retry = 0
-            while retry < 3:
-                # get_flavors_detail is an expensive call, if it fails,
-                # If it fails, we retry 3 times while reducing the `limit` param
-                # otherwise we will backoff
-                try:
-                    resp = self._compute_api.get_flavors_detail(query_params, timeout=timeout)
-                    flavors.extend(resp)
-
-                    break
-                except Exception as e:
-                    query_params['limit'] = self.paginated_server_limit // 2
-                    retry += 1
-                    if retry == 3:
-                        raise e
-
-        return flavors
+    def get_flavors_detail(self, query_params):
+        return self._compute_api.get_flavors_detail(query_params)
 
     # Keystone Proxy Methods
     def get_projects(self, project_token, include_project_name_rules, exclude_project_name_rules):

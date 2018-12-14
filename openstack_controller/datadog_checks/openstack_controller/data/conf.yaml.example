@@ -1,66 +1,10 @@
 init_config:
 
-## @param keystone_server_url - string - required
-## URL of your identity server. Note that the server must support Identity API v3
-#
-  keystone_server_url: <"https://my-keystone-server.com:<port>/">
-
-
 ## @param os_host - string - optional
-## The hostname of this machine registered with Nova. 
+## The hostname of this machine registered with Nova.
 ## Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
 #
 #  os_host: <HOSTNAME>
-
-
-## @param whitelist_project_names - list of string - optional - default:[]
-## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
-## Regex expressions for the project names are supported.
-## Whitelist takes precedence over blacklist in case of overlap.
-#
-#  whitelist_project_names:
-#    - <PROJECT_NAME>
-#    - <PROJECT_PREFIX>*
-
-
-## @param blacklist_project_names - list of string - optional - default:[]
-## IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
-## Regex expressions for the project names are supported.
-## Whitelist takes precedence over blacklist in case of overlap.
-#
-#  blacklist_project_names:
-#    - <PROJECT_NAME>
-#    - <PROJECT_PREFIX>*
-
-
-## @param exclude_server_ids - list of string - optional - default:[]
-## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
-## Regex expressions for the server IDs are supported.
-#
-#  exclude_server_ids:
-#    - <SERVER_ID>
-#    - <SERVER_ID_PREFIX>*
-
-
-## @param exclude_network_ids - optional - list of string - default:[]
-## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the neutron:get_networks operation)
-## Regex expressions for the network IDs to exclude are supported.
-#
-#  exclude_network_ids:
-#    - <NETWORK_ID>
-#    - <NETWORK_ID_PREFIX>*
-
-
-## @param ssl_verify - optional - boolean - default:true
-## Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
-## need to set to false when using self-signed certs.
-#
-#  ssl_verify: true
-
-## @param use_agent_proxy - optional - boolean - default:true
-## Whether the dd-agent proxy should also be used for openstack API requests (if set).
-#
-#  use_agent_proxy: true
 
 instances:
 
@@ -69,6 +13,65 @@ instances:
 #
   - name: <INSTANCE_NAME>
 
+  ## @param keystone_server_url - string - required
+  ## URL of your identity server. Note that the server must support Identity API v3
+  #
+    keystone_server_url: <"https://my-keystone-server.com:<port>/">
+
+  ## @param whitelist_project_names - list of string - optional - default:[]
+  ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
+  ## Regex expressions for the project names are supported.
+  ## Whitelist takes precedence over blacklist in case of overlap.
+  #
+  #  whitelist_project_names:
+  #    - <PROJECT_NAME>
+  #    - <PROJECT_PREFIX>*
+
+  ## @param blacklist_project_names - list of string - optional - default:[]
+  ## IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
+  ## Regex expressions for the project names are supported.
+  ## Whitelist takes precedence over blacklist in case of overlap.
+  #
+  #  blacklist_project_names:
+  #    - <PROJECT_NAME>
+  #    - <PROJECT_PREFIX>*
+
+  ## @param exclude_server_ids - list of string - optional - default:[]
+  ## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
+  ## Regex expressions for the server IDs are supported.
+  #
+  #  exclude_server_ids:
+  #    - <SERVER_ID>
+  #    - <SERVER_ID_PREFIX>*
+
+  ## @param exclude_network_ids - optional - list of string - default:[]
+  ## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the neutron:get_networks operation)
+  ## Regex expressions for the network IDs to exclude are supported.
+  #
+  #  exclude_network_ids:
+  #    - <NETWORK_ID>
+  #    - <NETWORK_ID_PREFIX>*
+
+  ## @param ssl_verify - optional - boolean - default:true
+  ## Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
+  ## need to set to false when using self-signed certs.
+  #
+  #  ssl_verify: true
+
+  ## @param use_agent_proxy - optional - boolean - default:true
+  ## Whether the dd-agent proxy should also be used for openstack API requests (if set).
+  #
+  #  use_agent_proxy: true
+
+  ##
+  ##
+  #
+  #  paginated_limit
+
+  ##
+  ##
+  #
+  #  request_timeout
 
   ## @param user - required - user_object
   ## Password authentication is the only auth method supported

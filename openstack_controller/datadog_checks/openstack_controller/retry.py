@@ -5,8 +5,6 @@
 import time
 from random import SystemRandom
 
-from .utils import get_instance_name
-
 BASE_BACKOFF_SECS = 15
 MAX_BACKOFF_SECS = 300
 
@@ -17,8 +15,7 @@ class BackOffRetry(object):
         self.backoff = {}
         self.random = SystemRandom()
 
-    def should_run(self, instance):
-        instance_name = get_instance_name(instance)
+    def should_run(self, instance_name):
         if instance_name not in self.backoff:
             self.backoff[instance_name] = {'retries': 0, 'scheduled': time.time()}
 
@@ -27,8 +24,7 @@ class BackOffRetry(object):
 
         return False
 
-    def do_backoff(self, instance):
-        instance_name = get_instance_name(instance)
+    def do_backoff(self, instance_name):
         tracker = self.backoff[instance_name]
 
         self.backoff[instance_name]['retries'] += 1
@@ -41,7 +37,6 @@ class BackOffRetry(object):
         tracker['scheduled'] = time.time() + backoff_interval
         return backoff_interval, self.backoff[instance_name]['retries']
 
-    def reset_backoff(self, instance):
-        name = get_instance_name(instance)
-        self.backoff[name]['retries'] = 0
-        self.backoff[name]['scheduled'] = time.time()
+    def reset_backoff(self, instance_name):
+        self.backoff[instance_name]['retries'] = 0
+        self.backoff[instance_name]['scheduled'] = time.time()
