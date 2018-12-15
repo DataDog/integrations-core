@@ -26,12 +26,6 @@ VERSION_BUMP = OrderedDict([
     ('beta', lambda v: semver.bump_prerelease(v, 'beta')),
 ])
 
-# The requirements file listing integrations to be included in the Agent package
-AGENT_RELEASE_REQ_FILE = 'requirements-agent-release.txt'
-# The requirements file listing dependencies needed by the embedded Python environment
-AGENT_REQUIREMENTS = os.path.join(
-    'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in'
-)
 AGENT_V5_ONLY = {
     'agent_metrics',
     'docker_daemon',
@@ -67,3 +61,23 @@ def get_root():
 def set_root(path):
     global ROOT
     ROOT = path
+
+
+def get_agent_release_requirements():
+    """
+    Return the full path to the requirements file listing integrations to be
+    included in the Agent package
+    """
+    return os.path.join(
+        get_root(), 'requirements-agent-release.txt'
+    )
+
+
+def get_agent_requirements():
+    """
+    Return the full path to the requirements file listing all the dependencies
+    needed by the embedded Python environment
+    """
+    return os.path.join(
+        get_root(), 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in'
+    )

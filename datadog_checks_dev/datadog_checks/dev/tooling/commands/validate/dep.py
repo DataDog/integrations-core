@@ -7,7 +7,7 @@ import click
 from six import iteritems
 
 from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info
-from ...constants import get_root, AGENT_REQUIREMENTS
+from ...constants import get_root, get_agent_requirements
 from ...dep import make_catalog, read_packages
 from ....utils import get_next
 
@@ -64,7 +64,7 @@ def dep():
             display_multiple_attributes(markers, 'Multiple markers found for package `{}`:'.format(package))
 
     # Check embedded env compatibility
-    agent_req_file = os.path.join(get_root(), AGENT_REQUIREMENTS)
+    agent_req_file = get_agent_requirements()
     embedded_deps = {p.name: p for p in read_packages(agent_req_file)}
     for check_name in sorted(os.listdir(get_root())):
         for package in catalog.get_check_packages(check_name):

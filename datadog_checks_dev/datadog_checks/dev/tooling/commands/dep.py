@@ -9,7 +9,7 @@ from six import itervalues
 from .utils import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 )
-from ..constants import get_root, AGENT_REQUIREMENTS
+from ..constants import get_root, get_agent_requirements
 from ..dep import (
     Package, make_catalog, read_packages, resolve_requirements
 )
@@ -168,7 +168,7 @@ def freeze():
     if catalog.errors:
         abort(catalog.errors[0])
 
-    static_file = os.path.join(get_root(), AGENT_REQUIREMENTS)
+    static_file = get_agent_requirements()
 
     echo_info('Static file: {}'.format(static_file))
 

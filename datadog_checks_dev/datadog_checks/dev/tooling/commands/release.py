@@ -16,7 +16,8 @@ from .utils import (
     echo_warning
 )
 from ..constants import (
-    AGENT_RELEASE_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP, get_root
+    AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP,
+    get_root, get_agent_release_requirements
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
@@ -578,7 +579,6 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
     from ..signing import update_link_metadata, YubikeyException
 
-    root = get_root()
     releasing_all = check == 'all'
 
     valid_checks = get_valid_checks()
@@ -669,8 +669,8 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
 
         # update the list of integrations to be shipped with the Agent
         if check not in NOT_CHECKS:
-            commit_targets.append(AGENT_RELEASE_REQ_FILE)
-            req_file = os.path.join(root, AGENT_RELEASE_REQ_FILE)
+            req_file = get_agent_release_requirements()
+            commit_targets.append(os.path.basename(req_file))
             echo_waiting('Updating the Agent requirements file... ', nl=False)
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
             echo_success('success!')
@@ -885,7 +885,7 @@ def agent_req_file(ctx):
 
     lines = sorted(entries)
 
-    req_file = os.path.join(get_root(), AGENT_RELEASE_REQ_FILE)
+    req_file = get_agent_release_requirements()
     write_file_lines(req_file, lines)
     echo_success('Successfully wrote to `{}`!'.format(req_file))
 
@@ -925,10 +925,11 @@ def agent_changelog(since, to, output, force):
     changes_per_agent = OrderedDict()
 
     for i in range(1, len(agent_tags)):
-        contents_from = git_show_file(AGENT_RELEASE_REQ_FILE, agent_tags[i - 1])
+        req_file_name = os.path.basename(get_agent_release_requirements())
+        contents_from = git_show_file(req_file_name, agent_tags[i - 1])
         catalog_from = parse_agent_req_file(contents_from)
 
-        contents_to = git_show_file(AGENT_RELEASE_REQ_FILE, agent_tags[i])
+        contents_to = git_show_file(req_file_name, agent_tags[i])
         catalog_to = parse_agent_req_file(contents_to)
 
         version_changes = OrderedDict()
