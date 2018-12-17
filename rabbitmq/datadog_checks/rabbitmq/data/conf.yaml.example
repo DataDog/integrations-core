@@ -58,6 +58,17 @@ instances:
     #   - thisqueue-.*
     #   - another_\d+queue
     #   - (lepidorae)-\d+   # to tag queues in the lepidorae queue_family
+    
+    # Use the `exchanges` or `exchanges_regexes` parameters to specify the exchanges you'd like to
+    # collect metrics on (up to 50 exchanges).
+    # If you have less than 50 exchanges, you don't have to set this parameter,
+    # the metrics will be collected on all the exchanges by default.
+    #
+    # exchanges:
+    #   - exchange1
+    #   - exchange2
+    # exchanges_regexes:
+    #   - thisexchange-.*
 
     # Service checks and `rabbitmq.connections` metric:
     # By default a list of all vhosts is fetched and each one will be checked
