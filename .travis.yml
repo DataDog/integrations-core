@@ -143,7 +143,7 @@ jobs:
     - stage: test
       env: CHECK=kafka_consumer PYTHON3=true
     - stage: test
-      env: CHECK=kong
+      env: CHECK=kong PYTHON3=true
     - stage: test
       env: CHECK=kube_dns
     - stage: test
