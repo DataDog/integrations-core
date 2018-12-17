@@ -11,7 +11,6 @@ import click
 from semver import finalize_version, parse_version_info
 from six import StringIO, iteritems
 
-from .dep import freeze as dep_freeze
 from .utils import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting,
     echo_warning
