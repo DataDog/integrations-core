@@ -40,7 +40,7 @@ class NfsStatCheck(AgentCheck):
         for l in stat_out.splitlines():
             if not l:
                 continue
-            elif l.find('mounted on') >= 0 and len(this_device) > 0:
+            elif l.find(b'mounted on') >= 0 and len(this_device) > 0:
                 # if it's a new device, create the device and add it to the array
                 device = Device(this_device, self.log)
                 all_devices.append(device)
@@ -77,8 +77,8 @@ class Device(object):
         self.log.info(self._device_header)
         self.device_name = self._device_header[0]
         self.mount = self._device_header[-1][:-1]
-        self.nfs_server = self.device_name.split(':')[0]
-        self.nfs_export = self.device_name.split(':')[1]
+        self.nfs_server = self.device_name.split(b':')[0]
+        self.nfs_export = self.device_name.split(b':')[1]
 
     def _parse_ops(self):
         ops = self._device_data[2]
@@ -91,7 +91,7 @@ class Device(object):
         self.read_kb_per_s = float(read_data[1])
         self.read_kb_per_op = float(read_data[2])
         self.read_retrans = float(read_data[3])
-        self.read_retrans_pct = read_data[4].strip('(').strip(')').strip('%')
+        self.read_retrans_pct = read_data[4].strip(b'(').strip(b')').strip(b'%')
         self.read_retrans_pct = float(self.read_retrans_pct)
         self.read_avg_rtt = float(read_data[5])
         self.read_avg_exe = float(read_data[6])
@@ -102,7 +102,7 @@ class Device(object):
         self.write_kb_per_s = float(write_data[1])
         self.write_kb_per_op = float(write_data[2])
         self.write_retrans = float(write_data[3])
-        self.write_retrans_pct = write_data[4].strip('(').strip(')').strip('%')
+        self.write_retrans_pct = write_data[4].strip(b'(').strip(b')').strip(b'%')
         self.write_retrans_pct = float(self.write_retrans_pct)
         self.write_avg_rtt = float(write_data[5])
         self.write_avg_exe = float(write_data[6])

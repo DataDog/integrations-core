@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import logging
 
 import mock
 import pytest
@@ -29,6 +30,8 @@ metrics = [
 ]
 
 FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+
+log = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -66,6 +69,10 @@ class TestNfsstat:
             'nfs_export:/exports/nfs/datadog/two',
             'nfs_mount:/mnt/datadog/two'
         ])
+
+        from six import iteritems
+        for name, metric in iteritems(Aggregator._metrics):
+            log.warning("{} {}".format(name, metric))
 
         for metric in metrics:
             Aggregator.assert_metric(metric, tags=tags)
