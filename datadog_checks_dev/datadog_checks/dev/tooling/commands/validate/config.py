@@ -45,6 +45,7 @@ def config(check):
         for config_file in config_files:
             num_files += 1
             file_display_queue = []
+            file_name = basepath(config_file)
 
             try:
                 config_data = yaml.safe_load(read_file(config_file))
@@ -54,7 +55,7 @@ def config(check):
                 # We must convert to text here to free Exception object before it goes out of scope
                 error = str(e)
 
-                check_display_queue.append(lambda: echo_info('{}:'.format(basepath(config_file)), indent=True))
+                check_display_queue.append(lambda: echo_info('{}:'.format(file_name), indent=True))
                 check_display_queue.append(lambda: echo_failure('Invalid YAML -', indent=FILE_INDENT))
                 check_display_queue.append(lambda: echo_info(error, indent=FILE_INDENT * 2))
                 continue
@@ -72,7 +73,7 @@ def config(check):
                     file_display_queue.append(lambda: echo_failure('No default instance', indent=FILE_INDENT))
 
             if file_display_queue:
-                check_display_queue.append(lambda: echo_info('{}:'.format(basepath(config_file)), indent=True))
+                check_display_queue.append(lambda: echo_info('{}:'.format(file_name), indent=True))
                 check_display_queue.extend(file_display_queue)
 
         if check_display_queue:

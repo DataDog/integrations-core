@@ -93,11 +93,17 @@ def get_config_files(check_name):
     if check_name in NOT_CHECKS:
         return files
 
-    default_yaml = os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'conf.yaml.default')
+    root = get_root()
+
+    auto_conf = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'auto_conf.yaml')
+    if file_exists(auto_conf):
+        files.append(auto_conf)
+
+    default_yaml = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'conf.yaml.default')
     if file_exists(default_yaml):
         files.append(default_yaml)
 
-    example_yaml = os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'conf.yaml.example')
+    example_yaml = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'conf.yaml.example')
     if file_exists(example_yaml):
         files.append(example_yaml)
 
