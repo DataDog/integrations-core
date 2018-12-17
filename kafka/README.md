@@ -43,7 +43,7 @@ Kafka uses the `log4j` logger by default. To activate logging to a file and cust
 log4j.rootLogger=INFO, R
 log4j.appender.R.File=/var/log/kafka/server.log
 log4j.appender.R.layout=org.apache.log4j.PatternLayout
-log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
 ```
 
 By default, our integration pipeline supports the following conversion patterns:
