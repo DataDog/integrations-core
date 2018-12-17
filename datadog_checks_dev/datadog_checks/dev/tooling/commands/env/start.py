@@ -6,7 +6,7 @@ import os
 import click
 import pyperclip
 
-from ..utils import (
+from ..console import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 )
 from ...e2e import derive_interface, start_environment, stop_environment

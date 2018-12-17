@@ -11,7 +11,7 @@ import click
 from semver import finalize_version, parse_version_info
 from six import StringIO, iteritems
 
-from .utils import (
+from .console import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting,
     echo_warning
 )

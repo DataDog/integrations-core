@@ -6,7 +6,7 @@ import os
 import click
 import toml
 
-from .utils import CONTEXT_SETTINGS, echo_info, echo_success
+from .console import CONTEXT_SETTINGS, echo_info, echo_success
 from ..config import (
     CONFIG_FILE, SECRET_KEYS, config_file_exists, read_config_file,
     read_config_file_scrubbed, restore_config, scrub_secrets,

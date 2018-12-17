@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..utils import CONTEXT_SETTINGS, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, echo_info, echo_success
 from ...e2e import get_configured_checks, get_configured_envs
 from ...test import get_available_tox_envs
 from ...utils import get_testable_checks

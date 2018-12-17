@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..utils import CONTEXT_SETTINGS
+from ..console import CONTEXT_SETTINGS
 from .prometheus import prom
 
 

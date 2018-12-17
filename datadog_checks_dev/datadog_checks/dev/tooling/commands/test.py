@@ -5,7 +5,7 @@ import os
 
 import click
 
-from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
+from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
 from ..utils import running_on_ci
 from ..constants import get_root
 from ..test import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources

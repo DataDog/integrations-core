@@ -4,7 +4,7 @@
 import click
 import yaml
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 from ...utils import get_config_files, get_valid_checks
 from ....utils import basepath, read_file
 

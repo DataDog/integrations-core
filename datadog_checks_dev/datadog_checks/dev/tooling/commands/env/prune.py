@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 from ...e2e.config import get_configured_checks, get_configured_envs, remove_env_data, remove_env_root
 
 
