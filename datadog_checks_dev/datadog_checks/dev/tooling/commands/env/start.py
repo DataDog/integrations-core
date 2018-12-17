@@ -10,7 +10,7 @@ from ..console import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 )
 from ...e2e import derive_interface, start_environment, stop_environment
-from ...test import get_available_tox_envs
+from ...testing import get_available_tox_envs
 from ...utils import get_tox_file
 from ....utils import dir_exists, file_exists, path_join
 

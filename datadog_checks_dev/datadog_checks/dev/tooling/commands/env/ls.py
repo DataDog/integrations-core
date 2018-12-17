@@ -5,7 +5,7 @@ import click
 
 from ..console import CONTEXT_SETTINGS, echo_info, echo_success
 from ...e2e import get_configured_checks, get_configured_envs
-from ...test import get_available_tox_envs
+from ...testing import get_available_tox_envs
 from ...utils import get_testable_checks
 
 
