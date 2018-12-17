@@ -418,7 +418,9 @@ class OpenStackControllerCheck(AgentCheck):
             if e.response.status_code == 404:
                 self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
             else:
-                self.warning("Received HTTP Error when reaching the /diagnostics endpoint", e)
+                self.warning(
+                    "Received HTTP Error when reaching the Diagnostics endpoint for server:{}, {}".format(e,
+                                                                                                          server_name))
             return
         except Exception as e:
             self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
