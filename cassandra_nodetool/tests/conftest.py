@@ -17,7 +17,7 @@ log = logging.getLogger(__file__)
 
 
 @pytest.fixture(scope="session")
-def dd_environment():
+def cassandra_cluster():
     """
         Start the cassandra cluster with required configuration
     """
@@ -54,4 +54,4 @@ def dd_environment():
                     "CREATE KEYSPACE IF NOT EXISTS test \
                     WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}"
                 ])
-                yield
+                yield common.CONFIG_INSTANCE
