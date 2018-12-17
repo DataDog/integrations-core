@@ -215,7 +215,7 @@ jobs:
     - stage: test
       env: CHECK=redisdb PYTHON3=true
     - stage: test
-      env: CHECK=riak
+      env: CHECK=riak PYTHON3=true
     - stage: test
       env: CHECK=riakcs
     - stage: test
