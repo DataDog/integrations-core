@@ -18,6 +18,15 @@ from ..utils import file_exists, read_file
 PR_PATTERN = re.compile(r'\(#(\d+)\)')
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
+# bits of info telling us we're on a CI platform
+CI_IDENTIFIERS = (
+    'APPVEYOR_',
+    'TRAVIS_',
+)
+
+
+def running_on_ci():
+    return any(ev.startswith(CI_IDENTIFIERS) for ev in os.environ)
 
 
 def format_commit_id(commit_id):
