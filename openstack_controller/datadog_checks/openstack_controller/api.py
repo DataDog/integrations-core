@@ -174,7 +174,7 @@ class KeystoneApi(AbstractApi):
                 data=json.dumps(payload),
                 verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=self.proxy_config,
+                proxies=self.proxies,
             )
             resp.raise_for_status()
             self.logger.debug("url: %s || response: %s", auth_url, resp.json())
@@ -197,7 +197,7 @@ class KeystoneApi(AbstractApi):
                 headers=self.headers,
                 verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=self.proxy_config
+                proxies=self.proxies
             )
             resp.raise_for_status()
             jresp = resp.json()
