@@ -122,7 +122,7 @@ class ComputeApi(AbstractApi):
             query_params['limit'] = self.paginated_limit
             retry = 0
             while retry < DEFAULT_MAX_RETRY:
-                # `details` endpoints are typically expensive calls, if it fails,
+                # `details` endpoints are typically expensive calls,
                 # If it fails, we retry DEFAULT_RETRY times while reducing the `limit` param
                 # otherwise we will backoff
                 try:
