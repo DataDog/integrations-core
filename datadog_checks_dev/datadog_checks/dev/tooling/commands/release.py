@@ -936,7 +936,7 @@ def agent_changelog(since, to, output, force):
 
         for name, ver in iteritems(catalog_to):
             old_ver = catalog_from.get(name, "")
-            if old_ver != ver:
+            if old_ver and old_ver != ver:
                 # determine whether major version changed
                 breaking = old_ver.split('.')[0] < ver.split('.')[0]
                 version_changes[name] = (ver, breaking)
