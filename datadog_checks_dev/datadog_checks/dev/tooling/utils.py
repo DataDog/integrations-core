@@ -16,7 +16,7 @@ from ..utils import file_exists, read_file
 
 # match something like `(#1234)` and return `1234` in a group
 PR_PATTERN = re.compile(r'\(#(\d+)\)')
-
+# match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 
 
