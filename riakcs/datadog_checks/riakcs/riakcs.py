@@ -9,6 +9,7 @@ from collections import defaultdict
 # 3rd party
 from boto.s3.connection import S3Connection
 import simplejson as json
+from six import iteritems
 
 # project
 from datadog_checks.checks import AgentCheck
@@ -55,7 +56,7 @@ class RiakCs(AgentCheck):
                 metrics.update(V21_DEFAULT_METRICS)
             else:
                 metrics = V21_DEFAULT_METRICS
-            for key, value in stats.iteritems():
+            for key, value in iteritems(stats):
                 if key not in metrics:
                     continue
                 suffix = key.rsplit("_", 1)[-1]
@@ -65,7 +66,7 @@ class RiakCs(AgentCheck):
             # pre 2.1 stats format
             legends = dict([(len(k), k) for k in stats["legend"]])
             del stats["legend"]
-            for key, values in stats.iteritems():
+            for key, values in iteritems(stats):
                 legend = legends[len(values)]
                 for i, value in enumerate(values):
                     metric_name = "riakcs.{0}.{1}".format(key, legend[i])
