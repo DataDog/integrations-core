@@ -2,10 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
+import json
 import os
-import subprocess
+from contextlib import closing
+from operator import itemgetter
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from pylint.lint import PyLinter, fix_import_path
+from pylint.reporters.json import JSONReporter
+
+from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 from ...constants import get_root, NOT_CHECKS
 from ...utils import get_valid_checks
 
@@ -29,30 +38,40 @@ def py3(check):
     if not os.path.exists(path_to_module):
         abort("{} does not exist.".format(path_to_module))
 
-    echo_info("Validating python3 compatibility of {}".format(check))
-    try:
+    echo_info("Validating python3 compatibility of {}...".format(check))
+    with closing(StringIO()) as out:
+        linter = PyLinter(reporter=JSONReporter(output=out))
+        linter.load_default_plugins()
+        linter.python3_porting_mode()
         # Disable `no-absolute-import`, which checks for a behaviour that's already part of python 2.7
         # cf https://www.python.org/dev/peps/pep-0328/
-        out = subprocess.check_output(["pylint", path_to_module, "--py3k", "--disable=no-absolute-import"])
-    except subprocess.CalledProcessError as e:
-        echo_failure("Incompatibilities were found for {}:".format(check))
-        # The last 3 lines are for the pylint score
-        for line in e.output.splitlines():
-            line = line.strip()
-            if line.startswith("----"):
-                # No more errors
-                break
-            if line.startswith("*************"):
-                # Line for the module where the issue is found
-                echo_info("  {}".format(line))
-            else:
-                # Line describing the issue
-                echo_failure("  {}".format(line))
-        abort()
+        linter.disable("no-absolute-import")
+        with fix_import_path([path_to_module]):
+            linter.check(path_to_module)
+            linter.generate_reports()
+        results = json.loads(out.getvalue() or "{}")
 
-    if len(out.strip()) == 0:
-        # No python files found by pylint
-        echo_warning("Pylint found no python files to check for {}.".format(check))
-        echo_warning("Be sure to specify the name of an integration, or a path to a python module")
+    if results:
+        echo_failure("Incompatibilities were found for {}:".format(check))
+        current_path = None
+        for problem in sorted(results, key=itemgetter("path")):
+            # An issue found by pylint is a dict like
+            # {
+            #     "message": "Calling a dict.iter*() method",
+            #     "obj": "OpenFilesCheck.check",
+            #     "column": 27,
+            #     "path": "/path/to/file.py",
+            #     "line": 235,
+            #     "message-id": "W1620",
+            #     "type": "warning",
+            #     "symbol": "dict-iter-method",
+            #     "module": "file"
+            # }
+            path = problem["path"]
+            if current_path is None or path != current_path:
+                echo_info("File {}:".format(path))
+            echo_failure("  Line {}, column {}: {}".format(problem["line"], problem["column"], problem["message"]))
+            current_path = path
+        abort()
     else:
         echo_success("{} is compatible with python3".format(check))
