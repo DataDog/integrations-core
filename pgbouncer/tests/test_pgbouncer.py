@@ -52,6 +52,10 @@ def test_check(instance, aggregator):
     aggregator.assert_metric('pgbouncer.stats.bytes_received_per_second')
     aggregator.assert_metric('pgbouncer.stats.bytes_sent_per_second')
 
+    aggregator.assert_metric('pgbouncer.databases.pool_size')
+    aggregator.assert_metric('pgbouncer.databases.max_connections')
+    aggregator.assert_metric('pgbouncer.databases.current_connections')
+
     # Service checks
     sc_tags = [
         'host:{}'.format(common.HOST),
