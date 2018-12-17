@@ -149,9 +149,7 @@ class PackageCatalog:
             versions[package.version].append(check_name)
             if len(versions) > 1:
                 self._errors.append(
-                    'Multiple dependency versions for `{}` in the {} and {} checks.'.format(
-                        package.name, versions.popitem()[1], versions.popitem()[1]
-                    )
+                    'Multiple dependency versions for `{}` in checks: {}'.format(package.name, versions)
                 )
 
         # Marker section
