@@ -68,3 +68,4 @@ kafka.consumer.zookeeper_commits,gauge,10,write,second,Rate of offset commits to
 kafka.consumer.kafka_commits,gauge,10,write,second,Rate of offset commits to Kafka.,1,kafka,kafka offset commit
 kafka.consumer.records_consumed,gauge,10,record,second,The average number of records consumed per second for a specific topic.,1,kafka,con rec consumed
 kafka.consumer.records_per_request_avg,gauge,10,record,request,The average number of records in each request for a specific topic.,1,kafka,rec per request
+kafka.topic.messages_in,rate,10,message,,Incoming message rate by topic,0,kafka,topic messages in

@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from urlparse import urljoin
-from urllib import quote
-import math
+
+from six.moves.urllib.parse import quote, urljoin
+from six import iteritems
 
 import requests
+import math
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 
@@ -103,14 +105,14 @@ class CouchDB1:
 
     def _create_metric(self, data, tags=None):
         overall_stats = data.get('stats', {})
-        for key, stats in overall_stats.items():
-            for metric, val in stats.items():
+        for key, stats in iteritems(overall_stats):
+            for metric, val in iteritems(stats):
                 if val['current'] is not None:
                     metric_name = '.'.join(['couchdb', key, metric])
                     self.gauge(metric_name, val['current'], tags=tags)
 
-        for db_name, db_stats in data.get('databases', {}).items():
-            for name, val in db_stats.items():
+        for db_name, db_stats in iteritems(data.get('databases', {})):
+            for name, val in iteritems(db_stats):
                 if name in ['doc_count', 'disk_size'] and val is not None:
                     metric_name = '.'.join(['couchdb', 'by_db', name])
                     metric_tags = list(tags)
@@ -184,10 +186,10 @@ class CouchDB2:
         self.gauge = agent_check.gauge
 
     def _build_metrics(self, data, tags, prefix='couchdb'):
-        for key, value in data.items():
+        for key, value in iteritems(data):
             if "type" in value:
                 if value["type"] == "histogram":
-                    for metric, value in value["value"].items():
+                    for metric, value in iteritems(value["value"]):
                         if metric == "histogram":
                             continue
                         elif metric == "percentile":
@@ -201,7 +203,7 @@ class CouchDB2:
                 self._build_metrics(value, tags, "{0}.{1}".format(prefix, key))
 
     def _build_db_metrics(self, data, tags):
-        for key, value in data['sizes'].items():
+        for key, value in iteritems(data['sizes']):
             self.gauge("couchdb.by_db.{0}_size".format(key), value, tags)
 
         for key in ['doc_del_count', 'doc_count']:
@@ -213,18 +215,18 @@ class CouchDB2:
         ddtags.append("design_document:{0}".format(info['name']))
         ddtags.append("language:{0}".format(data['language']))
 
-        for key, value in data['sizes'].items():
+        for key, value in iteritems(data['sizes']):
             self.gauge("couchdb.by_ddoc.{0}_size".format(key), value, ddtags)
 
-        for key, value in data['updates_pending'].items():
+        for key, value in iteritems(data['updates_pending']):
             self.gauge("couchdb.by_ddoc.{0}_updates_pending".format(key), value, ddtags)
 
         self.gauge("couchdb.by_ddoc.waiting_clients", data['waiting_clients'], ddtags)
 
     def _build_system_metrics(self, data, tags, prefix='couchdb.erlang'):
-        for key, value in data.items():
+        for key, value in iteritems(data):
             if key == "message_queues":
-                for queue, val in value.items():
+                for queue, val in iteritems(value):
                     queue_tags = list(tags)
                     queue_tags.append("queue:{0}".format(queue))
                     if type(val) is dict:
@@ -236,7 +238,7 @@ class CouchDB2:
                     else:
                         self.gauge("{0}.{1}.size".format(prefix, key), val, queue_tags)
             elif key == "distribution":
-                for node, metrics in value.items():
+                for node, metrics in iteritems(value):
                     dist_tags = list(tags)
                     dist_tags.append("node:{0}".format(node))
                     self._build_system_metrics(metrics, dist_tags, "{0}.{1}".format(prefix, key))
@@ -289,7 +291,7 @@ class CouchDB2:
                     if task.get(metric, None) is not None:
                         self.gauge("{0}.view_compaction.{1}".format(prefix, metric), task[metric], rtags)
 
-        for metric, count in counts.items():
+        for metric, count in iteritems(counts):
             if metric == "database_compaction":
                 metric = "db_compaction"
             self.gauge("{0}.{1}.count".format(prefix, metric), count, tags)

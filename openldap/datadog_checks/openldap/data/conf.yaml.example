@@ -3,7 +3,7 @@ init_config:
 # List of instances describing your OpenLDAP servers to monitor.
 instances:
   - url: ldaps://localhost:636  # Mandatory: full URL of your ldap server. Use `ldaps` or `ldap` as the scheme to use TLS or not, or `ldapi` to connect to a UNIX socket.
-  	#
+    #
     # username: dc=monitor,dc=yourdomain  # Optional: the DN of the user that can read the monitor database.
     # password: pass  # Optional: the password of the above user.
     #

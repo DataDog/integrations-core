@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 3.1.1 / 2018-12-07
+
+* [Fixed] Fix unicode handling of log messages. See [#2700](https://github.com/DataDog/integrations-core/pull/2700).
+
 ## 3.1.0 / 2018-11-30
 
 * [Added] Add option to set `stream` parameter on requests. See [#2658](https://github.com/DataDog/integrations-core/pull/2658). Thanks [syskill](https://github.com/syskill).

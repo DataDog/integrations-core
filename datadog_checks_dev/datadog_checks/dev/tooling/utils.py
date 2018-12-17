@@ -11,7 +11,7 @@ import requests
 import semver
 from six import string_types
 
-from .constants import VERSION_BUMP, get_root
+from .constants import NOT_CHECKS, VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
 
 # match something like `(#1234)` and return `1234` in a group
@@ -85,6 +85,29 @@ def get_tox_file(check_name):
 
 def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
+
+
+def get_config_files(check_name):
+    files = []
+
+    if check_name in NOT_CHECKS:
+        return files
+
+    root = get_root()
+
+    auto_conf = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'auto_conf.yaml')
+    if file_exists(auto_conf):
+        files.append(auto_conf)
+
+    default_yaml = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'conf.yaml.default')
+    if file_exists(default_yaml):
+        files.append(default_yaml)
+
+    example_yaml = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'conf.yaml.example')
+    if file_exists(example_yaml):
+        files.append(example_yaml)
+
+    return sorted(files)
 
 
 def get_valid_checks():

@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
-from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base import ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.utils.headers import headers as agent_headers
 
 
@@ -42,7 +42,11 @@ def from_instance(instance, default_ca_certs=None):
         headers = {}
     headers.update(config_headers)
     url = instance.get('url')
+    if url is not None:
+        url = ensure_unicode(url)
     content_match = instance.get('content_match')
+    if content_match is not None:
+        content_match = ensure_unicode(content_match)
     reverse_content_match = is_affirmative(instance.get('reverse_content_match', False))
     response_time = is_affirmative(instance.get('collect_response_time', True))
     if not url:
