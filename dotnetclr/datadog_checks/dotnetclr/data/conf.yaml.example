@@ -6,5 +6,6 @@ instances:
   #   a set of customizable tags and other parameters we might need to
   #   configure the behavior of our check.
   #
-  # - host: localhost
+  # "." means the current host, any other value will have the Agent attempt to connect to a remote host. 
+  # - host: .
   #   tags: ['custom:tag']

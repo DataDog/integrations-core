@@ -4,7 +4,7 @@ instances:
 
   ## @param host - string - required
   ## ASP .NET host to connect to.
-  ## "." means the current host
+  ## "." means the current host, any other value will have the Agent attempt to connect to a remote host. 
   #
   - host: .
   

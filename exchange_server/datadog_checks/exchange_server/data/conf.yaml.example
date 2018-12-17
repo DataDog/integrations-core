@@ -1,7 +1,7 @@
 init_config:
 
 instances:
-  # "." means the current host
+  # "." means the current host, any other value will have the Agent attempt to connect to a remote host. 
   - host: .
   #
   #   The additional metrics is a list of additional counters to collect.  The

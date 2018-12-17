@@ -22,7 +22,7 @@ instances:
   # only pulling metrics from the default site.
   #
 
-  # "." means the current host
+  # "." means the current host, any other value will have the Agent attempt to connect to a remote host. 
   - host: .
   #   tags:
   #     - myapp1
