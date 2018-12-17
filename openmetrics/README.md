@@ -43,7 +43,7 @@ The OpenMetrics check does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][3].
+Need help? Contact [Datadog support][3].
 
 ## Further Reading
 

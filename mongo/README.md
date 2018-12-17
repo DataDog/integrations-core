@@ -129,7 +129,7 @@ This check emits an event each time a Mongo node has a change in its replication
 Returns CRITICAL if the Agent cannot connect to MongoDB to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][8].
+Need help? Contact [Datadog support][8].
 
 ## Further Reading
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:

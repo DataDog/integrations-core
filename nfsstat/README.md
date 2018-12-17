@@ -28,7 +28,7 @@ The Nfststat check does not include any events at this time.
 The Nfsstat check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 

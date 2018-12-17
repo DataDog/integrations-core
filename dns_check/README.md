@@ -59,7 +59,7 @@ Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP
 Tagged by `hostname` and `record_type`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/dns_check/datadog_checks/dns_check/data/conf.yaml.example

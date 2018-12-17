@@ -73,7 +73,7 @@ The Agent submits this service check for each Windows service configured in `ser
 |Unknown|UNKNOWN|
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 ## Further Reading
 

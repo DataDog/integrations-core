@@ -93,7 +93,7 @@ The Agent submits a `process.up` tagged `process:my_worker_process` whose status
 - OK when there are 3, 4 or 5 worker processes
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][10].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out our [series of blog posts][11] about it.

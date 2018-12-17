@@ -545,7 +545,7 @@ class RabbitMQ(AgentCheck):
             # Display a warning in the info page
             msg = ("Too many items to fetch. "
                    "You must choose the {} you are interested in by editing the rabbitmq.yaml configuration file"
-                   "or get in touch with Datadog Support").format(object_type)
+                   "or get in touch with Datadog support").format(object_type)
             self.warning(msg)
 
         for data_line in data[:max_detailed]:

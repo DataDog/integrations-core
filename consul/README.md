@@ -150,7 +150,7 @@ The Datadog Agent submits a service check for each of Consul's health checks, ta
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][9].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 

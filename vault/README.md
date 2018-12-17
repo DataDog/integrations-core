@@ -47,7 +47,7 @@ Returns CRITICAL if Vault is not yet initialized, otherwise OK.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 [1]: https://www.vaultproject.io
 [2]: https://app.datadoghq.com/account/settings#agent

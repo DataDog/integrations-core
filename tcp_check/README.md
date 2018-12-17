@@ -59,7 +59,7 @@ Returns DOWN if the Agent cannot connect to the configured `host` and `port`, ot
 To create alert conditions on this service check in Datadog, click **Network** on the [Create Monitor][6] page, not **Integration**.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][7].
+Need help? Contact [Datadog support][7].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent

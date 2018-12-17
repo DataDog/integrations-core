@@ -137,7 +137,7 @@ Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise retur
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][3].
+Need help? Contact [Datadog support][3].
 
 ## Further Reading
 

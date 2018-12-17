@@ -35,7 +35,7 @@ The ActiveMQ XML check does not include any events at this time.
 The ActiveMQ XML check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 ## Further Reading
 

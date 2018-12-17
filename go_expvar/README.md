@@ -62,7 +62,7 @@ The Go-Expvar check does not include any events at this time.
 The Go-Expvar check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][9].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 

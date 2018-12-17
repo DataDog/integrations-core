@@ -53,7 +53,7 @@ The KyotoTycoon check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to KyotoTycoon to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/datadog_checks/kyototycoon/data/conf.yaml.example
