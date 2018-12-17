@@ -82,10 +82,6 @@ def dir_exists(d):
     return os.path.isdir(d)
 
 
-def path_exists(p):
-    return os.path.exists(p)
-
-
 def path_join(path, *paths):
     return os.path.join(path, *paths)
 
