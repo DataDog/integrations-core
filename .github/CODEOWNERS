@@ -11,6 +11,7 @@
 manifest.json         @DataDog/baklava @DataDog/agent-integrations
 
 # Container monitoring
+/datadog_checks_base/ @DataDog/container-integrations @DataDog/agent-integrations
 /docker_daemon/       @DataDog/container-integrations @DataDog/agent-integrations
 /ecs_fargate/         @DataDog/container-integrations @DataDog/agent-integrations
 /kube_dns/            @DataDog/container-integrations @DataDog/agent-integrations
