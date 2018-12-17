@@ -4,8 +4,9 @@ instances:
 
   ## @param host - string - required
   ## ASP .NET host to connect to.
+  ## "." means the current host
   #
-  - host: localhost
+  - host: .
   
   ## @param port - integer - required
   ## ASP .NET port to connect to. 
