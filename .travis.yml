@@ -47,21 +47,23 @@ jobs:
   include:
     - stage: test_changed
       script:
+        - ddev validate agent-reqs
+        - ddev validate config
         - ddev validate dep
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
-        - ddev validate agent-reqs
         - ddev test --cov
         - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base PYTHON3=true
       script:
+        - ddev validate agent-reqs
+        - ddev validate config
         - ddev validate dep
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
-        - ddev validate agent-reqs
         - travis_retry ddev test --cov ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
@@ -81,7 +83,7 @@ jobs:
     - stage: test
       env: CHECK=cacti PYTHON3=true
     - stage: test
-      env: CHECK=cassandra_nodetool
+      env: CHECK=cassandra_nodetool PYTHON3=true
     - stage: test
       env: CHECK=ceph
     - stage: test
@@ -117,15 +119,15 @@ jobs:
     - stage: test
       env: CHECK=exchange_server
     - stage: test
-      env: CHECK=fluentd
+      env: CHECK=fluentd PYTHON3=true
     - stage: test
-      env: CHECK=gearmand
+      env: CHECK=gearmand PYTHON3=true
     - stage: test
       env: CHECK=gitlab
     - stage: test
       env: CHECK=go_expvar
     - stage: test
-      env: CHECK=gunicorn
+      env: CHECK=gunicorn PYTHON3=true
     - stage: test
       env: CHECK=haproxy
     - stage: test

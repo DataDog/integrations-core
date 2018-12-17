@@ -199,108 +199,91 @@ def test_get_os_hypervisors_detail(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_33_response):
         compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisors_detail() == {
-            "hypervisors": [
-                {
-                    "cpu_info": {
-                        "arch": "x86_64",
-                        "model": "Nehalem",
-                        "vendor": "Intel",
-                        "features": [
-                            "pge",
-                            "clflush"
-                        ],
-                        "topology": {
-                            "cores": 1,
-                            "threads": 1,
-                            "sockets": 4
-                        }
-                    },
-                    "current_workload": 0,
-                    "status": "enabled",
-                    "state": "up",
-                    "disk_available_least": 0,
-                    "host_ip": "1.1.1.1",
-                    "free_disk_gb": 1028,
-                    "free_ram_mb": 7680,
-                    "hypervisor_hostname": "host1",
-                    "hypervisor_type": "fake",
-                    "hypervisor_version": 1000,
-                    "id": 2,
-                    "local_gb": 1028,
-                    "local_gb_used": 0,
-                    "memory_mb": 8192,
-                    "memory_mb_used": 512,
-                    "running_vms": 0,
-                    "service": {
-                        "host": "host1",
-                        "id": 7,
-                        "disabled_reason": None
-                    },
-                    "vcpus": 2,
-                    "vcpus_used": 0
-                }
-            ],
-            "hypervisors_links": [
-                {
-                    "href": "http://openstack.example.com/v2.1/6f70656e737461636b20342065766572/hypervisors/detail?limit=1&marker=2",  # noqa: E501
-                    "rel": "next"
-                }
-            ]
-        }
+        assert compute_api.get_os_hypervisors_detail() == [
+            {
+                "cpu_info": {
+                    "arch": "x86_64",
+                    "model": "Nehalem",
+                    "vendor": "Intel",
+                    "features": [
+                        "pge",
+                        "clflush"
+                    ],
+                    "topology": {
+                        "cores": 1,
+                        "threads": 1,
+                        "sockets": 4
+                    }
+                },
+                "current_workload": 0,
+                "status": "enabled",
+                "state": "up",
+                "disk_available_least": 0,
+                "host_ip": "1.1.1.1",
+                "free_disk_gb": 1028,
+                "free_ram_mb": 7680,
+                "hypervisor_hostname": "host1",
+                "hypervisor_type": "fake",
+                "hypervisor_version": 1000,
+                "id": 2,
+                "local_gb": 1028,
+                "local_gb_used": 0,
+                "memory_mb": 8192,
+                "memory_mb_used": 512,
+                "running_vms": 0,
+                "service": {
+                    "host": "host1",
+                    "id": 7,
+                    "disabled_reason": None
+                },
+                "vcpus": 2,
+                "vcpus_used": 0
+            }
+        ]
 
     with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_53_response):
         compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisors_detail() == {
-            "hypervisors": [
-                {
-                    "cpu_info": {
-                        "arch": "x86_64",
-                        "model": "Nehalem",
-                        "vendor": "Intel",
-                        "features": [
-                            "pge",
-                            "clflush"
-                        ],
-                        "topology": {
-                            "cores": 1,
-                            "threads": 1,
-                            "sockets": 4
-                        }
-                    },
-                    "current_workload": 0,
-                    "status": "enabled",
-                    "state": "up",
-                    "disk_available_least": 0,
-                    "host_ip": "1.1.1.1",
-                    "free_disk_gb": 1028,
-                    "free_ram_mb": 7680,
-                    "hypervisor_hostname": "host2",
-                    "hypervisor_type": "fake",
-                    "hypervisor_version": 1000,
-                    "id": "1bb62a04-c576-402c-8147-9e89757a09e3",
-                    "local_gb": 1028,
-                    "local_gb_used": 0,
-                    "memory_mb": 8192,
-                    "memory_mb_used": 512,
-                    "running_vms": 0,
-                    "service": {
-                        "host": "host1",
-                        "id": "62f62f6e-a713-4cbe-87d3-3ecf8a1e0f8d",
-                        "disabled_reason": None
-                    },
-                    "vcpus": 2,
-                    "vcpus_used": 0
-                }
-            ],
-            "hypervisors_links": [
-                {
-                    "href": "http://openstack.example.com/v2.1/6f70656e737461636b20342065766572/hypervisors/detail?limit=1&marker=1bb62a04-c576-402c-8147-9e89757a09e3",  # noqa: E501
-                    "rel": "next"
-                }
-            ]
-        }
+        assert compute_api.get_os_hypervisors_detail() == [
+            {
+                "cpu_info": {
+                    "arch": "x86_64",
+                    "model": "Nehalem",
+                    "vendor": "Intel",
+                    "features": [
+                        "pge",
+                        "clflush"
+                    ],
+                    "topology": {
+                        "cores": 1,
+                        "threads": 1,
+                        "sockets": 4
+                    }
+                },
+                "current_workload": 0,
+                "status": "enabled",
+                "state": "up",
+                "disk_available_least": 0,
+                "host_ip": "1.1.1.1",
+                "free_disk_gb": 1028,
+                "free_ram_mb": 7680,
+                "hypervisor_hostname": "host2",
+                "hypervisor_type": "fake",
+                "hypervisor_version": 1000,
+                "id": "1bb62a04-c576-402c-8147-9e89757a09e3",
+                "local_gb": 1028,
+                "local_gb_used": 0,
+                "memory_mb": 8192,
+                "memory_mb_used": 512,
+                "running_vms": 0,
+                "service": {
+                    "host": "host1",
+                    "id": "62f62f6e-a713-4cbe-87d3-3ecf8a1e0f8d",
+                    "disabled_reason": None
+                },
+                "vcpus": 2,
+                "vcpus_used": 0
+            }]
 
 
 def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=None):

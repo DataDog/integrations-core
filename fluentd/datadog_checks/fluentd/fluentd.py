@@ -3,12 +3,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-
-# stdlib
-import urlparse
-
 # 3rd party
 import requests
+
+from six.moves.urllib.parse import urlparse
 
 # project
 from datadog_checks.checks import AgentCheck
@@ -46,7 +44,7 @@ class Fluentd(AgentCheck):
             tag_by = instance.get('tag_by')
             tag_by = tag_by if tag_by in self._AVAILABLE_TAGS else 'plugin_id'
 
-            parsed_url = urlparse.urlparse(url)
+            parsed_url = urlparse(url)
             monitor_agent_host = parsed_url.hostname
             monitor_agent_port = parsed_url.port or 24220
             service_check_tags = ['fluentd_host:%s' % monitor_agent_host, 'fluentd_port:%s'

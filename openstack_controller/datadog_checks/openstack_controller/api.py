@@ -83,7 +83,8 @@ class ComputeApi(AbstractApi):
 
     def get_os_hypervisors_detail(self):
         url = '{}/os-hypervisors/detail'.format(self.endpoint)
-        return self._make_request(url, self.headers)
+        hypervisors = self._make_request(url, self.headers)
+        return hypervisors.get('hypervisors', [])
 
     def get_servers_detail(self, query_params, timeout=None):
         url = '{}/servers/detail'.format(self.endpoint)
@@ -99,6 +100,11 @@ class ComputeApi(AbstractApi):
         server_stats = self._make_request(url, self.headers, params={"tenant_id": tenant_id})
         limits = server_stats.get('limits', {}).get('absolute', {})
         return limits
+
+    def get_flavors_detail(self, query_params, timeout=None):
+        url = '{}/flavors/detail'.format(self.endpoint)
+        flavors = self._make_request(url, self.headers, params=query_params, timeout=timeout)
+        return flavors.get('flavors', [])
 
 
 class NeutronApi(AbstractApi):

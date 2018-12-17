@@ -4,7 +4,7 @@
 
 import pytest
 
-import common
+from . import common
 from datadog_checks.cassandra_nodetool import CassandraNodetoolCheck
 
 

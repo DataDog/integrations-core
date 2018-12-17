@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+import datetime
 
 CHECK_NAME = 'openstack'
 
@@ -22,7 +23,8 @@ MOCK_CONFIG = {
     },
     'instances': [
         {
-            'name': 'test_name', 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}
+            'name': 'test_name',
+            'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}}
         }
     ]
 }
@@ -175,11 +177,20 @@ EXAMPLE_PROJECTS_RESPONSE = {
 }
 
 # .. server/network
-ALL_SERVER_DETAILS = {
-    "server-1": {"id": "server-1", "name": "server-name-1", "status": "ACTIVE", "project_name": "testproj"},
-    "server-2": {"id": "server-2", "name": "server-name-2", "status": "ACTIVE", "project_name": "testproj"},
-    "other-1": {"id": "other-1", "name": "server-name-other-1", "status": "ACTIVE", "project_name": "blacklist_1"},
-    "other-2": {"id": "other-2", "name": "server-name-other-2", "status": "ACTIVE", "project_name": "blacklist_2"}
+SERVERS_CACHE_MOCK = {
+    "test_name": {
+        'servers': {
+            "server-1": {"id": "server-1", "name": "server-name-1",
+                         "status": "ACTIVE", "project_name": "testproj"},
+            "server-2": {"id": "server-2", "name": "server-name-2",
+                         "status": "ACTIVE", "project_name": "testproj"},
+            "other-1": {"id": "other-1", "name": "server-name-other-1",
+                        "status": "ACTIVE", "project_name": "blacklist_1"},
+            "other-2": {"id": "other-2", "name": "server-name-other-2",
+                        "status": "ACTIVE", "project_name": "blacklist_2"}
+        },
+        'change_since': datetime.datetime.utcnow().isoformat()
+    }
 }
 
 EMPTY_NOVA_SERVERS = []
