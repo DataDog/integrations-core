@@ -251,7 +251,7 @@ jobs:
     - stage: test
       env: CHECK=vsphere
     - stage: test
-      env: CHECK=yarn
+      env: CHECK=yarn PYTHON3=true
     - stage: test
       env: CHECK=zk
 before_install:
