@@ -14,7 +14,7 @@ except ImportError:
 from pylint.lint import PyLinter, fix_import_path
 from pylint.reporters.json import JSONReporter
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 from ...constants import get_root, NOT_CHECKS
 from ...utils import get_valid_checks
 
