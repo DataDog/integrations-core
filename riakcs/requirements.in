@@ -1,2 +1,3 @@
-boto3==1.9.67
+boto==2.46.1; python_version < '3.0'
+# boto3==1.9.67; python_version > '3.0'
 google-compute-engine==2.8.3
