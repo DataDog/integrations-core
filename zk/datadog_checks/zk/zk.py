@@ -59,13 +59,19 @@ zk_max_file_descriptor_count    4096
 # stdlib
 from collections import defaultdict
 from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
-from StringIO import StringIO
+from six import PY3, iteritems
 import re
 import socket
 import struct
 
 # project
 from datadog_checks.checks import AgentCheck
+
+if PY3:
+    from io import StringIO
+    long = int
+else:
+    from StringIO import StringIO
 
 
 class ZKConnectionFailure(Exception):
@@ -222,8 +228,7 @@ class ZookeeperCheck(AgentCheck):
         tags = tags + ['mode:%s' % mode]
         self.gauge('zookeeper.instances', 1, tags=tags)
         gauges[mode] = 1
-
-        for k, v in gauges.iteritems():
+        for k, v in iteritems(gauges):
             gauge_name = 'zookeeper.instances.%s' % k
             self.gauge(gauge_name, v)
 
@@ -238,10 +243,10 @@ class ZookeeperCheck(AgentCheck):
             try:
                 # Connect to the zk client port and send the stat command
                 sock.connect((host, port))
-                sock.sendall(command)
+                sock.sendall(command.encode("UTF-8"))
 
                 # Read the response into a StringIO buffer
-                chunk = sock.recv(chunk_size)
+                chunk = sock.recv(chunk_size).decode("UTF-8")
                 buf.write(chunk)
                 num_reads = 1
                 max_reads = 10000
@@ -250,7 +255,7 @@ class ZookeeperCheck(AgentCheck):
                         # Safeguard against an infinite loop
                         raise Exception("Read %s bytes before exceeding max reads of %s. "
                                         % (buf.tell(), max_reads))
-                    chunk = sock.recv(chunk_size)
+                    chunk = sock.recv(chunk_size).decode("UTF-8")
                     buf.write(chunk)
                     num_reads += 1
             except (socket.timeout, socket.error):

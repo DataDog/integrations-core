@@ -8,7 +8,7 @@ import pytest
 
 # project
 from datadog_checks.zk import ZookeeperCheck
-import conftest
+from . import conftest
 
 
 def test_check(aggregator, spin_up_zk, get_instance):

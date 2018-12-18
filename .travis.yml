@@ -253,7 +253,7 @@ jobs:
     - stage: test
       env: CHECK=yarn
     - stage: test
-      env: CHECK=zk
+      env: CHECK=zk PYTHON3=true
 before_install:
   - bash .travis/prepare.sh
   - PATH="$PATH:$(pyenv root)/versions/3.6/bin"
