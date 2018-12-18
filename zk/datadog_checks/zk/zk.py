@@ -59,11 +59,10 @@ zk_max_file_descriptor_count    4096
 # stdlib
 from collections import defaultdict
 from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
-from six import PY3, iteritems
+from six import iteritems, PY3, StringIO
 import re
 import socket
 import struct
-from six import StringIO
 
 from datadog_checks.base import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
