@@ -5,6 +5,7 @@
 
 # stdlib
 from collections import defaultdict
+from copy import deepcopy
 
 # 3rd party
 from boto.s3.connection import S3Connection
@@ -23,7 +24,8 @@ def multidict(ordered_pairs):
     for k, v in ordered_pairs:
         d[k].append(v)
     # unpack lists that have only 1 item
-    for k, v in d.items():
+    dict_copy = deepcopy(d)
+    for k, v in iteritems(dict_copy):
         if len(v) == 1:
             d[k] = v[0]
     return dict(d)
