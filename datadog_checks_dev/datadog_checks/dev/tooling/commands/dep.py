@@ -164,9 +164,11 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
 def freeze():
     """Combine all dependencies for the Agent's static environment."""
     echo_waiting('Verifying collected packages...')
-    catalog = make_catalog()
-    if catalog.errors:
-        abort(catalog.errors[0])
+    catalog, errors = make_catalog()
+    if errors:
+        for error in errors:
+            echo_failure(error)
+        abort()
 
     static_file = get_agent_requirements()
 

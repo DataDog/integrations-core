@@ -102,11 +102,6 @@ class PackageCatalog:
         self._packages = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         self._checks_deps = defaultdict(list)
         self._package_set = set()
-        self._errors = []
-
-    @property
-    def errors(self):
-        return self._errors
 
     @property
     def packages(self):
@@ -116,7 +111,7 @@ class PackageCatalog:
         if package.name not in self._packages:
             return {}
 
-        return self._packages[package.name].get('versions')
+        return self._packages[package.name].get('versions', {})
 
     def get_check_packages(self, check_name):
         return self._checks_deps.get(check_name, [])
@@ -125,7 +120,7 @@ class PackageCatalog:
         if package.name not in self._packages:
             return {}
 
-        return self._packages[package.name].get('markers')
+        return self._packages[package.name].get('markers', {})
 
     def write_packages(self, reqs_file):
         """
@@ -142,26 +137,14 @@ class PackageCatalog:
         self._checks_deps[check_name].append(package)
 
         # Versions
-        if package.version == '':
-            self._errors.append('Unpinned dependency `{}` in the `{}` check.'.format(package.name, check_name))
-        else:
+        if package.version:
             versions = package_data['versions']
             versions[package.version].append(check_name)
-            if len(versions) > 1:
-                self._errors.append(
-                    'Multiple dependency versions for `{}` in checks: {}'.format(package.name, versions)
-                )
 
         # Marker section
-        markers = package_data['markers']
-        markers[package.marker].append(check_name)
-
-        if len(markers) > 1:
-            self._errors.append(
-                'Multiple environment marker definitions for `{}` in checks {} and {}.'.format(
-                    package.name, markers.popitem()[1], markers.popitem()[1]
-                )
-            )
+        if package.marker:
+            markers = package_data['markers']
+            markers[package.marker].append(check_name)
 
 
 def resolve_requirements(pinned_file, resolved_file, lazy=True):
@@ -200,10 +183,13 @@ def read_packages(reqs_file):
 def make_catalog(verify=False, checks=None):
     root = get_root()
     catalog = PackageCatalog()
+    errors = []
     checks = checks if checks else os.listdir(root)
 
     for check_name in sorted(checks):
         for package in read_packages(os.path.join(root, check_name, 'requirements.in')):
+            if not package.version:
+                errors.append('Unpinned dependency `{}` in the `{}` check'.format(package.name, check_name))
             catalog.add_package(check_name, package)
 
-    return catalog
+    return catalog, errors

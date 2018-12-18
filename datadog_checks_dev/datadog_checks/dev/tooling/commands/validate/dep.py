@@ -43,24 +43,37 @@ def dep():
     * Verify the embedded Python environment defined in the base check and requirements
       listed in every integration are compatible.
     """
-    catalog = make_catalog()
     failed = False
+    catalog, errors = make_catalog()
 
-    # Check uniqueness and unpinned
+    # Check unpinned
+    if errors:
+        for error in errors:
+            echo_failure(error)
+        failed = True
+
+    # Check uniqueness
+    have_multiple_versions = set()
+    have_multiple_markers = set()
     for package in catalog.packages:
         versions = catalog.get_package_versions(package)
         if len(versions) > 1:
+            if package.name in have_multiple_versions:
+                # don't print the error multiple times
+                continue
+
             failed = True
-            display_multiple_attributes(versions, 'Multiple versions found for package `{}`:'.format(package))
-        else:
-            version, checks = get_next(iteritems(versions))
-            if version is None:
-                failed = True
-                echo_failure('Unpinned dependency `{}` in the `{}` check.'.format(package, checks[0]))
+            have_multiple_versions.add(package.name)
+            display_multiple_attributes(versions, 'Multiple versions found for package `{}`:'.format(package.name))
 
         markers = catalog.get_package_markers(package)
         if len(markers) > 1:
+            if package.name in have_multiple_markers:
+                # don't print the error multiple times
+                continue
+
             failed = True
+            have_multiple_markers.add(package.name)
             display_multiple_attributes(markers, 'Multiple markers found for package `{}`:'.format(package))
 
     # Check embedded env compatibility
@@ -78,8 +91,8 @@ def dep():
                 echo_failure('Dependency `{}` mismatch for check `{}` in the embedded environment'.format(
                     package.name, check_name
                 ))
-                echo_failure('    have: {}'.format(embedded_deps[package.name]))
-                echo_failure('    want: {}'.format(package))
+                echo_info('    have: {}'.format(embedded_deps[package.name]))
+                echo_info('    want: {}'.format(package))
 
     if failed:
         abort()

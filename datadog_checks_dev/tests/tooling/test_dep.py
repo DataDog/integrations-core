@@ -76,13 +76,6 @@ def test_package__hash__(package):
     assert package.__hash__() == other.__hash__()
 
 
-def test_package_catalog_errors(catalog):
-    assert len(catalog.errors) is 0
-    catalog._errors.append("foo")
-    assert len(catalog.errors) is 1
-    assert catalog.errors.pop() == "foo"
-
-
 def test_package_catalog_packages(catalog, package):
     assert len(catalog.packages) is 0
     catalog.add_package("a_check", package)
@@ -127,16 +120,25 @@ def test_package_catalog_write_packages(catalog, package, tmp_path):
     assert lines[1] == "foo==3.0; sys_platform == 'win32'\n"
 
 
+def test_package_catalog_add_package_no_version(catalog, package):
+    package.version = ''
+    catalog.add_package("a_check", package)
+    assert catalog.get_package_versions(package) == {}
+
+
+def test_package_catalog_add_package_no_marker(catalog, package):
+    package.marker = ''
+    catalog.add_package("a_check", package)
+    assert catalog.get_package_markers(package) == {}
+
+
 def test_package_catalog_add_package(catalog, package):
     unpinned_foo = Package("foo", None, "sys_platform == 'win32'")
     no_marker_foo = Package("foo", None, None)
     catalog.add_package("a_check", unpinned_foo)
-    catalog.add_package("a_check", package)
     catalog.add_package("another_check", no_marker_foo)
-    assert len(catalog.errors) is 3
-    assert catalog.errors[0] == "Unpinned dependency `foo` in the `a_check` check."
-    assert catalog.errors[1] == "Unpinned dependency `foo` in the `another_check` check."
-    assert "Multiple environment marker definitions for `foo` in checks" in catalog.errors[2]
+    catalog.add_package("a_check", package)
+    assert len(catalog.packages) is 3
 
 
 def test_read_packages(catalog, package, tmp_path):
