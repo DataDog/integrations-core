@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import click
 from six import iteritems
 
 from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info
-from ...dep import collect_packages
-from ....utils import get_next
+from ...constants import get_root, get_agent_requirements
+from ...dep import make_catalog, read_packages
 
 
 def display_multiple_attributes(attributes, message):
@@ -29,28 +31,67 @@ def display_multiple_attributes(attributes, message):
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help='Verify the uniqueness of dependency versions'
+    short_help='Verify dependencies across all checks'
 )
 def dep():
-    """Verify the uniqueness of dependency versions across all checks."""
-    all_packages, _ = collect_packages()
+    """
+    This command will:
+
+    * Verify the uniqueness of dependency versions across all checks.
+    * Verify all the dependencies are pinned.
+    * Verify the embedded Python environment defined in the base check and requirements
+      listed in every integration are compatible.
+    """
     failed = False
+    catalog, errors = make_catalog()
 
-    for package, package_data in sorted(iteritems(all_packages)):
-        versions = package_data['versions']
+    # Check unpinned
+    if errors:
+        for error in errors:
+            echo_failure(error)
+        failed = True
+
+    # Check uniqueness
+    have_multiple_versions = set()
+    have_multiple_markers = set()
+    for package in catalog.packages:
+        versions = catalog.get_package_versions(package)
         if len(versions) > 1:
-            failed = True
-            display_multiple_attributes(versions, 'Multiple versions found for package `{}`:'.format(package))
-        else:
-            version, checks = get_next(iteritems(versions))
-            if version is None:
-                failed = True
-                echo_failure('Unpinned dependency `{}` in the `{}` check.'.format(package, checks[0]))
+            if package.name in have_multiple_versions:
+                # don't print the error multiple times
+                continue
 
-        markers = package_data['markers']
-        if len(markers) > 1:
             failed = True
+            have_multiple_versions.add(package.name)
+            display_multiple_attributes(versions, 'Multiple versions found for package `{}`:'.format(package.name))
+
+        markers = catalog.get_package_markers(package)
+        if len(markers) > 1:
+            if package.name in have_multiple_markers:
+                # don't print the error multiple times
+                continue
+
+            failed = True
+            have_multiple_markers.add(package.name)
             display_multiple_attributes(markers, 'Multiple markers found for package `{}`:'.format(package))
+
+    # Check embedded env compatibility
+    agent_req_file = get_agent_requirements()
+    embedded_deps = {p.name: p for p in read_packages(agent_req_file)}
+    for check_name in sorted(os.listdir(get_root())):
+        for package in catalog.get_check_packages(check_name):
+            if package.name not in embedded_deps:
+                failed = True
+                echo_failure('Dependency `{}` for check `{}` missing from the embedded environment'.format(
+                    package.name, check_name
+                ))
+            elif embedded_deps[package.name] != package:
+                failed = True
+                echo_failure('Dependency `{}` mismatch for check `{}` in the embedded environment'.format(
+                    package.name, check_name
+                ))
+                echo_info('    have: {}'.format(embedded_deps[package.name]))
+                echo_info('    want: {}'.format(package))
 
     if failed:
         abort()

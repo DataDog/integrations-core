@@ -10,7 +10,7 @@ from datadog_checks.dev._env import TESTING_PLUGIN
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CORE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+CORE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(HERE))))
 
 
 def test_new_check_test():
