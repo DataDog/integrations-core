@@ -3,8 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-import common
 from datadog_checks.squid import SquidCheck
+
+from . import common
 
 
 @pytest.mark.integration

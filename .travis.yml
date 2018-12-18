@@ -231,7 +231,7 @@ jobs:
     - stage: test
       env: CHECK=supervisord
     - stage: test
-      env: CHECK=squid
+      env: CHECK=squid PYTHON3=true
     - stage: test
       env: CHECK=system_core
     - stage: test

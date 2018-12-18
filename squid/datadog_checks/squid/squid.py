@@ -4,6 +4,8 @@
 
 import requests
 
+from six import iteritems
+
 # project
 from datadog_checks.checks import AgentCheck
 
@@ -78,7 +80,7 @@ class SquidCheck(AgentCheck):
         counters = self.get_counters(host, port, cachemgr_user, cachemgr_passwd, tags + custom_tags)
 
         # Send these values as rate
-        for counter, value in counters.iteritems():
+        for counter, value in iteritems(counters):
             self.rate(counter, value, tags=tags + custom_tags)
 
     def get_counters(self, host, port, user, pwd, tags):
