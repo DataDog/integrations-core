@@ -65,7 +65,7 @@ import socket
 import struct
 from six import StringIO
 
-from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode
+from datadog_checks.base import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
 
 if PY3:
