@@ -32,6 +32,26 @@ This causes a number of issues for all actors involved:
 1. Each integration must keep its own release cycle.
 2. The solutions must work for integrations from `integrations-extra` as well.
 
+### A note about testing
+
+At this moment, this is the list of automated checks performed for any PR and
+when something is merged in the `master` branch:
+
+- ensure the list of checks shipped with the agent is correct
+- validate config files are well formed (YAML, presence of an instance, etc)
+- validate the dependencies declared in the check are compatible with what the Agent ships
+- validate manifest file is valid (both JSON format and contents)
+- validate metadata (same as manifest)
+- validate service-checks (same as manifest)
+- unit and integrations test + test coverage (the Datadog Agent is not involved)
+- benchmarks (at the moment they don't fail but we could stop a release if a slowdown is found)
+
+This is **not** enough to ensure an integration can run on any supported platform
+without any problem. For this reason, before shipping a feature, a manual pre-release
+testing is still required. Depending on the solution adopted, the pre-release
+testing can happen at different moments of the release cycle but no solution can
+avoid it.
+
 ## Recommended Solution
 
 A release must be immediately triggered after merging a PR into the `master` branch.
@@ -39,6 +59,13 @@ To ensure quality of the software shipped, **changes on the branch should be tes
 A pre-release testing checklist is out of the scope of this RFC but in general
 an engineer must consider that changes in a PR could be used right after the
 release by any users on any supported Agent version and platform.
+
+The release process will stay manual, since the release commit has to be signed by
+an authorized Datadog engineer in order to trigger the build pipeline and make the
+package generally available. This means that exceptions to the proposed workflow
+will still be possible; for example, if two different PRs for the same integrations
+are good to go at the same time, they can be shipped within the same release, at
+the discretion of the engineer who will sign the release commit.
 
 - **Strengths**:
   - Well defined release process, predictable and reliable.
@@ -56,7 +83,7 @@ release by any users on any supported Agent version and platform.
 - **Wait some time before releasing something that was merged on `master`**
   - How much time?
   - Not sure who will be the release owner: the person who merged the first PR? The person who merged the last?
-  - We should probably still do pre-release testing before merging, so review time would be the same as the proposed solution.
+  - We should still do pre-release testing before merging, so review time would be the same as the proposed solution.
   - During the Agent release week, we might have few integrations in an unreleased state, a code freeze would likely be required.
   
 - **Release with a fixed schedule**
