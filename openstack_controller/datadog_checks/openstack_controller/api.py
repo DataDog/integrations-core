@@ -4,7 +4,8 @@
 import requests
 import simplejson as json
 from six.moves.urllib.parse import urljoin
-from .settings import DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION, DEFAULT_NEUTRON_API_VERSION
+from .settings import (DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION, DEFAULT_NEUTRON_API_VERSION,
+                       DEFAULT_PAGINATED_LIMIT, DEFAULT_MAX_RETRY)
 from .exceptions import (InstancePowerOffFailure, AuthenticationNeeded, KeystoneUnreachable)
 
 
@@ -12,22 +13,23 @@ UNSCOPED_AUTH = 'unscoped'
 
 
 class AbstractApi(object):
-    DEFAULT_API_REQUEST_TIMEOUT = 10  # seconds
 
-    def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
+    def __init__(self, logger, endpoint, auth_token, timeout=DEFAULT_API_REQUEST_TIMEOUT, ssl_verify=False,
+                 proxies=None):
         self.logger = logger
         self.ssl_verify = ssl_verify
-        self.proxy_config = proxy_config
+        self.proxies = proxies
         self.endpoint = endpoint
         self.auth_token = auth_token
         self.headers = {'X-Auth-Token': auth_token}
+        self.timeout = timeout
         # Cache for the `_make_request` method
         self.cache = {}
 
     def get_endpoint(self):
         self._make_request(self.endpoint, self.headers)
 
-    def _make_request(self, url, headers, params=None, timeout=DEFAULT_API_REQUEST_TIMEOUT):
+    def _make_request(self, url, headers, params=None):
         """
         Generic request handler for OpenStack API requests
         Raises specialized Exceptions for commonly encountered error codes
@@ -35,7 +37,7 @@ class AbstractApi(object):
         self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, headers, params)
 
         # Checking if request is in cache
-        cache_key = "|".join([url, json.dumps(headers), json.dumps(params), str(timeout)])
+        cache_key = "|".join([url, json.dumps(headers), json.dumps(params), str(self.timeout)])
         if cache_key in self.cache:
             self.logger.debug("Request found in cache. cache key %s", cache_key)
             return self.cache.get(cache_key)
@@ -46,8 +48,8 @@ class AbstractApi(object):
                 headers=headers,
                 verify=self.ssl_verify,
                 params=params,
-                timeout=timeout,
-                proxies=self.proxy_config,
+                timeout=self.timeout,
+                proxies=self.proxies,
             )
             resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -68,8 +70,11 @@ class AbstractApi(object):
 
 
 class ComputeApi(AbstractApi):
-    def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(ComputeApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
+    def __init__(self, logger, endpoint, auth_token, timeout=DEFAULT_API_REQUEST_TIMEOUT, ssl_verify=False,
+                 proxies=None, limit=DEFAULT_PAGINATED_LIMIT):
+        super(ComputeApi, self).__init__(logger, endpoint, auth_token, timeout=timeout, ssl_verify=ssl_verify,
+                                         proxies=proxies)
+        self.paginated_limit = limit
 
     def get_os_hypervisor_uptime(self, hyp_id):
         url = '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hyp_id)
@@ -86,10 +91,9 @@ class ComputeApi(AbstractApi):
         hypervisors = self._make_request(url, self.headers)
         return hypervisors.get('hypervisors', [])
 
-    def get_servers_detail(self, query_params, timeout=None):
+    def get_servers_detail(self, query_params):
         url = '{}/servers/detail'.format(self.endpoint)
-        resp = self._make_request(url, self.headers, params=query_params, timeout=timeout)
-        return resp.get('servers', [])
+        return self._get_paginated_list(url, 'servers', query_params)
 
     def get_server_diagnostics(self, server_id):
         url = '{}/servers/{}/diagnostics'.format(self.endpoint, server_id)
@@ -101,15 +105,45 @@ class ComputeApi(AbstractApi):
         limits = server_stats.get('limits', {}).get('absolute', {})
         return limits
 
-    def get_flavors_detail(self, query_params, timeout=None):
+    def get_flavors_detail(self, query_params):
         url = '{}/flavors/detail'.format(self.endpoint)
-        flavors = self._make_request(url, self.headers, params=query_params, timeout=timeout)
-        return flavors.get('flavors', [])
+        return self._get_paginated_list(url, 'flavors', query_params)
+
+    def _get_paginated_list(self, url, obj, query_params):
+        result = []
+        query_params = query_params or {}
+        query_params['limit'] = self.paginated_limit
+        resp = self._make_request(url, self.headers, params=query_params)
+        result.extend(resp.get(obj, []))
+        # Avoid the extra request since we know we're done when the response has anywhere between
+        # 0 and paginated_server_limit servers
+        while len(resp) == self.paginated_limit:
+            query_params['marker'] = resp[-1]['id']
+            query_params['limit'] = self.paginated_limit
+            retry = 0
+            while retry < DEFAULT_MAX_RETRY:
+                # `details` endpoints are typically expensive calls,
+                # If it fails, we retry DEFAULT_RETRY times while reducing the `limit` param
+                # otherwise we will backoff
+                try:
+                    resp = self._make_request(url, self.headers, params=query_params)
+                    result.extend(resp.get(obj, []))
+
+                    break
+                except Exception as e:
+                    query_params['limit'] /= 2
+                    retry += 1
+                    if retry == DEFAULT_MAX_RETRY:
+                        raise e
+
+        return result
 
 
 class NeutronApi(AbstractApi):
-    def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(NeutronApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
+    def __init__(self, logger, endpoint, auth_token, timeout=DEFAULT_API_REQUEST_TIMEOUT, ssl_verify=False,
+                 proxies=None):
+        super(NeutronApi, self).__init__(logger, endpoint, auth_token, timeout=timeout, ssl_verify=ssl_verify,
+                                         proxies=proxies)
 
     def get_networks(self):
         url = '{}/{}/networks'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION)
@@ -123,8 +157,10 @@ class NeutronApi(AbstractApi):
 
 
 class KeystoneApi(AbstractApi):
-    def __init__(self, logger, ssl_verify, proxy_config, endpoint, auth_token):
-        super(KeystoneApi, self).__init__(logger, ssl_verify, proxy_config, endpoint, auth_token)
+    def __init__(self, logger, endpoint, auth_token, timeout=DEFAULT_API_REQUEST_TIMEOUT, ssl_verify=False,
+                 proxies=None):
+        super(KeystoneApi, self).__init__(logger, endpoint, auth_token, timeout=timeout, ssl_verify=ssl_verify,
+                                          proxies=proxies)
 
     def post_auth_token(self, identity, scope=UNSCOPED_AUTH):
         auth_url = urljoin(self.endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
@@ -138,7 +174,7 @@ class KeystoneApi(AbstractApi):
                 data=json.dumps(payload),
                 verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=self.proxy_config,
+                proxies=self.proxies,
             )
             resp.raise_for_status()
             self.logger.debug("url: %s || response: %s", auth_url, resp.json())
@@ -161,7 +197,7 @@ class KeystoneApi(AbstractApi):
                 headers=self.headers,
                 verify=self.ssl_verify,
                 timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=self.proxy_config
+                proxies=self.proxies
             )
             resp.raise_for_status()
             jresp = resp.json()
