@@ -5,10 +5,12 @@
 
 # stdlib
 from collections import defaultdict
+from copy import deepcopy
 
 # 3rd party
 from boto.s3.connection import S3Connection
 import simplejson as json
+from six import iteritems
 
 # project
 from datadog_checks.checks import AgentCheck
@@ -22,7 +24,8 @@ def multidict(ordered_pairs):
     for k, v in ordered_pairs:
         d[k].append(v)
     # unpack lists that have only 1 item
-    for k, v in d.items():
+    dict_copy = deepcopy(d)
+    for k, v in iteritems(dict_copy):
         if len(v) == 1:
             d[k] = v[0]
     return dict(d)
@@ -55,7 +58,7 @@ class RiakCs(AgentCheck):
                 metrics.update(V21_DEFAULT_METRICS)
             else:
                 metrics = V21_DEFAULT_METRICS
-            for key, value in stats.iteritems():
+            for key, value in iteritems(stats):
                 if key not in metrics:
                     continue
                 suffix = key.rsplit("_", 1)[-1]
@@ -65,7 +68,7 @@ class RiakCs(AgentCheck):
             # pre 2.1 stats format
             legends = dict([(len(k), k) for k in stats["legend"]])
             del stats["legend"]
-            for key, values in stats.iteritems():
+            for key, values in iteritems(stats):
                 legend = legends[len(values)]
                 for i, value in enumerate(values):
                     metric_name = "riakcs.{0}.{1}".format(key, legend[i])
