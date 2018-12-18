@@ -17,6 +17,7 @@ from .structures import EnvVars
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
+ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
 CI_IDENTIFIERS = (
     'APPVEYOR_',
