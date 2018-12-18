@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import iteritems
 
 from requests.exceptions import SSLError
 from datadog_checks.yarn import YarnCheck
@@ -45,23 +46,23 @@ def test_check(aggregator, mocked_request):
     )
 
     # Check the YARN Cluster Metrics
-    for metric, value in YARN_CLUSTER_METRICS_VALUES.iteritems():
+    for metric, value in iteritems(YARN_CLUSTER_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN App Metrics
-    for metric, value in YARN_APP_METRICS_VALUES.iteritems():
+    for metric, value in iteritems(YARN_APP_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=YARN_APP_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Node Metrics
-    for metric, value in YARN_NODE_METRICS_VALUES.iteritems():
+    for metric, value in iteritems(YARN_NODE_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=YARN_NODE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Root Queue Metrics
-    for metric, value in YARN_ROOT_QUEUE_METRICS_VALUES.iteritems():
+    for metric, value in iteritems(YARN_ROOT_QUEUE_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=YARN_ROOT_QUEUE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Custom Queue Metrics
-    for metric, value in YARN_QUEUE_METRICS_VALUES.iteritems():
+    for metric, value in iteritems(YARN_QUEUE_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=YARN_QUEUE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Queue Metrics from excluded queues are absent

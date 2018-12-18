@@ -79,14 +79,12 @@ yarn.queue.maxApplications             The maximum number of applications this q
 yarn.queue.maxApplicationsPerUser      The maximum number of active applications per user this queue can have
 """
 
-# stdlib
-from urlparse import urljoin, urlsplit, urlunsplit
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
+from six import iteritems
 
-# 3rd party
 from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError, SSLError
 import requests
 
-# Project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 
@@ -226,7 +224,7 @@ class YarnCheck(AgentCheck):
             app_tags = {}
 
         filtered_app_tags = {}
-        for dd_prefix, yarn_key in app_tags.iteritems():
+        for dd_prefix, yarn_key in iteritems(app_tags):
             if yarn_key in self._ALLOWED_APPLICATION_TAGS:
                 filtered_app_tags[dd_prefix] = yarn_key
         app_tags = filtered_app_tags
@@ -292,7 +290,7 @@ class YarnCheck(AgentCheck):
             for app_json in metrics_json['apps']['app']:
 
                 tags = []
-                for dd_tag, yarn_key in app_tags.iteritems():
+                for dd_tag, yarn_key in iteritems(app_tags):
                     try:
                         val = app_json[yarn_key]
                         if val:
@@ -371,7 +369,7 @@ class YarnCheck(AgentCheck):
         """
         Parse the JSON response and set the metrics
         """
-        for dict_path, metric in yarn_metrics.iteritems():
+        for dict_path, metric in iteritems(yarn_metrics):
             metric_name, metric_type = metric
 
             metric_value = self._get_value_from_json(dict_path, metrics_json)
@@ -424,7 +422,7 @@ class YarnCheck(AgentCheck):
 
         # Add kwargs as arguments
         if kwargs:
-            query = '&'.join(['{}={}'.format(key, value) for key, value in kwargs.iteritems()])
+            query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(kwargs)])
             url = urljoin(url, '?' + query)
 
         try:

@@ -15,14 +15,6 @@ from .common import (
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture
 def mocked_request():
     with patch("requests.get", new=requests_get_mock):
         yield
