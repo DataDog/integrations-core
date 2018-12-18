@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import pytest
+
 from datadog_checks.dev import docker_run, RetryError
 from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.zk import ZookeeperCheck

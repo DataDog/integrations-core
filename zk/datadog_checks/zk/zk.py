@@ -63,15 +63,13 @@ from six import PY3, iteritems
 import re
 import socket
 import struct
+from six import StringIO
 
-# project
+from datadog_checks.dev.utils import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
 
 if PY3:
-    from io import StringIO
     long = int
-else:
-    from StringIO import StringIO
 
 
 class ZKConnectionFailure(Exception):
@@ -243,10 +241,10 @@ class ZookeeperCheck(AgentCheck):
             try:
                 # Connect to the zk client port and send the stat command
                 sock.connect((host, port))
-                sock.sendall(command.encode("UTF-8"))
+                sock.sendall(ensure_bytes(command))
 
                 # Read the response into a StringIO buffer
-                chunk = sock.recv(chunk_size).decode("UTF-8")
+                chunk = ensure_unicode(sock.recv(chunk_size))
                 buf.write(chunk)
                 num_reads = 1
                 max_reads = 10000
@@ -255,7 +253,7 @@ class ZookeeperCheck(AgentCheck):
                         # Safeguard against an infinite loop
                         raise Exception("Read %s bytes before exceeding max reads of %s. "
                                         % (buf.tell(), max_reads))
-                    chunk = sock.recv(chunk_size).decode("UTF-8")
+                    chunk = ensure_unicode(sock.recv(chunk_size))
                     buf.write(chunk)
                     num_reads += 1
             except (socket.timeout, socket.error):
