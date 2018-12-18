@@ -859,7 +859,7 @@ def upload(ctx, check, dry_run):
 @release.command(
     context_settings=CONTEXT_SETTINGS,
     short_help="Generate the list of integrations to ship with the Agent and save it to '{}'".format(
-        get_agent_release_requirements
+        get_agent_release_requirements()
     )
 )
 @click.pass_context
