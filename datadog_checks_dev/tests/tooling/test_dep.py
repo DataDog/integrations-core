@@ -4,7 +4,7 @@
 import pytest
 import six
 
-from datadog_checks.dev.tooling.dep import Package, PackageCatalog, read_packages
+from datadog_checks.dev.tooling.requirements import Package, PackageCatalog, read_packages
 from datadog_checks.dev.utils import read_file_lines, write_file_lines
 
 

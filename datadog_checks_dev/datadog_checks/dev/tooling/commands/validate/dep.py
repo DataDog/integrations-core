@@ -8,7 +8,7 @@ from six import iteritems
 
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 from ...constants import get_root, get_agent_requirements
-from ...dep import make_catalog, read_packages
+from ...requirements import make_catalog, read_packages
 
 
 def display_multiple_attributes(attributes, message):
