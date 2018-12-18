@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -15,7 +17,7 @@ def aggregator():
 
 def test_instance():
     """
-    Simply assert the class can be insantiated
+    Simply assert the class can be instantiated
     """
     AgentCheck()
 
@@ -27,6 +29,13 @@ class TestMetrics:
         with pytest.raises(ValueError):
             check.gauge(metric_name, '85k')
         aggregator.assert_metric(metric_name, count=0)
+
+    def test_normalize(self):
+        check = AgentCheck()
+        metric_name = u'Klüft inför på fédéral'
+        normalized_metric_name = b'kluft_infor_pa_federal'
+
+        assert check.normalize(metric_name, fix_case=True) == normalized_metric_name
 
 
 class TestEvents:
