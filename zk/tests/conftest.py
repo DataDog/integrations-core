@@ -62,7 +62,7 @@ STATUS_TYPES = [
 ]
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def get_instance():
     return {
         'host': HOST,
@@ -101,7 +101,7 @@ def get_version():
 
 
 @pytest.fixture(scope="session")
-def spin_up_zk():
+def dd_environment(get_instance):
     def condition():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
@@ -125,4 +125,4 @@ def spin_up_zk():
         compose_file = os.path.join(HERE, 'compose', 'zk35plus.yaml')
 
     with docker_run(compose_file, conditions=[condition]):
-        yield
+        yield get_instance

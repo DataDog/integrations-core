@@ -10,7 +10,7 @@ from datadog_checks.zk import ZookeeperCheck
 from . import conftest
 
 
-def test_check(aggregator, spin_up_zk, get_instance):
+def test_check(aggregator, dd_environment, get_instance):
     """
     Collect ZooKeeper metrics.
     """
@@ -37,7 +37,7 @@ def test_check(aggregator, spin_up_zk, get_instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_wrong_expected_mode(aggregator, spin_up_zk, get_invalid_mode_instance):
+def test_wrong_expected_mode(aggregator, dd_environment, get_invalid_mode_instance):
     """
     Raise a 'critical' service check when ZooKeeper is not in the expected mode.
     """
@@ -48,7 +48,7 @@ def test_wrong_expected_mode(aggregator, spin_up_zk, get_invalid_mode_instance):
     aggregator.assert_service_check("zookeeper.mode", status=zk_check.CRITICAL)
 
 
-def test_error_state(aggregator, spin_up_zk, get_conn_failure_config):
+def test_error_state(aggregator, dd_environment, get_conn_failure_config):
     """
     Raise a 'critical' service check when ZooKeeper is in an error state.
     Report status as down.
