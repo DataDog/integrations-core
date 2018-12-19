@@ -28,7 +28,7 @@ ply==3.10
 prometheus-client==0.3.0
 protobuf==3.5.1
 psutil==5.4.8
-psycopg2-binary==2.7.4
+psycopg2-binary==2.7.5
 pyasn1==0.4.2
 pycparser==2.18
 pycryptodomex==3.4.7
