@@ -127,7 +127,7 @@ The WMI check does not include any events at this time.
 The WMI check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][10].
+Need help? Contact [Datadog support][10].
 
 [1]: https://msdn.microsoft.com/en-us/library/system.diagnostics.performancecounter(v=vs.110.aspx)
 [2]: https://wmie.codeplex.com/

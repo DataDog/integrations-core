@@ -59,7 +59,7 @@ The Kube-DNS check does not include any events at this time.
 The Kube-DNS check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_dns/datadog_checks/kube_dns/data/conf.yaml.example

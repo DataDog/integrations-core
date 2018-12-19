@@ -106,7 +106,7 @@ Returns `CRITICAL` for a given service if HAProxy is reporting it `down`.
 Returns `OK` for `maint`, `ok` and any other state.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][14].
+Need help? Contact [Datadog support][14].
 
 ## Further Reading
 

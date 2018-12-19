@@ -54,7 +54,7 @@ Returns CRITICAL if the StatsD server does not respond to the Agent's health sta
 Returns CRITICAL if the Agent cannot collect metrics about StatsD, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 If you don't know what StatsD is and how does it work, check out [our blog post about it][7]

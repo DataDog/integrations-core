@@ -124,7 +124,7 @@ The mesos_slave check creates a service check for each executor task, giving it 
 |TASK_ERROR|AgentCheck.CRITICAL
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][4].
+Need help? Contact [Datadog support][4].
 
 ## Further Reading
 

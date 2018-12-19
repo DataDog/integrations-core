@@ -44,7 +44,7 @@ The Riak check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/riak/datadog_checks/riak/data/conf.yaml.example

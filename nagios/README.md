@@ -63,7 +63,7 @@ The check watches the Nagios events log for log lines containing these strings, 
 The Nagios check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 ## Further Reading
 

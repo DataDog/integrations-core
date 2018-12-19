@@ -36,7 +36,7 @@ The Gitlab check includes a readiness and a liveness service check.
 Moreover, it provides a service check to ensure that the local Prometheus endpoint is available.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][105].
+Need help? Contact [Datadog support][105].
 
 [101]: https://app.datadoghq.com/account/settings#agent
 [102]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example

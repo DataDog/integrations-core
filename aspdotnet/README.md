@@ -36,7 +36,7 @@ The ASP.NET check does not include any events at this time.
 The ASP.NET check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

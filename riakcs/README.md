@@ -52,7 +52,7 @@ The RiackCS check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to the RiakCS endpoint to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 To get a better idea of how (or why) to monitor Riak CS performance and availability with Datadog, check out our [series of blog posts][7] about it.

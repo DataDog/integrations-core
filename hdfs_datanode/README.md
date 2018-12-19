@@ -58,7 +58,7 @@ The HDFS-datanode check does not include any events at this time.
 Returns `Critical` if the Agent cannot connect to the DataNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][106].
+Need help? Contact [Datadog support][106].
 
 ## Further Reading
 

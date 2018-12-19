@@ -23,7 +23,7 @@ The Dotnetclr check is included in the [Datadog Agent][1] package, so you don't 
 [Run the Agent's `status` subcommand][2] and look for `dotnetclr` under the Checks section.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][3].
+Need help? Contact [Datadog support][3].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

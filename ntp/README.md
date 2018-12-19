@@ -62,7 +62,7 @@ The NTP check does not include any events at this time.
 Returns CRITICAL if the NTP offset is greater than the threshold specified in `ntp.yaml`, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/ntp/datadog_checks/ntp/data/conf.yaml.default

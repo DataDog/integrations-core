@@ -50,7 +50,7 @@ The CoreDNS check does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][7].
+Need help? Contact [Datadog support][7].
 
 ## Development
 

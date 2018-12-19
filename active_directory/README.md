@@ -64,7 +64,7 @@ The Active Directory check does not include any events at this time.
 The Active Directory check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 [1]: https://github.com/DataDog/integrations-core/blob/master/active_directory/datadog_checks/active_directory/data/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

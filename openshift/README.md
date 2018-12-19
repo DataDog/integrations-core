@@ -21,7 +21,7 @@ The OpenShift check does not include any events at this time.
 The OpenShift check does not include any Service Checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 
 [1]: https://docs.datadoghq.com/integrations/kubernetes/

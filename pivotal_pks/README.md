@@ -25,7 +25,7 @@ Follow the [container log collection steps][5] to learn more about those environ
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 
 [1]: https://pivotal.io/platform/pivotal-container-service

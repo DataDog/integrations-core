@@ -93,7 +93,7 @@ The Postfix check does not include any events at this time.
 The Postfix check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 

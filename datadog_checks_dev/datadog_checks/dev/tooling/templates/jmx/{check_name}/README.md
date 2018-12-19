@@ -43,7 +43,7 @@ This check monitors [{check_name_cap}][1].
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 
 [1]: **LINK_TO_INTEGERATION_SITE**
