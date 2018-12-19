@@ -53,6 +53,7 @@ CM_TAGS = [
     "custom:tag",
 ]
 
+
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
