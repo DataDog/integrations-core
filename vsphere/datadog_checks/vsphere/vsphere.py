@@ -912,7 +912,7 @@ class VSphereCheck(AgentCheck):
         thread_crashed = False
         try:
             while True:
-                self.log.critical(self.exceptionq.get_nowait())
+                self.log.error(self.exceptionq.get_nowait())
                 thread_crashed = True
         except Empty:
             pass
