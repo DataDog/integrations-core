@@ -1,4 +1,4 @@
-{license_header}from datadog_checks.checks import AgentCheck
+{license_header}from datadog_checks.base import AgentCheck
 
 
 class {check_class}(AgentCheck):
