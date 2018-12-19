@@ -85,15 +85,16 @@ class KubeLeaderElectionMixin(object):
         prefix = config.get("namespace") + ".leader_election"
 
         # Compute tags for gauges and service check
-        tags = config.get("tags", [])
+        tags = []
         for n in ["record_kind", "record_name", "record_namespace"]:
             if n in config:
                 tags.append("{}:{}".format(n, config[n]))
+        tags += config.get("tags", [])
 
         # Sanity check on the record
         valid, reason = record.validate()
         if not valid:
-            self.service_check(prefix, AgentCheck.CRITICAL, tags=tags, message=reason)
+            self.service_check(prefix + ".status", AgentCheck.CRITICAL, tags=tags, message=reason)
             return  # Stop here
 
         # Report gauges

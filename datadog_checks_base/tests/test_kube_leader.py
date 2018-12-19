@@ -15,12 +15,43 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecord, KubeLeaderElectionMixin
 
 
-RAW_VALID_RECORD = ('{"holderIdentity":"dd-cluster-agent-568f458dd6-kj6vt",'
-                    '"leaseDurationSeconds":60,'
-                    '"acquireTime":"2018-12-17T11:53:07Z",'
-                    '"renewTime":"2018-12-18T12:32:22Z",'
-                    '"leaderTransitions":7}')
+RAW_VALID_RECORD = (
+    '{"holderIdentity":"dd-cluster-agent-568f458dd6-kj6vt",'
+    '"leaseDurationSeconds":60,'
+    '"acquireTime":"2018-12-17T11:53:07Z",'
+    '"renewTime":"2018-12-18T12:32:22Z",'
+    '"leaderTransitions":7}'
+)
 
+EP_INSTANCE = {
+    "namespace": "base",
+    "record_kind": "endpoints",
+    "record_name": "thisrecord",
+    "record_namespace": "myns",
+    "tags": ["custom:tag"],
+}
+
+EP_TAGS = [
+    "record_kind:endpoints",
+    "record_name:thisrecord",
+    "record_namespace:myns",
+    "custom:tag",
+]
+
+CM_INSTANCE = {
+    "namespace": "base",
+    "record_kind": "configmap",
+    "record_name": "thisrecord",
+    "record_namespace": "myns",
+    "tags": ["custom:tag"],
+}
+
+CM_TAGS = [
+    "record_kind:configmap",
+    "record_name:thisrecord",
+    "record_namespace:myns",
+    "custom:tag",
+]
 
 @pytest.fixture
 def aggregator():
@@ -32,12 +63,14 @@ def aggregator():
 
 @pytest.fixture()
 def mock_incluster():
+    # Disable the kube config loader to avoid errors on check run
     with mock.patch('datadog_checks.base.checks.kube_leader.mixins.config.load_incluster_config'):
         yield
 
 
 @pytest.fixture()
 def mock_read_endpoints():
+    # Allows to inject an arbitrary endpoints object
     with mock.patch(
         'datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_endpoints',
     ) as m:
@@ -46,6 +79,7 @@ def mock_read_endpoints():
 
 @pytest.fixture()
 def mock_read_configmap():
+    # Allows to inject an arbitrary configmap object
     with mock.patch(
         'datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_config_map',
     ) as m:
@@ -167,92 +201,55 @@ class TestClientConfig:
 
 class TestMixin:
     def test_valid_endpoints(self, aggregator, mock_read_endpoints, mock_incluster):
-        instance = {
-            "namespace": "base",
-            "record_kind": "ep",
-            "record_name": "thisrecord",
-            "record_namespace": "myns",
-            "tags": ["custom:tag"],
-        }
-        expected_tags = [
-            "record_kind:ep",
-            "record_name:thisrecord",
-            "record_namespace:myns",
-            "custom:tag",
-        ]
         mock_read_endpoints.return_value = make_fake_object(RAW_VALID_RECORD)
         c = SimpleLeaderCheck()
-        c.check(instance)
+        c.check(EP_INSTANCE)
 
         assert c.get_warnings() == []
         mock_read_endpoints.assert_called_once_with("thisrecord", "myns")
-
-        aggregator.assert_metric("base.leader_election.transitions", value=7, tags=expected_tags)
-        aggregator.assert_metric("base.leader_election.lease_duration", value=60, tags=expected_tags)
-        aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.CRITICAL, tags=expected_tags)
+        aggregator.assert_metric("base.leader_election.transitions", value=7, tags=EP_TAGS)
+        aggregator.assert_metric("base.leader_election.lease_duration", value=60, tags=EP_TAGS)
+        aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.CRITICAL, tags=EP_TAGS)
+        aggregator.assert_all_metrics_covered()
 
     def test_valid_configmap(self, aggregator, mock_read_configmap, mock_incluster):
-        instance = {
-            "namespace": "base",
-            "record_kind": "configmap",
-            "record_name": "thisrecord",
-            "record_namespace": "myns",
-            "tags": ["custom:tag"],
-        }
-        expected_tags = [
-            "record_kind:configmap",
-            "record_name:thisrecord",
-            "record_namespace:myns",
-            "custom:tag",
-        ]
         mock_read_configmap.return_value = make_fake_object(RAW_VALID_RECORD)
         c = SimpleLeaderCheck()
-        c.check(instance)
+        c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []
         mock_read_configmap.assert_called_once_with("thisrecord", "myns")
+        aggregator.assert_metric("base.leader_election.transitions", value=7, tags=CM_TAGS)
+        aggregator.assert_metric("base.leader_election.lease_duration", value=60, tags=CM_TAGS)
+        aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.CRITICAL, tags=CM_TAGS)
+        aggregator.assert_all_metrics_covered()
 
-        aggregator.assert_metric("base.leader_election.transitions", value=7, tags=expected_tags)
-        aggregator.assert_metric("base.leader_election.lease_duration", value=60, tags=expected_tags)
-        aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.CRITICAL, tags=expected_tags)
-
-    def test_invalid_configmap(self, aggregator, mock_read_configmap, mock_incluster):
-        instance = {
-            "namespace": "base",
-            "record_kind": "configmap",
-            "record_name": "thisrecord",
-            "record_namespace": "myns",
-        }
+    def test_empty_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object()
         c = SimpleLeaderCheck()
-        c.check(instance)
+        c.check(CM_INSTANCE)
 
         assert len(c.get_warnings()) == 1
-        mock_read_configmap.assert_called_once_with("thisrecord", "myns")
+        aggregator.assert_all_metrics_covered()
 
     def test_ok_configmap(self, aggregator, mock_read_configmap, mock_incluster):
-        instance = {
-            "namespace": "base",
-            "record_kind": "configmap",
-            "record_name": "thisrecord",
-            "record_namespace": "myns",
-            "tags": ["custom:tag"],
-        }
-        expected_tags = [
-            "record_kind:configmap",
-            "record_name:thisrecord",
-            "record_namespace:myns",
-            "custom:tag",
-        ]
         mock_read_configmap.return_value = make_fake_object(
             make_record(holder="me", duration=30, renew=datetime.now(), acquire="2018-12-18T12:32:22Z")
         )
         c = SimpleLeaderCheck()
-        c.check(instance)
+        c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []
-        mock_read_configmap.assert_called_once_with("thisrecord", "myns")
+        aggregator.assert_metric("base.leader_election.transitions", value=0, tags=CM_TAGS)
+        aggregator.assert_metric("base.leader_election.lease_duration", value=30, tags=CM_TAGS)
+        aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.OK, tags=CM_TAGS)
+        aggregator.assert_all_metrics_covered()
 
-        aggregator.assert_metric("base.leader_election.transitions", value=0, tags=expected_tags)
-        aggregator.assert_metric("base.leader_election.lease_duration", value=30, tags=expected_tags)
-        aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.OK, tags=expected_tags)
+    def test_invalid_configmap(self, aggregator, mock_read_configmap, mock_incluster):
+        mock_read_configmap.return_value = make_fake_object(make_record(holder="me"))
+        c = SimpleLeaderCheck()
+        c.check(CM_INSTANCE)
+
+        assert c.get_warnings() == []
+        aggregator.assert_service_check("base.leader_election.status", status=AgentCheck.CRITICAL, tags=CM_TAGS)
+        aggregator.assert_all_metrics_covered()
