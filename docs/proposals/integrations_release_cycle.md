@@ -46,11 +46,11 @@ when something is merged in the `master` branch:
 - unit and integrations test + test coverage (the Datadog Agent is not involved)
 - benchmarks (at the moment they don't fail but we could stop a release if a slowdown is found)
 
-This is **not** enough to ensure an integration can run on any supported platform
-without any problem. For this reason, before shipping a feature, a manual pre-release
-testing is still required. Depending on the solution adopted, the pre-release
-testing can happen at different moments of the release cycle but no solution can
-avoid it.
+Unit and integration tests are **not** enough to ensure an integration can run
+on any supported platform without any problem. For this reason, before shipping
+a feature, a manual pre-release testing is still required. Depending on the solution
+adopted, the pre-release testing can happen at different stages of the release
+cycle, still will be part of it in any case.
 
 ## Recommended Solution
 
@@ -73,7 +73,7 @@ the discretion of the engineer who will sign the release commit.
   - Pre-release testing is distributed during the release cycle instead of piled during Agent release week.
   - Agent release is easier to manage from the integrations standpoint.
   - Ownership of a release would be clear: the same person would review, test, merge and release.
-  
+
 - **Weaknesses**:
   - A fair amount of work might be needed to properly test releases since we might have many.
   - For each release of an integration, the `CHANGELOG.md` would most likely list only one item.
@@ -85,6 +85,6 @@ the discretion of the engineer who will sign the release commit.
   - Not sure who will be the release owner: the person who merged the first PR? The person who merged the last?
   - We should still do pre-release testing before merging, so review time would be the same as the proposed solution.
   - During the Agent release week, we might have few integrations in an unreleased state, a code freeze would likely be required.
-  
+
 - **Release with a fixed schedule**
   - Very hard if not impossible to implement since `integrations-core` already hosts more than 100 different packages.
