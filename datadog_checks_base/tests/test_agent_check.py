@@ -22,6 +22,67 @@ def test_instance():
     AgentCheck()
 
 
+class TestMetricNormalization:
+    def test_default(self):
+        check = AgentCheck()
+        metric_name = u'Klüft inför på fédéral'
+        normalized_metric_name = b'Kluft_infor_pa_federal'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+    def test_fix_case(self):
+        check = AgentCheck()
+        metric_name = u'Klüft inför på fédéral'
+        normalized_metric_name = b'kluft_infor_pa_federal'
+
+        assert check.normalize(metric_name, fix_case=True) == normalized_metric_name
+
+    def test_prefix(self):
+        check = AgentCheck()
+        metric_name = u'metric'
+        prefix = u'some'
+        normalized_metric_name = b'some.metric'
+
+        assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
+
+    def test_prefix_bytes(self):
+        check = AgentCheck()
+        metric_name = u'metric'
+        prefix = b'some'
+        normalized_metric_name = b'some.metric'
+
+        assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
+
+    def test_prefix_unicode_metric_bytes(self):
+        check = AgentCheck()
+        metric_name = b'metric'
+        prefix = u'some'
+        normalized_metric_name = b'some.metric'
+
+        assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
+
+    def test_underscores_redundant(self):
+        check = AgentCheck()
+        metric_name = u'a_few__redundant___underscores'
+        normalized_metric_name = b'a_few_redundant_underscores'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+    def test_underscores_at_ends(self):
+        check = AgentCheck()
+        metric_name = u'_some_underscores_'
+        normalized_metric_name = b'some_underscores'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+    def test_underscores_and_dots(self):
+        check = AgentCheck()
+        metric_name = u'some_.dots._and_._underscores'
+        normalized_metric_name = b'some.dots.and.underscores'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+
 class TestMetrics:
     def test_non_float_metric(self, aggregator):
         check = AgentCheck()
@@ -29,13 +90,6 @@ class TestMetrics:
         with pytest.raises(ValueError):
             check.gauge(metric_name, '85k')
         aggregator.assert_metric(metric_name, count=0)
-
-    def test_normalize(self):
-        check = AgentCheck()
-        metric_name = u'Klüft inför på fédéral'
-        normalized_metric_name = b'kluft_infor_pa_federal'
-
-        assert check.normalize(metric_name, fix_case=True) == normalized_metric_name
 
 
 class TestEvents:
