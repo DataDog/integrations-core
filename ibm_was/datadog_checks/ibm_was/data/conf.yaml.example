@@ -1,0 +1,7 @@
+init_config:
+
+instances:
+  ## @param 
+  ## The URL of the PerfServlet configured to report metrics
+  #
+  - servler_url: localhost
