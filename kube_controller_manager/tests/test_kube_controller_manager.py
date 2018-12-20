@@ -54,10 +54,17 @@ def test_check_metrics(aggregator, mock_metrics):
     aggregator.assert_metric(NAMESPACE + '.nodes.count', value=5, tags=["zone:test"])
     aggregator.assert_metric(NAMESPACE + '.nodes.unhealthy', value=1, tags=["zone:test"])
 
-
     aggregator.assert_metric(NAMESPACE + '.rate_limiter.use', value=1, tags=["controller:job"])
     aggregator.assert_metric(NAMESPACE + '.rate_limiter.use', value=0, tags=["controller:daemon"])
 
     aggregator.assert_metric(NAMESPACE + '.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=29, tags=["queue:replicaset"])
     aggregator.assert_metric(NAMESPACE + '.queue.depth', metric_type=aggregator.GAUGE, value=3, tags=["queue:service"])
     aggregator.assert_metric(NAMESPACE + '.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=13, tags=["queue:deployment"])
+
+    aggregator.assert_metric(NAMESPACE + '.queue.work_duration.sum', value=255667, tags=["queue:replicaset"])
+    aggregator.assert_metric(NAMESPACE + '.queue.work_duration.count', value=29, tags=["queue:replicaset"])
+    aggregator.assert_metric(NAMESPACE + '.queue.work_duration.quantile', value=110, tags=["queue:replicaset", "quantile:0.5"])
+
+    aggregator.assert_metric(NAMESPACE + '.queue.latency.sum', value=423889, tags=["queue:deployment"])
+    aggregator.assert_metric(NAMESPACE + '.queue.latency.count', value=29, tags=["queue:deployment"])
+    aggregator.assert_metric(NAMESPACE + '.queue.latency.quantile', value=1005, tags=["queue:deployment", "quantile:0.9"])

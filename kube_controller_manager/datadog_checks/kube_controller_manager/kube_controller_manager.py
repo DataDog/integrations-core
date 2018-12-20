@@ -62,9 +62,9 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
         self.QUEUE_METRICS_TRANSFORMERS = {
             '_adds': self.queue_adds,
             '_depth': self.queue_depth,
-            #'_queue_latency': self.queue_latency,
+            '_queue_latency': self.queue_latency,
             '_retries': self.queue_retries,
-            #'_work_duration': self.queue_work_duration,
+            '_work_duration': self.queue_work_duration,
         }
 
         super(KubeControllerManagerCheck, self).__init__(
@@ -107,40 +107,44 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
 
         self.process(scraper_config, metric_transformers=transformers)
 
-    def _tag_and_submit(self, metric, scraper_config, metric_suffix, tag_name, tag_value_trim):
-        metric_name = scraper_config['namespace'] + metric_suffix
-
+    def _tag_and_submit(self, metric, scraper_config, metric_name, tag_name, tag_value_trim):
         # Get tag value from original metric name or return trying
         if not metric.name.endswith(tag_value_trim):
             self.debug("Cannot process metric {} with expected suffix {}".format(metric.name, tag_value_trim))
             return
-        value = metric.name[:-len(tag_value_trim)]
-        tags = scraper_config['custom_tags'] + ["{}:{}".format(tag_name, value)]
+        tag_value = metric.name[:-len(tag_value_trim)]
 
         for sample in metric.samples:
-            if metric.type == "counter" and scraper_config['send_monotonic_counter']:
-                self.monotonic_count(metric_name, sample[self.SAMPLE_VALUE], tags=tags)
-            elif metric.type == "rate":
-                self.rate(metric_name, sample[self.SAMPLE_VALUE], tags=tags)
-            else:
-                self.gauge(metric_name, sample[self.SAMPLE_VALUE], tags=tags)
+            sample[self.SAMPLE_LABELS][tag_name] = tag_value
+
+        self._submit(metric_name, metric, scraper_config)
 
     def rate_limiter_use(self, metric, scraper_config):
         self._tag_and_submit(
-            metric, scraper_config, ".rate_limiter.use", "controller", "_controller_rate_limiter_use"
+            metric, scraper_config, "rate_limiter.use", "controller", "_controller_rate_limiter_use"
         )
 
     def queue_adds(self, metric, scraper_config):
         self._tag_and_submit(
-            metric, scraper_config, ".queue.adds", "queue", "_adds"
+            metric, scraper_config, "queue.adds", "queue", "_adds"
         )
 
     def queue_depth(self, metric, scraper_config):
         self._tag_and_submit(
-            metric, scraper_config, ".queue.depth", "queue", "_depth"
+            metric, scraper_config, "queue.depth", "queue", "_depth"
+        )
+
+    def queue_latency(self, metric, scraper_config):
+        self._tag_and_submit(
+            metric, scraper_config, "queue.latency", "queue", "_queue_latency"
         )
 
     def queue_retries(self, metric, scraper_config):
         self._tag_and_submit(
-            metric, scraper_config, ".queue.retries", "queue", "_retries"
+            metric, scraper_config, "queue.retries", "queue", "_retries"
+        )
+
+    def queue_work_duration(self, metric, scraper_config):
+        self._tag_and_submit(
+            metric, scraper_config, "queue.work_duration", "queue", "_work_duration"
         )
