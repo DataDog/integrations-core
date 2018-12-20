@@ -1,18 +1,19 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import bmemcached
 import pkg_resources
 
-from datadog_checks.errors import CheckException
-from datadog_checks.checks import AgentCheck
+import bmemcached
+from six import iteritems, itervalues
+
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 
-class BadResponseError(CheckException):
+class BadResponseError(ConfigurationError):
     pass
 
 
-class InvalidConfigError(CheckException):
+class InvalidConfigError(ConfigurationError):
     pass
 
 
@@ -113,19 +114,21 @@ class Memcache(AgentCheck):
 
     SERVICE_CHECK = 'memcache.can_connect'
 
-    def get_library_versions(self):
+    @classmethod
+    def get_library_versions(cls):
         return {
             "memcache": pkg_resources.get_distribution("python-binary-memcached").version
         }
 
-    def _process_response(self, response):
+    @classmethod
+    def _process_response(cls, response):
         """
         Examine the response and raise an error is something is off
         """
         if len(response) != 1:
             raise BadResponseError("Malformed response: {}".format(response))
 
-        stats = response.values()[0]
+        stats = list(itervalues(response))[0]
         if not len(stats):
             raise BadResponseError("Malformed response for host: {}".format(stats))
 
@@ -186,7 +189,7 @@ class Memcache(AgentCheck):
             raise
 
     def _get_optional_metrics(self, client, tags, options=None):
-        for arg, metrics_args in self.OPTIONAL_STATS.iteritems():
+        for arg, metrics_args in iteritems(self.OPTIONAL_STATS):
             if not options or options.get(arg, False):
                 try:
                     optional_rates = metrics_args[0]
@@ -196,7 +199,7 @@ class Memcache(AgentCheck):
                     stats = self._process_response(client.stats(arg))
                     prefix = "memcache.{}".format(arg)
 
-                    for metric, val in stats.iteritems():
+                    for metric, val in iteritems(stats):
                         # Check if metric is a gauge or rate
                         metric_tags = []
                         if optional_fn:
@@ -278,30 +281,29 @@ class Memcache(AgentCheck):
             connection_server = "{}:{}".format(server, port)
         custom_tags = instance.get('tags') or []
 
-        mc = None  # client
         tags = ["url:{0}:{1}".format(server, port)] + custom_tags
         service_check_tags = ["host:%s" % server, "port:%s" % port] + custom_tags
 
         try:
             self.log.debug("Connecting to %s, tags:%s", connection_server, tags)
-            mc = bmemcached.Client(connection_server, username, password)
+            client = bmemcached.Client(connection_server, username, password)
 
-            self._get_metrics(mc, tags, service_check_tags)
+            self._get_metrics(client, tags, service_check_tags)
             if options:
                 # setting specific handlers
                 self.OPTIONAL_STATS["items"][2] = Memcache.get_items_stats
                 self.OPTIONAL_STATS["slabs"][2] = Memcache.get_slabs_stats
-                self._get_optional_metrics(mc, tags, options)
+                self._get_optional_metrics(client, tags, options)
         except BadResponseError as e:
             self.service_check(
                 self.SERVICE_CHECK, AgentCheck.CRITICAL,
                 tags=service_check_tags,
                 message="Unable to fetch stats from server")
-            raise CheckException(
+            raise ConfigurationError(
                 "Unable to retrieve stats from memcache instance: {}:{}."
                 "Please check your configuration. ({})".format(server, port, e))
-
-        if mc is not None:
-            mc.disconnect_all()
+        else:
+            client.disconnect_all()
             self.log.debug("Disconnected from memcached")
-        del mc
+
+        del client

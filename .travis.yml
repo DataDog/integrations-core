@@ -167,7 +167,7 @@ jobs:
     - stage: test
       env: CHECK=marathon
     - stage: test
-      env: CHECK=mcache
+      env: CHECK=mcache PYTHON3=true
     - stage: test
       env: CHECK=mesos_slave
     - stage: test
