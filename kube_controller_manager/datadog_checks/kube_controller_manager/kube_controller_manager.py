@@ -115,7 +115,7 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
         for sample in metric.samples:
             sample[self.SAMPLE_LABELS][tag_name] = tag_value
 
-        self._submit(metric_name, metric, scraper_config)
+        self.submit_openmetric(metric_name, metric, scraper_config)
 
     def rate_limiter_use(self, metric, scraper_config):
         self._tag_and_submit(
