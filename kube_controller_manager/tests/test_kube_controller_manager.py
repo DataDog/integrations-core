@@ -39,10 +39,6 @@ def mock_metrics():
     mocked.stop()
 
 def test_check_metrics(aggregator, mock_metrics):
-    """
-    Testing Kube_proxy in iptables mode.
-    """
-
     c = KubeControllerManagerCheck(CHECK_NAME, None, {}, [instance])
     c.check(instance)
 

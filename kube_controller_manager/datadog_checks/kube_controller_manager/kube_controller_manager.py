@@ -97,10 +97,8 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
 
         # Populate the metric transformers dict
         transformers = {}
-
         for limiter in self.DEFAUT_RATE_LIMITERS:
             transformers[limiter + "_controller_rate_limiter_use"] = self.rate_limiter_use
-
         for queue in self.DEFAULT_QUEUES:
             for metric, func in iteritems(self.QUEUE_METRICS_TRANSFORMERS):
                     transformers[queue + metric] = func
