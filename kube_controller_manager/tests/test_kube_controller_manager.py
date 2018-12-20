@@ -50,6 +50,11 @@ def test_check_metrics(aggregator, mock_metrics):
     aggregator.assert_metric(NAMESPACE + '.threads')
     aggregator.assert_metric(NAMESPACE + '.open_fds')
 
+    aggregator.assert_metric(NAMESPACE + '.nodes.evictions', metric_type=aggregator.MONOTONIC_COUNT, value=33, tags=["zone:test"])
+    aggregator.assert_metric(NAMESPACE + '.nodes.count', value=5, tags=["zone:test"])
+    aggregator.assert_metric(NAMESPACE + '.nodes.unhealthy', value=1, tags=["zone:test"])
+
+
     aggregator.assert_metric(NAMESPACE + '.rate_limiter.use', value=1, tags=["controller:job"])
     aggregator.assert_metric(NAMESPACE + '.rate_limiter.use', value=0, tags=["controller:daemon"])
 

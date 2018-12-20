@@ -2,33 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""
-Missing
-
-# TYPE cronjob_controller_rate_limiter_use gauge
-cronjob",
-# HELP daemon_controller_rate_limiter_use A metric measuring the saturation of the rate limiter for daemon_controller
-# TYPE daemon_controller_rate_limiter_use gauge
-daemon",
-# HELP gc_controller_rate_limiter_use A metric measuring the saturation of the rate limiter for gc_controller
-# TYPE gc_controller_rate_limiter_use gauge
-gc",
-node_lifecycle",
-
-# HELP node_collector_evictions_number Number of Node evictions that happened since current instance of NodeController started.
-# TYPE node_collector_evictions_number counter
-node_collector_evictions_number{zone=""} 0
-# HELP node_collector_unhealthy_nodes_in_zone Gauge measuring number of not Ready Nodes per zones.
-# TYPE node_collector_unhealthy_nodes_in_zone gauge
-node_collector_unhealthy_nodes_in_zone{zone=""} 0
-# HELP node_collector_zone_health Gauge measuring percentage of healthy nodes per zone.
-# TYPE node_collector_zone_health gauge
-node_collector_zone_health{zone=""} 100
-# HELP node_collector_zone_size Gauge measuring number of registered Nodes per zones.
-# TYPE node_collector_zone_size gauge
-node_collector_zone_size{zone=""} 1
-"""
-
 from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -107,7 +80,10 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
                         {'go_goroutines': 'goroutines'},
                         {'go_threads': 'threads'},
                         {'process_open_fds': 'open_fds'},
-                        {'rest_client_requests_total': 'client.http.requests'}
+                        {'rest_client_requests_total': 'client.http.requests'},
+                        {'node_collector_evictions_number': 'nodes.evictions'},
+                        {'node_collector_unhealthy_nodes_in_zone': 'nodes.unhealthy'},
+                        {'node_collector_zone_size': 'nodes.count'},
                     ],
                     'send_monotonic_counter': True,
                 }

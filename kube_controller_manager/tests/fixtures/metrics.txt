@@ -479,16 +479,16 @@ namespace_work_duration_sum 0
 namespace_work_duration_count 0
 # HELP node_collector_evictions_number Number of Node evictions that happened since current instance of NodeController started.
 # TYPE node_collector_evictions_number counter
-node_collector_evictions_number{zone=""} 0
+node_collector_evictions_number{zone="test"} 33
 # HELP node_collector_unhealthy_nodes_in_zone Gauge measuring number of not Ready Nodes per zones.
 # TYPE node_collector_unhealthy_nodes_in_zone gauge
-node_collector_unhealthy_nodes_in_zone{zone=""} 0
+node_collector_unhealthy_nodes_in_zone{zone="test"} 1
 # HELP node_collector_zone_health Gauge measuring percentage of healthy nodes per zone.
 # TYPE node_collector_zone_health gauge
-node_collector_zone_health{zone=""} 100
+node_collector_zone_health{zone="test"} 80
 # HELP node_collector_zone_size Gauge measuring number of registered Nodes per zones.
 # TYPE node_collector_zone_size gauge
-node_collector_zone_size{zone=""} 1
+node_collector_zone_size{zone="test"} 5
 # HELP node_lifecycle_controller_rate_limiter_use A metric measuring the saturation of the rate limiter for node_lifecycle_controller
 # TYPE node_lifecycle_controller_rate_limiter_use gauge
 node_lifecycle_controller_rate_limiter_use 0
