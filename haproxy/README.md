@@ -113,6 +113,7 @@ Need help? Contact [Datadog support][14].
 * [Monitoring HAProxy performance metrics][15]
 * [How to collect HAProxy metrics][16]
 * [Monitor HAProxy with Datadog][17]
+* [HA Proxy Multi Process Configuration][19]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -128,3 +129,4 @@ Need help? Contact [Datadog support][14].
 [16]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/
 [17]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/
 [18]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[19]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
