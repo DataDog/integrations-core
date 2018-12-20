@@ -135,6 +135,9 @@ elasticsearch.search.fetch.total,gauge,,fetch,,The total number of search fetche
 elasticsearch.search.query.current,gauge,,query,,The number of currently active queries.,0,elasticsearch,current queries
 elasticsearch.search.query.time,gauge,,second,,The total time spent on queries.,0,elasticsearch,total query time
 elasticsearch.search.query.total,gauge,,query,,The total number of queries.,0,elasticsearch,total queries
+elasticsearch.search.scroll.current,gauge,,query,,The number of currently active scroll queries.,0,elasticsearch,current scroll queries
+elasticsearch.search.scroll.time,gauge,,second,,The total time spent on scroll queries.,0,elasticsearch,total scroll query time
+elasticsearch.search.scroll.total,gauge,,query,,The total number of scroll queries.,0,elasticsearch,total scroll queries
 elasticsearch.store.size,gauge,,byte,,The total size in bytes of the store.,0,elasticsearch,store size
 elasticsearch.thread_pool.bulk.active,gauge,,thread,,The number of active threads in the bulk pool.,0,elasticsearch,active bulk threads
 elasticsearch.thread_pool.bulk.queue,gauge,,thread,,The number of queued threads in the bulk pool.,0,elasticsearch,queued bulk threads
