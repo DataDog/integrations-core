@@ -26,7 +26,7 @@ from ..git import (
 from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
-    update_version_module
+    update_version_module, get_folder_name, get_package_name, DATADOG_PACKAGE_PREFIX
 )
 from ..trello import TrelloClient
 from ..utils import (
@@ -926,23 +926,35 @@ def agent_changelog(since, to, output, force):
     # store the changes in a mapping {agent_version --> {check_name --> current_version}}
     changes_per_agent = OrderedDict()
 
+    # to keep indexing easy, we run the loop off-by-one
     for i in range(1, len(agent_tags)):
         req_file_name = os.path.basename(get_agent_release_requirements())
-        contents_from = git_show_file(req_file_name, agent_tags[i - 1])
-        catalog_from = parse_agent_req_file(contents_from)
+        current_tag = agent_tags[i - 1]
+        # Requirements for current tag
+        file_contents = git_show_file(req_file_name, current_tag)
+        catalog_now = parse_agent_req_file(file_contents)
+        # Requirements for previous tag
+        file_contents = git_show_file(req_file_name, agent_tags[i])
+        catalog_prev = parse_agent_req_file(file_contents)
 
-        contents_to = git_show_file(req_file_name, agent_tags[i])
-        catalog_to = parse_agent_req_file(contents_to)
+        changes_per_agent[current_tag] = OrderedDict()
 
-        version_changes = OrderedDict()
-        changes_per_agent[agent_tags[i - 1]] = version_changes
+        for name, ver in iteritems(catalog_now):
+            # at some point in the git history, the requirements file erroneusly
+            # contained the folder name instead of the package name for each check,
+            # let's be resilient
+            old_ver = catalog_prev.get(name) \
+                or catalog_prev.get(get_folder_name(name)) \
+                or catalog_prev.get(get_package_name(name))
 
-        for name, ver in iteritems(catalog_to):
-            old_ver = catalog_from.get(name, "")
+            # normalize the package name to the check_name
+            if name.startswith(DATADOG_PACKAGE_PREFIX):
+                name = get_folder_name(name)
+
             if old_ver and old_ver != ver:
                 # determine whether major version changed
                 breaking = old_ver.split('.')[0] < ver.split('.')[0]
-                version_changes[name] = (ver, breaking)
+                changes_per_agent[current_tag][name] = (ver, breaking)
 
     # store the changelog in memory
     changelog_contents = StringIO()
@@ -968,7 +980,7 @@ def agent_changelog(since, to, output, force):
                 else:
                     display_name = name
 
-                breaking_notice = " **BREAKING CHANGE** " if ver[1] else ""
+                breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)
                 changelog_contents.write(
                     '* {} [{}]({}){}\n'.format(display_name, ver[0], changelog_url, breaking_notice)
