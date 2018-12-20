@@ -205,7 +205,7 @@ jobs:
     - stage: test
       env: CHECK=postfix
     - stage: test
-      env: CHECK=powerdns_recursor
+      env: CHECK=powerdns_recursor PYTHON3=true
     - stage: test
       env: CHECK=process
     - stage: test
