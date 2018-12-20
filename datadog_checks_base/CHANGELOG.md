@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 4.7.0-rc.1 / 2018-12-20
+
+* [Changed] Bump kafka-python and kazoo. See [#2766](https://github.com/DataDog/integrations-core/pull/2766).
+* [Added] Support Python 3. See [#2738](https://github.com/DataDog/integrations-core/pull/2738).
+
 ## 4.6.0 / 2018-12-07
 
 * [Added] Fix unicode handling of log messages. See [#2698](https://github.com/DataDog/integrations-core/pull/2698).
