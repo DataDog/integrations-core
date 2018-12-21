@@ -8,15 +8,15 @@
 
 At the start, there was only one dependency file: `requirements.txt`. It was used exclusively for our Ruby/rake tests. The contents appear to have come directly from the `dd-agent` and omnibus repos during the:
 
-Migration of checks to their own repo (integrations-core), e.g. https://github.com/DataDog/integrations-core/pull/50
-Porting of checks to wheels https://github.com/DataDog/integrations-core/pull/829
+- Migration of checks to their own repo (integrations-core), e.g. https://github.com/DataDog/integrations-core/pull/50
+- Porting of checks to wheels https://github.com/DataDog/integrations-core/pull/829
 
 ## Port to wheels
 
 During the effort to make every check its own Python package, it was also decided that, to further the separation of the agents and their integrations, the builders should install each check as a wheel, thus setting up the scaffolding to move to using every check’s defined dependency file rather than a single large file of dependencies. See:
 
-https://github.com/DataDog/dd-agent-omnibus/pull/213
-https://github.com/DataDog/datadog-agent/pull/1048
+- https://github.com/DataDog/dd-agent-omnibus/pull/213
+- https://github.com/DataDog/datadog-agent/pull/1048
 
 ## New testing framework
 
@@ -30,21 +30,21 @@ The work to unpack each wheel to verify dependency hashes had not been done yet 
 
 During testing of our new wheel pipeline it was discovered that, since wheels were built with `requirements.in` as `install_requires`, installation had the potential to break other checks’ compatibility. We therefore removed dependencies from `setup.py` and used `requirements.in` in the builders. See:
 
-https://github.com/DataDog/integrations-core/pull/1796
-https://github.com/DataDog/datadog-agent/pull/1896
+- https://github.com/DataDog/integrations-core/pull/1796
+- https://github.com/DataDog/datadog-agent/pull/1896
 
 ### Dependency conflicts
 
 We began running into issues where the builders would fail because, since pip has no resolver, transient dependencies from one package would be incompatible with others. To remedy this we began catching conflicts in our CI, syncing every dependency to one static file (agent_requirements.in), and resolving the static file locally and committing the resulting file (agent_requirements.txt). See:
 
-https://github.com/DataDog/integrations-core/pull/1760
+- https://github.com/DataDog/integrations-core/pull/1760
 
 ### Cross-platform support
 
 We discovered shortly before an agent release that this strategy did not work because some dependencies that are platform-specific would either be missing or fail to install depending on which machine the committer happened to be on when resolving. To fix this we introduced environment markers and began resolving `agent_requirements.in` on the builders. See:
 
-https://github.com/DataDog/integrations-core/pull/1921
-https://github.com/DataDog/dd-agent-omnibus/pull/268
+- https://github.com/DataDog/integrations-core/pull/1921
+- https://github.com/DataDog/dd-agent-omnibus/pull/268
 
 ## Why they are being removed
 
