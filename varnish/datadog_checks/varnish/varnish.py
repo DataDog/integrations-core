@@ -1,19 +1,22 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 from collections import defaultdict
 from distutils.version import LooseVersion
 from os import geteuid
 import json
 import re
 import shlex
+from six import iteritems, PY3
+from six.moves import filter
 import xml.parsers.expat  # python 2.4 compatible
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base import ensure_unicode
+
+if PY3:
+    long = int
 
 
 class BackendStatus(object):
@@ -55,7 +58,7 @@ class Varnish(AgentCheck):
 
     def _end_element(self, name, tags):
         if name == "stat":
-            m_name = self.normalize(self._current_metric)
+            m_name = ensure_unicode(self.normalize(self._current_metric))
             if self._current_type in ("a", "c"):
                 self.rate(m_name, long(self._current_value), tags=tags)
             elif self._current_type in ("i", "g"):
@@ -217,7 +220,7 @@ class Varnish(AgentCheck):
             p.Parse(output, True)
         elif varnishstat_format == "json":
             json_output = json.loads(output)
-            for name, metric in json_output.iteritems():
+            for name, metric in iteritems(json_output):
                 if not isinstance(metric, dict):  # skip 'timestamp' field
                     continue
 
@@ -229,7 +232,7 @@ class Varnish(AgentCheck):
                     self.rate(self.normalize(name, prefix="varnish"), long(value), tags=tags)
                 elif metric["flag"] in ("g", "i"):
                     self.gauge(self.normalize(name, prefix="varnish"), long(value), tags=tags)
-                    if 'n_purges' in self.normalize(name, prefix="varnish"):
+                    if 'n_purges' in ensure_unicode(self.normalize(name, prefix="varnish")):
                         self.rate('varnish.n_purgesps', long(value), tags=tags)
         elif varnishstat_format == "text":
             for line in output.split("\n"):
@@ -293,8 +296,8 @@ class Varnish(AgentCheck):
             backend, status, message = None, None, None
             # split string and remove all empty fields
             tokens = filter(None, line.strip().split(' '))
-
-            if len(tokens) > 0:
+            tokens = [t for t in tokens]
+            if len(tokens):
                 if tokens == ['Backend', 'name', 'Admin', 'Probe']:
                     # skip the column headers that exist in new output format
                     continue
@@ -325,7 +328,7 @@ class Varnish(AgentCheck):
                 if backend is not None:
                     backends_by_status[status].append((backend, message))
 
-        for status, backends in backends_by_status.iteritems():
+        for status, backends in iteritems(backends_by_status):
             check_status = BackendStatus.to_check_status(status)
             for backend, message in backends:
                 service_checks_tags = ['backend:%s' % backend] + tags
