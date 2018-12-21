@@ -9,6 +9,7 @@ from tempfile import mkdtemp
 import six
 
 from ._env import e2e_active, get_env_vars, remove_env_vars, set_env_vars, tear_down_env
+from .warn import warning
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -70,6 +71,13 @@ class TempDir(object):
         self.key = key
         self.directory = os.path.realpath(directory or mkdtemp())
 
+    @classmethod
+    def _cleanup(cls, directory):
+        try:
+            rmtree(directory)
+        except Exception as e:
+            warning('Error removing temporary directory `{}`: {}'.format(directory, e))
+
     def __enter__(self):
         return self.directory
 
@@ -78,6 +86,6 @@ class TempDir(object):
             if tear_down_env():
                 TempDir.all_names.discard(self.name)
                 remove_env_vars([self.key])
-                rmtree(self.directory)
+                self._cleanup(self.directory)
         else:
-            rmtree(self.directory)
+            self._cleanup(self.directory)
