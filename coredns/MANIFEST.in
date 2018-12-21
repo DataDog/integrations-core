@@ -4,7 +4,6 @@ graft tests
 include MANIFEST.in
 include README.md
 include requirements.in
-include requirements.txt
 include requirements-dev.txt
 include manifest.json
 
