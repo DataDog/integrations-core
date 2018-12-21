@@ -55,7 +55,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,
-                message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(endpoint, e.message),
+                message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(endpoint, e),
                 tags=custom_tags,
             )
 
@@ -167,7 +167,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
             self.service_check(
                 service_check_name,
                 OpenMetricsBaseCheck.CRITICAL,
-                message="Error hitting {}. Error: {}".format(check_url, e.message),
+                message="Error hitting {}. Error: {}".format(check_url, e),
                 tags=service_check_tags,
             )
             raise
