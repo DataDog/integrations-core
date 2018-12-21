@@ -123,7 +123,6 @@ class Varnish(AgentCheck):
             tags = custom_tags + [u'varnish_name:default']
 
         output, _, _ = get_subprocess_output(cmd, self.log)
-        output = output
 
         self._parse_varnishstat(output, varnishstat_format, tags)
 
@@ -171,7 +170,6 @@ class Varnish(AgentCheck):
     def _get_version_info(self, varnishstat_path):
         # Get the varnish version from varnishstat
         output, error, _ = get_subprocess_output(varnishstat_path + ["-V"], self.log, raise_on_empty_output=False)
-        output = output
 
         # Assumptions regarding varnish's version
         varnishstat_format = "json"
