@@ -236,6 +236,9 @@ class WinPDHCounter(object):
             path = self._make_counter_path(self._machine_name, self._counter_name, self._instance_name, counters)
             if not path:
                 self.logger.warning("Empty path returned")
+            elif win32pdh.ValidatePath(path) != 0:
+                # Multi-instance counter with no instances presently
+                pass
             else:
                 try:
                     if SINGLE_INSTANCE_KEY not in self.counterdict:
