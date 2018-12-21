@@ -163,7 +163,7 @@ def parse_agent_req_file(contents):
     Returns a dictionary mapping {check-package-name --> pinned_version} from the
     given file contents. We can assume lines are in the form:
 
-        active-directory==1.1.1; sys_platform == 'win32'
+        datadog-active-directory==1.1.1; sys_platform == 'win32'
 
     """
     catalog = OrderedDict()
