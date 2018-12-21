@@ -245,7 +245,7 @@ jobs:
     - stage: test
       env: CHECK=twemproxy
     - stage: test
-      env: CHECK=varnish
+      env: CHECK=varnish PYTHON3=true
     - stage: test
       env: CHECK=vault PYTHON3=true
     - stage: test
