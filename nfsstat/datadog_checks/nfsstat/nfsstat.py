@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
+from datadog_checks.base import ensure_unicode
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.subprocess_output import get_subprocess_output
 
@@ -109,9 +111,9 @@ class Device(object):
 
     def _parse_tags(self):
         self.tags = []
-        self.tags.append('nfs_server:{0}'.format(self.nfs_server))
-        self.tags.append('nfs_export:{0}'.format(self.nfs_export))
-        self.tags.append('nfs_mount:{0}'.format(self.mount))
+        self.tags.append('nfs_server:{0}'.format(ensure_unicode(self.nfs_server)))
+        self.tags.append('nfs_export:{0}'.format(ensure_unicode(self.nfs_export)))
+        self.tags.append('nfs_mount:{0}'.format(ensure_unicode(self.mount)))
 
     def send_metrics(self, gauge, tags):
         metric_prefix = 'system.nfs.'
