@@ -6,7 +6,7 @@ import mock
 import os
 from distutils.version import LooseVersion
 
-import common
+from . import common
 from datadog_checks.varnish import Varnish
 
 
