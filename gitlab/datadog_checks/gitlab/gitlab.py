@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
-import urlparse
 from copy import deepcopy
 
 # 3rd party
+from six.moves.urllib.parse import urlparse
 import requests
 
 from datadog_checks.errors import CheckException
@@ -55,7 +55,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,
-                message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(endpoint, e.message),
+                message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(endpoint, e),
                 tags=custom_tags,
             )
 
@@ -95,7 +95,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         return ssl_ca_certs if ssl_cert_validation else False
 
     def _service_check_tags(self, url):
-        parsed_url = urlparse.urlparse(url)
+        parsed_url = urlparse(url)
         gitlab_host = parsed_url.hostname
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)]
@@ -167,7 +167,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
             self.service_check(
                 service_check_name,
                 OpenMetricsBaseCheck.CRITICAL,
-                message="Error hitting {}. Error: {}".format(check_url, e.message),
+                message="Error hitting {}. Error: {}".format(check_url, e),
                 tags=service_check_tags,
             )
             raise

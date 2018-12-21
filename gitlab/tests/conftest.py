@@ -56,7 +56,7 @@ def gitlab_service(request):
         raise Exception("prometheus endpoint timed out!")
 
     # run pre-test commands
-    for i in xrange(100):
+    for i in range(100):
         requests.get(GITLAB_URL)
     sleep(2)
 
@@ -68,7 +68,7 @@ def wait_for(URL, timeout):
     Wait for specified URL
     """
 
-    for i in xrange(timeout):
+    for i in range(timeout):
         try:
             r = requests.get(URL)
             r.raise_for_status()
