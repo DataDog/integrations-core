@@ -6,11 +6,10 @@ import os
 import click
 
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
-from ..utils import running_on_ci
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, remove_path
+from ...utils import chdir, file_exists, remove_path, running_on_ci
 
 
 def display_envs(check_envs):

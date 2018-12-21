@@ -23,6 +23,15 @@ ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
+CI_IDENTIFIERS = (
+    'APPVEYOR_',
+    'TRAVIS_',
+)
+
+
+def running_on_ci():
+    return any(ev.startswith(CI_IDENTIFIERS) for ev in os.environ)
+
 
 if PY3:
     def write_file(file, contents, encoding='utf-8'):
