@@ -1,38 +1,18 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 
 import ldap3
 import pytest
 
-from datadog_checks.dev.docker import get_docker_hostname
 from datadog_checks.utils.platform import Platform
 
 pytestmark = pytest.mark.integration
 
 
-@pytest.fixture
-def instance():
-    return {
-        "url": "ldap://{}:3890".format(get_docker_hostname()),
-        "username": "cn=monitor,dc=example,dc=org",
-        "password": "monitor",
-        "custom_queries": [{
-            "name": "stats",
-            "search_base": "cn=statistics,cn=monitor",
-            "search_filter": "(!(cn=Statistics))",
-        }],
-        "tags": ["test:integration"]
-    }
-
-
-@pytest.fixture
-def instance_ssl(instance):
-    instance["url"] = "ldaps://{}:6360".format(get_docker_hostname())
-    return instance
-
-
-def test_check(aggregator, check, openldap_server, instance):
+@pytest.mark.usefixtures('dd_environment')
+def test_check(aggregator, check, instance):
     tags = ["url:{}".format(instance["url"]), "test:integration"]
     check.check(instance)
     aggregator.assert_service_check("openldap.can_connect", check.OK, tags=tags)
@@ -81,7 +61,8 @@ def test_check(aggregator, check, openldap_server, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_ssl(aggregator, check, openldap_server, instance_ssl):
+@pytest.mark.usefixtures('dd_environment')
+def test_check_ssl(aggregator, check, instance_ssl):
     tags = ["url:{}".format(instance_ssl["url"]), "test:integration"]
     # Should fail certificate verification
     with pytest.raises(ldap3.core.exceptions.LDAPExceptionError):
@@ -93,7 +74,8 @@ def test_check_ssl(aggregator, check, openldap_server, instance_ssl):
     aggregator.assert_service_check("openldap.can_connect", check.OK, tags=tags)
 
 
-def test_check_connection_failure(aggregator, check, openldap_server, instance):
+@pytest.mark.usefixtures('dd_environment')
+def test_check_connection_failure(aggregator, check, instance):
     instance["url"] = "bad_url"
     tags = ["url:{}".format(instance["url"]), "test:integration"]
     # Should fail certificate verification
@@ -103,8 +85,10 @@ def test_check_connection_failure(aggregator, check, openldap_server, instance):
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
-def test_check_socket(aggregator, check, openldap_server, instance):
-    instance["url"] = "ldapi://{}".format(openldap_server)
+@pytest.mark.usefixtures('dd_environment')
+def test_check_socket(aggregator, check, instance):
+    host_socket_path = os.path.join(os.environ['HOST_SOCKET_DIR'], 'ldapi')
+    instance["url"] = "ldapi://{}".format(host_socket_path)
     tags = ["url:{}".format(instance["url"]), "test:integration"]
     check.check(instance)
     aggregator.assert_service_check("openldap.can_connect", check.OK, tags=tags)
