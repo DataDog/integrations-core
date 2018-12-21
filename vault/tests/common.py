@@ -11,6 +11,11 @@ INSTANCES = {
         'tags': ['instance:foobar'],
         'detect_leader': True,
     },
+    'unsupported_api': {
+        'api_url': 'http://{}:{}/v0'.format(HOST, PORT),
+        'tags': ['instance:foobar'],
+        'detect_leader': True,
+    },
     'bad_url': {
         'api_url': 'http://1.2.3.4:555/v1',
         'tags': ['instance:foobar'],
