@@ -87,7 +87,7 @@ def spin_up_twemproxy(request):
 
 
 def wait_for_cluster():
-    for _ in xrange(0, 10):
+    for _ in range(0, 10):
         res = None
         try:
             socket.getaddrinfo(HOST, PORT, 0, 0, socket.IPPROTO_TCP)

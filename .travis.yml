@@ -243,7 +243,7 @@ jobs:
     - stage: test
       env: CHECK=tokumx
     - stage: test
-      env: CHECK=twemproxy
+      env: CHECK=twemproxy PYTHON3=true
     - stage: test
       env: CHECK=varnish PYTHON3=true
     - stage: test
