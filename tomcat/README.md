@@ -343,8 +343,10 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 `sudo /etc/init.d/datadog-agent jmx collect`
 
 ## Further Reading
+Additional helpful documentation, links, and articles:
 
 * [Monitor Tomcat metrics with Datadog][22]
+* [Key metrics for monitoring Tomcat][25]
 
 
 [13]: https://app.datadoghq.com/account/settings#agent
@@ -359,3 +361,4 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 [22]: https://www.datadoghq.com/blog/monitor-tomcat-metrics/
 [23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
 [24]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[25]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance/
