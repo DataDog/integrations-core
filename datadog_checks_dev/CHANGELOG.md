@@ -10,7 +10,7 @@
 * [Added] Validate checks dependencies against the embedded environment. See [#2746](https://github.com/DataDog/integrations-core/pull/2746).
 * [Added] Add constant to check if platform is Linux. See [#2782](https://github.com/DataDog/integrations-core/pull/2782).
 * [Fixed] Do not consider empty string as a version change. See [#2771](https://github.com/DataDog/integrations-core/pull/2771).
-* [Changed] Rename `ddev release freeze` to `ddev release agent_req_file`, refacor commands code. See [#2765](https://github.com/DataDog/integrations-core/pull/2765).
+* [Changed] Rename `ddev release freeze` to `ddev release agent_req_file`, refactor commands code. See [#2765](https://github.com/DataDog/integrations-core/pull/2765).
 * [Added] Add validation for configuration files. See [#2759](https://github.com/DataDog/integrations-core/pull/2759).
 * [Added] Add ability to pass state to e2e tear down. See [#2724](https://github.com/DataDog/integrations-core/pull/2724).
 * [Added] Add ability to use dev version of base package for e2e. See [#2689](https://github.com/DataDog/integrations-core/pull/2689).
