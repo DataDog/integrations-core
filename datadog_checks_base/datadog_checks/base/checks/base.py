@@ -322,7 +322,7 @@ class AgentCheck(object):
 
         if device_name:
             self._log_deprecation("device_name")
-            normalized_tags.append("device:%s" % device_name)
+            normalized_tags.append("device:{}".format(device_name))
 
         return normalized_tags
 
