@@ -86,20 +86,22 @@ init_config:
             metric_type: counter
     - include:
         type: Cache
-        accessCount:
-          alias: tomcat.cache.access_count
-          metric_type: counter
-        hitsCounts:
-          alias: tomcat.cache.hits_count
-          metric_type: counter
+        attribute:
+          accessCount:
+            alias: tomcat.cache.access_count
+            metric_type: counter
+          hitsCounts:
+            alias: tomcat.cache.hits_count
+            metric_type: counter
     - include:
         type: JspMonitor
-        jspCount:
-          alias: tomcat.jsp.count
-          metric_type: counter
-        jspReloadCount:
-          alias: tomcat.jsp.reload_count
-          metric_type: counter
+        attribute:
+          jspCount:
+            alias: tomcat.jsp.count
+            metric_type: counter
+          jspReloadCount:
+            alias: tomcat.jsp.reload_count
+            metric_type: counter
 ```
 
 See the [JMX Check documentation][15] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
