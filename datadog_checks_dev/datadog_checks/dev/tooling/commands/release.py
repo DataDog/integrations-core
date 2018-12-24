@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import time
-import json
 from collections import OrderedDict, namedtuple
 from datetime import datetime
 
@@ -16,28 +15,30 @@ from .console import (
     echo_warning
 )
 from ..constants import (
-    AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP,
+    BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP,
     get_root, get_agent_release_requirements
 )
 from ..git import (
-    get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
-    git_show_file, git_tag_list
+    get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit
 )
-from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone
+from ..github import (
+    from_contributor, get_changelog_types, get_pr, get_pr_from_hash, get_pr_labels,
+    get_pr_milestone
+)
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
-    update_version_module, get_folder_name, get_package_name, DATADOG_PACKAGE_PREFIX
+    update_version_module
 )
 from ..trello import TrelloClient
 from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
-    get_version_string, format_commit_id, parse_pr_number, parse_agent_req_file
+    get_version_string, format_commit_id, parse_pr_number
 )
 from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
     basepath, chdir, ensure_unicode, get_next, remove_path, stream_file_lines,
-    write_file, write_file_lines, read_file
+    write_file
 )
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
@@ -854,147 +855,3 @@ def upload(ctx, check, dry_run):
                 abort(code=result.code)
 
     echo_success('Success!')
-
-
-@release.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help="Generate the list of integrations to ship with the Agent and save it to '{}'".format(
-        get_agent_release_requirements()
-    )
-)
-@click.pass_context
-def agent_req_file(ctx):
-    """Write the `requirements-agent-release.txt` file at the root of the repo
-    listing all the Agent-based integrations pinned at the version they currently
-    have in HEAD.
-    """
-    echo_info('Freezing check releases')
-    checks = get_valid_checks()
-    checks.remove('datadog_checks_dev')
-
-    entries = []
-    for check in checks:
-        if check in AGENT_V5_ONLY:
-            echo_info('Check `{}` is only shipped with Agent 5, skipping'.format(check))
-            continue
-
-        try:
-            version = get_version_string(check)
-            entries.append('{}\n'.format(get_agent_requirement_line(check, version)))
-        except Exception as e:
-            echo_failure('Error generating line: {}'.format(e))
-            continue
-
-    lines = sorted(entries)
-
-    req_file = get_agent_release_requirements()
-    write_file_lines(req_file, lines)
-    echo_success('Successfully wrote to `{}`!'.format(req_file))
-
-
-@release.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help="Provide a list of the updated checks on a given agent version, in changelog form"
-)
-@click.option('--since', help="Initial Agent version", default='6.3.0')
-@click.option('--to', help="Final Agent version")
-@click.option('--output', '-o', help="Path to the changelog file, if omitted contents will be printed to stdout")
-@click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
-def agent_changelog(since, to, output, force):
-    """
-    Generates a markdown file containing the list of checks that changed for a
-    given Agent release. Agent version numbers are derived inspecting tags on
-    `integrations-core` so running this tool might provide unexpected results
-    if the repo is not up to date with the Agent release process.
-
-    If neither `--since` or `--to` are passed (the most common use case), the
-    tool will generate the whole changelog since Agent version 6.3.0
-    (before that point we don't have enough information to build the log).
-    """
-    agent_tags = git_tag_list(r'^\d+\.\d+\.\d+$')
-
-    # default value for --to is the latest tag
-    if not to:
-        to = agent_tags[-1]
-
-    # filter out versions according to the interval [since, to]
-    agent_tags = [t for t in agent_tags if since <= t <= to]
-
-    # reverse so we have descendant order
-    agent_tags = agent_tags[::-1]
-
-    # store the changes in a mapping {agent_version --> {check_name --> current_version}}
-    changes_per_agent = OrderedDict()
-
-    # to keep indexing easy, we run the loop off-by-one
-    for i in range(1, len(agent_tags)):
-        req_file_name = os.path.basename(get_agent_release_requirements())
-        current_tag = agent_tags[i - 1]
-        # Requirements for current tag
-        file_contents = git_show_file(req_file_name, current_tag)
-        catalog_now = parse_agent_req_file(file_contents)
-        # Requirements for previous tag
-        file_contents = git_show_file(req_file_name, agent_tags[i])
-        catalog_prev = parse_agent_req_file(file_contents)
-
-        changes_per_agent[current_tag] = OrderedDict()
-
-        for name, ver in iteritems(catalog_now):
-            # at some point in the git history, the requirements file erroneusly
-            # contained the folder name instead of the package name for each check,
-            # let's be resilient
-            old_ver = catalog_prev.get(name) \
-                or catalog_prev.get(get_folder_name(name)) \
-                or catalog_prev.get(get_package_name(name))
-
-            # normalize the package name to the check_name
-            if name.startswith(DATADOG_PACKAGE_PREFIX):
-                name = get_folder_name(name)
-
-            if old_ver and old_ver != ver:
-                # determine whether major version changed
-                breaking = old_ver.split('.')[0] < ver.split('.')[0]
-                changes_per_agent[current_tag][name] = (ver, breaking)
-
-    # store the changelog in memory
-    changelog_contents = StringIO()
-
-    # prepare the links
-    agent_changelog_url = 'https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#{}'
-    check_changelog_url = 'https://github.com/DataDog/integrations-core/blob/master/{}/CHANGELOG.md'
-
-    # go through all the agent releases
-    for agent, version_changes in iteritems(changes_per_agent):
-        url = agent_changelog_url.format(agent.replace('.', ''))  # Github removes dots from the anchor
-        changelog_contents.write('## Datadog Agent version [{}]({})\n\n'.format(agent, url))
-
-        if not version_changes:
-            changelog_contents.write('* There were no integration updates for this version of the Agent.\n\n')
-        else:
-            for name, ver in iteritems(version_changes):
-                # get the "display name" for the check
-                manifest_file = os.path.join(get_root(), name, 'manifest.json')
-                if os.path.exists(manifest_file):
-                    decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
-                    display_name = decoded.get('display_name')
-                else:
-                    display_name = name
-
-                breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
-                changelog_url = check_changelog_url.format(name)
-                changelog_contents.write(
-                    '* {} [{}]({}){}\n'.format(display_name, ver[0], changelog_url, breaking_notice)
-                )
-            # add an extra line to separate the release block
-            changelog_contents.write('\n')
-
-    # save the changelog on disk if --output was passed
-    if output:
-        # don't overwrite an existing file
-        if os.path.exists(output) and not force:
-            msg = "Output file {} already exists, run the command again with --force to overwrite"
-            abort(msg.format(output))
-
-        write_file(output, changelog_contents.getvalue())
-    else:
-        echo_info(changelog_contents.getvalue())
