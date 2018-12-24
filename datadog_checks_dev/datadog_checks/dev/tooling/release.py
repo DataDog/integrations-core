@@ -5,6 +5,8 @@ import re
 
 from .utils import get_version_file, load_manifest
 from ..utils import read_file, read_file_lines, write_file, write_file_lines
+from ..errors import ManifestError
+
 
 # Maps the Python platform strings to the ones we have in the manifest
 PLATFORMS_TO_PY = {
@@ -88,7 +90,7 @@ def get_agent_requirement_line(check, version):
         elif 'linux' not in platforms:
             return "{}=={}; sys_platform != 'linux2'".format(package_name, version)
 
-    raise Exception("Can't parse the `supported_os` list for the check {}: {}".format(check, platforms))
+    raise ManifestError("Can't parse the `supported_os` list for the check {}: {}".format(check, platforms))
 
 
 def update_agent_requirements(req_file, check, newline):
