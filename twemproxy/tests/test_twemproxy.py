@@ -64,7 +64,7 @@ def setup_request():
 
 
 def test_check(check, dd_environment, setup_request, aggregator):
-    check.check(common.instance)
+    check.check(common.INSTANCE)
 
     for stat in GLOBAL_STATS:
         aggregator.assert_metric("twemproxy.{}".format(stat), at_least=0)
