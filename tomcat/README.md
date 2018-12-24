@@ -4,7 +4,7 @@
 
 ## Overview
 
-This check collects Tomcat metrics like:
+This check collects Tomcat metrics, for example:
 
 * Overall activity metrics: error count, request count, processing times
 * Thread pool metrics: thread count, number of threads busy
@@ -113,9 +113,9 @@ Configuration Options:
 | Option                                        | Required | Description                                                                                                                                                                |
 |-----------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `user` and `password`                         | No       | Username and password                                                                                                                                                      |
-| `process_name_regex`                          | No       | Instead of specifying a host and port or `jmx_url`, the agent can connect using the attach api. This requires the JDK to be installed and the path to tools.jar to be set. |
+| `process_name_regex`                          | No       | Instead of specifying a host and port or `jmx_url`, the Agent can connect using the attach api. This requires the JDK to be installed and the path to tools.jar to be set. |
 | `tools_jar_path`                              | No       | Should be set when `process_name_regex` is set.                                                                                                                            |
-| `java_bin_path`                               | No       | Should be set if the agent cannot find your java executable.                                                                                                               |
+| `java_bin_path`                               | No       | Should be set if the Agent cannot find your java executable.                                                                                                               |
 | `java_options`                                | No       | Java JVM options                                                                                                                                                           |
 | `trust_store_path` and `trust_store_password` | No       | Should be set if `com.sun.management.jmxremote.ssl` is set to true on the target JVM.                                                                                      |
 | `key_store_path` and `key_store_password`     | No       | Should be set if `com.sun.management.jmxremote.ssl.need.client.auth` is set to true on the target JVM.                                                                     |
@@ -312,7 +312,7 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
 
 ### Validation
 
-[Run the Agent's `status` subcommand][20] and look for `tomcat` under the Checks section.
+[Run the Agent's status subcommand][20] and look for `tomcat` under the **Checks** section.
 
 ## Data Collected
 ### Metrics
