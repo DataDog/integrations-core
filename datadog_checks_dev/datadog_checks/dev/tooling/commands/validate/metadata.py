@@ -8,7 +8,7 @@ from io import open
 import click
 from six import PY2, iteritems
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
 from ...utils import get_metadata_file, get_metric_sources, load_manifest
 
 REQUIRED_HEADERS = {

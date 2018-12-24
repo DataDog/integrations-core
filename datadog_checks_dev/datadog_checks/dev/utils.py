@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""
+Utilities functions abstracting common operations, specially designed to be used
+by Integrations within tests.
+"""
 import os
 import platform
 import shutil

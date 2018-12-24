@@ -5,10 +5,16 @@ import socket
 
 import simplejson as json
 from six import iteritems
+<<<<<<< nick/twemE2E
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.base import ensure_unicode
 
+=======
+
+from datadog_checks.base import AgentCheck, ensure_unicode
+
+>>>>>>> master
 
 GLOBAL_STATS = set([
     'curr_connections',
