@@ -1,12 +1,16 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 import json
 from base64 import urlsafe_b64decode
 
 
 def test_runner(dd_environment_runner, mock_e2e_config, mock_e2e_metadata):
     message = dd_environment_runner
+    if not message:
+        # this can happen when tests are manually run
+        pytest.skip("ddev plugin not loaded, skipping plugin test...")
 
     encoded = message.split(' ')[1]
     decoded = urlsafe_b64decode(encoded.encode('utf-8'))
