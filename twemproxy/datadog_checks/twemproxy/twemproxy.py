@@ -6,8 +6,7 @@ import socket
 import simplejson as json
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.base import ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_unicode
 
 
 GLOBAL_STATS = set([
