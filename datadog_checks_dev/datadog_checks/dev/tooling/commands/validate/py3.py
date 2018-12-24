@@ -26,7 +26,7 @@ from ...utils import get_valid_checks
 @click.argument('check')
 def py3(check):
     """Verify if a custom check or integration can run on python 3. CHECK
-    must be a valid path to a Python module or package folder.
+    can be an integration name or a valid path to a Python module or package folder.
     """
 
     root = get_root()
