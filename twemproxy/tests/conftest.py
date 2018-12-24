@@ -35,7 +35,7 @@ def dd_environment(request):
         if not wait_for_cluster():
             raise Exception("The cluster never came up")
         time.sleep(15)
-        yield
+        yield common.INSTANCE
 
 
 def wait_for_cluster():

@@ -64,13 +64,7 @@ def setup_request():
 
 
 def test_check(check, dd_environment, setup_request, aggregator):
-    instance = {
-        'host': common.HOST,
-        'port': 6222,
-        'tags': ['optional:tag1']
-    }
-
-    check.check(instance)
+    check.check(common.instance)
 
     for stat in GLOBAL_STATS:
         aggregator.assert_metric("twemproxy.{}".format(stat), at_least=0)
