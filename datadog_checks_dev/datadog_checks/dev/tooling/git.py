@@ -5,7 +5,6 @@ import os
 import re
 
 from .constants import get_root
-from .utils import parse_pr_number
 from ..subprocess import run_command
 from ..utils import chdir
 
@@ -30,22 +29,6 @@ def files_changed():
 
     # Remove empty lines
     return [f for f in changed_files if f]
-
-
-def parse_pr_numbers(git_log_lines):
-    """
-    Parse PR numbers from commit messages. At GitHub those have the format:
-
-        `here is the message (#1234)`
-
-    being `1234` the PR number.
-    """
-    prs = []
-    for line in git_log_lines:
-        pr_number = parse_pr_number(line)
-        if pr_number:
-            prs.append(pr_number)
-    return prs
 
 
 def get_commits_since(check_name, target_tag=None):

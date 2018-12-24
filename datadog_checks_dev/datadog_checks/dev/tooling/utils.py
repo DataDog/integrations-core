@@ -14,8 +14,6 @@ from six import string_types
 from .constants import NOT_CHECKS, VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
 
-# match something like `(#1234)` and return `1234` in a group
-PR_PATTERN = re.compile(r'\(#(\d+)\)')
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 
@@ -27,12 +25,6 @@ def format_commit_id(commit_id):
         else:
             return 'commit hash `{}`'.format(commit_id)
     return commit_id
-
-
-def parse_pr_number(log_line):
-    match = re.search(PR_PATTERN, log_line)
-    if match:
-        return match.group(1)
 
 
 def get_current_agent_version():

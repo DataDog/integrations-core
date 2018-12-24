@@ -19,11 +19,11 @@ from ..constants import (
     get_root, get_agent_release_requirements
 )
 from ..git import (
-    get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit
+    get_current_branch, get_commits_since, git_tag, git_commit
 )
 from ..github import (
     from_contributor, get_changelog_types, get_pr, get_pr_from_hash, get_pr_labels,
-    get_pr_milestone
+    get_pr_milestone, parse_pr_numbers, parse_pr_number
 )
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
@@ -32,7 +32,7 @@ from ..release import (
 from ..trello import TrelloClient
 from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
-    get_version_string, format_commit_id, parse_pr_number
+    get_version_string, format_commit_id
 )
 from ...structures import EnvVars
 from ...subprocess import run_command
