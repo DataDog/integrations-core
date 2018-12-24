@@ -21,11 +21,13 @@ from ...utils import get_valid_checks
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help="Verify if a custom check or integration will run on python 3"
+    short_help="Verify if a custom check or integration can run on python 3"
 )
 @click.argument('check')
 def py3(check):
-    """Verify if a custom check or integration will run on python 3"""
+    """Verify if a custom check or integration can run on python 3. CHECK
+    must be a valid path to a Python module or package folder.
+    """
 
     root = get_root()
     if check == 'datadog_checks_base':
