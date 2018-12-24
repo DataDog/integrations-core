@@ -11,7 +11,7 @@ import requests
 from six import iteritems, itervalues
 from six.moves import input, range
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 from ...constants import get_root
 from ....utils import dir_exists, ensure_unicode, path_join, write_file_lines
 

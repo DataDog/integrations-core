@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..utils import CONTEXT_SETTINGS, DEFAULT_INDENT, abort, echo_failure, echo_info, echo_success, echo_waiting
+from ..console import CONTEXT_SETTINGS, DEFAULT_INDENT, abort, echo_failure, echo_info, echo_success, echo_waiting
 from ...e2e import create_interface, get_configured_checks, get_configured_envs, stop_environment
 
 

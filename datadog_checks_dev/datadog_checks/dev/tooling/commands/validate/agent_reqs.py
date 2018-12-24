@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 from ...constants import get_agent_release_requirements, AGENT_V5_ONLY, NOT_CHECKS
 from ...utils import get_valid_checks, parse_agent_req_file, get_version_string
 from ...release import get_package_name

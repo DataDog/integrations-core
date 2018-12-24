@@ -10,7 +10,7 @@ from .manifest import manifest
 from .metadata import metadata
 from .service_checks import service_checks
 from .py3 import py3
-from ..utils import CONTEXT_SETTINGS
+from ..console import CONTEXT_SETTINGS
 
 ALL_COMMANDS = (
     agent_reqs,
