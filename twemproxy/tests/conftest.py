@@ -1,60 +1,47 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-import logging
-import os
 import pytest
-import socket
-import time
+import requests
 
 from . import common
 from datadog_checks.dev import docker_run
+from datadog_checks.twemproxy import Twemproxy
 
 
-log = logging.getLogger('test_twemproxy')
+def setup_post_data():
+    requests.put('http://localhost:2379/v2/keys/services/redis/01', data={'value': 'redis1:6101'})
+    requests.put('http://localhost:2379/v2/keys/services/redis/02', data={'value': 'redis2:6102'})
+    requests.put('http://localhost:2379/v2/keys/services/twemproxy/port', data={'value': '6100'})
+    requests.put('http://localhost:2379/v2/keys/services/twemproxy/host', data={'value': 'localhost'})
 
 
 @pytest.fixture(scope="session")
-def dd_environment(request):
+def dd_environment():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
-
-    env = {}
-
-    env['DOCKER_COMPOSE_FILE'] = common.COMPOSE_FILE
-    env['DOCKER_ADDR'] = common.HOST
-    env['WAIT_FOR_IT_SCRIPT_PATH'] = _wait_for_it_script()
-    env['SETUP_SCRIPT_PATH'] = os.path.join(common.HERE, 'compose', 'setup.sh')
-
-    with docker_run(common.COMPOSE_FILE, env_vars=env):
-        if not wait_for_cluster():
-            raise Exception("The cluster never came up")
-        time.sleep(15)
-        yield common.INSTANCE
+    with docker_run(common.COMPOSE_FILE, service_name="etcd0", conditions=[setup_post_data]):
+        with docker_run(common.COMPOSE_FILE, log_patterns="twemproxy entered RUNNING state"):
+            yield common.INSTANCE
 
 
-def wait_for_cluster():
-    for _ in range(0, 10):
-        res = None
-        try:
-            socket.getaddrinfo(common.HOST, common.PORT, 0, 0, socket.IPPROTO_TCP)
-            return True
-        except Exception as e:
-            log.debug("exception: {0} res: {1}".format(e, res))
-            time.sleep(5)
-
-    return False
+@pytest.fixture
+def check():
+    check = Twemproxy('twemproxy', {}, {})
+    return check
 
 
-def _wait_for_it_script():
+@pytest.fixture
+def setup_request():
     """
-    FIXME: relying on the filesystem layout is a bad idea, the testing helper
-    should expose its path through the api instead
+    A request needs to be made in order for some of the data to be seeded
     """
-    dir = os.path.join(common.TESTS_HELPER_DIR, 'scripts', 'wait-for-it.sh')
-    return os.path.abspath(dir)
+    url = "http://{}:{}".format(common.HOST, common.PORT)
+    try:
+        requests.get(url)
+    except Exception:
+        pass
