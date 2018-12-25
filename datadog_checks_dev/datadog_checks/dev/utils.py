@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""
+Utilities functions abstracting common operations, specially designed to be used
+by Integrations within tests.
+"""
 import os
 import platform
 import shutil
@@ -17,6 +21,7 @@ from .structures import EnvVars
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
+ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
 CI_IDENTIFIERS = (
     'APPVEYOR_',

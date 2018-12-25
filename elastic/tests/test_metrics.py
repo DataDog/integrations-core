@@ -12,51 +12,51 @@ from datadog_checks.elastic.metrics import (
 def test_stats_for_version():
     # v0.90
     metrics = stats_for_version([0, 90, 0])
-    assert len(metrics) == 123
+    assert len(metrics) == 133
 
     # v0.90.5
     metrics = stats_for_version([0, 90, 5])
-    assert len(metrics) == 124
+    assert len(metrics) == 134
 
     # v0.90.10
     metrics = stats_for_version([0, 90, 10])
-    assert len(metrics) == 122
+    assert len(metrics) == 132
 
     # v1
     metrics = stats_for_version([1, 0, 0])
-    assert len(metrics) == 130
+    assert len(metrics) == 140
 
     # v1.3.0
     metrics = stats_for_version([1, 3, 0])
-    assert len(metrics) == 132
+    assert len(metrics) == 142
 
     # v1.4.0
     metrics = stats_for_version([1, 4, 0])
-    assert len(metrics) == 152
+    assert len(metrics) == 162
 
     # v1.5.0
     metrics = stats_for_version([1, 5, 0])
-    assert len(metrics) == 155
+    assert len(metrics) == 165
 
     # v1.6.0
     metrics = stats_for_version([1, 6, 0])
-    assert len(metrics) == 163
+    assert len(metrics) == 173
 
     # v2
     metrics = stats_for_version([2, 0, 0])
-    assert len(metrics) == 162
+    assert len(metrics) == 172
 
     # v2.1.0
     metrics = stats_for_version([2, 1, 0])
-    assert len(metrics) == 167
+    assert len(metrics) == 177
 
     # v5
     metrics = stats_for_version([5, 0, 0])
-    assert len(metrics) == 170
+    assert len(metrics) == 180
 
     # v6.3.0
     metrics = stats_for_version([6, 3, 0])
-    assert len(metrics) == 170
+    assert len(metrics) == 180
 
 
 @pytest.mark.unit

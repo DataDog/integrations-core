@@ -55,7 +55,7 @@ tox
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][4].
+Need help? Contact [Datadog support][4].
 
 [1]: https://github.com/DataDog/datadog-agent
 [2]: https://github.com/DataDog/integrations-core

@@ -49,7 +49,7 @@ DATABASES = [
 
 
 def wait_for_cluster():
-    for _ in xrange(0, 100):
+    for _ in range(0, 100):
         res = None
         try:
             res = requests.get(STATUS_URL)

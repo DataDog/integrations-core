@@ -11,11 +11,6 @@ instances:
   #
     queue_manager: 'datadog'
 
-  ## @param mq_installation_dir - string - required - default: /opt/mqm
-  ## The directory where MQ is installed, required to ensure the c bindings are set correctly
-  #
-    mq_installation_dir: /opt/mqm
-
   ## @param host - string - required - default: localhost
   ## The host IBM MQ is running on.
   #
@@ -77,9 +72,12 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 
-#logs:
-#  - type: file
-#    path: /var/mqm/errors/*
-#    service: ibm_mq
-#    source: ibm_mq
-#    sourcecategory: errors
+# logs:
+#   - type: file
+#     path: /var/mqm/log/<APPNAME>/active/AMQERR01.LOG
+#     service: <APPNAME>
+#     source: ibm_mq
+#     log_processing_rules:
+#       - type: multi_line
+#         name: new_log_start_with_date
+#         pattern: "\d{2}/\d{2}/\d{4}"

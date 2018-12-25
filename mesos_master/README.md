@@ -83,7 +83,7 @@ The Mesos-master check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][103].
+Need help? Contact [Datadog support][103].
 
 ## Further Reading
 

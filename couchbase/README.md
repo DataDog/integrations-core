@@ -67,7 +67,7 @@ Returns `Ok` otherwise.
 Returns `Critical` if the node is unhealthy. Returns `Ok` otherwise.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][7].
+Need help? Contact [Datadog support][7].
 
 ## Further Reading
 

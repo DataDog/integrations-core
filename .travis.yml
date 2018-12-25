@@ -47,21 +47,23 @@ jobs:
   include:
     - stage: test_changed
       script:
+        - ddev validate agent-reqs
+        - ddev validate config
         - ddev validate dep
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
-        - ddev validate agent-reqs
         - ddev test --cov
         - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base PYTHON3=true
       script:
+        - ddev validate agent-reqs
+        - ddev validate config
         - ddev validate dep
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
-        - ddev validate agent-reqs
         - travis_retry ddev test --cov ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
@@ -81,7 +83,7 @@ jobs:
     - stage: test
       env: CHECK=cacti PYTHON3=true
     - stage: test
-      env: CHECK=cassandra_nodetool
+      env: CHECK=cassandra_nodetool PYTHON3=true
     - stage: test
       env: CHECK=ceph
     - stage: test
@@ -93,7 +95,7 @@ jobs:
     - stage: test
       env: CHECK=coredns PYTHON3=true
     - stage: test
-      env: CHECK=couch
+      env: CHECK=couch PYTHON3=true
     - stage: test
       env: CHECK=couchbase
     - stage: test
@@ -117,15 +119,15 @@ jobs:
     - stage: test
       env: CHECK=exchange_server
     - stage: test
-      env: CHECK=fluentd
+      env: CHECK=fluentd PYTHON3=true
     - stage: test
-      env: CHECK=gearmand
+      env: CHECK=gearmand PYTHON3=true
     - stage: test
-      env: CHECK=gitlab
+      env: CHECK=gitlab PYTHON3=true
     - stage: test
       env: CHECK=go_expvar
     - stage: test
-      env: CHECK=gunicorn
+      env: CHECK=gunicorn PYTHON3=true
     - stage: test
       env: CHECK=haproxy
     - stage: test
@@ -143,7 +145,7 @@ jobs:
     - stage: test
       env: CHECK=kafka_consumer PYTHON3=true
     - stage: test
-      env: CHECK=kong
+      env: CHECK=kong PYTHON3=true
     - stage: test
       env: CHECK=kube_dns
     - stage: test
@@ -165,7 +167,7 @@ jobs:
     - stage: test
       env: CHECK=marathon
     - stage: test
-      env: CHECK=mcache
+      env: CHECK=mcache PYTHON3=true
     - stage: test
       env: CHECK=mesos_slave
     - stage: test
@@ -181,11 +183,11 @@ jobs:
     - stage: test
       env: CHECK=nfsstat
     - stage: test
-      env: CHECK=nginx
+      env: CHECK=nginx PYTHON3=true
     - stage: test
       env: CHECK=ntp
     - stage: test
-      env: CHECK=openldap
+      env: CHECK=openldap PYTHON3=true
     - stage: test
       env: CHECK=openstack
     - stage: test
@@ -203,19 +205,19 @@ jobs:
     - stage: test
       env: CHECK=postfix
     - stage: test
-      env: CHECK=powerdns_recursor
+      env: CHECK=powerdns_recursor PYTHON3=true
     - stage: test
       env: CHECK=process
     - stage: test
       env: CHECK=prometheus
     - stage: test
-      env: CHECK=rabbitmq
+      env: CHECK=rabbitmq PYTHON3=true
     - stage: test
       env: CHECK=redisdb PYTHON3=true
     - stage: test
-      env: CHECK=riak
+      env: CHECK=riak PYTHON3=true
     - stage: test
-      env: CHECK=riakcs
+      env: CHECK=riakcs PYTHON3=true
     - stage: test
       env: CHECK=snmp
     - stage: test
@@ -229,7 +231,7 @@ jobs:
     - stage: test
       env: CHECK=supervisord
     - stage: test
-      env: CHECK=squid
+      env: CHECK=squid PYTHON3=true
     - stage: test
       env: CHECK=system_core
     - stage: test
@@ -241,17 +243,17 @@ jobs:
     - stage: test
       env: CHECK=tokumx
     - stage: test
-      env: CHECK=twemproxy
+      env: CHECK=twemproxy PYTHON3=true
     - stage: test
-      env: CHECK=varnish
+      env: CHECK=varnish PYTHON3=true
     - stage: test
       env: CHECK=vault PYTHON3=true
     - stage: test
       env: CHECK=vsphere
     - stage: test
-      env: CHECK=yarn
+      env: CHECK=yarn PYTHON3=true
     - stage: test
-      env: CHECK=zk
+      env: CHECK=zk PYTHON3=true
 before_install:
   - bash .travis/prepare.sh
   - PATH="$PATH:$(pyenv root)/versions/3.6/bin"

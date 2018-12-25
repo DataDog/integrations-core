@@ -5,7 +5,7 @@ import os
 
 import click
 
-from .utils import (
+from .console import (
     CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 )
 from ..clean import clean_package, remove_compiled_scripts

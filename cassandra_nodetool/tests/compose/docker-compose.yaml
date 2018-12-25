@@ -19,7 +19,7 @@ services:
     expose:
       - ${CONTAINER_PORT}
     volumes:
-      - ./jmxremote.password:/etc/cassandra/jmxremote.password
+      - ${JMX_PASS_FILE}:/etc/cassandra/jmxremote.password
 
   dd-test-cassandra2:
     image: cassandra:${CASSANDRA_VERSION}

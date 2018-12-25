@@ -11,13 +11,13 @@ import click
 from semver import finalize_version, parse_version_info
 from six import StringIO, iteritems
 
-from .dep import freeze as dep_freeze
-from .utils import (
+from .console import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting,
     echo_warning
 )
 from ..constants import (
-    AGENT_REQ_FILE, AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP, get_root
+    AGENT_V5_ONLY, BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP,
+    get_root, get_agent_release_requirements
 )
 from ..git import (
     get_current_branch, parse_pr_numbers, get_commits_since, git_tag, git_commit,
@@ -26,7 +26,7 @@ from ..git import (
 from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
-    update_version_module
+    update_version_module, get_folder_name, get_package_name, DATADOG_PACKAGE_PREFIX
 )
 from ..trello import TrelloClient
 from ..utils import (
@@ -579,7 +579,6 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
     from ..signing import update_link_metadata, YubikeyException
 
-    root = get_root()
     releasing_all = check == 'all'
 
     valid_checks = get_valid_checks()
@@ -668,10 +667,10 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
 
         commit_targets = [check]
 
-        # update the global requirements file
+        # update the list of integrations to be shipped with the Agent
         if check not in NOT_CHECKS:
-            commit_targets.append(AGENT_REQ_FILE)
-            req_file = os.path.join(root, AGENT_REQ_FILE)
+            req_file = get_agent_release_requirements()
+            commit_targets.append(os.path.basename(req_file))
             echo_waiting('Updating the Agent requirements file... ', nl=False)
             update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
             echo_success('success!')
@@ -859,14 +858,15 @@ def upload(ctx, check, dry_run):
 
 @release.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help="Update the Agent's release and static dependency files"
+    short_help="Generate the list of integrations to ship with the Agent and save it to '{}'".format(
+        get_agent_release_requirements()
+    )
 )
-@click.option('--no-deps', is_flag=True, help='Do not create the static dependency file')
 @click.pass_context
-def freeze(ctx, no_deps):
+def agent_req_file(ctx):
     """Write the `requirements-agent-release.txt` file at the root of the repo
     listing all the Agent-based integrations pinned at the version they currently
-    have in HEAD. Also by default will create the Agent's static dependency file.
+    have in HEAD.
     """
     echo_info('Freezing check releases')
     checks = get_valid_checks()
@@ -887,12 +887,9 @@ def freeze(ctx, no_deps):
 
     lines = sorted(entries)
 
-    req_file = os.path.join(get_root(), AGENT_REQ_FILE)
+    req_file = get_agent_release_requirements()
     write_file_lines(req_file, lines)
     echo_success('Successfully wrote to `{}`!'.format(req_file))
-
-    if not no_deps:
-        ctx.invoke(dep_freeze)
 
 
 @release.command(
@@ -929,22 +926,35 @@ def agent_changelog(since, to, output, force):
     # store the changes in a mapping {agent_version --> {check_name --> current_version}}
     changes_per_agent = OrderedDict()
 
+    # to keep indexing easy, we run the loop off-by-one
     for i in range(1, len(agent_tags)):
-        contents_from = git_show_file(AGENT_REQ_FILE, agent_tags[i - 1])
-        catalog_from = parse_agent_req_file(contents_from)
+        req_file_name = os.path.basename(get_agent_release_requirements())
+        current_tag = agent_tags[i - 1]
+        # Requirements for current tag
+        file_contents = git_show_file(req_file_name, current_tag)
+        catalog_now = parse_agent_req_file(file_contents)
+        # Requirements for previous tag
+        file_contents = git_show_file(req_file_name, agent_tags[i])
+        catalog_prev = parse_agent_req_file(file_contents)
 
-        contents_to = git_show_file(AGENT_REQ_FILE, agent_tags[i])
-        catalog_to = parse_agent_req_file(contents_to)
+        changes_per_agent[current_tag] = OrderedDict()
 
-        version_changes = OrderedDict()
-        changes_per_agent[agent_tags[i - 1]] = version_changes
+        for name, ver in iteritems(catalog_now):
+            # at some point in the git history, the requirements file erroneusly
+            # contained the folder name instead of the package name for each check,
+            # let's be resilient
+            old_ver = catalog_prev.get(name) \
+                or catalog_prev.get(get_folder_name(name)) \
+                or catalog_prev.get(get_package_name(name))
 
-        for name, ver in iteritems(catalog_to):
-            old_ver = catalog_from.get(name, "")
-            if old_ver != ver:
+            # normalize the package name to the check_name
+            if name.startswith(DATADOG_PACKAGE_PREFIX):
+                name = get_folder_name(name)
+
+            if old_ver and old_ver != ver:
                 # determine whether major version changed
                 breaking = old_ver.split('.')[0] < ver.split('.')[0]
-                version_changes[name] = (ver, breaking)
+                changes_per_agent[current_tag][name] = (ver, breaking)
 
     # store the changelog in memory
     changelog_contents = StringIO()
@@ -970,7 +980,7 @@ def agent_changelog(since, to, output, force):
                 else:
                     display_name = name
 
-                breaking_notice = " **BREAKING CHANGE** " if ver[1] else ""
+                breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)
                 changelog_contents.write(
                     '* {} [{}]({}){}\n'.format(display_name, ver[0], changelog_url, breaking_notice)

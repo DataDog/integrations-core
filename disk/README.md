@@ -31,7 +31,7 @@ The Disk check does not include any events at this time.
 Returns `CRITICAL` if filesystem is in read-only mode.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/disk/datadog_checks/disk/data/conf.yaml.default

@@ -120,7 +120,7 @@ This table shows the `supervisord.process.status` that results from each supervi
 |UNKNOWN|UNKNOWN|
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 

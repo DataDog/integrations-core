@@ -21,7 +21,7 @@ metadata:
   annotations:
     ad.datadoghq.com/coredns.check_names: '["coredns"]'
     ad.datadoghq.com/coredns.init_configs: '[{}]'
-    ad.datadoghq.com/coredns.instances: '[[{"prometheus_url":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]]'
+    ad.datadoghq.com/coredns.instances: '[{"prometheus_url":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}]'
 ```
 
 **Note:**
@@ -50,7 +50,7 @@ The CoreDNS check does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][7].
+Need help? Contact [Datadog support][7].
 
 ## Development
 

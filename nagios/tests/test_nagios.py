@@ -21,7 +21,7 @@ class TestEventLogTailer:
         """
 
         # Get the config
-        config, nagios_cfg = get_config("log_file={}\n".format(NAGIOS_TEST_LOG), events=True)
+        config, nagios_cfg = get_config("log_file={}\n".format(NAGIOS_TEST_LOG), events=True, tags=CUSTOM_TAGS)
 
         # Set up the check
         nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
@@ -70,6 +70,7 @@ class TestEventLogTailer:
                 elif t == "HOST DOWNTIME ALERT":
                     assert event["host"] is not None
                     assert event["downtime_start_stop"] in ("STARTED", "STOPPED")
+                assert CUSTOM_TAGS == event['tags']
 
         assert counters["SERVICE ALERT"] == 301
         assert counters["SERVICE NOTIFICATION"] == 120

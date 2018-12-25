@@ -89,7 +89,7 @@ The Go-metro check does not include any events at this time.
 The Go-metro check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][4].
+Need help? Contact [Datadog support][4].
 
 [1]: https://github.com/DataDog/go-metro
 [2]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example

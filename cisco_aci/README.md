@@ -56,7 +56,7 @@ The Cisco ACI check sends tenant faults as events.
 Returns CRITICAL if the Agent cannot connect to the Cisco ACI API to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example

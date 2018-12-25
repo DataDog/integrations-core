@@ -6,12 +6,13 @@
 # stdlib
 import re
 import time
-import urllib
-import urlparse
 import warnings
 from collections import defaultdict
 
 # 3p
+from six.moves.urllib.parse import urlparse, quote_plus, urljoin
+from six import iteritems
+
 import requests
 from requests.exceptions import RequestException
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -204,16 +205,16 @@ class RabbitMQ(AgentCheck):
         username = instance.get('rabbitmq_user', 'guest')
         password = instance.get('rabbitmq_pass', 'guest')
         custom_tags = instance.get('tags', [])
-        parsed_url = urlparse.urlparse(base_url)
+        parsed_url = urlparse(base_url)
         if not parsed_url.scheme or "://" not in parsed_url.geturl():
             self.log.warning('The rabbit url did not include a protocol, assuming http')
-            # urlparse.urljoin cannot add a protocol to the rest of the url for some reason.
+            # urljoin cannot add a protocol to the rest of the url for some reason.
             # This still leaves the potential for errors, but such urls would never have been valid, either
             # and it's not likely to be useful to attempt to catch all possible mistakes people could make.
             # urlparse also has a known issue parsing url with no schema, but a port in the host section
             # mistakingly taking the host for the schema, hence the additional validation
             base_url = 'http://' + base_url
-            parsed_url = urlparse.urlparse(base_url)
+            parsed_url = urlparse(base_url)
 
         suppress_warning = False
         ssl_verify = is_affirmative(instance.get('ssl_verify', True))
@@ -245,8 +246,8 @@ class RabbitMQ(AgentCheck):
             },
         }
 
-        for object_type, filters in specified.iteritems():
-            for _, filter_objects in filters.iteritems():
+        for object_type, filters in iteritems(specified):
+            for _, filter_objects in iteritems(filters):
                 if type(filter_objects) != list:
                     raise TypeError(
                         "{0} / {0}_regexes parameter must be a list".format(object_type))
@@ -260,7 +261,7 @@ class RabbitMQ(AgentCheck):
 
         if not vhosts:
             # Fetch a list of _all_ vhosts from the API.
-            vhosts_url = urlparse.urljoin(base_url, 'vhosts')
+            vhosts_url = urljoin(base_url, 'vhosts')
             vhost_proxy = self.get_instance_proxy(instance, vhosts_url)
             vhosts_response = self._get_data(vhosts_url, auth=auth, ssl_verify=ssl_verify, proxies=vhost_proxy)
             vhosts = [v['name'] for v in vhosts_response]
@@ -415,14 +416,14 @@ class RabbitMQ(AgentCheck):
         # otherwise it'll just be making more queries for the same data
         if self._limit_vhosts(instance) and object_type == QUEUE_TYPE:
             for vhost in limit_vhosts:
-                url = '{}/{}'.format(object_type, urllib.quote_plus(vhost))
+                url = '{}/{}'.format(object_type, quote_plus(vhost))
                 try:
-                    data += self._get_data(urlparse.urljoin(base_url, url), auth=auth,
+                    data += self._get_data(urljoin(base_url, url), auth=auth,
                                            ssl_verify=ssl_verify, proxies=instance_proxy)
                 except Exception as e:
                     self.log.debug("Couldn't grab queue data from vhost, {}: {}".format(vhost, e))
         else:
-            data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
+            data = self._get_data(urljoin(base_url, object_type), auth=auth,
                                   ssl_verify=ssl_verify, proxies=instance_proxy)
 
         """ data is a list of nodes or queues:
@@ -545,7 +546,7 @@ class RabbitMQ(AgentCheck):
             # Display a warning in the info page
             msg = ("Too many items to fetch. "
                    "You must choose the {} you are interested in by editing the rabbitmq.yaml configuration file"
-                   "or get in touch with Datadog Support").format(object_type)
+                   "or get in touch with Datadog support").format(object_type)
             self.warning(msg)
 
         for data_line in data[:max_detailed]:
@@ -560,7 +561,7 @@ class RabbitMQ(AgentCheck):
 
     def get_overview_stats(self, instance, base_url, custom_tags, auth=None, ssl_verify=True):
         instance_proxy = self.get_instance_proxy(instance, base_url)
-        data = self._get_data(urlparse.urljoin(base_url, "overview"), auth=auth,
+        data = self._get_data(urljoin(base_url, "overview"), auth=auth,
                               ssl_verify=ssl_verify, proxies=instance_proxy)
         self._get_metrics(data, OVERVIEW_TYPE, custom_tags)
 
@@ -587,8 +588,8 @@ class RabbitMQ(AgentCheck):
         for item in data:
             vhost = item['vhost']
             tags = self._get_tags(item, object_type, custom_tags)
-            url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, urllib.quote_plus(vhost), urllib.quote_plus(item['name']))
-            bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
+            url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, quote_plus(vhost), quote_plus(item['name']))
+            bindings_count = len(self._get_data(urljoin(base_url, url), auth=auth,
                                  ssl_verify=ssl_verify, proxies=instance_proxy))
 
             self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
@@ -607,9 +608,9 @@ class RabbitMQ(AgentCheck):
             grab_all_data = False
             data = []
             for vhost in vhosts:
-                url = "vhosts/{}/{}".format(urllib.quote_plus(vhost), object_type)
+                url = "vhosts/{}/{}".format(quote_plus(vhost), object_type)
                 try:
-                    data += self._get_data(urlparse.urljoin(base_url, url), auth=auth,
+                    data += self._get_data(urljoin(base_url, url), auth=auth,
                                            ssl_verify=ssl_verify, proxies=instance_proxy)
                 except Exception as e:
                     # This will happen if there is no connection data to grab
@@ -617,7 +618,7 @@ class RabbitMQ(AgentCheck):
 
         # sometimes it seems to need to fall back to this
         if grab_all_data or not len(data):
-            data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
+            data = self._get_data(urljoin(base_url, object_type), auth=auth,
                                   ssl_verify=ssl_verify, proxies=instance_proxy)
 
         stats = {vhost: 0 for vhost in vhosts}
@@ -628,10 +629,10 @@ class RabbitMQ(AgentCheck):
                 # 'state' does not exist for direct type connections.
                 connection_states[conn.get('state', 'direct')] += 1
 
-        for vhost, nb_conn in stats.iteritems():
+        for vhost, nb_conn in iteritems(stats):
             self.gauge('rabbitmq.connections', nb_conn, tags=['{}_vhost:{}'.format(TAG_PREFIX, vhost)] + custom_tags)
 
-        for conn_state, nb_conn in connection_states.iteritems():
+        for conn_state, nb_conn in iteritems(connection_states):
             self.gauge('rabbitmq.connections.state',
                        nb_conn,
                        tags=['{}_conn_state:{}'.format(TAG_PREFIX, conn_state)] + custom_tags)
@@ -684,8 +685,8 @@ class RabbitMQ(AgentCheck):
         for vhost in vhosts:
             tags = ['vhost:{}'.format(vhost)] + custom_tags
             # We need to urlencode the vhost because it can be '/'.
-            path = u'aliveness-test/{}'.format(urllib.quote_plus(vhost))
-            aliveness_url = urlparse.urljoin(base_url, path)
+            path = u'aliveness-test/{}'.format(quote_plus(vhost))
+            aliveness_url = urljoin(base_url, path)
             aliveness_proxy = self.get_instance_proxy(instance, aliveness_url)
             aliveness_response = self._get_data(aliveness_url,
                                                 auth=auth,

@@ -357,7 +357,7 @@ def spin_up_riak():
     ]
     subprocess.check_call(args + ["up", "-d"], env=env)
     can_access = False
-    for _ in xrange(0, 10):
+    for _ in range(0, 10):
         res = None
         try:
             res = requests.get("{0}/riak/bucket".format(BASE_URL))
@@ -374,7 +374,7 @@ def spin_up_riak():
 
     data = 'herzlich willkommen'
     headers = {"Content-Type": "text/plain"}
-    for _ in xrange(0, 10):
+    for _ in range(0, 10):
         res = requests.post(
             "{0}/riak/bucket/german".format(BASE_URL),
             headers=headers,

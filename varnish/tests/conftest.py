@@ -7,14 +7,7 @@ import os
 import subprocess
 import time
 
-import common
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+from . import common
 
 
 @pytest.fixture(scope="session")

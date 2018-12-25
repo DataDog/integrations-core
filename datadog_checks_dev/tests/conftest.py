@@ -20,6 +20,7 @@ def mock_e2e_metadata():
     return {
         'env_type': 'vagrant',
         'future': 'now',
+        'env_vars': {},
     }
 
 

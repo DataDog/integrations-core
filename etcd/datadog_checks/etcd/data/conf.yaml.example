@@ -7,7 +7,7 @@ instances:
   - use_preview: false
 
   ## @param prometheus_url - string - required
-  ## The Prometheus endpoint to query.
+  ## The URL where your application metrics are exposed by Prometheus.
   #
   #  prometheus_url: http://localhost:2379/metrics
 

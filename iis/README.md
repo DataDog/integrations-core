@@ -127,7 +127,7 @@ Here's an example of configuration that would check the current machine and a re
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample iis.d/conf.yaml][2] for all available configuration options.
+  See the [sample iis.d/conf.yaml][3] for all available configuration options.
 
   * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
@@ -151,7 +151,7 @@ The IIS check does not include any events at this time.
 The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][8].
+Need help? Contact [Datadog support][8].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure

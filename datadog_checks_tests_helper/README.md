@@ -21,7 +21,7 @@ tox
 ```
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][2].
+Need help? Contact [Datadog support][2].
 
 [1]: https://tox.readthedocs.io/en/latest/install.html
 [2]: https://docs.datadoghq.com/help/

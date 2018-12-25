@@ -54,7 +54,7 @@ Returns 'Critical' if the Agent cannot collect metrics from your etcd API endpoi
 Returns 'Critical' if a member node is not healthy. Returns 'Unknown' if the Agent can't reach the `/health` endpoint, or if the health status is missing.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 To get a better idea of how (or why) to integrate etcd with Datadog, check out our [blog post][7] about it.

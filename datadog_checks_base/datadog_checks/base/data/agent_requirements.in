@@ -1,7 +1,8 @@
 adodbapi==2.6.0.7; sys_platform == 'win32'
 asn1crypto==0.24.0
 beautifulsoup4==4.5.1
-boto==2.46.1
+boto==2.46.1; python_version < '3.0'
+boto3==1.9.67; python_version > '3.0'
 cffi==1.11.5
 cryptography==2.3.1
 cx_oracle==6.0.1
@@ -10,13 +11,14 @@ dnspython==1.12.0
 enum34==1.1.6
 flup==1.0.3.dev-20110405; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
+python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 google-compute-engine==2.8.3
 httplib2==0.10.3
 ipaddress==1.0.22
 jaydebeapi==1.1.1
 jpype1==0.6.3
-kafka-python==1.4.3; sys_platform != 'win32'
-kazoo==2.4.0; sys_platform != 'win32'
+kafka-python==1.4.4; sys_platform != 'win32'
+kazoo==2.6.0; sys_platform != 'win32'
 ldap3==2.5
 meld3==1.0.2
 ntplib==0.3.3
@@ -26,14 +28,14 @@ ply==3.10
 prometheus-client==0.3.0
 protobuf==3.5.1
 psutil==5.4.8
-psycopg2-binary==2.7.4
+psycopg2-binary==2.7.5
 pyasn1==0.4.2
 pycparser==2.18
 pycryptodomex==3.4.7
 pymongo==3.5.1
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.8.0
-pyodbc==4.0.13
+pyodbc==4.0.22
 pyro4==4.73; sys_platform == 'win32'
 pysmi==0.2.2
 pysnmp==4.4.3

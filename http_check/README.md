@@ -105,7 +105,7 @@ Otherwise, returns `UP`.
 To disable this check, set `check_certificate_expiration` to false.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][9].
+Need help? Contact [Datadog support][9].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example

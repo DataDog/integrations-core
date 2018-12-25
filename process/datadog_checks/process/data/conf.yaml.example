@@ -48,7 +48,7 @@ instances:
 #      - env:staging
 #      - cluster:big-data
 #    thresholds:
-#      critical if no sshd or more than 8 sshd are running
+#      critical if no sshd or more than 7 sshd are running
 #      critical: [1, 7]
 #      warning if 1, 2, 6, 7 sshd processes are running
 #      warning: [3, 5]

@@ -279,7 +279,7 @@ class DockerDaemon(AgentCheck):
             self.capped_metrics = instance.get('capped_metrics')
 
         except Exception as e:
-            self.log.critical(e)
+            self.log.error(e)
             self.warning("Initialization failed. Will retry at next iteration")
         else:
             self.init_success = True

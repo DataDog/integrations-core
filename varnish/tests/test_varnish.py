@@ -10,8 +10,10 @@ import subprocess
 
 import pytest
 
-import common
+from . import common
+from datadog_checks.base import ensure_unicode
 from datadog_checks.varnish import Varnish
+
 
 pytestmark = pytest.mark.integration
 
@@ -60,7 +62,7 @@ def test_version():
 
     # Version info is printed to stderr
     output = subprocess.check_output(shlex.split(varnishstat) + ["-V"], stderr=subprocess.STDOUT)
-    res = re.search(r"varnish-(\d+\.\d\.\d)", output)
+    res = re.search(r"varnish-(\d+\.\d\.\d)", ensure_unicode(output))
     if res is None:
         raise Exception("Could not retrieve varnish version from docker")
 

@@ -154,7 +154,7 @@ Returns CRITICAL if the Agent cannot connect to Envoy to collect metrics, otherw
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][11].
+Need help? Contact [Datadog support][11].
 
 
 [1]: https://www.envoyproxy.io

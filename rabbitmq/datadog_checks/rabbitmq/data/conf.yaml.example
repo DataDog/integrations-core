@@ -20,6 +20,10 @@ instances:
     #
     # ssl_verify: false
 
+    # If ssl_verify is turned on and the SSL cert is invalid, it can be very noisy. This will reduce the noise in the logs.
+    #
+    #  ignore_ssl_warning: false
+
     # The (optional) skip_proxy parameter would bypass any proxy settings enabled
     # and attempt to reach the the URL directly.
     # If no proxy is defined at any level, this flag bears no effect.
@@ -54,6 +58,17 @@ instances:
     #   - thisqueue-.*
     #   - another_\d+queue
     #   - (lepidorae)-\d+   # to tag queues in the lepidorae queue_family
+    
+    # Use the `exchanges` or `exchanges_regexes` parameters to specify the exchanges you'd like to
+    # collect metrics on (up to 50 exchanges).
+    # If you have less than 50 exchanges, you don't have to set this parameter,
+    # the metrics will be collected on all the exchanges by default.
+    #
+    # exchanges:
+    #   - exchange1
+    #   - exchange2
+    # exchanges_regexes:
+    #   - thisexchange-.*
 
     # Service checks and `rabbitmq.connections` metric:
     # By default a list of all vhosts is fetched and each one will be checked

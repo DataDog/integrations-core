@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
-import urlparse
+from six.moves.urllib.parse import urlparse
 
 # 3rd party
 import requests
@@ -35,7 +35,7 @@ class Kong(AgentCheck):
         url = instance.get('kong_status_url')
         ssl_validation = instance.get('ssl_validation', True)
 
-        parsed_url = urlparse.urlparse(url)
+        parsed_url = urlparse(url)
         host = parsed_url.hostname
         port = parsed_url.port or 80
         service_check_name = 'kong.can_connect'

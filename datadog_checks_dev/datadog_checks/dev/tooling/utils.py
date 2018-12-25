@@ -11,12 +11,12 @@ import requests
 import semver
 from six import string_types
 
-from .constants import VERSION_BUMP, get_root
+from .constants import NOT_CHECKS, VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
 
 # match something like `(#1234)` and return `1234` in a group
 PR_PATTERN = re.compile(r'\(#(\d+)\)')
-
+# match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 
 
@@ -87,6 +87,29 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
 
 
+def get_config_files(check_name):
+    files = []
+
+    if check_name in NOT_CHECKS:
+        return files
+
+    root = get_root()
+
+    auto_conf = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'auto_conf.yaml')
+    if file_exists(auto_conf):
+        files.append(auto_conf)
+
+    default_yaml = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'conf.yaml.default')
+    if file_exists(default_yaml):
+        files.append(default_yaml)
+
+    example_yaml = os.path.join(root, check_name, 'datadog_checks', check_name, 'data', 'conf.yaml.example')
+    if file_exists(example_yaml):
+        files.append(example_yaml)
+
+    return sorted(files)
+
+
 def get_valid_checks():
     return {path for path in os.listdir(get_root()) if file_exists(get_version_file(path))}
 
@@ -137,10 +160,10 @@ def get_bump_function(changelog_types):
 
 def parse_agent_req_file(contents):
     """
-    Returns a dictionary mapping {check_name --> pinned_version} from the
+    Returns a dictionary mapping {check-package-name --> pinned_version} from the
     given file contents. We can assume lines are in the form:
 
-        active_directory==1.1.1; sys_platform == 'win32'
+        datadog-active-directory==1.1.1; sys_platform == 'win32'
 
     """
     catalog = OrderedDict()

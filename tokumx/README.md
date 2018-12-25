@@ -82,7 +82,7 @@ This check emits an event each time a TokuMX node has a change in its replicatio
 Returns CRITICAL if the Agent cannot connect to TokuMX to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][7].
+Need help? Contact [Datadog support][7].
 
 ## Further Reading
 

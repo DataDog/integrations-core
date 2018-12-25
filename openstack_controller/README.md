@@ -41,7 +41,7 @@ Openstack_controller does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 [1]: **LINK_TO_INTEGERATION_SITE**
 [2]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example

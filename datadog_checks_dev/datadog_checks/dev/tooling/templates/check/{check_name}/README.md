@@ -38,7 +38,7 @@ This check monitors [{check_name_cap}][1].
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 [1]: **LINK_TO_INTEGERATION_SITE**
 [2]: https://github.com/DataDog/integrations-core/blob/master/{check_name}/datadog_checks/{check_name}/data/conf.yaml.example

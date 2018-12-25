@@ -10,7 +10,7 @@ from collections import defaultdict
 import pytest
 import requests
 
-import common
+from . import common
 from datadog_checks.couch import CouchDb
 
 
@@ -98,7 +98,7 @@ def generate_data(couch_version):
     ]
 
     ready = defaultdict(bool)
-    for i in xrange(60):
+    for i in range(60):
         print("Waiting for stats to be generated on the nodes...")
         try:
             for url in urls:
@@ -117,7 +117,7 @@ def wait_for_couch():
     """
     Wait for the couchdb container to be reachable
     """
-    for i in xrange(60):
+    for i in range(60):
         print("Waiting for service to come up")
         try:
             requests.get(common.URL).raise_for_status()

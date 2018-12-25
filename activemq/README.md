@@ -101,7 +101,7 @@ The ActiveMQ check does not include any events at this time.
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][107].
+Need help? Contact [Datadog support][107].
 
 ## Further Reading
 Additional helpful documentation, links, and articles:

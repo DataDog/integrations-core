@@ -1,8 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.config import is_affirmative
-from .exceptions import (IncompleteConfig, IncompleteIdentity, MissingNovaEndpoint,
+from .exceptions import (IncompleteIdentity, MissingNovaEndpoint,
                          MissingNeutronEndpoint)
 from .api import KeystoneApi
 
@@ -12,24 +11,25 @@ class ScopeFetcher(object):
         pass
 
     @classmethod
-    def from_config(cls, logger, init_config, instance_config, proxy_config=None):
-        keystone_server_url = init_config.get("keystone_server_url")
-        if not keystone_server_url:
-            raise IncompleteConfig()
-
-        ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
-        auth_token = cls._get_auth_response_from_config(logger, init_config, instance_config, proxy_config=proxy_config)
-        keystone_api = KeystoneApi(logger, ssl_verify, proxy_config, keystone_server_url, auth_token)
-        # list all projects
+    def from_config(cls, logger, keystone_server_url, ssl_verify, user, proxy_config=None):
+        # Make Token authentication with explicit unscoped authorization
+        identity = cls._get_user_identity(user)
+        auth_token = cls._get_auth_response_from_config(logger, keystone_server_url, identity, ssl_verify,
+                                                        proxy_config=proxy_config)
+        keystone_api = KeystoneApi(logger, keystone_server_url, auth_token, timeout=None, ssl_verify=ssl_verify,
+                                   proxies=proxy_config)
+        # List all projects using retrieved auth token
         projects = keystone_api.get_auth_projects()
 
-        # for each project, we create an OpenStackProject object that we add to the `project_scopes` dict
+        # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict
         project_scopes = {}
         for project in projects:
             identity = {"methods": ['token'], "token": {"id": auth_token}}
             scope = {'project': {'id': project.get('id')}}
+            # Make Token authentication with project id scoped authorization
             token_resp = keystone_api.post_auth_token(identity, scope=scope)
 
+            # Retrieved token, nova and neutron endpoints
             project_auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json())
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json())
@@ -52,19 +52,14 @@ class ScopeFetcher(object):
         return Scope(auth_token, project_scopes)
 
     @classmethod
-    def _get_auth_response_from_config(cls, logger, init_config, instance_config, proxy_config=None):
-        keystone_server_url = init_config.get("keystone_server_url")
-        if not keystone_server_url:
-            raise IncompleteConfig()
-        ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
-
-        identity = cls._get_user_identity(instance_config)
-        keystone_api = KeystoneApi(logger, ssl_verify, proxy_config, keystone_server_url, None)
+    def _get_auth_response_from_config(cls, logger, keystone_server_url, identity, ssl_verify, proxy_config=None):
+        keystone_api = KeystoneApi(logger, keystone_server_url, None, timeout=None, ssl_verify=ssl_verify,
+                                   proxies=proxy_config)
         resp = keystone_api.post_auth_token(identity)
         return resp.headers.get('X-Subject-Token')
 
     @staticmethod
-    def _get_user_identity(instance_config):
+    def _get_user_identity(user):
         """
         Parse user identity out of init_config
 
@@ -74,8 +69,6 @@ class ScopeFetcher(object):
                   }
         }
         """
-        user = instance_config.get('user')
-
         if not (user and user.get('name') and user.get('password') and user.get("domain")
                 and user.get("domain").get("id")):
             raise IncompleteIdentity()

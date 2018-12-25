@@ -76,7 +76,7 @@ The SQL server check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to SQL Server to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Development
 
