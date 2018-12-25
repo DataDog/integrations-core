@@ -1,3 +1,2 @@
-
 beautifulsoup4==4.5.1
-
+requests-kerberos==0.12.0

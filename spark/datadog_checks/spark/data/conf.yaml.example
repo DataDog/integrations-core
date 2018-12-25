@@ -56,6 +56,16 @@ instances:
     # username: user
     # password: pass
 
+    # If your service uses Kerberos authentication, you can optionally
+    # specify the Kerberos strategy to use.
+    # See https://github.com/requests/requests-kerberos#mutual-authentication
+    # kerberos: "required|optional|disabled"
+    # kerberos_delegate: false
+    # kerberos_force_initiate: false
+    # kerberos_hostname: null
+    # kerberos_principal: null
+    # kerberos_keytab: /path/to/keytab_file
+
     # SSL configuration.
     # ssl_verify: false
     # ssl_cert: /path/to/cert.pem
