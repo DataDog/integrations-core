@@ -31,10 +31,12 @@ def pdh_mocks_fixture():
     pdhaddcounter = mock.patch('win32pdh.AddCounter', mock_AddCounter)
     pdhgetformattedcountervalue = mock.patch('win32pdh.GetFormattedCounterValue', mock_GetFormattedCounterValue)
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
+    pdhvalidatepath = mock.patch('win32pdh.ValidatePath', mock_ValidatePath)
 
     yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
         pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
-        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
+        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), \
+        pdhvalidatepath.start()
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -43,6 +45,7 @@ def pdh_mocks_fixture():
     pdhaddcounter.stop()
     pdhgetformattedcountervalue.stop()
     pdhcollectquerydata.stop()
+    pdhvalidatepath.stop()
 
 
 @pytest.fixture
@@ -58,10 +61,12 @@ def pdh_mocks_fixture_bad_perf_strings():
     pdhaddcounter = mock.patch('win32pdh.AddCounter', mock_AddCounter)
     pdhgetformattedcountervalue = mock.patch('win32pdh.GetFormattedCounterValue', mock_GetFormattedCounterValue)
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
+    pdhvalidatepath = mock.patch('win32pdh.ValidatePath', mock_ValidatePath)
 
     yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
         pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
-        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
+        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), \
+        pdhvalidatepath.start()
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -70,6 +75,7 @@ def pdh_mocks_fixture_bad_perf_strings():
     pdhaddcounter.stop()
     pdhgetformattedcountervalue.stop()
     pdhcollectquerydata.stop()
+    pdhvalidatepath.stop()
 
 
 def initialize_pdh_tests(lang=None):
@@ -216,3 +222,7 @@ def mock_QueryValueEx(*args, **kwargs):
 
 def mock_QueryValueExWithRaise(*args, **kwargs):
     raise WindowsError
+
+
+def mock_ValidatePath(p):
+    return 0
