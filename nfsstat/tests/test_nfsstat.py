@@ -2,10 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import logging
 
 import mock
-import pytest
-from datadog_checks.stubs import aggregator
 
 from datadog_checks.nfsstat import NfsStatCheck
 
@@ -30,11 +29,7 @@ metrics = [
 
 FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 
-
-@pytest.fixture
-def Aggregator():
-    aggregator.reset()
-    return aggregator
+log = logging.getLogger(__name__)
 
 
 class TestNfsstat:
@@ -49,7 +44,7 @@ class TestNfsstat:
         'nfsiostat_path': '/opt/datadog-agent/embedded/sbin/nfsiostat',
     }
 
-    def test_check(self, Aggregator):
+    def test_check(self, aggregator):
         instance = self.INSTANCES['main']
         c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
 
@@ -68,6 +63,6 @@ class TestNfsstat:
         ])
 
         for metric in metrics:
-            Aggregator.assert_metric(metric, tags=tags)
+            aggregator.assert_metric(metric, tags=tags)
 
-        assert Aggregator.metrics_asserted_pct == 100.0
+        assert aggregator.metrics_asserted_pct == 100.0
