@@ -241,7 +241,7 @@ jobs:
     - stage: test
       env: CHECK=teamcity
     - stage: test
-      env: CHECK=tokumx
+      env: CHECK=tokumx PYTHON3=true
     - stage: test
       env: CHECK=twemproxy PYTHON3=true
     - stage: test
