@@ -38,7 +38,7 @@ init:
   - diskperf -y
 
   # Workaround for known limitation https://github.com/docker/for-win/issues/598#issuecomment-290365862
-  - ps: Get-NetNat | Remove-NetNat -InputObject
+  - ps: get-netnat -erroraction silentlycontinue | remove-netnat
 
   # See what we get
   - docker version
