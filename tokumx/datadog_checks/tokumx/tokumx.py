@@ -3,7 +3,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import time
-from six import iteritems
+from six import iteritems, PY3
 
 import bson
 from pymongo import (
@@ -13,7 +13,6 @@ from pymongo import (
     uri_parser,
     version as py_version,
 )
-from six import PY3
 
 from datadog_checks.checks import AgentCheck
 
