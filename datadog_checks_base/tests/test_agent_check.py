@@ -157,6 +157,17 @@ class TestTags:
         assert normalized_tags is not tags
         assert normalized_tag == tag.encode('utf-8')
 
+    def test_unicode_device_name(self):
+        check = AgentCheck()
+        tags = ['test:tag']
+        device_name = u'unicode_string'
+
+        normalized_tags = check._normalize_tags(tags, device_name)
+        normalized_device_tag = normalized_tags[0]
+
+        assert len(normalized_tags) is 2
+        assert normalized_device_tag == tag.encode('utf-8')
+
 
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
