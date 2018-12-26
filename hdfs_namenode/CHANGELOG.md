@@ -1,5 +1,8 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.4.0-rc.1 / 2018-12-26
+
+
 ## 1.3.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
