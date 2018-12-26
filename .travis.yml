@@ -233,7 +233,7 @@ jobs:
     - stage: test
       env: CHECK=squid PYTHON3=true
     - stage: test
-      env: CHECK=system_core
+      env: CHECK=system_core PYTHON3=true
     - stage: test
       env: CHECK=system_swap
     - stage: test
