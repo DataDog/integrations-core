@@ -166,7 +166,7 @@ class TestTags:
         normalized_device_tag = normalized_tags[0]
 
         assert len(normalized_tags) is 2
-        assert normalized_device_tag == tag.encode('utf-8')
+        assert isinstance(normalized_device_tag, str)
 
 
 class LimitedCheck(AgentCheck):
