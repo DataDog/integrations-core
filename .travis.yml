@@ -235,7 +235,7 @@ jobs:
     - stage: test
       env: CHECK=system_core PYTHON3=true
     - stage: test
-      env: CHECK=system_swap
+      env: CHECK=system_swap PYTHON3=true
     - stage: test
       env: CHECK=tcp_check
     - stage: test
