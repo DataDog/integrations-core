@@ -8,9 +8,8 @@ import re
 
 import requests
 
-from six.moves.urllib.parse import urlparse
-
 from six import string_types, iteritems
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 
