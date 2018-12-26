@@ -5,7 +5,6 @@
 
 from collections import defaultdict
 import re
-import copy
 
 import requests
 
@@ -73,8 +72,7 @@ class GoExpvar(AgentCheck):
             'ssl_certfile': instance.get('ssl_certfile'),
             'ssl_verify': instance.get('ssl_verify'),
         }
-        ssl_params_copy = copy.copy(ssl_params)
-        for key, param in iteritems(ssl_params_copy):
+        for key, param in list(iteritems(ssl_params)):
             if param is None:
                 del ssl_params[key]
 
