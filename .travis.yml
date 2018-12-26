@@ -239,7 +239,7 @@ jobs:
     - stage: test
       env: CHECK=tcp_check
     - stage: test
-      env: CHECK=teamcity
+      env: CHECK=teamcity PYTHON3=true
     - stage: test
       env: CHECK=tokumx
     - stage: test
