@@ -9,6 +9,8 @@ import subprocess
 
 import psutil
 
+from six import iteritems
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.platform import Platform
@@ -27,17 +29,17 @@ ATTR_TO_METRIC = {
     'real':             'mem.real',
     'open_fd':          'open_file_descriptors',
     'open_handle':      'open_handles',  # win32 only
-    # FIXME: namespace me correctly (6.x), io.r_count
+    # FIXME: namespace me correctly (8.x), io.r_count
     'r_count':          'ioread_count',
-    # FIXME: namespace me correctly (6.x) io.r_bytes
+    # FIXME: namespace me correctly (8.x) io.r_bytes
     'w_count':          'iowrite_count',
-    # FIXME: namespace me correctly (6.x) io.w_count
+    # FIXME: namespace me correctly (8.x) io.w_count
     'r_bytes':          'ioread_bytes',
-    # FIXME: namespace me correctly (6.x) io.w_bytes
+    # FIXME: namespace me correctly (8.x) io.w_bytes
     'w_bytes':          'iowrite_bytes',
-    # FIXME: namespace me correctly (6.x), ctx_swt.voluntary
+    # FIXME: namespace me correctly (8.x), ctx_swt.voluntary
     'ctx_swtch_vol':    'voluntary_ctx_switches',
-    # FIXME: namespace me correctly (6.x), ctx_swt.involuntary
+    # FIXME: namespace me correctly (8.x), ctx_swt.involuntary
     'ctx_swtch_invol':  'involuntary_ctx_switches',
     'run_time':         'run_time',
     'mem_pct':          'mem.pct'
@@ -125,7 +127,7 @@ class ProcessCheck(AgentCheck):
             found = False
             for string in search_string:
                 try:
-                    # FIXME 6.x: All has been deprecated
+                    # FIXME 8.x: All has been deprecated
                     # from the doc, should be removed
                     if string == 'All':
                         found = True
@@ -371,7 +373,7 @@ class ProcessCheck(AgentCheck):
         if not isinstance(search_string, list) and pid is None and pid_file is None:
             raise ValueError('"search_string" or "pid" or "pid_file" parameter is required')
 
-        # FIXME 6.x remove me
+        # FIXME 8.x remove me
         if search_string is not None:
             if "All" in search_string:
                 self.warning('Deprecated: Having "All" in your search_string will greatly reduce the '
@@ -411,7 +413,7 @@ class ProcessCheck(AgentCheck):
 
         proc_state = self.get_process_state(name, pids, try_sudo)
 
-        # FIXME 6.x remove the `name` tag
+        # FIXME 8.x remove the `name` tag
         tags.extend(['process_name:{}'.format(name), name])
 
         self.log.debug('ProcessCheck: process {} analysed'.format(name))
@@ -420,7 +422,7 @@ class ProcessCheck(AgentCheck):
         if len(pids) == 0:
             self.warning("No matching process '{}' was found".format(name))
 
-        for attr, mname in ATTR_TO_METRIC.iteritems():
+        for attr, mname in iteritems(ATTR_TO_METRIC):
             vals = [x for x in proc_state[attr] if x is not None]
             # skip []
             if vals:
@@ -429,11 +431,11 @@ class ProcessCheck(AgentCheck):
                     self.gauge('system.processes.{}.max'.format(mname), max(vals), tags=tags)
                     self.gauge('system.processes.{}.min'.format(mname), min(vals), tags=tags)
 
-                # FIXME 6.x: change this prefix?
+                # FIXME 8.x: change this prefix?
                 else:
                     self.gauge('system.processes.{}'.format(mname), sum(vals), tags=tags)
 
-        for attr, mname in ATTR_TO_METRIC_RATE.iteritems():
+        for attr, mname in iteritems(ATTR_TO_METRIC_RATE):
             vals = [x for x in proc_state[attr] if x is not None]
             if vals:
                 self.rate('system.processes.{}'.format(mname), sum(vals), tags=tags)
@@ -453,7 +455,7 @@ class ProcessCheck(AgentCheck):
                    CRITICAL             out of the critical thresholds
                    WARNING              out of the warning thresholds
         """
-        # FIXME 6.x remove the `process:name` tag
+        # FIXME 8.x remove the `process:name` tag
         service_check_tags = tags + ["process:{}".format(name)]
         status = AgentCheck.OK
         status_str = {

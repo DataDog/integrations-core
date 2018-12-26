@@ -207,7 +207,7 @@ jobs:
     - stage: test
       env: CHECK=powerdns_recursor PYTHON3=true
     - stage: test
-      env: CHECK=process
+      env: CHECK=process PYTHON3=true
     - stage: test
       env: CHECK=prometheus
     - stage: test
