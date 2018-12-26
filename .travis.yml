@@ -227,7 +227,7 @@ jobs:
     - stage: test
       env: CHECK=ssh_check
     - stage: test
-      env: CHECK=statsd
+      env: CHECK=statsd PYTHON3=true
     - stage: test
       env: CHECK=supervisord
     - stage: test

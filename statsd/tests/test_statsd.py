@@ -6,9 +6,14 @@ import os
 
 import pytest
 
+import time
+
 from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.statsd.statsd import StatsCheck, SERVICE_CHECK_NAME_HEALTH, SERVICE_CHECK_NAME
 
+import logging
+
+log = logging.getLogger(__file__)
 
 CHECK_NAME = 'statsd'
 HOST = get_docker_hostname()
@@ -17,16 +22,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
 
 METRICS = [
-    'statsd.graphite.flush_length',
-    'statsd.messages.last_msg_seen',
+    'statsd.uptime',
+    'statsd.timers.count',
     'statsd.counters.count',
-    'statsd.graphite.last_exception',
     'statsd.gauges.count',
+    'statsd.messages.last_msg_seen',
+    'statsd.graphite.last_exception',
     'statsd.messages.bad_lines_seen',
     'statsd.graphite.flush_time',
     'statsd.graphite.last_flush',
-    'statsd.uptime',
-    'statsd.timers.count'
+    'statsd.graphite.flush_length',
 ]
 
 
@@ -41,9 +46,16 @@ def get_instance():
 @pytest.fixture(scope='session', autouse=True)
 def spin_up_statsd():
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'),
-        endpoints=URL
+        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml')
     ):
+
+        # In Python 3 the url checker does not work.
+        # It doesn't handle raw tcp connections
+        # in fact the only reason it worked in Python 2 was that it was broken
+        # The only good way to mock this would be to duplicate the logic in the check
+        # which doesn't make a very good test.
+        # Instead, just add a sleep here since the container is pretty quick to spin up
+        time.sleep(10)
         yield
 
 
@@ -51,6 +63,7 @@ def test_simple_run(aggregator, get_instance):
     stats_check = StatsCheck(CHECK_NAME, {}, {})
     stats_check.check(get_instance)
     expected_tags = ["host:{}".format(HOST), "port:{}".format(PORT)]
+
     for mname in METRICS:
         aggregator.assert_metric(mname, count=1, tags=expected_tags)
 
