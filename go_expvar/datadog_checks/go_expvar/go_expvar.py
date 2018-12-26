@@ -3,15 +3,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
 from collections import defaultdict
-from urlparse import urlparse
 import re
 
-# 3rd party
 import requests
 
-# project
+from six import string_types, iteritems
+from six.moves.urllib.parse import urlparse
+
 from datadog_checks.checks import AgentCheck
 
 DEFAULT_MAX_METRICS = 350
@@ -72,14 +71,14 @@ class GoExpvar(AgentCheck):
             'ssl_certfile': instance.get('ssl_certfile'),
             'ssl_verify': instance.get('ssl_verify'),
         }
-        for key, param in ssl_params.items():
+        for key, param in list(iteritems(ssl_params)):
             if param is None:
                 del ssl_params[key]
 
         # Load SSL configuration, if available.
         # ssl_verify can be a bool or a string
         # (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
-        if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), basestring):
+        if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), string_types):
             verify = ssl_params.get('ssl_verify')
         else:
             verify = None
@@ -251,7 +250,7 @@ class GoExpvar(AgentCheck):
             for new_key, new_content in enumerate(object):
                 yield str(new_key), new_content
         elif isinstance(object, dict):
-            for new_key, new_content in object.iteritems():
+            for new_key, new_content in iteritems(object):
                 yield str(new_key), new_content
         else:
             self.log.warning("Could not parse this object, check the json"

@@ -6,6 +6,8 @@ import pytest
 import logging
 import copy
 
+from six import iteritems
+
 from . import common
 
 log = logging.getLogger(__file__)
@@ -91,7 +93,7 @@ def test_go_expvar_mocked(go_expvar_mock, check, aggregator):
     for gauge in CHECK_GAUGES:
         aggregator.assert_metric(gauge.format(common.CHECK_NAME),
                                  count=1, tags=shared_tags)
-    for gauge, tags in CHECK_GAUGES_CUSTOM_MOCK.iteritems():
+    for gauge, tags in iteritems(CHECK_GAUGES_CUSTOM_MOCK):
         aggregator.assert_metric(gauge.format(common.CHECK_NAME),
                                  count=1, tags=shared_tags + tags)
 
@@ -144,7 +146,7 @@ def test_go_expvar_mocked_namespace(go_expvar_mock, check, aggregator):
     for gauge in CHECK_GAUGES:
         aggregator.assert_metric(gauge.format(metric_namespace),
                                  count=1, tags=shared_tags)
-    for gauge, tags in CHECK_GAUGES_CUSTOM_MOCK.iteritems():
+    for gauge, tags in iteritems(CHECK_GAUGES_CUSTOM_MOCK):
         aggregator.assert_metric(gauge.format(metric_namespace),
                                  count=1, tags=shared_tags + tags)
 
