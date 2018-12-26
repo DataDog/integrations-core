@@ -165,7 +165,7 @@ class TestTags:
         normalized_tags = check._normalize_tags(tags, device_name)
         normalized_device_tag = normalized_tags[0]
 
-        assert isinstance(normalized_device_tag, bytes)
+        assert isinstance(normalized_device_tag, str)
 
 
 class LimitedCheck(AgentCheck):
