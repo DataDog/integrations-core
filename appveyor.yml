@@ -39,9 +39,6 @@ init:
 
   # Workaround for known limitation https://github.com/docker/for-win/issues/598#issuecomment-290365862
   - ps: Stop-Service docker
-  - ps: Get-ContainerNetwork | Remove-ContainerNetwork
-  - ps: Get-NetNat | Remove-NetNat
-  - ps: Get-VMSwitch | Remove-VMSwitch
   - ps: dockerd -H npipe:// -b "none"
   - ps: Start-Service docker
 
