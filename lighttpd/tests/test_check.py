@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import unicode_literals
-import urllib2
 import os
 import subprocess
 import time
+
+from six.moves.urllib.request import urlopen
+from six.moves.urllib import error
 
 import pytest
 
@@ -24,13 +26,6 @@ CHECK_GAUGES = [
     'lighttpd.performance.idle_server',
     'lighttpd.performance.uptime',
 ]
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 @pytest.fixture
@@ -56,11 +51,11 @@ def lighttpd():
             raise Exception("lighttpd boot timed out!")
 
         try:
-            urllib2.urlopen(STATUS_URL).read()
-        except urllib2.HTTPError:
+            urlopen(STATUS_URL).read()
+        except error.HTTPError:
             # endpoint is secured, we do expect 401
             break
-        except urllib2.URLError:
+        except error.URLError:
             attempts += 1
             time.sleep(1)
 

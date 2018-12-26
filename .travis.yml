@@ -157,7 +157,7 @@ jobs:
     - stage: test
       env: CHECK=kyototycoon
     - stage: test
-      env: CHECK=lighttpd
+      env: CHECK=lighttpd PYTHON3=true
     - stage: test
       env: CHECK=linkerd
     - stage: test
