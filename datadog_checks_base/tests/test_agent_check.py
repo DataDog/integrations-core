@@ -159,14 +159,13 @@ class TestTags:
 
     def test_unicode_device_name(self):
         check = AgentCheck()
-        tags = ['test:tag']
+        tags = []
         device_name = u'unicode_string'
 
         normalized_tags = check._normalize_tags(tags, device_name)
-        normalized_device_tag = normalized_tags[1]
+        normalized_device_tag = normalized_tags[0]
 
-        assert len(normalized_tags) is 2
-        assert isinstance(normalized_device_tag, str)
+        assert isinstance(normalized_device_tag, bytes)
 
 
 class LimitedCheck(AgentCheck):
