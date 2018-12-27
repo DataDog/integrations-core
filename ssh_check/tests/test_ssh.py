@@ -54,12 +54,8 @@ class TestSshCheck:
             for tag in sc.tags:
                 assert tag in ('instance:io.netgarage.org-22', 'optional:tag1')
 
-        for thread in threading.enumerate():
-            try:
-                thread.join(self.THREAD_TIMEOUT)
-            except RuntimeError:
-                pass
-
+        # Check that we've closed all connections, if not we're leaking threads
+        self.wait_for_threads()
         assert nb_threads == threading.active_count()
 
     def test_ssh_bad_config(self, aggregator):
@@ -77,4 +73,12 @@ class TestSshCheck:
             assert sc.status == CheckSSH.CRITICAL
 
         # Check that we've closed all connections, if not we're leaking threads
+        self.wait_for_threads()
         assert nb_threads == threading.active_count()
+
+    def wait_for_threads(self):
+        for thread in threading.enumerate():
+            try:
+                thread.join(self.THREAD_TIMEOUT)
+            except RuntimeError:
+                pass
