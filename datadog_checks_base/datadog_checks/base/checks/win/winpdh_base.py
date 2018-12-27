@@ -162,8 +162,11 @@ class PDHBaseCheck(AgentCheck):
                     precision=precision
                 )
             except Exception as e:
-                self.log.warning('Could not create counter {}\\{} due to {}'.format(counterset, counter_name, e))
-                self.log.warning('Datadog Agent will not report {}'.format(dd_name))
+                self.log.debug(
+                    'Could not create counter {}\\{} due to {}, will not report {}.'.format(
+                        counterset, counter_name, e, dd_name
+                    )
+                )
                 self._missing_counters[(counterset, inst_name, counter_name, dd_name, mtype)] = (
                     datatypes, remote_machine, check_instance, message
                 )
