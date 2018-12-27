@@ -115,15 +115,15 @@ class PDHBaseCheck(AgentCheck):
     def check(self, instance):
         self.log.debug("PDHBaseCheck: check()")
         key = hash_mutable(instance)
-        cache_counter_instances = is_affirmative(instance.get('cache_counter_instances', True))
+        refresh_counters = is_affirmative(instance.get('refresh_counters', True))
 
-        if not cache_counter_instances:
+        if refresh_counters:
             for counter, values in list(iteritems(self._missing_counters)):
                 self._make_counters(key, ([counter], values))
 
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             try:
-                if not cache_counter_instances:
+                if refresh_counters:
                     counter.collect_counters()
                 vals = counter.get_all_values()
                 for instance_name, val in iteritems(vals):
