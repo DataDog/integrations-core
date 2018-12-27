@@ -64,6 +64,7 @@ jobs:
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
+        - if [ -n "$PYTHON3" ]; ddev validate py3 ${CHECK}; fi
         - travis_retry ddev test --cov ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
