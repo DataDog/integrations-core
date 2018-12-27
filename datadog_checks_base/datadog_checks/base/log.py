@@ -15,6 +15,9 @@ TRACE_LEVEL = 7
 
 
 class AgentLogger(logging.getLoggerClass()):
+    def critical(self, msg, *args, **kwargs):
+        raise NotImplementedError('The critical log level is reserved for agent shutdowns.')
+
     def trace(self, msg, *args, **kwargs):
         if self.isEnabledFor(TRACE_LEVEL):
             self._log(TRACE_LEVEL, msg, args, **kwargs)
