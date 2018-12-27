@@ -10,6 +10,7 @@ except ImportError:
 
 from .utils.common import ensure_bytes
 
+# Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
 
 
