@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import traceback
 import win32wnet
 from six import iteritems
 
@@ -138,9 +137,7 @@ class PDHBaseCheck(AgentCheck):
                     metric_func(dd_name, val, tags)
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error(
-                    "Failed to get data for %s %s: %s %s" % (inst_name, dd_name, str(e), traceback.format_exc())
-                )
+                self.log.error("Failed to get data for %s %s: %s" % (inst_name, dd_name, str(e)))
 
     def _make_counters(self, key, counter_data):
         counter_list, (datatypes, remote_machine, check_instance, message) = counter_data
