@@ -4,6 +4,7 @@
 import threading
 
 import pytest
+import time
 
 from datadog_checks.ssh_check import CheckSSH
 
@@ -60,6 +61,8 @@ class TestSshCheck:
                 assert tag in ('instance:io.netgarage.org-22', 'optional:tag1')
 
         # Check that we've closed all connections, if not we're leaking threads
+        # It seems Python3 takes a small amount of time to finish closing threads
+        time.sleep(2)
         assert nb_threads == threading.active_count()
 
     def test_ssh_bad_config(self, aggregator):

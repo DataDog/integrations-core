@@ -225,7 +225,7 @@ jobs:
     - stage: test
       env: CHECK=sqlserver
     - stage: test
-      env: CHECK=ssh_check
+      env: CHECK=ssh_check PYTHON3=true
     - stage: test
       env: CHECK=statsd PYTHON3=true
     - stage: test
