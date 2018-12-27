@@ -6,8 +6,6 @@ import os
 
 import pytest
 
-import time
-
 from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.statsd.statsd import StatsCheck, SERVICE_CHECK_NAME_HEALTH, SERVICE_CHECK_NAME
 
@@ -46,16 +44,9 @@ def get_instance():
 @pytest.fixture(scope='session', autouse=True)
 def spin_up_statsd():
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml')
+        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'),
+        log_patterns=['server is up']
     ):
-
-        # In Python 3 the url checker does not work.
-        # It doesn't handle raw tcp connections
-        # in fact the only reason it worked in Python 2 was that it was broken
-        # The only good way to mock this would be to duplicate the logic in the check
-        # which doesn't make a very good test.
-        # Instead, just add a sleep here since the container is pretty quick to spin up
-        time.sleep(10)
         yield
 
 
