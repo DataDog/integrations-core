@@ -85,7 +85,7 @@ jobs:
     - stage: test
       env: CHECK=cassandra_nodetool PYTHON3=true
     - stage: test
-      env: CHECK=ceph
+      env: CHECK=ceph PYTHON3=true
     - stage: test
       env: CHECK=cisco_aci
     - stage: test
