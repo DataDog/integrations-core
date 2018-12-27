@@ -63,8 +63,6 @@ def test_package_rich_comparison(package):
     if six.PY3:
         with pytest.raises(TypeError):
             package < 42
-    else:
-        assert (package < 42) is True
 
 
 def test_package__hash__(package):
