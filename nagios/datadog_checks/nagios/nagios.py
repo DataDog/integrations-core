@@ -5,10 +5,18 @@
 from collections import namedtuple
 import json
 import re
-from inspect import getargspec
+from six import next, PY3
+from six.moves import map
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.tailfile import TailFile
+
+if not PY3:
+    from inspect import getargspec
+else:
+    from inspect import getfullargspec
+    getargspec = getfullargspec
+
 
 # fields order for each event type, as named tuples
 EVENT_FIELDS = {
@@ -242,14 +250,14 @@ class NagiosTailer(object):
 
         self.tail = TailFile(self.log, self.log_path, self._parse_line)
         self.gen = self.tail.tail(line_by_line=False, move_end=True)
-        self.gen.next()
+        next(self.gen)
 
     def check(self):
         self._line_parsed = 0
         # read until the end of file
         try:
             self.log.debug("Start nagios check for file %s" % (self.log_path))
-            self.gen.next()
+            next(self.gen)
             self.log.debug("Done nagios check for file %s (parsed %s line(s))" % (self.log_path, self._line_parsed))
         except StopIteration as e:
             self.log.exception(e)
@@ -259,7 +267,7 @@ class NagiosTailer(object):
         try:
             # Escape characters that will be interpreted as regex bits
             # e.g. [ and ] in "[SERVICEPERFDATA]"
-            regex = re.sub(r'[[\]*]', r'.', file_template)
+            regex = re.sub(r'[\[\]*]', r'.', file_template)
             regex = re.sub(r'\$([^\$]*)\$', r'(?P<\1>[^\$]*)', regex)
             self.line_pattern = re.compile(regex)
         except Exception as e:
@@ -318,7 +326,7 @@ class NagiosEventLogTailer(NagiosTailer):
                 return False
 
             # and parse the rest of the line
-            parts = map(lambda p: p.strip(), remainder.split(';'))
+            parts = list(map(lambda p: p.strip(), remainder.split(';')))
             # Chop parts we don't recognize
             parts = parts[: len(fields._fields)]
 

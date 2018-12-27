@@ -7,6 +7,7 @@ import time
 import pytest
 
 from datadog_checks.nagios import Nagios
+from datadog_checks.utils.common import ensure_bytes
 from .common import (
     CHECK_NAME, CUSTOM_TAGS, NAGIOS_TEST_LOG, NAGIOS_TEST_HOST, NAGIOS_TEST_ALT_HOST_TEMPLATE,
     NAGIOS_TEST_HOST_TEMPLATE, NAGIOS_TEST_SVC, NAGIOS_TEST_SVC_TEMPLATE, NAGIOS_TEST_ALT_SVC_TEMPLATE,
@@ -21,7 +22,10 @@ class TestEventLogTailer:
         """
 
         # Get the config
-        config, nagios_cfg = get_config("log_file={}\n".format(NAGIOS_TEST_LOG), events=True, tags=CUSTOM_TAGS)
+        config, nagios_cfg = get_config(
+            ensure_bytes("log_file={}\n".format(NAGIOS_TEST_LOG)),
+            events=True, tags=CUSTOM_TAGS
+        )
 
         # Set up the check
         nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
@@ -87,7 +91,7 @@ class TestEventLogTailer:
         """
         Make sure the tailer continues to parse nagios as the file grows
         """
-        test_data = open(NAGIOS_TEST_LOG).read()
+        test_data = ensure_bytes(open(NAGIOS_TEST_LOG).read())
         ITERATIONS = 1
         log_file = tempfile.NamedTemporaryFile(mode="a+b")
 
@@ -312,7 +316,7 @@ class TestPerfDataTailer:
         nagios.check(config['instances'][0])
 
         with open(NAGIOS_TEST_SVC, "r") as f:
-            nagios_perf = f.read()
+            nagios_perf = ensure_bytes(f.read())
 
         perfdata_file.write(nagios_perf)
         perfdata_file.flush()
@@ -377,7 +381,7 @@ class TestPerfDataTailer:
         nagios.check(config['instances'][0])
 
         with open(NAGIOS_TEST_HOST, "r") as f:
-            nagios_perf = f.read()
+            nagios_perf = ensure_bytes(f.read())
 
         perfdata_file.write(nagios_perf)
         perfdata_file.flush()
@@ -411,7 +415,7 @@ class TestPerfDataTailer:
         """
         Write log data to log file
         """
-        self.log_file.write(log_data + "\n")
+        self.log_file.write(ensure_bytes(log_data + "\n"))
         self.log_file.flush()
 
 
@@ -419,6 +423,7 @@ def get_config(nagios_conf, events=False, service_perf=False, host_perf=False, t
     """
     Helper to generate a valid Nagios configuration
     """
+    nagios_conf = ensure_bytes(nagios_conf)
     tags = [] if tags is None else tags
 
     NAGIOS_CFG = tempfile.NamedTemporaryFile(mode="a+b")
