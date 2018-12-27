@@ -77,6 +77,7 @@ class TestCheckCommandOutput:
         assert matches == 2
 
 
+@pytest.mark.docker
 class TestCheckDockerLogs:
     def test_no_matches(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
