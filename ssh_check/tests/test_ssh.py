@@ -62,7 +62,7 @@ class TestSshCheck:
 
         # Check that we've closed all connections, if not we're leaking threads
         # It seems Python3 takes a small amount of time to finish closing threads
-        time.sleep(2)
+        time.sleep(5)
         assert nb_threads == threading.active_count()
 
     def test_ssh_bad_config(self, aggregator):
