@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import mock
+
+from datadog_checks.oracle import queries
 
 
 def test__get_sys_metrics(aggregator, check):
-    query = "SELECT METRIC_NAME, VALUE, BEGIN_TIME FROM GV$SYSMETRIC ORDER BY BEGIN_TIME"
+    query = queries.SYSTEM
     con = mock.MagicMock()
     cur = mock.MagicMock()
     con.cursor.return_value = cur
@@ -20,7 +21,7 @@ def test__get_sys_metrics(aggregator, check):
 
 
 def test__get_process_metrics(aggregator, check):
-    query = "SELECT PROGRAM, {} FROM GV$PROCESS".format(','.join(check.PROCESS_METRICS.keys()))
+    query = queries.PROCESS.format(','.join(check.PROCESS_METRICS.keys()))
     con = mock.MagicMock()
     cur = mock.MagicMock()
     con.cursor.return_value = cur
@@ -42,15 +43,15 @@ def test__get_process_metrics(aggregator, check):
 
 
 def test__get_tablespace_metrics(aggregator, check):
-    query = "SELECT TABLESPACE_NAME, sum(BYTES), sum(MAXBYTES) FROM sys.dba_data_files GROUP BY TABLESPACE_NAME"
+    query = queries.TABLESPACE
 
     con = mock.MagicMock()
     cur = mock.MagicMock()
     cur.fetchall.return_value = [
-        ["offline", None, 100],
-        ["normal", 50, 100],
-        ["full", 100, 100],
-        ["size_0", 1, None]
+        ["offline", None, 100, 0],
+        ["normal", 50, 100, 50],
+        ["full", 100, 100, 100],
+        ["size_0", 1, None, 100]
     ]
     con.cursor.return_value = cur
 
