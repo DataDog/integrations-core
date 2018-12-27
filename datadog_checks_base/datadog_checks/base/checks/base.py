@@ -318,11 +318,11 @@ class AgentCheck(object):
         - normalize tags to type `str`
         - always return a list
         """
-        normalized_tags = self._normalize_tags_type(tags)
-
         if device_name:
             self._log_deprecation("device_name")
-            normalized_tags.append("device:{}".format(device_name))
+            tags.append("device:{}".format(device_name))
+
+        normalized_tags = self._normalize_tags_type(tags)
 
         return normalized_tags
 
