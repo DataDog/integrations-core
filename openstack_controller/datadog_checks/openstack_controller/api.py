@@ -224,7 +224,6 @@ class SimpleApi(AbstractApi):
         Returns all projects in the domain
         """
         url = urljoin(self.keystone_endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
-        # headers = {'X-Auth-Token': project_token}
         try:
             r = self._make_request(url, self.headers)
             return r.get('projects', [])
@@ -252,7 +251,10 @@ class Authenticator(object):
                                           proxies=proxies, timeout=timeout)
 
         # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict
-        # project_scopes = {}
+        last_auth_token = None
+        last_project_auth_scope = None
+        last_nova_endpoint = None
+        last_neutron_endpoint = None
         for project in projects:
             identity = {"methods": ['token'], "token": {"id": keystone_auth_token}}
             scope = {'project': {'id': project.get('id')}}
@@ -275,8 +277,14 @@ class Authenticator(object):
             project_name = project.get('name')
             project_id = project.get('id')
             if project_name is not None and project_id is not None:
-                return Credential(auth_token, project_auth_scope, nova_endpoint, neutron_endpoint)
-
+                last_auth_token = auth_token
+                last_project_auth_scope = project_auth_scope
+                last_nova_endpoint = nova_endpoint
+                last_neutron_endpoint = neutron_endpoint
+            else:
+                break
+        if last_auth_token and last_project_auth_scope and last_nova_endpoint and last_neutron_endpoint:
+            return Credential(last_auth_token, last_project_auth_scope, last_nova_endpoint, last_neutron_endpoint)
         return None
 
     @staticmethod
