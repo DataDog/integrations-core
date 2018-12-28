@@ -30,11 +30,11 @@ CI_IDENTIFIERS = {
 
 
 def running_on_appveyor():
-    return any(ev.startswith(CI_IDENTIFIERS.get('appveyor') for ev in os.environ))
+    return any(ev.startswith(CI_IDENTIFIERS.get('appveyor')) for ev in os.environ)
 
 
 def running_on_travis():
-    return any(ev.startswith(CI_IDENTIFIERS.get('travis') for ev in os.environ))
+    return any(ev.startswith(CI_IDENTIFIERS.get('travis')) for ev in os.environ)
 
 
 def running_on_ci():

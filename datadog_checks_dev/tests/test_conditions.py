@@ -11,6 +11,7 @@ from datadog_checks.dev.conditions import (
 )
 from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.utils import running_on_appveyor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
