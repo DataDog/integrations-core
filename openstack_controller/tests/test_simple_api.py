@@ -139,7 +139,6 @@ def test_from_config():
             cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
             assert isinstance(cred, Credential)
             assert cred.auth_token == "fake_token"
-            assert cred.project_auth_token == "fake_token"
             assert cred.name == "name 1"
             assert cred.domain_id == "2222"
             assert cred.tenant_id == "1111"

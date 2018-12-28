@@ -691,7 +691,7 @@ class OpenStackControllerCheck(AgentCheck):
             # TODO: NOTE: During authentication we use /v3/auth/projects and here we use /v3/projects.
             # TODO: These api don't seems to return the same thing however the latter contains the former.
             # TODO: Is this expected or could we just have one call with proper config?
-            projects = self.get_projects(api.auth_token, include_project_name_rules, exclude_project_name_rules)
+            projects = self.get_projects(include_project_name_rules, exclude_project_name_rules)
 
             if collect_project_metrics:
                 for name, project in iteritems(projects):
@@ -802,8 +802,8 @@ class OpenStackControllerCheck(AgentCheck):
         return self._apis.get(self.instance_name).get_flavors_detail(query_params)
 
     # Keystone Proxy Methods
-    def get_projects(self, project_token, include_project_name_rules, exclude_project_name_rules):
-        projects = self._apis.get(self.instance_name).get_projects(project_token)
+    def get_projects(self, include_project_name_rules, exclude_project_name_rules):
+        projects = self._apis.get(self.instance_name).get_projects()
         project_by_name = {}
         for project in projects:
             name = project.get('name')

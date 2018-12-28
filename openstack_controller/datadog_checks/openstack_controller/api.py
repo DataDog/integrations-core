@@ -219,14 +219,14 @@ class SimpleApi(AbstractApi):
             self.logger.warning('Unable to get the list of all network ids: {}'.format(e))
             raise e
 
-    def get_projects(self, project_token):
+    def get_projects(self):
         """
         Returns all projects in the domain
         """
         url = urljoin(self.keystone_endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
-        headers = {'X-Auth-Token': project_token}
+        # headers = {'X-Auth-Token': project_token}
         try:
-            r = self._make_request(url, headers)
+            r = self._make_request(url, self.headers)
             return r.get('projects', [])
 
         except Exception as e:
@@ -245,23 +245,23 @@ class Authenticator(object):
         identity = cls._get_user_identity(user)
         post_auth_token_resp = cls._post_auth_token(logger, keystone_endpoint, identity, ssl_verify=ssl_verify,
                                                     proxies=proxies, timeout=timeout, scope=UNSCOPED_AUTH)
-        auth_token = post_auth_token_resp.headers.get('X-Subject-Token')
+        keystone_auth_token = post_auth_token_resp.headers.get('X-Subject-Token')
         # List all projects using retrieved auth token
-        headers = {'X-Auth-Token': auth_token}
+        headers = {'X-Auth-Token': keystone_auth_token}
         projects = cls._get_auth_projects(logger, keystone_endpoint, headers=headers, ssl_verify=ssl_verify,
                                           proxies=proxies, timeout=timeout)
 
         # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict
         # project_scopes = {}
         for project in projects:
-            identity = {"methods": ['token'], "token": {"id": auth_token}}
+            identity = {"methods": ['token'], "token": {"id": keystone_auth_token}}
             scope = {'project': {'id': project.get('id')}}
             # Make Token authentication with project id scoped authorization
             token_resp = cls._post_auth_token(logger, keystone_endpoint, identity, ssl_verify=ssl_verify,
                                               proxies=proxies, timeout=timeout, scope=scope)
 
             # Retrieved token, nova and neutron endpoints
-            project_auth_token = token_resp.headers.get('X-Subject-Token')
+            auth_token = token_resp.headers.get('X-Subject-Token')
             nova_endpoint = cls._get_nova_endpoint(token_resp.json())
             neutron_endpoint = cls._get_neutron_endpoint(token_resp.json())
             project_auth_scope = {
@@ -275,7 +275,7 @@ class Authenticator(object):
             project_name = project.get('name')
             project_id = project.get('id')
             if project_name is not None and project_id is not None:
-                return Credential(auth_token, project_auth_scope, project_auth_token, nova_endpoint, neutron_endpoint)
+                return Credential(auth_token, project_auth_scope, nova_endpoint, neutron_endpoint)
 
         return None
 
@@ -399,9 +399,8 @@ class Authenticator(object):
 
 
 class Credential(object):
-    def __init__(self, auth_token, auth_scope, project_auth_token, nova_endpoint, neutron_endpoint):
+    def __init__(self, auth_token, auth_scope, nova_endpoint, neutron_endpoint):
         self.auth_token = auth_token
-        self.project_auth_token = project_auth_token
         self.name = auth_scope.get("project", {}).get("name")
         self.domain_id = auth_scope.get("project", {}).get("domain", {}).get("id")
         self.tenant_id = auth_scope.get("project", {}).get("id")
