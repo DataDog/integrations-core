@@ -7,8 +7,12 @@ import pytest
 
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.utils import running_on_appveyor
 
-pytestmark = pytest.mark.docker
+pytestmark = [
+    pytest.mark.docker,
+    pytest.mark.skipif(running_on_appveyor(), reason="Docker is not supported on Appveyor"),
+]
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')

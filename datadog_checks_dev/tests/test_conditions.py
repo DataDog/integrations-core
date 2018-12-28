@@ -78,6 +78,7 @@ class TestCheckCommandOutput:
 
 
 @pytest.mark.docker
+@pytest.mark.skipif(running_on_appveyor(), reason="Docker is not supported on Appveyor")
 class TestCheckDockerLogs:
     def test_no_matches(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')

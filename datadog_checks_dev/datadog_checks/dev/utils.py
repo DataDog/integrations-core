@@ -23,14 +23,22 @@ ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
-CI_IDENTIFIERS = (
-    'APPVEYOR_',
-    'TRAVIS_',
-)
+CI_IDENTIFIERS = {
+    'appveyor': 'APPVEYOR_',
+    'travis': 'TRAVIS_',
+}
+
+
+def running_on_appveyor():
+    return any(ev.startswith(CI_IDENTIFIERS.get('appveyor') for ev in os.environ))
+
+
+def running_on_travis():
+    return any(ev.startswith(CI_IDENTIFIERS.get('travis') for ev in os.environ))
 
 
 def running_on_ci():
-    return any(ev.startswith(CI_IDENTIFIERS) for ev in os.environ)
+    return any(ev.startswith(CI_IDENTIFIERS.values()) for ev in os.environ)
 
 
 if PY3:
