@@ -281,10 +281,10 @@ class Authenticator(object):
                 last_project_auth_scope = project_auth_scope
                 last_nova_endpoint = nova_endpoint
                 last_neutron_endpoint = neutron_endpoint
-            else:
-                break
+
         if last_auth_token and last_project_auth_scope and last_nova_endpoint and last_neutron_endpoint:
             return Credential(last_auth_token, last_project_auth_scope, last_nova_endpoint, last_neutron_endpoint)
+
         return None
 
     @staticmethod

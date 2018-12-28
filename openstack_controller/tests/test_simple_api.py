@@ -139,9 +139,9 @@ def test_from_config():
             cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
             assert isinstance(cred, Credential)
             assert cred.auth_token == "fake_token"
-            assert cred.name == "name 1"
-            assert cred.domain_id == "2222"
-            assert cred.tenant_id == "1111"
+            assert cred.name == "name 2"
+            assert cred.domain_id == "3333"
+            assert cred.tenant_id == "2222"
             assert cred.nova_endpoint == "http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876"
             assert cred.neutron_endpoint == "http://10.0.2.15:9292"
 
