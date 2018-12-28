@@ -3,31 +3,99 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests
 import simplejson as json
+
 from six.moves.urllib.parse import urljoin
+from datadog_checks.config import is_affirmative
+
 from .settings import (DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION, DEFAULT_NEUTRON_API_VERSION,
                        DEFAULT_PAGINATED_LIMIT, DEFAULT_MAX_RETRY)
-from .exceptions import (InstancePowerOffFailure, AuthenticationNeeded, KeystoneUnreachable)
+from .exceptions import (InstancePowerOffFailure, AuthenticationNeeded)
+from .scopes import Authenticator
 
 
-UNSCOPED_AUTH = 'unscoped'
+class ApiFactory(object):
+
+    @staticmethod
+    def create(logger, proxies, instance_config):
+        keystone_server_url = instance_config.get("keystone_server_url")
+        ssl_verify = is_affirmative(instance_config.get("ssl_verify", True))
+        paginated_limit = instance_config.get('paginated_limit')
+        request_timeout = instance_config.get('request_timeout')
+        user = instance_config.get("user")
+
+        api = SimpleApi(logger, keystone_server_url, timeout=request_timeout, ssl_verify=ssl_verify, proxies=proxies,
+                        limit=paginated_limit)
+        api.connect(user)
+        return api
 
 
 class AbstractApi(object):
-
-    def __init__(self, logger, endpoint, auth_token, timeout=DEFAULT_API_REQUEST_TIMEOUT, ssl_verify=False,
-                 proxies=None):
+    def __init__(self, logger):
         self.logger = logger
+
+    def get_keystone_endpoint(self):
+        raise NotImplementedError()
+
+    def get_nova_endpoint(self):
+        raise NotImplementedError()
+
+    def get_neutron_endpoint(self):
+        raise NotImplementedError()
+
+    def get_projects(self, project_token):
+        raise NotImplementedError()
+
+    def get_os_hypervisor_uptime(self, hypervisor_id):
+        raise NotImplementedError()
+
+    def get_os_aggregates(self):
+        raise NotImplementedError()
+
+    def get_os_hypervisors_detail(self):
+        raise NotImplementedError()
+
+    def get_servers_detail(self, query_params):
+        raise NotImplementedError()
+
+    def get_flavors_detail(self, query_params):
+        raise NotImplementedError()
+
+    def get_server_diagnostics(self, server_id):
+        raise NotImplementedError()
+
+    def get_project_limits(self, project_id):
+        raise NotImplementedError()
+
+    def get_networks(self):
+        raise NotImplementedError()
+
+
+class SimpleApi(AbstractApi):
+    def __init__(self, logger, keystone_endpoint, ssl_verify=False, proxies=None,
+                 timeout=DEFAULT_API_REQUEST_TIMEOUT, limit=DEFAULT_PAGINATED_LIMIT):
+        super(SimpleApi, self).__init__(logger)
+
+        self.keystone_endpoint = keystone_endpoint
         self.ssl_verify = ssl_verify
         self.proxies = proxies
-        self.endpoint = endpoint
-        self.auth_token = auth_token
-        self.headers = {'X-Auth-Token': auth_token}
         self.timeout = timeout
+        self.paginated_limit = limit
+        self.nova_endpoint = None
+        self.neutron_endpoint = None
+        self.auth_token = None
+        self.headers = None
         # Cache for the `_make_request` method
         self.cache = {}
 
-    def get_endpoint(self):
-        self._make_request(self.endpoint, self.headers)
+    def connect(self, user):
+        credentials = Authenticator.from_config(self.logger, self.keystone_endpoint, user, self.ssl_verify,
+                                                self.proxies, self.timeout)
+        self.logger.debug("Nova Url: %s", credentials.nova_endpoint)
+        self.nova_endpoint = credentials.nova_endpoint
+        self.logger.debug("Neutron Url: %s", credentials.neutron_endpoint)
+        self.neutron_endpoint = credentials.neutron_endpoint
+        self.auth_token = credentials.auth_token
+        self.headers = {'X-Auth-Token': credentials.auth_token}
 
     def _make_request(self, url, headers, params=None):
         """
@@ -68,45 +136,46 @@ class AbstractApi(object):
         self.cache[cache_key] = jresp
         return jresp
 
+    def get_keystone_endpoint(self):
+        self._make_request(self.keystone_endpoint, self.headers)
 
-class ComputeApi(AbstractApi):
-    def __init__(self, logger, endpoint, auth_token, timeout=DEFAULT_API_REQUEST_TIMEOUT, ssl_verify=False,
-                 proxies=None, limit=DEFAULT_PAGINATED_LIMIT):
-        super(ComputeApi, self).__init__(logger, endpoint, auth_token, timeout=timeout, ssl_verify=ssl_verify,
-                                         proxies=proxies)
-        self.paginated_limit = limit
+    def get_nova_endpoint(self):
+        self._make_request(self.nova_endpoint, self.headers)
+
+    def get_neutron_endpoint(self):
+        self._make_request(self.neutron_endpoint, self.headers)
 
     def get_os_hypervisor_uptime(self, hyp_id):
-        url = '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hyp_id)
+        url = '{}/os-hypervisors/{}/uptime'.format(self.nova_endpoint, hyp_id)
         resp = self._make_request(url, self.headers)
         return resp.get('hypervisor', {}).get('uptime')
 
     def get_os_aggregates(self):
-        url = '{}/os-aggregates'.format(self.endpoint)
+        url = '{}/os-aggregates'.format(self.nova_endpoint)
         aggregate_list = self._make_request(url, self.headers)
         return aggregate_list.get('aggregates', [])
 
     def get_os_hypervisors_detail(self):
-        url = '{}/os-hypervisors/detail'.format(self.endpoint)
+        url = '{}/os-hypervisors/detail'.format(self.nova_endpoint)
         hypervisors = self._make_request(url, self.headers)
         return hypervisors.get('hypervisors', [])
 
     def get_servers_detail(self, query_params):
-        url = '{}/servers/detail'.format(self.endpoint)
+        url = '{}/servers/detail'.format(self.nova_endpoint)
         return self._get_paginated_list(url, 'servers', query_params)
 
     def get_server_diagnostics(self, server_id):
-        url = '{}/servers/{}/diagnostics'.format(self.endpoint, server_id)
+        url = '{}/servers/{}/diagnostics'.format(self.nova_endpoint, server_id)
         return self._make_request(url, self.headers)
 
     def get_project_limits(self, tenant_id):
-        url = '{}/limits'.format(self.endpoint)
+        url = '{}/limits'.format(self.nova_endpoint)
         server_stats = self._make_request(url, self.headers, params={"tenant_id": tenant_id})
         limits = server_stats.get('limits', {}).get('absolute', {})
         return limits
 
     def get_flavors_detail(self, query_params):
-        url = '{}/flavors/detail'.format(self.endpoint)
+        url = '{}/flavors/detail'.format(self.nova_endpoint)
         return self._get_paginated_list(url, 'flavors', query_params)
 
     def _get_paginated_list(self, url, obj, query_params):
@@ -138,15 +207,8 @@ class ComputeApi(AbstractApi):
 
         return result
 
-
-class NeutronApi(AbstractApi):
-    def __init__(self, logger, endpoint, auth_token, timeout=DEFAULT_API_REQUEST_TIMEOUT, ssl_verify=False,
-                 proxies=None):
-        super(NeutronApi, self).__init__(logger, endpoint, auth_token, timeout=timeout, ssl_verify=ssl_verify,
-                                         proxies=proxies)
-
     def get_networks(self):
-        url = '{}/{}/networks'.format(self.endpoint, DEFAULT_NEUTRON_API_VERSION)
+        url = '{}/{}/networks'.format(self.neutron_endpoint, DEFAULT_NEUTRON_API_VERSION)
 
         try:
             networks = self._make_request(url, self.headers)
@@ -155,67 +217,11 @@ class NeutronApi(AbstractApi):
             self.logger.warning('Unable to get the list of all network ids: {}'.format(e))
             raise e
 
-
-class KeystoneApi(AbstractApi):
-    def __init__(self, logger, endpoint, auth_token, timeout=DEFAULT_API_REQUEST_TIMEOUT, ssl_verify=False,
-                 proxies=None):
-        super(KeystoneApi, self).__init__(logger, endpoint, auth_token, timeout=timeout, ssl_verify=ssl_verify,
-                                          proxies=proxies)
-
-    def post_auth_token(self, identity, scope=UNSCOPED_AUTH):
-        auth_url = urljoin(self.endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
-        try:
-            payload = {'auth': {'identity': identity, 'scope': scope}}
-            headers = {'Content-Type': 'application/json'}
-
-            resp = requests.post(
-                auth_url,
-                headers=headers,
-                data=json.dumps(payload),
-                verify=self.ssl_verify,
-                timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=self.proxies,
-            )
-            resp.raise_for_status()
-            self.logger.debug("url: %s || response: %s", auth_url, resp.json())
-            return resp
-
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            msg = "Failed keystone auth with identity:{identity} scope:{scope} @{url}".format(
-                identity=identity,
-                scope=scope,
-                url=auth_url)
-            self.logger.debug(msg)
-            raise KeystoneUnreachable(msg)
-
-    def get_auth_projects(self):
-        auth_url = ""
-        try:
-            auth_url = urljoin(self.endpoint, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
-            resp = requests.get(
-                auth_url,
-                headers=self.headers,
-                verify=self.ssl_verify,
-                timeout=DEFAULT_API_REQUEST_TIMEOUT,
-                proxies=self.proxies
-            )
-            resp.raise_for_status()
-            jresp = resp.json()
-            self.logger.debug("url: %s || response: %s", auth_url, jresp)
-            projects = jresp.get('projects')
-            return projects
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-            msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
-                    url=auth_url,
-                    ex=e)
-            self.logger.debug(msg)
-            raise KeystoneUnreachable(msg)
-
     def get_projects(self, project_token):
         """
         Returns all projects in the domain
         """
-        url = urljoin(self.endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
+        url = urljoin(self.keystone_endpoint, "{}/{}".format(DEFAULT_KEYSTONE_API_VERSION, "projects"))
         headers = {'X-Auth-Token': project_token}
         try:
             r = self._make_request(url, headers)

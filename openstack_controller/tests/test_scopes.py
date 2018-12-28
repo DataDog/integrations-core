@@ -5,9 +5,8 @@ import copy
 import mock
 import pytest
 import logging
-from six import iteritems
 
-from datadog_checks.openstack_controller.scopes import (Project, Scope, ScopeFetcher)
+from datadog_checks.openstack_controller.scopes import (Credential, Authenticator)
 from datadog_checks.openstack_controller.exceptions import (IncompleteIdentity, MissingNovaEndpoint,
                                                             MissingNeutronEndpoint)
 
@@ -18,45 +17,45 @@ log = logging.getLogger('test_openstack_controller')
 
 
 def test_get_endpoint():
-    scope_fetcher = ScopeFetcher()
-    assert scope_fetcher._get_nova_endpoint(
+    authenticator = Authenticator()
+    assert authenticator._get_nova_endpoint(
         common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
     with pytest.raises(MissingNovaEndpoint):
-        scope_fetcher._get_nova_endpoint({})
+        authenticator._get_nova_endpoint({})
 
-    assert scope_fetcher._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
+    assert authenticator._get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
     with pytest.raises(MissingNeutronEndpoint):
-        scope_fetcher._get_neutron_endpoint({})
+        authenticator._get_neutron_endpoint({})
 
-    assert scope_fetcher._get_valid_endpoint({}, None, None) is None
-    assert scope_fetcher._get_valid_endpoint({'token': {}}, None, None) is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{}]}}, None, None) is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
+    assert authenticator._get_valid_endpoint({}, None, None) is None
+    assert authenticator._get_valid_endpoint({'token': {}}, None, None) is None
+    assert authenticator._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
+    assert authenticator._get_valid_endpoint({'token': {"catalog": []}}, None, None) is None
+    assert authenticator._get_valid_endpoint({'token': {"catalog": [{}]}}, None, None) is None
+    assert authenticator._get_valid_endpoint({'token': {"catalog": [{
         u'type': u'compute',
         u'name': u'nova'}]}}, None, None) is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
+    assert authenticator._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [],
         u'type': u'compute',
         u'name': u'nova'}]}}, None, None) is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
+    assert authenticator._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
+    assert authenticator._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{u'url': u'dummy_url', u'interface': u'dummy'}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
+    assert authenticator._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{u'url': u'dummy_url'}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
+    assert authenticator._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{u'interface': u'public'}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') is None
-    assert scope_fetcher._get_valid_endpoint({'token': {"catalog": [{
+    assert authenticator._get_valid_endpoint({'token': {"catalog": [{
         u'endpoints': [{u'url': u'dummy_url', u'interface': u'internal'}],
         u'type': u'compute',
         u'name': u'nova'}]}}, 'nova', 'compute') == 'dummy_url'
@@ -76,18 +75,18 @@ GOOD_USERS = [
 
 
 def _test_bad_user(user):
-    scope_fetcher = ScopeFetcher()
+    authenticator = Authenticator()
     with pytest.raises(IncompleteIdentity):
-        scope_fetcher._get_user_identity(user['user'])
+        authenticator._get_user_identity(user['user'])
 
 
 def test_get_user_identity():
-    scope_fetcher = ScopeFetcher()
+    authenticator = Authenticator()
     for user in BAD_USERS:
         _test_bad_user(user)
 
     for user in GOOD_USERS:
-        parsed_user = scope_fetcher._get_user_identity(user['user'])
+        parsed_user = authenticator._get_user_identity(user['user'])
         assert parsed_user == {'methods': ['password'], 'password': user}
 
 
@@ -101,14 +100,22 @@ class MockHTTPResponse(object):
 
 
 PROJECTS_RESPONSE = [
+        {},
+        {
+            "domain_id": "0000",
+        },
         {
             "domain_id": "1111",
-            "id": "3333",
+            "id": "0000",
+        },
+        {
+            "domain_id": "2222",
+            "id": "1111",
             "name": "name 1"
         },
         {
-            "domain_id": "22222",
-            "id": "4444",
+            "domain_id": "3333",
+            "id": "2222",
             "name": "name 2"
         },
     ]
@@ -122,52 +129,50 @@ PROJECT_RESPONSE = [
     ]
 
 
-def test_from_config_simple():
+def test_from_config():
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
-    with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
+    with mock.patch('datadog_checks.openstack_controller.scopes.Authenticator._post_auth_token',
                     return_value=mock_response):
-        with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
+        with mock.patch('datadog_checks.openstack_controller.scopes.Authenticator._get_auth_projects',
                         return_value=PROJECTS_RESPONSE):
-            scope = ScopeFetcher.from_config(log, 'http://10.0.2.15:5000', True, GOOD_USERS[0]['user'])
-            assert isinstance(scope, Scope)
-
-            assert scope.auth_token == 'fake_token'
-            assert len(scope.project_scopes) == 2
-            expected_tenant_id = ['3333', '4444']
-            for index, scope in iteritems(scope.project_scopes):
-                assert isinstance(scope, Project)
-                assert scope.auth_token == 'fake_token'
-                assert scope.tenant_id in expected_tenant_id
-                expected_tenant_id.remove(scope.tenant_id)
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            assert isinstance(cred, Credential)
+            assert cred.auth_token == "fake_token"
+            assert cred.project_auth_token == "fake_token"
+            assert cred.name == "name 1"
+            assert cred.domain_id == "2222"
+            assert cred.tenant_id == "1111"
+            assert cred.nova_endpoint == "http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876"
+            assert cred.neutron_endpoint == "http://10.0.2.15:9292"
 
 
 def test_from_config_with_missing_name():
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
-    project_response_without_name = copy.deepcopy(PROJECTS_RESPONSE)
+    project_response_without_name = copy.deepcopy(PROJECT_RESPONSE)
     del project_response_without_name[0]["name"]
 
-    with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
+    with mock.patch('datadog_checks.openstack_controller.scopes.Authenticator._post_auth_token',
                     return_value=mock_response):
-        with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
+        with mock.patch('datadog_checks.openstack_controller.scopes.Authenticator._get_auth_projects',
                         return_value=project_response_without_name):
-            scope = ScopeFetcher.from_config(log, 'http://10.0.2.15:5000', True, GOOD_USERS[0]['user'])
-            assert len(scope.project_scopes) == 0
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            assert cred is None
 
 
 def test_from_config_with_missing_id():
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
-    project_response_without_name = copy.deepcopy(PROJECTS_RESPONSE)
+    project_response_without_name = copy.deepcopy(PROJECT_RESPONSE)
     del project_response_without_name[0]["id"]
 
-    with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
+    with mock.patch('datadog_checks.openstack_controller.scopes.Authenticator._post_auth_token',
                     return_value=mock_response):
-        with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
+        with mock.patch('datadog_checks.openstack_controller.scopes.Authenticator._get_auth_projects',
                         return_value=project_response_without_name):
-            scope = ScopeFetcher.from_config(log, 'http://10.0.2.15:5000', True, GOOD_USERS[0]['user'])
-            assert len(scope.project_scopes) == 0
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            assert cred is None

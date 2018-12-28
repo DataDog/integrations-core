@@ -2,8 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
+import logging
 import simplejson as json
-from datadog_checks.openstack_controller.api import ComputeApi
+from datadog_checks.openstack_controller.api import SimpleApi
+
+
+log = logging.getLogger('test_openstack_controller')
 
 
 def get_os_hypervisor_uptime_pre_v2_52_response(url, header, params=None, timeout=None):
@@ -31,16 +35,16 @@ def get_os_hypervisor_uptime_post_v2_53_response(url, header, params=None, timeo
 
 
 def test_get_os_hypervisor_uptime(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisor_uptime_pre_v2_52_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisor_uptime(1) == \
+        api = SimpleApi(None, None)
+        assert api.get_os_hypervisor_uptime(1) == \
             " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
 
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisor_uptime_post_v2_53_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisor_uptime(1) == \
+        api = SimpleApi(None, None)
+        assert api.get_os_hypervisor_uptime(1) == \
             " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
 
 
@@ -68,10 +72,10 @@ def get_os_aggregates_response(url, headers, params=None, timeout=None):
 
 
 def test_get_os_aggregates(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_aggregates_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_aggregates() == [
+        api = SimpleApi(None, None)
+        assert api.get_os_aggregates() == [
             {
                 "availability_zone": "london",
                 "created_at": "2016-12-27T23:47:32.911515",
@@ -196,10 +200,10 @@ def get_os_hypervisors_detail_post_v2_53_response(url, headers, params=None, tim
 
 
 def test_get_os_hypervisors_detail(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_33_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisors_detail() == [
+        api = SimpleApi(None, None)
+        assert api.get_os_hypervisors_detail() == [
             {
                 "cpu_info": {
                     "arch": "x86_64",
@@ -241,10 +245,10 @@ def test_get_os_hypervisors_detail(aggregator):
             }
         ]
 
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_53_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_os_hypervisors_detail() == [
+        api = SimpleApi(None, None)
+        assert api.get_os_hypervisors_detail() == [
             {
                 "cpu_info": {
                     "arch": "x86_64",
@@ -390,10 +394,10 @@ def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=No
 
 
 def test_get_servers_detail(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_servers_detail_post_v2_63_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_servers_detail(None) == [
+        api = SimpleApi(None, None)
+        assert api.get_servers_detail(None) == [
             {
                 "OS-DCF:diskConfig": "AUTO",
                 "OS-EXT-AZ:availability_zone": "nova",
@@ -557,10 +561,10 @@ def get_server_diagnostics_post_v2_1_response(url, headers, params=None, timeout
 
 
 def test_get_server_diagnostics(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_server_diagnostics_post_v2_48_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_server_diagnostics(None) == {
+        api = SimpleApi(None, None)
+        assert api.get_server_diagnostics(None) == {
             "config_drive": True,
             "cpu_details": [
                 {
@@ -607,10 +611,10 @@ def test_get_server_diagnostics(aggregator):
             "uptime": 46664
         }
 
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_server_diagnostics_post_v2_1_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_server_diagnostics(None) == {
+        api = SimpleApi(None, None)
+        assert api.get_server_diagnostics(None) == {
             "cpu0_time": 17300000000,
             "memory": 524288,
             "vda_errors": -1,
@@ -659,10 +663,10 @@ def get_project_limits_response(url, headers, params=None, timeout=None):
 
 
 def test_get_project_limits(aggregator):
-    with mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+    with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_project_limits_response):
-        compute_api = ComputeApi(None, False, None, "foo", "foo")
-        assert compute_api.get_project_limits(None) == {
+        api = SimpleApi(None, None)
+        assert api.get_project_limits(None) == {
                 "maxImageMeta": 128,
                 "maxPersonality": 5,
                 "maxPersonalitySize": 10240,
