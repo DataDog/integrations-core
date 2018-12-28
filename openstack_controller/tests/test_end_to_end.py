@@ -129,9 +129,9 @@ def test_scenario(make_request, aggregator):
     with open(auth_projects_response_path, 'r') as f:
         auth_projects_response = json.loads(f.read())
 
-    with mock.patch('datadog_checks.openstack_controller.scopes.Authenticator._post_auth_token',
+    with mock.patch('datadog_checks.openstack_controller.api.Authenticator._post_auth_token',
                     return_value=auth_tokens_response):
-        with mock.patch('datadog_checks.openstack_controller.scopes.Authenticator._get_auth_projects',
+        with mock.patch('datadog_checks.openstack_controller.api.Authenticator._get_auth_projects',
                         return_value=auth_projects_response):
             check.check(common.MOCK_CONFIG['instances'][0])
 
