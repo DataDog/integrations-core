@@ -6,6 +6,7 @@ from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
+
 class KubeControllerManagerCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
@@ -80,6 +81,7 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
                         {'go_goroutines': 'goroutines'},
                         {'go_threads': 'threads'},
                         {'process_open_fds': 'open_fds'},
+                        {'process_max_fds': 'max_fds'},
                         {'rest_client_requests_total': 'client.http.requests'},
                         {'node_collector_evictions_number': 'nodes.evictions'},
                         {'node_collector_unhealthy_nodes_in_zone': 'nodes.unhealthy'},

@@ -9,9 +9,10 @@ kube_controller_manager.queue.depth,gauge,,,,"Current depth, by queue",-1,kube_c
 kube_controller_manager.queue.adds,count,,,,Adds handled by queue,0,kube_controller_manager,queue.adds
 kube_controller_manager.queue.retries,count,,,,Retries handled by queue,-1,kube_controller_manager,queue.retries
 kube_controller_manager.rate_limiter.use,gauge,,,,"Usage of the rate limiter, by controller",-1,kube_controller_manager,rate_limiter.use
-kube_controller_manager.rate_limiter.goroutines,gauge,,,,Number of goroutines that currently exist,0,kube_controller_manager,goroutines
-kube_controller_manager.rate_limiter.threads,gauge,,,,Number of OS threads created,0,kube_controller_manager,threads
-kube_controller_manager.rate_limiter.open_fds,gauge,,,,Number of open file descriptors,0,kube_controller_manager,open_fds
-kube_controller_manager.nodes.evictions,count,,,,"Count of node eviction events, per zone",-1,kube_controller_manager,nodes.evictions
+kube_controller_manager.goroutines,gauge,,,,Number of goroutines that currently exist,0,kube_controller_manager,goroutines
+kube_controller_manager.threads,gauge,,,,Number of OS threads created,0,kube_controller_manager,threads
+kube_controller_manager.open_fds,gauge,,,,Number of open file descriptors,0,kube_controller_manager,open_fds
+kube_controller_manager.max_fds,gauge,,,,Maximum allowed open file descriptors,0,kube_controller_manager,max_fds
+kube_controller_manager.nodes.evictions,count,,,,Count of node eviction events, per zone,-1,kube_controller_manager,nodes.evictions
 kube_controller_manager.nodes.count,gauge,,,,Number of registered nodes per zone,0,kube_controller_manager,nodes.count
 kube_controller_manager.nodes.unhealthy,gauge,,,,Number of unhealthy nodes per zone,-1,kube_controller_manager,nodes.unhealthy
