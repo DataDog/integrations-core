@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from six import iteritems
 from kubernetes.config.dateutil import parse_rfc3339
 
 # If these fields are missing or empty, the service check

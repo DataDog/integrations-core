@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from kubernetes import client, config
-from six import iteritems, string_types
 
 try:
     import datadog_agent
