@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
 
-from .conftest import not_appveyor
+from .common import not_appveyor
 
 pytestmark = [pytest.mark.docker, not_appveyor]
 HERE = os.path.dirname(os.path.abspath(__file__))
