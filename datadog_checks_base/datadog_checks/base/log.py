@@ -5,8 +5,10 @@ import logging
 
 try:
     import datadog_agent
+    running_on_agent = True
 except ImportError:
     from .stubs import datadog_agent
+    running_on_agent = False
 
 from .utils.common import ensure_bytes
 
@@ -15,12 +17,13 @@ TRACE_LEVEL = 7
 
 
 class AgentLogger(logging.getLoggerClass()):
-    def critical(self, msg, *args, **kwargs):
-        raise NotImplementedError('The critical log level is reserved for agent shutdowns.')
-
     def trace(self, msg, *args, **kwargs):
         if self.isEnabledFor(TRACE_LEVEL):
             self._log(TRACE_LEVEL, msg, args, **kwargs)
+
+    if not running_on_agent:
+        def critical(self, msg, *args, **kwargs):
+            raise NotImplementedError('The critical log level is reserved for agent shutdowns.')
 
 
 class AgentLogHandler(logging.Handler):
