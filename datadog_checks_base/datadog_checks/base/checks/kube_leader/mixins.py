@@ -67,10 +67,12 @@ class KubeLeaderElectionMixin(object):
             raise ValueError("Unknown kind {}".format(kind))
 
         if not obj:
-            return ValueError("Empty input object")
+            raise ValueError("Empty input object")
 
-        # Can raise AttributeError if object is not a v1 kube object
-        annotations = obj.metadata.annotations
+        try:
+            annotations = obj.metadata.annotations
+        except AttributeError:
+            raise ValueError("Invalid input object type")
 
         for name in ELECTION_ANNOTATION_NAMES:
             if name in annotations:

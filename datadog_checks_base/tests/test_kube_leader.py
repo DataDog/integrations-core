@@ -11,8 +11,8 @@ from six import iteritems, string_types
 from kubernetes.config.dateutil import format_rfc3339
 from kubernetes.client import ApiClient
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.base.checks.kube_leader import ElectionRecord, KubeLeaderElectionMixin
+from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
+from datadog_checks.base.checks.kube_leader import ElectionRecord
 
 
 RAW_VALID_RECORD = (
@@ -54,14 +54,6 @@ CM_TAGS = [
 ]
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 @pytest.fixture()
 def mock_incluster():
     # Disable the kube config loader to avoid errors on check run
@@ -85,11 +77,6 @@ def mock_read_configmap():
         'datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_config_map',
     ) as m:
         yield m
-
-
-class SimpleLeaderCheck(AgentCheck, KubeLeaderElectionMixin):
-    def check(self, instance):
-        self.check_election_status(instance)
 
 
 def make_record(holder=None, duration=None, transitions=None, acquire=None, renew=None):
@@ -187,23 +174,23 @@ class TestElectionRecord:
 @mock.patch('datadog_checks.base.checks.kube_leader.mixins.config')
 class TestClientConfig:
     def test_config_incluster(self, config):
-        c = SimpleLeaderCheck()
+        c = KubeLeaderElectionBaseCheck()
         c.check({})
         config.load_incluster_config.assert_called_once()
 
     @mock.patch('datadog_checks.base.checks.kube_leader.mixins.datadog_agent')
     def test_config_kubeconfig(self, datadog_agent, config):
         datadog_agent.get_config.return_value = "/file/path"
-        c = SimpleLeaderCheck()
+        c = KubeLeaderElectionBaseCheck()
         c.check({})
         datadog_agent.get_config.assert_called_once_with('kubernetes_kubeconfig_path')
         config.load_kube_config.assert_called_once_with(config_file="/file/path")
 
 
-class TestMixin:
+class TestBaseCheck:
     def test_valid_endpoints(self, aggregator, mock_read_endpoints, mock_incluster):
         mock_read_endpoints.return_value = make_fake_object(RAW_VALID_RECORD)
-        c = SimpleLeaderCheck()
+        c = KubeLeaderElectionBaseCheck()
         c.check(EP_INSTANCE)
 
         assert c.get_warnings() == []
@@ -215,7 +202,7 @@ class TestMixin:
 
     def test_valid_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object(RAW_VALID_RECORD)
-        c = SimpleLeaderCheck()
+        c = KubeLeaderElectionBaseCheck()
         c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []
@@ -227,7 +214,7 @@ class TestMixin:
 
     def test_empty_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object()
-        c = SimpleLeaderCheck()
+        c = KubeLeaderElectionBaseCheck()
         c.check(CM_INSTANCE)
 
         assert len(c.get_warnings()) == 1
@@ -237,7 +224,7 @@ class TestMixin:
         mock_read_configmap.return_value = make_fake_object(
             make_record(holder="me", duration=30, renew=datetime.now(), acquire="2018-12-18T12:32:22Z")
         )
-        c = SimpleLeaderCheck()
+        c = KubeLeaderElectionBaseCheck()
         c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []
@@ -248,7 +235,7 @@ class TestMixin:
 
     def test_invalid_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object(make_record(holder="me"))
-        c = SimpleLeaderCheck()
+        c = KubeLeaderElectionBaseCheck()
         c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []
