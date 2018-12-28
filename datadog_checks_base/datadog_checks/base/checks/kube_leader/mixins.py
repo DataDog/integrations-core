@@ -96,8 +96,8 @@ class KubeLeaderElectionMixin(object):
             self.service_check(prefix + ".status", AgentCheck.CRITICAL, tags=tags, message=reason)
             return  # Stop here
 
-        # Report gauges
-        self.gauge(prefix + ".transitions", record.transitions, tags)
+        # Report metrics
+        self.monotonic_count(prefix + ".transitions", record.transitions, tags)
         self.gauge(prefix + ".lease_duration", record.lease_duration, tags)
 
         leader_status = AgentCheck.OK
