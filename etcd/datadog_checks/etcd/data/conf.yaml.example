@@ -64,6 +64,7 @@ instances:
   #    - <KEY_2>:<VALUE_2>
 
 
+  ## Note: the following configuration params are only available when the `use_preview` param is set to False
   #  API endpoint of your etcd instance
   #  url: "https://server:port"
 
