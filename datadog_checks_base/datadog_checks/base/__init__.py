@@ -4,7 +4,6 @@
 from .__about__ import __version__
 from .checks import AgentCheck
 from .checks.openmetrics import OpenMetricsBaseCheck
-from .checks.kube_leader import KubeLeaderElectionMixin, KubeLeaderElectionBaseCheck
 
 from .config import is_affirmative
 from .errors import ConfigurationError
@@ -16,10 +15,15 @@ try:
 except ImportError:
     PDHBaseCheck = None
 
+# Kubernetes dep will not always be installed
+try:
+    from .checks.kube_leader import KubeLeaderElectionBaseCheck
+except ImportError:
+    KubeLeaderElectionBaseCheck = None
+
 __all__ = [
     '__version__',
     'AgentCheck',
-    'KubeLeaderElectionMixin',
     'KubeLeaderElectionBaseCheck',
     'OpenMetricsBaseCheck',
     'PDHBaseCheck',
