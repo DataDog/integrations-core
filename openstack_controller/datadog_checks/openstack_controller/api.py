@@ -44,7 +44,7 @@ class AbstractApi(object):
     def get_neutron_endpoint(self):
         raise NotImplementedError()
 
-    def get_projects(self, project_token):
+    def get_projects(self):
         raise NotImplementedError()
 
     def get_os_hypervisor_uptime(self, hypervisor_id):
