@@ -11,12 +11,12 @@ from datadog_checks.dev.utils import (
 
 
 def test_running_on_appveyor():
-    with mock.patch.dict(os.environ, {'APPVEYOR_FOO': 'foo'}):
+    with mock.patch.dict(os.environ, {'APPVEYOR': 'true'}):
         assert running_on_appveyor() is True
         assert running_on_ci() is True
 
 
 def test_running_on_travis():
-    with mock.patch.dict(os.environ, {'TRAVIS_FOO': 'foo'}):
+    with mock.patch.dict(os.environ, {'TRAVIS': 'true'}):
         assert running_on_travis() is True
         assert running_on_ci() is True

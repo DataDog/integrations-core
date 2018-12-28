@@ -24,8 +24,8 @@ ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
 CI_IDENTIFIERS = {
-    'appveyor': 'APPVEYOR_',
-    'travis': 'TRAVIS_',
+    'appveyor': 'APPVEYOR',
+    'travis': 'TRAVIS',
 }
 
 
