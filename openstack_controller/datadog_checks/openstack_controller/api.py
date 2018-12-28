@@ -240,7 +240,7 @@ class Authenticator(object):
 
     @classmethod
     def from_config(cls, logger, keystone_endpoint, user, ssl_verify=False, proxies=None,
-                    timeout=DEFAULT_KEYSTONE_API_VERSION):
+                    timeout=DEFAULT_API_REQUEST_TIMEOUT):
         # Make Token authentication with explicit unscoped authorization
         identity = cls._get_user_identity(user)
         post_auth_token_resp = cls._post_auth_token(logger, keystone_endpoint, identity, ssl_verify=ssl_verify,
@@ -281,8 +281,8 @@ class Authenticator(object):
 
     @staticmethod
     def _post_auth_token(logger, keystone_endpoint, identity, ssl_verify=False, proxies=None,
-                         timeout=DEFAULT_KEYSTONE_API_VERSION, scope=UNSCOPED_AUTH):
-        auth_url = urljoin(keystone_endpoint, "{}/auth/tokens".format(timeout))
+                         timeout=DEFAULT_API_REQUEST_TIMEOUT, scope=UNSCOPED_AUTH):
+        auth_url = urljoin(keystone_endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         try:
             payload = {'auth': {'identity': identity, 'scope': scope}}
             headers = {'Content-Type': 'application/json'}
@@ -309,10 +309,10 @@ class Authenticator(object):
 
     @staticmethod
     def _get_auth_projects(logger, keystone_endpoint, headers=None, ssl_verify=False, proxies=None,
-                           timeout=DEFAULT_KEYSTONE_API_VERSION):
+                           timeout=DEFAULT_API_REQUEST_TIMEOUT):
         auth_url = ""
         try:
-            auth_url = urljoin(keystone_endpoint, "{}/auth/projects".format(timeout))
+            auth_url = urljoin(keystone_endpoint, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
             resp = requests.get(
                 auth_url,
                 headers=headers,
