@@ -38,7 +38,7 @@ def running_on_travis():
 
 
 def running_on_ci():
-    return any(ev.startswith(CI_IDENTIFIERS.values()) for ev in os.environ)
+    return any(ev.startswith(tuple(CI_IDENTIFIERS.values())) for ev in os.environ)
 
 
 if PY3:
