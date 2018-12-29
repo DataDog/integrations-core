@@ -14,21 +14,18 @@ class IbmWasCheck(AgentCheck):
 
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self.collect_stats = {}
-
     def check(self, instance):
+        self.collect_stats = {}
         self.validate_config(instance)
         self.setup_config(instance)
         custom_tags = instance.get('custom_tags', [])
 
         data = self.make_request("servers")
         server_data_xml = etree.fromstring(data)
-        node_list = self.get_path_from_element(server_data_xml, "Node")
+        node_list = self.get_node_from_root(server_data_xml, "Node")
 
         for node in node_list:
-            server_list = self.get_path_from_element(node, 'Server')
+            server_list = self.get_node_from_root(node, 'Server')
             node_tags = list(custom_tags)
             node_tags.append('node:{}'.format(node.get('name')))
 
@@ -38,11 +35,11 @@ class IbmWasCheck(AgentCheck):
 
                 for category, prefix in iteritems(metrics.METRIC_CATEGORIES):
                     self.log.debug("Collecting {} stats".format(category))
-                    if self.collect_stats[category]:
-                        stats = self.get_xml_path(server, category)
+                    if self.collect_stats.get(category):
+                        stats = self.get_node_from_name(server, category)
                         self.process_stats(stats, prefix, server_tags)
 
-    def get_xml_path(self, xml_data, path):
+    def get_node_from_name(self, xml_data, path):
         # XMLPath returns a list, but there should only be one element here since we start
         # the search within a given Node/server
         data = xml_data.xpath('//Stat[normalize-space(@name)="{}"]'.format(path))
@@ -52,7 +49,7 @@ class IbmWasCheck(AgentCheck):
             self.warning('Error finding {} stats in XML output.'.format(path))
             return []
 
-    def get_path_from_element(self, xml_data, path):
+    def get_node_from_root(self, xml_data, path):
         return xml_data.xpath('//{}'.format(path))
 
     # The XML will have Stat Nodes and Nodes that contain the metrics themselves

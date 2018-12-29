@@ -38,5 +38,5 @@ METRIC_CATEGORIES = {
     'JVM Runtime': 'jvm',
     'JDBC Connection Pools': 'jdbc',
     'Servlet Session Manager': 'servlet_session',
-    'Thread Pools': 'thread_pools',
+    'Thread Pools': 'thread_pool',
 }

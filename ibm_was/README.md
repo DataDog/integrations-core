@@ -6,6 +6,8 @@ This check monitors [Ibm_was][1].
 
 ## Setup
 
+The IBM WAS Datadog Integration collects enabled PMI Counters from the WebSphere Application Server environment. Setup requires enabling the PerfServlet as documented on the [IBM documentation][8]
+
 ### Installation
 
 The Ibm_was check is included in the [Datadog Agent][2] package, so you do not
@@ -27,11 +29,11 @@ need to install anything else on your server.
 
 ### Metrics
 
-Ibm_was does not include any metrics.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
-Ibm_was does not include any service checks.
+See [service_checks.json][7] for a list of service checks provided by this check
 
 ### Events
 
@@ -46,3 +48,6 @@ Need help? Contact [Datadog Support][5].
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://docs.datadoghq.com/help/
+[6]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
+[7]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/service_checks.json
+[8]: https://www.ibm.com/support/knowledgecenter/en/SSAW57_8.5.5/com.ibm.websphere.nd.multiplatform.doc/ae/tprf_devprfservlet.html

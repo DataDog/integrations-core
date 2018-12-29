@@ -9,5 +9,8 @@ HERE = path.dirname(path.abspath(__file__))
 FIXTURE_DIR = os.path.join(HERE, "fixtures/")
 
 INSTANCE = {
-    'servlet_url': 'http://hostname/wasPerfTool/servlet/perfservlet'
+    'servlet_url': 'http://hostname/wasPerfTool/servlet/perfservlet',
+    'collect_thread_pool_stats': False,
+    'collect_servlet_session_stats': False,
+    'collect_jdbc_stats': False
 }
