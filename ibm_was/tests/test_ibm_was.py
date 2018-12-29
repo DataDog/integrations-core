@@ -10,15 +10,13 @@ from . import common
 
 def mock_data(file):
     filepath = os.path.join(common.FIXTURE_DIR, file)
-    with open(filepath, "r") as f:
+    with open(filepath, "rb") as f:
         data = f.read()
     return data
 
 
 @mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request',
             return_value=mock_data("server.xml"))
-def test_check(aggregator, instance):
+def test_check(mock_server, aggregator, instance):
     check = IbmWasCheck('ibm_was', {}, {})
     check.check(instance)
-
-    # aggregator.assert_all_metrics_covered()
