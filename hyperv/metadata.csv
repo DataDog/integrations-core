@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-hyperv.dynamic_memory_balancer.available_memory,gauge,,byte,,The amount of memory left on the node.,1,hyperv,
+hyper_v.dynamic_memory_balancer.available_memory,gauge,,byte,,The amount of memory left on the node.,1,hyperv,
 hyperv.dynamic_memory_balancer.average_pressure,gauge,,percent,,This counter represents the average pressure in the VM.,-1,hyperv,
 hyperv.hypervisor_logical_processor.guest_run_time,gauge,,percent,,The percentage of time spent by the processor in guest code.,0,hyperv,
 hyperv.hypervisor_logical_processor.hypervisor_run_time,gauge,,percent,,The percentage of time spent by the processor in hypervisor code.,0,hyperv,
