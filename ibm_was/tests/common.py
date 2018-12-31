@@ -12,5 +12,23 @@ INSTANCE = {
     'servlet_url': 'http://hostname/wasPerfTool/servlet/perfservlet',
     'collect_thread_pool_stats': False,
     'collect_servlet_session_stats': False,
-    'collect_jdbc_stats': False
+    'collect_jdbc_stats': False,
+    'custom_queries': [
+        {
+            'metric_prefix': 'jdbc_custom',
+            'tagKeys':
+                [
+                    'JDBCKey',
+                    'JDBCKey2'
+                ],
+            'stat': 'JDBC Connection Custom'
+        },
+        {
+            'metric_prefix': 'jvm_custom',
+            'tagKeys': [
+                'JVMKey'
+            ],
+            'stat': 'JVM Runtime Custom'
+        }
+    ]
 }

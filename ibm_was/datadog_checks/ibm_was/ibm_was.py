@@ -6,8 +6,8 @@ from lxml import etree
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from . import metrics
+from datadog_checks.base import AgentCheck, is_affirmative
+from . import metrics, validation
 
 
 class IbmWasCheck(AgentCheck):
@@ -16,8 +16,12 @@ class IbmWasCheck(AgentCheck):
 
     def check(self, instance):
         self.collect_stats = {}
-        self.validate_config(instance)
+        validation.validate_config(instance)
         self.setup_config(instance)
+        custom_recursion_tags, custom_metric_categories = self.setup_custom_queries(instance)
+        metrics.RECURSION_TAGS = dict(metrics.RECURSION_TAGS, **custom_recursion_tags)
+        metrics.METRIC_CATEGORIES = dict(metrics.METRIC_CATEGORIES, **custom_metric_categories)
+
         custom_tags = instance.get('custom_tags', [])
 
         data = self.make_request("servers")
@@ -81,9 +85,15 @@ class IbmWasCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, tags='url')
         return resp
 
-    def validate_config(self, instance):
-        if not instance.get('servlet_url'):
-            raise ConfigurationError("Please specify a servlet_url in the configuration file")
+    def setup_custom_queries(self, instance):
+        custom_recursion_tags = {}
+        custom_metric_categories = {}
+        custom_queries = instance.get('custom_queries')
+        for query in custom_queries:
+            validation.validate_query(query)
+            custom_metric_categories[query['stat']] = query['metric_prefix']
+            custom_recursion_tags[query['metric_prefix']] = [key for key in query['tagKeys']]
+        return custom_recursion_tags, custom_metric_categories
 
     def setup_config(self, instance):
         for category, prefix in iteritems(metrics.METRIC_CATEGORIES):

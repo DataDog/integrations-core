@@ -20,3 +20,9 @@ def mock_data(file):
 def test_check(mock_server, aggregator, instance):
     check = IbmWasCheck('ibm_was', {}, {})
     check.check(instance)
+
+
+@mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request',
+            return_value=mock_data("server.xml"))
+def test_custom_queries(mock_server, aggregator, instance):
+    pass
