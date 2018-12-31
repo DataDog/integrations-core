@@ -12,6 +12,8 @@ from datadog_checks.dev.conditions import (
 from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
 
+from .common import not_appveyor
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
 
@@ -78,6 +80,8 @@ class TestCheckCommandOutput:
 
 
 class TestCheckDockerLogs:
+    pytestmark = [pytest.mark.docker, not_appveyor]
+
     def test_no_matches(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
         run_command(['docker-compose', '-f', compose_file, 'down'])

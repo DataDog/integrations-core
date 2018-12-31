@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 import requests
 
@@ -10,6 +11,7 @@ from .constants import CHANGELOG_LABEL_PREFIX
 API_URL = 'https://api.github.com'
 PR_ENDPOINT = API_URL + '/repos/DataDog/{}/pulls/{}'
 DEFAULT_REPO = 'integrations-core'
+PR_PATTERN = re.compile(r'\(#(\d+)\)')  # match something like `(#1234)` and return `1234` in a group
 
 
 def get_auth_info(config=None):
@@ -90,3 +92,25 @@ def from_contributor(pr_payload):
         return pr_payload.get('head', {}).get('repo', {}).get('fork') is True
     except Exception:
         return False
+
+
+def parse_pr_number(log_line):
+    match = re.search(PR_PATTERN, log_line)
+    if match:
+        return match.group(1)
+
+
+def parse_pr_numbers(git_log_lines):
+    """
+    Parse PR numbers from commit messages. At GitHub those have the format:
+
+        `here is the message (#1234)`
+
+    being `1234` the PR number.
+    """
+    prs = []
+    for line in git_log_lines:
+        pr_number = parse_pr_number(line)
+        if pr_number:
+            prs.append(pr_number)
+    return prs
