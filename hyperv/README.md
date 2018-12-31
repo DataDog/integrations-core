@@ -1,4 +1,4 @@
-# Agent Check: Hyper-V
+# Agent Check: HyperV
 
 ## Overview
 
@@ -31,11 +31,11 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-Hyper-V does not include any service checks.
+HyperV does not include any service checks.
 
 ### Events
 
-Hyper-V does not include any events.
+HyperV does not include any events.
 
 ## Troubleshooting
 

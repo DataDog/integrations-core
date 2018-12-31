@@ -1,5 +1,5 @@
 {
-  "display_name": "Hyper-V",
+  "display_name": "HyperV",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "hyperv",
@@ -12,7 +12,7 @@
   "supported_os": [
     "windows"
   ],
-  "public_title": "Datadog-Hyper-V Integration",
+  "public_title": "Datadog-HyperV Integration",
   "categories": [
     "azure",
     "cloud",
