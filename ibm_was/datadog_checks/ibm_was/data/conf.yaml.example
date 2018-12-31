@@ -6,6 +6,12 @@ instances:
   #
   - servlet_url: localhost
 
+  ## @param skip_proxy - boolean - optional - default: False
+  ## Wheter or not to skip the proxy configured in the Agent's config file when
+  ## making the request to the PerfServlet 
+  #
+  # skip_proxy: False
+
   ## @param collect_jdbc_stats - boolean - optional - default: True
   ## Whether or not to collect JDBC Connection Pool stats
   #
@@ -32,15 +38,23 @@ instances:
   ## If the `stat` node has sub `stat` nodes, the name of these nodes must be specified
   ## in the order they occur within the XML document and will be displayed as tags.
   ## The metric will be named `ibmwas.<metric_prefix>.<xml_attribute_name>` and be tagged with the 
-  ## `name` value of the corresponding `tagKeys` attributes. 
+  ## `name` value of the corresponding `tag_keys` attributes. 
+  ##
+  ## <Stat name="Thread Pools Custom">
+  ##   <Stat name="AriesThreadPool">
+  ##     <TimeStatistic name="ActiveTime" totalTime="0" ... />
+  ##   </Stat>
+  ##   <Stat name="Default">
+  ##     <CountStatistic name="DeclaredThreadHungCount" count="0" ... />
+  ##   </Stat>
+  ## </Stat>
+  ##
+  ## The following custom query would emit:
+  ## self.gauge('ibm_was.thread_pools.CreateCount', value=0, tags=['threadKey:AriesThreadPool', ...])
+  ## self.gauge('ibm_was.thread_pools.DeclaredThreadHungCount', value=0, tags=['threadKey:Default', ...])
   #
   # custom_queries:
-  #  - metric_prefix: "jdbc"
-  #    stat: "JDBC Connection Custom"
-  #    tagKeys:
-  #      - "JDBCKey"
-  #      - "JDBCKey2"
-  #  - metric_prefix: "jvm"
-  #    stat: "JVM Runtime Custom"
-  #    tagKeys:
-  #      - "JVMKey"
+  #  - metric_prefix: "thread_pools"
+  #    stat: "Thread Pools Custom"
+  #    tag_keys:
+  #      - "threadKey"

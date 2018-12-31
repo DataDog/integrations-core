@@ -6,11 +6,6 @@ import pytest
 from . import common
 
 
-@pytest.fixture(scope='session')
-def dd_environment():
-    yield
-
-
 @pytest.fixture(scope="session")
 def instance():
     return common.INSTANCE

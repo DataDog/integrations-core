@@ -15,12 +15,9 @@ class IbmWasCheck(AgentCheck):
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
 
     def check(self, instance):
-        self.collect_stats = {}
         validation.validate_config(instance)
-        self.setup_config(instance)
-        custom_recursion_tags, custom_metric_categories = self.setup_custom_queries(instance)
-        metrics.RECURSION_TAGS = dict(metrics.RECURSION_TAGS, **custom_recursion_tags)
-        metrics.METRIC_CATEGORIES = dict(metrics.METRIC_CATEGORIES, **custom_metric_categories)
+        collect_stats = self.setup_configured_stats(instance)
+        nested_tags, metric_categories = self.append_custom_queries(instance, collect_stats)
 
         custom_tags = instance.get('custom_tags', [])
 
@@ -32,16 +29,15 @@ class IbmWasCheck(AgentCheck):
             server_list = self.get_node_from_root(node, 'Server')
             node_tags = list(custom_tags)
             node_tags.append('node:{}'.format(node.get('name')))
-
             for server in server_list:
                 server_tags = ['server:{}'.format(server.get('name'))]
                 server_tags.extend(node_tags)
 
-                for category, prefix in iteritems(metrics.METRIC_CATEGORIES):
+                for category, prefix in iteritems(metric_categories):
                     self.log.debug("Collecting {} stats".format(category))
-                    if self.collect_stats.get(category):
+                    if collect_stats.get(category):
                         stats = self.get_node_from_name(server, category)
-                        self.process_stats(stats, prefix, server_tags)
+                        self.process_stats(stats, prefix, metric_categories, nested_tags, server_tags)
 
     def get_node_from_name(self, xml_data, path):
         # XMLPath returns a list, but there should only be one element here since we start
@@ -59,23 +55,23 @@ class IbmWasCheck(AgentCheck):
     # The XML will have Stat Nodes and Nodes that contain the metrics themselves
     # We have to recursively go through each Stat Node to properly setup tags
     # where each Stat will have a different tag key depending on the context.
-    def process_stats(self, stats, prefix, tags, recursion_level=0):
+    def process_stats(self, stats, prefix, metric_categories, nested_tags, tags, recursion_level=0):
         for child in stats:
-            if child.tag in metrics.METRIC_TAGS:
+            if child.tag in metrics.METRIC_VALUE_FIELDS:
                 self.submit_metrics(child, prefix, tags)
-            elif child.tag in metrics.CATEGORY_TAGS:
+            elif child.tag in metrics.CATEGORY_FIELDS:
                 recursion_tags = tags + ["{}:{}".format(
-                    metrics.RECURSION_TAGS.get(prefix)[recursion_level], child.get('name')
+                    nested_tags.get(prefix)[recursion_level], child.get('name')
                 )]
-                self.process_stats(child, prefix, recursion_tags, recursion_level+1)
+                self.process_stats(child, prefix, metric_categories, nested_tags, recursion_tags, recursion_level+1)
 
     def submit_metrics(self, child, prefix, tags):
-        value = child.get(metrics.METRIC_TAGS[child.tag])
+        value = child.get(metrics.METRIC_VALUE_FIELDS[child.tag])
         self.gauge('ibmwas.{}.{}'.format(prefix, child.get('name')), value, tags=tags)
 
     def make_request(self, url):
         try:
-            resp = requests.get(url)
+            resp = requests.get(url, )
             resp.raise_for_status()
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags='url')
         except requests.HTTPError as e:
@@ -85,17 +81,23 @@ class IbmWasCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, tags='url')
         return resp
 
-    def setup_custom_queries(self, instance):
+    def append_custom_queries(self, instance, collect_stats=[]):
         custom_recursion_tags = {}
         custom_metric_categories = {}
-        custom_queries = instance.get('custom_queries')
+        custom_queries = instance.get('custom_queries', [])
         for query in custom_queries:
             validation.validate_query(query)
             custom_metric_categories[query['stat']] = query['metric_prefix']
-            custom_recursion_tags[query['metric_prefix']] = [key for key in query['tagKeys']]
-        return custom_recursion_tags, custom_metric_categories
+            custom_recursion_tags[query['metric_prefix']] = [key for key in query.get('tag_keys', [])]
+            collect_stats[query['stat']] = True
+        return (
+            dict(metrics.NESTED_TAGS, **custom_recursion_tags),
+            dict(metrics.METRIC_CATEGORIES, **custom_metric_categories)
+        )
 
-    def setup_config(self, instance):
+    def setup_configured_stats(self, instance):
+        collect_stats = {}
         for category, prefix in iteritems(metrics.METRIC_CATEGORIES):
             if is_affirmative(instance.get('collect_{}_stats'.format(prefix), True)):
-                self.collect_stats[category] = True
+                collect_stats[category] = True
+        return collect_stats
