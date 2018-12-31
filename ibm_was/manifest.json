@@ -1,9 +1,9 @@
 {
-  "display_name": "Ibm_was",
+  "display_name": "IBM WAS",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "ibm_was",
-  "metric_prefix": "ibm_was.",
+  "metric_prefix": "ibmwas.",
   "metric_to_check": "",
   "creates_events": false,
   "short_description": "",
@@ -14,10 +14,11 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Ibm_was Integration",
+  "public_title": "Datadog IBM WAS Integration",
   "categories": [
-    ""
+    "web",
+    "os and system"
   ],
   "type": "check",
-  "is_public": true
+  "is_public": false
 }
