@@ -1,8 +1,8 @@
-# Agent Check: Ibm_was
+# Agent Check: IBM WAS
 
 ## Overview
 
-This check monitors [Ibm_was][1].
+This check monitors [IBM WAS][1].
 
 ## Setup
 
@@ -37,13 +37,13 @@ See [service_checks.json][7] for a list of service checks provided by this check
 
 ### Events
 
-Ibm_was does not include any events.
+`IBM WAS` does not include any events.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog Support][5].
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: https://www.ibm.com/cloud/websphere-application-platform
 [2]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/datadog_checks/ibm_was/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
