@@ -10,17 +10,21 @@ import mock
 
 instance = {
     'prometheus_url': 'http://localhost:10252/metrics',
+    'extra_queues': ['extra'],
+    'extra_limiters': ['extra'],
 }
 
 # Constants
 CHECK_NAME = 'kube_controller_manager'
 NAMESPACE = 'kube_controller_manager'
 
+
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
+
 
 @pytest.fixture()
 def mock_metrics():
@@ -37,6 +41,7 @@ def mock_metrics():
     )
     yield mocked.start()
     mocked.stop()
+
 
 def test_check_metrics(aggregator, mock_metrics):
     c = KubeControllerManagerCheck(CHECK_NAME, None, {}, [instance])
@@ -64,3 +69,15 @@ def test_check_metrics(aggregator, mock_metrics):
     aggregator.assert_metric(NAMESPACE + '.queue.latency.sum', value=423889, tags=["queue:deployment"])
     aggregator.assert_metric(NAMESPACE + '.queue.latency.count', value=29, tags=["queue:deployment"])
     aggregator.assert_metric(NAMESPACE + '.queue.latency.quantile', value=1005, tags=["queue:deployment", "quantile:0.9"])
+
+    # Extra name from the instance
+    aggregator.assert_metric(NAMESPACE + '.rate_limiter.use', value=0, tags=["controller:extra"])
+    aggregator.assert_metric(NAMESPACE + '.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=13, tags=["queue:extra"])
+    aggregator.assert_metric(NAMESPACE + '.queue.depth', metric_type=aggregator.GAUGE, value=2, tags=["queue:extra"])
+    aggregator.assert_metric(NAMESPACE + '.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=55, tags=["queue:extra"])
+    aggregator.assert_metric(NAMESPACE + '.queue.work_duration.sum', value=45171, tags=["queue:extra"])
+    aggregator.assert_metric(NAMESPACE + '.queue.work_duration.count', value=13, tags=["queue:extra"])
+    aggregator.assert_metric(NAMESPACE + '.queue.work_duration.quantile', value=6, tags=["queue:extra", "quantile:0.5"])
+    aggregator.assert_metric(NAMESPACE + '.queue.latency.sum', value=9309, tags=["queue:extra"])
+    aggregator.assert_metric(NAMESPACE + '.queue.latency.count', value=13, tags=["queue:extra"])
+    aggregator.assert_metric(NAMESPACE + '.queue.latency.quantile', value=10, tags=["queue:extra", "quantile:0.9"])

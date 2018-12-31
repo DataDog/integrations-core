@@ -3298,3 +3298,29 @@ volumes_work_duration{quantile="0.9"} NaN
 volumes_work_duration{quantile="0.99"} NaN
 volumes_work_duration_sum 0
 volumes_work_duration_count 0
+# HELP extra_adds Total number of adds handled by workqueue: endpoint
+# TYPE extra_adds counter
+extra_adds 13
+# HELP extra_controller_rate_limiter_use A metric measuring the saturation of the rate limiter for extra_controller
+# TYPE extra_controller_rate_limiter_use gauge
+extra_controller_rate_limiter_use 0
+# HELP extra_depth Current depth of workqueue: endpoint
+# TYPE extra_depth gauge
+extra_depth 2
+# HELP extra_queue_latency How long an item stays in workqueueendpoint before being requested.
+# TYPE extra_queue_latency summary
+extra_queue_latency{quantile="0.5"} 3
+extra_queue_latency{quantile="0.9"} 10
+extra_queue_latency{quantile="0.99"} 75
+extra_queue_latency_sum 9309
+extra_queue_latency_count 13
+# HELP extra_retries Total number of retries handled by workqueue: endpoint
+# TYPE extra_retries counter
+extra_retries 55
+# HELP extra_work_duration How long processing an item from workqueueendpoint takes.
+# TYPE extra_work_duration summary
+extra_work_duration{quantile="0.5"} 6
+extra_work_duration{quantile="0.9"} 13
+extra_work_duration{quantile="0.99"} 30
+extra_work_duration_sum 45171
+extra_work_duration_count 13
