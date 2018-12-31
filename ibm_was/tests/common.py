@@ -25,10 +25,17 @@ INSTANCE = {
         },
         {
             'metric_prefix': 'jvm_custom',
-            'tag_eys': [
+            'tag_keys': [
                 'JVMKey'
             ],
             'stat': 'JVM Runtime Custom'
+        },
+        {
+            'metric_prefix': 'object_pool',
+            'tag_keys': [
+                'implementations'
+            ],
+            'stat': 'Object Pool'
         }
     ]
 }
@@ -55,3 +62,10 @@ MALFORMED_CUSTOM_QUERY_INSTANCE = {
         },
     ]
 }
+
+METRICS_ALWAYS_PRESENT = [
+    'ibmwas.jdbc.CreateCount',
+    'ibmwas.jvm.FreeMemory',
+    'ibmwas.servlet_session.LifeTime',
+    'ibmwas.thread_pools.CreateCount'
+]

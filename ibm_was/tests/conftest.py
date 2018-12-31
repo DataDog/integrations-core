@@ -4,8 +4,14 @@
 import pytest
 
 from . import common
+from datadog_checks.ibm_was import IbmWasCheck
 
 
 @pytest.fixture(scope="session")
 def instance():
     return common.INSTANCE
+
+
+@pytest.fixture()
+def check():
+    return IbmWasCheck('ibm_was', {}, {})
