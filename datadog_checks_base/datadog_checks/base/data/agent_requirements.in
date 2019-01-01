@@ -11,7 +11,6 @@ dnspython==1.12.0
 enum34==1.1.6
 flup==1.0.3.dev-20110405; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
-python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 google-compute-engine==2.8.3
 httplib2==0.10.3
 ipaddress==1.0.22
@@ -20,6 +19,7 @@ jpype1==0.6.3
 kafka-python==1.4.4; sys_platform != 'win32'
 kazoo==2.6.0; sys_platform != 'win32'
 ldap3==2.5
+lxml==4.2.5
 meld3==1.0.2
 ntplib==0.3.3
 paramiko==2.1.5
@@ -41,6 +41,7 @@ pysmi==0.2.2
 pysnmp==4.4.3
 pysnmp-mibs==0.1.6
 python-binary-memcached==0.26.1; sys_platform != 'win32'
+python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 pyvmomi==v6.5.0.2017.5-1
 pywin32==224; sys_platform == 'win32'
 redis==2.10.5

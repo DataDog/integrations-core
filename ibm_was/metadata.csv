@@ -22,13 +22,13 @@ ibmwas.jvm.UpTime,gauge,,,,The amount of time that the JVM is running,0,ibm_was,
 ibmwas.jvm.ProcessCpuUsage,gauge,,percent,,The CPU Usage (in percent) of the Java virtual machine.,0,ibm_was,jvm process cpu usage
 ibmwas.thread_pools.CreateCount,gauge,,thread,,The total number of threads created,0,ibm_was,thread pools create count
 ibmwas.thread_pools.DestroyCount,gauge,,thread,,The total number of threads destroyed,0,ibm_was,thread pools destroy count
-ibmwas.thread_pools.ActiveCount,gauge,,thread,, The number of concurrently active threads,0,ibm_was,thread pools active count
-ibmwas.thread_pools.PoolSize,gauge,,thread,, The average number of threads in pool,0,ibm_was,thread pools size
+ibmwas.thread_pools.ActiveCount,gauge,,thread,,The number of concurrently active threads,0,ibm_was,thread pools active count
+ibmwas.thread_pools.PoolSize,gauge,,thread,,The average number of threads in pool,0,ibm_was,thread pools size
 ibmwas.thread_pools.PercentMaxed,gauge,,percent,,The average percent of the time that all threads are in use,0,ibm_was,thread pools percent max
-ibmwas.thread_pools.DeclaredthreadHungCount ,gauge,,thread,,The number of threads declared hung,0,ibm_was,thread pools declared count
-ibmwas.thread_pools.ClearedThreadHangCount,gauge,,thread,,The number of thread hangs cleared,,ibm_was,thread pools cleared
+ibmwas.thread_pools.DeclaredthreadHungCount,gauge,,thread,,The number of threads declared hung,0,ibm_was,thread pools declared count
+ibmwas.thread_pools.ClearedThreadHangCount,gauge,,thread,,The number of thread hangs cleared,0,ibm_was,thread pools cleared
 ibmwas.thread_pools.ConcurrentHungThreadCount,gauge,,thread,,The number of concurrently hung threads,0,ibm_was,thread pools concurrent hung
-ibmwas.thread_pools.ActiveTime,guage,,millisecond,,The average time in milliseconds the threads are in active state,0,ibm_was,thread pools active time
+ibmwas.thread_pools.ActiveTime,gauge,,millisecond,,The average time in milliseconds the threads are in active state,0,ibm_was,thread pools active time
 ibmwas.servlet_session.CreateCount,gauge,,session,,The number of sessions that were created,0,ibm_was,servlet session create count
 ibmwas.servlet_session.InvalidateCount,gauge,,session,,The number of sessions that were invalidated,0,ibm_was,servlet session invalidate count
 ibmwas.servlet_session.LifeTime,gauge,,millisecond,,The average session life time in milliseconds (time invalidated - time created),0,ibm_was,servlet session life time
@@ -41,7 +41,7 @@ ibmwas.servlet_session.ExternalReadSize,gauge,,,,Size of the session data read f
 ibmwas.servlet_session.ExternalWriteTime,gauge,,millisecond,,The time (milliseconds) taken to write the session data from the persistent store. Applicable only for (serialized) persistent sessions. Similar to external Read Time.,0,ibm_was,servlet session external write time
 ibmwas.servlet_session.ExternalWriteSize,gauge,,request,,The size of the session data written to persistent store. Applicable only for (serialized) persistent sessions. Similar to external Read Time.,0,ibm_was,servlet session external write size
 ibmwas.servlet_session.AffinityBreakCount,gauge,,request,,The number of requests that are received for sessions that were last accessed from another web application. This value can indicate failover processing or a corrupt plug-in configuration.,0,ibm_was,servlet session affinity break
-ibmwas.servlet_session.TimeSinceLastActivated ,gauge,,millisecond,,The time difference in milliseconds between previous and current access time stamps. Does not include session time out.,0,ibm_was,servlet session last activated
+ibmwas.servlet_session.TimeSinceLastActivated,gauge,,millisecond,,The time difference in milliseconds between previous and current access time stamps. Does not include session time out.,0,ibm_was,servlet session last activated
 ibmwas.servlet_session.TimeoutInvalidationCount,gauge,,session,,The number of sessions that are invalidated by timeout.,0,ibm_was,servlet session timeout invalidation
-ibmwas.servlet_session.ActivateNonExistSessionCount,,,request,,"The number of requests for a session that no longer exists, presumably because the session timed out. Use this counter to help determine if the timeout is too short.",0,ibm_was,
-ibmwas.servlet_session.SessionObjectSize,,,,, The size in bytes of (the serializable attributes of ) in-memory sessions. Only session objects that contain at least one serializable attribute object is counted. A session can contain some attributes that are serializable and some that are not. The size in bytes is at a session level.,0,ibm_was,servlet session object size
+ibmwas.servlet_session.ActivateNonExistSessionCount,gauge,,request,,"The number of requests for a session that no longer exists, presumably because the session timed out. Use this counter to help determine if the timeout is too short.",0,ibm_was,
+ibmwas.servlet_session.SessionObjectSize,gauge,,,,The size in bytes of (the serializable attributes of ) in-memory sessions. Only session objects that contain at least one serializable attribute object is counted. A session can contain some attributes that are serializable and some that are not. The size in bytes is at a session level.,0,ibm_was,servlet session object size
