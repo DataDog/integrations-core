@@ -22,7 +22,8 @@ instances:
   # only pulling metrics from the default site.
   #
 
-  # "." means the current host
+  # "." means the current host, any other value will have the Agent attempt to connect to a remote host.
+  # Note: Remote access requires additional permissions - https://support.microsoft.com/en-us/help/922775/how-to-troubleshoot-monitoring-and-logging-issues-for-performance-coun
   - host: .
   #   tags:
   #     - myapp1

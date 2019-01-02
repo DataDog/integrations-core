@@ -46,7 +46,7 @@ Simply follow the examples present in the [default configuration][3].
 Returns CRITICAL if the Agent fails to connect to the prometheus endpoint, otherwise returns UP.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][8].
+Need help? Contact [Datadog support][8].
 
 [1]: https://linkerd.io/
 [2]: https://app.datadoghq.com/account/settings#agent

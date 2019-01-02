@@ -49,7 +49,7 @@ The Prometheus check does not include any events at this time.
 The Prometheus check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][3].
+Need help? Contact [Datadog support][3].
 
 ## Further Reading
 

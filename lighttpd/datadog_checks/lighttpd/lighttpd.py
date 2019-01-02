@@ -2,14 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
 import re
-import urlparse
 
-# 3rd party
 import requests
 
-# project
+from six.moves.urllib.parse import urlparse
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 
@@ -32,42 +30,42 @@ class Lighttpd(AgentCheck):
     }
 
     GAUGES = {
-        'IdleServers': 'lighttpd.performance.idle_server',
-        'BusyServers': 'lighttpd.performance.busy_servers',
-        'Uptime': 'lighttpd.performance.uptime',
-        'Total kBytes': 'lighttpd.net.bytes',
-        'Total Accesses': 'lighttpd.net.hits',
-        'memory_usage': 'lighttpd.performance.memory_usage',
-        'requests_avg': 'lighttpd.net.requests_avg',
-        'traffic_out_avg': 'lighttpd.net.bytes_out_avg',
-        'traffic_in_avg': 'lighttpd.net.bytes_in_avg',
-        'connections_avg': 'lighttpd.net.connections_avg',
-        'connection_state_start': 'lighttpd.connections.state_start',
-        'connection_state_read_header': 'lighttpd.connections.state_read_header',
-        'connection_state_handle_request': 'lighttpd.connections.state_handle_request',
-        'connection_state_write_response': 'lighttpd.connections.state_write_response',
-        'connection_state_keep_alive': 'lighttpd.connections.state_keep_alive',
-        'requests_avg_5sec': 'lighttpd.net.requests_avg_5sec',
-        'traffic_out_avg_5sec': 'lighttpd.net.bytes_out_avg_5sec',
-        'traffic_in_avg_5sec': 'lighttpd.net.bytes_in_avg_5sec',
-        'connections_avg_5sec': 'lighttpd.net.connections_avg_5sec',
+        b'IdleServers': 'lighttpd.performance.idle_server',
+        b'BusyServers': 'lighttpd.performance.busy_servers',
+        b'Uptime': 'lighttpd.performance.uptime',
+        b'Total kBytes': 'lighttpd.net.bytes',
+        b'Total Accesses': 'lighttpd.net.hits',
+        b'memory_usage': 'lighttpd.performance.memory_usage',
+        b'requests_avg': 'lighttpd.net.requests_avg',
+        b'traffic_out_avg': 'lighttpd.net.bytes_out_avg',
+        b'traffic_in_avg': 'lighttpd.net.bytes_in_avg',
+        b'connections_avg': 'lighttpd.net.connections_avg',
+        b'connection_state_start': 'lighttpd.connections.state_start',
+        b'connection_state_read_header': 'lighttpd.connections.state_read_header',
+        b'connection_state_handle_request': 'lighttpd.connections.state_handle_request',
+        b'connection_state_write_response': 'lighttpd.connections.state_write_response',
+        b'connection_state_keep_alive': 'lighttpd.connections.state_keep_alive',
+        b'requests_avg_5sec': 'lighttpd.net.requests_avg_5sec',
+        b'traffic_out_avg_5sec': 'lighttpd.net.bytes_out_avg_5sec',
+        b'traffic_in_avg_5sec': 'lighttpd.net.bytes_in_avg_5sec',
+        b'connections_avg_5sec': 'lighttpd.net.connections_avg_5sec',
     }
 
     COUNTERS = {
-        'requests_abs': 'lighttpd.net.requests_total',
-        'traffic_out_abs': 'lighttpd.net.bytes_out',
-        'traffic_in_abs': 'lighttpd.net.bytes_in',
-        'connections_abs': 'lighttpd.net.connections_total',
-        'status_1xx': 'lighttpd.response.status_1xx',
-        'status_2xx': 'lighttpd.response.status_2xx',
-        'status_3xx': 'lighttpd.response.status_3xx',
-        'status_4xx': 'lighttpd.response.status_4xx',
-        'status_5xx': 'lighttpd.response.status_5xx',
+        b'requests_abs': 'lighttpd.net.requests_total',
+        b'traffic_out_abs': 'lighttpd.net.bytes_out',
+        b'traffic_in_abs': 'lighttpd.net.bytes_in',
+        b'connections_abs': 'lighttpd.net.connections_total',
+        b'status_1xx': 'lighttpd.response.status_1xx',
+        b'status_2xx': 'lighttpd.response.status_2xx',
+        b'status_3xx': 'lighttpd.response.status_3xx',
+        b'status_4xx': 'lighttpd.response.status_4xx',
+        b'status_5xx': 'lighttpd.response.status_5xx',
     }
 
     RATES = {
-        'Total kBytes': 'lighttpd.net.bytes_per_s',
-        'Total Accesses': 'lighttpd.net.request_per_s'
+        b'Total kBytes': 'lighttpd.net.bytes_per_s',
+        b'Total Accesses': 'lighttpd.net.request_per_s'
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -98,7 +96,7 @@ class Lighttpd(AgentCheck):
         self.log.debug("Connecting to %s" % url)
 
         # Submit a service check for status page availability.
-        parsed_url = urlparse.urlparse(url)
+        parsed_url = urlparse(url)
         lighttpd_url = parsed_url.hostname
         lighttpd_port = parsed_url.port or 80
         service_check_tags = ['host:%s' % lighttpd_url, 'port:%s' % lighttpd_port] + tags
@@ -119,8 +117,8 @@ class Lighttpd(AgentCheck):
 
         metric_count = 0
         # Loop through and extract the numerical values
-        for line in response.split('\n'):
-            values = line.split(': ')
+        for line in response.split(b'\n'):
+            values = line.split(b': ')
             if len(values) == 2:  # match
                 metric, value = values
                 try:
@@ -129,7 +127,7 @@ class Lighttpd(AgentCheck):
                     continue
 
                 # Special case: kBytes => bytes
-                if metric == 'Total kBytes':
+                if metric == b'Total kBytes':
                     value = value * 1024
 
                 # Send metric as a gauge, if applicable

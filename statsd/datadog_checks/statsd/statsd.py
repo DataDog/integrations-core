@@ -2,19 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 import re
 import socket
-from StringIO import StringIO
 
-# project
+from six import BytesIO
+
+from datadog_checks.utils.common import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
 
 SERVICE_CHECK_NAME = "statsd.can_connect"
 SERVICE_CHECK_NAME_HEALTH = "statsd.is_up"
 
-ENDER = re.compile("^(END|health: up|health: down)\n$", re.MULTILINE)
-BAD_ENDER = re.compile("^ERROR\n$", re.MULTILINE)
+ENDER = re.compile(b"^(END|health: up|health: down)\n$", re.MULTILINE)
+BAD_ENDER = re.compile(b"^ERROR\n$", re.MULTILINE)
 
 
 class StatsCheck(AgentCheck):
@@ -27,7 +27,7 @@ class StatsCheck(AgentCheck):
 
         # Is it up?
         health = self._send_command(host, port, timeout, "health", tags).getvalue().strip()
-        if health == "health: up":
+        if health == b"health: up":
             self.service_check(
                 SERVICE_CHECK_NAME_HEALTH, AgentCheck.OK, tags
             )
@@ -40,14 +40,14 @@ class StatsCheck(AgentCheck):
         stats = self._send_command(host, port, timeout, "stats", tags)
         stats.seek(0)
         for l in stats.readlines():
-            parts = l.strip().split(":")
+            parts = l.strip().split(b":")
             if len(parts) == 2:
                 # Uptime isn't a gauge. Since we have only one exception, this
                 # seems fine. If we make more a lookup table might be best.
-                if parts[0] == "bad_lines_seen":
-                    self.monotonic_count("statsd.{0}".format(parts[0]), float(parts[1]), tags=tags)
+                if parts[0] == b"bad_lines_seen":
+                    self.monotonic_count("statsd.{0}".format(ensure_unicode(parts[0])), float(parts[1]), tags=tags)
                 else:
-                    self.gauge("statsd.{0}".format(parts[0]), float(parts[1]), tags=tags)
+                    self.gauge("statsd.{0}".format(ensure_unicode(parts[0])), float(parts[1]), tags=tags)
 
         counters = len(self._send_command(host, port, timeout, "counters", tags).getvalue().splitlines()) - 1
         self.gauge("statsd.counters.count", counters, tags=tags)
@@ -67,12 +67,12 @@ class StatsCheck(AgentCheck):
             s.settimeout(timeout)
             s.connect((host, port))
 
-            s.sendall("{0}\n".format(command))
+            s.sendall(ensure_bytes("{0}\n".format(command)))
 
-            buf = StringIO()
+            buf = BytesIO()
 
             chunk = s.recv(1024)
-            buf.write(chunk)
+            buf.write(ensure_bytes(chunk))
             while chunk:
                 if ENDER.search(chunk):
                     break

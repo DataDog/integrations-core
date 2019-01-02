@@ -1,15 +1,13 @@
 # (C) Datadog, Inc. 2016-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import socket
 
-# 3rd party
 import simplejson as json
+from six import iteritems
 
-# project
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck, ensure_unicode
+
 
 GLOBAL_STATS = set([
     'curr_connections',
@@ -116,7 +114,7 @@ class Twemproxy(AgentCheck):
                     self.gauge(name, value, tags)
                 else:
                     self.rate(name, value, tags)
-            except Exception, e:
+            except Exception as e:
                 self.log.error(
                     u'Could not submit metric: %s: %s',
                     repr(row), str(e)
@@ -149,7 +147,7 @@ class Twemproxy(AgentCheck):
 
                     self.log.debug(u"Querying: {0}:{1}".format(host, port))
                     while 1:
-                        data = client.recv(1024)
+                        data = ensure_unicode(client.recv(1024))
                         if not data:
                             break
                         response = ''.join([response, data])
@@ -172,11 +170,11 @@ class Twemproxy(AgentCheck):
         metric_base = 'twemproxy'
         output = []
 
-        for key, val in parsed.iteritems():
+        for key, val in iteritems(parsed):
             if isinstance(val, dict):
                 # server pool
                 pool_tags = tags + ['pool:%s' % key]
-                for server_key, server_val in val.iteritems():
+                for server_key, server_val in iteritems(val):
                     if isinstance(server_val, dict):
                         # server
                         server_tags = pool_tags + ['server:%s' % server_key]

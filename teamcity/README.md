@@ -53,7 +53,7 @@ Teamcity events representing successful builds are forwarded to your Datadog app
 The Teamcity check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 

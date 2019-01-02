@@ -113,7 +113,7 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 
-The openldap check does not include any event at this time.
+The openldap check does not include any events at this time.
 
 ### Service Checks
 
@@ -123,7 +123,7 @@ Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP serv
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][7].
+Need help? Contact [Datadog support][7].
 
 ## Development
 

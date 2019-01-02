@@ -41,7 +41,7 @@ Returns `CRITICAL` if the Agent is unable to connect to the Application Master.
 Returns `OK` otherwise.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 ## Further Reading
 

@@ -16,6 +16,17 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, count=0)
 
+    def test_unsupported_api_version_fallback(self, aggregator):
+        instance = INSTANCES['unsupported_api']
+        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+
+        assert not instance['api_url'].endswith(Vault.DEFAULT_API_VERSION)
+        config = c.get_config(instance)
+        assert config['api_url'].endswith(Vault.DEFAULT_API_VERSION)
+
+        c.check(instance)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
+
     def test_service_check_connect_ok(self, aggregator):
         instance = INSTANCES['main']
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])

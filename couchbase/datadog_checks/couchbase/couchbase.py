@@ -278,23 +278,25 @@ class Couchbase(AgentCheck):
 
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
-            metric_tags = list(tags)
+            metric_tags = [] if tags is None else tags[:]
             metric_tags.append('bucket:{}'.format(bucket_name))
+            metric_tags.append('device:{}'.format(bucket_name))
             for metric_name, val in bucket_stats.items():
                 if val is not None:
                     norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                     if norm_metric_name in self.BUCKET_STATS:
                         full_metric_name = 'couchbase.by_bucket.{}'.format(norm_metric_name)
-                        self.gauge(full_metric_name, val[0], tags=metric_tags, device_name=bucket_name)
+                        self.gauge(full_metric_name, val[0], tags=metric_tags)
 
         # Get node metrics
         for node_name, node_stats in data['nodes'].items():
-            metric_tags = list(tags)
+            metric_tags = [] if tags is None else tags[:]
             metric_tags.append('node:{}'.format(node_name))
+            metric_tags.append('device:{}'.format(node_name))
             for metric_name, val in node_stats['interestingStats'].items():
                 if val is not None:
                     metric_name = 'couchbase.by_node.{}'.format(self.camel_case_to_joined_lower(metric_name))
-                    self.gauge(metric_name, val, tags=metric_tags, device_name=node_name)
+                    self.gauge(metric_name, val, tags=metric_tags)
 
             # Get cluster health data
             self._process_cluster_health_data(node_name, node_stats, tags)

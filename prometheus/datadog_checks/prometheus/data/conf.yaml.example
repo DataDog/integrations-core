@@ -5,7 +5,7 @@ instances:
   ## @param prometheus_url - string - required
   ## The URL where your application metrics are exposed by Prometheus.
   #
-  - prometheus_endpoint: http://localhost:10055/metrics
+  - prometheus_url: http://localhost:10055/metrics
 
   ## @param namespace - string - required
   ## The namespace to be appended before all metrics namespace
@@ -103,7 +103,8 @@ instances:
   #  ssl_private_key: "<KEY_PATH>"
 
   ## @param ssl_ca_cert - string - optional
-  ## The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL
+  ## The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL certificate 
+  ## verification.
   #
   #  ssl_ca_cert: "<CA_CERT_PATH>"
 

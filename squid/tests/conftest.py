@@ -33,7 +33,7 @@ def spin_up_squid():
         "-f", os.path.join(common.HERE, 'compose', 'squid.yaml')
     ]
     subprocess.check_call(args + ["up", "-d"], env=env)
-    for _ in xrange(10):
+    for _ in range(10):
         try:
             res = requests.get(common.URL)
             res.raise_for_status()

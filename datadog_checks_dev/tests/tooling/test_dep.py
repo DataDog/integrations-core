@@ -4,7 +4,7 @@
 import pytest
 import six
 
-from datadog_checks.dev.tooling.dep import Package, PackageCatalog, read_packages
+from datadog_checks.dev.tooling.requirements import Package, PackageCatalog, read_packages
 from datadog_checks.dev.utils import read_file_lines, write_file_lines
 
 
@@ -63,8 +63,6 @@ def test_package_rich_comparison(package):
     if six.PY3:
         with pytest.raises(TypeError):
             package < 42
-    else:
-        assert (package < 42) is True
 
 
 def test_package__hash__(package):

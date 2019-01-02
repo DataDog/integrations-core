@@ -252,6 +252,9 @@ STATS_METRICS = {
     'elasticsearch.thread_pool.flush.rejected': (
         'rate', 'thread_pool.flush.rejected'
     ),
+    'elasticsearch.thread_pool.flush.completed': (
+        'gauge', 'thread_pool.flush.completed'
+    ),
     'elasticsearch.thread_pool.generic.active': (
         'gauge', 'thread_pool.generic.active'
     ),
@@ -263,6 +266,9 @@ STATS_METRICS = {
     ),
     'elasticsearch.thread_pool.generic.rejected': (
         'rate', 'thread_pool.generic.rejected'
+    ),
+    'elasticsearch.thread_pool.generic.completed': (
+        'gauge', 'thread_pool.generic.completed'
     ),
     'elasticsearch.thread_pool.get.active': (
         'gauge', 'thread_pool.get.active'
@@ -276,6 +282,9 @@ STATS_METRICS = {
     'elasticsearch.thread_pool.get.rejected': (
         'rate', 'thread_pool.get.rejected'
     ),
+    'elasticsearch.thread_pool.get.completed': (
+        'gauge', 'thread_pool.get.completed'
+    ),
     'elasticsearch.thread_pool.index.active': (
         'gauge', 'thread_pool.index.active'
     ),
@@ -287,6 +296,9 @@ STATS_METRICS = {
     ),
     'elasticsearch.thread_pool.index.rejected': (
         'rate', 'thread_pool.index.rejected'
+    ),
+    'elasticsearch.thread_pool.index.completed': (
+        'gauge', 'thread_pool.index.completed'
     ),
     'elasticsearch.thread_pool.management.active': (
         'gauge', 'thread_pool.management.active'
@@ -300,6 +312,9 @@ STATS_METRICS = {
     'elasticsearch.thread_pool.management.rejected': (
         'rate', 'thread_pool.management.rejected'
     ),
+    'elasticsearch.thread_pool.management.completed': (
+        'gauge', 'thread_pool.management.completed'
+    ),
     'elasticsearch.thread_pool.refresh.active': (
         'gauge', 'thread_pool.refresh.active'
     ),
@@ -311,6 +326,9 @@ STATS_METRICS = {
     ),
     'elasticsearch.thread_pool.refresh.rejected': (
         'rate', 'thread_pool.refresh.rejected'
+    ),
+    'elasticsearch.thread_pool.refresh.completed': (
+        'gauge', 'thread_pool.refresh.completed'
     ),
     'elasticsearch.thread_pool.search.active': (
         'gauge', 'thread_pool.search.active'
@@ -324,6 +342,9 @@ STATS_METRICS = {
     'elasticsearch.thread_pool.search.rejected': (
         'rate', 'thread_pool.search.rejected'
     ),
+    'elasticsearch.thread_pool.search.completed': (
+        'gauge', 'thread_pool.search.completed'
+    ),
     'elasticsearch.thread_pool.snapshot.active': (
         'gauge', 'thread_pool.snapshot.active'
     ),
@@ -336,6 +357,9 @@ STATS_METRICS = {
     'elasticsearch.thread_pool.snapshot.rejected': (
         'rate', 'thread_pool.snapshot.rejected'
     ),
+    'elasticsearch.thread_pool.snapshot.completed': (
+        'gauge', 'thread_pool.snapshot.completed'
+    ),
     'elasticsearch.thread_pool.warmer.active': (
         'gauge', 'thread_pool.warmer.active'
     ),
@@ -347,6 +371,9 @@ STATS_METRICS = {
     ),
     'elasticsearch.thread_pool.warmer.rejected': (
         'rate', 'thread_pool.warmer.rejected'
+    ),
+    'elasticsearch.thread_pool.warmer.completed': (
+        'gauge', 'thread_pool.warmer.completed'
     ),
     'elasticsearch.http.current_open': (
         'gauge', 'http.current_open'
@@ -802,6 +829,9 @@ ADDITIONAL_METRICS_PRE_6_3 = {
     'elasticsearch.thread_pool.bulk.rejected': (
         'rate', 'thread_pool.bulk.rejected'
     ),
+    'elasticsearch.thread_pool.bulk.completed': (
+        'rate', 'thread_pool.bulk.completed'
+    ),
 }
 
 ADDITIONAL_METRICS_POST_6_3 = {
@@ -816,6 +846,9 @@ ADDITIONAL_METRICS_POST_6_3 = {
     ),
     'elasticsearch.thread_pool.write.rejected': (
         'rate', 'thread_pool.write.rejected'
+    ),
+    'elasticsearch.thread_pool.write.completed': (
+        'rate', 'thread_pool.write.completed'
     ),
 }
 

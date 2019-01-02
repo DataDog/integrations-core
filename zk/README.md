@@ -134,7 +134,7 @@ Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN`
 The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise `CRITICAL`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][18].
+Need help? Contact [Datadog support][18].
 
 [13]: https://app.datadoghq.com/account/settings#agent
 [14]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example

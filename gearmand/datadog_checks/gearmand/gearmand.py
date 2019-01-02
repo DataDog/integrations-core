@@ -65,7 +65,7 @@ class Gearman(AgentCheck):
             self.warning(
                 ("Too many tasks to fetch. "
                  "You must choose the tasks you are interested in by editing the gearmand.yaml configuration file "
-                 "or get in touch with Datadog Support"))
+                 "or get in touch with Datadog support"))
 
         for stat in tasks[:MAX_NUM_TASKS]:
             running = stat['running']

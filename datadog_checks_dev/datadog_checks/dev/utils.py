@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""
+Utilities functions abstracting common operations, specially designed to be used
+by Integrations within tests.
+"""
 import os
 import platform
 import shutil
@@ -19,14 +23,22 @@ ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
-CI_IDENTIFIERS = (
-    'APPVEYOR_',
-    'TRAVIS_',
-)
+CI_IDENTIFIERS = {
+    'appveyor': 'APPVEYOR',
+    'travis': 'TRAVIS',
+}
+
+
+def running_on_appveyor():
+    return any(ev.startswith(CI_IDENTIFIERS.get('appveyor')) for ev in os.environ)
+
+
+def running_on_travis():
+    return any(ev.startswith(CI_IDENTIFIERS.get('travis')) for ev in os.environ)
 
 
 def running_on_ci():
-    return any(ev.startswith(CI_IDENTIFIERS) for ev in os.environ)
+    return any(ev.startswith(tuple(CI_IDENTIFIERS.values())) for ev in os.environ)
 
 
 if PY3:

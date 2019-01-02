@@ -53,7 +53,7 @@ Returns CRITICAL if the Agent cannot open an SSH session, otherwise OK.
 Returns CRITICAL if the Agent cannot open an SFTP session, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/datadog_checks/ssh_check/data/conf.yaml.example

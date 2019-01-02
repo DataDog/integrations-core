@@ -9,7 +9,7 @@ from collections import OrderedDict
 import click
 from six import string_types
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 from ...constants import get_root
 from ...utils import parse_version_parts
 from ....compat import JSONDecodeError

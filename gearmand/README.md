@@ -47,7 +47,7 @@ The Gearmand check does not include any events at this time.
 Returns `Critical` if the Agent cannot connect to Gearman to collect metrics.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/gearmand/datadog_checks/gearmand/data/conf.yaml.example

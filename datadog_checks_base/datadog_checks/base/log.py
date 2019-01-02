@@ -5,10 +5,25 @@ import logging
 
 try:
     import datadog_agent
+    running_on_agent = True
 except ImportError:
     from .stubs import datadog_agent
+    running_on_agent = False
 
 from .utils.common import ensure_bytes
+
+# Arbitrary number less than 10 (DEBUG)
+TRACE_LEVEL = 7
+
+
+class AgentLogger(logging.getLoggerClass()):
+    def trace(self, msg, *args, **kwargs):
+        if self.isEnabledFor(TRACE_LEVEL):
+            self._log(TRACE_LEVEL, msg, args, **kwargs)
+
+    if not running_on_agent:
+        def critical(self, msg, *args, **kwargs):
+            raise NotImplementedError('The critical log level is reserved for agent shutdowns.')
 
 
 class AgentLogHandler(logging.Handler):
@@ -34,7 +49,7 @@ LOG_LEVEL_MAP = {
     'WARNING': logging.WARNING,
     'INFO': logging.INFO,
     'DEBUG': logging.DEBUG,
-    'TRACE': logging.DEBUG,
+    'TRACE': TRACE_LEVEL,
 }
 
 
@@ -53,6 +68,8 @@ def init_logging():
     Initialize logging (set up forwarding to Go backend and sane defaults)
     """
     # Forward to Go backend
+    logging.addLevelName(TRACE_LEVEL, 'TRACE')
+    logging.setLoggerClass(AgentLogger)
     rootLogger = logging.getLogger()
     rootLogger.addHandler(AgentLogHandler())
     rootLogger.setLevel(_get_py_loglevel(datadog_agent.get_config('log_level')))

@@ -52,7 +52,7 @@ The Istio check does not include any events at this time.
 The Istio check does not include any service checks at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][7].
+Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on

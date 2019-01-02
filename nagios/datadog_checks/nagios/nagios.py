@@ -125,6 +125,7 @@ class Nagios(AgentCheck):
                             file_template=None,
                             logger=self.log,
                             hostname=self.hostname,
+                            tags=custom_tag,
                             event_func=self.event,
                             gauge_func=self.gauge,
                             freq=check_freq,
@@ -266,7 +267,8 @@ class NagiosTailer(object):
 
 
 class NagiosEventLogTailer(NagiosTailer):
-    def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, passive_checks=False):
+    def __init__(self, log_path, file_template, logger, hostname, tags, event_func, gauge_func,
+                 freq, passive_checks=False):
         """
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
@@ -279,6 +281,7 @@ class NagiosEventLogTailer(NagiosTailer):
         """
 
         self.passive_checks = passive_checks
+        self.tags = tags
         super(NagiosEventLogTailer, self).__init__(
             log_path, file_template, logger, hostname, event_func, gauge_func, freq
         )
@@ -319,7 +322,7 @@ class NagiosEventLogTailer(NagiosTailer):
             # Chop parts we don't recognize
             parts = parts[: len(fields._fields)]
 
-            event = self.create_event(tstamp, event_type, self.hostname, fields._make(parts))
+            event = self.create_event(tstamp, event_type, self.hostname, fields._make(parts), tags=self.tags)
 
             self._event(event)
             self.log.debug("Nagios event: %s" % (event))
@@ -329,7 +332,7 @@ class NagiosEventLogTailer(NagiosTailer):
             self.log.exception("Unable to create a nagios event from line: [%s]" % (line))
             return False
 
-    def create_event(self, timestamp, event_type, hostname, fields):
+    def create_event(self, timestamp, event_type, hostname, fields, tags=None):
         """Factory method called by the parsers
         """
         # Agent6 expects a specific set of fields, so we need to place all
@@ -355,6 +358,7 @@ class NagiosEventLogTailer(NagiosTailer):
                 'event_type': event_type,
                 'msg_text': msg_text,
                 'source_type_name': SOURCE_TYPE_NAME,
+                'tags': tags
         })
 
         # if host is localhost, turn that into the internal host name

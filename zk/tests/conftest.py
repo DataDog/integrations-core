@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import pytest
+
 from datadog_checks.dev import docker_run, RetryError
 from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.zk import ZookeeperCheck
@@ -61,7 +62,7 @@ STATUS_TYPES = [
 ]
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def get_instance():
     return {
         'host': HOST,
@@ -100,11 +101,11 @@ def get_version():
 
 
 @pytest.fixture(scope="session")
-def spin_up_zk():
+def dd_environment(get_instance):
     def condition():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
-        for _ in xrange(10):
+        for _ in range(10):
             try:
                 out = ZookeeperCheck._send_command('ruok', HOST, PORT, 500)
                 out.seek(0)
@@ -124,4 +125,4 @@ def spin_up_zk():
         compose_file = os.path.join(HERE, 'compose', 'zk35plus.yaml')
 
     with docker_run(compose_file, conditions=[condition]):
-        yield
+        yield get_instance

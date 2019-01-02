@@ -50,7 +50,7 @@ Returns CRITICAL if the Agent cannot connect to lighttpd to collect metrics, oth
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 To get a better idea of how (or why) to monitor Lighttpd web server metrics with Datadog, check out our [series of blog posts][7] about it.

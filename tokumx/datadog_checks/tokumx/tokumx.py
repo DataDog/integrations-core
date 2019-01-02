@@ -2,12 +2,9 @@
 # (C) Leif Walsh <leif.walsh@gmail.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import time
-import types
+from six import iteritems, PY3
 
-# 3p
 import bson
 from pymongo import (
     MongoClient,
@@ -17,8 +14,10 @@ from pymongo import (
     version as py_version,
 )
 
-# project
 from datadog_checks.checks import AgentCheck
+
+if PY3:
+    long = int
 
 DEFAULT_TIMEOUT = 10
 
@@ -264,7 +263,7 @@ class TokuMX(AgentCheck):
             'ssl_ca_certs': instance.get('ssl_ca_certs', None)
         }
 
-        for key, param in ssl_params.items():
+        for key, param in list(iteritems(ssl_params)):
             if param is None:
                 del ssl_params[key]
 
@@ -452,7 +451,7 @@ class TokuMX(AgentCheck):
                             for idx_stats in v:
                                 for k in ['count', 'size', 'avgObjSize', 'storageSize']:
                                     value = idx_stats[k]
-                                    if type(value) in (types.IntType, types.LongType, types.FloatType):
+                                    if self.isNumeric(value):
                                         self.histogram('tokumx.stats.idx.%s' % k, idx_stats[k], tags=db_tags)
                                 for k in ['queries', 'nscanned', 'nscannedObjects', 'inserts', 'deletes']:
                                     key = (dbname, collname, idx_stats['name'], k)
@@ -461,7 +460,7 @@ class TokuMX(AgentCheck):
                                                          tags=db_tags,
                                                          key=key)
                         # FIXME: here tokumx.stats.coll.* are potentially unbounded
-                        elif type(v) in (types.IntType, types.LongType, types.FloatType):
+                        elif self.isNumeric(v):
                             self.histogram('tokumx.stats.coll.%s' % m, v, db_tags)
 
             # If these keys exist, remove them for now as they cannot be serialized
@@ -489,7 +488,7 @@ class TokuMX(AgentCheck):
                 if type(value) == bson.int64.Int64:
                     value = long(value)
                 else:
-                    if type(value) not in (types.IntType, types.LongType, types.FloatType):
+                    if not self.isNumeric(value):
                         self.log.warning("Value found that is not of type int, int64,long, or float")
 
                 # Check if metric is a gauge or rate
@@ -498,6 +497,9 @@ class TokuMX(AgentCheck):
 
                 if m in self.RATES:
                     self.rate('tokumx.%sps' % m, value, tags=tags)
+
+    def isNumeric(self, value):
+        return isinstance(value, (int, long, float))
 
     def check(self, instance):
         server, conn, db, tags = self._get_connection(instance)

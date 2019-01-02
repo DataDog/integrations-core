@@ -34,6 +34,6 @@ This check monitors [{check_name_cap}][1].
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][1].
+Need help? Contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/

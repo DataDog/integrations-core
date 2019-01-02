@@ -5,6 +5,8 @@ import re
 
 from .utils import get_version_file, load_manifest
 from ..utils import read_file, read_file_lines, write_file, write_file_lines
+from ..errors import ManifestError
+
 
 # Maps the Python platform strings to the ones we have in the manifest
 PLATFORMS_TO_PY = {
@@ -13,8 +15,8 @@ PLATFORMS_TO_PY = {
     'linux': 'linux2',
 }
 ALL_PLATFORMS = sorted(PLATFORMS_TO_PY)
-
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
+DATADOG_PACKAGE_PREFIX = 'datadog-'
 
 
 def get_release_tag_string(check_name, version_string):
@@ -36,11 +38,26 @@ def update_version_module(check_name, old_ver, new_ver):
     write_file(version_file, contents)
 
 
-def get_package_name(check_name):
-    if check_name == 'datadog_checks_base':
-        return check_name.replace('_', '-')
+def get_package_name(folder_name):
+    """
+    Given a folder name for a check, return the name of the
+    corresponding Python package
+    """
+    if folder_name == 'datadog_checks_base':
+        return 'datadog-checks-base'
 
-    return 'datadog-{}'.format(check_name.replace('_', '-'))
+    return '{}{}'.format(DATADOG_PACKAGE_PREFIX, folder_name.replace('_', '-'))
+
+
+def get_folder_name(package_name):
+    """
+    Given a Python package name for a check, return the corresponding folder
+    name in the git repo
+    """
+    if package_name == 'datadog-checks-base':
+        return 'datadog_checks_base'
+
+    return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX):]
 
 
 def get_agent_requirement_line(check, version):
@@ -73,7 +90,7 @@ def get_agent_requirement_line(check, version):
         elif 'linux' not in platforms:
             return "{}=={}; sys_platform != 'linux2'".format(package_name, version)
 
-    raise Exception("Can't parse the `supported_os` list for the check {}: {}".format(check, platforms))
+    raise ManifestError("Can't parse the `supported_os` list for the check {}: {}".format(check, platforms))
 
 
 def update_agent_requirements(req_file, check, newline):

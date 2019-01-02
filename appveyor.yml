@@ -46,7 +46,7 @@ install:
 
 test_script:
   # Only test any of these that have changed for pull requests
-  - ddev test%CHANGED_ONLY_FLAG% -c datadog_checks_base active_directory aspdotnet disk dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
+  - ddev test%CHANGED_ONLY_FLAG% -c datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
 
 # Uncomment the following to enable RDP connection into the builder and debug a build
 # on_finish:

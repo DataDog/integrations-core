@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -15,9 +17,70 @@ def aggregator():
 
 def test_instance():
     """
-    Simply assert the class can be insantiated
+    Simply assert the class can be instantiated
     """
     AgentCheck()
+
+
+class TestMetricNormalization:
+    def test_default(self):
+        check = AgentCheck()
+        metric_name = u'Klüft inför på fédéral'
+        normalized_metric_name = b'Kluft_infor_pa_federal'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+    def test_fix_case(self):
+        check = AgentCheck()
+        metric_name = u'Klüft inför på fédéral'
+        normalized_metric_name = b'kluft_infor_pa_federal'
+
+        assert check.normalize(metric_name, fix_case=True) == normalized_metric_name
+
+    def test_prefix(self):
+        check = AgentCheck()
+        metric_name = u'metric'
+        prefix = u'some'
+        normalized_metric_name = b'some.metric'
+
+        assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
+
+    def test_prefix_bytes(self):
+        check = AgentCheck()
+        metric_name = u'metric'
+        prefix = b'some'
+        normalized_metric_name = b'some.metric'
+
+        assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
+
+    def test_prefix_unicode_metric_bytes(self):
+        check = AgentCheck()
+        metric_name = b'metric'
+        prefix = u'some'
+        normalized_metric_name = b'some.metric'
+
+        assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
+
+    def test_underscores_redundant(self):
+        check = AgentCheck()
+        metric_name = u'a_few__redundant___underscores'
+        normalized_metric_name = b'a_few_redundant_underscores'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+    def test_underscores_at_ends(self):
+        check = AgentCheck()
+        metric_name = u'_some_underscores_'
+        normalized_metric_name = b'some_underscores'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+    def test_underscores_and_dots(self):
+        check = AgentCheck()
+        metric_name = u'some_.dots._and_._underscores'
+        normalized_metric_name = b'some.dots.and.underscores'
+
+        assert check.normalize(metric_name) == normalized_metric_name
 
 
 class TestMetrics:
@@ -93,6 +156,16 @@ class TestTags:
 
         assert normalized_tags is not tags
         assert normalized_tag == tag.encode('utf-8')
+
+    def test_unicode_device_name(self):
+        check = AgentCheck()
+        tags = []
+        device_name = u'unicode_string'
+
+        normalized_tags = check._normalize_tags(tags, device_name)
+        normalized_device_tag = normalized_tags[0]
+
+        assert isinstance(normalized_device_tag, bytes)
 
 
 class LimitedCheck(AgentCheck):

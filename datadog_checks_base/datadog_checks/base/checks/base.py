@@ -274,16 +274,14 @@ class AgentCheck(object):
         :param fix_case A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
         """
         if isinstance(metric, text_type):
-            metric_name = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
-        else:
-            metric_name = metric
+            metric = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
 
         if fix_case:
-            name = self.convert_to_underscore_separated(metric_name)
+            name = self.convert_to_underscore_separated(metric)
             if prefix is not None:
                 prefix = self.convert_to_underscore_separated(prefix)
         else:
-            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric_name)
+            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric)
         # Eliminate multiple _
         name = re.sub(br"__+", b"_", name)
         # Don't start/end with _
@@ -294,24 +292,24 @@ class AgentCheck(object):
         name = re.sub(br"_\.", b".", name)
 
         if prefix is not None:
-            return prefix + "." + name
+            return ensure_bytes(prefix) + b"." + name
         else:
             return name
 
-    FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
-    ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
-    METRIC_REPLACEMENT = re.compile(r'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
-    DOT_UNDERSCORE_CLEANUP = re.compile(r'_*\._*')
+    FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
+    ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
+    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
+    DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
 
     def convert_to_underscore_separated(self, name):
         """
         Convert from CamelCase to camel_case
         And substitute illegal metric characters
         """
-        metric_name = self.FIRST_CAP_RE.sub(r'\1_\2', name)
-        metric_name = self.ALL_CAP_RE.sub(r'\1_\2', metric_name).lower()
-        metric_name = self.METRIC_REPLACEMENT.sub('_', metric_name)
-        return self.DOT_UNDERSCORE_CLEANUP.sub('.', metric_name).strip('_')
+        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', ensure_bytes(name))
+        metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
+        metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
+        return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
     def _normalize_tags(self, tags, device_name):
         """
@@ -320,11 +318,11 @@ class AgentCheck(object):
         - normalize tags to type `str`
         - always return a list
         """
-        normalized_tags = self._normalize_tags_type(tags)
-
         if device_name:
             self._log_deprecation("device_name")
-            normalized_tags.append("device:%s" % device_name)
+            tags.append("device:{}".format(device_name))
+
+        normalized_tags = self._normalize_tags_type(tags)
 
         return normalized_tags
 

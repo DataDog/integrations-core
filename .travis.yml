@@ -123,9 +123,9 @@ jobs:
     - stage: test
       env: CHECK=gearmand PYTHON3=true
     - stage: test
-      env: CHECK=gitlab
+      env: CHECK=gitlab PYTHON3=true
     - stage: test
-      env: CHECK=go_expvar
+      env: CHECK=go_expvar PYTHON3=true
     - stage: test
       env: CHECK=gunicorn PYTHON3=true
     - stage: test
@@ -159,7 +159,7 @@ jobs:
     - stage: test
       env: CHECK=kyototycoon
     - stage: test
-      env: CHECK=lighttpd
+      env: CHECK=lighttpd PYTHON3=true
     - stage: test
       env: CHECK=linkerd
     - stage: test
@@ -169,7 +169,7 @@ jobs:
     - stage: test
       env: CHECK=marathon
     - stage: test
-      env: CHECK=mcache
+      env: CHECK=mcache PYTHON3=true
     - stage: test
       env: CHECK=mesos_slave
     - stage: test
@@ -183,13 +183,13 @@ jobs:
     - stage: test
       env: CHECK=network
     - stage: test
-      env: CHECK=nfsstat
+      env: CHECK=nfsstat PYTHON3=true
     - stage: test
       env: CHECK=nginx PYTHON3=true
     - stage: test
       env: CHECK=ntp
     - stage: test
-      env: CHECK=openldap
+      env: CHECK=openldap PYTHON3=true
     - stage: test
       env: CHECK=openstack
     - stage: test
@@ -207,13 +207,13 @@ jobs:
     - stage: test
       env: CHECK=postfix
     - stage: test
-      env: CHECK=powerdns_recursor
+      env: CHECK=powerdns_recursor PYTHON3=true
     - stage: test
-      env: CHECK=process
+      env: CHECK=process PYTHON3=true
     - stage: test
       env: CHECK=prometheus
     - stage: test
-      env: CHECK=rabbitmq
+      env: CHECK=rabbitmq PYTHON3=true
     - stage: test
       env: CHECK=redisdb PYTHON3=true
     - stage: test
@@ -227,27 +227,27 @@ jobs:
     - stage: test
       env: CHECK=sqlserver
     - stage: test
-      env: CHECK=ssh_check
+      env: CHECK=ssh_check PYTHON3=true
     - stage: test
-      env: CHECK=statsd
+      env: CHECK=statsd PYTHON3=true
     - stage: test
       env: CHECK=supervisord
     - stage: test
-      env: CHECK=squid
+      env: CHECK=squid PYTHON3=true
     - stage: test
-      env: CHECK=system_core
+      env: CHECK=system_core PYTHON3=true
     - stage: test
-      env: CHECK=system_swap
+      env: CHECK=system_swap PYTHON3=true
     - stage: test
       env: CHECK=tcp_check
     - stage: test
-      env: CHECK=teamcity
+      env: CHECK=teamcity PYTHON3=true
     - stage: test
-      env: CHECK=tokumx
+      env: CHECK=tokumx PYTHON3=true
     - stage: test
-      env: CHECK=twemproxy
+      env: CHECK=twemproxy PYTHON3=true
     - stage: test
-      env: CHECK=varnish
+      env: CHECK=varnish PYTHON3=true
     - stage: test
       env: CHECK=vault PYTHON3=true
     - stage: test
@@ -255,7 +255,7 @@ jobs:
     - stage: test
       env: CHECK=yarn PYTHON3=true
     - stage: test
-      env: CHECK=zk
+      env: CHECK=zk PYTHON3=true
 before_install:
   - bash .travis/prepare.sh
   - PATH="$PATH:$(pyenv root)/versions/3.6/bin"

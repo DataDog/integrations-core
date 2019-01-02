@@ -1,5 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 kubernetes.containers.last_state.terminated,gauge,,,,The number of containers that were previously terminated,0,kubelet,k8s.containers.last_state.terminated
+kubernetes.pods.running,gauge,,,,The number of running pods,1,kubelet,k8s.pods.running
+kubernetes.containers.running,gauge,,,,The number of running containers,1,kubelet,k8s.containers.running
 kubernetes.containers.restarts,gauge,,,,The number of times the container has been restarted,1,kubelet,k8s.containers.restarts
 kubernetes.containers.state.terminated,gauge,,,,The number of currently terminated containers,0,kubelet,k8s.containers.state.terminated
 kubernetes.containers.state.waiting,gauge,,,,The number of currently waiting containers,0,kubelet,k8s.containers.state.waiting

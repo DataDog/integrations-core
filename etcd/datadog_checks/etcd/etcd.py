@@ -99,7 +99,7 @@ class Etcd(OpenMetricsBaseCheck):
             self.check_post_v3(instance)
         else:
             self.warning(
-                'In Agent 6.9 this check will only support ETCD v3+. If you '
+                'In Agent 6.10 this check will only support ETCD v3+. If you '
                 'wish to preview the new version, set `use_preview` to `true`.'
             )
             self.check_pre_v3(instance)

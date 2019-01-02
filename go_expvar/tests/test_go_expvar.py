@@ -5,6 +5,8 @@
 import pytest
 import logging
 
+from six import iteritems
+
 from . import common
 
 log = logging.getLogger(__file__)
@@ -25,7 +27,7 @@ def test_go_expvar(check, spin_up_go_expvar, aggregator):
         aggregator.assert_metric(gauge, count=1, tags=shared_tags)
     for rate in common.CHECK_RATES:
         aggregator.assert_metric(rate, count=1, tags=shared_tags)
-    for rate, value in CHECK_RATES_CUSTOM.iteritems():
+    for rate, value in iteritems(CHECK_RATES_CUSTOM):
         aggregator.assert_metric(rate, count=1, value=value, tags=shared_tags)
 
     aggregator.assert_all_metrics_covered()

@@ -151,7 +151,7 @@ The IIS check does not include any events at this time.
 The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][8].
+Need help? Contact [Datadog support][8].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure

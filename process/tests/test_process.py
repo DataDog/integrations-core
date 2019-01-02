@@ -7,6 +7,8 @@ import psutil
 import pytest
 from mock import patch
 
+from six import iteritems
+
 from datadog_checks.process import ProcessCheck
 from . import common
 
@@ -299,7 +301,7 @@ def test_relocated_procfs(aggregator):
     my_procfs = tempfile.mkdtemp()
 
     def _fake_procfs(arg, root=my_procfs):
-        for key, val in arg.iteritems():
+        for key, val in iteritems(arg):
             path = os.path.join(root, key)
             if isinstance(val, dict):
                 os.mkdir(path)

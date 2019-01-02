@@ -11,8 +11,7 @@ import logging
 
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
-import common
-import metrics
+from . import common, metrics
 
 CHECK_NAME = 'powerdns_recursor'
 
@@ -21,7 +20,7 @@ log = logging.getLogger('test_apache')
 
 def wait_for_powerdns():
     base_url = "http://{}:{}".format(common.HOST, common.PORT)
-    for _ in xrange(0, 100):
+    for _ in range(0, 100):
         res = None
         try:
             res = requests.get(base_url)

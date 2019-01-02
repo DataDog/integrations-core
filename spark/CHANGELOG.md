@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.5.0 / 2018-12-20
+
+* [Added] Add streaming statistics metrics to the spark integration. See [#2437](https://github.com/DataDog/integrations-core/pull/2437).
+
 ## 1.4.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

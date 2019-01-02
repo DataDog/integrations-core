@@ -9,7 +9,7 @@ try:
 except ImportError:
     from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 
-from .. import AgentCheck
+from ... import AgentCheck, is_affirmative
 from ...utils.containers import hash_mutable
 
 int_types = [
@@ -34,6 +34,7 @@ class PDHBaseCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._countersettypes = {}
         self._counters = {}
+        self._missing_counters = {}
         self._metrics = {}
         self._tags = {}
         key = None
@@ -95,67 +96,14 @@ class PDHBaseCheck(AgentCheck):
                             else:
                                 self.log.warning("Unknown data type %s" % str(v))
 
-                # list of the metrics.  Each entry is itself an entry,
-                # which is the pdh name, datadog metric name, type, and the
-                # pdh counter object
-
-                for counterset, inst_name, counter_name, dd_name, mtype in counter_list:
-                    m = getattr(self, mtype.lower())
-
-                    precision = datatypes.get(dd_name)
-
-                    try:
-                        obj = WinPDHCounter(
-                            counterset,
-                            counter_name,
-                            self.log,
-                            inst_name,
-                            machine_name=remote_machine,
-                            precision=precision
-                        )
-                    except Exception as e:
-                        self.log.warning("Couldn't create counter {}\\{} due to {}".format(counterset, counter_name, e))
-                        self.log.warning("Datadog Agent will not report {}".format(dd_name))
-                        continue
-
-                    entry = [inst_name, dd_name, m, obj]
-                    self.log.debug("entry: %s" % str(entry))
-                    self._metrics[key].append(entry)
+                self._make_counters(key, (counter_list, (datatypes, remote_machine, False, 'entry')))
 
                 # get any additional metrics in the instance
                 addl_metrics = instance.get('additional_metrics')
                 if addl_metrics is not None:
-                    for counterset, inst_name, counter_name, dd_name, mtype in addl_metrics:
-                        if (
-                            inst_name.lower() == "none" or
-                            len(inst_name) == 0 or
-                            inst_name == "*" or
-                            inst_name.lower() == "all"
-                        ):
-                            inst_name = None
-                        m = getattr(self, mtype.lower())
-
-                        precision = datatypes.get(dd_name)
-
-                        try:
-                            obj = WinPDHCounter(
-                                counterset,
-                                counter_name,
-                                self.log,
-                                inst_name,
-                                machine_name=remote_machine,
-                                precision=precision
-                            )
-                        except Exception as e:
-                            self.log.warning(
-                                "Couldn't create counter {}\\{} due to {}".format(counterset, counter_name, e)
-                            )
-                            self.log.warning("Datadog Agent will not report {}".format(dd_name))
-                            continue
-
-                        entry = [inst_name, dd_name, m, obj]
-                        self.log.debug("additional metric entry: %s" % str(entry))
-                        self._metrics[key].append(entry)
+                    self._make_counters(
+                        key, (addl_metrics, (datatypes, remote_machine, True, 'additional metric entry'))
+                    )
 
         except Exception as e:
             self.log.debug("Exception in PDH init: %s", str(e))
@@ -167,8 +115,16 @@ class PDHBaseCheck(AgentCheck):
     def check(self, instance):
         self.log.debug("PDHBaseCheck: check()")
         key = hash_mutable(instance)
+        refresh_counters = is_affirmative(instance.get('refresh_counters', True))
+
+        if refresh_counters:
+            for counter, values in list(iteritems(self._missing_counters)):
+                self._make_counters(key, ([counter], values))
+
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             try:
+                if refresh_counters:
+                    counter.collect_counters()
                 vals = counter.get_all_values()
                 for instance_name, val in iteritems(vals):
                     tags = []
@@ -182,3 +138,51 @@ class PDHBaseCheck(AgentCheck):
             except Exception as e:
                 # don't give up on all of the metrics because one failed
                 self.log.error("Failed to get data for %s %s: %s" % (inst_name, dd_name, str(e)))
+
+    def _make_counters(self, key, counter_data):
+        counter_list, (datatypes, remote_machine, check_instance, message) = counter_data
+
+        # list of the metrics. Each entry is itself an entry,
+        # which is the pdh name, datadog metric name, type, and the
+        # pdh counter object
+        for counterset, inst_name, counter_name, dd_name, mtype in counter_list:
+            if check_instance and self._no_instance(inst_name):
+                inst_name = None
+
+            m = getattr(self, mtype.lower())
+            precision = datatypes.get(dd_name)
+
+            try:
+                obj = WinPDHCounter(
+                    counterset,
+                    counter_name,
+                    self.log,
+                    inst_name,
+                    machine_name=remote_machine,
+                    precision=precision
+                )
+            except Exception as e:
+                self.log.debug(
+                    'Could not create counter {}\\{} due to {}, will not report {}.'.format(
+                        counterset, counter_name, e, dd_name
+                    )
+                )
+                self._missing_counters[(counterset, inst_name, counter_name, dd_name, mtype)] = (
+                    datatypes, remote_machine, check_instance, message
+                )
+                continue
+            else:
+                self._missing_counters.pop((counterset, inst_name, counter_name, dd_name, mtype), None)
+
+            entry = [inst_name, dd_name, m, obj]
+            self.log.debug('{}: {}'.format(message, entry))
+            self._metrics[key].append(entry)
+
+    @classmethod
+    def _no_instance(cls, inst_name):
+        return (
+            inst_name.lower() == 'none' or
+            len(inst_name) == 0 or
+            inst_name == '*' or
+            inst_name.lower() == 'all'
+        )

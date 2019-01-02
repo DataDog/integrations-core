@@ -70,7 +70,7 @@ The PowerDNS Recursor check does not include any events at this time.### Service
 Returns CRITICAL if the Agent is unable to connect to the recursor's statistics API, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][6].
+Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/datadog_checks/powerdns_recursor/data/conf.yaml.example

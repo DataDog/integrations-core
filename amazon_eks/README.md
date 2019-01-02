@@ -32,7 +32,7 @@ Take also advantage of DaemonSets to [automatically deploy the Datadog Agent on 
 Follow the [container log collection steps][8] to learn more about those environment variables and discover more advanced setup options.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][9].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 

@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 from ...e2e import create_interface, get_configured_envs
 
 

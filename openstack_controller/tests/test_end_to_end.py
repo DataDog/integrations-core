@@ -112,7 +112,7 @@ class MockHTTPResponse(object):
         return self.response_dict
 
 
-@mock.patch('datadog_checks.openstack_controller.api.AbstractApi._make_request',
+@mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
             side_effect=make_request_responses)
 def test_scenario(make_request, aggregator):
     instance = common.MOCK_CONFIG["instances"][0]
@@ -129,9 +129,9 @@ def test_scenario(make_request, aggregator):
     with open(auth_projects_response_path, 'r') as f:
         auth_projects_response = json.loads(f.read())
 
-    with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.post_auth_token',
+    with mock.patch('datadog_checks.openstack_controller.api.Authenticator._post_auth_token',
                     return_value=auth_tokens_response):
-        with mock.patch('datadog_checks.openstack_controller.scopes.KeystoneApi.get_auth_projects',
+        with mock.patch('datadog_checks.openstack_controller.api.Authenticator._get_auth_projects',
                         return_value=auth_projects_response):
             check.check(common.MOCK_CONFIG['instances'][0])
 

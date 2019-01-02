@@ -39,12 +39,13 @@ class Vault(AgentCheck):
         if config is None:
             return
 
+        api = config['api']
         tags = list(config['tags'])
 
         # We access the version of the Vault API corresponding to each instance's `api_url`.
         try:
-            config['api']['check_leader'](config, tags)
-            config['api']['check_health'](config, tags)
+            api['check_leader'](config, tags)
+            api['check_health'](config, tags)
         except ApiUnreachable:
             return
 
@@ -113,9 +114,11 @@ class Vault(AgentCheck):
                         'Unknown Vault API version `{}`, using version '
                         '`{}`'.format(api_version, self.DEFAULT_API_VERSION)
                     )
+                    api_url = api_url[:-1] + self.DEFAULT_API_VERSION
+                    api_version = self.DEFAULT_API_VERSION
 
                 config['api_url'] = api_url
-                config['api'] = self.api_versions.get(api_version, self.DEFAULT_API_VERSION)['functions']
+                config['api'] = self.api_versions[api_version]['functions']
             except KeyError:
                 self.log.error('Vault configuration setting `api_url` is required')
                 return
