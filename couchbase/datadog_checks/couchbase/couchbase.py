@@ -278,7 +278,7 @@ class Couchbase(AgentCheck):
 
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
-            metric_tags = tags[:] or []
+            metric_tags = [] if tags is None else tags[:]
             metric_tags.append('bucket:{}'.format(bucket_name))
             metric_tags.append('device:{}'.format(bucket_name))
             for metric_name, val in bucket_stats.items():
