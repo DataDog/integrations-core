@@ -11,22 +11,28 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     DEFAUT_RATE_LIMITERS = [
-        "cronjob",
-        "daemon",
-        "deployment",
-        "endpoint",
-        "gc",
-        "job",
-        "namespace",
-        "node_lifecycle",
-        "persistentvolume_protection",
-        "persistentvolumeclaim_protection",
-        "replicaset",
-        "replication",
-        "resource_quota",
-        "service",
-        "serviceaccount",
-        "serviceaccount_tokens",
+        "bootstrap_signer",
+        "cronjob_controller",
+        "daemon_controller",
+        "deployment_controller",
+        "endpoint_controller",
+        "gc_controller",
+        "job_controller",
+        "namespace_controller",
+        "node_ipam_controller",
+        "node_lifecycle_controller",
+        "persistentvolume_protection_controller",
+        "persistentvolumeclaim_protection_controller",
+        "replicaset_controller",
+        "replication_controller"
+        "resource_quota_controller"
+        "root_ca_cert_publisher",
+        "route_controller",
+        "service_controller",
+        "serviceaccount_controller",
+        "serviceaccount_tokens_controller",
+        "token_cleaner",
+        "ttl_after_finished_controller",
     ]
 
     DEFAULT_QUEUES = [
@@ -101,7 +107,7 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
         transformers = {}
         limiters = self.DEFAUT_RATE_LIMITERS + instance.get("extra_limiters", [])
         for limiter in limiters:
-            transformers[limiter + "_controller_rate_limiter_use"] = self.rate_limiter_use
+            transformers[limiter + "_rate_limiter_use"] = self.rate_limiter_use
         queues = self.DEFAULT_QUEUES + instance.get("extra_queues", [])
         for queue in queues:
             for metric, func in iteritems(self.QUEUE_METRICS_TRANSFORMERS):
@@ -123,7 +129,7 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
 
     def rate_limiter_use(self, metric, scraper_config):
         self._tag_and_submit(
-            metric, scraper_config, "rate_limiter.use", "controller", "_controller_rate_limiter_use"
+            metric, scraper_config, "rate_limiter.use", "limiter", "_rate_limiter_use"
         )
 
     def queue_adds(self, metric, scraper_config):

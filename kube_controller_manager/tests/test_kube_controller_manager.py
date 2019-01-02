@@ -11,7 +11,7 @@ import mock
 instance = {
     'prometheus_url': 'http://localhost:10252/metrics',
     'extra_queues': ['extra'],
-    'extra_limiters': ['extra'],
+    'extra_limiters': ['extra_controller'],
 }
 
 # Constants
@@ -52,8 +52,8 @@ def test_check_metrics(aggregator, mock_metrics):
     assert_metric('.nodes.count', value=5, tags=["zone:test"])
     assert_metric('.nodes.unhealthy', value=1, tags=["zone:test"])
 
-    assert_metric('.rate_limiter.use', value=1, tags=["controller:job"])
-    assert_metric('.rate_limiter.use', value=0, tags=["controller:daemon"])
+    assert_metric('.rate_limiter.use', value=1, tags=["limiter:job_controller"])
+    assert_metric('.rate_limiter.use', value=0, tags=["limiter:daemon_controller"])
 
     assert_metric('.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=29, tags=["queue:replicaset"])
     assert_metric('.queue.depth', metric_type=aggregator.GAUGE, value=3, tags=["queue:service"])
@@ -68,7 +68,7 @@ def test_check_metrics(aggregator, mock_metrics):
     assert_metric('.queue.latency.quantile', value=1005, tags=["queue:deployment", "quantile:0.9"])
 
     # Extra name from the instance
-    assert_metric('.rate_limiter.use', value=0, tags=["controller:extra"])
+    assert_metric('.rate_limiter.use', value=0, tags=["limiter:extra_controller"])
     assert_metric('.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=13, tags=["queue:extra"])
     assert_metric('.queue.depth', metric_type=aggregator.GAUGE, value=2, tags=["queue:extra"])
     assert_metric('.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=55, tags=["queue:extra"])
