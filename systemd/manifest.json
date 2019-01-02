@@ -1,0 +1,23 @@
+{
+  "display_name": "Systemd",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "systemd",
+  "metric_prefix": "systemd.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "acd470e7-5413-4deb-95fc-4b034d904691",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Systemd Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false
+}
