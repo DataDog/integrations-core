@@ -440,7 +440,7 @@ job_queue_latency_sum 0
 job_queue_latency_count 0
 # HELP job_retries Total number of retries handled by workqueue: job
 # TYPE job_retries counter
-job_retries 0
+job_retries 6
 # HELP job_work_duration How long processing an item from workqueuejob takes.
 # TYPE job_work_duration summary
 job_work_duration{quantile="0.5"} NaN

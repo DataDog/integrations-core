@@ -52,6 +52,7 @@ def mock_leader():
     yield mocked.start()
     mocked.stop()
 
+
 def test_check_metrics(aggregator, mock_metrics, mock_leader):
     c = KubeControllerManagerCheck(CHECK_NAME, None, {}, [instance])
     c.check(instance)
@@ -73,7 +74,7 @@ def test_check_metrics(aggregator, mock_metrics, mock_leader):
 
     assert_metric('.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=29, tags=["queue:replicaset", "te:st"])
     assert_metric('.queue.depth', metric_type=aggregator.GAUGE, value=3, tags=["queue:service", "te:st"])
-    assert_metric('.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=13, tags=["queue:deployment", "te:st"])
+    assert_metric('.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=6, tags=["queue:job", "te:st"])
 
     assert_metric('.queue.work_duration.sum', value=255667, tags=["queue:replicaset", "te:st"])
     assert_metric('.queue.work_duration.count', value=29, tags=["queue:replicaset", "te:st"])
