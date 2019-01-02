@@ -47,7 +47,7 @@ class IbmWasCheck(AgentCheck):
                         self.process_stats(stats, prefix, metric_categories, nested_tags, server_tags)
 
     def get_node_from_name(self, xml_data, path):
-        # XMLPath returns a list, but there should only be one element here since we start
+        # XMLPath returns a list, but there should only be one element here since the function starts
         # the search within a given Node/Server
         data = xml_data.xpath('//Stat[normalize-space(@name)="{}"]'.format(path))
         if len(data):
@@ -60,7 +60,7 @@ class IbmWasCheck(AgentCheck):
         return xml_data.xpath('//{}'.format(path))
 
     # The XML will have Stat Nodes and Nodes that contain the metrics themselves
-    # We have to recursively go through each Stat Node to properly setup tags
+    # This code recursively goes through each Stat Node to properly setup tags
     # where each Stat will have a different tag key depending on the context.
     def process_stats(self, stats, prefix, metric_categories, nested_tags, tags, recursion_level=0):
         for child in stats:
