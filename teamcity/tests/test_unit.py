@@ -5,6 +5,8 @@
 # project
 from datadog_checks.teamcity import TeamCityCheck
 
+from six import iteritems
+
 # A path regularly used in the TeamCity Check
 COMMON_PATH = "guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,status:SUCCESS"
 
@@ -38,7 +40,7 @@ def test_server_normalization():
 
     teamcity = TeamCityCheck("teamcity", {}, {})
 
-    for server, expected_server in TEAMCITY_SERVER_VALUES.iteritems():
+    for server, expected_server in iteritems(TEAMCITY_SERVER_VALUES):
         normalized_server = teamcity._normalize_server_url(server)
 
         assert expected_server == normalized_server
