@@ -23,13 +23,13 @@ instances:
   ## @param extra_queues - list strings - optional
   ## Monitor additional queues, in addition to the default ones
   #
-  # extra_queues:
-  #   - <NAME1>
-  #   - <NAME2>
+  #  extra_queues:
+  #    - <NAME1>
+  #    - <NAME2>
 
   ## @param extra_limiters - list strings - optional
   ## Monitor additional rate limiters, in addition to the default ones
   #
-  # extra_limiters:
-  #   - <NAME1>
-  #   - <NAME2>
+  #  extra_limiters:
+  #    - <NAME1>
+  #    - <NAME2>
