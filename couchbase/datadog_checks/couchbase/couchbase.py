@@ -290,7 +290,7 @@ class Couchbase(AgentCheck):
 
         # Get node metrics
         for node_name, node_stats in data['nodes'].items():
-            metric_tags = tags[:] or []
+            metric_tags = [] if tags is None else tags[:]
             metric_tags.append('node:{}'.format(node_name))
             metric_tags.append('device:{}'.format(node_name))
             for metric_name, val in node_stats['interestingStats'].items():
