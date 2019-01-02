@@ -10,7 +10,7 @@
   "guid": "34156dda-9288-4968-962b-6b29e1753d33",
   "support": "core",
   "supported_os": [
-    "linux",
+    "linux"
   ],
   "public_title": "Datadog-Kubernetes Controller Manager Integration",
   "categories": [
