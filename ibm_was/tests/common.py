@@ -67,10 +67,10 @@ MALFORMED_CUSTOM_QUERY_INSTANCE = {
 }
 
 METRICS_ALWAYS_PRESENT = [
-    'ibmwas.jdbc.CreateCount',
-    'ibmwas.jvm.FreeMemory',
-    'ibmwas.servlet_session.LifeTime',
-    'ibmwas.thread_pools.CreateCount'
+    'ibmwas.jdbc.create_count',
+    'ibmwas.jvm.free_memory',
+    'ibmwas.servlet_session.life_time',
+    'ibmwas.thread_pools.create_count'
 ]
 
 DEFAULT_SERVICE_CHECK_TAGS = [

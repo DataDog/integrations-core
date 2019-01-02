@@ -6,13 +6,15 @@ from lxml import etree
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+
 from . import metrics, validation
 
 
 class IbmWasCheck(AgentCheck):
 
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
+    METRIC_PREFIX = 'ibmwas'
 
     def check(self, instance):
         validation.validate_config(instance)
@@ -46,7 +48,7 @@ class IbmWasCheck(AgentCheck):
 
     def get_node_from_name(self, xml_data, path):
         # XMLPath returns a list, but there should only be one element here since we start
-        # the search within a given Node/server
+        # the search within a given Node/Server
         data = xml_data.xpath('//Stat[normalize-space(@name)="{}"]'.format(path))
         if len(data):
             return data[0]
@@ -72,7 +74,12 @@ class IbmWasCheck(AgentCheck):
 
     def submit_metrics(self, child, prefix, tags):
         value = child.get(metrics.METRIC_VALUE_FIELDS[child.tag])
-        self.gauge('ibmwas.{}.{}'.format(prefix, child.get('name')), value, tags=tags)
+        metric_name = self.normalize(
+            ensure_unicode(child.get('name')),
+            prefix='{}.{}'.format(self.METRIC_PREFIX, prefix),
+            fix_case=True
+        )
+        self.gauge(metric_name, value, tags=tags)
 
     def make_request(self, instance, url, tags):
         try:
