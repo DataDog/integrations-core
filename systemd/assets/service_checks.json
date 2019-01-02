@@ -1,0 +1,29 @@
+[
+    {
+        "agent_version": "6.12.0",
+        "integration": "systemd",
+        "groups": ["host", "instance"],
+        "check": "systemd.can_connect",
+        "statuses": ["ok", "critical"],
+        "name": "Can Connect",
+        "description": "Returns `OK` if systemd is reachable, `CRITICAL` otherwise."
+    },
+    {
+        "agent_version": "6.12.0",
+        "integration": "systemd",
+        "groups": ["host", "instance"],
+        "check": "systemd.system_state",
+        "statuses": ["ok", "critical", "unknown"],
+        "name": "System State",
+        "description": "Returns `OK` if systemd's system state is running, `CRITICAL` if degraded, maintenance or stopping, `UNKNOWN` if initializing, starting or other."
+    },
+    {
+        "agent_version": "6.12.0",
+        "integration": "systemd",
+        "groups": ["host", "unit"],
+        "check": "systemd.unit.active_state",
+        "statuses": ["ok", "critical", "unknown"],
+        "name": "Unit Active State",
+        "description": "Returns `OK` if the unit active state is active, `CRITICAL` if inactive, deactivating or failed, `UNKNOWN` if activating or other."
+    }
+]
