@@ -8,4 +8,13 @@
         "name": "Kube Controller Manager prometheus health",
         "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint."
     }
+    {
+        "agent_version": "6.0.0",
+        "integration":"kube_controller_manager",
+        "check": "kube_controller_manager.leader_election.status",
+        "statuses": ["ok", "critical"],
+        "groups": ["record_kind", "record_name", "record_namespace"],
+        "name": "Kube Controller Manager leader election health",
+        "description": "Returns `CRITICAL` if no replica is currently set as leader."
+    }
 ]
