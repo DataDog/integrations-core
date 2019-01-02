@@ -318,15 +318,12 @@ class AgentCheck(object):
         - normalize tags to type `str`
         - always return a list
         """
+        out_tags = [] if tags is None else tags[:]
         if device_name:
             self._log_deprecation("device_name")
-            device_tag = "device:{}".format(device_name)
-            if device_tag not in tags:
-                tags.append(device_tag)
+            out_tags.append("device:{}".format(device_name))
 
-        normalized_tags = self._normalize_tags_type(tags)
-
-        return normalized_tags
+        return self._normalize_tags_type(out_tags)
 
     def _normalize_tags_type(self, tags):
         """
