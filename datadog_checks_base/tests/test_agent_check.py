@@ -167,6 +167,14 @@ class TestTags:
 
         assert isinstance(normalized_device_tag, bytes)
 
+    def test_duplicated_device_name(self):
+        check = AgentCheck()
+        tags = []
+        device_name = 'foo'
+        check._normalize_tags(tags, device_name)
+        normalized_tags = check._normalize_tags(tags, device_name)
+        assert len(normalized_tags) == 1
+
 
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
