@@ -4,19 +4,18 @@
   "manifest_version": "1.0.0",
   "name": "kube_controller_manager",
   "metric_prefix": "kube_controller_manager.",
-  "metric_to_check": "",
+  "metric_to_check": "kube_controller_manager.threads",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Monitors the Kubernetes Controller Manager",
   "guid": "34156dda-9288-4968-962b-6b29e1753d33",
   "support": "core",
   "supported_os": [
     "linux",
-    "mac_os",
-    "windows"
   ],
   "public_title": "Datadog-Kubernetes Controller Manager Integration",
   "categories": [
-    ""
+    "orchestration",
+    "containers"
   ],
   "type": "check",
   "is_public": true
