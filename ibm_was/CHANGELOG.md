@@ -1,2 +1,2 @@
-# CHANGELOG - Ibm_was
+# CHANGELOG - IBM WAS
 

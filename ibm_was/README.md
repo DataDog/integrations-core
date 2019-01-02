@@ -10,13 +10,13 @@ The IBM WAS Datadog Integration collects enabled PMI Counters from the WebSphere
 
 ### Installation
 
-The Ibm_was check is included in the [Datadog Agent][2] package, so you do not
+The IBM WAS check is included in the [Datadog Agent][2] package, so you do not
 need to install anything else on your server.
 
 ### Configuration
 
 1. Edit the `ibm_was.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your ibm_was performance data.
+   Agent's configuration directory to start collecting your IBM WAS performance data.
    See the [sample ibm_was.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]

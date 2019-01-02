@@ -18,13 +18,13 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base'
+CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 
 
 setup(
     name='datadog-ibm_was',
     version=ABOUT['__version__'],
-    description='The Ibm_was check',
+    description='The IBM WAS check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent ibm_was check',

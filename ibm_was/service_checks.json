@@ -2,10 +2,10 @@
     {
         "agent_version": "6.9.0",
         "integration":"ibm_was",
-	    "groups": ["host", "url"],
-	    "check": "ibm_was.can_connect",
-	    "statuses": ["ok", "critical"],
-	    "name": "Can Connect",
-	    "description": "Returns `CRITICAL` if the Agent cannot connect to the PerfServlet for any reason. Returns `OK` otherwise."
-	}
+        "groups": ["host", "url"],
+        "check": "ibm_was.can_connect",
+        "statuses": ["ok", "critical"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent cannot connect to the PerfServlet for any reason. Returns `OK` otherwise."
+    }
 ]

@@ -50,7 +50,7 @@ instances:
   ## </Stat>
   ##
   ## The following custom query would emit:
-  ## self.gauge('ibm_was.thread_pools.CreateCount', value=0, tags=['threadKey:AriesThreadPool', ...])
+  ## self.gauge('ibm_was.thread_pools.ActiveTime', value=0, tags=['threadKey:AriesThreadPool', ...])
   ## self.gauge('ibm_was.thread_pools.DeclaredThreadHungCount', value=0, tags=['threadKey:Default', ...])
   #
   # custom_queries:
@@ -58,3 +58,12 @@ instances:
   #    stat: "Thread Pools Custom"
   #    tag_keys:
   #      - "threadKey"
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>

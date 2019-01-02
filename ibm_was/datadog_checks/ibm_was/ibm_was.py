@@ -17,17 +17,22 @@ class IbmWasCheck(AgentCheck):
     def check(self, instance):
         validation.validate_config(instance)
         collect_stats = self.setup_configured_stats(instance)
+        url = instance.get('servlet_url')
+
         nested_tags, metric_categories = self.append_custom_queries(instance, collect_stats)
+        custom_tags = instance.get('tags', [])
 
-        custom_tags = instance.get('custom_tags', [])
+        service_check_tags = list(custom_tags)
+        service_check_tags.append('url:{}'.format(url))
 
-        data = self.make_request("servers")
+        data = self.make_request(instance, url, service_check_tags)
         server_data_xml = etree.fromstring(data)
         node_list = self.get_node_from_root(server_data_xml, "Node")
 
         for node in node_list:
             server_list = self.get_node_from_root(node, 'Server')
             node_tags = list(custom_tags)
+
             node_tags.append('node:{}'.format(node.get('name')))
             for server in server_list:
                 server_tags = ['server:{}'.format(server.get('name'))]
@@ -69,19 +74,20 @@ class IbmWasCheck(AgentCheck):
         value = child.get(metrics.METRIC_VALUE_FIELDS[child.tag])
         self.gauge('ibmwas.{}.{}'.format(prefix, child.get('name')), value, tags=tags)
 
-    def make_request(self, url):
+    def make_request(self, instance, url, tags):
         try:
-            resp = requests.get(url, )
+            resp = requests.get(url, proxies=self.get_instance_proxy(instance, url))
             resp.raise_for_status()
-            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags='url')
-        except requests.HTTPError as e:
+            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=tags)
+        except (requests.HTTPError, requests.ConnectionError) as e:
             self.warning(
                 "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
                 .format(url, e))
-            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, tags='url')
+            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, tags=tags)
+            raise e
         return resp
 
-    def append_custom_queries(self, instance, collect_stats=[]):
+    def append_custom_queries(self, instance, collect_stats):
         custom_recursion_tags = {}
         custom_metric_categories = {}
         custom_queries = instance.get('custom_queries', [])
