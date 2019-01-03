@@ -9,7 +9,7 @@ import copy
 from datadog_checks.utils.platform import Platform
 from datadog_checks.haproxy import HAProxy
 
-import common
+from . import common
 
 
 def _test_frontend_metrics(aggregator, shared_tag):
