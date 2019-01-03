@@ -100,7 +100,7 @@ class IbmMqCheck(AgentCheck):
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: queue_name,
-                pymqi.CMQC.MQIA_Q_TYPE: queue_type,
+                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
             pcf = pymqi.PCFExecute(queue_manager)
