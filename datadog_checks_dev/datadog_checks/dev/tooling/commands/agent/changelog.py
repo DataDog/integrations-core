@@ -8,6 +8,7 @@ from collections import OrderedDict
 import click
 from six import StringIO, iteritems
 
+from .common import get_agent_tags
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 from ...constants import get_root, get_agent_release_requirements
 from ...git import git_show_file, git_tag_list
@@ -35,17 +36,7 @@ def changelog(since, to, output, force):
     tool will generate the whole changelog since Agent version 6.3.0
     (before that point we don't have enough information to build the log).
     """
-    agent_tags = git_tag_list(r'^\d+\.\d+\.\d+$')
-
-    # default value for --to is the latest tag
-    if not to:
-        to = agent_tags[-1]
-
-    # filter out versions according to the interval [since, to]
-    agent_tags = [t for t in agent_tags if since <= t <= to]
-
-    # reverse so we have descendant order
-    agent_tags = agent_tags[::-1]
+    agent_tags = get_agent_tags(since, to)
 
     # store the changes in a mapping {agent_version --> {check_name --> current_version}}
     changes_per_agent = OrderedDict()
