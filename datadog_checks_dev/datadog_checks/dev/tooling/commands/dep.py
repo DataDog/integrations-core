@@ -16,10 +16,6 @@ from ..requirements import (
 from ...utils import write_file_lines
 
 
-def transform_package_data(packages):
-    return {package.name: package for package in packages}
-
-
 def display_package_changes(pre_packages, post_packages, indent=''):
     """
     Print packages that've been added, removed or changed
@@ -125,7 +121,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
         resolved_reqs_file = os.path.join(root, check_name, 'requirements.txt')
 
         if os.path.isfile(pinned_reqs_file):
-            pinned_packages = transform_package_data(read_packages(pinned_reqs_file))
+            pinned_packages = {package.name: package for package in read_packages(pinned_reqs_file)}
             if package not in pinned_packages and check_name not in checks:
                 continue
 
