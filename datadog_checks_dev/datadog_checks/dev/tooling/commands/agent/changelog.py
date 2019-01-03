@@ -10,7 +10,7 @@ from six import StringIO, iteritems
 
 from .common import get_agent_tags
 from ..console import CONTEXT_SETTINGS, abort, echo_info
-from ...constants import get_root, get_agent_release_requirements
+from ...constants import get_root, get_agent_release_requirements, get_agent_changelog
 from ...git import git_show_file, git_tag_list
 from ...release import get_folder_name, get_package_name, DATADOG_PACKAGE_PREFIX
 from ...utils import parse_agent_req_file
@@ -23,9 +23,9 @@ from ....utils import write_file, read_file
 )
 @click.option('--since', help="Initial Agent version", default='6.3.0')
 @click.option('--to', help="Final Agent version")
-@click.option('--output', '-o', help="Path to the changelog file, if omitted contents will be printed to stdout")
+@click.option('--write', '-w', help="Write to the changelog file, if omitted contents will be printed to stdout")
 @click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
-def changelog(since, to, output, force):
+def changelog(since, to, write, force):
     """
     Generates a markdown file containing the list of checks that changed for a
     given Agent release. Agent version numbers are derived inspecting tags on
@@ -103,13 +103,14 @@ def changelog(since, to, output, force):
             # add an extra line to separate the release block
             changelog_contents.write('\n')
 
-    # save the changelog on disk if --output was passed
-    if output:
+    # save the changelog on disk if --write was passed
+    if write:
+        dest = get_agent_changelog()
         # don't overwrite an existing file
-        if os.path.exists(output) and not force:
+        if os.path.exists(dest) and not force:
             msg = "Output file {} already exists, run the command again with --force to overwrite"
-            abort(msg.format(output))
+            abort(msg.format(dest))
 
-        write_file(output, changelog_contents.getvalue())
+        write_file(dest, changelog_contents.getvalue())
     else:
         echo_info(changelog_contents.getvalue())
