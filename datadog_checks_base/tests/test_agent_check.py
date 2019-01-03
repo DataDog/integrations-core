@@ -5,7 +5,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 import mock
-from six import string_types
 
 from datadog_checks.checks import AgentCheck
 
@@ -177,12 +176,10 @@ class TestTags:
         normalized_tags = check._normalize_tags_type(tags, device_name)
         assert len(normalized_tags) == 1
 
-    def test__normalize_type(self):
+    def test__to_bytes(self):
         check = AgentCheck()
-        in_str = bytes("tag:☣")
-        assert check._normalize_type(in_str) == bytes("tag:☣")
-        in_str = u"tag:☣"
-        assert check._normalize_type(in_str) == bytes("tag:☣")
+        assert isinstance(check._normalize_type(b"tag:foo"), bytes)
+        assert isinstance(check._normalize_type(u"tag:☣"), bytes)
         in_str = mock.MagicMock(side_effect=Exception)
         in_str.encode.side_effect = Exception
         assert check._normalize_type(in_str) is None

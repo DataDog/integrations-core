@@ -322,7 +322,7 @@ class AgentCheck(object):
 
         if device_name:
             self._log_deprecation("device_name")
-            device_tag = self._normalize_type("device:{}".format(device_name))
+            device_tag = self._to_bytes("device:{}".format(device_name))
             if device_tag is None:
                 self.log.warning('Error encoding device tag to utf-8 encoded string, ignoring')
             else:
@@ -330,7 +330,7 @@ class AgentCheck(object):
 
         if tags is not None:
             for tag in tags:
-                tag = self._normalize_type(tag)
+                tag = self._to_bytes(tag)
                 if tag is None:
                     self.log.warning('Error encoding tag to utf-8 encoded string, ignoring tag')
                     continue
@@ -338,7 +338,7 @@ class AgentCheck(object):
 
         return normalized_tags
 
-    def _normalize_type(self, data):
+    def _to_bytes(self, data):
         """
         Normalize a text data to bytes (type `bytes`) so that the go bindings can
         handle it easily.
