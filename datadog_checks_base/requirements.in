@@ -1,4 +1,5 @@
 ddtrace==0.13.0
+kubernetes==8.0.0
 prometheus-client==0.3.0
 protobuf==3.5.1
 pywin32==224; sys_platform == 'win32'

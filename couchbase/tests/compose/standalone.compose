@@ -2,12 +2,7 @@ version: '3.5'
 
 services:
   couchbase-standalone:
-    image: "couchbase/server"
+    image: "couchbase/server:5.5.3"
     ports:
-      - 8091:8091
-      - 8092:8092
-      - 8093:8093
-      - 8094:8094
-      - 11210:11210
-      - 11211:11211
+      - 8091-8094:8091-8094
     container_name: ${CB_CONTAINER_NAME}
