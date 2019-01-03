@@ -45,13 +45,14 @@ class IbmMqCheck(AgentCheck):
             return
 
         try:
-            self.queue_manager_stats(queue_manager, config.tags, metrics)
+            self.queue_manager_stats(queue_manager, config.tags)
 
             for queue_name in config.queues:
                 queue_tags = config.tags + ["queue:{}".format(queue_name)]
                 try:
                     queue = pymqi.Queue(queue_manager, queue_name)
-                    self.queue_stats(queue, queue_tags, metrics)
+                    self.queue_stats(queue, queue_tags)
+                    self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
                     queue.close()
                 except Exception as e:
@@ -60,7 +61,7 @@ class IbmMqCheck(AgentCheck):
         finally:
             queue_manager.disconnect()
 
-    def queue_manager_stats(self, queue_manager, tags, metrics):
+    def queue_manager_stats(self, queue_manager, tags):
         """
         Get stats from the queue manager
         """
@@ -75,7 +76,7 @@ class IbmMqCheck(AgentCheck):
                 self.warning("Error getting queue manager stats: {}".format(e))
                 self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags)
 
-    def queue_stats(self, queue, tags, metrics):
+    def queue_stats(self, queue, tags):
         """
         Grab stats from queues
         """
@@ -95,7 +96,7 @@ class IbmMqCheck(AgentCheck):
             except pymqi.Error as e:
                 self.warning("Error getting queue stats: {}".format(e))
 
-    def get_pcf_queue_metrics(queue_manager, queue_name):
+    def get_pcf_queue_metrics(self, queue_manager, queue_name, tags):
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: queue_name,
