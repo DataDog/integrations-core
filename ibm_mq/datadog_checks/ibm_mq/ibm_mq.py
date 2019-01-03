@@ -95,7 +95,6 @@ class IbmMqCheck(AgentCheck):
             except pymqi.Error as e:
                 self.warning("Error getting queue stats: {}".format(e))
 
-
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: queue_name,
