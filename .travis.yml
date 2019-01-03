@@ -133,7 +133,7 @@ jobs:
     - stage: test
       env: CHECK=hdfs_datanode
     - stage: test
-      env: CHECK=hdfs_namenode
+      env: CHECK=hdfs_namenode PYTHON3=true
     - stage: test
       env: CHECK=http_check PYTHON3=true
     - stage: test
