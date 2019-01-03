@@ -128,7 +128,7 @@ def wait_for_couchbase_container(container_name):
     Wait for couchbase to start
     """
 
-    for i in xrange(15):
+    for i in range(15):
         status_args = [
             'docker', 'exec', container_name,
             'couchbase-cli', 'server-info', '-c', 'localhost:{}'.format(PORT),
@@ -148,7 +148,7 @@ def wait_for_couchbase_init():
     Wait for couchbase to be initialized
     """
 
-    for i in xrange(15):
+    for i in range(15):
         r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
         if r.status_code == requests.codes.ok:
             return True
@@ -160,7 +160,7 @@ def wait_for_node_stats():
     """
     Wait for couchbase to generate node stats
     """
-    for i in xrange(15):
+    for i in range(15):
         try:
             r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
             r.raise_for_status()
@@ -179,7 +179,7 @@ def wait_for_bucket_stats(bucket_name):
     """
     Wait for couchbase to generate bucket stats
     """
-    for i in xrange(15):
+    for i in range(15):
         try:
             r = requests.get('{}/pools/default/buckets/{}/stats'.format(URL, bucket_name), auth=(USER, PASSWORD))
             r.raise_for_status()

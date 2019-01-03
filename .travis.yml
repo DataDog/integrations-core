@@ -97,7 +97,7 @@ jobs:
     - stage: test
       env: CHECK=couch PYTHON3=true
     - stage: test
-      env: CHECK=couchbase
+      env: CHECK=couchbase PYTHON3=true
     - stage: test
       env: CHECK=crio PYTHON3=true
     - stage: test

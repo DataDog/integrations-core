@@ -3,15 +3,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
+from __future__ import division
+
 import time
 import re
 from collections import defaultdict
 
-# 3rd party
 import requests
 
-# project
+from six import string_types
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 from datadog_checks.utils.containers import hash_mutable
@@ -307,7 +308,7 @@ class Couchbase(AgentCheck):
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:
                     # for query times, the unit is part of the value, we need to extract it
-                    if isinstance(val, basestring):
+                    if isinstance(val, string_types):
                         val = self.extract_seconds_value(val)
 
                     full_metric_name = 'couchbase.query.{}'.format(self.camel_case_to_joined_lower(norm_metric_name))
@@ -449,7 +450,7 @@ class Couchbase(AgentCheck):
                 raise Exception("No data returned from couchbase endpoint: {}".format(url))
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags, message=str(e.message))
+                               tags=service_check_tags, message=str(e))
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
