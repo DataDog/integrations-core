@@ -161,7 +161,7 @@ jobs:
     - stage: test
       env: CHECK=linkerd
     - stage: test
-      env: CHECK=linux_proc_extras
+      env: CHECK=linux_proc_extras PYTHON3=true
     - stage: test
       env: CHECK=mapreduce
     - stage: test
