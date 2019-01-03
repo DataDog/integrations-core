@@ -9,7 +9,7 @@ import tempfile
 import shutil
 import getpass
 
-import common
+from . import common
 
 log = logging.getLogger('test_haproxy')
 
@@ -24,7 +24,7 @@ def aggregator():
 @pytest.fixture(scope="module")
 def haproxy_mock():
     filepath = os.path.join(common.HERE, 'fixtures', 'mock_data')
-    with open(filepath, 'r') as f:
+    with open(filepath, 'rb') as f:
         data = f.read()
     p = mock.patch('requests.get', return_value=mock.Mock(content=data))
     yield p.start()
@@ -34,7 +34,7 @@ def haproxy_mock():
 @pytest.fixture(scope="module")
 def haproxy_mock_evil():
     filepath = os.path.join(common.HERE, 'fixtures', 'mock_data_evil')
-    with open(filepath, 'r') as f:
+    with open(filepath, 'rb') as f:
         data = f.read()
     p = mock.patch('requests.get', return_value=mock.Mock(content=data))
     yield p.start()
@@ -42,7 +42,7 @@ def haproxy_mock_evil():
 
 
 def wait_for_haproxy():
-    for _ in xrange(0, 100):
+    for _ in range(0, 100):
         res = None
         res_open = None
         try:

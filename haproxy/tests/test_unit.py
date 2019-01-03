@@ -1,7 +1,7 @@
 import os
 import copy
 
-import common
+from . import common
 
 from datadog_checks.haproxy import HAProxy
 from collections import defaultdict
