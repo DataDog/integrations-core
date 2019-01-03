@@ -110,6 +110,8 @@ def update_link_metadata(checks):
         run_in_toto(key_id, products)
 
         # Check whether each signed product is being tracked by git.
+        # NOTE: We have to check now *AFTER* signing the tag link file, so that
+        # we can check against the actual complete list of products.
         with open(tag_link) as tag_json:
             tag = json.load(tag_json)
             products = tag['signed']['products']
