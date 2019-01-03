@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # flake8: noqa
 import json
+import os
 import shutil
 
 # NOTE: Set one minute for any GPG subprocess to timeout in in-toto.  Should be
@@ -116,9 +117,10 @@ def update_link_metadata(checks):
             tag = json.load(tag_json)
             products = tag['signed']['products']
 
-            for product in products:
-                if not git_ls_files(product):
-                    raise UntrackedFileException(product)
+        for product in products:
+            if not git_ls_files(product):
+                os.remove(tag_link)
+                raise UntrackedFileException(product)
 
         # Tell pipeline which tag link metadata to use.
         write_file(metadata_file_tracker, tag_link)
