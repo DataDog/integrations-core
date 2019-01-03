@@ -15,7 +15,7 @@ except ImportError:
     psutil = None
 
 try:
-    import datadog_agent
+    import datadog_agent  # noqa: F401
     is_agent_6 = True
 except ImportError:
     is_agent_6 = False
@@ -53,6 +53,7 @@ class Disk(AgentCheck):
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
 
+        # TODO Remove this v5/v6 fork when agent 5 will be fully deprecated
         if is_agent_6:
             self._use_mount = is_affirmative(instance.get('use_mount', False))
         else:
