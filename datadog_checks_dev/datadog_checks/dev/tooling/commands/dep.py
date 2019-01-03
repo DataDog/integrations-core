@@ -117,7 +117,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
     pin for via arguments.
     """
     root = get_root()
-    package = package.lower()
+    package_name = package.lower()
     version = version.lower()
 
     for check_name in sorted(os.listdir(root)):
@@ -138,11 +138,11 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
                 echo_info('Check `{}`:'.format(check_name))
 
             if version == 'none':
-                del pinned_packages[package]
+                del pinned_packages[package_name]
             else:
-                pinned_packages[package] = Package(package, version, marker)
+                pinned_packages[package_name] = Package(package_name, version, marker)
 
-            write_file_lines(pinned_reqs_file, ('{}\n'.format(package) for package in sorted(pinned_packages)))
+            write_file_lines(pinned_reqs_file, ('{}\n'.format(package) for package in sorted(itervalues(pinned_packages))))
 
             if not quiet:
                 echo_waiting('    Resolving dependencies...')
