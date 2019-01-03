@@ -46,12 +46,15 @@ need to install anything else on your server.
 
 By default nginx metrix are collected by the nginx-ingress-controller check but for convenience you might want to run the regular `nginx` check on the ingress controller.
 
-You achieve so by making the nginx status page reachable from the agent by using the `nginx-status-ipv4-whitelist` setting on the controller and adding these autodiscovery annotations to the controller pod:
+You achieve so by making the nginx status page reachable from the agent by using the `nginx-status-ipv4-whitelist` setting on the controller and adding autodiscovery annotations to the controller pod.
+
+For example these annotations will enable both the `nginx` and `nginx-ingress-controller` checks and the log collection:
 
 ```text
-ad.datadoghq.com/nginx-ingress-controller.check_names: '["nginx"]'
-ad.datadoghq.com/nginx-ingress-controller.init_configs: '[{}]'
-ad.datadoghq.com/nginx-ingress-controller.instances: '[{"nginx_status_url": "http://%%host%%/nginx_status"}]'
+ad.datadoghq.com/nginx-ingress-controller.check_names: '["nginx","nginx-ingress-controller"]'
+ad.datadoghq.com/nginx-ingress-controller.init_configs: '[{},{}]'
+ad.datadoghq.com/nginx-ingress-controller.instances: '[{"nginx_status_url": "http://%%host%%/nginx_status"},{"prometheus_url": "http://%%host%%:10254/metrics"}]'
+ad.datadoghq.com/nginx-ingress-controller.logs: '[{"service": "controller", "source":"nginx-ingress-controller"}]'
 ```
 
 ### Validation
