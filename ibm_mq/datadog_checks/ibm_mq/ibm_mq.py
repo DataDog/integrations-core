@@ -113,4 +113,7 @@ class IbmMqCheck(AgentCheck):
                 mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
                 m = int(queue_info[pymqi_value]))
 
-                self.gauge(mname, m, tags=tags)
+                if m > failure_value:
+                    self.gauge(mname, m, tags=tags)
+                else:
+                    log.debug("Unable to get {}, turn on queue level monitoring to access these metrics".format(mname))
