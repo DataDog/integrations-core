@@ -95,24 +95,28 @@ class IbmMqCheck(AgentCheck):
             except pymqi.Error as e:
                 self.warning("Error getting queue stats: {}".format(e))
 
+    def get_pcf_queue_metrics(queue_manager, queue_name):
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: queue_name,
                 pymqi.CMQC.MQIA_Q_TYPE: queue_type,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
-            pcf = pymqi.PCFExecute(qmgr)
+            pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
             self.warning("Error getting queue stats: {}".format(e))
         else:
-            for mname, values in iteritems(metrics.pcf_metrics()):
-                failure_value = values['failure']
-                pymqi_value = values['pymqi_value']
-                mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
-                m = int(queue_info[pymqi_value])
+            # Response is a list. It likely has only one member in it.
+            for queue_info in response:
+                for mname, values in iteritems(metrics.pcf_metrics()):
+                    failure_value = values['failure']
+                    pymqi_value = values['pymqi_value']
+                    mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
+                    m = int(queue_info[pymqi_value])
 
-                if m > failure_value:
-                    self.gauge(mname, m, tags=tags)
-                else:
-                    log.debug("Unable to get {}, turn on queue level monitoring to access these metrics".format(mname))
+                    if m > failure_value:
+                        self.gauge(mname, m, tags=tags)
+                    else:
+                        msg = "Unable to get {}, turn on queue level monitoring to access these metrics".format(mname)
+                        log.debug(msg)
