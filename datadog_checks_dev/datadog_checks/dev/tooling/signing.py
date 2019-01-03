@@ -15,6 +15,7 @@ from in_toto import runlib
 from in_toto.gpg.constants import GPG_COMMAND
 
 from .constants import get_root
+from .git import git_ls_files
 from ..subprocess import run_command
 from ..utils import (
     chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
@@ -26,6 +27,15 @@ STEP_NAME = 'tag'
 
 class YubikeyException(Exception):
     pass
+
+
+class UntrackedFileException(Exception):
+    def __init__(self, filename):
+        self.filename = filename
+
+
+    def __str__(self):
+        return '{} has not been tracked by git!'.format(self.filename)
 
 
 def read_gitignore_patterns():
@@ -81,6 +91,11 @@ def update_link_metadata(checks):
     for check in checks:
         products.append(path_join(check, 'datadog_checks'))
         products.append(path_join(check, 'setup.py'))
+
+    # Check whether each product is being tracked by git.
+    for product in products:
+        if not git_ls_files(product):
+            raise UntrackedFileException(product)
 
     key_id = get_key_id(GPG_COMMAND)
 

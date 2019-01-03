@@ -113,3 +113,13 @@ def git_tag_list(pattern=None):
 
     regex = re.compile(pattern)
     return list(filter(regex.search, result))
+
+
+def git_ls_files(filename):
+    """
+    Return a boolean value for whether the given file is tracked by git.
+    """
+    with chdir(get_root()):
+        # https://stackoverflow.com/a/2406813
+        result = run_command('git ls-files --error-unmatch {}'.format(filename))
+        return result.code == 0
