@@ -95,11 +95,22 @@ class IbmMqCheck(AgentCheck):
             except pymqi.Error as e:
                 self.warning("Error getting queue stats: {}".format(e))
 
-        for mname, pymqi_value in iteritems(metrics.failure_prone_queue_metrics()):
-            mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
-            try:
-                m = queue.inquire(pymqi_value)
+
+        try:
+            args = {
+                pymqi.CMQC.MQCA_Q_NAME: queue_name,
+                pymqi.CMQC.MQIA_Q_TYPE: queue_type,
+                pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
+            }
+            pcf = pymqi.PCFExecute(qmgr)
+            response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
+        except pymqi.MQMIError as e:
+            self.warning("Error getting queue stats: {}".format(e))
+        else:
+            for mname, values in iteritems(metrics.pcf_metrics()):
+                failure_value = values['failure']
+                pymqi_value = values['pymqi_value']
+                mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
+                m = int(queue_info[pymqi_value]))
+
                 self.gauge(mname, m, tags=tags)
-            except pymqi.Error as e:
-                # if these values cannot be collected, just skip them
-                log.debug("skipping {} as it cannot be collected: {}".format(mname, e))

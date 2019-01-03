@@ -43,10 +43,12 @@ def queue_metrics():
     }
 
 
-def failure_prone_queue_metrics():
+def pcf_metrics():
     return {
-        'max_channels': pymqi.CMQC.MQIA_MAX_CHANNELS,
-        'oldest_message_age': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE,
+        'oldest_message_age': {
+            'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE,
+            'failure': -1,
+        },
     }
 
 
