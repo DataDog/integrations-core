@@ -14,6 +14,12 @@ try:
 except ImportError:
     psutil = None
 
+try:
+    import datadog_agent  # noqa: F401
+    is_agent_6 = True
+except ImportError:
+    is_agent_6 = False
+
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
@@ -35,7 +41,6 @@ class Disk(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
 
         instance = instances[0]
-        self._use_mount = is_affirmative(instance.get('use_mount', False))
         self._all_partitions = is_affirmative(instance.get('all_partitions', False))
         self._file_system_whitelist = instance.get('file_system_whitelist', [])
         self._file_system_blacklist = instance.get('file_system_blacklist', [])
@@ -48,8 +53,32 @@ class Disk(AgentCheck):
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
 
+        # TODO Remove this v5/v6 fork when agent 5 will be fully deprecated
+        if is_agent_6:
+            self._use_mount = is_affirmative(instance.get('use_mount', False))
+        else:
+            # FIXME: 6.x, drop use_mount option in datadog.conf
+            self._load_legacy_option(instance, 'use_mount', False, operation=is_affirmative)
+
+            # FIXME: 6.x, drop device_blacklist_re option in datadog.conf
+            self._load_legacy_option(
+                instance, 'excluded_disk_re', '^$', legacy_name='device_blacklist_re', operation=re.compile
+            )
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
+
+    def _load_legacy_option(self, instance, option, default, legacy_name=None, operation=lambda l: l):
+        value = instance.get(option, default)
+        legacy_name = legacy_name or option
+
+        if value == default and legacy_name in self.agentConfig:
+            self.log.warning(
+                'Using `{}` in datadog.conf has been deprecated '
+                'in favor of `{}` in disk.yaml'.format(legacy_name, option)
+            )
+            value = self.agentConfig.get(legacy_name) or default
+
+        setattr(self, '_{}'.format(option), operation(value))
 
     def check(self, instance):
         """Get disk space/inode stats"""

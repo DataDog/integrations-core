@@ -38,6 +38,17 @@ def test_bad_config():
         Disk('disk', None, {}, [{}, {}])
 
 
+def test_legacy_option(instance_basic_mount, instance_basic_volume):
+    """
+    Ensure check option overrides datadog.conf
+    """
+    c = Disk('disk', None, instance_basic_mount, [{}])
+    assert c._use_mount is True
+
+    c = Disk('disk', None, instance_basic_mount, [instance_basic_volume])
+    assert c._use_mount is False
+
+
 @pytest.mark.usefixtures('psutil_mocks')
 def test_psutil(aggregator, gauge_metrics, rate_metrics):
     """
