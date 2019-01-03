@@ -110,7 +110,7 @@ class IbmMqCheck(AgentCheck):
                 failure_value = values['failure']
                 pymqi_value = values['pymqi_value']
                 mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
-                m = int(queue_info[pymqi_value]))
+                m = int(queue_info[pymqi_value])
 
                 if m > failure_value:
                     self.gauge(mname, m, tags=tags)
