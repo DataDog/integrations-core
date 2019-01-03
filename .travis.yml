@@ -131,7 +131,7 @@ jobs:
     - stage: test
       env: CHECK=haproxy PYTHON3=true
     - stage: test
-      env: CHECK=hdfs_datanode
+      env: CHECK=hdfs_datanode PYTHON3=true
     - stage: test
       env: CHECK=hdfs_namenode PYTHON3=true
     - stage: test
