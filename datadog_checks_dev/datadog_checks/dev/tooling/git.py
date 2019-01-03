@@ -121,5 +121,5 @@ def git_ls_files(filename):
     """
     with chdir(get_root()):
         # https://stackoverflow.com/a/2406813
-        result = run_command('git ls-files --error-unmatch {}'.format(filename))
+        result = run_command('git ls-files --error-unmatch {}'.format(filename), capture=True)
         return result.code == 0

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # flake8: noqa
+import json
 import shutil
 
 # NOTE: Set one minute for any GPG subprocess to timeout in in-toto.  Should be
@@ -92,11 +93,6 @@ def update_link_metadata(checks):
         products.append(path_join(check, 'datadog_checks'))
         products.append(path_join(check, 'setup.py'))
 
-    # Check whether each product is being tracked by git.
-    for product in products:
-        if not git_ls_files(product):
-            raise UntrackedFileException(product)
-
     key_id = get_key_id(GPG_COMMAND)
 
     # Find this latest signed link metadata file on disk.
@@ -112,6 +108,15 @@ def update_link_metadata(checks):
 
     with chdir(root):
         run_in_toto(key_id, products)
+
+        # Check whether each signed product is being tracked by git.
+        with open(tag_link) as tag_json:
+            tag = json.load(tag_json)
+            products = tag['signed']['products']
+
+            for product in products:
+                if not git_ls_files(product):
+                    raise UntrackedFileException(product)
 
         # Tell pipeline which tag link metadata to use.
         write_file(metadata_file_tracker, tag_link)
