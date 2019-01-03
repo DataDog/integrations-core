@@ -16,10 +16,6 @@ from ..requirements import (
 from ...utils import write_file_lines
 
 
-def transform_package_data(packages):
-    return {package.name: package for package in packages}
-
-
 def display_package_changes(pre_packages, post_packages, indent=''):
     """
     Print packages that've been added, removed or changed
@@ -117,7 +113,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
     pin for via arguments.
     """
     root = get_root()
-    package = package.lower()
+    package_name = package.lower()
     version = version.lower()
 
     for check_name in sorted(os.listdir(root)):
@@ -125,7 +121,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
         resolved_reqs_file = os.path.join(root, check_name, 'requirements.txt')
 
         if os.path.isfile(pinned_reqs_file):
-            pinned_packages = transform_package_data(read_packages(pinned_reqs_file))
+            pinned_packages = {package.name: package for package in read_packages(pinned_reqs_file)}
             if package not in pinned_packages and check_name not in checks:
                 continue
 
@@ -138,11 +134,12 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
                 echo_info('Check `{}`:'.format(check_name))
 
             if version == 'none':
-                del pinned_packages[package]
+                del pinned_packages[package_name]
             else:
-                pinned_packages[package] = Package(package, version, marker)
+                pinned_packages[package_name] = Package(package_name, version, marker)
 
-            write_file_lines(pinned_reqs_file, ('{}\n'.format(package) for package in sorted(pinned_packages)))
+            package_list = sorted(itervalues(pinned_packages))
+            write_file_lines(pinned_reqs_file, ('{}\n'.format(package) for package in package_list))
 
             if not quiet:
                 echo_waiting('    Resolving dependencies...')
