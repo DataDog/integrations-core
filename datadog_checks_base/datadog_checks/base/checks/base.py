@@ -164,7 +164,7 @@ class AgentCheck(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags(tags, device_name)
+        tags = self._normalize_tags_type(tags, device_name)
         if hostname is None:
             hostname = b''
 
@@ -311,40 +311,48 @@ class AgentCheck(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def _normalize_tags(self, tags, device_name):
+    def _normalize_tags_type(self, tags, device_name=None):
         """
-        Normalize tags:
+        Normalize tags contents and type:
         - append `device_name` as `device:` tag
-        - normalize tags to type `str`
-        - always return a list
-        """
-        out_tags = [] if tags is None else tags[:]
-        if device_name:
-            self._log_deprecation("device_name")
-            out_tags.append("device:{}".format(device_name))
-
-        return self._normalize_tags_type(out_tags)
-
-    def _normalize_tags_type(self, tags):
-        """
-        Normalize all the tags to bytes (type `bytes`) so that the go bindings can handle them easily
-        Doesn't mutate the passed list, returns a new list
+        - normalize tags type
+        - doesn't mutate the passed list, returns a new list
         """
         normalized_tags = []
+
+        if device_name:
+            self._log_deprecation("device_name")
+            device_tag = self._normalize_type("device:{}".format(device_name))
+            if device_tag is None:
+                self.log.warning('Error encoding device tag to utf-8 encoded string, ignoring')
+            else:
+                normalized_tags.append(device_tag)
+
         if tags is not None:
             for tag in tags:
-                # TODO: On Python 3, move this `if` line to the `except` branch
-                # as the common case will indeed no longer be bytes.
-                if not isinstance(tag, bytes):
-                    try:
-                        tag = tag.encode('utf-8')
-                    except Exception:
-                        self.log.warning('Error encoding tag to utf-8 encoded string, ignoring tag')
-                        continue
-
+                tag = self._normalize_type(tag)
+                if tag is None:
+                    self.log.warning('Error encoding tag to utf-8 encoded string, ignoring tag')
+                    continue
                 normalized_tags.append(tag)
 
         return normalized_tags
+
+    def _normalize_type(self, data):
+        """
+        Normalize a text data to bytes (type `bytes`) so that the go bindings can
+        handle it easily.
+        """
+        # TODO: On Python 3, move this `if` line to the `except` branch
+        # as the common case will indeed no longer be bytes.
+        if not isinstance(data, bytes):
+            try:
+                return data.encode('utf-8')
+            except Exception:
+                self.log.warning('Error encoding tag to utf-8 encoded string, ignoring tag')
+                return None
+
+        return data
 
     def warning(self, warning_message):
         warning_message = ensure_bytes(warning_message)

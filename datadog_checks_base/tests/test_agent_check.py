@@ -4,6 +4,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+import mock
+from six import string_types
 
 from datadog_checks.checks import AgentCheck
 
@@ -128,7 +130,7 @@ class TestTags:
         tag = 'default:string'
         tags = [tag]
 
-        normalized_tags = check._normalize_tags(tags, None)
+        normalized_tags = check._normalize_tags_type(tags, None)
         normalized_tag = normalized_tags[0]
 
         assert normalized_tags is not tags
@@ -139,7 +141,7 @@ class TestTags:
         tag = b'bytes:string'
         tags = [tag]
 
-        normalized_tags = check._normalize_tags(tags, None)
+        normalized_tags = check._normalize_tags_type(tags, None)
         normalized_tag = normalized_tags[0]
 
         assert normalized_tags is not tags
@@ -151,7 +153,7 @@ class TestTags:
         tag = u'unicode:string'
         tags = [tag]
 
-        normalized_tags = check._normalize_tags(tags, None)
+        normalized_tags = check._normalize_tags_type(tags, None)
         normalized_tag = normalized_tags[0]
 
         assert normalized_tags is not tags
@@ -162,7 +164,7 @@ class TestTags:
         tags = []
         device_name = u'unicode_string'
 
-        normalized_tags = check._normalize_tags(tags, device_name)
+        normalized_tags = check._normalize_tags_type(tags, device_name)
         normalized_device_tag = normalized_tags[0]
 
         assert isinstance(normalized_device_tag, bytes)
@@ -171,9 +173,19 @@ class TestTags:
         check = AgentCheck()
         tags = []
         device_name = 'foo'
-        check._normalize_tags(tags, device_name)
-        normalized_tags = check._normalize_tags(tags, device_name)
+        check._normalize_tags_type(tags, device_name)
+        normalized_tags = check._normalize_tags_type(tags, device_name)
         assert len(normalized_tags) == 1
+
+    def test__normalize_type(self):
+        check = AgentCheck()
+        in_str = bytes("tag:☣")
+        assert check._normalize_type(in_str) == bytes("tag:☣")
+        in_str = u"tag:☣"
+        assert check._normalize_type(in_str) == bytes("tag:☣")
+        in_str = mock.MagicMock(side_effect=Exception)
+        in_str.encode.side_effect = Exception
+        assert check._normalize_type(in_str) is None
 
 
 class LimitedCheck(AgentCheck):
