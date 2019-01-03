@@ -178,11 +178,11 @@ class TestTags:
 
     def test__to_bytes(self):
         check = AgentCheck()
-        assert isinstance(check._normalize_type(b"tag:foo"), bytes)
-        assert isinstance(check._normalize_type(u"tag:☣"), bytes)
+        assert isinstance(check._to_bytes(b"tag:foo"), bytes)
+        assert isinstance(check._to_bytes(u"tag:☣"), bytes)
         in_str = mock.MagicMock(side_effect=Exception)
         in_str.encode.side_effect = Exception
-        assert check._normalize_type(in_str) is None
+        assert check._to_bytes(in_str) is None
 
 
 class LimitedCheck(AgentCheck):
