@@ -138,7 +138,8 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
             else:
                 pinned_packages[package_name] = Package(package_name, version, marker)
 
-            write_file_lines(pinned_reqs_file, ('{}\n'.format(package) for package in sorted(itervalues(pinned_packages))))
+            package_list = sorted(itervalues(pinned_packages))
+            write_file_lines(pinned_reqs_file, ('{}\n'.format(package) for package in package_list))
 
             if not quiet:
                 echo_waiting('    Resolving dependencies...')
