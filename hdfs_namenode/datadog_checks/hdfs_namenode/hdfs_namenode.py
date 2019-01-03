@@ -31,15 +31,15 @@ hdfs.namenode.missing_blocks                    Number of missing blocks
 hdfs.namenode.corrupt_blocks                    Number of corrupt blocks
 """
 
-# stdlib
-from urlparse import urljoin
+from __future__ import division
 
-# 3rd party
+from six.moves.urllib.parse import urljoin
+from six import iteritems
+
 import requests
 from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
 from simplejson import JSONDecodeError
 
-# Project
 from datadog_checks.checks import AgentCheck
 
 
@@ -151,7 +151,7 @@ class HDFSNameNode(AgentCheck):
         if bean_name != bean_name:
             raise Exception("Unexpected bean name {}".format(bean_name))
 
-        for metric, (metric_name, metric_type) in metrics.iteritems():
+        for metric, (metric_name, metric_type) in iteritems(metrics):
             metric_value = bean.get(metric)
 
             if metric_value is not None:
@@ -186,7 +186,7 @@ class HDFSNameNode(AgentCheck):
 
         # Add query_params as arguments
         if query_params:
-            query = '&'.join(['{}={}'.format(key, value) for key, value in query_params.iteritems()])
+            query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(query_params)])
             url = urljoin(url, '?' + query)
 
         self.log.debug('Attempting to connect to "{}"'.format(url))
