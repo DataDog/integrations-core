@@ -91,7 +91,7 @@ sudo ldconfig
 
 There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
 
-Also, queue level metric stats will need to be enabled. This can be done with a mqsc command:
+Also, queue level metric stats need to be enabled. This can be done with a mqsc command:
 
 ```
 > /opt/mqm/bin/runmqsc
