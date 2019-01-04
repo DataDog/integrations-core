@@ -1,5 +1,9 @@
 # CHANGELOG - Nfsstat
 
+## 1.1.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2775](https://github.com/DataDog/integrations-core/pull/2775).
+
 ## 1.0.0 / 2018-10-13
 
 * [Added] NFSIOStat Check. See [#720](https://github.com/DataDog/integrations-core/pull/720).
