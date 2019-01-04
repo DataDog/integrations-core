@@ -118,8 +118,8 @@ def update_link_metadata(checks):
             tag = json.load(tag_json)
             products = tag['signed']['products']
 
-        tracked, stderr = git_ls_files(products)
-        if not tracked:
+        stderr = git_ls_files(products)
+        if stderr:
             os.remove(tag_link)
             raise UntrackedFileException(stderr)
 

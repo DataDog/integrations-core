@@ -117,9 +117,8 @@ def git_tag_list(pattern=None):
 
 def git_ls_files(filenames):
     """
-    Returns a 2-tuple:
-        1. A boolean value indicating whether all given files are tracked by git.
-        2. Stderr output indicating which files are not tracked by git.
+    Returns a stderr output, if any, indicating which files are not tracked by
+    git.
     """
     with chdir(get_root()):
         # We assume that we are given a list of strings.
@@ -129,4 +128,4 @@ def git_ls_files(filenames):
         filenames = ' '.join(filenames)
         # https://stackoverflow.com/a/2406813
         result = run_command('git ls-files --error-unmatch {}'.format(filenames), capture=True)
-        return result.code == 0, result.stderr
+        return result.stderr
