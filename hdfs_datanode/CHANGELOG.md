@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_datanode
 
+## 1.6.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2856](https://github.com/DataDog/integrations-core/pull/2856).
+
 ## 1.5.0 / 2018-11-14
 
 * [Added] Support keytab files for kerberos. See [#2591](https://github.com/DataDog/integrations-core/pull/2591).
