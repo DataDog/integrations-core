@@ -47,7 +47,7 @@ datadog-kube-proxy==3.0.0
 datadog-kubelet==2.3.1; sys_platform == 'linux2'
 datadog-kubernetes-state==4.1.0; sys_platform != 'win32'
 datadog-kyototycoon==1.4.1
-datadog-lighttpd==1.2.1
+datadog-lighttpd==1.3.0
 datadog-linkerd==2.0.0
 datadog-linux-proc-extras==1.0.1; sys_platform == 'linux2'
 datadog-mapreduce==1.2.1
