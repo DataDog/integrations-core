@@ -115,11 +115,19 @@ def git_tag_list(pattern=None):
     return list(filter(regex.search, result))
 
 
-def git_ls_files(filename):
+def git_ls_files(filenames):
     """
-    Return a boolean value for whether the given file is tracked by git.
+    Returns a 2-tuple:
+        1. A boolean value indicating whether all given files are tracked by git.
+        2. Stderr output indicating which files are not tracked by git.
     """
     with chdir(get_root()):
+        # We assume that we are given a list of strings.
+        # We then transform this into a giant space-delimited string.
+        # Also, ARGMAX on a modern system is large enough (2,097,152) that the
+        # number of filenames should not matter for practical purposes.
+        filenames = ' '.join(filenames)
         # https://stackoverflow.com/a/2406813
-        result = run_command('git ls-files --error-unmatch {}'.format(filename), capture=True)
-        return result.code == 0
+        result = run_command('git ls-files --error-unmatch {}'.format(filenames), capture=True)
+        return result.code == 0, result.stderr
+
