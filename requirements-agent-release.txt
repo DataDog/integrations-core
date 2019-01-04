@@ -92,7 +92,7 @@ datadog-tcp-check==2.1.0
 datadog-teamcity==1.2.0
 datadog-tokumx==1.3.0
 datadog-tomcat==1.2.0
-datadog-twemproxy==1.2.1
+datadog-twemproxy==1.3.0
 datadog-varnish==1.2.1
 datadog-vault==1.3.0
 datadog-vsphere==3.6.0
