@@ -97,7 +97,7 @@ jobs:
     - stage: test
       env: CHECK=couch PYTHON3=true
     - stage: test
-      env: CHECK=couchbase
+      env: CHECK=couchbase PYTHON3=true
     - stage: test
       env: CHECK=crio PYTHON3=true
     - stage: test
@@ -131,9 +131,9 @@ jobs:
     - stage: test
       env: CHECK=haproxy PYTHON3=true
     - stage: test
-      env: CHECK=hdfs_datanode
+      env: CHECK=hdfs_datanode PYTHON3=true
     - stage: test
-      env: CHECK=hdfs_namenode
+      env: CHECK=hdfs_namenode PYTHON3=true
     - stage: test
       env: CHECK=http_check PYTHON3=true
     - stage: test
@@ -146,6 +146,8 @@ jobs:
       env: CHECK=kafka_consumer PYTHON3=true
     - stage: test
       env: CHECK=kong PYTHON3=true
+    - stage: test
+      env: CHECK=kube_controller_manager PYTHON3=true
     - stage: test
       env: CHECK=kube_dns
     - stage: test
@@ -184,6 +186,8 @@ jobs:
       env: CHECK=nfsstat PYTHON3=true
     - stage: test
       env: CHECK=nginx PYTHON3=true
+    - stage: test
+      env: CHECK=nginx_ingress_controller PYTHON3=true
     - stage: test
       env: CHECK=ntp
     - stage: test

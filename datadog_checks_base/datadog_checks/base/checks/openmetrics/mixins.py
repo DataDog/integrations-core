@@ -363,7 +363,7 @@ class OpenMetricsScraperMixin(object):
             return
 
         try:
-            self._submit(scraper_config['metrics_mapper'][metric.name], metric, scraper_config)
+            self.submit_openmetric(scraper_config['metrics_mapper'][metric.name], metric, scraper_config)
         except KeyError:
             if metric_transformers is not None:
                 if metric.name in metric_transformers:
@@ -384,7 +384,7 @@ class OpenMetricsScraperMixin(object):
                 # try matching wildcard (generic check)
                 for wildcard in scraper_config['_metrics_wildcards']:
                     if fnmatchcase(metric.name, wildcard):
-                        self._submit(metric.name, metric, scraper_config)
+                        self.submit_openmetric(metric.name, metric, scraper_config)
 
     def poll(self, scraper_config, headers=None):
         """
@@ -479,7 +479,7 @@ class OpenMetricsScraperMixin(object):
         """
         return self._get_hostname(None, sample, scraper_config)
 
-    def _submit(self, metric_name, metric, scraper_config, hostname=None):
+    def submit_openmetric(self, metric_name, metric, scraper_config, hostname=None):
         """
         For each sample in the metric, report it as a gauge with all labels as tags
         except if a labels dict is passed, in which case keys are label names we'll extract

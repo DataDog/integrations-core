@@ -81,3 +81,23 @@ def get_agent_requirements():
     return os.path.join(
         get_root(), 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in'
     )
+
+
+def get_agent_integrations_file():
+    """
+    Return the full path to the file containing the full list of integrations
+    shipped with any Datadog Agent release.
+    """
+    return os.path.join(
+        get_root(), 'AGENT_INTEGRATIONS.md'
+    )
+
+
+def get_agent_changelog():
+    """
+    Return the full path to the file containing the list of integrations that
+    have changed with any Datadog Agent release.
+    """
+    return os.path.join(
+        get_root(), 'AGENT_CHANGELOG.md'
+    )

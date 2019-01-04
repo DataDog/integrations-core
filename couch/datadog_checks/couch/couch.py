@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import division
+
 from six.moves.urllib.parse import quote, urljoin
 from six import iteritems
 

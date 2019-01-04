@@ -130,4 +130,3 @@ def git_ls_files(filenames):
         # https://stackoverflow.com/a/2406813
         result = run_command('git ls-files --error-unmatch {}'.format(filenames), capture=True)
         return result.code == 0, result.stderr
-
