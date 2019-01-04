@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.8.1 / 2019-01-04
+
+* [Fixed] Bump pyodbc for python3.7 compatibility. See [#2801](https://github.com/DataDog/integrations-core/pull/2801).
+
 ## 1.8.0 / 2018-11-30
 
 * [Added] Add linux as supported OS. See [#2614](https://github.com/DataDog/integrations-core/pull/2614).
