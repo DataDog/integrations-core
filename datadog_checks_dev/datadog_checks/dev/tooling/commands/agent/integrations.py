@@ -46,7 +46,7 @@ def integrations(since, to, write, force):
             integrations_contents.write('* {}: {}\n'.format(name, ver))
         integrations_contents.write('\n')
 
-    # save the changelog on disk if --output was passed
+    # save the changelog on disk if --write was passed
     if write:
         dest = get_agent_integrations_file()
         # don't overwrite an existing file
