@@ -1,5 +1,9 @@
 # CHANGELOG - ssh_check
 
+## 1.5.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2836](https://github.com/DataDog/integrations-core/pull/2836).
+
 ## 1.4.0 / 2018-11-30
 
 * [Added] Upgrade cryptography. See [#2659](https://github.com/DataDog/integrations-core/pull/2659).
