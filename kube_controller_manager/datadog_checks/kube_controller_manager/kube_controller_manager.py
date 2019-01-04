@@ -5,12 +5,9 @@
 from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.config import is_affirmative
-
-from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 
 
-class KubeControllerManagerCheck(OpenMetricsBaseCheck, KubeLeaderElectionMixin):
+class KubeControllerManagerCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     DEFAUT_RATE_LIMITERS = [
@@ -74,13 +71,6 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck, KubeLeaderElectionMixin):
         "volumes",
     ]
 
-    LEADER_ELECTION_CONFIG = {
-        "namespace": "kube_controller_manager",
-        "record_kind": "endpoints",
-        "record_name": "kube-controller-manager",
-        "record_namespace": "kube-system",
-    }
-
     def __init__(self, name, init_config, agentConfig, instances=None):
         self.QUEUE_METRICS_TRANSFORMERS = {
             '_adds': self.queue_adds,
@@ -130,12 +120,6 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck, KubeLeaderElectionMixin):
                     transformers[queue + metric] = func
 
         self.process(scraper_config, metric_transformers=transformers)
-
-        # Check the leader-election status
-        if is_affirmative(instance.get('leader_election', True)):
-            leader_config = self.LEADER_ELECTION_CONFIG
-            leader_config["tags"] = instance.get("tags", [])
-            self.check_election_status(leader_config)
 
     def _tag_and_submit(self, metric, scraper_config, metric_name, tag_name, tag_value_trim):
         # Get tag value from original metric name or return trying
