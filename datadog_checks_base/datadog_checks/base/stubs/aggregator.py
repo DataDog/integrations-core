@@ -7,7 +7,7 @@ from collections import defaultdict, namedtuple
 
 from six import binary_type, iteritems
 
-from ..utils.common import ensure_bytes, ensure_unicode
+from ..utils.common import ensure_unicode, to_string
 
 MetricStub = namedtuple('MetricStub', 'name type value tags hostname')
 ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
@@ -59,7 +59,7 @@ class AggregatorStub(object):
                 normalize_tags(stub.tags),
                 ensure_unicode(stub.hostname)
             )
-            for stub in self._metrics.get(ensure_bytes(name), [])
+            for stub in self._metrics.get(to_string(name), [])
         ]
 
     def service_checks(self, name):
@@ -75,7 +75,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 ensure_unicode(stub.message)
             )
-            for stub in self._service_checks.get(ensure_bytes(name), [])
+            for stub in self._service_checks.get(to_string(name), [])
         ]
 
     @property

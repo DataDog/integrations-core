@@ -22,13 +22,6 @@ CONFIG = {
 }
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
 @pytest.mark.integration
 def test_build_event(aggregator):
     teamcity = TeamCityCheck('teamcity', {}, {})
@@ -49,7 +42,7 @@ def test_build_event(aggregator):
     assert events[0]['msg_text'] == "Build Number: 2\nDeployed To: buildhost42.dtdg.co\n\nMore Info: " + \
                                     "http://localhost:8111/viewLog.html?buildId=2&buildTypeId=TestProject_TestBuild"
     assert events[0]['tags'] == ['build', 'one:tag', 'one:test']
-    assert events[0]['host'] == b"buildhost42.dtdg.co"
+    assert events[0]['host'] == "buildhost42.dtdg.co"
     aggregator.reset()
 
     # One more check should not create any more events
