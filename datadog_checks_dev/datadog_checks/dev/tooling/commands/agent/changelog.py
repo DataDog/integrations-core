@@ -11,7 +11,7 @@ from six import StringIO, iteritems
 from .common import get_agent_tags
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 from ...constants import get_root, get_agent_release_requirements, get_agent_changelog
-from ...git import git_show_file, git_tag_list
+from ...git import git_show_file
 from ...release import get_folder_name, get_package_name, DATADOG_PACKAGE_PREFIX
 from ...utils import parse_agent_req_file
 from ....utils import write_file, read_file

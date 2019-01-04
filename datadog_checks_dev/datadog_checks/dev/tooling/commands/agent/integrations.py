@@ -8,7 +8,7 @@ from six import StringIO, iteritems
 
 from .common import get_agent_tags
 from ..console import CONTEXT_SETTINGS, abort, echo_info
-from ...constants import get_root, get_agent_release_requirements, get_agent_integrations_file
+from ...constants import get_agent_release_requirements, get_agent_integrations_file
 from ...git import git_show_file
 from ...utils import parse_agent_req_file
 from ....utils import write_file
