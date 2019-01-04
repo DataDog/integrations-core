@@ -47,6 +47,8 @@ def test_check_metrics(aggregator, mock_metrics):
     assert_metric('.goroutines')
     assert_metric('.threads')
     assert_metric('.open_fds')
+    assert_metric('.client.http.requests')
+    assert_metric('.max_fds')
 
     assert_metric('.nodes.evictions', metric_type=aggregator.MONOTONIC_COUNT, value=33, tags=["zone:test"])
     assert_metric('.nodes.count', value=5, tags=["zone:test"])
@@ -78,3 +80,5 @@ def test_check_metrics(aggregator, mock_metrics):
     assert_metric('.queue.latency.sum', value=9309, tags=["queue:extra"])
     assert_metric('.queue.latency.count', value=13, tags=["queue:extra"])
     assert_metric('.queue.latency.quantile', value=10, tags=["queue:extra", "quantile:0.9"])
+
+    aggregator.assert_all_metrics_covered()

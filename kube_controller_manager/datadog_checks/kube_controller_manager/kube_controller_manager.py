@@ -99,7 +99,6 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
                         {'node_collector_unhealthy_nodes_in_zone': 'nodes.unhealthy'},
                         {'node_collector_zone_size': 'nodes.count'},
                     ],
-                    'send_monotonic_counter': True,
                 }
             },
             default_namespace="kube_controller_manager"
