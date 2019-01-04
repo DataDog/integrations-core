@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors the kubernetes [NGINX Ingress Controller.][1].
+This check monitors the kubernetes [NGINX Ingress Controller][1].
 
 ## Setup
 
@@ -19,7 +19,7 @@ need to install anything else on your server.
    Agent's configuration directory to start collecting your NGINX ingress controller metrics.
    See the [sample nginx_ingress_controller.d/conf.yaml][2] for all available configuration options.
 
-2. [Restart the Agent][3]
+2. [Restart the Agent][3].
 
 #### Log Collection
 
@@ -38,17 +38,17 @@ need to install anything else on your server.
 (...)
 ```
 
-* Make sure that the docker socket is mounted to the Datadog Agent as done in [this manifest][8].
+* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][8].
 
-* [Restart the Agent][3]
+* [Restart the Agent][3].
 
 ### Configuration of the nginx check (optional)
 
-By default nginx metrix are collected by the nginx-ingress-controller check but for convenience you might want to run the regular `nginx` check on the ingress controller.
+By default nginx metrics are collected by the nginx-ingress-controller check but for convenience you might want to run the regular `nginx` check on the ingress controller.
 
 You achieve so by making the nginx status page reachable from the agent by using the `nginx-status-ipv4-whitelist` setting on the controller and adding autodiscovery annotations to the controller pod.
 
-For example these annotations will enable both the `nginx` and `nginx-ingress-controller` checks and the log collection:
+For example these annotations enable both the `nginx` and `nginx-ingress-controller` checks and the log collection:
 
 ```text
 ad.datadoghq.com/nginx-ingress-controller.check_names: '["nginx","nginx_ingress_controller"]'
@@ -69,15 +69,15 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-nginx-ingress-controller does not include any service checks.
+nginx-ingress-controller does not include any service checks at this time.
 
 ### Events
 
-nginx-ingress-controller does not include any events.
+nginx-ingress-controller does not include any events at this time.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog support][5].
 
 [1]: https://kubernetes.github.io/ingress-nginx/
 [2]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/datadog_checks/nginx_ingress_controller/data/conf.yaml.example
