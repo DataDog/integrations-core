@@ -6,7 +6,7 @@
   "metric_prefix": "nginx_ingress.",
   "metric_to_check": "nginx_ingress.nginx.process.count",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Monitor metrics about the NGINX ingress controller and the embedded NGINX.",
   "guid": "27f6a498-6b3e-41b0-bec4-68db4d3322c3",
   "support": "core",
   "supported_os": [
@@ -23,5 +23,5 @@
     "network"
   ],
   "type": "check",
-  "is_public": false
+  "is_public": true
 }
