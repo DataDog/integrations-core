@@ -10,8 +10,6 @@ nginx_ingress.nginx.cpu.time,counter,,second,,Cpu usage in seconds,0,nginx_ingre
 nginx_ingress.nginx.mem.resident,gauge,,byte,,Resident memory size in bytes,0,nginx_ingress,mem rss
 nginx_ingress.nginx.mem.virtual,gauge,,byte,,Virtual memory size in bytes,0,nginx_ingress,mem virt
 nginx_ingress.controller.reload.success,counter,,,,Cumulative number of Ingress controller reload operations,0,nginx_ingress,nb reload
-nginx_ingress.controller.config.hash,gauge,,,,Running configuration hash actually running,0,nginx_ingress,cfg hash
-nginx_ingress.controller.config.last_reload,gauge,,second,,Timestamp of the last successful configuration reload,0,nginx_ingress,last reload
 nginx_ingress.controller.upstream.latency.count,gauge,,,,Count of upstream service latency per Ingress,0,nginx_ingress,upstream latency count
 nginx_ingress.controller.upstream.latency.sum,gauge,,second,,Sum of upstream service latency per Ingress,0,nginx_ingress,upstream latency sum
 nginx_ingress.controller.upstream.latency.quantile,gauge,,second,,Quantiles of upstream service latency per Ingress,0,nginx_ingress,upstream latency quant

@@ -34,9 +34,6 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
                         {'nginx_ingress_controller_nginx_process_resident_memory_bytes': 'nginx.mem.resident'},
                         {'nginx_ingress_controller_nginx_process_virtual_memory_bytes': 'nginx.mem.virtual'},
                         # controller metrics
-                        {'nginx_ingress_controller_config_hash': 'controller.config.hash'},
-                        {'nginx_ingress_controller_config_last_reload_successful_timestamp_seconds':
-                            'controller.config.last_reload'},
                         {'nginx_ingress_controller_success': 'controller.reload.success'},
                         {'nginx_ingress_controller_ingress_upstream_latency_seconds': 'controller.upstream.latency'},
                         {'nginx_ingress_controller_requests': 'controller.requests'},
