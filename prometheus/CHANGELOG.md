@@ -1,5 +1,10 @@
 # CHANGELOG - Prometheus
 
+## 3.0.1 / 2019-01-04
+
+* [Fixed] Added crucial words to make sentence clearer. See [#2811](https://github.com/DataDog/integrations-core/pull/2811). Thanks [someword](https://github.com/someword).
+* [Fixed] Change the prometheus example to use prometheus_url. See [#2790](https://github.com/DataDog/integrations-core/pull/2790). Thanks [someword](https://github.com/someword).
+
 ## 3.0.0 / 2018-10-12
 
 * [Changed] Change default prometheus metric limit to 2000. See [#2248](https://github.com/DataDog/integrations-core/pull/2248).
