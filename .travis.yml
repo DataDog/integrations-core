@@ -147,6 +147,8 @@ jobs:
     - stage: test
       env: CHECK=kong PYTHON3=true
     - stage: test
+      env: CHECK=kube_controller_manager PYTHON3=true
+    - stage: test
       env: CHECK=kube_dns
     - stage: test
       env: CHECK=kube_proxy
