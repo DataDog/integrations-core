@@ -44,7 +44,6 @@ def test_nginx_ingress_controller(aggregator, mock_data):
     aggregator.assert_metric(NAMESPACE + '.nginx.requests.total')
     # nginx process metrics
     aggregator.assert_metric(NAMESPACE + '.nginx.process.count')
-    aggregator.assert_metric(NAMESPACE + '.nginx.process.oldest')
     aggregator.assert_metric(NAMESPACE + '.nginx.bytes.read')
     aggregator.assert_metric(NAMESPACE + '.nginx.bytes.write')
     aggregator.assert_metric(NAMESPACE + '.nginx.cpu.time')

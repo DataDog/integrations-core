@@ -27,7 +27,6 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
                         {'nginx_ingress_controller_nginx_process_requests_total': 'nginx.requests.total'},
                         # nginx process metrics
                         {'nginx_ingress_controller_nginx_process_num_procs': 'nginx.process.count'},
-                        {'nginx_ingress_controller_nginx_process_oldest_start_time_seconds': 'nginx.process.oldest'},
                         {'nginx_ingress_controller_nginx_process_read_bytes_total': 'nginx.bytes.read'},
                         {'nginx_ingress_controller_nginx_process_write_bytes_total': 'nginx.bytes.write'},
                         {'nginx_ingress_controller_nginx_process_cpu_seconds_total': 'nginx.cpu.time'},
