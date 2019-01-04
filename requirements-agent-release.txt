@@ -28,7 +28,7 @@ datadog-exchange-server==1.2.1; sys_platform == 'win32'
 datadog-fluentd==1.1.0
 datadog-gearmand==1.2.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.0.0
-datadog-gitlab==2.0.0
+datadog-gitlab==2.1.0
 datadog-go-expvar==1.0.5
 datadog-go-metro==1.1.0; sys_platform == 'linux2'
 datadog-gunicorn==1.4.0; sys_platform != 'win32'
