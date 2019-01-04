@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.4.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2857](https://github.com/DataDog/integrations-core/pull/2857).
+
 ## 1.3.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

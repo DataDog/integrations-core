@@ -34,7 +34,7 @@ datadog-go-metro==1.1.0; sys_platform == 'linux2'
 datadog-gunicorn==1.5.0; sys_platform != 'win32'
 datadog-haproxy==1.4.0
 datadog-hdfs-datanode==1.6.0; sys_platform != 'win32'
-datadog-hdfs-namenode==1.3.1; sys_platform != 'win32'
+datadog-hdfs-namenode==1.4.0; sys_platform != 'win32'
 datadog-http-check==3.1.1
 datadog-ibm-mq==1.0.0; sys_platform == 'linux2'
 datadog-iis==2.2.0; sys_platform == 'win32'
