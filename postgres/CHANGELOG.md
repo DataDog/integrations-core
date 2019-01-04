@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 2.4.0 / 2019-01-04
+
+* [Added] Bump psycopg2-binary version to 2.7.5. See [#2799](https://github.com/DataDog/integrations-core/pull/2799).
+
 ## 2.3.0 / 2018-11-30
 
 * [Added] Include db tag with postgresql.locks metrics. See [#2567](https://github.com/DataDog/integrations-core/pull/2567). Thanks [sj26](https://github.com/sj26).
