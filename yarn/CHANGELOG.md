@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.5.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2786](https://github.com/DataDog/integrations-core/pull/2786).
+
 ## 1.4.0 / 2018-09-04
 
 * [Added] Add option to verify ssl certificate. See [#1739](https://github.com/DataDog/integrations-core/pull/1739).
