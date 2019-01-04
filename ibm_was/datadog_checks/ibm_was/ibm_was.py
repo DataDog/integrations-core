@@ -16,6 +16,17 @@ class IbmWasCheck(AgentCheck):
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
     METRIC_PREFIX = 'ibmwas'
 
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+        self.metric_type_mapping = {
+            'AverageStatistic': self.gauge,
+            'BoundedRangeStatistic': self.gauge,
+            'CountStatistic': self.monotonic_count,
+            'DoubleStatistic': self.rate,
+            'RangeStatistic': self.gauge,
+            'TimeStatistic': self.gauge
+        }
+
     def check(self, instance):
         validation.validate_config(instance)
         collect_stats = self.setup_configured_stats(instance)
@@ -79,7 +90,7 @@ class IbmWasCheck(AgentCheck):
             prefix='{}.{}'.format(self.METRIC_PREFIX, prefix),
             fix_case=True
         )
-        self.gauge(metric_name, value, tags=tags)
+        self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
 
     def make_request(self, instance, url, tags):
         try:

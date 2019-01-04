@@ -5,8 +5,10 @@
 # Mapping of the Statistic type to which attribute contains the metric value
 # noqa E501 IBM Docs https://www.ibm.com/support/knowledgecenter/en/SSAW57_8.5.5/com.ibm.websphere.nd.multiplatform.doc/ae/rprf_dataclass.html
 METRIC_VALUE_FIELDS = {
-    'CountStatistic': 'count',
+    'AverageStatistic': 'count',
     'BoundedRangeStatistic': 'value',
+    'CountStatistic': 'count',
+    'DoubleStatistic': 'double',
     'RangeStatistic': 'value',
     'TimeStatistic': 'totalTime'
 }
