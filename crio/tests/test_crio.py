@@ -30,6 +30,7 @@ def mock_data():
     ):
         yield
 
+
 def test_crio(aggregator, mock_data):
     """
     Testing crio.
