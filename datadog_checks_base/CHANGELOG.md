@@ -1,5 +1,20 @@
 # CHANGELOG - datadog_checks_base
 
+## 5.0.0 / 2019-01-04
+
+* [Added] Add kube_controller_manager integration. See [#2845](https://github.com/DataDog/integrations-core/pull/2845).
+* [Added] Add kube_leader mixin to monitor leader elections. See [#2796](https://github.com/DataDog/integrations-core/pull/2796).
+* [Fixed] Use 'format()' function to create device tag. See [#2822](https://github.com/DataDog/integrations-core/pull/2822).
+* [Added] Prevent caching of PDH counter instances by default. See [#2654](https://github.com/DataDog/integrations-core/pull/2654).
+* [Added] Prevent critical logs during testing. See [#2840](https://github.com/DataDog/integrations-core/pull/2840).
+* [Added] Support trace logging. See [#2838](https://github.com/DataDog/integrations-core/pull/2838).
+* [Fixed] Bump pyodbc for python3.7 compatibility. See [#2801](https://github.com/DataDog/integrations-core/pull/2801).
+* [Added] Bump psycopg2-binary version to 2.7.5. See [#2799](https://github.com/DataDog/integrations-core/pull/2799).
+* [Fixed] Fix metric normalization function for Python 3. See [#2784](https://github.com/DataDog/integrations-core/pull/2784).
+* [Added] Support Python 3. See [#2780](https://github.com/DataDog/integrations-core/pull/2780).
+* [Changed] Bump kafka-python and kazoo. See [#2766](https://github.com/DataDog/integrations-core/pull/2766).
+* [Added] Support Python 3. See [#2738](https://github.com/DataDog/integrations-core/pull/2738).
+
 ## 4.6.0 / 2018-12-07
 
 * [Added] Fix unicode handling of log messages. See [#2698](https://github.com/DataDog/integrations-core/pull/2698).

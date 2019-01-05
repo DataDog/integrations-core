@@ -1,5 +1,9 @@
 # CHANGELOG - openstack
 
+## 1.6.0 / 2019-01-04
+
+* [Added] Adds ability to Trace "check" function with DD APM. See [#2079](https://github.com/DataDog/integrations-core/pull/2079).
+
 ## 1.5.0 / 2018-08-29
 
 * [Fixed] Remove duplicate project call and reword os_host config option. See [#2066](https://github.com/DataDog/integrations-core/pull/2066).

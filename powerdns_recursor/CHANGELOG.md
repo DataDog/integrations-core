@@ -1,5 +1,9 @@
 # CHANGELOG - powerdns_recursor
 
+## 1.2.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2789](https://github.com/DataDog/integrations-core/pull/2789).
+
 ## 1.1.1 / 2018-09-04
 
 * [Fixed] Make sure all checks' versions are exposed. See [#1945](https://github.com/DataDog/integrations-core/pull/1945).

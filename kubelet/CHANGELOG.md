@@ -1,5 +1,11 @@
 # CHANGELOG - kubelet
 
+## 2.3.1 / 2019-01-04
+
+* [Fixed] document kubernetes.pods.running and kubernetes.containers.running. See [#2792](https://github.com/DataDog/integrations-core/pull/2792).
+* [Fixed] Fix default yaml instance. See [#2756](https://github.com/DataDog/integrations-core/pull/2756).
+* [Fixed] Make the check robust to an unresponsive kubelet. See [#2719](https://github.com/DataDog/integrations-core/pull/2719).
+
 ## 2.3.0 / 2018-11-30
 
 * [Added] Add restart and container state metrics to kubelet. See [#2605](https://github.com/DataDog/integrations-core/pull/2605). Thanks [schleyfox](https://github.com/schleyfox).

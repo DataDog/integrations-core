@@ -1,5 +1,9 @@
 # CHANGELOG - tokumx
 
+## 1.3.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2832](https://github.com/DataDog/integrations-core/pull/2832).
+
 ## 1.2.1 / 2018-09-04
 
 * [Fixed] Moves Tokumx to pytest. See [#2134](https://github.com/DataDog/integrations-core/pull/2134).

@@ -1,5 +1,9 @@
 # CHANGELOG - couch
 
+## 3.1.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2721](https://github.com/DataDog/integrations-core/pull/2721).
+
 ## 3.0.0 / 2018-11-30
 
 * [Removed] Add CouchDB 2.2.0 compatibility by dropping the `purge_seq` metric. See [#2287](https://github.com/DataDog/integrations-core/pull/2287). Thanks [janl](https://github.com/janl).

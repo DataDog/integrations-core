@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 1.6.0 / 2019-01-04
+
+* [Added] [kafka_consumer] Bump vendored kazoo to 2.6.0. See [#2729](https://github.com/DataDog/integrations-core/pull/2729). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] [kafka_consumer] Bump kafka-python to 1.4.4. See [#2728](https://github.com/DataDog/integrations-core/pull/2728). Thanks [jeffwidman](https://github.com/jeffwidman).
+
 ## 1.5.0 / 2018-11-30
 
 * [Added] Support Python 3. See [#2648](https://github.com/DataDog/integrations-core/pull/2648).

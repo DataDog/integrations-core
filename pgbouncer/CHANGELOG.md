@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 1.4.0 / 2019-01-04
+
+* [Added] Bump psycopg2-binary version to 2.7.5. See [#2799](https://github.com/DataDog/integrations-core/pull/2799).
+
 ## 1.3.1 / 2018-11-30
 
 * [Fixed] Failure to reconnect to PGBouncer when using database URL. See [#2587](https://github.com/DataDog/integrations-core/pull/2587). Thanks [VSpike](https://github.com/VSpike).

@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 1.3.0 / 2019-01-04
+
+* [Added] Add Per Topic IncomingMessages metric for Kafka.. See [#2732](https://github.com/DataDog/integrations-core/pull/2732).
+
 ## 1.2.1 / 2018-11-30
 
 * [Fixed] Updated kafka.producer.record_error_rate to gauge. See [#2253](https://github.com/DataDog/integrations-core/pull/2253).

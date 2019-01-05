@@ -1,5 +1,9 @@
 # CHANGELOG - Aspdotnet
 
+## 1.0.1 / 2019-01-04
+
+* [Fixed] Change example config from "localhost" to ".". See [#2779](https://github.com/DataDog/integrations-core/pull/2779).
+
 ## 1.0.0 / 2018-10-13
 
 * [Added] moves aspdotnet and dotnet clr metrics to their own checks. See [#884](https://github.com/DataDog/integrations-core/pull/884).

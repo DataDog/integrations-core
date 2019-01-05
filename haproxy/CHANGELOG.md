@@ -1,5 +1,11 @@
 # CHANGELOG - haproxy
 
+## 1.4.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2849](https://github.com/DataDog/integrations-core/pull/2849).
+* [Added] tcp scheme support for stats socket. See [#2731](https://github.com/DataDog/integrations-core/pull/2731).
+* [Added] Add server_address tag when available. See [#2727](https://github.com/DataDog/integrations-core/pull/2727).
+
 ## 1.3.2 / 2018-11-30
 
 * [Fixed] Use raw string literals when \ is present. See [#2465](https://github.com/DataDog/integrations-core/pull/2465).

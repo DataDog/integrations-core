@@ -1,5 +1,9 @@
 # CHANGELOG - system_core
 
+## 1.3.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2805](https://github.com/DataDog/integrations-core/pull/2805).
+
 ## 1.2.0 / 2018-11-30
 
 * [Added] Update psutil. See [#2576](https://github.com/DataDog/integrations-core/pull/2576).

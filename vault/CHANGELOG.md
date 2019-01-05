@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 1.3.1 / 2019-01-04
+
+* [Fixed] Fix unsupported API version fallback. See [#2793](https://github.com/DataDog/integrations-core/pull/2793).
+
 ## 1.3.0 / 2018-11-30
 
 * [Added] Support custom certificates. See [#2657](https://github.com/DataDog/integrations-core/pull/2657). Thanks [eedwards-sk](https://github.com/eedwards-sk).
