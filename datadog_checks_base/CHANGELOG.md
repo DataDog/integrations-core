@@ -4,7 +4,6 @@
 
 * [Added] Add kube_controller_manager integration. See [#2845](https://github.com/DataDog/integrations-core/pull/2845).
 * [Added] Add kube_leader mixin to monitor leader elections. See [#2796](https://github.com/DataDog/integrations-core/pull/2796).
-* [Added] Add kube_leader mixin to monitor leader elections. See [#2796](https://github.com/DataDog/integrations-core/pull/2796).
 * [Fixed] Use 'format()' function to create device tag. See [#2822](https://github.com/DataDog/integrations-core/pull/2822).
 * [Added] Prevent caching of PDH counter instances by default. See [#2654](https://github.com/DataDog/integrations-core/pull/2654).
 * [Added] Prevent critical logs during testing. See [#2840](https://github.com/DataDog/integrations-core/pull/2840).

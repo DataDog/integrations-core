@@ -3,7 +3,6 @@
 ## 1.2.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2789](https://github.com/DataDog/integrations-core/pull/2789).
-* [Added] Command to validate metadata. See [#2269](https://github.com/DataDog/integrations-core/pull/2269).
 
 ## 1.1.1 / 2018-09-04
 
