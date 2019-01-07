@@ -156,7 +156,7 @@ class AgentCheck(object):
 
         return config_proxy_skip(proxies, uri, skip)
 
-    def _context_uid(mtype, name, value, tags=None, hostname=None):
+    def _context_uid(self, mtype, name, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
