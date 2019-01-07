@@ -20,3 +20,15 @@ instances:
   # - name: My second service
   #   host: 127.0.0.1
   #   port: 80
+
+  # - name: Test tcp check
+  #   host: 1.2.3.4
+  #   port: 9093
+  #   timeout: 10
+  #   check_certificate_expiration: true
+  #   days_warning: 14
+  #   days_critical: 7
+  #   check_hostname: true
+  #   # ssl_hostname:
+  #   disable_ssl_validation: false
+  #   ignore_ssl_warnings: false

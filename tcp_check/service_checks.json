@@ -7,5 +7,14 @@
         "groups": ["host", "instance", "port", "target_host"],
         "name": "TCP",
         "description": "Returns CRITICAL if the Agent cannot establish an TCP connection to the URL. Returns OK if the connection is successful."
+    },
+    {
+        "agent_version": "5.0.0",
+        "integration":"system",
+        "check": "tcp.ssl_cert",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["target_host", "instance", "port"],
+        "name": "TCP - SSL",
+        "description": "Returns CRITICAL if the SSL certificate has expired. Returns WARNING if the SSL certificate will expire in less than the configured threshold. Returns OK otherwise."
     }
 ]

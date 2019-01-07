@@ -33,6 +33,13 @@ Configuration Options
 * `port` (Required) - Port to be checked. This will be included as a tag: `url:<host>:<port>`.
 * `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
 * `collect_response_time` (Optional) - Defaults to false. If this is not set to true, no response time metric will be collected. If it is set to true, the metric returned is `network.tcp.response_time`.
+* `check_certificate_expiration` (Optional) - When `check_certificate_expiration` is enabled, the service check will check the expiration date of the SSL certificate. Defaults to `false`.
+* `days_warning` & `days_critical` (Optional) - When `check_certificate_expiration` is enabled, these settings will raise a warning or critical alert when the SSL certificate is within the specified number of days from expiration.
+* `check_hostname` (Optional) - When `check_certificate_expiration` is enabled, this setting will raise a warning if the hostname on the SSL certificate does not match the host of the given URL.
+* `ssl_server_name` (Optional) - When `check_certificate_expiration` is enabled, this setting specifies the hostname of the service to connect to and it also overrides the host to match with if check_hostname is enabled.
+* `ca_certs` (Optional) - This setting will allow you to override the default certificate path as specified in `init_config`
+* `client_key` (Optional) - Path to the TLS client key file
+* `client_cert` (Optional) - Path to the TLS client certificate file
 * `tags` (Optional) - Tags to be assigned to the metric.
 
 [Restart the Agent][3] to start sending TCP service checks and response times to Datadog.
@@ -55,6 +62,14 @@ The TCP check does not include any events at this time.
 **`tcp.can_connect`**:
 
 Returns DOWN if the Agent cannot connect to the configured `host` and `port`, otherwise UP.
+
+**`tcp.ssl_cert`**:
+
+The check returns:
+
+* `DOWN` if the `host`'s certificate has already expired
+* `CRITICAL` if the `host`'s certificate expires in less than `days_critical` days
+* `WARNING` if the `host`'s certificate expires in less than `days_warning` days
 
 To create alert conditions on this service check in Datadog, click **Network** on the [Create Monitor][6] page, not **Integration**.
 
