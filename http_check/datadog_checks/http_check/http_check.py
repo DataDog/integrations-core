@@ -20,9 +20,9 @@ from requests_ntlm import HttpNtlmAuth
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.base.checks import NetworkCheck, Status
+from datadog_checks.base.utils.ca_cert import get_ca_certs_path
 from .config import from_instance, DEFAULT_EXPECTED_CODE
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
-from .utils import get_ca_certs_path
 
 
 DEFAULT_EXPIRE_DAYS_WARNING = 14
