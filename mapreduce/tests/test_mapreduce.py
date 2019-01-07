@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.mapreduce import MapReduceCheck
+
+from six import iteritems
+
 from .common import (
     INIT_CONFIG,
     MR_CONFIG,
@@ -34,19 +37,19 @@ def test_check(aggregator, mocked_request):
     mapreduce.check(MR_CONFIG["instances"][0])
 
     # Check the MapReduce job metrics
-    for metric, value in MAPREDUCE_JOB_METRIC_VALUES.iteritems():
+    for metric, value in iteritems(MAPREDUCE_JOB_METRIC_VALUES):
         aggregator.assert_metric(metric, value=value, tags=MAPREDUCE_JOB_METRIC_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the map task metrics
-    for metric, value in MAPREDUCE_MAP_TASK_METRIC_VALUES.iteritems():
+    for metric, value in iteritems(MAPREDUCE_MAP_TASK_METRIC_VALUES):
         aggregator.assert_metric(metric, value=value, tags=MAPREDUCE_MAP_TASK_METRIC_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the reduce task metrics
-    for metric, value in MAPREDUCE_REDUCE_TASK_METRIC_VALUES.iteritems():
+    for metric, value in iteritems(MAPREDUCE_REDUCE_TASK_METRIC_VALUES):
         aggregator.assert_metric(metric, value=value, tags=MAPREDUCE_REDUCE_TASK_METRIC_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the MapReduce job counter metrics
-    for metric, attributes in MAPREDUCE_JOB_COUNTER_METRIC_VALUES_READ.iteritems():
+    for metric, attributes in iteritems(MAPREDUCE_JOB_COUNTER_METRIC_VALUES_READ):
         aggregator.assert_metric(
             metric,
             value=attributes["value"],
@@ -55,7 +58,7 @@ def test_check(aggregator, mocked_request):
         )
 
     # Check the MapReduce job counter metrics
-    for metric, attributes in MAPREDUCE_JOB_COUNTER_METRIC_VALUES_WRITTEN.iteritems():
+    for metric, attributes in iteritems(MAPREDUCE_JOB_COUNTER_METRIC_VALUES_WRITTEN):
         aggregator.assert_metric(
             metric,
             value=attributes["value"],
@@ -64,7 +67,7 @@ def test_check(aggregator, mocked_request):
         )
 
     # Check the MapReduce job counter metrics
-    for metric, attributes in MAPREDUCE_JOB_COUNTER_METRIC_VALUES_RECORDS.iteritems():
+    for metric, attributes in iteritems(MAPREDUCE_JOB_COUNTER_METRIC_VALUES_RECORDS):
         aggregator.assert_metric(
             metric,
             value=attributes["value"],
