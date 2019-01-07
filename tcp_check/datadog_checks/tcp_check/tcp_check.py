@@ -82,19 +82,19 @@ class TCPCheck(NetworkCheck):
         try:
             days_warning = int(instance.get('days_warning', DEFAULT_EXPIRE_DAYS_WARNING))
         except Exception:
-            raise BadConfException("{} is not a valid timeout".format(instance['days_warning']))
+            raise BadConfException("{} should be an integer".format(instance['days_warning']))
         try:
             days_critical = int(instance.get('days_critical', DEFAULT_EXPIRE_DAYS_CRITICAL))
         except Exception:
-            raise BadConfException("{} is not a valid timeout".format(instance['days_critical']))
+            raise BadConfException("{} should be an integer".format(instance['days_critical']))
         try:
             seconds_warning = int(instance.get('seconds_warning', 0))
         except Exception:
-            raise BadConfException("{} is not a valid timeout".format(instance['seconds_warning']))
+            raise BadConfException("{} should be an integer".format(instance['seconds_warning']))
         try:
             seconds_critical = int(instance.get('seconds_critical', 0))
         except Exception:
-            raise BadConfException("{} is not a valid timeout".format(instance['seconds_critical']))
+            raise BadConfException("{} should be an integer".format(instance['seconds_critical']))
 
         return url, addr, port, custom_tags, socket_type, timeout, response_time, \
             check_certificate_expiration, ssl_server_name, ca_certs, \
