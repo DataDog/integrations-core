@@ -167,7 +167,7 @@ jobs:
     - stage: test
       env: CHECK=mapreduce
     - stage: test
-      env: CHECK=marathon
+      env: CHECK=marathon PYTHON3=true
     - stage: test
       env: CHECK=mcache PYTHON3=true
     - stage: test
