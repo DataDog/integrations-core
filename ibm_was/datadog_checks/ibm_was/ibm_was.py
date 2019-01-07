@@ -103,7 +103,7 @@ class IbmWasCheck(AgentCheck):
                 .format(url, e))
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, tags=tags)
             raise e
-        return resp
+        return resp.content
 
     def append_custom_queries(self, instance, collect_stats):
         custom_recursion_tags = {}
