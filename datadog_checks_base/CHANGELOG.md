@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 5.0.1 / 2019-01-07
+
+* [Fixed] Fix context limit logic for OpenMetrics checks. See [#2877](https://github.com/DataDog/integrations-core/pull/2877).
+
 ## 5.0.0 / 2019-01-04
 
 * [Added] Add kube_controller_manager integration. See [#2845](https://github.com/DataDog/integrations-core/pull/2845).
