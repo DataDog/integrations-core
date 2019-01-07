@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
+
 import requests
 from six import iteritems
 
@@ -126,7 +128,7 @@ class FargateCheck(AgentCheck):
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
 
-        for container_id, container_stats in stats.iteritems():
+        for container_id, container_stats in iteritems(stats):
             self.submit_perf_metrics(instance, container_tags, container_id, container_stats)
 
         self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)
