@@ -52,7 +52,7 @@ def gitlab_runner_service(request):
         raise Exception("gitlab_runner container timed out!")
 
     # run pre-test commands
-    for i in xrange(100):
+    for i in range(100):
         requests.get(GITLAB_RUNNER_URL)
     sleep(2)
 
@@ -64,7 +64,7 @@ def wait_for(URL):
     Wait for specified URL
     """
 
-    for i in xrange(180):
+    for i in range(180):
         try:
             r = requests.get(URL)
             r.raise_for_status()
