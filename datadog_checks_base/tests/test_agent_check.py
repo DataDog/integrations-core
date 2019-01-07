@@ -190,6 +190,20 @@ class LimitedCheck(AgentCheck):
 
 
 class TestLimits():
+    def test_context_uid(self, aggregator):
+        check = LimitedCheck()
+
+        # Test stability of the hash against tag ordering
+        uid = check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], None)
+        assert uid == check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], None)
+        assert uid == check._context_uid(aggregator.GAUGE, "test.metric", ["two", "one"], None)
+
+        # Test all fields impact the hash
+        assert uid != check._context_uid(aggregator.RATE, "test.metric", ["one", "two"], None)
+        assert uid != check._context_uid(aggregator.GAUGE, "test.metric2", ["one", "two"], None)
+        assert uid != check._context_uid(aggregator.GAUGE, "test.metric", ["two"], None)
+        assert uid != check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], "host")
+
     def test_metric_limit_gauges(self, aggregator):
         check = LimitedCheck()
         assert check.get_warnings() == []
