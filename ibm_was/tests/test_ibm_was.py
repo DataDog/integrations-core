@@ -31,7 +31,7 @@ def test_metric_collection_per_category(mock_server, aggregator, instance, check
 def test_custom_query(mock_server, aggregator, instance, check):
     check.check(instance)
     aggregator.assert_metric_has_tag(
-        'ibmwas.object_pool.objects_created_count',
+        'ibm_was.object_pool.objects_created_count',
         'implementations:ObjectPool_ibm.system.objectpool_com.ibm.ws.webcontainer.srt.SRTConnectionContextImpl'
     )
 

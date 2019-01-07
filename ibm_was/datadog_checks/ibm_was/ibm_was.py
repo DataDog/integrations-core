@@ -14,7 +14,7 @@ from . import metrics, validation
 class IbmWasCheck(AgentCheck):
 
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
-    METRIC_PREFIX = 'ibmwas'
+    METRIC_PREFIX = 'ibm_was'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
