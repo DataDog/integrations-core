@@ -1,16 +1,23 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from urlparse import urljoin, urlsplit, urlunsplit, urlparse
+import os
 from collections import namedtuple
 
 import requests
+import requests_kerberos
 from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
-from simplejson import JSONDecodeError
 from bs4 import BeautifulSoup
+from simplejson import JSONDecodeError
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit, urlparse
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
+
+KERBEROS_STRATEGIES = {
+    'required': requests_kerberos.REQUIRED,
+    'optional': requests_kerberos.OPTIONAL,
+    'disabled': requests_kerberos.DISABLED,
+}
 
 # Identifier for cluster master address in `spark.yaml`
 MASTER_ADDRESS = 'spark_url'
@@ -148,7 +155,8 @@ RequestsConfig = namedtuple(
         'auth',
         'ssl_verify',
         'ssl_cert',
-        'ssl_key'
+        'ssl_key',
+        'kerberos_keytab',
     ]
 )
 
@@ -199,17 +207,32 @@ class SparkCheck(AgentCheck):
                 message='Connection to ApplicationMaster "%s" was successful' % am_address)
 
     def _get_requests_config(self, instance):
+        auth = None
+
+        # Authenticate our connection to JMX endpoint if required
+        kerberos = instance.get('kerberos')
         username = instance.get('username')
         password = instance.get('password')
-        auth = None
         if username is not None and password is not None:
             auth = (username, password)
+        elif kerberos is not None:
+            if kerberos not in KERBEROS_STRATEGIES:
+                raise Exception('Invalid Kerberos strategy `{}`'.format(kerberos))
+
+            auth = requests_kerberos.HTTPKerberosAuth(
+                mutual_authentication=KERBEROS_STRATEGIES[kerberos],
+                delegate=is_affirmative(instance.get('kerberos_delegate', False)),
+                force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
+                hostname_override=instance.get('kerberos_hostname'),
+                principal=instance.get('kerberos_principal')
+            )
 
         return RequestsConfig(
             auth=auth,
             ssl_verify=instance.get('ssl_verify'),
             ssl_cert=instance.get('ssl_cert'),
             ssl_key=instance.get('ssl_key'),
+            kerberos_keytab=instance.get('kerberos_keytab'),
         )
 
     def _get_master_address(self, instance):
@@ -606,14 +629,11 @@ class SparkCheck(AgentCheck):
         else:
             self.log.error('Metric type "{}" unknown'.format(metric_type))
 
-    def _rest_request(self, address, object_path, service_name, requests_config, tags, *args, **kwargs):
+    def _rest_request(self, url, object_path, service_name, requests_config, tags, *args, **kwargs):
         '''
         Query the given URL and return the response
         '''
-        response = None
-        service_check_tags = ['url:%s' % self._get_url_base(address)] + tags
-
-        url = address
+        service_check_tags = ['url:%s' % self._get_url_base(url)] + tags
 
         if object_path:
             url = self._join_url_dir(url, object_path)
@@ -641,6 +661,11 @@ class SparkCheck(AgentCheck):
         if kwargs:
             query = '&'.join(['{0}={1}'.format(key, value) for key, value in kwargs.iteritems()])
             url = urljoin(url, '?' + query)
+
+        old_keytab_path = None
+        if requests_config.kerberos_keytab:
+            old_keytab_path = os.getenv('KRB5_CLIENT_KTNAME')
+            os.environ['KRB5_CLIENT_KTNAME'] = requests_config.kerberos_keytab
 
         try:
             self.log.debug('Spark check URL: %s' % url)
@@ -677,7 +702,12 @@ class SparkCheck(AgentCheck):
                 message=str(e))
             raise
 
-        return response
+        else:
+            return response
+
+        finally:
+            if old_keytab_path is not None:
+                os.environ['KRB5_CLIENT_KTNAME'] = old_keytab_path
 
     def _rest_request_to_json(self, address, object_path, service_name, requests_config, tags, *args, **kwargs):
         '''
