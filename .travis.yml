@@ -173,7 +173,7 @@ jobs:
     - stage: test
       env: CHECK=mesos_slave PYTHON3=true
     - stage: test
-      env: CHECK=mesos_master
+      env: CHECK=mesos_master PYTHON3=true
     - stage: test
       env: CHECK=mongo PYTHON3=true
     - stage: test
