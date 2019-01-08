@@ -1,6 +1,7 @@
 {
   "aliases": [
-    "/integrations/event_viewer/"
+    "/integrations/event_viewer/",
+    "/integrations/eventviewer/"
   ],
   "categories": [
     "os & system",
