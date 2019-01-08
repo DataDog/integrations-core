@@ -8,6 +8,8 @@ import mock
 
 import pytest
 
+from datadog_checks.utils.common import ensure_unicode
+
 # project
 from datadog_checks.kube_dns import KubeDNSCheck
 
@@ -30,7 +32,7 @@ class MockResponse:
         self.headers = {'Content-Type': content_type}
 
     def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
+        for elt in ensure_unicode(self.content).split("\n"):
             yield elt
 
     def raise_for_status(self):
