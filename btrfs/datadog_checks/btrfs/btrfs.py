@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
 
 import array
 from collections import defaultdict
@@ -11,8 +12,10 @@ import struct
 
 import psutil
 from six import iteritems
+from six.moves import xrange
 
 from datadog_checks.checks import AgentCheck
+
 
 MIXED = "mixed"
 DATA = "data"
@@ -185,7 +188,7 @@ class BTRFS(AgentCheck):
                 tags.extend(custom_tags)
 
                 free = total_bytes - used_bytes
-                usage = float(used_bytes) / float(total_bytes)
+                usage = used_bytes / total_bytes
 
                 self.gauge('system.disk.btrfs.total', total_bytes, tags=tags)
                 self.gauge('system.disk.btrfs.used', used_bytes, tags=tags)
