@@ -230,5 +230,5 @@ class Cacti(AgentCheck):
         ''' Add any special case transformations here '''
         # Report memory in MB
         if m_name[0:11] in ('system.mem.', 'system.disk'):
-            return float(val) / 1024
+            return val / 1024
         return val
