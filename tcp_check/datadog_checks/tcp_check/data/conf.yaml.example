@@ -21,7 +21,7 @@ instances:
   #   host: 127.0.0.1
   #   port: 80
 
-  # - name: Test tcp check
+  # - name: Test tcp/ssl check
   #   host: 1.2.3.4
   #   port: 9093
   #   timeout: 10
