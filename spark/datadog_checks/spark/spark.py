@@ -192,7 +192,8 @@ class SparkCheck(AgentCheck):
         self._spark_rdd_metrics(instance, spark_apps, tags, requests_config)
 
         # Get the streaming statistics metrics
-        self._spark_streaming_statistics_metrics(instance, spark_apps, tags, requests_config)
+        if is_affirmative(instance.get('streaming_metrics', True)):
+            self._spark_streaming_statistics_metrics(instance, spark_apps, tags, requests_config)
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
