@@ -10,7 +10,7 @@ except ImportError:
     from .stubs import datadog_agent
     running_on_agent = False
 
-from .utils.common import ensure_bytes
+from .utils.common import to_string
 
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
@@ -35,7 +35,7 @@ class AgentLogHandler(logging.Handler):
         msg = "({}:{}) | {}".format(
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
-            ensure_bytes(self.format(record))
+            to_string(self.format(record))
         )
         datadog_agent.log(msg, record.levelno)
 
@@ -75,7 +75,7 @@ def init_logging():
     rootLogger.setLevel(_get_py_loglevel(datadog_agent.get_config('log_level')))
 
     # `requests` (used in a lot of checks) imports `urllib3`, which logs a bunch of stuff at the info level
-    # Therefore, pre-emptively increase the default level of that logger to `WARN`
+    # Therefore, pre emptively increase the default level of that logger to `WARN`
     urllib_logger = logging.getLogger("requests.packages.urllib3")
     urllib_logger.setLevel(logging.WARN)
     urllib_logger.propagate = True

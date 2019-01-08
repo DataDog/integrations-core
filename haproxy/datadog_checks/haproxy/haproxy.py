@@ -16,7 +16,7 @@ from collections import defaultdict
 from six import iteritems, PY2
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers
 
@@ -705,7 +705,7 @@ class HAProxy(AgentCheck):
         custom_tags = [] if custom_tags is None else custom_tags
         service_name = data['pxname']
         status = data['status']
-        haproxy_hostname = self.hostname.decode('utf-8')
+        haproxy_hostname = to_string(self.hostname)
         check_hostname = haproxy_hostname if tag_by_host else ''
 
         if self._is_service_excl_filtered(service_name, services_incl_filter,

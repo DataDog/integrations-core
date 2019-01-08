@@ -4,6 +4,7 @@
 import os
 import re
 
+from six import PY3
 from six.moves.urllib.parse import urlparse
 
 
@@ -17,6 +18,9 @@ def ensure_unicode(s):
     if isinstance(s, bytes):
         s = s.decode('utf-8')
     return s
+
+
+to_string = ensure_unicode if PY3 else ensure_bytes
 
 
 def get_docker_hostname():
