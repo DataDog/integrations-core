@@ -70,3 +70,5 @@ instances:
     # ssl_verify: false
     # ssl_cert: /path/to/cert.pem
     # ssl_key: /path/to/cert.key
+
+    # streaming_metrics: true
