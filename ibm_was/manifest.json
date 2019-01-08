@@ -3,7 +3,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "ibm_was",
-  "metric_prefix": "ibmwas.",
+  "metric_prefix": "ibm_was.",
   "metric_to_check": "ibm_was.can_connect",
   "creates_events": false,
   "short_description": "IBM WAS is a Web Application Server",

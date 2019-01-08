@@ -78,10 +78,12 @@ class IbmWasCheck(AgentCheck):
     def get_node_from_root(self, xml_data, path):
         return xml_data.xpath('//{}'.format(path))
 
-    # The XML will have Stat Nodes and Nodes that contain the metrics themselves
-    # This code recursively goes through each Stat Node to properly setup tags
-    # where each Stat will have a different tag key depending on the context.
     def process_stats(self, stats, prefix, metric_categories, nested_tags, tags, recursion_level=0):
+        """
+        The XML will have Stat Nodes and Nodes that contain the metrics themselves
+        This code recursively goes through each Stat Node to properly setup tags
+        where each Stat will have a different tag key depending on the context.
+        """
         for child in stats:
             if child.tag in metrics.METRIC_VALUE_FIELDS:
                 self.submit_metrics(child, prefix, tags)
