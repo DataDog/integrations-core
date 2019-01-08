@@ -78,10 +78,10 @@ def _test_service_checks(aggregator, services=None):
                                         tags=tags)
 
 
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, haproxy_container):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
-    haproxy_check.check(common.CHECK_CONFIG)
+def test_check(aggregator, check, instance):
+    check.check(common.CHECK_CONFIG)
 
     shared_tag = ["instance_url:{0}".format(common.STATS_URL)]
 
@@ -97,13 +97,13 @@ def test_check(aggregator, haproxy_container):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check_service_filter(aggregator, haproxy_container):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_check_service_filter(aggregator, check, instance):
     config = copy.deepcopy(common.CHECK_CONFIG)
     config['services_include'] = ['datadog']
     config['services_exclude'] = ['.*']
-    haproxy_check.check(config)
+    check.check(config)
     shared_tag = ["instance_url:{0}".format(common.STATS_URL)]
 
     _test_backend_metrics(aggregator, shared_tag + ['active:false'], ['datadog'])
@@ -113,22 +113,22 @@ def test_check_service_filter(aggregator, haproxy_container):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_wrong_config(aggregator, haproxy_container):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_wrong_config(aggregator, check, instance):
     config = copy.deepcopy(common.CHECK_CONFIG)
     config['username'] = 'fake_username'
 
     with pytest.raises(Exception):
-        haproxy_check.check(config)
+        check.check(config)
 
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_open_config(aggregator, haproxy_container):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
-    haproxy_check.check(common.CHECK_CONFIG_OPEN)
+def test_open_config(aggregator, check, instance):
+    check.check(common.CHECK_CONFIG_OPEN)
 
     shared_tag = ["instance_url:{0}".format(common.STATS_URL_OPEN)]
 
@@ -139,13 +139,13 @@ def test_open_config(aggregator, haproxy_container):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'],
                     reason='Sockets with operator level are only available with haproxy 1.7')
-def test_tcp_socket(aggregator, haproxy_container):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_tcp_socket(aggregator, check, instance):
     config = copy.deepcopy(common.CONFIG_TCPSOCKET)
-    haproxy_check.check(config)
+    check.check(config)
 
     shared_tag = ["instance_url:{0}".format(common.STATS_SOCKET)]
 
@@ -156,14 +156,14 @@ def test_tcp_socket(aggregator, haproxy_container):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
-def test_unixsocket_config(aggregator, haproxy_container):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_unixsocket_config(aggregator, check, instance):
     config = copy.deepcopy(common.CONFIG_UNIXSOCKET)
-    unixsocket_url = 'unix://{0}'.format(haproxy_container)
+    unixsocket_url = 'unix://{0}'.format(instance)
     config['url'] = unixsocket_url
-    haproxy_check.check(config)
+    check.check(config)
 
     shared_tag = ["instance_url:{0}".format(unixsocket_url)]
 

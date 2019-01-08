@@ -16,7 +16,6 @@ AGG_STATUSES = (
 )
 
 CHECK_NAME = 'haproxy'
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 HOST = get_docker_hostname()
