@@ -107,4 +107,4 @@ def dd_environment():
         log_patterns=log_pattern,
         sleep=10
     ):
-        yield
+        yield common.INSTANCE
