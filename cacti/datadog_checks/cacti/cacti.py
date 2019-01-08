@@ -1,21 +1,19 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import division
 
-# stdlib
 from collections import namedtuple
 from fnmatch import fnmatch
 import os
 import time
 
-# 3rd party
 try:
     import rrdtool
 except ImportError:
     rrdtool = None
 import pymysql
 
-# project
 from datadog_checks.checks import AgentCheck
 
 CFUNC_TO_AGGR = {'AVERAGE': 'avg', 'MAXIMUM': 'max', 'MINIMUM': 'min'}
@@ -232,5 +230,5 @@ class Cacti(AgentCheck):
         ''' Add any special case transformations here '''
         # Report memory in MB
         if m_name[0:11] in ('system.mem.', 'system.disk'):
-            return val / 1024
+            return float(val) / 1024
         return val
