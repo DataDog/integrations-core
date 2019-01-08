@@ -116,7 +116,7 @@ class IbmWasCheck(AgentCheck):
         return resp.content
 
     def submit_service_checks(self, tags, value):
-        self.gauge(self.SERVICE_CHECK_CONNECT, value, tags=tags)
+        self.gauge(self.SERVICE_CHECK_CONNECT, 1 if value == AgentCheck.OK else 0, tags=tags)
         self.service_check(self.SERVICE_CHECK_CONNECT, value, tags=tags)
 
     def append_custom_queries(self, instance, collect_stats):
