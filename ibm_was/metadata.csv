@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+ibm_was.can_connect, gauge,,,,The ability of the integration to connect to the Perf Servlet to collect metrics,0,ibm_was,was can connect
 ibm_was.jdbc.create_count,gauge,,connection,,The total number of managed connections that were created since pool creation.,0,ibm_was,jdbc create count
 ibm_was.jdbc.close_count,gauge,,connection,,The total number of managed connections that were destroyed since pool creation.,0,ibm_was,jdbc close count
 ibm_was.jdbc.allocate_count,gauge,,connection,,The total number of managed connections that were allocated since pool creation.,0,ibm_was,jdbc allocated count

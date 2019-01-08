@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests
 from lxml import etree
+from xml.etree.ElementTree import ParseError
 
 from six import iteritems
 
@@ -39,7 +40,14 @@ class IbmWasCheck(AgentCheck):
         service_check_tags.append('url:{}'.format(url))
 
         data = self.make_request(instance, url, service_check_tags)
-        server_data_xml = etree.fromstring(data)
+
+        try:
+            server_data_xml = etree.fromstring(data)
+        except ParseError as e:
+            self.submit_service_checks(service_check_tags, AgentCheck.CRITICAL)
+            self.log.Error("Unable to parse the XML response: {}".format(e))
+            return
+
         node_list = self.get_node_from_root(server_data_xml, "Node")
 
         for node in node_list:
@@ -96,14 +104,18 @@ class IbmWasCheck(AgentCheck):
         try:
             resp = requests.get(url, proxies=self.get_instance_proxy(instance, url))
             resp.raise_for_status()
-            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=tags)
+            self.submit_service_checks(tags, AgentCheck.OK)
         except (requests.HTTPError, requests.ConnectionError) as e:
             self.warning(
                 "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
                 .format(url, e))
-            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, tags=tags)
+            self.submit_service_checks(tags, AgentCheck.CRITICAL)
             raise e
         return resp.content
+
+    def submit_service_checks(self, tags, value):
+        self.gauge(self.SERVICE_CHECK_CONNECT, value, tags=tags)
+        self.service_check(self.SERVICE_CHECK_CONNECT, value, tags=tags)
 
     def append_custom_queries(self, instance, collect_stats):
         custom_recursion_tags = {}
