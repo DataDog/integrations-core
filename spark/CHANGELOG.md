@@ -1,5 +1,10 @@
 # CHANGELOG - spark
 
+## 1.6.0 / 2019-01-08
+
+* [Added] Allow disabling of streaming metrics. See [#2889](https://github.com/DataDog/integrations-core/pull/2889).
+* [Added] Support Kerberos auth. See [#2825](https://github.com/DataDog/integrations-core/pull/2825).
+
 ## 1.5.0 / 2018-12-20
 
 * [Added] Add streaming statistics metrics to the spark integration. See [#2437](https://github.com/DataDog/integrations-core/pull/2437).
