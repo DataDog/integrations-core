@@ -22,16 +22,7 @@ services:
     environment:
       - ENABLE_INIT_DAEMON=false
       - "SPARK_MASTER=spark://spark-master:7077"
-  spark-worker-2:
-    image: bde2020/spark-worker:${SPARK_VERSION}-hadoop2.7
-    container_name: spark-worker-2
-    depends_on:
-      - spark-master
-    ports:
-      - "8082:8081"
-    environment:
-      - ENABLE_INIT_DAEMON=false
-      - "SPARK_MASTER=spark://spark-master:7077"
+      - SPARK_WORKER_CORES=1
   spark-app-1:
     build:
       context: .
