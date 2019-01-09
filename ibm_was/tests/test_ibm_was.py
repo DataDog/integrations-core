@@ -40,7 +40,7 @@ def test_custom_query(mock_server, aggregator, instance, check):
             return_value=mock_data("server.xml"))
 def test_custom_queries_missing_stat_in_payload(mock_server, instance, check):
     check.check(instance)
-    assert b"Error finding JDBC Connection Custom stats in XML output." in check.warnings
+    assert "Error finding JDBC Connection Custom stats in XML output." in check.warnings
 
 
 @mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request',
