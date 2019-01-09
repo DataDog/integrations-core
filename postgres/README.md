@@ -129,9 +129,10 @@ PostgreSQL default logging is to `stderr` and logs do not include detailed infor
 [Run the Agent's status subcommand][17] and look for `postgres` under the Checks section.
 
 ## Data Collected
-### Metrics
 
 Some of the metrics listed below require additional configuration, see the [sample postgres.d/conf.yaml][14] for all configurable options.
+
+### Metrics
 
 See [metadata.csv][18] for a list of metrics provided by this integration.
 
