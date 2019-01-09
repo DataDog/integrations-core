@@ -24,15 +24,15 @@ This check monitors [{check_name_cap}][1] through the Datadog Agent.
 
 ### Metrics
 
-{check_name_cap} does not include any metrics at this time.
+{check_name_cap} does not include any metrics.
 
 ### Service Checks
 
-{check_name_cap} does not include any service checks at this time.
+{check_name_cap} does not include any service checks.
 
 ### Events
 
-{check_name_cap} does not include any events at this time.
+{check_name_cap} does not include any events.
 
 ## Troubleshooting
 
