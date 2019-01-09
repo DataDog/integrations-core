@@ -1,0 +1,23 @@
+{
+  "display_name": "Jboss/Wildfly",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "jboss",
+  "metric_prefix": "jboss.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "ff99b3d2-9c14-4cdf-b869-7b8b1cbf0716",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Jboss/Wildfly Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false
+}
