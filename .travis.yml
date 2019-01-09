@@ -225,7 +225,7 @@ jobs:
     - stage: test
       env: CHECK=snmp
     - stage: test
-      env: CHECK=spark
+      env: CHECK=spark PYTHON3=true
     - stage: test
       env: CHECK=sqlserver
     - stage: test
