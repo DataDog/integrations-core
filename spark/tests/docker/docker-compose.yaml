@@ -32,7 +32,6 @@ services:
     depends_on:
       - spark-master
       - spark-worker-1
-      - spark-worker-2
     hostname: localhost
     ports:
       - "4040:4040"
