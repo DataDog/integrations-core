@@ -832,7 +832,7 @@ def upload(ctx, check, sdist, dry_run):
     else:
         check_dir = resolve_path(check)
         if not dir_exists(check_dir):
-            abort('Check `{}` is not an Agent-based Integration'.format(check))
+            abort('`{}` is not an Agent-based Integration or Python package'.format(check))
 
         check = basepath(check_dir)
 
