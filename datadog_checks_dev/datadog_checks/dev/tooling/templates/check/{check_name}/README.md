@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [{check_name_cap}][1].
+This check monitors [{check_name_cap}][1] through the Datadog Agent.
 
 ## Setup
 
@@ -12,29 +12,27 @@ This check monitors [{check_name_cap}][1].
 
 ### Configuration
 
-1. Edit the `{check_name}.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your {check_name} performance data.
-   See the [sample {check_name}.d/conf.yaml][2] for all available configuration options.
+1. Edit the `{check_name}.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your {check_name} performance data. See the [sample {check_name}.d/conf.yaml][2] for all available configuration options.
 
-2. [Restart the Agent][3]
+2. [Restart the Agent][3].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `{check_name}` under the Checks section.
+[Run the Agent's status subcommand][4] and look for `{check_name}` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-{check_name_cap} does not include any metrics.
+{check_name_cap} does not include any metrics at this time.
 
 ### Service Checks
 
-{check_name_cap} does not include any service checks.
+{check_name_cap} does not include any service checks at this time.
 
 ### Events
 
-{check_name_cap} does not include any events.
+{check_name_cap} does not include any events at this time.
 
 ## Troubleshooting
 
