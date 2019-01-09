@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
+
 import random
 from collections import defaultdict
 from time import time, sleep
