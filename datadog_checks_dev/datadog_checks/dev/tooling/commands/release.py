@@ -37,7 +37,7 @@ from ..utils import (
 from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
-    basepath, chdir, ensure_unicode, get_next, remove_path, stream_file_lines,
+    basepath, chdir, dir_exists, ensure_unicode, get_next, remove_path, resolve_path, stream_file_lines,
     write_file
 )
 
@@ -822,12 +822,19 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
     short_help='Build and upload a check to PyPI'
 )
 @click.argument('check')
+@click.option('--sdist', '-s', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def upload(ctx, check, dry_run):
+def upload(ctx, check, sdist, dry_run):
     """Release a specific check to PyPI as it is on the repo HEAD."""
-    if check not in get_valid_checks():
-        abort('Check `{}` is not an Agent-based Integration'.format(check))
+    if check in get_valid_checks():
+        check_dir = os.path.join(get_root(), check)
+    else:
+        check_dir = resolve_path(check)
+        if not dir_exists(check_dir):
+            abort('Check `{}` is not an Agent-based Integration'.format(check))
+
+        check = basepath(check_dir)
 
     # retrieve credentials
     pypi_config = ctx.obj.get('pypi', {})
@@ -839,13 +846,17 @@ def upload(ctx, check, dry_run):
     auth_env_vars = {'TWINE_USERNAME': username, 'TWINE_PASSWORD': password}
     echo_waiting('Building and publishing `{}` to PyPI...'.format(check))
 
-    check_dir = os.path.join(get_root(), check)
     remove_path(os.path.join(check_dir, 'dist'))
 
     with chdir(check_dir), EnvVars(auth_env_vars):
         result = run_command('python setup.py bdist_wheel --universal', capture='out')
         if result.code != 0:
             abort(result.stdout, result.code)
+
+        if sdist:
+            result = run_command('python setup.py sdist', capture='out')
+            if result.code != 0:
+                abort(result.stdout, result.code)
 
         echo_waiting('Build done, uploading the package...')
 
