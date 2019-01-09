@@ -773,7 +773,7 @@ def test_mesos_filter(aggregator):
         assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_standalone(aggregator):
+def test_standalone_unit(aggregator):
     with mock.patch('requests.get', standalone_requests_get_mock):
         c = SparkCheck('spark', None, {}, [STANDALONE_CONFIG])
         c.check(STANDALONE_CONFIG)
@@ -978,3 +978,49 @@ def run_ssl_server():
     threading.Thread(target=httpd.handle_request).start()
     time.sleep(.5)
     return httpd
+
+
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_standalone(aggregator, instance_standalone):
+    c = SparkCheck('spark', None, {}, [instance_standalone])
+    c.check(instance_standalone)
+
+    # Check the running job metrics
+    for metric in SPARK_JOB_RUNNING_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the succeeded job metrics
+    for metric in SPARK_JOB_SUCCEEDED_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the running stage metrics
+    for metric in SPARK_STAGE_RUNNING_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the complete stage metrics
+    for metric in SPARK_STAGE_COMPLETE_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the driver metrics
+    for metric in SPARK_DRIVER_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the streaming statistics metrics and remove 2 we're not getting for now
+    streaming_statistics = set(SPARK_STREAMING_STATISTICS_METRIC_VALUES) - {
+        'spark.streaming.statistics.avg_processing_time',
+        'spark.streaming.statistics.avg_total_delay',
+    }
+
+    for metric in streaming_statistics:
+        aggregator.assert_metric(metric)
+
+    # TODO: Further investigate why we aren't getting these, it may be Docker networking
+    #
+    # # Check the executor metrics
+    # for metric in SPARK_EXECUTOR_METRIC_VALUES:
+    #     aggregator.assert_metric(metric)
+    #
+    # # Check the RDD metrics
+    # for metric in SPARK_RDD_METRIC_VALUES:
+    #     aggregator.assert_metric(metric)
