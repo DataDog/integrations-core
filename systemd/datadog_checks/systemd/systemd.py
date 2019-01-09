@@ -10,14 +10,16 @@ from datadog_checks.base import AgentCheck
 
 class SystemdCheck(AgentCheck):
     def check(self, instance):
-        unit = instance.get('unit_id')
-        if unit is None:
-            pass
-        else:
-            self.get_unit_state(unit)
+        units = instance.get('units', [])
+        # self.log.info(units[1])
+        # self.log.info(units)
+
+        if units:
+            # self.get_unit_state(units)
+            for u in units:
+                self.get_unit_state([u][unit_id])
         
         self.get_active_inactive_units()
-
 
     def get_active_inactive_units(self):
         # returns the number of active and inactive units
