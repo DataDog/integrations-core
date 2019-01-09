@@ -181,7 +181,7 @@ class KafkaCheck(AgentCheck):
                                node_id, DEFAULT_KAFKA_RETRIES)
                 break
             attempts = attempts + 1
-            delay = (2 ** attempts) + (random.randint(0, 1000) / 1000) * 0.01  # starting at 20 ms
+            delay = (2 ** attempts) + (random.randint(0, 1000) // 1000) * 0.01  # starting at 20 ms
 
             future = client.cluster.request_update()
             client.poll(future=future)
