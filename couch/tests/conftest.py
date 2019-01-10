@@ -3,27 +3,28 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import json
-import subprocess
-from time import sleep
-from collections import defaultdict
-
 import pytest
 import requests
 
-from . import common
+from time import sleep
+from collections import defaultdict
+from copy import deepcopy
+
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.couch import CouchDb
 
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+from . import common
 
 
 @pytest.fixture
 def check():
     return CouchDb(common.CHECK_NAME, {}, {})
+
+
+@pytest.fixture
+def instance():
+    instance = deepcopy(common.BASIC_CONFIG)
+    return instance
 
 
 @pytest.fixture
@@ -36,7 +37,7 @@ def active_tasks():
 
 
 @pytest.fixture(scope="session")
-def couch_cluster():
+def dd_environment():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
@@ -47,24 +48,14 @@ def couch_cluster():
     env['COUCH_PORT'] = common.PORT
     couch_version = env["COUCH_VERSION"][0]
 
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version))
-    ]
-
-    subprocess.check_call(args + ["down"])
-    subprocess.check_call(args + ["up", "-d"])
-
-    # wait for the cluster to be up before yielding
-    if not wait_for_couch():
-        subprocess.check_call(args + ["down"])
-        raise Exception("couchdb container boot timed out!")
-
-    generate_data(couch_version)
-
-    yield
-
-    subprocess.check_call(args + ["down"])
+    with docker_run(
+            compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
+            env_vars=env,
+            conditions=[WaitFor(wait_for_couch)],
+    ):
+        generate_data(couch_version)
+        instance = common.BASIC_CONFIG
+        yield instance
 
 
 def generate_data(couch_version):
