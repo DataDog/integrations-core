@@ -3,57 +3,46 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 import sys
-import subprocess
 import time
-
 import pytest
 import requests
 
+from copy import deepcopy
+
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.squid import SquidCheck
+
 from . import common
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+def wait_for_squid():
+    try:
+        res = requests.get(common.URL)
+        res.raise_for_status()
+        return True
+    except Exception:
+        time.sleep(1)
+        sys.stderr.write("Waiting for Squid to boot...")
+        return False
 
 
-@pytest.fixture
-def squid_check():
-    return SquidCheck(common.CHECK_NAME, {}, {})
-
-
-@pytest.fixture(scope="session")
-def spin_up_squid():
+@pytest.fixture(scope='session')
+def dd_environment():
     env = os.environ
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'squid.yaml')
-    ]
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    for _ in range(10):
-        try:
-            res = requests.get(common.URL)
-            res.raise_for_status()
-            break
-        except Exception:
-            time.sleep(1)
-            sys.stderr.write("Waiting for Squid to boot...")
-    else:
-        subprocess.check_call(args + ["down"], env=env)
-        raise Exception("Squid failed to boot...")
+    with docker_run(
+            compose_file=os.path.join(common.HERE, 'compose', 'squid.yaml'),
+            env_vars=env,
+            conditions=[WaitFor(wait_for_squid)],
+    ):
+        yield common.CHECK_CONFIG
 
-    yield
-    subprocess.check_call(args + ["down"], env=env)
+
+@pytest.fixture
+def check():
+    return SquidCheck(common.CHECK_NAME, {}, {})
 
 
 @pytest.fixture
 def instance():
-    instance = {
-        "name": "ok_instance",
-        "tags": ["custom_tag"],
-        "host": common.HOST
-    }
+    instance = deepcopy(common.CHECK_CONFIG)
     return instance
