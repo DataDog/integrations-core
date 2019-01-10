@@ -38,9 +38,8 @@ def wait_for_haproxy():
 def dd_environment():
     env = os.environ
     with TempDir() as d:
-        host_socket_path = os.path.join(d, 'haproxy')
+        host_socket_path = os.path.join(d, 'datadog-haproxy-stats.sock')
 
-        # host_socket_path = os.path.join(host_socket_dir, 'datadog-haproxy-stats.sock')
         if not file_exists(host_socket_path):
             os.chmod(d, 0o770)
             create_file(host_socket_path)
@@ -71,7 +70,10 @@ def dd_environment():
                 # it's not always bad if this fails
                 pass
             time.sleep(20)
-            yield CHECK_CONFIG
+            config = deepcopy(CHECK_CONFIG)
+            unixsocket_url = 'unix://{0}'.format(host_socket_path)
+            config['url'] = unixsocket_url
+            yield config
 
 
 @pytest.fixture
