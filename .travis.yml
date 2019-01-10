@@ -125,6 +125,8 @@ jobs:
     - stage: test
       env: CHECK=gitlab PYTHON3=true
     - stage: test
+      env: CHECK=gitlab_runner PYTHON3=true
+    - stage: test
       env: CHECK=go_expvar PYTHON3=true
     - stage: test
       env: CHECK=gunicorn PYTHON3=true
