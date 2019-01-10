@@ -31,12 +31,17 @@ class AggregatorStub(object):
     """
     # Replicate the Enum we have on the Agent
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = range(7)
+    AGGREGATE_TYPES = {COUNT, COUNTER}
 
     def __init__(self):
         self._metrics = defaultdict(list)
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+
+    @classmethod
+    def is_aggregate(cls, mtype):
+        return mtype in cls.AGGREGATE_TYPES
 
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
         self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
@@ -151,7 +156,7 @@ class AggregatorStub(object):
 
         candidates = []
         for metric in self.metrics(name):
-            if value is not None and metric.type != self.COUNTER and value != metric.value:
+            if value is not None and not self.is_aggregate(metric.type) and value != metric.value:
                 continue
 
             if tags and tags != sorted(metric.tags):
@@ -165,7 +170,7 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
-        if value is not None and candidates and all(m.type == self.COUNTER for m in candidates):
+        if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
             msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
             assert value == got, msg
