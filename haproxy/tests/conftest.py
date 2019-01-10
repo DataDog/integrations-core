@@ -62,8 +62,6 @@ def dd_environment():
                 # it won't work without access
                 chown_args = []
                 user = getpass.getuser()
-                if user != 'root':
-                    chown_args += ['sudo']
                 chown_args += ["chown", user, host_socket_path]
                 subprocess.check_call(chown_args, env=env)
             except subprocess.CalledProcessError:
