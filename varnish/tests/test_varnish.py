@@ -2,21 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-import re
-import shlex
-import subprocess
 import pytest
-
-from datadog_checks.base import ensure_unicode
 
 from . import common
 
 
-pytestmark = pytest.mark.integration
-
-
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
 def test_check(aggregator, check, instance):
 
     check.check(instance)
@@ -25,6 +17,7 @@ def test_check(aggregator, check, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
 def test_inclusion_filter(aggregator, check, instance):
     instance['metrics_filter'] = ['SMA.*']
 
@@ -37,6 +30,7 @@ def test_inclusion_filter(aggregator, check, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
 def test_exclusion_filter(aggregator, check, instance):
     instance['metrics_filter'] = ['^SMA.Transient.c_req']
 
