@@ -527,11 +527,27 @@ class VSphereCheck(AgentCheck):
                     "mor_type": mor_type,
                     "mor": obj,
                     "hostname": hostname,
-                    "tags": self._normalize_tags_type(tags + instance_tags)
+                    "tags": self.encode_tags(tags + instance_tags)
                 })
 
         self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
         return obj_list
+
+    def encode_tags(self, tags):
+        """
+        Encode tags to bytes so that they are properly handled by the agent
+        """
+        encoded_tags = []
+        if tags is not None:
+            for tag in tags:
+                if not isinstance(tag, bytes):
+                    try:
+                        tag = tag.encode('utf-8')
+                    except UnicodeError as e:
+                        self.log.exception('Error encoding tag `{}` as utf-8, ignoring tag: {}'.format(tag, e))
+                        continue
+                encoded_tags.append(tag)
+        return encoded_tags
 
     @trace_method
     def _cache_morlist_raw_async(self, instance, tags, regexes=None, include_only_marked=False):
