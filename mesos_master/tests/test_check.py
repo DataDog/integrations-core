@@ -6,6 +6,8 @@ import os
 import pytest
 import json
 
+from six import iteritems
+
 from datadog_checks.mesos_master import MesosMaster
 
 
@@ -41,11 +43,11 @@ def test_check(check, aggregator):
               check.CLUSTER_FRAMEWORK_METRICS, check.SYSTEM_METRICS, check.STATS_METRICS):
         metrics.update(d)
 
-    for _, v in check.FRAMEWORK_METRICS.iteritems():
+    for _, v in iteritems(check.FRAMEWORK_METRICS):
         aggregator.assert_metric(v[0])
-    for _, v in metrics.iteritems():
+    for _, v in iteritems(metrics):
         aggregator.assert_metric(v[0])
-    for _, v in check.ROLE_RESOURCES_METRICS.iteritems():
+    for _, v in iteritems(check.ROLE_RESOURCES_METRICS):
         aggregator.assert_metric(v[0])
 
     aggregator.assert_metric('mesos.cluster.total_frameworks')

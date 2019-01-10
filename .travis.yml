@@ -109,7 +109,7 @@ jobs:
     - stage: test
       env: CHECK=dotnetclr
     - stage: test
-      env: CHECK=ecs_fargate
+      env: CHECK=ecs_fargate PYTHON3=true
     - stage: test
       env: CHECK=elastic PYTHON3=true
     - stage: test
@@ -124,6 +124,8 @@ jobs:
       env: CHECK=gearmand PYTHON3=true
     - stage: test
       env: CHECK=gitlab PYTHON3=true
+    - stage: test
+      env: CHECK=gitlab_runner PYTHON3=true
     - stage: test
       env: CHECK=go_expvar PYTHON3=true
     - stage: test
@@ -165,15 +167,15 @@ jobs:
     - stage: test
       env: CHECK=linux_proc_extras PYTHON3=true
     - stage: test
-      env: CHECK=mapreduce
+      env: CHECK=mapreduce PYTHON3=true
     - stage: test
-      env: CHECK=marathon
+      env: CHECK=marathon PYTHON3=true
     - stage: test
       env: CHECK=mcache PYTHON3=true
     - stage: test
-      env: CHECK=mesos_slave
+      env: CHECK=mesos_slave PYTHON3=true
     - stage: test
-      env: CHECK=mesos_master
+      env: CHECK=mesos_master PYTHON3=true
     - stage: test
       env: CHECK=mongo PYTHON3=true
     - stage: test
@@ -225,7 +227,7 @@ jobs:
     - stage: test
       env: CHECK=snmp
     - stage: test
-      env: CHECK=spark
+      env: CHECK=spark PYTHON3=true
     - stage: test
       env: CHECK=sqlserver
     - stage: test

@@ -1,5 +1,9 @@
 # CHANGELOG - riak
 
+## 1.4.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2774](https://github.com/DataDog/integrations-core/pull/2774).
+
 ## 1.3.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

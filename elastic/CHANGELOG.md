@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 1.10.0 / 2019-01-04
+
+* [Added] Add completed metric for all ES thread pools. See [#2803](https://github.com/DataDog/integrations-core/pull/2803).
+* [Added] Capture metrics for ES scroll requests . See [#2687](https://github.com/DataDog/integrations-core/pull/2687).
+
 ## 1.9.1 / 2018-11-30
 
 * [Fixed] Add elasticsearch-oss as an auto_conf.yaml Elasticsearch identifier. See [#2644](https://github.com/DataDog/integrations-core/pull/2644). Thanks [jcassee](https://github.com/jcassee).

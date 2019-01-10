@@ -1,5 +1,9 @@
 # CHANGELOG - gearmand
 
+## 1.2.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2738](https://github.com/DataDog/integrations-core/pull/2738).
+
 ## 1.1.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

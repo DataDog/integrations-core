@@ -1,5 +1,9 @@
 # CHANGELOG - system_swap
 
+## 1.4.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2830](https://github.com/DataDog/integrations-core/pull/2830).
+
 ## 1.3.0 / 2018-11-30
 
 * [Added] Update psutil. See [#2576](https://github.com/DataDog/integrations-core/pull/2576).

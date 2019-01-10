@@ -53,7 +53,7 @@ class CouchDb(AgentCheck):
             raise
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags, message=str(e.message))
+                               tags=service_check_tags, message=str(e))
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,

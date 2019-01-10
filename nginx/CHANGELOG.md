@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 3.1.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2716](https://github.com/DataDog/integrations-core/pull/2716).
+
 ## 3.0.0 / 2018-09-04
 
 * [Changed] Send correct count values for NGINX ever increasing counters. See [#2041](https://github.com/DataDog/integrations-core/pull/2041).

@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 1.7.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2812](https://github.com/DataDog/integrations-core/pull/2812).
+
 ## 1.6.0 / 2018-11-30
 
 * [Added] Update psutil. See [#2576](https://github.com/DataDog/integrations-core/pull/2576).

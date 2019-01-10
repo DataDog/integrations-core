@@ -1,5 +1,10 @@
 # CHANGELOG - twemproxy
 
+## 1.3.0 / 2019-01-04
+
+* [Added] Refactor Twemproxy tests and add E2E. See [#2820](https://github.com/DataDog/integrations-core/pull/2820).
+* [Added] Support Python 3. See [#2817](https://github.com/DataDog/integrations-core/pull/2817).
+
 ## 1.2.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

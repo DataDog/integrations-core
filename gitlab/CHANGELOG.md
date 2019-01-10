@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 2.1.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2751](https://github.com/DataDog/integrations-core/pull/2751).
+
 ## 2.0.0 / 2018-10-12
 
 * [Changed] Update gitlab to use the new OpenMetricsBaseCheck. See [#1977](https://github.com/DataDog/integrations-core/pull/1977).

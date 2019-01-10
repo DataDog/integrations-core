@@ -32,27 +32,30 @@ METRICS = [
     'statsd.graphite.flush_length',
 ]
 
+DEFAULT_INSTANCE = {
+    'host': HOST,
+    'port': PORT,
+}
+
 
 @pytest.fixture
-def get_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-    }
+def instance():
+    return DEFAULT_INSTANCE
 
 
-@pytest.fixture(scope='session', autouse=True)
-def spin_up_statsd():
+@pytest.fixture(scope='session')
+def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'),
         log_patterns=['server is up']
     ):
-        yield
+        yield DEFAULT_INSTANCE
 
 
-def test_simple_run(aggregator, get_instance):
+@pytest.mark.usefixtures("dd_environment")
+def test_simple_run(aggregator, instance):
     stats_check = StatsCheck(CHECK_NAME, {}, {})
-    stats_check.check(get_instance)
+    stats_check.check(instance)
     expected_tags = ["host:{}".format(HOST), "port:{}".format(PORT)]
 
     for mname in METRICS:

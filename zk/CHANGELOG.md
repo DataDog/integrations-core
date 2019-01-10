@@ -1,5 +1,9 @@
 # CHANGELOG - zk
 
+## 2.1.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2781](https://github.com/DataDog/integrations-core/pull/2781).
+
 ## 2.0.0 / 2018-11-30
 
 * [Removed] Removed incorrect metric name 'bytes_outstanding'. See [#2476](https://github.com/DataDog/integrations-core/pull/2476).
