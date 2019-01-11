@@ -40,7 +40,7 @@ In addition, install `mod_status` on your Lighttpd servers.
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The Lighttpd check does not include any events at this time.
+The Lighttpd check does not include any events.
 
 ### Service Checks
 

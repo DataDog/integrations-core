@@ -82,7 +82,7 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 
-The Redis check does not include any events at this time.
+The Redis check does not include any events.
 
 ### Service Checks
 

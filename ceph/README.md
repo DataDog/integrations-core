@@ -46,7 +46,7 @@ See [metadata.csv][4] for a list of metrics provided by this integration.
 Note: If you are running ceph luminous or later, you will not see the metric `ceph.osd.pct_used`.
 
 ### Events
-The Ceph check does not include any events at this time.
+The Ceph check does not include any events.
 
 ### Service Checks
 

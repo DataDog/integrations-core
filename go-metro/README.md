@@ -83,10 +83,10 @@ If the TCP RTT check has started you should see something similar to the go-metr
 See [metadata.csv][3] for a list of metrics provided by this check.
 
 ### Events
-The Go-metro check does not include any events at this time.
+The Go-metro check does not include any events.
 
 ### Service Checks
-The Go-metro check does not include any service checks at this time.
+The Go-metro check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][4].

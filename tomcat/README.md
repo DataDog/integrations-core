@@ -319,7 +319,7 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
 See [metadata.csv][21] for a list of metrics provided by this check.
 
 ### Events
-The Tomcat check does not include any events at this time.
+The Tomcat check does not include any events.
 
 ### Service Checks
 

@@ -40,10 +40,10 @@ The network check is included in the [Datadog Agent][1] package, so you don't ne
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The Network check does not include any events at this time.
+The Network check does not include any events.
 
 ### Service Checks
-The Network check does not include any service checks at this time.
+The Network check does not include any service checks.
 
 ## Troubleshooting
 

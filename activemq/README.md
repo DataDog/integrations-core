@@ -94,7 +94,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 See [metadata.csv][112] for a list of metrics provided by this integration.
 
 ### Events
-The ActiveMQ check does not include any events at this time.
+The ActiveMQ check does not include any events.
 
 ### Service Checks
 **activemq.can_connect**:  

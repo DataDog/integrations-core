@@ -144,13 +144,13 @@ Checks
 
 ## Data Collected
 ### Metrics
-The Win32 Event log check does not include any metrics at this time.
+The Win32 Event log check does not include any metrics.
 
 ### Events
 All Windows Event are forwarded to your Datadog application.
 
 ### Service Checks
-The Win32 Event log check does not include any service checks at this time.
+The Win32 Event log check does not include any service checks.
 
 ## Troubleshooting
 

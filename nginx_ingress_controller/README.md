@@ -69,11 +69,11 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-nginx-ingress-controller does not include any service checks at this time.
+nginx-ingress-controller does not include any service checks.
 
 ### Events
 
-nginx-ingress-controller does not include any events at this time.
+nginx-ingress-controller does not include any events.
 
 ## Troubleshooting
 

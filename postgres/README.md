@@ -137,7 +137,7 @@ Some of the metrics listed below require additional configuration, see the [samp
 See [metadata.csv][18] for a list of metrics provided by this integration.
 
 ### Events
-The PostgreSQL check does not include any events at this time.
+The PostgreSQL check does not include any events.
 
 ### Service Checks
 
