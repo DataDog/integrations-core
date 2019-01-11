@@ -32,7 +32,7 @@ class BackOffRetry(object):
         jitter = min(MAX_BACKOFF_SECS, BASE_BACKOFF_SECS * 2 ** self.backoff[instance_name]['retries'])
 
         # let's add some jitter (half jitter)
-        backoff_interval = jitter / 2
+        backoff_interval = jitter // 2
         backoff_interval += self.random.randint(0, backoff_interval)
 
         tracker['scheduled'] = time.time() + backoff_interval
