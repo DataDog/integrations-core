@@ -25,7 +25,7 @@ to_string = ensure_unicode if PY3 else ensure_bytes
 
 
 def round_value(value, precision=0, rounding_method=ROUND_HALF_UP):
-    precision = 0 if precision == 0 else '0.{}'.format('0' * precision)
+    precision = '0.{}'.format('0' * precision)
     return float(Decimal(str(value)).quantize(Decimal(precision), rounding=rounding_method))
 
 
