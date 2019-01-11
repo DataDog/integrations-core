@@ -49,9 +49,10 @@ def dd_environment():
     couch_version = env["COUCH_VERSION"][0]
 
     with docker_run(
-            compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
-            env_vars=env,
-            conditions=[WaitFor(wait_for_couch)],
+        compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
+        env_vars=env,
+        endpoints=[common.URL],
+        conditions=[WaitFor(generate_data, args=(couch_version,))],
     ):
         generate_data(couch_version)
         instance = common.BASIC_CONFIG
@@ -102,18 +103,3 @@ def generate_data(couch_version):
         except Exception:
             pass
         sleep(1)
-
-
-def wait_for_couch():
-    """
-    Wait for the couchdb container to be reachable
-    """
-    for i in range(60):
-        print("Waiting for service to come up")
-        try:
-            requests.get(common.URL).raise_for_status()
-            return True
-        except Exception:
-            sleep(1)
-
-    return False
