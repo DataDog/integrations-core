@@ -533,6 +533,8 @@ class VSphereCheck(AgentCheck):
         self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
         return obj_list
 
+    # TODO: Remove this method when Agent 5 is EOL.
+    # This method is a copy/past from AgentCheck class in Agent 6 so we have backward compatibility with Agent 5
     def encode_tags(self, tags):
         """
         Encode tags to bytes so that they are properly handled by the agent
