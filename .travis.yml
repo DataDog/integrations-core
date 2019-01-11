@@ -153,7 +153,7 @@ jobs:
     - stage: test
       env: CHECK=kube_dns
     - stage: test
-      env: CHECK=kube_proxy
+      env: CHECK=kube_proxy PYTHON3=true
     - stage: test
       env: CHECK=kubelet
     - stage: test
