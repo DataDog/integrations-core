@@ -26,7 +26,7 @@ to_string = ensure_unicode if PY3 else ensure_bytes
 
 def round_value(value, sig_digits="0.01", rounding_method=ROUND_HALF_UP):
     getcontext().rounding = rounding_method
-    return float(Decimal(value).quantize(Decimal(sig_digits)))
+    return float(Decimal(str(value)).quantize(Decimal(sig_digits)))
 
 
 def get_docker_hostname():

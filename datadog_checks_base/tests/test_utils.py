@@ -119,4 +119,4 @@ class TestRounding():
         assert round_value(3.5, sig_digits="1") == 4.0
         assert round_value(2.555, sig_digits="0.01") == 2.560
         assert round_value(4.2345, sig_digits="0.01") == 4.23
-        assert round_value(4.2345, sig_digits="0.001", rounding_method=ROUND_HALF_UP) == 4.2350
+        assert round_value(4.2345, sig_digits="0.000") == 4.235
