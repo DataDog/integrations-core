@@ -838,7 +838,7 @@ GROUP BY datid, datname
             "host:%s" % host,
             "port:%s" % port,
         ]
-        service_check_tags.extend(tags)
+        service_check_tags.extend([t for t in tags if not t.startswith('pginstance')])
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
 
