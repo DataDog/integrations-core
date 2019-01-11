@@ -110,13 +110,12 @@ class TestLimiter():
 
 class TestRounding():
     def test_round_half_up(self):
-        assert round_value(2.555) == 2.560
+        assert round_value(3.5) == 4.0
 
     def test_round_modify_method(self):
-        assert round_value(3.5, sig_digits="1", rounding_method=ROUND_HALF_DOWN) == 3.0
+        assert round_value(3.5, rounding_method=ROUND_HALF_DOWN) == 3.0
 
     def test_round_modify_sig_digits(self):
-        assert round_value(3.5, sig_digits="1") == 4.0
-        assert round_value(2.555, sig_digits="0.01") == 2.560
-        assert round_value(4.2345, sig_digits="0.01") == 4.23
-        assert round_value(4.2345, sig_digits="0.000") == 4.235
+        assert round_value(2.555, precision=2) == 2.560
+        assert round_value(4.2345, precision=2) == 4.23
+        assert round_value(4.2345, precision=3) == 4.235
