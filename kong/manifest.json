@@ -1,7 +1,8 @@
 {
   "categories": [
     "web",
-    "api"
+    "api",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Kong",
