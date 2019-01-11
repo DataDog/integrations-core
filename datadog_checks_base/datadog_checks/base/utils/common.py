@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from decimal import ROUND_HALF_UP, Decimal, getcontext
 import os
 import re
 
@@ -21,6 +22,11 @@ def ensure_unicode(s):
 
 
 to_string = ensure_unicode if PY3 else ensure_bytes
+
+
+def round_value(value, sig_digits="0.01", rounding_method=ROUND_HALF_UP):
+    getcontext().rounding = rounding_method
+    return float(Decimal(value).quantize(Decimal(sig_digits)))
 
 
 def get_docker_hostname():
