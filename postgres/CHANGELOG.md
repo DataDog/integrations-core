@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## Unreleased
+
+* [Added] Adds option to tag metrics with replication_role. See [#2929](https://github.com/DataDog/integrations-core/pull/2929)
+
 ## 2.4.0 / 2019-01-04
 
 * [Added] Bump psycopg2-binary version to 2.7.5. See [#2799](https://github.com/DataDog/integrations-core/pull/2799).
