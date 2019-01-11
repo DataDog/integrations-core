@@ -158,7 +158,7 @@ class Memcache(AgentCheck):
             try:
                 self.gauge(
                     "memcache.get_hit_percent",
-                    100.0 * stats["get_hits"] / stats["cmd_get"],
+                    100.0 * float(stats["get_hits"]) / float(stats["cmd_get"]),
                     tags=tags,
                 )
             except ZeroDivisionError:
@@ -167,7 +167,7 @@ class Memcache(AgentCheck):
             try:
                 self.gauge(
                     "memcache.fill_percent",
-                    100.0 * stats["bytes"] / stats["limit_maxbytes"],
+                    100.0 * float(stats["bytes"]) / float(stats["limit_maxbytes"]),
                     tags=tags,
                 )
             except ZeroDivisionError:
@@ -176,7 +176,7 @@ class Memcache(AgentCheck):
             try:
                 self.gauge(
                     "memcache.avg_item_size",
-                    stats["bytes"] / stats["curr_items"],
+                    float(stats["bytes"]) / float(stats["curr_items"]),
                     tags=tags,
                 )
             except ZeroDivisionError:
