@@ -28,11 +28,11 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-Hyper-V does not include any service checks at this time.
+Hyper-V does not include any service checks.
 
 ### Events
 
-Hyper-V does not include any events at this time.
+Hyper-V does not include any events.
 
 ## Troubleshooting
 

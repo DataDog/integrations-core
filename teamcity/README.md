@@ -44,13 +44,13 @@ Add an item like the above to `instances` for each build configuration you want 
 
 ## Data Collected
 ### Metrics
-The Teamcity check does not include any metrics at this time.
+The Teamcity check does not include any metrics.
 
 ### Events
 Teamcity events representing successful builds are forwarded to your Datadog application.
 
 ### Service Checks
-The Teamcity check does not include any service checks at this time.
+The Teamcity check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][6].

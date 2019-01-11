@@ -24,7 +24,7 @@ If you want to configure the check with custom options, Edit the `disk.d/conf.ya
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The Disk check does not include any events at this time.
+The Disk check does not include any events.
 
 ### Service Checks
 **`disk.read_write`**:

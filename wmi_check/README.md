@@ -121,10 +121,10 @@ Setting this will cause any instance number to be removed from tag_by values i.e
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
-The WMI check does not include any events at this time.
+The WMI check does not include any events.
 
 ### Service Checks
-The WMI check does not include any service checks at this time.
+The WMI check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][10].

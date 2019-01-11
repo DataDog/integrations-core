@@ -42,11 +42,11 @@ Due to the nature of this integration, it's possible to submit a high number of 
 All metrics collected by the prometheus check are forwarded to Datadog as custom metrics.
 
 ### Events
-The Prometheus check does not include any events at this time.
+The Prometheus check does not include any events.
 
 ### Service Checks
 
-The Prometheus check does not include any service checks at this time.
+The Prometheus check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][3].

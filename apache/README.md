@@ -83,7 +83,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
-The Apache check does not include any events at this time.
+The Apache check does not include any events.
 
 ### Service Checks
 

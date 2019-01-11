@@ -30,10 +30,10 @@ The ASP.NET check is included in the [Datadog Agent][1] package, so you don't ne
 See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
-The ASP.NET check does not include any events at this time.
+The ASP.NET check does not include any events.
 
 ### Service Checks
-The ASP.NET check does not include any service checks at this time.
+The ASP.NET check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][5].
