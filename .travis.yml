@@ -125,6 +125,8 @@ jobs:
     - stage: test
       env: CHECK=gitlab PYTHON3=true
     - stage: test
+      env: CHECK=gitlab_runner PYTHON3=true
+    - stage: test
       env: CHECK=go_expvar PYTHON3=true
     - stage: test
       env: CHECK=gunicorn PYTHON3=true
@@ -139,6 +141,8 @@ jobs:
     - stage: test
       env: CHECK=ibm_mq
     - stage: test
+      env: CHECK=ibm_was PYTHON3=true
+    - stage: test
       env: CHECK=iis
     - stage: test
       env: CHECK=istio
@@ -151,7 +155,7 @@ jobs:
     - stage: test
       env: CHECK=kube_dns
     - stage: test
-      env: CHECK=kube_proxy
+      env: CHECK=kube_proxy PYTHON3=true
     - stage: test
       env: CHECK=kubelet
     - stage: test

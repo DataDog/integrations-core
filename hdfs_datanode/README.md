@@ -49,7 +49,7 @@ instances:
 See [metadata.csv][105] for a list of metrics provided by this integration.
 
 ### Events
-The HDFS-datanode check does not include any events at this time.
+The HDFS-datanode check does not include any events.
 
 ### Service Checks
 

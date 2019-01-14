@@ -24,10 +24,10 @@ The integration relies on the `--enable-metrics` option of CRI-O that is disable
 
 ## Data Collected
 
-### Metrics
-
 CRI-O collect metrics about the count and latency of operations that are done by the runtime.
-We're also collecting CPU and memory usage of CRI-O golang binary itself.
+Datadog-CRI-O integration is also collecting CPU and memory usage of CRI-O golang binary itself.
+
+### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 

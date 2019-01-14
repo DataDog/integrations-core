@@ -26,7 +26,7 @@ REQUIRES = [
     'coverage>=4.5.1',
     'mock',
     'pytest',
-    'pytest-benchmark>=3.2.0',
+    'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
     'pytest-mock',
     'requests>=2.20.0',

@@ -22,10 +22,10 @@ Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
-The Nfststat check does not include any events at this time.
+The Nfststat check does not include any events.
 
 ### Service Checks
-The Nfsstat check does not include any service checks at this time.
+The Nfsstat check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][6].

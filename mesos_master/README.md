@@ -74,7 +74,7 @@ In Datadog, search for `mesos.cluster` in the Metrics Explorer.
 See [metadata.csv][102] for a list of metrics provided by this integration.
 
 ### Events
-The Mesos-master check does not include any events at this time.
+The Mesos-master check does not include any events.
 
 ### Service Checks
 

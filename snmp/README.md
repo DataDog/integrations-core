@@ -206,7 +206,7 @@ The SNMP check submits specified metrics under the `snmp.*` namespace.
 
 ### Events
 
-The SNMP check does not include any events at this time.
+The SNMP check does not include any events.
 
 ### Service Checks
 
