@@ -23,7 +23,8 @@ def test_custom_metrics(aggregator, pg_instance):
     postgres_check = PostgreSql('postgres', {}, {})
     postgres_check.check(pg_instance)
 
-    aggregator.assert_metric('custom.num', value=21, tags=['customdb:a'] + pg_instance['tags'])
+    tags = ['customdb:a', 'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port'])] + pg_instance['tags']
+    aggregator.assert_metric('custom.num', value=21, tags=tags)
 
 
 @pytest.mark.integration

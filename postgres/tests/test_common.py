@@ -76,11 +76,11 @@ def check_bgw_metrics(aggregator, expected_tags):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_common_metrics(aggregator, check, pg_instance):
-    expected_tags = pg_instance['tags'] + ['db:{}'.format(DB_NAME), 'pg_instance:{}'.format((HOST if HOST.startswith('/') else "{}-{}".format(HOST,PORT)))]
+    expected_tags = pg_instance['tags'] + ['pg_instance:{}-{}'.format(HOST, PORT)]
 
     check.check(pg_instance)
-    check_common_metrics(aggregator, expected_tags)
-    check_bgw_metrics(aggregator, pg_instance['tags'])
+    check_common_metrics(aggregator, expected_tags=expected_tags + ['db:{}'.format(DB_NAME)])
+    check_bgw_metrics(aggregator, expected_tags)
 
 
 @pytest.mark.integration
@@ -109,7 +109,7 @@ def test_schema_metrics(aggregator, check, pg_instance):
     check.check(pg_instance)
 
     aggregator.assert_metric('postgresql.table.count', value=1, count=1,
-                             tags=pg_instance['tags']+['schema:public'])
+                             tags=pg_instance['tags'] + ['schema:public', 'pg_instance:{}-{}'.format(HOST, PORT)])
     aggregator.assert_metric('postgresql.db.count', value=2, count=1)
 
 
@@ -120,7 +120,8 @@ def test_connections_metrics(aggregator, check, pg_instance):
 
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=pg_instance['tags'])
-    aggregator.assert_metric('postgresql.connections', count=1, tags=pg_instance['tags']+['db:datadog_test'])
+    tags = pg_instance['tags'] + ['db:datadog_test', 'pg_instance:{}-{}'.format(HOST, PORT)]
+    aggregator.assert_metric('postgresql.connections', count=1, tags=tags)
 
 
 @pytest.mark.integration
@@ -131,7 +132,7 @@ def test_locks_metrics(aggregator, check, pg_instance):
             cur.execute('LOCK persons')
             check.check(pg_instance)
 
-    tags = pg_instance['tags'] + ['lock_mode:AccessExclusiveLock', 'table:persons', 'db:datadog_test']
+    tags = pg_instance['tags'] + ['lock_mode:AccessExclusiveLock', 'table:persons', 'db:datadog_test', 'pg_instance:{}-{}'.format(HOST, PORT)]
     aggregator.assert_metric('postgresql.locks', count=1, tags=tags)
 
 
@@ -142,4 +143,4 @@ def test_activity_metrics(aggregator, check, pg_instance):
     check.check(pg_instance)
 
     for name in ACTIVITY_METRICS:
-        aggregator.assert_metric(name, count=1, tags=pg_instance['tags'] + ['db:datadog_test'])
+        aggregator.assert_metric(name, count=1, tags=pg_instance['tags'] + ['db:datadog_test', 'pg_instance:{}-{}'.format(HOST, PORT)])
