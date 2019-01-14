@@ -71,11 +71,11 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 3. [Restart the Agent][3].
 
-**Learn more about log collection [in the log documentation][4]**
+**Learn more about log collection [in the log documentation][4]**.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `apache` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `apache` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -87,8 +87,7 @@ The Apache check does not include any events.
 
 ### Service Checks
 
-**apache.can_connect**:
-
+**apache.can_connect**:  
 Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
 
 ## Troubleshooting
@@ -97,7 +96,9 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 * [Apache SSL certificate issues][8]
 
 ## Further Reading
+Additional helpful documentation, links, and articles:
 
+* [Deploying and configuring Datadog with CloudFormation][14]
 * [Monitoring Apache web server performance][9]
 * [How to collect Apache performance metrics][10]
 * [How to monitor Apache web server with Datadog][11]
@@ -116,3 +117,4 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 [11]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
 [13]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[14]: https://www.datadoghq.com/blog/deploying-datadog-with-cloudformation/
