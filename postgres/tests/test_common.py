@@ -118,10 +118,11 @@ def test_schema_metrics(aggregator, check, pg_instance):
 def test_connections_metrics(aggregator, check, pg_instance):
     check.check(pg_instance)
 
+    expected_tags = pg_instance['tags'] + ['pg_instance:{}-{}'.format(HOST, PORT)]
     for name in CONNECTION_METRICS:
-        aggregator.assert_metric(name, count=1, tags=pg_instance['tags'])
-    tags = pg_instance['tags'] + ['db:datadog_test', 'pg_instance:{}-{}'.format(HOST, PORT)]
-    aggregator.assert_metric('postgresql.connections', count=1, tags=tags)
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
+    expected_tags += ['db:datadog_test']
+    aggregator.assert_metric('postgresql.connections', count=1, tags=expected_tags)
 
 
 @pytest.mark.integration
