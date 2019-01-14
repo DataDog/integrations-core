@@ -6,7 +6,6 @@ import mock
 import pytest
 
 
-@pytest.mark.unit
 def test_parse_counter(aggregator, squid_check):
     # Good format
     line = "counter = 0\n"
@@ -21,7 +20,6 @@ def test_parse_counter(aggregator, squid_check):
     assert value is None
 
 
-@pytest.mark.unit
 def test_parse_instance(aggregator, squid_check):
     # instance with defaults
     instance = {
@@ -62,7 +60,6 @@ def test_parse_instance(aggregator, squid_check):
         squid_check.parse_instance(instance)
 
 
-@pytest.mark.unit
 def test_get_counters(squid_check):
     """
     Squid can return a trailing newline at the end of its metrics and it would be
