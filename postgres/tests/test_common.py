@@ -76,11 +76,13 @@ def check_bgw_metrics(aggregator, expected_tags):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_common_metrics(aggregator, check, pg_instance):
-    expected_tags = pg_instance['tags'] + ['pg_instance:{}-{}'.format(HOST, PORT)]
-
     check.check(pg_instance)
-    check_common_metrics(aggregator, expected_tags=expected_tags + ['db:{}'.format(DB_NAME)])
+
+    expected_tags = pg_instance['tags'] + ['pg_instance:{}-{}'.format(HOST, PORT)]
     check_bgw_metrics(aggregator, expected_tags)
+
+    expected_tags += ['db:{}'.format(DB_NAME)]
+    check_common_metrics(aggregator, expected_tags=expected_tags)
 
 
 @pytest.mark.integration
