@@ -23,7 +23,10 @@ def test_custom_metrics(aggregator, pg_instance):
     postgres_check = PostgreSql('postgres', {}, {})
     postgres_check.check(pg_instance)
 
-    tags = ['customdb:a', 'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port'])] + pg_instance['tags']
+    tags = pg_instance['tags'] + [
+        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'customdb:a',
+    ]
     aggregator.assert_metric('custom.num', value=21, tags=tags)
 
 
