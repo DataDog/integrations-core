@@ -81,7 +81,7 @@ def _test_service_checks(aggregator, services=None):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check(aggregator, check, instance):
-    check.check(common.CHECK_CONFIG)
+    check.check(instance)
 
     shared_tag = ["instance_url:{0}".format(common.STATS_URL)]
 
@@ -100,10 +100,9 @@ def test_check(aggregator, check, instance):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check_service_filter(aggregator, check, instance):
-    config = copy.deepcopy(common.CHECK_CONFIG)
-    config['services_include'] = ['datadog']
-    config['services_exclude'] = ['.*']
-    check.check(config)
+    instance['services_include'] = ['datadog']
+    instance['services_exclude'] = ['.*']
+    check.check(instance)
     shared_tag = ["instance_url:{0}".format(common.STATS_URL)]
 
     _test_backend_metrics(aggregator, shared_tag + ['active:false'], ['datadog'])
@@ -116,18 +115,17 @@ def test_check_service_filter(aggregator, check, instance):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_wrong_config(aggregator, check, instance):
-    config = copy.deepcopy(common.CHECK_CONFIG)
-    config['username'] = 'fake_username'
+    instance['username'] = 'fake_username'
 
     with pytest.raises(Exception):
-        check.check(config)
+        check.check(instance)
 
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_open_config(aggregator, check, instance):
+def test_open_config(aggregator, check):
     check.check(common.CHECK_CONFIG_OPEN)
 
     shared_tag = ["instance_url:{0}".format(common.STATS_URL_OPEN)]
@@ -143,7 +141,7 @@ def test_open_config(aggregator, check, instance):
 @pytest.mark.integration
 @pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'],
                     reason='Sockets with operator level are only available with haproxy 1.7')
-def test_tcp_socket(aggregator, check, instance):
+def test_tcp_socket(aggregator, check):
     config = copy.deepcopy(common.CONFIG_TCPSOCKET)
     check.check(config)
 
@@ -158,10 +156,10 @@ def test_tcp_socket(aggregator, check, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
-def test_unixsocket_config(aggregator, check, instance):
+@pytest.mark.skipif(common.requires_socket_support, reason='Windows sockets are not file handles')
+def test_unixsocket_config(aggregator, check, dd_environment):
     config = copy.deepcopy(common.CONFIG_UNIXSOCKET)
-    unixsocket_url = 'unix://{0}'.format(instance)
+    unixsocket_url = dd_environment["unixsocket_url"]
     config['url'] = unixsocket_url
     check.check(config)
 
