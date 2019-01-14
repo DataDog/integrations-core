@@ -141,6 +141,8 @@ jobs:
     - stage: test
       env: CHECK=ibm_mq
     - stage: test
+      env: CHECK=ibm_was PYTHON3=true
+    - stage: test
       env: CHECK=iis
     - stage: test
       env: CHECK=istio
