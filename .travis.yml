@@ -153,6 +153,8 @@ jobs:
     - stage: test
       env: CHECK=http_check PYTHON3=true
     - stage: test
+      env: CHECK=ibm_db2 PYTHON3=true
+    - stage: test
       env: CHECK=ibm_mq PYTHON3=true
     - stage: test
       env: CHECK=ibm_was PYTHON3=true
