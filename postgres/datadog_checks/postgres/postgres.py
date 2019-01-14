@@ -1046,7 +1046,7 @@ GROUP BY datid, datname
             tags = list(set(tags))
 
         # preset tags to host (if using socket) or host-port
-        tags.extend(["pg_instance:%s" % (host if host.startswith('/') else "{}-{}".format(host,port))])
+        tags.extend(["pg_instance:%s" % (host if host.startswith('/') else "{}-{}".format(host, port))])
 
         # preset tags to the database name
         tags.extend(["db:%s" % dbname])
