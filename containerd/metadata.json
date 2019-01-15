@@ -1,0 +1,19 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "containerd",
+  "short_description": "containerd description.",
+  "guid": "5cdc0363-a0df-469b-8346-2da4ab84128b",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Containerd Integration",
+  "categories": ["containers"],
+  "type": "check",
+  "doc_link": "https://docs.datadoghq.com/integrations/containerd/",
+  "is_public": true,
+  "has_logo": true
+}
