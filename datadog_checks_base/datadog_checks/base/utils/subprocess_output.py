@@ -64,7 +64,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
         )
     )
 
-    out = ensure_unicode(out)
-    err = ensure_unicode(err)
+    out = ensure_unicode(out) if out is not None else None
+    err = ensure_unicode(err) if err is not None else None
 
     return out, err, returncode
