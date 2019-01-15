@@ -15,5 +15,6 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/containerd/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "creates_events": true,
 }
