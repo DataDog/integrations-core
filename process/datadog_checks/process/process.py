@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import division
+
 from collections import defaultdict
 import time
 import os
@@ -334,8 +336,7 @@ class ProcessCheck(AgentCheck):
             self.log.debug('error getting proc stats: file_to_string failed',
                            'for /{}/{}/stat'.format(psutil.PROCFS_PATH, pid))
             return None
-
-        return map(lambda i: int(i), data.split()[9:13])
+        return (int(i) for i in data.split()[9:13])
 
     def _get_child_processes(self, pids):
         children_pids = set()
