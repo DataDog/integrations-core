@@ -156,7 +156,7 @@ def test_tcp_socket(aggregator, check):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(common.requires_socket_support, reason='Windows sockets are not file handles')
+@pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
 def test_unixsocket_config(aggregator, check, dd_environment):
     config = copy.deepcopy(common.CONFIG_UNIXSOCKET)
     unixsocket_url = dd_environment["unixsocket_url"]
