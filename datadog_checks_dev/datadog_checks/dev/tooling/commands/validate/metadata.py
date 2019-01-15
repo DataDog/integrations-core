@@ -188,6 +188,8 @@ PROVIDER_INTEGRATIONS = {
     'prometheus',
 }
 
+MAX_DESCRIPTION_LENGTH = 400
+
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -309,6 +311,12 @@ def metadata(check):
                 # empty description field, description is recommended
                 if not row['description']:
                     empty_warning_count['description'] += 1
+                # exceeds max allowed length of description
+                elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
+                    errors = True
+                    echo_failure('{}: `{}` exceeds the max length: {} for descriptions.'.format(
+                        current_check, row['metric_name'], MAX_DESCRIPTION_LENGTH)
+                    )
 
         for header, count in iteritems(empty_count):
             errors = True

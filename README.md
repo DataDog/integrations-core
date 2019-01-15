@@ -36,7 +36,7 @@ to idiomatic Python package delivery.
 ## Contributing
 
 Working with integrations is easy, the main page of the [development docs][6]
-contains all the info you need to get your dev enviroment up and running in minutes
+contains all the info you need to get your dev environment up and running in minutes
 to run, test and build a Check. More advanced API documentation can be found [here][20]
 
 ## Reporting Issues

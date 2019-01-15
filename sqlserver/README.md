@@ -67,7 +67,7 @@ See [metadata.csv][5] for a list of metrics provided by this check.
 Most of these metrics come from your SQL Server's `sys.dm_os_performance_counters` table.
 
 ### Events
-The SQL server check does not include any events at this time.
+The SQL server check does not include any events.
 
 ### Service Checks
 

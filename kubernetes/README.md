@@ -129,7 +129,7 @@ As the 5.17.0 release, Datadog Agent now supports built in [leader election opti
 * Unhealthy
 
 ### Service Checks
-The Kubernetes check does not include any service checks at this time.
+The Kubernetes check does not include any service checks.
 
 ## Troubleshooting
 ### Can I install the agent on my Kubernetes master node(s) ?

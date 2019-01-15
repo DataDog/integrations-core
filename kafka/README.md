@@ -104,7 +104,7 @@ JMXFetch
 See [metadata.csv][23] for a list of metrics provided by this check.
 
 ### Events
-The Kafka check does not include any events at this time.
+The Kafka check does not include any events.
 
 ### Service Checks
 **kafka.can_connect**  

@@ -32,6 +32,8 @@ instances:
 
 The HTTP check has more configuration options than many checks - many more than are shown above. Most options are opt-in, e.g. the Agent will not check SSL validation unless you configure the requisite options. Notably, the Agent _will_ check for soon-to-expire SSL certificates by default.
 
+This check runs on every run of the Agent collector, which defaults to every 15 seconds. To set a custom run frequency for this check, refer to the [collection interval][11] section of the custom check documentation.
+
 See the [sample http_check.d/conf.yaml][2] for a full list and description of available options, here is a list of them:
 
 | Setting                          | Description                                                                                                                                                                                                                                                                                                                 |
@@ -74,7 +76,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The HTTP check does not include any events at this time.
+The HTTP check does not include any events.
 
 ### Service Checks
 
@@ -117,3 +119,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://app.datadoghq.com/monitors#/create
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[11]: https://docs.datadoghq.com/developers/write_agent_check/?tab=agentv6#collection-interval
