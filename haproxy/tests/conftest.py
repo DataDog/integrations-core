@@ -47,7 +47,7 @@ def dd_environment():
             env_vars=env,
             conditions=[WaitFor(wait_for_haproxy)],
         ):
-            os.chmod(host_socket_path, 0o777)
+            # os.chmod(host_socket_path, 0o777)
             config = deepcopy(CHECK_CONFIG)
             unixsocket_url = 'unix://{0}'.format(host_socket_path)
             config['unixsocket_url'] = unixsocket_url
