@@ -4,7 +4,7 @@
 from __future__ import division
 
 import re
-import time 
+import time
 from distutils.version import LooseVersion
 
 import pymongo
@@ -12,6 +12,8 @@ from six import PY3, iteritems, itervalues
 from six.moves.urllib.parse import unquote_plus, urlsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.common import round_value
+
 
 if PY3:
     long = int
@@ -1011,13 +1013,13 @@ class MongoDb(AgentCheck):
 
             if ol_options:
                 try:
-                    oplog_data['logSizeMB'] = round(
+                    oplog_data['logSizeMB'] = round_value(
                         ol_options['size'] / 2.0 ** 20, 2
                     )
 
                     oplog = localdb[ol_collection_name]
 
-                    oplog_data['usedSizeMB'] = round(
+                    oplog_data['usedSizeMB'] = round_value(
                         localdb.command("collstats", ol_collection_name)['size'] / 2.0 ** 20, 2
                     )
 
