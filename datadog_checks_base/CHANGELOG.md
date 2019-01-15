@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 5.1.0 / 2019-01-15
+
+* [Added] Add round method to checks base. See [#2931](https://github.com/DataDog/integrations-core/pull/2931).
+* [Added] Create IBM WAS Integration. See [#2846](https://github.com/DataDog/integrations-core/pull/2846).
+* [Fixed] Include count as an aggregate type in tests. See [#2920](https://github.com/DataDog/integrations-core/pull/2920).
+* [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
+
 ## 5.0.1 / 2019-01-07
 
 * [Fixed] Fix context limit logic for OpenMetrics checks. See [#2877](https://github.com/DataDog/integrations-core/pull/2877).
