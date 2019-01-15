@@ -52,7 +52,6 @@ def dd_environment():
         compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
         env_vars=env,
         endpoints=[common.URL],
-        conditions=[WaitFor(generate_data, args=(couch_version,))],
     ):
         generate_data(couch_version)
         instance = common.BASIC_CONFIG
