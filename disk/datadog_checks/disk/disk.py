@@ -136,8 +136,9 @@ class Disk(AgentCheck):
             if Platform.is_win32():
                 device_name = device_name.strip('\\').lower()
 
+            tags.append('device:{}'.format(device_name))
             for metric_name, metric_value in iteritems(self._collect_part_metrics(part, disk_usage)):
-                self.gauge(metric_name, metric_value, tags=tags, device_name=device_name)
+                self.gauge(metric_name, metric_value, tags=tags)
 
             # Add in a disk read write or read only check
             if self._service_check_rw:
@@ -146,12 +147,12 @@ class Disk(AgentCheck):
                     self.service_check(
                         'disk.read_write',
                         AgentCheck.OK if rwro.pop() == 'rw' else AgentCheck.CRITICAL,
-                        tags=tags + ['device:{}'.format(device_name)]
+                        tags=tags
                     )
                 else:
                     self.service_check(
                         'disk.read_write', AgentCheck.UNKNOWN,
-                        tags=tags + ['device:{}'.format(device_name)]
+                        tags=tags
                     )
 
         self.collect_latency_metrics()
@@ -288,10 +289,12 @@ class Disk(AgentCheck):
                 # /1000 as psutil returns the value in ms
                 read_time_pct = disk.read_time * 100 / 1000
                 write_time_pct = disk.write_time * 100 / 1000
+                metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
+                metric_tags.append('device:{}'.format(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'),
-                          read_time_pct, device_name=disk_name, tags=self._custom_tags)
+                          read_time_pct, tags=metric_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'),
-                          write_time_pct, device_name=disk_name, tags=self._custom_tags)
+                          write_time_pct, tags=metric_tags)
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
@@ -313,9 +316,9 @@ class Disk(AgentCheck):
             for regex, device_tags in self._device_tag_re:
                 if regex.match(device_name):
                     tags += device_tags
-
+            tags.append('device:{}'.format(device_name))
             for metric_name, value in iteritems(self._collect_metrics_manually(device)):
-                self.gauge(metric_name, value, tags=tags, device_name=device_name)
+                self.gauge(metric_name, value, tags=tags)
 
     def _collect_metrics_manually(self, device):
         result = {}
