@@ -4,7 +4,7 @@
 
 * [Fixed] Always ensure_unicode for subprocess output. See [#2941](https://github.com/DataDog/integrations-core/pull/2941).
 * [Added] Add round method to checks base. See [#2931](https://github.com/DataDog/integrations-core/pull/2931).
-* [Added] Create IBM WAS Integration. See [#2846](https://github.com/DataDog/integrations-core/pull/2846).
+* [Added] Added lxml dependency. See [#2846](https://github.com/DataDog/integrations-core/pull/2846).
 * [Fixed] Include count as an aggregate type in tests. See [#2920](https://github.com/DataDog/integrations-core/pull/2920).
 * [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
 
