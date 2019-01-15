@@ -243,6 +243,10 @@ class Network(AgentCheck):
             # Skip this network interface.
             return False
 
+        # adding the device to the tags as device_name is deprecated
+        metric_tags = [] if tags is None else tags[:]
+        metric_tags.append('device:{}'.format(iface))
+
         expected_metrics = [
             'bytes_rcvd',
             'bytes_sent',
@@ -257,7 +261,7 @@ class Network(AgentCheck):
 
         count = 0
         for metric, val in vals_by_metric.iteritems():
-            self.rate('system.net.%s' % metric, val, device_name=iface, tags=tags)
+            self.rate('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network metrics for interface %s" % (count, iface))
 
