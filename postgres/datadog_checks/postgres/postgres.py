@@ -756,13 +756,11 @@ GROUP BY datid, datname
             # [(metric-map, value), (metric-map, value), ...]
             # metric-map is: (dd_name, "rate"|"gauge")
             # shift the results since the first columns will be the "descriptors"
-            values = zip([scope['metrics'][c] for c in cols], row[len(desc):])
-
             # To submit simply call the function for each value v
             # v[0] == (metric_name, submit_function)
             # v[1] == the actual value
             # tags are
-            for v in values:
+            for v in zip([scope['metrics'][c] for c in cols], row[len(desc):]):
                 v[0][1](self, v[0][0], v[1], tags=tags)
 
         return len(results)
