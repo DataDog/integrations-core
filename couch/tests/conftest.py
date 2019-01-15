@@ -10,7 +10,7 @@ from time import sleep
 from collections import defaultdict
 from copy import deepcopy
 
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import docker_run
 from datadog_checks.couch import CouchDb
 
 from . import common
