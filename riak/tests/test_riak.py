@@ -3,14 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-import os
-import subprocess
-import requests
 import socket
-import time
 import logging
+
 from datadog_checks.riak import Riak
-from datadog_checks.utils.common import get_docker_hostname
+
+from . import common
 
 log = logging.getLogger('test_riak')
 
@@ -338,79 +336,18 @@ CHECK_NOT_TESTED = [
     'riak.search_query_throughput_count',
 ]
 
-SERVICE_CHECK_NAME = 'riak.can_connect'
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-
-HOST = get_docker_hostname()
-PORT = 18098
-BASE_URL = "http://{0}:{1}".format(HOST, PORT)
-
-
-@pytest.fixture(scope="session")
-def spin_up_riak():
-    env = os.environ
-    env['RIAK_CONFIG'] = os.path.join(HERE, 'config')
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'compose', 'riak.yaml')
-    ]
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    can_access = False
-    for _ in range(0, 10):
-        res = None
-        try:
-            res = requests.get("{0}/riak/bucket".format(BASE_URL))
-            log.info("response: {0}".format(res))
-            log.info("status code: {0}, text: {1}".format(res.status_code, res.text))
-            res.raise_for_status
-            can_access = True
-            break
-        except Exception as e:
-            log.info("exception: {0}, response: {1}".format(e, res))
-            time.sleep(5)
-    if not can_access:
-        raise Exception("Cannot access Riak")
-
-    data = 'herzlich willkommen'
-    headers = {"Content-Type": "text/plain"}
-    for _ in range(0, 10):
-        res = requests.post(
-            "{0}/riak/bucket/german".format(BASE_URL),
-            headers=headers,
-            data=data)
-        res.raise_for_status
-        res = requests.get("{0}/riak/bucket/german".format(BASE_URL))
-        res.raise_for_status
-
-    # some stats require a bit of time before the test will capture them
-    time.sleep(10)
-    yield
-    subprocess.check_call(args + ["down"], env=env)
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
-def test_check(aggregator, spin_up_riak):
-    riak_check = Riak(CHECK_NAME, {}, {})
-    config = {
-            "url": "{0}/stats".format(BASE_URL),
-            "tags": ["my_tag"]
-    }
-    riak_check.check(config)
-    riak_check.check(config)
+@pytest.mark.usefixtures('dd_environment')
+def test_check(aggregator, check, instance):
+    check.check(instance)
+    check.check(instance)
     tags = ['my_tag']
-    sc_tags = tags + ['url:' + config['url']]
+    sc_tags = tags + ['url:' + instance['url']]
 
     for gauge in CHECK_GAUGES + CHECK_GAUGES_STATS:
         aggregator.assert_metric(gauge, tags=tags, count=2)
 
-    for sc in aggregator.service_checks(SERVICE_CHECK_NAME):
+    for sc in aggregator.service_checks(common.SERVICE_CHECK_NAME):
         assert sc.status == Riak.OK
         for tag in sc.tags:
             assert tag in sc_tags
@@ -421,13 +358,13 @@ def test_check(aggregator, spin_up_riak):
     aggregator.all_metrics_asserted()
 
 
-def test_bad_config(aggregator, spin_up_riak):
-    riak_check = Riak(CHECK_NAME, {}, {})
+@pytest.mark.usefixtures('dd_environment')
+def test_bad_config(aggregator, check):
     with pytest.raises(socket.error):
-        riak_check.check({"url": "http://localhost:5985"})
+        check.check({"url": "http://localhost:5985"})
 
     sc_tags = ['url:http://localhost:5985']
-    for sc in aggregator.service_checks(SERVICE_CHECK_NAME):
+    for sc in aggregator.service_checks(common.SERVICE_CHECK_NAME):
         assert sc.status == Riak.CRITICAL
         for tag in sc.tags:
             assert tag in sc_tags
