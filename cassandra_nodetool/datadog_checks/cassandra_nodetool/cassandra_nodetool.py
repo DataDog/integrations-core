@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+# pylint: disable=W1633
+from __future__ import division
 
 import re
 import shlex

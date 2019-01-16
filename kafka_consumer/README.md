@@ -33,7 +33,7 @@ The Datadog Agent emits an event when the value of the `consumer_lag` metric goe
 `partition` and `consumer_group`.
 
 ### Service Checks
-The Kafka-consumer check does not include any service checks at this time.
+The Kafka-consumer check does not include any service checks.
 
 ## Troubleshooting
 

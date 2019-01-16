@@ -3,9 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
 
+from .common import not_appveyor
+
+pytestmark = [pytest.mark.docker, not_appveyor]
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
 

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
+
 import random
 from collections import defaultdict
 from time import time, sleep
@@ -179,7 +181,7 @@ class KafkaCheck(AgentCheck):
                                node_id, DEFAULT_KAFKA_RETRIES)
                 break
             attempts = attempts + 1
-            delay = (2 ** attempts) + (random.randint(0, 1000) / 1000) * 0.01  # starting at 20 ms
+            delay = (2 ** attempts) + (random.randint(0, 1000) // 1000) * 0.01  # starting at 20 ms
 
             future = client.cluster.request_update()
             client.poll(future=future)

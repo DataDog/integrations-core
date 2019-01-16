@@ -9,6 +9,8 @@ import os
 import pytest
 import json
 
+from six import iteritems
+
 from datadog_checks.mesos_slave import MesosSlave
 
 
@@ -43,9 +45,9 @@ def test_check(check, aggregator):
               check.SLAVE_EXECUTORS_METRICS, check.STATS_METRICS):
         metrics.update(d)
 
-    for _, v in check.TASK_METRICS.iteritems():
+    for _, v in iteritems(check.TASK_METRICS):
         aggregator.assert_metric(v[0])
-    for _, v in metrics.iteritems():
+    for _, v in iteritems(metrics):
         aggregator.assert_metric(v[0])
 
     service_check_tags = ['instance:mytag1',

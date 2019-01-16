@@ -3,7 +3,7 @@
 set -ex
 
 TMP_DIR=/tmp/mq
-MQ_URL=http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqadv/mqadv_dev90_linux_x86-64.tar.gz
+MQ_URL=https://s3.amazonaws.com/dd-agent-tarball-mirror/mqadv_dev90_linux_x86-64.tar.gz
 MQ_PACKAGES="MQSeriesRuntime-*.rpm MQSeriesServer-*.rpm MQSeriesMsg*.rpm MQSeriesJava*.rpm MQSeriesJRE*.rpm MQSeriesGSKit*.rpm"
 
 if [ -z "$CHECK" ]; then

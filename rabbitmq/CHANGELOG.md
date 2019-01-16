@@ -1,5 +1,10 @@
 # CHANGELOG - rabbitmq
 
+## 1.7.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2791](https://github.com/DataDog/integrations-core/pull/2791).
+* [Fixed] adds ignore_ssl_warning to rabbit file. See [#2706](https://github.com/DataDog/integrations-core/pull/2706).
+
 ## 1.6.0 / 2018-11-30
 
 * [Added] Option to ignore SSL warnings. See [#2472](https://github.com/DataDog/integrations-core/pull/2472). Thanks [tebriel](https://github.com/tebriel).

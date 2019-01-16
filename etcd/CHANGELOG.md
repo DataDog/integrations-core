@@ -1,5 +1,10 @@
 # CHANGELOG - etcd
 
+## 1.6.1 / 2019-01-04
+
+* [Fixed] Postpone deprecation warning to 6.10. See [#2844](https://github.com/DataDog/integrations-core/pull/2844).
+* [Fixed] Fix indentation for end of .example file. See [#2843](https://github.com/DataDog/integrations-core/pull/2843).
+
 ## 1.6.0 / 2018-11-07
 
 * [Added] Add support for ETCD v3 API, begin deprecation of ETCD < v3. See [#2506](https://github.com/DataDog/integrations-core/pull/2506).

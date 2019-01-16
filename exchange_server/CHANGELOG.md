@@ -1,5 +1,9 @@
 # CHANGELOG - exchange_server
 
+## 1.2.1 / 2019-01-04
+
+* [Fixed] Change example config from "localhost" to ".". See [#2779](https://github.com/DataDog/integrations-core/pull/2779).
+
 ## 1.2.0 / 2018-10-12
 
 * [Added] Pin pywin32 dependency. See [#2322](https://github.com/DataDog/integrations-core/pull/2322).

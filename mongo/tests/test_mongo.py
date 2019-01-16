@@ -6,7 +6,7 @@ from . import common
 import pytest
 from six import itervalues
 
-from datadog_checks.dev.utils import ensure_bytes
+from datadog_checks.base import to_string
 
 METRIC_VAL_CHECKS = {
     'mongodb.asserts.msgps': lambda x: x >= 0,
@@ -75,12 +75,12 @@ def test_mongo2(aggregator, check, instance_user):
     assert len(service_checks[0]) == 1
     # Assert that all service checks have the proper tags: host and port
     for sc in service_checks[0]:
-        assert ensure_bytes('host:{}'.format(common.HOST)) in sc.tags
+        assert to_string('host:{}'.format(common.HOST)) in sc.tags
         assert (
-            ensure_bytes('port:{}'.format(common.PORT1)) in sc.tags
-            or ensure_bytes('port:{}'.format(common.PORT2)) in sc.tags
+            to_string('port:{}'.format(common.PORT1)) in sc.tags
+            or to_string('port:{}'.format(common.PORT2)) in sc.tags
         )
-        assert b'db:test' in sc.tags
+        assert 'db:test' in sc.tags
 
     # Metric assertions
     metrics = list(itervalues(aggregator._metrics))

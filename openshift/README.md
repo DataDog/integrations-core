@@ -14,11 +14,11 @@ Datadog's [Kubernetes integration][1] supports OpenShift versions 3.3 and up. No
 See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
-The OpenShift check does not include any events at this time.
+The OpenShift check does not include any events.
 
 ### Service Checks
 
-The OpenShift check does not include any Service Checks at this time.
+The OpenShift check does not include any Service Checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][5].

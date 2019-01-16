@@ -55,7 +55,7 @@ See [metadata.csv][5] for a list of metrics provided by this check.
 Note: Not all metrics are available with all versions of PgBouncer.
 
 ### Events
-The PgBouncer check does not include any events at this time.
+The PgBouncer check does not include any events.
 
 ### Service Checks
 

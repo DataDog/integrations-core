@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import division
+
 from six.moves.urllib.parse import quote, urljoin
 from six import iteritems
 
@@ -51,7 +53,7 @@ class CouchDb(AgentCheck):
             raise
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags, message=str(e.message))
+                               tags=service_check_tags, message=str(e))
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,

@@ -1,0 +1,24 @@
+{
+  "display_name": "IBM WAS",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "ibm_was",
+  "metric_prefix": "ibm_was.",
+  "metric_to_check": "ibm_was.can_connect",
+  "creates_events": false,
+  "short_description": "IBM WAS is a Web Application Server",
+  "guid": "ba177bb7-1bad-4ea8-ac59-1bc8a016f4f7",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-IBM WAS Integration",
+  "categories": [
+    "web",
+    "os and system"
+  ],
+  "type": "check",
+  "is_public": false
+}

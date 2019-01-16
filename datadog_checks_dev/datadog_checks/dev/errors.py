@@ -9,3 +9,10 @@ class RetryError(Exception):
 
 class SubprocessError(Exception):
     pass
+
+
+class ManifestError(Exception):
+    """
+    Raised when the manifest.json file is malformed
+    """
+    pass

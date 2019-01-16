@@ -91,6 +91,24 @@ sudo ldconfig
 
 There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
 
+Also, queue level metric stats need to be enabled. This can be done with a mqsc command:
+
+```
+> /opt/mqm/bin/runmqsc
+5724-H72 (C) Copyright IBM Corp. 1994, 2018.
+Starting MQSC for queue manager datadog.
+
+
+ALTER QMGR MONQ(MEDIUM) MONCHL(MEDIUM)
+     1 : ALTER QMGR MONQ(MEDIUM) MONCHL(MEDIUM)
+AMQ8005I: IBM MQ queue manager changed.
+
+       :
+One MQSC command read.
+No commands have a syntax error.
+All valid MQSC commands were processed.
+```
+
 
 ### Configuration
 
@@ -176,4 +194,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help/
-[8]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv

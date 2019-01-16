@@ -2,17 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
-import json
 import os
-from contextlib import closing
 from operator import itemgetter
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
-from pylint.lint import PyLinter, fix_import_path
-from pylint.reporters.json import JSONReporter
+from a7 import validate_py3
 
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 from ...constants import get_root, NOT_CHECKS
@@ -38,42 +31,25 @@ def py3(check):
         path_to_module = check
 
     if not os.path.exists(path_to_module):
-        abort("{} does not exist.".format(path_to_module))
+        abort(u"{} does not exist.".format(path_to_module))
 
-    echo_info("Validating python3 compatibility of {}...".format(check))
-    with closing(StringIO()) as out:
-        linter = PyLinter(reporter=JSONReporter(output=out))
-        linter.load_default_plugins()
-        linter.python3_porting_mode()
-        # Disable `no-absolute-import`, which checks for a behaviour that's already part of python 2.7
-        # cf https://www.python.org/dev/peps/pep-0328/
-        linter.disable("no-absolute-import")
-        with fix_import_path([path_to_module]):
-            linter.check(path_to_module)
-            linter.generate_reports()
-        results = json.loads(out.getvalue() or "{}")
+    echo_info(u"Validating python3 compatibility of {}...".format(check))
+    results = validate_py3(path_to_module)
 
     if results:
-        echo_failure("Incompatibilities were found for {}:".format(check))
+        echo_failure(u"Incompatibilities were found for {}:".format(check))
         current_path = None
         for problem in sorted(results, key=itemgetter("path")):
-            # An issue found by pylint is a dict like
+            # validate_py3 returns an array a dicts like
             # {
-            #     "message": "Calling a dict.iter*() method",
-            #     "obj": "OpenFilesCheck.check",
-            #     "column": 27,
-            #     "path": "/path/to/file.py",
-            #     "line": 235,
-            #     "message-id": "W1620",
-            #     "type": "warning",
-            #     "symbol": "dict-iter-method",
-            #     "module": "file"
+            #     "message": "Line 23, Column 8: Calling a dict.iter*() method",
+            #     "file": "/path/to/file.py",
             # }
             path = problem["path"]
             if current_path is None or path != current_path:
-                echo_info("File {}:".format(path))
-            echo_failure("  Line {}, column {}: {}".format(problem["line"], problem["column"], problem["message"]))
+                echo_info(u"File {}:".format(path))
+            echo_failure("  {}".format(problem["message"]))
             current_path = path
         abort()
     else:
-        echo_success("{} is compatible with python3".format(check))
+        echo_success(u"{} is compatible with python3".format(check))

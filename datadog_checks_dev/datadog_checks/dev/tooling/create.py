@@ -40,8 +40,8 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         email = 'help@datadoghq.com'
         email_packages = 'packages@datadoghq.com'
         install_info = (
-            'The {check_name_cap} check is included in the [Datadog Agent][2] package, so you do not\n'
-            'need to install anything else on your server.'.format(check_name_cap=check_name_cap)
+            'The {check_name_cap} check is included in the [Datadog Agent][2] package.\n'
+            'No additional installation is needed on your server.'.format(check_name_cap=check_name_cap)
         )
         license_header = (
             '# (C) Datadog, Inc. {year}\n'

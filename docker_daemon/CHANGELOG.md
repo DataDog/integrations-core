@@ -1,5 +1,9 @@
 # CHANGELOG - docker_daemon
 
+## 1.10.2 / 2019-01-04
+
+* [Fixed] Demote critical log levels to error. See [#2795](https://github.com/DataDog/integrations-core/pull/2795).
+
 ## 1.10.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).

@@ -3,16 +3,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
+from six import PY3
 
-from datadog_checks.checks import AgentCheck
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+from datadog_checks.base import AgentCheck
 
 
 def test_instance():
@@ -128,34 +123,72 @@ class TestTags:
         tag = 'default:string'
         tags = [tag]
 
-        normalized_tags = check._normalize_tags(tags, None)
-        normalized_tag = normalized_tags[0]
-
-        assert normalized_tags is not tags
-        assert normalized_tag == tag.encode('utf-8')
-
-    def test_bytes_string(self):
-        check = AgentCheck()
-        tag = b'bytes:string'
-        tags = [tag]
-
-        normalized_tags = check._normalize_tags(tags, None)
+        normalized_tags = check._normalize_tags_type(tags, None)
         normalized_tag = normalized_tags[0]
 
         assert normalized_tags is not tags
         # Ensure no new allocation occurs
         assert normalized_tag is tag
 
+    def test_bytes_string(self):
+        check = AgentCheck()
+        tag = b'bytes:string'
+        tags = [tag]
+
+        normalized_tags = check._normalize_tags_type(tags, None)
+        normalized_tag = normalized_tags[0]
+
+        assert normalized_tags is not tags
+
+        if PY3:
+            assert normalized_tag == tag.decode('utf-8')
+        else:
+            # Ensure no new allocation occurs
+            assert normalized_tag is tag
+
     def test_unicode_string(self):
         check = AgentCheck()
         tag = u'unicode:string'
         tags = [tag]
 
-        normalized_tags = check._normalize_tags(tags, None)
+        normalized_tags = check._normalize_tags_type(tags, None)
         normalized_tag = normalized_tags[0]
 
         assert normalized_tags is not tags
-        assert normalized_tag == tag.encode('utf-8')
+
+        if PY3:
+            # Ensure no new allocation occurs
+            assert normalized_tag is tag
+        else:
+            assert normalized_tag == tag.encode('utf-8')
+
+    def test_unicode_device_name(self):
+        check = AgentCheck()
+        tags = []
+        device_name = u'unicode_string'
+
+        normalized_tags = check._normalize_tags_type(tags, device_name)
+        normalized_device_tag = normalized_tags[0]
+
+        assert isinstance(normalized_device_tag, str if PY3 else bytes)
+
+    def test_duplicated_device_name(self):
+        check = AgentCheck()
+        tags = []
+        device_name = 'foo'
+        check._normalize_tags_type(tags, device_name)
+        normalized_tags = check._normalize_tags_type(tags, device_name)
+        assert len(normalized_tags) == 1
+
+    def test__to_bytes(self):
+        if PY3:
+            pytest.skip('Method only exists on Python 2')
+        check = AgentCheck()
+        assert isinstance(check._to_bytes(b"tag:foo"), bytes)
+        assert isinstance(check._to_bytes(u"tag:☣"), bytes)
+        in_str = mock.MagicMock(side_effect=Exception)
+        in_str.encode.side_effect = Exception
+        assert check._to_bytes(in_str) is None
 
 
 class LimitedCheck(AgentCheck):
@@ -163,6 +196,20 @@ class LimitedCheck(AgentCheck):
 
 
 class TestLimits():
+    def test_context_uid(self, aggregator):
+        check = LimitedCheck()
+
+        # Test stability of the hash against tag ordering
+        uid = check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], None)
+        assert uid == check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], None)
+        assert uid == check._context_uid(aggregator.GAUGE, "test.metric", ["two", "one"], None)
+
+        # Test all fields impact the hash
+        assert uid != check._context_uid(aggregator.RATE, "test.metric", ["one", "two"], None)
+        assert uid != check._context_uid(aggregator.GAUGE, "test.metric2", ["one", "two"], None)
+        assert uid != check._context_uid(aggregator.GAUGE, "test.metric", ["two"], None)
+        assert uid != check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], "host")
+
     def test_metric_limit_gauges(self, aggregator):
         check = LimitedCheck()
         assert check.get_warnings() == []

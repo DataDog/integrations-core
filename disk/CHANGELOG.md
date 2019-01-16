@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 2.0.1 / 2019-01-04
+
+* [Fixed] Fix regression on agent 5 only. See [#2848](https://github.com/DataDog/integrations-core/pull/2848).
+
 ## 2.0.0 / 2018-11-30
 
 * [Added] Update psutil. See [#2576](https://github.com/DataDog/integrations-core/pull/2576).

@@ -40,7 +40,7 @@ The Marathon check is included in the [Datadog Agent][1] package, so you don't n
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The Marathon check does not include any events at this time.
+The Marathon check does not include any events.
 
 ### Service Checks
 

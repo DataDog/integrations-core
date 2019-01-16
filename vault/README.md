@@ -23,7 +23,7 @@ The Vault check is included in the [Datadog Agent][2] package, so you don't need
 ## Data Collected
 ### Metrics
 
-The Vault check does not include any metrics at this time.
+The Vault check does not include any metrics.
 
 ### Events
 

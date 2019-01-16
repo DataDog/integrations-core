@@ -2,9 +2,11 @@
 # (C)  graemej <graeme.johnson@jadedpixel.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from urlparse import urljoin
 
 import requests
+
+from six import iteritems
+from six.moves.urllib.parse import urljoin
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
@@ -201,7 +203,7 @@ class Marathon(AgentCheck):
 
             queued.add(queue['app']['id'])
 
-            for m_type, sub_metric in self.QUEUE_METRICS.iteritems():
+            for m_type, sub_metric in iteritems(self.QUEUE_METRICS):
                 if isinstance(sub_metric, list):
                     for attr, name in sub_metric:
                         try:

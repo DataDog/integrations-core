@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.17.0 / 2019-01-07
+
+* [Added] Use standalone py3 validation. See [#2854](https://github.com/DataDog/integrations-core/pull/2854).
+* [Fixed] Fix root folder name when running 'validate' commands on integrations-extras. See [#2879](https://github.com/DataDog/integrations-core/pull/2879).
+* [Fixed] Pin pytest because of a regression in pytest-benchmark. See [#2878](https://github.com/DataDog/integrations-core/pull/2878).
+
 ## 0.16.0 / 2018-12-22
 
 * [Added] Remove requirements.txt from check template. See [#2816](https://github.com/DataDog/integrations-core/pull/2816).

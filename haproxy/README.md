@@ -96,7 +96,7 @@ See the [sample haproxy.yaml][6] for all available configuration options.
 See [metadata.csv][13] for a list of metrics provided by this integration.
 
 ### Events
-The Haproxy check does not include any events at this time.
+The Haproxy check does not include any events.
 
 ### Service Checks
 **haproxy.backend_up**

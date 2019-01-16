@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from decimal import ROUND_HALF_UP, Decimal
 import os
 import re
 
+from six import PY3
 from six.moves.urllib.parse import urlparse
 
 
@@ -17,6 +19,14 @@ def ensure_unicode(s):
     if isinstance(s, bytes):
         s = s.decode('utf-8')
     return s
+
+
+to_string = ensure_unicode if PY3 else ensure_bytes
+
+
+def round_value(value, precision=0, rounding_method=ROUND_HALF_UP):
+    precision = '0.{}'.format('0' * precision)
+    return float(Decimal(str(value)).quantize(Decimal(precision), rounding=rounding_method))
 
 
 def get_docker_hostname():

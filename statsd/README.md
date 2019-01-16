@@ -41,7 +41,7 @@ The StatsD check is included in the [Datadog Agent][1] package, so you don't nee
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The StatsD check does not include any events at this time.
+The StatsD check does not include any events.
 
 ### Service Checks
 

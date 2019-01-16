@@ -1,5 +1,10 @@
 # CHANGELOG - couchbase
 
+## 1.7.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2851](https://github.com/DataDog/integrations-core/pull/2851).
+* [Fixed] Stop using deprecated 'device_name' parameter.. See [#2847](https://github.com/DataDog/integrations-core/pull/2847).
+
 ## 1.6.1 / 2018-11-23
 
 * [Fixed] Keep running the check when one endpoint fails. See [#2638](https://github.com/DataDog/integrations-core/pull/2638).

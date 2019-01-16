@@ -6,13 +6,12 @@
 
 Collects metrics from mesos slave node.
 """
-# stdlib
-from urlparse import urlparse
 
-# 3rd party
 import requests
 
-# project
+from six import iteritems
+from six.moves.urllib.parse import urlparse
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.errors import CheckException
 from datadog_checks.config import _is_affirmative
@@ -153,7 +152,7 @@ class MesosSlave(AgentCheck):
         if self.cluster_name is None:
             state_metrics = self._get_state(url, timeout, verify, tags)
             if state_metrics is not None:
-                self.version = map(int, state_metrics['version'].split('.'))
+                self.version = list(map(int, state_metrics['version'].split('.')))
 
                 if 'master_hostname' in state_metrics:
                     master_state = self._get_state(
@@ -204,7 +203,7 @@ class MesosSlave(AgentCheck):
                             if task.lower() in t['name'].lower() and t['slave_id'] == state_metrics['id']:
                                 task_tags = ['task_name:' + t['name']] + tags
                                 self.service_check(t['name'] + '.ok', self.TASK_STATUS[t['state']], tags=task_tags)
-                                for key_name, (metric_name, metric_func) in self.TASK_METRICS.iteritems():
+                                for key_name, (metric_name, metric_func) in iteritems(self.TASK_METRICS):
                                     metric_func(self, metric_name, t['resources'][key_name], tags=task_tags)
 
         stats_metrics = self._get_stats(url, timeout, ssl_verify, instance_tags)
@@ -213,7 +212,7 @@ class MesosSlave(AgentCheck):
             metrics = [self.SLAVE_TASKS_METRICS, self.SYSTEM_METRICS, self.SLAVE_RESOURCE_METRICS,
                        self.SLAVE_EXECUTORS_METRICS, self.STATS_METRICS]
             for m in metrics:
-                for key_name, (metric_name, metric_func) in m.iteritems():
+                for key_name, (metric_name, metric_func) in iteritems(m):
                     if key_name in stats_metrics:
                         metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
 

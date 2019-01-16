@@ -21,13 +21,13 @@ Edit the `linux_proc_extras.d/conf.yaml` file, in the `conf.d/` folder at the ro
 
 ## Data Collected
 ### Metrics
-The Linux proc extras check does not include any metrics at this time.
+The Linux proc extras check does not include any metrics.
 
 ### Events
-The Linux proc extras check does not include any events at this time.
+The Linux proc extras check does not include any events.
 
 ### Service Checks
-The Linux proc extras check does not include any service checks at this time.
+The Linux proc extras check does not include any service checks.
 
 ## Troubleshooting
 

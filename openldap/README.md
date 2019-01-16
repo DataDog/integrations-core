@@ -113,7 +113,7 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 
-The openldap check does not include any events at this time.
+The openldap check does not include any events.
 
 ### Service Checks
 

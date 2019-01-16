@@ -127,7 +127,7 @@ Configuration Options:
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
-The Oracle Database check does not include any events at this time.
+The Oracle Database check does not include any events.
 
 ### Service Checks
 **oracle.can_connect**  

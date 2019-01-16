@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import time
 import mock
 import copy
 from . import common
@@ -16,21 +15,6 @@ def test_parse_uptime_string(aggregator):
     response = u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
     uptime_parsed = check._parse_uptime_string(response)
     assert uptime_parsed == [0.04, 0.14, 0.19]
-
-
-def test_cache_utils(aggregator):
-    instance = common.MOCK_CONFIG["instances"][0]
-    instance['tags'] = ['optional:tag1']
-    init_config = common.MOCK_CONFIG['init_config']
-    check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
-    check.CACHE_TTL['aggregates'] = 1
-    expected_aggregates = {'hyp_1': ['aggregate:staging', 'availability_zone:test']}
-
-    with mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_all_aggregate_hypervisors',
-                    return_value=expected_aggregates):
-        assert check._get_and_set_aggregate_list() == expected_aggregates
-        time.sleep(1.5)
-        assert check._is_expired('aggregates')
 
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',

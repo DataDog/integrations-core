@@ -2,19 +2,21 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
-from collections import defaultdict
+from __future__ import division
+
 import copy
 import re
 import socket
 import time
-import urlparse
 
-# 3rd party
 import requests
 
-# project
-from datadog_checks.checks import AgentCheck
+from collections import defaultdict
+
+from six import iteritems, PY2
+from six.moves.urllib.parse import urlparse
+
+from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers
 
@@ -106,7 +108,7 @@ class HAProxy(AgentCheck):
         url = instance.get('url')
         self.log.debug('Processing HAProxy data for %s' % url)
 
-        parsed_url = urlparse.urlparse(url)
+        parsed_url = urlparse(url)
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
             data = self._fetch_socket_data(parsed_url)
@@ -190,7 +192,20 @@ class HAProxy(AgentCheck):
                                 timeout=self.default_integration_http_timeout)
         response.raise_for_status()
 
-        return response.content.splitlines()
+        # it only needs additional decoding in py3, so skip it if it's py2
+        if PY2:
+            return response.content.splitlines()
+        else:
+            content = response.content
+
+            # If the content is a string, it can't be decoded again
+            # But if it's bytes, it can be decoded.
+            # So, check if it has the decode method
+            decode_fn = getattr(content, "decode", None)
+            if callable(decode_fn):
+                content = content.decode('utf-8')
+
+            return content.splitlines()
 
     def _fetch_socket_data(self, parsed_url):
         ''' Hit a given stats socket and return the stats lines '''
@@ -206,7 +221,7 @@ class HAProxy(AgentCheck):
         else:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
-        sock.send("show stat\r\n")
+        sock.send(b"show stat\r\n")
 
         response = ""
         output = sock.recv(BUFSIZE)
@@ -233,7 +248,11 @@ class HAProxy(AgentCheck):
         # wredis,status,weight,act,bck,chkfail,chkdown,lastchg,
         # downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,
         # type,rate,rate_lim,rate_max,"
-        fields = [f.strip() for f in data[0][2:].split(',') if f]
+        fields = []
+        for f in data[0].split(','):
+            if f:
+                f = f.replace('# ', '')
+                fields.append(f.strip())
 
         self.hosts_statuses = defaultdict(int)
 
@@ -452,7 +471,7 @@ class HAProxy(AgentCheck):
 
         # match.groupdict() returns tags dictionary in the form of {'name': 'value'}
         # convert it to Datadog tag LIST: ['name:value']
-        return ["%s:%s" % (name, value) for name, value in match.groupdict().iteritems()]
+        return ["%s:%s" % (name, value) for name, value in iteritems(match.groupdict())]
 
     @staticmethod
     def _normalize_status(status):
@@ -474,7 +493,7 @@ class HAProxy(AgentCheck):
         custom_tags = [] if custom_tags is None else custom_tags
         active_tag = [] if active_tag is None else active_tag
 
-        for host_status, count in hosts_statuses.iteritems():
+        for host_status, count in iteritems(hosts_statuses):
             try:
                 service, hostname, status = host_status
             except Exception:
@@ -521,7 +540,7 @@ class HAProxy(AgentCheck):
             reported_statuses_dict[reported_status] = 0
         statuses_counter = defaultdict(lambda: copy.copy(reported_statuses_dict))
 
-        for host_status, count in hosts_statuses.iteritems():
+        for host_status, count in iteritems(hosts_statuses):
             hostname = None
             try:
                 service, hostname, status = host_status
@@ -559,13 +578,13 @@ class HAProxy(AgentCheck):
                 status_key = Services.STATUS_TO_COLLATED.get(status, Services.UNAVAILABLE)
                 agg_statuses_counter[tuple(agg_tags)][status_key] += count
 
-        for tags, count_per_status in statuses_counter.iteritems():
-            for status, count in count_per_status.iteritems():
+        for tags, count_per_status in iteritems(statuses_counter):
+            for status, count in iteritems(count_per_status):
                 self.gauge('haproxy.count_per_status', count, tags=tags + ('status:%s' % status, ))
 
         # Send aggregates
-        for service_tags, service_agg_statuses in agg_statuses_counter.iteritems():
-            for status, count in service_agg_statuses.iteritems():
+        for service_tags, service_agg_statuses in iteritems(agg_statuses_counter):
+            for status, count in iteritems(service_agg_statuses):
                 self.gauge("haproxy.count_per_status", count, tags=service_tags + ('status:%s' % status, ))
 
     def _process_metrics(self, data, url, services_incl_filter=None,
@@ -686,7 +705,7 @@ class HAProxy(AgentCheck):
         custom_tags = [] if custom_tags is None else custom_tags
         service_name = data['pxname']
         status = data['status']
-        haproxy_hostname = self.hostname.decode('utf-8')
+        haproxy_hostname = to_string(self.hostname)
         check_hostname = haproxy_hostname if tag_by_host else ''
 
         if self._is_service_excl_filtered(service_name, services_incl_filter,

@@ -9,15 +9,38 @@ from time import sleep
 import pytest
 import requests
 
-from .common import HERE, PORT, URL, BUCKET_NAME, USER, PASSWORD, CB_CONTAINER_NAME
+from datadog_checks.dev.docker import get_container_ip
+
+from .common import HERE, HOST, PORT, QUERY_PORT, BUCKET_NAME, CUSTOM_TAGS
+
+URL = 'http://{}:{}'.format(HOST, PORT)
+QUERY_URL = 'http://{}:{}'.format(HOST, QUERY_PORT)
+CB_CONTAINER_NAME = 'couchbase-standalone'
+USER = 'Administrator'
+PASSWORD = 'password'
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
+def instance():
+    return {
+        'server': URL,
+        'user': USER,
+        'password': PASSWORD,
+        'timeout': 0.5,
+        'tags': CUSTOM_TAGS,
+    }
 
-    aggregator.reset()
-    return aggregator
+
+@pytest.fixture
+def instance_query():
+    return {
+        'server': URL,
+        'user': USER,
+        'password': PASSWORD,
+        'timeout': 0.5,
+        'tags': CUSTOM_TAGS,
+        'query_monitoring_url': QUERY_URL,
+    }
 
 
 @pytest.fixture(scope="session")
@@ -68,18 +91,6 @@ def couchbase_container_ip(couchbase_service):
     return get_container_ip(CB_CONTAINER_NAME)
 
 
-def get_container_ip(container_id_or_name):
-    """
-    Get a docker container's IP address from its id or name
-    """
-    args = [
-        'docker', 'inspect',
-        '-f', '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', container_id_or_name
-    ]
-
-    return subprocess.check_output(args).rstrip('\r\n')
-
-
 def setup_couchbase():
     """
     Initialize couchbase using its CLI tool
@@ -117,7 +128,7 @@ def wait_for_couchbase_container(container_name):
     Wait for couchbase to start
     """
 
-    for i in xrange(15):
+    for i in range(15):
         status_args = [
             'docker', 'exec', container_name,
             'couchbase-cli', 'server-info', '-c', 'localhost:{}'.format(PORT),
@@ -137,7 +148,7 @@ def wait_for_couchbase_init():
     Wait for couchbase to be initialized
     """
 
-    for i in xrange(15):
+    for i in range(15):
         r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
         if r.status_code == requests.codes.ok:
             return True
@@ -149,7 +160,7 @@ def wait_for_node_stats():
     """
     Wait for couchbase to generate node stats
     """
-    for i in xrange(15):
+    for i in range(15):
         try:
             r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
             r.raise_for_status()
@@ -168,7 +179,7 @@ def wait_for_bucket_stats(bucket_name):
     """
     Wait for couchbase to generate bucket stats
     """
-    for i in xrange(15):
+    for i in range(15):
         try:
             r = requests.get('{}/pools/default/buckets/{}/stats'.format(URL, bucket_name), auth=(USER, PASSWORD))
             r.raise_for_status()

@@ -1,5 +1,13 @@
 # CHANGELOG - vsphere
 
+## 3.6.2 / 2019-01-10
+
+* [Fixed] Fix tags normalization. See [#2918](https://github.com/DataDog/integrations-core/pull/2918).
+
+## 3.6.1 / 2019-01-04
+
+* [Fixed] Demote critical log levels to error. See [#2795](https://github.com/DataDog/integrations-core/pull/2795).
+
 ## 3.6.0 / 2018-11-29
 
 * [Added] Add option to collect cluster, datacenter and datastore metrics. See [#2655](https://github.com/DataDog/integrations-core/pull/2655).

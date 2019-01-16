@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 1.2.0 / 2019-01-04
+
+* [Added] Support Python 3. See [#2761](https://github.com/DataDog/integrations-core/pull/2761).
+
 ## 1.1.0 / 2018-11-21
 
 * [Added] Add --ssl option to cassandra_nodetool check. See [#2378](https://github.com/DataDog/integrations-core/pull/2378). Thanks [laurieodgers](https://github.com/laurieodgers).
