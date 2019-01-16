@@ -332,6 +332,8 @@ class VSphereCheck(AgentCheck):
                 if hostname:
                     external_host_tags.append((hostname, {SOURCE_TYPE: mor.get('tags')}))
 
+        self.log.debug(b"External host tags payload: %s", external_host_tags)
+
         return external_host_tags
 
     def _get_parent_tags(self, mor, all_objects):
