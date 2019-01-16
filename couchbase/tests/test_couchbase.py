@@ -10,6 +10,7 @@ from .common import CHECK_TAGS, BUCKET_NAME, PORT
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_service_check(aggregator, instance, couchbase_container_ip):
     """
     Assert the OK service check
@@ -28,6 +29,7 @@ def test_service_check(aggregator, instance, couchbase_container_ip):
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_metrics(aggregator, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
@@ -38,6 +40,7 @@ def test_metrics(aggregator, instance, couchbase_container_ip):
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_query_monitoring_metrics(aggregator, instance_query, couchbase_container_ip):
     """
     Test system vitals metrics (prefixed "couchbase.query.")
