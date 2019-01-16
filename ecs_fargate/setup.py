@@ -23,7 +23,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base'
+CHECKS_BASE_REQ = 'datadog_checks_base>=5.1.0'
 
 setup(
     name='datadog-ecs_fargate',
