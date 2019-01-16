@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 5.2.0 / 2019-01-16
+
+* [Added] Make service check statuses available as constants. See [#2960](https://github.com/DataDog/integrations-core/pull/2960).
+
 ## 5.1.0 / 2019-01-15
 
 * [Fixed] Always ensure_unicode for subprocess output. See [#2941](https://github.com/DataDog/integrations-core/pull/2941).
