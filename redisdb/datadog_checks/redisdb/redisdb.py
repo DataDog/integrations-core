@@ -12,6 +12,7 @@ import redis
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from datadog_checks.base.utils.common import round_value
 
 DEFAULT_MAX_SLOW_ENTRIES = 128
 MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"
@@ -188,7 +189,7 @@ class Redis(AgentCheck):
             self.service_check('redis.can_connect', status, tags=tags)
             raise
 
-        latency_ms = round((time.time() - start) * 1000, 2)
+        latency_ms = round_value((time.time() - start) * 1000, 2)
         self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
 
         # Save the database statistics.
