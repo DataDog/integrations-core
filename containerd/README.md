@@ -10,14 +10,14 @@ This check monitors the Container Runtime Containerd
 
 Containerd is a core agent 6 check and thus needs to be configured in both in `datadog.yaml` and with `containerd.d/conf.yaml`.
 
-In `datadog.yaml` you will need to configure your `cri_socket_path` for the agent to query containerd (you can also configure default timeouts) and in `containerd.d/conf.yaml` you can configure the check instance settings such as `filters` for the events.
+In `datadog.yaml` configure your `cri_socket_path` for the agent to query Containerd and in `containerd.d/conf.yaml` configure the check instance settings such as `filters` for the events.
 
-Note that if you're using the agent in a container, setting `DD_CRI_SOCKET_PATH` environment variable will automatically enable the `Containerd` check with the default configuration.
+**Note** if you are using the agent in a container, setting `DD_CRI_SOCKET_PATH` environment variable automatically enables the `Containerd` check with the default configuration.
 
 ### Configuration
 
 1. Edit the `containerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your crio performance data.
+   Agent's configuration directory to start collecting your Containerd performance data.
    See the [sample containerd.d/conf.yaml][1] for all available configuration options.
 
 2. [Restart the Agent][3]
