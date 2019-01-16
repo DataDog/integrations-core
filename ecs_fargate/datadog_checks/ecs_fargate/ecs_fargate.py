@@ -7,7 +7,7 @@ import requests
 from six import iteritems
 
 from datadog_checks.checks import AgentCheck
-
+from datadog_checks.base.utils.common import round_value
 
 try:
     from tagger import get_tags
@@ -168,7 +168,7 @@ class FargateCheck(AgentCheck):
             cpu_percent = 0.0
             if system_delta > 0 and cpu_delta > 0 and active_cpus > 0:
                 cpu_percent = (cpu_delta / system_delta) * active_cpus * 100.0
-                cpu_percent = round(cpu_percent, 2)
+                cpu_percent = round_value(cpu_percent, 2)
                 self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
 
             # Memory metrics
