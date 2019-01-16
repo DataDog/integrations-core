@@ -34,6 +34,7 @@ stages:
 script:
   - travis_retry ddev test --cov ${CHECK}
   - ddev test ${CHECK} --bench || true
+  - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
 
 # Conditional jobs are currently buggy and verbose.
 #
