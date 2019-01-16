@@ -28,6 +28,7 @@ except ImportError:
     using_stub_aggregator = True
 
 from ..config import is_affirmative
+from ..constants import ServiceCheck
 from ..utils.common import ensure_bytes, ensure_unicode
 from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
@@ -45,7 +46,7 @@ class __AgentCheck7(object):
     """
     The base class for any Agent based integrations
     """
-    OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
+    OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
     """
     DEFAULT_METRIC_LIMIT allows to set a limit on the number of metric name and tags combination
@@ -403,7 +404,7 @@ class __AgentCheck6(object):
     """
     The base class for any Agent based integrations
     """
-    OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
+    OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
     """
     DEFAULT_METRIC_LIMIT allows to set a limit on the number of metric name and tags combination
