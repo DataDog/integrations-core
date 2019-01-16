@@ -100,7 +100,7 @@ This also can be used to send logs to **Datadog EU** by setting:
 <match datadog.**>
 
   ...
-  host 'tcp-intake.logs.datadoghq.com'
+  host 'tcp-intake.logs.datadoghq.eu'
   port '443'
 
 </match>
