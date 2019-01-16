@@ -128,7 +128,7 @@ See [metadata.csv][2] for a list of metrics provided by this integration.
 
 ### Events
 
-The ECS Fargate check does not include any events at this time.
+The ECS Fargate check does not include any events.
 
 ### Service Checks
 

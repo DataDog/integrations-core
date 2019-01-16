@@ -29,10 +29,10 @@ The ActiveMQ XML check is included in the [Datadog Agent][1] package, so you don
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The ActiveMQ XML check does not include any events at this time.
+The ActiveMQ XML check does not include any events.
 
 ### Service Checks
-The ActiveMQ XML check does not include any service checks at this time.
+The ActiveMQ XML check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][5].

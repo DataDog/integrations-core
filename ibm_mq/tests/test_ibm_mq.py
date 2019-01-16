@@ -4,6 +4,8 @@
 
 import logging
 
+import pytest
+
 from datadog_checks.ibm_mq import IbmMqCheck
 
 log = logging.getLogger(__file__)
@@ -53,7 +55,8 @@ OPTIONAL_METRICS = [
 ]
 
 
-def test_check(aggregator, instance, spin_up_ibmmq, seed_data):
+@pytest.mark.usefixtures("dd_environment")
+def test_check(aggregator, instance, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance)
 

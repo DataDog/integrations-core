@@ -43,7 +43,7 @@ The RiakCS check is included in the [Datadog Agent][1] package, so you don't nee
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
-The RiackCS check does not include any events at this time.
+The RiackCS check does not include any events.
 
 ### Service Checks
 

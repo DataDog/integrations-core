@@ -60,7 +60,7 @@ The check watches the Nagios events log for log lines containing these strings, 
 - SERVICE DOWNTIME ALERT
 
 ### Service Checks
-The Nagios check does not include any service checks at this time.
+The Nagios check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][5].

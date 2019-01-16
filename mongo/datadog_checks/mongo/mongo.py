@@ -963,7 +963,7 @@ class MongoDb(AgentCheck):
         # Report the usage metrics for dbs/collections
         if 'top' in additional_metrics:
             try:
-                dbtop = db.command('top')
+                dbtop = admindb.command('top')
                 for ns, ns_metrics in iteritems(dbtop['totals']):
                     if "." not in ns:
                         continue

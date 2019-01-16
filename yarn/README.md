@@ -43,7 +43,7 @@ The YARN check is included in the [Datadog Agent][1] package, so you don't need 
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
-The Yarn check does not include any events at this time.
+The Yarn check does not include any events.
 
 ### Service Checks
 **yarn.can_connect**:

@@ -58,10 +58,10 @@ See the [sample active_directory.d/conf.yaml][1] for all available configuration
 See [metadata.csv][3] for a list of metrics provided by this integration.
 
 ### Events
-The Active Directory check does not include any events at this time.
+The Active Directory check does not include any events.
 
 ### Service Checks
-The Active Directory check does not include any service checks at this time.
+The Active Directory check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][5].

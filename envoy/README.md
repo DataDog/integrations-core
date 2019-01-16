@@ -144,7 +144,7 @@ See [metrics.py][10] for a list of tags sent by each metric.
 
 ### Events
 
-The Envoy check does not include any events at this time.
+The Envoy check does not include any events.
 
 ### Service Checks
 

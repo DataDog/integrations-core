@@ -193,7 +193,7 @@ jmx_metrics:
         tags:
           client: $1
           topic: $2
-          
+
     #
     # Consumers (only v0.8.2.x)
     #
@@ -314,7 +314,7 @@ jmx_metrics:
         tags:
           client: $1
           topic: $2
-            
+
     #
     # Aggregate cluster stats
     #
@@ -348,7 +348,7 @@ jmx_metrics:
             alias: kafka.net.bytes_rejected.rate
     
     #
-    # Per Topic Broker Stats
+    # Per Topic Broker Stats (only v0.8.x)
     #
     - include:
         domain: '"kafka.server"'
@@ -359,6 +359,38 @@ jmx_metrics:
             alias: kafka.topic.messages_in.rate
         tags:
           topic: $1
+
+    #
+    # Brokers: Per Topic Metrics (v0.9.0.x+)
+    #
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=MessagesInPerSec,topic=.*'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topic.messages_in.rate
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesOutPerSec,topic=.*'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topic.net.bytes_out.rate
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesInPerSec,topic=.*'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topic.net.bytes_in.rate
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesRejectedPerSec,topic=.*'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topic.net.bytes_rejected.rate
 
     #
     # Request timings
@@ -459,12 +491,30 @@ jmx_metrics:
             metric_type: gauge
             alias: kafka.request.offsets.time.99percentile
     - include:
+        domain: 'kafka.network'
+        bean: 'kafka.network:type=RequestChannel,name=RequestQueueSize'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.request.channel.queue.size
+    - include:
+        domain: 'kafka.network'
+        bean: 'kafka.network:type=SocketServer,name=NetworkProcessorAvgIdlePercent'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.net.processor.avg.idle.pct.rate
+    - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent'
         attribute:
           OneMinuteRate:
             metric_type: gauge
             alias: kafka.request.handler.avg.idle.pct.rate
+
+    #
+    # Request Purgatory (only v0.8.2.x)
+    #
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ProducerRequestPurgatory,name=PurgatorySize'
@@ -475,6 +525,24 @@ jmx_metrics:
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=FetchRequestPurgatory,name=PurgatorySize'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.request.fetch_request_purgatory.size
+
+    #
+    # Request Purgatory (v0.9.0.x onwards)
+    #
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Produce'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.request.producer_request_purgatory.size
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Fetch'
         attribute:
           Value:
             metric_type: gauge
@@ -564,3 +632,35 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.log.flush_rate.rate
+
+    #
+    # Zookeeper stats
+    #
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=SessionExpireListener,name=ZooKeeperDisconnectsPerSec'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.session.zookeeper.disconnect.rate
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=SessionExpireListener,name=ZooKeeperExpiresPerSec'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.session.zookeeper.expire.rate
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=SessionExpireListener,name=ZooKeeperReadOnlyConnectsPerSec'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.session.zookeeper.readonly.rate
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=SessionExpireListener,name=ZooKeeperSyncConnectsPerSec'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.session.zookeeper.sync.rate

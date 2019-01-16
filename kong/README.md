@@ -38,7 +38,7 @@ The Kong check is included in the [Datadog Agent][1] package, so you don't need 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The Kong check does not include any events at this time.
+The Kong check does not include any events.
 
 ### Service Checks
 
