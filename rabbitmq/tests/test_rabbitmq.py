@@ -4,6 +4,7 @@
 
 import pika
 import logging
+import pytest
 
 from contextlib import closing
 
@@ -14,7 +15,8 @@ from . import common, metrics
 log = logging.getLogger(__file__)
 
 
-def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_rabbitmq(aggregator, check):
     check.check(common.CONFIG)
 
     # Node attributes
@@ -60,7 +62,8 @@ def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_regex(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_regex(aggregator, check):
     check.check(common.CONFIG_REGEX)
 
     # Node attributes
@@ -98,7 +101,8 @@ def test_regex(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_limit_vhosts(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_limit_vhosts(aggregator, check):
     check.check(common.CONFIG_REGEX)
 
     # Node attributes
@@ -132,7 +136,8 @@ def test_limit_vhosts(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_family_tagging(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_family_tagging(aggregator, check):
     check.check(common.CONFIG_WITH_FAMILY)
 
     # Node attributes
@@ -165,7 +170,8 @@ def test_family_tagging(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_connections(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_connections(aggregator, check):
     # no connections and no 'vhosts' list in the conf don't produce 'connections' metric
     check.check(common.CONFIG)
     aggregator.assert_metric('rabbitmq.connections',

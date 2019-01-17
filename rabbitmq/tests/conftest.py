@@ -10,11 +10,11 @@ import subprocess
 from datadog_checks.dev import docker_run, temp_dir
 from datadog_checks.rabbitmq import RabbitMQ
 
-from .common import HERE, CHECK_NAME, HOST, PORT
+from .common import HERE, CHECK_NAME, HOST, PORT, CONFIG
 
 
 @pytest.fixture(scope="session")
-def spin_up_rabbitmq(request):
+def dd_environment(request, ):
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
@@ -32,10 +32,10 @@ def spin_up_rabbitmq(request):
     with docker_run(compose_file,
                     log_patterns='Server startup complete',
                     env_vars=env):
-        yield
+        setup_rabbitmq()
+        yield CONFIG
 
 
-@pytest.fixture(scope="session")
 def setup_rabbitmq():
     with temp_dir() as tmpdir:
         url = 'http://{}:{}/cli/rabbitmqadmin'.format(HOST, PORT)
