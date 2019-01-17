@@ -69,7 +69,7 @@ class DockerInterface(object):
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:
             command = [
-                'docker', 'run', '-e', 'DD_API_KEY={}'.format(self.api_key), self.agent_build,
+                'docker', 'run', '--rm', '-e', 'DD_API_KEY={}'.format(self.api_key), self.agent_build,
                 'head', '--lines=1', '/opt/datadog-agent/version-manifest.txt'
             ]
             result = run_command(command, capture=True)
