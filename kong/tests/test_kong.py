@@ -18,16 +18,17 @@ PORT = 8001
 
 STATUS_URL = 'http://{0}:{1}/status/'.format(HOST, PORT)
 
-CONFIG_STUBS = [
-    {
-        'kong_status_url': STATUS_URL,
-        'tags': ['first_instance']
-    },
-    {
-        'kong_status_url': STATUS_URL,
-        'tags': ['second_instance']
-    }
-]
+instance_1 = {
+    'kong_status_url': STATUS_URL,
+    'tags': ['first_instance']
+}
+
+instance_2 = {
+    'kong_status_url': STATUS_URL,
+    'tags': ['second_instance']
+}
+
+CONFIG_STUBS = [instance_1, instance_2]
 
 BAD_CONFIG = {
     'kong_status_url': 'http://localhost:1111/status/'
@@ -62,8 +63,8 @@ def wait_for_cluster():
     return False
 
 
-@pytest.fixture(scope="session", autouse=True)
-def kong_cluster():
+@pytest.fixture(scope="session")
+def dd_environment():
     """
     Start a kong cluster
     """
@@ -78,7 +79,7 @@ def kong_cluster():
     if not wait_for_cluster():
         subprocess.check_call(args + ["down"])
         raise Exception("Kong cluster boot timed out!")
-    yield
+    yield instance_1
     subprocess.check_call(args + ["down"])
 
 
@@ -94,6 +95,7 @@ def aggregator():
     return aggregator
 
 
+@pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, check):
     for stub in CONFIG_STUBS:
         check.check(stub)
@@ -114,6 +116,7 @@ def test_check(aggregator, check):
         aggregator.all_metrics_asserted()
 
 
+@pytest.mark.usefixtures('dd_environment')
 def test_connection_failure(aggregator, check):
     with pytest.raises(Exception):
         check.check(BAD_CONFIG)
