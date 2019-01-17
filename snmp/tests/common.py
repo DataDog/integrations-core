@@ -21,7 +21,6 @@ PRIV_KEY = 'doggiePRIVkey'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
-
 SNMP_CONF = {
     'name': 'snmp_conf',
     'ip_address': HOST,
