@@ -7,7 +7,7 @@ import time
 import pytest
 
 from datadog_checks.nagios import Nagios
-from datadog_checks.utils.common import ensure_bytes
+from datadog_checks.base import ensure_bytes
 from .common import (
     CHECK_NAME, CUSTOM_TAGS, NAGIOS_TEST_LOG, NAGIOS_TEST_HOST, NAGIOS_TEST_ALT_HOST_TEMPLATE,
     NAGIOS_TEST_HOST_TEMPLATE, NAGIOS_TEST_SVC, NAGIOS_TEST_SVC_TEMPLATE, NAGIOS_TEST_ALT_SVC_TEMPLATE,

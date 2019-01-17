@@ -5,7 +5,7 @@ import binascii
 import os
 from stat import ST_INO, ST_SIZE
 
-from datadog_checks.utils.common import ensure_bytes
+from .common import ensure_bytes
 
 
 class TailFile(object):

@@ -6,7 +6,6 @@ from collections import namedtuple
 import json
 import re
 from six import next, PY3
-from six.moves import map
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.tailfile import TailFile
@@ -326,7 +325,7 @@ class NagiosEventLogTailer(NagiosTailer):
                 return False
 
             # and parse the rest of the line
-            parts = list(map(lambda p: p.strip(), remainder.split(';')))
+            parts = [p.strip() for p in remainder.split(';')]
             # Chop parts we don't recognize
             parts = parts[: len(fields._fields)]
 
