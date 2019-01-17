@@ -171,7 +171,7 @@ class __AgentCheck7(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags, name, device_name)
+        tags = self._normalize_tags_type(tags, device_name, name)
         if hostname is None:
             hostname = ''
 
@@ -319,7 +319,7 @@ class __AgentCheck7(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def _normalize_tags_type(self, tags, metric_name, device_name=None):
+    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """
         Normalize tags contents and type:
         - append `device_name` as `device:` tag
@@ -525,7 +525,7 @@ class __AgentCheck6(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags, name, device_name)
+        tags = self._normalize_tags_type(tags, device_name, name)
         if hostname is None:
             hostname = b''
 
@@ -672,7 +672,7 @@ class __AgentCheck6(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def _normalize_tags_type(self, tags, metric_name, device_name=None):
+    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """
         Normalize tags contents and type:
         - append `device_name` as `device:` tag
