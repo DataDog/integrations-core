@@ -8,10 +8,9 @@ import os
 from datadog_checks.dev import docker_run
 from datadog_checks.snmp import SnmpCheck
 
-from .common import SNMP_CONF
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-COMPOSE_DIR = os.path.join(HERE, 'compose')
+from .common import (
+    generate_instance_config, SCALAR_OBJECTS, SCALAR_OBJECTS_WITH_TAGS, TABULAR_OBJECTS, COMPOSE_DIR
+)
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -24,7 +23,7 @@ def dd_environment():
         env_vars=env,
         log_patterns="Listening at"
     ):
-        yield SNMP_CONF
+        yield generate_instance_config(SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS)
 
 
 @pytest.fixture
