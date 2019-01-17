@@ -14,8 +14,7 @@ from datadog_checks.base.utils.tailfile import TailFile
 if not PY3:
     from inspect import getargspec
 else:
-    from inspect import getfullargspec
-    getargspec = getfullargspec
+    from inspect import getfullargspec as getargspec
 
 
 # fields order for each event type, as named tuples
