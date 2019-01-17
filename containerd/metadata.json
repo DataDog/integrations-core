@@ -1,6 +1,8 @@
 {
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "containerd.",
+  "metric_to_check": "containerd.cpu.user",
   "name": "containerd",
   "short_description": "Track all your Containerd metrics with Datadog",
   "guid": "5cdc0363-a0df-469b-8346-2da4ab84128b",
