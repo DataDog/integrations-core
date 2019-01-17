@@ -7,8 +7,8 @@ import json
 import re
 from six import next, PY3
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.tailfile import TailFile
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tailfile import TailFile
 
 if not PY3:
     from inspect import getargspec
