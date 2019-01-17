@@ -171,7 +171,7 @@ class __AgentCheck7(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags, device_name)
+        tags = self._normalize_tags_type(tags, name, device_name)
         if hostname is None:
             hostname = ''
 
@@ -319,7 +319,7 @@ class __AgentCheck7(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def _normalize_tags_type(self, tags, device_name=None):
+    def _normalize_tags_type(self, tags, metric_name, device_name=None):
         """
         Normalize tags contents and type:
         - append `device_name` as `device:` tag
@@ -338,7 +338,9 @@ class __AgentCheck7(object):
                     try:
                         tag = tag.decode('utf-8')
                     except UnicodeError:
-                        self.log.warning('Error decoding tag `{}` as utf-8, ignoring tag'.format(tag))
+                        self.log.warning(
+                            'Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
+                        )
                         continue
 
                 normalized_tags.append(tag)
@@ -523,7 +525,7 @@ class __AgentCheck6(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags, device_name)
+        tags = self._normalize_tags_type(tags, name, device_name)
         if hostname is None:
             hostname = b''
 
@@ -670,7 +672,7 @@ class __AgentCheck6(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def _normalize_tags_type(self, tags, device_name=None):
+    def _normalize_tags_type(self, tags, metric_name, device_name=None):
         """
         Normalize tags contents and type:
         - append `device_name` as `device:` tag
@@ -683,17 +685,25 @@ class __AgentCheck6(object):
             self._log_deprecation("device_name")
             device_tag = self._to_bytes("device:{}".format(device_name))
             if device_tag is None:
-                self.log.warning('Error encoding device tag to utf-8 encoded string, ignoring')
+                self.log.warning(
+                    'Error encoding device name `{}` to utf-8 for metric `{}`, ignoring tag'.format(
+                        repr(device_name), repr(metric_name)
+                    )
+                )
             else:
                 normalized_tags.append(device_tag)
 
         if tags is not None:
             for tag in tags:
-                tag = self._to_bytes(tag)
-                if tag is None:
-                    self.log.warning('Error encoding tag to utf-8 encoded string, ignoring tag')
+                encoded_tag = self._to_bytes(tag)
+                if encoded_tag is None:
+                    self.log.warning(
+                        'Error encoding tag `{}` to utf-8 for metric `{}`, ignoring tag'.format(
+                            repr(tag), repr(metric_name)
+                        )
+                    )
                     continue
-                normalized_tags.append(tag)
+                normalized_tags.append(encoded_tag)
 
         return normalized_tags
 
