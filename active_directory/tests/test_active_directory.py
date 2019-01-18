@@ -17,7 +17,7 @@ from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_te
 
 # flake8 then says this is a redefinition of unused, which it's not.
 @pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
-def test_basic_check(Aggregator, pdh_mocks_fixture):
+def test_basic_check(aggregator, pdh_mocks_fixture):
     initialize_pdh_tests()
     instance = MINIMAL_INSTANCE
     c = ActiveDirectoryCheck(CHECK_NAME, {}, {}, [instance])
@@ -25,6 +25,6 @@ def test_basic_check(Aggregator, pdh_mocks_fixture):
 
     for metric_def in DEFAULT_COUNTERS:
         metric = metric_def[3]
-        Aggregator.assert_metric(metric, tags=None, count=1)
+        aggregator.assert_metric(metric, tags=None, count=1)
 
-    assert Aggregator.metrics_asserted_pct == 100.0
+    assert aggregator.metrics_asserted_pct == 100.0
