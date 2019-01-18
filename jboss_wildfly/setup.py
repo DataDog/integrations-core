@@ -10,7 +10,7 @@ HERE = path.dirname(path.abspath(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, 'datadog_checks', 'jboss', '__about__.py')) as f:
+with open(path.join(HERE, 'datadog_checks', 'jboss_wildfly', '__about__.py')) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -22,12 +22,12 @@ CHECKS_BASE_REQ = 'datadog-checks-base'
 
 
 setup(
-    name='datadog-jboss',
+    name='datadog-jboss_wildfly',
     version=ABOUT['__version__'],
-    description='The Jboss check',
+    description='The JBoss/Wildfly check',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords='datadog agent jboss check',
+    keywords='datadog agent jboss wildfly check',
 
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
@@ -52,7 +52,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.jboss'],
+    packages=['datadog_checks.jboss_wildfly'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
