@@ -15,7 +15,8 @@ CHECK_RATES_CUSTOM = {'go_expvar.num_calls': 10}
 
 
 @pytest.mark.integration
-def test_go_expvar(check, spin_up_go_expvar, aggregator):
+@pytest.mark.usefixtures("dd_environment")
+def test_go_expvar(check, aggregator):
     check.check(common.INSTANCE)
 
     shared_tags = [
