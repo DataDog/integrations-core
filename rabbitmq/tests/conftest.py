@@ -6,7 +6,6 @@ import os
 import pytest
 import requests
 import subprocess
-import time
 
 from datadog_checks.dev import docker_run, temp_dir
 from datadog_checks.rabbitmq import RabbitMQ
@@ -34,7 +33,6 @@ def dd_environment():
                     log_patterns='Server startup complete',
                     env_vars=env):
         setup_rabbitmq()
-        time.sleep(10)
         yield CONFIG
 
 
@@ -61,7 +59,6 @@ def setup_rabbitmq():
             headers={"Content-Type": "application/json"}
         )
         res.raise_for_status()
-        yield
 
 
 def setup_vhosts(rabbitmq_admin_script):
