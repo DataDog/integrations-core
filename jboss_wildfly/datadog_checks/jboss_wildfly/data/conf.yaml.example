@@ -1,12 +1,12 @@
 instances:
 
   ## @param host - string - required
-  ## Jboss host to connect to
+  ## JBoss/Wildfly host to connect to
   #
   - host: localhost
 
   ## @param port - integer - required
-  ## Jboss port to connect to
+  ## JBoss/Wildfly port to connect to
   #
     port: 9990
 
@@ -97,7 +97,7 @@ init_config:
   #
   collect_default_metrics: true
 
-  # Additional section to allow jmx connection to jboss.
+  # Additional section to allow jmx connection to JBoss/Wildfly.
   # See documentation: https://docs.datadoghq.com/integrations/java/#monitoring-jboss-wildfly-applications
   custom_jar_paths:
   - /path/to/jboss-cli-client.jar
