@@ -8,11 +8,11 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.fluentd import Fluentd
 
-from .common import HERE, CHECK_NAME
+from .common import HERE, CHECK_NAME, DEFAULT_INSTANCE
 
 
 @pytest.fixture(scope="session")
-def spin_up_fluentd(request):
+def dd_environment():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
@@ -20,19 +20,17 @@ def spin_up_fluentd(request):
     up.
     """
 
-    env = {}
+    env = {
+        'TD_AGENT_CONF_PATH': os.path.join(HERE, 'compose', 'td-agent.conf'),
+        'FLUENTD_VERSION': os.environ.get('FLUENTD_VERSION') or 'v0.12.23',
+    }
 
-    if not os.environ.get('FLUENTD_VERSION'):
-        env['FLUENTD_VERSION'] = 'v0.12.23'
-
-    env['TD_AGENT_CONF_PATH'] = os.path.join(HERE, 'compose', 'td-agent.conf')
-
-    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-
-    with docker_run(compose_file,
-                    log_patterns="type monitor_agent",
-                    env_vars=env):
-        yield
+    with docker_run(
+        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        log_patterns="type monitor_agent",
+        env_vars=env
+    ):
+        yield DEFAULT_INSTANCE
 
 
 @pytest.fixture
