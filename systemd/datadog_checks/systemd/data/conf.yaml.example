@@ -1,10 +1,12 @@
 init_config:
 
 instances:
-  - units:
-    - unit_name: networking
-      unit_id: networking.service
-    - unit_name: cron
-      unit_id: cron.service
-    - unit_name: ssh
-      unit_id: ssh.service
+  - unit_id: networking.service
+    tags:
+      - env:staging
+      - cluster:test
+  - unit_id: cron.service
+  - unit_id: ssh.service
+
+## @param collect_all_units - boolean - optional - default: False
+  - collect_all_units = False

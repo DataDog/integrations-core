@@ -16,17 +16,29 @@ class SystemdCheck(AgentCheck):
         super(SystemdCheck, self).__init__(name, init_config, agentConfig, instances)
 
         # to store the state of a unit and compare it at the next run
-        self.unit_state_cache = {}
+        self.unit_cache = {}
 
-        # Ex: unit_state_cache = {
-        #   <unit_name>: {
+        # Ex: unit_cache = {
+        #   <unit_id>: {
         #       'unit_state': state,
         #       'changes_since': <ISO8601 date time>
         #   }
         # }
 
+    def check(self, instance):
+        units = instance.get('units', [])
+        collect_all = instance.get('collect_all_units')
+
+        if units:
+            for unit_id in units:
+                self.get_unit_state(unit_id)
+        if collect_all == True:
+            # we display status for all units if no unit has been specified in the configuration file
+            self.log.warn("Getting status for all units. Performance might be impacted!")
+            self.get_active_inactive_units()
+
     def get_all_listed_units(self, unit_name):
-        cached_units = self.unit_state_cache.get(unit_name, {}).get('unit_state')
+        cached_units = self.unit_cache.get(unit_name, {}).get('unit_state')
         changes_since = datetime.utcnow().isoformat()
         if cached_units is None:
             units = self.get_all_units()
@@ -65,7 +77,6 @@ class SystemdCheck(AgentCheck):
                     active_units += 1
                 if unit_state == b'inactive':
                     inactive_units += 1
-                # self.log.info(unit_state)
             except pystemd.dbusexc.DBusInvalidArgsError as e:
                 self.log.debug("Cannot retrieve unit status for {}".format(unit_short_name))
         
@@ -79,37 +90,24 @@ class SystemdCheck(AgentCheck):
             tag = unit_name.split('.', 1)[0]
             self.log.info(tag)
             state = unit.Unit.ActiveState
-            # 1 if active, 0 if inactive
+            # Send a service check: OK if the unit is active, CRITICAL if inactive
             if state == b'active':
-                active_status = 1
+                self.service_check(
+                    AgentCheck.OK,
+                    tags=["unit:{}".format(unit_name)]
+                )
             if state == b'inactive':
-                active_status = 0
-            self.gauge('systemd.unit.active', active_status)
+                self.service_check(
+                    AgentCheck.CRITICAL,
+                    tags=["unit:{}".format(unit_name)]
+                )
+            if unit_id in unit_cache:
+                previous_status = unit_cache[unit_id]['state']
+                if previous_status != active_status:
+                    self.event(...)
+                unit_cache[unit_id]['state'] = active_status
+            else:
+                unit_cache[unit_id]['state'] = active_status
+
         except pystemd.dbusexc.DBusInvalidArgsError as e:
             self.log.info("Unit name invalid for {}".format(unit_name))
-
-    def unit_pid(self, unit_name):
-        """
-        The unit has a main PID
-        """
-        try:
-            unit = Unit(unit_name, _autoload=True)
-            running = unit.Service.MainPID
-            if running:
-                self.gauge('systemd.unit.pid.found', 1)
-            else:
-                self.gauge('systemd.unit.pid.found', 0)
-        except pystemd.dbusexc.DBusInvalidArgsError as e:
-            self.log.info("Cannot retrieve unit PID for {}".format(unit_name))
-    
-    def check(self, instance):
-        units = instance.get('units', [])
-
-        if units:
-            for i in range(len(units)):
-                self.get_unit_state(units[i]['unit_id'])
-                self.unit_pid(units[i]['unit_id'])
-        if not units:
-            # we display status for all units if no unit has been specified in the configuration file
-            self.log.warn("no units specified, getting status for all units. Performance might be impacted!")
-            self.get_active_inactive_units()

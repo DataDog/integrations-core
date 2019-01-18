@@ -2,14 +2,13 @@
 
 ## Overview
 
-This check monitors [Systemd][1].
+This check monitors [Systemd][1] through the Datadog Agent.
 
 ## Setup
 
 ### Installation
 
-The Systemd check is included in the [Datadog Agent][2] package, so you do not
-need to install anything else on your server.
+The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -17,11 +16,11 @@ need to install anything else on your server.
    Agent's configuration directory to start collecting your systemd performance data.
    See the [sample systemd.d/conf.yaml][2] for all available configuration options.
 
-2. [Restart the Agent][3]
+2. [Restart the Agent][3].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `systemd` under the Checks section.
+[Run the Agent's status subcommand][4] and look for `systemd` under the Checks section.
 
 ## Data Collected
 
