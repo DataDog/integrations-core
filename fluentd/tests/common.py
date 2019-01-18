@@ -17,3 +17,7 @@ URL = "http://{}:{}/api/plugins.json".format(HOST, PORT)
 BAD_URL = "http://{}:{}/api/plugins.json".format(HOST, BAD_PORT)
 
 CHECK_NAME = 'fluentd'
+
+DEFAULT_INSTANCE = {
+    "monitor_agent_url": URL,
+}
