@@ -15,8 +15,8 @@
   "public_title": "Datadog-Containerd Integration",
   "categories": ["containers"],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/containerd/",
   "is_public": true,
+  "doc_link": "https://docs.datadoghq.com/integrations/containerd/",
   "has_logo": true,
-  "creates_events": true,
+  "creates_events": true
 }
