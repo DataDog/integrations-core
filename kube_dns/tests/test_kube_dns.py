@@ -20,24 +20,20 @@ instance = {
 }
 
 
-class MockResponse:
-    """
-    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
-    """
-
-    def __init__(self, content, content_type):
-        self.content = content
-        self.headers = {'Content-Type': content_type}
-
-    def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
-            yield elt
-
-    def raise_for_status(self):
-        pass
-
-    def close(self):
-        pass
+@pytest.fixture()
+def mock_get():
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
+    with open(f_name, 'r') as f:
+        text_data = f.read()
+    with mock.patch(
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200,
+            iter_lines=lambda **kwargs: text_data.split("\n"),
+            headers={'Content-Type': "text/plain"}
+        )
+    ):
+        yield
 
 
 @pytest.fixture
@@ -46,17 +42,6 @@ def aggregator():
 
     aggregator.reset()
     return aggregator
-
-
-@pytest.fixture
-def mock_get():
-    mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    text_data = None
-    with open(mesh_file_path, 'rb') as f:
-        text_data = f.read()
-
-    with mock.patch('requests.get', return_value=MockResponse(text_data, 'text/plain; version=0.0.4'), __name__='get'):
-        yield
 
 
 class TestKubeDNS:
