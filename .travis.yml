@@ -8,7 +8,7 @@ python:
 addons:
   apt:
     packages:
-      - tdsodbc
+      - unixodbc-dev
 cache:
   directories:
     - "$HOME/.cache/pip"
