@@ -14,7 +14,7 @@ from .common import HERE, CHECK_NAME, HOST, PORT, CONFIG
 
 
 @pytest.fixture(scope="session")
-def dd_environment(request, ):
+def dd_environment():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
