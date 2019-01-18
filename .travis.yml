@@ -278,7 +278,7 @@ jobs:
       env: CHECK=zk PYTHON3=true
 before_install:
   - bash .travis/prepare.sh
-  - PATH="$PATH:$(pyenv root)/versions/3.6/bin"
+  - PATH="$PATH:$(pyenv root)/versions/3.6.7/bin:$(pyenv root)/versions/3.7.1/bin"
 install:
   - pip install -U pip setuptools codecov
   - pip install ./datadog_checks_dev[cli]
