@@ -718,7 +718,6 @@ class __AgentCheck6(object):
             try:
                 return data.encode('utf-8')
             except Exception:
-                self.log.warning('Error encoding tag to utf-8 encoded string, ignoring tag')
                 return None
 
         return data
