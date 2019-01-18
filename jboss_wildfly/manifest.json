@@ -6,7 +6,7 @@
   "metric_prefix": "jboss.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Gathers various JMX metrics from JBoss and Wildfly Applications",
   "guid": "ff99b3d2-9c14-4cdf-b869-7b8b1cbf0716",
   "support": "core",
   "supported_os": [
