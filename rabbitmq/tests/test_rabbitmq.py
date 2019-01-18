@@ -23,6 +23,10 @@ def test_rabbitmq(aggregator, check):
     for mname in metrics.COMMON_METRICS:
         aggregator.assert_metric_has_tag_prefix(mname, 'rabbitmq_node', count=1)
 
+    from six import iteritems
+    for m, v in iteritems(aggregator._metrics):
+        log.warning("{} {}".format(m, v))
+
     aggregator.assert_metric('rabbitmq.node.partitions', value=0, count=1)
     aggregator.assert_metric('rabbitmq.connections',
                              tags=['rabbitmq_vhost:/', "tag1:1", "tag2"],
