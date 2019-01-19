@@ -37,24 +37,21 @@ class SystemdCheck(AgentCheck):
             self.log.warn("Getting status for all units. Performance might be impacted!")
             self.get_active_inactive_units()
 
-    def get_all_listed_units(self, unit_name):
-        cached_units = self.unit_cache.get(unit_name, {}).get('unit_state')
+    def get_all_listed_units(self, unit_id):
+        cached_units = self.unit_cache.get(unit_id, {}).get('unit_state')
         changes_since = datetime.utcnow().isoformat()
         if cached_units is None:
             units = self.get_all_units()
         else:
-            previous_changes_since = self.unit_state_cache.get(unit_name, {}).get('changes_since')
+            previous_changes_since = self.unit_state_cache.get(unit_id, {}).get('changes_since')
             updated_units = self.update_unit_state(cached_units, previous_changes_since)
 
         # Initialize or update cache for this instance
-        self.unit_state_cache[unit_name] = {
+        self.unit_state_cache[unit_id] = {
             'unit_state': unit_state,
             'changes_since': changes_since
         }
     
-    def update_unit_state(self, cached_units, changes_since):
-        # TODO
-
     def get_active_inactive_units(self):
         # returns the number of active and inactive units
         manager = Manager()
@@ -83,29 +80,27 @@ class SystemdCheck(AgentCheck):
         self.gauge('systemd.units.active', active_units)
         self.gauge('systemd.units.inactive', inactive_units)
         
-    def get_unit_state(self, unit_name):
+    def get_unit_state(self, unit_id):
         try:
-            unit = Unit(unit_name, _autoload=True)
+            unit = Unit(unit_id, _autoload=True)
             # self.log.info(str(unit_name))
-            tag = unit_name.split('.', 1)[0]
-            self.log.info(tag)
             state = unit.Unit.ActiveState
             # Send a service check: OK if the unit is active, CRITICAL if inactive
             if state == b'active':
                 self.service_check(
                     AgentCheck.OK,
-                    tags=["unit:{}".format(unit_name)]
+                    tags=["unit:{}".format(unit_id)]
                 )
             if state == b'inactive':
                 self.service_check(
                     AgentCheck.CRITICAL,
-                    tags=["unit:{}".format(unit_name)]
+                    tags=["unit:{}".format(unit_id)]
                 )
             if unit_id in unit_cache:
                 previous_status = unit_cache[unit_id]['state']
                 if previous_status != active_status:
-                    self.event(...)
-                unit_cache[unit_id]['state'] = active_status
+                    # self.event(...)
+                    unit_cache[unit_id]['state'] = active_status
             else:
                 unit_cache[unit_id]['state'] = active_status
 

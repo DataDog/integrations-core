@@ -10,9 +10,7 @@
   "guid": "acd470e7-5413-4deb-95fc-4b034d904691",
   "support": "core",
   "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
+    "linux"
   ],
   "public_title": "Datadog-Systemd Integration",
   "categories": [
