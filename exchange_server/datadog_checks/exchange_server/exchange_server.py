@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2013-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# datadog
-from datadog_checks.checks.win import PDHBaseCheck
+from datadog_checks.base import PDHBaseCheck
 
 DEFAULT_COUNTERS = [
     # counterset, instance of counter, counter name, metric name
@@ -86,7 +84,6 @@ DEFAULT_COUNTERS = [
     ["MSExchange WorkloadManagement Workloads", None, "ActiveTasks",    "exchange.workload_management.active_tasks",    "gauge"],  # noqa: E501
     ["MSExchange WorkloadManagement Workloads", None, "CompletedTasks", "exchange.workload_management.completed_tasks", "gauge"],  # noqa: E501
     ["MSExchange WorkloadManagement Workloads", None, "QueuedTasks",    "exchange.workload_management.queued_tasks",    "gauge"],  # noqa: E501
-
 ]
 
 
