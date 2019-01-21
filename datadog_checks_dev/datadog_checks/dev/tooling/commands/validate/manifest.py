@@ -43,6 +43,11 @@ OPTIONAL_ATTRIBUTES = {
 
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
+INTEGRATION_TYPE = {
+    "check",
+    "library",
+}
+
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -321,20 +326,10 @@ def manifest(fix, include_extras):
                         file_fixed = True
                     else:
                         display_queue.append((echo_failure, output))
-                elif integration_type != correct_integration_type:
+                elif integration_type not in INTEGRATION_TYPE:
                     file_failures += 1
                     output = '  invalid `type`: {}'.format(integration_type)
-
-                    if fix:
-                        decoded['type'] = correct_integration_type
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `type`: {}'.format(correct_integration_type)))
-
-                        file_failures -= 1
-                        file_fixed = True
-                    else:
-                        display_queue.append((echo_failure, output))
+                    display_queue.append((echo_failure, output))
 
                 # is_public
                 correct_is_public = True
