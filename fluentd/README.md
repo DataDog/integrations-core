@@ -92,7 +92,7 @@ Additional parameters can be used to change the endpoint used in order to go thr
 
 * `host`: Proxy endpoint when logs are not directly forwarded to Datadog (default value is `intake.logs.datadoghq.com`)
 * `port`: Proxy port when logs are not directly forwarded to Datadog (default value is `10516`)
-* `use_ssl`: If `true`, the Agent initializes a secure connection to Datadog. In clear, TCP otherwise (default value is `true`)
+* `use_ssl`: If `true`, the Agent initializes a secure TCP/SSL connection to Datadog. (default value is `true`)
 
 This also can be used to send logs to **Datadog EU** by setting:
 
