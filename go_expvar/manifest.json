@@ -23,5 +23,5 @@
     "mac_os",
     "windows"
   ],
-  "type": "library"
+  "type": "check"
 }
