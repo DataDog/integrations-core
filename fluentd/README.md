@@ -10,6 +10,7 @@ Get metrics from Fluentd to:
 * Correlate the performance of Fluentd with the rest of your applications.
 
 ## Setup
+
 ### Installation
 
 The Fluentd check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Fluentd servers.
@@ -87,6 +88,24 @@ Setup Example:
 </match>
 ```
 
+Additional parameters can be used to change the endpoint used in order to go through a proxy:
+
+* `host`: Proxy endpoint when logs are not directly forwarded to Datadog (default value is `intake.logs.datadoghq.com`)
+* `port`: Proxy port when logs are not directly forwarded to Datadog (default value is `10516`)
+* `use_ssl`: If `true`, the Agent initializes a secure TCP/SSL connection to Datadog. (default value is `true`)
+
+This also can be used to send logs to **Datadog EU** by setting:
+
+```
+<match datadog.**>
+
+  ...
+  host 'tcp-intake.logs.datadoghq.eu'
+  port '443'
+
+</match>
+```
+
 ##### Kubernetes and Docker tags
 
 Datadog tags are critical to be able to jump from one part of the product to another. Having the right metadata associated with your logs is therefore important in jumping from a container view or any container metrics to the most related logs.
@@ -121,7 +140,7 @@ Configuration example:
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The FluentD check does not include any events at this time.
+The FluentD check does not include any events.
 
 ### Service Checks
 

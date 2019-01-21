@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import division
+
 from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import islice
@@ -460,7 +462,7 @@ class ConsulCheck(AgentCheck):
                     tags = main_tags + ['source_datacenter:{}'.format(name),
                                         'dest_datacenter:{}'.format(other_name)]
                     n = len(latencies)
-                    half_n = int(n // 2)
+                    half_n = n // 2
                     if n % 2:
                         median = latencies[half_n]
                     else:
@@ -487,7 +489,7 @@ class ConsulCheck(AgentCheck):
                     latencies.append(distance(node, other))
                 latencies.sort()
                 n = len(latencies)
-                half_n = int(n // 2)
+                half_n = n // 2
                 if n % 2:
                     median = latencies[half_n]
                 else:

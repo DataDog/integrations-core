@@ -44,7 +44,7 @@ Though many metrics-oriented checks are best run on the same host(s) as the moni
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The DNS check does not include any events at this time.
+The DNS check does not include any events.
 
 ### Service Checks
 This agent check tags all service checks it collects with:

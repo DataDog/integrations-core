@@ -20,6 +20,7 @@ jpype1==0.6.3
 kafka-python==1.4.4; sys_platform != 'win32'
 kazoo==2.6.0; sys_platform != 'win32'
 ldap3==2.5
+lxml==4.2.6
 meld3==1.0.2
 ntplib==0.3.3
 paramiko==2.1.5

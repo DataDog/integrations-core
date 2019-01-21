@@ -18,5 +18,5 @@
   "supported_os": [
     "windows"
   ],
-  "type": "check"
+  "type": "library"
 }

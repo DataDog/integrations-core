@@ -34,6 +34,7 @@ stages:
 script:
   - travis_retry ddev test --cov ${CHECK}
   - ddev test ${CHECK} --bench || true
+  - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
 
 # Conditional jobs are currently buggy and verbose.
 #
@@ -85,7 +86,7 @@ jobs:
     - stage: test
       env: CHECK=cassandra_nodetool PYTHON3=true
     - stage: test
-      env: CHECK=ceph
+      env: CHECK=ceph PYTHON3=true
     - stage: test
       env: CHECK=cisco_aci
     - stage: test
@@ -125,6 +126,8 @@ jobs:
     - stage: test
       env: CHECK=gitlab PYTHON3=true
     - stage: test
+      env: CHECK=gitlab_runner PYTHON3=true
+    - stage: test
       env: CHECK=go_expvar PYTHON3=true
     - stage: test
       env: CHECK=gunicorn PYTHON3=true
@@ -139,6 +142,8 @@ jobs:
     - stage: test
       env: CHECK=ibm_mq
     - stage: test
+      env: CHECK=ibm_was PYTHON3=true
+    - stage: test
       env: CHECK=iis
     - stage: test
       env: CHECK=istio
@@ -149,9 +154,9 @@ jobs:
     - stage: test
       env: CHECK=kube_controller_manager PYTHON3=true
     - stage: test
-      env: CHECK=kube_dns
+      env: CHECK=kube_dns PYTHON3=true
     - stage: test
-      env: CHECK=kube_proxy
+      env: CHECK=kube_proxy PYTHON3=true
     - stage: test
       env: CHECK=kubelet
     - stage: test
@@ -179,7 +184,7 @@ jobs:
     - stage: test
       env: CHECK=mysql PYTHON3=true
     - stage: test
-      env: CHECK=nagios
+      env: CHECK=nagios PYTHON3=true
     - stage: test
       env: CHECK=network
     - stage: test
@@ -225,7 +230,7 @@ jobs:
     - stage: test
       env: CHECK=snmp
     - stage: test
-      env: CHECK=spark
+      env: CHECK=spark PYTHON3=true
     - stage: test
       env: CHECK=sqlserver
     - stage: test

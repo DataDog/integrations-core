@@ -63,7 +63,7 @@ See the [sample  cassandra.d/conf.yaml][103] for all available configuration opt
 See [metadata.csv][106] for a list of metrics provided by this integration.
 
 ### Events
-The Cassandra check does not include any events at this time.
+The Cassandra check does not include any events.
 
 ### Service Checks
 **cassandra.can_connect**

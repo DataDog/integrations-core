@@ -121,7 +121,7 @@ Following metrics are still sent but will be removed eventually:
  * `zookeeper.bytes_sent`
 
 ### Events
-The Zookeeper check does not include any events at this time.
+The Zookeeper check does not include any events.
 
 ### Service Checks
 

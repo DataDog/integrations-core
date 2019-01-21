@@ -51,10 +51,10 @@ Note: spaces are replaced by underscores in Datadog.
 ## Data Collected
 ### Metrics
 
-The Windows Service check does not include any metrics at this time.
+The Windows Service check does not include any metrics.
 
 ### Events
-The Windows Service check does not include any events at this time.
+The Windows Service check does not include any events.
 
 ### Service Checks
 **windows_service.state**:
