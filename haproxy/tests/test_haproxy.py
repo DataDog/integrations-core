@@ -12,7 +12,7 @@ from .common import (BACKEND_SERVICES, BACKEND_LIST, BACKEND_TO_ADDR, BACKEND_CH
                      FRONTEND_CHECK_GAUGES_POST_1_4, BACKEND_CHECK_GAUGES_POST_1_5, BACKEND_CHECK_GAUGES_POST_1_7,
                      FRONTEND_CHECK_RATES, FRONTEND_CHECK_RATES_POST_1_4, BACKEND_CHECK_RATES_POST_1_4,
                      BACKEND_CHECK_RATES, requires_socket_support, SERVICE_CHECK_NAME, STATS_URL, CHECK_CONFIG_OPEN,
-                     STATS_URL_OPEN, CONFIG_TCPSOCKET, STATS_SOCKET, CONFIG_UNIXSOCKET)
+                     STATS_URL_OPEN, CONFIG_TCPSOCKET, STATS_SOCKET, CONFIG_UNIXSOCKET, platform_supports_sockets)
 
 
 def _test_frontend_metrics(aggregator, shared_tag):
@@ -143,10 +143,10 @@ def test_open_config(aggregator, check):
     aggregator.assert_all_metrics_covered()
 
 
-@requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'],
+@pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'] and
+                    not platform_supports_sockets,
                     reason='Sockets with operator level are only available with haproxy 1.7')
 def test_tcp_socket(aggregator, check):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
