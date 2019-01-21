@@ -82,6 +82,6 @@ instances:
 
 #logs:
 #  - type: file
-#    path: opt/IBM/WebSphere/AppServer/profiles/profile/logs/server1/*.log
+#    path: /opt/IBM/WebSphere/AppServer/profiles/InfoSphere/logs/server1/*.log
 #    source: ibm_was
 #    service: websphere
