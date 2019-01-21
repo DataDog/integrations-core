@@ -22,16 +22,14 @@ instances:
   #    - <KEY_2>:<VALUE_2>
 
 ## Log section (Available for Agent >=6.0)
+## - type : (mandatory) type of log input source (tcp / udp / file)
+##   port / path : (mandatory) Use port for types tcp or udp. Use path for type file.
+##   service : (mandatory) name of the service owning the log
+##   source : (mandatory) attribute that defines which integration is sending the logs
+##   sourcecategory : (optional) Multiple value attribute used to refine the source attribute.
+##   tags: (optional) Add tags to each log collected.
 
 #logs:
-
-  ## - type : (mandatory) type of log input source (tcp / udp / file)
-  ##   port / path : (mandatory) Use port for types tcp or udp. Use path for type file.
-  ##   service : (mandatory) name of the service owning the log
-  ##   source : (mandatory) attribute that defines which integration is sending the logs
-  ##   sourcecategory : (optional) Multiple value attribute used to refine the source attribute.
-  ##   tags: (optional) Add tags to each log collected.
-
   # - type: file
   #   path: /var/log/nginx/access.log
   #   service: webapp
