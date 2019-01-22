@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from six import iteritems
+
 from datadog_checks.base import AgentCheck, PDHBaseCheck
 from datadog_checks.utils.containers import hash_mutable
 
@@ -67,7 +69,7 @@ class IIS(PDHBaseCheck):
                     self.log.error("Failed to get_all_values %s %s" % (inst_name, dd_name))
                     continue
 
-                for sitename, val in vals.iteritems():
+                for sitename, val in iteritems(vals):
                     tags = []
                     if key in self._tags:
                         tags = list(self._tags[key])
