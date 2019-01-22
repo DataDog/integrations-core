@@ -11,7 +11,8 @@ from copy import deepcopy
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxy
 
-from .common import HERE, CHECK_CONFIG, USERNAME, PASSWORD, STATS_URL, STATS_URL_OPEN, platform_supports_sockets
+from .common import (HERE, CHECK_CONFIG, USERNAME, PASSWORD, STATS_URL, STATS_URL_OPEN, CHECK_CONFIG_OPEN,
+                     platform_supports_sockets)
 
 log = logging.getLogger('test_haproxy')
 
@@ -68,7 +69,7 @@ def dd_environment():
                     config['unixsocket_url'] = unixsocket_url
                     yield config
         else:
-            yield deepcopy(CHECK_CONFIG)
+            yield deepcopy(CHECK_CONFIG_OPEN)
 
 
 @pytest.fixture
