@@ -1,8 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 system.net.bytes_rcvd,gauge,,byte,second,The number of bytes received on a device per second.,0,system,bytes rcvd
 system.net.bytes_sent,gauge,,byte,second,The number of bytes sent from a device per second.,0,system,bytes sent
-system.net.conntrack.count,gauge,,count,connections,The number of connections present in the conntrack table.,0,system,connections
-system.net.conntrack.max,gauge,,count,entries,Conntrack table max capacity.,0,system,table entries
+system.net.conntrack.count,gauge,,connections,connection,The number of connections present in the conntrack table.,0,system,connections
+system.net.conntrack.max,gauge,,entries,entry,Conntrack table max capacity.,0,system,table entries
 system.net.packets_in.count,gauge,,packet,second,The number of packets of data received by the interface.,0,system,packets in
 system.net.packets_in.error,gauge,,error,second,The number of packet receive errors detected by the device driver.,-1,system,pkts in err
 system.net.packets_out.count,gauge,,packet,second,The number of packets of data transmitted by the interface.,0,system,packets out
