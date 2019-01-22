@@ -5,12 +5,13 @@
 """
 Collects network metrics.
 """
-# stdlib
+
 import re
 import socket
 from collections import defaultdict
 
-# project
+from six import iteritems, PY3
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.platform import Platform
 from datadog_checks.utils.subprocess_output import (
@@ -18,6 +19,10 @@ from datadog_checks.utils.subprocess_output import (
     SubprocessOutputEmptyError,
 )
 import psutil
+
+if PY3:
+    long = int
+
 
 BSD_TCP_METRICS = [
     (re.compile(
@@ -260,7 +265,7 @@ class Network(AgentCheck):
         assert len(vals_by_metric) == len(expected_metrics)
 
         count = 0
-        for metric, val in vals_by_metric.iteritems():
+        for metric, val in iteritems(vals_by_metric):
             self.rate('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network metrics for interface %s" % (count, iface))
@@ -333,7 +338,7 @@ class Network(AgentCheck):
                         metrics = self._parse_linux_cx_state(lines[1:], self.tcp_states['ss'], 0, protocol=protocol,
                                                              ip_version=ip_version)
                         # Only send the metrics which match the loop iteration's ip version
-                        for stat, metric in self.cx_state_gauge.iteritems():
+                        for stat, metric in iteritems(self.cx_state_gauge):
                             if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
                                 self.gauge(metric, metrics.get(metric), tags=custom_tags)
 
@@ -352,7 +357,7 @@ class Network(AgentCheck):
                 # udp6       0      0 :::41458                :::*
 
                 metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
-                for metric, value in metrics.iteritems():
+                for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
             except SubprocessOutputEmptyError:
                 self.log.exception("Error collecting connection stats.")
@@ -438,7 +443,9 @@ class Network(AgentCheck):
         Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
         Returns a dict metric_name -> value
         """
-        metrics = dict.fromkeys(self.cx_state_gauge.values(), 0)
+        metrics = {}
+        for _, val in iteritems(self.cx_state_gauge.values):
+            metrics[val] = 0
         for l in lines:
             cols = l.split()
             if cols[0].startswith('tcp') or protocol == 'tcp':
@@ -559,7 +566,7 @@ class Network(AgentCheck):
         try:
             netstat, _, _ = get_subprocess_output(["kstat", "-p", "link:0:"], self.log)
             metrics_by_interface = self._parse_solaris_netstat(netstat)
-            for interface, metrics in metrics_by_interface.iteritems():
+            for interface, metrics in iteritems(metrics_by_interface):
                 self._submit_devicemetrics(interface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting kstat stats.")
@@ -701,7 +708,7 @@ class Network(AgentCheck):
             else:
                 metrics[metric] += 1
 
-        for metric, value in metrics.iteritems():
+        for metric, value in iteritems(metrics):
             self.gauge(metric, value, tags=tags)
 
     def _cx_counters_psutil(self, tags=None):
@@ -709,7 +716,7 @@ class Network(AgentCheck):
         Collect metrics about interfaces counters using psutil
         """
         tags = [] if tags is None else tags
-        for iface, counters in psutil.net_io_counters(pernic=True).iteritems():
+        for iface, counters in iteritems(psutil.net_io_counters(pernic=True)):
             metrics = {
                 'bytes_rcvd': counters.bytes_recv,
                 'bytes_sent': counters.bytes_sent,
