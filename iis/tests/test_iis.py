@@ -82,7 +82,7 @@ def test_check(aggregator, pdh_mocks_fixture):
     instance = WIN_SERVICES_CONFIG
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
-
+    raise Exception("Metrics: {}".format(aggregator._metrics))
     # Test metrics
     # ... normalize site-names
     default_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", WIN_SERVICES_CONFIG['sites'][0])
