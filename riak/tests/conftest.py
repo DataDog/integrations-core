@@ -35,6 +35,8 @@ def wait_for_riak():
     if not can_access:
         raise Exception("Cannot access Riak")
 
+
+def populate():
     data = 'herzlich willkommen'
     headers = {"Content-Type": "text/plain"}
     for _ in range(0, 10):
@@ -49,13 +51,11 @@ def wait_for_riak():
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    env = os.environ
-    env['RIAK_CONFIG'] = os.path.join(common.HERE, 'config')
-
+    env = {'RIAK_CONFIG': os.path.join(common.HERE, 'config')}
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'riak.yaml'),
         env_vars=env,
-        conditions=[WaitFor(wait_for_riak)],
+        conditions=[WaitFor(wait_for_riak), populate],
         sleep=10,  # some stats require a bit of time before the test will capture them
     ):
         yield common.INSTANCE
