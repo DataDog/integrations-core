@@ -444,7 +444,7 @@ class Network(AgentCheck):
         Returns a dict metric_name -> value
         """
         metrics = {}
-        for _, val in iteritems(self.cx_state_gauge.values):
+        for _, val in iteritems(self.cx_state_gauge):
             metrics[val] = 0
         for l in lines:
             cols = l.split()
