@@ -1,8 +1,7 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.checks import AgentCheck
-from datadog_checks.checks.win import PDHBaseCheck
+from datadog_checks.base import AgentCheck, PDHBaseCheck
 from datadog_checks.utils.containers import hash_mutable
 
 
@@ -48,7 +47,6 @@ class IIS(PDHBaseCheck):
         PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
 
     def check(self, instance):
-
         sites = instance.get('sites')
         if sites is None:
             expected_sites = set()
