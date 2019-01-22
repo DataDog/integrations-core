@@ -37,8 +37,15 @@ CX_STATE_GAUGES_VALUES = {
 
 if PY3:
     ESCAPE_ENCODING = 'unicode-escape'
+
+    def decode_string(s):
+        return s.decode(ESCAPE_ENCODING)
 else:
     ESCAPE_ENCODING = 'string-escape'
+
+    def decode_string(s):
+        s.decode(ESCAPE_ENCODING)
+        return s.decode("utf-8")
 
 
 @pytest.fixture
@@ -58,8 +65,7 @@ def ss_subprocess_mock(*args, **kwargs):
 
     with open(os.path.join(FIXTURE_DIR, file_name), 'rb') as f:
         contents = f.read()
-        contents = contents.decode(ESCAPE_ENCODING)
-        return contents.decode("utf-8"), None, None
+        return decode_string(contents), None, None
 
 
 def netstat_subprocess_mock(*args, **kwargs):
@@ -68,8 +74,7 @@ def netstat_subprocess_mock(*args, **kwargs):
     elif args[0][0] == 'netstat':
         with open(os.path.join(FIXTURE_DIR, 'netstat'), 'rb') as f:
             contents = f.read()
-            contents = contents.decode(ESCAPE_ENCODING)
-            return contents.decode("utf-8"), None, None
+            return decode_string(contents), None, None
 
 
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
