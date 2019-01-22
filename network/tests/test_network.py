@@ -35,6 +35,11 @@ CX_STATE_GAUGES_VALUES = {
     'system.net.tcp6.time_wait': 1,
 }
 
+if PY3:
+    ESCAPE_ENCODING = 'unicode-escape'
+else:
+    ESCAPE_ENCODING = 'string-escape'
+
 
 @pytest.fixture
 def network_check():
@@ -53,7 +58,7 @@ def ss_subprocess_mock(*args, **kwargs):
 
     with open(os.path.join(FIXTURE_DIR, file_name), 'rb') as f:
         contents = f.read()
-        contents = contents.decode('string-escape')
+        contents = contents.decode(ESCAPE_ENCODING)
         return contents.decode("utf-8"), None, None
 
 
@@ -63,7 +68,7 @@ def netstat_subprocess_mock(*args, **kwargs):
     elif args[0][0] == 'netstat':
         with open(os.path.join(FIXTURE_DIR, 'netstat'), 'rb') as f:
             contents = f.read()
-            contents = contents.decode('string-escape')
+            contents = contents.decode(ESCAPE_ENCODING)
             return contents.decode("utf-8"), None, None
 
 
