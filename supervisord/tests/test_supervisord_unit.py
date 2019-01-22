@@ -2,14 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.supervisord.supervisord import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
-from mock import patch
-import pytest
 from socket import socket
+
+import pytest
 import xmlrpclib
+from mock import patch
+
+from datadog_checks.supervisord.supervisord import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
+
 from .common import (
-    TEST_CASES,
-    supervisor_check
+    TEST_CASES
 )
 
 
@@ -22,7 +24,7 @@ def mock_server(url):
 
 
 @patch('xmlrpclib.Server', side_effect=mock_server)
-def test_check(mock_server, aggregator):
+def test_check(mock_server, aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
     for tc in TEST_CASES:
@@ -31,7 +33,7 @@ def test_check(mock_server, aggregator):
 
             try:
                 # Run the check
-                supervisor_check.check(instance)
+                check.check(instance)
             except Exception as e:
                 if 'error_message' in tc:  # excepted error
                     assert str(e) == tc['error_message']
@@ -53,7 +55,7 @@ def test_check(mock_server, aggregator):
                 aggregator.reset()
 
 
-def test_build_message():
+def test_build_message(check):
     """Unit test supervisord build service check message."""
     time_stop = 0
     time_start = 1414815388
@@ -90,7 +92,7 @@ Stop time: {time_stop}\nExit Status: 0""".format(
         time_stop='' if time_stop == 0 else FORMAT_TIME(time_stop)
     )
 
-    assert expected_message == supervisor_check._build_message(process)
+    assert expected_message == check._build_message(process)
 
 
 class MockXmlRcpServer:
