@@ -51,7 +51,7 @@ def ss_subprocess_mock(*args, **kwargs):
     elif args[0][-1] == '-6' and args[0][-3] == '-t':
         file_name = 'ss_ipv6_tcp'
 
-    with open(os.path.join(FIXTURE_DIR, file_name)) as f:
+    with open(os.path.join(FIXTURE_DIR, file_name), 'rb') as f:
         contents = f.read()
         contents = contents.decode('string-escape')
         return contents.decode("utf-8"), None, None
