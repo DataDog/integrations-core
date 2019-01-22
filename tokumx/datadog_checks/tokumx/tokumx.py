@@ -8,7 +8,7 @@ import time
 from six import iteritems, PY3
 
 import bson
-from pymongo import (
+from .vendor.pymongo import (
     MongoClient,
     ReadPreference,
     errors,

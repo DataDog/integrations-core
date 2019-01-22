@@ -4,10 +4,10 @@
 
 import pytest
 import os
-import pymongo
 
 from datadog_checks.dev import docker_run
 from datadog_checks.tokumx import TokuMX
+from datadog_checks.tokumx.vendor import pymongo
 
 from . import common
 
@@ -40,7 +40,7 @@ def check():
 
 @pytest.fixture(scope="session")
 def set_up_tokumx():
-    cli = pymongo.mongo_client.MongoClient(
+    cli = pymongo.MongoClient(
         common.TOKUMX_SERVER,
         socketTimeoutMS=30000,
         read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)
@@ -70,7 +70,7 @@ def set_up_tokumx():
 
 
 def tear_down_tokumx():
-    cli = pymongo.mongo_client.MongoClient(
+    cli = pymongo.MongoClient(
         common.TOKUMX_SERVER,
         socketTimeoutMS=30000,
         read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)
