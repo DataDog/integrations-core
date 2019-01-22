@@ -11,6 +11,7 @@ from collections import defaultdict
 from copy import deepcopy
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.couch import CouchDb
 
 from . import common
@@ -51,9 +52,8 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
         env_vars=env,
-        endpoints=[common.URL],
+        conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version)],
     ):
-        generate_data(couch_version)
         yield common.BASIC_CONFIG
 
 
