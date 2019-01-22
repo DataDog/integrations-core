@@ -48,10 +48,6 @@ def dd_environment(instance_single_node_install):
 
 
 @pytest.fixture
-def check():
-    return ConsulCheck(common.CHECK_NAME, {}, {})
-
-@pytest.fixture
 def instance():
     return {
         'url': common.URL,
