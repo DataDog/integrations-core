@@ -440,7 +440,8 @@ class Network(AgentCheck):
                 conntrack_count = 0
                 while 1:
                     conntrack_buffer = conntrack_file.read(65536)
-                    if not conntrack_buffer: break
+                    if not conntrack_buffer:
+                        break
                     conntrack_count += conntrack_buffer.count('\n')
                 self.gauge('system.net.conntrack.count', conntrack_count, tags=custom_tags)
         except IOError:
@@ -450,7 +451,7 @@ class Network(AgentCheck):
         try:
             with open(proc_conntrack_max_path, 'r') as conntrack_max_file:
                 # Starting at 0 as the last line has a line return
-                conntrack_max=conntrack_max_file.read()
+                conntrack_max = conntrack_max_file.read()
                 self.gauge('system.net.conntrack.max', conntrack_max, tags=custom_tags)
         except IOError:
             self.log.debug("Unable to read %s. Skipping nf_conntrack_max metrics pull.", proc_conntrack_max_path)
