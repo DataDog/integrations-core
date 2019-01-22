@@ -17,10 +17,11 @@ log = logging.getLogger('test_haproxy')
 
 
 def wait_for_haproxy():
-    if platform_supports_sockets:
-        res = requests.get(STATS_URL, auth=(USERNAME, PASSWORD))
-        res.raise_for_status()
+    res = requests.get(STATS_URL, auth=(USERNAME, PASSWORD))
+    res.raise_for_status()
 
+
+def wait_for_haproxy_open():
     res_open = requests.get(STATS_URL_OPEN)
     res_open.raise_for_status()
 
@@ -30,43 +31,44 @@ def dd_environment():
     env = {}
     env['HAPROXY_CONFIG_DIR'] = os.path.join(HERE, 'compose')
     env['HAPROXY_CONFIG_OPEN'] = os.path.join(HERE, 'compose', 'haproxy-open.cfg')
-    if not platform_supports_sockets:
-        with docker_run(
-            compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
-            env_vars=env,
-            service_name="haproxy-open",
-            conditions=[WaitFor(wait_for_haproxy)],
-        ):
-            yield deepcopy(CHECK_CONFIG)
-    else:
-        with TempDir() as temp_dir:
-            host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
-            env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
-            if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '7']:
-                env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_7.cfg')
-            env['HAPROXY_SOCKET_DIR'] = temp_dir
+    with docker_run(
+        compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
+        env_vars=env,
+        service_name="haproxy-open",
+        conditions=[WaitFor(wait_for_haproxy_open)],
+    ):
+        if platform_supports_sockets:
+            with TempDir() as temp_dir:
+                host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
+                env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
+                if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '7']:
+                    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_7.cfg')
+                env['HAPROXY_SOCKET_DIR'] = temp_dir
 
-            with docker_run(
-                compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
-                env_vars=env,
-                conditions=[WaitFor(wait_for_haproxy)],
-            ):
-                try:
-                    # on linux this needs access to the socket
-                    # it won't work without access
-                    chown_args = []
-                    user = getpass.getuser()
-                    if user != 'root':
-                        chown_args += ['sudo']
-                    chown_args += ["chown", user, host_socket_path]
-                    subprocess.check_call(chown_args, env=env)
-                except subprocess.CalledProcessError:
-                    # it's not always bad if this fails
-                    pass
-                config = deepcopy(CHECK_CONFIG)
-                unixsocket_url = 'unix://{0}'.format(host_socket_path)
-                config['unixsocket_url'] = unixsocket_url
-                yield config
+                with docker_run(
+                    compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
+                    env_vars=env,
+                    service_name="haproxy",
+                    conditions=[WaitFor(wait_for_haproxy)],
+                ):
+                    try:
+                        # on linux this needs access to the socket
+                        # it won't work without access
+                        chown_args = []
+                        user = getpass.getuser()
+                        if user != 'root':
+                            chown_args += ['sudo']
+                        chown_args += ["chown", user, host_socket_path]
+                        subprocess.check_call(chown_args, env=env)
+                    except subprocess.CalledProcessError:
+                        # it's not always bad if this fails
+                        pass
+                    config = deepcopy(CHECK_CONFIG)
+                    unixsocket_url = 'unix://{0}'.format(host_socket_path)
+                    config['unixsocket_url'] = unixsocket_url
+                    yield config
+        else:
+            yield deepcopy(CHECK_CONFIG)
 
 
 @pytest.fixture

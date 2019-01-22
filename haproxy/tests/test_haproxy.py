@@ -145,7 +145,7 @@ def test_open_config(aggregator, check):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'] and
+@pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'] or
                     not platform_supports_sockets,
                     reason='Sockets with operator level are only available with haproxy 1.7')
 def test_tcp_socket(aggregator, check):

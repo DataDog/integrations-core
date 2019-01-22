@@ -34,9 +34,8 @@ USERNAME = 'datadog'
 PASSWORD = 'isdevops'
 
 platform_supports_sockets = ON_LINUX
-requires_socket_support = pytest.mark.skipif(
-    not platform_supports_sockets, reason='Windows sockets are not file handles'
-)
+requires_socket_support = pytest.mark.skipif(not platform_supports_sockets,
+                                             reason='Windows sockets are not file handles')
 
 CONFIG_UNIXSOCKET = {
     'collect_aggregates_only': False,
