@@ -378,8 +378,6 @@ class Redis(AgentCheck):
         #   'id': 496L,
         #   'start_time': 1422529869}
         for slowlog in slowlogs:
-            slowlog['command'] = ensure_unicode(slowlog['command'])
-
             if slowlog['start_time'] > max_ts:
                 max_ts = slowlog['start_time']
 
@@ -389,7 +387,7 @@ class Redis(AgentCheck):
             # an empty `command` field
             # FIXME when https://github.com/andymccurdy/redis-py/pull/622 is released in redis-py
             if command:
-                slowlog_tags.append('command:{}'.format(command[0]))
+                slowlog_tags.append('command:{}'.format(ensure_unicode(command[0])))
 
             value = slowlog['duration']
             self.histogram('redis.slowlog.micros', value, tags=slowlog_tags)
