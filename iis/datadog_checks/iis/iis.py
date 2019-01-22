@@ -114,5 +114,5 @@ class IIS(PDHBaseCheck):
             tags = []
             if key in self._tags:
                 tags = list(self._tags[key])
-            tags.append("site:{}".format(self.normalize(site)))
+            tags.append("site:{}".format(ensure_unicode(self.normalize(site))))
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)
