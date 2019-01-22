@@ -147,11 +147,11 @@ class FargateCheck(AgentCheck):
 
             value_system = cpu_stats.get('system_cpu_usage')
             if value_system is not None:
-                self.rate('ecs.fargate.cpu.system', value_system, tags)
+                self.rate('ecs.fargate.cpu.system', value_system // 10**9, tags)
 
             value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
             if value_total is not None:
-                self.rate('ecs.fargate.cpu.user', value_total, tags)
+                self.rate('ecs.fargate.cpu.user', value_total // 10**9, tags)
 
             prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
             prevalue_system = prev_cpu_stats.get('system_cpu_usage')
