@@ -54,8 +54,7 @@ def dd_environment():
         endpoints=[common.URL],
     ):
         generate_data(couch_version)
-        instance = common.BASIC_CONFIG
-        yield instance
+        yield common.BASIC_CONFIG
 
 
 def generate_data(couch_version):
