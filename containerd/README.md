@@ -2,17 +2,17 @@
 
 ## Overview
 
-This check monitors the Container Runtime Containerd
+This Check monitors the Container Runtime Containerd.
 
 ## Setup
 
 ### Installation
 
-Containerd is a core agent 6 check and thus needs to be configured in both in `datadog.yaml` and with `containerd.d/conf.yaml`.
+Containerd is a core Agent 6 check and thus needs to be configured in both in `datadog.yaml` and with `containerd.d/conf.yaml`.
 
-In `datadog.yaml` configure your `cri_socket_path` for the agent to query Containerd and in `containerd.d/conf.yaml` configure the check instance settings such as `filters` for the events.
+In `datadog.yaml`, configure your `cri_socket_path` for the Agent to query Containerd. In `containerd.d/conf.yaml`, configure the Check instance settings (such as `filters`) for the events.
 
-**Note** if you are using the agent in a container, setting `DD_CRI_SOCKET_PATH` environment variable automatically enables the `Containerd` check with the default configuration.
+**Note**: If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable automatically enables the `Containerd` Check with the default configuration.
 
 ### Configuration
 
@@ -32,17 +32,17 @@ In `datadog.yaml` configure your `cri_socket_path` for the agent to query Contai
 
 Containerd collects metrics about the resource usage of your containers.
 
-CPU, memory, block I/O or huge page table metrics are collected out of the box and you can additionally collect some disk metrics.
+CPU, memory, block I/O, or huge page table metrics are collected out of the box. Additionally, you can also collect some disk metrics.
 
-See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this Integration.
 
 ### Service Checks
 
-Containerd includes a service check `containerd.health` to notify on the health of the connection to the Containerd Socket.
+Containerd includes a Service Check `containerd.health` to notify on the health of the connection to the Containerd Socket.
 
 ### Events
 
-The Containerd check can collect events, you can use `filters` to select the event kinds you want to get. Refer to the [sample containerd.d/conf.yaml][1] to have more details.
+The Containerd Check can collect events. Use `filters` to select the relevant events. Refer to the [sample containerd.d/conf.yaml][1] to have more details.
 
 ## Troubleshooting
 
