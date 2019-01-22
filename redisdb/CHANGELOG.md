@@ -1,5 +1,10 @@
 # CHANGELOG - redisdb
 
+## 1.9.0 / 2019-01-22
+
+* [Fixed] Only try to decode slowlog command entrypoint. See [#2998](https://github.com/DataDog/integrations-core/pull/2998).
+* [Added] Finish Python 3 Support. See [#2951](https://github.com/DataDog/integrations-core/pull/2951).
+
 ## 1.8.0 / 2018-11-30
 
 * [Added] Support Python 3. See [#2422](https://github.com/DataDog/integrations-core/pull/2422).
