@@ -61,7 +61,7 @@ def netstat_subprocess_mock(*args, **kwargs):
     if args[0][0] == 'ss':
         raise OSError
     elif args[0][0] == 'netstat':
-        with open(os.path.join(FIXTURE_DIR, 'netstat'), 'br') as f:
+        with open(os.path.join(FIXTURE_DIR, 'netstat'), 'rb') as f:
             contents = f.read()
             contents = contents.decode('string-escape')
             return contents.decode("utf-8"), None, None
