@@ -228,7 +228,7 @@ jobs:
     - stage: test
       env: CHECK=riakcs PYTHON3=true
     - stage: test
-      env: CHECK=snmp
+      env: CHECK=snmp PYTHON3=true
     - stage: test
       env: CHECK=spark PYTHON3=true
     - stage: test
