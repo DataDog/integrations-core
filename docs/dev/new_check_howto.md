@@ -125,7 +125,7 @@ class MyCheck(AgentCheck):
                 # Page is accessible but the string was not found.
                 self.service_check('my_check.all_good', self.WARNING)
         except Exception as e:
-            # Something went horribly wrong. Ideally we'd be more specific…
+            # Something went horribly wrong. Ideally we'd be more specific...
             self.service_check('my_check.all_good', self.CRITICAL, e)
 ```
 
