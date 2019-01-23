@@ -107,13 +107,25 @@ class ConsulCheck(AgentCheck):
 
             resp.raise_for_status()
 
-        except requests.exceptions.Timeout:
-            self.log.exception('Consul request to {} timed out'.format(url))
-            self.service_check(self.CONSUL_CAN_CONNECT, self.CRITICAL, tags=service_check_tags)
+        except requests.exceptions.Timeout as e:
+            msg = 'Consul request to {} timed out'.format(url)
+            self.log.exception(msg)
+            self.service_check(
+                self.CONSUL_CAN_CONNECT,
+                self.CRITICAL,
+                tags=service_check_tags,
+                message="{}: {}".format(msg, e)
+            )
             raise
-        except Exception:
-            self.log.exception("Consul request to {} failed".format(url))
-            self.service_check(self.CONSUL_CAN_CONNECT, self.CRITICAL, tags=service_check_tags)
+        except Exception as e:
+            msg = "Consul request to {} failed".format(url)
+            self.log.exception(msg)
+            self.service_check(
+                self.CONSUL_CAN_CONNECT,
+                self.CRITICAL,
+                tags=service_check_tags,
+                message="{}: {}".format(msg, e)
+            )
             raise
         else:
             self.service_check(self.CONSUL_CAN_CONNECT, self.OK, tags=service_check_tags)

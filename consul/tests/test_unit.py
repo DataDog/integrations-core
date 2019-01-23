@@ -119,20 +119,24 @@ def test_consul_request(aggregator, instance):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
     with mock.patch("datadog_checks.consul.consul.requests") as mock_requests:
         consul_check.consul_request(instance, "foo")
+        url = "{}/{}".format(instance["url"], "foo")
         aggregator.assert_service_check(
             "consul.can_connect",
             ConsulCheck.OK,
-            tags=['url:{}/{}'.format(instance["url"], "foo")]
+            tags=["url:{}".format(url)],
+            count=1,
         )
 
         aggregator.reset()
-        mock_requests.get.side_effect = Exception
+        mock_requests.get.side_effect = Exception("message")
         with pytest.raises(Exception):
             consul_check.consul_request(instance, "foo")
         aggregator.assert_service_check(
             "consul.can_connect",
             ConsulCheck.CRITICAL,
-            tags=['url:{}/{}'.format(instance["url"], "foo")]
+            tags=["url:{}".format(url)],
+            count=1,
+            message="Consul request to {} failed: message".format(url)
         )
 
 
