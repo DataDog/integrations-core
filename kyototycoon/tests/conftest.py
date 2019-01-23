@@ -33,7 +33,7 @@ def dd_environment():
             'X-Kt-Mode': 'set'
         }
 
-        for i in xrange(100):
+        for i in range(100):
             requests.put(URL, data=data, headers=headers)
             requests.get(URL)
 

@@ -162,7 +162,7 @@ jobs:
     - stage: test
       env: CHECK=kubernetes_state
     - stage: test
-      env: CHECK=kyototycoon
+      env: CHECK=kyototycoon PYTHON3=true
     - stage: test
       env: CHECK=lighttpd PYTHON3=true
     - stage: test

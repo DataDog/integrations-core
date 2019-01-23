@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import itervalues
 
 from copy import deepcopy
 
@@ -20,10 +21,10 @@ def test_check(aggregator, dd_environment):
     # run the check
     kt.check(deepcopy(DEFAULT_INSTANCE))
 
-    GAUGES = KyotoTycoonCheck.GAUGES.values()
-    DB_GAUGES = KyotoTycoonCheck.DB_GAUGES.values()
-    TOTALS = KyotoTycoonCheck.TOTALS.values()
-    RATES = KyotoTycoonCheck.RATES.values()
+    GAUGES = list(itervalues(KyotoTycoonCheck.GAUGES))
+    DB_GAUGES = list(itervalues(KyotoTycoonCheck.DB_GAUGES))
+    TOTALS = list(itervalues(KyotoTycoonCheck.TOTALS))
+    RATES = list(itervalues(KyotoTycoonCheck.RATES))
 
     # all the RATE type metrics
     ALL_RATES = TOTALS + RATES
