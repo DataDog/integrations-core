@@ -2,15 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
+
 import mock
 import os
 
-# 3rd-party
 import pytest
 from requests.exceptions import HTTPError
 
-# project
+from datadog_checks.utils.common import ensure_unicode
+
 from datadog_checks.istio import Istio
 
 
@@ -165,7 +165,7 @@ class MockResponse:
     def iter_lines(self, **_):
         content = self.content.pop(0)
         for elt in content.split("\n"):
-            yield elt
+            yield ensure_unicode(elt)
 
     def raise_for_status(self):
         if self.status != 200:
@@ -188,9 +188,9 @@ def mesh_mixture_fixture():
     mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'istio', 'mesh.txt')
     mixer_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'istio', 'mixer.txt')
     responses = []
-    with open(mesh_file_path, 'rb') as f:
+    with open(mesh_file_path, 'r') as f:
         responses.append(f.read())
-    with open(mixer_file_path, 'rb') as f:
+    with open(mixer_file_path, 'r') as f:
         responses.append(f.read())
 
     with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
