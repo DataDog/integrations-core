@@ -308,8 +308,12 @@ class Redis(AgentCheck):
                         keylen = db_conn.hlen(key)
                         lengths[text_key] += keylen
                         lengths_overall[text_key] += keylen
+                    elif key_type == 'string':
+                        # Send 1 if the key exists as a string
+                        lengths[text_key] += 1
+                        lengths_overall[text_key] += 1
                     else:
-                        # If the type is unknown, it might be because the key doesn't exist,
+                        # If the type is 'none', it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.
                         lengths[text_key] += 0
                         lengths_overall[text_key] += 0
