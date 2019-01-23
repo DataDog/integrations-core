@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-
 import pytest
 import mock
 
@@ -12,8 +10,9 @@ from . import common
 pytestmark = pytest.mark.v1
 
 
-def test_couch(aggregator, check, couch_cluster):
-
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_couch(aggregator, check, instance):
     check.check(common.BASIC_CONFIG)
 
     # Metrics should have been emitted for any publicly readable databases.
@@ -34,7 +33,9 @@ def test_couch(aggregator, check, couch_cluster):
                                     tags=common.BASIC_CONFIG_TAGS, count=2)
 
 
-def test_bad_config(aggregator, check):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_bad_config(aggregator, check, instance):
     """
     Test the check with various bogus instances
     """
@@ -56,12 +57,12 @@ def test_bad_config(aggregator, check):
                                         tags=common.BAD_CONFIG_TAGS, count=1)
 
 
-def test_couch_whitelist(aggregator, check, couch_cluster):
-
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_couch_whitelist(aggregator, check, instance):
     DB_WHITELIST = ["_users"]
-    config = deepcopy(common.BASIC_CONFIG)
-    config["db_whitelist"] = DB_WHITELIST
-    check.check(config)
+    instance["db_whitelist"] = DB_WHITELIST
+    check.check(instance)
 
     for db_name in common.DB_NAMES:
         expected_tags = common.BASIC_CONFIG_TAGS + [
@@ -75,12 +76,12 @@ def test_couch_whitelist(aggregator, check, couch_cluster):
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-def test_couch_blacklist(aggregator, check, couch_cluster):
-
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_couch_blacklist(aggregator, check, instance):
     DB_BLACKLIST = ["_replicator"]
-    config = deepcopy(common.BASIC_CONFIG)
-    config["db_blacklist"] = DB_BLACKLIST
-    check.check(config)
+    instance["db_blacklist"] = DB_BLACKLIST
+    check.check(instance)
 
     for db_name in common.DB_NAMES:
         expected_tags = common.BASIC_CONFIG_TAGS + [
@@ -94,21 +95,21 @@ def test_couch_blacklist(aggregator, check, couch_cluster):
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
 
-def test_only_max_nodes_are_scanned(aggregator, check, couch_cluster):
-
-    config = deepcopy(common.BASIC_CONFIG)
-    config["max_dbs_per_check"] = 1
-    check.check(config)
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_only_max_nodes_are_scanned(aggregator, check, instance):
+    instance["max_dbs_per_check"] = 1
+    check.check(instance)
     for gauge in common.CHECK_GAUGES:
         aggregator.assert_metric(gauge, count=1)
 
 
-def test_config_tags(aggregator, check, couch_cluster):
-
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_config_tags(aggregator, check, instance):
     TEST_TAG = "test_tag"
-    config = deepcopy(common.BASIC_CONFIG)
-    config["tags"] = [TEST_TAG]
-    check.check(config)
+    instance["tags"] = [TEST_TAG]
+    check.check(instance)
 
     for gauge in common.CHECK_GAUGES:
         aggregator.assert_metric_has_tag(gauge, TEST_TAG)
