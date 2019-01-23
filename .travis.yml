@@ -70,7 +70,7 @@ jobs:
     - stage: test
       env: CHECK=datadog_checks_dev PYTHON3=true
     - stage: test
-      env: CHECK=active_directory
+      env: CHECK=active_directory PYTHON3=true
     - stage: test
       env: CHECK=activemq_xml PYTHON3=true
     - stage: test
@@ -78,7 +78,7 @@ jobs:
     - stage: test
       env: CHECK=apache PYTHON3=true
     - stage: test
-      env: CHECK=aspdotnet
+      env: CHECK=aspdotnet PYTHON3=true
     - stage: test
       env: CHECK=btrfs PYTHON3=true
     - stage: test
@@ -108,7 +108,7 @@ jobs:
     - stage: test
       env: CHECK=dns_check
     - stage: test
-      env: CHECK=dotnetclr
+      env: CHECK=dotnetclr PYTHON3=true
     - stage: test
       env: CHECK=ecs_fargate PYTHON3=true
     - stage: test
@@ -118,7 +118,7 @@ jobs:
     - stage: test
       env: CHECK=etcd PYTHON3=true
     - stage: test
-      env: CHECK=exchange_server
+      env: CHECK=exchange_server PYTHON3=true
     - stage: test
       env: CHECK=fluentd PYTHON3=true
     - stage: test
@@ -140,11 +140,11 @@ jobs:
     - stage: test
       env: CHECK=http_check PYTHON3=true
     - stage: test
-      env: CHECK=ibm_mq
+      env: CHECK=ibm_mq PYTHON3=true
     - stage: test
       env: CHECK=ibm_was PYTHON3=true
     - stage: test
-      env: CHECK=iis
+      env: CHECK=iis PYTHON3=true
     - stage: test
       env: CHECK=istio PYTHON3=true
     - stage: test
@@ -186,7 +186,7 @@ jobs:
     - stage: test
       env: CHECK=nagios PYTHON3=true
     - stage: test
-      env: CHECK=network
+      env: CHECK=network PYTHON3=true
     - stage: test
       env: CHECK=nfsstat PYTHON3=true
     - stage: test
@@ -246,7 +246,7 @@ jobs:
     - stage: test
       env: CHECK=system_swap PYTHON3=true
     - stage: test
-      env: CHECK=tcp_check
+      env: CHECK=tcp_check PYTHON3=true
     - stage: test
       env: CHECK=teamcity PYTHON3=true
     - stage: test
