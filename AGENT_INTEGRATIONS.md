@@ -174,7 +174,6 @@
 * datadog-nginx: 3.0.0
 * datadog-openldap: 1.1.0
 * datadog-openmetrics: 1.0.0
-* datadog-openstack-controller: 0.0.1
 * datadog-openstack: 1.5.0
 * datadog-oracle: 1.4.0
 * datadog-pdh-check: 1.3.0
