@@ -374,7 +374,7 @@ Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherw
 ## Further Reading
 Read our [series of blog posts][29] about monitoring MySQL with Datadog.
 
-
+[2]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
 [13]: https://app.datadoghq.com/account/settings#agent
 [14]: https://dev.mysql.com/doc/refman/5.7/en/adding-users.html
 [15]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
