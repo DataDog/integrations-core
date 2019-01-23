@@ -274,7 +274,7 @@ class Redis(AgentCheck):
         tmp_instance = deepcopy(instance)
 
         for db in databases:
-            lengths = defaultdict(int)
+            lengths = defaultdict(lambda: defaultdict(int))
             tmp_instance['db'] = db
             db_conn = self._get_conn(tmp_instance)
 
@@ -294,29 +294,33 @@ class Redis(AgentCheck):
 
                     if key_type == 'list':
                         keylen = db_conn.llen(key)
-                        lengths[text_key] += keylen
+                        lengths[text_key]["length"] += keylen
                         lengths_overall[text_key] += keylen
                     elif key_type == 'set':
                         keylen = db_conn.scard(key)
-                        lengths[text_key] += keylen
+                        lengths[text_key]["length"] += keylen
                         lengths_overall[text_key] += keylen
                     elif key_type == 'zset':
                         keylen = db_conn.zcard(key)
-                        lengths[text_key] += keylen
+                        lengths[text_key]["length"] += keylen
                         lengths_overall[text_key] += keylen
                     elif key_type == 'hash':
                         keylen = db_conn.hlen(key)
-                        lengths[text_key] += keylen
+                        lengths[text_key]["length"] += keylen
                         lengths_overall[text_key] += keylen
                     elif key_type == 'string':
                         # Send 1 if the key exists as a string
-                        lengths[text_key] += 1
+                        lengths[text_key]["length"] += 1
                         lengths_overall[text_key] += 1
                     else:
                         # If the type is 'none', it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.
-                        lengths[text_key] += 0
+                        lengths[text_key]["length"] += 0
                         lengths_overall[text_key] += 0
+
+                    # Tagging with key_type since the same key 
+                    #   can exist with  different key_type per db
+                    lengths[text_key]["key_type"] = key_type
 
             # Send the metrics for each db in the redis instance.
             for key, total in iteritems(lengths):
@@ -325,6 +329,7 @@ class Redis(AgentCheck):
                     total,
                     tags=tags + [
                         'key:' + key,
+                        'key_type:' + total["key_type"],
                         'redis_db:db' + str(db)])
 
         # Warn if a key is missing from the entire redis instance.

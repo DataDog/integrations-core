@@ -33,6 +33,7 @@ instances:
     #
 
     # Collect the lengths of the following keys.
+    # Length is 1 for strings
     # Length is zero for keys that have a type other than list, set, hash, or sorted set.
     # Keys can be expressed as patterns, see https://redis.io/commands/keys
     #
