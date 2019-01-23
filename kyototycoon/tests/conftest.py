@@ -9,16 +9,9 @@ from time import sleep
 import pytest
 import requests
 
-from common import (
+from .common import (
     HERE, URL
 )
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 @pytest.fixture(scope="session")
@@ -45,7 +38,7 @@ def kyototycoon():
         'X-Kt-Mode': 'set'
     }
 
-    for i in xrange(100):
+    for i in range(100):
         requests.put(URL, data=data, headers=headers)
         requests.get(URL)
 
@@ -58,7 +51,7 @@ def wait_for_kyototycoon():
     """
     Wait for the kyototycoon container to be reachable
     """
-    for i in xrange(40):
+    for i in range(40):
         sleep(1)
         try:
             requests.get('{0}/rpc/report'.format(URL)).raise_for_status()
