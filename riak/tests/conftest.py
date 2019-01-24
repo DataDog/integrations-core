@@ -19,7 +19,6 @@ log = logging.getLogger('test_riak')
 
 
 def populate():
-    # for _ in range(0, 10):
     res = requests.post(
         "{}/riak/bucket/german".format(common.BASE_URL),
         headers={"Content-Type": "text/plain"},
