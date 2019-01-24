@@ -14,8 +14,8 @@ Though many metrics-oriented checks are best run on the same host(s) as the moni
 
 ### Configuration
 
-1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your Couchbase performance data.
-    See the [sample dns_check.d/conf.yaml][2] for all available configuration options:
+1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Couchbase performance data.
+    See the [sample dns_check.d/conf.yaml][3] for all available configuration options:
 
     ```yaml
       init_config:
@@ -31,17 +31,17 @@ Though many metrics-oriented checks are best run on the same host(s) as the moni
 
     If you omit the `nameserver` option, the check uses whichever nameserver is configured in local network settings.
 
-2. [Restart the Agent][3] to begin sending DNS service checks and response times to Datadog.
+2. [Restart the Agent][4] to begin sending DNS service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `dns_check` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `dns_check` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 The DNS check does not include any events.
@@ -59,12 +59,12 @@ Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP
 Tagged by `hostname` and `record_type`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/dns_check/datadog_checks/dns_check/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/dns_check/datadog_checks/dns_check/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv
+[7]: https://docs.datadoghq.com/help

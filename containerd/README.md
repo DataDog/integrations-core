@@ -20,11 +20,11 @@ In `datadog.yaml`, configure your `cri_socket_path` for the Agent to query Conta
    Agent's configuration directory to start collecting your Containerd performance data.
    See the [sample containerd.d/conf.yaml][1] for all available configuration options.
 
-2. [Restart the Agent][3]
+2. [Restart the Agent][2]
 
 ### Validation
 
-[Run the Agent's `status` subcommand][2] and look for `containerd` under the Checks section.
+[Run the Agent's `status` subcommand][3] and look for `containerd` under the Checks section.
 
 ## Data Collected
 
@@ -46,9 +46,9 @@ The Containerd Check can collect events. Use `filters` to select the relevant ev
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/containerd.d/conf.yaml.example
-[2]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[3]: https://docs.datadoghq.com/help/
+[2]: https://docs.datadoghq.com/help
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv
