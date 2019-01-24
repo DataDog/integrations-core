@@ -1,13 +1,15 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
 
-# project
 from copy import deepcopy
+
+from six import iteritems
+
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from tagger import get_tags
 
-# check
 from .common import is_static_pending_pod, get_pod_by_uid
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
@@ -266,7 +268,7 @@ class CadvisorPrometheusScraperMixin(object):
             return
 
         samples = self._sum_values_by_context(metric, self._get_container_id_if_container_metric)
-        for c_id, sample in samples.iteritems():
+        for c_id, sample in iteritems(samples):
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
@@ -299,7 +301,7 @@ class CadvisorPrometheusScraperMixin(object):
             return
 
         samples = self._sum_values_by_context(metric, self._get_pod_uid_if_pod_metric)
-        for pod_uid, sample in samples.iteritems():
+        for pod_uid, sample in iteritems(samples):
             if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                 continue
             tags = get_tags('kubernetes_pod://%s' % pod_uid, True)
@@ -317,7 +319,7 @@ class CadvisorPrometheusScraperMixin(object):
         seen_keys = {k: False for k in cache}
 
         samples = self._sum_values_by_context(metric, self._get_container_id_if_container_metric)
-        for c_id, sample in samples.iteritems():
+        for c_id, sample in iteritems(samples):
             c_name = self._get_container_label(sample[self.SAMPLE_LABELS], 'name')
             if not c_name:
                 continue
@@ -342,7 +344,7 @@ class CadvisorPrometheusScraperMixin(object):
             self.gauge(m_name, val, tags)
 
         # purge the cache
-        for k, seen in seen_keys.iteritems():
+        for k, seen in iteritems(seen_keys):
             if not seen:
                 del cache[k]
 
@@ -353,7 +355,7 @@ class CadvisorPrometheusScraperMixin(object):
         for each sample in the metric and reports the usage_pct
         """
         samples = self._sum_values_by_context(metric, self._get_container_id_if_container_metric)
-        for c_id, sample in samples.iteritems():
+        for c_id, sample in iteritems(samples):
             limit = sample[self.SAMPLE_VALUE]
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):

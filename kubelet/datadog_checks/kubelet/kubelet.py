@@ -1,25 +1,23 @@
 # (C) Datadog, Inc. 2016-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
 
-# stdlib
 import logging
 import re
 from collections import defaultdict
-from urlparse import urljoin
 from copy import deepcopy
 
-# 3p
 import requests
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 from kubeutil import get_connection_info
+from six import iteritems
+from six.moves.urllib.parse import urljoin
 from tagger import get_tags
 
-# check
 from .common import CADVISOR_DEFAULT_PORT, PodListUtils, KubeletCredentials
 from .cadvisor import CadvisorScraper
 from .prometheus import CadvisorPrometheusScraperMixin
@@ -307,9 +305,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 tags += instance_tags
                 hash_tags = tuple(sorted(tags))
                 containers_tag_counter[hash_tags] += 1
-        for tags, count in pods_tag_counter.iteritems():
+        for tags, count in iteritems(pods_tag_counter):
             self.gauge(self.NAMESPACE + '.pods.running', count, list(tags))
-        for tags, count in containers_tag_counter.iteritems():
+        for tags, count in iteritems(containers_tag_counter):
             self.gauge(self.NAMESPACE + '.containers.running', count, list(tags))
 
     def _report_container_spec_metrics(self, pod_list, instance_tags):
@@ -341,14 +339,14 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 tags = get_tags('%s' % cid, True) + instance_tags
 
                 try:
-                    for resource, value_str in ctr.get('resources', {}).get('requests', {}).iteritems():
+                    for resource, value_str in iteritems(ctr.get('resources', {}).get('requests', {})):
                         value = self.parse_quantity(value_str)
                         self.gauge('{}.{}.requests'.format(self.NAMESPACE, resource), value, tags)
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
 
                 try:
-                    for resource, value_str in ctr.get('resources', {}).get('limits', {}).iteritems():
+                    for resource, value_str in iteritems(ctr.get('resources', {}).get('limits', {})):
                         value = self.parse_quantity(value_str)
                         self.gauge('{}.{}.limits'.format(self.NAMESPACE, resource), value, tags)
                 except (KeyError, AttributeError) as e:

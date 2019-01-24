@@ -7,6 +7,7 @@ import sys
 
 import mock
 import pytest
+from six import iteritems
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
 
 # Skip the whole tests module on Windows
@@ -141,7 +142,7 @@ def test_bad_config():
 
 
 def test_parse_quantity():
-    for raw, res in QUANTITIES.iteritems():
+    for raw, res in iteritems(QUANTITIES):
         assert KubeletCheck.parse_quantity(raw) == res
 
 

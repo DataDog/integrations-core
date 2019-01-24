@@ -21,21 +21,18 @@ EXPECTED_METRICS_CADVISOR = [
 ]
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+@pytest.fixture()
+def m():
+    with requests_mock.Mocker() as m:
+        yield m
 
 
-@requests_mock.mock()
 def test_detect_cadvisor_nominal(m):
     m.head('http://kubelet:4192/api/v1.3/subcontainers/', text='{}')
     url = KubeletCheck.detect_cadvisor("http://kubelet:10250", 4192)
     assert url == "http://kubelet:4192/api/v1.3/subcontainers/"
 
 
-@requests_mock.mock()
 def test_detect_cadvisor_404(m):
     m.head('http://kubelet:4192/api/v1.3/subcontainers/', status_code=404)
     with pytest.raises(HTTPError):
