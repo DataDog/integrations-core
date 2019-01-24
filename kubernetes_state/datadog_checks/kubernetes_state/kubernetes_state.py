@@ -6,6 +6,7 @@ import re
 import time
 from collections import defaultdict, Counter
 from copy import deepcopy
+from six import iteritems
 
 from datadog_checks.errors import CheckException
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -98,9 +99,9 @@ class KubernetesState(OpenMetricsBaseCheck):
         scraper_config = self.config_map[endpoint]
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
 
-        for job_tags, job_count in self.job_succeeded_count.iteritems():
+        for job_tags, job_count in iteritems(self.job_succeeded_count):
             self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count, list(job_tags))
-        for job_tags, job_count in self.job_failed_count.iteritems():
+        for job_tags, job_count in iteritems(self.job_failed_count):
             self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count, list(job_tags))
 
     def _create_kubernetes_state_prometheus_instance(self, instance):
@@ -396,7 +397,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             ] + scraper_config['custom_tags']
             status_phase_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in status_phase_counter.iteritems():
+        for tags, count in iteritems(status_phase_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
     def _submit_metric_kube_pod_container_status_reason(self, metric, metric_suffix, whitelisted_status_reasons,
@@ -443,7 +444,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             on_schedule = int(sample[self.SAMPLE_VALUE]) - curr_time
             tags = [self._format_tag(label_name, label_value, scraper_config)
-                    for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems()]
+                    for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS])]
             tags += scraper_config['custom_tags']
             if on_schedule < 0:
                 message = "The service check scheduled at {} is {} seconds late".format(
@@ -457,7 +458,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         service_check_name = scraper_config['namespace'] + '.job.complete'
         for sample in metric.samples:
             tags = []
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
@@ -469,7 +470,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         service_check_name = scraper_config['namespace'] + '.job.complete'
         for sample in metric.samples:
             tags = []
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
@@ -480,7 +481,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     def kube_job_status_failed(self, metric, scraper_config):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
@@ -491,7 +492,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
@@ -518,7 +519,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             ] + scraper_config['custom_tags']
             by_condition_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in by_condition_counter.iteritems():
+        for tags, count in iteritems(by_condition_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
     def kube_node_status_ready(self, metric, scraper_config):
@@ -568,7 +569,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if metric.type in METRIC_TYPES:
             for sample in metric.samples:
                 tags = [self._format_tag(label_name, label_value, scraper_config)
-                        for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems()]
+                        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS])]
                 tags += scraper_config['custom_tags']
                 status = statuses[int(sample[self.SAMPLE_VALUE])]  # value can be 0 or 1
                 tags.append(self._format_tag('status', status, scraper_config))
@@ -636,5 +637,5 @@ class KubernetesState(OpenMetricsBaseCheck):
             ] + scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in object_counter.iteritems():
+        for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
