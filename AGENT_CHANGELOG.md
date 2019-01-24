@@ -299,6 +299,7 @@
 * HTTP [2.2.0][71]
 * Kubelet [1.4.0][26]
 * Kubernetes State [2.7.0][72]
+
 [1]: https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#690
 [2]: https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md
 [3]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/CHANGELOG.md
