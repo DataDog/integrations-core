@@ -19,15 +19,15 @@ log = logging.getLogger('test_riak')
 
 
 def populate():
-    for _ in range(0, 10):
-        res = requests.post(
-            "{0}/riak/bucket/german".format(common.BASE_URL),
-            headers={"Content-Type": "text/plain"},
-            data='herzlich willkommen')
-        res.raise_for_status
+    # for _ in range(0, 10):
+    res = requests.post(
+        "{}/riak/bucket/german".format(common.BASE_URL),
+        headers={"Content-Type": "text/plain"},
+        data='herzlich willkommen')
+    res.raise_for_status
 
-        res = requests.get("{0}/riak/bucket/german".format(common.BASE_URL))
-        res.raise_for_status
+    res = requests.get("{}/riak/bucket/german".format(common.BASE_URL))
+    res.raise_for_status
 
 
 @pytest.fixture(scope="session")
