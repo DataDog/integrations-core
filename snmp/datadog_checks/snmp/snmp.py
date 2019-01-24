@@ -258,7 +258,7 @@ class SnmpCheck(NetworkCheck):
                         lexicographicMode=False  # Don't walk through the entire MIB, stop at end of table
                     ):
 
-                        self.log.debug("Returned vars: {}".format(var_binds))
+                        self.log.debug("Returned vars: {}".format(var_binds_table))
                         # Raise on error_indication
                         self.raise_on_error_indication(error_indication, instance)
 
