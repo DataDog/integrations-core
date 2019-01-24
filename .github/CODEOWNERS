@@ -28,5 +28,7 @@ manifest.json         @DataDog/baklava @DataDog/agent-integrations
 /datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations
 
 # To keep ProdSec up-to-date with changes to requirements.txt.
-requirements.in       @DataDog/prodsec
-requirements.txt      @DataDog/prodsec
+requirements.in                 @DataDog/prodsec
+requirements.txt                @DataDog/prodsec
+# As well as the secure downloader.
+/integrations_core_downloader/  @DataDog/prodsec
