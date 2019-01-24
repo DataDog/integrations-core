@@ -241,7 +241,7 @@ def test_prometheus_net_summed(monkeypatch, aggregator):
     #
     calls = [
         mock.call('kubernetes.network.rx_bytes', 35276103554.0, ['pod_name:dd-agent-q6hpw']),
-        mock.call('kubernetes.network.rx_bytes', 58107648.0, ['pod_name:fluentd-gcp-v2.0.10-fkeuj']),
+        mock.call('kubernetes.network.rx_bytes', 58107648.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
     ]
     check.rate.assert_has_calls(calls, any_order=True)
 
@@ -307,7 +307,7 @@ def mocked_get_tags(entity, _):
             "pod_name:fluentd-gcp-v2.0.10-9q9t4"
         ],
         "kubernetes_pod://2fdfd4d9-10ce-11e8-bd5a-42010af00137": [
-            "pod_name:fluentd-gcp-v2.0.10-fkeuj"
+            "pod_name:fluentd-gcp-v2.0.10-p13r3"
         ],
         'docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
             'kube_container_name:fluentd-gcp',
@@ -355,7 +355,7 @@ def test_report_pods_running(monkeypatch):
 
     calls = [
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
-        mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-fkeuj"]),
+        mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-p13r3"]),
         mock.call('kubernetes.containers.running', 2, [
             "kube_container_name:fluentd-gcp",
             "kube_deployment:fluentd-gcp-v2.0.10"

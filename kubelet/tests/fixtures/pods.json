@@ -673,7 +673,7 @@
                 "nodeName": "gke-haissam-default-pool-be5066f1-wnvn"
             },
             "metadata": {
-                "name": "fluentd-gcp-v2.0.10-9q9t4",
+                "name": "fluentd-gcp-v2.0.10-p13r3",
                 "labels": {
                     "k8s-app": "fluentd-gcp",
                     "version": "v2.0.10",
@@ -700,7 +700,7 @@
                     "kubernetes.io/config.source": "api",
                     "kubernetes.io/config.seen": "2018-02-13T16:10:19.509264637Z"
                 },
-                "selfLink": "/api/v1/namespaces/kube-system/pods/fluentd-gcp-v2.0.10-9q9t4",
+                "selfLink": "/api/v1/namespaces/kube-system/pods/fluentd-gcp-v2.0.10-p13r3",
                 "uid": "2fdfd4d9-10ce-11e8-bd5a-42010af00137"
             }
         },
