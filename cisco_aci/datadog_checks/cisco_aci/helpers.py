@@ -165,7 +165,7 @@ def get_attributes(obj):
     if not obj or type(obj) is not dict:
         return {}
 
-    keys = obj.keys()
+    keys = list(obj.keys())
     if len(keys) > 0:
         key = keys[0]
     else:

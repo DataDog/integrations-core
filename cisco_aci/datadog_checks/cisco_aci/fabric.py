@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import aci_metrics
+from six import iteritems
+
+from . import aci_metrics
 from . import helpers
 from . import exceptions
 
@@ -47,7 +49,7 @@ class Fabric:
             try:
                 stats = self.api.get_pod_stats(pod_id)
                 self.submit_fabric_metric(stats, tags, 'fabricPod')
-            except exceptions.APIConnectionException, exceptions.APIParsingException:
+            except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
             self.log.info("finished processing pod {}".format(pod_id))
 
@@ -71,14 +73,14 @@ class Fabric:
             self.log.info("processing node {} on pod {}".format(node_id, pod_id))
             try:
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
-            except exceptions.APIConnectionException, exceptions.APIParsingException:
+            except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
             if node_attrs.get('role') != "controller":
                 try:
                     stats = self.api.get_node_stats(pod_id, node_id)
                     self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
                     self.process_eth(node_attrs)
-                except exceptions.APIConnectionException, exceptions.APIParsingException:
+                except (exceptions.APIConnectionException, exceptions.APIParsingException):
                     pass
             self.log.info("finished processing node {}".format(node_id))
 
@@ -88,7 +90,7 @@ class Fabric:
         pod_id = helpers.get_pod_from_dn(node['dn'])
         try:
             eth_list = self.api.get_eth_list(pod_id, node['id'])
-        except exceptions.APIConnectionException, exceptions.APIParsingException:
+        except (exceptions.APIConnectionException, exceptions.APIParsingException):
             pass
         for e in eth_list:
             eth_attrs = helpers.get_attributes(e)
@@ -97,13 +99,13 @@ class Fabric:
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
-            except exceptions.APIConnectionException, exceptions.APIParsingException:
+            except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
         self.log.info("finished processing ethernet ports for {}".format(node['id']))
 
     def submit_fabric_metric(self, stats, tags, obj_type, hostname=None):
         for s in stats:
-            name = s.keys()[0]
+            name = list(s.keys())[0]
             # we only want to collect the 5 minutes metrics.
             if '15min' in name or '5min' not in name:
                 continue
@@ -112,10 +114,10 @@ class Fabric:
                 continue
 
             metrics = {}
-            for n, ms in aci_metrics.FABRIC_METRICS.iteritems():
+            for n, ms in iteritems(aci_metrics.FABRIC_METRICS):
                 if n not in name:
                     continue
-                for cisco_metric, dd_metric in ms.iteritems():
+                for cisco_metric, dd_metric in iteritems(ms):
                     mname = dd_metric.format(self.get_fabric_type(obj_type))
                     mval = s.get(name, {}).get("attributes", {}).get(cisco_metric)
                     json_attrs = s.get(name, {}).get("attributes", {})
