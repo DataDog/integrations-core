@@ -22,19 +22,19 @@ EXPECTED_METRICS_CADVISOR = [
 
 
 @pytest.fixture()
-def m():
+def mock_request():
     with requests_mock.Mocker() as m:
         yield m
 
 
-def test_detect_cadvisor_nominal(m):
-    m.head('http://kubelet:4192/api/v1.3/subcontainers/', text='{}')
+def test_detect_cadvisor_nominal(mock_request):
+    mock_request.head('http://kubelet:4192/api/v1.3/subcontainers/', text='{}')
     url = KubeletCheck.detect_cadvisor("http://kubelet:10250", 4192)
     assert url == "http://kubelet:4192/api/v1.3/subcontainers/"
 
 
-def test_detect_cadvisor_404(m):
-    m.head('http://kubelet:4192/api/v1.3/subcontainers/', status_code=404)
+def test_detect_cadvisor_404(mock_request):
+    mock_request.head('http://kubelet:4192/api/v1.3/subcontainers/', status_code=404)
     with pytest.raises(HTTPError):
         url = KubeletCheck.detect_cadvisor("http://kubelet:10250", 4192)
         assert url == ""
