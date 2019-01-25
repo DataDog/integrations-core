@@ -24,6 +24,8 @@ env:
     # if the c include path doesn't have the proper path pymqi will not compile
     - C_INCLUDE_PATH="/opt/mqm/inc:$C_INCLUDE_PATH"
     - LD_LIBRARY_PATH="/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH"
+    # https://github.com/travis-ci/travis-ci/issues/7940
+    - BOTO_CONFIG=/dev/null
 
 stages:
   - name: test_changed
