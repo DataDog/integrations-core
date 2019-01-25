@@ -22,7 +22,7 @@ Istio needs to have the built in [prometheus adapter][2] enabled and the ports e
 
 #### Connect the Agent
 
-Edit the `istio.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][8], to connect it to Istio. See the [sample istio.d/conf.yaml][3] for all available configuration options:
+Edit the `istio.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to connect it to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options:
 
 ```
 init_config:
@@ -33,17 +33,17 @@ instances:
     send_histograms_buckets: true
 ```
 
-Both endpoints need to be connected to the check for it to work. To learn more about the prometheus adapter, you can read the [istio documentation][4].
+Both endpoints need to be connected to the check for it to work. To learn more about the prometheus adapter, you can read the [istio documentation][5].
 
 ### Validation
 
-[Run the Agent's `info` subcommand][5] and look for `istio` under the Checks section.
+[Run the Agent's `info` subcommand][6] and look for `istio` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 The Istio check does not include any events.
@@ -52,13 +52,13 @@ The Istio check does not include any events.
 The Istio check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on
-[3]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/conf.yaml.example
-[4]: https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on
-[5]: https://docs.datadoghq.com/agent/faq/agent-status-and-information/
-[6]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/conf.yaml.example
+[5]: https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on
+[6]: https://docs.datadoghq.com/agent/faq/agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv
+[8]: https://docs.datadoghq.com/help

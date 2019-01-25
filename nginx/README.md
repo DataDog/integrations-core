@@ -1,6 +1,6 @@
 # NGINX check
 
-![NGINX default dashboard][14]
+![NGINX default dashboard][1]
 
 ## Overview
 
@@ -20,17 +20,17 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 
 ### Installation
 
-The NGINX check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your NGINX servers.
+The NGINX check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your NGINX servers.
 
 #### NGINX status module
 
 The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
 
-* [stub status module][2] - for open source NGINX
-* [http status module][3] - only for NGINX Plus
+* [stub status module][3] - for open source NGINX
+* [http status module][4] - only for NGINX Plus
 
 NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to **Configuration** now.
-For NGINX Plus release 13 and above, the status module is deprecated and you should use the new Plus API instead. See [the announcement][4] for more information.
+For NGINX Plus release 13 and above, the status module is deprecated and you should use the new Plus API instead. See [the announcement][5] for more information.
 
 If you use open source NGINX, however, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 
@@ -43,8 +43,8 @@ If the command output does not include `http_stub_status_module`, you must insta
 
 ### Configuration
 
-Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][15] to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
-See the [sample nginx.d/conf.yaml][5] for all available configuration options.
+Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample nginx.d/conf.yaml][7] for all available configuration options.
 
 #### Prepare NGINX
 
@@ -93,9 +93,9 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
     # user: <USER>
     # password: <PASSWORD>
   ```
-  See the [sample nginx.d/conf.yaml][5] for all available configuration options.
+  See the [sample nginx.d/conf.yaml][7] for all available configuration options.
 
-* [Restart the Agent][6] to start sending NGINX metrics to Datadog.
+* [Restart the Agent][8] to start sending NGINX metrics to Datadog.
 
 #### Log Collection
 
@@ -124,22 +124,22 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
       sourcecategory: http_web_access
   ```
   Change the `service` and `path` parameter values and configure them for your environment.
-  See the [sample nginx.d/conf.yaml][5] for all available configuration options.
+  See the [sample nginx.d/conf.yaml][7] for all available configuration options.
 
-* [Restart the Agent][6]
+* [Restart the Agent][8]
 
-**Learn more about log collection [in the log documentation][7]**
+**Learn more about log collection [in the log documentation][9]**
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `nginx` under the Checks section.
+[Run the Agent's `status` subcommand][10] and look for `nginx` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][9] for a full list of provided metrics by this integration.
+See [metadata.csv][11] for a full list of provided metrics by this integration.
 
-Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status][2] (open source NGINX) and [http status][3] (NGINX Plus) to understand which metrics are provided by each module.
+Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status][3] (open source NGINX) and [http status][4] (NGINX Plus) to understand which metrics are provided by each module.
 
 A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
 
@@ -204,24 +204,24 @@ Otherwise, review the **Configuration** section.
 
 ## Further Reading
 ### Knowledge Base
-The data pulled from the NGINX Plus status page are described in the [NGINX docs][10].
+The data pulled from the NGINX Plus status page are described in the [NGINX docs][12].
 
 ### Datadog Blog
-Learn more about how to monitor NGINX performance metrics thanks to [our series of posts][11]. We detail the key performance metrics, [how to collect them][12], and [how to use Datadog to monitor NGINX][13].
+Learn more about how to monitor NGINX performance metrics thanks to [our series of posts][13]. We detail the key performance metrics, [how to collect them][14], and [how to use Datadog to monitor NGINX][15].
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
-[3]: https://nginx.org/en/docs/http/ngx_http_status_module.html
-[4]: https://www.nginx.com/blog/nginx-plus-r13-released/
-[5]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[7]: https://docs.datadoghq.com/logs
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
-[10]: https://nginx.org/en/docs/http/ngx_http_status_module.html#data
-[11]: https://www.datadoghq.com/blog/how-to-monitor-nginx/
-[12]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
-[13]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
-[14]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
-[15]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
+[4]: https://nginx.org/en/docs/http/ngx_http_status_module.html
+[5]: https://www.nginx.com/blog/nginx-plus-r13-released
+[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[7]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
+[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[9]: https://docs.datadoghq.com/logs
+[10]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
+[12]: https://nginx.org/en/docs/http/ngx_http_status_module.html#data
+[13]: https://www.datadoghq.com/blog/how-to-monitor-nginx
+[14]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
+[15]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
