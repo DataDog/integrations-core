@@ -301,6 +301,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 hash_tags = tuple(sorted(tags))
                 containers_tag_counter[hash_tags] += 1
             # Pod reporting
+            if not has_container_running:
+                continue
             pod_id = pod.get('metadata', {}).get('uid')
             if not pod_id:
                 self.log.debug('skipping pod with no uid')
@@ -310,8 +312,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 continue
             tags += instance_tags
             hash_tags = tuple(sorted(tags))
-            if has_container_running:
-                pods_tag_counter[hash_tags] += 1
+            pods_tag_counter[hash_tags] += 1
         for tags, count in pods_tag_counter.iteritems():
             self.gauge(self.NAMESPACE + '.pods.running', count, list(tags))
         for tags, count in containers_tag_counter.iteritems():
