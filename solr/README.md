@@ -1,6 +1,6 @@
 # Solr Check
 
-![Solr Graph][8]
+![Solr Graph][1]
 
 ## Overview
 
@@ -9,13 +9,13 @@ The Solr check tracks the state and performance of a Solr cluster. It collects m
 ## Setup
 ### Installation
 
-The Solr check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Solr nodes.
+The Solr check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Solr nodes.
 
-This check is JMX-based, so you'll need to enable JMX Remote on your Solr servers. Read the [JMX Check documentation][2] for more information on that.
+This check is JMX-based, so you'll need to enable JMX Remote on your Solr servers. Read the [JMX Check documentation][3] for more information on that.
 
 ### Configuration
 
-Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample solr.d/conf.yaml][3] for all available configuration options:
+Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample solr.d/conf.yaml][5] for all available configuration options:
 
 ```
 instances:
@@ -94,9 +94,9 @@ init_config:
           metric_type: gauge
 ```
 
-Again, see the [JMX Check documentation][2] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
+Again, see the [JMX Check documentation][3] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
 
-[Restart the Agent][4] to start sending Solr metrics to Datadog.
+[Restart the Agent][6] to start sending Solr metrics to Datadog.
 
 Configuration Options
 
@@ -209,12 +209,12 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `solr` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `solr` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 The Solr check does not include any events.
@@ -266,11 +266,11 @@ You may use the `attribute` filter as follow:
 ```
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/integrations/java/
-[3]: https://github.com/DataDog/integrations-core/blob/master/solr/datadog_checks/solr/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
-[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/solr/images/solrgraph.png
-[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/solr/images/solrgraph.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/integrations/java
+[4]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/solr/datadog_checks/solr/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv

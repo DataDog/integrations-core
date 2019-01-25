@@ -13,6 +13,7 @@ import cx_Oracle
 
 # project
 from datadog_checks.checks import AgentCheck
+from . import queries
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 
@@ -230,9 +231,9 @@ class Oracle(AgentCheck):
     def _get_sys_metrics(self, con, tags):
         if tags is None:
             tags = []
-        query = "SELECT METRIC_NAME, VALUE, BEGIN_TIME FROM GV$SYSMETRIC ORDER BY BEGIN_TIME"
+
         with closing(con.cursor()) as cur:
-            cur.execute(query)
+            cur.execute(queries.SYSTEM)
             for row in cur.fetchall():
                 metric_name = row[0]
                 metric_value = row[1]
@@ -243,9 +244,8 @@ class Oracle(AgentCheck):
         if tags is None:
             tags = []
 
-        query = "SELECT PROGRAM, {} FROM GV$PROCESS".format(','.join(self.PROCESS_METRICS.keys()))
         with closing(con.cursor()) as cur:
-            cur.execute(query)
+            cur.execute(queries.PROCESS.format(','.join(self.PROCESS_METRICS.keys())))
             for row in cur.fetchall():
 
                 # Oracle program name
@@ -259,28 +259,26 @@ class Oracle(AgentCheck):
     def _get_tablespace_metrics(self, con, tags):
         if tags is None:
             tags = []
-        query = "SELECT TABLESPACE_NAME, sum(BYTES), sum(MAXBYTES) FROM sys.dba_data_files GROUP BY TABLESPACE_NAME"
+
         with closing(con.cursor()) as cur:
-            cur.execute(query)
-            for row in cur.fetchall():
-                tablespace_tag = 'tablespace:%s' % row[0]
-                if row[1] is None:
-                    # mark tablespace as offline if sum(BYTES) is null
-                    offline = True
+            cur.execute(queries.TABLESPACE)
+            for tablespace_name, used_bytes, max_bytes, used_percent in cur.fetchall():
+                tablespace_tag = 'tablespace:{}'.format(tablespace_name)
+                if used_bytes is None:
+                    # mark tablespace as offline if null
+                    offline = 1
                     used = 0
                 else:
-                    offline = False
-                    used = float(row[1])
-                if row[2] is None:
+                    offline = 0
+                    used = float(used_bytes)
+                if max_bytes is None:
                     size = 0
                 else:
-                    size = float(row[2])
-                if (used >= size):
-                    in_use = 100
-                elif (used == 0) or (size == 0):
+                    size = float(max_bytes)
+                if used_percent is None:
                     in_use = 0
                 else:
-                    in_use = used / size * 100
+                    in_use = float(used_percent)
 
                 self.gauge('oracle.tablespace.used', used, tags=tags + [tablespace_tag])
                 self.gauge('oracle.tablespace.size', size, tags=tags + [tablespace_tag])

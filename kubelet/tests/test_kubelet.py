@@ -210,7 +210,7 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
             'kube_container_name:fluentd-gcp',
             'kube_deployment:fluentd-gcp-v2.0.10'
         ]),
-        mock.call('kubernetes.cpu.usage.total', 7756358313.0, ['pod_name=demo-app-success-c485bc67b-klj45']),
+        mock.call('kubernetes.cpu.usage.total', 7756358313.0, ['pod_name:demo-app-success-c485bc67b-klj45']),
     ]
     check.rate.assert_has_calls(calls, any_order=True)
 
@@ -327,13 +327,16 @@ def mocked_get_tags(entity, _):
             'kube_deployment:fluentd-gcp-v2.0.10'
         ],
         "docker://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
-            "pod_name=demo-app-success-c485bc67b-klj45"
+            "pod_name:demo-app-success-c485bc67b-klj45"
         ],
         "kubernetes_pod://d2e71e36-10d0-11e8-bd5a-42010af00137": [
             'pod_name:dd-agent-q6hpw'
         ],
         "kubernetes_pod://260c2b1d43b094af6d6b4ccba082c2db": [
             'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
+        ],
+        "kubernetes_pod://24d6daa3-10d8-11e8-bd5a-42010af00137": [
+            'pod_name:demo-app-success-c485bc67b-klj45'
         ],
         "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": [
             'pod_name:pi-kff76'
@@ -357,6 +360,7 @@ def test_report_pods_running(monkeypatch):
     calls = [
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-p13r3"]),
+        mock.call('kubernetes.pods.running', 1, ['pod_name:demo-app-success-c485bc67b-klj45']),
         mock.call('kubernetes.containers.running', 2, [
             "kube_container_name:fluentd-gcp",
             "kube_deployment:fluentd-gcp-v2.0.10"
@@ -365,8 +369,16 @@ def test_report_pods_running(monkeypatch):
             "kube_container_name:prometheus-to-sd-exporter",
             "kube_deployment:fluentd-gcp-v2.0.10"
         ]),
+        mock.call('kubernetes.containers.running', 1, ['pod_name:demo-app-success-c485bc67b-klj45']),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
+    # Make sure non running container/pods are not sent
+    bad_calls = [
+        mock.call('kubernetes.pods.running', 1, ['pod_name:dd-agent-q6hpw']),
+        mock.call('kubernetes.containers.running', 1, ['pod_name:dd-agent-q6hpw']),
+    ]
+    for c in bad_calls:
+        assert c not in check.gauge.mock_calls
 
 
 def test_report_pods_running_none_ids(monkeypatch):
@@ -424,7 +436,7 @@ def test_report_container_spec_metrics(monkeypatch):
         mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
         mock.call('kubernetes.cpu.limits', 0.25, instance_tags),
         mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name=demo-app-success-c485bc67b-klj45"] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
     if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
