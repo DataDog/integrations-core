@@ -172,6 +172,9 @@ class TUFDownloader:
 
             # Download this target only if it _looks_ like a public key.
             if target_relpath.endswith('.pub'):
+                # NOTE: Avoid recursively downloading in-toto metadata for
+                # in-toto root layout pubkeys themselves, and so on ad
+                # infinitum.
                 self._get_target(target_relpath,
                                  download_in_toto_metadata=False)
                 target_relpaths.append(target_relpath)
