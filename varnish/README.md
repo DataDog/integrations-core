@@ -1,6 +1,6 @@
 # Agent Check: Varnish
 
-![Varnish default dashboard][11]
+![Varnish default dashboard][1]
 
 ## Overview
 
@@ -16,14 +16,14 @@ It also submits service checks for the health of each backend.
 ## Setup
 ### Installation
 
-The Varnish check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Varnish servers.
+The Varnish check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Varnish servers.
 
 ### Configuration
 
-1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][12] to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection).
-  See the [sample varnish.d/conf.yaml][2] for all available configuration options.
+1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample varnish.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][3]
+2. [Restart the Agent][5]
 
 #### Prepare Varnish
 
@@ -50,9 +50,9 @@ If you're running Varnish 4.1+, add the dd-agent system user to the Varnish grou
   dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
   ```
 
-  See the [sample varnish.yaml][2] for all available configuration options.
+  See the [sample varnish.yaml][4] for all available configuration options.
 
-* [Restart the Agent][3] to start sending Varnish metrics and service checks to Datadog.
+* [Restart the Agent][5] to start sending Varnish metrics and service checks to Datadog.
 
 #### Log Collection
 
@@ -92,19 +92,19 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
       service: varnish
   ```
   Change the `path` and `service` parameter value and configure them for your environment.
-  See the [sample varnish.yaml][2] for all available configuration options.
+  See the [sample varnish.yaml][4] for all available configuration options.
 
-* [Restart the Agent][3].
+* [Restart the Agent][5].
 
-**Learn more about log collection [in the log documentation][4]**
+**Learn more about log collection [in the log documentation][6]**
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `varnish` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `varnish` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 The Varnish check does not include any events.
@@ -115,24 +115,24 @@ The Varnish check does not include any events.
 The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<backend_name>`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-* [Top Varnish performance metrics][8]
-* [How to collect Varnish metrics][9]
-* [Monitor Varnish using Datadog][10]
+* [Top Varnish performance metrics][10]
+* [How to collect Varnish metrics][11]
+* [Monitor Varnish using Datadog][12]
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/varnish/datadog_checks/varnish/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/logs
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/blog/top-varnish-performance-metrics/
-[9]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/
-[10]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog/
-[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png
-[12]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/varnish/datadog_checks/varnish/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/logs
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
+[9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/top-varnish-performance-metrics
+[11]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics
+[12]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog

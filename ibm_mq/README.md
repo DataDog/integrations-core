@@ -169,7 +169,7 @@ logs:
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -185,13 +185,13 @@ IBM MQ does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 [1]: https://www.ibm.com/products/mq
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://developer.ibm.com/messaging/mq-downloads/
+[3]: https://developer.ibm.com/messaging/mq-downloads
 [4]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[7]: https://docs.datadoghq.com/help/
-[8]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
+[7]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
+[8]: https://docs.datadoghq.com/help

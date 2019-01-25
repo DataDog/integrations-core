@@ -906,7 +906,7 @@
                         "image": "datadog/dev-dd-agent:beta",
                         "imageID": "docker-pullable://datadog/dev-dd-agent@sha256:1672a9c8741813070b5fac803d598c379e37e678e989582c55b7659b01f36eb4",
                         "state": {
-                            "running": {
+                            "waiting": {
                                 "startedAt": "2018-02-13T16:11:00Z"
                             }
                         },
@@ -918,7 +918,7 @@
                 "podIP": "10.8.2.2",
                 "startTime": "2018-02-13T15:16:11Z",
                 "hostIP": "10.132.0.4",
-                "phase": "Running",
+                "phase": "Pending",
                 "conditions": [
                     {
                         "status": "True",
@@ -1123,7 +1123,7 @@
                 "podIP": "10.8.2.5",
                 "startTime": "2018-02-13T16:11:38Z",
                 "hostIP": "10.132.0.4",
-                "phase": "Running",
+                "phase": "Pending",
                 "conditions": [
                     {
                         "status": "True",
