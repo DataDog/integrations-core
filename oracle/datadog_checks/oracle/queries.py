@@ -11,5 +11,5 @@ select
   m.used_percent
 from
   dba_tablespace_usage_metrics m
-  join dba_tablespaces t on m.tablespace_name = t.tablespace_name;
+  join dba_tablespaces t on m.tablespace_name = t.tablespace_name
 """
