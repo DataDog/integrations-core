@@ -519,18 +519,12 @@ LINKERD_FIXTURE_VALUES = {
 def linkerd_fixture():
     metrics_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'linkerd.txt')
     responses = None
-    with open(metrics_file_path, 'rb') as f:
+    with open(metrics_file_path, 'r') as f:
         responses = f.read()
 
     with mock.patch('requests.get', return_value=mock.MagicMock(status_code=200,
                     iter_lines=lambda **kwargs: responses.split("\n"), headers={'Content-Type': "text/plain"})) as p:
         yield p
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 def test_linkerd(aggregator, linkerd_fixture):
     """
