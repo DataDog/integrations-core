@@ -203,7 +203,7 @@ def test__check_key_lengths_multi_db(aggregator, redis_instance):
     conn.lpush('test_foo', 'value4')
 
     redis_check._check_key_lengths(c, redis_instance, [])
-    aggregator.assert_metric('redis.key.length', count=3)
+    aggregator.assert_metric('redis.key.length', count=4)
     aggregator.assert_metric('redis.key.length', value=4, tags=['key:test_foo', 'key_type:list'])
     aggregator.assert_metric('redis.key.length', value=1, tags=['key:test_bar', 'key_type:list'])
     aggregator.assert_metric('redis.key.length', value=0, tags=['key:missing_key'])
