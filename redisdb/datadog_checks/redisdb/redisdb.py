@@ -313,7 +313,7 @@ class Redis(AgentCheck):
                         lengths[text_key]["length"] += 1
                         lengths_overall[text_key] += 1
                     else:
-                        # If the type is 'none', it might be because the key doesn't exist,
+                        # If the type is unknown, it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.
                         lengths[text_key]["length"] += 0
                         lengths_overall[text_key] += 0
