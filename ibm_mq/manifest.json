@@ -17,5 +17,6 @@
     "Message Queue"
   ],
   "type": "check",
-  "is_public": true
+  "is_public": true,
+  "integration_id": "ibm-mq"
 }

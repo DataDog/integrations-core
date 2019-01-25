@@ -22,5 +22,6 @@
     "linux",
     "mac_os"
   ],
-  "type": "check"
+  "type": "check",
+  "integration_id": "postfix"
 }
