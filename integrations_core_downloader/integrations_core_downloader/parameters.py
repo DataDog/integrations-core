@@ -14,8 +14,8 @@ def substitute(target_relpath):
     if wheel_distribution_name in set([ 'datadog_checks_base',
                                         'datadog_checks_dev',    ]):
         package_github_dir = wheel_distribution_name
-   # FIXME: This is the only other package at the time of writing (Sep 7 2018)
-   # that does not replace `-` with `_`.
+    # FIXME: This is the only other package at the time of writing (Sep 7 2018)
+    # that does not replace `-` with `_`.
     elif wheel_distribution_name == 'datadog_go_metro':
         package_github_dir = 'go-metro'
     else:
