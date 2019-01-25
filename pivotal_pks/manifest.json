@@ -18,5 +18,5 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "pivotal"
+  "integration_id": "pivotal-pks"
 }
