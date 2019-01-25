@@ -4,9 +4,7 @@
 
 from six import iteritems
 
-from . import aci_metrics
-from . import helpers
-from . import exceptions
+from . import aci_metrics, helpers, exceptions
 
 
 class Fabric:
