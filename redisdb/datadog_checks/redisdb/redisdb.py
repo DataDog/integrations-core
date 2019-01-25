@@ -318,23 +318,30 @@ class Redis(AgentCheck):
                         lengths[text_key]["length"] += 0
                         lengths_overall[text_key] += 0
 
-                    # Tagging with key_type since the same key 
+                    # Tagging with key_type since the same key
                     #   can exist with  different key_type per db
                     lengths[text_key]["key_type"] = key_type
 
             # Send the metrics for each db in the redis instance.
             for key, total in iteritems(lengths):
+                # Only send non-zeros if tagged per db.
+                if total["length"] > 0:
+                    self.gauge(
+                        'redis.key.length',
+                        total["length"],
+                        tags=tags + [
+                            'key:' + key,
+                            'key_type:' + total["key_type"],
+                            'redis_db:db' + str(db)])
+
+        # Warn if a key is missing from the entire redis instance.
+        # Send 0 if the key is missing/empty from the entire redis instance.
+        for key, total in iteritems(lengths_overall):
+            if total == 0 and instance.get("warn_on_missing_keys", True):
                 self.gauge(
                     'redis.key.length',
                     total,
-                    tags=tags + [
-                        'key:' + key,
-                        'key_type:' + total["key_type"],
-                        'redis_db:db' + str(db)])
-
-        # Warn if a key is missing from the entire redis instance.
-        for key, total in iteritems(lengths_overall):
-            if total == 0 and instance.get("warn_on_missing_keys", True):
+                    tags=tags + ['key:' + key])
                 self.warning("{0} key not found in redis".format(key))
 
     def _check_replication(self, info, tags):
