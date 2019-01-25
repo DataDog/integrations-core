@@ -202,7 +202,7 @@ jobs:
     - stage: test
       env: CHECK=openstack_controller PYTHON3=true
     - stage: test
-      env: CHECK=oracle
+      env: CHECK=oracle PYTHON3=true
     - stage: test
       env: CHECK=pdh_check
     - stage: test
