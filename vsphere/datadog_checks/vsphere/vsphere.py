@@ -561,18 +561,6 @@ class VSphereCheck(AgentCheck):
                 encoded_tags.append(tag)
         return encoded_tags
 
-    @trace_method
-    def _cache_morlist_raw_async(self, instance, tags, regexes=None, include_only_marked=False):
-        """
-        Fills the queue in a separate thread
-        """
-        i_key = self._instance_key(instance)
-        server_instance = self._get_server_instance(instance)
-        use_guest_hostname = is_affirmative(instance.get("use_guest_hostname", False))
-        all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags,
-                                      use_guest_hostname=use_guest_hostname)
-        self.mor_objects_queue.fill(i_key, dict(all_objs))
-
     @staticmethod
     def _is_excluded(obj, properties, regexes, include_only_marked):
         """
@@ -627,7 +615,7 @@ class VSphereCheck(AgentCheck):
                                "(latest refresh was {}s ago)".format(resource_type, time.time() - last))
                 return
 
-        instance_tag = b"vcenter_server:{}".format(instance.get('name'))
+        tags = [b"vcenter_server:{}".format(instance.get('name'))]
         regexes = {
             'host_include': instance.get('host_include_only_regex'),
             'vm_include': instance.get('vm_include_only_regex')
@@ -635,11 +623,12 @@ class VSphereCheck(AgentCheck):
         include_only_marked = is_affirmative(instance.get('include_only_marked', False))
 
         # Discover hosts and virtual machines
-        self.pool.apply_async(
-            self._cache_morlist_raw_async,
-            args=(instance, [instance_tag], regexes, include_only_marked)
-        )
-
+        i_key = self._instance_key(instance)
+        server_instance = self._get_server_instance(instance)
+        use_guest_hostname = is_affirmative(instance.get("use_guest_hostname", False))
+        all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags,
+                                      use_guest_hostname=use_guest_hostname)
+        self.mor_objects_queue.fill(i_key, dict(all_objs))
         self.cache_config.set_last(CacheConfig.Morlist, i_key, time.time())
 
     @trace_method
