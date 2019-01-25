@@ -19,7 +19,7 @@ from datadog_checks.config import is_affirmative
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
-from datadog_checks.checks.libs.thread_pool import Pool
+from datadog_checks.checks.libs.thread_pool import Pool, SENTINEL
 from datadog_checks.checks.libs.timer import Timer
 from datadog_checks.utils.common import ensure_bytes
 from .common import SOURCE_TYPE
@@ -157,10 +157,20 @@ class VSphereCheck(AgentCheck):
         self.pool = Pool(self.pool_size)
         self.pool_started = True
 
+    def terminate_pool(self):
+        self.log.info("Terminating Thread Pool")
+        if self.pool_started:
+            self.pool.terminate()
+            self.pool.join()
+            assert self.pool.get_nworkers() == 0
+            self.pool_started = False
+
     def stop_pool(self):
         self.log.info("Stopping Thread Pool")
         if self.pool_started:
-            self.pool.terminate()
+            for _ in self.pool._workers:
+                self.pool._workq.put(SENTINEL)
+            self.pool.close()
             self.pool.join()
             assert self.pool.get_nworkers() == 0
             self.pool_started = False
@@ -896,8 +906,7 @@ class VSphereCheck(AgentCheck):
         self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
-        if not self.pool_started:
-            self.start_pool()
+        self.start_pool()
 
         custom_tags = instance.get('tags', [])
 
@@ -905,25 +914,20 @@ class VSphereCheck(AgentCheck):
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'] + custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
-        # Only schedule more jobs on the queue if the jobs from the previous check runs are finished
-        # It's no good to keep piling up jobs
-        if self.pool._workq.qsize() == 0:
-            # First part: make sure our object repository is neat & clean
-            if self._should_cache(instance, CacheConfig.Metadata):
-                self._cache_metrics_metadata(instance)
+        # First part: make sure our object repository is neat & clean
+        if self._should_cache(instance, CacheConfig.Metadata):
+            self._cache_metrics_metadata(instance)
 
-            if self._should_cache(instance, CacheConfig.Morlist):
-                self._cache_morlist_raw(instance)
+        if self._should_cache(instance, CacheConfig.Morlist):
+            self._cache_morlist_raw(instance)
 
-            self._process_mor_objects_queue(instance)
+        self._process_mor_objects_queue(instance)
 
-            # Remove old objects that might be gone from the Mor cache
-            self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval)
+        # Remove old objects that might be gone from the Mor cache
+        self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval)
 
-            # Second part: do the job
-            self.collect_metrics(instance)
-        else:
-            self.log.debug("Thread pool is still processing jobs from previous run. Not scheduling anything.")
+        # Second part: do the job
+        self.collect_metrics(instance)
 
         self._query_event(instance)
 
@@ -936,11 +940,13 @@ class VSphereCheck(AgentCheck):
             pass
 
         if thread_crashed:
-            self.stop_pool()
+            self.terminate_pool()
             raise Exception("One thread in the pool crashed, check the logs")
 
         if set_external_tags is not None:
             set_external_tags(self.get_external_host_tags())
+
+        self.stop_pool()
 
         # ## <TEST-INSTRUMENTATION>
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'] + custom_tags)
