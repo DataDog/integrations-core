@@ -20,5 +20,5 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "agent"
+  "integration_id": "datadog-agent"
 }

@@ -20,5 +20,5 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "kubernetes"
+  "integration_id": "kube-proxy"
 }

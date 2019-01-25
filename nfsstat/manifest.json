@@ -18,5 +18,5 @@
     "linux"
   ],
   "type": "check",
-  "integration_id": "nfsstat"
+  "integration_id": "system"
 }

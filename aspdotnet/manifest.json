@@ -19,5 +19,5 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "asp-net"
+  "integration_id": "aspdotnet"
 }

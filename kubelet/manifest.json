@@ -18,5 +18,5 @@
     "linux"
   ],
   "type": "check",
-  "integration_id": "kubernetes"
+  "integration_id": "kubelet"
 }
