@@ -212,7 +212,7 @@ jobs:
     - stage: test
       env: CHECK=postgres PYTHON3=true
     - stage: test
-      env: CHECK=postfix
+      env: CHECK=postfix PYTHON3=true
     - stage: test
       env: CHECK=powerdns_recursor PYTHON3=true
     - stage: test
