@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from six import iteritems
+
 METRIC_PREFIX = "cisco_aci"
 
 FABRIC_PREFIX = METRIC_PREFIX + ".fabric"
@@ -113,11 +115,11 @@ def make_tenant_metrics():
         "endpoint_group": {}
     }
 
-    for cisco_metric, metric_map in metrics.iteritems():
+    for cisco_metric, metric_map in iteritems(metrics):
         tenant_metrics["tenant"][cisco_metric] = {}
         tenant_metrics["application"][cisco_metric] = {}
         tenant_metrics["endpoint_group"][cisco_metric] = {}
-        for sub_metric, dd_metric in metric_map.iteritems():
+        for sub_metric, dd_metric in iteritems(metric_map):
             dd_tenant_metric = dd_metric.format(TENANT_PREFIX)
             tenant_metrics["tenant"][cisco_metric][sub_metric] = dd_tenant_metric
             dd_app_metric = dd_metric.format(APPLICATION_PREFIX)
@@ -125,10 +127,10 @@ def make_tenant_metrics():
             dd_epg_metric = dd_metric.format(ENDPOINT_GROUP_PREFIX)
             tenant_metrics["endpoint_group"][cisco_metric][sub_metric] = dd_epg_metric
 
-    for cisco_metric, metric_map in endpoint_metrics.iteritems():
+    for cisco_metric, metric_map in iteritems(endpoint_metrics):
         if not tenant_metrics.get("endpoint_group", {}).get(cisco_metric):
             tenant_metrics["endpoint_group"][cisco_metric] = {}
-        for sub_metric, dd_metric in metric_map.iteritems():
+        for sub_metric, dd_metric in iteritems(metric_map):
             dd_epg_metric = dd_metric.format(TENANT_PREFIX)
             tenant_metrics["endpoint_group"][cisco_metric][sub_metric] = dd_epg_metric
 

@@ -90,7 +90,7 @@ jobs:
     - stage: test
       env: CHECK=ceph PYTHON3=true
     - stage: test
-      env: CHECK=cisco_aci
+      env: CHECK=cisco_aci PYTHON3=true
     - stage: test
       env: CHECK=cockroachdb PYTHON3=true
     - stage: test
