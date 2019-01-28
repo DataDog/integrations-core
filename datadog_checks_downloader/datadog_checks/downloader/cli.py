@@ -54,8 +54,7 @@ class MissingVersionsException(Exception):
 
 
     def __str__(self):
-        return 'No version found for {} !'\
-                .format(self.standard_distribution_name)
+        return 'No version found for {} !'.format(self.standard_distribution_name)
 
 
 # Private module functions.
@@ -69,8 +68,7 @@ def __get_latest_version(tuf_downloader, standard_distribution_name,
     target_abspath = tuf_downloader.download(target_relpath,
                                              download_in_toto_metadata=False)
 
-    pattern = "<a href='(" + wheel_distribution_name + \
-              "-(.*?)-py2\.py3-none-any\.whl)'>(.*?)<\/a><br \/>"
+    pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-py2\\.py3-none-any\\.whl)'>(.*?)</a><br />"
     versions = []
 
     with open(target_abspath) as simple_index:
@@ -94,7 +92,7 @@ def __get_latest_version(tuf_downloader, standard_distribution_name,
 
 def __wheel_distribution_name(standard_distribution_name):
     # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
-    return re.sub('[^\w\d.]+', '_', standard_distribution_name, re.UNICODE)
+    return re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)
 
 
 
@@ -108,8 +106,7 @@ def download(standard_distribution_name, version, verbose):
     if not standard_distribution_name.startswith('datadog-'):
         raise NonDatadogPackageException(standard_distribution_name)
     else:
-        wheel_distribution_name = \
-                        __wheel_distribution_name(standard_distribution_name)
+        wheel_distribution_name = __wheel_distribution_name(standard_distribution_name)
         tuf_downloader = TUFDownloader(verbose=verbose)
 
         if not version:

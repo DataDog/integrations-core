@@ -7,17 +7,21 @@ from pkg_resources import safe_name
 import os.path
 
 
+EXCEPTIONS = set([
+    'datadog_checks_base',
+    'datadog_checks_dev',
+])
+
+
 def substitute(target_relpath):
     filename = os.path.basename(target_relpath)
     name, ext = os.path.splitext(filename)
     wheel_distribution_name, package_version, _, _, _ = name.split('-')
-    assert wheel_distribution_name.startswith('datadog_'), \
-           wheel_distribution_name
+    assert wheel_distribution_name.startswith('datadog_'), wheel_distribution_name
     standard_distribution_name = safe_name(wheel_distribution_name)
 
     # These names are the exceptions.
-    if wheel_distribution_name in set([ 'datadog_checks_base',
-                                        'datadog_checks_dev',    ]):
+    if wheel_distribution_name in EXCEPTIONS:
         package_github_dir = wheel_distribution_name
     # FIXME: This is the only other package at the time of writing (Sep 7 2018)
     # that does not replace `-` with `_`.

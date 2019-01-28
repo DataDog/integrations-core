@@ -163,12 +163,15 @@ class TUFDownloader:
         return target_relpaths
 
 
-    # NOTE: We assume that all the public keys needed to verify any in-toto
-    # root layout, or sublayout, metadata file has been directly signed by the
-    # top-level TUF targets role using *OFFLINE* keys. This is a reasonable
-    # assumption, as TUF does not offer meaningful security guarantees if _ALL_
-    # targets were signed using _online_ keys.
     def __update_in_toto_layout_pubkeys(self):
+        '''
+        NOTE: We assume that all the public keys needed to verify any in-toto
+        root layout, or sublayout, metadata file has been directly signed by
+        the top-level TUF targets role using *OFFLINE* keys. This is a
+        reasonable assumption, as TUF does not offer meaningful security
+        guarantees if _ALL_ targets were signed using _online_ keys.
+        '''
+
         target_relpaths = []
         targets = self.__updater.targets_of_role('targets')
 
@@ -195,8 +198,7 @@ class TUFDownloader:
 
         try:
             # Copy files over into temp dir.
-            rel_paths = [target_relpath] + in_toto_metadata_relpaths + \
-                    pubkey_relpaths
+            rel_paths = [target_relpath] + in_toto_metadata_relpaths + pubkey_relpaths
             for rel_path in rel_paths:
                 # Don't confuse Python with any leading path separator.
                 rel_path = rel_path.lstrip('/')
@@ -209,16 +211,14 @@ class TUFDownloader:
             # Load the root layout and public keys.
             layout = Metablock.load('root.layout')
             pubkeys = glob.glob('*.pub')
-            layout_key_dict = \
-                         import_public_keys_from_files_as_dict(pubkeys)
+            layout_key_dict = import_public_keys_from_files_as_dict(pubkeys)
             # Verify and inspect.
             params = substitute(target_relpath)
             verifylib.in_toto_verify(layout, layout_key_dict,
                                      substitution_parameters=params)
             logger.info('in-toto verified {}'.format(target_relpath))
         except:
-            logger.exception('in-toto failed to verify {}'\
-                             .format(target_relpath))
+            logger.exception('in-toto failed to verify {}'.format(target_relpath))
             raise
         finally:
             os.chdir(prev_cwd)
@@ -262,16 +262,15 @@ class TUFDownloader:
 
         logger.info('TUF verified {}'.format(target_relpath))
 
-	# Next, we use in-toto to verify the supply chain of the target.
-	# NOTE: We use a flag to avoid recursively downloading in-toto
-	# metadata for in-toto metadata themselves, and so on ad infinitum.
-	# All other files, presumably packages, should also be
-	# inspected.
+        # Next, we use in-toto to verify the supply chain of the target.
+        # NOTE: We use a flag to avoid recursively downloading in-toto
+        # metadata for in-toto metadata themselves, and so on ad infinitum.
+        # All other files, presumably packages, should also be
+        # inspected.
         if download_in_toto_metadata:
             self.__download_and_verify_in_toto_metadata(target, target_relpath)
         else:
-            logger.debug('Switched off in-toto verification for {}'\
-                         .format(target_relpath))
+            logger.debug('Switched off in-toto verification for {}'.format(target_relpath))
 
         target_path = os.path.join(self.__targets_dir, target_relpath)
         return target_path
