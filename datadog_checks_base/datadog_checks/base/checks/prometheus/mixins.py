@@ -16,7 +16,6 @@ from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, string_types
 
 from .. import AgentCheck
-from datadog_checks.base import ensure_unicode
 
 if PY3:
     long = int
