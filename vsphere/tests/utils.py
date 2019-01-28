@@ -118,6 +118,7 @@ def disable_thread_pool(check):
     """
     check.pool = MagicMock(apply_async=lambda func, args: func(*args))
     check.pool._workq.qsize.return_value = 0
+    check.pool.get_nworkers.return_value = 0
     check.pool_started = True  # otherwise the mock will be overwritten
     return check
 

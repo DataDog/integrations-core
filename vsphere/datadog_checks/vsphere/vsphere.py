@@ -151,11 +151,12 @@ class VSphereCheck(AgentCheck):
         self.latest_event_query = {}
 
     def start_pool(self):
-        self.log.info("Starting Thread Pool")
-        self.pool_size = int(self.init_config.get('threads_count', DEFAULT_SIZE_POOL))
+        if not self.pool_started:
+            self.log.info("Starting Thread Pool")
+            self.pool_size = int(self.init_config.get('threads_count', DEFAULT_SIZE_POOL))
 
-        self.pool = Pool(self.pool_size)
-        self.pool_started = True
+            self.pool = Pool(self.pool_size)
+            self.pool_started = True
 
     def terminate_pool(self):
         self.log.info("Terminating Thread Pool")
