@@ -106,7 +106,6 @@ class VSphereCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.time_started = time.time()
-        self.pool_started = False
         self.exceptionq = Queue()
 
         self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
@@ -151,30 +150,23 @@ class VSphereCheck(AgentCheck):
         self.latest_event_query = {}
 
     def start_pool(self):
-        if not self.pool_started:
-            self.log.info("Starting Thread Pool")
-            self.pool_size = int(self.init_config.get('threads_count', DEFAULT_SIZE_POOL))
-
-            self.pool = Pool(self.pool_size)
-            self.pool_started = True
+        self.log.info("Starting Thread Pool")
+        self.pool_size = int(self.init_config.get('threads_count', DEFAULT_SIZE_POOL))
+        self.pool = Pool(self.pool_size)
 
     def terminate_pool(self):
         self.log.info("Terminating Thread Pool")
-        if self.pool_started:
-            self.pool.terminate()
-            self.pool.join()
-            assert self.pool.get_nworkers() == 0
-            self.pool_started = False
+        self.pool.terminate()
+        self.pool.join()
+        assert self.pool.get_nworkers() == 0
 
     def stop_pool(self):
         self.log.info("Stopping Thread Pool, waiting for queued jobs to finish")
-        if self.pool_started:
-            for _ in self.pool._workers:
-                self.pool._workq.put(SENTINEL)
-            self.pool.close()
-            self.pool.join()
-            assert self.pool.get_nworkers() == 0
-            self.pool_started = False
+        for _ in self.pool._workers:
+            self.pool._workq.put(SENTINEL)
+        self.pool.close()
+        self.pool.join()
+        assert self.pool.get_nworkers() == 0
 
     def _query_event(self, instance):
         i_key = self._instance_key(instance)
@@ -896,38 +888,42 @@ class VSphereCheck(AgentCheck):
         self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
-        self.start_pool()
-
-        # First part: make sure our object repository is neat & clean
-        if self._should_cache(instance, CacheConfig.Metadata):
-            self._cache_metrics_metadata(instance)
-
-        if self._should_cache(instance, CacheConfig.Morlist):
-            self._cache_morlist_raw(instance)
-
-        self._process_mor_objects_queue(instance)
-
-        # Remove old objects that might be gone from the Mor cache
-        self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval)
-
-        # Second part: do the job
-        self.collect_metrics(instance)
-
-        self._query_event(instance)
-
-        thread_crashed = False
         try:
-            while True:
-                self.log.error(self.exceptionq.get_nowait())
-                thread_crashed = True
-        except Empty:
-            pass
+            self.start_pool()
 
-        if thread_crashed:
+            # First part: make sure our object repository is neat & clean
+            if self._should_cache(instance, CacheConfig.Metadata):
+                self._cache_metrics_metadata(instance)
+
+            if self._should_cache(instance, CacheConfig.Morlist):
+                self._cache_morlist_raw(instance)
+
+            self._process_mor_objects_queue(instance)
+
+            # Remove old objects that might be gone from the Mor cache
+            self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval)
+
+            # Second part: do the job
+            self.collect_metrics(instance)
+
+            self._query_event(instance)
+
+            try:
+                thread_crashed = False
+                while True:
+                    # Pop every exceptions from the queue and log them
+                    self.log.error(self.exceptionq.get_nowait())
+                    thread_crashed = True
+            except Empty:
+                pass
+
+            if thread_crashed:
+                raise Exception("One thread in the pool crashed, check the logs")
+
+            if set_external_tags is not None:
+                set_external_tags(self.get_external_host_tags())
+
+            self.stop_pool()
+        except Exception:
             self.terminate_pool()
-            raise Exception("One thread in the pool crashed, check the logs")
-
-        if set_external_tags is not None:
-            set_external_tags(self.get_external_host_tags())
-
-        self.stop_pool()
+            raise

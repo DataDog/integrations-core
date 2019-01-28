@@ -37,7 +37,6 @@ def test__init__(instance):
     i_key = check._instance_key(instance)
 
     assert check.time_started > 0
-    assert check.pool_started is False
     assert len(check.server_instances) == 0
     assert check.cache_config.get_interval(CacheConfig.Morlist, i_key) == 42
     assert check.cache_config.get_interval(CacheConfig.Metadata, i_key) == -42
