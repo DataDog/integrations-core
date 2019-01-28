@@ -16,11 +16,11 @@ vsphere.mem.overhead,gauge,,kibibyte,,Kilobytes of memory allocated to a vm beyo
 vsphere.mem.vmmemctl,gauge,,kibibyte,,Kilobytes of memory allocated by the virtual machine memory control driver (vmmemctl),-1,vsphere,mem vmmemctl
 vsphere.network.received,rate,,kibibyte,,Number of kilobytes received by the host,-1,vsphere,net rx
 vsphere.network.transmitted,rate,,kibibyte,,Number of kilobytes transmitted by the host,-1,vsphere,net tx
-vpshere.clusterServices.cpufairness.latest,gauge,,,,Fairness of distributed CPU resource allocation,0,vsphere,cluster cpufairness latest
-vpshere.clusterServices.effectivecpu.avg,gauge,,megahertz,,Total available CPU resources of all hosts within a cluster,1,vsphere,cluster effectivecpu avg
-vpshere.clusterServices.effectivemem.avg,gauge,,mebibyte,,Total amount of machine memory of all hosts in the cluster that is available for use for virtual machine memory (physical memory for use by the Guest OS) and virtual machine overhead memory,1,vsphere,cluster effectivemem avg
-vpshere.clusterServices.failover.latest,gauge,,,,vSphere HA number of failures that can be tolerated,1,vsphere,cluster failover latest
-vpshere.clusterServices.memfairness.latest,gauge,,,,Fairness of distributed memory resource allocation,0,vsphere,cluster memfairness latest
+vsphere.clusterServices.cpufairness.latest,gauge,,,,Fairness of distributed CPU resource allocation,0,vsphere,cluster cpufairness latest
+vsphere.clusterServices.effectivecpu.avg,gauge,,megahertz,,Total available CPU resources of all hosts within a cluster,1,vsphere,cluster effectivecpu avg
+vsphere.clusterServices.effectivemem.avg,gauge,,mebibyte,,Total amount of machine memory of all hosts in the cluster that is available for use for virtual machine memory (physical memory for use by the Guest OS) and virtual machine overhead memory,1,vsphere,cluster effectivemem avg
+vsphere.clusterServices.failover.latest,gauge,,,,vSphere HA number of failures that can be tolerated,1,vsphere,cluster failover latest
+vsphere.clusterServices.memfairness.latest,gauge,,,,Fairness of distributed memory resource allocation,0,vsphere,cluster memfairness latest
 vsphere.cpu.ready.sum,gauge,,millisecond,,Milliseconds of CPU time spent in ready state,-1,vsphere,cpu ready sum
 vsphere.cpu.usage.avg,gauge,,percent,,Percentage of CPU capacity being used,-1,vsphere,cpu usage avg
 vsphere.cpu.usagemhz.avg,gauge,,megahertz,,"CPU usage, as measured in megahertz",-1,vsphere,cpu usagemhz avg
