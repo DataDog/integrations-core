@@ -149,6 +149,9 @@ class VSphereCheck(AgentCheck):
         self.exception_printed = 0
 
     def print_exception(self, msg):
+        """ Print exceptions happening in separate threads
+        Prevent from logging a ton of them if a potentially big number of them fail the same way
+        """
         if self.exception_printed < 10:
             self.log.error(msg)
             self.exception_printed += 1
