@@ -130,11 +130,11 @@ metrics:
 
 #### Use your own MIB
 
-To use your own MIB with the Datadog Agent, convert it to the PySNMP format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][5].
+To use your own MIB with the Datadog Agent, convert it to the [PySNMP][14] format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][5].
 
 Since Datadog Agent version 5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][6]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
  
-To find the location of `mibdump.py`, run:
+In Linux, find the location of `mibdump.py`, run:
 
 ```
 $ find /opt/datadog-agent/ -type f -name build-pysnmp-mib.py -o -name mibdump.py
@@ -149,10 +149,29 @@ C:\>dir mibdump.py /s
  Directory of C:\Program Files\Datadog\Datadog Agent\embedded\Scripts
 ```
 
-Use this format for the script:
+In Linux, use this format for the script:
 
 ```
-<PATH_TO_FILE>/mibdump.py --mib-source /path/to/mib/files/  --mib-source http://mibs.snmplabs.com/asn1/@mib@ --destination-directory=/path/to/converted/mib/pyfiles/ --destination-format=pysnmp <MIB_FILE_NAME>
+export MIBSRC=/path/to/mib/files
+export MIBDST=/path/to/converted/mib/pyfiles
+
+<PATH_TO_FILE>/mibdump.py \
+  --mib-source $MIBSRC \
+  --mib-source http://mibs.snmplabs.com/asn1/@mib@ \
+  --destination-directory=$MIBDST \
+  --destination-format=pysnmp <MIB_FILE_NAME>
+```
+
+Windows Powershell example:
+
+```
+PS> New-Variable -Name MIBSRC -Value file:///X:/path/to/mib/source
+PS> New-Variable -Name MIBDST -Value X:\path\to\mib\destination
+PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FILE>\mibdump.py' `
+  --mib-source $MIBSRC  `
+  --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
+  --destination-directory=$MIBDST `
+  --destination-format=pysnmp <MIB_FILE_NAME>
 ```
 
 Example using the `CISCO-TCP-MIB.my`:
@@ -237,3 +256,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [12]: https://docs.datadoghq.com/agent/faq/how-to-monitor-snmp-devices
 [13]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[14]: http://snmplabs.com/pysnmp/index.html
