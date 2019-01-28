@@ -897,12 +897,6 @@ class VSphereCheck(AgentCheck):
     def check(self, instance):
         self.start_pool()
 
-        custom_tags = instance.get('tags', [])
-
-        # ## <TEST-INSTRUMENTATION>
-        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'] + custom_tags)
-        # ## </TEST-INSTRUMENTATION>
-
         # First part: make sure our object repository is neat & clean
         if self._should_cache(instance, CacheConfig.Metadata):
             self._cache_metrics_metadata(instance)
@@ -936,7 +930,3 @@ class VSphereCheck(AgentCheck):
             set_external_tags(self.get_external_host_tags())
 
         self.stop_pool()
-
-        # ## <TEST-INSTRUMENTATION>
-        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'] + custom_tags)
-        # ## </TEST-INSTRUMENTATION>
