@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 from collections import defaultdict
 from datetime import timedelta
-from Queue import Empty, Queue
 import re
 import ssl
 import time
@@ -87,7 +86,7 @@ def trace_method(method):
         try:
             method(*args, **kwargs)
         except Exception:
-            args[0].exceptionq.put("A worker thread crashed:\n" + traceback.format_exc())
+            args[0].print_exception("A worker thread crashed:\n" + traceback.format_exc())
     return wrapper
 
 
@@ -106,7 +105,6 @@ class VSphereCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.time_started = time.time()
-        self.exceptionq = Queue()
 
         self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
         self.batch_collector_size = max(init_config.get("batch_property_collector_size", BATCH_COLLECTOR_SIZE), 0)
@@ -148,6 +146,12 @@ class VSphereCheck(AgentCheck):
         # Metrics metadata, for each instance keeps the mapping: perfCounterKey -> {name, group, description}
         self.metadata_cache = MetadataCache()
         self.latest_event_query = {}
+        self.exception_printed = 0
+
+    def print_exception(self, msg):
+        if self.exception_printed < 10:
+            self.log.error(msg)
+            self.exception_printed += 1
 
     def start_pool(self):
         self.log.info("Starting Thread Pool")
@@ -890,6 +894,7 @@ class VSphereCheck(AgentCheck):
     def check(self, instance):
         try:
             self.start_pool()
+            self.exception_printed = 0
 
             # First part: make sure our object repository is neat & clean
             if self._should_cache(instance, CacheConfig.Metadata):
@@ -908,22 +913,12 @@ class VSphereCheck(AgentCheck):
 
             self._query_event(instance)
 
-            try:
-                thread_crashed = False
-                while True:
-                    # Pop every exceptions from the queue and log them
-                    self.log.error(self.exceptionq.get_nowait())
-                    thread_crashed = True
-            except Empty:
-                pass
-
-            if thread_crashed:
-                raise Exception("One thread in the pool crashed, check the logs")
-
             if set_external_tags is not None:
                 set_external_tags(self.get_external_host_tags())
 
             self.stop_pool()
+            if self.exception_printed > 0:
+                self.log.error("One thread in the pool crashed, check the logs")
         except Exception:
             self.terminate_pool()
             raise
