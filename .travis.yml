@@ -269,7 +269,8 @@ before_install:
 install:
   # Setuptools has a PY2 incompatibility issue with build_ext on v40.7.0
   # https://github.com/pypa/setuptools/issues/1653
-  - pip install -U pip setuptools==40.6.3 codecov
+  - pip install -U pip codecov
+  - pip install setuptools==40.6.3
   - pip install ./datadog_checks_dev[cli]
   - ddev config set core .
   # since on PRs it only runs test_changed we have to do this globally
