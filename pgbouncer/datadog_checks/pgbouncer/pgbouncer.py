@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import urlparse
-
 import psycopg2 as pg
 import psycopg2.extras as pgextras
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
@@ -74,7 +73,7 @@ class PgBouncer(AgentCheck):
             tags = []
 
         if database_url:
-            parsed_url = urlparse.urlparse(database_url)
+            parsed_url = urlparse(database_url)
             host = parsed_url.hostname
             port = parsed_url.port
 
@@ -195,7 +194,7 @@ class PgBouncer(AgentCheck):
         if not database_url:
             return u'pgbouncer://%s:******@%s:%s/%s' % (user, host, port, self.DB_NAME)
 
-        parsed_url = urlparse.urlparse(database_url)
+        parsed_url = urlparse(database_url)
         if parsed_url.password:
             return database_url.replace(parsed_url.password, '******')
         return database_url

@@ -206,7 +206,7 @@ jobs:
     - stage: test
       env: CHECK=pdh_check
     - stage: test
-      env: CHECK=pgbouncer
+      env: CHECK=pgbouncer PYTHON3=true
     - stage: test
       env: CHECK=php_fpm PYTHON3=true
     - stage: test
