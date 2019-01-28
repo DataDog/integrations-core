@@ -43,6 +43,15 @@ To see the most active channels, run the following command in a PowerShell:
 Get-WinEvent -ListLog * | sort RecordCount -Descending
 ```
 
+This command displays channels in the format `LogMode MaximumSizeInBytes RecordCount LogName`. Example response:
+
+```
+LogMode MaximumSizeInBytes RecordCount LogName
+Circular 134217728 249896 Security
+```
+
+The value under the column `LogName` is the name of the channel. In the above example, the channel name is `Security`.
+
 Then add the channels in your `win32_event_log.d/conf.yaml` configuration file:
 
 ```
