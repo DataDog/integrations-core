@@ -439,6 +439,7 @@ class Network(AgentCheck):
                 # Starting at 0 as the last line has a line return
                 conntrack_count = 0
                 while 1:
+                    # Reading the file by chucks (64k being a randomly chosen buffer size)
                     conntrack_buffer = conntrack_file.read(65536)
                     if not conntrack_buffer:
                         break
