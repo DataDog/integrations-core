@@ -166,7 +166,7 @@ class VSphereCheck(AgentCheck):
             self.pool_started = False
 
     def stop_pool(self):
-        self.log.info("Stopping Thread Pool")
+        self.log.info("Stopping Thread Pool, waiting for queued jobs to finish")
         if self.pool_started:
             for _ in self.pool._workers:
                 self.pool._workq.put(SENTINEL)
@@ -628,6 +628,7 @@ class VSphereCheck(AgentCheck):
         use_guest_hostname = is_affirmative(instance.get("use_guest_hostname", False))
         all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags,
                                       use_guest_hostname=use_guest_hostname)
+
         self.mor_objects_queue.fill(i_key, dict(all_objs))
         self.cache_config.set_last(CacheConfig.Morlist, i_key, time.time())
 
