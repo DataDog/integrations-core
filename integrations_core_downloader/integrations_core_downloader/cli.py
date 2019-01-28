@@ -55,8 +55,6 @@ class MissingVersionsException(Exception):
 # Private module functions.
 
 
-# TODO: Use TUF metadata to index packages instead of PyPI simple indices:
-# https://github.com/theupdateframework/tuf/issues/822.
 def __get_latest_version(tuf_downloader, standard_distribution_name,
                          wheel_distribution_name):
     target_relpath = 'simple/{}/index.html'.format(standard_distribution_name)

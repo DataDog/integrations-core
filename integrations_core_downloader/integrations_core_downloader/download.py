@@ -182,8 +182,6 @@ class TUFDownloader:
         return target_relpaths
 
 
-    # TODO: Consider borrowing techniques used in containers to restrict CPU,
-    # RAM, disk space, and so on for the inspection.
     def __verify_in_toto_metadata(self, target_relpath,
                                   in_toto_metadata_relpaths, pubkey_relpaths):
         # Make a temporary directory.
@@ -201,7 +199,6 @@ class TUFDownloader:
                 shutil.copy(abs_path, tempdir)
 
             # Switch to the temp dir.
-            # TODO: Consider using chroot.
             os.chdir(tempdir)
 
             # Load the root layout and public keys.
