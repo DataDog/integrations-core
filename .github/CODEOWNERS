@@ -31,4 +31,4 @@ manifest.json         @DataDog/baklava @DataDog/agent-integrations
 requirements.in                 @DataDog/prodsec
 requirements.txt                @DataDog/prodsec
 # As well as the secure downloader.
-/integrations_core_downloader/  @DataDog/prodsec
+/datadog_checks_downloader/     @DataDog/prodsec

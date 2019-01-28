@@ -1,3 +1,8 @@
+# (C) Datadog, Inc. 2019
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+
 import glob
 import logging
 import logging.config
@@ -38,9 +43,9 @@ from .parameters import substitute
 here = os.path.abspath(os.path.dirname(__file__))
 REPOSITORIES_DIR = os.path.join(here, 'data')
 # abspath = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
-REPOSITORY_DIR = 'integrations-core-repo'
+REPOSITORY_DIR = 'repo'
 REPOSITORY_MIRRORS = {
-    'integrations-core-repo': {
+    'repo': {
         'url_prefix': 'https://dd-integrations-core-wheels-build-stable.s3.amazonaws.com',
         'metadata_path': 'metadata.staged',
         'targets_path': 'targets',
