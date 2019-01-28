@@ -220,7 +220,7 @@ jobs:
     - stage: test
       env: CHECK=process PYTHON3=true
     - stage: test
-      env: CHECK=prometheus
+      env: CHECK=prometheus PYTHON3=true
     - stage: test
       env: CHECK=rabbitmq PYTHON3=true
     - stage: test
