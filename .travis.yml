@@ -234,7 +234,7 @@ jobs:
     - stage: test
       env: CHECK=spark PYTHON3=true
     - stage: test
-      env: CHECK=sqlserver
+      env: CHECK=sqlserver PYTHON3=true
     - stage: test
       env: CHECK=ssh_check PYTHON3=true
     - stage: test
