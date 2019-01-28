@@ -6,12 +6,12 @@ Check the performance counters from SQL Server
 For information on how to report the metrics available in the sys.dm_os_performance_counters table see
 http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-values-from-sys-dm-os-performance-counters.aspx  # noqa: E501
 '''
-from __future__ import division
-
+# stdlib
 import traceback
 from contextlib import contextmanager
 from collections import defaultdict
 
+# 3rd party
 try:
     import adodbapi
 except ImportError:
@@ -22,6 +22,7 @@ try:
 except ImportError:
     pyodbc = None
 
+# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 
@@ -190,7 +191,7 @@ class SQLServer(AgentCheck):
                 for row in cursor:
                     self.existing_databases[row.name] = True
 
-            except Exception as e:
+            except Exception, e:
                 self.log.error("Failed to check if database {} exists: {}".format(database, e))
                 return False, context
             finally:
@@ -555,7 +556,7 @@ class SQLServer(AgentCheck):
                                                                                                            proc,
                                                                                                            row.metric))
 
-            except Exception as e:
+            except Exception, e:
                 self.log.warning("Could not call procedure {}: {}".format(proc, e))
 
             self.close_cursor(cursor)
@@ -576,7 +577,7 @@ class SQLServer(AgentCheck):
             cursor.execute(sql, ())
             result = cursor.fetchone()
             should_run = result[0] == 1
-        except Exception as e:
+        except Exception, e:
             self.log.error("Failed to run proc_only_if sql {} : {}".format(sql, e))
 
         self.close_cursor(cursor)
