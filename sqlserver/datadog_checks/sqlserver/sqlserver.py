@@ -483,6 +483,7 @@ class SQLServer(AgentCheck):
         """
         Fetch the metrics from the sys.dm_os_performance_counters table
         """
+
         custom_tags = instance.get('tags', [])
         if custom_tags is None:
             custom_tags = []
