@@ -22,3 +22,6 @@ pgbouncer.pools.sv_used,gauge,,connection,,"Server connections idle more than se
 pgbouncer.pools.sv_tested,gauge,,connection,,Server connections currently running either server_reset_query or server_check_query,0,pgbouncer,server tested conns
 pgbouncer.pools.sv_login,gauge,,connection,,Server connections currently in the process of logging in,0,pgbouncer,server login conns
 pgbouncer.pools.maxwait,gauge,,second,,Age of oldest unserved client connection,-1,pgbouncer,max client wait
+pgbouncer.databases.pool_size,gauge,,connection,,Maximum number of server connections,0,pgbouncer,database pool size
+pgbouncer.databases.max_connections,gauge,,connection,,Maximum number of allowed connections,0,pgbouncer,database max conns
+pgbouncer.databases.current_connections,gauge,,connection,,Current number of connections for this database,0,pgbouncer,database current conns

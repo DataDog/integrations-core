@@ -64,6 +64,18 @@ class PgBouncer(AgentCheck):
         'query': """SHOW POOLS""",
     }
 
+    DATABASES_METRICS = {
+        'descriptors': [
+            ('database', 'db'),
+        ],
+        'metrics': [
+            ('pool_size',            ('pgbouncer.databases.pool_size', GAUGE)),
+            ('max_connections',      ('pgbouncer.databases.max_connections', GAUGE)),
+            ('current_connections',  ('pgbouncer.databases.current_connections', GAUGE)),
+        ],
+        'query': """SHOW DATABASES""",
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.dbs = {}
@@ -91,7 +103,7 @@ class PgBouncer(AgentCheck):
         """Query pgbouncer for various metrics
         """
 
-        metric_scope = [self.STATS_METRICS, self.POOLS_METRICS]
+        metric_scope = [self.STATS_METRICS, self.POOLS_METRICS, self.DATABASES_METRICS]
 
         try:
             with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
