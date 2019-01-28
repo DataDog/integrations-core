@@ -623,7 +623,6 @@ class VSphereCheck(AgentCheck):
         include_only_marked = is_affirmative(instance.get('include_only_marked', False))
 
         # Discover hosts and virtual machines
-        i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         use_guest_hostname = is_affirmative(instance.get("use_guest_hostname", False))
         all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags,
