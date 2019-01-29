@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 4.0.0 / 2019-01-29
+
+* [Changed] Wait for jobs to finish before returning from check function. See [#3034](https://github.com/DataDog/integrations-core/pull/3034).
+
 ## 3.6.2 / 2019-01-10
 
 * [Fixed] Fix tags normalization. See [#2918][1].
