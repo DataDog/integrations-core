@@ -35,9 +35,9 @@ the modern methods :meth:`~pymongo.collection.Collection.bulk_write`,
 
 import collections
 
-from bson.dbref import DBRef
-from bson.objectid import ObjectId
-from bson.son import SON
+from datadog_checks.tokumx.vendor.bson.dbref import DBRef
+from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
+from datadog_checks.tokumx.vendor.bson.son import SON
 
 
 class SONManipulator(object):

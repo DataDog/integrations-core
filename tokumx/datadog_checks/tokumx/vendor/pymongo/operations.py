@@ -14,9 +14,9 @@
 
 """Operation class definitions."""
 
-from pymongo.common import validate_boolean, validate_is_mapping
-from pymongo.collation import validate_collation_or_none
-from pymongo.helpers import _gen_index_name, _index_document, _index_list
+from datadog_checks.tokumx.vendor.pymongo.common import validate_boolean, validate_is_mapping
+from datadog_checks.tokumx.vendor.pymongo.collation import validate_collation_or_none
+from datadog_checks.tokumx.vendor.pymongo.helpers import _gen_index_name, _index_document, _index_list
 
 
 class InsertOne(object):

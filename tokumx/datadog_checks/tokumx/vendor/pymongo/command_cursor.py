@@ -18,10 +18,10 @@ import datetime
 
 from collections import deque
 
-from bson.py3compat import integer_types
-from pymongo import helpers
-from pymongo.errors import AutoReconnect, NotMasterError, OperationFailure
-from pymongo.message import _CursorAddress, _GetMore, _convert_exception
+from datadog_checks.tokumx.vendor.bson.py3compat import integer_types
+from datadog_checks.tokumx.vendor.pymongo import helpers
+from datadog_checks.tokumx.vendor.pymongo.errors import AutoReconnect, NotMasterError, OperationFailure
+from datadog_checks.tokumx.vendor.pymongo.message import _CursorAddress, _GetMore, _convert_exception
 
 
 class CommandCursor(object):

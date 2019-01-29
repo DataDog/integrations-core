@@ -27,35 +27,35 @@ import uuid
 from codecs import (utf_8_decode as _utf_8_decode,
                     utf_8_encode as _utf_8_encode)
 
-from bson.binary import (Binary, OLD_UUID_SUBTYPE,
+from datadog_checks.tokumx.vendor.bson.binary import (Binary, OLD_UUID_SUBTYPE,
                          JAVA_LEGACY, CSHARP_LEGACY,
                          UUIDLegacy)
-from bson.code import Code
-from bson.codec_options import (
+from datadog_checks.tokumx.vendor.bson.code import Code
+from datadog_checks.tokumx.vendor.bson.codec_options import (
     CodecOptions, DEFAULT_CODEC_OPTIONS, _raw_document_class)
-from bson.dbref import DBRef
-from bson.decimal128 import Decimal128
-from bson.errors import (InvalidBSON,
+from datadog_checks.tokumx.vendor.bson.dbref import DBRef
+from datadog_checks.tokumx.vendor.bson.decimal128 import Decimal128
+from datadog_checks.tokumx.vendor.bson.errors import (InvalidBSON,
                          InvalidDocument,
                          InvalidStringData)
-from bson.int64 import Int64
-from bson.max_key import MaxKey
-from bson.min_key import MinKey
-from bson.objectid import ObjectId
-from bson.py3compat import (b,
+from datadog_checks.tokumx.vendor.bson.int64 import Int64
+from datadog_checks.tokumx.vendor.bson.max_key import MaxKey
+from datadog_checks.tokumx.vendor.bson.min_key import MinKey
+from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
+from datadog_checks.tokumx.vendor.bson.py3compat import (b,
                             PY3,
                             iteritems,
                             text_type,
                             string_type,
                             reraise)
-from bson.regex import Regex
-from bson.son import SON, RE_TYPE
-from bson.timestamp import Timestamp
-from bson.tz_util import utc
+from datadog_checks.tokumx.vendor.bson.regex import Regex
+from datadog_checks.tokumx.vendor.bson.son import SON, RE_TYPE
+from datadog_checks.tokumx.vendor.bson.timestamp import Timestamp
+from datadog_checks.tokumx.vendor.bson.tz_util import utc
 
 
 try:
-    from bson import _cbson
+    from datadog_checks.tokumx.vendor.bson import _cbson
     _USE_C = True
 except ImportError:
     _USE_C = False

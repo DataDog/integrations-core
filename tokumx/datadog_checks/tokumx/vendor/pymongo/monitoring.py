@@ -24,7 +24,7 @@ For example, a simple command logger might be implemented like this::
 
     import logging
 
-    from pymongo import monitoring
+    from datadog_checks.tokumx.vendor.pymongo import monitoring
 
     class CommandLogger(monitoring.CommandListener):
 
@@ -138,7 +138,7 @@ import sys
 import traceback
 
 from collections import namedtuple, Sequence
-from pymongo.helpers import _handle_exception
+from datadog_checks.tokumx.vendor.pymongo.helpers import _handle_exception
 
 _Listeners = namedtuple('Listeners',
                         ('command_listeners', 'server_listeners',

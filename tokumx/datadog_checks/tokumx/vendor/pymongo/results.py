@@ -14,7 +14,7 @@
 
 """Result class definitions."""
 
-from pymongo.errors import InvalidOperation
+from datadog_checks.tokumx.vendor.pymongo.errors import InvalidOperation
 
 
 class _WriteResult(object):

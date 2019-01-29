@@ -23,7 +23,7 @@ import decimal
 import struct
 import sys
 
-from bson.py3compat import (PY3 as _PY3,
+from datadog_checks.tokumx.vendor.bson.py3compat import (PY3 as _PY3,
                             string_type as _string_type)
 
 

@@ -16,9 +16,9 @@
 
 import itertools
 
-from bson.py3compat import imap
-from pymongo import common
-from pymongo.server_type import SERVER_TYPE
+from datadog_checks.tokumx.vendor.bson.py3compat import imap
+from datadog_checks.tokumx.vendor.pymongo import common
+from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 
 
 def _get_server_type(doc):

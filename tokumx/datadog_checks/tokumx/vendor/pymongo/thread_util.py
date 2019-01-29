@@ -20,8 +20,8 @@ try:
 except ImportError:
     from time import time as _time
 
-from pymongo.monotonic import time as _time
-from pymongo.errors import ExceededMaxWaiters
+from datadog_checks.tokumx.vendor.pymongo.monotonic import time as _time
+from datadog_checks.tokumx.vendor.pymongo.errors import ExceededMaxWaiters
 
 
 ### Begin backport from CPython 3.2 for timeout support for Semaphore.acquire

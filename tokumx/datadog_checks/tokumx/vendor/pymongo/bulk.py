@@ -17,24 +17,24 @@
 .. versionadded:: 2.7
 """
 
-from bson.objectid import ObjectId
-from bson.raw_bson import RawBSONDocument
-from bson.son import SON
-from pymongo.common import (validate_is_mapping,
+from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
+from datadog_checks.tokumx.vendor.bson.raw_bson import RawBSONDocument
+from datadog_checks.tokumx.vendor.bson.son import SON
+from datadog_checks.tokumx.vendor.pymongo.common import (validate_is_mapping,
                             validate_is_document_type,
                             validate_ok_for_replace,
                             validate_ok_for_update)
-from pymongo.collation import validate_collation_or_none
-from pymongo.errors import (BulkWriteError,
+from datadog_checks.tokumx.vendor.pymongo.collation import validate_collation_or_none
+from datadog_checks.tokumx.vendor.pymongo.errors import (BulkWriteError,
                             ConfigurationError,
                             DocumentTooLarge,
                             InvalidOperation,
                             OperationFailure)
-from pymongo.message import (_INSERT, _UPDATE, _DELETE,
+from datadog_checks.tokumx.vendor.pymongo.message import (_INSERT, _UPDATE, _DELETE,
                              _do_batched_write_command,
                              _randint,
                              _BulkWriteContext)
-from pymongo.write_concern import WriteConcern
+from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
 
 
 _DELETE_ALL = 0

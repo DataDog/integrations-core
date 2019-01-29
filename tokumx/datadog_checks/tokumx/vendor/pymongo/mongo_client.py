@@ -39,19 +39,19 @@ import weakref
 
 from collections import defaultdict
 
-from bson.codec_options import DEFAULT_CODEC_OPTIONS
-from bson.py3compat import (integer_types,
+from datadog_checks.tokumx.vendor.bson.codec_options import DEFAULT_CODEC_OPTIONS
+from datadog_checks.tokumx.vendor.bson.py3compat import (integer_types,
                             string_type)
-from bson.son import SON
-from pymongo import (common,
+from datadog_checks.tokumx.vendor.bson.son import SON
+from datadog_checks.tokumx.vendor.pymongo import (common,
                      database,
                      helpers,
                      message,
                      periodic_executor,
                      uri_parser)
-from pymongo.client_options import ClientOptions
-from pymongo.cursor_manager import CursorManager
-from pymongo.errors import (AutoReconnect,
+from datadog_checks.tokumx.vendor.pymongo.client_options import ClientOptions
+from datadog_checks.tokumx.vendor.pymongo.cursor_manager import CursorManager
+from datadog_checks.tokumx.vendor.pymongo.errors import (AutoReconnect,
                             ConfigurationError,
                             ConnectionFailure,
                             InvalidOperation,
@@ -59,14 +59,14 @@ from pymongo.errors import (AutoReconnect,
                             NetworkTimeout,
                             NotMasterError,
                             OperationFailure)
-from pymongo.read_preferences import ReadPreference
-from pymongo.server_selectors import (writable_preferred_server_selector,
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
+from datadog_checks.tokumx.vendor.pymongo.server_selectors import (writable_preferred_server_selector,
                                       writable_server_selector)
-from pymongo.server_type import SERVER_TYPE
-from pymongo.topology import Topology
-from pymongo.topology_description import TOPOLOGY_TYPE
-from pymongo.settings import TopologySettings
-from pymongo.write_concern import WriteConcern
+from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
+from datadog_checks.tokumx.vendor.pymongo.topology import Topology
+from datadog_checks.tokumx.vendor.pymongo.topology_description import TOPOLOGY_TYPE
+from datadog_checks.tokumx.vendor.pymongo.settings import TopologySettings
+from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
 
 
 class MongoClient(common.BaseObject):
@@ -135,7 +135,7 @@ class MongoClient(common.BaseObject):
           background threads. You can check if the server is available
           like this::
 
-            from pymongo.errors import ConnectionFailure
+            from datadog_checks.tokumx.vendor.pymongo.errors import ConnectionFailure
             client = MongoClient()
             try:
                 # The ismaster command is cheap and does not require auth.

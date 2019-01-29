@@ -14,7 +14,7 @@
 
 """Criteria to select some ServerDescriptions from a TopologyDescription."""
 
-from pymongo.server_type import SERVER_TYPE
+from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 
 
 class Selection(object):

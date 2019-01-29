@@ -14,7 +14,7 @@
 
 """Tools for working with read concerns."""
 
-from bson.py3compat import string_type
+from datadog_checks.tokumx.vendor.bson.py3compat import string_type
 
 
 class ReadConcern(object):

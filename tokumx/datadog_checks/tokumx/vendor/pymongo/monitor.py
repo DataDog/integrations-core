@@ -16,14 +16,14 @@
 
 import weakref
 
-from bson.codec_options import DEFAULT_CODEC_OPTIONS
-from bson.son import SON
-from pymongo import common, helpers, message, periodic_executor
-from pymongo.server_type import SERVER_TYPE
-from pymongo.ismaster import IsMaster
-from pymongo.monotonic import time as _time
-from pymongo.read_preferences import MovingAverage
-from pymongo.server_description import ServerDescription
+from datadog_checks.tokumx.vendor.bson.codec_options import DEFAULT_CODEC_OPTIONS
+from datadog_checks.tokumx.vendor.bson.son import SON
+from datadog_checks.tokumx.vendor.pymongo import common, helpers, message, periodic_executor
+from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
+from datadog_checks.tokumx.vendor.pymongo.ismaster import IsMaster
+from datadog_checks.tokumx.vendor.pymongo.monotonic import time as _time
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import MovingAverage
+from datadog_checks.tokumx.vendor.pymongo.server_description import ServerDescription
 
 
 class Monitor(object):

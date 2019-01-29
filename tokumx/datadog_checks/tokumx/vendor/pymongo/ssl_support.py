@@ -38,8 +38,8 @@ try:
 except ImportError:
     pass
 
-from bson.py3compat import string_type
-from pymongo.errors import ConfigurationError
+from datadog_checks.tokumx.vendor.bson.py3compat import string_type
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
 
 _WINCERTSLOCK = threading.Lock()
 _WINCERTS = None
@@ -49,7 +49,7 @@ if HAVE_SSL:
         # Python 2.7.9+, 3.2+, PyPy 2.5.1+, etc.
         from ssl import SSLContext
     except ImportError:
-        from pymongo.ssl_context import SSLContext
+        from datadog_checks.tokumx.vendor.pymongo.ssl_context import SSLContext
 
     def validate_cert_reqs(option, value):
         """Validate the cert reqs are valid. It must be None or one of the

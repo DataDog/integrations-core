@@ -19,18 +19,18 @@ import collections
 import datetime
 import warnings
 
-from bson.binary import (STANDARD, PYTHON_LEGACY,
+from datadog_checks.tokumx.vendor.bson.binary import (STANDARD, PYTHON_LEGACY,
                          JAVA_LEGACY, CSHARP_LEGACY)
-from bson.codec_options import CodecOptions
-from bson.py3compat import string_type, integer_types, iteritems
-from bson.raw_bson import RawBSONDocument
-from pymongo.auth import MECHANISMS
-from pymongo.errors import ConfigurationError
-from pymongo.monitoring import _validate_event_listeners
-from pymongo.read_concern import ReadConcern
-from pymongo.read_preferences import _MONGOS_MODES, _ServerMode
-from pymongo.ssl_support import validate_cert_reqs
-from pymongo.write_concern import WriteConcern
+from datadog_checks.tokumx.vendor.bson.codec_options import CodecOptions
+from datadog_checks.tokumx.vendor.bson.py3compat import string_type, integer_types, iteritems
+from datadog_checks.tokumx.vendor.bson.raw_bson import RawBSONDocument
+from datadog_checks.tokumx.vendor.pymongo.auth import MECHANISMS
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
+from datadog_checks.tokumx.vendor.pymongo.monitoring import _validate_event_listeners
+from datadog_checks.tokumx.vendor.pymongo.read_concern import ReadConcern
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import _MONGOS_MODES, _ServerMode
+from datadog_checks.tokumx.vendor.pymongo.ssl_support import validate_cert_reqs
+from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
 
 # Defaults until we connect to a server and get updated limits.
 MAX_BSON_SIZE = 16 * (1024 ** 2)

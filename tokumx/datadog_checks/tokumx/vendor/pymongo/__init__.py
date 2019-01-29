@@ -80,26 +80,26 @@ def get_version_string():
 __version__ = version = get_version_string()
 """Current version of PyMongo."""
 
-from pymongo.collection import ReturnDocument
-from pymongo.common import (MIN_SUPPORTED_WIRE_VERSION,
+from datadog_checks.tokumx.vendor.pymongo.collection import ReturnDocument
+from datadog_checks.tokumx.vendor.pymongo.common import (MIN_SUPPORTED_WIRE_VERSION,
                             MAX_SUPPORTED_WIRE_VERSION)
-from pymongo.cursor import CursorType
-from pymongo.mongo_client import MongoClient
-from pymongo.mongo_replica_set_client import MongoReplicaSetClient
-from pymongo.operations import (IndexModel,
+from datadog_checks.tokumx.vendor.pymongo.cursor import CursorType
+from datadog_checks.tokumx.vendor.pymongo.mongo_client import MongoClient
+from datadog_checks.tokumx.vendor.pymongo.mongo_replica_set_client import MongoReplicaSetClient
+from datadog_checks.tokumx.vendor.pymongo.operations import (IndexModel,
                                 InsertOne,
                                 DeleteOne,
                                 DeleteMany,
                                 UpdateOne,
                                 UpdateMany,
                                 ReplaceOne)
-from pymongo.read_preferences import ReadPreference
-from pymongo.write_concern import WriteConcern
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
+from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
 
 def has_c():
     """Is the C extension installed?"""
     try:
-        from pymongo import _cmessage
+        from datadog_checks.tokumx.vendor.pymongo import _cmessage
         return True
     except ImportError:
         return False

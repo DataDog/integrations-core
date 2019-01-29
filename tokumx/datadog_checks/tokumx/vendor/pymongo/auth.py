@@ -39,10 +39,10 @@ from collections import namedtuple
 from hashlib import md5, sha1
 from random import SystemRandom
 
-from bson.binary import Binary
-from bson.py3compat import b, string_type, _unicode, PY3
-from bson.son import SON
-from pymongo.errors import ConfigurationError, OperationFailure
+from datadog_checks.tokumx.vendor.bson.binary import Binary
+from datadog_checks.tokumx.vendor.bson.py3compat import b, string_type, _unicode, PY3
+from datadog_checks.tokumx.vendor.bson.son import SON
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError, OperationFailure
 
 
 MECHANISMS = frozenset(

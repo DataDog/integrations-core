@@ -14,7 +14,7 @@
 
 """Exceptions raised by the :mod:`gridfs` package"""
 
-from pymongo.errors import PyMongoError
+from datadog_checks.tokumx.vendor.pymongo.errors import PyMongoError
 
 
 class GridFSError(PyMongoError):

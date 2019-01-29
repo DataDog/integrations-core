@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from bson.py3compat import PY3
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3
 
 """Tools for representing BSON binary data.
 """

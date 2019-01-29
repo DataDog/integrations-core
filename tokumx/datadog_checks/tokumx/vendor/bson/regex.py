@@ -17,8 +17,8 @@
 
 import re
 
-from bson.son import RE_TYPE
-from bson.py3compat import string_type, text_type
+from datadog_checks.tokumx.vendor.bson.son import RE_TYPE
+from datadog_checks.tokumx.vendor.bson.py3compat import string_type, text_type
 
 
 def str_flags_to_int(str_flags):

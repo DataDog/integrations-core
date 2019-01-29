@@ -14,12 +14,12 @@
 
 """Exceptions raised by PyMongo."""
 
-from bson.errors import *
+from datadog_checks.tokumx.vendor.bson.errors import *
 
 try:
     from ssl import CertificateError
 except ImportError:
-    from pymongo.ssl_match_hostname import CertificateError
+    from datadog_checks.tokumx.vendor.pymongo.ssl_match_hostname import CertificateError
 
 
 class PyMongoError(Exception):

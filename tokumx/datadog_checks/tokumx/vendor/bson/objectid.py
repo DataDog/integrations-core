@@ -27,9 +27,9 @@ import struct
 import threading
 import time
 
-from bson.errors import InvalidId
-from bson.py3compat import PY3, bytes_from_hex, string_type, text_type
-from bson.tz_util import utc
+from datadog_checks.tokumx.vendor.bson.errors import InvalidId
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3, bytes_from_hex, string_type, text_type
+from datadog_checks.tokumx.vendor.bson.tz_util import utc
 
 
 def _machine_bytes():

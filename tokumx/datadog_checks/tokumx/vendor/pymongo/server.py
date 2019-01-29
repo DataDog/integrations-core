@@ -18,10 +18,10 @@ import contextlib
 
 from datetime import datetime
 
-from pymongo.errors import ConfigurationError
-from pymongo.message import _Query, _convert_exception
-from pymongo.response import Response, ExhaustResponse
-from pymongo.server_type import SERVER_TYPE
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
+from datadog_checks.tokumx.vendor.pymongo.message import _Query, _convert_exception
+from datadog_checks.tokumx.vendor.pymongo.response import Response, ExhaustResponse
+from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 
 
 class Server(object):

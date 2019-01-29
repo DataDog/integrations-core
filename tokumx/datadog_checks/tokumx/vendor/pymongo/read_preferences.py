@@ -16,10 +16,10 @@
 
 from collections import Mapping
 
-from bson.py3compat import integer_types
-from pymongo import max_staleness_selectors
-from pymongo.errors import ConfigurationError
-from pymongo.server_selectors import (member_with_tags_server_selector,
+from datadog_checks.tokumx.vendor.bson.py3compat import integer_types
+from datadog_checks.tokumx.vendor.pymongo import max_staleness_selectors
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
+from datadog_checks.tokumx.vendor.pymongo.server_selectors import (member_with_tags_server_selector,
                                       secondary_with_tags_server_selector)
 
 

@@ -24,18 +24,18 @@ import datetime
 import random
 import struct
 
-import bson
-from bson.codec_options import DEFAULT_CODEC_OPTIONS
-from bson.py3compat import b, StringIO
-from bson.son import SON
+from datadog_checks.tokumx.vendor import bson
+from datadog_checks.tokumx.vendor.bson.codec_options import DEFAULT_CODEC_OPTIONS
+from datadog_checks.tokumx.vendor.bson.py3compat import b, StringIO
+from datadog_checks.tokumx.vendor.bson.son import SON
 try:
-    from pymongo import _cmessage
+    from datadog_checks.tokumx.vendor.pymongo import _cmessage
     _use_c = True
 except ImportError:
     _use_c = False
-from pymongo.errors import DocumentTooLarge, InvalidOperation, OperationFailure
-from pymongo.read_concern import DEFAULT_READ_CONCERN
-from pymongo.read_preferences import ReadPreference
+from datadog_checks.tokumx.vendor.pymongo.errors import DocumentTooLarge, InvalidOperation, OperationFailure
+from datadog_checks.tokumx.vendor.pymongo.read_concern import DEFAULT_READ_CONCERN
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
 
 
 MAX_INT32 = 2147483647

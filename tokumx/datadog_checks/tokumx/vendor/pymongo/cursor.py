@@ -20,22 +20,22 @@ import warnings
 
 from collections import deque
 
-from bson import RE_TYPE
-from bson.code import Code
-from bson.py3compat import (iteritems,
+from datadog_checks.tokumx.vendor.bson import RE_TYPE
+from datadog_checks.tokumx.vendor.bson.code import Code
+from datadog_checks.tokumx.vendor.bson.py3compat import (iteritems,
                             integer_types,
                             string_type)
-from bson.son import SON
-from pymongo import helpers
-from pymongo.common import validate_boolean, validate_is_mapping
-from pymongo.collation import validate_collation_or_none
-from pymongo.errors import (AutoReconnect,
+from datadog_checks.tokumx.vendor.bson.son import SON
+from datadog_checks.tokumx.vendor.pymongo import helpers
+from datadog_checks.tokumx.vendor.pymongo.common import validate_boolean, validate_is_mapping
+from datadog_checks.tokumx.vendor.pymongo.collation import validate_collation_or_none
+from datadog_checks.tokumx.vendor.pymongo.errors import (AutoReconnect,
                             ConnectionFailure,
                             InvalidOperation,
                             NotMasterError,
                             OperationFailure)
-from pymongo.message import _CursorAddress, _GetMore, _Query, _convert_exception
-from pymongo.read_preferences import ReadPreference
+from datadog_checks.tokumx.vendor.pymongo.message import _CursorAddress, _GetMore, _Query, _convert_exception
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
 
 _QUERY_OPTIONS = {
     "tailable_cursor": 2,

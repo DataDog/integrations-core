@@ -14,8 +14,8 @@
 
 """Tools for working with write concerns."""
 
-from bson.py3compat import integer_types, string_type
-from pymongo.errors import ConfigurationError
+from datadog_checks.tokumx.vendor.bson.py3compat import integer_types, string_type
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
 
 class WriteConcern(object):
     """WriteConcern

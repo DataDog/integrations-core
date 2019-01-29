@@ -27,8 +27,8 @@ When there is no known primary, a secondary S's staleness is estimated with:
 where "SMax" is the secondary with the greatest lastWriteDate.
 """
 
-from pymongo.errors import ConfigurationError
-from pymongo.server_type import SERVER_TYPE
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
+from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 
 
 # Constant defined in Max Staleness Spec: An idle primary writes a no-op every

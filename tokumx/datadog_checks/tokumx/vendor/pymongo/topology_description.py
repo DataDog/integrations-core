@@ -16,12 +16,12 @@
 
 from collections import namedtuple
 
-from pymongo import common
-from pymongo.errors import ConfigurationError
-from pymongo.read_preferences import ReadPreference
-from pymongo.server_description import ServerDescription
-from pymongo.server_selectors import Selection
-from pymongo.server_type import SERVER_TYPE
+from datadog_checks.tokumx.vendor.pymongo import common
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
+from datadog_checks.tokumx.vendor.pymongo.server_description import ServerDescription
+from datadog_checks.tokumx.vendor.pymongo.server_selectors import Selection
+from datadog_checks.tokumx.vendor.pymongo.server_type import SERVER_TYPE
 
 
 TOPOLOGY_TYPE = namedtuple('TopologyType', ['Single', 'ReplicaSetNoPrimary',

@@ -16,23 +16,23 @@
 
 import warnings
 
-from bson.code import Code
-from bson.codec_options import CodecOptions, DEFAULT_CODEC_OPTIONS
-from bson.dbref import DBRef
-from bson.objectid import ObjectId
-from bson.py3compat import iteritems, string_type, _unicode
-from bson.son import SON
-from pymongo import auth, common, helpers
-from pymongo.collection import Collection
-from pymongo.command_cursor import CommandCursor
-from pymongo.errors import (CollectionInvalid,
+from datadog_checks.tokumx.vendor.bson.code import Code
+from datadog_checks.tokumx.vendor.bson.codec_options import CodecOptions, DEFAULT_CODEC_OPTIONS
+from datadog_checks.tokumx.vendor.bson.dbref import DBRef
+from datadog_checks.tokumx.vendor.bson.objectid import ObjectId
+from datadog_checks.tokumx.vendor.bson.py3compat import iteritems, string_type, _unicode
+from datadog_checks.tokumx.vendor.bson.son import SON
+from datadog_checks.tokumx.vendor.pymongo import auth, common, helpers
+from datadog_checks.tokumx.vendor.pymongo.collection import Collection
+from datadog_checks.tokumx.vendor.pymongo.command_cursor import CommandCursor
+from datadog_checks.tokumx.vendor.pymongo.errors import (CollectionInvalid,
                             ConfigurationError,
                             InvalidName,
                             OperationFailure)
-from pymongo.helpers import _first_batch
-from pymongo.read_preferences import ReadPreference
-from pymongo.son_manipulator import SONManipulator
-from pymongo.write_concern import WriteConcern
+from datadog_checks.tokumx.vendor.pymongo.helpers import _first_batch
+from datadog_checks.tokumx.vendor.pymongo.read_preferences import ReadPreference
+from datadog_checks.tokumx.vendor.pymongo.son_manipulator import SONManipulator
+from datadog_checks.tokumx.vendor.pymongo.write_concern import WriteConcern
 
 
 def _check_name(name):

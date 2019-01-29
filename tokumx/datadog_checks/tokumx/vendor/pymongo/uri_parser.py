@@ -17,15 +17,15 @@
 import re
 import warnings
 
-from bson.py3compat import PY3, iteritems, string_type
+from datadog_checks.tokumx.vendor.bson.py3compat import PY3, iteritems, string_type
 
 if PY3:
     from urllib.parse import unquote_plus
 else:
     from urllib import unquote_plus
 
-from pymongo.common import get_validated_options
-from pymongo.errors import ConfigurationError, InvalidURI
+from datadog_checks.tokumx.vendor.pymongo.common import get_validated_options
+from datadog_checks.tokumx.vendor.pymongo.errors import ConfigurationError, InvalidURI
 
 
 SCHEME = 'mongodb://'

@@ -20,7 +20,6 @@ def spin_up_tokumx(request):
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
-
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     compose_dir = os.path.join(common.HERE, 'compose')
     env = {

@@ -20,12 +20,12 @@ import struct
 import sys
 import traceback
 
-import bson
-from bson.codec_options import CodecOptions
-from bson.py3compat import itervalues, string_type, iteritems
-from bson.son import SON
-from pymongo import ASCENDING
-from pymongo.errors import (CursorNotFound,
+from datadog_checks.tokumx.vendor import bson
+from datadog_checks.tokumx.vendor.bson.codec_options import CodecOptions
+from datadog_checks.tokumx.vendor.bson.py3compat import itervalues, string_type, iteritems
+from datadog_checks.tokumx.vendor.bson.son import SON
+from datadog_checks.tokumx.vendor.pymongo import ASCENDING
+from datadog_checks.tokumx.vendor.pymongo.errors import (CursorNotFound,
                             DuplicateKeyError,
                             ExecutionTimeout,
                             NotMasterError,
@@ -34,8 +34,8 @@ from pymongo.errors import (CursorNotFound,
                             WriteError,
                             WriteConcernError,
                             WTimeoutError)
-from pymongo.message import _Query, _convert_exception
-from pymongo.read_concern import DEFAULT_READ_CONCERN
+from datadog_checks.tokumx.vendor.pymongo.message import _Query, _convert_exception
+from datadog_checks.tokumx.vendor.pymongo.read_concern import DEFAULT_READ_CONCERN
 
 
 _UUNDER = u"_"

@@ -34,13 +34,13 @@ try:
 except ImportError:
     _SELECT_ERROR = OSError
 
-from pymongo import helpers, message
-from pymongo.common import MAX_MESSAGE_SIZE
-from pymongo.errors import (AutoReconnect,
+from datadog_checks.tokumx.vendor.pymongo import helpers, message
+from datadog_checks.tokumx.vendor.pymongo.common import MAX_MESSAGE_SIZE
+from datadog_checks.tokumx.vendor.pymongo.errors import (AutoReconnect,
                             NotMasterError,
                             OperationFailure,
                             ProtocolError)
-from pymongo.read_concern import DEFAULT_READ_CONCERN
+from datadog_checks.tokumx.vendor.pymongo.read_concern import DEFAULT_READ_CONCERN
 
 _UNPACK_INT = struct.Struct("<i").unpack
 

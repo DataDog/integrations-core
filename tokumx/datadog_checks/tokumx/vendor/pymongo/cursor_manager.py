@@ -29,7 +29,7 @@ installed on a client by calling
 
 import warnings
 import weakref
-from bson.py3compat import integer_types
+from datadog_checks.tokumx.vendor.bson.py3compat import integer_types
 
 
 class CursorManager(object):

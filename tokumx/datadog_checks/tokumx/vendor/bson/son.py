@@ -22,7 +22,7 @@ import collections
 import copy
 import re
 
-from bson.py3compat import iteritems
+from datadog_checks.tokumx.vendor.bson.py3compat import iteritems
 
 
 # This sort of sucks, but seems to be as good as it gets...
