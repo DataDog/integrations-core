@@ -1,16 +1,21 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
 from collections import namedtuple
 import socket
 import os
 import platform
+
+from six import PY3, iteritems
 
 from datadog_checks.network import Network
 
 import mock
 import pytest
 
+if PY3:
+    long = int
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
@@ -30,6 +35,18 @@ CX_STATE_GAUGES_VALUES = {
     'system.net.tcp6.time_wait': 1,
 }
 
+if PY3:
+    ESCAPE_ENCODING = 'unicode-escape'
+
+    def decode_string(s):
+        return s.decode(ESCAPE_ENCODING)
+else:
+    ESCAPE_ENCODING = 'string-escape'
+
+    def decode_string(s):
+        s.decode(ESCAPE_ENCODING)
+        return s.decode("utf-8")
+
 
 @pytest.fixture
 def network_check():
@@ -46,20 +63,18 @@ def ss_subprocess_mock(*args, **kwargs):
     elif args[0][-1] == '-6' and args[0][-3] == '-t':
         file_name = 'ss_ipv6_tcp'
 
-    with open(os.path.join(FIXTURE_DIR, file_name)) as f:
+    with open(os.path.join(FIXTURE_DIR, file_name), 'rb') as f:
         contents = f.read()
-        contents = contents.decode('string-escape')
-        return contents.decode("utf-8"), None, None
+        return decode_string(contents), None, None
 
 
 def netstat_subprocess_mock(*args, **kwargs):
     if args[0][0] == 'ss':
         raise OSError
     elif args[0][0] == 'netstat':
-        with open(os.path.join(FIXTURE_DIR, 'netstat')) as f:
+        with open(os.path.join(FIXTURE_DIR, 'netstat'), 'rb') as f:
             contents = f.read()
-            contents = contents.decode('string-escape')
-            return contents.decode("utf-8"), None, None
+            return decode_string(contents), None, None
 
 
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
@@ -69,13 +84,13 @@ def test_cx_state(aggregator, network_check):
         out.side_effect = ss_subprocess_mock
         network_check._collect_cx_state = True
         network_check.check(instance)
-        for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
+        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
         aggregator.reset()
 
         out.side_effect = netstat_subprocess_mock
         network_check.check(instance)
-        for metric, value in CX_STATE_GAUGES_VALUES.iteritems():
+        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
 
 
@@ -171,7 +186,7 @@ def test_cx_state_psutil(aggregator, network_check):
         network_check = Network('network', {}, {})
         network_check._setup_metrics({})
         network_check._cx_state_psutil()
-        for _, m in aggregator._metrics.iteritems():
+        for _, m in iteritems(aggregator._metrics):
             assert results[m[0].name] == m[0].value
 
 
@@ -185,7 +200,7 @@ def test_cx_counters_psutil(aggregator, network_check):
     counters = {
         'Ethernet':
         snetio(
-            bytes_sent=3096403230L, bytes_recv=3280598526L,
+            bytes_sent=long(3096403230), bytes_recv=long(3280598526),
             packets_sent=6777924, packets_recv=32888147,
             errin=0, errout=0, dropin=0, dropout=0),
         'Loopback Pseudo-Interface 1':
@@ -199,7 +214,7 @@ def test_cx_counters_psutil(aggregator, network_check):
         network_check._excluded_ifaces = ['Loopback Pseudo-Interface 1']
         network_check._exclude_iface_re = ''
         network_check._cx_counters_psutil()
-        for _, m in aggregator._metrics.iteritems():
+        for _, m in iteritems(aggregator._metrics):
             assert 'device:Ethernet' in m[0].tags
             if 'bytes_rcvd' in m[0].name:
                 assert m[0].value == 3280598526

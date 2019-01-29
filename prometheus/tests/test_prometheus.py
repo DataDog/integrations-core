@@ -1,15 +1,14 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 import mock
 
-# 3p
 from prometheus_client import generate_latest, CollectorRegistry, Gauge, Counter
 
-# project
+from datadog_checks.base import ensure_unicode
 from datadog_checks.prometheus import PrometheusCheck
+
 
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
@@ -50,7 +49,7 @@ def poll_mock():
         'requests.get',
         return_value=mock.MagicMock(
             status_code=200,
-            iter_lines=lambda **kwargs: generate_latest(registry).split("\n"),
+            iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
             headers={'Content-Type': "text/plain"}
         )
     )

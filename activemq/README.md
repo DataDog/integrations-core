@@ -4,19 +4,19 @@
 
 The ActiveMQ check collects metrics for brokers and queues, producers and consumers, and more.
 
-**Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][110].
+**Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][1].
 
 ## Setup
 ### Installation
 
-The Agent's ActiveMQ check is included in the [Datadog Agent][101] package, so you don't need to install anything else on your ActiveMQ nodes.
+The Agent's ActiveMQ check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your ActiveMQ nodes.
 
-The check collects metrics via JMX, so you need a JVM on each node so the Agent can fork [jmxfetch][102]. We recommend using an Oracle-provided JVM.
+The check collects metrics via JMX, so you need a JVM on each node so the Agent can fork [jmxfetch][3]. We recommend using an Oracle-provided JVM.
 
 ### Configuration
 
-1. **Make sure that [JMX Remote is enabled][103] on your ActiveMQ server.**
-2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][111]. See the [sample activemq.d/conf.yaml][104] for all available configuration options.
+1. **Make sure that [JMX Remote is enabled][4] on your ActiveMQ server.**
+2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample activemq.d/conf.yaml][6] for all available configuration options.
 
       ```yaml
       instances:
@@ -83,15 +83,15 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
                 metric_type: gauge
       ```
 
-3. [Restart the agent][109]
+3. [Restart the agent][7]
 
 ### Validation
 
-[Run the Agent's `status` subcommand][105] and look for `activemq` under the Checks section.
+[Run the Agent's `status` subcommand][8] and look for `activemq` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][112] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
 The ActiveMQ check does not include any events.
@@ -101,24 +101,24 @@ The ActiveMQ check does not include any events.
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][107].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 Additional helpful documentation, links, and articles:
 
-* [ActiveMQ architecture and key metrics][113]
-* [Monitor ActiveMQ metrics and performance][108]
+* [ActiveMQ architecture and key metrics][11]
+* [Monitor ActiveMQ metrics and performance][12]
 
 
-[101]: https://app.datadoghq.com/account/settings#agent
-[102]: https://github.com/DataDog/jmxfetch
-[103]: https://activemq.apache.org/jmx.html
-[104]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/conf.yaml.example
-[105]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[107]: https://docs.datadoghq.com/help/
-[108]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/
-[109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[110]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
-[111]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
-[112]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
-[113]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics/
+[1]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://github.com/DataDog/jmxfetch
+[4]: https://activemq.apache.org/jmx.html
+[5]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[6]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/conf.yaml.example
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
+[10]: https://docs.datadoghq.com/help
+[11]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics
+[12]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance

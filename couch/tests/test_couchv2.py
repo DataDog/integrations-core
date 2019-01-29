@@ -1,21 +1,21 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-from collections import defaultdict
 import csv
 import random
 import re
 import string
 import time
 import threading
-
 import pytest
 import requests
 
 from six import PY2
+from copy import deepcopy
+from collections import defaultdict
 
 from datadog_checks.couch import CouchDb
+
 from . import common
 
 pytestmark = pytest.mark.v2
@@ -60,7 +60,9 @@ def gauges():
         yield res
 
 
-def test_check(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_check(aggregator, check, gauges, instance):
     """
     Testing Couchdb2 check.
     """
@@ -103,7 +105,9 @@ def test_check(aggregator, check, gauges, couch_cluster):
     aggregator.assert_all_metrics_covered()
 
 
-def test_db_whitelisting(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_db_whitelisting(aggregator, check, gauges, instance):
     configs = []
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
@@ -125,7 +129,9 @@ def test_db_whitelisting(aggregator, check, gauges, couch_cluster):
             aggregator.assert_metric(gauge, tags=expected_tags)
 
 
-def test_db_blacklisting(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_db_blacklisting(aggregator, check, gauges, instance):
     configs = []
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
@@ -147,7 +153,9 @@ def test_db_blacklisting(aggregator, check, gauges, couch_cluster):
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-def test_check_without_names(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_check_without_names(aggregator, check, gauges, instance):
     config = deepcopy(common.NODE1)
     config.pop('name')
     check.check(config)
@@ -190,7 +198,9 @@ def test_check_without_names(aggregator, check, gauges, couch_cluster):
     aggregator.assert_all_metrics_covered()
 
 
-def test_only_max_nodes_are_scanned(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_only_max_nodes_are_scanned(aggregator, check, gauges, instance):
     config = deepcopy(common.NODE1)
     config.pop("name")
     config['max_nodes_per_check'] = 2
@@ -243,7 +253,9 @@ def test_only_max_nodes_are_scanned(aggregator, check, gauges, couch_cluster):
     aggregator.assert_all_metrics_covered()
 
 
-def test_only_max_dbs_are_scanned(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_only_max_dbs_are_scanned(aggregator, check, gauges, instance):
     configs = []
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
@@ -264,7 +276,9 @@ def test_only_max_dbs_are_scanned(aggregator, check, gauges, couch_cluster):
             aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
 
-def test_replication_metrics(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_replication_metrics(aggregator, check, gauges, instance):
     url = "{}/_replicator".format(common.NODE1['server'])
     replication_body = {
         '_id': 'my_replication_id',
@@ -299,7 +313,9 @@ def test_replication_metrics(aggregator, check, gauges, couch_cluster):
         aggregator.assert_metric(gauge)
 
 
-def test_compaction_metrics(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_compaction_metrics(aggregator, check, gauges, instance):
     url = "{}/kennel".format(common.NODE1['server'])
     body = {
         '_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE',
@@ -358,6 +374,8 @@ def test_compaction_metrics(aggregator, check, gauges, couch_cluster):
         aggregator.assert_metric(gauge)
 
 
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
 def test_indexing_metrics(aggregator, check, gauges, active_tasks):
     """
     Testing metrics coming from a running indexer would be extremely flaky,
@@ -386,7 +404,9 @@ def test_indexing_metrics(aggregator, check, gauges, active_tasks):
             aggregator.assert_metric(gauge, tags=expected_tags)
 
 
-def test_view_compaction_metrics(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_view_compaction_metrics(aggregator, check, gauges, instance):
     class LoadGenerator(threading.Thread):
         STOP = 0
         RUN = 1
@@ -497,7 +517,9 @@ def test_view_compaction_metrics(aggregator, check, gauges, couch_cluster):
         assert False, "Could not find the view_compaction happening"
 
 
-def test_config_tags(aggregator, check, gauges, couch_cluster):
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_config_tags(aggregator, check, gauges, instance):
     TEST_TAG = "test_tag:test"
     config = deepcopy(common.NODE1)
     config['tags'] = [TEST_TAG]

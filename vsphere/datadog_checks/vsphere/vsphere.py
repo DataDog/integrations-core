@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 from collections import defaultdict
 from datetime import timedelta
-from Queue import Empty, Queue
 import re
 import ssl
 import time
@@ -19,7 +18,7 @@ from datadog_checks.config import is_affirmative
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
-from datadog_checks.checks.libs.thread_pool import Pool
+from datadog_checks.checks.libs.thread_pool import Pool, SENTINEL
 from datadog_checks.checks.libs.timer import Timer
 from datadog_checks.utils.common import ensure_bytes
 from .common import SOURCE_TYPE
@@ -87,7 +86,7 @@ def trace_method(method):
         try:
             method(*args, **kwargs)
         except Exception:
-            args[0].exceptionq.put("A worker thread crashed:\n" + traceback.format_exc())
+            args[0].print_exception("A worker thread crashed:\n" + traceback.format_exc())
     return wrapper
 
 
@@ -106,8 +105,6 @@ class VSphereCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.time_started = time.time()
-        self.pool_started = False
-        self.exceptionq = Queue()
 
         self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
         self.batch_collector_size = max(init_config.get("batch_property_collector_size", BATCH_COLLECTOR_SIZE), 0)
@@ -149,21 +146,34 @@ class VSphereCheck(AgentCheck):
         # Metrics metadata, for each instance keeps the mapping: perfCounterKey -> {name, group, description}
         self.metadata_cache = MetadataCache()
         self.latest_event_query = {}
+        self.exception_printed = 0
+
+    def print_exception(self, msg):
+        """ Print exceptions happening in separate threads
+        Prevent from logging a ton of them if a potentially big number of them fail the same way
+        """
+        if self.exception_printed < 10:
+            self.log.error(msg)
+            self.exception_printed += 1
 
     def start_pool(self):
         self.log.info("Starting Thread Pool")
         self.pool_size = int(self.init_config.get('threads_count', DEFAULT_SIZE_POOL))
-
         self.pool = Pool(self.pool_size)
-        self.pool_started = True
+
+    def terminate_pool(self):
+        self.log.info("Terminating Thread Pool")
+        self.pool.terminate()
+        self.pool.join()
+        assert self.pool.get_nworkers() == 0
 
     def stop_pool(self):
-        self.log.info("Stopping Thread Pool")
-        if self.pool_started:
-            self.pool.terminate()
-            self.pool.join()
-            assert self.pool.get_nworkers() == 0
-            self.pool_started = False
+        self.log.info("Stopping Thread Pool, waiting for queued jobs to finish")
+        for _ in self.pool._workers:
+            self.pool._workq.put(SENTINEL)
+        self.pool.close()
+        self.pool.join()
+        assert self.pool.get_nworkers() == 0
 
     def _query_event(self, instance):
         i_key = self._instance_key(instance)
@@ -551,18 +561,6 @@ class VSphereCheck(AgentCheck):
                 encoded_tags.append(tag)
         return encoded_tags
 
-    @trace_method
-    def _cache_morlist_raw_async(self, instance, tags, regexes=None, include_only_marked=False):
-        """
-        Fills the queue in a separate thread
-        """
-        i_key = self._instance_key(instance)
-        server_instance = self._get_server_instance(instance)
-        use_guest_hostname = is_affirmative(instance.get("use_guest_hostname", False))
-        all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags,
-                                      use_guest_hostname=use_guest_hostname)
-        self.mor_objects_queue.fill(i_key, dict(all_objs))
-
     @staticmethod
     def _is_excluded(obj, properties, regexes, include_only_marked):
         """
@@ -617,7 +615,7 @@ class VSphereCheck(AgentCheck):
                                "(latest refresh was {}s ago)".format(resource_type, time.time() - last))
                 return
 
-        instance_tag = b"vcenter_server:{}".format(instance.get('name'))
+        tags = [b"vcenter_server:{}".format(instance.get('name'))]
         regexes = {
             'host_include': instance.get('host_include_only_regex'),
             'vm_include': instance.get('vm_include_only_regex')
@@ -625,11 +623,12 @@ class VSphereCheck(AgentCheck):
         include_only_marked = is_affirmative(instance.get('include_only_marked', False))
 
         # Discover hosts and virtual machines
-        self.pool.apply_async(
-            self._cache_morlist_raw_async,
-            args=(instance, [instance_tag], regexes, include_only_marked)
-        )
+        server_instance = self._get_server_instance(instance)
+        use_guest_hostname = is_affirmative(instance.get("use_guest_hostname", False))
+        all_objs = self._get_all_objs(server_instance, regexes, include_only_marked, tags,
+                                      use_guest_hostname=use_guest_hostname)
 
+        self.mor_objects_queue.fill(i_key, dict(all_objs))
         self.cache_config.set_last(CacheConfig.Morlist, i_key, time.time())
 
     @trace_method
@@ -896,18 +895,10 @@ class VSphereCheck(AgentCheck):
         self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
-        if not self.pool_started:
+        try:
             self.start_pool()
+            self.exception_printed = 0
 
-        custom_tags = instance.get('tags', [])
-
-        # ## <TEST-INSTRUMENTATION>
-        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'] + custom_tags)
-        # ## </TEST-INSTRUMENTATION>
-
-        # Only schedule more jobs on the queue if the jobs from the previous check runs are finished
-        # It's no good to keep piling up jobs
-        if self.pool._workq.qsize() == 0:
             # First part: make sure our object repository is neat & clean
             if self._should_cache(instance, CacheConfig.Metadata):
                 self._cache_metrics_metadata(instance)
@@ -922,26 +913,15 @@ class VSphereCheck(AgentCheck):
 
             # Second part: do the job
             self.collect_metrics(instance)
-        else:
-            self.log.debug("Thread pool is still processing jobs from previous run. Not scheduling anything.")
 
-        self._query_event(instance)
+            self._query_event(instance)
 
-        thread_crashed = False
-        try:
-            while True:
-                self.log.error(self.exceptionq.get_nowait())
-                thread_crashed = True
-        except Empty:
-            pass
+            if set_external_tags is not None:
+                set_external_tags(self.get_external_host_tags())
 
-        if thread_crashed:
             self.stop_pool()
-            raise Exception("One thread in the pool crashed, check the logs")
-
-        if set_external_tags is not None:
-            set_external_tags(self.get_external_host_tags())
-
-        # ## <TEST-INSTRUMENTATION>
-        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'] + custom_tags)
-        # ## </TEST-INSTRUMENTATION>
+            if self.exception_printed > 0:
+                self.log.error("One thread in the pool crashed, check the logs")
+        except Exception:
+            self.terminate_pool()
+            raise

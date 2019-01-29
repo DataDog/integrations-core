@@ -24,6 +24,8 @@ env:
     # if the c include path doesn't have the proper path pymqi will not compile
     - C_INCLUDE_PATH="/opt/mqm/inc:$C_INCLUDE_PATH"
     - LD_LIBRARY_PATH="/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH"
+    # https://github.com/travis-ci/travis-ci/issues/7940
+    - BOTO_CONFIG=/dev/null
 
 stages:
   - name: test_changed
@@ -70,7 +72,7 @@ jobs:
     - stage: test
       env: CHECK=datadog_checks_dev PYTHON3=true
     - stage: test
-      env: CHECK=active_directory
+      env: CHECK=active_directory PYTHON3=true
     - stage: test
       env: CHECK=activemq_xml PYTHON3=true
     - stage: test
@@ -78,7 +80,7 @@ jobs:
     - stage: test
       env: CHECK=apache PYTHON3=true
     - stage: test
-      env: CHECK=aspdotnet
+      env: CHECK=aspdotnet PYTHON3=true
     - stage: test
       env: CHECK=btrfs PYTHON3=true
     - stage: test
@@ -88,7 +90,7 @@ jobs:
     - stage: test
       env: CHECK=ceph PYTHON3=true
     - stage: test
-      env: CHECK=cisco_aci
+      env: CHECK=cisco_aci PYTHON3=true
     - stage: test
       env: CHECK=cockroachdb PYTHON3=true
     - stage: test
@@ -108,7 +110,7 @@ jobs:
     - stage: test
       env: CHECK=dns_check
     - stage: test
-      env: CHECK=dotnetclr
+      env: CHECK=dotnetclr PYTHON3=true
     - stage: test
       env: CHECK=ecs_fargate PYTHON3=true
     - stage: test
@@ -118,7 +120,7 @@ jobs:
     - stage: test
       env: CHECK=etcd PYTHON3=true
     - stage: test
-      env: CHECK=exchange_server
+      env: CHECK=exchange_server PYTHON3=true
     - stage: test
       env: CHECK=fluentd PYTHON3=true
     - stage: test
@@ -140,13 +142,13 @@ jobs:
     - stage: test
       env: CHECK=http_check PYTHON3=true
     - stage: test
-      env: CHECK=ibm_mq
+      env: CHECK=ibm_mq PYTHON3=true
     - stage: test
       env: CHECK=ibm_was PYTHON3=true
     - stage: test
-      env: CHECK=iis
+      env: CHECK=iis PYTHON3=true
     - stage: test
-      env: CHECK=istio
+      env: CHECK=istio PYTHON3=true
     - stage: test
       env: CHECK=kafka_consumer PYTHON3=true
     - stage: test
@@ -158,11 +160,11 @@ jobs:
     - stage: test
       env: CHECK=kube_proxy PYTHON3=true
     - stage: test
-      env: CHECK=kubelet
+      env: CHECK=kubelet PYTHON3=true
     - stage: test
-      env: CHECK=kubernetes_state
+      env: CHECK=kubernetes_state PYTHON3=true
     - stage: test
-      env: CHECK=kyototycoon
+      env: CHECK=kyototycoon PYTHON3=true
     - stage: test
       env: CHECK=lighttpd PYTHON3=true
     - stage: test
@@ -186,7 +188,7 @@ jobs:
     - stage: test
       env: CHECK=nagios PYTHON3=true
     - stage: test
-      env: CHECK=network
+      env: CHECK=network PYTHON3=true
     - stage: test
       env: CHECK=nfsstat PYTHON3=true
     - stage: test
@@ -198,27 +200,27 @@ jobs:
     - stage: test
       env: CHECK=openldap PYTHON3=true
     - stage: test
-      env: CHECK=openstack
+      env: CHECK=openstack PYTHON3=true
     - stage: test
       env: CHECK=openstack_controller PYTHON3=true
     - stage: test
-      env: CHECK=oracle
+      env: CHECK=oracle PYTHON3=true
     - stage: test
-      env: CHECK=pdh_check
+      env: CHECK=pdh_check PYTHON3=true
     - stage: test
-      env: CHECK=pgbouncer
+      env: CHECK=pgbouncer PYTHON3=true
     - stage: test
       env: CHECK=php_fpm PYTHON3=true
     - stage: test
       env: CHECK=postgres PYTHON3=true
     - stage: test
-      env: CHECK=postfix
+      env: CHECK=postfix PYTHON3=true
     - stage: test
       env: CHECK=powerdns_recursor PYTHON3=true
     - stage: test
       env: CHECK=process PYTHON3=true
     - stage: test
-      env: CHECK=prometheus
+      env: CHECK=prometheus PYTHON3=true
     - stage: test
       env: CHECK=rabbitmq PYTHON3=true
     - stage: test
@@ -228,11 +230,11 @@ jobs:
     - stage: test
       env: CHECK=riakcs PYTHON3=true
     - stage: test
-      env: CHECK=snmp
+      env: CHECK=snmp PYTHON3=true
     - stage: test
       env: CHECK=spark PYTHON3=true
     - stage: test
-      env: CHECK=sqlserver
+      env: CHECK=sqlserver PYTHON3=true
     - stage: test
       env: CHECK=ssh_check PYTHON3=true
     - stage: test
@@ -246,7 +248,7 @@ jobs:
     - stage: test
       env: CHECK=system_swap PYTHON3=true
     - stage: test
-      env: CHECK=tcp_check
+      env: CHECK=tcp_check PYTHON3=true
     - stage: test
       env: CHECK=teamcity PYTHON3=true
     - stage: test

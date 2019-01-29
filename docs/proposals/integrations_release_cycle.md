@@ -3,7 +3,7 @@
 - Authors: Massimiliano Pippi
 - Date: 2018-12-12
 - Status: draft
-- [Discussion](https://github.com/DataDog/integrations-core/pull/2741)
+- [Discussion][1]
 
 ## Overview
 
@@ -88,3 +88,4 @@ the discretion of the engineer who will sign the release commit.
 
 - **Release with a fixed schedule**
   - Very hard if not impossible to implement since `integrations-core` already hosts more than 100 different packages.
+[1]: https://github.com/DataDog/integrations-core/pull/2741

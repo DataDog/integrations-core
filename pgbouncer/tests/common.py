@@ -13,6 +13,19 @@ USER = 'postgres'
 PASS = 'datadog'
 DB = 'datadog_test'
 
+DEFAULT_INSTANCE = {
+    'host': HOST,
+    'port': PORT,
+    'username': USER,
+    'password': PASS,
+    'tags': ['optional:tag1']
+}
+
+INSTANCE_URL = {
+    'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test',
+    'tags': ['optional:tag1']
+}
+
 
 def get_version():
     """

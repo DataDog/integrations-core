@@ -41,11 +41,10 @@ The CockroachDB check does not include any events.
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://www.cockroachlabs.com/product/cockroachdb/
+[1]: https://www.cockroachlabs.com/product/cockroachdb
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/metadata.csv
-[7]: https://docs.datadoghq.com/help/
-[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[7]: https://docs.datadoghq.com/help

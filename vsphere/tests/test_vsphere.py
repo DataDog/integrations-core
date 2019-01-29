@@ -37,7 +37,6 @@ def test__init__(instance):
     i_key = check._instance_key(instance)
 
     assert check.time_started > 0
-    assert check.pool_started is False
     assert len(check.server_instances) == 0
     assert check.cache_config.get_interval(CacheConfig.Morlist, i_key) == 42
     assert check.cache_config.get_interval(CacheConfig.Metadata, i_key) == -42
@@ -178,7 +177,7 @@ def test__collect_mors_and_attributes(vsphere, instance):
         assert len(mor_attrs) == 1
 
 
-def test__cache_morlist_raw_async(vsphere, instance):
+def test__cache_morlist_raw(vsphere, instance):
     """
     Explore the vCenter infrastructure to discover hosts, virtual machines.
 
@@ -201,16 +200,12 @@ def test__cache_morlist_raw_async(vsphere, instance):
     """
     # Samples
     with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
-        tags = ["toto", "optional:tag1"]
-        include_regexes = {
-            'host_include': "host[2-9]",
-            'vm_include': "vm[^2]",
-        }
-        include_only_marked = True
-        instance["tags"] = ["optional:tag1"]
+        instance["host_include_only_regex"] = "host[2-9]"
+        instance["vm_include_only_regex"] = "vm[^2]"
+        instance["include_only_marked"] = True
 
         # Discover hosts and virtual machines
-        vsphere._cache_morlist_raw_async(instance, tags, include_regexes, include_only_marked)
+        vsphere._cache_morlist_raw(instance)
 
         # Assertions: 1 labeled+monitored VM + 2 hosts + 2 datacenters + 2 clusters + 1 datastore.
         assertMOR(vsphere, instance, count=8)
@@ -218,24 +213,24 @@ def test__cache_morlist_raw_async(vsphere, instance):
         # ...on hosts
         assertMOR(vsphere, instance, spec="host", count=2)
         tags = [
-            "toto", "vsphere_folder:rootFolder", "vsphere_datacenter:datacenter1",
+            "vcenter_server:vsphere_mock", "vsphere_folder:rootFolder", "vsphere_datacenter:datacenter1",
             "vsphere_compute:compute_resource1", "vsphere_cluster:compute_resource1",
-            "vsphere_type:host", "optional:tag1"
+            "vsphere_type:host"
         ]
         assertMOR(vsphere, instance, name="host2", spec="host", tags=tags)
         tags = [
-            "toto", "vsphere_folder:rootFolder", "vsphere_folder:folder1",
+            "vcenter_server:vsphere_mock", "vsphere_folder:rootFolder", "vsphere_folder:folder1",
             "vsphere_datacenter:datacenter2", "vsphere_compute:compute_resource2",
-            "vsphere_cluster:compute_resource2", "vsphere_type:host", "optional:tag1"
+            "vsphere_cluster:compute_resource2", "vsphere_type:host"
         ]
         assertMOR(vsphere, instance, name="host3", spec="host", tags=tags)
 
         # ...on VMs
         assertMOR(vsphere, instance, spec="vm", count=1)
         tags = [
-            "toto", "vsphere_folder:folder1", "vsphere_datacenter:datacenter2",
+            "vcenter_server:vsphere_mock", "vsphere_folder:folder1", "vsphere_datacenter:datacenter2",
             "vsphere_compute:compute_resource2", "vsphere_cluster:compute_resource2",
-            "vsphere_host:host3", "vsphere_type:vm", "optional:tag1"
+            "vsphere_host:host3", "vsphere_type:vm"
         ]
         assertMOR(vsphere, instance, name="vm4", spec="vm", subset=True, tags=tags)
 
@@ -244,20 +239,20 @@ def test_use_guest_hostname(vsphere, instance):
     # Default value
     with mock.patch("datadog_checks.vsphere.VSphereCheck._get_all_objs") as mock_get_all_objs, \
          mock.patch("datadog_checks.vsphere.vsphere.vmodl"):
-        vsphere._cache_morlist_raw_async(instance, [])
+        vsphere._cache_morlist_raw(instance)
         # Default value
         mock_get_all_objs.call_args[1]["use_guest_hostname"] is False
 
         # use guest hostname
         instance["use_guest_hostname"] = True
-        vsphere._cache_morlist_raw_async(instance, [])
+        vsphere._cache_morlist_raw(instance)
         mock_get_all_objs.call_args[1]["use_guest_hostname"] is True
 
     with mock.patch("datadog_checks.vsphere.vsphere.vmodl"):
 
         # Discover hosts and virtual machines
         instance["use_guest_hostname"] = True
-        vsphere._cache_morlist_raw_async(instance, [])
+        vsphere._cache_morlist_raw(instance)
         assertMOR(vsphere, instance, spec="vm", count=3)
         # Fallback on VM name when guest hostname not available
         assertMOR(vsphere, instance, name="vm1", spec="vm", subset=True)

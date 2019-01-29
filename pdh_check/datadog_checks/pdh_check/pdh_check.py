@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2013-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from six import iteritems
 
-# datadog
 from datadog_checks.checks.win import WinPDHCounter
 from datadog_checks.checks import AgentCheck
 
@@ -11,7 +11,7 @@ from datadog_checks.utils.containers import hash_mutable
 
 class PDHCheck(AgentCheck):
     """
-    WMI check.
+    PDH check.
 
     Windows only.
     """
@@ -54,7 +54,7 @@ class PDHCheck(AgentCheck):
         key = hash_mutable(instance)
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             vals = counter.get_all_values()
-            for key, val in vals.iteritems():
+            for key, val in iteritems(vals):
                 tags = []
                 if key in self._tags:
                     tags = self._tags[key]

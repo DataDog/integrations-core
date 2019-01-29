@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+import mock
+import pytest
+
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.utils.containers import hash_mutable
 from . import common
@@ -110,6 +113,31 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_warning', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_critical', value=6, tags=expected_tags)
+
+
+def test_consul_request(aggregator, instance):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    with mock.patch("datadog_checks.consul.consul.requests") as mock_requests:
+        consul_check.consul_request(instance, "foo")
+        url = "{}/{}".format(instance["url"], "foo")
+        aggregator.assert_service_check(
+            "consul.can_connect",
+            ConsulCheck.OK,
+            tags=["url:{}".format(url)],
+            count=1,
+        )
+
+        aggregator.reset()
+        mock_requests.get.side_effect = Exception("message")
+        with pytest.raises(Exception):
+            consul_check.consul_request(instance, "foo")
+        aggregator.assert_service_check(
+            "consul.can_connect",
+            ConsulCheck.CRITICAL,
+            tags=["url:{}".format(url)],
+            count=1,
+            message="Consul request to {} failed: message".format(url)
+        )
 
 
 def test_service_checks(aggregator):

@@ -2,15 +2,11 @@
 # (C) Dan Crosta <dcrosta@late.am> 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 from collections import defaultdict
 import re
 
-# 3rd party
 import requests
 
-# project
 from datadog_checks.checks import AgentCheck
 
 db_stats = re.compile(r'^db_(\d)+$')
@@ -74,7 +70,7 @@ class KyotoTycoonCheck(AgentCheck):
             r.raise_for_status()
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags,
-                               message=str(e.message))
+                               message=str(e))
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
@@ -82,7 +78,7 @@ class KyotoTycoonCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
-        body = r.content
+        body = r.text
 
         totals = defaultdict(int)
         for line in body.splitlines():
