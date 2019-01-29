@@ -10,6 +10,9 @@ There is a blog post forthcoming shortly that will explain in more detail the
 security guarantees. Interested readers may also wish to consult our KubeCon
 2018 [talk][4] for more details.
 
+Presently, the downloader is limited to downloading packages of
+[integrations-core][5], but not [integrations-extras][6].
+
 ## Installation
 
 This package is expected to be built and included with the DataDog Agent
@@ -40,7 +43,7 @@ Or you may leave the version unspecified to download the latest version:
 datadog-checks-downloader -vvvv datadog-$INTEGRATION
 ```
 
-To run the tests, [install tox][5] and just run:
+To run the tests, [install tox][7] and just run:
 
 ```shell
 tox
@@ -48,11 +51,13 @@ tox
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][8].
 
 [1]: https://github.com/DataDog/datadog-agent
 [2]: https://theupdateframework.com/
-[3]: https://in-toto.github.io/
+[3]: https://in-toto.io/
 [4]: https://youtu.be/XAlvd4QXngs
-[5]: https://tox.readthedocs.io/en/latest/install.html
-[6]: https://docs.datadoghq.com/help
+[5]: https://github.com/DataDog/integrations-core
+[6]: https://github.com/DataDog/integrations-extras
+[7]: https://tox.readthedocs.io/en/latest/install.html
+[8]: https://docs.datadoghq.com/help

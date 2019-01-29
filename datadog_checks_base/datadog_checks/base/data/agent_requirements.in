@@ -2,8 +2,8 @@ adodbapi==2.6.0.7; sys_platform == 'win32'
 asn1crypto==0.24.0
 beautifulsoup4==4.5.1
 boto==2.46.1; python_version < '3.0'
-boto3==1.9.67; python_version > '3.0'
 cffi==1.11.5
+click==7.0
 cryptography==2.3.1
 cx_oracle==6.0.1
 ddtrace==0.13.0
@@ -13,6 +13,7 @@ flup==1.0.3.dev-20110405; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 google-compute-engine==2.8.3
 httplib2==0.10.3
+in-toto==0.2.3
 ipaddress==1.0.22
 jaydebeapi==1.1.1
 jpype1==0.6.3
@@ -49,10 +50,13 @@ requests==2.20.1
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
 scandir==1.8
+securesystemslib[crypto,pynacl]==0.11.3
 selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 serpent==1.27; sys_platform == 'win32'
+setuptools==40.7.1
 simplejson==3.6.5
 six==1.11.0
 supervisor==3.3.3; python_version < '3.0'
+tuf==0.11.2.dev3
 uptime==3.0.1
 uuid==1.30

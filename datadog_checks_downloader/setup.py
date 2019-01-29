@@ -28,7 +28,7 @@ setup(
     version=ABOUT["__version__"],
 
     name='datadog_checks_downloader',
-    description='The Datadog Check Downloader',
+    description='The Datadog Checks Downloader',
     long_description=LONG_DESC,
     long_description_content_type='text/markdown',
     keywords='datadog agent checks',
