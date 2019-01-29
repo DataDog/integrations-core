@@ -1,9 +1,9 @@
 init_config:
 
 instances:
-  - unit_id: networking.service
-  - unit_id: cron.service
-  - unit_id: ssh.service
+  - units:
+      - networking.service
+      - cron.service
+      - ssh.service
 
-## @param collect_all_units - boolean - optional - default: False
-  - collect_all_units = false
+    collect_all_units: false

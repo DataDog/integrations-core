@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
 import pystemd
 from pystemd.systemd1 import Manager
 from pystemd.systemd1 import Unit
@@ -19,7 +20,7 @@ class SystemdCheck(AgentCheck):
         super(SystemdCheck, self).__init__(name, init_config, agentConfig, instances)
 
         # to store the state of a unit and compare it at the next run
-        self.unit_cache = {}
+        self.unit_cache = defaultdict(dict)
 
         # Ex: unit_cache = {
         #   <instance_name>: {
@@ -29,15 +30,15 @@ class SystemdCheck(AgentCheck):
         # }
 
     def check(self, instance):
-        unit = instance.get('unit_id', {})
+        units = instance.get('units', [])
         collect_all = instance.get('collect_all_units', False)
 
-        if unit:
-            self.log.info(unit)
-            self.get_unit_state(unit)
+        if units:
+            self.log.info(units)
+            for unit in units:
+                self.get_unit_state(unit)
         if collect_all == True:
             # we display status for all units if no unit has been specified in the configuration file
-            self.log.warn("Getting status for all units. Performance might be impacted!")
             self.get_active_inactive_units()
 
     def get_all_units(self, unit_id):
@@ -51,7 +52,7 @@ class SystemdCheck(AgentCheck):
         
         units = {}
         for unit_id in iteritems(updated_units):
-            unit_cache[unit_id] = updated_units
+            self.unit_cache[unit_id] = updated_units
 
         # Initialize or update cache for this instance
         self.unit_state_cache[unit_id] = {
@@ -139,19 +140,21 @@ class SystemdCheck(AgentCheck):
                     AgentCheck.OK,
                     tags=["unit:{}".format(unit_id)]
                 )
-            if state == b'inactive':
+            elif state == b'inactive':
                 self.service_check(
                     self.UNIT_STATUS_SC,
                     AgentCheck.CRITICAL,
                     tags=["unit:{}".format(unit_id)]
                 )
-            if unit_id in unit_cache:
-                previous_status = unit_cache[unit_id]['state']
-                if previous_status != active_status:
+                
+            if unit_id in self.unit_cache:
+                previous_status = self.unit_cache[unit_id]['unit_state']
+                if previous_status != state:
+                    # TODO:
                     # self.event(...)
-                    unit_cache[unit_id]['state'] = active_status
+                    self.unit_cache[unit_id]['unit_state'] = state
             else:
-                unit_cache[unit_id]['state'] = active_status
+                self.unit_cache[unit_id]['unit_state'] = state
 
         except pystemd.dbusexc.DBusInvalidArgsError as e:
             self.log.info("Unit name invalid for {}".format(unit_id))
