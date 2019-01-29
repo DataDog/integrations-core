@@ -21,7 +21,7 @@ def dd_environment():
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
-    compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+    compose_dir = os.path.join(common.HERE, 'compose')
 
     with docker_run(
         compose_file=os.path.join(compose_dir, 'docker-compose.yaml'),
