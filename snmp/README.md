@@ -152,25 +152,20 @@ C:\>dir mibdump.py /s
 In Linux, use this format for the script:
 
 ```
-export MIBSRC=<PATH_TO_MIB_FILES>
-export MIBDST=<PATH_TO_CONVERTED_MIB_PYFILES>
-
 <PATH_TO_FILE>/mibdump.py \
-  --mib-source $MIBSRC \
+  --mib-source <PATH_TO_MIB_FILES> \
   --mib-source http://mibs.snmplabs.com/asn1/@mib@ \
-  --destination-directory=$MIBDST \
+  --destination-directory=<PATH_TO_CONVERTED_MIB_PYFILES> \
   --destination-format=pysnmp <MIB_FILE_NAME>
 ```
 
 Windows Powershell example:
 
 ```
-PS> New-Variable -Name MIBSRC -Value file:///X:<PATH_TO_MIB_SOURCE>
-PS> New-Variable -Name MIBDST -Value X:<PATH_TO_MIB_DESTINATION>
 PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FILE>\mibdump.py' `
-  --mib-source $MIBSRC  `
+  --mib-source <PATH_TO_MIB_SOURCE> `
   --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
-  --destination-directory=$MIBDST `
+  --destination-directory=<PATH_TO_MIB_DESTINATION> `
   --destination-format=pysnmp <MIB_FILE_NAME>
 ```
 
