@@ -17,7 +17,7 @@ The SNMP check doesn't collect anything by default. Specify metrics to collect b
 
 ```
 init_config:
-  mibs_folder: /path/to/your/additional/mibs
+  mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
 
 instances:
    - ip_address: localhost
@@ -59,7 +59,7 @@ instances:
 
 ```
 init_config:
-   - mibs_folder: /path/to/your/additional/mibs
+   - mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
 
 instances:
    - ip_address: 192.168.34.10
@@ -130,11 +130,11 @@ metrics:
 
 #### Use your own MIB
 
-To use your own MIB with the Datadog Agent, convert it to the PySNMP format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][5].
+To use your own MIB with the Datadog Agent, convert it to the [PySNMP][14] format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][5].
 
 Since Datadog Agent version 5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][6]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
  
-To find the location of `mibdump.py`, run:
+In Linux, find the location of `mibdump.py`, run:
 
 ```
 $ find /opt/datadog-agent/ -type f -name build-pysnmp-mib.py -o -name mibdump.py
@@ -149,18 +149,32 @@ C:\>dir mibdump.py /s
  Directory of C:\Program Files\Datadog\Datadog Agent\embedded\Scripts
 ```
 
-Use this format for the script:
+In Linux, use this format for the script:
 
 ```
-<PATH_TO_FILE>/mibdump.py --mib-source /path/to/mib/files/  --mib-source http://mibs.snmplabs.com/asn1/@mib@ --destination-directory=/path/to/converted/mib/pyfiles/ --destination-format=pysnmp <MIB_FILE_NAME>
+<PATH_TO_FILE>/mibdump.py \
+  --mib-source <PATH_TO_MIB_FILES> \
+  --mib-source http://mibs.snmplabs.com/asn1/@mib@ \
+  --destination-directory=<PATH_TO_CONVERTED_MIB_PYFILES> \
+  --destination-format=pysnmp <MIB_FILE_NAME>
+```
+
+Windows Powershell example:
+
+```
+PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FILE>\mibdump.py' `
+  --mib-source <PATH_TO_MIB_SOURCE> `
+  --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
+  --destination-directory=<PATH_TO_MIB_DESTINATION> `
+  --destination-format=pysnmp <MIB_FILE_NAME>
 ```
 
 Example using the `CISCO-TCP-MIB.my`:
 
 ```
- # /opt/datadog-agent/embedded/bin/mibdump.py --mib-source /path/to/mib/files/  --mib-source http://mibs.snmplabs.com/asn1/@mib@ --destination-directory=/opt/datadog-agent/pysnmp/custom_mibpy/ --destination-format=pysnmp CISCO-TCP-MIB
+ # /opt/datadog-agent/embedded/bin/mibdump.py --mib-source <PATH_TO_MIB_FILE>  --mib-source http://mibs.snmplabs.com/asn1/@mib@ --destination-directory=/opt/datadog-agent/pysnmp/custom_mibpy/ --destination-format=pysnmp CISCO-TCP-MIB
 
- Source MIB repositories: /path/to/mib/files/, http://mibs.snmplabs.com/asn1/@mib@
+ Source MIB repositories: <PATH_TO_MIB_FILE>, http://mibs.snmplabs.com/asn1/@mib@
  Borrow missing/failed MIBs from: http://mibs.snmplabs.com/pysnmp/notexts/@mib@
  Existing/compiled MIB locations: pysnmp.smi.mibs, pysnmp_mibs
  Compiled MIBs destination directory: /opt/datadog-agent/pysnmp/custom_mibpy/
@@ -190,8 +204,6 @@ CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
 ```
 
 The Agent looks for the converted MIB Python files by specifying the destination path with `mibs_folder` in the [SNMP YAML configuration][7].
-
----
 
 [Restart the Agent][8] to start sending SNMP metrics to Datadog.
 
@@ -237,3 +249,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [12]: https://docs.datadoghq.com/agent/faq/how-to-monitor-snmp-devices
 [13]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[14]: http://snmplabs.com/pysnmp/index.html
