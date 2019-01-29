@@ -206,7 +206,7 @@ jobs:
     - stage: test
       env: CHECK=oracle
     - stage: test
-      env: CHECK=pdh_check
+      env: CHECK=pdh_check PYTHON3=true
     - stage: test
       env: CHECK=pgbouncer PYTHON3=true
     - stage: test
