@@ -8,26 +8,29 @@ This check collects varnish metrics regarding:
 
 * Clients: connections and requests
 * Cache performance: hits, evictions, etc
-* Threads: creation, failures, threads queued
-* Backends: successful, failed, retried connections
+* Threads: creations, failures, and threads queued
+* Backends: successful, failed, and retried connections
 
 It also submits service checks for the health of each backend.
 
 ## Setup
 ### Installation
 
-The Varnish check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Varnish servers.
+The Varnish check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection).
-  See the [sample varnish.d/conf.yaml][4] for all available configuration options.
+1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection). See the [sample varnish.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][5]
+2. [Restart the Agent][5].
 
 #### Prepare Varnish
 
-If you're running Varnish 4.1+, add the dd-agent system user to the Varnish group (e.g. `sudo usermod -G varnish -a dd-agent`).
+If you're running Varnish 4.1+, add the `dd-agent` system user to the Varnish group using:
+
+```
+sudo usermod -G varnish -a dd-agent
+```
 
 #### Metric Collection
 
@@ -54,6 +57,13 @@ If you're running Varnish 4.1+, add the dd-agent system user to the Varnish grou
 
 * [Restart the Agent][5] to start sending Varnish metrics and service checks to Datadog.
 
+##### Autodiscovery
+
+Configuration of the Varnish check using Autodiscovery in containerized environments is not supported. Collecting metrics in this type of environment may be possible by pushing metrics to DogStatsD using a StatsD plugin. The following 3rd party plugins are available:
+
+* [libvmod-statsd][13]
+* [prometheus_varnish_exporter][14]
+
 #### Log Collection
 
 **Available for Agent >6.0**
@@ -72,7 +82,7 @@ LOG_FORMAT="{\"date_access\": \"%{%Y-%m-%dT%H:%M:%S%z}t\", \"network.client.ip\"
 DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
 ```
 
-  Restart Varnishncsa to make sure the changes are taken into account.
+  Restart Varnishncsa to apply the changes.
 
 
 *  Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
@@ -100,7 +110,7 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `varnish` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `varnish` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -110,14 +120,14 @@ See [metadata.csv][8] for a list of metrics provided by this check.
 The Varnish check does not include any events.
 
 ### Service Checks
-**varnish.backend_healthy**:
-
+**varnish.backend_healthy**:  
 The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<backend_name>`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][9].
 
 ## Further Reading
+Additional helpful documentation, links, and articles:
 
 * [Top Varnish performance metrics][10]
 * [How to collect Varnish metrics][11]
@@ -136,3 +146,5 @@ Need help? Contact [Datadog support][9].
 [10]: https://www.datadoghq.com/blog/top-varnish-performance-metrics
 [11]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics
 [12]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog
+[13]: https://github.com/jib/libvmod-statsd
+[14]: https://github.com/jonnenauha/prometheus_varnish_exporter
