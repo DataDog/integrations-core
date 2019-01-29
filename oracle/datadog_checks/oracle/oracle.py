@@ -1,17 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 from contextlib import closing
 from collections import OrderedDict
 
-# 3rd party
 import jaydebeapi as jdb
 import jpype
 import cx_Oracle
 
-# project
 from datadog_checks.checks import AgentCheck
 from . import queries
 
