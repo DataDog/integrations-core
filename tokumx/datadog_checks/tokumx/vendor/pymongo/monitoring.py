@@ -1,4 +1,4 @@
-# Copyright 2015-present MongoDB, Inc.
+# Copyright 2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -137,9 +137,7 @@ will not add that listener to existing client instances.
 import sys
 import traceback
 
-from collections import namedtuple
-
-from bson.py3compat import abc
+from collections import namedtuple, Sequence
 from pymongo.helpers import _handle_exception
 
 _Listeners = namedtuple('Listeners',
@@ -284,12 +282,15 @@ class ServerListener(_EventListener):
 
 def _to_micros(dur):
     """Convert duration 'dur' to microseconds."""
-    return int(dur.total_seconds() * 10e5)
+    if hasattr(dur, 'total_seconds'):
+        return int(dur.total_seconds() * 10e5)
+    # Python 2.6
+    return dur.microseconds + (dur.seconds + dur.days * 24 * 3600) * 1000000
 
 
 def _validate_event_listeners(option, listeners):
     """Validate event listeners"""
-    if not isinstance(listeners, abc.Sequence):
+    if not isinstance(listeners, Sequence):
         raise TypeError("%s must be a list or tuple" % (option,))
     for listener in listeners:
         if not isinstance(listener, _EventListener):

@@ -1,4 +1,4 @@
-# Copyright 2013-present MongoDB, Inc.
+# Copyright 2013-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
 
 """Authentication helpers."""
 
-import functools
-import hashlib
 import hmac
 import socket
 
@@ -38,58 +36,23 @@ except ImportError:
 
 from base64 import standard_b64decode, standard_b64encode
 from collections import namedtuple
+from hashlib import md5, sha1
 from random import SystemRandom
 
 from bson.binary import Binary
-from bson.py3compat import string_type, _unicode, PY3
+from bson.py3compat import b, string_type, _unicode, PY3
 from bson.son import SON
 from pymongo.errors import ConfigurationError, OperationFailure
-from pymongo.saslprep import saslprep
 
 
 MECHANISMS = frozenset(
-    ['GSSAPI',
-     'MONGODB-CR',
-     'MONGODB-X509',
-     'PLAIN',
-     'SCRAM-SHA-1',
-     'SCRAM-SHA-256',
-     'DEFAULT'])
+    ['GSSAPI', 'MONGODB-CR', 'MONGODB-X509', 'PLAIN', 'SCRAM-SHA-1', 'DEFAULT'])
 """The authentication mechanisms supported by PyMongo."""
-
-
-class _Cache(object):
-    __slots__ = ("data",)
-
-    _hash_val = hash('_Cache')
-
-    def __init__(self):
-        self.data = None
-
-    def __eq__(self, other):
-        # Two instances must always compare equal.
-        if isinstance(other, _Cache):
-            return True
-        return NotImplemented
-
-    def __ne__(self, other):
-        if isinstance(other, _Cache):
-            return False
-        return NotImplemented
-
-    def __hash__(self):
-        return self._hash_val
-
 
 
 MongoCredential = namedtuple(
     'MongoCredential',
-    ['mechanism',
-     'source',
-     'username',
-     'password',
-     'mechanism_properties',
-     'cache'])
+    ['mechanism', 'source', 'username', 'password', 'mechanism_properties'])
 """A hashable namedtuple of values used for authentication."""
 
 
@@ -100,15 +63,12 @@ GSSAPIProperties = namedtuple('GSSAPIProperties',
 """Mechanism properties for GSSAPI authentication."""
 
 
-def _build_credentials_tuple(mech, source, user, passwd, extra, database):
+def _build_credentials_tuple(mech, source, user, passwd, extra):
     """Build and return a mechanism specific credentials tuple.
     """
-    if mech != 'MONGODB-X509' and user is None:
-        raise ConfigurationError("%s requires a username." % (mech,))
+    user = _unicode(user) if user is not None else None
+    password = passwd if passwd is None else _unicode(passwd)
     if mech == 'GSSAPI':
-        if source is not None and source != '$external':
-            raise ValueError(
-                "authentication source must be $external or None for GSSAPI")
         properties = extra.get('authmechanismproperties', {})
         service_name = properties.get('SERVICE_NAME', 'mongodb')
         canonicalize = properties.get('CANONICALIZE_HOST_NAME', False)
@@ -117,26 +77,14 @@ def _build_credentials_tuple(mech, source, user, passwd, extra, database):
                                  canonicalize_host_name=canonicalize,
                                  service_realm=service_realm)
         # Source is always $external.
-        return MongoCredential(mech, '$external', user, passwd, props, None)
+        return MongoCredential(mech, '$external', user, password, props)
     elif mech == 'MONGODB-X509':
-        if passwd is not None:
-            raise ConfigurationError(
-                "Passwords are not supported by MONGODB-X509")
-        if source is not None and source != '$external':
-            raise ValueError(
-                "authentication source must be "
-                "$external or None for MONGODB-X509")
         # user can be None.
-        return MongoCredential(mech, '$external', user, None, None, None)
-    elif mech == 'PLAIN':
-        source_database = source or database or '$external'
-        return MongoCredential(mech, source_database, user, passwd, None, None)
+        return MongoCredential(mech, '$external', user, None, None)
     else:
-        source_database = source or database or 'admin'
         if passwd is None:
             raise ConfigurationError("A password is required.")
-        return MongoCredential(
-            mech, source_database, user, passwd, None, _Cache())
+        return MongoCredential(mech, source, user, password, None)
 
 
 if PY3:
@@ -157,29 +105,36 @@ else:
         return b"".join([chr(ord(x) ^ ord(y)) for x, y in zip(fir, sec)])
 
 
-    def _from_bytes(value, dummy, _int=int, _hexlify=_hexlify):
+    def _from_bytes(value, dummy, int=int, _hexlify=_hexlify):
         """An implementation of int.from_bytes for python 2.x."""
-        return _int(_hexlify(value), 16)
+        return int(_hexlify(value), 16)
 
 
-    def _to_bytes(value, length, dummy, _unhexlify=_unhexlify):
+    def _to_bytes(value, dummy0, dummy1, _unhexlify=_unhexlify):
         """An implementation of int.to_bytes for python 2.x."""
-        fmt = '%%0%dx' % (2 * length,)
-        return _unhexlify(fmt % value)
+        return _unhexlify('%040x' % value)
 
 
 try:
     # The fastest option, if it's been compiled to use OpenSSL's HMAC.
-    from backports.pbkdf2 import pbkdf2_hmac as _hi
+    from backports.pbkdf2 import pbkdf2_hmac
+
+    def _hi(data, salt, iterations):
+        return pbkdf2_hmac('sha1', data, salt, iterations)
+
 except ImportError:
     try:
         # Python 2.7.8+, or Python 3.4+.
-        from hashlib import pbkdf2_hmac as _hi
+        from hashlib import pbkdf2_hmac
+
+        def _hi(data, salt, iterations):
+            return pbkdf2_hmac('sha1', data, salt, iterations)
+
     except ImportError:
 
-        def _hi(hash_name, data, salt, iterations):
-            """A simple implementation of PBKDF2-HMAC."""
-            mac = hmac.HMAC(data, None, getattr(hashlib, hash_name))
+        def _hi(data, salt, iterations):
+            """A simple implementation of PBKDF2."""
+            mac = hmac.HMAC(data, None, sha1)
 
             def _digest(msg, mac=mac):
                 """Get a digest for msg."""
@@ -195,7 +150,7 @@ except ImportError:
             for _ in range(iterations - 1):
                 _u1 = _digest(_u1)
                 _ui ^= from_bytes(_u1, 'big')
-            return to_bytes(_ui, mac.digest_size, 'big')
+            return to_bytes(_ui, 20, 'big')
 
 try:
     from hmac import compare_digest
@@ -207,9 +162,7 @@ except ImportError:
         def _xor_bytes(a, b, _ord=ord):
             return _ord(a) ^ _ord(b)
 
-    # Python 2.x < 2.7.7
-    # Note: This method is intentionally obtuse to prevent timing attacks. Do
-    # not refactor it!
+    # Python 2.x < 2.7.7 and Python 3.x < 3.3
     # References:
     #  - http://bugs.python.org/issue14532
     #  - http://bugs.python.org/issue14955
@@ -234,23 +187,15 @@ def _parse_scram_response(response):
     return dict(item.split(b"=", 1) for item in response.split(b","))
 
 
-def _authenticate_scram(credentials, sock_info, mechanism):
-    """Authenticate using SCRAM."""
-
+def _authenticate_scram_sha1(credentials, sock_info):
+    """Authenticate using SCRAM-SHA-1."""
     username = credentials.username
-    if mechanism == 'SCRAM-SHA-256':
-        digest = "sha256"
-        digestmod = hashlib.sha256
-        data = saslprep(credentials.password).encode("utf-8")
-    else:
-        digest = "sha1"
-        digestmod = hashlib.sha1
-        data = _password_digest(username, credentials.password).encode("utf-8")
+    password = credentials.password
     source = credentials.source
-    cache = credentials.cache
 
     # Make local
     _hmac = hmac.HMAC
+    _sha1 = sha1
 
     user = username.encode("utf-8").replace(b"=", b"=3D").replace(b",", b"=2C")
     nonce = standard_b64encode(
@@ -258,7 +203,7 @@ def _authenticate_scram(credentials, sock_info, mechanism):
     first_bare = b"n=" + user + b",r=" + nonce
 
     cmd = SON([('saslStart', 1),
-               ('mechanism', mechanism),
+               ('mechanism', 'SCRAM-SHA-1'),
                ('payload', Binary(b"n,," + first_bare)),
                ('autoAuthorize', 1)])
     res = sock_info.command(source, cmd)
@@ -266,35 +211,25 @@ def _authenticate_scram(credentials, sock_info, mechanism):
     server_first = res['payload']
     parsed = _parse_scram_response(server_first)
     iterations = int(parsed[b'i'])
-    if iterations < 4096:
-        raise OperationFailure("Server returned an invalid iteration count.")
     salt = parsed[b's']
     rnonce = parsed[b'r']
     if not rnonce.startswith(nonce):
         raise OperationFailure("Server returned an invalid nonce.")
 
     without_proof = b"c=biws,r=" + rnonce
-    if cache.data:
-        client_key, server_key, csalt, citerations = cache.data
-    else:
-        client_key, server_key, csalt, citerations = None, None, None, None
-
-    # Salt and / or iterations could change for a number of different
-    # reasons. Either changing invalidates the cache.
-    if not client_key or salt != csalt or iterations != citerations:
-        salted_pass = _hi(
-            digest, data, standard_b64decode(salt), iterations)
-        client_key = _hmac(salted_pass, b"Client Key", digestmod).digest()
-        server_key = _hmac(salted_pass, b"Server Key", digestmod).digest()
-        cache.data = (client_key, server_key, salt, iterations)
-    stored_key = digestmod(client_key).digest()
+    salted_pass = _hi(_password_digest(username, password).encode("utf-8"),
+                      standard_b64decode(salt),
+                      iterations)
+    client_key = _hmac(salted_pass, b"Client Key", _sha1).digest()
+    stored_key = _sha1(client_key).digest()
     auth_msg = b",".join((first_bare, server_first, without_proof))
-    client_sig = _hmac(stored_key, auth_msg, digestmod).digest()
+    client_sig = _hmac(stored_key, auth_msg, _sha1).digest()
     client_proof = b"p=" + standard_b64encode(_xor(client_key, client_sig))
     client_final = b",".join((without_proof, client_proof))
 
+    server_key = _hmac(salted_pass, b"Server Key", _sha1).digest()
     server_sig = standard_b64encode(
-        _hmac(server_key, auth_msg, digestmod).digest())
+        _hmac(server_key, auth_msg, _sha1).digest())
 
     cmd = SON([('saslContinue', 1),
                ('conversationId', res['conversationId']),
@@ -328,7 +263,7 @@ def _password_digest(username, password):
         raise TypeError("password must be an "
                         "instance of  %s" % (string_type.__name__,))
 
-    md5hash = hashlib.md5()
+    md5hash = md5()
     data = "%s:mongo:%s" % (username, password)
     md5hash.update(data.encode('utf-8'))
     return _unicode(md5hash.hexdigest())
@@ -338,7 +273,7 @@ def _auth_key(nonce, username, password):
     """Get an auth key to use for authentication.
     """
     digest = _password_digest(username, password)
-    md5hash = hashlib.md5()
+    md5hash = md5()
     data = "%s%s%s" % (nonce, username, digest)
     md5hash.update(data.encode('utf-8'))
     return _unicode(md5hash.hexdigest())
@@ -484,9 +419,9 @@ def _authenticate_cram_md5(credentials, sock_info):
     response = sock_info.command(source, cmd)
     # MD5 as implicit default digest for digestmod is deprecated
     # in python 3.4
-    mac = hmac.HMAC(key=passwd.encode('utf-8'), digestmod=hashlib.md5)
+    mac = hmac.HMAC(key=passwd.encode('utf-8'), digestmod=md5)
     mac.update(response['payload'])
-    challenge = username.encode('utf-8') + b' ' + mac.hexdigest().encode('utf-8')
+    challenge = username.encode('utf-8') + b' ' + b(mac.hexdigest())
     cmd = SON([('saslContinue', 1),
                ('conversationId', response['conversationId']),
                ('payload', Binary(challenge))])
@@ -527,19 +462,8 @@ def _authenticate_mongo_cr(credentials, sock_info):
 
 
 def _authenticate_default(credentials, sock_info):
-    if sock_info.max_wire_version >= 7:
-        source = credentials.source
-        cmd = SON([
-            ('ismaster', 1),
-            ('saslSupportedMechs', source + '.' + credentials.username)])
-        mechs = sock_info.command(
-            source, cmd, publish_events=False).get('saslSupportedMechs', [])
-        if 'SCRAM-SHA-256' in mechs:
-            return _authenticate_scram(credentials, sock_info, 'SCRAM-SHA-256')
-        else:
-            return _authenticate_scram(credentials, sock_info, 'SCRAM-SHA-1')
-    elif sock_info.max_wire_version >= 3:
-        return _authenticate_scram(credentials, sock_info, 'SCRAM-SHA-1')
+    if sock_info.max_wire_version >= 3:
+        return _authenticate_scram_sha1(credentials, sock_info)
     else:
         return _authenticate_mongo_cr(credentials, sock_info)
 
@@ -550,10 +474,7 @@ _AUTH_MAP = {
     'MONGODB-CR': _authenticate_mongo_cr,
     'MONGODB-X509': _authenticate_x509,
     'PLAIN': _authenticate_plain,
-    'SCRAM-SHA-1': functools.partial(
-        _authenticate_scram, mechanism='SCRAM-SHA-1'),
-    'SCRAM-SHA-256': functools.partial(
-        _authenticate_scram, mechanism='SCRAM-SHA-256'),
+    'SCRAM-SHA-1': _authenticate_scram_sha1,
     'DEFAULT': _authenticate_default,
 }
 

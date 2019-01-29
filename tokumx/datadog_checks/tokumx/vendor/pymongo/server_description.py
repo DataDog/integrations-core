@@ -1,4 +1,4 @@
-# Copyright 2014-present MongoDB, Inc.
+# Copyright 2014-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,16 @@ from pymongo.ismaster import IsMaster
 from pymongo.monotonic import time as _time
 
 
+def _total_seconds(delta):
+    """Total seconds in the duration."""
+    if hasattr(delta, 'total_seconds'):
+        return delta.total_seconds()
+
+    # Python 2.6.
+    return ((delta.days * 86400 + delta.seconds) * 10 ** 6 +
+            delta.microseconds) / 10.0 ** 6
+
+
 class ServerDescription(object):
     """Immutable representation of one server.
 
@@ -34,9 +44,8 @@ class ServerDescription(object):
         '_address', '_server_type', '_all_hosts', '_tags', '_replica_set_name',
         '_primary', '_max_bson_size', '_max_message_size',
         '_max_write_batch_size', '_min_wire_version', '_max_wire_version',
-        '_round_trip_time', '_me', '_is_writable', '_is_readable',
-        '_ls_timeout_minutes', '_error', '_set_version', '_election_id',
-        '_cluster_time', '_last_write_date', '_last_update_time')
+        '_round_trip_time', '_me', '_is_writable', '_is_readable', '_error',
+        '_set_version', '_election_id', '_last_write_date', '_last_update_time')
 
     def __init__(
             self,
@@ -60,10 +69,8 @@ class ServerDescription(object):
         self._max_wire_version = ismaster.max_wire_version
         self._set_version = ismaster.set_version
         self._election_id = ismaster.election_id
-        self._cluster_time = ismaster.cluster_time
         self._is_writable = ismaster.is_writable
         self._is_readable = ismaster.is_readable
-        self._ls_timeout_minutes = ismaster.logical_session_timeout_minutes
         self._round_trip_time = round_trip_time
         self._me = ismaster.me
         self._last_update_time = _time()
@@ -72,7 +79,7 @@ class ServerDescription(object):
         if ismaster.last_write_date:
             # Convert from datetime to seconds.
             delta = ismaster.last_write_date - EPOCH_NAIVE
-            self._last_write_date = delta.total_seconds()
+            self._last_write_date = _total_seconds(delta)
         else:
             self._last_write_date = None
 
@@ -142,20 +149,12 @@ class ServerDescription(object):
         return self._election_id
 
     @property
-    def cluster_time(self):
-        return self._cluster_time
-
-    @property
     def election_tuple(self):
         return self._set_version, self._election_id
 
     @property
     def me(self):
         return self._me
-
-    @property
-    def logical_session_timeout_minutes(self):
-        return self._ls_timeout_minutes
 
     @property
     def last_write_date(self):
@@ -190,13 +189,6 @@ class ServerDescription(object):
     @property
     def is_server_type_known(self):
         return self.server_type != SERVER_TYPE.Unknown
-
-    @property
-    def retryable_writes_supported(self):
-        """Checks if this server supports retryable writes."""
-        return (
-            self._ls_timeout_minutes is not None and
-            self._server_type in (SERVER_TYPE.Mongos, SERVER_TYPE.RSPrimary))
 
     # For unittesting only. Use under no circumstances!
     _host_to_round_trip_time = {}

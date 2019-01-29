@@ -1,4 +1,4 @@
-# Copyright 2014-present MongoDB, Inc.
+# Copyright 2014-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -35,16 +35,15 @@ class TopologySettings(object):
                  condition_class=None,
                  local_threshold_ms=LOCAL_THRESHOLD_MS,
                  server_selection_timeout=SERVER_SELECTION_TIMEOUT,
-                 heartbeat_frequency=common.HEARTBEAT_FREQUENCY,
-                 server_selector=None):
+                 heartbeat_frequency=common.HEARTBEAT_FREQUENCY):
         """Represent MongoClient's configuration.
 
         Take a list of (host, port) pairs and optional replica set name.
         """
         if heartbeat_frequency < common.MIN_HEARTBEAT_INTERVAL:
             raise ConfigurationError(
-                "heartbeatFrequencyMS cannot be less than %d" % (
-                    common.MIN_HEARTBEAT_INTERVAL * 1000,))
+                "heartbeatFrequencyMS cannot be less than %d" %
+                common.MIN_HEARTBEAT_INTERVAL * 1000)
 
         self._seeds = seeds or [('localhost', 27017)]
         self._replica_set_name = replica_set_name
@@ -54,7 +53,6 @@ class TopologySettings(object):
         self._condition_class = condition_class or threading.Condition
         self._local_threshold_ms = local_threshold_ms
         self._server_selection_timeout = server_selection_timeout
-        self._server_selector = server_selector
         self._heartbeat_frequency = heartbeat_frequency
         self._direct = (len(self._seeds) == 1 and not replica_set_name)
         self._topology_id = ObjectId()
@@ -91,10 +89,6 @@ class TopologySettings(object):
     @property
     def server_selection_timeout(self):
         return self._server_selection_timeout
-
-    @property
-    def server_selector(self):
-        return self._server_selector
 
     @property
     def heartbeat_frequency(self):

@@ -12,25 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Time. Monotonic if possible.
-"""
+"""A BSON wrapper for long (int in python3)"""
 
-__all__ = ['time']
+from bson.py3compat import PY3
 
-try:
-    # Patches standard time module.
-    # From https://pypi.python.org/pypi/Monotime.
-    import monotime
-except ImportError:
-    pass
+if PY3:
+    long = int
 
-try:
-    # From https://pypi.python.org/pypi/monotinic.
-    from monotonic import monotonic as time
-except ImportError:
-    try:
-        # Monotime or Python 3.3+.
-        from time import monotonic as time
-    except ImportError:
-        # Not monotonic.
-        from time import time
+
+class Int64(long):
+    """Representation of the BSON int64 type.
+
+    This is necessary because every integral number is an :class:`int` in
+    Python 3. Small integral numbers are encoded to BSON int32 by default,
+    but Int64 numbers will always be encoded to BSON int64.
+
+    :Parameters:
+      - `value`: the numeric value to represent
+    """
+
+    _type_marker = 18

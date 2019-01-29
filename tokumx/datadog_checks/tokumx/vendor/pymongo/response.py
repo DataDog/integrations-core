@@ -1,4 +1,4 @@
-# Copyright 2014-present MongoDB, Inc.
+# Copyright 2014-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ class Response(object):
         """Represent a response from the server.
 
         :Parameters:
-          - `data`: A network response message.
+          - `data`: Raw BSON bytes.
           - `address`: (host, port) of the source server.
           - `request_id`: The request id of this operation.
           - `duration`: The duration of the operation.
@@ -69,7 +69,7 @@ class ExhaustResponse(Response):
         """Represent a response to an exhaust cursor's initial query.
 
         :Parameters:
-          - `data`:  A network response message.
+          - `data`: Raw BSON bytes.
           - `address`: (host, port) of the source server.
           - `socket_info`: The SocketInfo used for the initial query.
           - `pool`: The Pool from which the SocketInfo came.

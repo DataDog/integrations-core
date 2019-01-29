@@ -1,4 +1,4 @@
-# Copyright 2014-present MongoDB, Inc.
+# Copyright 2014-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -25,7 +25,7 @@ class SSLContext(object):
 
     This implements an API similar to ssl.SSLContext from python 3.2
     but does not implement methods or properties that would be
-    incompatible with ssl.wrap_socket from python 2.7 < 2.7.9.
+    incompatible with ssl.wrap_socket from python 2.6.
 
     You must pass protocol which must be one of the PROTOCOL_* constants
     defined in the ssl module. ssl.PROTOCOL_SSLv23 is recommended for maximum
@@ -94,3 +94,4 @@ class SSLContext(object):
                                ca_certs=self._cafile,
                                do_handshake_on_connect=do_handshake_on_connect,
                                suppress_ragged_eofs=suppress_ragged_eofs)
+

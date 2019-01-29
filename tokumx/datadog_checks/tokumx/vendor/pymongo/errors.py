@@ -1,4 +1,4 @@
-# Copyright 2009-present MongoDB, Inc.
+# Copyright 2009-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
 
 """Exceptions raised by PyMongo."""
 
-import sys
-
 from bson.errors import *
 
 try:
@@ -26,30 +24,6 @@ except ImportError:
 
 class PyMongoError(Exception):
     """Base class for all PyMongo exceptions."""
-    def __init__(self, message='', error_labels=None):
-        super(PyMongoError, self).__init__(message)
-        self._message = message
-        self._error_labels = set(error_labels or [])
-
-    def has_error_label(self, label):
-        """Return True if this error contains the given label.
-
-        .. versionadded:: 3.7
-        """
-        return label in self._error_labels
-
-    def _add_error_label(self, label):
-        """Add the given label to this error."""
-        self._error_labels.add(label)
-
-    def _remove_error_label(self, label):
-        """Remove the given label from this error."""
-        self._error_labels.remove(label)
-
-    def __str__(self):
-        if sys.version_info[0] == 2 and isinstance(self._message, unicode):
-            return self._message.encode('utf-8', errors='replace')
-        return str(self._message)
 
 
 class ProtocolError(PyMongoError):
@@ -58,12 +32,6 @@ class ProtocolError(PyMongoError):
 
 class ConnectionFailure(PyMongoError):
     """Raised when a connection to the database cannot be made or is lost."""
-    def __init__(self, message='', error_labels=None):
-        if error_labels is None:
-            # Connection errors are transient errors by default.
-            error_labels = ("TransientTransactionError",)
-        super(ConnectionFailure, self).__init__(
-            message, error_labels=error_labels)
 
 
 class AutoReconnect(ConnectionFailure):
@@ -79,8 +47,8 @@ class AutoReconnect(ConnectionFailure):
     Subclass of :exc:`~pymongo.errors.ConnectionFailure`.
     """
     def __init__(self, message='', errors=None):
-        super(AutoReconnect, self).__init__(message)
         self.errors = self.details = errors or []
+        ConnectionFailure.__init__(self, message)
 
 
 class NetworkTimeout(AutoReconnect):
@@ -134,13 +102,9 @@ class OperationFailure(PyMongoError):
     """
 
     def __init__(self, error, code=None, details=None):
-        error_labels = None
-        if details is not None:
-            error_labels = details.get('errorLabels')
-        super(OperationFailure, self).__init__(
-            error, error_labels=error_labels)
         self.__code = code
         self.__details = details
+        PyMongoError.__init__(self, error)
 
     @property
     def code(self):
@@ -214,8 +178,8 @@ class BulkWriteError(OperationFailure):
     .. versionadded:: 2.7
     """
     def __init__(self, results):
-        super(BulkWriteError, self).__init__(
-            "batch op errors occurred", 65, results)
+        OperationFailure.__init__(
+            self, "batch op errors occurred", 65, results)
 
 
 class InvalidOperation(PyMongoError):

@@ -1,4 +1,4 @@
-# Copyright 2014-present MongoDB, Inc.
+# Copyright 2014-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 from bson.py3compat import integer_types, string_type
 from pymongo.errors import ConfigurationError
-
 
 class WriteConcern(object):
     """WriteConcern
@@ -46,7 +45,7 @@ class WriteConcern(object):
           journal. Cannot be used in combination with `j`.
     """
 
-    __slots__ = ("__document", "__acknowledged", "__server_default")
+    __slots__ = ("__document", "__acknowledged")
 
     def __init__(self, w=None, wtimeout=None, j=None, fsync=None):
         self.__document = {}
@@ -55,8 +54,6 @@ class WriteConcern(object):
         if wtimeout is not None:
             if not isinstance(wtimeout, integer_types):
                 raise TypeError("wtimeout must be an integer")
-            if wtimeout < 0:
-                raise ValueError("wtimeout cannot be less than 0")
             self.__document["wtimeout"] = wtimeout
 
         if j is not None:
@@ -72,24 +69,15 @@ class WriteConcern(object):
                                          "and fsync at the same time")
             self.__document["fsync"] = fsync
 
-        if w == 0 and j is True:
-            raise ConfigurationError("Cannot set w to 0 and j to True")
-
+        if self.__document and w == 0:
+            raise ConfigurationError("Can not use w value "
+                                     "of 0 with other options")
         if w is not None:
             if isinstance(w, integer_types):
-                if w < 0:
-                    raise ValueError("w cannot be less than 0")
                 self.__acknowledged = w > 0
             elif not isinstance(w, string_type):
                 raise TypeError("w must be an integer or string")
             self.__document["w"] = w
-
-        self.__server_default = not self.__document
-
-    @property
-    def is_server_default(self):
-        """Does this WriteConcern match the server default."""
-        return self.__server_default
 
     @property
     def document(self):
@@ -110,17 +98,13 @@ class WriteConcern(object):
 
     def __repr__(self):
         return ("WriteConcern(%s)" % (
-            ", ".join("%s=%s" % kvt for kvt in self.__document.items()),))
+            ", ".join("%s=%s" % kvt for kvt in self.document.items()),))
 
     def __eq__(self, other):
-        if isinstance(other, WriteConcern):
-            return self.__document == other.document
-        return NotImplemented
+        return self.document == other.document
 
     def __ne__(self, other):
-        if isinstance(other, WriteConcern):
-            return self.__document != other.document
-        return NotImplemented
+        return self.document != other.document
 
-
-DEFAULT_WRITE_CONCERN = WriteConcern()
+    def __bool__(self):
+        return bool(self.document)

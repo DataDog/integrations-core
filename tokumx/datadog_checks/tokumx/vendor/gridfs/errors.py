@@ -1,4 +1,4 @@
-# Copyright 2014-2015 MongoDB, Inc.
+# Copyright 2009-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Time. Monotonic if possible.
-"""
+"""Exceptions raised by the :mod:`gridfs` package"""
 
-__all__ = ['time']
+from pymongo.errors import PyMongoError
 
-try:
-    # Patches standard time module.
-    # From https://pypi.python.org/pypi/Monotime.
-    import monotime
-except ImportError:
-    pass
 
-try:
-    # From https://pypi.python.org/pypi/monotinic.
-    from monotonic import monotonic as time
-except ImportError:
-    try:
-        # Monotime or Python 3.3+.
-        from time import monotonic as time
-    except ImportError:
-        # Not monotonic.
-        from time import time
+class GridFSError(PyMongoError):
+    """Base class for all GridFS exceptions."""
+
+
+class CorruptGridFile(GridFSError):
+    """Raised when a file in :class:`~gridfs.GridFS` is malformed."""
+
+
+class NoFile(GridFSError):
+    """Raised when trying to read from a non-existent file."""
+
+
+class FileExists(GridFSError):
+    """Raised when trying to create a file that already exists."""

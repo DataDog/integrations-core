@@ -1,4 +1,4 @@
-# Copyright 2009-present MongoDB, Inc.
+# Copyright 2009-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,9 +33,10 @@ the modern methods :meth:`~pymongo.collection.Collection.bulk_write`,
 :meth:`~pymongo.collection.Collection.find_one_and_update`.
 """
 
+import collections
+
 from bson.dbref import DBRef
 from bson.objectid import ObjectId
-from bson.py3compat import abc
 from bson.son import SON
 
 
@@ -154,7 +155,7 @@ class AutoReference(SONManipulator):
         """
 
         def transform_value(value):
-            if isinstance(value, abc.MutableMapping):
+            if isinstance(value, collections.MutableMapping):
                 if "_id" in value and "_ns" in value:
                     return DBRef(value["_ns"], transform_value(value["_id"]))
                 else:
@@ -179,7 +180,7 @@ class AutoReference(SONManipulator):
                 return self.database.dereference(value)
             elif isinstance(value, list):
                 return [transform_value(v) for v in value]
-            elif isinstance(value, abc.MutableMapping):
+            elif isinstance(value, collections.MutableMapping):
                 return transform_dict(SON(value))
             return value
 

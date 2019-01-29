@@ -1,4 +1,4 @@
-# Copyright 2009-present MongoDB, Inc.
+# Copyright 2009-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,15 @@
 
 """Bits and pieces used by the driver that don't really fit elsewhere."""
 
+import collections
+import datetime
+import struct
 import sys
 import traceback
 
-from bson.py3compat import abc, iteritems, itervalues, string_type
+import bson
+from bson.codec_options import CodecOptions
+from bson.py3compat import itervalues, string_type, iteritems
 from bson.son import SON
 from pymongo import ASCENDING
 from pymongo.errors import (CursorNotFound,
@@ -25,29 +30,18 @@ from pymongo.errors import (CursorNotFound,
                             ExecutionTimeout,
                             NotMasterError,
                             OperationFailure,
+                            ProtocolError,
                             WriteError,
                             WriteConcernError,
                             WTimeoutError)
+from pymongo.message import _Query, _convert_exception
+from pymongo.read_concern import DEFAULT_READ_CONCERN
 
-# From the Server Discovery and Monitoring spec, the "not master" error codes
-# are combined with the "node is recovering" error codes.
-_NOT_MASTER_CODES = frozenset([
-    10107,  # NotMaster
-    13435,  # NotMasterNoSlaveOk
-    11600,  # InterruptedAtShutdown
-    11602,  # InterruptedDueToReplStateChange
-    13436,  # NotMasterOrSecondary
-    189,    # PrimarySteppedDown
-    91,     # ShutdownInProgress
-])
-# From the retryable writes spec.
-_RETRYABLE_ERROR_CODES = _NOT_MASTER_CODES | frozenset([
-    7,     # HostNotFound
-    6,     # HostUnreachable
-    89,    # NetworkTimeout
-    9001,  # SocketException
-])
+
 _UUNDER = u"_"
+
+_UNICODE_REPLACE_CODEC_OPTIONS = CodecOptions(
+    unicode_decode_error_handler='replace')
 
 
 def _gen_index_name(keys):
@@ -76,7 +70,7 @@ def _index_document(index_list):
 
     Takes a list of (key, direction) pairs.
     """
-    if isinstance(index_list, abc.Mapping):
+    if isinstance(index_list, collections.Mapping):
         raise TypeError("passing a dict to sort/create_index/hint is not "
                         "allowed - use a list of tuples instead. did you "
                         "mean %r?" % list(iteritems(index_list)))
@@ -90,12 +84,65 @@ def _index_document(index_list):
     for (key, value) in index_list:
         if not isinstance(key, string_type):
             raise TypeError("first item in each key pair must be a string")
-        if not isinstance(value, (string_type, int, abc.Mapping)):
+        if not isinstance(value, (string_type, int, collections.Mapping)):
             raise TypeError("second item in each key pair must be 1, -1, "
                             "'2d', 'geoHaystack', or another valid MongoDB "
                             "index specifier.")
         index[key] = value
     return index
+
+
+def _unpack_response(response,
+                     cursor_id=None,
+                     codec_options=_UNICODE_REPLACE_CODEC_OPTIONS):
+    """Unpack a response from the database.
+
+    Check the response for errors and unpack, returning a dictionary
+    containing the response data.
+
+    Can raise CursorNotFound, NotMasterError, ExecutionTimeout, or
+    OperationFailure.
+
+    :Parameters:
+      - `response`: byte string as returned from the database
+      - `cursor_id` (optional): cursor_id we sent to get this response -
+        used for raising an informative exception when we get cursor id not
+        valid at server response
+      - `codec_options` (optional): an instance of
+        :class:`~bson.codec_options.CodecOptions`
+    """
+    response_flag = struct.unpack("<i", response[:4])[0]
+    if response_flag & 1:
+        # Shouldn't get this response if we aren't doing a getMore
+        if cursor_id is None:
+            raise ProtocolError("No cursor id for getMore operation")
+
+        # Fake a getMore command response. OP_GET_MORE provides no document.
+        msg = "Cursor not found, cursor id: %d" % (cursor_id,)
+        errobj = {"ok": 0, "errmsg": msg, "code": 43}
+        raise CursorNotFound(msg, 43, errobj)
+    elif response_flag & 2:
+        error_object = bson.BSON(response[20:]).decode()
+        # Fake the ok field if it doesn't exist.
+        error_object.setdefault("ok", 0)
+        if error_object["$err"].startswith("not master"):
+            raise NotMasterError(error_object["$err"], error_object)
+        elif error_object.get("code") == 50:
+            raise ExecutionTimeout(error_object.get("$err"),
+                                   error_object.get("code"),
+                                   error_object)
+        raise OperationFailure("database error: %s" %
+                               error_object.get("$err"),
+                               error_object.get("code"),
+                               error_object)
+
+    result = {"cursor_id": struct.unpack("<q", response[4:12])[0],
+              "starting_from": struct.unpack("<i", response[12:16])[0],
+              "number_returned": struct.unpack("<i", response[16:20])[0],
+              "data": bson.decode_all(response[20:], codec_options)}
+
+    assert len(result["data"]) == result["number_returned"]
+    return result
 
 
 def _check_command_response(response, msg=None, allowable_errors=None,
@@ -108,8 +155,18 @@ def _check_command_response(response, msg=None, allowable_errors=None,
                                response.get("code"),
                                response)
 
+    # TODO: remove, this is moving to _check_gle_response
+    if response.get("wtimeout", False):
+        # MongoDB versions before 1.8.0 return the error message in an "errmsg"
+        # field. If "errmsg" exists "err" will also exist set to None, so we
+        # have to check for "errmsg" first.
+        raise WTimeoutError(response.get("errmsg", response.get("err")),
+                            response.get("code"),
+                            response)
+
     if parse_write_concern_error and 'writeConcernError' in response:
-        _raise_write_concern_error(response['writeConcernError'])
+        wce = response['writeConcernError']
+        raise WriteConcernError(wce['errmsg'], wce['code'], wce)
 
     if not response["ok"]:
 
@@ -126,12 +183,9 @@ def _check_command_response(response, msg=None, allowable_errors=None,
         errmsg = details["errmsg"]
         if allowable_errors is None or errmsg not in allowable_errors:
 
-            code = details.get("code")
             # Server is "not master" or "recovering"
-            if code in _NOT_MASTER_CODES:
-                raise NotMasterError(errmsg, response)
-            elif ("not master" in errmsg
-                  or "node is recovering" in errmsg):
+            if (errmsg.startswith("not master")
+                    or errmsg.startswith("node is recovering")):
                 raise NotMasterError(errmsg, response)
 
             # Server assertion failures
@@ -143,6 +197,7 @@ def _check_command_response(response, msg=None, allowable_errors=None,
                                        response)
 
             # Other errors
+            code = details.get("code")
             # findAndModify with upsert can raise duplicate key error
             if code in (11000, 11001, 12582):
                 raise DuplicateKeyError(errmsg, code, response)
@@ -155,8 +210,13 @@ def _check_command_response(response, msg=None, allowable_errors=None,
             raise OperationFailure(msg % errmsg, code, response)
 
 
-def _check_gle_response(result):
+def _check_gle_response(response):
     """Return getlasterror response as a dict, or raise OperationFailure."""
+    response = _unpack_response(response)
+
+    assert response["number_returned"] == 1
+    result = response["data"][0]
+
     # Did getlasterror itself fail?
     _check_command_response(result)
 
@@ -190,46 +250,77 @@ def _check_gle_response(result):
     raise OperationFailure(details["err"], code, result)
 
 
-def _raise_last_write_error(write_errors):
-    # If the last batch had multiple errors only report
-    # the last error to emulate continue_on_error.
-    error = write_errors[-1]
-    if error.get("code") == 11000:
-        raise DuplicateKeyError(error.get("errmsg"), 11000, error)
-    raise WriteError(error.get("errmsg"), error.get("code"), error)
+def _first_batch(sock_info, db, coll, query, ntoreturn,
+                 slave_ok, codec_options, read_preference, cmd, listeners):
+    """Simple query helper for retrieving a first (and possibly only) batch."""
+    query = _Query(
+        0, db, coll, 0, query, None, codec_options,
+        read_preference, ntoreturn, 0, DEFAULT_READ_CONCERN, None)
+
+    name = next(iter(cmd))
+    duration = None
+    publish = listeners.enabled_for_commands
+    if publish:
+        start = datetime.datetime.now()
+
+    request_id, msg, max_doc_size = query.get_message(slave_ok,
+                                                      sock_info.is_mongos)
+
+    if publish:
+        encoding_duration = datetime.datetime.now() - start
+        listeners.publish_command_start(
+            cmd, db, request_id, sock_info.address)
+        start = datetime.datetime.now()
+
+    sock_info.send_message(msg, max_doc_size)
+    response = sock_info.receive_message(1, request_id)
+    try:
+        result = _unpack_response(response, None, codec_options)
+    except Exception as exc:
+        if publish:
+            duration = (datetime.datetime.now() - start) + encoding_duration
+            if isinstance(exc, (NotMasterError, OperationFailure)):
+                failure = exc.details
+            else:
+                failure = _convert_exception(exc)
+            listeners.publish_command_failure(
+                duration, failure, name, request_id, sock_info.address)
+        raise
+    if publish:
+        duration = (datetime.datetime.now() - start) + encoding_duration
+        listeners.publish_command_success(
+            duration, result, name, request_id, sock_info.address)
+
+    return result
 
 
-def _raise_write_concern_error(error):
-    if "errInfo" in error and error["errInfo"].get('wtimeout'):
-        # Make sure we raise WTimeoutError
-        raise WTimeoutError(
-            error.get("errmsg"), error.get("code"), error)
-    raise WriteConcernError(
-        error.get("errmsg"), error.get("code"), error)
-
-
-def _check_write_command_response(result):
+def _check_write_command_response(results):
     """Backward compatibility helper for write command error handling.
     """
-    # Prefer write errors over write concern errors
-    write_errors = result.get("writeErrors")
-    if write_errors:
-        _raise_last_write_error(write_errors)
-
-    error = result.get("writeConcernError")
-    if error:
-        _raise_write_concern_error(error)
-
-
-def _raise_last_error(bulk_write_result):
-    """Backward compatibility helper for insert error handling.
-    """
-    # Prefer write errors over write concern errors
-    write_errors = bulk_write_result.get("writeErrors")
-    if write_errors:
-        _raise_last_write_error(write_errors)
-
-    _raise_write_concern_error(bulk_write_result["writeConcernErrors"][-1])
+    errors = [res for res in results
+              if "writeErrors" in res[1] or "writeConcernError" in res[1]]
+    if errors:
+        # If multiple batches had errors
+        # raise from the last batch.
+        offset, result = errors[-1]
+        # Prefer write errors over write concern errors
+        write_errors = result.get("writeErrors")
+        if write_errors:
+            # If the last batch had multiple errors only report
+            # the last error to emulate continue_on_error.
+            error = write_errors[-1]
+            error["index"] += offset
+            if error.get("code") == 11000:
+                raise DuplicateKeyError(error.get("errmsg"), 11000, error)
+            raise WriteError(error.get("errmsg"), error.get("code"), error)
+        else:
+            error = result["writeConcernError"]
+            if "errInfo" in error and error["errInfo"].get('wtimeout'):
+                # Make sure we raise WTimeoutError
+                raise WTimeoutError(
+                    error.get("errmsg"), error.get("code"), error)
+            raise WriteConcernError(
+                error.get("errmsg"), error.get("code"), error)
 
 
 def _fields_list_to_dict(fields, option_name):
@@ -241,10 +332,10 @@ def _fields_list_to_dict(fields, option_name):
 
     ["a.b.c", "d", "a.c"] becomes {"a.b.c": 1, "d": 1, "a.c": 1}
     """
-    if isinstance(fields, abc.Mapping):
+    if isinstance(fields, collections.Mapping):
         return fields
 
-    if isinstance(fields, (abc.Sequence, abc.Set)):
+    if isinstance(fields, collections.Sequence):
         if not all(isinstance(field, string_type) for field in fields):
             raise TypeError("%s must be a list of key names, each an "
                             "instance of %s" % (option_name,

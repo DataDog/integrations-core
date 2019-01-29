@@ -7,7 +7,7 @@ from __future__ import division
 import time
 from six import iteritems, PY3
 
-import bson
+from .vendor import bson
 from .vendor.pymongo import (
     MongoClient,
     ReadPreference,

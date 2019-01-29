@@ -1,4 +1,4 @@
-# Copyright 2011-present MongoDB, Inc.
+# Copyright 2011-2015 MongoDB, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -15,32 +15,22 @@
 
 """Functions and classes common to multiple pymongo modules."""
 
+import collections
 import datetime
 import warnings
 
-from bson import SON
 from bson.binary import (STANDARD, PYTHON_LEGACY,
                          JAVA_LEGACY, CSHARP_LEGACY)
 from bson.codec_options import CodecOptions
-from bson.py3compat import abc, integer_types, iteritems, string_type
+from bson.py3compat import string_type, integer_types, iteritems
 from bson.raw_bson import RawBSONDocument
 from pymongo.auth import MECHANISMS
-from pymongo.compression_support import (validate_compressors,
-                                         validate_zlib_compression_level)
-from pymongo.driver_info import DriverInfo
 from pymongo.errors import ConfigurationError
 from pymongo.monitoring import _validate_event_listeners
 from pymongo.read_concern import ReadConcern
 from pymongo.read_preferences import _MONGOS_MODES, _ServerMode
 from pymongo.ssl_support import validate_cert_reqs
-from pymongo.write_concern import DEFAULT_WRITE_CONCERN, WriteConcern
-
-try:
-    from collections import OrderedDict
-    ORDERED_TYPES = (SON, OrderedDict)
-except ImportError:
-    ORDERED_TYPES = (SON,)
-
+from pymongo.write_concern import WriteConcern
 
 # Defaults until we connect to a server and get updated limits.
 MAX_BSON_SIZE = 16 * (1024 ** 2)
@@ -50,8 +40,7 @@ MAX_WIRE_VERSION = 0
 MAX_WRITE_BATCH_SIZE = 1000
 
 # What this version of PyMongo supports.
-MIN_SUPPORTED_SERVER_VERSION = "2.6"
-MIN_SUPPORTED_WIRE_VERSION = 2
+MIN_SUPPORTED_WIRE_VERSION = 0
 MAX_SUPPORTED_WIRE_VERSION = 5
 
 # Frequency to call ismaster on servers, in seconds.
@@ -87,18 +76,16 @@ MAX_IDLE_TIME_MS = None
 # Default value for localThresholdMS.
 LOCAL_THRESHOLD_MS = 15
 
-# Default value for retryWrites.
-RETRY_WRITES = False
-
-# mongod/s 2.6 and above return code 59 when a command doesn't exist.
-COMMAND_NOT_FOUND_CODES = (59,)
+# mongod/s 2.6 and above return code 59 when a
+# command doesn't exist. mongod versions previous
+# to 2.6 and mongos 2.4.x return no error code
+# when a command does exist. mongos versions previous
+# to 2.4.0 return code 13390 when a command does not
+# exist.
+COMMAND_NOT_FOUND_CODES = (59, 13390, None)
 
 # Error codes to ignore if GridFS calls createIndex on a secondary
 UNAUTHORIZED_CODES = (13, 16547, 16548)
-
-# Maximum number of sessions to send in a single endSessions command.
-# From the driver sessions spec.
-_MAX_END_SESSIONS = 10000
 
 
 def partition_node(node):
@@ -161,11 +148,10 @@ def validate_integer(option, value):
     if isinstance(value, integer_types):
         return value
     elif isinstance(value, string_type):
-        try:
-            return int(value)
-        except ValueError:
+        if not value.isdigit():
             raise ValueError("The value of %s must be "
                              "an integer" % (option,))
+        return int(value)
     raise TypeError("Wrong type for %s, value must be an integer" % (option,))
 
 
@@ -241,27 +227,11 @@ def validate_int_or_basestring(option, value):
     if isinstance(value, integer_types):
         return value
     elif isinstance(value, string_type):
-        try:
+        if value.isdigit():
             return int(value)
-        except ValueError:
-            return value
+        return value
     raise TypeError("Wrong type for %s, value must be an "
                     "integer or a string" % (option,))
-
-
-def validate_non_negative_int_or_basestring(option, value):
-    """Validates that 'value' is an integer or string.
-    """
-    if isinstance(value, integer_types):
-        return value
-    elif isinstance(value, string_type):
-        try:
-            val = int(value)
-        except ValueError:
-            return value
-        return validate_non_negative_integer(option, val)
-    raise TypeError("Wrong type for %s, value must be an "
-                    "non negative integer or a string" % (option,))
 
 
 def validate_positive_float(option, value):
@@ -415,30 +385,16 @@ def validate_auth_mechanism_properties(option, value):
 
 def validate_document_class(option, value):
     """Validate the document_class option."""
-    if not issubclass(value, (abc.MutableMapping, RawBSONDocument)):
+    if not issubclass(value, (collections.MutableMapping, RawBSONDocument)):
         raise TypeError("%s must be dict, bson.son.SON, "
                         "bson.raw_bson.RawBSONDocument, or a "
                         "sublass of collections.MutableMapping" % (option,))
     return value
 
 
-def validate_list(option, value):
-    """Validates that 'value' is a list."""
-    if not isinstance(value, list):
-        raise TypeError("%s must be a list" % (option,))
-    return value
-
-
-def validate_list_or_none(option, value):
-    """Validates that 'value' is a list or None."""
-    if value is None:
-        return value
-    return validate_list(option, value)
-
-
 def validate_is_mapping(option, value):
     """Validate the type of method arguments that expect a document."""
-    if not isinstance(value, abc.Mapping):
+    if not isinstance(value, collections.Mapping):
         raise TypeError("%s must be an instance of dict, bson.son.SON, or "
                         "other type that inherits from "
                         "collections.Mapping" % (option,))
@@ -446,7 +402,7 @@ def validate_is_mapping(option, value):
 
 def validate_is_document_type(option, value):
     """Validate the type of method arguments that expect a MongoDB document."""
-    if not isinstance(value, (abc.MutableMapping, RawBSONDocument)):
+    if not isinstance(value, (collections.MutableMapping, RawBSONDocument)):
         raise TypeError("%s must be an instance of dict, bson.son.SON, "
                         "bson.raw_bson.RawBSONDocument, or "
                         "a type that inherits from "
@@ -461,24 +417,6 @@ def validate_appname_or_none(option, value):
     # We need length in bytes, so encode utf8 first.
     if len(value.encode('utf-8')) > 128:
         raise ValueError("%s must be <= 128 bytes" % (option,))
-    return value
-
-
-def validate_driver_or_none(option, value):
-    """Validate the driver keyword arg."""
-    if value is None:
-        return value
-    if not isinstance(value, DriverInfo):
-        raise TypeError("%s must be an instance of DriverInfo" % (option,))
-    return value
-
-
-def validate_is_callable_or_none(option, value):
-    """Validates that 'value' is a callable."""
-    if value is None:
-        return value
-    if not callable(value):
-        raise ValueError("%s must be a callable" % (option,))
     return value
 
 
@@ -528,9 +466,9 @@ def validate_tzinfo(dummy, value):
 # wtimeoutms is an alias for wtimeout,
 URI_VALIDATORS = {
     'replicaset': validate_string_or_none,
-    'w': validate_non_negative_int_or_basestring,
-    'wtimeout': validate_non_negative_integer,
-    'wtimeoutms': validate_non_negative_integer,
+    'w': validate_int_or_basestring,
+    'wtimeout': validate_integer,
+    'wtimeoutms': validate_integer,
     'fsync': validate_boolean_or_string,
     'j': validate_boolean_or_string,
     'journal': validate_boolean_or_string,
@@ -557,11 +495,7 @@ URI_VALIDATORS = {
     'connect': validate_boolean_or_string,
     'minpoolsize': validate_non_negative_integer,
     'appname': validate_appname_or_none,
-    'driver': validate_driver_or_none,
-    'unicode_decode_error_handler': validate_unicode_decode_error_handler,
-    'retrywrites': validate_boolean_or_string,
-    'compressors': validate_compressors,
-    'zlibcompressionlevel': validate_zlib_compression_level,
+    'unicode_decode_error_handler': validate_unicode_decode_error_handler
 }
 
 TIMEOUT_VALIDATORS = {
@@ -581,7 +515,6 @@ KW_VALIDATORS = {
     'tzinfo': validate_tzinfo,
     'username': validate_string_or_none,
     'password': validate_string_or_none,
-    'server_selector': validate_is_callable_or_none,
 }
 
 URI_VALIDATORS.update(TIMEOUT_VALIDATORS)
@@ -689,14 +622,6 @@ class BaseObject(object):
         """
         return self.__write_concern
 
-    def _write_concern_for(self, session):
-        """Read only access to the write concern of this instance or session.
-        """
-        # Override this operation's write concern with the transaction's.
-        if session and session._in_transaction:
-            return DEFAULT_WRITE_CONCERN
-        return self.write_concern
-
     @property
     def read_preference(self):
         """Read only access to the read preference of this instance.
@@ -706,18 +631,9 @@ class BaseObject(object):
         """
         return self.__read_preference
 
-    def _read_preference_for(self, session):
-        """Read only access to the read preference of this instance or session.
-        """
-        # Override this operation's read preference with the transaction's.
-        if session:
-            return session._txn_read_preference() or self.__read_preference
-        return self.__read_preference
-
     @property
     def read_concern(self):
-        """Read only access to the :class:`~pymongo.read_concern.ReadConcern`
-        of this instance.
+        """Read only access to the read concern of this instance.
 
         .. versionadded:: 3.2
         """
