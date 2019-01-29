@@ -309,6 +309,32 @@ class SnmpCheck(NetworkCheck):
         self.log.debug("Raw results: {}".format(results))
         return results
 
+    def parse_metrics(self, metrics, enforce_constraints):
+        if not metrics:
+            raise Exception('Metrics list must contain at least one metric')
+        raw_oids = []
+        table_oids = []
+        mibs_to_load = set()
+        # Check the metrics completely defined
+        for metric in metrics:
+            if 'MIB' in metric:
+                if not("table" in metric or "symbol" in metric):
+                    raise Exception("When specifying a MIB, you must specify either table or symbol")
+                if not enforce_constraints:
+                    # We need this only if we don't enforce constraints to be able to lookup MIBs manually
+                    mibs_to_load.add(metric["MIB"])
+                to_query = metric.get("table", metric.get("symbol"))
+                try:
+                    table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric["MIB"], to_query)))
+                except Exception as e:
+                    self.warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+            elif 'OID' in metric:
+                raw_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID'])))
+            else:
+                raise Exception('Unsupported metric in config file: {}'.format(metric))
+
+        return table_oids, raw_oids, mibs_to_load
+
     def _check(self, instance):
         '''
         Perform two series of SNMP requests, one for all that have MIB asociated
@@ -318,32 +344,9 @@ class SnmpCheck(NetworkCheck):
         (snmp_engine, mib_view_controller, ip_address,
          tags, metrics, timeout, retries, enforce_constraints) = self._load_conf(instance)
 
-        if not metrics:
-            raise Exception('Metrics list must contain at least one metric')
-
         tags += ['snmp_device:{}'.format(ip_address)]
 
-        table_oids = []
-        raw_oids = []
-        mibs_to_load = set()
-
-        # Check the metrics completely defined
-        for metric in metrics:
-            if 'MIB' in metric:
-                try:
-                    assert "table" in metric or "symbol" in metric
-                    if not enforce_constraints:
-                        # We need this only if we don't enforce constraints to be able to lookup MIBs manually
-                        mibs_to_load.add(metric["MIB"])
-                    to_query = metric.get("table", metric.get("symbol"))
-                    table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric["MIB"], to_query)))
-                except Exception as e:
-                    self.log.warning("Can't generate MIB object for variable : %s\n"
-                                     "Exception: %s", metric, e)
-            elif 'OID' in metric:
-                raw_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID'])))
-            else:
-                raise Exception('Unsupported metric in config file: {}'.format(metric))
+        table_oids, raw_oids, mibs_to_load = self.parse_metrics(metrics, enforce_constraints)
         try:
             if table_oids:
                 self.log.debug("Querying device %s for %s oids", ip_address, len(table_oids))
