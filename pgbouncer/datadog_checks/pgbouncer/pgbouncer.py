@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import urlparse
-
 import psycopg2 as pg
 import psycopg2.extras as pgextras
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
@@ -65,6 +64,18 @@ class PgBouncer(AgentCheck):
         'query': """SHOW POOLS""",
     }
 
+    DATABASES_METRICS = {
+        'descriptors': [
+            ('database', 'db'),
+        ],
+        'metrics': [
+            ('pool_size',            ('pgbouncer.databases.pool_size', GAUGE)),
+            ('max_connections',      ('pgbouncer.databases.max_connections', GAUGE)),
+            ('current_connections',  ('pgbouncer.databases.current_connections', GAUGE)),
+        ],
+        'query': """SHOW DATABASES""",
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.dbs = {}
@@ -74,7 +85,7 @@ class PgBouncer(AgentCheck):
             tags = []
 
         if database_url:
-            parsed_url = urlparse.urlparse(database_url)
+            parsed_url = urlparse(database_url)
             host = parsed_url.hostname
             port = parsed_url.port
 
@@ -92,7 +103,7 @@ class PgBouncer(AgentCheck):
         """Query pgbouncer for various metrics
         """
 
-        metric_scope = [self.STATS_METRICS, self.POOLS_METRICS]
+        metric_scope = [self.STATS_METRICS, self.POOLS_METRICS, self.DATABASES_METRICS]
 
         try:
             with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
@@ -195,7 +206,7 @@ class PgBouncer(AgentCheck):
         if not database_url:
             return u'pgbouncer://%s:******@%s:%s/%s' % (user, host, port, self.DB_NAME)
 
-        parsed_url = urlparse.urlparse(database_url)
+        parsed_url = urlparse(database_url)
         if parsed_url.password:
             return database_url.replace(parsed_url.password, '******')
         return database_url

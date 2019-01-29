@@ -82,4 +82,4 @@ Need help? Contact [Datadog support][5].
 [2]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
-[5]: https://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/help

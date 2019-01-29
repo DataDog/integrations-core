@@ -24,8 +24,8 @@ The OpenShift check does not include any Service Checks.
 Need help? Contact [Datadog support][5].
 
 
-[1]: https://docs.datadoghq.com/integrations/kubernetes/
+[1]: https://docs.datadoghq.com/integrations/kubernetes
 [2]: https://docs.openshift.com/container-platform/3.9/admin_guide/multiproject_quota.html
 [3]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#event-collection
 [4]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
-[5]: https://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/help

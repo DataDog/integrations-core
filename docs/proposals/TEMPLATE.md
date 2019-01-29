@@ -3,7 +3,7 @@
 - Authors: your names here
 - Date: 2000-01-01
 - Status: draft|review|accepted|rejected
-- [Discussion](https://github.com/DataDog/datadog-agent/pull/0)
+- [Discussion][1]
 
 ## Overview
 
@@ -67,3 +67,4 @@ common for C applications. The same C api can be leveraged using cgo...
 ## Appendix
 
 *Link any relevant stats, code, images, whatever that work for you.*
+[1]: https://github.com/DataDog/datadog-agent/pull/0

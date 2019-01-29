@@ -2,7 +2,39 @@
 # All rights reserved
 # Licensed under Simplified BSD License see LICENSE
 
+import os
 import hashlib
+
+CHECK_NAME = 'cisco_aci'
+
+FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+CAPACITY_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'capacity')
+FABRIC_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'fabric')
+TENANT_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'tenant')
+ALL_FICTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TENANT_FIXTURES_DIR]
+
+USERNAME = 'datadog'
+PASSWORD = 'datadog'
+ACI_URL = 'https://datadoghq.com'
+ACI_URLS = [ACI_URL]
+CONFIG = {
+    'aci_urls': ACI_URLS,
+    'username': USERNAME,
+    'pwd': PASSWORD,
+    'tenant': [
+        'DataDog',
+    ]
+}
+
+CONFIG_WITH_TAGS = {
+    'aci_urls': ACI_URLS,
+    'username': USERNAME,
+    'pwd': PASSWORD,
+    'tenant': [
+        'DataDog',
+    ],
+    "tags": ["project:cisco_aci"],
+}
 
 # list of fixture names
 FIXTURE_LIST = [
@@ -626,4 +658,4 @@ FIXTURE_LIST = [
 # {MD5 hash}.txt of the mock_path used.
 FIXTURE_LIST_FILE_MAP = {}
 for fixture in FIXTURE_LIST:
-    FIXTURE_LIST_FILE_MAP[fixture] = hashlib.md5(fixture).hexdigest()
+    FIXTURE_LIST_FILE_MAP[fixture] = hashlib.md5(fixture.encode('utf-8')).hexdigest()

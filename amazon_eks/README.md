@@ -40,12 +40,12 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/amazon_eks/images/amazon_eks_dashboard.png
-[2]: https://docs.datadoghq.com/integrations/kubernetes/
-[3]: https://docs.datadoghq.com/integrations/amazon_web_services/
-[4]: https://docs.datadoghq.com/integrations/amazon_ec2/
-[5]: https://docs.datadoghq.com/integrations/amazon_elb/
+[2]: https://docs.datadoghq.com/integrations/kubernetes
+[3]: https://docs.datadoghq.com/integrations/amazon_web_services
+[4]: https://docs.datadoghq.com/integrations/amazon_ec2
+[5]: https://docs.datadoghq.com/integrations/amazon_elb
 [6]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup
 [7]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#container-installation
 [8]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
-[9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/announcing-eks/
+[9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/announcing-eks
