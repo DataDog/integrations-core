@@ -146,7 +146,7 @@ queues:
 
 Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-    ```yaml
+    ```
     logs_enabled: true
     ```
 
