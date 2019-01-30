@@ -330,9 +330,9 @@ class Redis(AgentCheck):
                         'redis.key.length',
                         total["length"],
                         tags=tags + [
-                            'key:' + key,
-                            'key_type:' + total["key_type"],
-                            'redis_db:db' + str(db)])
+                            'key:{}'.format(key),
+                            'key_type:{}'.format(total["key_type"]),
+                            'redis_db:db{}'.format(db)])
 
         # Warn if a key is missing from the entire redis instance.
         # Send 0 if the key is missing/empty from the entire redis instance.
@@ -341,7 +341,7 @@ class Redis(AgentCheck):
                 self.gauge(
                     'redis.key.length',
                     total,
-                    tags=tags + ['key:' + key])
+                    tags=tags + ['key:{}'.format(key)])
                 self.warning("{0} key not found in redis".format(key))
 
     def _check_replication(self, info, tags):
