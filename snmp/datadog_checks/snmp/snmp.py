@@ -323,11 +323,37 @@ class SnmpCheck(NetworkCheck):
                 if not enforce_constraints:
                     # We need this only if we don't enforce constraints to be able to lookup MIBs manually
                     mibs_to_load.add(metric["MIB"])
-                to_query = metric.get("table", metric.get("symbol"))
-                try:
-                    table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric["MIB"], to_query)))
-                except Exception as e:
-                    self.warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                if "symbol" in metric:
+                    to_query = metric["symbol"]
+                    try:
+                        table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric["MIB"], to_query)))
+                    except Exception as e:
+                        self.warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                else:
+                    if "symbols" not in metric:
+                        raise Exception("When specifying a table, you must specify a list of symbols")
+                    for symbol in metric["symbols"]:
+                        try:
+                            table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric["MIB"], symbol)))
+                        except Exception as e:
+                            self.warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                    if "metric_tags" in metric:
+                        for metric_tag in metric["metric_tags"]:
+                            if not ("tag" in metric_tag and ("index" in metric_tag or "column" in metric_tag)):
+                                raise Exception(
+                                    "When specifying metric tags, you must specify a tag, and an index or column"
+                                )
+                            if "column" in metric_tag:
+                                # In case it's a column, we need to query it as well
+                                try:
+                                    table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(
+                                        metric["MIB"], metric_tag.get("column")
+                                    )))
+                                except Exception as e:
+                                    self.warning(
+                                        "Can't generate MIB object for variable : %s\nException: %s", metric, e
+                                    )
+
             elif 'OID' in metric:
                 raw_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID'])))
             else:
