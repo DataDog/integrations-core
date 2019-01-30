@@ -75,10 +75,10 @@ def test_package__hash__(package):
 
 
 def test_package_catalog_packages(catalog, package):
-    assert len(catalog.packages) is 0
+    assert len(catalog.packages) == 0
     catalog.add_package("a_check", package)
     catalog.add_package("a_check", Package("Aaa", None, None))
-    assert len(catalog.packages) is 2
+    assert len(catalog.packages) == 2
     lst = list(catalog.packages)
     assert lst[0].name == "aaa"
     assert lst[1].name == "foo"
@@ -87,7 +87,7 @@ def test_package_catalog_packages(catalog, package):
 def test_package_catalog_get_package_versions(catalog, package):
     assert catalog.get_package_versions(package) == {}
     catalog.add_package("a_check", package)
-    assert len(catalog.get_package_versions(package)) is 1
+    assert len(catalog.get_package_versions(package)) == 1
 
 
 def test_package_catalog_get_check_packages(catalog, package):
@@ -100,7 +100,7 @@ def test_package_catalog_get_check_packages(catalog, package):
 def test_package_catalog_get_package_markers(catalog, package):
     assert catalog.get_package_markers(package) == {}
     catalog.add_package("a_check", package)
-    assert len(catalog.get_package_markers(package)) is 1
+    assert len(catalog.get_package_markers(package)) == 1
 
 
 def test_package_catalog_write_packages(catalog, package, tmp_path):
@@ -113,7 +113,7 @@ def test_package_catalog_write_packages(catalog, package, tmp_path):
     catalog.write_packages(out)
 
     lines = read_file_lines(out)
-    assert len(lines) is 2
+    assert len(lines) == 2
     assert lines[0] == "aaa==4.0\n"
     assert lines[1] == "foo==3.0; sys_platform == 'win32'\n"
 
@@ -136,7 +136,7 @@ def test_package_catalog_add_package(catalog, package):
     catalog.add_package("a_check", unpinned_foo)
     catalog.add_package("another_check", no_marker_foo)
     catalog.add_package("a_check", package)
-    assert len(catalog.packages) is 3
+    assert len(catalog.packages) == 3
 
 
 def test_read_packages(catalog, package, tmp_path):
@@ -153,6 +153,6 @@ def test_read_packages(catalog, package, tmp_path):
     ]
     write_file_lines(in_file, lines)
     result = list(read_packages(in_file))
-    assert len(result) is 2
+    assert len(result) == 2
     assert result[0].name == "foo"
     assert result[1].name == "bar"
