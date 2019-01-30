@@ -27,7 +27,7 @@ def test_downloader():
             # -vvv:   WARNING
             # -vvvv:  INFO
             # -vvvvv: DEBUG
-            cmd = ['datadog-checks-downloader', href, '-vvvv']
+            cmd = ['datadog-checks-downloader', '-vvvv', href]
             out = subprocess.check_output(cmd)
             log.debug(' '.join(cmd))
             log.debug(out)
