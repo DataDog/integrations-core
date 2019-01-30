@@ -8,97 +8,82 @@ from pystemd.systemd1 import Unit
 
 from datetime import datetime
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 
 class SystemdCheck(AgentCheck):
 
-
     UNIT_STATUS_SC = 'systemd.unit.active'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
+        if instances is not None and len(instances) > 1:
+            raise ConfigurationError('Systemd check only supports one configured instance.')
         super(SystemdCheck, self).__init__(name, init_config, agentConfig, instances)
 
+        instance = instances[0]
+        self.collect_all = is_affirmative(instance.get('collect_all_units', False))
+        self.units = instance.get('units', [])
         # to store the state of a unit and compare it at the next run
         self.unit_cache = defaultdict(dict)
 
-        # Ex: unit_cache = {
-        #   <instance_name>: {
-        #       'units': {<unit_id>: <unit_state>},
-        #       'changes_since': <ISO8601 date time>
-        #   }
-        # }
+        # unit_cache = {
+        #    "units": {
+        #        "networking.service": "active",
+        #        "cron.service": "inactive",
+        #        "ssh.service": "active"
+        #    },
+        #    "change_since": "iso_time"
+        #}
 
+        self.units_in_dict = None
+        
     def check(self, instance):
-        units = instance.get('units', [])
-        collect_all = instance.get('collect_all_units', False)
-
-        if units:
-            self.log.info(units)
-            for unit in units:
+        
+        if self.units:
+            # self.log.info(units)
+            for unit in self.units:
                 self.get_unit_state(unit)
-        if collect_all == True:
+        if self.collect_all == True:
             # we display status for all units if no unit has been specified in the configuration file
             self.get_active_inactive_units()
 
-    def get_all_units(self, unit_id):
-        cached_units = self.unit_cache.get(unit_id, {}).get('unit_state')
+        self.units_in_dict = 'units'
+        
+        self.get_all_units(self.units)
+
+
+    def get_all_units(self, instance):
+        cached_units = self.unit_cache.get(self.units_in_dict)
         changes_since = datetime.utcnow().isoformat()
         if cached_units is None:
             updated_units = self.get_listed_units()
         else:
-            previous_changes_since = self.unit_state_cache.get(unit_id, {}).get('changes_since')
+            previous_changes_since = self.unit_cache.get(self.units_in_dict, {}).get('changes_since')
             updated_units = self.update_unit_cache(cached_units, previous_changes_since)
-        
-        units = {}
-        for unit_id in iteritems(updated_units):
-            self.unit_cache[unit_id] = updated_units
+            self.log.info(updated_units)
 
         # Initialize or update cache for this instance
-        self.unit_state_cache[unit_id] = {
-            'unit_state': unit_state,
-            'changes_since': changes_since
-        }
+        self.unit_cache[self.units_in_dict] = updated_units
+        self.unit_cache['change_since'] = changes_since
     
-    def get_listed_units(self, instance):
+    def get_listed_units(self):
         manager = Manager()
         manager.load()
-        units = instance.get('unit_id', {})
 
-        # remove units that have an @ symbol in their names - cannot seem to get unit info then - to investigate
-        unit_names = [unit[0] for unit in units if '@' not in unit[0]]
-        listed_units = []
+        units = self.units
 
-        for unit in unit_names:
-            unit_short_name = unit.rpartition('/')[2]
-            listed_units.append(unit_short_name)
+        return {unit: self.get_state_single_unit(unit) for unit in units}
 
-        return listed_units
-
-    def update_unit_cache(self, unit_cache, changes_since):
-        units = unit_cache
+    def update_unit_cache(self, cached_units, changes_since):
 
         updated_units = self.get_listed_units()
 
-        for updated_unit in updated_units:
-            updated_unit_id = updated_unit.get('unit_id')
-            updated_unit_state = updated_unit.get('unit_state')
-            if updated_unit_state == b'active':
-                # update the cache
-                units[updated_unit_id] = self.create_unit_object(updated_unit)
-            else:
-                # remove from the cache
-                if updated_unit_id in units:
-                    del units[updated_unit_id]
-        return units
-                
-    def create_unit_object(self, unit):
-        result = {
-            'unit_id': unit.get('unit_id'),
-            'unit_state': unit.get('unit_state')
-        }
+        returned_cache = {}
 
-        return result
+        returned_cache[self.units_in_dict] = updated_units
+        returned_cache['changes_since'] = changes_since
+
+        return returned_cache  # a new cache, dict of units and timestamp
 
     def get_active_inactive_units(self):
         # returns the number of active and inactive units
@@ -127,6 +112,15 @@ class SystemdCheck(AgentCheck):
         
         self.gauge('systemd.units.active', active_units)
         self.gauge('systemd.units.inactive', inactive_units)
+
+    def get_state_single_unit(self, unit_id):
+        try:
+            unit = Unit(unit_id, _autoload=True)
+            # self.log.info(str(unit_name))
+            state = unit.Unit.ActiveState
+            return state
+        except pystemd.dbusexc.DBusInvalidArgsError as e:
+            self.log.info("Unit name invalid for {}".format(unit_id))
         
     def get_unit_state(self, unit_id):
         try:
@@ -147,14 +141,14 @@ class SystemdCheck(AgentCheck):
                     tags=["unit:{}".format(unit_id)]
                 )
                 
-            if unit_id in self.unit_cache:
-                previous_status = self.unit_cache[unit_id]['unit_state']
+            if unit_id in self.unit_cache.get('units', {}):
+                previous_status = self.unit_cache[self.units_in_dict][unit_id]
                 if previous_status != state:
                     # TODO:
                     # self.event(...)
-                    self.unit_cache[unit_id]['unit_state'] = state
+                    self.unit_cache[self.units_in_dict][unit_id] = state
             else:
-                self.unit_cache[unit_id]['unit_state'] = state
+                self.unit_cache[self.units_in_dict][unit_id] = state
 
         except pystemd.dbusexc.DBusInvalidArgsError as e:
             self.log.info("Unit name invalid for {}".format(unit_id))
