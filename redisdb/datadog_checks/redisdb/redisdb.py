@@ -318,8 +318,8 @@ class Redis(AgentCheck):
                         lengths[text_key]["length"] += 0
                         lengths_overall[text_key] += 0
 
-                    # Tagging with key_type since the same key
-                    #   can exist with  different key_type per db
+                    # Tagging with key_type since the same key can exist with a
+                    # different key_type in another db
                     lengths[text_key]["key_type"] = key_type
 
             # Send the metrics for each db in the redis instance.
