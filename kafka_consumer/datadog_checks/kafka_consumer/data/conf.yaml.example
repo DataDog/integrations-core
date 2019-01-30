@@ -41,6 +41,12 @@ instances:
                             # collections. If kafka consumer offsets disabled
                             # this has no effect.
     # zk_prefix: /0.8
+    
+    # SASL Username/Password Configuration
+    
+    # sasl_mechanism: SASL_PLAINTEXT
+    # sasl_plain_username: username
+    # sasl_plain_password: password
 
     # SSL Configuration
 
