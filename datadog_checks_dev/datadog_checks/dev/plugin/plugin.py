@@ -45,7 +45,6 @@ def dd_environment_runner(request):
         raise
 
     metadata = {}
-
     # Environment fixture also returned some metadata
     if isinstance(config, tuple):
         config, possible_metadata = config

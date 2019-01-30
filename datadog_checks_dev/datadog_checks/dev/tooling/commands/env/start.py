@@ -9,11 +9,10 @@ import pyperclip
 from ..console import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 )
-from ...e2e import derive_interface, start_environment, stop_environment
+from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...testing import get_available_tox_envs
 from ...utils import get_tox_file
 from ....utils import dir_exists, file_exists, path_join
-
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -83,7 +82,7 @@ def start(ctx, check, env, agent, dev, base):
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    if env_type != 'docker' and agent.isdigit():
+    if env_type not in E2E_SUPPORTED_TYPES and agent.isdigit():
         echo_failure('Configuration for default Agents are only for Docker. You must specify the full build.')
         echo_waiting('Stopping the environment...')
         stop_environment(check, env, metadata=metadata)

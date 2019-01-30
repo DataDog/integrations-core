@@ -1,0 +1,8 @@
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+
+class LocalAgentInterface(object):
+    def __init__(self):
+        import pdb; pdb.set_trace()
