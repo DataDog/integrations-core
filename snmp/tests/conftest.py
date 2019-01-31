@@ -13,7 +13,7 @@ from .common import (
 )
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def dd_environment():
     env = {
         'COMPOSE_DIR': COMPOSE_DIR

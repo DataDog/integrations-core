@@ -18,7 +18,8 @@ from datadog_checks.varnish import Varnish
 pytestmark = pytest.mark.integration
 
 
-def test_check(aggregator, spin_up_varnish):
+@pytest.mark.usefixtures('dd_environment')
+def test_check(aggregator):
     check = Varnish(common.CHECK_NAME, {}, {})
     config = common.get_config_by_version()
 
@@ -27,7 +28,8 @@ def test_check(aggregator, spin_up_varnish):
         aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
 
-def test_inclusion_filter(aggregator, spin_up_varnish):
+@pytest.mark.usefixtures('dd_environment')
+def test_inclusion_filter(aggregator):
     check = Varnish(common.CHECK_NAME, {}, {})
     config = common.get_config_by_version()
     config['metrics_filter'] = ['SMA.*']
@@ -40,7 +42,8 @@ def test_inclusion_filter(aggregator, spin_up_varnish):
             aggregator.assert_metric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
 
 
-def test_exclusion_filter(aggregator, spin_up_varnish):
+@pytest.mark.usefixtures('dd_environment')
+def test_exclusion_filter(aggregator):
     check = Varnish(common.CHECK_NAME, {}, {})
     config = common.get_config_by_version()
     config['metrics_filter'] = ['^SMA.Transient.c_req']
