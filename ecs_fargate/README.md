@@ -7,11 +7,19 @@ Get metrics from all your containers running in ECS Fargate:
 * CPU/Memory usage & limit metrics
 * Monitor your applications running on Fargate via Datadog integrations or custom metrics.
 
+The Datadog agent retrieves metrics for the task definition's containers via the ECS Task Metadata endpoint, `169.254.170.2/v2/stats`.  According to the [ECS Documentation](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html) on that endpoint:
+
+> This endpoint returns Docker stats JSON for all of the containers associated with the task. For more information about each of the returned stats, see [ContainerStats](https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats) in the Docker API documentation.
+
+The Task Metadata endpoint is only available from within the Task Definition itself, which is why the Datadog Agent needs to be run as an additional container within the TaskDef.
+
+The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the Task Definition.
+
 ## Setup
 The following steps cover setup of the Datadog Container Agent within AWS ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
 
 ### Installation
-To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in same task definition as your application. To collect metrics with Datadog, each task definition should include a sidecar Datadog Agent container. Follow these setup steps:
+To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in same task definition as your application. To collect metrics with Datadog, each Task Definition should include a Datadog Agent container in addition to the application containers. Follow these setup steps:
 
 1. **Add an ECS Fargate Task**
 2. **Create or Modify your IAM Policy**
@@ -20,7 +28,7 @@ To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in 
 #### Create an ECS Fargate Task
 This task launches the Datadog Agent container. Configure the task using the [AWS CLI tools][1] or the [Amazon Web Console][2]. **Note**: To monitor your application or integrations, add them to this task.
 
-##### AWS CLI
+##### via AWS CLI
 
 1. Download [datadog-agent-ecs-fargate.json][3].
 2. Update the json with a **TASK_NAME** and your [Datadog API Key][4].
@@ -30,7 +38,7 @@ This task launches the Datadog Agent container. Configure the task using the [AW
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
 ```
 
-##### Web UI
+##### via Web UI
 
 1. Log in to your [AWS Web Console][2] and navigate to the ECS section.
 2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button.
@@ -105,9 +113,9 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
 2. Fargate task definitions only support the awslogs log driver for the log configuration. This configures your Fargate tasks to send log information to Amazon CloudWatch Logs. The following shows a snippet of a task definition where the awslogs log driver is configured:
 
     ```
-    "logConfiguration": { 
+    "logConfiguration": {
        "logDriver": "awslogs",
-       "options": { 
+       "options": {
           "awslogs-group" : "/ecs/fargate-task-definition",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
@@ -132,7 +140,7 @@ The ECS Fargate check does not include any events.
 
 ### Service Checks
 
-**fargate_check**  
+**fargate_check**
 Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise returns `OK`.
 
 ## Troubleshooting
