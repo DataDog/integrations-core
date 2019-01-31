@@ -4,6 +4,8 @@
 import os
 import re
 
+from shutil import copyfile, move
+
 from .agent import (
     AGENT_CMD, DEFAULT_AGENT_VERSION, FAKE_API_KEY, MANIFEST_VERSION_PATTERN,
     get_agent_conf_dir, get_agent_exe,
@@ -67,8 +69,8 @@ class LocalAgentInterface(object):
             '{}.yaml'.format(self.check)
         )
         if file_exists(check_conf_file):
-            run_command(['cp', check_conf_file, '{}.bak'.format(check_conf_file)])
-        run_command(['cp', '{}'.format(self.config_file), '{}'.format(check_conf_file)])
+            copyfile(check_conf_file, '{}.bak'.format(check_conf_file))
+        copyfile(self.config_file, check_conf_file)
 
     def remove_config_from_local_agent(self):
         check_conf_file = os.path.join(
@@ -76,9 +78,9 @@ class LocalAgentInterface(object):
             '{}.yaml'.format(self.check)
         )
         backup_conf_file = '{}.bak'.format(check_conf_file)
-        run_command(['rm', check_conf_file])
+        os.remove(check_conf_file)
         if file_exists(backup_conf_file):
-            run_command(['mv', backup_conf_file, check_conf_file])
+            move(backup_conf_file, check_conf_file)
 
     def run_check(self, capture=False, rate=False):
         command = '{} check {}{}'.format(
