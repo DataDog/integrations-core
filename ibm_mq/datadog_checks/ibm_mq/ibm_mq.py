@@ -89,7 +89,9 @@ class IbmMqCheck(AgentCheck):
             self.warning("Error getting queue stats: {}".format(e))
         else:
             for queue_info in response:
-                queues.append(queue_info[pymqi.CMQC.MQCA_Q_NAME])
+                queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
+                queue = queue.strip()
+                queues.append(queue)
 
         return queues
 
