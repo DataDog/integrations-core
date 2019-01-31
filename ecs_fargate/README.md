@@ -15,7 +15,7 @@ The Task Metadata endpoint is only available from within the Task Definition its
 
 The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the Task Definition.
 
-## Setup
+## Agent Setup
 The following steps cover setup of the Datadog Container Agent within AWS ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
 
 ### Installation
@@ -130,6 +130,19 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
 
 3. Finally, use a [Lambda function][14] to collect logs from CloudWatch and send them to Datadog.
 
+## Agentless Setup / Crawler-based metrics
+
+In addition or alternative to the metrics collected by the Datadog agent, we also have a CloudWatch based ECS integration. This integration collects the ECS metrics from the CloudWatch API described [here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html).
+
+As noted there, Fargate tasks also report metrics in this way:
+> The metrics made available will depend on the launch type of the tasks and services in your clusters. If you are using the Fargate launch type for your services then CPU and memory utilization metrics are provided to assist in the monitoring of your services.
+
+Since this method does not use the Datadog agent, you need to configure our AWS integration by checking 'ECS' on the integration tile. Then our application will pull in these CloudWatch metrics (namespaced aws.ecs.*  in Datadog) on your behalf - https://docs.datadoghq.com/integrations/amazon_ecs/#data-collected
+
+If these are the only metrics you need, you could rely on this integration for collection via CloudWatch metrics.  Note though, the CloudWatch data is less granular (1-5 min depending on the type of monitoring you have enabled) and will be delayed in reporting to Datadog.  This is because we must collect it from CloudWatch and adhere to their API limits, instead of pushing it to Datadog via the agent.
+
+Datadog's default CloudWatch crawler polls metrics once every 10 minutes, you may enable faster crawl schedules (2 and 5 mins). Note that there would be some cost increase involved on the AWS side as CloudWatch bills for API calls.
+
 ## Data Collected
 
 ### Metrics
@@ -144,6 +157,8 @@ The ECS Fargate check does not include any events.
 
 **fargate_check**
 Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise returns `OK`.
+
+
 
 ## Troubleshooting
 
