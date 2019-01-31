@@ -28,16 +28,6 @@ To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in 
 #### Create an ECS Fargate Task
 This task launches the Datadog Agent container. Configure the task using the [AWS CLI tools][1] or the [Amazon Web Console][2]. **Note**: To monitor your application or integrations, add them to this task.
 
-##### via AWS CLI
-
-1. Download [datadog-agent-ecs-fargate.json][3].
-2. Update the json with a **TASK_NAME** and your [Datadog API Key][4].
-3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
-3. Execute the following command to register the ECS task definition:
-```
-aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
-```
-
 ##### via Web UI
 
 1. Log in to your [AWS Web Console][2] and navigate to the ECS section.
@@ -55,6 +45,16 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 13. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
 14. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
 15. Click **Create** to create the task definition.
+
+##### via AWS CLI
+
+1. Download [datadog-agent-ecs-fargate.json][3].
+2. Update the json with a **TASK_NAME** and your [Datadog API Key][4].  Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
+3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
+3. Execute the following command to register the ECS task definition:
+```
+aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
+```
 
 #### Create or Modify your IAM Policy
 Add the following permissions to your [Datadog IAM policy][7] to collect ECS Fargate metrics. For more information on ECS policies, [review the documentation on the AWS website][8].
