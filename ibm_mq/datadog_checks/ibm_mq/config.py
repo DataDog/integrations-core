@@ -64,7 +64,7 @@ class IBMMQConfig:
         # add queues without duplication
 
         for queue in self.DISALLOWED_QUEUES:
-            new_queues = new_queues.remove(queue)
+            new_queues.remove(queue)
 
         self.queues = list(set(self.queues + new_queues))
 
