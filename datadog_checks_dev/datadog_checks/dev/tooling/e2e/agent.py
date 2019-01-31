@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import platform as Platform
 
 from .platform import LINUX, MAC, WINDOWS
 from ...utils import HOME
@@ -83,7 +84,7 @@ def get_agent_service_cmd(platform, action):
     if platform == WINDOWS:
         root = [
             'runas', r'/user:{}\{}'.format(
-                platform.node() or os.environ.get('USERDOMAIN', ''),
+                Platform.node() or os.environ.get('USERDOMAIN', ''),
                 os.environ.get('_DEFAULT_ADMIN_', 'Administrator')
             )
         ]
