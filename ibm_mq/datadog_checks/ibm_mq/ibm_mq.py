@@ -146,25 +146,25 @@ class IbmMqCheck(AgentCheck):
                     msg = msg.format(mname, queue_name)
                     log.debug(msg)
 
-def _pcf_queue_metrics(self, queue_manager, queue_name):
-    response = []
-    try:
-        args = {
-            pymqi.CMQC.MQCA_Q_NAME: queue_name,
-            pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL,
-            pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
-        }
-        pcf = pymqi.PCFExecute(queue_manager)
-        response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
-    except pymqi.MQMIError as e:
+    def _pcf_queue_metrics(self, queue_manager, queue_name):
+        response = []
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: queue_name,
-                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL
+                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL,
+                pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
-            self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
+            try:
+                args = {
+                    pymqi.CMQC.MQCA_Q_NAME: queue_name,
+                    pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL
+                }
+                pcf = pymqi.PCFExecute(queue_manager)
+                response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
+            except pymqi.MQMIError as e:
+                self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
 
-    return response
+        return response
