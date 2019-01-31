@@ -17,6 +17,16 @@ class IBMMQConfig:
     No need to parse the instance more than once in the check run
     """
 
+    DISALLOWED_QUEUES = [
+        'SYSTEM.MQSC.REPLY.QUEUE',
+        'SYSTEM.DEFAULT.MODEL.QUEUE',
+        'SYSTEM.DURABLE.MODEL.QUEUE',
+        'SYSTEM.JMS.TEMPQ.MODEL',
+        'SYSTEM.MQEXPLORER.REPLY.MODEL',
+        'SYSTEM.NDURABLE.MODEL.QUEUE',
+        'SYSTEM.CLUSTER.TRANSMIT.MODEL.QUEUE',
+    ]
+
     def __init__(self, instance):
         self.channel = instance.get('channel')
         self.queue_manager_name = instance.get('queue_manager', 'default')
@@ -50,9 +60,13 @@ class IBMMQConfig:
             msg = "channel, queue_manager, host and port are all required configurations"
             raise ConfigurationError(msg)
 
-    def add_queues(self, queues):
+    def add_queues(self, new_queues):
         # add queues without duplication
-        self.queues = list(set(self.queues + queues))
+
+        for queue in self.DISALLOWED_QUEUES:
+            new_queues = new_queues.remove(queue)
+
+        self.queues = list(set(self.queues + new_queues))
 
     @property
     def tags(self):

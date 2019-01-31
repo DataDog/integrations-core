@@ -46,6 +46,7 @@ instances:
 
   ## @param auto_discover_queues - string - optional - default: false
   ## Autodiscover the queues to monitor
+  ## Warning: this will lead to some warnings in your
   #
   #  auto_discover_queues: '<PASSWORD>'
 
