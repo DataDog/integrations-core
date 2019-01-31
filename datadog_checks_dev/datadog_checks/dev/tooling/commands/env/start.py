@@ -14,6 +14,7 @@ from ...testing import get_available_tox_envs
 from ...utils import get_tox_file
 from ....utils import dir_exists, file_exists, path_join
 
+
 @click.command(
     context_settings=CONTEXT_SETTINGS,
     short_help='Start an environment'
@@ -56,7 +57,6 @@ def start(ctx, check, env, agent, dev, base):
         echo_info('See what is available via `ddev env ls {}`.'.format(check))
         abort()
 
-    agent_build = ctx.obj.get('agent{}'.format(agent), agent)
     api_key = ctx.obj['dd_api_key']
     if api_key is None:
         echo_warning(
@@ -75,6 +75,8 @@ def start(ctx, check, env, agent, dev, base):
     echo_success('success!')
 
     env_type = metadata['env_type']
+    agent_build = ctx.obj.get('agent{}'.format(agent), agent).get(env_type, 'docker')
+
     interface = derive_interface(env_type)
     if interface is None:
         echo_failure('`{}` is an unsupported environment type.'.format(env_type))

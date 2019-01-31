@@ -3,15 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from .agent import DEFAULT_AGENT_VERSION, FAKE_API_KEY, get_agent_exe, get_agent_conf_dir, get_rate_flag
+from .agent import (
+    DEFAULT_AGENT_VERSION, FAKE_API_KEY, MANIFEST_VERSION_PATTERN,
+    get_agent_exe, get_agent_conf_dir,
+    get_agent_version_manifest_cmd, get_rate_flag
+)
 from .config import (
     config_file_name, env_exists, locate_config_dir, locate_config_file, remove_env_data, write_env_data
 )
 from ..constants import get_root
 from ...subprocess import run_command
 from ...utils import path_join
-
-MANIFEST_VERSION_PATTERN = r'agent (\d)'
 
 
 class DockerInterface(object):
@@ -69,9 +71,8 @@ class DockerInterface(object):
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:
             command = [
-                'docker', 'run', '--rm', '-e', 'DD_API_KEY={}'.format(self.api_key), self.agent_build,
-                'head', '--lines=1', '/opt/datadog-agent/version-manifest.txt'
-            ]
+                'docker', 'run', '--rm', '-e', 'DD_API_KEY={}'.format(self.api_key), self.agent_build
+            ] + get_agent_version_manifest_cmd('linux')
             result = run_command(command, capture=True)
             match = re.search(MANIFEST_VERSION_PATTERN, result.stdout)
             if match:

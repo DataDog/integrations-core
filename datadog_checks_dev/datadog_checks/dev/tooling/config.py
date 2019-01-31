@@ -29,8 +29,14 @@ DEFAULT_CONFIG = OrderedDict([
     ('extras', os.path.join('~', 'dd', 'integrations-extras')),
     ('agent', os.path.join('~', 'dd', 'datadog-agent')),
     ('repo', 'core'),
-    ('agent6', 'datadog/agent-dev:master'),
-    ('agent5', 'datadog/dev-dd-agent:master'),
+    ('agent6', OrderedDict((
+        ('docker', 'datadog/agent-dev:master'),
+        ('local', 'latest'),
+    ))),
+    ('agent5', OrderedDict((
+        ('docker', 'datadog/dev-dd-agent:master'),
+        ('local', 'latest'),
+    ))),
     ('dd_api_key', os.getenv('DD_API_KEY')),
     ('github', OrderedDict((
         ('user', ''),
