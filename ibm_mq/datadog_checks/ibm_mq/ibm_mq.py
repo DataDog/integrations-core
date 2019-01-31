@@ -74,7 +74,6 @@ class IbmMqCheck(AgentCheck):
 
         config.add_queues(queues)
 
-
     def _discover_queues(self, queue_manager, regex):
         args = {
             pymqi.CMQC.MQCA_Q_NAME: regex,
