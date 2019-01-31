@@ -29,7 +29,7 @@ class IBMMQConfig:
         self.password = instance.get('password')
 
         self.queues = instance.get('queues', [])
-        self.queue_regexes = instance.get('queue_regexes', [])
+        self.queue_patterns = instance.get('queue_patterns', [])
 
         self.custom_tags = instance.get('tags', [])
 
