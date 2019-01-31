@@ -44,6 +44,8 @@ class IbmMqCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, config.tags)
             return
 
+        self.discover_queues(queue_manager, config)
+
         try:
             self.queue_manager_stats(queue_manager, config.tags)
 
@@ -60,6 +62,36 @@ class IbmMqCheck(AgentCheck):
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags)
         finally:
             queue_manager.disconnect()
+
+    def discover_queues(self, queue_manager, config):
+        queues = []
+        if config.auto_discover_queues:
+            queues.extend(self._discover_queues(queue_manager, '*'))
+
+        if len(config.queue_regexes) > 0:
+            for regex in config.queue_regexes:
+                queues.extend(self._discover_queues(queue_manager, regex))
+
+        config.add_queues(queues)
+
+
+    def _discover_queues(self, queue_manager, regex):
+        args = {
+            pymqi.CMQC.MQCA_Q_NAME: regex,
+            pymqi.CMQC.MQIA_Q_TYPE: queue_type
+        }
+        queues = []
+
+        try:
+            pcf = pymqi.PCFExecute(qmgr)
+            response = pcf.MQCMD_INQUIRE_Q(args)
+        except pymqi.MQMIError as e:
+            self.warning("Error getting queue stats: {}".format(e))
+        else:
+            for queue_info in response:
+                queues.append(queue_info[pymqi.CMQC.MQCA_Q_NAME])
+
+        return queues
 
     def queue_manager_stats(self, queue_manager, tags):
         """

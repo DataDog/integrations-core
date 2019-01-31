@@ -29,7 +29,11 @@ class IBMMQConfig:
         self.password = instance.get('password')
 
         self.queues = instance.get('queues', [])
+        self.queue_regexes = instance.get('queue_regexes', [])
+
         self.custom_tags = instance.get('tags', [])
+
+        self.auto_discover_queues = instance.get('auto_discover_queues', False)
 
         self.ssl = is_affirmative(instance.get('ssl_auth', False))
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')
@@ -45,6 +49,10 @@ class IBMMQConfig:
         if not self.channel or not self.queue_manager_name or not self.host or not self.port:
             msg = "channel, queue_manager, host and port are all required configurations"
             raise ConfigurationError(msg)
+
+    def add_queues(self, queues):
+        # add queues without duplication
+        self.queues = list(set(self.queues + queues))
 
     @property
     def tags(self):
