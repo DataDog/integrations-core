@@ -13,7 +13,7 @@ AGENT_CMD = {
     WINDOWS: {
         'start': 'start-service',
         'stop': 'stopservice',
-        'pip': ['C:\"Program Files"\Datadog\"Datadog Agent"\embedded\python', '-m', 'pip']
+        'pip': [r'C:\Program Files\Datadog\Datadog Agent\embedded\python', '-m', 'pip']
     },
     MAC: {
         'start': 'load',
@@ -54,9 +54,9 @@ def get_agent_exe(agent_version, platform=LINUX):
 def get_agent_conf_dir(check, agent_version, platform=LINUX):
     if platform == WINDOWS:
         if agent_version >= 6:
-            return 'C:\ProgramData\Datadog\conf.d\{}.d'.format(check)
+            return r'C:\ProgramData\Datadog\conf.d\{}.d'.format(check)
         else:
-            return 'C:\ProgramData\Datadog\conf.d'
+            return r'C:\ProgramData\Datadog\conf.d'
     elif platform == MAC:
         if agent_version >= 6:
             return '{}/.datadog-agent/conf.d/{}.d'.format(HOME, check)
@@ -71,7 +71,7 @@ def get_agent_conf_dir(check, agent_version, platform=LINUX):
 
 def get_agent_version_manifest_cmd(platform):
     if platform == WINDOWS:
-        return ['gc', 'C:\Program Files\Datadog\Datadog Agent\version-manifest.txt', '|', 'select', '-first', '10']
+        return ['gc', r'C:\Program Files\Datadog\Datadog Agent\version-manifest.txt', '|', 'select', '-first', '10']
     else:
         return ['head', '-n', '1', '/opt/datadog-agent/version-manifest.txt']
 
@@ -79,7 +79,7 @@ def get_agent_version_manifest_cmd(platform):
 def get_agent_service_cmd(platform, action):
     # [TODO] Confirm this works with A5
     if platform == WINDOWS:
-        return ['C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe', AGENT_CMD[platform][action]]
+        return [r'C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe', AGENT_CMD[platform][action]]
     elif platform == MAC:
         return [
             'launchctl', AGENT_CMD[platform][action], '-w',
