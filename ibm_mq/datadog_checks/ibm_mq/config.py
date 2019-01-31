@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import logging
 from datadog_checks.config import is_affirmative
 
 # compatability layer for agents under 6.6.0
@@ -10,8 +9,6 @@ try:
     from datadog_checks.errors import ConfigurationError
 except ImportError:
     ConfigurationError = Exception
-
-log = logging.getLogger(__file__)
 
 
 class IBMMQConfig:
