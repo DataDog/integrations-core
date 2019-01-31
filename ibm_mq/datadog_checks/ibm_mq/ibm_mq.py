@@ -138,7 +138,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
-            self.warning("Error getting queue stats: {}".format(e))
+            self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
