@@ -26,7 +26,9 @@ To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in 
 3. **Run the Task as a Replica Service**
 
 #### Create an ECS Fargate Task
-This task launches the Datadog Agent container. Configure the task using the [AWS CLI tools][1] or the [Amazon Web Console][2]. **Note**: To monitor your application or integrations, add them to this task.
+The primary unit of work in Fargate is the Task, which is configured in the Task Definition.  A Task Definition is directly analogous to a Pod in Kubernetes.  A Task Definition must contain one or more containers.  In order to run the Datadog Agent, you will create your Task Definition to run your application container(s), as well as the Datadog Agent container.
+
+We will demonstrate how to configure the task using the [AWS CLI tools][1] or the [Amazon Web Console][2] below.
 
 ##### via Web UI
 
