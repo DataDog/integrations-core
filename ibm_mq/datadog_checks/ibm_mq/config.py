@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 from datadog_checks.config import is_affirmative
 
 # compatability layer for agents under 6.6.0
@@ -9,6 +10,8 @@ try:
     from datadog_checks.errors import ConfigurationError
 except ImportError:
     ConfigurationError = Exception
+
+log = logging.getLogger(__file__)
 
 
 class IBMMQConfig:
@@ -65,8 +68,10 @@ class IBMMQConfig:
         for queue in self.DISALLOWED_QUEUES:
             new_queues.remove(queue)
 
+        log.info(new_queues)
         # add queues without duplication
         self.queues = list(set(self.queues + new_queues))
+        log.info(self.queues)
 
     @property
     def tags(self):
