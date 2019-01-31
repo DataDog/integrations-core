@@ -20,6 +20,16 @@ class IBMMQConfig:
     No need to parse the instance more than once in the check run
     """
 
+    DISALLOWED_QUEUES = [
+        'SYSTEM.MQSC.REPLY.QUEUE',
+        'SYSTEM.DEFAULT.MODEL.QUEUE',
+        'SYSTEM.DURABLE.MODEL.QUEUE',
+        'SYSTEM.JMS.TEMPQ.MODEL',
+        'SYSTEM.MQEXPLORER.REPLY.MODEL',
+        'SYSTEM.NDURABLE.MODEL.QUEUE',
+        'SYSTEM.CLUSTER.TRANSMIT.MODEL.QUEUE',
+    ]
+
     def __init__(self, instance):
         self.channel = instance.get('channel')
         self.queue_manager_name = instance.get('queue_manager', 'default')
