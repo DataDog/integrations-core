@@ -99,6 +99,8 @@ aws ecs run-task --cluster <CLUSTER_NAME> \
 ### Metric Collection
 After the Datadog Agent is setup as described above, the [ecs_fargate check][10] collects metrics with autodiscovery enabled. Add Docker labels to your other containers in the same task to collect additional metrics.
 
+Metrics collected via the agent will be namespaced as `ecs.fargate.*`.
+
 For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
 
 #### DogStatsD
