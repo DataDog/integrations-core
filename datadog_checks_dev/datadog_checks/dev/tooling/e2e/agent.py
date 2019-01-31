@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 from .platform import LINUX, MAC, WINDOWS
 from ...utils import HOME
 
@@ -79,7 +81,13 @@ def get_agent_version_manifest(platform):
 def get_agent_service_cmd(platform, action):
     # [TODO] Confirm this works with A5
     if platform == WINDOWS:
-        return [r'C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe', AGENT_CMD[platform][action]]
+        root = [
+            'runas', r'/user:{}\{}'.format(
+                platform.node() or os.environ.get('USERDOMAIN', ''),
+                os.environ.get('_DEFAULT_ADMIN_', 'Administrator')
+            )
+        ]
+        return root + [r'C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe', AGENT_CMD[platform][action]]
     elif platform == MAC:
         return [
             'launchctl', AGENT_CMD[platform][action], '-w',
