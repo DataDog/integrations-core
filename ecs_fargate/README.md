@@ -7,9 +7,9 @@ Get metrics from all your containers running in ECS Fargate:
 * CPU/Memory usage & limit metrics
 * Monitor your applications running on Fargate via Datadog integrations or custom metrics.
 
-The Datadog agent retrieves metrics for the task definition's containers via the ECS Task Metadata endpoint, `169.254.170.2/v2/stats`. According to the [ECS Documentation](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html) on that endpoint:
+The Datadog agent retrieves metrics for the task definition's containers via the ECS Task Metadata endpoint, `169.254.170.2/v2/stats`. According to the [ECS Documentation][18] on that endpoint:
 
-> This endpoint returns Docker stats JSON for all of the containers associated with the task. For more information about each of the returned stats, see [ContainerStats](https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats) in the Docker API documentation.
+> This endpoint returns Docker stats JSON for all of the containers associated with the task. For more information about each of the returned stats, see [ContainerStats][19] in the Docker API documentation.
 
 The Task Metadata endpoint is only available from within the Task Definition itself, which is why the Datadog Agent needs to be run as an additional container within the TaskDef.
 
@@ -134,12 +134,12 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
 
 ## Agentless Setup / Crawler-based metrics
 
-In addition or alternative to the metrics collected by the Datadog agent, we also have a CloudWatch based ECS integration. This integration collects the ECS metrics from the CloudWatch API described [here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html).
+In addition or alternative to the metrics collected by the Datadog agent, we also have a CloudWatch based ECS integration. This integration collects the ECS metrics from the CloudWatch API described [here][20].
 
 As noted there, Fargate tasks also report metrics in this way:
 > The metrics made available will depend on the launch type of the tasks and services in your clusters. If you are using the Fargate launch type for your services then CPU and memory utilization metrics are provided to assist in the monitoring of your services.
 
-Since this method does not use the Datadog agent, you need to configure our AWS integration by checking 'ECS' on the integration tile. Then our application will pull in these CloudWatch metrics (namespaced aws.ecs.* in Datadog) on your behalf - https://docs.datadoghq.com/integrations/amazon_ecs/#data-collected
+Since this method does not use the Datadog agent, you need to configure our AWS integration by checking 'ECS' on the integration tile. Then our application will pull in these CloudWatch metrics (namespaced `aws.ecs.*` in Datadog) on your behalf.  See the [Data Collected][21] section of the documentation.
 
 If these are the only metrics you need, you could rely on this integration for collection via CloudWatch metrics. Note though, the CloudWatch data is less granular (1-5 min depending on the type of monitoring you have enabled) and will be delayed in reporting to Datadog. This is because we must collect it from CloudWatch and adhere to their API limits, instead of pushing it to Datadog via the agent.
 
@@ -189,3 +189,7 @@ Need help? Contact [Datadog support][16].
 [15]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
 [16]: https://docs.datadoghq.com/help
 [17]: https://www.datadoghq.com/blog/monitor-aws-fargate
+[18]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
+[19]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats
+[20]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html
+[21]: https://docs.datadoghq.com/integrations/amazon_ecs/#data-collected
