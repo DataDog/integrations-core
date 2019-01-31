@@ -4,6 +4,8 @@
 
 from datadog_checks.checks import AgentCheck
 
+from datadog_checks.base import ensure_bytes
+
 from six import iteritems
 import logging
 
@@ -79,7 +81,7 @@ class IbmMqCheck(AgentCheck):
 
     def _discover_queues(self, queue_manager, regex):
         args = {
-            pymqi.CMQC.MQCA_Q_NAME: regex,
+            pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(regex),
             pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL
         }
         queues = []
@@ -135,7 +137,7 @@ class IbmMqCheck(AgentCheck):
     def get_pcf_queue_metrics(self, queue_manager, queue_name, tags):
         try:
             args = {
-                pymqi.CMQC.MQCA_Q_NAME: queue_name,
+                pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name),
                 pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
