@@ -7,7 +7,7 @@ Get metrics from all your containers running in ECS Fargate:
 * CPU/Memory usage & limit metrics
 * Monitor your applications running on Fargate via Datadog integrations or custom metrics.
 
-The Datadog agent retrieves metrics for the task definition's containers via the ECS Task Metadata endpoint, `169.254.170.2/v2/stats`.  According to the [ECS Documentation](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html) on that endpoint:
+The Datadog agent retrieves metrics for the task definition's containers via the ECS Task Metadata endpoint, `169.254.170.2/v2/stats`. According to the [ECS Documentation](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html) on that endpoint:
 
 > This endpoint returns Docker stats JSON for all of the containers associated with the task. For more information about each of the returned stats, see [ContainerStats](https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats) in the Docker API documentation.
 
@@ -26,7 +26,7 @@ To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in 
 3. **Run the Task as a Replica Service**
 
 #### Create an ECS Fargate Task
-The primary unit of work in Fargate is the Task, which is configured in the Task Definition.  A Task Definition is directly analogous to a Pod in Kubernetes.  A Task Definition must contain one or more containers.  In order to run the Datadog Agent, you will create your Task Definition to run your application container(s), as well as the Datadog Agent container.
+The primary unit of work in Fargate is the Task, which is configured in the Task Definition. A Task Definition is directly analogous to a Pod in Kubernetes. A Task Definition must contain one or more containers. In order to run the Datadog Agent, you will create your Task Definition to run your application container(s), as well as the Datadog Agent container.
 
 We will demonstrate how to configure the task using the [AWS CLI tools][1] or the [Amazon Web Console][2] below.
 
@@ -51,7 +51,7 @@ We will demonstrate how to configure the task using the [AWS CLI tools][1] or th
 ##### via AWS CLI
 
 1. Download [datadog-agent-ecs-fargate.json][3].
-2. Update the json with a **TASK_NAME** and your [Datadog API Key][4].  Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
+2. Update the json with a **TASK_NAME** and your [Datadog API Key][4]. Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
 3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
 3. Execute the following command to register the ECS task definition:
 ```
@@ -139,9 +139,9 @@ In addition or alternative to the metrics collected by the Datadog agent, we als
 As noted there, Fargate tasks also report metrics in this way:
 > The metrics made available will depend on the launch type of the tasks and services in your clusters. If you are using the Fargate launch type for your services then CPU and memory utilization metrics are provided to assist in the monitoring of your services.
 
-Since this method does not use the Datadog agent, you need to configure our AWS integration by checking 'ECS' on the integration tile. Then our application will pull in these CloudWatch metrics (namespaced aws.ecs.*  in Datadog) on your behalf - https://docs.datadoghq.com/integrations/amazon_ecs/#data-collected
+Since this method does not use the Datadog agent, you need to configure our AWS integration by checking 'ECS' on the integration tile. Then our application will pull in these CloudWatch metrics (namespaced aws.ecs.* in Datadog) on your behalf - https://docs.datadoghq.com/integrations/amazon_ecs/#data-collected
 
-If these are the only metrics you need, you could rely on this integration for collection via CloudWatch metrics.  Note though, the CloudWatch data is less granular (1-5 min depending on the type of monitoring you have enabled) and will be delayed in reporting to Datadog.  This is because we must collect it from CloudWatch and adhere to their API limits, instead of pushing it to Datadog via the agent.
+If these are the only metrics you need, you could rely on this integration for collection via CloudWatch metrics. Note though, the CloudWatch data is less granular (1-5 min depending on the type of monitoring you have enabled) and will be delayed in reporting to Datadog. This is because we must collect it from CloudWatch and adhere to their API limits, instead of pushing it to Datadog via the agent.
 
 Datadog's default CloudWatch crawler polls metrics once every 10 minutes, you may enable faster crawl schedules (2 and 5 mins). Note that there would be some cost increase involved on the AWS side as CloudWatch bills for API calls.
 
