@@ -54,8 +54,7 @@ class IbmMqCheck(AgentCheck):
                 try:
                     queue = pymqi.Queue(queue_manager, queue_name)
                     self.queue_stats(queue, queue_tags)
-                    self.log.info("{} {} {}".format(queue, config.DISALLOWED_QUEUES, queue not in config.DISALLOWED_QUEUES))
-                    if queue not in config.DISALLOWED_QUEUES:
+                    if queue_name not in config.DISALLOWED_QUEUES:
                         self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
                     queue.close()
