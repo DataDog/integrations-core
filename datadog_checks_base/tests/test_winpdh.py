@@ -8,7 +8,9 @@ from collections import defaultdict
 
 try:
     from datadog_checks.checks.win.winpdh import WinPDHCounter, SINGLE_INSTANCE_KEY
-    from datadog_test_libs.win import pdh_mocks
+    from datadog_test_libs.win.pdh_mocks import (
+        initialize_pdh_tests, pdh_mocks_fixture_bad_perf_strings, pdh_mocks_fixture
+    )
 except ImportError:
     import platform
 
@@ -27,8 +29,8 @@ the interface to the OS API.
 
 
 @requires_windows
-def test_winpdhcounter_bad_strings_english(pdh_mocks_fixture_bad_perf_strings):
-    pdh_mocks.initialize_pdh_tests()
+def test_winpdhcounter_bad_strings_english(pdh_mocks_fixture_bad_perf_strings):  # noqa F811
+    initialize_pdh_tests()
     counter = WinPDHCounter('System', 'Processor Queue Length', logger)
 
     vals = counter.get_all_values()
@@ -37,8 +39,8 @@ def test_winpdhcounter_bad_strings_english(pdh_mocks_fixture_bad_perf_strings):
 
 
 @requires_windows
-def test_winpdhcounter_throws_on_bad_input(pdh_mocks_fixture):
-    pdh_mocks.initialize_pdh_tests()
+def test_winpdhcounter_throws_on_bad_input(pdh_mocks_fixture):  # noqa F811
+    initialize_pdh_tests()
     with pytest.raises(AttributeError):
         WinPDHCounter('Ssystem', 'Processor Queue Length', logger)
 
@@ -47,8 +49,8 @@ def test_winpdhcounter_throws_on_bad_input(pdh_mocks_fixture):
 
 
 @requires_windows
-def test_winpdhcounter_throws_on_bad_input_with_bad_strings(pdh_mocks_fixture_bad_perf_strings):
-    pdh_mocks.initialize_pdh_tests()
+def test_winpdhcounter_throws_on_bad_input_with_bad_strings(pdh_mocks_fixture_bad_perf_strings):  # noqa F811
+    initialize_pdh_tests()
     with pytest.raises(AttributeError):
         WinPDHCounter('Ssystem', 'Processor Queue Length', logger)
 
@@ -57,11 +59,11 @@ def test_winpdhcounter_throws_on_bad_input_with_bad_strings(pdh_mocks_fixture_ba
 
 
 @requires_windows
-def test_winpdhcounter_bad_strings_not_english(pdh_mocks_fixture_bad_perf_strings):
+def test_winpdhcounter_bad_strings_not_english(pdh_mocks_fixture_bad_perf_strings):  # noqa F811
     WinPDHCounter._use_en_counter_names = False
     WinPDHCounter.pdh_counter_dict = defaultdict(list)
 
-    pdh_mocks.initialize_pdh_tests(lang="se-sv")
+    initialize_pdh_tests(lang="se-sv")
     '''
     expectation is that the initialization will fail.  We attempt to fall
     back to english counters if the strings database isn't present; however,
@@ -72,10 +74,10 @@ def test_winpdhcounter_bad_strings_not_english(pdh_mocks_fixture_bad_perf_string
 
 
 @requires_windows
-def test_winpdhcounter_non_english(pdh_mocks_fixture):
+def test_winpdhcounter_non_english(pdh_mocks_fixture):  # noqa F811
     WinPDHCounter._use_en_counter_names = False
     WinPDHCounter.pdh_counter_dict = defaultdict(list)
-    pdh_mocks.initialize_pdh_tests(lang="se-sv")
+    initialize_pdh_tests(lang="se-sv")
     counter = WinPDHCounter('System', 'Processor Queue Length', logger)
 
     vals = counter.get_all_values()

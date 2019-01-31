@@ -6,7 +6,7 @@ import pytest
 
 try:
     from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
-    from datadog_test_libs.win import pdh_mocks
+    from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture
 except ImportError:
     pass
 
@@ -28,8 +28,8 @@ MULTI_INSTANCE_COUNTER_WITH_INSTANCES = [
 
 
 @requires_windows
-def test_single_instance_counter(aggregator, pdh_mocks_fixture):
-    pdh_mocks.initialize_pdh_tests()
+def test_single_instance_counter(aggregator, pdh_mocks_fixture):  # noqa F811
+    initialize_pdh_tests()
     instance = DEFAULT_INSTANCE
     c = PDHBaseCheck("testcheck", {}, {}, [instance], SINGLE_INSTANCE_COUNTER)
     c.check(instance)
@@ -38,16 +38,16 @@ def test_single_instance_counter(aggregator, pdh_mocks_fixture):
 
 
 @requires_windows
-def test_single_instance_counter_with_instance(aggregator, pdh_mocks_fixture):
-    pdh_mocks.initialize_pdh_tests()
+def test_single_instance_counter_with_instance(aggregator, pdh_mocks_fixture):  # noqa F811
+    initialize_pdh_tests()
     instance = DEFAULT_INSTANCE
     with pytest.raises(AttributeError):
         PDHBaseCheck("testcheck", {}, {}, [instance], INSTANCE_OF_SINGLE_INSTANCE_COUNTER)
 
 
 @requires_windows
-def test_multi_instance_counter(aggregator, pdh_mocks_fixture):
-    pdh_mocks.initialize_pdh_tests()
+def test_multi_instance_counter(aggregator, pdh_mocks_fixture):  # noqa F811
+    initialize_pdh_tests()
     instance = DEFAULT_INSTANCE
     c = PDHBaseCheck("testcheck", {}, {}, [instance], MULTI_INSTANCE_COUNTER)
     c.check(instance)
@@ -57,8 +57,8 @@ def test_multi_instance_counter(aggregator, pdh_mocks_fixture):
 
 
 @requires_windows
-def test_multi_instance_counter_specific_instances(aggregator, pdh_mocks_fixture):
-    pdh_mocks.initialize_pdh_tests()
+def test_multi_instance_counter_specific_instances(aggregator, pdh_mocks_fixture):  # noqa F811
+    initialize_pdh_tests()
     instance = DEFAULT_INSTANCE
     c = PDHBaseCheck("testcheck", {}, {}, [instance], MULTI_INSTANCE_COUNTER_WITH_INSTANCES)
     c.check(instance)
@@ -68,7 +68,7 @@ def test_multi_instance_counter_specific_instances(aggregator, pdh_mocks_fixture
 
 
 @requires_windows
-def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):
+def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
     COUNTER_LIST = [
         ["NTDS", None, "LDAP Client Sessions", "active_directory.ldap.client_sessions", "gauge"],
         ["NTDS", None, "LDAP Bind Time", "active_directory.ldap.bind_time", "gauge"],
@@ -78,7 +78,7 @@ def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):
         ["NTDS", None, "Kerberos Authentications/sec", "active_directory.kerberos.auths_persec", "gauge"],
         ["NTDS", None, "NTLM Authentications/sec", "active_directory.ntlm.auths_persec", "gauge"],
     ]
-    pdh_mocks.initialize_pdh_tests()
+    initialize_pdh_tests()
     instance = DEFAULT_INSTANCE
     c = PDHBaseCheck("testcheck", {}, {}, [instance], COUNTER_LIST)
     c.check(instance)
