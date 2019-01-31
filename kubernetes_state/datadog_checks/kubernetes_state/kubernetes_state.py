@@ -263,7 +263,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 ksm_instance['label_to_hostname_suffix'] = "-" + clustername
 
         if 'labels_mapper' in ksm_instance and not isinstance(ksm_instance['labels_mapper'], dict):
-                self.log.warning("Option labels_mapper should be a dictionary for {}".format(endpoint))
+            self.log.warning("Option labels_mapper should be a dictionary for {}".format(endpoint))
 
         return ksm_instance
 
