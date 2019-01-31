@@ -7,7 +7,7 @@ import re
 from .agent import (
     AGENT_CMD, DEFAULT_AGENT_VERSION, FAKE_API_KEY, MANIFEST_VERSION_PATTERN,
     get_agent_conf_dir, get_agent_exe,
-    get_agent_service_cmd, get_agent_version_manifest_cmd,
+    get_agent_service_cmd, get_agent_version_manifest,
     get_rate_flag
 )
 from .config import (
@@ -62,7 +62,6 @@ class LocalAgentInterface(object):
         self.remove_config_from_local_agent()
 
     def copy_config_to_local_agent(self):
-        # [TODO] We should backup that file and restore it when E2E goes down
         check_conf_file = os.path.join(
             get_agent_conf_dir(self.check, self.agent_version, self.platform),
             '{}.yaml'.format(self.check)
@@ -103,9 +102,9 @@ class LocalAgentInterface(object):
 
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:
-            command = get_agent_version_manifest_cmd(self.platform)
-            result = run_command(command, capture=True)
-            match = re.search(MANIFEST_VERSION_PATTERN, result.stdout)
+            with open(get_agent_version_manifest(self.platform)) as f:
+                ver = f.readline()
+                match = re.search(MANIFEST_VERSION_PATTERN, ver)
             if match:
                 self._agent_version = int(match.group(1))
 

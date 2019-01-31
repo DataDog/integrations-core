@@ -69,11 +69,11 @@ def get_agent_conf_dir(check, agent_version, platform=LINUX):
             return '/etc/dd-agent/conf.d'
 
 
-def get_agent_version_manifest_cmd(platform):
+def get_agent_version_manifest(platform):
     if platform == WINDOWS:
-        return ['gc', r'C:\Program Files\Datadog\Datadog Agent\version-manifest.txt', '|', 'select', '-first', '10']
+        return r'C:\Program Files\Datadog\Datadog Agent\version-manifest.txt'
     else:
-        return ['head', '-n', '1', '/opt/datadog-agent/version-manifest.txt']
+        return '/opt/datadog-agent/version-manifest.txt'
 
 
 def get_agent_service_cmd(platform, action):
