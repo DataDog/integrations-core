@@ -118,7 +118,7 @@ class IbmMqCheck(AgentCheck):
                 m = queue.inquire(pymqi_value)
                 self.gauge(mname, m, tags=tags)
             except pymqi.Error as e:
-                self.warning("Error getting queue stats: {}".format(e))
+                self.warning("Error getting queue stats for {}: {}".format(queue, e))
 
         for mname, func in iteritems(metrics.queue_metrics_functions()):
             try:
@@ -126,7 +126,7 @@ class IbmMqCheck(AgentCheck):
                 m = func(queue)
                 self.gauge(mname, m, tags=tags)
             except pymqi.Error as e:
-                self.warning("Error getting queue stats: {}".format(e))
+                self.warning("Error getting queue stats for {}: {}".format(queue, e))
 
     def get_pcf_queue_metrics(self, queue_manager, queue_name, tags):
         try:
@@ -151,5 +151,6 @@ class IbmMqCheck(AgentCheck):
                     if m > failure_value:
                         self.gauge(mname, m, tags=tags)
                     else:
-                        msg = "Unable to get {}, turn on queue level monitoring to access these metrics".format(mname)
+                        msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
+                        msg = msg.format(mname, queue_name)
                         log.debug(msg)
