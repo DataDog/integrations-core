@@ -83,7 +83,7 @@ class IbmMqCheck(AgentCheck):
         queues = []
 
         try:
-            pcf = pymqi.PCFExecute(qmgr)
+            pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q(args)
         except pymqi.MQMIError as e:
             self.warning("Error getting queue stats: {}".format(e))
