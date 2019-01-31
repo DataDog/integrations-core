@@ -61,11 +61,11 @@ class IBMMQConfig:
             raise ConfigurationError(msg)
 
     def add_queues(self, new_queues):
-        # add queues without duplication
-
+        # remove disallowed system queues from the discovered queues
         for queue in self.DISALLOWED_QUEUES:
             new_queues.remove(queue)
 
+        # add queues without duplication
         self.queues = list(set(self.queues + new_queues))
 
     @property
