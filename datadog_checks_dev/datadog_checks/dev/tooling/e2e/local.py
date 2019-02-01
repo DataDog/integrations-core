@@ -98,7 +98,6 @@ class LocalAgentInterface(object):
 This check will remain in an editable install after \
 the environment is torn down. Would you like to proceed? '.format(self.check))
         if value:
-            import pdb; pdb.set_trace()
             install_cmd = AGENT_CMD[self.platform]['pip_install'] + ['-e',  path_join(get_root(), self.check)]
             return run_command(install_cmd, capture=True, check=True)
         else:
