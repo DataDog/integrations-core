@@ -59,9 +59,9 @@ def get_agent_conf_dir(check, agent_version, platform=LINUX):
             return r'C:\ProgramData\Datadog\conf.d'
     elif platform == MAC:
         if agent_version >= 6:
-            return '{}/.datadog-agent/conf.d/{}.d'.format(HOME, check)
+            return '/opt/datadog-agent/etc/conf.d/{}.d'.format(check)
         else:
-            return '{}/.datadog-agent/conf.d'.format(HOME)
+            return '/opt/datadog-agent/etc/conf.d'
     else:
         if agent_version >= 6:
             return '/etc/datadog-agent/conf.d/{}.d'.format(check)
@@ -76,10 +76,9 @@ def get_agent_version_manifest(platform):
         return '/opt/datadog-agent/version-manifest.txt'
 
 
-def get_agent_service_cmd(platform, action):
-    # [TODO] Confirm this works with A5
+def get_agent_service_cmd(version, platform, action):
     if platform == WINDOWS:
-        return [r'C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe', AGENT_CMD[platform][action]]
+        return [get_agent_exe(version, platform), AGENT_CMD[platform][action]]
     elif platform == MAC:
         return [
             'launchctl', AGENT_CMD[platform][action], '-w',

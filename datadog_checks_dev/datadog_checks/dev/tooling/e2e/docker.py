@@ -72,7 +72,7 @@ class DockerInterface(object):
         if self.agent_build and self._agent_version is None:
             command = [
                 'docker', 'run', '--rm', '-e', 'DD_API_KEY={}'.format(self.api_key), self.agent_build,
-                + 'head', '--lines=1', '{}'.format(get_agent_version_manifest('linux'))
+                'head', '--lines=1', '{}'.format(get_agent_version_manifest('linux'))
             ]
             result = run_command(command, capture=True)
             match = re.search(MANIFEST_VERSION_PATTERN, result.stdout)

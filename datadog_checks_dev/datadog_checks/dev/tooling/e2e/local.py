@@ -17,6 +17,7 @@ from .config import (
 )
 from .platform import LINUX, MAC, WINDOWS
 from ..constants import get_root
+from ..commands.console import echo_warning
 from ...utils import ON_MACOS, ON_WINDOWS, ON_LINUX, path_join, file_exists
 from ...subprocess import run_command
 
@@ -113,16 +114,15 @@ class LocalAgentInterface(object):
             self.metadata['agent_version'] = self.agent_version
 
     def start_agent(self):
-        if self.agent_build:
-            command = get_agent_service_cmd(self.platform, 'start')
+        command = get_agent_service_cmd(self.agent_version, self.platform, 'start')
 
-            if self.base_package:
-                # Editable install the base package to the local agent
-                install_cmd = AGENT_CMD[self.platform]['pip'] + ['install', '-e', self.base_package]
-                run_command(install_cmd, capture=True, shell=True)
-
-            return run_command(command, capture=True)
+        if self.base_package:
+            echo_warning(
+                "Env was started with an editable check install. This check will remain in an editable install after \
+the environment is torn down."
+            )
+        return run_command(command, capture=True)
 
     def stop_agent(self):
-        command = get_agent_service_cmd(self.platform, 'stop')
+        command = get_agent_service_cmd(self.agent_version, self.platform, 'stop')
         run_command(command, capture=True)
