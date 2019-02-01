@@ -40,7 +40,7 @@ class NfsStatCheck(AgentCheck):
         custom_tags = instance.get("tags", [])
         for l in stat_out.splitlines():
             if l.find(b'No NFS mount point') >= 0:
-                self.log.warning("No NFS mount points were found")
+                self.warning("No NFS mount points were found")
                 return
             if not l or l.find(b'No NFS mount point') >= 0:
                 continue
