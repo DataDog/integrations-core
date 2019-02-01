@@ -88,7 +88,7 @@ class LocalAgentInterface(object):
             self.check,
             ' {}'.format(get_rate_flag(self.agent_version)) if rate else ''
         )
-        return run_command([command], capture=capture, shell=True)
+        return run_command(command, capture=capture)
 
     def update_check(self):
         install_cmd = AGENT_CMD[self.platform]['pip'] + ['install', '-e',  path_join(get_root(), self.check)]
@@ -125,4 +125,4 @@ class LocalAgentInterface(object):
 
     def stop_agent(self):
         command = get_agent_service_cmd(self.platform, 'stop')
-        run_command(command)
+        run_command(command, capture=True)
