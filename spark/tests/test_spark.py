@@ -591,12 +591,6 @@ def test_yarn(aggregator):
         c = SparkCheck('spark', None, {}, [YARN_CONFIG])
         c.check(YARN_CONFIG)
 
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(
-                metric,
-                tags=SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS, value=value)
-
         # Check the succeeded job metrics
         for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
             aggregator.assert_metric(
