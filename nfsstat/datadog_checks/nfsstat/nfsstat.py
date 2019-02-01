@@ -38,9 +38,11 @@ class NfsStatCheck(AgentCheck):
         all_devices = []
         this_device = []
         custom_tags = instance.get("tags", [])
-
         for l in stat_out.splitlines():
-            if not l:
+            if l.find(b'No NFS mount point') >= 0:
+                self.log.warning("No NFS mount points were found")
+                return
+            if not l or l.find(b'No NFS mount point') >= 0:
                 continue
             elif l.find(b'mounted on') >= 0 and len(this_device) > 0:
                 # if it's a new device, create the device and add it to the array
