@@ -74,6 +74,8 @@ class HTTPCheck(NetworkCheck):
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
+        instance_name = ensure_unicode(self.normalize(instance['name']))
+        tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         r = None
         try:
