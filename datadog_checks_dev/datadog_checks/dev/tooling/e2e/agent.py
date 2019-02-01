@@ -13,12 +13,12 @@ AGENT_CMD = {
     WINDOWS: {
         'start': 'start-service',
         'stop': 'stopservice',
-        'pip': [r'C:\Program Files\Datadog\Datadog Agent\embedded\python', '-m', 'pip']
+        'pip_install': [r'C:\Program Files\Datadog\Datadog Agent\embedded\python', '-m', 'pip', 'install']
     },
     MAC: {
         'start': 'load',
         'stop': 'unload',
-        'pip': ['/opt/datadog-agent/embedded/bin/pip', '--user']
+        'pip_install': ['/opt/datadog-agent/embedded/bin/pip', 'install', '--user']
     }
 }
 

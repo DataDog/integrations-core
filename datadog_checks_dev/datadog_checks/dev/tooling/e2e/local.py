@@ -93,22 +93,23 @@ class LocalAgentInterface(object):
         return run_command(command, capture=capture)
 
     def update_check(self):
-        value = click.prompt('Env will started with an editable check install for the {} package. \
+        value = click.confirm('Env will started with an editable check install for the {} package. \
 This check will remain in an editable install after \
-the environment is torn down. Would you like to proceed? '.format(self.check), type=bool)
+the environment is torn down. Would you like to proceed? '.format(self.check))
         if value:
-            install_cmd = AGENT_CMD[self.platform]['pip'] + ['install', '-e',  path_join(get_root(), self.check)]
-            return run_command(install_cmd, capture=True, check=True, shell=True)
+            import pdb; pdb.set_trace()
+            install_cmd = AGENT_CMD[self.platform]['pip_install'] + ['-e',  path_join(get_root(), self.check)]
+            return run_command(install_cmd, capture=True, check=True)
         else:
             return
 
     def update_base_package(self):
-        value = click.prompt('Env will started with an editable check install for the base package. \
+        value = click.confirm('Env will started with an editable check install for the base package. \
 This check will remain in an editable install after \
-the environment is torn down. Would you like to proceed? ', type=bool)
+the environment is torn down. Would you like to proceed? ')
         if value:
-            install_cmd = AGENT_CMD[self.platform]['pip'] + ['install', '-e', self.base_package]
-            run_command(install_cmd, capture=True, check=True, shell=True)
+            install_cmd = AGENT_CMD[self.platform]['pip_install'] + ['-e', self.base_package]
+            run_command(install_cmd, capture=True, check=True)
         else:
             return
 
