@@ -34,6 +34,18 @@ def instance():
 
 
 @pytest.fixture
+def instance_pattern():
+    inst = copy.deepcopy(common.INSTANCE_PATTERN)
+    return inst
+
+
+@pytest.fixture
+def instance_collect_all():
+    inst = copy.deepcopy(common.INSTANCE_COLLECT_ALL)
+    return inst
+
+
+@pytest.fixture
 def seed_data():
     publish()
     consume()

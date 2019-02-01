@@ -37,3 +37,26 @@ INSTANCE = {
         QUEUE
     ]
 }
+
+INSTANCE_PATTERN = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queue_patterns': [
+        'DEV.*',
+        'SYSTEM.*'
+    ]
+}
+
+INSTANCE_COLLECT_ALL = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'auto_discover_queues': True,
+}
