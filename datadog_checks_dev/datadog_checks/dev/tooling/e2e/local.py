@@ -66,10 +66,11 @@ class LocalAgentInterface(object):
         self.remove_config_from_local_agent()
 
     def copy_config_to_local_agent(self):
-        check_conf_file = os.path.join(
-            get_agent_conf_dir(self.check, self.agent_version, self.platform),
-            '{}.yaml'.format(self.check)
-        )
+        conf_dir = get_agent_conf_dir(self.check, self.agent_version, self.platform)
+        check_conf_file = os.path.join(get_agent_conf_dir(conf_dir, '{}.yaml'.format(self.check)))
+        if not os.path.exists(conf_dir):
+            os.makedirs(conf_dir)
+
         if file_exists(check_conf_file):
             copyfile(check_conf_file, '{}.bak'.format(check_conf_file))
         copyfile(self.config_file, check_conf_file)
