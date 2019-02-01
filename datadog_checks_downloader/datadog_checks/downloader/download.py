@@ -148,12 +148,12 @@ class TUFDownloader:
                         # mix-and-match attacks by MitM attackers, and rollback
                         # attacks even by attackers who control the repository:
                         # https://www.usenix.org/conference/atc17/technical-sessions/presentation/kuppusamy
-                        self._get_target(target_relpath,
-                                         # NOTE: Avoid recursively downloading
-                                         # in-toto metadata for in-toto
-                                         # metadata themselves, and so on ad
-                                         # infinitum.
-                                         download_in_toto_metadata=False)
+                        self.__get_target(target_relpath,
+                                          # NOTE: Avoid recursively downloading
+                                          # in-toto metadata for in-toto
+                                          # metadata themselves, and so on ad
+                                          # infinitum.
+                                          download_in_toto_metadata=False)
 
                         # Add this file to the growing collection of where
                         # in-toto metadata live.
@@ -183,8 +183,8 @@ class TUFDownloader:
                 # NOTE: Avoid recursively downloading in-toto metadata for
                 # in-toto root layout pubkeys themselves, and so on ad
                 # infinitum.
-                self._get_target(target_relpath,
-                                 download_in_toto_metadata=False)
+                self.__get_target(target_relpath,
+                                  download_in_toto_metadata=False)
                 target_relpaths.append(target_relpath)
 
         return target_relpaths
@@ -244,7 +244,7 @@ class TUFDownloader:
                                                pubkey_relpaths)
 
 
-    def _get_target(self, target_relpath, download_in_toto_metadata=True):
+    def __get_target(self, target_relpath, download_in_toto_metadata=True):
         target = self.__updater.get_one_valid_targetinfo(target_relpath)
         updated_targets = self.__updater.updated_targets((target,),
                                                          self.__targets_dir)
@@ -282,5 +282,5 @@ class TUFDownloader:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         '''
-        return self._get_target(target_relpath,
-                                download_in_toto_metadata=download_in_toto_metadata)
+        return self.__get_target(target_relpath,
+                                 download_in_toto_metadata=download_in_toto_metadata)
