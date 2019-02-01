@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from collections import defaultdict
 import pystemd
 from pystemd.systemd1 import Manager
@@ -28,15 +29,13 @@ class SystemdCheck(AgentCheck):
 
         # unit_cache = {
         #    "units": {
-        #        "networking.service": "active",
+        #        "<unit_name>": "<unit_status>",
         #        "cron.service": "inactive",
         #        "ssh.service": "active"
         #    },
         #    "change_since": "iso_time"
         #}
-
-        self.units_in_dict = None
-        
+      
     def check(self, instance):
         
         if self.units:
@@ -47,24 +46,28 @@ class SystemdCheck(AgentCheck):
             # we display status for all units if no unit has been specified in the configuration file
             self.get_active_inactive_units()
 
-        self.units_in_dict = 'units'
+        self.log.info("unit_cache is... ")
+        self.log.info(self.unit_cache)
         
         self.get_all_units(self.units)
 
-
     def get_all_units(self, instance):
-        cached_units = self.unit_cache.get(self.units_in_dict)
+        cached_units = self.unit_cache.get('units')
         changes_since = datetime.utcnow().isoformat()
         if cached_units is None:
             updated_units = self.get_listed_units()
         else:
-            previous_changes_since = self.unit_cache.get(self.units_in_dict, {}).get('changes_since')
+            previous_changes_since = self.unit_cache.get('units', {}).get('changes_since')
             updated_units = self.update_unit_cache(cached_units, previous_changes_since)
-            self.log.info(updated_units)
+            self.log.info(previous_changes_since)
 
         # Initialize or update cache for this instance
-        self.unit_cache[self.units_in_dict] = updated_units
-        self.unit_cache['change_since'] = changes_since
+        self.unit_cache = {
+            'units': updated_units,
+            'changes_since': changes_since
+        }
+
+        self.log.info(self.unit_cache)
     
     def get_listed_units(self):
         manager = Manager()
@@ -72,16 +75,27 @@ class SystemdCheck(AgentCheck):
 
         units = self.units
 
-        return {unit: self.get_state_single_unit(unit) for unit in units}
+        mytemp_dict = {}
+
+        mytemp_dict = {unit: self.get_state_single_unit(unit) for unit in units}
+
+        self.log.info(mytemp_dict)
+
+        return mytemp_dict
 
     def update_unit_cache(self, cached_units, changes_since):
+        units = copy.deepcopy(cached_units)
 
         updated_units = self.get_listed_units()
 
+        self.log.info(units)
+
         returned_cache = {}
 
-        returned_cache[self.units_in_dict] = updated_units
-        returned_cache['changes_since'] = changes_since
+        returned_cache = updated_units
+        # returned_cache['changes_since'] = changes_since
+
+        self.log.info(returned_cache)
 
         return returned_cache  # a new cache, dict of units and timestamp
 
@@ -140,15 +154,24 @@ class SystemdCheck(AgentCheck):
                     AgentCheck.CRITICAL,
                     tags=["unit:{}".format(unit_id)]
                 )
-                
+
             if unit_id in self.unit_cache.get('units', {}):
-                previous_status = self.unit_cache[self.units_in_dict][unit_id]
+                previous_status = self.unit_cache['units'][unit_id]
+                self.log.info("previous status:" + str(previous_status))
+                self.log.info("current status:" + str(state))
                 if previous_status != state:
                     # TODO:
-                    # self.event(...)
-                    self.unit_cache[self.units_in_dict][unit_id] = state
+                    # self.event("unit {} changed state, it is now: {}".format(unit_id, state))
+                    self.event({
+                        "event_type": "unit.status.changed",
+                        "msg_title": "unit {} changed state".format(unit_id),
+                        "msg_text": "it is now: {}".format(state),
+                        "tags": ["unit:status_changed"]
+                    })
+                    self.unit_cache['units'][unit_id] = state
+                
             else:
-                self.unit_cache[self.units_in_dict][unit_id] = state
+                self.unit_cache['units'][unit_id] = state
 
         except pystemd.dbusexc.DBusInvalidArgsError as e:
             self.log.info("Unit name invalid for {}".format(unit_id))
