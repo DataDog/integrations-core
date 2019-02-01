@@ -123,12 +123,12 @@ def start(ctx, check, env, agent, dev, base):
         )
 
     if dev:
-        echo_waiting('Upgrading `{}` check to the development version... '.format(check), nl=False)
+        echo_waiting('Upgrading `{}` check to the development version... \n'.format(check), nl=False)
         environment.update_check()
         echo_success('success!')
 
     if base:
-        echo_waiting('Upgrading the base package to the development version... ', nl=False)
+        echo_waiting('Upgrading the base package to the development version... \n', nl=False)
         environment.update_base_package()
         echo_success('success!')
 
