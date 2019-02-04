@@ -3,10 +3,13 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import mock
+import pytest
 
 from . import common
 
 from datadog_checks.snmp import SnmpCheck
+
+pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
 def test_command_generator(aggregator):
