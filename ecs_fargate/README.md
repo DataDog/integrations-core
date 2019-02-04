@@ -7,7 +7,7 @@ Get metrics from all your containers running in ECS Fargate:
 * CPU/Memory usage & limit metrics
 * Monitor your applications running on Fargate via Datadog integrations or custom metrics.
 
-The Datadog agent retrieves metrics for the task definition's containers via the ECS Task Metadata endpoint, `169.254.170.2/v2/stats`. According to the [ECS Documentation][18] on that endpoint:
+The Datadog agent retrieves metrics for the task definition's containers via the ECS Task Metadata endpoint. According to the [ECS Documentation][18] on that endpoint:
 
 > This endpoint returns Docker stats JSON for all of the containers associated with the task. For more information about each of the returned stats, see [ContainerStats][19] in the Docker API documentation.
 
@@ -17,6 +17,8 @@ The only configuration required to enable this metrics collection is to set an e
 
 ## Agent Setup
 The following steps cover setup of the Datadog Container Agent within AWS ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
+
+Tasks that do not have the Datadog Agent will still report metrics via Cloudwatch, however the Agent is needed for Autodiscovery, detailed container metrics, tracing, and more.  Additionally, Cloudwatch metrics will be less granular, and will have more latency in reporting than metrics shipped directly via the Datadog Agent.
 
 ### Installation
 To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in same task definition as your application. To collect metrics with Datadog, each Task Definition should include a Datadog Agent container in addition to the application containers. Follow these setup steps:
@@ -101,8 +103,6 @@ aws ecs run-task --cluster <CLUSTER_NAME> \
 ### Metric Collection
 After the Datadog Agent is setup as described above, the [ecs_fargate check][10] collects metrics with autodiscovery enabled. Add Docker labels to your other containers in the same task to collect additional metrics.
 
-Metrics collected via the agent will be namespaced as `ecs.fargate.*`.
-
 For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
 
 #### DogStatsD
@@ -134,7 +134,7 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
 
 ## Agentless Setup / Crawler-based metrics
 
-In addition or alternative to the metrics collected by the Datadog agent, we also have a CloudWatch based ECS integration. This integration collects the ECS metrics from the CloudWatch API described [here][20].
+In addition to the metrics collected by the Datadog agent, we also have a CloudWatch based ECS integration. This integration collects the ECS metrics from the CloudWatch API described [here][20].
 
 As noted there, Fargate tasks also report metrics in this way:
 > The metrics made available will depend on the launch type of the tasks and services in your clusters. If you are using the Fargate launch type for your services then CPU and memory utilization metrics are provided to assist in the monitoring of your services.
@@ -159,8 +159,6 @@ The ECS Fargate check does not include any events.
 
 **fargate_check**
 Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise returns `OK`.
-
-
 
 ## Troubleshooting
 
