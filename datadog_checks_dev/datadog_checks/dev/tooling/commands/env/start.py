@@ -5,6 +5,7 @@ import os
 
 import click
 import pyperclip
+from six import string_types
 
 from ..console import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
@@ -77,14 +78,15 @@ def start(ctx, check, env, agent, dev, base):
     env_type = metadata['env_type']
 
     # Support legacy config where agent5 and agent6 were strings
-    try:
-        agent_build = ctx.obj.get('agent{}'.format(agent), agent).get(env_type, 'docker')
-    except AttributeError:
+    agent_ver = ctx.obj.get('agent{}'.format(agent), agent)
+    if isinstance(agent_ver, string_types):
+        agent_build = agent_ver
         echo_warning(
             "Agent fields missing from ddev config, please update to the latest config, \
 falling back to latest docker image"
         )
-        agent_build = 'datadog/dev-dd-agent:master'
+    else:
+        agent_build = agent_ver.get(env_type, env_type)
 
     interface = derive_interface(env_type)
     if interface is None:
@@ -131,15 +133,27 @@ falling back to latest docker image"
             'Will install the development version of the check too so the base package can import it (in editable mode)'
         )
 
+    editable_warning = (
+        '\nEnv will started with an editable check install for the {} package. '
+        'This check will remain in an editable install after '
+        'the environment is torn down. Would you like to proceed?'
+    )
+
     if dev:
-        echo_waiting('Upgrading `{}` check to the development version... \n'.format(check), nl=False)
-        environment.update_check()
-        echo_success('success!')
+        echo_waiting('Upgrading `{}` check to the development version... '.format(check), nl=False)
+        if environment.ENV_TYPE == 'local' and not click.confirm(editable_warning.format(environment.check)):
+            echo_success('skipping')
+        else:
+            environment.update_check()
+            echo_success('success!')
 
     if base:
-        echo_waiting('Upgrading the base package to the development version... \n', nl=False)
-        environment.update_base_package()
-        echo_success('success!')
+        echo_waiting('Upgrading the base package to the development version... ', nl=False)
+        if environment.ENV_TYPE == 'local' and not click.confirm(editable_warning.format('base')):
+            echo_success('skipping')
+        else:
+            environment.update_base_package()
+            echo_success('success!')
 
     click.echo()
 

@@ -24,6 +24,8 @@ from ...subprocess import run_command
 
 
 class LocalAgentInterface(object):
+    ENV_TYPE = 'local'
+
     def __init__(self, check, env, base_package=None, config=None, metadata=None, agent_build=None, api_key=None):
         self.check = check
         self.env = env
@@ -94,26 +96,14 @@ class LocalAgentInterface(object):
         return run_command(command, capture=capture)
 
     def update_check(self):
-        value = click.confirm('Env will started with an editable check install for the {} package. \
-This check will remain in an editable install after \
-the environment is torn down. Would you like to proceed? '.format(self.check))
-        if value:
-            install_cmd = get_agent_pip_install(self.verision, self.platform)
-            + ['-e',  path_join(get_root(), self.check)]
-            return run_command(install_cmd, capture=True, check=True)
-        else:
-            return
+        install_cmd = get_agent_pip_install(self.verision, self.platform)
+        + ['-e',  path_join(get_root(), self.check)]
+        return run_command(install_cmd, capture=True, check=True)
 
     def update_base_package(self):
-        value = click.confirm('Env will started with an editable check install for the base package. \
-This check will remain in an editable install after \
-the environment is torn down. Would you like to proceed? ')
-        if value:
-            install_cmd = get_agent_pip_install(self.version, self.platform)
-            + ['-e', self.base_package]
-            run_command(install_cmd, capture=True, check=True)
-        else:
-            return
+        install_cmd = get_agent_pip_install(self.version, self.platform)
+        + ['-e', self.base_package]
+        return run_command(install_cmd, capture=True, check=True)
 
     def update_agent(self):
         # The Local E2E assumes an Agent is already installed on the machine
