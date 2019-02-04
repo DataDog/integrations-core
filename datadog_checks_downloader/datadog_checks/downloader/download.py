@@ -183,8 +183,7 @@ class TUFDownloader:
         return target_relpaths
 
 
-    def __verify_in_toto_metadata(self, target_relpath,
-                                  in_toto_metadata_relpaths, pubkey_relpaths):
+    def __verify_in_toto_metadata(self, target_relpath, in_toto_metadata_relpaths, pubkey_relpaths):
         # Make a temporary directory.
         tempdir = tempfile.mkdtemp()
         prev_cwd = os.getcwd()
@@ -231,9 +230,7 @@ class TUFDownloader:
                 raise NoInTotoRootLayoutPublicKeysFound(target_relpath)
 
             else:
-                self.__verify_in_toto_metadata(target_relpath,
-                                               in_toto_metadata_relpaths,
-                                               pubkey_relpaths)
+                self.__verify_in_toto_metadata(target_relpath, in_toto_metadata_relpaths, pubkey_relpaths)
 
 
     def __get_target(self, target_relpath, download_in_toto_metadata=True):
