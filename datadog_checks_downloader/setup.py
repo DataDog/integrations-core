@@ -62,9 +62,9 @@ setup(
     },
     include_package_data=True,
 
-    extras_require={
-        'deps': get_requirements('requirements.in'),
-    },
+    install_requires=[
+        get_requirements('requirements.in'),
+    ],
 
     entry_points={
         'console_scripts': [

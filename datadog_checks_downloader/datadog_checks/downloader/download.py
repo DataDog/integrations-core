@@ -66,24 +66,21 @@ class TUFInTotoError(Exception):
 
 
     def __str__(self):
-        return 'Unexpected tuf-in-toto error for {}!'\
-               .format(self.target_relpath)
+        return 'Unexpected tuf-in-toto error for {}!'.format(self.target_relpath)
 
 
 class NoInTotoLinkMetadataFound(TUFInTotoError):
 
 
     def __str__(self):
-        return 'in-toto link metadata expected, '\
-               'but not found for {}!'.format(self.target_relpath)
+        return 'in-toto link metadata expected, but not found for {}!'.format(self.target_relpath)
 
 
 class NoInTotoRootLayoutPublicKeysFound(TUFInTotoError):
 
 
     def __str__(self):
-        return 'in-toto root layout public keys expected, '\
-               'but not found for {}!'.format(self.target_relpath)
+        return 'in-toto root layout public keys expected, but not found for {}!'.format(self.target_relpath)
 
 
 class TUFDownloader:
@@ -110,8 +107,7 @@ class TUFDownloader:
         # NOTE: The directory where the targets for *this* repository is
         # cached. We hard-code this keep this to a subdirectory dedicated to
         # this repository.
-        self.__targets_dir = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR,
-                                          'targets')
+        self.__targets_dir = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR, 'targets')
 
         # NOTE: Build a TUF updater which stores metadata in (1) the given
         # directory, and (2) uses the following mirror configuration,
@@ -148,12 +144,10 @@ class TUFDownloader:
                         # mix-and-match attacks by MitM attackers, and rollback
                         # attacks even by attackers who control the repository:
                         # https://www.usenix.org/conference/atc17/technical-sessions/presentation/kuppusamy
-                        self.__get_target(target_relpath,
-                                          # NOTE: Avoid recursively downloading
-                                          # in-toto metadata for in-toto
-                                          # metadata themselves, and so on ad
-                                          # infinitum.
-                                          download_in_toto_metadata=False)
+                        # NOTE: Avoid recursively downloading in-toto metadata
+                        # for in-toto metadata themselves, and so on ad
+                        # infinitum.
+                        self.__get_target(target_relpath, download_in_toto_metadata=False)
 
                         # Add this file to the growing collection of where
                         # in-toto metadata live.
@@ -183,8 +177,7 @@ class TUFDownloader:
                 # NOTE: Avoid recursively downloading in-toto metadata for
                 # in-toto root layout pubkeys themselves, and so on ad
                 # infinitum.
-                self.__get_target(target_relpath,
-                                  download_in_toto_metadata=False)
+                self.__get_target(target_relpath, download_in_toto_metadata=False)
                 target_relpaths.append(target_relpath)
 
         return target_relpaths
@@ -214,8 +207,7 @@ class TUFDownloader:
             layout_key_dict = import_public_keys_from_files_as_dict(pubkeys)
             # Verify and inspect.
             params = substitute(target_relpath)
-            verifylib.in_toto_verify(layout, layout_key_dict,
-                                     substitution_parameters=params)
+            verifylib.in_toto_verify(layout, layout_key_dict, substitution_parameters=params)
             logger.info('in-toto verified {}'.format(target_relpath))
         except:
             logger.exception('in-toto failed to verify {}'.format(target_relpath))
@@ -246,8 +238,7 @@ class TUFDownloader:
 
     def __get_target(self, target_relpath, download_in_toto_metadata=True):
         target = self.__updater.get_one_valid_targetinfo(target_relpath)
-        updated_targets = self.__updater.updated_targets((target,),
-                                                         self.__targets_dir)
+        updated_targets = self.__updater.updated_targets((target,), self.__targets_dir)
 
         # Either the target has not been updated...
         if not len(updated_targets):
@@ -282,5 +273,4 @@ class TUFDownloader:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         '''
-        return self.__get_target(target_relpath,
-                                 download_in_toto_metadata=download_in_toto_metadata)
+        return self.__get_target(target_relpath, download_in_toto_metadata=download_in_toto_metadata)

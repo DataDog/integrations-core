@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -29,8 +26,7 @@ class NonDatadogPackageException(Exception):
 
 
     def __str__(self):
-        return '{} is not a Datadog package!'\
-               .format(self.standard_distribution_name)
+        return '{} is not a Datadog package!'.format(self.standard_distribution_name)
 
 
 
@@ -60,13 +56,11 @@ class MissingVersionsException(Exception):
 # Private module functions.
 
 
-def __get_latest_version(tuf_downloader, standard_distribution_name,
-                         wheel_distribution_name):
+def __get_latest_version(tuf_downloader, standard_distribution_name, wheel_distribution_name):
     target_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
     # NOTE: We do not perform in-toto inspection for simple indices; only for
     # wheels.
-    target_abspath = tuf_downloader.download(target_relpath,
-                                             download_in_toto_metadata=False)
+    target_abspath = tuf_downloader.download(target_relpath, download_in_toto_metadata=False)
 
     pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-py2\\.py3-none-any\\.whl)'>(.*?)</a><br />"
     versions = []

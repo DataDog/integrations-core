@@ -7,10 +7,10 @@ from pkg_resources import safe_name
 import os.path
 
 
-EXCEPTIONS = set([
+EXCEPTIONS = {
     'datadog_checks_base',
     'datadog_checks_dev',
-])
+}
 
 
 def substitute(target_relpath):
