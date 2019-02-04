@@ -18,13 +18,6 @@ from six.moves.urllib.request import urlopen
 from .compat import FileNotFoundError, PermissionError
 from .structures import EnvVars
 
-if PY3:
-    from pathlib import Path
-    HOME = str(Path.home())
-else:
-    from os.path import expanduser
-    HOME = expanduser("~")
-
 __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'

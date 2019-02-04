@@ -1,26 +1,15 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from os.path import expanduser
+
 from .platform import LINUX, MAC, WINDOWS
-from ...utils import HOME
+
 
 DEFAULT_AGENT_VERSION = 6
 
 # Must be a certain length
 FAKE_API_KEY = 'a' * 32
-
-AGENT_CMD = {
-    WINDOWS: {
-        'start': 'start-service',
-        'stop': 'stopservice',
-        'pip_install': [r'C:\Program Files\Datadog\Datadog Agent\embedded\python', '-m', 'pip', 'install']
-    },
-    MAC: {
-        'start': 'load',
-        'stop': 'unload',
-        'pip_install': ['/opt/datadog-agent/embedded/bin/pip', 'install', '--user']
-    }
-}
 
 MANIFEST_VERSION_PATTERN = r'agent (\d)'
 
@@ -76,11 +65,18 @@ def get_agent_version_manifest(platform):
         return '/opt/datadog-agent/version-manifest.txt'
 
 
+def get_agent_pip_install(version, platform):
+    if platform == WINDOWS:
+        return [r'C:\Program Files\Datadog\Datadog Agent\embedded\python', '-m', 'pip', 'install']
+    elif platform == MAC:
+        return ['/opt/datadog-agent/embedded/bin/pip', 'install', '--user']
+
+
 def get_agent_service_cmd(version, platform, action):
     if platform == WINDOWS:
-        return [get_agent_exe(version, platform), AGENT_CMD[platform][action]]
+        return [get_agent_exe(version, platform), 'start-service' if action == 'start' else 'stopservice']
     elif platform == MAC:
         return [
-            'launchctl', AGENT_CMD[platform][action], '-w',
-            '{}/Library/LaunchAgents/com.datadoghq.agent.plist'.format(HOME)
+            'launchctl', 'load' if action == 'start' else 'unload', '-w',
+            '{}/Library/LaunchAgents/com.datadoghq.agent.plist'.format(expanduser("~"))
         ]

@@ -75,7 +75,16 @@ def start(ctx, check, env, agent, dev, base):
     echo_success('success!')
 
     env_type = metadata['env_type']
-    agent_build = ctx.obj.get('agent{}'.format(agent), agent).get(env_type, 'docker')
+
+    # Support legacy config where agent5 and agent6 were strings
+    try:
+        agent_build = ctx.obj.get('agent{}'.format(agent), agent).get(env_type, 'docker')
+    except AttributeError:
+        echo_warning(
+            "Agent fields missing from ddev config, please update to the latest config, \
+falling back to latest docker image"
+        )
+        agent_build = 'datadog/dev-dd-agent:master'
 
     interface = derive_interface(env_type)
     if interface is None:

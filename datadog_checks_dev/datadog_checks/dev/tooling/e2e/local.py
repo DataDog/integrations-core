@@ -8,8 +8,8 @@ import click
 from shutil import copyfile, move
 
 from .agent import (
-    AGENT_CMD, DEFAULT_AGENT_VERSION, FAKE_API_KEY, MANIFEST_VERSION_PATTERN,
-    get_agent_conf_dir, get_agent_exe,
+    DEFAULT_AGENT_VERSION, FAKE_API_KEY, MANIFEST_VERSION_PATTERN,
+    get_agent_conf_dir, get_agent_exe, get_agent_pip_install,
     get_agent_service_cmd, get_agent_version_manifest,
     get_rate_flag
 )
@@ -55,7 +55,7 @@ class LocalAgentInterface(object):
 
     @property
     def agent_command(self):
-        return '{}'.format(get_agent_exe(self.agent_version, platform=self.platform))
+        return get_agent_exe(self.agent_version, platform=self.platform)
 
     def write_config(self):
         write_env_data(self.check, self.env, self.config, self.metadata)
@@ -98,7 +98,8 @@ class LocalAgentInterface(object):
 This check will remain in an editable install after \
 the environment is torn down. Would you like to proceed? '.format(self.check))
         if value:
-            install_cmd = AGENT_CMD[self.platform]['pip_install'] + ['-e',  path_join(get_root(), self.check)]
+            install_cmd = get_agent_pip_install(self.verision, self.platform)
+            + ['-e',  path_join(get_root(), self.check)]
             return run_command(install_cmd, capture=True, check=True)
         else:
             return
@@ -108,7 +109,8 @@ the environment is torn down. Would you like to proceed? '.format(self.check))
 This check will remain in an editable install after \
 the environment is torn down. Would you like to proceed? ')
         if value:
-            install_cmd = AGENT_CMD[self.platform]['pip_install'] + ['-e', self.base_package]
+            install_cmd = get_agent_pip_install(self.version, self.platform)
+            + ['-e', self.base_package]
             run_command(install_cmd, capture=True, check=True)
         else:
             return
