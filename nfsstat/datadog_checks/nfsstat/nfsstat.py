@@ -42,7 +42,7 @@ class NfsStatCheck(AgentCheck):
             if l.find(b'No NFS mount point') >= 0:
                 self.warning("No NFS mount points were found")
                 return
-            if not l:
+            elif not l:
                 continue
             elif l.find(b'mounted on') >= 0 and len(this_device) > 0:
                 # if it's a new device, create the device and add it to the array
