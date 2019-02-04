@@ -7,14 +7,14 @@ from __future__ import division
 import time
 from six import iteritems, PY3
 
-import bson
-from pymongo import (
+from datadog_checks.tokumx.vendor.pymongo import (
     MongoClient,
     ReadPreference,
     errors,
     uri_parser,
     version as py_version,
 )
+from datadog_checks.tokumx.vendor import bson
 
 from datadog_checks.checks import AgentCheck
 
