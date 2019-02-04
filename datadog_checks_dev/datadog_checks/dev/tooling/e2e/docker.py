@@ -129,6 +129,9 @@ class DockerInterface(object):
         run_command(['docker', 'stop', self.container_name], capture=True, check=self.exists())
         run_command(['docker', 'rm', self.container_name], capture=True, check=self.exists())
 
+    def restart_agent(self):
+        return run_command(['docker', 'restart', self.container_name], capture=True)
+
 
 def get_docker_networks():
     command = ['docker', 'network', 'ls', '--format', '{{.Name}}']

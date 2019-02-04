@@ -107,7 +107,7 @@ class CadvisorPrometheusScraperMixin(object):
             if lbl == 'container_name':
                 if lbl in labels:
                     if labels[lbl] == '' or labels[lbl] == 'POD':
-                            return False
+                        return False
             if lbl not in labels:
                 return False
         return True

@@ -11,7 +11,7 @@ from datadog_checks.dev.tooling.utils import (
 def test_parse_agent_req_file():
     contents = "datadog-active-directory==1.1.1; sys_platform == 'win32'\nthis is garbage"
     catalog = parse_agent_req_file(contents)
-    assert len(catalog) is 1
+    assert len(catalog) == 1
     assert catalog['datadog-active-directory'] == '1.1.1'
 
 

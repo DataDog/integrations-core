@@ -99,10 +99,10 @@ def test_cx_state(aggregator, network_check):
 @mock.patch('datadog_checks.network.network.Platform.is_solaris', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
 def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, network_check):
-        with mock.patch.object(network_check, '_check_psutil') as _check_psutil:
-            network_check.check({})
-            network_check._check_psutil = mock.MagicMock()
-            _check_psutil.assert_called_once_with({})
+    with mock.patch.object(network_check, '_check_psutil') as _check_psutil:
+        network_check.check({})
+        network_check._check_psutil = mock.MagicMock()
+        _check_psutil.assert_called_once_with({})
 
 
 def test_check_psutil(aggregator, network_check):

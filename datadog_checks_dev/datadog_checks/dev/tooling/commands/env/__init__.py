@@ -7,6 +7,7 @@ from ..console import CONTEXT_SETTINGS
 from .check import check_run
 from .ls import ls
 from .prune import prune
+from .reload import reload_env
 from .start import start
 from .stop import stop
 
@@ -15,6 +16,7 @@ ALL_COMMANDS = (
     check_run,
     ls,
     prune,
+    reload_env,
     start,
     stop,
 )

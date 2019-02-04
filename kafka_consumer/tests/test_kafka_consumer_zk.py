@@ -86,7 +86,7 @@ def test_check_nogroups_zk(aggregator, zk_instance):
     kafka_consumer_check.check(nogroup_instance)
 
     for topic in TOPICS:
-        if topic is not '__consumer_offsets':
+        if topic != '__consumer_offsets':
             for partition in PARTITIONS:
                 tags = ["topic:{}".format(topic),
                         "partition:{}".format(partition)]

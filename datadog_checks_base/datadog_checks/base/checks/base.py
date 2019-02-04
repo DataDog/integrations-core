@@ -19,6 +19,8 @@ try:
     init_logging()
 except ImportError:
     from ..stubs import datadog_agent
+    from ..stubs.log import init_logging
+    init_logging()
 
 try:
     import aggregator
