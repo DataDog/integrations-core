@@ -27,7 +27,7 @@ from ..github import (
 )
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
-    update_version_module
+    update_version_module, build_wheel
 )
 from ..trello import TrelloClient
 from ..utils import (
@@ -817,26 +817,13 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
         write_file(changelog_path, changelog_buffer.getvalue())
 
 
-def build_wheel(package_path, sdist):
-    with chdir(package_path):
-        result = run_command('python setup.py bdist_wheel --universal', capture='out')
-        if result.code != 0:
-            abort(result.stdout, result.code)
-
-        if sdist:
-            result = run_command('python setup.py sdist', capture='out')
-            if result.code != 0:
-                abort(result.stdout, result.code)
-
-
 @release.command(
     context_settings=CONTEXT_SETTINGS,
     short_help='Build a wheel for a check'
 )
 @click.argument('check')
 @click.option('--sdist', '-s', is_flag=True)
-@click.pass_context
-def build(ctx, check, sdist):
+def build(check, sdist):
     """Build a wheel for a check as it is on the repo HEAD"""
     if check in get_valid_checks():
         check_dir = os.path.join(get_root(), check)
@@ -849,11 +836,14 @@ def build(ctx, check, sdist):
 
     echo_waiting('Building `{}`...'.format(check))
 
-    remove_path(os.path.join(check_dir, 'dist'))
+    dist_dir = os.path.join(check_dir, 'dist')
+    remove_path(dist_dir)
 
-    build_wheel(check_dir, sdist)
+    result = build_wheel(check_dir, sdist)
+    if result.code != 0:
+        abort(result.stdout, result.code)
 
-    echo_info('Build done, wheel file in: {}'.format(os.path.join(check_dir, "dist")))
+    echo_info('Build done, wheel file in: {}'.format(dist_dir))
     echo_success('Success!')
 
 
@@ -887,7 +877,9 @@ def upload(ctx, check, sdist, dry_run):
     echo_waiting('Building and publishing `{}` to PyPI...'.format(check))
 
     with EnvVars(auth_env_vars):
-        build_wheel(check_dir, sdist)
+        result = build_wheel(check_dir, sdist)
+        if result.code != 0:
+            abort(result.stdout, result.code)
         echo_waiting('Uploading the package...')
         if not dry_run:
             result = run_command('twine upload --skip-existing dist{}*'.format(os.path.sep))
