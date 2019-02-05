@@ -4,14 +4,13 @@
 
 
 # 1st party.
+import argparse
 import re
 
 # 2nd party.
 from .download import TUFDownloader
 
 # 3rd party.
-import click
-
 from pkg_resources import parse_version
 
 
@@ -89,14 +88,23 @@ def __wheel_distribution_name(standard_distribution_name):
     return re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)
 
 
+def download():
+    parser = argparse.ArgumentParser()
 
-@click.command()
-@click.argument('standard_distribution_name')
-@click.option('--version', default=None, show_default=True,
-              help='The version number for the integration')
-@click.option('-v', '--verbose', count=True, default=0, show_default=True,
-              help='Show verbose information about TUF and in-toto')
-def download(standard_distribution_name, version, verbose):
+    parser.add_argument('standard_distribution_name', type=str,
+                        help='Standard distribution name of the desired Datadog check.')
+
+    parser.add_argument('--version', type=str, default=None,
+                        help='The version number of the desired Datadog check.')
+
+    parser.add_argument('-v', '--verbose', action='count', default=0,
+                        help='Show verbose information about TUF and in-toto.')
+
+    args = parser.parse_args()
+    standard_distribution_name = args.standard_distribution_name
+    version = args.version
+    verbose = args.verbose
+
     if not standard_distribution_name.startswith('datadog-'):
         raise NonDatadogPackageException(standard_distribution_name)
     else:
@@ -113,4 +121,4 @@ def download(standard_distribution_name, version, verbose):
                                  wheel_distribution_name, version)
         target_abspath = tuf_downloader.download(target_relpath)
 
-        click.echo(target_abspath)
+        print(target_abspath)

@@ -87,7 +87,7 @@ class TUFDownloader:
 
 
     def __init__(self, verbose=0):
-        # 0 =>  0 (UNSET)
+        # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
         # 2 => 40 (ERROR)
         # 3 => 30 (WARNING)
@@ -95,11 +95,8 @@ class TUFDownloader:
         # 5 => 10 (DEBUG)
         # And so it repeats from here...
         remainder = verbose % 6
-        if not remainder:
-            level = remainder
-        else:
-            level = (6 - remainder) * 10
-        assert level in range(0, 60, 10), level
+        level = (6 - remainder) * 10
+        assert level in range(10, 70, 10), level
         logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
 
         tuf.settings.repositories_directory = REPOSITORIES_DIR

@@ -13,8 +13,4 @@ securesystemslib[crypto,pynacl]==0.11.3
 #
 # For in-toto parameter substitutions.
 #
-setuptools==40.7.1
-#
-# For CLI interface.
-#
-click==7.0
+setuptools==40.7.3
