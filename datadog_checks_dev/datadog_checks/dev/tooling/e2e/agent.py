@@ -68,15 +68,21 @@ def get_agent_version_manifest(platform):
 def get_agent_pip_install(version, platform):
     if platform == WINDOWS:
         return [r'C:\Program Files\Datadog\Datadog Agent\embedded\python', '-m', 'pip', 'install']
-    elif platform == MAC:
+    else:
         return ['/opt/datadog-agent/embedded/bin/pip', 'install', '--user']
 
 
 def get_agent_service_cmd(version, platform, action):
     if platform == WINDOWS:
-        return [get_agent_exe(version, platform), 'start-service' if action == 'start' else 'stopservice']
+        arg = 'start-service' if action == 'start' else 'stopservice'
+        return (
+            r'powershell -executionpolicy bypass -Command Start-Process """""""""C:\Program Files\Datadog\Datadog '
+            r'Agent\embedded\agent.exe""""""""" -Verb runAs -argumentlist {}'.format(arg)
+        )
     elif platform == MAC:
         return [
             'launchctl', 'load' if action == 'start' else 'unload', '-w',
             '{}/Library/LaunchAgents/com.datadoghq.agent.plist'.format(expanduser("~"))
         ]
+    else:
+        return ['sudo', 'service', 'datadog-agent', action]

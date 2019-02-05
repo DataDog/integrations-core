@@ -4,7 +4,6 @@
 import os
 import re
 
-import click
 from shutil import copyfile, move
 
 from .agent import (
@@ -18,7 +17,6 @@ from .config import (
 )
 from .platform import LINUX, MAC, WINDOWS
 from ..constants import get_root
-from ..commands.console import echo_info
 from ...utils import ON_MACOS, ON_WINDOWS, ON_LINUX, path_join, file_exists
 from ...subprocess import run_command
 
@@ -69,12 +67,13 @@ class LocalAgentInterface(object):
 
     def copy_config_to_local_agent(self):
         conf_dir = get_agent_conf_dir(self.check, self.agent_version, self.platform)
-        check_conf_file = os.path.join(get_agent_conf_dir(conf_dir, '{}.yaml'.format(self.check)))
+        check_conf_file = os.path.join(conf_dir, '{}.yaml'.format(self.check))
         if not os.path.exists(conf_dir):
             os.makedirs(conf_dir)
 
         if file_exists(check_conf_file):
             copyfile(check_conf_file, '{}.bak'.format(check_conf_file))
+
         copyfile(self.config_file, check_conf_file)
 
     def remove_config_from_local_agent(self):
@@ -96,18 +95,18 @@ class LocalAgentInterface(object):
         return run_command(command, capture=capture)
 
     def update_check(self):
-        install_cmd = get_agent_pip_install(self.verision, self.platform)
-        + ['-e',  path_join(get_root(), self.check)]
+        install_cmd = get_agent_pip_install(self.agent_version, self.platform) + \
+                      ['-e',  path_join(get_root(), self.check)]
         return run_command(install_cmd, capture=True, check=True)
 
     def update_base_package(self):
-        install_cmd = get_agent_pip_install(self.version, self.platform)
-        + ['-e', self.base_package]
+        install_cmd = get_agent_pip_install(self.agent_version, self.platform) + \
+                      ['-e', self.base_package]
         return run_command(install_cmd, capture=True, check=True)
 
     def update_agent(self):
         # The Local E2E assumes an Agent is already installed on the machine
-        echo_info("Using the locally installed Agent")
+        pass
 
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:
