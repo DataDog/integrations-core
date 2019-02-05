@@ -11,6 +11,7 @@ import re
 from .download import TUFDownloader
 
 # 3rd party.
+# NOTE: We assume that setuptools is installed by default.
 from pkg_resources import parse_version
 
 
