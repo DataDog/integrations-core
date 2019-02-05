@@ -5,7 +5,8 @@
 import pytest
 
 from datadog_checks.pdh_check import PDHCheck
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests
+
+from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
 CHECK_NAME = 'pdh_check'
 

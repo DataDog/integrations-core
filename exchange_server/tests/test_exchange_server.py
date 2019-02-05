@@ -10,7 +10,8 @@ from .common import (
 )
 from datadog_checks.exchange_server import ExchangeCheck
 from datadog_checks.exchange_server.exchange_server import DEFAULT_COUNTERS
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests
+
+from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')

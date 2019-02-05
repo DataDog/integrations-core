@@ -7,7 +7,8 @@ import pytest
 
 from datadog_checks.iis import IIS
 from datadog_checks.iis.iis import DEFAULT_COUNTERS
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture
+
+from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture  # noqa: F401
 
 from .common import (
     CHECK_NAME,
