@@ -17,6 +17,17 @@ from pkg_resources import parse_version
 # Exceptions
 
 
+class NonCanonicalVersionException(Exception):
+
+
+    def __init__(self, version):
+        self.version = version
+
+
+    def __str__(self):
+        return '{} is not a valid PEP 440 version!'.format(self.version)
+
+
 class NonDatadogPackageException(Exception):
 
 
@@ -83,6 +94,15 @@ def __get_latest_version(tuf_downloader, standard_distribution_name, wheel_distr
         return max(versions)
 
 
+def __is_canonical(version):
+    '''
+    https://www.python.org/dev/peps/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions
+    '''
+
+    P = r'^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$'
+    return re.match(P, version) is not None
+
+
 def __wheel_distribution_name(standard_distribution_name):
     # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
     return re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)
@@ -112,9 +132,10 @@ def download():
         tuf_downloader = TUFDownloader(verbose=verbose)
 
         if not version:
-            version = __get_latest_version(tuf_downloader,
-                                           standard_distribution_name,
-                                           wheel_distribution_name)
+            version = __get_latest_version(tuf_downloader, standard_distribution_name, wheel_distribution_name)
+        else:
+            if not __is_canonical(version):
+                raise NonCanonicalVersionException(version)
 
         target_relpath = 'simple/{}/{}-{}-py2.py3-none-any.whl'\
                          .format(standard_distribution_name,
