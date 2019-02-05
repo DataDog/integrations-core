@@ -60,10 +60,6 @@ setup(
     },
     include_package_data=True,
 
-    install_requires=[
-        get_requirements('requirements.in'),
-    ],
-
     entry_points={
         'console_scripts': [
             'datadog-checks-downloader=datadog_checks.downloader.cli:download'
