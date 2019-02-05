@@ -2,8 +2,6 @@
 
 ## Overview
 
-DISCLAIMER: This integration is in beta and should not be used.
-
 This check monitors [Openstack_controller][1].
 
 ## Setup
