@@ -427,9 +427,9 @@ class HAProxy(AgentCheck):
             return
         if collect_status_metrics and 'status' in data_dict and 'pxname' in data_dict:
             if collect_status_metrics_by_host and 'svname' in data_dict:
-                key = (data_dict['pxname'], data_dict['svname'], data_dict['status'])
+                key = (data_dict['pxname'], data_dict['back_or_front'], data_dict['svname'], data_dict['status'])
             else:
-                key = (data_dict['pxname'], data_dict['status'])
+                key = (data_dict['pxname'], data_dict['back_or_front'], data_dict['status'])
             hosts_statuses[key] += 1
 
     def _should_process(self, data_dict, collect_aggregates_only):
@@ -502,9 +502,11 @@ class HAProxy(AgentCheck):
 
         for host_status, count in iteritems(hosts_statuses):
             try:
-                service, hostname, status = host_status
+                service, back_or_front, hostname, status = host_status
             except Exception:
-                service, status = host_status
+                service, back_or_front, status = host_status
+            if back_or_front == 'FRONTEND':
+                continue
 
             if self._is_service_excl_filtered(service, services_incl_filter, services_excl_filter):
                 continue
@@ -550,12 +552,12 @@ class HAProxy(AgentCheck):
         for host_status, count in iteritems(hosts_statuses):
             hostname = None
             try:
-                service, hostname, status = host_status
+                service, _, hostname, status = host_status
             except Exception:
                 if collect_status_metrics_by_host:
                     self.warning('`collect_status_metrics_by_host` is enabled but no host info\
                                  could be extracted from HAProxy stats endpoint for {0}'.format(service))
-                service, status = host_status
+                service, _, status = host_status
 
             if self._is_service_excl_filtered(service, services_incl_filter, services_excl_filter):
                 continue
