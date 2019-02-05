@@ -172,6 +172,8 @@ class CadvisorPrometheusScraperMixin(object):
         if CadvisorPrometheusScraperMixin._is_container_metric(labels):
             pod = self._get_pod_by_metric_label(labels)
             if is_static_pending_pod(pod):
+                # If the pod is static, ContainerStatus is unavailable.
+                # Return the pod UID so that we can collect metrics from it later on.
                 return self._get_pod_uid(labels)
             return self._get_container_id(labels)
 
