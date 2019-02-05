@@ -10,7 +10,3 @@ in-toto==0.2.3
 # version of the library.
 #
 securesystemslib[crypto,pynacl]==0.11.3
-#
-# For in-toto parameter substitutions.
-#
-setuptools==40.8.0

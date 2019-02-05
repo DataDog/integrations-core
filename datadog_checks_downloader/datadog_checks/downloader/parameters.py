@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from pkg_resources import safe_name
+# 1st party.
 import os.path
+import re
 
 
 EXCEPTIONS = {
@@ -13,12 +14,21 @@ EXCEPTIONS = {
 }
 
 
+def __safe_name(name):
+    '''Convert an arbitrary string to a standard distribution name
+    Any runs of non-alphanumeric/. characters are replaced with a single '-'.
+
+    https://github.com/pypa/setuptools/blob/c1243e96f05d3b13392a792144c97d9471581550/pkg_resources/__init__.py#L1317-L1322
+    '''
+    return re.sub('[^A-Za-z0-9.]+', '-', name)
+
+
 def substitute(target_relpath):
     filename = os.path.basename(target_relpath)
     name, ext = os.path.splitext(filename)
     wheel_distribution_name, package_version, _, _, _ = name.split('-')
     assert wheel_distribution_name.startswith('datadog_'), wheel_distribution_name
-    standard_distribution_name = safe_name(wheel_distribution_name)
+    standard_distribution_name = __safe_name(wheel_distribution_name)
 
     # These names are the exceptions.
     if wheel_distribution_name in EXCEPTIONS:
