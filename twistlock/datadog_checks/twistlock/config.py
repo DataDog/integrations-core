@@ -4,11 +4,12 @@
 
 from copy import deepcopy
 
+
 class Config:
 
     STANDARD_METRICS = {
-        'twistlock_totalDefenders': 'total_defenders',
-        'twistlock_activeDefenders': 'active_defenders',
+        'twistlock_total_defenders': 'total_defenders',
+        'twistlock_active_defenders': 'active_defenders',
         'twistlock_images_critical_vulnerabilities': 'images.critical_vulnerabilities',
         'twistlock_images_high_vulnerabilities': 'images.high_vulnerabilities',
         'twistlock_images_medium_vulnerabilities': 'images.medium_vulnerabilities',
@@ -53,7 +54,7 @@ class Config:
     def __init__(self, instance):
         self.instance = instance
 
-        self.prometheus_url = instance.get('prometheus_url')
+        self.prometheus_url = instance.get('prometheus_url', 'http://localhost:8081/api/v1/metrics')
         self.username = instance.get('username')
         self.password = instance.get('password')
         self.send_monotonic_counter = instance.get('send_monotonic_counter', True)
@@ -72,10 +73,7 @@ class Config:
             'namespace': self.NAMESPACE,
             'prometheus_url': self.prometheus_url,
             'label_to_hostname': self.prometheus_url,
-            'username': self.username,
-            'password': self.password,
             'send_monotonic_counter': self.send_monotonic_counter,
             'health_service_check': self.health_service_check,
-            'custom_tags': self.tags,
             'metrics': [self.STANDARD_METRICS],
         })

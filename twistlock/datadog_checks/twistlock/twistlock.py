@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base import AgentCheck
-
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
 
 from .config import Config
 
@@ -21,7 +18,7 @@ class TwistlockCheck(OpenMetricsBaseCheck):
             init_config,
             agentConfig,
             instances=instances,
-            default_namespace='twistlock'
+            default_namespace=default_namespace
         )
 
     def check(self, instance):
