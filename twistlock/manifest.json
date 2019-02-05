@@ -1,0 +1,23 @@
+{
+  "display_name": "Twistlock",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "twistlock",
+  "metric_prefix": "twistlock.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "59082b73-62f4-48d4-83f8-af3d5576eae1",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Twistlock Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false
+}
