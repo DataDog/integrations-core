@@ -31,10 +31,11 @@ To install the check in dev mode:
 pip install -e .[dev]
 ```
 
-To download a new or updated integration, you may specify a precise version:
+To download a new or updated integration, you may specify a precise
+[version][7]:
 
 ```shell
-datadog-checks-downloader -vvvv datadog-$INTEGRATION==X.Y.Z
+datadog-checks-downloader -vvvv datadog-$INTEGRATION --version X.Y.Z
 ```
 
 Or you may leave the version unspecified to download the latest version:
@@ -43,7 +44,7 @@ Or you may leave the version unspecified to download the latest version:
 datadog-checks-downloader -vvvv datadog-$INTEGRATION
 ```
 
-To run the tests, [install tox][7] and just run:
+To run the tests, [install tox][8] and just run:
 
 ```shell
 tox
@@ -51,7 +52,7 @@ tox
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 [1]: https://github.com/DataDog/datadog-agent
 [2]: https://theupdateframework.com/
@@ -59,5 +60,6 @@ Need help? Contact [Datadog support][8].
 [4]: https://youtu.be/XAlvd4QXngs
 [5]: https://github.com/DataDog/integrations-core
 [6]: https://github.com/DataDog/integrations-extras
-[7]: https://tox.readthedocs.io/en/latest/install.html
-[8]: https://docs.datadoghq.com/help
+[7]: https://www.python.org/dev/peps/pep-0440/#version-scheme
+[8]: https://tox.readthedocs.io/en/latest/install.html
+[9]: https://docs.datadoghq.com/help
