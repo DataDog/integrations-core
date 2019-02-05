@@ -9,15 +9,11 @@ from .common import (
 )
 from datadog_checks.active_directory import ActiveDirectoryCheck
 from datadog_checks.active_directory.active_directory import DEFAULT_COUNTERS
-
-# for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though
-# it's used below.  noqa to suppress that error.
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
+from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests
 
 
-# flake8 then says this is a redefinition of unused, which it's not.
-@pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
-def test_basic_check(aggregator, pdh_mocks_fixture):
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_basic_check(aggregator):
     initialize_pdh_tests()
     instance = MINIMAL_INSTANCE
     c = ActiveDirectoryCheck(CHECK_NAME, {}, {}, [instance])
