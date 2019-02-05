@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 2.3.2 / 2019-02-05
+
+* [Fixed] Collect memory usage and filesystem usage for static pods. See [#XXX]
+
 ## 2.3.1 / 2019-01-04
 
 * [Fixed] document kubernetes.pods.running and kubernetes.containers.running. See [#2792][1].
