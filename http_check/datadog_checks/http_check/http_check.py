@@ -213,6 +213,12 @@ class HTTPCheck(NetworkCheck):
 
         # Report status metrics as well
         if service_checks:
+            url = instance.get('url', None)
+            if url is not None:
+                url = ensure_unicode(url)
+            if not any(filter(re.compile('^url:').match, tags)):
+                tags_list.append('url:{}'.format(url))
+                
             can_status = 1 if service_checks[0][1] == "UP" else 0
             self.gauge('network.http.can_connect', can_status, tags=tags_list)
 
