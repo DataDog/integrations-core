@@ -16,7 +16,7 @@ omit =
     ../datadog_checks_dev/datadog_checks/dev/tooling/*
 
     # Vendored dependencies
-    */datadog_checks/vendor/*
+    */datadog_checks/*/vendor/*
 
 [report]
 show_missing = ${DDEV_COV_MISSING}
