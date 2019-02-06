@@ -1,5 +1,5 @@
 graft datadog_checks
-graft test
+graft tests
 
 include MANIFEST.in
 include README.md

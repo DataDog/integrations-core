@@ -71,7 +71,6 @@ target/
 
 #sdk collateral
 venv/
-vendor/
 embedded/
 .bundle/
 .ropeproject/

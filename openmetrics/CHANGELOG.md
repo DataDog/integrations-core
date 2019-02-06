@@ -2,5 +2,6 @@
 
 ## 1.0.0 / 2018-10-13
 
-* [Added] Add OpenMetrics integration. See [#2148](https://github.com/DataDog/integrations-core/pull/2148).
+* [Added] Add OpenMetrics integration. See [#2148][1].
 
+[1]: https://github.com/DataDog/integrations-core/pull/2148

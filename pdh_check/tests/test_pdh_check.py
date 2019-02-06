@@ -4,11 +4,8 @@
 
 import pytest
 
-from datadog_checks.stubs import aggregator
 from datadog_checks.pdh_check import PDHCheck
 
-# for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though
-# it's used below.  noqa to suppress that error.
 from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
 CHECK_NAME = 'pdh_check'
@@ -27,15 +24,8 @@ INSTANCE_METRICS = [
 ]
 
 
-@pytest.fixture
-def Aggregator():
-    aggregator.reset()
-    return aggregator
-
-
-# flake8 then says this is a redefinition of unused, which it's not.
-@pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
-def test_basic_check(Aggregator, pdh_mocks_fixture):
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_basic_check(aggregator):
     """
     Returns the right metrics and service checks
     """
@@ -48,6 +38,6 @@ def test_basic_check(Aggregator, pdh_mocks_fixture):
     c.check(config['instances'][0])
 
     for metric in INSTANCE_METRICS:
-        Aggregator.assert_metric(metric, tags=None, count=1)
+        aggregator.assert_metric(metric, tags=None, count=1)
 
-    Aggregator.assert_all_metrics_covered()
+    aggregator.assert_all_metrics_covered()

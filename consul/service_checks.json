@@ -16,5 +16,14 @@
         "statuses": ["ok", "critical"],
         "name": "Up",
         "description": "Returns OK if the consul server is up, CRITICAL otherwise."
+    },
+    {
+        "agent_version": "5.5.0",
+        "integration":"consul",
+        "groups": ["host", "url"],
+        "check": "consul.can_connect",
+        "statuses": ["ok", "critical"],
+        "name": "Can Connect",
+        "description": "Returns OK if the Agent can make HTTP requests to consul, CRITICAL otherwise."
     }
 ]

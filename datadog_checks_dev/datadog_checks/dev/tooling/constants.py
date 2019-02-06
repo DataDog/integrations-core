@@ -35,10 +35,12 @@ AGENT_V5_ONLY = {
 
 BETA_PACKAGES = {
     'datadog_checks_dev',
+    'datadog_checks_downloader',
 }
 
 NOT_CHECKS = {
     'datadog_checks_dev',
+    'datadog_checks_downloader',
 }
 
 # If a file changes in a PR with any of these file extensions,

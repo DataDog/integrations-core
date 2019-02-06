@@ -13,6 +13,7 @@ from .common import HERE, HOST
 def dd_environment(instance_standalone):
     with docker_run(
         compose_file=os.path.join(HERE, 'docker', 'docker-compose.yaml'),
+        build=True,
         endpoints='http://{}:4040/api/v1/applications'.format(HOST),
         sleep=5,
     ):

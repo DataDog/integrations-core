@@ -18,13 +18,13 @@ To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in 
 3. **Run the Task as a Replica Service**
 
 #### Create an ECS Fargate Task
-This task launches the Datadog Agent container. Configure the task using the [AWS CLI tools][11] or the [Amazon Web Console][12]. **Note**: To monitor your application or integrations, add them to this task.
+This task launches the Datadog Agent container. Configure the task using the [AWS CLI tools][1] or the [Amazon Web Console][2]. **Note**: To monitor your application or integrations, add them to this task.
 
 ##### AWS CLI
 
-1. Download [datadog-agent-ecs-fargate.json][18].
-2. Update the json with a **TASK_NAME** and your [Datadog API Key][13].
-3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][19].
+1. Download [datadog-agent-ecs-fargate.json][3].
+2. Update the json with a **TASK_NAME** and your [Datadog API Key][4].
+3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
 3. Execute the following command to register the ECS task definition:
 ```
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
@@ -32,7 +32,7 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 
 ##### Web UI
 
-1. Log in to your [AWS Web Console][12] and navigate to the ECS section.
+1. Log in to your [AWS Web Console][2] and navigate to the ECS section.
 2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button.
 3. Select **Fargate** as the launch type, then click the **Next step** button.
 4. Enter a **Task Definition Name**, such as `my-app-and-datadog`.
@@ -43,13 +43,13 @@ aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-
 9. For **Image** enter `datadog/agent:latest`.
 10. For **Memory Limits** enter `256` soft limit.
 11. Scroll down to the **Advanced container configuration** section and enter `10` in **CPU units**.
-12. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API Key][13] as the value. *If you feel more comfortable storing secrets in s3, refer to the [ECS Configuration guide][14].*
+12. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API Key][4] as the value. *If you feel more comfortable storing secrets in s3, refer to the [ECS Configuration guide][6].*
 13. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
-14. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][19].
+14. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
 15. Click **Create** to create the task definition.
 
 #### Create or Modify your IAM Policy
-Add the following permissions to your [Datadog IAM policy][15] to collect ECS Fargate metrics. For more information on ECS policies, [review the documentation on the AWS website][16].
+Add the following permissions to your [Datadog IAM policy][7] to collect ECS Fargate metrics. For more information on ECS policies, [review the documentation on the AWS website][8].
 
 | AWS Permission                   | Description                                                       |
 |----------------------------------|-------------------------------------------------------------------|
@@ -58,10 +58,10 @@ Add the following permissions to your [Datadog IAM policy][15] to collect ECS Fa
 | `ecs:DescribeContainerInstances` | Describe instances to add metrics on resources and tasks running. |
 
 #### Run the Task as a Replica Service
-The only option in ECS Fargate is to run the task as a [Replica Service][17]. The Datadog Agent runs as a sidecar in each Fargate task.
+The only option in ECS Fargate is to run the task as a [Replica Service][9]. The Datadog Agent runs as a sidecar in each Fargate task.
 
 ##### AWS CLI
-Run the following commands using the [AWS CLI tools][11]. **Note**: Fargate version 1.1.0 or greater is required, so the command below specifies the platform version.
+Run the following commands using the [AWS CLI tools][1]. **Note**: Fargate version 1.1.0 or greater is required, so the command below specifies the platform version.
 
 ```
 # If needed, create a cluster
@@ -75,7 +75,7 @@ aws ecs run-task --cluster <CLUSTER_NAME> \
 ```
 
 ##### Web UI
-1. Log in to your [AWS Web Console][12] and navigate to the ECS section. If needed, create a cluster with the **Networking only** cluster template.
+1. Log in to your [AWS Web Console][2] and navigate to the ECS section. If needed, create a cluster with the **Networking only** cluster template.
 2. Choose the cluster to run the Datadog Agent on.
 3. On the **Services** tab, click the **Create** button.
 4. For **Launch type**, choose **FARGATE**.
@@ -89,18 +89,18 @@ aws ecs run-task --cluster <CLUSTER_NAME> \
 12. Click the **Next step** button, then click the **Create service** button.
 
 ### Metric Collection
-After the Datadog Agent is setup as described above, the [ecs_fargate check][6] collects metrics with autodiscovery enabled. Add Docker labels to your other containers in the same task to collect additional metrics.
+After the Datadog Agent is setup as described above, the [ecs_fargate check][10] collects metrics with autodiscovery enabled. Add Docker labels to your other containers in the same task to collect additional metrics.
 
-For details on collecting integration metrics, see [Integration Setup for ECS Fargate][19].
+For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
 
 #### DogStatsD
-Metrics are collected with [DogStatsD][20] through UDP port 8125.
+Metrics are collected with [DogStatsD][11] through UDP port 8125.
 
 To send custom metrics by listening to DogStatsD packets from other containers, set the environment variable `DD_DOGSTATSD_NON_LOCAL_TRAFFIC` to `true` within the Datadog Agent container.
 
 ### Log Collection
 
-1. Define the Fargate AwsLogDriver in your task. [Consult the AWS Fargate developer guide][8] for instructions.
+1. Define the Fargate AwsLogDriver in your task. [Consult the AWS Fargate developer guide][12] for instructions.
 
 2. Fargate task definitions only support the awslogs log driver for the log configuration. This configures your Fargate tasks to send log information to Amazon CloudWatch Logs. The following shows a snippet of a task definition where the awslogs log driver is configured:
 
@@ -114,17 +114,17 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
     }
     ```
 
-    For more information about using the awslogs log driver in your task definitions to send container logs to CloudWatch Logs, see [Using the awslogs Log Driver][9].
+    For more information about using the awslogs log driver in your task definitions to send container logs to CloudWatch Logs, see [Using the awslogs Log Driver][13].
 
     This driver collects logs generated by the container and sends them to CloudWatch directly.
 
-3. Finally, use a [Lambda function][10] to collect logs from CloudWatch and send them to Datadog.
+3. Finally, use a [Lambda function][14] to collect logs from CloudWatch and send them to Datadog.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][2] for a list of metrics provided by this integration.
+See [metadata.csv][15] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -137,30 +137,28 @@ Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise retur
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][16].
 
 ## Further Reading
 
-* Blog post: [Monitor AWS Fargate applications with Datadog][4]
-* FAQ: [Integration Setup for ECS Fargate][19]
+* Blog post: [Monitor AWS Fargate applications with Datadog][17]
+* FAQ: [Integration Setup for ECS Fargate][5]
 
 
-[1]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[2]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
-[3]: https://docs.datadoghq.com/help/
-[4]: https://www.datadoghq.com/blog/monitor-aws-fargate/
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/datadog_checks/ecs_fargate/data/conf.yaml.example
-[8]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html
-[9]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html
-[10]: https://docs.datadoghq.com/integrations/amazon_lambda/#log-collection
-[11]: https://aws.amazon.com/cli/
-[12]: https://aws.amazon.com/console/
-[13]: https://app.datadoghq.com/account/settings#api
-[14]: http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html#ecs-config-s3
-[15]: https://docs.datadoghq.com/integrations/amazon_web_services/#installation
-[16]: https://docs.aws.amazon.com/IAM/latest/UserGuide/list_ecs.html
-[17]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html#service_scheduler_replica
-[18]: https://docs.datadoghq.com/json/datadog-agent-ecs-fargate.json
-[19]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/
-[20]: https://docs.datadoghq.com/developers/dogstatsd/
+[1]: https://aws.amazon.com/cli
+[2]: https://aws.amazon.com/console
+[3]: https://docs.datadoghq.com/json/datadog-agent-ecs-fargate.json
+[4]: https://app.datadoghq.com/account/settings#api
+[5]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate
+[6]: http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html#ecs-config-s3
+[7]: https://docs.datadoghq.com/integrations/amazon_web_services/#installation
+[8]: https://docs.aws.amazon.com/IAM/latest/UserGuide/list_ecs.html
+[9]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html#service_scheduler_replica
+[10]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/datadog_checks/ecs_fargate/data/conf.yaml.example
+[11]: https://docs.datadoghq.com/developers/dogstatsd
+[12]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html
+[13]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html
+[14]: https://docs.datadoghq.com/integrations/amazon_lambda/#log-collection
+[15]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
+[16]: https://docs.datadoghq.com/help
+[17]: https://www.datadoghq.com/blog/monitor-aws-fargate

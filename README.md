@@ -95,4 +95,3 @@ fingerprints known to correspond to developers who, at the time of writing (Nov
 [18]: https://codecov.io/github/DataDog/integrations-core?branch=master
 [19]: https://readthedocs.org/projects/datadog-checks-base/badge/?version=latest
 [20]: https://datadog-checks-base.readthedocs.io/en/latest/?badge=latest
-
