@@ -175,3 +175,13 @@ class SystemdCheck(AgentCheck):
 
         except pystemd.dbusexc.DBusInvalidArgsError as e:
             self.log.info("Unit name invalid for {}".format(unit_id))
+
+    def get_number_processes(self, unit_id):
+        try:
+            unit = Unit(unit_id, _autoload=True)
+            list_processes = unit.Service.GetProcesses()
+            process_number = len(list_processes)
+            self.gauge('systemd.unit.numprocess', process_number)
+
+        except pystemd.dbusexc.DBusInvalidArgsError as e:
+            self.log.info("Unit name invalid for {}".format(unit_id))
