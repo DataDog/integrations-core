@@ -1,3 +1,29 @@
+instances:
+  - host: localhost
+    port: 3003
+
+    # All metrics collected by default. You probably don't want to do this,
+    # so list the ones you do want here. Check with asinfo -v statistics -l
+    # and asinfo -v namespace/YOURNAMESPACE -l.
+
+    # metrics:
+    # - migrate_rx_objs
+    # - migrate_tx_objs
+    # namespace_metrics:
+    # - free-pct-disk
+    # - free-pct-memory
+    # - evicted-objects
+    # - expired-objects
+    # - master-objects
+    # - migrate-rx-partitions-initial
+    # - migrate-rx-partitions-remaining
+    # - migrate-tx-partitions-initial
+    # - migrate-tx-partitions-remaining
+
+    # tags:
+    # - optional_tag1
+    # - optional_tag2
+
 init_config:
   # Rate mappings. DO NOT EDIT unless you know what you're doing.
   # See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
@@ -27,7 +53,7 @@ init_config:
     - early_tsvc_client_error
     - early_tsvc_udf_sub_error
     - err_duplicate_proxy_request
-    - err_out_of_space    
+    - err_out_of_space
     - err_recs_dropped            # renamed xdr_queue_overflow_error
     - err_replica_non_null_node
     - err_replica_null_node
@@ -97,7 +123,7 @@ init_config:
     - query_lookup_avg_rec_count    # moved to NS
     - query_lookup_err        # moved to NS query_lookup_error
     - query_lookups    # moved to NS
-    - query_lookup_success        # moved to NS 
+    - query_lookup_success        # moved to NS
     - query_reqs                # moved to NS
     - query_short_queue_full    # moved to NS
     - query_short_reqs        # moved to NS
@@ -220,11 +246,11 @@ init_config:
     - xdr_uninitialized_destination_error
     - xdr_unknown_namespace_error
     - xdr_uptime
- 
+
     # ==============================================================================
     # Namespace specific metrics recorded per namespace
     # ------------------------------------------------------------------------------
-    
+
     # inline comments indicate moved/renamed metrics starting with ASD 3.9+
     - batch_sub_proxy_complete
     - batch_sub_proxy_error
@@ -334,11 +360,11 @@ init_config:
     - xdr_write_error
     - xdr_write_success
     - xdr_write_timeout
-  
+
     # ==============================================================================
     # Datacenter (XDR) specific metrics recorded per datacenter
     # ------------------------------------------------------------------------------
-    
+
     # inline comments indicate moved/renamed metrics starting with ASD 3.9+
     - dc_remote_ship_ok
     - dc_rec_ship_attempts        # renamed dc_ship_attempt
@@ -348,30 +374,3 @@ init_config:
     - dc_ship_destination_error
     - dc_ship_source_error
     - dc_ship_success
-
-instances:
-  - host: localhost
-    # port: 3003
-
-    # All metrics collected by default. You probably don't want to do this,
-    # so list the ones you do want here. Check with asinfo -v statistics -l
-    # and asinfo -v namespace/YOURNAMESPACE -l.
-
-    # metrics:
-    # - migrate_rx_objs
-    # - migrate_tx_objs
-    # namespace_metrics:
-    # - free-pct-disk
-    # - free-pct-memory
-    # - evicted-objects
-    # - expired-objects
-    # - master-objects
-    # - migrate-rx-partitions-initial
-    # - migrate-rx-partitions-remaining
-    # - migrate-tx-partitions-initial
-    # - migrate-tx-partitions-remaining
-
-    # tags:
-    # - optional_tag1
-    # - optional_tag2
-
