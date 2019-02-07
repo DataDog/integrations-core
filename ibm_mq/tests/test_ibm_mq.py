@@ -67,3 +67,31 @@ def test_check(aggregator, instance, seed_data):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_pattern(aggregator, instance_pattern, seed_data):
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check.check(instance_pattern)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_all(aggregator, instance_collect_all, seed_data):
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check.check(instance_collect_all)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    aggregator.assert_all_metrics_covered()

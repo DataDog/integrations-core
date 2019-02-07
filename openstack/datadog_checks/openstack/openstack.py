@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
+
 from datetime import datetime, timedelta
-from urlparse import urljoin
 import re
 import time
 import random
@@ -10,6 +11,8 @@ import copy
 
 import requests
 import simplejson as json
+from six import iteritems
+from six.moves.urllib.parse import urljoin
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
@@ -612,7 +615,7 @@ class OpenStackCheck(AgentCheck):
 
     def delete_current_scope(self):
         scope_to_delete = self._parent_scope if self._parent_scope else self._current_scope
-        for i_key, scope in self.instance_map.items():
+        for i_key, scope in list(self.instance_map.items()):
             if scope is scope_to_delete:
                 self.log.debug("Deleting current scope: %s", i_key)
                 del self.instance_map[i_key]
@@ -635,7 +638,7 @@ class OpenStackCheck(AgentCheck):
         jitter = min(MAX_BACKOFF_SECS, BASE_BACKOFF_SECS * 2 ** self.backoff[i_key]['retries'])
 
         # let's add some jitter  (half jitter)
-        backoff_interval = jitter / 2
+        backoff_interval = jitter // 2
         backoff_interval += random.randint(0, backoff_interval)
 
         tags = instance.get('tags', [])
@@ -760,7 +763,7 @@ class OpenStackCheck(AgentCheck):
         load_averages = uptime[uptime.find('load average:'):].split(':')[1].split(',')
         uptime_sec = uptime.split(',')[0]
 
-        return {'loads': map(float, load_averages), 'uptime_sec': uptime_sec}
+        return {'loads': list(map(float, load_averages)), 'uptime_sec': uptime_sec}
 
     def get_all_hypervisor_ids(self, filter_by_host=None):
         nova_version = self.init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
@@ -861,7 +864,7 @@ class OpenStackCheck(AgentCheck):
         else:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, tags=service_check_tags)
 
-        for label, val in hyp.iteritems():
+        for label, val in iteritems(hyp):
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{0}".format(label)
                 self.gauge(metric_label, val, tags=tags)
@@ -1205,7 +1208,7 @@ class OpenStackCheck(AgentCheck):
             #  The scopes we iterate over should all be OpenStackProjectScope
             #  instances
             projects = []
-            for _, scope in scope_map.iteritems():
+            for _, scope in iteritems(scope_map):
                 # Store the scope on the object so we don't have to keep passing it around
                 self._current_scope = scope
 
@@ -1417,7 +1420,7 @@ class OpenStackCheck(AgentCheck):
         """
         self.log.debug("Collecting external_host_tags now")
         external_host_tags = []
-        for k, v in self.external_host_tags.iteritems():
+        for k, v in iteritems(self.external_host_tags):
             external_host_tags.append((k, {SOURCE_TYPE: v}))
 
         self.log.debug("Sending external_host_tags: %s", external_host_tags)

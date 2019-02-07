@@ -1,6 +1,9 @@
 import os
 
+import pytest
+
 from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.dev.utils import ON_LINUX
 
 AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:a'], 1),
@@ -16,7 +19,6 @@ AGG_STATUSES = (
 )
 
 CHECK_NAME = 'haproxy'
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 HOST = get_docker_hostname()
@@ -30,6 +32,10 @@ STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
 STATS_SOCKET = "tcp://{0}:{1}".format(HOST, SOCKET_PORT)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
+
+platform_supports_sockets = ON_LINUX
+requires_socket_support = pytest.mark.skipif(not platform_supports_sockets,
+                                             reason='Windows sockets are not file handles')
 
 CONFIG_UNIXSOCKET = {
     'collect_aggregates_only': False,

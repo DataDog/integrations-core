@@ -1,19 +1,17 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import copy
 import re
 import time
 
-# 3p
 import mock
 import pytest
+from six import iteritems
 
-# project
-import common
+from . import common
 
+from datadog_checks.checks import AgentCheck
 from datadog_checks.openstack.openstack import (
     OpenStackCheck,
     OpenStackProjectScope,
@@ -24,7 +22,6 @@ from datadog_checks.openstack.openstack import (
     IncompleteIdentity
 )
 
-from datadog_checks.checks import AgentCheck
 
 instance = common.MOCK_CONFIG["instances"][0]
 instance['tags'] = ['optional:tag1']
@@ -146,7 +143,7 @@ def test_unscoped_from_config():
 
                 assert scope.auth_token == 'fake_token'
                 assert len(scope.project_scope_map) == 1
-                for _, scope in scope.project_scope_map.iteritems():
+                for _, scope in iteritems(scope.project_scope_map):
                     assert isinstance(scope, OpenStackProjectScope)
                     assert scope.auth_token == 'fake_token'
                     assert scope.tenant_id == '263fd9'

@@ -1,6 +1,6 @@
 # Oracle Integration
 
-![Oracle Dashboard][9]
+![Oracle Dashboard][1]
 
 ## Overview
 
@@ -14,12 +14,12 @@ To use the Oracle integration, either install the Oracle Instant Client librarie
 
 #### Steps for the JDBC Driver
 
-- [Download][1] the jar file.
-- Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][2]).
+- [Download][2] the jar file.
+- Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
 
 #### Steps for the Instant Client
 
-Go to the [download page][3] and install the Instant Client Basic and SDK packages.
+Go to the [download page][4] and install the Instant Client Basic and SDK packages.
 
 If you are using Linux, after the Instant Client libraries are installed ensure the runtime linker can find the libraries. For example, using `ldconfig`:
 
@@ -47,7 +47,7 @@ unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
 export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 ```
 
-**Note:** Agent 6 uses Upstart or systemd to orchestrate the `datadog-agent` service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][4] or [systemd][5] for more information on how to configure these settings.
+**Note:** Agent 6 uses Upstart or systemd to orchestrate the `datadog-agent` service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][5] or [systemd][6] for more information on how to configure these settings.
 
 The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/int/init/datadog-agent.conf`) on a system using Upstart.
 
@@ -105,7 +105,7 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
-Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10] to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][2] for all available configuration options.
+Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options.
 
 Configuration Options:
 
@@ -119,12 +119,12 @@ Configuration Options:
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `oracle` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `oracle` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
 The Oracle Database check does not include any events.
@@ -134,15 +134,15 @@ The Oracle Database check does not include any events.
 Verifies the database is available and accepting connections.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][10].
 
-[1]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
-[2]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
-[3]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
-[4]: http://upstart.ubuntu.com/cookbook/#environment-variables
-[5]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
-[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
+[2]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+[3]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
+[4]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
+[5]: http://upstart.ubuntu.com/cookbook/#environment-variables
+[6]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
+[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
+[10]: https://docs.datadoghq.com/help

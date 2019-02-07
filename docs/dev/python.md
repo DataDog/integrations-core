@@ -18,18 +18,18 @@ Many operating systems come with Python pre-installed. If your system Python is 
 Any recent version of macOS comes with Python pre-installed, however, it may be older than the version used in the Agent, and might also lack required tools and dependencies. You must install a fresh, dedicated Python interpreter that you can manage *without* the App Store.
 
 Some options include:
-* [Homebrew][3]: Follow the "[Doing it Right][4]" instructions.
-* [Miniconda][6]: Follow the "[Conda installation][7]" instructions.
+* [Homebrew][2]: Follow the "[Doing it Right][3]" instructions.
+* [Miniconda][4]: Follow the "[Conda installation][5]" instructions.
 
-It is recommended to install an [environment manager][5] in order to preserve a clean system Python.
+It is recommended to install an [environment manager][6] in order to preserve a clean system Python.
 
 ### Linux
 
-All mainstream distributions of Linux come with Python pre-installed — likely one of an acceptable version level. It is recommended to install an [environment manager][5] in order to preserve a clean system Python. Refer to your distribution's package management documentation for more information.
+All mainstream distributions of Linux come with Python pre-installed — likely one of an acceptable version level. It is recommended to install an [environment manager][6] in order to preserve a clean system Python. Refer to your distribution's package management documentation for more information.
 
 ### Windows
 
-Windows does not normally have a Python environment present. The [official Python documentation][12] contains detailed installation instructions and links to further documentation and tooling.
+Windows does not normally have a Python environment present. The [official Python documentation][7] contains detailed installation instructions and links to further documentation and tooling.
 
 ## Virtual environment manager
 
@@ -44,13 +44,13 @@ We recommend using [Virtualenv][8] to manage Python virtual environments, and [v
 If you're using Miniconda, a tool to manage virtual environments is included. Refer to the [official guide][11] for more information.
 
 [1]: https://github.com/DataDog/omnibus-software/blob/master/config/software/python.rb#L21
-[3]: https://brew.sh/#install
-[4]: https://docs.python-guide.org/en/latest/starting/install/osx/#doing-it-right
-[5]: #virtual-environment-manager
-[6]: https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh
-[7]: https://conda.io/docs/user-guide/install/macos.html
+[2]: https://brew.sh/#install
+[3]: https://docs.python-guide.org/en/latest/starting/install/osx/#doing-it-right
+[4]: https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh
+[5]: https://conda.io/docs/user-guide/install/macos.html
+[6]: #virtual-environment-manager
+[7]: https://docs.python.org/2.7/using/windows.html
 [8]: https://pypi.python.org/pypi/virtualenv
 [9]: https://virtualenvwrapper.readthedocs.io/en/latest/index.html
 [10]: https://docs.python-guide.org/en/latest/dev/virtualenvs/#lower-level-virtualenv
 [11]: https://conda.io/docs/user-guide/tasks/manage-environments.html
-[12]: https://docs.python.org/2.7/using/windows.html

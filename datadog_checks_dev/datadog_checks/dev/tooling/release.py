@@ -4,8 +4,9 @@
 import re
 
 from .utils import get_version_file, load_manifest
-from ..utils import read_file, read_file_lines, write_file, write_file_lines
+from ..utils import read_file, read_file_lines, write_file, write_file_lines, chdir
 from ..errors import ManifestError
+from ..subprocess import run_command
 
 
 # Maps the Python platform strings to the ones we have in the manifest
@@ -108,3 +109,11 @@ def update_agent_requirements(req_file, check, newline):
             break
 
     write_file_lines(req_file, sorted(lines))
+
+
+def build_wheel(package_path, sdist):
+    with chdir(package_path):
+        return run_command('python setup.py bdist_wheel --universal', capture='out')
+
+        if sdist:
+            return run_command('python setup.py sdist', capture='out')

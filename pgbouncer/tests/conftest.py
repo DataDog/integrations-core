@@ -1,87 +1,54 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from __future__ import print_function
-import subprocess
+
 import os
-import time
+from copy import deepcopy
 
 import pytest
 import psycopg2
+
+from datadog_checks.dev import docker_run, WaitFor
 
 from . import common
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def wait_for(service_name, port):
+def container_up(service_name, port):
     """
     Try to connect to postgres/pgbouncer
     """
-    for _ in range(10):
-        try:
-            psycopg2.connect(host=common.HOST, port=port, user=common.USER, password=common.PASS,
-                             database=common.DB, connect_timeout=2)
-            print("{} started".format(service_name))
-            return True
-        except Exception:
-            print("Waiting for {}...".format(service_name))
-            time.sleep(1)
-
-    return False
+    psycopg2.connect(
+        host=common.HOST, port=port, user=common.USER, password=common.PASS,
+        database=common.DB, connect_timeout=2,
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)
-def pgb_service():
+def dd_environment():
     """
     Start postgres and install pgbouncer. If there's any problem executing
     docker-compose, let the exception bubble up.
     """
-    env = os.environ
-    env['TEST_RESOURCES_PATH'] = os.path.join(HERE, 'resources')
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'docker-compose.yml')
-    ]
 
-    subprocess.check_call(args + ["up", "-d"], env=env)
+    with docker_run(
+        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
+        env_vars={'TEST_RESOURCES_PATH': os.path.join(HERE, 'resources')},
+        conditions=[
+            WaitFor(container_up, args=("Postgres", 5432)),
+            WaitFor(container_up, args=("PgBouncer", common.PORT)),
+        ]
+    ):
 
-    if not wait_for("Postgres", '5432'):
-        subprocess.check_call(args + ["logs"], env=env)
-        subprocess.check_call(args + ["down"])
-        raise Exception("Postgres boot timed out!")
-
-    if not wait_for("PgBouncer", common.PORT):
-        subprocess.check_call(args + ["logs"], env=env)
-        subprocess.check_call(args + ["down"])
-        raise Exception("PgBouncer boot timed out!")
-
-    yield
-
-    subprocess.check_call(args + ["down"])
+        yield common.DEFAULT_INSTANCE
 
 
 @pytest.fixture
 def instance():
-    return {
-        'host': common.HOST,
-        'port': common.PORT,
-        'username': common.USER,
-        'password': common.PASS,
-        'tags': ['optional:tag1']
-    }
+    return deepcopy(common.DEFAULT_INSTANCE)
 
 
 @pytest.fixture
 def instance_with_url():
-    return {
-        'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test',
-        'tags': ['optional:tag1']
-    }
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+    return deepcopy(common.INSTANCE_URL)

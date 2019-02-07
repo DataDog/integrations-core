@@ -37,6 +37,19 @@ instances:
   #  queues:
   #    - '<QUEUE_NAME>'
 
+  ## @param queue_patterns - list of string - optional
+  ## Collect from queues that match a pattern
+  #
+  #  queue_patterns:
+  #    - 'DEV.*'
+  #    - 'SYSTEM.*'
+
+  ## @param auto_discover_queues - string - optional - default: false
+  ## Autodiscover the queues to monitor
+  ## Warning: this will lead to some warnings in your
+  #
+  #  auto_discover_queues: '<PASSWORD>'
+
   ## @param ssl_auth - string - optional
   ## Whether or not to use SSL auth while connecting to the channel.
   #

@@ -1,6 +1,6 @@
 # Agent Check: Tomcat
 
-![Tomcat Dashboard][23]
+![Tomcat Dashboard][1]
 
 ## Overview
 
@@ -15,15 +15,15 @@ And more.
 ## Setup
 ### Installation
 
-The Tomcat check is included in the [Datadog Agent][13] package, so you don't need to install anything else on your Tomcat servers.
+The Tomcat check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Tomcat servers.
 
-This check is JMX-based, so you need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][14] to do that.
+This check is JMX-based, so you need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][3] to do that.
 
 ### Configuration
 
-1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][24] to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection). See the [sample tomcat.d/conf.yaml][17] for all available configuration options.
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection). See the [sample tomcat.d/conf.yaml][5] for all available configuration options.
 
-2. [Restart the Agent][16]
+2. [Restart the Agent][6]
 
 #### Metric Collection
 
@@ -104,9 +104,9 @@ init_config:
             metric_type: counter
 ```
 
-See the [JMX Check documentation][15] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
+See the [JMX Check documentation][7] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
 
-[Restart the Agent][16] to start sending Tomcat metrics to Datadog.
+[Restart the Agent][6] to start sending Tomcat metrics to Datadog.
 
 Configuration Options:
 
@@ -136,7 +136,7 @@ Your metric is mydomain (or some variation depending on the attribute inside the
 
 If you specify an alias in an `include` key that is formatted as *camel case*, it is converted to *snake case*. For example, `MyMetricName` is shown in Datadog as `my_metric_name`.
 
-See the [sample tomcat.yaml][17] for all available configuration options.
+See the [sample tomcat.yaml][5] for all available configuration options.
 
 ##### The `attribute` filter
 
@@ -274,7 +274,7 @@ log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/hos
   INFO, HOST-MANAGER
 ```
 
-Check Tomcat [logging documentation][18] for more information about Tomcat logging capabilities.
+Check Tomcat [logging documentation][8] for more information about Tomcat logging capabilities.
 
 By default, Datadog's integration pipeline support the following conversion patterns:
 
@@ -283,7 +283,7 @@ By default, Datadog's integration pipeline support the following conversion patt
   %d [%t] %-5p %c - %m%n
   ```
 
-Make sure you clone and edit the [integration pipeline][19] if you have a different format.
+Make sure you clone and edit the [integration pipeline][9] if you have a different format.
 
 * Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
 
@@ -306,17 +306,17 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
       #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
   ```
 
-* Change the `path` and `service` parameter values and configure them for your environment. See the [sample tomcat.yaml][17] for all available configuration options.
+* Change the `path` and `service` parameter values and configure them for your environment. See the [sample tomcat.yaml][5] for all available configuration options.
 
-* [Restart the Agent][16].
+* [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's status subcommand][20] and look for `tomcat` under the **Checks** section.
+[Run the Agent's status subcommand][10] and look for `tomcat` under the **Checks** section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][21] for a list of metrics provided by this check.
+See [metadata.csv][11] for a list of metrics provided by this check.
 
 ### Events
 The Tomcat check does not include any events.
@@ -347,20 +347,20 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 ## Further Reading
 Additional helpful documentation, links, and articles:
 
-* [Monitor Tomcat metrics with Datadog][22]
-* [Key metrics for monitoring Tomcat][25]
+* [Monitor Tomcat metrics with Datadog][12]
+* [Key metrics for monitoring Tomcat][13]
 
 
-[13]: https://app.datadoghq.com/account/settings#agent
-[14]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
-[15]: https://docs.datadoghq.com/integrations/java/
-[16]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[17]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
-[18]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
-[19]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[20]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[21]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
-[22]: https://www.datadoghq.com/blog/monitor-tomcat-metrics/
-[23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
-[24]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
-[25]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance/
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
+[4]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[7]: https://docs.datadoghq.com/integrations/java
+[8]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
+[9]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[10]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
+[12]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
+[13]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance

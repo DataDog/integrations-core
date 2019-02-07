@@ -1,13 +1,11 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import socket
 import time
 
-# project
-from datadog_checks.checks import NetworkCheck, Status
+from datadog_checks.base import ensure_unicode
+from datadog_checks.base.checks import NetworkCheck, Status
 
 
 class BadConfException(Exception):
@@ -106,7 +104,7 @@ class TCPCheck(NetworkCheck):
         return Status.UP, "UP"
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):
-        instance_name = self.normalize(instance['name'])
+        instance_name = ensure_unicode(self.normalize(instance['name']))
         host = instance.get('host', None)
         port = instance.get('port', None)
         custom_tags = instance.get('tags', [])
