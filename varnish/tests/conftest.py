@@ -7,6 +7,7 @@ import os
 
 from datadog_checks.dev import docker_run
 from datadog_checks.varnish import Varnish
+
 from . import common
 
 
@@ -17,11 +18,9 @@ def check():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(
-            compose_file=os.path.join(common.HERE, 'compose', 'docker-compose.yaml'),
-            sleep=2,
-    ):
-        yield common.get_config_by_version()
+    compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+    with docker_run(compose_file, sleep=2):
+        yield common.get_config_by_version(), 'local'
 
 
 @pytest.fixture

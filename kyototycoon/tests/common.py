@@ -8,6 +8,13 @@ from datadog_checks.utils.common import get_docker_hostname
 HOST = get_docker_hostname()
 PORT = '1978'
 
-URL = 'http://{0}:{1}'.format(HOST, PORT)
+URL = 'http://{}:{}'.format(HOST, PORT)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+TAGS = ['optional:tag1']
+
+DEFAULT_INSTANCE = {
+    'report_url': '{}/rpc/report'.format(URL),
+    'tags': TAGS
+}

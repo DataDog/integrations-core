@@ -6,13 +6,12 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 
-
-CHECK_NAME = 'sqlserver'
-EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS]
+from .common import CHECK_NAME, EXPECTED_METRICS
 
 
 @pytest.mark.docker
-def test_check_invalid_password(aggregator, init_config, instance_docker, sqlserver):
+@pytest.mark.usefixtures("dd_environment")
+def test_check_invalid_password(aggregator, init_config, instance_docker):
     instance_docker['password'] = 'FOO'
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
@@ -20,12 +19,16 @@ def test_check_invalid_password(aggregator, init_config, instance_docker, sqlser
     with pytest.raises(SQLConnectionError) as excinfo:
         sqlserver_check.check(instance_docker)
         assert excinfo.value.args[0] == 'Unable to connect to SQL Server'
-    aggregator.assert_service_check('sqlserver.can_connect', status=sqlserver_check.CRITICAL,
-                                    tags=['host:localhost,1433', 'db:master', 'optional:tag1'])
+    aggregator.assert_service_check(
+        'sqlserver.can_connect',
+        status=sqlserver_check.CRITICAL,
+        tags=['host:localhost,1433', 'db:master', 'optional:tag1']
+    )
 
 
 @pytest.mark.docker
-def test_check_docker(aggregator, init_config, instance_docker, sqlserver):
+@pytest.mark.usefixtures("dd_environment")
+def test_check_docker(aggregator, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
     sqlserver_check.check(instance_docker)
     expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
@@ -33,29 +36,8 @@ def test_check_docker(aggregator, init_config, instance_docker, sqlserver):
 
 
 @pytest.mark.docker
-def test_object_name(aggregator, instance_docker, sqlserver):
-    init_config_object_name = {
-        'custom_metrics': [
-            {
-                'name': 'sqlserver.cache.hit_ratio',
-                'counter_name': 'Cache Hit Ratio',
-                'instance_name': 'SQL Plans',
-                'object_name': 'SQLServer:Plan Cache',
-                'tags': [
-                    'optional_tag:tag1'
-                ]
-            },
-            {
-                'name': 'sqlserver.active_requests',
-                'counter_name': 'Active requests',
-                'instance_name': 'default',
-                'object_name': 'SQLServer:Workload Group Stats',
-                'tags': [
-                    'optional_tag:tag1'
-                ]
-            }
-        ]
-    }
+@pytest.mark.usefixtures("dd_environment")
+def test_object_name(aggregator, init_config_object_name, instance_docker):
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, {}, [instance_docker])
     sqlserver_check.check(instance_docker)

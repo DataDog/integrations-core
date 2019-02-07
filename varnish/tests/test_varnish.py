@@ -10,7 +10,6 @@ from . import common
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check(aggregator, check, instance):
-
     check.check(instance)
     for mname in common.COMMON_METRICS:
         aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])

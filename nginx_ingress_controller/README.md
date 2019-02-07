@@ -25,7 +25,7 @@ need to install anything else on your server.
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][7]:
+* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
 
 ```
 (...)
@@ -38,7 +38,7 @@ need to install anything else on your server.
 (...)
 ```
 
-* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][8].
+* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5].
 
 * [Restart the Agent][3].
 
@@ -59,13 +59,13 @@ ad.datadoghq.com/nginx-ingress-controller.logs: '[{"service": "controller", "sou
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `nginx_ingress_controller` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `nginx_ingress_controller` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -77,13 +77,13 @@ nginx-ingress-controller does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][8].
 
-[1]: https://kubernetes.github.io/ingress-nginx/
+[1]: https://kubernetes.github.io/ingress-nginx
 [2]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/datadog_checks/nginx_ingress_controller/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://docs.datadoghq.com/help/
-[6]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/metadata.csv
-[7]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
-[8]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
+[4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
+[5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/metadata.csv
+[8]: https://docs.datadoghq.com/help

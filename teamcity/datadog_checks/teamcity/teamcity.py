@@ -107,7 +107,7 @@ class TeamCityCheck(AgentCheck):
         ssl_validation = _is_affirmative(instance.get("ssl_validation", True))
 
         server = instance.get("server")
-        if "server" is None:
+        if server is None:
             raise Exception("Each instance must have a server")
 
         # Check the server URL for HTTP or HTTPS designation,

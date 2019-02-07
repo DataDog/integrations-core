@@ -6,8 +6,8 @@ import os
 import mock
 import pytest
 
-from datadog_checks.stubs import aggregator as _aggregator
 from datadog_checks.kubernetes_state import KubernetesState
+from datadog_checks.utils.common import ensure_unicode
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -198,17 +198,11 @@ class MockResponse:
         self.headers = {'Content-Type': content_type}
 
     def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
-            yield elt
+        for elt in self.content.split(b"\n"):
+            yield ensure_unicode(elt)
 
     def close(self):
         pass
-
-
-@pytest.fixture
-def aggregator():
-    _aggregator.reset()
-    return _aggregator
 
 
 @pytest.fixture

@@ -4,6 +4,7 @@
 
 import pika
 import logging
+import pytest
 
 from contextlib import closing
 
@@ -14,12 +15,17 @@ from . import common, metrics
 log = logging.getLogger(__file__)
 
 
-def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_rabbitmq(aggregator, check):
     check.check(common.CONFIG)
 
     # Node attributes
     for mname in metrics.COMMON_METRICS:
         aggregator.assert_metric_has_tag_prefix(mname, 'rabbitmq_node', count=1)
+
+    from six import iteritems
+    for m, v in iteritems(aggregator._metrics):
+        log.warning("{} {}".format(m, v))
 
     aggregator.assert_metric('rabbitmq.node.partitions', value=0, count=1)
     aggregator.assert_metric('rabbitmq.connections',
@@ -60,7 +66,8 @@ def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_regex(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_regex(aggregator, check):
     check.check(common.CONFIG_REGEX)
 
     # Node attributes
@@ -98,7 +105,8 @@ def test_regex(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_limit_vhosts(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_limit_vhosts(aggregator, check):
     check.check(common.CONFIG_REGEX)
 
     # Node attributes
@@ -132,7 +140,8 @@ def test_limit_vhosts(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_family_tagging(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_family_tagging(aggregator, check):
     check.check(common.CONFIG_WITH_FAMILY)
 
     # Node attributes
@@ -165,7 +174,8 @@ def test_family_tagging(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_connections(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
+@pytest.mark.usefixtures('dd_environment')
+def test_connections(aggregator, check):
     # no connections and no 'vhosts' list in the conf don't produce 'connections' metric
     check.check(common.CONFIG)
     aggregator.assert_metric('rabbitmq.connections',

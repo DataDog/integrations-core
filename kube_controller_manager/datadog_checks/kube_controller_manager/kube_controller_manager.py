@@ -116,7 +116,7 @@ class KubeControllerManagerCheck(OpenMetricsBaseCheck):
         queues = self.DEFAULT_QUEUES + instance.get("extra_queues", [])
         for queue in queues:
             for metric, func in iteritems(self.QUEUE_METRICS_TRANSFORMERS):
-                    transformers[queue + metric] = func
+                transformers[queue + metric] = func
 
         self.process(scraper_config, metric_transformers=transformers)
 

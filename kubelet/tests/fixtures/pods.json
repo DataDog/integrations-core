@@ -673,7 +673,7 @@
                 "nodeName": "gke-haissam-default-pool-be5066f1-wnvn"
             },
             "metadata": {
-                "name": "fluentd-gcp-v2.0.10-9q9t4",
+                "name": "fluentd-gcp-v2.0.10-p13r3",
                 "labels": {
                     "k8s-app": "fluentd-gcp",
                     "version": "v2.0.10",
@@ -700,7 +700,7 @@
                     "kubernetes.io/config.source": "api",
                     "kubernetes.io/config.seen": "2018-02-13T16:10:19.509264637Z"
                 },
-                "selfLink": "/api/v1/namespaces/kube-system/pods/fluentd-gcp-v2.0.10-9q9t4",
+                "selfLink": "/api/v1/namespaces/kube-system/pods/fluentd-gcp-v2.0.10-p13r3",
                 "uid": "2fdfd4d9-10ce-11e8-bd5a-42010af00137"
             }
         },
@@ -906,7 +906,7 @@
                         "image": "datadog/dev-dd-agent:beta",
                         "imageID": "docker-pullable://datadog/dev-dd-agent@sha256:1672a9c8741813070b5fac803d598c379e37e678e989582c55b7659b01f36eb4",
                         "state": {
-                            "running": {
+                            "waiting": {
                                 "startedAt": "2018-02-13T16:11:00Z"
                             }
                         },
@@ -918,7 +918,7 @@
                 "podIP": "10.8.2.2",
                 "startTime": "2018-02-13T15:16:11Z",
                 "hostIP": "10.132.0.4",
-                "phase": "Running",
+                "phase": "Pending",
                 "conditions": [
                     {
                         "status": "True",
@@ -1123,7 +1123,7 @@
                 "podIP": "10.8.2.5",
                 "startTime": "2018-02-13T16:11:38Z",
                 "hostIP": "10.132.0.4",
-                "phase": "Running",
+                "phase": "Pending",
                 "conditions": [
                     {
                         "status": "True",

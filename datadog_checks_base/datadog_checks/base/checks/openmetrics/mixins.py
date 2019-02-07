@@ -519,12 +519,14 @@ class OpenMetricsScraperMixin(object):
         """
         If hostname is None, look at label_to_hostname setting
         """
-        if (hostname is None and scraper_config['label_to_hostname'] is not None and
-                scraper_config['label_to_hostname'] in sample[self.SAMPLE_LABELS]):
-                hostname = sample[self.SAMPLE_LABELS][scraper_config['label_to_hostname']]
-                suffix = scraper_config['label_to_hostname_suffix']
-                if suffix is not None:
-                    hostname += suffix
+        if (
+            hostname is None and scraper_config['label_to_hostname'] is not None and
+            scraper_config['label_to_hostname'] in sample[self.SAMPLE_LABELS]
+        ):
+            hostname = sample[self.SAMPLE_LABELS][scraper_config['label_to_hostname']]
+            suffix = scraper_config['label_to_hostname_suffix']
+            if suffix is not None:
+                hostname += suffix
 
         return hostname
 
