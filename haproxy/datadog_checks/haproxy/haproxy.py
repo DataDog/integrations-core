@@ -148,7 +148,7 @@ class HAProxy(AgentCheck):
             instance.get('tag_service_check_by_host', False)
         )
 
-        enable_service_check = _is_aggregate(
+        enable_service_check = _is_affirmative(
             instance.get('enable_service_check', False)
         )
 
