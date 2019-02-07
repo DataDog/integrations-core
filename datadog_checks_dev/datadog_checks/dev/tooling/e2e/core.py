@@ -3,11 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .config import read_env_data
 from .docker import DockerInterface
+from .local import LocalAgentInterface
 
 
 def derive_interface(env_type):
     if env_type == 'docker':
         return DockerInterface
+    elif env_type == 'local':
+        return LocalAgentInterface
 
 
 def create_interface(check, env):

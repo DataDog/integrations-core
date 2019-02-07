@@ -2,10 +2,10 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 system.processes.cpu.pct,gauge,,percent,,The CPU utilization of a process.,0,system,processes cpu pct
 system.processes.cpu.normalized_pct,gauge,,percent,,The normalized CPU utilization of a process.,0,system,processes cpu normalized pct
 system.processes.involuntary_ctx_switches,gauge,,event,,The number of involuntary context switches performed by this process.,0,system,processes invol ctx switches
-system.processes.ioread_bytes,gauge,,byte,,The number of bytes read from disk by this process.,0,system,processes io r bytes
-system.processes.ioread_count,gauge,,read,,The number of disk reads by this process.,0,system,processes io r count
-system.processes.iowrite_bytes,gauge,,byte,,The number of bytes written to disk by this process.,0,system,processes io w bytes
-system.processes.iowrite_count,gauge,,write,,The number of disk writes by this process.,0,system,processes io w count
+system.processes.ioread_bytes,gauge,,byte,,The number of bytes read from disk by this process. In Windows: the number of bytes read.,0,system,processes io r bytes
+system.processes.ioread_count,gauge,,read,,The number of disk reads by this process. In Windows: the number of reads by this process.,0,system,processes io r count
+system.processes.iowrite_bytes,gauge,,byte,,The number of bytes written to disk by this process. In Windows: the number of bytes written by this process.,0,system,processes io w bytes
+system.processes.iowrite_count,gauge,,write,,The number of disk writes by this process. In Windows: the number of writes by this process.,0,system,processes io w count
 system.processes.mem.page_faults.minor_faults,gauge,,occurrence,second,The number of minor page faults per second for this process.,0,system,minor page faults
 system.processes.mem.page_faults.children_minor_faults,gauge,,occurrence,second,The number of minor page faults per second for children of this process.,0,system,children minor page faults
 system.processes.mem.page_faults.major_faults,gauge,,occurrence,second,The number of major page faults per second for this process.,0,system,major page faults
