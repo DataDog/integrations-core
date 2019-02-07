@@ -8,6 +8,7 @@ import requests
 import logging
 
 from copy import deepcopy
+
 from datadog_checks.riak import Riak
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
