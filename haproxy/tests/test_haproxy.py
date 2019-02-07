@@ -64,7 +64,7 @@ def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=Fa
                     aggregator.assert_metric(rate, tags=tags, count=1)
 
 
-def _test_service_checks(aggregator, services=None):
+def _test_service_checks(aggregator, services=None, count=1):
     if not services:
         services = BACKEND_SERVICES
     for service in services:
@@ -92,6 +92,26 @@ def test_check(aggregator, check, instance):
     _test_frontend_metrics(aggregator, shared_tag + ['active:false'])
     _test_backend_metrics(aggregator, shared_tag + ['active:false'])
 
+    _test_service_checks(aggregator, count=0)
+
+    aggregator.assert_all_metrics_covered()
+
+@requires_socket_support
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_check_service_check(aggregator, check, instance):
+    # Add the enable service check
+    instance.update({
+        "enable_service_check": True
+    })
+
+    check.check(instance)
+
+    shared_tag = ["instance_url:{0}".format(STATS_URL)]
+
+    _test_frontend_metrics(aggregator, shared_tag + ['active:false'])
+    _test_backend_metrics(aggregator, shared_tag + ['active:false'])
+
     # check was run 2 times
     #       - FRONTEND is reporting OPEN that we ignore
     #       - only the BACKEND aggregate is reporting UP -> OK
@@ -99,7 +119,6 @@ def test_check(aggregator, check, instance):
     _test_service_checks(aggregator)
 
     aggregator.assert_all_metrics_covered()
-
 
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
@@ -111,8 +130,6 @@ def test_check_service_filter(aggregator, check, instance):
     shared_tag = ["instance_url:{0}".format(STATS_URL)]
 
     _test_backend_metrics(aggregator, shared_tag + ['active:false'], ['datadog'])
-
-    _test_service_checks(aggregator, ['datadog'])
 
     aggregator.assert_all_metrics_covered()
 
@@ -138,7 +155,6 @@ def test_open_config(aggregator, check):
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag)
-    _test_service_checks(aggregator)
 
     aggregator.assert_all_metrics_covered()
 
@@ -156,7 +172,6 @@ def test_tcp_socket(aggregator, check):
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
-    _test_service_checks(aggregator)
 
     aggregator.assert_all_metrics_covered()
 
@@ -174,6 +189,5 @@ def test_unixsocket_config(aggregator, check, dd_environment):
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
-    _test_service_checks(aggregator)
 
     aggregator.assert_all_metrics_covered()
