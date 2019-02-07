@@ -4,6 +4,8 @@
 
 import re
 
+from six import iteritems
+
 from datadog_checks.utils.containers import hash_mutable
 
 from . import helpers
@@ -89,7 +91,7 @@ class CiscoTags:
             if len(epg_metas) > 0 and epg_metas[0] and type(epg_metas[0]) is dict:
                 epg = epg_metas[0].get('fvCEp', {})
                 return self._epg_meta_tags_map(epg)
-        except exceptions.APIConnectionException, exceptions.APIParsingException:
+        except (exceptions.APIConnectionException, exceptions.APIParsingException):
             # the exception will already be logged, just pass it over here
             pass
         return tags_map
@@ -101,7 +103,7 @@ class CiscoTags:
 
         application_meta = []
         application_meta_map = self._edpt_tags_map(edpt)
-        for k, v in application_meta_map.iteritems():
+        for k, v in iteritems(application_meta_map):
             application_meta.append(k + ":" + v)
         tenant_name = application_meta_map.get("tenant")
         app_name = application_meta_map.get("application")
@@ -110,7 +112,7 @@ class CiscoTags:
         # adding meta tags
         endpoint_meta = []
         endpoint_meta_map = self._get_epg_meta_tags_map(tenant_name, app_name, epg_name)
-        for k, v in endpoint_meta_map.iteritems():
+        for k, v in iteritems(endpoint_meta_map):
             endpoint_meta.append(k + ":" + v)
 
         # adding application tags
@@ -148,7 +150,7 @@ class CiscoTags:
 
                     self.tenant_farbic_mapper[tenant_fabric_key] = list(set(
                         self.tenant_farbic_mapper[tenant_fabric_key]))
-            except exceptions.APIConnectionException, exceptions.APIParsingException:
+            except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 # the exception will already be logged, just pass it over here
                 pass
 

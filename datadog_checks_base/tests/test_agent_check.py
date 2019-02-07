@@ -17,6 +17,13 @@ def test_instance():
     AgentCheck()
 
 
+def test_log_critical_error():
+    check = AgentCheck()
+
+    with pytest.raises(NotImplementedError):
+        check.log.critical('test')
+
+
 class TestMetricNormalization:
     def test_default(self):
         check = AgentCheck()

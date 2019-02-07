@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import pytest
 import re
+
+import pytest
 
 from datadog_checks.iis import IIS
 from datadog_checks.iis.iis import DEFAULT_COUNTERS
-# for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though
-# it's used below.  noqa to suppress that error.
+
 from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture  # noqa: F401
 
 from .common import (
@@ -20,9 +20,8 @@ from .common import (
 )
 
 
-# flake8 then says this is a redefinition of unused, which it's not.
-@pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
-def test_basic_check(aggregator, pdh_mocks_fixture):
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_basic_check(aggregator):
     instance = MINIMAL_INSTANCE
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
@@ -40,9 +39,8 @@ def test_basic_check(aggregator, pdh_mocks_fixture):
     aggregator.assert_all_metrics_covered()
 
 
-# flake8 then says this is a redefinition of unused, which it's not.
-@pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
-def test_check_on_specific_websites(aggregator, pdh_mocks_fixture):
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_check_on_specific_websites(aggregator):
     instance = INSTANCE
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
@@ -63,9 +61,8 @@ def test_check_on_specific_websites(aggregator, pdh_mocks_fixture):
     aggregator.assert_all_metrics_covered()
 
 
-# flake8 then says this is a redefinition of unused, which it's not.
-@pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
-def test_service_check_with_invalid_host(aggregator, pdh_mocks_fixture):
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_service_check_with_invalid_host(aggregator):
     instance = INVALID_HOST_INSTANCE
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
@@ -73,9 +70,8 @@ def test_service_check_with_invalid_host(aggregator, pdh_mocks_fixture):
     aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=["site:{0}".format('Total')])
 
 
-# flake8 then says this is a redefinition of unused, which it's not.
-@pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
-def test_check(aggregator, pdh_mocks_fixture):
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_check(aggregator):
     """
     Returns the right metrics and service checks
     """
@@ -106,9 +102,8 @@ def test_check(aggregator, pdh_mocks_fixture):
     aggregator.assert_all_metrics_covered()
 
 
-# flake8 then says this is a redefinition of unused, which it's not.
-@pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
-def test_check_without_sites_specified(aggregator, pdh_mocks_fixture):
+@pytest.mark.usefixtures('pdh_mocks_fixture')
+def test_check_without_sites_specified(aggregator):
     """
     Returns the right metrics and service checks for the `_Total` site
     """

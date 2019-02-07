@@ -6,9 +6,11 @@ from random import sample, shuffle
 import getpass
 
 import pytest
+from six import iteritems
 
 from datadog_checks.postfix import PostfixCheck
 from datadog_checks.dev.utils import temp_dir, create_file
+from datadog_checks.utils.common import ensure_unicode
 
 log = logging.getLogger()
 
@@ -50,7 +52,7 @@ def add_messages(queue_root, queues, in_count):
     for _ in range(10000):
         shuffle(queues)
         rand_queue = sample(queues, 1)[0]
-        queue_file = binascii.b2a_hex(os.urandom(7))
+        queue_file = ensure_unicode(binascii.b2a_hex(os.urandom(7)))
 
         create_file(os.path.join(queue_root, rand_queue, queue_file))
 
@@ -77,7 +79,7 @@ def test_check(setup_postfix, check, aggregator):
 
     check.check(instance)
 
-    for queue, count in in_count.iteritems():
+    for queue, count in iteritems(in_count):
         tags = ['instance:postfix', 'queue:{}'.format(queue)]
         aggregator.assert_metric('postfix.queue.size',
                                  value=count[0],

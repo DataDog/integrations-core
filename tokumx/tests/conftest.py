@@ -6,10 +6,9 @@ import pytest
 import os
 from copy import deepcopy
 
-import pymongo
-
 from datadog_checks.dev import docker_run
 from datadog_checks.tokumx import TokuMX
+from datadog_checks.tokumx.vendor import pymongo
 
 from . import common
 
@@ -22,7 +21,6 @@ def dd_environment():
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
-
     compose_dir = os.path.join(common.HERE, 'compose')
 
     with docker_run(
@@ -45,7 +43,7 @@ def instance():
 
 
 def set_up_tokumx():
-    cli = pymongo.mongo_client.MongoClient(
+    cli = pymongo.MongoClient(
         common.TOKUMX_SERVER,
         socketTimeoutMS=30000,
         read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)

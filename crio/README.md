@@ -29,7 +29,7 @@ Datadog-CRI-O integration is also collecting CPU and memory usage of CRI-O golan
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -43,9 +43,9 @@ CRI-O does not include any events.
 
 Need help? Contact [Datadog support][6].
 
-[1]: http://cri-o.io/
+[1]: http://cri-o.io
+[2]: 
 [3]: https://github.com/DataDog/integrations-core/blob/master/crio/datadog_checks/crio/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/help/
-[7]: https://github.com/DataDog/integrations-core/blob/master/crio/metadata.csv
+[5]: https://github.com/DataDog/integrations-core/blob/master/crio/metadata.csv
+[6]: https://docs.datadoghq.com/help

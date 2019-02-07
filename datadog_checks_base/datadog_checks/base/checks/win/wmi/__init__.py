@@ -254,7 +254,7 @@ class WinWMICheck(AgentCheck):
         """
         Create and cache a WMISampler for the given (class, properties)
         """
-        properties = properties + [tag_by] if tag_by else properties
+        properties = list(properties) + [tag_by] if tag_by else list(properties)
 
         if instance_key not in self.wmi_samplers:
             wmi_sampler = WMISampler(self.log, wmi_class, properties, **kwargs)

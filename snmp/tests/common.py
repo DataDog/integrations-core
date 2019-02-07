@@ -159,7 +159,7 @@ INVALID_METRICS = [
     {
         'MIB': "IF-MIB",
         'table': "noIdeaWhatIAmDoingHere",
-        'symbols': ["ifInOctets", "ifOutOctets"],
+        'symbols': ["ImWrong", "MeToo"],
     }
 ]
 
