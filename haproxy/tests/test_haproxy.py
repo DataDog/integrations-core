@@ -72,12 +72,12 @@ def _test_service_checks(aggregator, services=None, count=1):
             tags = ['service:' + service, 'backend:' + backend]
             aggregator.assert_service_check(SERVICE_CHECK_NAME,
                                             status=HAProxy.UNKNOWN,
-                                            count=1,
+                                            count=count,
                                             tags=tags)
         tags = ['service:' + service, 'backend:BACKEND']
         aggregator.assert_service_check(SERVICE_CHECK_NAME,
                                         status=HAProxy.OK,
-                                        count=1,
+                                        count=count,
                                         tags=tags)
 
 
