@@ -77,6 +77,9 @@ instances:
     # headers:
     #   key1: value1
 
+    # Enable the service check, off by default
+    # enable_service_check: False
+
 ## Log section (Available for Agent >=6.0)
 
 #logs:
