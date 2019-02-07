@@ -35,13 +35,19 @@ from ..utils.common import ensure_bytes, ensure_unicode
 from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
 
-
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [
     aggregator.GAUGE,
     aggregator.RATE,
     aggregator.MONOTONIC_COUNT,
 ]
+
+try: # pyyaml may not be available
+    import yaml
+    from ..ddyaml import monkey_patch_pyyaml
+    monkey_patch_pyyaml()
+except ImportError:
+    pass
 
 
 class __AgentCheck7(object):
