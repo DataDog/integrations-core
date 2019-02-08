@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from openstack import connection
+from os import environ
 import requests
 import simplejson as json
 
@@ -24,10 +26,19 @@ class ApiFactory(object):
         paginated_limit = instance_config.get('paginated_limit')
         request_timeout = instance_config.get('request_timeout')
         user = instance_config.get("user")
+        openstack_sdk_config_file_path = instance_config.get("openstack_sdk_config_file_path")
+        openstack_sdk_cloud_name = instance_config.get("openstack_sdk_cloud_name")
 
-        api = SimpleApi(logger, keystone_server_url, timeout=request_timeout, ssl_verify=ssl_verify, proxies=proxies,
-                        limit=paginated_limit)
-        api.connect(user)
+        api = None
+
+        if openstack_sdk_cloud_name is None:
+            api = SimpleApi(logger, keystone_server_url, timeout=request_timeout, ssl_verify=ssl_verify,
+                            proxies=proxies, limit=paginated_limit)
+            api.connect(user)
+        else:
+            api = OpenstackSdkApi(logger)
+            api.connect(openstack_sdk_config_file_path, openstack_sdk_cloud_name)
+
         return api
 
 
@@ -70,6 +81,73 @@ class AbstractApi(object):
 
     def get_networks(self):
         raise NotImplementedError()
+
+
+class OpenstackSdkApi(AbstractApi):
+    def __init__(self, logger):
+        super(OpenstackSdkApi, self).__init__(logger)
+
+        self.connection = None
+        self.services = {}
+        self.endpoints = {}
+
+    def connect(self, openstack_sdk_config_file_path, openstack_sdk_cloud_name):
+        if openstack_sdk_config_file_path is not None:
+            # Set the environment variable to the path of the config file for openstacksdk to find it
+            environ["OS_CLIENT_CONFIG_FILE"] = openstack_sdk_config_file_path
+
+        self.connection = connection.Connection(cloud=openstack_sdk_cloud_name)
+        # Raise error if the connection failed
+        self.connection.authorize()
+
+    def _check_authentication(self):
+        if self.connection is None:
+            raise AuthenticationNeeded()
+
+    def _get_service(self, service_name):
+        self._check_authentication()
+
+        if service_name not in self.services:
+            self.services[service_name] = self.connection.get_service(service_name)
+        return self.services[service_name]
+
+    def _get_endpoint(self, service_name):
+        self._check_authentication()
+
+        if service_name not in self.endpoints:
+            try:
+                service_filter = {u'service_id': self._get_service(service_name)[u'id']}
+                endpoints_list = self.connection.search_endpoints(filter=service_filter)
+
+                if not endpoints_list:
+                    return None
+                # Get the first endpoint found
+                self.endpoints[service_name] = endpoints_list[0]
+            except Exception as e:
+                self.logger.debug("Error contacting openstack endpoint with openstacksdk: %s", e)
+
+        return self.endpoints[service_name]
+
+    def get_keystone_endpoint(self):
+        keystone_endpoint = self._get_endpoint(u'keystone')
+
+        if keystone_endpoint is None:
+            raise KeystoneUnreachable()
+        return keystone_endpoint[u'links'][u'self']
+
+    def get_nova_endpoint(self):
+        nova_endpoint = self._get_endpoint(u'nova')
+
+        if nova_endpoint is None:
+            raise MissingNovaEndpoint()
+        return nova_endpoint[u'links'][u'self']
+
+    def get_neutron_endpoint(self):
+        neutron_endpoint = self._get_endpoint(u'neutron')
+
+        if neutron_endpoint is None:
+            raise MissingNeutronEndpoint()
+        return neutron_endpoint[u'links'][u'self']
 
 
 class SimpleApi(AbstractApi):

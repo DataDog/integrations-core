@@ -1,1 +1,2 @@
 datadog-checks-dev
+openstacksdk==0.24.0
