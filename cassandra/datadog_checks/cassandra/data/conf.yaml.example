@@ -113,6 +113,10 @@ instances:
 #    source: cassandra
 #    sourcecategory: database
 #    service: myapplication
+#    log_processing_rules:
+#      - type: "multi_line"
+#        name: "new_log_start_with_date"
+#        pattern: "\\w+\\s+\\[.*\\]\\s+\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01])"
 
 
 init_config:
