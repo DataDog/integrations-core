@@ -15,7 +15,7 @@ need to install anything else on your server.
 
 #### Prepare OpenStack
 
-Create a datadog user that will be specified in your `openstack_controller.d/conf.yaml` file. This user requires admin read only permissions across your environment so that it can be run from a single node and read high level system information about all compute nodes and servers. 
+Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` file. This user requires admin read only permissions across your environment so that it can be run from a single node and read high level system information about all compute nodes and servers.
 
 #### Deployment Strategy
 
