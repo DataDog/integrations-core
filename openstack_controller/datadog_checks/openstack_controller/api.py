@@ -117,7 +117,7 @@ class OpenstackSdkApi(AbstractApi):
         if service_name not in self.endpoints:
             try:
                 service_filter = {u'service_id': self._get_service(service_name)[u'id']}
-                endpoints_list = self.connection.search_endpoints(filter=service_filter)
+                endpoints_list = self.connection.search_endpoints(filters=service_filter)
 
                 if not endpoints_list:
                     return None

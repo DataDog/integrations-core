@@ -42,8 +42,8 @@ class MockOpenstackConnection:
 
         return None
 
-    def search_endpoints(self, filter):
-        if filter[u'service_id'] == u'cb1478c7210540dfa0ddffeeea017167':
+    def search_endpoints(self, filters):
+        if filters[u'service_id'] == u'cb1478c7210540dfa0ddffeeea017167':
             return [
                 {
                     u'region_id': u'RegionOne',
@@ -71,7 +71,7 @@ class MockOpenstackConnection:
                 }
             ]
 
-        elif filter[u'service_id'] == u'30b4e3ac5e7a4cf5b83c9f7226705d1f':
+        elif filters[u'service_id'] == u'30b4e3ac5e7a4cf5b83c9f7226705d1f':
             return [
                 {
                     u'region_id': u'RegionOne',
@@ -99,7 +99,7 @@ class MockOpenstackConnection:
                 }
             ]
 
-        elif filter[u'service_id'] == u'97557fe6cb0f409bbf2e586ef169a6f4':
+        elif filters[u'service_id'] == u'97557fe6cb0f409bbf2e586ef169a6f4':
             return [
                 {
                     u'region_id': u'RegionOne',
