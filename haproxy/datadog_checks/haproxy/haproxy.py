@@ -148,6 +148,10 @@ class HAProxy(AgentCheck):
             instance.get('tag_service_check_by_host', False)
         )
 
+        enable_service_check = _is_affirmative(
+            instance.get('enable_service_check', False)
+        )
+
         services_incl_filter = instance.get('services_include', [])
         services_excl_filter = instance.get('services_exclude', [])
 
@@ -173,6 +177,7 @@ class HAProxy(AgentCheck):
             custom_tags=custom_tags,
             tags_regex=tags_regex,
             active_tag=active_tag,
+            enable_service_check=enable_service_check,
         )
 
     def _fetch_url_data(self, url, username, password, verify, custom_headers):
@@ -237,7 +242,8 @@ class HAProxy(AgentCheck):
                       collect_status_metrics=False, collect_status_metrics_by_host=False,
                       tag_service_check_by_host=False, services_incl_filter=None,
                       services_excl_filter=None, collate_status_tags_per_host=False,
-                      count_status_by_service=True, custom_tags=None, tags_regex=None, active_tag=None):
+                      count_status_by_service=True, custom_tags=None, tags_regex=None, active_tag=None,
+                      enable_service_check=False):
         ''' Main data-processing loop. For each piece of useful data, we'll
         either save a metric, save an event or both. '''
 
@@ -309,13 +315,14 @@ class HAProxy(AgentCheck):
                     services_excl_filter=services_excl_filter,
                     custom_tags=line_tags,
                 )
-            self._process_service_check(
-                data_dict, url,
-                tag_by_host=tag_service_check_by_host,
-                services_incl_filter=services_incl_filter,
-                services_excl_filter=services_excl_filter,
-                custom_tags=line_tags,
-            )
+            if enable_service_check:
+                self._process_service_check(
+                    data_dict, url,
+                    tag_by_host=tag_service_check_by_host,
+                    services_incl_filter=services_incl_filter,
+                    services_excl_filter=services_excl_filter,
+                    custom_tags=line_tags,
+                )
 
         if collect_status_metrics:
             self._process_status_metric(
