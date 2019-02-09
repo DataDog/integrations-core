@@ -139,20 +139,20 @@ falling back to latest docker image"
         'the environment is torn down. Would you like to proceed?'
     )
 
-    if dev:
-        echo_waiting('Upgrading `{}` check to the development version... '.format(check), nl=False)
-        if environment.ENV_TYPE == 'local' and not click.confirm(editable_warning.format(environment.check)):
-            echo_success('skipping')
-        else:
-            environment.update_check()
-            echo_success('success!')
-
     if base:
         echo_waiting('Upgrading the base package to the development version... ', nl=False)
         if environment.ENV_TYPE == 'local' and not click.confirm(editable_warning.format('base')):
             echo_success('skipping')
         else:
             environment.update_base_package()
+            echo_success('success!')
+
+    if dev:
+        echo_waiting('Upgrading `{}` check to the development version... '.format(check), nl=False)
+        if environment.ENV_TYPE == 'local' and not click.confirm(editable_warning.format(environment.check)):
+            echo_success('skipping')
+        else:
+            environment.update_check()
             echo_success('success!')
 
     click.echo()
