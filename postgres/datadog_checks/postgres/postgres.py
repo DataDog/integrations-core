@@ -1067,7 +1067,7 @@ GROUP BY datid, datname
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
             if tag_replication_role:
-                tags.extend(["replication_role:%s" % self._get_replication_role(key, db)])
+                tags.extend(["replication_role:{}".format(self._get_replication_role(key, db))])
             self._collect_stats(key, db, tags, relations, custom_metrics, collect_function_metrics,
                                 collect_count_metrics, collect_activity_metrics, collect_database_size_metrics,
                                 collect_default_db, interface_error, programming_error)
