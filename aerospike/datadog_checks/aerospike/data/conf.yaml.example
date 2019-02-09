@@ -1,55 +1,33 @@
 instances:
-  
-  ## @param host - string - required
-  ## Aerospike host to connect to.
-  #
   - host: localhost
-  
-  ## @param port - integer - required
-  ## Aerospike port to connect to.
-  #
     port: 3003
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
-    
-  ## @param metrics - list of strings - optional
-  ## All metrics collected by default. You probably don't want to do this,
-  ## so list the ones you do want here. Check with:
-  ##  asinfo -v statistics -l
-  #
-  #  metrics:
-  #    - migrate_rx_objs
-  #    - migrate_tx_objs
-  
-  ## @param namespace_metrics - list of strings - optional
-  ## All Namespace metrics collected by default. You probably don't want to do this,
-  ## so list the ones you do want here. Check with:
-  ##  asinfo -v namespace/<NAME_SPACE> -l.
-  #
-  #  namespace_metrics:
-  #    - free-pct-disk
-  #    - free-pct-memory
-  #    - evicted-objects
-  #    - expired-objects
-  #    - master-objects
-  #    - migrate-rx-partitions-initial
-  #    - migrate-rx-partitions-remaining
-  #    - migrate-tx-partitions-initial
-  #    - migrate-tx-partitions-remaining
+    # All metrics collected by default. You probably don't want to do this,
+    # so list the ones you do want here. Check with asinfo -v statistics -l
+    # and asinfo -v namespace/YOURNAMESPACE -l.
+
+    # metrics:
+    # - migrate_rx_objs
+    # - migrate_tx_objs
+    # namespace_metrics:
+    # - free-pct-disk
+    # - free-pct-memory
+    # - evicted-objects
+    # - expired-objects
+    # - master-objects
+    # - migrate-rx-partitions-initial
+    # - migrate-rx-partitions-remaining
+    # - migrate-tx-partitions-initial
+    # - migrate-tx-partitions-remaining
+
+    # tags:
+    # - optional_tag1
+    # - optional_tag2
 
 init_config:
-
-  ## Rate mappings. DO NOT EDIT unless you know what you're doing.
-  ## See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
-  ## for the definitive list
-  
+  # Rate mappings. DO NOT EDIT unless you know what you're doing.
+  # See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
+  # for the definitive list
   mappings:
     - basic_scans_failed    # moved to NS scan_basic_error
     - basic_scans_succeeded    # moved to NS scan_basic_complete
