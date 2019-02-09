@@ -422,6 +422,7 @@ GROUP BY datid, datname
         cursor = db.cursor()
         cursor.execute('SELECT pg_is_in_recovery();')
         role = cursor.fetchone()[0]
+        # value fetched for role is of <type 'bool'> 
         return "standby" if role else "master"
 
     def _get_version(self, key, db):
