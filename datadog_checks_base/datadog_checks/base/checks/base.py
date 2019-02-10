@@ -89,6 +89,9 @@ class __AgentCheck7(object):
                 # new-style init: the 3rd argument is `instances`
                 self.instances = args[2]
 
+        # Agent 6+ will only have one instance
+        self.instance = self.instances[0] if self.instances else None
+
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()
 
@@ -448,6 +451,9 @@ class __AgentCheck6(object):
             else:
                 # new-style init: the 3rd argument is `instances`
                 self.instances = args[2]
+
+        # Agent 6+ will only have one instance
+        self.instance = self.instances[0] if self.instances else None
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()
