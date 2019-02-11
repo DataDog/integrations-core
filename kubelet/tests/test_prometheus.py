@@ -133,11 +133,25 @@ def test_get_container_id(cadvisor_scraper):
         "container_name": "datadog-agent",
         "namespace": "default",
         "pod_name": "datadog-agent-pbqt2",
-        "container_name": "datadog-agent",
     }
     container_id = cadvisor_scraper._get_container_id(labels)
     assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
     assert cadvisor_scraper._get_container_id([]) is None
+
+
+def test_get_entity_id_if_container_metric(cadvisor_scraper):
+    staticPod = MockMetric(
+        'bar',
+        {
+            "container_name": "web",
+            "namespace": "default",
+            "pod_name": "static-web-chk",
+            "name": "web",
+            "image": "nginx",
+            "id": "1",
+        }
+    )
+    assert cadvisor_scraper._get_entity_id_if_container_metric(staticPod.label) == "fbf18e171294371272adc19391eae7cc"
 
 
 def test_get_pod_uid(cadvisor_scraper):
