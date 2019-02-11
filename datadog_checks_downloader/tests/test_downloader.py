@@ -13,7 +13,7 @@ log = logging.getLogger('test_downloader')
 
 
 def test_downloader():
-    r = requests.get('https://dd-integrations-core-wheels-build-stable.s3.amazonaws.com/targets/simple/index.html')
+    r = requests.get('https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/index.html')
     r.raise_for_status()
 
     for line in r.text.split('\n'):
