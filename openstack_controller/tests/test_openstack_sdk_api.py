@@ -131,6 +131,26 @@ EXAMPLE_HYPERVISORS_VALUE = [
     }
 ]
 
+EXAMPLE_AGGREGATES_VALUE = [
+    {
+        "availability_zone": "london",
+        "created_at": "2016-12-27T23:47:32.911515",
+        "deleted": False,
+        "deleted_at": None,
+        "hosts": [
+            "compute"
+        ],
+        "id": 1,
+        "metadata": {
+            "availability_zone": "london"
+        },
+        "name": "name",
+        "updated_at": None,
+        # "uuid" is not returned by OpenstackSdkApi
+        # "uuid": "6ba28ba7-f29b-45cc-a30b-6e3a40c2fb14"
+    }
+]
+
 
 class MockOpenstackConnection:
     def __init__(self):
@@ -265,6 +285,9 @@ class MockOpenstackConnection:
     def list_hypervisors(self):
         return EXAMPLE_HYPERVISORS_VALUE
 
+    def list_aggregates(self):
+        return EXAMPLE_AGGREGATES_VALUE
+
 
 def test_get_endpoint():
     api = OpenstackSdkApi(None)
@@ -324,3 +347,10 @@ def test_get_os_hypervisors_detail():
     api.connection = MockOpenstackConnection()
 
     assert api.get_os_hypervisors_detail() == EXAMPLE_HYPERVISORS_VALUE
+
+
+def test_get_os_aggregates():
+    api = OpenstackSdkApi(None)
+    api.connection = MockOpenstackConnection()
+
+    assert api.get_os_aggregates() == EXAMPLE_AGGREGATES_VALUE

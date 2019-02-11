@@ -195,6 +195,12 @@ class OpenstackSdkApi(AbstractApi):
     def get_os_hypervisor_uptime(self, hypervisor_id):
         self.logger.warning("Hypervisor uptime is disabled with Openstacksdk")
 
+    def get_os_aggregates(self):
+        """ Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi """
+        self._check_authentication()
+
+        return self.connection.list_aggregates()
+
 
 class SimpleApi(AbstractApi):
     def __init__(self, logger, keystone_endpoint, ssl_verify=False, proxies=None,
