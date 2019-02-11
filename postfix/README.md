@@ -106,6 +106,7 @@ By default, the naming convention and log files can by configured in your syslog
     - type: file
       path: /var/log/mail.log
       source: postfix
+      service: myapp
   ```
 
 * [Restart the Agent][9].
