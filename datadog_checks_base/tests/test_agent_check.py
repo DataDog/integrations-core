@@ -14,7 +14,24 @@ def test_instance():
     """
     Simply assert the class can be instantiated
     """
-    AgentCheck()
+    # rely on default
+    check = AgentCheck()
+    assert check.init_config == {}
+    assert check.instances == []
+
+    # pass dict for 'init_config', a list for 'instances'
+    init_config = {'foo': 'bar'}
+    instances = [{'bar': 'baz'}]
+    check = AgentCheck(init_config=init_config, instances=instances)
+    assert check.init_config == {'foo': 'bar'}
+    assert check.instances == [{'bar': 'baz'}]
+
+    # use raw yaml
+    init_config = "raw_foo: bar"
+    instances = "[raw_bar: baz]"
+    check = AgentCheck(init_config=init_config, instances=instances)
+    assert check.init_config == {'raw_foo': 'bar'}
+    assert check.instances == [{'raw_bar': 'baz'}]
 
 
 def test_log_critical_error():

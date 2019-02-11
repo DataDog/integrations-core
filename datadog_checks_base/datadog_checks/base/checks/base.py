@@ -11,6 +11,7 @@ import traceback
 import unicodedata
 import inspect
 
+import yaml
 from six import PY3, iteritems, text_type
 
 try:
@@ -69,8 +70,12 @@ class __AgentCheck7(object):
         self.metrics = defaultdict(list)
         self.check_id = ''
         self.instances = kwargs.get('instances', [])
+        if isinstance(self.instances, str):
+            self.instances = yaml.safe_load(self.instances)
         self.name = kwargs.get('name', '')
         self.init_config = kwargs.get('init_config', {})
+        if isinstance(self.init_config, str):
+            self.init_config = yaml.safe_load(self.init_config)
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
