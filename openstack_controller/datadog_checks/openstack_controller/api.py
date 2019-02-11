@@ -90,6 +90,7 @@ class OpenstackSdkApi(AbstractApi):
         self.connection = None
         self.services = {}
         self.endpoints = {}
+        self.projects = None
 
     def connect(self, openstack_sdk_config_file_path, openstack_sdk_cloud_name):
         if openstack_sdk_config_file_path is not None:
@@ -148,6 +149,43 @@ class OpenstackSdkApi(AbstractApi):
         if neutron_endpoint is None:
             raise MissingNeutronEndpoint()
         return neutron_endpoint[u'links'][u'self']
+
+    def get_projects(self):
+        self._check_authentication()
+
+        if self.projects is None:
+            self.projects = self.connection.search_projects()
+
+        return self.projects
+
+    def get_project_limits(self, project_id):
+        self._check_authentication()
+
+        # Raise exception if the project is not found
+        project_limits_raw = self.connection.get_compute_limits(project_id)
+        project_limits = project_limits_raw["properties"]
+
+        # Used to convert the project_limits_raw key name
+        key_name_conversion = {
+            "max_personality": "maxPersonality",
+            "max_personality_size": "maxPersonalitySize",
+            "max_server_groups": "maxServerGroups",
+            "max_server_group_members": "maxServerGroupMembers",
+            "max_server_meta": "maxServerMeta",
+            "max_total_cores": "maxTotalCores",
+            "max_total_keypairs": "maxTotalKeypairs",
+            "max_total_instances": "maxTotalInstances",
+            "max_total_ram_size": "maxTotalRAMSize",
+            "total_cores_used": "totalCoresUsed",
+            "total_instances_used": "totalInstancesUsed",
+            "total_ram_used": "totalRAMUsed",
+            "total_server_groups_used": "totalServerGroupsUsed"
+        }
+
+        for raw_value, value in key_name_conversion.items():
+            project_limits[value] = project_limits_raw[raw_value]
+
+        return project_limits
 
 
 class SimpleApi(AbstractApi):

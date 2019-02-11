@@ -6,6 +6,89 @@ from datadog_checks.openstack_controller.exceptions import (KeystoneUnreachable,
                                                             MissingNeutronEndpoint)
 
 
+EXAMPLE_PROJECTS_VALUE = [
+    {
+        'id': u'680031a39ce040e1b81289ea8c73fb11',
+        'domain_id': u'default',
+        'name': u'admin',
+        'parent_id': u'default',
+        'properties': {},
+        'is_enabled': True,
+        'is_domain': False,
+        'description': u'Bootstrap project for initializing the cloud.',
+        'enabled': True,
+        'location': {
+            'project': {
+                'domain_id': u'default',
+                'id': u'default',
+                'name': None,
+                'domain_name': None
+            },
+            'zone': None,
+            'region_name': None,
+            'cloud': 'test_cloud'
+        }
+    },
+    {
+        'id': u'69db552bcb5e41ad925b388e73d73dbe',
+        'domain_id': u'default',
+        'name': u'testProj1',
+        'parent_id': u'default',
+        'properties': {},
+        'is_enabled': True,
+        'is_domain': False,
+        'description': u'test project',
+        'enabled': True,
+        'location': {
+            'project': {
+                'domain_id': u'default',
+                'id': u'default',
+                'name': None,
+                'domain_name': None
+            },
+            'zone': None,
+            'region_name': None,
+            'cloud': 'test_cloud'
+        }
+    }
+]
+
+EXAMPLE_COMPUTE_LIMITS_VALUE = {
+    'total_server_groups_used': 0,
+    'max_server_groups': 10,
+    'total_instances_used': 0,
+    'max_total_ram_size': 51200,
+    'total_ram_used': 0,
+    'total_cores_used': 0,
+    'max_total_cores': 20,
+    'max_personality_size': 10240,
+    'max_total_keypairs': 100,
+    'max_server_group_members': 10,
+    'location': {
+        'project': {
+            'domain_id': None,
+            'id': u'680031a39ce040e1b81289ea8c73fb11',
+            'name': None,
+            'domain_name': None
+        },
+        'zone': None,
+        'region_name': 'RegionOne',
+        'cloud': 'test_cloud'
+    },
+    'max_personality': 5,
+    'max_total_instances': 10,
+    'properties': {
+        u'totalFloatingIpsUsed': 0,
+        u'maxSecurityGroupRules': 20,
+        u'totalSecurityGroupsUsed': 0,
+        u'maxImageMeta': 128,
+        u'maxSecurityGroups': 10,
+        u'maxTotalFloatingIps': 10
+    },
+    'max_server_meta': 128
+}
+
+
 class MockOpenstackConnection:
     def __init__(self):
         pass
@@ -129,6 +212,13 @@ class MockOpenstackConnection:
 
         return []
 
+    def get_compute_limits(self, project_id):
+        if project_id == u'680031a39ce040e1b81289ea8c73fb11':
+            return EXAMPLE_COMPUTE_LIMITS_VALUE
+
+    def search_projects(self):
+        return EXAMPLE_PROJECTS_VALUE
+
 
 def test_get_endpoint():
     api = OpenstackSdkApi(None)
@@ -147,3 +237,37 @@ def test_get_endpoint():
 
         with pytest.raises(MissingNeutronEndpoint):
             api.get_neutron_endpoint()
+
+
+def test_get_project():
+    api = OpenstackSdkApi(None)
+    api.connection = MockOpenstackConnection()
+
+    assert api.get_projects() == EXAMPLE_PROJECTS_VALUE
+
+
+def test_get_project_limit():
+    api = OpenstackSdkApi(None)
+    api.connection = MockOpenstackConnection()
+
+    assert api.get_project_limits(u'680031a39ce040e1b81289ea8c73fb11') == {
+                "maxImageMeta": 128,
+                "maxPersonality": 5,
+                "maxPersonalitySize": 10240,
+                "maxSecurityGroupRules": 20,
+                "maxSecurityGroups": 10,
+                "maxServerMeta": 128,
+                "maxTotalCores": 20,
+                "maxTotalFloatingIps": 10,
+                "maxTotalInstances": 10,
+                "maxTotalKeypairs": 100,
+                "maxTotalRAMSize": 51200,
+                "maxServerGroups": 10,
+                "maxServerGroupMembers": 10,
+                "totalCoresUsed": 0,
+                "totalInstancesUsed": 0,
+                "totalRAMUsed": 0,
+                "totalSecurityGroupsUsed": 0,
+                "totalFloatingIpsUsed": 0,
+                "totalServerGroupsUsed": 0
+            }
