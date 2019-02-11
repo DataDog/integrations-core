@@ -78,6 +78,41 @@ List of users who are authorized to view the queue.
 
 [Restart the Agent][5] to start sending Postfix metrics to Datadog.
 
+#### Log Collection
+
+**Available for Agent >6.0**
+
+Postfix logs activity to the syslog daemon that then gets sent to logfiles.
+
+By default, the naming convention and log files can by configured in your syslog file:
+
+```
+/etc/syslog.conf:
+    mail.err                                    /dev/console
+    mail.debug                                  /var/log/maillog
+```
+
+
+* Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
+
+  ```
+  logs_enabled: true
+  ```
+
+* Add the following configuration block to your `postfix.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample postfix.d/conf.yaml][5] for all available configuration options.
+
+  ```
+  logs:
+    - type: file
+      path: /var/log/mail.log
+      source: postfix
+  ```
+
+* [Restart the Agent][9].
+
+**Learn more about log collection [in the log documentation][10]**
+
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `postfix` under the Checks section.
@@ -109,3 +144,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/monitor-postfix-queues
+[10]: https://docs.datadoghq.com/logs
