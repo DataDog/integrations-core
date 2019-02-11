@@ -26,12 +26,9 @@ def test_instance():
     assert check.init_config == {'foo': 'bar'}
     assert check.instances == [{'bar': 'baz'}]
 
-    # use raw yaml
-    init_config = "raw_foo: bar"
-    instances = "[raw_bar: baz]"
-    check = AgentCheck(init_config=init_config, instances=instances)
-    assert check.init_config == {'raw_foo': 'bar'}
-    assert check.instances == [{'raw_bar': 'baz'}]
+
+def test_load_config():
+    assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
 
 
 def test_log_critical_error():

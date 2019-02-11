@@ -45,7 +45,7 @@ ONE_PER_CONTEXT_METRIC_TYPES = [
 ]
 
 
-class __AgentCheck7(object):
+class __AgentCheckPy3(object):
     """
     The base class for any Agent based integrations
     """
@@ -70,12 +70,8 @@ class __AgentCheck7(object):
         self.metrics = defaultdict(list)
         self.check_id = ''
         self.instances = kwargs.get('instances', [])
-        if isinstance(self.instances, str):
-            self.instances = yaml.safe_load(self.instances)
         self.name = kwargs.get('name', '')
         self.init_config = kwargs.get('init_config', {})
-        if isinstance(self.init_config, str):
-            self.init_config = yaml.safe_load(self.init_config)
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
@@ -151,6 +147,13 @@ class __AgentCheck7(object):
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, 'metrics', metric_limit, self.warning)
+
+    @classmethod
+    def load_config(cls, yaml_str):
+        """
+        Convenience wrapper to ease programmatic use of this class from the C API.
+        """
+        return yaml.safe_load(yaml_str)
 
     @property
     def in_developer_mode(self):
@@ -409,7 +412,7 @@ class __AgentCheck7(object):
         return proxies if proxies else no_proxy_settings
 
 
-class __AgentCheck6(object):
+class __AgentCheckPy2(object):
     """
     The base class for any Agent based integrations
     """
@@ -504,6 +507,13 @@ class __AgentCheck6(object):
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, "metrics", metric_limit, self.warning)
+
+    @classmethod
+    def load_config(cls, yaml_str):
+        """
+        Convenience wrapper to ease programmatic use of this class from the C API.
+        """
+        return yaml.safe_load(yaml_str)
 
     @property
     def in_developer_mode(self):
@@ -786,8 +796,8 @@ class __AgentCheck6(object):
 
 
 if PY3:
-    AgentCheck = __AgentCheck7
-    del __AgentCheck6
+    AgentCheck = __AgentCheckPy3
+    del __AgentCheckPy2
 else:
-    AgentCheck = __AgentCheck6
-    del __AgentCheck7
+    AgentCheck = __AgentCheckPy2
+    del __AgentCheckPy3
