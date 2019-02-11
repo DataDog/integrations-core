@@ -294,9 +294,9 @@ def test_data_methods(aggregator, http_check):
         instance_tag = ['instance:{}'.format(instance.get('name'))]
 
         aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=url_tag + instance_tag, count=1)
-        aggregator.assert_metric('network.http.can_connect', tags=url_tag, value=1, count=1)
-        aggregator.assert_metric('network.http.cant_connect', tags=url_tag, value=0, count=1)
-        aggregator.assert_metric('network.http.response_time', tags=url_tag, count=1)
+        aggregator.assert_metric('network.http.can_connect', tags=url_tag + instance_tag, value=1, count=1)
+        aggregator.assert_metric('network.http.cant_connect', tags=url_tag + instance_tag, value=0, count=1)
+        aggregator.assert_metric('network.http.response_time', tags=url_tag + instance_tag, count=1)
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
