@@ -5,7 +5,6 @@
 import pytest
 import os
 import requests
-import logging
 
 from copy import deepcopy
 
@@ -14,9 +13,6 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
 from . import common
-
-
-log = logging.getLogger('test_riak')
 
 
 def populate():

@@ -4,13 +4,10 @@
 
 import pytest
 import socket
-import logging
 
 from datadog_checks.riak import Riak
 
 from . import common
-
-log = logging.getLogger('test_riak')
 
 CHECK_NAME = 'riak'
 
@@ -347,10 +344,7 @@ def test_check(aggregator, check, instance):
     for gauge in CHECK_GAUGES + CHECK_GAUGES_STATS:
         aggregator.assert_metric(gauge, tags=tags, count=2)
 
-    for sc in aggregator.service_checks(common.SERVICE_CHECK_NAME):
-        assert sc.status == Riak.OK
-        for tag in sc.tags:
-            assert tag in sc_tags
+    aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=Riak.OK, tags=sc_tags)
 
     for gauge in GAUGE_OTHER:
         aggregator.assert_metric(gauge, count=1)
@@ -364,7 +358,4 @@ def test_bad_config(aggregator, check):
         check.check({"url": "http://localhost:5985"})
 
     sc_tags = ['url:http://localhost:5985']
-    for sc in aggregator.service_checks(common.SERVICE_CHECK_NAME):
-        assert sc.status == Riak.CRITICAL
-        for tag in sc.tags:
-            assert tag in sc_tags
+    aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=Riak.CRITICAL, tags=sc_tags)
