@@ -89,6 +89,49 @@ EXAMPLE_COMPUTE_LIMITS_VALUE = {
 }
 
 
+EXAMPLE_HYPERVISORS_VALUE = [
+    {
+        "cpu_info": {
+            "arch": "x86_64",
+            "model": "Nehalem",
+            "vendor": "Intel",
+            "features": [
+                "pge",
+                "clflush"
+            ],
+            "topology": {
+                "cores": 1,
+                "threads": 1,
+                "sockets": 4
+            }
+        },
+        "current_workload": 0,
+        "status": "enabled",
+        "state": "up",
+        "disk_available_least": 0,
+        "host_ip": "1.1.1.1",
+        "free_disk_gb": 1028,
+        "free_ram_mb": 7680,
+        "hypervisor_hostname": "host2",
+        "hypervisor_type": "fake",
+        "hypervisor_version": 1000,
+        "id": "1bb62a04-c576-402c-8147-9e89757a09e3",
+        "local_gb": 1028,
+        "local_gb_used": 0,
+        "memory_mb": 8192,
+        "memory_mb_used": 512,
+        "running_vms": 0,
+        "service": {
+            "host": "host1",
+            "id": "62f62f6e-a713-4cbe-87d3-3ecf8a1e0f8d",
+            "disabled_reason": None
+        },
+        "vcpus": 2,
+        "vcpus_used": 0
+    }
+]
+
+
 class MockOpenstackConnection:
     def __init__(self):
         pass
@@ -219,6 +262,9 @@ class MockOpenstackConnection:
     def search_projects(self):
         return EXAMPLE_PROJECTS_VALUE
 
+    def list_hypervisors(self):
+        return EXAMPLE_HYPERVISORS_VALUE
+
 
 def test_get_endpoint():
     api = OpenstackSdkApi(None)
@@ -271,3 +317,10 @@ def test_get_project_limit():
                 "totalFloatingIpsUsed": 0,
                 "totalServerGroupsUsed": 0
             }
+
+
+def test_get_os_hypervisors_detail():
+    api = OpenstackSdkApi(None)
+    api.connection = MockOpenstackConnection()
+
+    assert api.get_os_hypervisors_detail() == EXAMPLE_HYPERVISORS_VALUE

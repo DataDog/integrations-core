@@ -187,6 +187,14 @@ class OpenstackSdkApi(AbstractApi):
 
         return project_limits
 
+    def get_os_hypervisors_detail(self):
+        self._check_authentication()
+
+        return self.connection.list_hypervisors()
+
+    def get_os_hypervisor_uptime(self, hypervisor_id):
+        self.logger.warning("Hypervisor uptime is disabled with Openstacksdk")
+
 
 class SimpleApi(AbstractApi):
     def __init__(self, logger, keystone_endpoint, ssl_verify=False, proxies=None,
