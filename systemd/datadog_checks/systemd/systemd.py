@@ -10,6 +10,10 @@ from pystemd.systemd1 import Unit
 from datetime import datetime
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.utils.subprocess_output import (
+    get_subprocess_output,
+    SubprocessOutputEmptyError,
+)
 
 
 class SystemdCheck(AgentCheck):
@@ -42,6 +46,7 @@ class SystemdCheck(AgentCheck):
             # self.log.info(units)
             for unit in self.units:
                 self.get_unit_state(unit)
+                self.get_number_processes(unit)
         if self.collect_all == True:
             # we display status for all units if no unit has been specified in the configuration file
             self.get_active_inactive_units()
@@ -177,11 +182,23 @@ class SystemdCheck(AgentCheck):
             self.log.info("Unit name invalid for {}".format(unit_id))
 
     def get_number_processes(self, unit_id):
+        """
         try:
             unit = Unit(unit_id, _autoload=True)
+            # Has to be run with elevated rights
             list_processes = unit.Service.GetProcesses()
             process_number = len(list_processes)
             self.gauge('systemd.unit.numprocess', process_number)
 
         except pystemd.dbusexc.DBusInvalidArgsError as e:
             self.log.info("Unit name invalid for {}".format(unit_id))
+        """
+        systemctl_flags = ['status', unit_id]
+
+        try:
+            output = get_subprocess_output(["systemctl"] + systemctl_flags, self.log)
+            output_to_parse = output[0].split()
+            number_of_pids = output_to_parse.count(u'Process:')
+            self.gauge('systemd.unit.processes', number_of_pids, tags=["unit:{}".format(unit_id)])
+        except SubprocessOutputEmptyError:
+            self.log.exception("Error collecting systemctl stats.")
