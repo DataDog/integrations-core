@@ -217,6 +217,42 @@ class OpenstackSdkApi(AbstractApi):
 
         return self.connection.list_networks()
 
+    def get_servers_detail(self, query_params):
+        """ Each server is missing some attributes compared to what is returned by SimpleApi.
+            They are all unused for the moment.
+            SimpleApi:
+            https://developer.openstack.org/api-ref/compute/?expanded=list-flavors-with-details-detail,list-servers-detailed-detail#list-servers-detailed
+            OpenstackSdkApi:
+            https://docs.openstack.org/openstacksdk/latest/user/proxies/compute.html
+        """
+        self._check_authentication()
+
+        return list(self.connection.compute.servers(details=True, all_projects=True, **query_params))
+
+    def get_server_diagnostics(self, server_id):
+        self._check_authentication()
+
+        # Raise exception if server_id not found
+        diagnostic = self.connection.compute.get_server_diagnostics(server_id)
+
+        diagnostic_dict = {
+            "config_drive": diagnostic.has_config_drive,
+            "cpu_details": diagnostic.cpu_details,
+            "disk_details": diagnostic.disk_details,
+            "driver": diagnostic.driver,
+            "hypervisor": diagnostic.hypervisor,
+            "hypervisor_os": diagnostic.hypervisor_os,
+            "memory_details": diagnostic.memory_details,
+            "nic_details": diagnostic.nic_details,
+            "num_cpus": diagnostic.num_cpus,
+            "num_disks": diagnostic.num_disks,
+            "num_nics": diagnostic.num_nics,
+            "state": diagnostic.state,
+            "uptime": diagnostic.uptime
+        }
+
+        return diagnostic_dict
+
 
 class SimpleApi(AbstractApi):
     def __init__(self, logger, keystone_endpoint, ssl_verify=False, proxies=None,
