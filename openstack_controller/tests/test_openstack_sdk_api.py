@@ -151,10 +151,83 @@ EXAMPLE_AGGREGATES_VALUE = [
     }
 ]
 
+EXAMPLE_FLAVORS_VALUE = [
+    {
+        'name': u'test_flavor',
+        'ephemeral': 0,
+        'ram': 1024,
+        'is_disabled': False,
+        'properties': {
+            u'OS-FLV-DISABLED:disabled': False,
+            u'OS-FLV-EXT-DATA:ephemeral': 0,
+            u'os-flavor-access:is_public': True
+        },
+        u'OS-FLV-DISABLED:disabled': False,
+        'vcpus': 2,
+        'extra_specs': {},
+        'location': {
+            'project': {
+                'domain_id': None,
+                'id': u'0123456789abcdef',
+                'name': 'testProj2',
+                'domain_name': None
+            },
+            'zone': None,
+            'region_name': 'RegionOne',
+            'cloud': 'test_cloud'
+        },
+        u'os-flavor-access:is_public': True,
+        'rxtx_factor': 2.0,
+        'is_public': True,
+        u'OS-FLV-EXT-DATA:ephemeral': 0,
+        'disk': 10,
+        'id': u'10',
+        'swap': 0
+    },
+    {
+        'name': u'FinalTestHopefully',
+        'ephemeral': 0,
+        'ram': 5934,
+        'is_disabled': False,
+        'properties': {
+            u'OS-FLV-DISABLED:disabled': False,
+            u'OS-FLV-EXT-DATA:ephemeral': 0,
+            u'os-flavor-access:is_public': True
+        },
+        u'OS-FLV-DISABLED:disabled': False,
+        'vcpus': 8,
+        'extra_specs': {},
+        'location': {
+            'project': {
+                'domain_id': None,
+                'id': u'0123456789abcdef',
+                'name': 'testProj2',
+                'domain_name': None
+            },
+            'zone': None,
+            'region_name': 'RegionOne',
+            'cloud': 'test_cloud'
+        },
+        u'os-flavor-access:is_public': True,
+        'rxtx_factor': 1.0,
+        'is_public': True,
+        u'OS-FLV-EXT-DATA:ephemeral': 0,
+        'disk': 48,
+        'id': u'625c2e4b-0a1f-4236-bb67-5ceee1a766e5',
+        'swap': 0
+    }
+]
+
+
+class MockOpenstackCompute:
+    def flavors(self, query):
+        yield EXAMPLE_FLAVORS_VALUE[0]
+        yield EXAMPLE_FLAVORS_VALUE[1]
+
 
 class MockOpenstackConnection:
     def __init__(self):
-        pass
+        self.compute = MockOpenstackCompute()
 
     def get_service(self, service_name):
         if service_name == u'keystone':
@@ -354,3 +427,10 @@ def test_get_os_aggregates():
     api.connection = MockOpenstackConnection()
 
     assert api.get_os_aggregates() == EXAMPLE_AGGREGATES_VALUE
+
+
+def test_get_flavors_detail():
+    api = OpenstackSdkApi(None)
+    api.connection = MockOpenstackConnection()
+
+    assert api.get_flavors_detail(query_params={}) == EXAMPLE_FLAVORS_VALUE

@@ -201,6 +201,11 @@ class OpenstackSdkApi(AbstractApi):
 
         return self.connection.list_aggregates()
 
+    def get_flavors_detail(self, query_params):
+        self._check_authentication()
+
+        return list(self.connection.compute.flavors(query=query_params))
+
 
 class SimpleApi(AbstractApi):
     def __init__(self, logger, keystone_endpoint, ssl_verify=False, proxies=None,
