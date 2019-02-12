@@ -82,9 +82,9 @@ List of users who are authorized to view the queue.
 
 **Available for Agent >6.0**
 
-Postfix logs activity to the syslog daemon that then gets sent to logfiles.
+Postfix sends logs to the syslog daemon, which then writes logs to the file system.
 
-By default, the naming convention and log files can by configured in your syslog file:
+The naming convention and log file destinations are configurable:
 
 ```
 /etc/syslog.conf:
@@ -93,7 +93,7 @@ By default, the naming convention and log files can by configured in your syslog
 ```
 
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
+* Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
   ```
   logs_enabled: true
