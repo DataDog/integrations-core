@@ -300,7 +300,7 @@ class MockOpenstackDiagnostics:
 
 
 class MockOpenstackCompute:
-    def flavors(self, query):
+    def flavors(self, **query):
         yield EXAMPLE_FLAVORS_VALUE[0]
         yield EXAMPLE_FLAVORS_VALUE[1]
 

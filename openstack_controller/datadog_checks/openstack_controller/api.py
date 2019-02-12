@@ -210,7 +210,7 @@ class OpenstackSdkApi(AbstractApi):
     def get_flavors_detail(self, query_params):
         self._check_authentication()
 
-        return list(self.connection.compute.flavors(query=query_params))
+        return list(self.connection.compute.flavors(**query_params))
 
     def get_networks(self):
         self._check_authentication()
