@@ -122,8 +122,14 @@ class OpenstackSdkApi(AbstractApi):
 
                 if not endpoints_list:
                     return None
-                # Get the first endpoint found
-                self.endpoints[service_name] = endpoints_list[0]
+
+                self.endpoints[service_name] = None
+                # Get the public or the internal endpoint
+                for endpoint in endpoints_list:
+                    if endpoint[u'interface'] == u'public':
+                        self.endpoints[service_name] = endpoint
+                    elif endpoint[u'interface'] == u'internal' and self.endpoints[service_name] is None:
+                        self.endpoints[service_name] = endpoint
             except Exception as e:
                 self.logger.debug("Error contacting openstack endpoint with openstacksdk: %s", e)
 

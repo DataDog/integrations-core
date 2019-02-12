@@ -323,18 +323,6 @@ class MockOpenstackConnection:
                 {
                     u'region_id': u'RegionOne',
                     u'links': {
-                        u'self': u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
-                    },
-                    u'url': u'http://172.29.236.101:9696',
-                    u'region': u'RegionOne',
-                    u'enabled': True,
-                    u'interface': u'internal',
-                    u'service_id': u'97557fe6cb0f409bbf2e586ef169a6f4',
-                    u'id': u'408fbfd00abf4bd1a71044f4849abf66'
-                },
-                {
-                    u'region_id': u'RegionOne',
-                    u'links': {
                         u'self': u'http://10.0.3.44:5000/v3/endpoints/6f9e5a99c33545bb88c62dad9b28d1ca'
                     },
                     u'url': u'http://172.29.236.101:9696',
@@ -343,6 +331,18 @@ class MockOpenstackConnection:
                     u'interface': u'admin',
                     u'service_id': u'97557fe6cb0f409bbf2e586ef169a6f4',
                     u'id': u'6f9e5a99c33545bb88c62dad9b28d1ca'
+                },
+                {
+                    u'region_id': u'RegionOne',
+                    u'links': {
+                        u'self': u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
+                    },
+                    u'url': u'http://172.29.236.101:9696',
+                    u'region': u'RegionOne',
+                    u'enabled': True,
+                    u'interface': u'internal',
+                    u'service_id': u'97557fe6cb0f409bbf2e586ef169a6f4',
+                    u'id': u'408fbfd00abf4bd1a71044f4849abf66'
                 }
             ]
 
