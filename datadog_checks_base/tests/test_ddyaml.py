@@ -19,6 +19,7 @@ from datadog_checks.base.ddyaml import (
 
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'ddyaml')
 
+
 class Dummy(object):
     def __init__(self):
         self.foo = 1

@@ -76,7 +76,8 @@ class __AgentCheck7(object):
         self.metric_limiter = None
 
         if datadog_agent.get_config('disable_unsafe_yaml'):
-            try: # pyyaml may not be available
+            # monkey-patches unsafe pyyaml methods
+            try:
                 import yaml
                 from ..ddyaml import monkey_patch_pyyaml
                 monkey_patch_pyyaml()
@@ -444,7 +445,8 @@ class __AgentCheck6(object):
         self.metric_limiter = None
 
         if datadog_agent.get_config('disable_unsafe_yaml'):
-            try: # pyyaml may not be available
+            # monkey-patches unsafe pyyaml methods
+            try:
                 import yaml
                 from ..ddyaml import monkey_patch_pyyaml
                 monkey_patch_pyyaml()
