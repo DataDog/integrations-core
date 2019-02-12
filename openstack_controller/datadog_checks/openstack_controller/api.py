@@ -212,6 +212,11 @@ class OpenstackSdkApi(AbstractApi):
 
         return list(self.connection.compute.flavors(query=query_params))
 
+    def get_networks(self):
+        self._check_authentication()
+
+        return self.connection.list_networks()
+
 
 class SimpleApi(AbstractApi):
     def __init__(self, logger, keystone_endpoint, ssl_verify=False, proxies=None,

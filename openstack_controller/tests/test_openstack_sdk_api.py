@@ -219,6 +219,38 @@ EXAMPLE_FLAVORS_VALUE = [
 ]
 
 
+EXAMPLE_NETWORKS_VALUE = [
+    {
+        u'status': u'ACTIVE',
+        u'subnets': [],
+        u'description': u'',
+        u'provider:physical_network': None,
+        u'tags': [],
+        u'ipv6_address_scope': None,
+        u'updated_at': u'2018-08-16T20:22:34Z',
+        u'is_default': False,
+        u'revision_number': 4,
+        u'port_security_enabled': False,
+        u'mtu': 1450,
+        u'id': u'2755452c-4fe8-4ba1-9b26-8898665b0958',
+        u'provider:segmentation_id': 91,
+        u'router:external': True,
+        u'availability_zone_hints': [
+            u'nova'
+        ],
+        u'availability_zones': [],
+        u'name': u'net2',
+        u'admin_state_up': True,
+        u'tenant_id': u'680031a39ce040e1b81289ea8c73fb11',
+        u'created_at': u'2018-08-16T20:22:34Z',
+        u'provider:network_type': u'vxlan',
+        u'ipv4_address_scope': None,
+        u'shared': False,
+        u'project_id': u'680031a39ce040e1b81289ea8c73fb11'
+    }
+]
+
+
 class MockOpenstackCompute:
     def flavors(self, query):
         yield EXAMPLE_FLAVORS_VALUE[0]
@@ -361,6 +393,9 @@ class MockOpenstackConnection:
     def list_aggregates(self):
         return EXAMPLE_AGGREGATES_VALUE
 
+    def list_networks(self):
+        return EXAMPLE_NETWORKS_VALUE
+
 
 def test_get_endpoint():
     api = OpenstackSdkApi(None)
@@ -434,3 +469,10 @@ def test_get_flavors_detail():
     api.connection = MockOpenstackConnection()
 
     assert api.get_flavors_detail(query_params={}) == EXAMPLE_FLAVORS_VALUE
+
+
+def test_get_networks():
+    api = OpenstackSdkApi(None)
+    api.connection = MockOpenstackConnection()
+
+    assert api.get_networks() == EXAMPLE_NETWORKS_VALUE
