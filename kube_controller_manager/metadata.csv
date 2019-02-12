@@ -16,3 +16,5 @@ kube_controller_manager.max_fds,gauge,,,,Maximum allowed open file descriptors,0
 kube_controller_manager.nodes.evictions,count,,,,"Count of node eviction events, per zone",-1,kube_controller_manager,nodes.evictions
 kube_controller_manager.nodes.count,gauge,,,,"Number of registered nodes, per zone",0,kube_controller_manager,nodes.count
 kube_controller_manager.nodes.unhealthy,gauge,,,,"Number of unhealthy nodes, per zone",-1,kube_controller_manager,nodes.unhealthy
+kube_controller_manager.leader_election.transtions,count,,,,"Number of leadership transitions observed",0,kube_controller_manager,le.transitions
+kube_controller_manager.leader_election.lease_duration,gauge,,,,"Duration of the leadership lease",0,kube_controller_manager,le.duration
