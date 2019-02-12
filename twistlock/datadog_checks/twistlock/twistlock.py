@@ -10,7 +10,8 @@ from datadog_checks.checks import AgentCheck
 from .config import Config
 from .utils import retrieve_json
 
-SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+REGISTRY_SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 LICENCE_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 DOCKERIO_PREFIX = "docker.io/"
@@ -36,6 +37,8 @@ class TwistlockCheck(AgentCheck):
 
         self._report_license_expiration(config)
         self._report_registry_scan(config)
+        self._report_images_scan(config)
+        self._report_hosts_scan(config)
 
     def _report_license_expiration(self, config):
         service_check_name = self.NAMESPACE + ".license_ok"
@@ -94,6 +97,71 @@ class TwistlockCheck(AgentCheck):
             self.gauge(namespace + '.image.layer_count', float(layer_count), image_tags)
 
             # Last scan service check
+            scan_date = datetime.strptime(image.get("scanTime"), REGISTRY_SCAN_DATE_FORMAT)
+            scan_status = AgentCheck.OK
+            if scan_date < warning_date:
+                scan_status = AgentCheck.WARNING
+            if scan_date < critical_date:
+                scan_status = AgentCheck.CRITICAL
+            self.service_check(namespace + '.image.is_scanned', scan_status,
+                               tags=image_tags, message="Last scan: " + image.get("scanTime"))
+
+            # CVE vulnerabilities
+            summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+            cves = image.get('info', {}).get('cveVulnerabilities', []) or []
+            for cve in cves:
+                summary[cve['severity']] += 1
+                tags = [
+                    'cve:' + cve['cve'],
+                ] + SEVERITY_TAGS.get(cve['severity'], []) + image_tags
+                if 'packageName' in cve:
+                    tags += ["package:" + cve['packageName']]
+                self.gauge(namespace + '.image.cve.details', float(1), tags)
+            # Send counts to avoid no-data on zeroes
+            for severity, count in summary.iteritems():
+                tags = SEVERITY_TAGS.get(severity, []) + image_tags
+                self.gauge(namespace + '.image.cve.count', float(count), tags)
+
+    def _report_images_scan(self, config):
+        namespace = self.NAMESPACE + ".images"
+        service_check_name = self.NAMESPACE + ".can_connect"
+        try:
+            scan_result = retrieve_json(config, "/api/v1/images")
+            self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
+        except Exception as e:
+            self.warning("cannot retrieve registry data: {}".format(e))
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
+            return None
+
+        current_date = datetime.now()
+        warning_date = current_date - timedelta(hours=7)
+        critical_date = current_date - timedelta(days=1)
+
+        for image in scan_result:
+            if '_id' not in image:
+                continue
+
+
+            instances = image.get('instances')
+            instance = instances[0]
+            image_name = instance.get('image')
+            if not image_name:
+                continue
+            if image_name.startswith(DOCKERIO_PREFIX):
+                image_name = image_name[len(DOCKERIO_PREFIX):]
+
+            image_tags = ["scanned_image:" + image_name] + config.tags
+
+            # Layer count and size
+            layer_count = 0
+            layer_sizes = 0
+            for layer in image.get('info', {}).get('history', []):
+                layer_count += 1
+                layer_sizes += layer.get('sizeBytes', 0)
+            self.gauge(namespace + '.image.size', float(layer_sizes), image_tags)
+            self.gauge(namespace + '.image.layer_count', float(layer_count), image_tags)
+
+            # Last scan service check
             scan_date = datetime.strptime(image.get("scanTime"), SCAN_DATE_FORMAT)
             scan_status = AgentCheck.OK
             if scan_date < warning_date:
@@ -118,3 +186,52 @@ class TwistlockCheck(AgentCheck):
             for severity, count in summary.iteritems():
                 tags = SEVERITY_TAGS.get(severity, []) + image_tags
                 self.gauge(namespace + '.image.cve.count', float(count), tags)
+
+    def _report_hosts_scan(self, config):
+        namespace = self.NAMESPACE + ".hosts"
+        service_check_name = self.NAMESPACE + ".can_connect"
+        try:
+            scan_result = retrieve_json(config, "/api/v1/hosts")
+            self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
+        except Exception as e:
+            self.warning("cannot retrieve registry data: {}".format(e))
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
+            return None
+
+        current_date = datetime.now()
+        warning_date = current_date - timedelta(hours=7)
+        critical_date = current_date - timedelta(days=1)
+
+        for host in scan_result:
+            if 'hostname' not in host:
+                continue
+
+            hostname = host['hostname']
+
+            image_tags = ["scanned_host:" + hostname] + config.tags
+
+            # Last scan service check
+            scan_date = datetime.strptime(host.get("scanTime"), SCAN_DATE_FORMAT)
+            scan_status = AgentCheck.OK
+            if scan_date < warning_date:
+                scan_status = AgentCheck.WARNING
+            if scan_date < critical_date:
+                scan_status = AgentCheck.CRITICAL
+            self.service_check(namespace + '.host.is_scanned', scan_status,
+                               tags=image_tags, message="Last scan: " + host.get("scanTime"))
+
+            # CVE vulnerabilities
+            summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+            cves = host.get('info', {}).get('cveVulnerabilities', []) or []
+            for cve in cves:
+                summary[cve['severity']] += 1
+                tags = [
+                    'cve:' + cve['cve'],
+                ] + SEVERITY_TAGS.get(cve['severity'], []) + image_tags
+                if 'packageName' in cve:
+                    tags += ["package:" + cve['packageName']]
+                self.gauge(namespace + '.host.cve.details', float(1), tags)
+            # Send counts to avoid no-data on zeroes
+            for severity, count in summary.iteritems():
+                tags = SEVERITY_TAGS.get(severity, []) + image_tags
+                self.gauge(namespace + '.host.cve.count', float(count), tags)
