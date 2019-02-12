@@ -12,8 +12,9 @@ from datadog_checks.twistlock.config import Config
 customtag = "custom:tag"
 
 instance = {
-    'prometheus_endpoint': 'http://localhost:8081/api/v1/metrics',
-    'tags': [customtag]
+    'url': 'http://localhost:8081',
+    'tags': [customtag],
+    'ssl_verify': False
 }
 
 
@@ -36,8 +37,6 @@ def mock_get():
 def test_check(aggregator, mock_get):
 
     metrics = []
-    for metric in Config.STANDARD_METRICS.values():
-        metrics.append(Config.NAMESPACE + '.' + metric)
 
     check = TwistlockCheck('twistlock', {}, {})
     check.check(instance)
@@ -47,4 +46,13 @@ def test_check(aggregator, mock_get):
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, customtag)
 
+    import logging
+    log = logging.getLogger(__file__)
+
+    from six import iteritems
+    for metric, value in iteritems(aggregator._metrics):
+        log.warning("{} {}".format(metric, value))
+
     aggregator.assert_all_metrics_covered()
+
+    assert False
