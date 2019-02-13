@@ -1,4 +1,10 @@
-# Docker_daemon Integration
+# Docker Daemon Integration
+
+**Note**: The Docker Daemon check is still maintained but only works with **Agent v5**.
+
+<div class="alert alert-warning">
+<b>To use the Docker integration with Agent v6 consult the <a href="#agent-v6">Agent v6 section</a> below.</b>
+</div>
 
 ![Docker default dashboard][1]
 
@@ -8,12 +14,6 @@ Configure this Agent check to get metrics from the Docker_daemon service in real
 
 * Visualize and monitor Docker_daemon states.
 * Be notified about Docker_daemon failovers and events.
-
-**Note**: The Docker_daemon check is still maintained but only works with Agents prior to major version 6.
-
-<div class="alert alert-warning">
-<b>To use the Docker integration with Agent v6 consult the <a href="#agent-v6">Agent v6 section</a> below.</b>
-</div>
 
 ## Setup
 ### Installation
