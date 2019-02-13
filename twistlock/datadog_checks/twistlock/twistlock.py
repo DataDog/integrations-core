@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 from datadog_checks.base import AgentCheck
 
 from .config import Config
-from .utils import retrieve_json
 
 REGISTRY_SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -43,11 +42,12 @@ class TwistlockCheck(AgentCheck):
         self._report_registry_scan(config)
         self._report_images_scan(config)
         self._report_hosts_scan(config)
+        self._report_container_compliance(config)
 
     def _report_license_expiration(self, config):
         service_check_name = self.NAMESPACE + ".license_ok"
         try:
-            license = retrieve_json(config, "/api/v1/settings/license", self.warning)
+            license = self._retrieve_json(config, "/api/v1/settings/license")
         except Exception as e:
             self.warning("cannot retrieve license data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
@@ -70,7 +70,7 @@ class TwistlockCheck(AgentCheck):
         namespace = self.NAMESPACE + ".registry"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = retrieve_json(config, "/api/v1/registry", self.warning)
+            scan_result = self._retrieve_json(config, "/api/v1/registry")
             self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
@@ -130,7 +130,7 @@ class TwistlockCheck(AgentCheck):
         namespace = self.NAMESPACE + ".images"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = retrieve_json(config, "/api/v1/images", self.warning)
+            scan_result = self._retrieve_json(config, "/api/v1/images")
             self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
@@ -194,7 +194,7 @@ class TwistlockCheck(AgentCheck):
         namespace = self.NAMESPACE + ".hosts"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = retrieve_json(config, "/api/v1/hosts", self.warning)
+            scan_result = self._retrieve_json(config, "/api/v1/hosts")
             self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
@@ -244,7 +244,7 @@ class TwistlockCheck(AgentCheck):
         namespace = self.NAMESPACE + ".containers"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = retrieve_json(config, "/api/v1/containers", self.warning)
+            scan_result = self._retrieve_json(config, "/api/v1/containers")
             self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
@@ -292,3 +292,19 @@ class TwistlockCheck(AgentCheck):
                            scan_status,
                            tags=tags,
                            message=message)
+
+    def _retrieve_json(self, config, path):
+        url = config.url + path
+        auth = (config.username, config.password)
+        response = requests.get(url, auth=auth, verify=config.ssl_verify)
+        try:
+            j = response.json()
+            # it's possible to get a null response from the server
+            # {} is a bit easier to deal with
+            if not j:
+                return {}
+            return j
+        except Exception as e:
+            self.warning("cannot get stuff: {} response is: {}".format(e, response.text))
+            raise e
+            return {}
