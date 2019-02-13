@@ -1,12 +1,11 @@
 # stdlib
 import os
-import unittest
 import tempfile
+
+import pytest
 
 # project
 import yaml
-
-import json
 
 from datadog_checks.base.ddyaml import (
     monkey_patch_pyyaml,
@@ -36,62 +35,62 @@ class Dummy(object):
         return self.qux
 
 
-class UtilsYAMLTest(unittest.TestCase):
+def test_monkey_patch():
+    monkey_patch_pyyaml()
+    assert yaml.dump_all == safe_yaml_dump_all
+    assert yaml.load_all == safe_yaml_load_all
+    assert yaml.load == safe_yaml_load
+    monkey_patch_pyyaml_reverse()
 
-    def setUp(self):
+
+def test_load():
+    monkey_patch_pyyaml()
+    conf = os.path.join(FIXTURE_PATH, "valid_conf.yaml")
+    with open(conf) as f:
+        stream = f.read()
+
+        yaml_config_safe = safe_yaml_load(stream)
+        yaml_config_native = yaml.load(stream)
+        assert yaml_config_safe is not None
+        assert yaml_config_native is not None
+        assert yaml_config_native == yaml_config_safe
+
+        yaml_config_safe = [entry for entry in safe_yaml_load_all(stream)]
+        yaml_config_native = [entry for entry in yaml.load_all(stream)]
+        assert yaml_config_safe is not []
+        assert yaml_config_native is not []
+        assert len(yaml_config_safe) == len(yaml_config_native)
+        for safe, native in zip(yaml_config_safe, yaml_config_native):
+            assert safe == native
+    monkey_patch_pyyaml_reverse()
+
+
+def test_unsafe():
+    dummy = Dummy()
+    monkey_patch_pyyaml()
+
+    with pytest.raises(yaml.representer.RepresenterError):
+        yaml.dump_all([dummy])
+
+    with pytest.raises(yaml.representer.RepresenterError):
+        yaml.dump(dummy, Dumper=yDumper)
+
+    # reverse monkey patch and try again
+    monkey_patch_pyyaml_reverse()
+
+    with tempfile.TemporaryFile(suffix='.yaml', mode='w+t') as f:
+        yaml.dump_all([dummy], stream=f)
+        f.seek(0)  # rewind
+
+        doc_unsafe = yaml.load(f)
+        assert type(doc_unsafe) is Dummy
+
         monkey_patch_pyyaml()
-
-    def tearDown(self):
-        monkey_patch_pyyaml_reverse()
-
-    def test_monkey_patch(self):
-        self.assertTrue(yaml.dump_all == safe_yaml_dump_all)
-        self.assertTrue(yaml.load_all == safe_yaml_load_all)
-        self.assertTrue(yaml.load == safe_yaml_load)
-
-    def test_load(self):
-        conf = os.path.join(FIXTURE_PATH, "valid_conf.yaml")
-        with open(conf) as f:
-            stream = f.read()
-
-            yaml_config_safe = safe_yaml_load(stream)
-            yaml_config_native = yaml.load(stream)
-            self.assertTrue(yaml_config_safe is not None)
-            self.assertTrue(yaml_config_native is not None)
-            self.assertTrue(yaml_config_native == yaml_config_safe)
-
-            yaml_config_safe = [entry for entry in safe_yaml_load_all(stream)]
-            yaml_config_native = [entry for entry in yaml.load_all(stream)]
-            self.assertTrue(yaml_config_safe is not [])
-            self.assertTrue(yaml_config_native is not [])
-            self.assertTrue(len(yaml_config_safe) == len(yaml_config_native))
-            for safe, native in zip(yaml_config_safe, yaml_config_native):
-                self.assertTrue(safe == native)
-
-    def test_unsafe(self):
-        dummy = Dummy()
-
-        with self.assertRaises(yaml.representer.RepresenterError):
-            yaml.dump_all([dummy])
-
-        with self.assertRaises(yaml.representer.RepresenterError):
-            yaml.dump(dummy, Dumper=yDumper)
-
-        # reverse monkey patch and try again
-        monkey_patch_pyyaml_reverse()
-
-        with tempfile.TemporaryFile(suffix='.yaml', mode='w+t') as f:
-            yaml.dump_all([dummy], stream=f)
+        with pytest.raises(yaml.constructor.ConstructorError):
             f.seek(0)  # rewind
+            safe_yaml_load(f)
 
-            doc_unsafe = yaml.load(f)
-            self.assertTrue(type(doc_unsafe) is Dummy)
-
-            monkey_patch_pyyaml()
-            with self.assertRaises(yaml.constructor.ConstructorError):
-                f.seek(0)  # rewind
-                safe_yaml_load(f)
-
-            with self.assertRaises(yaml.constructor.ConstructorError):
-                f.seek(0)  # rewind
-                yaml.load(f)
+        with pytest.raises(yaml.constructor.ConstructorError):
+            f.seek(0)  # rewind
+            yaml.load(f)
+    monkey_patch_pyyaml_reverse()
