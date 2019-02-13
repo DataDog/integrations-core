@@ -42,6 +42,7 @@ METRICS = [
     NAMESPACE + '.daemonset.scheduled',
     NAMESPACE + '.daemonset.misscheduled',
     NAMESPACE + '.daemonset.desired',
+    NAMESPACE + '.daemonset.updated',
     # hpa
     NAMESPACE + '.hpa.min_replicas',
     NAMESPACE + '.hpa.max_replicas',

@@ -16,6 +16,7 @@ kubernetes_state.daemonset.scheduled,gauge,,,,The number of nodes running at lea
 kubernetes_state.daemonset.misscheduled,gauge,,,,The number of nodes running a daemon pod but are not supposed to,-1,kubernetes,k8s_state.ds.misscheduled
 kubernetes_state.daemonset.desired,gauge,,,,The number of nodes that should be running the daemon pod,0,kubernetes,k8s_state.ds.desired
 kubernetes_state.daemonset.ready,gauge,,,,The number of nodes that should be running the daemon pod and have one or more running and ready,0,kubernetes,k8s_state.ds.ready
+kubernetes_state.daemonset.updated,gauge,,,,The number of nodes that run the updated daemon pod spec,0,kubernetes,k8s_state.ds.updated
 kubernetes_state.deployment.replicas,gauge,,,,The number of replicas per deployment,0,kubernetes,k8s_state.deployment.replicas
 kubernetes_state.deployment.replicas_available,gauge,,,,The number of available replicas per deployment,0,kubernetes,k8s_state.deployment.replicas_available
 kubernetes_state.deployment.replicas_unavailable,gauge,,,,The number of unavailable replicas per deployment,0,kubernetes,k8s_state.deployment.replicas_unavailable

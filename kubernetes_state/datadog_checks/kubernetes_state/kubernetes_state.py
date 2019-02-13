@@ -123,6 +123,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_daemonset_status_desired_number_scheduled': 'daemonset.desired',
                 'kube_daemonset_status_number_misscheduled': 'daemonset.misscheduled',
                 'kube_daemonset_status_number_ready': 'daemonset.ready',
+                'kube_daemonset_updated_number_scheduled': 'daemonset.updated',
                 'kube_deployment_spec_paused': 'deployment.paused',
                 'kube_deployment_spec_replicas': 'deployment.replicas_desired',
                 'kube_deployment_spec_strategy_rollingupdate_max_unavailable': 'deployment.rollingupdate.max_unavailable',  # noqa: E501
@@ -200,11 +201,18 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_replicaset_created',
                 'kube_replicationcontroller_created',
                 'kube_resourcequota_created',
+                'kube_replicaset_owner',
                 'kube_service_created',
                 'kube_service_info',
                 'kube_service_labels',
+                'kube_service_spec_external_ip',
+                'kube_service_status_load_balancer_ingress',
                 'kube_statefulset_labels',
                 'kube_statefulset_created',
+                'kube_statefulset_status_current_revision',
+                'kube_statefulset_status_update_revision',
+                # Already provided by the kubelet integration
+                'kube_pod_container_status_last_terminated_reason',
                 # _generation metrics are more metadata than metrics, no real use case for now
                 'kube_daemonset_metadata_generation',
                 'kube_deployment_metadata_generation',
