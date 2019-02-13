@@ -5,6 +5,8 @@
 from collections import Counter
 from datetime import datetime, timedelta
 
+import requests
+
 from datadog_checks.base import AgentCheck
 
 from .config import Config
@@ -44,7 +46,7 @@ class TwistlockCheck(AgentCheck):
         self._report_hosts_scan(config)
         self._report_container_compliance(config)
 
-    def _report_license_expiration(self, config):
+    def report_license_expiration(self, config):
         service_check_name = self.NAMESPACE + ".license_ok"
         try:
             license = self._retrieve_json(config, "/api/v1/settings/license")
@@ -66,7 +68,7 @@ class TwistlockCheck(AgentCheck):
         self.service_check(service_check_name, licence_status,
                            tags=config.tags, message=license.get("expiration_date"))
 
-    def _report_registry_scan(self, config):
+    def report_registry_scan(self, config):
         namespace = self.NAMESPACE + ".registry"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
@@ -126,7 +128,7 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(type, []) + image_tags
                 self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
 
-    def _report_images_scan(self, config):
+    def report_images_scan(self, config):
         namespace = self.NAMESPACE + ".images"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
@@ -190,7 +192,7 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(type, []) + image_tags
                 self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
 
-    def _report_hosts_scan(self, config):
+    def report_hosts_scan(self, config):
         namespace = self.NAMESPACE + ".hosts"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
@@ -239,7 +241,7 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(type, []) + host_tags
                 self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
 
-    def _report_container_compliance(self, config):
+    def report_container_compliance(self, config):
 
         namespace = self.NAMESPACE + ".containers"
         service_check_name = self.NAMESPACE + ".can_connect"
