@@ -55,6 +55,7 @@ kubernetes_state.nodes.by_condition,gauge,,,,To sum by `condition` and `status` 
 kubernetes_state.hpa.min_replicas,gauge,,,,Lower limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.min_replicas
 kubernetes_state.hpa.max_replicas,gauge,,,,Upper limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.max_replicas
 kubernetes_state.hpa.desired_replicas,gauge,,,,Desired number of replicas of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.desired_replicas
+kubernetes_state.hpa.condition,gauge,,,,Observed condition of autoscalers to sum by condition and status,0,kubernetes,k8s_state.hpa.status
 kubernetes_state.pod.ready,gauge,,,,"In association with the `condition` tag, whether the pod is ready to serve requests, e.g. `condition:true` keeps the pods that are in a ready state",1,kubernetes,k8s_state.pod.ready
 kubernetes_state.pod.scheduled,gauge,,,,Reports the status of the scheduling process for the pod with its tags,0,kubernetes,k8s_state.pod.scheduled
 kubernetes_state.pod.status_phase,gauge,,,,"To sum by `phase` to get number of pods in a given phase, and `namespace` to break this down by namespace",0,kubernetes,k8s_state.pod.status_phase

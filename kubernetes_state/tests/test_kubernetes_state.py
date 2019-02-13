@@ -48,6 +48,7 @@ METRICS = [
     NAMESPACE + '.hpa.max_replicas',
     NAMESPACE + '.hpa.desired_replicas',
     NAMESPACE + '.hpa.current_replicas',
+    NAMESPACE + '.hpa.condition',
     # pods
     NAMESPACE + '.pod.ready',
     NAMESPACE + '.pod.scheduled',
@@ -142,6 +143,12 @@ TAGS = {
     NAMESPACE + '.job.succeeded': [
         'job:hello',
         'job_name:hello2',
+    ],
+    NAMESPACE + '.hpa.condition': [
+        'namespace:default',
+        'hpa:myhpa',
+        'condition:true',
+        'status:AbleToScale',
     ],
 }
 
