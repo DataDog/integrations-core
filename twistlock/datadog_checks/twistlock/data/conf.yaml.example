@@ -9,9 +9,9 @@ instances:
   ## @param username - string - required
   ## The twistlock prometheus endpoint
   #
-    username: 'admin'
+    username: '<USERNAME>'
 
   ## @param password - string - required
   ## The twistlock prometheus endpoint
   #
-    password: 'password'
+    password: '<PASSWORD>'
