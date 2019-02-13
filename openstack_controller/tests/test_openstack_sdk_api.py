@@ -300,10 +300,6 @@ class MockOpenstackDiagnostics:
 
 
 class MockOpenstackCompute:
-    def flavors(self, **query):
-        yield EXAMPLE_FLAVORS_VALUE[0]
-        yield EXAMPLE_FLAVORS_VALUE[1]
-
     def get_server_diagnostics(self, server_id):
         if server_id != 'acb4197c-f54e-488e-a40a-1b7f59cc9117':
             raise openstack.exceptions.ResourceNotFound()
@@ -448,6 +444,9 @@ class MockOpenstackConnection:
 
     def list_networks(self):
         return EXAMPLE_NETWORKS_VALUE
+
+    def list_flavors(self):
+        return EXAMPLE_FLAVORS_VALUE
 
 
 def test_get_endpoint():

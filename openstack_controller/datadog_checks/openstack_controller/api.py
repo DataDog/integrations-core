@@ -210,7 +210,11 @@ class OpenstackSdkApi(AbstractApi):
     def get_flavors_detail(self, query_params):
         self._check_authentication()
 
-        return list(self.connection.compute.flavors(**query_params))
+        # query params is ignored here since Connection does not allow additional filters for list_flavors() method
+        if query_params:
+            print("Filters in query_params ({}) are ignored".format(query_params))
+
+        return self.connection.list_flavors()
 
     def get_networks(self):
         self._check_authentication()
@@ -223,11 +227,11 @@ class OpenstackSdkApi(AbstractApi):
             SimpleApi:
             https://developer.openstack.org/api-ref/compute/?expanded=list-flavors-with-details-detail,list-servers-detailed-detail#list-servers-detailed
             OpenstackSdkApi:
-            https://docs.openstack.org/openstacksdk/latest/user/proxies/compute.html
+            https://docs.openstack.org/openstacksdk/latest/user/connection.html#openstack.connection.Connection
         """
         self._check_authentication()
 
-        return list(self.connection.compute.servers(details=True, all_projects=True, **query_params))
+        return self.connection.list_servers(detailed=True, all_projects=True, filters=query_params)
 
     def get_server_diagnostics(self, server_id):
         self._check_authentication()
