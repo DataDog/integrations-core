@@ -24,7 +24,7 @@ Finally, in addition to metrics, the Datadog Agent also sends a service check fo
 ## Setup
 ### Installation
 
-The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, so you don't need to install anything else on yourConsul nodes.
+The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Consul nodes.
 
 ### Configuration
 
