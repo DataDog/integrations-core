@@ -201,11 +201,18 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_replicaset_created',
                 'kube_replicationcontroller_created',
                 'kube_resourcequota_created',
+                'kube_replicaset_owner',
                 'kube_service_created',
                 'kube_service_info',
                 'kube_service_labels',
+                'kube_service_spec_external_ip',
+                'kube_service_status_load_balancer_ingress',
                 'kube_statefulset_labels',
                 'kube_statefulset_created',
+                'kube_statefulset_status_current_revision',
+                'kube_statefulset_status_update_revision',
+                # Already provided by the kubelet integration
+                'kube_pod_container_status_last_terminated_reason',
                 # _generation metrics are more metadata than metrics, no real use case for now
                 'kube_daemonset_metadata_generation',
                 'kube_deployment_metadata_generation',
