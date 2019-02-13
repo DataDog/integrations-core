@@ -91,14 +91,7 @@ class TwistlockCheck(AgentCheck):
 
             image_tags = ["scanned_image:" + image_name] + self.config.tags
 
-            # Layer count and size
-            layer_count = 0
-            layer_sizes = 0
-            for layer in image.get('info', {}).get('history', []):
-                layer_count += 1
-                layer_sizes += layer.get('sizeBytes', 0)
-            self.gauge(namespace + '.image.size', float(layer_sizes), image_tags)
-            self.gauge(namespace + '.image.layer_count', float(layer_count), image_tags)
+            self._report_layer_count(image, namespace, image_tags)
 
             self._report_service_check(image,
                                        namespace + '.image',
@@ -106,29 +99,9 @@ class TwistlockCheck(AgentCheck):
                                        tags=image_tags,
                                        message="Last scan: " + image.get("scanTime"))
 
-            # CVE vulnerabilities
-            summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
-            cves = image.get('info', {}).get('cveVulnerabilities', []) or []
-            for cve in cves:
-                summary[cve['severity']] += 1
-                tags = [
-                    'cve:' + cve['cve'],
-                ] + SEVERITY_TAGS.get(cve['severity'], []) + image_tags
-                if 'packageName' in cve:
-                    tags += ["package:" + cve['packageName']]
-                self.gauge(namespace + '.image.cve.details', float(1), tags)
-            # Send counts to avoid no-data on zeroes
-            for severity, count in iteritems(summary):
-                tags = SEVERITY_TAGS.get(severity, []) + image_tags
-                self.gauge(namespace + '.image.cve.count', float(count), tags)
+            self._report_vuln_info(namespace + '.image', image, image_tags)
 
-            compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
-            vulns = image.get('info', {}).get('complianceDistribution', {}) or {}
-            types = ["critical", "high", "medium", "low"]
-            for type in types:
-                compliance[type] += vulns[type]
-                tags = SEVERITY_TAGS.get(type, []) + image_tags
-                self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
+            self._report_compliance_information(namespace + '.image', image, image_tags)
 
     def report_images_scan(self):
         namespace = self.NAMESPACE + ".images"
@@ -155,14 +128,7 @@ class TwistlockCheck(AgentCheck):
 
             image_tags = ["scanned_image:" + image_name] + self.config.tags
 
-            # Layer count and size
-            layer_count = 0
-            layer_sizes = 0
-            for layer in image.get('info', {}).get('history', []):
-                layer_count += 1
-                layer_sizes += layer.get('sizeBytes', 0)
-            self.gauge(namespace + '.image.size', float(layer_sizes), image_tags)
-            self.gauge(namespace + '.image.layer_count', float(layer_count), image_tags)
+            self._report_layer_count(image, namespace, image_tags)
 
             self._report_service_check(image,
                                        namespace + '.image',
@@ -170,29 +136,9 @@ class TwistlockCheck(AgentCheck):
                                        tags=image_tags,
                                        message="Last scan: " + image.get("scanTime"))
 
-            # CVE vulnerabilities
-            summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
-            cves = image.get('info', {}).get('cveVulnerabilities', []) or []
-            for cve in cves:
-                summary[cve['severity']] += 1
-                tags = [
-                    'cve:' + cve['cve'],
-                ] + SEVERITY_TAGS.get(cve['severity'], []) + image_tags
-                if 'packageName' in cve:
-                    tags += ["package:" + cve['packageName']]
-                self.gauge(namespace + '.image.cve.details', float(1), tags)
-            # Send counts to avoid no-data on zeroes
-            for severity, count in iteritems(summary):
-                tags = SEVERITY_TAGS.get(severity, []) + image_tags
-                self.gauge(namespace + '.image.cve.count', float(count), tags)
+            self._report_vuln_info(namespace + '.image', image, image_tags)
 
-            compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
-            vulns = image.get('info', {}).get('complianceDistribution', {}) or {}
-            types = ["critical", "high", "medium", "low"]
-            for type in types:
-                compliance[type] += vulns[type]
-                tags = SEVERITY_TAGS.get(type, []) + image_tags
-                self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
+            self._report_compliance_information(namespace + '.image', image, image_tags)
 
     def report_hosts_scan(self):
         namespace = self.NAMESPACE + ".hosts"
@@ -219,29 +165,9 @@ class TwistlockCheck(AgentCheck):
                                        tags=host_tags,
                                        message="Last scan: " + host.get("scanTime"))
 
-            # CVE vulnerabilities
-            summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
-            cves = host.get('info', {}).get('cveVulnerabilities', []) or []
-            for cve in cves:
-                summary[cve['severity']] += 1
-                tags = [
-                    'cve:' + cve['cve'],
-                ] + SEVERITY_TAGS.get(cve['severity'], []) + host_tags
-                if 'packageName' in cve:
-                    tags += ["package:" + cve['packageName']]
-                self.gauge(namespace + '.host.cve.details', float(1), tags)
-            # Send counts to avoid no-data on zeroes
-            for severity, count in iteritems(summary):
-                tags = SEVERITY_TAGS.get(severity, []) + host_tags
-                self.gauge(namespace + '.host.cve.count', float(count), tags)
+            self._report_vuln_info(namespace + '.host', host, host_tags)
 
-            compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
-            vulns = host.get('info', {}).get('complianceDistribution', {}) or {}
-            types = ["critical", "high", "medium", "low"]
-            for type in types:
-                compliance[type] += vulns[type]
-                tags = SEVERITY_TAGS.get(type, []) + host_tags
-                self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
+            self._report_compliance_information(namespace + '.host', host, host_tags)
 
     def report_container_compliance(self):
 
@@ -276,13 +202,43 @@ class TwistlockCheck(AgentCheck):
                                        tags=container_tags,
                                        message="Last scan: " + container.get("scanTime"))
 
-            compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
-            vulns = container.get('info', {}).get('complianceDistribution', {}) or {}
-            types = ["critical", "high", "medium", "low"]
-            for type in types:
-                compliance[type] += vulns[type]
-                tags = SEVERITY_TAGS.get(type, []) + container_tags
-                self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
+            self._report_compliance_information(namespace + '.container', container, container_tags)
+
+    def _report_vuln_info(self, namespace, data, tags):
+        # CVE vulnerabilities
+        summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+        cves = data.get('info', {}).get('cveVulnerabilities', []) or []
+        for cve in cves:
+            summary[cve['severity']] += 1
+            cve_tags = [
+                'cve:' + cve['cve'],
+            ] + SEVERITY_TAGS.get(cve['severity'], []) + tags
+            if 'packageName' in cve:
+                cve_tags += ["package:" + cve['packageName']]
+            self.gauge(namespace + '.cve.details', float(1), cve_tags)
+        # Send counts to avoid no-data on zeroes
+        for severity, count in iteritems(summary):
+            cve_tags = SEVERITY_TAGS.get(severity, []) + tags
+            self.gauge(namespace + '.cve.count', float(count), cve_tags)
+
+    def _report_compliance_information(self, namespace, data, tags):
+        compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+        vulns = data.get('info', {}).get('complianceDistribution', {}) or {}
+        types = ["critical", "high", "medium", "low"]
+        for type in types:
+            compliance[type] += vulns[type]
+            compliance_tags = SEVERITY_TAGS.get(type, []) + tags
+            self.gauge(namespace + '.compliance.count', compliance[type], compliance_tags)
+
+    def _report_layer_count(self, data, namespace, tags):
+        # Layer count and size
+        layer_count = 0
+        layer_sizes = 0
+        for layer in data.get('info', {}).get('history', []):
+            layer_count += 1
+            layer_sizes += layer.get('sizeBytes', 0)
+        self.gauge(namespace + '.image.size', float(layer_sizes), tags)
+        self.gauge(namespace + '.image.layer_count', float(layer_count), tags)
 
     def _report_service_check(self, data, prefix, format, tags=[], message=""):
         # Last scan service check
