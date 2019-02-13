@@ -248,6 +248,57 @@
             }
         },
         {
+          "metadata": {
+            "name": "static-web-chk",
+            "namespace": "default",
+            "selfLink": "/api/v1/namespaces/default/pods/static-web-chk",
+            "uid": "fbf18e171294371272adc19391eae7cc",
+            "creationTimestamp": null,
+            "labels": {
+              "role": "myrole"
+            },
+            "annotations": {
+              "kubernetes.io/config.hash": "fbf18e171294371272adc19391eae7cc",
+              "kubernetes.io/config.seen": "2019-02-05T09:06:29.146513865-05:00",
+              "kubernetes.io/config.source": "file"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "web",
+                "image": "nginx",
+                "ports": [
+                  {
+                    "name": "web",
+                    "containerPort": 80,
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "imagePullPolicy": "Always"
+              }
+            ],
+            "restartPolicy": "Always",
+            "terminationGracePeriodSeconds": 30,
+            "dnsPolicy": "ClusterFirst",
+            "nodeName": "chk",
+            "securityContext": {},
+            "schedulerName": "default-scheduler",
+            "tolerations": [
+              {
+                "operator": "Exists",
+                "effect": "NoExecute"
+              }
+            ]
+          },
+          "status": {
+            "phase": "Pending"
+          }
+        },
+        {
             "metadata": {
                 "name": "kube-proxy-2d2bq",
                 "generateName": "kube-proxy-",
