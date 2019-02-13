@@ -88,19 +88,15 @@ class TwistlockCheck(AgentCheck):
             image_name = image['_id']
             if image_name.startswith(DOCKERIO_PREFIX):
                 image_name = image_name[len(DOCKERIO_PREFIX):]
-
             image_tags = ["scanned_image:" + image_name] + self.config.tags
 
             self._report_layer_count(image, namespace, image_tags)
-
             self._report_service_check(image,
                                        namespace + '.image',
                                        REGISTRY_SCAN_DATE_FORMAT,
                                        tags=image_tags,
                                        message="Last scan: " + image.get("scanTime"))
-
             self._report_vuln_info(namespace + '.image', image, image_tags)
-
             self._report_compliance_information(namespace + '.image', image, image_tags)
 
     def report_images_scan(self):
@@ -125,19 +121,15 @@ class TwistlockCheck(AgentCheck):
                 continue
             if image_name.startswith(DOCKERIO_PREFIX):
                 image_name = image_name[len(DOCKERIO_PREFIX):]
-
             image_tags = ["scanned_image:" + image_name] + self.config.tags
 
             self._report_layer_count(image, namespace, image_tags)
-
             self._report_service_check(image,
                                        namespace + '.image',
                                        SCAN_DATE_FORMAT,
                                        tags=image_tags,
                                        message="Last scan: " + image.get("scanTime"))
-
             self._report_vuln_info(namespace + '.image', image, image_tags)
-
             self._report_compliance_information(namespace + '.image', image, image_tags)
 
     def report_hosts_scan(self):
@@ -156,7 +148,6 @@ class TwistlockCheck(AgentCheck):
                 continue
 
             hostname = host['hostname']
-
             host_tags = ["scanned_host:" + hostname] + self.config.tags
 
             self._report_service_check(host,
@@ -164,9 +155,7 @@ class TwistlockCheck(AgentCheck):
                                        SCAN_DATE_FORMAT,
                                        tags=host_tags,
                                        message="Last scan: " + host.get("scanTime"))
-
             self._report_vuln_info(namespace + '.host', host, host_tags)
-
             self._report_compliance_information(namespace + '.host', host, host_tags)
 
     def report_container_compliance(self):
@@ -192,7 +181,6 @@ class TwistlockCheck(AgentCheck):
             image_name = container_info.get('imageName')
             if image_name:
                 container_tags += ["image_name:" + image_name]
-
             container_tags += self.config.tags
 
             self._report_service_check(container,
@@ -200,7 +188,6 @@ class TwistlockCheck(AgentCheck):
                                        SCAN_DATE_FORMAT,
                                        tags=container_tags,
                                        message="Last scan: " + container.get("scanTime"))
-
             self._report_compliance_information(namespace + '.container', container, container_tags)
 
     def _report_vuln_info(self, namespace, data, tags):
