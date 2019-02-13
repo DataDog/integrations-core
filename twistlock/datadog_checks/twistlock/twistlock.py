@@ -5,6 +5,8 @@
 from collections import Counter
 from datetime import datetime, timedelta
 
+from six import iteritems
+
 import requests
 
 from datadog_checks.base import AgentCheck
@@ -116,7 +118,7 @@ class TwistlockCheck(AgentCheck):
                     tags += ["package:" + cve['packageName']]
                 self.gauge(namespace + '.image.cve.details', float(1), tags)
             # Send counts to avoid no-data on zeroes
-            for severity, count in summary.iteritems():
+            for severity, count in iteritems(summary):
                 tags = SEVERITY_TAGS.get(severity, []) + image_tags
                 self.gauge(namespace + '.image.cve.count', float(count), tags)
 
@@ -180,7 +182,7 @@ class TwistlockCheck(AgentCheck):
                     tags += ["package:" + cve['packageName']]
                 self.gauge(namespace + '.image.cve.details', float(1), tags)
             # Send counts to avoid no-data on zeroes
-            for severity, count in summary.iteritems():
+            for severity, count in iteritems(summary):
                 tags = SEVERITY_TAGS.get(severity, []) + image_tags
                 self.gauge(namespace + '.image.cve.count', float(count), tags)
 
@@ -229,7 +231,7 @@ class TwistlockCheck(AgentCheck):
                     tags += ["package:" + cve['packageName']]
                 self.gauge(namespace + '.host.cve.details', float(1), tags)
             # Send counts to avoid no-data on zeroes
-            for severity, count in summary.iteritems():
+            for severity, count in iteritems(summary):
                 tags = SEVERITY_TAGS.get(severity, []) + host_tags
                 self.gauge(namespace + '.host.cve.count', float(count), tags)
 
