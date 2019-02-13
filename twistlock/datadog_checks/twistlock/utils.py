@@ -8,7 +8,7 @@ import logging
 log = logging.getLogger(__file__)
 
 
-def retrieve_json(config, path):
+def retrieve_json(config, path, warning):
     url = config.url + path
     auth = (config.username, config.password)
     response = requests.get(url, auth=auth, verify=config.ssl_verify)
@@ -20,6 +20,6 @@ def retrieve_json(config, path):
             return {}
         return j
     except Exception as e:
-        self.warning("cannot get stuff: {} response is: {}".format(e, response.text))
+        warning("cannot get stuff: {} response is: {}".format(e, response.text))
         raise e
         return {}

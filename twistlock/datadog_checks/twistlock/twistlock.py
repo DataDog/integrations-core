@@ -5,7 +5,7 @@
 from collections import Counter
 from datetime import datetime, timedelta
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 from .config import Config
 from .utils import retrieve_json
@@ -47,7 +47,7 @@ class TwistlockCheck(AgentCheck):
     def _report_license_expiration(self, config):
         service_check_name = self.NAMESPACE + ".license_ok"
         try:
-            license = retrieve_json(config, "/api/v1/settings/license")
+            license = retrieve_json(config, "/api/v1/settings/license", self.warning)
         except Exception as e:
             self.warning("cannot retrieve license data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
@@ -70,16 +70,12 @@ class TwistlockCheck(AgentCheck):
         namespace = self.NAMESPACE + ".registry"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = retrieve_json(config, "/api/v1/registry")
+            scan_result = retrieve_json(config, "/api/v1/registry", self.warning)
             self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
             return None
-
-        current_date = datetime.now()
-        warning_date = current_date - timedelta(hours=7)
-        critical_date = current_date - timedelta(days=1)
 
         for image in scan_result:
             if '_id' not in image:
@@ -100,15 +96,11 @@ class TwistlockCheck(AgentCheck):
             self.gauge(namespace + '.image.size', float(layer_sizes), image_tags)
             self.gauge(namespace + '.image.layer_count', float(layer_count), image_tags)
 
-            # Last scan service check
-            scan_date = datetime.strptime(image.get("scanTime"), REGISTRY_SCAN_DATE_FORMAT)
-            scan_status = AgentCheck.OK
-            if scan_date < warning_date:
-                scan_status = AgentCheck.WARNING
-            if scan_date < critical_date:
-                scan_status = AgentCheck.CRITICAL
-            self.service_check(namespace + '.image.is_scanned', scan_status,
-                               tags=image_tags, message="Last scan: " + image.get("scanTime"))
+            self._report_service_check(image,
+                                       namespace + '.image',
+                                       REGISTRY_SCAN_DATE_FORMAT,
+                                       tags=image_tags,
+                                       message="Last scan: " + image.get("scanTime"))
 
             # CVE vulnerabilities
             summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
@@ -126,25 +118,28 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(severity, []) + image_tags
                 self.gauge(namespace + '.image.cve.count', float(count), tags)
 
+            compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+            vulns = image.get('info', {}).get('complianceDistribution', {}) or {}
+            types = ["critical", "high", "medium", "low"]
+            for type in types:
+                compliance[type] += vulns[type]
+                tags = SEVERITY_TAGS.get(type, []) + image_tags
+                self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
+
     def _report_images_scan(self, config):
         namespace = self.NAMESPACE + ".images"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = retrieve_json(config, "/api/v1/images")
+            scan_result = retrieve_json(config, "/api/v1/images", self.warning)
             self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
             return None
 
-        current_date = datetime.now()
-        warning_date = current_date - timedelta(hours=7)
-        critical_date = current_date - timedelta(days=1)
-
         for image in scan_result:
             if '_id' not in image:
                 continue
-
 
             instances = image.get('instances')
             instance = instances[0]
@@ -165,15 +160,11 @@ class TwistlockCheck(AgentCheck):
             self.gauge(namespace + '.image.size', float(layer_sizes), image_tags)
             self.gauge(namespace + '.image.layer_count', float(layer_count), image_tags)
 
-            # Last scan service check
-            scan_date = datetime.strptime(image.get("scanTime"), SCAN_DATE_FORMAT)
-            scan_status = AgentCheck.OK
-            if scan_date < warning_date:
-                scan_status = AgentCheck.WARNING
-            if scan_date < critical_date:
-                scan_status = AgentCheck.CRITICAL
-            self.service_check(namespace + '.image.is_scanned', scan_status,
-                               tags=image_tags, message="Last scan: " + image.get("scanTime"))
+            self._report_service_check(image,
+                                       namespace + '.image',
+                                       SCAN_DATE_FORMAT,
+                                       tags=image_tags,
+                                       message="Last scan: " + image.get("scanTime"))
 
             # CVE vulnerabilities
             summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
@@ -191,11 +182,19 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(severity, []) + image_tags
                 self.gauge(namespace + '.image.cve.count', float(count), tags)
 
+            compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+            vulns = image.get('info', {}).get('complianceDistribution', {}) or {}
+            types = ["critical", "high", "medium", "low"]
+            for type in types:
+                compliance[type] += vulns[type]
+                tags = SEVERITY_TAGS.get(type, []) + image_tags
+                self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
+
     def _report_hosts_scan(self, config):
         namespace = self.NAMESPACE + ".hosts"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = retrieve_json(config, "/api/v1/hosts")
+            scan_result = retrieve_json(config, "/api/v1/hosts", self.warning)
             self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
@@ -232,6 +231,54 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(severity, []) + host_tags
                 self.gauge(namespace + '.host.cve.count', float(count), tags)
 
+            compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+            vulns = host.get('info', {}).get('complianceDistribution', {}) or {}
+            types = ["critical", "high", "medium", "low"]
+            for type in types:
+                compliance[type] += vulns[type]
+                tags = SEVERITY_TAGS.get(type, []) + host_tags
+                self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
+
+    def _report_container_compliance(self, config):
+
+        namespace = self.NAMESPACE + ".containers"
+        service_check_name = self.NAMESPACE + ".can_connect"
+        try:
+            scan_result = retrieve_json(config, "/api/v1/containers", self.warning)
+            self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
+        except Exception as e:
+            self.warning("cannot retrieve registry data: {}".format(e))
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
+            return None
+
+        for container in scan_result:
+            if '_id' not in container:
+                continue
+
+            container_tags = []
+            container_info = container.get('info', {})
+            name = container_info.get('name')
+            if name:
+                container_tags += ["container_name:" + name]
+            image_name = container_info.get('imageName')
+            if image_name:
+                container_tags += ["image_name:" + image_name]
+
+            container_tags += config.tags
+
+            self._report_service_check(container,
+                                       namespace + '.container',
+                                       SCAN_DATE_FORMAT,
+                                       tags=container_tags,
+                                       message="Last scan: " + container.get("scanTime"))
+
+            compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+            vulns = container.get('info', {}).get('complianceDistribution', {}) or {}
+            types = ["critical", "high", "medium", "low"]
+            for type in types:
+                compliance[type] += vulns[type]
+                tags = SEVERITY_TAGS.get(type, []) + container_tags
+                self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
 
     def _report_service_check(self, data, prefix, format, tags=[], message=""):
         # Last scan service check
@@ -245,6 +292,3 @@ class TwistlockCheck(AgentCheck):
                            scan_status,
                            tags=tags,
                            message=message)
-
-    def _report_cve_vulnerabilities(self):
-        pass
