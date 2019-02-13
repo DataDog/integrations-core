@@ -170,7 +170,6 @@ class TwistlockCheck(AgentCheck):
             self._report_compliance_information(namespace + '.host', host, host_tags)
 
     def report_container_compliance(self):
-
         namespace = self.NAMESPACE + ".containers"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
