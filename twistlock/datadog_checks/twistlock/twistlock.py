@@ -36,25 +36,25 @@ class TwistlockCheck(AgentCheck):
         if 'url' not in instance:
             raise Exception('Instance missing "url" value.')
 
-        config = Config(instance)
+        self.config = Config(instance)
 
         current_date = datetime.now()
         self._warning_date = current_date - timedelta(hours=7)
         self._critical_date = current_date - timedelta(days=1)
 
-        self._report_license_expiration(config)
-        self._report_registry_scan(config)
-        self._report_images_scan(config)
-        self._report_hosts_scan(config)
-        self._report_container_compliance(config)
+        self.report_license_expiration()
+        self.report_registry_scan()
+        self.report_images_scan()
+        self.report_hosts_scan()
+        self.report_container_compliance()
 
-    def report_license_expiration(self, config):
+    def report_license_expiration(self):
         service_check_name = self.NAMESPACE + ".license_ok"
         try:
-            license = self._retrieve_json(config, "/api/v1/settings/license")
+            license = self._retrieve_json("/api/v1/settings/license")
         except Exception as e:
             self.warning("cannot retrieve license data: {}".format(e))
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
         expiration_date = datetime.strptime(license.get("expiration_date"), LICENCE_DATE_FORMAT)
@@ -68,17 +68,17 @@ class TwistlockCheck(AgentCheck):
         if expiration_date < critical_date:
             licence_status = AgentCheck.CRITICAL
         self.service_check(service_check_name, licence_status,
-                           tags=config.tags, message=license.get("expiration_date"))
+                           tags=self.config.tags, message=license.get("expiration_date"))
 
-    def report_registry_scan(self, config):
+    def report_registry_scan(self):
         namespace = self.NAMESPACE + ".registry"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = self._retrieve_json(config, "/api/v1/registry")
-            self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
+            scan_result = self._retrieve_json("/api/v1/registry")
+            self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
         for image in scan_result:
@@ -89,7 +89,7 @@ class TwistlockCheck(AgentCheck):
             if image_name.startswith(DOCKERIO_PREFIX):
                 image_name = image_name[len(DOCKERIO_PREFIX):]
 
-            image_tags = ["scanned_image:" + image_name] + config.tags
+            image_tags = ["scanned_image:" + image_name] + self.config.tags
 
             # Layer count and size
             layer_count = 0
@@ -130,15 +130,15 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(type, []) + image_tags
                 self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
 
-    def report_images_scan(self, config):
+    def report_images_scan(self):
         namespace = self.NAMESPACE + ".images"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = self._retrieve_json(config, "/api/v1/images")
-            self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
+            scan_result = self._retrieve_json("/api/v1/images")
+            self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
         for image in scan_result:
@@ -153,7 +153,7 @@ class TwistlockCheck(AgentCheck):
             if image_name.startswith(DOCKERIO_PREFIX):
                 image_name = image_name[len(DOCKERIO_PREFIX):]
 
-            image_tags = ["scanned_image:" + image_name] + config.tags
+            image_tags = ["scanned_image:" + image_name] + self.config.tags
 
             # Layer count and size
             layer_count = 0
@@ -194,15 +194,15 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(type, []) + image_tags
                 self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
 
-    def report_hosts_scan(self, config):
+    def report_hosts_scan(self):
         namespace = self.NAMESPACE + ".hosts"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = self._retrieve_json(config, "/api/v1/hosts")
-            self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
+            scan_result = self._retrieve_json("/api/v1/hosts")
+            self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
         for host in scan_result:
@@ -211,7 +211,7 @@ class TwistlockCheck(AgentCheck):
 
             hostname = host['hostname']
 
-            host_tags = ["scanned_host:" + hostname] + config.tags
+            host_tags = ["scanned_host:" + hostname] + self.config.tags
 
             self._report_service_check(host,
                                        namespace + '.host',
@@ -243,16 +243,16 @@ class TwistlockCheck(AgentCheck):
                 tags = SEVERITY_TAGS.get(type, []) + host_tags
                 self.gauge(namespace + '.host.compliance.count', compliance[type], tags)
 
-    def report_container_compliance(self, config):
+    def report_container_compliance(self):
 
         namespace = self.NAMESPACE + ".containers"
         service_check_name = self.NAMESPACE + ".can_connect"
         try:
-            scan_result = self._retrieve_json(config, "/api/v1/containers")
-            self.service_check(service_check_name, AgentCheck.OK, tags=config.tags)
+            scan_result = self._retrieve_json("/api/v1/containers")
+            self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: {}".format(e))
-            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=config.tags)
+            self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
         for container in scan_result:
@@ -268,7 +268,7 @@ class TwistlockCheck(AgentCheck):
             if image_name:
                 container_tags += ["image_name:" + image_name]
 
-            container_tags += config.tags
+            container_tags += self.config.tags
 
             self._report_service_check(container,
                                        namespace + '.container',
@@ -297,10 +297,10 @@ class TwistlockCheck(AgentCheck):
                            tags=tags,
                            message=message)
 
-    def _retrieve_json(self, config, path):
-        url = config.url + path
-        auth = (config.username, config.password)
-        response = requests.get(url, auth=auth, verify=config.ssl_verify)
+    def _retrieve_json(self, path):
+        url = self.config.url + path
+        auth = (self.config.username, self.config.password)
+        response = requests.get(url, auth=auth, verify=self.config.ssl_verify)
         try:
             j = response.json()
             # it's possible to get a null response from the server
