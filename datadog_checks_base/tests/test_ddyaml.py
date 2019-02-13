@@ -35,16 +35,20 @@ class Dummy(object):
         return self.qux
 
 
-def test_monkey_patch():
+@pytest.fixture(scope="module", autouse=True)
+def patch_yaml():
     monkey_patch_pyyaml()
-    assert yaml.dump_all == safe_yaml_dump_all
-    assert yaml.load_all == safe_yaml_load_all
-    assert yaml.load == safe_yaml_load
+    yield
     monkey_patch_pyyaml_reverse()
 
 
+def test_monkey_patch():
+    assert yaml.dump_all == safe_yaml_dump_all
+    assert yaml.load_all == safe_yaml_load_all
+    assert yaml.load == safe_yaml_load
+
+
 def test_load():
-    monkey_patch_pyyaml()
     conf = os.path.join(FIXTURE_PATH, "valid_conf.yaml")
     with open(conf) as f:
         stream = f.read()
@@ -62,12 +66,10 @@ def test_load():
         assert len(yaml_config_safe) == len(yaml_config_native)
         for safe, native in zip(yaml_config_safe, yaml_config_native):
             assert safe == native
-    monkey_patch_pyyaml_reverse()
 
 
 def test_unsafe():
     dummy = Dummy()
-    monkey_patch_pyyaml()
 
     with pytest.raises(yaml.representer.RepresenterError):
         yaml.dump_all([dummy])
@@ -93,4 +95,3 @@ def test_unsafe():
         with pytest.raises(yaml.constructor.ConstructorError):
             f.seek(0)  # rewind
             yaml.load(f)
-    monkey_patch_pyyaml_reverse()
