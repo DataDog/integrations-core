@@ -199,7 +199,8 @@ class OpenstackSdkApi(AbstractApi):
         return self.connection.list_hypervisors()
 
     def get_os_hypervisor_uptime(self, hypervisor_id):
-        self.logger.warning("Hypervisor uptime is disabled with Openstacksdk")
+        # Hypervisor uptime is not available in openstacksdk 0.24.0.
+        self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
 
     def get_os_aggregates(self):
         """ Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi """
@@ -234,28 +235,8 @@ class OpenstackSdkApi(AbstractApi):
         return self.connection.list_servers(detailed=True, all_projects=True, filters=query_params)
 
     def get_server_diagnostics(self, server_id):
-        self._check_authentication()
-
-        # Raise exception if server_id not found
-        diagnostic = self.connection.compute.get_server_diagnostics(server_id)
-
-        diagnostic_dict = {
-            "config_drive": diagnostic.has_config_drive,
-            "cpu_details": diagnostic.cpu_details,
-            "disk_details": diagnostic.disk_details,
-            "driver": diagnostic.driver,
-            "hypervisor": diagnostic.hypervisor,
-            "hypervisor_os": diagnostic.hypervisor_os,
-            "memory_details": diagnostic.memory_details,
-            "nic_details": diagnostic.nic_details,
-            "num_cpus": diagnostic.num_cpus,
-            "num_disks": diagnostic.num_disks,
-            "num_nics": diagnostic.num_nics,
-            "state": diagnostic.state,
-            "uptime": diagnostic.uptime
-        }
-
-        return diagnostic_dict
+        # Server diagnostics is not available in openstacksdk 0.24.0. It should be available in the next release.
+        self.logger.warning("Server diagnostics is not available with this version of openstacksdk")
 
 
 class SimpleApi(AbstractApi):

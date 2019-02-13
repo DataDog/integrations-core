@@ -1,6 +1,5 @@
 import mock
 import pytest
-import openstack
 
 from datadog_checks.openstack_controller.api import OpenstackSdkApi
 from datadog_checks.openstack_controller.exceptions import (KeystoneUnreachable, MissingNovaEndpoint,
@@ -299,16 +298,9 @@ class MockOpenstackDiagnostics:
     ]
 
 
-class MockOpenstackCompute:
-    def get_server_diagnostics(self, server_id):
-        if server_id != 'acb4197c-f54e-488e-a40a-1b7f59cc9117':
-            raise openstack.exceptions.ResourceNotFound()
-        return MockOpenstackDiagnostics()
-
-
 class MockOpenstackConnection:
     def __init__(self):
-        self.compute = MockOpenstackCompute()
+        pass
 
     def get_service(self, service_name):
         if service_name == u'keystone':
@@ -528,58 +520,3 @@ def test_get_networks():
     api.connection = MockOpenstackConnection()
 
     assert api.get_networks() == EXAMPLE_NETWORKS_VALUE
-
-
-def test_get_server_diagnostics():
-    api = OpenstackSdkApi(None)
-    api.connection = MockOpenstackConnection()
-
-    with pytest.raises(openstack.exceptions.ResourceNotFound):
-        api.get_server_diagnostics('wrong-id')
-
-    assert api.get_server_diagnostics('acb4197c-f54e-488e-a40a-1b7f59cc9117') == {
-        "config_drive": True,
-        "cpu_details": [
-            {
-                "id": 0,
-                "time": 17300000000,
-                "utilisation": 15
-            }
-        ],
-        "disk_details": [
-            {
-                "errors_count": 1,
-                "read_bytes": 262144,
-                "read_requests": 112,
-                "write_bytes": 5778432,
-                "write_requests": 488
-            }
-        ],
-        "driver": "libvirt",
-        "hypervisor": "kvm",
-        "hypervisor_os": "ubuntu",
-        "memory_details": {
-            "maximum": 524288,
-            "used": 0
-        },
-        "nic_details": [
-            {
-                "mac_address": "01:23:45:67:89:ab",
-                "rx_drop": 200,
-                "rx_errors": 100,
-                "rx_octets": 2070139,
-                "rx_packets": 26701,
-                "rx_rate": 300,
-                "tx_drop": 500,
-                "tx_errors": 400,
-                "tx_octets": 140208,
-                "tx_packets": 662,
-                "tx_rate": 600
-            }
-        ],
-        "num_cpus": 1,
-        "num_disks": 1,
-        "num_nics": 1,
-        "state": "running",
-        "uptime": 46664
-    }

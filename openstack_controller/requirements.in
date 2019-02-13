@@ -1,1 +1,1 @@
-git+git://github.com/openstack/openstacksdk.git@dc092757d1fdf56806abc0a8c45f2021c6cc5771
+openstacksdk==0.24.0
