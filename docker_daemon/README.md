@@ -32,8 +32,6 @@ For either option, your hosts need cgroup memory management enabled for the Dock
 6. To enable other integrations, use `docker ps` to identify the ports used by the corresponding applications.
     ![Docker ps command][7]
 
-**Note:** Docker_daemon has replaced the older Docker integration.
-
 #### Container Installation
 
 1. Ensure Docker is running on the host.
