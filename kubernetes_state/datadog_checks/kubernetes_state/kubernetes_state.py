@@ -163,7 +163,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_poddisruptionbudget_status_current_healthy': 'pdb.pods_healthy',
                 'kube_poddisruptionbudget_status_desired_healthy': 'pdb.pods_desired',
                 'kube_poddisruptionbudget_status_pod_disruptions_allowed': 'pdb.disruptions_allowed',
-                'kube_poddisruptionbudget_status_expected_pods': 'pdb.pods',
+                'kube_poddisruptionbudget_status_expected_pods': 'pdb.pods_total',
                 'kube_replicaset_spec_replicas': 'replicaset.replicas_desired',
                 'kube_replicaset_status_fully_labeled_replicas': 'replicaset.fully_labeled_replicas',
                 'kube_replicaset_status_ready_replicas': 'replicaset.replicas_ready',
