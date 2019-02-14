@@ -36,6 +36,10 @@ from ..utils.common import ensure_bytes, ensure_unicode
 from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
 
+if datadog_agent.get_config('disable_unsafe_yaml'):
+    from ..ddyaml import monkey_patch_pyyaml
+    monkey_patch_pyyaml()
+
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [
@@ -75,15 +79,6 @@ class __AgentCheckPy3(object):
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
-
-        if datadog_agent.get_config('disable_unsafe_yaml'):
-            # monkey-patches unsafe pyyaml methods
-            try:
-                import yaml
-                from ..ddyaml import monkey_patch_pyyaml
-                monkey_patch_pyyaml()
-            except ImportError:
-                pass
 
         if len(args) > 0:
             self.name = args[0]
@@ -454,15 +449,6 @@ class __AgentCheckPy2(object):
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
-
-        if datadog_agent.get_config('disable_unsafe_yaml'):
-            # monkey-patches unsafe pyyaml methods
-            try:
-                import yaml
-                from ..ddyaml import monkey_patch_pyyaml
-                monkey_patch_pyyaml()
-            except ImportError:
-                pass
 
         if len(args) > 0:
             self.name = args[0]
