@@ -23,6 +23,10 @@ except ImportError:
     from ..stubs.log import init_logging
     init_logging()
 
+if datadog_agent.get_config('disable_unsafe_yaml'):
+    from ..ddyaml import monkey_patch_pyyaml
+    monkey_patch_pyyaml()
+
 try:
     import aggregator
     using_stub_aggregator = False
@@ -75,15 +79,6 @@ class __AgentCheckPy3(object):
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
-
-        if datadog_agent.get_config('disable_unsafe_yaml'):
-            # monkey-patches unsafe pyyaml methods
-            try:
-                import yaml
-                from ..ddyaml import monkey_patch_pyyaml
-                monkey_patch_pyyaml()
-            except ImportError:
-                pass
 
         if len(args) > 0:
             self.name = args[0]
@@ -454,15 +449,6 @@ class __AgentCheckPy2(object):
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
-
-        if datadog_agent.get_config('disable_unsafe_yaml'):
-            # monkey-patches unsafe pyyaml methods
-            try:
-                import yaml
-                from ..ddyaml import monkey_patch_pyyaml
-                monkey_patch_pyyaml()
-            except ImportError:
-                pass
 
         if len(args) > 0:
             self.name = args[0]
