@@ -10,9 +10,12 @@ This check monitors [IBM MQ][1].
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
-In order to use the IBM MQ check, you need to install the [IBM MQ Client][3], unless the IBM MQ server is already installed on the box. Take note of where you installed it.
+In order to use the IBM MQ check, you need to:
 
-Update your LD_LIBRARY_PATH to include the location of the libraries. For example:
+1. Make sure the [IBM MQ Client][3] is installed (unless the IBM MQ server is already installed)
+2. Update your LD_LIBRARY_PATH to include the location of the libraries
+
+For example:
 
 ```
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
@@ -91,7 +94,7 @@ sudo ldconfig
 
 There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
 
-Also, queue level metric stats need to be enabled. This can be done with a mqsc command:
+Note: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done via the MQ UI or with an mqsc command:
 
 ```
 > /opt/mqm/bin/runmqsc
@@ -142,10 +145,9 @@ queues:
 #### Log Collection
 
 Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
-
-    ```yaml
+```
     logs_enabled: true
-    ```
+```
 
 Next, point the config file to the proper MQ log files. You can uncomment the lines at the bottom of the MQ integration's config file, and amend them as you see fit:
 

@@ -32,12 +32,13 @@ class YubikeyException(Exception):
 
 
 class UntrackedFileException(Exception):
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, stderr):
+        self.stderr = stderr
 
 
     def __str__(self):
-        return '{} has not been tracked by git!'.format(self.filename)
+        # https://stackoverflow.com/a/18389510
+        return '\n\t{}'.format('\t'.join(self.stderr.splitlines(True)))
 
 
 def read_gitignore_patterns():
@@ -117,10 +118,10 @@ def update_link_metadata(checks):
             tag = json.load(tag_json)
             products = tag['signed']['products']
 
-        for product in products:
-            if not git_ls_files(product):
-                os.remove(tag_link)
-                raise UntrackedFileException(product)
+        stderr = git_ls_files(products)
+        if stderr:
+            os.remove(tag_link)
+            raise UntrackedFileException(stderr)
 
         # Tell pipeline which tag link metadata to use.
         write_file(metadata_file_tracker, tag_link)

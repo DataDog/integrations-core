@@ -49,6 +49,11 @@ METRICS = [
     NAMESPACE + '.hpa.desired_replicas',
     NAMESPACE + '.hpa.current_replicas',
     NAMESPACE + '.hpa.condition',
+    # pdb
+    NAMESPACE + '.pdb.disruptions_allowed',
+    NAMESPACE + '.pdb.pods_desired',
+    NAMESPACE + '.pdb.pods_healthy',
+    NAMESPACE + '.pdb.pods_total',
     # pods
     NAMESPACE + '.pod.ready',
     NAMESPACE + '.pod.scheduled',

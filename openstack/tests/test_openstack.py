@@ -22,8 +22,8 @@ from datadog_checks.openstack.openstack import (
     IncompleteIdentity
 )
 
-
-instance = common.MOCK_CONFIG["instances"][0]
+instances = common.MOCK_CONFIG['instances']
+instance = common.MOCK_CONFIG['instances'][0]
 instance['tags'] = ['optional:tag1']
 init_config = common.MOCK_CONFIG['init_config']
 openstack_check = OpenStackCheck('openstack', init_config, {}, instances=[instance])
@@ -169,7 +169,7 @@ def test_from_auth_response():
 
 
 def test_ensure_auth_scope(aggregator):
-    instance = common.MOCK_CONFIG["instances"][0]
+    instance = common.MOCK_CONFIG['instances'][0]
     instance['tags'] = ['optional:tag1']
 
     with pytest.raises(KeyError):
@@ -227,7 +227,7 @@ def test_server_exclusion(*args):
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=common.MOCK_CONFIG)
+    }, {}, instances=instances)
 
     # Retrieve servers
     openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
@@ -281,7 +281,7 @@ def test_cache_between_runs(self, *args):
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=common.MOCK_CONFIG)
+    }, {}, instances=instances)
 
     # Start off with a list of servers
     openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
