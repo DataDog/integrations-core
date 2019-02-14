@@ -42,10 +42,6 @@ http_stub_status_module
 If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX-enabling the module as you compile it-but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
 ### Configuration
-
-Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
-See the [sample nginx.d/conf.yaml][7] for all available configuration options.
-
 #### Prepare NGINX
 
 On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
@@ -82,20 +78,13 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 #### Metric Collection
 
-* Add this configuration block to your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics):
+1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][7] for all available configuration options.
 
-  ```
-  init_config:
+2. Optional - If you are using the NGINX vhost_traffic_status module, set the parameter `use_vts` to `true` in your `nginx.d/conf.yaml` configuration file.
 
-  instances:
-    - nginx_status_url: http://localhost:81/nginx_status/
-    # If you configured the endpoint with HTTP basic authentication
-    # user: <USER>
-    # password: <PASSWORD>
-  ```
-  See the [sample nginx.d/conf.yaml][7] for all available configuration options.
+3. Optional - If you are using the commercial version of NGINX, for releases R13 and above, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
 
-* [Restart the Agent][8] to start sending NGINX metrics to Datadog.
+4. [Restart the Agent][8] to start sending NGINX metrics to Datadog.
 
 #### Log Collection
 
@@ -143,25 +132,25 @@ Not all metrics shown are available to users of open source NGINX. Compare the m
 
 A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
 
-| NGINX | NGINX Plus |
-|-------------------|-------------------|
-| nginx.net.connections | nginx.connections.active |
-| nginx.net.conn_opened_per_s | nginx.connections.accepted |
-| nginx.net.conn_dropped_per_s | nginx.connections.dropped |
-| nginx.net.request_per_s | nginx.requests.total |
+| NGINX                        | NGINX Plus                 |
+| -------------------          | -------------------        |
+| nginx.net.connections        | nginx.connections.active   |
+| nginx.net.conn_opened_per_s  | nginx.connections.accepted |
+| nginx.net.conn_dropped_per_s | nginx.connections.dropped  |
+| nginx.net.request_per_s      | nginx.requests.total       |
 
 These metrics don't refer exactly to the same metric, but they are somewhat related:
 
-| NGINX | NGINX Plus |
-|-------------------|-------------------|
-| nginx.net.waiting | nginx.connections.idle|
+| NGINX               | NGINX Plus             |
+| ------------------- | -------------------    |
+| nginx.net.waiting   | nginx.connections.idle |
 
 Finally, these metrics have no good equivalent:
 
-|||
-|-------------------|-------------------|
-| nginx.net.reading | The current number of connections where nginx is reading the request header. |
-| nginx.net.writing | The current number of connections where nginx is writing the response back to the client. |
+|                     |                                                                                           |
+| ------------------- | -------------------                                                                       |
+| nginx.net.reading   | The current number of connections where nginx is reading the request header.              |
+| nginx.net.writing   | The current number of connections where nginx is writing the response back to the client. |
 
 ### Events
 The NGINX check does not include any events.
@@ -203,10 +192,7 @@ http{
 Otherwise, review the **Configuration** section.
 
 ## Further Reading
-### Knowledge Base
-The data pulled from the NGINX Plus status page are described in the [NGINX docs][12].
 
-### Datadog Blog
 Learn more about how to monitor NGINX performance metrics thanks to [our series of posts][13]. We detail the key performance metrics, [how to collect them][14], and [how to use Datadog to monitor NGINX][15].
 
 
