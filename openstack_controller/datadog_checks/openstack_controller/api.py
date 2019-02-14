@@ -213,7 +213,7 @@ class OpenstackSdkApi(AbstractApi):
 
         # query params is ignored here since Connection does not allow additional filters for list_flavors() method
         if query_params:
-            print("Filters in query_params ({}) are ignored".format(query_params))
+            self.logger.warning("Filters in query_params ({}) are ignored".format(query_params))
 
         return self.connection.list_flavors()
 

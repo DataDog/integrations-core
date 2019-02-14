@@ -1,9 +1,11 @@
 import mock
 import pytest
 
+from openstack.exceptions import SDKException
+
 from datadog_checks.openstack_controller.api import OpenstackSdkApi
-from datadog_checks.openstack_controller.exceptions import (KeystoneUnreachable, MissingNovaEndpoint,
-                                                            MissingNeutronEndpoint)
+from datadog_checks.openstack_controller.exceptions import (AuthenticationNeeded, KeystoneUnreachable,
+                                                            MissingNovaEndpoint, MissingNeutronEndpoint)
 
 
 EXAMPLE_PROJECTS_VALUE = [
@@ -251,53 +253,6 @@ EXAMPLE_NETWORKS_VALUE = [
 ]
 
 
-class MockOpenstackDiagnostics:
-    has_config_drive = True
-    state = "running"
-    driver = "libvirt"
-    hypervisor = "kvm"
-    hypervisor_os = "ubuntu"
-    uptime = 46664
-    num_cpus = 1
-    num_disks = 1
-    num_nics = 1
-    memory_details = {
-        "maximum": 524288,
-        "used": 0
-    }
-    cpu_details = [
-        {
-            "id": 0,
-            "time": 17300000000,
-            "utilisation": 15
-        }
-    ]
-    disk_details = [
-        {
-            "errors_count": 1,
-            "read_bytes": 262144,
-            "read_requests": 112,
-            "write_bytes": 5778432,
-            "write_requests": 488
-        }
-    ]
-    nic_details = [
-        {
-            "mac_address": "01:23:45:67:89:ab",
-            "rx_drop": 200,
-            "rx_errors": 100,
-            "rx_octets": 2070139,
-            "rx_packets": 26701,
-            "rx_rate": 300,
-            "tx_drop": 500,
-            "tx_errors": 400,
-            "tx_octets": 140208,
-            "tx_packets": 662,
-            "tx_rate": 600
-        }
-    ]
-
-
 class MockOpenstackConnection:
     def __init__(self):
         pass
@@ -424,6 +379,7 @@ class MockOpenstackConnection:
     def get_compute_limits(self, project_id):
         if project_id == u'680031a39ce040e1b81289ea8c73fb11':
             return EXAMPLE_COMPUTE_LIMITS_VALUE
+        raise SDKException()
 
     def search_projects(self):
         return EXAMPLE_PROJECTS_VALUE
@@ -443,13 +399,19 @@ class MockOpenstackConnection:
 
 def test_get_endpoint():
     api = OpenstackSdkApi(None)
+
+    with pytest.raises(AuthenticationNeeded):
+        api._check_authentication()
+
     api.connection = MockOpenstackConnection()
 
     assert api.get_keystone_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/a536052eba574bd4baf89ff83e3a23db'
     assert api.get_nova_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/0adb9d108440437fa6841d31a989ed89'
     assert api.get_neutron_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
 
-    with mock.patch('datadog_checks.openstack_controller.api.OpenstackSdkApi._get_endpoint', return_value=None):
+    with mock.patch('datadog_checks.openstack_controller.api.OpenstackSdkApi._get_service',
+                    return_value={u'id': 'invalid_id'}):
+        api.endpoints = {}
         with pytest.raises(KeystoneUnreachable):
             api.get_keystone_endpoint()
 
@@ -492,6 +454,8 @@ def test_get_project_limit():
                 "totalFloatingIpsUsed": 0,
                 "totalServerGroupsUsed": 0
             }
+    with pytest.raises(SDKException):
+        api.get_project_limits('invalid_id')
 
 
 def test_get_os_hypervisors_detail():
