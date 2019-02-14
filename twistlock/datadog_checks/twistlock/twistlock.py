@@ -33,16 +33,17 @@ SEVERITY_TAGS = {
 class TwistlockCheck(AgentCheck):
     NAMESPACE = 'twistlock'
 
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+
+        msg = 'This check has not run before, '
+        msg += 'it will send all the new vulnerabilities that happened in the past day'
+        self.log.debug(msg)
+        self.last_run = datetime.now() - timedelta(days=1)
+
     def check(self, instance):
         if 'url' not in instance:
             raise Exception('Instance missing "url" value.')
-
-        # This can be set to a single attribute, as this will be an agent 6 only check
-        if not self.last_run:
-            msg = 'This check has not run before, '
-            msg += 'it will send all the new vulnerabilities that happened in the past day'
-            self.log.debug(msg)
-            self.last_run = datetime.now() - timedelta(days=1)
 
         self.config = Config(instance)
 
@@ -213,10 +214,10 @@ class TwistlockCheck(AgentCheck):
 
             if host_vulns:
                 for host_vuln in host_vulns:
-                    self._analyze_vulnerability(vuln, host=True)
+                    self._analyze_vulnerability(host_vuln, host=True)
             if image_vulns:
                 for image_vuln in image_vulns:
-                    self._analyze_vulnerability(vuln, image=True)
+                    self._analyze_vulnerability(image_vuln, image=True)
 
     def _analyze_vulnerability(self, vuln, host=False, image=False):
         cve_id = vuln.get('id')
