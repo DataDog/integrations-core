@@ -721,6 +721,18 @@ kube_pod_status_scheduled{condition="unknown",namespace="kube-system",pod="kube-
 kube_pod_status_scheduled{condition="unknown",namespace="kube-system",pod="kubernetes-dashboard-zhtjl"} 0
 kube_pod_status_scheduled{condition="unknown",namespace="kube-system",pod="registry-creds-hq249"} 0
 kube_pod_status_scheduled{condition="unknown",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn"} 0
+# HELP kube_poddisruptionbudget_status_current_healthy Current number of healthy pods
+# TYPE kube_poddisruptionbudget_status_current_healthy gauge
+kube_poddisruptionbudget_status_current_healthy{namespace="default",poddisruptionbudget="web-pdb"} 3
+# HELP kube_poddisruptionbudget_status_desired_healthy Minimum desired number of healthy pods
+# TYPE kube_poddisruptionbudget_status_desired_healthy gauge
+kube_poddisruptionbudget_status_desired_healthy{namespace="default",poddisruptionbudget="web-pdb"} 2
+# HELP kube_poddisruptionbudget_status_pod_disruptions_allowed Number of pod disruptions that are currently allowed
+# TYPE kube_poddisruptionbudget_status_pod_disruptions_allowed gauge
+kube_poddisruptionbudget_status_pod_disruptions_allowed{namespace="default",poddisruptionbudget="web-pdb"} 1
+# HELP kube_poddisruptionbudget_status_expected_pods Total number of pods counted by this disruption budget
+# TYPE kube_poddisruptionbudget_status_expected_pods gauge
+kube_poddisruptionbudget_status_expected_pods{namespace="default",poddisruptionbudget="web-pdb"} 3
 # HELP kube_replicaset_created Unix creation timestamp
 # TYPE kube_replicaset_created gauge
 kube_replicaset_created{namespace="default",replicaset="failingtest-f585bbd4"} 1.510059371e+09
@@ -846,3 +858,8 @@ kube_resourcequota{namespace="default",resource="pods",resourcequota="custom-res
 # HELP kube_limitrange Information about limit range.
 # TYPE kube_limitrange gauge
 kube_limitrange{constraint="defaultRequest",limitrange="limits",namespace="default",resource="cpu",type="Container"} 0.1
+# HELP kube_daemonset_updated_number_scheduled The total number of nodes that are running updated daemon pod
+# TYPE kube_daemonset_updated_number_scheduled gauge
+kube_daemonset_updated_number_scheduled{namespace="kube-system",daemonset="kube-proxy"} 3
+kube_daemonset_updated_number_scheduled{namespace="kube-system",daemonset="kube-svc-redirect"} 3
+kube_daemonset_updated_number_scheduled{namespace="default",daemonset="dd-datadog"} 3

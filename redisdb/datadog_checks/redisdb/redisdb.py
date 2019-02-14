@@ -268,12 +268,13 @@ class Redis(AgentCheck):
             databases = [db, ]
 
         # maps a key to the total length across databases
-        lengths = defaultdict(int)
+        lengths_overall = defaultdict(int)
 
         # don't overwrite the configured instance, use a copy
         tmp_instance = deepcopy(instance)
 
         for db in databases:
+            lengths = defaultdict(lambda: defaultdict(int))
             tmp_instance['db'] = db
             db_conn = self._get_conn(tmp_instance)
 
@@ -292,22 +293,55 @@ class Redis(AgentCheck):
                         continue
 
                     if key_type == 'list':
-                        lengths[text_key] += db_conn.llen(key)
+                        keylen = db_conn.llen(key)
+                        lengths[text_key]["length"] += keylen
+                        lengths_overall[text_key] += keylen
                     elif key_type == 'set':
-                        lengths[text_key] += db_conn.scard(key)
+                        keylen = db_conn.scard(key)
+                        lengths[text_key]["length"] += keylen
+                        lengths_overall[text_key] += keylen
                     elif key_type == 'zset':
-                        lengths[text_key] += db_conn.zcard(key)
+                        keylen = db_conn.zcard(key)
+                        lengths[text_key]["length"] += keylen
+                        lengths_overall[text_key] += keylen
                     elif key_type == 'hash':
-                        lengths[text_key] += db_conn.hlen(key)
+                        keylen = db_conn.hlen(key)
+                        lengths[text_key]["length"] += keylen
+                        lengths_overall[text_key] += keylen
+                    elif key_type == 'string':
+                        # Send 1 if the key exists as a string
+                        lengths[text_key]["length"] += 1
+                        lengths_overall[text_key] += 1
                     else:
                         # If the type is unknown, it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.
-                        lengths[text_key] += 0
+                        lengths[text_key]["length"] += 0
+                        lengths_overall[text_key] += 0
 
-        # send the metrics
-        for key, total in iteritems(lengths):
-            self.gauge('redis.key.length', total, tags=tags + ['key:' + key])
+                    # Tagging with key_type since the same key can exist with a
+                    # different key_type in another db
+                    lengths[text_key]["key_type"] = key_type
+
+            # Send the metrics for each db in the redis instance.
+            for key, total in iteritems(lengths):
+                # Only send non-zeros if tagged per db.
+                if total["length"] > 0:
+                    self.gauge(
+                        'redis.key.length',
+                        total["length"],
+                        tags=tags + [
+                            'key:{}'.format(key),
+                            'key_type:{}'.format(total["key_type"]),
+                            'redis_db:db{}'.format(db)])
+
+        # Warn if a key is missing from the entire redis instance.
+        # Send 0 if the key is missing/empty from the entire redis instance.
+        for key, total in iteritems(lengths_overall):
             if total == 0 and instance.get("warn_on_missing_keys", True):
+                self.gauge(
+                    'redis.key.length',
+                    total,
+                    tags=tags + ['key:{}'.format(key)])
                 self.warning("{0} key not found in redis".format(key))
 
     def _check_replication(self, info, tags):
