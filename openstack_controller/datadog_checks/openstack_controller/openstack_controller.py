@@ -219,8 +219,7 @@ class OpenStackControllerCheck(AgentCheck):
     def collect_hypervisors_metrics(self, custom_tags=None,
                                     use_shortname=False,
                                     collect_hypervisor_metrics=True,
-                                    collect_hypervisor_load=False,
-                                    openstack_sdk_cloud_name=None):
+                                    collect_hypervisor_load=False):
         """
         Submits stats for all hypervisors registered to this control plane
         Raises specific exceptions based on response code
@@ -230,16 +229,14 @@ class OpenStackControllerCheck(AgentCheck):
             self.get_stats_for_single_hypervisor(hyp, custom_tags=custom_tags,
                                                  use_shortname=use_shortname,
                                                  collect_hypervisor_metrics=collect_hypervisor_metrics,
-                                                 collect_hypervisor_load=collect_hypervisor_load,
-                                                 openstack_sdk_cloud_name=openstack_sdk_cloud_name)
+                                                 collect_hypervisor_load=collect_hypervisor_load)
         if not hypervisors:
             self.warning("Unable to collect any hypervisors from Nova response.")
 
     def get_stats_for_single_hypervisor(self, hyp, custom_tags=None,
                                         use_shortname=False,
                                         collect_hypervisor_metrics=True,
-                                        collect_hypervisor_load=True,
-                                        openstack_sdk_cloud_name=None):
+                                        collect_hypervisor_load=True):
         hyp_hostname = hyp.get('hypervisor_hostname')
         custom_tags = custom_tags or []
         tags = [
@@ -274,19 +271,16 @@ class OpenStackControllerCheck(AgentCheck):
         # Disable this by default for higher performance in a large environment
         # If the Agent is installed on the hypervisors, system.load.1/5/15 is available as a system metric
         if collect_hypervisor_load:
-            if openstack_sdk_cloud_name is not None:
-                self.warning("Hypervisor load is disabled with Openstacksdk")
+            try:
+                load_averages = self.get_loads_for_single_hypervisor(hyp['id'])
+            except Exception as e:
+                self.warning('Unable to get loads averages for hypervisor {}: {}'.format(hyp['id'], e))
+                load_averages = []
+            if load_averages and len(load_averages) == 3:
+                for i, avg in enumerate([1, 5, 15]):
+                    self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
             else:
-                try:
-                    load_averages = self.get_loads_for_single_hypervisor(hyp['id'])
-                except Exception as e:
-                    self.warning('Unable to get loads averages for hypervisor {}: {}'.format(hyp['id'], e))
-                    load_averages = []
-                if load_averages and len(load_averages) == 3:
-                    for i, avg in enumerate([1, 5, 15]):
-                        self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
-                else:
-                    self.warning("Load Averages didn't return expected values: {}".format(load_averages))
+                self.warning("Load Averages didn't return expected values: {}".format(load_averages))
 
     def get_active_servers(self, tenant_to_name):
         query_params = {
@@ -673,8 +667,6 @@ class OpenStackControllerCheck(AgentCheck):
         exclude_project_name_patterns = set(instance.get('blacklist_project_names', []))
         exclude_project_name_rules = [re.compile(ex) for ex in exclude_project_name_patterns]
 
-        openstack_sdk_cloud_name = instance.get('openstack_sdk_cloud_name', None)
-
         custom_tags = instance.get("tags", [])
         collect_project_metrics = is_affirmative(instance.get('collect_project_metrics', True))
         collect_hypervisor_metrics = is_affirmative(instance.get('collect_hypervisor_metrics', True))
@@ -708,8 +700,7 @@ class OpenStackControllerCheck(AgentCheck):
             self.collect_hypervisors_metrics(custom_tags=custom_tags,
                                              use_shortname=use_shortname,
                                              collect_hypervisor_metrics=collect_hypervisor_metrics,
-                                             collect_hypervisor_load=collect_hypervisor_load,
-                                             openstack_sdk_cloud_name=openstack_sdk_cloud_name)
+                                             collect_hypervisor_load=collect_hypervisor_load)
 
             if collect_server_diagnostic_metrics or collect_server_flavor_metrics:
                 # This updates the server cache directly

@@ -3,7 +3,7 @@ import pytest
 
 from openstack.exceptions import SDKException
 
-from datadog_checks.openstack_controller.api import OpenstackSdkApi
+from datadog_checks.openstack_controller.api import OpenstackSDKApi
 from datadog_checks.openstack_controller.exceptions import (AuthenticationNeeded, KeystoneUnreachable,
                                                             MissingNovaEndpoint, MissingNeutronEndpoint)
 
@@ -148,7 +148,7 @@ EXAMPLE_AGGREGATES_VALUE = [
         },
         "name": "name",
         "updated_at": None,
-        # "uuid" is not returned by OpenstackSdkApi
+        # "uuid" is not returned by OpenstackSDKApi
         # "uuid": "6ba28ba7-f29b-45cc-a30b-6e3a40c2fb14"
     }
 ]
@@ -398,7 +398,7 @@ class MockOpenstackConnection:
 
 
 def test_get_endpoint():
-    api = OpenstackSdkApi(None)
+    api = OpenstackSDKApi(None)
 
     with pytest.raises(AuthenticationNeeded):
         api._check_authentication()
@@ -414,7 +414,7 @@ def test_get_endpoint():
     assert api.get_nova_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/0adb9d108440437fa6841d31a989ed89'
     assert api.get_neutron_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
 
-    with mock.patch('datadog_checks.openstack_controller.api.OpenstackSdkApi._get_service',
+    with mock.patch('datadog_checks.openstack_controller.api.OpenstackSDKApi._get_service',
                     return_value={u'id': 'invalid_id'}):
         api.endpoints = {}
         with pytest.raises(KeystoneUnreachable):
@@ -428,14 +428,14 @@ def test_get_endpoint():
 
 
 def test_get_project():
-    api = OpenstackSdkApi(None)
+    api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
     assert api.get_projects() == EXAMPLE_PROJECTS_VALUE
 
 
 def test_get_project_limit():
-    api = OpenstackSdkApi(None)
+    api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
     assert api.get_project_limits(u'680031a39ce040e1b81289ea8c73fb11') == {
@@ -464,28 +464,28 @@ def test_get_project_limit():
 
 
 def test_get_os_hypervisors_detail():
-    api = OpenstackSdkApi(None)
+    api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
     assert api.get_os_hypervisors_detail() == EXAMPLE_HYPERVISORS_VALUE
 
 
 def test_get_os_aggregates():
-    api = OpenstackSdkApi(None)
+    api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
     assert api.get_os_aggregates() == EXAMPLE_AGGREGATES_VALUE
 
 
 def test_get_flavors_detail():
-    api = OpenstackSdkApi(None)
+    api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
     assert api.get_flavors_detail(query_params={}) == EXAMPLE_FLAVORS_VALUE
 
 
 def test_get_networks():
-    api = OpenstackSdkApi(None)
+    api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
     assert api.get_networks() == EXAMPLE_NETWORKS_VALUE

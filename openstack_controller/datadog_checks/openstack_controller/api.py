@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from openstack import connection
-from os import environ
 import requests
 import simplejson as json
 
+from openstack import connection
+from os import environ
 from six.moves.urllib.parse import urljoin
 from datadog_checks.config import is_affirmative
 
@@ -26,18 +26,20 @@ class ApiFactory(object):
         paginated_limit = instance_config.get('paginated_limit')
         request_timeout = instance_config.get('request_timeout')
         user = instance_config.get("user")
-        openstack_sdk_config_file_path = instance_config.get("openstack_sdk_config_file_path")
-        openstack_sdk_cloud_name = instance_config.get("openstack_sdk_cloud_name")
+        openstack_config_file_path = instance_config.get("openstack_config_file_path")
+        openstack_cloud_name = instance_config.get("openstack_cloud_name")
 
         api = None
 
-        if openstack_sdk_cloud_name is None:
+        # If an openstack configuration is specified, an OpenstackSDKApi will be created, and the authentification
+        # will be made directly from the openstack configuration file
+        if openstack_cloud_name is None:
             api = SimpleApi(logger, keystone_server_url, timeout=request_timeout, ssl_verify=ssl_verify,
                             proxies=proxies, limit=paginated_limit)
             api.connect(user)
         else:
-            api = OpenstackSdkApi(logger)
-            api.connect(openstack_sdk_config_file_path, openstack_sdk_cloud_name)
+            api = OpenstackSDKApi(logger)
+            api.connect(openstack_config_file_path, openstack_cloud_name)
 
         return api
 
@@ -83,9 +85,9 @@ class AbstractApi(object):
         raise NotImplementedError()
 
 
-class OpenstackSdkApi(AbstractApi):
+class OpenstackSDKApi(AbstractApi):
     def __init__(self, logger):
-        super(OpenstackSdkApi, self).__init__(logger)
+        super(OpenstackSDKApi, self).__init__(logger)
 
         self.connection = None
         self.services = {}
@@ -201,6 +203,7 @@ class OpenstackSdkApi(AbstractApi):
     def get_os_hypervisor_uptime(self, hypervisor_id):
         # Hypervisor uptime is not available in openstacksdk 0.24.0.
         self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
+        raise NotImplementedError()
 
     def get_os_aggregates(self):
         """ Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi """
@@ -223,7 +226,7 @@ class OpenstackSdkApi(AbstractApi):
             They are all unused for the moment.
             SimpleApi:
             https://developer.openstack.org/api-ref/compute/?expanded=list-flavors-with-details-detail,list-servers-detailed-detail#list-servers-detailed
-            OpenstackSdkApi:
+            OpenstackSDKApi:
             https://docs.openstack.org/openstacksdk/latest/user/connection.html#openstack.connection.Connection
         """
         self._check_authentication()
@@ -233,6 +236,7 @@ class OpenstackSdkApi(AbstractApi):
     def get_server_diagnostics(self, server_id):
         # Server diagnostics is not available in openstacksdk 0.24.0. It should be available in the next release.
         self.logger.warning("Server diagnostics is not available with this version of openstacksdk")
+        raise NotImplementedError()
 
 
 class SimpleApi(AbstractApi):
