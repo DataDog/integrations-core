@@ -6,6 +6,7 @@ from openstack.exceptions import SDKException
 from datadog_checks.openstack_controller.api import OpenstackSDKApi
 from datadog_checks.openstack_controller.exceptions import (AuthenticationNeeded, KeystoneUnreachable,
                                                             MissingNovaEndpoint, MissingNeutronEndpoint)
+from . import common
 
 
 EXAMPLE_PROJECTS_VALUE = [
@@ -89,49 +90,6 @@ EXAMPLE_COMPUTE_LIMITS_VALUE = {
     },
     'max_server_meta': 128
 }
-
-
-EXAMPLE_HYPERVISORS_VALUE = [
-    {
-        "cpu_info": {
-            "arch": "x86_64",
-            "model": "Nehalem",
-            "vendor": "Intel",
-            "features": [
-                "pge",
-                "clflush"
-            ],
-            "topology": {
-                "cores": 1,
-                "threads": 1,
-                "sockets": 4
-            }
-        },
-        "current_workload": 0,
-        "status": "enabled",
-        "state": "up",
-        "disk_available_least": 0,
-        "host_ip": "1.1.1.1",
-        "free_disk_gb": 1028,
-        "free_ram_mb": 7680,
-        "hypervisor_hostname": "host2",
-        "hypervisor_type": "fake",
-        "hypervisor_version": 1000,
-        "id": "1bb62a04-c576-402c-8147-9e89757a09e3",
-        "local_gb": 1028,
-        "local_gb_used": 0,
-        "memory_mb": 8192,
-        "memory_mb_used": 512,
-        "running_vms": 0,
-        "service": {
-            "host": "host1",
-            "id": "62f62f6e-a713-4cbe-87d3-3ecf8a1e0f8d",
-            "disabled_reason": None
-        },
-        "vcpus": 2,
-        "vcpus_used": 0
-    }
-]
 
 EXAMPLE_AGGREGATES_VALUE = [
     {
@@ -385,7 +343,7 @@ class MockOpenstackConnection:
         return EXAMPLE_PROJECTS_VALUE
 
     def list_hypervisors(self):
-        return EXAMPLE_HYPERVISORS_VALUE
+        return common.EXAMPLE_GET_OS_HYPERVISORS_RETURN_VALUE
 
     def list_aggregates(self):
         return EXAMPLE_AGGREGATES_VALUE
@@ -438,27 +396,7 @@ def test_get_project_limit():
     api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
-    assert api.get_project_limits(u'680031a39ce040e1b81289ea8c73fb11') == {
-                "maxImageMeta": 128,
-                "maxPersonality": 5,
-                "maxPersonalitySize": 10240,
-                "maxSecurityGroupRules": 20,
-                "maxSecurityGroups": 10,
-                "maxServerMeta": 128,
-                "maxTotalCores": 20,
-                "maxTotalFloatingIps": 10,
-                "maxTotalInstances": 10,
-                "maxTotalKeypairs": 100,
-                "maxTotalRAMSize": 51200,
-                "maxServerGroups": 10,
-                "maxServerGroupMembers": 10,
-                "totalCoresUsed": 0,
-                "totalInstancesUsed": 0,
-                "totalRAMUsed": 0,
-                "totalSecurityGroupsUsed": 0,
-                "totalFloatingIpsUsed": 0,
-                "totalServerGroupsUsed": 0
-            }
+    assert api.get_project_limits(u'680031a39ce040e1b81289ea8c73fb11') == common.EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE
     with pytest.raises(SDKException):
         api.get_project_limits('invalid_id')
 
@@ -467,7 +405,7 @@ def test_get_os_hypervisors_detail():
     api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
-    assert api.get_os_hypervisors_detail() == EXAMPLE_HYPERVISORS_VALUE
+    assert api.get_os_hypervisors_detail() == common.EXAMPLE_GET_OS_HYPERVISORS_RETURN_VALUE
 
 
 def test_get_os_aggregates():

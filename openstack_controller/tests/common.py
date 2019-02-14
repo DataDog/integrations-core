@@ -301,3 +301,67 @@ MOCK_NOVA_SERVERS = [
         "user_id": "fake"
     }
 ]
+
+EXAMPLE_GET_OS_HYPERVISORS_RETURN_VALUE = [
+    {
+        "cpu_info": {
+            "arch": "x86_64",
+            "model": "Nehalem",
+            "vendor": "Intel",
+            "features": [
+                "pge",
+                "clflush"
+            ],
+            "topology": {
+                "cores": 1,
+                "threads": 1,
+                "sockets": 4
+            }
+        },
+        "current_workload": 0,
+        "status": "enabled",
+        "state": "up",
+        "disk_available_least": 0,
+        "host_ip": "1.1.1.1",
+        "free_disk_gb": 1028,
+        "free_ram_mb": 7680,
+        "hypervisor_hostname": "host1",
+        "hypervisor_type": "fake",
+        "hypervisor_version": 1000,
+        "id": 2,
+        "local_gb": 1028,
+        "local_gb_used": 0,
+        "memory_mb": 8192,
+        "memory_mb_used": 512,
+        "running_vms": 0,
+        "service": {
+            "host": "host1",
+            "id": 7,
+            "disabled_reason": None
+        },
+        "vcpus": 2,
+        "vcpus_used": 0
+    }
+]
+
+EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE = {
+    "maxImageMeta": 128,
+    "maxPersonality": 5,
+    "maxPersonalitySize": 10240,
+    "maxSecurityGroupRules": 20,
+    "maxSecurityGroups": 10,
+    "maxServerMeta": 128,
+    "maxTotalCores": 20,
+    "maxTotalFloatingIps": 10,
+    "maxTotalInstances": 10,
+    "maxTotalKeypairs": 100,
+    "maxTotalRAMSize": 51200,
+    "maxServerGroups": 10,
+    "maxServerGroupMembers": 10,
+    "totalCoresUsed": 0,
+    "totalInstancesUsed": 0,
+    "totalRAMUsed": 0,
+    "totalSecurityGroupsUsed": 0,
+    "totalFloatingIpsUsed": 0,
+    "totalServerGroupsUsed": 0
+}
