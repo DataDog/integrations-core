@@ -211,11 +211,7 @@ class OpenstackSdkApi(AbstractApi):
     def get_flavors_detail(self, query_params):
         self._check_authentication()
 
-        # query params is ignored here since Connection does not allow additional filters for list_flavors() method
-        if query_params:
-            self.logger.warning("Filters in query_params ({}) are ignored".format(query_params))
-
-        return self.connection.list_flavors()
+        return self.connection.search_flavors(filters=query_params)
 
     def get_networks(self):
         self._check_authentication()

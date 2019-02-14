@@ -393,7 +393,7 @@ class MockOpenstackConnection:
     def list_networks(self):
         return EXAMPLE_NETWORKS_VALUE
 
-    def list_flavors(self):
+    def search_flavors(self, filters):
         return EXAMPLE_FLAVORS_VALUE
 
 
@@ -405,6 +405,11 @@ def test_get_endpoint():
 
     api.connection = MockOpenstackConnection()
 
+    assert api.get_keystone_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/a536052eba574bd4baf89ff83e3a23db'
+    assert api.get_nova_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/0adb9d108440437fa6841d31a989ed89'
+    assert api.get_neutron_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
+
+    # Test cache
     assert api.get_keystone_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/a536052eba574bd4baf89ff83e3a23db'
     assert api.get_nova_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/0adb9d108440437fa6841d31a989ed89'
     assert api.get_neutron_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
