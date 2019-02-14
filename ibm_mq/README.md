@@ -94,7 +94,7 @@ sudo ldconfig
 
 There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
 
-Note: "Queue Monitoring" must be enabled and set to to at least "Medium". This can be done via the MQ UI or with an mqsc command:
+Note: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done via the MQ UI or with an mqsc command:
 
 ```
 > /opt/mqm/bin/runmqsc
