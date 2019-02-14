@@ -22,15 +22,14 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 
 The NGINX check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your NGINX servers.
 
-#### NGINX status module
+### Configuration
+
+#### NGINX Open Source
 
 The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
 
 * [stub status module][3] - for open source NGINX
 * [http status module][4] - only for NGINX Plus
-
-NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to **Configuration** now.
-For NGINX Plus release 13 and above, the status module is deprecated and you should use the new Plus API instead. See [the announcement][5] for more information.
 
 If you use open source NGINX, however, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 
@@ -41,7 +40,10 @@ http_stub_status_module
 
 If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX-enabling the module as you compile it-but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
-### Configuration
+#### NGINX Plus 
+
+NGINX Plus packages prior to release 13 include the http status module, for NGINX Plus release 13 and above, the status module is deprecated and you should use the new Plus API instead. See [the announcement][5] for more information.
+
 #### Prepare NGINX
 
 On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
@@ -72,17 +74,14 @@ server {
 
 NGINX Plus can also use `stub_status`, but since that module provides fewer metrics, you should use `status` if you're a Plus user.
 
-You may optionally configure HTTP basic authentication in the server block, but since the service is only listening locally, it's not necessary.
-
 Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 #### Metric Collection
 
 1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][7] for all available configuration options.
+  **Note**: If you are using the NGINX Plus, for releases 13 and above, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
 
-2. Optional - If you are using the NGINX vhost_traffic_status module, set the parameter `use_vts` to `true` in your `nginx.d/conf.yaml` configuration file.
-
-3. Optional - If you are using the commercial version of NGINX, for releases R13 and above, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
+3. Optional - If you are using the NGINX `vhost_traffic_status module`, set the parameter `use_vts` to `true` in your `nginx.d/conf.yaml` configuration file.
 
 4. [Restart the Agent][8] to start sending NGINX metrics to Datadog.
 
@@ -162,38 +161,11 @@ The NGINX check does not include any events.
 Returns CRITICAL if the Agent cannot connect to NGINX to collect metrics, otherwise OK.
 
 ## Troubleshooting
-You may observe one of these common problems in the output of the Datadog Agent's info subcommand.
-
-### Agent cannot connect
-```
-  Checks
-  ======
-
-    nginx
-    -----
-      - instance #0 [ERROR]: "('Connection aborted.', error(111, 'Connection refused'))"
-      - Collected 0 metrics, 0 events & 1 service check
-```
-
-Either NGINX's local status endpoint is not running, or the Agent is not configured with correct connection information for it.
-
-Check that the main `nginx.conf` includes a line like the following:
-
-```
-http{
-
-  ...
-
-  include <directory_that_contains_status.conf>/*.conf;
-  # e.g.: include /etc/nginx/conf.d/*.conf;
-}
-```
-
-Otherwise, review the **Configuration** section.
+Need help? Contact [Datadog support][13].
 
 ## Further Reading
 
-Learn more about how to monitor NGINX performance metrics thanks to [our series of posts][13]. We detail the key performance metrics, [how to collect them][14], and [how to use Datadog to monitor NGINX][15].
+Learn more about how to monitor NGINX performance metrics thanks to [our series of posts][14]. We detail the key performance metrics, [how to collect them][15], and [how to use Datadog to monitor NGINX][16].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
@@ -208,6 +180,7 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 [10]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
 [12]: https://nginx.org/en/docs/http/ngx_http_status_module.html#data
-[13]: https://www.datadoghq.com/blog/how-to-monitor-nginx
-[14]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
-[15]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[13]: https://docs.datadoghq.com/help/
+[14]: https://www.datadoghq.com/blog/how-to-monitor-nginx
+[15]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
+[16]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
