@@ -55,7 +55,7 @@ setup(
     packages=['datadog_checks.systemd'],
 
     # Run-time dependencies
-    install_requires=[CHECKS_BASE_REQ],
+    install_requires=[CHECKS_BASE_REQ, 'pystemd==0.5.0'],
 
     # Extra files to ship with the wheel package
     include_package_data=True,

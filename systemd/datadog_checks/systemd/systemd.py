@@ -36,12 +36,10 @@ class SystemdCheck(AgentCheck):
         #        "<unit_name>": "<unit_status>",
         #        "cron.service": "inactive",
         #        "ssh.service": "active"
-        #    },
-        #    "change_since": "iso_time"
+        #    }
         #}
       
     def check(self, instance):
-        
         if self.units:
             # self.log.info(units)
             for unit in self.units:
@@ -50,59 +48,33 @@ class SystemdCheck(AgentCheck):
         if self.collect_all == True:
             # we display status for all units if no unit has been specified in the configuration file
             self.get_active_inactive_units()
-
-        self.log.info("unit_cache is... ")
-        self.log.info(self.unit_cache)
         
         self.get_all_units(self.units)
 
     def get_all_units(self, instance):
         cached_units = self.unit_cache.get('units')
-        changes_since = datetime.utcnow().isoformat()
         if cached_units is None:
             updated_units = self.get_listed_units()
         else:
-            previous_changes_since = self.unit_cache.get('units', {}).get('changes_since')
-            updated_units = self.update_unit_cache(cached_units, previous_changes_since)
-            self.log.info(previous_changes_since)
+            updated_units = self.update_unit_cache()
 
         # Initialize or update cache for this instance
         self.unit_cache = {
-            'units': updated_units,
-            'changes_since': changes_since
+            'units': updated_units
         }
-
-        self.log.info(self.unit_cache)
     
     def get_listed_units(self):
         manager = Manager()
         manager.load()
-
         units = self.units
 
-        mytemp_dict = {}
+        return {unit: self.get_state_single_unit(unit) for unit in units}
 
-        mytemp_dict = {unit: self.get_state_single_unit(unit) for unit in units}
-
-        self.log.info(mytemp_dict)
-
-        return mytemp_dict
-
-    def update_unit_cache(self, cached_units, changes_since):
-        units = copy.deepcopy(cached_units)
-
-        updated_units = self.get_listed_units()
-
-        self.log.info(units)
-
+    def update_unit_cache(self, cached_units):
         returned_cache = {}
+        returned_cache = self.get_listed_units()
 
-        returned_cache = updated_units
-        # returned_cache['changes_since'] = changes_since
-
-        self.log.info(returned_cache)
-
-        return returned_cache  # a new cache, dict of units and timestamp
+        return returned_cache
 
     def get_active_inactive_units(self):
         # returns the number of active and inactive units
@@ -162,11 +134,7 @@ class SystemdCheck(AgentCheck):
 
             if unit_id in self.unit_cache.get('units', {}):
                 previous_status = self.unit_cache['units'][unit_id]
-                self.log.info("previous status:" + str(previous_status))
-                self.log.info("current status:" + str(state))
                 if previous_status != state:
-                    # TODO:
-                    # self.event("unit {} changed state, it is now: {}".format(unit_id, state))
                     self.event({
                         "event_type": "unit.status.changed",
                         "msg_title": "unit {} changed state".format(unit_id),
@@ -182,19 +150,8 @@ class SystemdCheck(AgentCheck):
             self.log.info("Unit name invalid for {}".format(unit_id))
 
     def get_number_processes(self, unit_id):
-        """
-        try:
-            unit = Unit(unit_id, _autoload=True)
-            # Has to be run with elevated rights
-            list_processes = unit.Service.GetProcesses()
-            process_number = len(list_processes)
-            self.gauge('systemd.unit.numprocess', process_number)
-
-        except pystemd.dbusexc.DBusInvalidArgsError as e:
-            self.log.info("Unit name invalid for {}".format(unit_id))
-        """
         systemctl_flags = ['status', unit_id]
-
+        tags=["unit:{}".format(unit_id)]
         try:
             output = get_subprocess_output(["systemctl"] + systemctl_flags, self.log)
             output_to_parse = output[0].split()
