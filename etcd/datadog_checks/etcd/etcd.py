@@ -168,7 +168,9 @@ class Etcd(OpenMetricsBaseCheck):
             )
 
         tags = []
-        self.add_leader_state_tag(scraper_config, tags)
+
+        if is_affirmative(instance.get('leader_tag', True)):
+            self.add_leader_state_tag(scraper_config, tags)
 
         scraper_config['_metric_tags'][:] = tags
 
