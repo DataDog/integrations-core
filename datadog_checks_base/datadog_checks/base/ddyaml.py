@@ -1,19 +1,17 @@
-# (C) Datadog, Inc. 2011-2016
+# (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import logging
+from contextlib import contextmanager
 
-# 3p
-import yaml  # noqa, let's guess, probably imported somewhere
+import yaml
 try:
     from yaml import CSafeLoader as yLoader
     from yaml import CSafeDumper as yDumper
 except ImportError:
     # On source install C Extensions might have not been built
-    from yaml import SafeLoader as yLoader  # noqa, imported from here elsewhere
-    from yaml import SafeDumper as yDumper  # noqa, imported from here elsewhere
+    from yaml import SafeLoader as yLoader
+    from yaml import SafeDumper as yDumper
 
 log = logging.getLogger(__name__)
 
@@ -103,3 +101,12 @@ def monkey_patch_pyyaml_reverse():
         log.info("reversing monkey patch for yaml.dump_all... (affects all yaml dump operations)")
         yaml.dump_all = pyyaml_dump_all
         pyyaml_dump_all = None
+
+
+@contextmanager
+def using_safe_pyyaml():
+    try:
+        monkey_patch_pyyaml()
+        yield
+    finally:
+        monkey_patch_pyyaml_reverse()

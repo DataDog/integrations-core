@@ -13,6 +13,7 @@ from datadog_checks.base.ddyaml import (
     safe_yaml_dump_all,
     safe_yaml_load_all,
     safe_yaml_load,
+    using_safe_pyyaml,
     yDumper,
 )
 
@@ -37,9 +38,8 @@ class Dummy(object):
 
 @pytest.fixture(scope="module", autouse=True)
 def patch_yaml():
-    monkey_patch_pyyaml()
-    yield
-    monkey_patch_pyyaml_reverse()
+    with using_safe_pyyaml():
+        yield
 
 
 def test_monkey_patch():

@@ -76,15 +76,6 @@ class __AgentCheckPy3(object):
         self.warnings = []
         self.metric_limiter = None
 
-        if datadog_agent.get_config('disable_unsafe_yaml'):
-            # monkey-patches unsafe pyyaml methods
-            try:
-                import yaml
-                from ..ddyaml import monkey_patch_pyyaml
-                monkey_patch_pyyaml()
-            except ImportError:
-                pass
-
         if len(args) > 0:
             self.name = args[0]
         if len(args) > 1:
@@ -454,15 +445,6 @@ class __AgentCheckPy2(object):
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
-
-        if datadog_agent.get_config('disable_unsafe_yaml'):
-            # monkey-patches unsafe pyyaml methods
-            try:
-                import yaml
-                from ..ddyaml import monkey_patch_pyyaml
-                monkey_patch_pyyaml()
-            except ImportError:
-                pass
 
         if len(args) > 0:
             self.name = args[0]
