@@ -24,14 +24,14 @@ The NGINX check is included in the [Datadog Agent][2] package, so you don't need
 
 ### Configuration
 
-#### NGINX Open Source
-
 The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
 
 * [stub status module][3] - for open source NGINX
 * [http status module][4] - only for NGINX Plus
 
-If you use open source NGINX, however, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
+#### NGINX Open Source
+
+If you use open source NGINX, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 
 ```
 $ nginx -V 2>&1| grep -o http_stub_status_module
