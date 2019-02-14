@@ -38,7 +38,7 @@ def test_get_all_servers_between_runs(servers_detail, aggregator):
     check.get_all_servers({'6f70656e737461636b20342065766572': 'testproj',
                            'blacklist_1': 'blacklist_1',
                            'blacklist_2': 'blacklist_2'}, "test_name", [])
-    servers = check.servers_cache['test_name']['servers']
+    servers = check.servers_cache['servers']
     assert 'server-1' not in servers
     assert 'server_newly_added' in servers
     assert 'other-1' in servers
@@ -63,7 +63,7 @@ def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
     check.get_all_servers({'6f70656e737461636b20342065766572': None,
                            'blacklist_1': 'blacklist_1',
                            'blacklist_2': 'blacklist_2'}, "test_name", [])
-    servers = check.servers_cache['test_name']['servers']
+    servers = check.servers_cache['servers']
     assert 'server_newly_added' not in servers
     assert 'server-1' not in servers
     assert 'other-1' in servers
@@ -90,8 +90,7 @@ def test_get_paginated_server(servers_detail, aggregator):
         'paginated_server_limit': 1
     }, {}, instances=instances)
     check.get_all_servers({"6f70656e737461636b20342065766572": "testproj"}, "test_name", [])
-    assert len(check.servers_cache) == 1
-    servers = check.servers_cache['test_name']['servers']
+    servers = check.servers_cache['servers']
     assert 'server-1' in servers
     assert 'other-1' not in servers
     assert 'other-2' not in servers
