@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from collections import Counter
+import time
 from datetime import datetime, timedelta
 
 from six import iteritems
@@ -36,17 +37,28 @@ class TwistlockCheck(AgentCheck):
         if 'url' not in instance:
             raise Exception('Instance missing "url" value.')
 
+        # This can be set to a single attribute, as this will be an agent 6 only check
+        if not self.last_run:
+            msg = 'This check has not run before, '
+            msg += 'it will send all the new vulnerabilities that happened in the past day'
+            self.log.debug(msg)
+            self.last_run = datetime.now() - timedelta(days=1)
+
         self.config = Config(instance)
 
-        current_date = datetime.now()
-        self._warning_date = current_date - timedelta(hours=7)
-        self._critical_date = current_date - timedelta(days=1)
+        self.current_date = datetime.now()
+        self.warning_date = self.current_date - timedelta(hours=7)
+        self.critical_date = self.current_date - timedelta(days=1)
 
         self.report_license_expiration()
         self.report_registry_scan()
         self.report_images_scan()
         self.report_hosts_scan()
         self.report_container_compliance()
+
+        self.report_vulnerabilities()
+
+        self.last_run = datetime.now()
 
     def report_license_expiration(self):
         service_check_name = self.NAMESPACE + ".license_ok"
@@ -190,6 +202,58 @@ class TwistlockCheck(AgentCheck):
                                        message="Last scan: " + container.get("scanTime"))
             self._report_compliance_information(namespace + '.container', container, container_tags)
 
+    def report_vulnerabilities(self):
+        vuln_containers = self._retrieve_json('/api/v1/stats/vulnerabilities')
+
+        for vuln_container in vuln_containers:
+            host_vulns = vuln_container.get('hostVulnerabilities')
+            image_vulns = vuln_container.get('imageVulnerabilities')
+            if not host_vulns and not image_vulns:
+                continue
+
+            if host_vulns:
+                for host_vuln in host_vulns:
+                    self._analyze_vulnerability(vuln, host=True)
+            if image_vulns:
+                for image_vuln in image_vulns:
+                    self._analyze_vulnerability(vuln, image=True)
+
+    def _analyze_vulnerability(self, vuln, host=False, image=False):
+        cve_id = vuln.get('id')
+        if not cve_id:
+            return
+
+        description = vuln.get('description')
+
+        published = vuln.get('published')
+
+        published_date = datetime.fromtimestamp(int(published))
+
+        if published_date < self.last_run:
+            if host:
+                type = 'hosts'
+            elif image:
+                type = 'images'
+            else:
+                type = 'systems'
+
+            msg_text = """
+            There is a new CVE affecting your {}:
+            {}
+            """.format(type, description)
+
+            event = {
+                'timestamp': time.mktime(published_date.timetuple()),
+                'event_type': 'twistlock',
+                'msg_title': cve_id,
+                'msg_text': msg_text,
+                "tags": self.config.tags,
+                "aggregation_key": cve_id,
+                'host': self.hostname
+            }
+
+            self.event(event)
+
     def _report_vuln_info(self, namespace, data, tags):
         # CVE vulnerabilities
         summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
@@ -230,16 +294,16 @@ class TwistlockCheck(AgentCheck):
         # Last scan service check
         scan_date = datetime.strptime(data.get("scanTime"), format)
         scan_status = AgentCheck.OK
-        if scan_date < self._warning_date:
+        if scan_date < self.warning_date:
             scan_status = AgentCheck.WARNING
-        if scan_date < self._critical_date:
+        if scan_date < self.critical_date:
             scan_status = AgentCheck.CRITICAL
         self.service_check(prefix + '.is_scanned',
                            scan_status,
                            tags=tags,
                            message=message)
 
-    def _retrieve_json(self, path):
+    def _retrieve_json(self, path, page=0):
         url = self.config.url + path
         auth = (self.config.username, self.config.password)
         response = requests.get(url, auth=auth, verify=self.config.ssl_verify)
