@@ -42,7 +42,7 @@ If the command output does not include `http_stub_status_module`, you must insta
 
 #### NGINX Plus 
 
-NGINX Plus packages prior to release 13 include the http status module, for NGINX Plus release 13 and above, the status module is deprecated and you should use the new Plus API instead. See [the announcement][5] for more information.
+NGINX Plus packages prior to release 13 include the http status module. For NGINX Plus release 13 and above, the status module is deprecated and you must use the new Plus API instead. See [the announcement][5] for more information.
 
 #### Prepare NGINX
 
