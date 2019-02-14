@@ -8,8 +8,9 @@ import copy
 
 from datadog_checks.haproxy import HAProxy
 
-from .common import (BACKEND_SERVICES, BACKEND_LIST, BACKEND_TO_ADDR, BACKEND_CHECK_GAUGES, FRONTEND_CHECK_GAUGES,
-                     FRONTEND_CHECK_GAUGES_POST_1_4, BACKEND_CHECK_GAUGES_POST_1_5, BACKEND_CHECK_GAUGES_POST_1_7,
+from .common import (BACKEND_SERVICES, BACKEND_LIST, BACKEND_STATUS_METRIC, BACKEND_HOSTS_METRIC, BACKEND_TO_ADDR,
+                     BACKEND_CHECK_GAUGES, FRONTEND_CHECK_GAUGES, FRONTEND_CHECK_GAUGES_POST_1_4,
+                     BACKEND_CHECK_GAUGES_POST_1_5, BACKEND_CHECK_GAUGES_POST_1_7,
                      FRONTEND_CHECK_RATES, FRONTEND_CHECK_RATES_POST_1_4, BACKEND_CHECK_RATES_POST_1_4,
                      BACKEND_CHECK_RATES, requires_socket_support, SERVICE_CHECK_NAME, STATS_URL, CHECK_CONFIG_OPEN,
                      STATS_URL_OPEN, CONFIG_TCPSOCKET, STATS_SOCKET, CONFIG_UNIXSOCKET, platform_supports_sockets)
@@ -62,6 +63,17 @@ def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=Fa
             if haproxy_version >= ['1', '4']:
                 for rate in BACKEND_CHECK_RATES_POST_1_4:
                     aggregator.assert_metric(rate, tags=tags, count=1)
+
+
+def _test_backend_hosts(aggregator):
+    for service in BACKEND_SERVICES:
+        available_tag = ['available:true', 'service:' + service]
+        unavailable_tag = ['available:false', 'service:' + service]
+        aggregator.assert_metric(BACKEND_HOSTS_METRIC, tags=available_tag, count=1)
+        aggregator.assert_metric(BACKEND_HOSTS_METRIC, tags=unavailable_tag, count=1)
+
+        status_no_check_tags = ['service:' + service, 'status:no_check']
+        aggregator.assert_metric(BACKEND_STATUS_METRIC, tags=status_no_check_tags, count=1)
 
 
 def _test_service_checks(aggregator, services=None, count=1):
@@ -155,6 +167,7 @@ def test_open_config(aggregator, check):
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag)
+    _test_backend_hosts(aggregator)
 
     aggregator.assert_all_metrics_covered()
 
