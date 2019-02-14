@@ -23,10 +23,6 @@ except ImportError:
     from ..stubs.log import init_logging
     init_logging()
 
-if datadog_agent.get_config('disable_unsafe_yaml'):
-    from ..ddyaml import monkey_patch_pyyaml
-    monkey_patch_pyyaml()
-
 try:
     import aggregator
     using_stub_aggregator = False
@@ -39,6 +35,10 @@ from ..constants import ServiceCheck
 from ..utils.common import ensure_bytes, ensure_unicode
 from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
+
+if datadog_agent.get_config('disable_unsafe_yaml'):
+    from ..ddyaml import monkey_patch_pyyaml
+    monkey_patch_pyyaml()
 
 
 # Metric types for which it's only useful to submit once per set of tags
