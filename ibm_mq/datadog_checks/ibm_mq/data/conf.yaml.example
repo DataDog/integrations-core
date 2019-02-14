@@ -48,7 +48,7 @@ instances:
   ## Autodiscover the queues to monitor
   ## Warning: this will lead to some warnings in your
   #
-  #  auto_discover_queues: '<PASSWORD>'
+  #  auto_discover_queues: false
 
   ## @param ssl_auth - string - optional
   ## Whether or not to use SSL auth while connecting to the channel.
