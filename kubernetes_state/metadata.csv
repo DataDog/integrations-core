@@ -56,7 +56,7 @@ kubernetes_state.hpa.max_replicas,gauge,,,,Upper limit for the number of pods th
 kubernetes_state.hpa.desired_replicas,gauge,,,,Desired number of replicas of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.desired_replicas
 kubernetes_state.pdb.pods_desired,gauge,,,,Minimum desired number of healthy pods,0,kubernetes,k8s_state.pdb.pods_desired
 kubernetes_state.pdb.disruptions_allowed,gauge,,,,Number of pod disruptions that are currently allowed,0,kubernetes,k8s_state.pdb.disruptions_allowed
-kubernetes_state.pdb.pods_healthy,gauge,,,,Current number of healthy pods,0,kubernetes,k8s_state.pdb.pods_healthy
+kubernetes_state.pdb.pods_healthy,gauge,,,,Current number of healthy pods,1,kubernetes,k8s_state.pdb.pods_healthy
 kubernetes_state.pdb.pods_total,gauge,,,,Total number of pods counted by this disruption budget,0,kubernetes,k8s_state.pdb.pods_total
 kubernetes_state.pod.ready,gauge,,,,"In association with the `condition` tag, whether the pod is ready to serve requests, e.g. `condition:true` keeps the pods that are in a ready state",1,kubernetes,k8s_state.pod.ready
 kubernetes_state.pod.scheduled,gauge,,,,Reports the status of the scheduling process for the pod with its tags,0,kubernetes,k8s_state.pod.scheduled
