@@ -57,7 +57,9 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
         elif name != 'redis.key.length':
             aggregator.assert_metric(name, tags=expected)
 
-    aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected + ['key:test_list'])
+    aggregator.assert_metric(
+        'redis.key.length', 3, count=1,
+        tags=expected_db + ['key:test_list', 'key_type:list'])
 
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names
@@ -201,7 +203,8 @@ def test__check_key_lengths_multi_db(aggregator, redis_instance):
     conn.lpush('test_foo', 'value4')
 
     redis_check._check_key_lengths(c, redis_instance, [])
-    aggregator.assert_metric('redis.key.length', count=3)
-    aggregator.assert_metric('redis.key.length', value=4, tags=['key:test_foo'])
-    aggregator.assert_metric('redis.key.length', value=1, tags=['key:test_bar'])
+    aggregator.assert_metric('redis.key.length', count=4)
+    aggregator.assert_metric('redis.key.length', value=2, tags=['key:test_foo', 'key_type:list', 'redis_db:db0'])
+    aggregator.assert_metric('redis.key.length', value=2, tags=['key:test_foo', 'key_type:list', 'redis_db:db3'])
+    aggregator.assert_metric('redis.key.length', value=1, tags=['key:test_bar', 'key_type:list', 'redis_db:db0'])
     aggregator.assert_metric('redis.key.length', value=0, tags=['key:missing_key'])

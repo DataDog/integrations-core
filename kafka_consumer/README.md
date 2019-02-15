@@ -43,9 +43,9 @@ The Kafka-consumer check does not include any service checks.
 
 ## Further Reading
 
-* [Monitoring Kafka performance metrics][1110]
-* [Collecting Kafka performance metrics][1111]
-* [Monitoring Kafka with Datadog][1112]
+* [Monitoring Kafka performance metrics][120]
+* [Collecting Kafka performance metrics][121]
+* [Monitoring Kafka with Datadog][122]
 
 
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
@@ -57,6 +57,6 @@ The Kafka-consumer check does not include any service checks.
 [117]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
 [118]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
 [119]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
-[10]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
-[11]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
-[12]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[120]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
+[121]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
+[122]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

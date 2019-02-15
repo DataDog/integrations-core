@@ -43,7 +43,7 @@ class IBMMQConfig:
 
         self.custom_tags = instance.get('tags', [])
 
-        self.auto_discover_queues = instance.get('auto_discover_queues', False)
+        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
 
         self.ssl = is_affirmative(instance.get('ssl_auth', False))
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
 import requests
 from six import itervalues
@@ -46,6 +48,23 @@ def test_check(aggregator, instance):
     for metric in itervalues(METRIC_MAP):
         try:
             aggregator.assert_metric(metric, tags=tags)
+        except AssertionError:
+            pass
+
+    assert aggregator.metrics_asserted_pct > 80
+
+
+@preview
+def test_check_no_leader_tag(aggregator, instance):
+    instance = deepcopy(instance)
+    instance['leader_tag'] = False
+
+    check = Etcd('etcd', {}, {}, [instance])
+    check.check(instance)
+
+    for metric in itervalues(METRIC_MAP):
+        try:
+            aggregator.assert_metric(metric, tags=[])
         except AssertionError:
             pass
 
