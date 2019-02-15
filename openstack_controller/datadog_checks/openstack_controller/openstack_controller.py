@@ -645,7 +645,7 @@ class OpenStackControllerCheck(AgentCheck):
             raise IncompleteConfig()
 
         # have we been backed off
-        if not self._backoff.should_run(self.instance_name):
+        if not self._backoff.should_run():
             self.log.info('Skipping run due to exponential backoff in effect')
             return
 
@@ -748,13 +748,13 @@ class OpenStackControllerCheck(AgentCheck):
                 self.warning("Error reaching nova API: %s" % e)
             else:
                 # exponential backoff
-                self.do_backoff(self.instance_name, custom_tags)
+                self.do_backoff(custom_tags)
                 return
 
-        self._backoff.reset_backoff(self.instance_name)
+        self._backoff.reset_backoff()
 
-    def do_backoff(self, instance_name, tags):
-        backoff_interval, retries = self._backoff.do_backoff(instance_name)
+    def do_backoff(self, tags):
+        backoff_interval, retries = self._backoff.do_backoff()
 
         self.gauge("openstack.backoff.interval", backoff_interval, tags=tags)
         self.gauge("openstack.backoff.retries", retries, tags=tags)
