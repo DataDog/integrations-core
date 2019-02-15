@@ -88,7 +88,7 @@ instances:
   ## @param openstack_config_file_path - optional - string
   ## Absolute path of the configuration file for the connection to openstack with openstacksdk.
   #
-  # openstack_config_file_path: "/path/to/file.yaml"
+  # openstack_config_file_path: <PATH_TO_YAML_FILE>
 
   ## @param openstack_cloud_name - optional - string
   ## Name of the cloud configuration to use.
@@ -96,7 +96,7 @@ instances:
   ## openstack_config_file_path, or at the default location:
   ## ~/.config/openstack or /etc/openstack
   #
-  # openstack_cloud_name: "simple-cloud"
+  # openstack_cloud_name: <CLOUD_NAME>
 
   ## @param collect_hypervisor_load - optional - boolean - default:true
   ## Collects hypervisor_load.1/5/15 for each hypervisor
