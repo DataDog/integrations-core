@@ -10,7 +10,7 @@ from datadog_checks.config import is_affirmative
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 
 
-class KubeControllerManagerCheck(OpenMetricsBaseCheck, KubeLeaderElectionMixin):
+class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     DEFAUT_RATE_LIMITERS = [
