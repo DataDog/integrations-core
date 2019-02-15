@@ -99,7 +99,7 @@ class Etcd(OpenMetricsBaseCheck):
             self.check_post_v3(instance)
         else:
             self.warning(
-                'In Agent 6.10 this check will only support ETCD v3+. If you '
+                'In Agent 6.11 this check will only support ETCD v3+. If you '
                 'wish to preview the new version, set `use_preview` to `true`.'
             )
             self.check_pre_v3(instance)
@@ -139,7 +139,7 @@ class Etcd(OpenMetricsBaseCheck):
     def is_leader(self, scraper_config):
         # Modify endpoint as etcd stabilizes
         # https://github.com/etcd-io/etcd/blob/master/Documentation/dev-guide/api_grpc_gateway.md#notes
-        response = self.access_api(scraper_config, '/v3beta/maintenance/status')
+        response = self.access_api(scraper_config, '/v3alpha/maintenance/status')
 
         leader = response.get('leader')
         member = response.get('header', {}).get('member_id')
