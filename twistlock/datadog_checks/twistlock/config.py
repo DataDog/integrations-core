@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.base import is_affirmative
+
 
 class Config:
 
@@ -17,4 +19,4 @@ class Config:
 
         self.tags = instance.get('tags', [])
 
-        self.ssl_verify = instance.get('ssl_verify', True)
+        self.ssl_verify = is_affirmative(instance.get('ssl_verify', True))

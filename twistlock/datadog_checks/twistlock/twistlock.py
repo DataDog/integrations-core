@@ -12,7 +12,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 
-from .config import Config
+# from .config import Config
 
 REGISTRY_SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
