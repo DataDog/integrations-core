@@ -130,10 +130,8 @@ class OpenStackControllerCheck(AgentCheck):
         self._backoff = BackOffRetry()
 
         # Ex: servers_cache = {
-        #   <instance_name>: {
-        #       'servers': {<server_id>: <server_metadata>},
-        #       'changes_since': <ISO8601 date time>
-        #   }
+        #   'servers': {<server_id>: <server_metadata>},
+        #   'changes_since': <ISO8601 date time>
         # }
         self.servers_cache = {}
 
@@ -346,13 +344,13 @@ class OpenStackControllerCheck(AgentCheck):
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
     def get_all_servers(self, tenant_to_name, instance_name, exclude_server_id_rules):
-        cached_servers = self.servers_cache.get(instance_name, {}).get('servers')
+        cached_servers = self.servers_cache.get('servers')
         # NOTE: updated_time need to be set at the beginning of this method in order to no miss servers changes.
         changes_since = datetime.utcnow().isoformat()
         if cached_servers is None:
             updated_servers = self.get_active_servers(tenant_to_name)
         else:
-            previous_changes_since = self.servers_cache.get(instance_name, {}).get('changes_since')
+            previous_changes_since = self.servers_cache.get('changes_since')
             updated_servers = self.update_servers_cache(cached_servers, tenant_to_name, previous_changes_since)
 
         # Filter out excluded servers
@@ -362,7 +360,7 @@ class OpenStackControllerCheck(AgentCheck):
                 servers[updated_server_id] = updated_server
 
         # Initialize or update cache for this instance
-        self.servers_cache[instance_name] = {
+        self.servers_cache = {
             'servers': servers,
             'changes_since': changes_since
         }
@@ -709,7 +707,7 @@ class OpenStackControllerCheck(AgentCheck):
                     tenant_id_to_name[p.get('id')] = name
                 self.get_all_servers(tenant_id_to_name, self.instance_name, exclude_server_id_rules)
 
-                servers = self.servers_cache[self.instance_name]['servers']
+                servers = self.servers_cache['servers']
                 if collect_server_diagnostic_metrics:
                     self.log.debug("Fetch stats from %s server(s)" % len(servers))
                     for _, server in iteritems(servers):
