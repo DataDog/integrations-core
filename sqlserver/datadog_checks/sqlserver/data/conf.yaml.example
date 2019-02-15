@@ -1,149 +1,104 @@
 init_config:
-  #
-  # By default, we only capture *some* of the metrics available in the
-  # `sys.dm_os_performance_counters` table. You can easily add additional
-  # metrics by following the custom_metrics structure shown below.
-  #
-  # In order to connect to SQL Server either enable SQL Authentication and
-  # specify a username or password below. If you do not specify a username
-  # or password then we will connect using integrated authentication.
-  #
-  # custom_metrics:
 
-    # This is a basic custom metric. There is no instance associated with
-    # this counter. You can specify optional tags to be sent.
-    #
-    # - name: sqlserver.clr.execution
-    #   counter_name: CLR Execution
-    #   tags:
-    #     - tag_name:value
+ ## @param custom_metrics - custom object - optional
+ ## Collect custom metrics and send them to Datadog based on 
+ ## your SQL server counters.
+ ##
+ ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
+ #
+ # custom_metrics:
+ #   - name: sqlserver.clr.execution
+ #     counter_name: CLR Execution
 
-    # The counter_name field uses the counter name of SQL server database objects
-    # https://docs.microsoft.com/en-us/sql/relational-databases/performance-monitor/sql-server-databases-object
-
-    # This counter has multiple instances associated with it and we're
-    # choosing to only fetch the 'Cumulative execution time (ms) per second' instance.
-    #
-    # - name: sqlserver.exec.in_progress
-    #   counter_name: OLEDB calls
-    #   instance_name: Cumulative execution time (ms) per second
-
-    # You can also query by the object_name for finer granularity.
-    #
-    # - name: sqlserver.cache.hit_ratio
-    #   counter_name: Cache Hit Ratio
-    #   instance_name: SQL Plans
-    #   object_name: SQLServer:Plan Cache
-
-    # This counter has multiple instances associated with it and we want
-    # every instance available. We'll use the special case ALL instance
-    # which *requires* a value for "tag_by". In this case, we'll get metrics
-    # tagged as "db:mydb1", "db:mydb2".
-    #
-    # - name: sqlserver.db.commit_table_entries
-    #   counter_name: Commit table entries
-    #   instance_name: ALL
-    #   tag_by: db
-
-    # the default table from which counters are drawn is the sys.dm_os_performance_counters
-    # table.  This integration also supports
-    #  sys.dm_os_wait_stats
-    #  sys.dm_os_memory_clerks
-    #  sys.dm_io_virtual_file_stats
-
-    # to report a metric drawn from one of the additional tables, specify the table in
-    # the counter definition, as well as the counter columns to be reported
-
-    # - name: sqlserver.LCK_M_S
-    #   table: sys.dm_os_wait_stats
-    #   counter_name: LCK_M_S
-    #   columns:
-    #     - max_wait_time_ms
-    #     - signal_wait_time_ms
-    #
-    # will report two metrics, sqlserver.LCK_M_S.max_wait_time.ms and sqlserver.LCK_M_S.signal_wait_time_ms
-
-    # sys.dm_io_virtual_file_stats and sys.dm_os_memory_clerks are not associated with a counter_name
-    # only the columns need to be specified
-
-    # - name: sqlserver.io_file_stats
-    #   table: sys.dm_io_virtual_file_stats
-    #   columns:
-    #   - num_of_reads
-    #   - num_of_writes
-    # will report two metrics, sqlserver.io_file_stats.num_of_reads and sqlserver.io_file_stats.num_of_writes
-    # each will be tagged with the database id and file id.
-
-    # As well as capturing from the DMV you can also capture from a custom proc
-    # Please note this feature will produce a number of custom metrics that might affect your billing
-    # This feature is also only available when using the adodbapi driver (set by default)
-    # To use this feature, specify in your instance the procedure to execute :
-    # stored_procedure: ProcedureToExecute
-    #
-    # The proc should return this table
-    # CREATE TABLE #Datadog
-    # (
-    # 	[metric] varchar(255) not null,
-    # 	[type] varchar(50) not null,
-    # 	[value] float not null,
-    # 	[tags] varchar(255)
-    # )
-    #
-    # NOTE: SET NOCOUNT to ON inside proc to avoid extra resultsets that prevent valid query results
-    #
-    # You can also specify:
-    # ignore_missing_database : if DB doesn't exist on the server then don't do the check. Default False
-    # proc_only_if : run this SQL before each call to stored_procedure. Only if it returns 1 then call the proc
-    # proc_only_if_database : the database to run the proc_only_if SQL in. Optional.
-    #                         Defaults to database attribute
-    #
-    # The proc_only_if guard condition is useful for HA scenarios where a database can move between servers.
 
 instances:
-   # All '%' characters must be escaped as '%%'.
+   
+## Note: All '%' characters must be escaped as '%%'.
 
-  - host: HOST,PORT
+## @param host - string - required
+## Host and port of your SQL server.
+#
+  - host: <HOST>,<PORT>
 
-    # Optional. Choose the ADO provider.  Note that the (default) provider
-    # SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-    # provider, set the adoprovider to "MSOLEDBSQL" below.  You will also need
-    # to download the new provider from
-    # https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
+  ## @param apache_user - string - required
+  ## Username for the Datadog-SQL server check user 
+  #
+    username: datadog
 
-    # adoprovider: MSOLEDBSQL
+  ## @param apache_password - string - required
+  ## Password for the Datadog-SQL server check user 
+  #
+    password: <PASSWORD>
+  
+  ## @param database - string - optional - default: master
+  ## Database name to query
+  # 
+  #  database: master
 
-    # Optional, change the connection method from adodbapi (the default) to
-    # odbc (valid connector names are 'odbc' and 'adodbapi')
-    # 'adodbapi` is only available on Windows
-    # connector: odbc
+  ## @param adoprovider - string - optional - default: SQLOLEDB
+  ## Choose the ADO provider.  Note that the (default) provider
+  ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
+  ## provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
+  ## to download the new provider from
+  ## https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
+  #
+  #  adoprovider: SQLOLEDB
 
-    # Optional, if using odbc, use the named driver.  If none is specified,
-    # the 'SQL Server' driver will be used
-    # driver: SQL Server
+  ## @param connector - string - optional - default: adodbapi  
+  ## Change the connection method from adodbapi (the default) to
+  ## odbc (valid connector names are 'odbc' and 'adodbapi')
+  ## Note: 'adodbapi` is only available on Windows
+  #
+  #  connector: adodbapi
 
-    # Optional, if using odbc, configure a connection using a DSN
-    # dsn: DSN_NAME
-    username: my_username
-    password: my_password
+  ## @param adoprovider - string - optional - default: SQL Server
+  ## If using odbc, use the named driver.
+  # 
+  #  driver: SQL Server
 
-    # Optional, specify a custom connection string to be used
-    # Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
-    # connection_string: "my_connection_string"
+  ## @param dsn - string - optional
+  ## If using odbc, configure a connection using a DSN.
+  # 
+  #  dsn: <DSN_NAME>
+    
+  ## @param connection_string - string - optional
+  ## Specify a custom connection string to be used
+  ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
+  #
+  #  connection_string: "<CONNECTION_STRING>"
 
-    # Optional, timeout in seconds for the connection and each command run
-    # command_timeout: 30
-    # database: my_database # Optional, defaults to "master"
-    tags:
-      - optional_tag
+  ## @param command_timeout - integer - optional - default: 30
+  ## Timeout in seconds for the connection and each command run
+  # 
+  #  command_timeout: 30
 
-  # Get metrics from custom proc in MyDB but only if the database is writeable (i.e. it's the master in an availability group)
-  # Note: Custom proc must be defined in its own instance
+  ## @param stored_procedure - string - optional
+  ## Get metrics from custom proc in MyDB but only if the database is writable 
+  ## (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance 
+  ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
+  #
+  #  stored_procedure: <PROCEDURE_NAME>
 
-  # - host: HOST,PORT
-  #   database: MyDB
-  #   username: my_username
-  #   password: my_password
-  #   stored_procedure: GetDatadogMetrics
-  #   proc_only_if: SELECT CASE CONVERT(sysname,DatabasePropertyEx('MyDB','Updateability')) WHEN 'READ_WRITE' THEN 1 ELSE 0 END
-  #   proc_only_if_database: master
-  #   ignore_missing_database: True
+  ## @param proc_only_if - string - optional
+  ## Run this SQL before each call to `stored_procedure`. Only if it returns 1 then call the proc.
+  # 
+  #  proc_only_if: <SQL_QUERY>
+
+  ## @param proc_only_if_database - string - optional - default: master
+  ## The database to run the `proc_only_if` SQL in.
+  #
+  #  proc_only_if_database: master
+
+  ## @param ignore_missing_database - boolean - optional - default: false
+  ## If the DB specified doesn't exist on the server then don't do the check
+  #
+  #  ignore_missing_database: false
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
