@@ -518,8 +518,8 @@ class __AgentCheckPy2(object):
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, "metrics", metric_limit, self.warning)
 
-    @classmethod
-    def load_config(cls, yaml_str):
+    @staticmethod
+    def load_config(yaml_str):
         """
         Convenience wrapper to ease programmatic use of this class from the C API.
         """
