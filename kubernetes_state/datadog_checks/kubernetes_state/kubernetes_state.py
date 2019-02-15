@@ -138,6 +138,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_hpa_spec_max_replicas': 'hpa.max_replicas',
                 'kube_hpa_status_desired_replicas': 'hpa.desired_replicas',
                 'kube_hpa_status_current_replicas': 'hpa.current_replicas',
+                'kube_hpa_status_condition': 'hpa.condition',
                 'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
                 'kube_node_status_allocatable_memory_bytes': 'node.memory_allocatable',
                 'kube_node_status_allocatable_pods': 'node.pods_allocatable',
