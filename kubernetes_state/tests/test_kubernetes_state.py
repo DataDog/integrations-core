@@ -42,11 +42,18 @@ METRICS = [
     NAMESPACE + '.daemonset.scheduled',
     NAMESPACE + '.daemonset.misscheduled',
     NAMESPACE + '.daemonset.desired',
+    NAMESPACE + '.daemonset.updated',
     # hpa
     NAMESPACE + '.hpa.min_replicas',
     NAMESPACE + '.hpa.max_replicas',
     NAMESPACE + '.hpa.desired_replicas',
     NAMESPACE + '.hpa.current_replicas',
+    NAMESPACE + '.hpa.condition',
+    # pdb
+    NAMESPACE + '.pdb.disruptions_allowed',
+    NAMESPACE + '.pdb.pods_desired',
+    NAMESPACE + '.pdb.pods_healthy',
+    NAMESPACE + '.pdb.pods_total',
     # pods
     NAMESPACE + '.pod.ready',
     NAMESPACE + '.pod.scheduled',
@@ -141,6 +148,12 @@ TAGS = {
     NAMESPACE + '.job.succeeded': [
         'job:hello',
         'job_name:hello2',
+    ],
+    NAMESPACE + '.hpa.condition': [
+        'namespace:default',
+        'hpa:myhpa',
+        'condition:true',
+        'status:AbleToScale',
     ],
 }
 

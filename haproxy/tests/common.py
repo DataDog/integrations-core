@@ -61,6 +61,7 @@ CHECK_CONFIG = {
 CHECK_CONFIG_OPEN = {
     'url': STATS_URL_OPEN,
     'collect_aggregates_only': False,
+    'collect_status_metrics': True,
 }
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
@@ -87,6 +88,10 @@ BACKEND_CHECK_GAUGES = [
     'haproxy.backend.queue.current',
     'haproxy.backend.session.current',
 ]
+
+BACKEND_HOSTS_METRIC = 'haproxy.backend_hosts'
+BACKEND_STATUS_METRIC = 'haproxy.count_per_status'
+
 
 BACKEND_CHECK_GAUGES_POST_1_5 = [
     'haproxy.backend.queue.time',

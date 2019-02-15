@@ -78,3 +78,10 @@ class TestKubeDNS:
             aggregator.assert_metric_has_tag(metric, customtag)
 
         aggregator.assert_all_metrics_covered()
+
+        # Make sure instance tags are not modified, see #3066
+        aggregator.reset()
+        check.check(instance)
+        name = self.NAMESPACE + ".request_duration.seconds.sum"
+        aggregator.assert_metric(name)
+        aggregator.assert_metric(name, tags=['custom:tag', 'system:reverse'])

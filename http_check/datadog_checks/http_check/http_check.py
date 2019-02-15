@@ -78,6 +78,8 @@ class HTTPCheck(NetworkCheck):
         if url is not None:
             url = ensure_unicode(url)
         tags_list.append('url:{}'.format(url))
+        instance_name = ensure_unicode(self.normalize(instance['name']))
+        tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         r = None
         try:
@@ -229,6 +231,7 @@ class HTTPCheck(NetworkCheck):
                                                                               check_hostname, client_cert, client_key)
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
+            tags_list.append("instance:{}".format(instance_name))
             self.gauge('http.ssl.days_left', days_left, tags=tags_list)
             self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
 

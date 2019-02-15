@@ -17,6 +17,7 @@ jaydebeapi==1.1.1
 jpype1==0.6.3
 kafka-python==1.4.4; sys_platform != 'win32'
 kazoo==2.6.0; sys_platform != 'win32'
+kubernetes==8.0.1
 ldap3==2.5
 lxml==4.2.6
 meld3==1.0.2
@@ -43,6 +44,7 @@ python-binary-memcached==0.26.1; sys_platform != 'win32'
 python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 pyvmomi==v6.5.0.2017.5-1
 pywin32==224; sys_platform == 'win32'
+pyyaml==3.13
 redis==2.10.5
 requests==2.20.1
 requests-kerberos==0.12.0
