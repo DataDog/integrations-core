@@ -130,7 +130,8 @@ class OpenstackSDKApi(AbstractApi):
                 for endpoint in endpoints_list:
                     if endpoint[u'interface'] == u'public':
                         self.endpoints[service_name] = endpoint
-                    elif endpoint[u'interface'] == u'internal' and self.endpoints[service_name] is None:
+                        return self.endpoints[service_name]
+                    elif endpoint[u'interface'] == u'internal':
                         self.endpoints[service_name] = endpoint
             except Exception as e:
                 self.logger.debug("Error contacting openstack endpoint with openstacksdk: %s", e)
@@ -206,7 +207,7 @@ class OpenstackSDKApi(AbstractApi):
         raise NotImplementedError()
 
     def get_os_aggregates(self):
-        """ Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi """
+        # Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi
         self._check_authentication()
 
         return self.connection.list_aggregates()
@@ -222,13 +223,13 @@ class OpenstackSDKApi(AbstractApi):
         return self.connection.list_networks()
 
     def get_servers_detail(self, query_params):
-        """ Each server is missing some attributes compared to what is returned by SimpleApi.
-            They are all unused for the moment.
-            SimpleApi:
-            https://developer.openstack.org/api-ref/compute/?expanded=list-flavors-with-details-detail,list-servers-detailed-detail#list-servers-detailed
-            OpenstackSDKApi:
-            https://docs.openstack.org/openstacksdk/latest/user/connection.html#openstack.connection.Connection
-        """
+        # Each server is missing some attributes compared to what is returned by SimpleApi.
+        # They are all unused for the moment.
+        # SimpleApi:
+        # https://developer.openstack.org/api-ref/compute/?expanded=list-flavors-with-details-detail,list-servers-detailed-detail#list-servers-detailed
+        # OpenstackSDKApi:
+        # https://docs.openstack.org/openstacksdk/latest/user/connection.html#openstack.connection.Connection
+
         self._check_authentication()
 
         return self.connection.list_servers(detailed=True, all_projects=True, filters=query_params)
