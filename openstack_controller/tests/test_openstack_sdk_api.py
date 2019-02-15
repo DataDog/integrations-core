@@ -412,18 +412,28 @@ def test_get_os_aggregates():
     api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
-    assert api.get_os_aggregates() == EXAMPLE_AGGREGATES_VALUE
+    aggregates = api.get_os_aggregates()
+
+    for i in range(len(aggregates)):
+        for key, value in common.EXAMPLE_GET_OS_AGGREGATES_RETURN_VALUE[i].items():
+            assert value == aggregates[i][key]
 
 
 def test_get_flavors_detail():
     api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
-    assert api.get_flavors_detail(query_params={}) == EXAMPLE_FLAVORS_VALUE
+    flavors = api.get_flavors_detail(query_params={})
+    for i in range(len(flavors)):
+        for key, value in common.EXAMPLE_GET_FLAVORS_DETAIL_RETURN_VALUE[i].items():
+            assert value == flavors[i][key]
 
 
 def test_get_networks():
     api = OpenstackSDKApi(None)
     api.connection = MockOpenstackConnection()
 
-    assert api.get_networks() == EXAMPLE_NETWORKS_VALUE
+    networks = api.get_networks()
+    for i in range(len(networks)):
+        for key, value in common.EXAMPLE_GET_NETWORKS_RETURN_VALUE[i].items():
+            assert value == networks[i][key]

@@ -241,24 +241,12 @@ def test_get_os_aggregates(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_aggregates_response):
         api = SimpleApi(None, None)
-        assert api.get_os_aggregates() == [
-            {
-                "availability_zone": "london",
-                "created_at": "2016-12-27T23:47:32.911515",
-                "deleted": False,
-                "deleted_at": None,
-                "hosts": [
-                    "compute"
-                ],
-                "id": 1,
-                "metadata": {
-                    "availability_zone": "london"
-                },
-                "name": "name",
-                "updated_at": None,
-                "uuid": "6ba28ba7-f29b-45cc-a30b-6e3a40c2fb14"
-            }
-        ]
+
+        aggregates = api.get_os_aggregates()
+
+        for i in range(len(aggregates)):
+            for key, value in common.EXAMPLE_GET_OS_AGGREGATES_RETURN_VALUE[i].items():
+                assert value == aggregates[i][key]
 
 
 def get_os_hypervisors_detail_post_v2_33_response(url, headers, params=None, timeout=None):

@@ -302,6 +302,35 @@ MOCK_NOVA_SERVERS = [
     }
 ]
 
+EXAMPLE_GET_FLAVORS_DETAIL_RETURN_VALUE = [
+    {
+        'id': u'10',
+        'disk': 10,
+        'vcpus': 2,
+        'ram': 1024,
+        'OS-FLV-EXT-DATA:ephemeral': 0,
+        'swap': 0
+    },
+    {
+        'id': u'625c2e4b-0a1f-4236-bb67-5ceee1a766e5',
+        'disk': 48,
+        'vcpus': 8,
+        'ram': 5934,
+        'OS-FLV-EXT-DATA:ephemeral': 0,
+        'swap': 0
+    }
+]
+
+EXAMPLE_GET_OS_AGGREGATES_RETURN_VALUE = [
+    {
+        'hosts': [
+            "compute"
+        ],
+        'name': "name",
+        'availability_zone': "london"
+    }
+]
+
 EXAMPLE_GET_OS_HYPERVISORS_RETURN_VALUE = [
     {
         "cpu_info": {
@@ -365,3 +394,12 @@ EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE = {
     "totalFloatingIpsUsed": 0,
     "totalServerGroupsUsed": 0
 }
+
+EXAMPLE_GET_NETWORKS_RETURN_VALUE = [
+    {
+        'id': u'2755452c-4fe8-4ba1-9b26-8898665b0958',
+        'name': u'net2',
+        'tenant_id': u'680031a39ce040e1b81289ea8c73fb11',
+        'admin_state_up': True
+    }
+]
