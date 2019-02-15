@@ -1,0 +1,3 @@
+# Default metrics collected by this check. You should not have to modify this.
+# See Cassandra metrics.yaml as an example
+# https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/metrics.yaml

@@ -1,0 +1,23 @@
+{
+  "display_name": "Presto",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "presto",
+  "metric_prefix": "presto.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "a05766fc-8760-464b-9e5d-a784500b7b90",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Presto Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false
+}
