@@ -76,6 +76,8 @@ jobs:
     - stage: test
       env: CHECK=activemq_xml PYTHON3=true
     - stage: test
+      env: CHECK=aerospike
+    - stage: test
       env: CHECK=agent_metrics
     - stage: test
       env: CHECK=apache PYTHON3=true
