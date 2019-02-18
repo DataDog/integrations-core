@@ -5,12 +5,12 @@ instances:
   ## If you are using gitlab CE and not EE, use this url with
   ## the authorization token: http://localhost/?token=<TOKEN>
   #
-  - gitlab_url: http://localhost
+  - gitlab_url: <GITLAB_URL>
 
   ## @param prometheus_endpoint - string - required
   ## URL of the metrics endpoint of prometheus
   #
-    prometheus_endpoint: http://localhost:9090/metrics
+    prometheus_endpoint: http://<PROMETHEUS_ENDPOINT>:<PROMETHEUS_PORT>/metrics
     
   ## @param send_histograms_buckets - boolean - optional - default: true
   ## The histogram buckets can be noisy and generate a lot of tags.
