@@ -78,7 +78,7 @@ datadog-powerdns-recursor==1.2.0
 datadog-process==1.8.0
 datadog-prometheus==3.1.0
 datadog-rabbitmq==1.7.0
-datadog-redisdb==1.9.0
+datadog-redisdb==1.10.0
 datadog-riak==1.4.0
 datadog-riakcs==1.2.0
 datadog-snmp==1.4.2
