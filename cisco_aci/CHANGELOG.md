@@ -1,5 +1,10 @@
 # CHANGELOG - cisco_aci
 
+## 1.4.0 / 2019-02-18
+
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Support Python 3. See [#3029](https://github.com/DataDog/integrations-core/pull/3029).
+
 ## 1.3.0 / 2018-11-30
 
 * [Added] Upgrade cryptography. See [#2659][1].
