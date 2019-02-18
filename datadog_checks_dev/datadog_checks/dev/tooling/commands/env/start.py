@@ -82,8 +82,8 @@ def start(ctx, check, env, agent, dev, base):
     if isinstance(agent_ver, string_types):
         agent_build = agent_ver
         echo_warning(
-            "Agent fields missing from ddev config, please update to the latest config, \
-falling back to latest docker image"
+            'Agent fields missing from ddev config, please update to the latest config, '
+            'falling back to latest docker image...'
         )
     else:
         agent_build = agent_ver.get(env_type, env_type)
@@ -171,4 +171,7 @@ falling back to latest docker image"
     echo_info('ddev env check {} {}'.format(check, env))
 
     echo_success('To stop this check, do: ', nl=False)
-    echo_info('ddev env stop {} {}'.format(check, env))
+    if ctx.obj['repo_choice'] == 'extras' and not ctx.obj.get('repo') == 'extras':
+        echo_info('ddev -e env stop {} {}'.format(check, env))
+    else:
+        echo_info('ddev env stop {} {}'.format(check, env))
