@@ -5,6 +5,7 @@
 Utilities functions abstracting common operations, specially designed to be used
 by Integrations within tests.
 """
+import inspect
 import os
 import platform
 import shutil
@@ -107,8 +108,12 @@ def ensure_dir_exists(d):
         os.makedirs(d)
 
 
+def get_parent_dir(path):
+    return os.path.dirname(os.path.abspath(path))
+
+
 def ensure_parent_dir_exists(path):
-    ensure_dir_exists(os.path.dirname(os.path.abspath(path)))
+    ensure_dir_exists(get_parent_dir(path))
 
 
 def create_file(fname):
@@ -171,6 +176,10 @@ def basepath(path):
 
 def get_next(obj):
     return next(iter(obj))
+
+
+def get_here():
+    return get_parent_dir(inspect.currentframe().f_back.f_code.co_filename)
 
 
 @contextmanager
