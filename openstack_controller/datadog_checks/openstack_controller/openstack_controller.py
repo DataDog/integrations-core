@@ -121,8 +121,7 @@ class OpenStackControllerCheck(AgentCheck):
         super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
         # We cache all api instances.
         # This allows to cache connection if the underlying implementation support it
-        # Ex: _api =
-        #   <instance_name>: <api object>
+        # Ex: _api = <api object>
         self._api = None
 
         # BackOffRetry supports multiple instances
@@ -140,11 +139,7 @@ class OpenStackControllerCheck(AgentCheck):
         self.external_host_tags = {}
 
     def delete_api_cache(self):
-        del self._api
-
-    def set_api_cache(self, api):
-        self.log.debug("Setting api")
-        self._api = api
+        self._api = None
 
     def collect_networks_metrics(self, tags, network_ids, exclude_network_id_rules):
         """
@@ -565,7 +560,6 @@ class OpenStackControllerCheck(AgentCheck):
         Communicates with the identity server and initializes a new scope when one is absent, or has been forcibly
         removed due to token expiry
         """
-        api = self._api
         custom_tags = custom_tags or []
         keystone_server_url = instance_config.get("keystone_server_url")
         proxy_config = self.get_instance_proxy(instance_config, keystone_server_url)
@@ -577,7 +571,7 @@ class OpenStackControllerCheck(AgentCheck):
             try:
                 self.log.debug("Fetch scope for instance {}".format(self.instance_name))
                 # Set keystone api with proper token
-                api = ApiFactory.create(self.log, proxy_config, instance_config)
+                self._api = ApiFactory.create(self.log, proxy_config, instance_config)
                 self.service_check(
                     self.IDENTITY_API_SC,
                     AgentCheck.OK,
@@ -623,12 +617,9 @@ class OpenStackControllerCheck(AgentCheck):
                     tags=["keystone_server: {}".format(keystone_server_url)] + custom_tags,
                 )
 
-        if not api:
+        if self._api is None:
             # Fast fail in the absence of an api
             raise IncompleteConfig()
-        # Set api to apis cache
-        self.set_api_cache(api)
-        return api
 
     @traced
     def check(self, instance):
@@ -671,8 +662,8 @@ class OpenStackControllerCheck(AgentCheck):
 
         try:
             # Authenticate and add the instance api to apis cache
-            api = self.init_api(instance, custom_tags)
-            if not api:
+            self.init_api(instance, custom_tags)
+            if self._api is None:
                 self.log.info("Not api found, make sure you admin user has access to your OpenStack projects: \n")
                 return
 
