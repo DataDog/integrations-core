@@ -1,5 +1,10 @@
 # CHANGELOG - process
 
+## 1.8.0 / 2019-02-18
+
+* [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
+* [Added] Finish Python 3 Support. See [#2950](https://github.com/DataDog/integrations-core/pull/2950).
+
 ## 1.7.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2812][1].
