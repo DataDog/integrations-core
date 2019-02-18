@@ -7,11 +7,13 @@ from . import common
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 
+instances = common.MOCK_CONFIG['instances']
+
+
 def test_parse_uptime_string(aggregator):
-    instance = common.MOCK_CONFIG["instances"][0]
-    instance['tags'] = ['optional:tag1']
+    instances[0]['tags'] = ['optional:tag1']
     init_config = common.MOCK_CONFIG['init_config']
-    check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
+    check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=instances)
     response = u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
     uptime_parsed = check._parse_uptime_string(response)
     assert uptime_parsed == [0.04, 0.14, 0.19]
@@ -28,7 +30,7 @@ def test_get_all_servers_between_runs(servers_detail, aggregator):
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=common.MOCK_CONFIG)
+    }, {}, instances=instances)
 
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
@@ -36,7 +38,7 @@ def test_get_all_servers_between_runs(servers_detail, aggregator):
     check.get_all_servers({'6f70656e737461636b20342065766572': 'testproj',
                            'blacklist_1': 'blacklist_1',
                            'blacklist_2': 'blacklist_2'}, "test_name", [])
-    servers = check.servers_cache['test_name']['servers']
+    servers = check.servers_cache['servers']
     assert 'server-1' not in servers
     assert 'server_newly_added' in servers
     assert 'other-1' in servers
@@ -53,7 +55,7 @@ def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=common.MOCK_CONFIG)
+    }, {}, instances=instances)
 
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
@@ -61,7 +63,7 @@ def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
     check.get_all_servers({'6f70656e737461636b20342065766572': None,
                            'blacklist_1': 'blacklist_1',
                            'blacklist_2': 'blacklist_2'}, "test_name", [])
-    servers = check.servers_cache['test_name']['servers']
+    servers = check.servers_cache['servers']
     assert 'server_newly_added' not in servers
     assert 'server-1' not in servers
     assert 'other-1' in servers
@@ -86,10 +88,9 @@ def test_get_paginated_server(servers_detail, aggregator):
         'ssl_verify': False,
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
-    }, {}, instances=common.MOCK_CONFIG)
+    }, {}, instances=instances)
     check.get_all_servers({"6f70656e737461636b20342065766572": "testproj"}, "test_name", [])
-    assert len(check.servers_cache) == 1
-    servers = check.servers_cache['test_name']['servers']
+    servers = check.servers_cache['servers']
     assert 'server-1' in servers
     assert 'other-1' not in servers
     assert 'other-2' not in servers
@@ -153,7 +154,7 @@ def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggr
         'ssl_verify': False,
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
-    }, {}, instances=common.MOCK_CONFIG)
+    }, {}, instances=instances)
 
     check.collect_server_diagnostic_metrics({})
 

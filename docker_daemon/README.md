@@ -1,4 +1,10 @@
-# Docker_daemon Integration
+# Docker Daemon Integration
+
+**Note**: The Docker Daemon check is still maintained but only works with **Agent v5**.
+
+<div class="alert alert-warning">
+<b>To use the Docker integration with Agent v6 consult the <a href="#agent-v6">Agent v6 section</a> below.</b>
+</div>
 
 ![Docker default dashboard][1]
 
@@ -8,12 +14,6 @@ Configure this Agent check to get metrics from the Docker_daemon service in real
 
 * Visualize and monitor Docker_daemon states.
 * Be notified about Docker_daemon failovers and events.
-
-**Note**: The Docker_daemon check is still maintained but only works with Agents prior to major version 6.
-
-<div class="alert alert-warning">
-<b>To use the Docker integration with Agent v6 consult the <a href="#agent-v6">Agent v6 section</a> below.</b>
-</div>
 
 ## Setup
 ### Installation
@@ -31,8 +31,6 @@ For either option, your hosts need cgroup memory management enabled for the Dock
 5. Create a `docker_daemon.yaml` file by copying [the example file in the agent conf.d directory][6]. If you have a standard install of Docker on your host, there shouldn't be anything you need to change to get the integration to work.
 6. To enable other integrations, use `docker ps` to identify the ports used by the corresponding applications.
     ![Docker ps command][7]
-
-**Note:** Docker_daemon has replaced the older Docker integration.
 
 #### Container Installation
 

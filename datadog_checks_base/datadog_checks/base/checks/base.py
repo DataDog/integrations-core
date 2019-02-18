@@ -11,6 +11,7 @@ import traceback
 import unicodedata
 import inspect
 
+import yaml
 from six import PY3, iteritems, text_type
 
 try:
@@ -35,6 +36,10 @@ from ..utils.common import ensure_bytes, ensure_unicode
 from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
 
+if datadog_agent.get_config('disable_unsafe_yaml'):
+    from ..ddyaml import monkey_patch_pyyaml
+    monkey_patch_pyyaml()
+
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [
@@ -44,7 +49,7 @@ ONE_PER_CONTEXT_METRIC_TYPES = [
 ]
 
 
-class __AgentCheck7(object):
+class __AgentCheckPy3(object):
     """
     The base class for any Agent based integrations
     """
@@ -88,6 +93,9 @@ class __AgentCheck7(object):
             else:
                 # new-style init: the 3rd argument is `instances`
                 self.instances = args[2]
+
+        # Agent 6+ will only have one instance
+        self.instance = self.instances[0] if self.instances else None
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()
@@ -146,6 +154,13 @@ class __AgentCheck7(object):
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, 'metrics', metric_limit, self.warning)
+
+    @staticmethod
+    def load_config(yaml_str):
+        """
+        Convenience wrapper to ease programmatic use of this class from the C API.
+        """
+        return yaml.safe_load(yaml_str)
 
     @property
     def in_developer_mode(self):
@@ -404,7 +419,7 @@ class __AgentCheck7(object):
         return proxies if proxies else no_proxy_settings
 
 
-class __AgentCheck6(object):
+class __AgentCheckPy2(object):
     """
     The base class for any Agent based integrations
     """
@@ -448,6 +463,9 @@ class __AgentCheck6(object):
             else:
                 # new-style init: the 3rd argument is `instances`
                 self.instances = args[2]
+
+        # Agent 6+ will only have one instance
+        self.instance = self.instances[0] if self.instances else None
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()
@@ -499,6 +517,13 @@ class __AgentCheck6(object):
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, "metrics", metric_limit, self.warning)
+
+    @staticmethod
+    def load_config(yaml_str):
+        """
+        Convenience wrapper to ease programmatic use of this class from the C API.
+        """
+        return yaml.safe_load(yaml_str)
 
     @property
     def in_developer_mode(self):
@@ -781,8 +806,8 @@ class __AgentCheck6(object):
 
 
 if PY3:
-    AgentCheck = __AgentCheck7
-    del __AgentCheck6
+    AgentCheck = __AgentCheckPy3
+    del __AgentCheckPy2
 else:
-    AgentCheck = __AgentCheck6
-    del __AgentCheck7
+    AgentCheck = __AgentCheckPy2
+    del __AgentCheckPy3

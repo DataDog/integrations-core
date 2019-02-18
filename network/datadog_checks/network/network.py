@@ -438,6 +438,30 @@ class Network(AgentCheck):
                     self._submit_netmetric(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]),
                                            tags=custom_tags)
 
+        proc_conntrack_path = "{}/net/nf_conntrack".format(proc_location)
+        try:
+            with open(proc_conntrack_path, 'r') as conntrack_file:
+                # Starting at 0 as the last line has a line return
+                conntrack_count = 0
+                while 1:
+                    # Reading the file by chucks (64k being a randomly chosen buffer size)
+                    conntrack_buffer = conntrack_file.read(65536)
+                    if not conntrack_buffer:
+                        break
+                    conntrack_count += conntrack_buffer.count('\n')
+                self.gauge('system.net.conntrack.count', conntrack_count, tags=custom_tags)
+        except IOError:
+            self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", proc_conntrack_path)
+
+        proc_conntrack_max_path = "{}/sys/net/nf_conntrack_max".format(proc_location)
+        try:
+            with open(proc_conntrack_max_path, 'r') as conntrack_max_file:
+                # Starting at 0 as the last line has a line return
+                conntrack_max = conntrack_max_file.read()
+                self.gauge('system.net.conntrack.max', conntrack_max, tags=custom_tags)
+        except IOError:
+            self.log.debug("Unable to read %s. Skipping nf_conntrack_max metrics pull.", proc_conntrack_max_path)
+
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
         Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)

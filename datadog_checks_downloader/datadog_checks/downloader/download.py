@@ -46,7 +46,7 @@ REPOSITORIES_DIR = os.path.join(here, 'data')
 REPOSITORY_DIR = 'repo'
 REPOSITORY_MIRRORS = {
     'repo': {
-        'url_prefix': 'https://dd-integrations-core-wheels-build-stable.s3.amazonaws.com',
+        'url_prefix': 'https://dd-integrations-core-wheels-build-stable.datadoghq.com',
         'metadata_path': 'metadata.staged',
         'targets_path': 'targets',
         'confined_target_dirs': ['']
