@@ -44,7 +44,7 @@ init_config:
   #
   statsd_port: 8125
     
-  ## @param log_to_file - boolean -required
+  ## @param log_to_file - boolean - required
   ## Whether or not this check should log in the Agent log file.
   #
   log_to_file: true
