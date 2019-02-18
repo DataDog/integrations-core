@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 2.2.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#2964](https://github.com/DataDog/integrations-core/pull/2964).
+
 ## 2.1.0 / 2018-11-30
 
 * [Added] Send service check as metric. See [#2509][1].
