@@ -1,16 +1,29 @@
 init_config:
 
 instances:
-    # Every instance requires a `monitor_agent_url`
-    # Optional, set `plugin_ids` to monitor a specific scope of plugins.
-    -  monitor_agent_url: http://example.com:24220/api/plugins.json
-       plugin_ids:
-         - plg1
-         - plg2
-       tags:
-         - 'test'
-         - 'datacenter:northeast'
-    # Optional, set 'tag_by' to specify how to tag metrics. By default, metrics are tagged with `plugin_id`
-    -  monitor_agent_url: http://example.com:24220/api/plugins.json
-       tag_by: type
 
+## @param monitor_agent_url - string - required
+## Monitor Agent URL to connect to.
+#
+  -  monitor_agent_url: http://example.com:24220/api/plugins.json
+
+  ## @param plugin_ids - list of strings - optional
+  ## Enter your Plugin IDs to monitor a specific scope of plugins.
+  #
+  #  plugin_ids:
+  #    - <PLUGIN_ID_1>
+  #    - <PLUGIN_ID_2>
+       
+  ## @param tag_by - string - optional
+  ## Set 'tag_by' to specify how to tag metrics. By default, metrics are tagged with `plugin_id`
+  #
+  #  tag_by: type
+
+  ## @param tags  - list of key:value string - optional
+  ## List of tags to attach to every metric and service check emitted by this integration.
+  ##
+  ## Learn more about tagging at https://docs.datadoghq.com/tagging
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
