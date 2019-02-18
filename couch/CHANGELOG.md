@@ -1,5 +1,9 @@
 # CHANGELOG - couch
 
+## 3.2.0 / 2019-02-18
+
+* [Added] Finish Python 3 Support. See [#2911](https://github.com/DataDog/integrations-core/pull/2911).
+
 ## 3.1.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2721][1].
