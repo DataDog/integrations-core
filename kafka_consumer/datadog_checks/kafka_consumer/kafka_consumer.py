@@ -161,10 +161,16 @@ class KafkaCheck(AgentCheck):
             cli = KafkaClient(bootstrap_servers=kafka_conn_str,
                               client_id='dd-agent',
                               security_protocol=instance.get('security_protocol', 'PLAINTEXT'),
+                              sasl_mechanism=instance.get('sasl_mechanism'),
+                              sasl_plain_username=instance.get('sasl_plain_username'),
+                              sasl_plain_password=instance.get('sasl_plain_password'),
+                              sasl_kerberos_service_name=instance.get('sasl_kerberos_service_name', 'kafka'),
+                              sasl_kerberos_domain_name=instance.get('sasl_kerberos_domain_name'),
                               ssl_cafile=instance.get('ssl_cafile'),
                               ssl_check_hostname=instance.get('ssl_check_hostname', True),
                               ssl_certfile=instance.get('ssl_certfile'),
                               ssl_keyfile=instance.get('ssl_keyfile'),
+                              ssl_crlfile=instance.get('ssl_crlfile'),
                               ssl_password=instance.get('ssl_password'))
             self.kafka_clients[instance_key] = cli
 

@@ -42,14 +42,81 @@ instances:
                             # this has no effect.
     # zk_prefix: /0.8
 
-    # SSL Configuration
+    ### SASL Username/Password Configuration ###
 
-    # ssl_cafile: /path/to/pem/file
-    # security_protocol: PLAINTEXT
+    ## @param security_protocol - string - required
+    ## Protocol used to communicate with brokers. 
+    ## Valid values are: PLAINTEXT, SSL. Default: PLAINTEXT.
+    #
+    security_protocol: PLAINTEXT
+    
+    ## @param sasl_mechanism - string - optional
+    ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL. 
+    ## Currently only PLAIN is supported.
+    #
+    # sasl_mechanism: SASL_PLAINTEXT
+
+    ## @param sasl_plain_username - string - optional
+    ## Username for sasl PLAIN authentication.
+    #
+    # sasl_plain_username: username
+
+    ## @param sasl_plain_password - string - optional
+    ## Password for sasl PLAIN authentication.
+    #
+    # sasl_plain_password: password
+
+    ## @param sasl_kerberos_service_name - string - optional - default:kafka
+    ## Service name to include in GSSAPI sasl mechanism handshake.
+    #
+    # sasl_kerberos_service_name: kafka 
+
+    ## @param sasl_kerberos_domain_name - string - optional - default:one of the bootstrap servers
+    ## Kerberos domain name to use in GSSAPI sasl mechanism handshake. 
+    #
+    # sasl_kerberos_domain_name: localhost
+
+    ### SSL Configuration ###
+
+    ## @param ssl_context - string - optional
+    ## Pre-configured SSLContext for wrapping socket connections. 
+    ## If provided, all other ssl_* configurations will be ignored. 
+    #
+    # ssl_context: 
+
+    ## @param ssl_check_hostname - string - optional - default:True
+    ## Flag to configure whether SSL handshake should verify that the 
+    ## certificate matches the broker’s hostname.
+    #
     # ssl_check_hostname: True
+
+    ## @param ssl_cafile - string - optional
+    ## Optional filename of CA file to use in certificate verification.
+    #
+    # ssl_cafile: /path/to/pem/file
+
+    ## @param ssl_certfile - string - optional
+    ## Optional filename of file in PEM format containing the client certificate, 
+    ## as well as any CA certificates needed to establish the certificate’s authenticity.
+    #
     # ssl_certfile: /path/to/pem/file
+
+    ## @param ssl_keyfile - string - optional
+    ## Optional filename containing the client private key.
+    #
     # ssl_keyfile: /path/to/key/file
+
+    ## @param ssl_password - string - optional
+    ## Optional password to be used when loading the certificate chain. 
+    #
     # ssl_password: password1
+
+    ## @param ssl_crlfile - string - optional
+    ## Optional filename containing the CRL to check for certificate expiration.
+    ## By default, no CRL check is done. When providing a file, only the leaf certificate
+    ## will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+. 
+    #
+    # ssl_crlfile:
 
     # kafka_consumer_offsets: false
     consumer_groups:
