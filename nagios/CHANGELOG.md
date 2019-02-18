@@ -1,5 +1,9 @@
 # CHANGELOG - nagios
 
+## 1.3.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#2835](https://github.com/DataDog/integrations-core/pull/2835).
+
 ## 1.2.0 / 2018-12-19
 
 * [Added] Add instance level tags to Nagios Events. See [#2778][1].

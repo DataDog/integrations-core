@@ -1,5 +1,9 @@
 # CHANGELOG - Linkerd
 
+## 2.1.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#3032](https://github.com/DataDog/integrations-core/pull/3032).
+
 ## 2.0.0 / 2018-10-12
 
 * [Changed] Update linkerd to use the new OpenMetricsBaseCheck. See [#1984][1].

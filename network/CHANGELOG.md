@@ -1,5 +1,13 @@
 # CHANGELOG - network
 
+## 1.9.0 / 2019-02-18
+
+* [Added] Add conntrack basic metrics to the network integration.. See [#2981](https://github.com/DataDog/integrations-core/pull/2981). Thanks [aerostitch](https://github.com/aerostitch).
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
+* [Added] Support Python 3. See [#3005](https://github.com/DataDog/integrations-core/pull/3005).
+* [Fixed] Use `device` tag instead of the deprecated `device_name` parameter. See [#2945](https://github.com/DataDog/integrations-core/pull/2945). Thanks [aerostitch](https://github.com/aerostitch).
+
 ## 1.8.0 / 2018-11-30
 
 * [Added] Update psutil. See [#2576][1].

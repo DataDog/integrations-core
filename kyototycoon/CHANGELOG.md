@@ -1,5 +1,9 @@
 # CHANGELOG - kyototycoon
 
+## 1.5.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#3013](https://github.com/DataDog/integrations-core/pull/3013).
+
 ## 1.4.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].

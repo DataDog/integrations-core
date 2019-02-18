@@ -1,5 +1,10 @@
 # CHANGELOG - iis
 
+## 2.3.0 / 2019-02-18
+
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Support Python 3. See [#2999](https://github.com/DataDog/integrations-core/pull/2999).
+
 ## 2.2.1 / 2019-01-04
 
 * [Fixed] Change example config from "localhost" to ".". See [#2779][1].

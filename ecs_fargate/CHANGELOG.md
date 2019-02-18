@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 2.1.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#2885](https://github.com/DataDog/integrations-core/pull/2885).
+
 ## 2.0.0 / 2018-11-30
 
 * [Changed] Rework tagging to be consistent with the live container view and Autodiscovery. See [#2601][1].

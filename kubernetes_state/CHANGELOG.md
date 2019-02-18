@@ -1,5 +1,13 @@
 # CHANGELOG - kubernetes_state
 
+## 4.2.0 / 2019-02-18
+
+* [Added] Collect .hpa.condition gauges. See [#3107](https://github.com/DataDog/integrations-core/pull/3107).
+* [Added] Collect PodDisruptionBudget metrics. See [#3111](https://github.com/DataDog/integrations-core/pull/3111).
+* [Added] Added .daemonset.updated gauge to track daemonset updates. See [#3102](https://github.com/DataDog/integrations-core/pull/3102).
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Support Python 3. See [#3030](https://github.com/DataDog/integrations-core/pull/3030).
+
 ## 4.1.0 / 2018-12-02
 
 * [Added] Add phase tag to pod metrics. See [#2624][1].

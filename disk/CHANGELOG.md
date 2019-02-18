@@ -1,5 +1,10 @@
 # CHANGELOG - disk
 
+## 2.1.0 / 2019-02-18
+
+* [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
+* [Fixed] Use `device` tag instead of the deprecated `device_name` parameter. See [#2946](https://github.com/DataDog/integrations-core/pull/2946). Thanks [aerostitch](https://github.com/aerostitch).
+
 ## 2.0.1 / 2019-01-04
 
 * [Fixed] Fix regression on agent 5 only. See [#2848][1].
