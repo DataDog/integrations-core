@@ -2,7 +2,6 @@
 
 ## 2.1.0 / 2019-02-18
 
-* [Added] Finish Python 3 Support. See [#2958](https://github.com/DataDog/integrations-core/pull/2958).
 * [Added] Support Python 3. See [#2885](https://github.com/DataDog/integrations-core/pull/2885).
 
 ## 2.0.0 / 2018-11-30
