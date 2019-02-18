@@ -2,10 +2,10 @@ init_config:
 
 instances:
 
-## @param url - string - required
-## The URL where elasticsearch accepts HTTP requests. This is used to
-## fetch statistics from the nodes and information about the cluster health.
-# 
+  ## @param url - string - required
+  ## The URL where elasticsearch accepts HTTP requests. This is used to
+  ## fetch statistics from the nodes and information about the cluster health.
+  # 
   - url: http://localhost:9200
 
   ## @param username - string - optional
