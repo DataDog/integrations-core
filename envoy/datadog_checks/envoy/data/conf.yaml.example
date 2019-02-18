@@ -2,12 +2,12 @@ init_config:
 
 instances:
 
-## @param stats_url - string - required
-## The admin endpoint to connect to. It must be accessible: 
-## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
-## Add a `?usedonly` on the end if you wish to ignore
-## unused metrics instead of reporting them as `0`.
-#
+  ## @param stats_url - string - required
+  ## The admin endpoint to connect to. It must be accessible: 
+  ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
+  ## Add a `?usedonly` on the end if you wish to ignore
+  ## unused metrics instead of reporting them as `0`.
+  #
   - stats_url: http://localhost:80/stats
 
   ## @param metric_whitelist - optional - list of strings
