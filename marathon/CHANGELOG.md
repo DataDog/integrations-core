@@ -1,5 +1,9 @@
 # CHANGELOG - marathon
 
+## 1.6.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#2871](https://github.com/DataDog/integrations-core/pull/2871).
+
 ## 1.5.0 / 2018-10-12
 
 * [Fixed] Removed default arguments from process_apps. See [#2337][1].
