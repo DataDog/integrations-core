@@ -565,7 +565,7 @@ class OpenStackControllerCheck(AgentCheck):
         Communicates with the identity server and initializes a new scope when one is absent, or has been forcibly
         removed due to token expiry
         """
-        api = None
+        api = self._api
         custom_tags = custom_tags or []
         keystone_server_url = instance_config.get("keystone_server_url")
         proxy_config = self.get_instance_proxy(instance_config, keystone_server_url)
