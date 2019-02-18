@@ -1,5 +1,10 @@
 # CHANGELOG - teamcity
 
+## 1.3.0 / 2019-02-18
+
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
+
 ## 1.2.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2829][1].

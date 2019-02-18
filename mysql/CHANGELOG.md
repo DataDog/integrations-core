@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 1.6.0 / 2019-02-18
+
+* [Added] Finish Python 3 Support. See [#2948](https://github.com/DataDog/integrations-core/pull/2948).
+
 ## 1.5.0 / 2018-11-30
 
 * [Added] Support Python 3. See [#2630][1].

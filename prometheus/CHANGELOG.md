@@ -1,5 +1,9 @@
 # CHANGELOG - Prometheus
 
+## 3.1.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#3048](https://github.com/DataDog/integrations-core/pull/3048).
+
 ## 3.0.1 / 2019-01-04
 
 * [Fixed] Added crucial words to make sentence clearer. See [#2811][1]. Thanks [someword][2].

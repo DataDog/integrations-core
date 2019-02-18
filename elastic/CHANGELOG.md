@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 1.11.0 / 2019-02-18
+
+* [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
+
 ## 1.10.0 / 2019-01-04
 
 * [Added] Add completed metric for all ES thread pools. See [#2803][1].

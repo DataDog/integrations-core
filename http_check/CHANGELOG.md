@@ -1,5 +1,10 @@
 # CHANGELOG - http_check
 
+## 3.2.0 / 2019-02-18
+
+* [Added] Add url as tag. See [#3080](https://github.com/DataDog/integrations-core/pull/3080).
+* [Added] [http_check] adds instance tag to metrics. See [#3065](https://github.com/DataDog/integrations-core/pull/3065).
+
 ## 3.1.1 / 2018-12-07
 
 * [Fixed] Fix unicode handling of log messages. See [#2700][1].

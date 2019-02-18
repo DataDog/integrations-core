@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.9.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#3027](https://github.com/DataDog/integrations-core/pull/3027).
+
 ## 1.8.1 / 2019-01-04
 
 * [Fixed] Bump pyodbc for python3.7 compatibility. See [#2801][1].

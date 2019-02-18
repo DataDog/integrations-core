@@ -1,5 +1,10 @@
 # CHANGELOG - Kube-dns
 
+## 2.1.0 / 2019-02-18
+
+* [Fixed] Fix growing CPU and memory usage. See [#3066](https://github.com/DataDog/integrations-core/pull/3066).
+* [Added] Support Python 3. See [#2896](https://github.com/DataDog/integrations-core/pull/2896).
+
 ## 2.0.1 / 2018-10-12
 
 * [Fixed] Submit metrics with instance tags. See [#2299][1].

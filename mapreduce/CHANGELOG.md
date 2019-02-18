@@ -1,5 +1,9 @@
 # CHANGELOG - mapreduce
 
+## 1.3.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#2870](https://github.com/DataDog/integrations-core/pull/2870).
+
 ## 1.2.1 / 2018-09-04
 
 * [Fixed] Fix bug and typo in DEFAULT_CLUSTER_NAME for YARN check. See [#1814][1]. Thanks [eplanet][2].

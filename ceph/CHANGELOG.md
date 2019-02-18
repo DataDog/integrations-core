@@ -1,5 +1,10 @@
 # CHANGELOG - ceph
 
+## 1.4.0 / 2019-02-18
+
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Support Python 3. See [#2837](https://github.com/DataDog/integrations-core/pull/2837).
+
 ## 1.3.2 / 2018-11-30
 
 * [Fixed] Use raw string literals when \ is present. See [#2465][1].

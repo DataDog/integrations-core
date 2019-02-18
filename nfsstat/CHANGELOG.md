@@ -1,5 +1,9 @@
 # CHANGELOG - Nfsstat
 
+## 1.2.0 / 2019-02-18
+
+* [Added] Don't raise Exception when No NFS mounts could be found. See [#3069](https://github.com/DataDog/integrations-core/pull/3069).
+
 ## 1.1.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2775][1].

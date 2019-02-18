@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 1.4.0 / 2019-02-18
+
+* [Added] Add extra Kafka broker metrics. See [#2484](https://github.com/DataDog/integrations-core/pull/2484). Thanks [jalaziz](https://github.com/jalaziz).
+
 ## 1.3.0 / 2019-01-04
 
 * [Added] Add Per Topic IncomingMessages metric for Kafka.. See [#2732][1].

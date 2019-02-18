@@ -1,5 +1,9 @@
 # CHANGELOG - agent_metrics
 
+## 1.4.0 / 2019-02-18
+
+* [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
+
 ## 1.3.0 / 2018-11-30
 
 * [Added] Update psutil. See [#2576][1].

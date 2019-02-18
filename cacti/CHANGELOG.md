@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.3.0 / 2019-02-18
+
+* [Added] Finish Python 3 Support. See [#2901](https://github.com/DataDog/integrations-core/pull/2901).
+
 ## 1.2.0 / 2018-11-30
 
 * [Added] Support Python3. See [#2622][1].

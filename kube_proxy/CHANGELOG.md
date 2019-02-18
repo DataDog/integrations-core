@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_proxy
 
+## 3.1.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#2919](https://github.com/DataDog/integrations-core/pull/2919).
+
 ## 3.0.0 / 2018-10-12
 
 * [Changed] Update kube_proxy to use the new OpenMetricsBaseCheck. See [#1981][1].

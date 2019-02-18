@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 1.3.0 / 2019-02-18
+
+* [Added] Finish Python3 Support. See [#2905](https://github.com/DataDog/integrations-core/pull/2905).
+
 ## 1.2.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2761][1].

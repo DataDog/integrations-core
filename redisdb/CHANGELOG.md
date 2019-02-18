@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 1.10.0 / 2019-02-18
+
+* [Added] adds redis_db tag to redis.key.length. See [#3008](https://github.com/DataDog/integrations-core/pull/3008).
+
 ## 1.9.0 / 2019-01-22
 
 * [Fixed] Only try to decode slowlog command entrypoint. See [#2998][1].

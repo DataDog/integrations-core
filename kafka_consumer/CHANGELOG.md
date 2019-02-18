@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 1.7.0 / 2019-02-18
+
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Finish Python 3 Support. See [#2912](https://github.com/DataDog/integrations-core/pull/2912).
+
 ## 1.6.0 / 2019-01-04
 
 * [Added] [kafka_consumer] Bump vendored kazoo to 2.6.0. See [#2729][1]. Thanks [jeffwidman][2].

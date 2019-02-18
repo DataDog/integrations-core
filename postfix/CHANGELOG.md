@@ -1,5 +1,10 @@
 # CHANGELOG - postfix
 
+## 1.3.0 / 2019-02-18
+
+* [Added] Add logs section. See [#3097](https://github.com/DataDog/integrations-core/pull/3097).
+* [Added] Support Python 3. See [#3038](https://github.com/DataDog/integrations-core/pull/3038).
+
 ## 1.2.3 / 2018-10-12
 
 * [Fixed] Use subprocess to get sudo capabilities instead of system(). See [#2353][1].
