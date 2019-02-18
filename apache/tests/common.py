@@ -1,14 +1,11 @@
-# (C) Datadog, Inc. 2010-2018
+# (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-import os
-
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.dev import get_docker_hostname, get_here
 
 CHECK_NAME = 'apache'
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
 HOST = get_docker_hostname()
 PORT = '18180'
 BASE_URL = "http://{0}:{1}".format(HOST, PORT)
