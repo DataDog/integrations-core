@@ -1,5 +1,9 @@
 # CHANGELOG - riakcs
 
+## 2.0.0 / 2019-02-18
+
+* [Changed] Fix riakcs dependencies. See [#3033](https://github.com/DataDog/integrations-core/pull/3033).
+
 ## 1.2.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2780][1].
