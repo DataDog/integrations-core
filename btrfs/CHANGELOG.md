@@ -1,5 +1,10 @@
 # CHANGELOG - btrfs
 
+## 1.5.0 / 2019-02-18
+
+* [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).
+* [Added] Finish Py3 support. See [#2900](https://github.com/DataDog/integrations-core/pull/2900).
+
 ## 1.4.0 / 2018-11-30
 
 * [Added] Add Python3 Support. See [#2579][1].
