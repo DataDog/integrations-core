@@ -1,5 +1,9 @@
 # CHANGELOG - wmi_check
 
+## 1.3.0 / 2019-02-18
+
+* [Added] Support Python 3 for WMI. See [#3031](https://github.com/DataDog/integrations-core/pull/3031).
+
 ## 1.2.0 / 2018-10-12
 
 * [Added] Pin pywin32 dependency. See [#2322][1].
