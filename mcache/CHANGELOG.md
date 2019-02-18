@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 1.5.0 / 2019-02-18
+
+* [Added] Finish Python 3 support. See [#2915](https://github.com/DataDog/integrations-core/pull/2915).
+
 ## 1.4.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2783][1].
