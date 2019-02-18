@@ -1,5 +1,11 @@
 # CHANGELOG - tokumx
 
+## 2.0.0 / 2019-02-18
+
+* [Changed] Vendor pymongo into tokumx check. See [#3001](https://github.com/DataDog/integrations-core/pull/3001).
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Finish Python 3 Support. See [#2926](https://github.com/DataDog/integrations-core/pull/2926).
+
 ## 1.3.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2832][1].
