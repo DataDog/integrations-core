@@ -1,5 +1,9 @@
 # CHANGELOG - openstack
 
+## 1.7.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#3035](https://github.com/DataDog/integrations-core/pull/3035).
+
 ## 1.6.0 / 2019-01-04
 
 * [Added] Adds ability to Trace "check" function with DD APM. See [#2079][1].
