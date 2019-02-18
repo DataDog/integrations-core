@@ -9,7 +9,7 @@ instances:
   ## The directory to monitor. On windows, please make sure you escape back-slashes otherwise the YAML
   ##  parser fails (eg. - directory: "C:\\Users\\foo\\Downloads").
   #
-  - directory: "/path/to/directory"
+  - directory: "<DIRECTORY_PATH>"
 
   ## @param name - string - optional - default: <DIRECTORY>
   ## Tag metrics with specified name.
