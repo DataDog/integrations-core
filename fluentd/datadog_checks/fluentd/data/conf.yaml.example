@@ -2,9 +2,9 @@ init_config:
 
 instances:
 
-## @param monitor_agent_url - string - required
-## Monitor Agent URL to connect to.
-#
+  ## @param monitor_agent_url - string - required
+  ## Monitor Agent URL to connect to.
+  #
   - monitor_agent_url: http://example.com:24220/api/plugins.json
 
   ## @param plugin_ids - list of strings - optional
@@ -15,7 +15,7 @@ instances:
   #    - <PLUGIN_ID_2>
        
   ## @param tag_by - string - optional
-  ## Set 'tag_by' to specify how to tag metrics. By default, metrics are tagged with `plugin_id`
+  ## Set 'tag_by' to specify how to tag metrics. By default, metrics are tagged with `plugin_id`.
   #
   #  tag_by: type
 
