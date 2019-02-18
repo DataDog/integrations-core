@@ -1,5 +1,11 @@
 # CHANGELOG - haproxy
 
+## 2.0.0 / 2019-02-18
+
+* [Changed] haproxy: Only send 'haproxy.backend_hosts' metrics for backend. See [#3073](https://github.com/DataDog/integrations-core/pull/3073).
+* [Changed] Put service check behind a flag, false by default. See [#3083](https://github.com/DataDog/integrations-core/pull/3083).
+* [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
+
 ## 1.4.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2849][1].
