@@ -9,24 +9,24 @@ instances:
   ## The directory to monitor. On windows, please make sure you escape back-slashes otherwise the YAML
   ##  parser fails (eg. - directory: "C:\\Users\\foo\\Downloads").
   #
-  - directory: "<DIRECTORY_PATH>"
+  - directory: <DIRECTORY_PATH>
 
   ## @param name - string - optional - default: <DIRECTORY>
   ## Tag metrics with specified name.
   #
-  #  name: "<DIRECTORY>"
+  #  name: <DIRECTORY>
 
   ## @param dirtagname - string - optional - default: <NAME>
   ## The name of the key for the tag used for the directory, the value is the value of "name" (see above). 
   ## The resulting tag attached is "<dirtagname>:<name>".
   # 
-  #  dirtagname: "<DIRECTORY_TAG_KEY>"
+  #  dirtagname: <DIRECTORY_TAG_KEY>
 
   ## @param filetagname - string - optional - default: <FILE_NAME>
   ## The name of the key for the tag used for each file, the value is the filename. 
   ## The resulting tag is "<filetagname>:<filename>".
   # 
-  #  filetagname: "<TAG_KEY_FILENAME>"
+  #  filetagname: <TAG_KEY_FILENAME>
 
   ## @param filegauges - boolean - optional - default: false
   ## When true stats are an individual gauge per file (max. 20 files!) and not a histogram of the whole directory.
@@ -37,7 +37,7 @@ instances:
   ## the `fnmatch` pattern to use when reading the "directory"'s files. 
   ## The pattern is matched against the files' absolute paths and relative paths in "directory".
   #
-  #  pattern: "*"
+  #  pattern: *
 
   ## @param exclude_dirs - list of strings - optional
   ## a list of regular expressions used to blacklist directory names. 
