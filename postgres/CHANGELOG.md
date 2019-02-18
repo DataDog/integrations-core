@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 2.5.0 / 2019-02-18
+
+* [Added] Finish Python3 Support. See [#2949](https://github.com/DataDog/integrations-core/pull/2949).
+
 ## 2.4.0 / 2019-01-04
 
 * [Added] Bump psycopg2-binary version to 2.7.5. See [#2799][1].
