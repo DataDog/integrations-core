@@ -16,7 +16,7 @@ instances:
   ## @param keystone_server_url - string - required
   ## URL of your identity server. Note that the server must support Identity API v3
   #
-    keystone_server_url: https://<KEYSTON_ENDPOINT>:<PORT>/
+    keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
 
   ## @param user - object - required
   ## Password authentication is the only auth method supported
