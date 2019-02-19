@@ -94,8 +94,7 @@ def __get_latest_version(tuf_downloader, standard_distribution_name, wheel_distr
     target_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
 
     try:
-        # NOTE: We do not perform in-toto inspection for simple indices; only for
-        # wheels.
+        # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
         target_abspath = tuf_downloader.download(target_relpath, download_in_toto_metadata=False)
     except UnknownTargetError:
         raise NoSuchDatadogPackageException(standard_distribution_name)
