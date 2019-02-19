@@ -27,7 +27,7 @@ instances:
 
   ## @param status_check - boolean - optional - default: false
   ## This paramater instructs the check to send events on status changes in the backend. 
-  ## This is DEPRECATED in favor of the creation a monitor on the service check status 
+  ## This is DEPRECATED in favor of the creation of a monitor on the service check status 
   ## and will be removed in a future version.
   #
   #  status_check: false
@@ -41,13 +41,13 @@ instances:
   ## @param collect_status_metrics - boolean - optional - default: false
   ## This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
   # 
-  #  collect_status_metrics: False
+  #  collect_status_metrics: false
 
   ## @param collect_status_metrics_by_host - boolean - optional - default: false
   ## This parameter instructs the check to collect status metrics per host instead of per service.
-  ## This only applies if `collect_status_metrics` is True.
+  ## This only applies if `collect_status_metrics` is true.
   #
-  #  collect_status_metrics_by_host: False
+  #  collect_status_metrics_by_host: false
 
   ## @param collate_status_tags_per_host - boolean - optional - default: true
   ## This parameter collects `status` tags for `haproxy.count_per_status` up to one of 
