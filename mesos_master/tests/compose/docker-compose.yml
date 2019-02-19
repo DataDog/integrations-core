@@ -1,0 +1,47 @@
+version: "3.5"
+# References:
+# - https://github.com/bobrik/mesos-compose
+# - https://github.com/mesosphere/docker-containers/tree/master/mesos
+services:
+  zk:
+    image: bobrik/zookeeper
+    network_mode: host
+    environment:
+      ZK_CONFIG: tickTime=2000,initLimit=10,syncLimit=5,maxClientCnxns=128,forceSync=no,clientPort=2181
+      ZK_ID: 1
+
+  master:
+    image: mesosphere/mesos-master:1.0.1-2.0.93.ubuntu1404
+    network_mode: host
+    environment:
+      MESOS_ZK: zk://127.0.0.1:2181/mesos
+      MESOS_QUORUM: 1
+      MESOS_CLUSTER: docker-compose
+      MESOS_REGISTRY: replicated_log # default is in_memory for some reason
+      MESOS_HOSTNAME: 127.0.0.1
+      LIBPROCESS_IP: 127.0.0.1
+    ports:
+      - 5050:5050
+    depends_on:
+      - zk
+
+  slave:
+    image: mesosphere/mesos-slave:1.0.1-2.0.93.ubuntu1404
+    network_mode: host
+    pid: host
+    environment:
+      MESOS_MASTER: zk://127.0.0.1:2181/mesos
+      MESOS_CONTAINERIZERS: docker,mesos
+      MESOS_PORT: 5051
+      MESOS_RESOURCES: ports(*):[11000-11999]
+      MESOS_HOSTNAME: 127.0.0.1
+      LIBPROCESS_IP: 127.0.0.1
+      MESOS_WORK_DIR: /tmp/mesos
+    ports:
+      - 5051:5051
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+      - /usr/local/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zk
