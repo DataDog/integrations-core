@@ -2,12 +2,26 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import os
+
 import pytest
 import mock
 
 from datadog_checks.riakcs import RiakCs
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    compose_file = os.path.join(common.HERE, "compose", "docker-compose.yaml")
+    with docker_run(
+        compose_file=compose_file,
+        conditions=[CheckDockerLogs(compose_file, "INFO success: riak-cs entered RUNNING state", attempts=120)],
+    ):
+        yield common.generate_config_with_creds()
 
 
 @pytest.fixture
