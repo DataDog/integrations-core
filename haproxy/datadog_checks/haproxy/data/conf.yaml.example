@@ -96,7 +96,7 @@ instances:
   ## @param enable_service_check - boolean - optional - default: false
   ## Enable the Haproxy service check.
   # 
-  #  enable_service_check: False
+  #  enable_service_check: false
 
   ## @param tags_regex - string - optional
   ## This parameter instructs the check to use the defined named regex for creating 
