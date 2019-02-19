@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from io import open
 from tempfile import mkdtemp
 
+import yaml
 from six import PY3, text_type
 from six.moves.urllib.request import urlopen
 
@@ -180,6 +181,24 @@ def get_next(obj):
 
 def get_here():
     return get_parent_dir(inspect.currentframe().f_back.f_code.co_filename)
+
+
+def load_jmx_config():
+    root = get_parent_dir(inspect.currentframe().f_back.f_code.co_filename)
+    while True:
+        if file_exists(path_join(root, 'setup.py')):
+            break
+
+        new_root = os.path.dirname(root)
+        if new_root == root:
+            return {}
+
+        root = new_root
+
+    check = basepath(root)
+    jmx_config = path_join(root, 'datadog_checks', check, 'data', 'metrics.yaml')
+
+    return yaml.safe_load(read_file(jmx_config))
 
 
 @contextmanager
