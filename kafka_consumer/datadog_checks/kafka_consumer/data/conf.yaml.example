@@ -70,7 +70,7 @@ instances:
   #  zk_iteration_ival: 1
 
   ## @param zk_prefix - string - optional
-  ##
+  ## To construct the Zookeeper path pattern. 
   #  zk_prefix: /0.8
 
   ## @param consumer_groups - object - optional
@@ -97,7 +97,8 @@ instances:
     monitor_unlisted_consumer_groups: false
 
   ## @param kafka_consumer_offsets - boolean - optional - default: false
-  ##
+  ## Set to true if consumer offsets are stored within Kafka.
+  ## Set to false if consumer offsets are stored within Zookeeper.
   #
   #  kafka_consumer_offsets: false
 
