@@ -70,8 +70,10 @@ instances:
   #  zk_iteration_ival: 1
 
   ## @param zk_prefix - string - optional
-  ## To construct the Zookeeper path pattern. 
-  #  zk_prefix: /0.8
+  ## Zookeeper chroot prefix under which kafka data is living in zookeeper. 
+  ## If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
+  #
+  #  zk_prefix: <ZK_PREFIX>
 
   ## @param consumer_groups - object - optional
   ## Note that each level of values is optional (this is currently only available
@@ -97,8 +99,8 @@ instances:
     monitor_unlisted_consumer_groups: false
 
   ## @param kafka_consumer_offsets - boolean - optional - default: false
-  ## Set to true if consumer offsets are stored within Kafka.
-  ## Set to false if consumer offsets are stored within Zookeeper.
+  ## Set to true if consumer offsets data are stored within Kafka.
+  ## Set to false if consumer offsets data are stored within Zookeeper.
   #
   #  kafka_consumer_offsets: false
 
