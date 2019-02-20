@@ -1,0 +1,26 @@
+{
+	"name": "[cassandra] Node stopped receiving requests, might be DN.",
+	"type": "query alert",
+	"query": "avg(last_4h):sum:cassandra.latency.one_minute_rate{} by {cluster} <= 0",
+	"message": "Sometimes a Cassandra node might itself see the cluster as perfectly healthy but all other nodes and clients might actually see that node as DN. This will stop data from being routed to the affected node, effectively having the same effect as Cassandra having crashed.\n\nA restart of Cassandra should force a resync of the node.",
+	"tags": [
+		"service:cassandra"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+        "timeout_h": 0,
+        "silenced": {},
+		"include_tags": false,
+		"no_data_timeframe": null,
+		"new_host_delay": 3600,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"evaluation_delay": 3600,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 0
+		}
+	}
+}

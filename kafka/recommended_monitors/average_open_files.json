@@ -1,0 +1,26 @@
+{
+	"name": "[kafka][{{name}}] Kafka is running out of available file descriptors on {{host.name}}",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:kafka.open_files{} by {host,name} > 95000",
+	"message": "The kafka server probably needs to be restarted",
+	"tags": [
+        "service:kafka"
+    ],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": false,
+		"no_data_timeframe": null,
+		"require_full_window": true,
+		"new_host_delay": 300,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 95000,
+			"warning": 80000
+		}
+	}
+}

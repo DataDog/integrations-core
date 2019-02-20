@@ -1,0 +1,26 @@
+{
+	"name": "[cassandra][error] Cassandra is reporting a high number of exceptions in cluster {{name.name}}",
+	"type": "query alert",
+	"query": "change(avg(last_5m),last_5m):max:cassandra.exceptions.count{} by {name} > 10",
+	"message": "This should probably be investigated, try checking the logs for errors.\n",
+	"tags": [
+		"service:cassandra"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": false,
+		"no_data_timeframe": null,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 10,
+			"warning": 5
+		}
+	}
+}
