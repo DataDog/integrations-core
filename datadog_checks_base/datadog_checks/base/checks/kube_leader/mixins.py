@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from kubernetes import client, config
-
 try:
     import datadog_agent
 except ImportError:
@@ -11,6 +9,9 @@ except ImportError:
 
 from .. import AgentCheck
 from .record import ElectionRecord
+
+# Import lazily to reduce memory footprint
+client = config = None
 
 # Known names of the leader election annotation,
 # will be tried in the order of the list
@@ -41,6 +42,10 @@ class KubeLeaderElectionMixin(object):
         It reads the following agent configuration:
             kubernetes_kubeconfig_path: defaut is to use in-cluster config
         """
+        global client, config
+        if client is config is None:
+            import kubernetes import client, config  # noqa F401
+
         try:
             record = self._get_record(
                 config.get("record_kind", ""), config.get("record_name", ""), config.get("record_namespace", "")

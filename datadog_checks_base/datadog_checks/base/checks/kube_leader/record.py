@@ -5,7 +5,8 @@
 import json
 from datetime import datetime
 
-from kubernetes.config.dateutil import parse_rfc3339
+# Import lazily to reduce memory footprint
+parse_rfc3339 = None
 
 # If these fields are missing or empty, the service check
 # will fail inconditionnaly. Fields taken from
@@ -20,6 +21,10 @@ REQUIRED_FIELDS = [
 
 class ElectionRecord(object):
     def __init__(self, record_string):
+        global parse_rfc3339
+        if parse_rfc3339 is None:
+            from kubernetes.config.dateutil import parse_rfc3339  # noqa F401
+
         self._record = json.loads(record_string)
 
     def validate(self):
