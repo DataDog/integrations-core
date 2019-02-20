@@ -13,6 +13,7 @@ from .download import TUFDownloader
 # 3rd party.
 # NOTE: We assume that setuptools is installed by default.
 from pkg_resources import parse_version
+from tuf.exceptions import UnknownTargetError
 
 
 # Exceptions
@@ -39,6 +40,28 @@ class NonDatadogPackageException(Exception):
     def __str__(self):
         return '{} is not a Datadog package!'.format(self.standard_distribution_name)
 
+
+class NoSuchDatadogPackageException(Exception):
+
+
+    def __init__(self, standard_distribution_name):
+        self.standard_distribution_name = standard_distribution_name
+
+
+    def __str__(self):
+        return 'Could not find the {} package!'.format(self.standard_distribution_name)
+
+
+class NoSuchDatadogPackageOrVersionException(Exception):
+
+
+    def __init__(self, standard_distribution_name, version):
+        self.standard_distribution_name = standard_distribution_name
+        self.version = version
+
+
+    def __str__(self):
+        return 'Either no {} package, or {} version!'.format(self.standard_distribution_name, self.version)
 
 
 class SimpleIndexException(Exception):
@@ -69,9 +92,12 @@ class MissingVersionsException(Exception):
 
 def __get_latest_version(tuf_downloader, standard_distribution_name, wheel_distribution_name):
     target_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
-    # NOTE: We do not perform in-toto inspection for simple indices; only for
-    # wheels.
-    target_abspath = tuf_downloader.download(target_relpath, download_in_toto_metadata=False)
+
+    try:
+        # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
+        target_abspath = tuf_downloader.download(target_relpath, download_in_toto_metadata=False)
+    except UnknownTargetError:
+        raise NoSuchDatadogPackageException(standard_distribution_name)
 
     pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-py2\\.py3-none-any\\.whl)'>(.*?)</a><br />"
     versions = []
@@ -141,6 +167,10 @@ def download():
         target_relpath = 'simple/{}/{}-{}-py2.py3-none-any.whl'\
                          .format(standard_distribution_name,
                                  wheel_distribution_name, version)
-        target_abspath = tuf_downloader.download(target_relpath)
+
+        try:
+            target_abspath = tuf_downloader.download(target_relpath)
+        except UnknownTargetError:
+            raise NoSuchDatadogPackageOrVersionException(standard_distribution_name, version)
 
         print(target_abspath)
