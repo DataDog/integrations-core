@@ -19,7 +19,7 @@ def dd_environment():
     compose_file = os.path.join(common.HERE, "compose", "docker-compose.yaml")
     with docker_run(
         compose_file=compose_file,
-        conditions=[CheckDockerLogs(compose_file, "INFO success: riak-cs entered RUNNING state", attempts=120)],
+        conditions=[CheckDockerLogs("dd-test-riakcs", "INFO success: riak-cs entered RUNNING state", attempts=120)],
     ):
         yield common.generate_config_with_creds()
 
