@@ -42,10 +42,6 @@ class KubeLeaderElectionMixin(object):
         It reads the following agent configuration:
             kubernetes_kubeconfig_path: defaut is to use in-cluster config
         """
-        global client, config
-        if client is config is None:
-            import kubernetes import client, config  # noqa F401
-
         try:
             record = self._get_record(
                 config.get("record_kind", ""), config.get("record_name", ""), config.get("record_namespace", "")
@@ -56,6 +52,10 @@ class KubeLeaderElectionMixin(object):
 
     @staticmethod
     def _get_record(kind, name, namespace):
+        global client, config
+        if client is config is None:
+            from kubernetes import client, config  # noqa F401
+
         kubeconfig_path = datadog_agent.get_config('kubernetes_kubeconfig_path')
         if kubeconfig_path:
             config.load_kube_config(config_file=kubeconfig_path)

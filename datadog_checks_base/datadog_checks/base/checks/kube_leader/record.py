@@ -21,10 +21,6 @@ REQUIRED_FIELDS = [
 
 class ElectionRecord(object):
     def __init__(self, record_string):
-        global parse_rfc3339
-        if parse_rfc3339 is None:
-            from kubernetes.config.dateutil import parse_rfc3339  # noqa F401
-
         self._record = json.loads(record_string)
 
     def validate(self):
@@ -52,6 +48,10 @@ class ElectionRecord(object):
 
     @property
     def renew_time(self):
+        global parse_rfc3339
+        if parse_rfc3339 is None:
+            from kubernetes.config.dateutil import parse_rfc3339  # noqa F401
+
         try:
             return parse_rfc3339(self._record.get("renewTime"))
         except Exception:
@@ -59,6 +59,10 @@ class ElectionRecord(object):
 
     @property
     def acquire_time(self):
+        global parse_rfc3339
+        if parse_rfc3339 is None:
+            from kubernetes.config.dateutil import parse_rfc3339  # noqa F401
+
         try:
             return parse_rfc3339(self._record.get("acquireTime"))
         except Exception:
