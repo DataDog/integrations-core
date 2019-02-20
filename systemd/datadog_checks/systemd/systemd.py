@@ -107,7 +107,6 @@ class SystemdCheck(AgentCheck):
     def get_state_single_unit(self, unit_id):
         try:
             unit = Unit(unit_id, _autoload=True)
-            # self.log.info(str(unit_name))
             state = unit.Unit.ActiveState
             return state
         except pystemd.dbusexc.DBusInvalidArgsError as e:
@@ -116,7 +115,6 @@ class SystemdCheck(AgentCheck):
     def get_unit_state(self, unit_id):
         try:
             unit = Unit(unit_id, _autoload=True)
-            # self.log.info(str(unit_name))
             state = unit.Unit.ActiveState
             # Send a service check: OK if the unit is active, CRITICAL if inactive
             if state == b'active':
@@ -151,7 +149,6 @@ class SystemdCheck(AgentCheck):
 
     def get_number_processes(self, unit_id):
         systemctl_flags = ['status', unit_id]
-        tags=["unit:{}".format(unit_id)]
         try:
             output = get_subprocess_output(["systemctl"] + systemctl_flags, self.log)
             output_to_parse = output[0].split()

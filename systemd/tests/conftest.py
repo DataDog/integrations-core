@@ -24,8 +24,8 @@ def dd_environment():
 def instance_ko():
     return {
         'units': [
-				"nonexisting.service"
-			],
+            "nonexisting.service"
+        ],
         'collect_all_units': False
     }
 
@@ -33,7 +33,7 @@ def instance_ko():
 def instance():
     return {
         'units': [
-				"httpd.service"
+            "httpd.service"
 			],
         'collect_all_units': False
     }
@@ -42,13 +42,12 @@ def instance():
 def instance_collect_all():
     return {
         'units': [
-				"httpd.service"
+			"httpd.service"
 			],
-        'collect_all_units': True
+    'collect_all_units': True
     }
 
 
 @pytest.fixture
 def check():
     return SystemdCheck({"systemd", {}, {}})
-
