@@ -1,3 +1,98 @@
 # Default metrics collected by this check. You should not have to modify this.
 # See Cassandra metrics.yaml as an example
 # https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/metrics.yaml
+
+jmx_metrics:
+  - include:
+      bean: presto.execution:name=QueryManager
+      attribute:
+        - CpuInputByteRate.OneMinute.Avg
+        - CpuInputByteRate.OneMinute.Count
+        - CpuInputByteRate.OneMinute.Max
+        - CpuInputByteRate.OneMinute.MaxError
+        - CpuInputByteRate.OneMinute.Min
+        - CpuInputByteRate.OneMinute.P75
+        - CpuInputByteRate.OneMinute.P95
+        - CpuInputByteRate.OneMinute.Total
+        - ConsumedCpuTimeSecs.OneMinute.Count
+        - ConsumedCpuTimeSecs.OneMinute.Rate
+        - ConsumedCpuTimeSecs.TotalCount
+        - RunningQueries
+        - StartedQueries.OneMinute.Count
+        - StartedQueries.OneMinute.Rate
+        - StartedQueries.TotalCount
+        - ExecutionTime.OneMinute.P95
+        - ExecutionTime.OneMinute.P75
+        - ExecutionTime.OneMinute.Avg
+        - ExecutionTime.OneMinute.Max
+        - ExecutionTime.OneMinute.Min
+        - ExecutionTime.AllTime.Avg
+        - ExecutionTime.AllTime.Count
+        - ExecutionTime.AllTime.Max
+        - ExecutionTime.AllTime.Min
+        - ExecutionTime.AllTime.P75
+        - ExecutionTime.AllTime.P95
+        - FailedQueries.TotalCount
+        - FailedQueries.OneMinute.Count
+        - FailedQueries.OneMinute.Rate
+        - InternalFailures.TotalCount
+        - InternalFailures.OneMinute.Count
+        - InternalFailures.OneMinute.Rate
+        - ExternalFailures.OneMinute.Count
+        - ExternalFailures.OneMinute.Rate
+        - ExternalFailures.TotalCount
+        - UserErrorFailures.TotalCount
+        - UserErrorFailures.OneMinute.Count
+        - UserErrorFailures.OneMinute.Rate
+        - CanceledQueries.OneMinute.Rate
+        - CanceledQueries.TotalCount
+        - CanceledQueries.OneMinute.Count
+        - CompletedQueries.TotalCount
+        - CompletedQueries.OneMinute.Count
+        - WallInputBytesRate.OneMinute.Avg
+        - WallInputBytesRate.OneMinute.Max
+        - WallInputBytesRate.OneMinute.Min
+        - WallInputBytesRate.OneMinute.MaxError
+        - WallInputBytesRate.OneMinute.P75
+        - WallInputBytesRate.OneMinute.P95
+  - include:
+      bean: presto.execution.executor:name=TaskExecutor
+      attribute:
+        - ProcessorExecutor.CompletedTaskCount
+  - include:
+      bean: presto.execution:name=TaskManager
+      attribute:
+        - InputDataSize.OneMinute.Count
+        - InputDataSize.OneMinute.Rate
+        - InputDataSize.TotalCount
+        - InputPositions.OneMinute.Count
+        - InputPositions.OneMinute.Rate
+        - InputPositions.TotalCount
+  - include:
+      bean:
+        - presto.failureDetector:name=HeartbeatFailureDetector
+      attribute:
+        - ActiveCount
+  - include:
+      domain: presto.memory
+      attribute:
+        - FreeBytes
+        - MaxBytes
+        - ReservedBytes
+        - ReservedRevocableBytes
+        - AssignedQueries
+        - BlockedNodes
+        - FreeDistributedBytes
+        - Nodes
+        - ReservedDistributedBytes
+        - ReservedRevocableDistributedBytes
+        - TotalDistributedBytes
+  - include:
+      bean:
+        - presto.metadata:name=DiscoveryNodeManager
+      attribute:
+        - ActiveNodeCount
+  - include:
+      bean: presto.server.remotetask:name=RemoteTaskStats
+      attribute:
+        - RequestFailure
