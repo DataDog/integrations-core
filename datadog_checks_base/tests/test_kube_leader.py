@@ -14,6 +14,12 @@ from kubernetes.client import ApiClient
 from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecord
 
+# Trigger lazy imports
+try:
+    KubeLeaderElectionBaseCheck().check({})
+except Exception:
+    pass
+
 
 RAW_VALID_RECORD = (
     '{"holderIdentity":"dd-cluster-agent-568f458dd6-kj6vt",'
