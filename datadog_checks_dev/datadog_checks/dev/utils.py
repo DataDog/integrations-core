@@ -191,7 +191,7 @@ def load_jmx_config():
 
         new_root = os.path.dirname(root)
         if new_root == root:
-            return {}
+            raise OSError('No check found')
 
         root = new_root
 
