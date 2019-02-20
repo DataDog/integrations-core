@@ -25,6 +25,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 REQUIRES = [
     'coverage>=4.5.1',
     'mock',
+    'PyYAML>=3.13',
     'pytest',
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
@@ -78,7 +79,6 @@ setup(
             'pip-tools',
             'pylint',
             'pyperclip>=1.7.0',
-            'PyYAML>=3.13',
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',
