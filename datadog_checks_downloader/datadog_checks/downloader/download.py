@@ -40,6 +40,12 @@ logging.config.dictConfig({
 # The module is expected to live here.
 from .parameters import substitute
 
+# Exceptions.
+from .exceptions import (
+    NoInTotoLinkMetadataFound,
+    NoInTotoRootLayoutPublicKeysFound,
+)
+
 
 # CONSTANTS.
 here = os.path.abspath(os.path.dirname(__file__))
@@ -58,31 +64,6 @@ REPOSITORY_MIRRORS = {
 
 # Global variables.
 logger = logging.getLogger(__name__)
-
-
-class TUFInTotoError(Exception):
-
-
-    def __init__(self, target_relpath):
-        self.target_relpath = target_relpath
-
-
-    def __str__(self):
-        return 'Unexpected tuf-in-toto error for {}!'.format(self.target_relpath)
-
-
-class NoInTotoLinkMetadataFound(TUFInTotoError):
-
-
-    def __str__(self):
-        return 'in-toto link metadata expected, but not found for {}!'.format(self.target_relpath)
-
-
-class NoInTotoRootLayoutPublicKeysFound(TUFInTotoError):
-
-
-    def __str__(self):
-        return 'in-toto root layout public keys expected, but not found for {}!'.format(self.target_relpath)
 
 
 class TUFDownloader:
