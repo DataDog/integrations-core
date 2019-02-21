@@ -17,7 +17,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'systemd.yaml')
     ):
-    yield {'units': ['networking.service']}
+    yield CONFIG
 
 
 @pytest.fixture

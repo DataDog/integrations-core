@@ -5,7 +5,7 @@
 import pytest
 
 from datadog_checks.systemd.systemd import (
-    get_all_units, get_active_inactive_units
+    get_all_units, get_active_inactive_units, get_number_processes
 )
 
 @pytest.fixture
@@ -24,8 +24,15 @@ def test_cache():
 
 
 @pytest.mark.unit
-def test_collect_all(aggregator, check, instance):
+def test_collect_all():
     # check that we are getting both inactive and active units
     all_unit_state = get_active_inactive_units()
     aggregator.assert_metric('systemd.units.active')
     aggregator.assert_metric('systemd.units.inactive')
+
+
+@pytest.mark.unit
+def test_get_number_processes():
+    # check we are getting at least one process for a given unit that is active
+    number_processes = get_number_processes()
+    assert number_processes >= 1
