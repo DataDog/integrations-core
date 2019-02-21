@@ -72,6 +72,8 @@ jobs:
     - stage: test
       env: CHECK=datadog_checks_dev PYTHON3=true
     - stage: test
+      env: CHECK=datadog_checks_downloader PYTHON3=true
+    - stage: test
       env: CHECK=active_directory PYTHON3=true
     - stage: test
       env: CHECK=activemq_xml PYTHON3=true
