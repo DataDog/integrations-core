@@ -24,7 +24,7 @@ instances:
   ##
   ## This matches all services starting with service, as if service.* is configured.
   ## For an exact match, use ^service$
-  
+  #
   - services:
       - <SERVICE_NAME_1>
       - <SERVICE_NAME_2>
