@@ -58,6 +58,7 @@ instances:
     #   - thisqueue-.*
     #   - another_\d+queue
     #   - (lepidorae)-\d+   # to tag queues in the lepidorae queue_family
+    #   - ^((?!errors|aliveness).)*$   # exclude queues with 'errors' or 'aliveness'
     
     # Use the `exchanges` or `exchanges_regexes` parameters to specify the exchanges you'd like to
     # collect metrics on (up to 50 exchanges).

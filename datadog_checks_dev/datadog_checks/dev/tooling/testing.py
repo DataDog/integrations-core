@@ -124,6 +124,8 @@ def coverage_sources(check):
         package_path = 'datadog_checks/base'
     elif check == 'datadog_checks_dev':
         package_path = 'datadog_checks/dev'
+    elif check == 'datadog_checks_downloader':
+        package_path = 'datadog_checks/downloader'
     else:
         package_path = 'datadog_checks/{}'.format(check)
 

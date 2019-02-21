@@ -25,6 +25,6 @@ INSTANCE = {
         'truncate_lut',
         'memory_data_bytes',
     ],
-    'namespaces': {'test'},
+    'namespaces': ['test'],
     'tags': ['tag:value'],
 }

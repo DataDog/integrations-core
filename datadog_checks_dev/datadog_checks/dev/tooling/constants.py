@@ -40,7 +40,6 @@ BETA_PACKAGES = {
 
 NOT_CHECKS = {
     'datadog_checks_dev',
-    'datadog_checks_downloader',
 }
 
 # If a file changes in a PR with any of these file extensions,
