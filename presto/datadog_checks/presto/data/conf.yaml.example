@@ -20,7 +20,7 @@ instances:
   ## @param port - integer - required
   ## Presto port to connect to
   #
-    port: 7199
+    port: 9999
 
   ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric and service check emitted by this integration.
@@ -28,13 +28,14 @@ instances:
   ##   - if the environment information (eg 'prod' or 'test') is included in the <node_environment>, just use <node_environment>.
   ##   - otherwise it's good to add the information to the 'environment' tag (eg 'prod-<node_environment>').
   ## This will prevent aggregation of metrics from like-named clusters in distinct environments.
-  ## The 'node_type' tag should be the Presto server type (coordinator or worker).
+  ## The 'node_type' tag should be the Presto server type (coordinator or worker) to differentiate metrics
+  ## collected from each instance type.
   ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
   #    - environment: <NODE_ENVIRONMENT>
-  #    - node_type: <NODE_TYPE>   # coordinator or worker
+  #    - node_type: <NODE_TYPE>   # e.g. coordinator or worker
 
   ## @param user - string - optional
   ##
@@ -42,24 +43,24 @@ instances:
   #  user: <USERNAME>
 
   ## @param password - string - optional
-  ## XXXXXXXXXXX
+  ##
   #
   #  password: <PASSWORD>
 
   ## @param process_name_regex - string - optional
-  ## XXXXXXXXXXX
+  ## Instead of specifying a host, and port. The agent can connect using the attach api.
+  ## This requires the JDK to be installed and the path to tools.jar to be set below.
+  ## Note: It needs to be set when process_name_regex parameter is set
+  ##
   #
   #  process_name_regex: .*process_name.*
 
   ## @param tools_jar_path - string - optional
-  ## Instead of specifying a host, and port. The agent can connect using the attach api.
-  ## This requires the JDK to be installed and the path to tools.jar to be set below.
-  ## Note: It needs to be set when process_name_regex parameter is set
   #
   #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
   ## @param name - string - optional
-  ## XXXXXXXXXXX
+  ##
   #
   #   name: coordinator_instance
 
@@ -107,8 +108,124 @@ instances:
   ## Agent 5: Customize all your metrics below
   ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
 
-  conf:
-    - include:
+    conf:
+      - include:
+          bean: presto.execution:name=QueryManager
+          attribute:
+            - AbandonedQueries.OneMinute.Count
+            - AbandonedQueries.OneMinute.Rate
+            - AbandonedQueries.TotalCount
+            - CanceledQueries.OneMinute.Count
+            - CanceledQueries.OneMinute.Rate
+            - CanceledQueries.TotalCount
+            - CompletedQueries.OneMinute.Count
+            - CompletedQueries.OneMinute.Rate
+            - CompletedQueries.TotalCount
+            - ConsumedCpuTimeSecs.OneMinute.Count
+            - ConsumedCpuTimeSecs.OneMinute.Rate
+            - ConsumedCpuTimeSecs.TotalCount
+            - CpuInputByteRate.AllTime.Avg
+            - CpuInputByteRate.AllTime.P75
+            - CpuInputByteRate.AllTime.P95
+            - CpuInputByteRate.OneMinute.Avg
+            - CpuInputByteRate.OneMinute.Count
+            - CpuInputByteRate.OneMinute.Max
+            - CpuInputByteRate.OneMinute.Min
+            - CpuInputByteRate.OneMinute.P75
+            - CpuInputByteRate.OneMinute.P95
+            - CpuInputByteRate.OneMinute.Total
+            - ExecutionTime.AllTime.Avg
+            - ExecutionTime.AllTime.Count
+            - ExecutionTime.AllTime.Max
+            - ExecutionTime.AllTime.Min
+            - ExecutionTime.AllTime.P75
+            - ExecutionTime.AllTime.P95
+            - ExecutionTime.OneMinute.Avg
+            - ExecutionTime.OneMinute.Max
+            - ExecutionTime.OneMinute.Min
+            - ExecutionTime.OneMinute.P75
+            - ExecutionTime.OneMinute.P95
+            - Executor.ActiveCount
+            - Executor.CompletedTaskCount
+            - Executor.CorePoolSize
+            - Executor.PoolSize
+            - Executor.QueuedTaskCount
+            - Executor.TaskCount
+            - ExternalFailures.OneMinute.Count
+            - ExternalFailures.OneMinute.Rate
+            - ExternalFailures.TotalCount
+            - FailedQueries.OneMinute.Count
+            - FailedQueries.OneMinute.Rate
+            - FailedQueries.TotalCount
+            - InsufficientResourcesFailures.OneMinute.Count
+            - InsufficientResourcesFailures.OneMinute.Rate
+            - InsufficientResourcesFailures.TotalCount
+            - InternalFailures.OneMinute.Count
+            - InternalFailures.OneMinute.Rate
+            - InternalFailures.TotalCount
+            - ManagementExecutor.ActiveCount
+            - ManagementExecutor.CompletedTaskCount
+            - ManagementExecutor.QueuedTaskCount
+            - RunningQueries
+            - StartedQueries.OneMinute.Count
+            - StartedQueries.OneMinute.Rate
+            - StartedQueries.TotalCount
+            - UserErrorFailures.OneMinute.Count
+            - UserErrorFailures.OneMinute.Rate
+            - UserErrorFailures.TotalCount
+            - WallInputBytesRate.OneMinute.Avg
+            - WallInputBytesRate.OneMinute.Max
+            - WallInputBytesRate.OneMinute.Min
+            - WallInputBytesRate.OneMinute.P75
+            - WallInputBytesRate.OneMinute.P95
+      - include:
+          bean: presto.execution.executor:name=TaskExecutor
+          attribute:
+            - BlockedSplits
+            - ProcessorExecutor.QueuedTaskCount
+            - RunningSplits
+            - TotalSplits
+            - WaitingSplits
+
+      - include:
+          bean: presto.execution:name=TaskManager
+          attribute:
+            - InputDataSize.OneMinute.Count
+            - InputDataSize.OneMinute.Rate
+            - InputDataSize.TotalCount
+            - InputPositions.OneMinute.Count
+            - InputPositions.OneMinute.Rate
+            - InputPositions.TotalCount
+            - OutputDataSize.OneMinute.Count
+            - OutputDataSize.OneMinute.Rate
+            - OutputDataSize.TotalCount
+            - OutputPositions.OneMinute.Count
+            - OutputPositions.OneMinute.Rate
+            - OutputPositions.TotalCount
+            - TaskNotificationExecutor.ActiveCount
+            - TaskNotificationExecutor.CompletedTaskCount
+            - TaskNotificationExecutor.PoolSize
+            - TaskNotificationExecutor.QueuedTaskCount
+      - include:
+          bean:
+            - presto.failureDetector:name=HeartbeatFailureDetector
+          attribute:
+            - ActiveCount
+      - include:
+          domain: presto.memory
+          attribute:
+            - AssignedQueries
+            - BlockedNodes
+            - ClusterMemoryBytes
+            - FreeBytes
+            - FreeDistributedBytes
+            - MaxBytes
+            - Nodes
+            - ReservedBytes
+            - ReservedDistributedBytes
+            - ReservedRevocableBytes
+            - ReservedRevocableDistributedBytes
+            - TotalDistributedBytes
 
 ## Log Section (Available for Agent >=6.0)
 ##
@@ -129,5 +246,3 @@ instances:
 #     source: presto
 #     sourcecategory: database
 #     service: myapplication
-
-
