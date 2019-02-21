@@ -81,10 +81,11 @@ def start(ctx, check, env, agent, dev, base):
     agent_ver = ctx.obj.get('agent{}'.format(agent), agent)
     if isinstance(agent_ver, string_types):
         agent_build = agent_ver
-        echo_warning(
-            'Agent fields missing from ddev config, please update to the latest config, '
-            'falling back to latest docker image...'
-        )
+        if agent_ver != agent:
+            echo_warning(
+                'Agent fields missing from ddev config, please update to the latest config via '
+                '`ddev config update`, falling back to latest docker image...'
+            )
     else:
         agent_build = agent_ver.get(env_type, env_type)
 
