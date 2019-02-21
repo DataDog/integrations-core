@@ -46,6 +46,8 @@ def get_package_name(folder_name):
     """
     if folder_name == 'datadog_checks_base':
         return 'datadog-checks-base'
+    elif folder_name == 'datadog_checks_downloader':
+        return 'datadog-checks-downloader'
 
     return '{}{}'.format(DATADOG_PACKAGE_PREFIX, folder_name.replace('_', '-'))
 
@@ -57,6 +59,8 @@ def get_folder_name(package_name):
     """
     if package_name == 'datadog-checks-base':
         return 'datadog_checks_base'
+    elif package_name == 'datadog-checks-downloader':
+        return 'datadog_checks_downloader'
 
     return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX):]
 
@@ -68,8 +72,8 @@ def get_agent_requirement_line(check, version):
     """
     package_name = get_package_name(check)
 
-    # base check has no manifest
-    if check == 'datadog_checks_base':
+    # no manifest
+    if check in ('datadog_checks_base', 'datadog_checks_downloader'):
         return '{}=={}'.format(package_name, version)
 
     m = load_manifest(check)
