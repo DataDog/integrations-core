@@ -6,59 +6,81 @@ jmx_metrics:
   - include:
       bean: presto.execution:name=QueryManager
       attribute:
+        - AbandonedQueries.OneMinute.Count
+        - AbandonedQueries.OneMinute.Rate
+        - AbandonedQueries.TotalCount
+        - CanceledQueries.OneMinute.Count
+        - CanceledQueries.OneMinute.Rate
+        - CanceledQueries.TotalCount
+        - CompletedQueries.OneMinute.Count
+        - CompletedQueries.OneMinute.Rate
+        - CompletedQueries.TotalCount
+        - ConsumedCpuTimeSecs.OneMinute.Count
+        - ConsumedCpuTimeSecs.OneMinute.Rate
+        - ConsumedCpuTimeSecs.TotalCount
+        - CpuInputByteRate.AllTime.Avg
+        - CpuInputByteRate.AllTime.P75
+        - CpuInputByteRate.AllTime.P95
         - CpuInputByteRate.OneMinute.Avg
         - CpuInputByteRate.OneMinute.Count
         - CpuInputByteRate.OneMinute.Max
-        - CpuInputByteRate.OneMinute.MaxError
         - CpuInputByteRate.OneMinute.Min
         - CpuInputByteRate.OneMinute.P75
         - CpuInputByteRate.OneMinute.P95
         - CpuInputByteRate.OneMinute.Total
-        - ConsumedCpuTimeSecs.OneMinute.Count
-        - ConsumedCpuTimeSecs.OneMinute.Rate
-        - ConsumedCpuTimeSecs.TotalCount
-        - RunningQueries
-        - StartedQueries.OneMinute.Count
-        - StartedQueries.OneMinute.Rate
-        - StartedQueries.TotalCount
-        - ExecutionTime.OneMinute.P95
-        - ExecutionTime.OneMinute.P75
-        - ExecutionTime.OneMinute.Avg
-        - ExecutionTime.OneMinute.Max
-        - ExecutionTime.OneMinute.Min
         - ExecutionTime.AllTime.Avg
         - ExecutionTime.AllTime.Count
         - ExecutionTime.AllTime.Max
         - ExecutionTime.AllTime.Min
         - ExecutionTime.AllTime.P75
         - ExecutionTime.AllTime.P95
-        - FailedQueries.TotalCount
-        - FailedQueries.OneMinute.Count
-        - FailedQueries.OneMinute.Rate
-        - InternalFailures.TotalCount
-        - InternalFailures.OneMinute.Count
-        - InternalFailures.OneMinute.Rate
+        - ExecutionTime.OneMinute.Avg
+        - ExecutionTime.OneMinute.Max
+        - ExecutionTime.OneMinute.Min
+        - ExecutionTime.OneMinute.P75
+        - ExecutionTime.OneMinute.P95
+        - Executor.ActiveCount
+        - Executor.CompletedTaskCount
+        - Executor.CorePoolSize
+        - Executor.PoolSize
+        - Executor.QueuedTaskCount
+        - Executor.TaskCount
         - ExternalFailures.OneMinute.Count
         - ExternalFailures.OneMinute.Rate
         - ExternalFailures.TotalCount
-        - UserErrorFailures.TotalCount
+        - FailedQueries.OneMinute.Count
+        - FailedQueries.OneMinute.Rate
+        - FailedQueries.TotalCount
+        - InsufficientResourcesFailures.OneMinute.Count
+        - InsufficientResourcesFailures.OneMinute.Rate
+        - InsufficientResourcesFailures.TotalCount
+        - InternalFailures.OneMinute.Count
+        - InternalFailures.OneMinute.Rate
+        - InternalFailures.TotalCount
+        - ManagementExecutor.ActiveCount
+        - ManagementExecutor.CompletedTaskCount
+        - ManagementExecutor.QueuedTaskCount
+        - RunningQueries
+        - StartedQueries.OneMinute.Count
+        - StartedQueries.OneMinute.Rate
+        - StartedQueries.TotalCount
         - UserErrorFailures.OneMinute.Count
         - UserErrorFailures.OneMinute.Rate
-        - CanceledQueries.OneMinute.Rate
-        - CanceledQueries.TotalCount
-        - CanceledQueries.OneMinute.Count
-        - CompletedQueries.TotalCount
-        - CompletedQueries.OneMinute.Count
+        - UserErrorFailures.TotalCount
         - WallInputBytesRate.OneMinute.Avg
         - WallInputBytesRate.OneMinute.Max
         - WallInputBytesRate.OneMinute.Min
-        - WallInputBytesRate.OneMinute.MaxError
         - WallInputBytesRate.OneMinute.P75
         - WallInputBytesRate.OneMinute.P95
   - include:
       bean: presto.execution.executor:name=TaskExecutor
       attribute:
-        - ProcessorExecutor.CompletedTaskCount
+        - BlockedSplits
+        - ProcessorExecutor.QueuedTaskCount
+        - RunningSplits
+        - TotalSplits
+        - WaitingSplits
+
   - include:
       bean: presto.execution:name=TaskManager
       attribute:
@@ -68,6 +90,16 @@ jmx_metrics:
         - InputPositions.OneMinute.Count
         - InputPositions.OneMinute.Rate
         - InputPositions.TotalCount
+        - OutputDataSize.OneMinute.Count
+        - OutputDataSize.OneMinute.Rate
+        - OutputDataSize.TotalCount
+        - OutputPositions.OneMinute.Count
+        - OutputPositions.OneMinute.Rate
+        - OutputPositions.TotalCount
+        - TaskNotificationExecutor.ActiveCount
+        - TaskNotificationExecutor.CompletedTaskCount
+        - TaskNotificationExecutor.PoolSize
+        - TaskNotificationExecutor.QueuedTaskCount
   - include:
       bean:
         - presto.failureDetector:name=HeartbeatFailureDetector
@@ -76,23 +108,15 @@ jmx_metrics:
   - include:
       domain: presto.memory
       attribute:
-        - FreeBytes
-        - MaxBytes
-        - ReservedBytes
-        - ReservedRevocableBytes
         - AssignedQueries
         - BlockedNodes
+        - ClusterMemoryBytes
+        - FreeBytes
         - FreeDistributedBytes
+        - MaxBytes
         - Nodes
+        - ReservedBytes
         - ReservedDistributedBytes
+        - ReservedRevocableBytes
         - ReservedRevocableDistributedBytes
         - TotalDistributedBytes
-  - include:
-      bean:
-        - presto.metadata:name=DiscoveryNodeManager
-      attribute:
-        - ActiveNodeCount
-  - include:
-      bean: presto.server.remotetask:name=RemoteTaskStats
-      attribute:
-        - RequestFailure
