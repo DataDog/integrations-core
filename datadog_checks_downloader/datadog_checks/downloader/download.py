@@ -10,9 +10,11 @@ import os
 import shutil
 import tempfile
 
-# Turn off TUF file logging.
 import tuf.settings
+# Turn off TUF file logging.
 tuf.settings.ENABLE_FILE_LOGGING = False
+# Increase requests timeout.
+tuf.settings.SOCKET_TIMEOUT = 60
 
 # Import what we need from TUF.
 from tuf.client.updater import Updater
