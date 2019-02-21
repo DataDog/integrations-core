@@ -852,7 +852,8 @@ class MySql(AgentCheck):
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute("SHOW BINARY LOGS;")
-                master_logs = dict(cursor.fetchall())
+                cursor_results = cursor.fetchall()
+                master_logs = {result[0]: result[1] for result in cursor_results}
 
                 binary_log_space = 0
                 for key, value in iteritems(master_logs):
