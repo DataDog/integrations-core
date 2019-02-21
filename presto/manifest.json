@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "presto",
   "metric_prefix": "presto.",
-  "metric_to_check": "presto.metadata.active_node_count",
+  "metric_to_check": "presto.failure_detector.active_count",
   "creates_events": false,
   "short_description": "Collects performance and usage stats on PrestoSQL cluster, and much more.",
   "guid": "a05766fc-8760-464b-9e5d-a784500b7b90",
