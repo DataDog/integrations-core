@@ -1,6 +1,6 @@
 # Default metrics collected by this check. You should not have to modify this.
-# See Cassandra metrics.yaml as an example
-# https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/metrics.yaml
+# See presto metrics.yaml as an example
+# https://github.com/DataDog/integrations-core/blob/master/presto/datadog_checks/presto/data/metrics.yaml
 
 jmx_metrics:
   - include:
