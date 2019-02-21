@@ -1,14 +1,31 @@
 init_config:
 
 instances:
-  # To enable Istio metrics you must specify the url exposing the API
+
+  ## @param istio_mesh_endpoint - string - required
+  ## To enable Istio metrics you must specify the url exposing the API
+  ##
+  ## Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
+  ## the CPP extension to process Protocol buffer messages coming from the api. Depending
+  ## on the metrics volume, the check may run very slowly.
   #
-  # Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
-  # the CPP extension to process Protocol buffer messages coming from the api. Depending
-  # on the metrics volume, the check may run very slowly.
   - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+
+  ## @param mixer_endpoint - string - required
+  ## 
+  #
     mixer_endpoint: http://istio-telemetry.istio-system:9093/metrics
+
+  ## @param send_histograms_buckets - boolean - required
+  ##
+  #
     send_histograms_buckets: true
-    # tags:
-    #   - optional_tag1
-    #   - optional_tag2
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
