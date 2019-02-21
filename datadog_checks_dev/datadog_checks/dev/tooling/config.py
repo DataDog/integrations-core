@@ -95,6 +95,19 @@ def restore_config():
 def update_config():
     config = copy_default_config()
     config.update(load_config())
+
+    # Support legacy config where agent5 and agent6 were strings
+    if isinstance(config['agent6'], string_types):
+        config['agent6'] = OrderedDict((
+            ('docker', config['agent6']),
+            ('local', 'latest'),
+        ))
+    if isinstance(config['agent5'], string_types):
+        config['agent5'] = OrderedDict((
+            ('docker', config['agent5']),
+            ('local', 'latest'),
+        ))
+
     save_config(config)
     return config
 
