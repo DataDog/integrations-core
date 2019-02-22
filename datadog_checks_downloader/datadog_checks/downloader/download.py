@@ -166,7 +166,6 @@ class TUFDownloader:
     def __verify_in_toto_metadata(self, target_relpath, in_toto_metadata_relpaths, pubkey_relpaths):
         # Make a temporary directory.
         tempdir = tempfile.mkdtemp()
-        prev_cwd = os.getcwd()
 
         try:
             # Copy files over into temp dir.
@@ -192,8 +191,8 @@ class TUFDownloader:
             logger.exception('in-toto failed to verify {}'.format(target_relpath))
             raise
         finally:
-            os.chdir(prev_cwd)
-            # Delete temp dir.
+            # NOTE: No need to switch back to previous cwd, because we do not
+            # need it for anything else, but do delete the temp dir.
             shutil.rmtree(tempdir)
 
 
