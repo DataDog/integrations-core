@@ -77,12 +77,10 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
                       [tags] varchar(255) \
                     ) \
                     SET NOCOUNT ON; \
-                    INSERT INTO #Datadog (metric, type, value, tags) \
-                        VALUES ("sql.sp.testa", "gauge", 100, "{1}"); \
-                    INSERT INTO #Datadog (metric, type, value, tags) \
-                        VALUES ("sql.sp.testb", "gauge", 1, "{1}"); \
-                    INSERT INTO #Datadog (metric, type, value, tags) \
-                        VALUES ("sql.sp.testb", "gauge", 2, "{1}"); \
+                    INSERT INTO #Datadog (metric, type, value, tags) VALUES \
+                        ("sql.sp.testa", "gauge", 100, "{1}"), \
+                        ("sql.sp.testb", "gauge", 1, "{1}"), \
+                        ("sql.sp.testb", "gauge", 2, "{1}"); \
                     SELECT * FROM #Datadog; \
                 END;'.format(proc, sp_tags)
     cursor.execute(sqlCreateSP)
