@@ -1,1 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+systemd.units.active,gauge
+systemd.units.inactive,gauge
+systemd.unit.processes,gauge

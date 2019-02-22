@@ -15,7 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'systemd.yaml')
+        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml')
     ):
     yield CONFIG
 

@@ -1,0 +1,13 @@
+version: '3.5'
+
+services:
+  systemd:
+    image: centos-systemd-unit-httpd:1.0
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    command: "/usr/sbin/init"
