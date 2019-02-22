@@ -60,6 +60,24 @@ class Package:
         except (AttributeError, TypeError):
             return NotImplemented
 
+    def __ne__(self, other):
+        eq = self.__eq__(other)
+        if eq != NotImplemented:
+            return not eq
+        return NotImplemented
+
+    def __le__(self, other):
+        gt = self.__gt__(other)
+        if gt != NotImplemented:
+            return not gt
+        return NotImplemented
+
+    def __ge__(self, other):
+        lt = self.__lt__(other)
+        if lt != NotImplemented:
+            return not lt
+        return NotImplemented
+
     def __hash__(self):
         return hash((self.name, self.version, self.marker))
 
