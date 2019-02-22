@@ -8,9 +8,9 @@ import re
 from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime, timedelta
+import json
 
 import requests
-import ijson
 from kubernetes.config.dateutil import parse_rfc3339, UTC
 
 from datadog_checks.checks import AgentCheck
@@ -65,6 +65,45 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
 
 
 log = logging.getLogger('collector')
+
+
+class ExpiredPodFilter(object):
+    """
+    Allows to filter old pods out of the podlist by providing a decoding hook
+    """
+    def __init__(self, cutoff_date):
+        self.expired_count = 0
+        self.cutoff_date = cutoff_date
+
+    def json_hook(self, pod):
+        # Not a pod (hook is called for all objects)
+        if 'metadata' not in pod or 'status' not in pod:
+            return pod
+
+        # Quick exit for running/pending containers
+        pod_phase = pod.get('status', {}).get('phase')
+        if pod_phase in ["Running", "Pending"]:
+            return pod
+
+        # Filter out expired terminated pods, based on container finishedAt time
+        expired = True
+        for ctr in pod['status'].get('containerStatuses', []):
+            if "terminated" not in ctr.get("state", {}):
+                expired = False
+                break
+            finishedTime = ctr["state"]["terminated"].get("finishedAt")
+            if not finishedTime:
+                expired = False
+                break
+            if parse_rfc3339(finishedTime) > self.cutoff_date:
+                expired = False
+                break
+        if not expired:
+            return pod
+
+        # We are ignoring this pod
+        self.expired_count += 1
+        return None
 
 
 class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, CadvisorScraper):
@@ -217,40 +256,18 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     def retrieve_pod_list(self):
         try:
-            pods = []
-            expired_count = 0
+            podlist_stream = self.perform_kubelet_query(self.pod_list_url, stream=True)
             cutoff_date = self._compute_pod_expiration_datetime()
-            podlist_contents = self.perform_kubelet_query(self.pod_list_url, stream=True)
 
-            for pod in ijson.items(podlist_contents.raw, 'items.item'):
-                pod_phase = pod.get('status', {}).get('phase')
-
-                # Quick exit for running/pending containers or if expiration is disabled
-                if not cutoff_date or pod_phase in ["Running", "Pending"]:
-                    pods.append(pod)
-                    continue
-
-                # Filter out expired terminated pods, based on container finishedAt time
-                expired = True
-                for ctr in pod['status'].get('containerStatuses', []):
-                    if "terminated" not in ctr.get("state", {}):
-                        expired = False
-                        break
-                    finishedTime = ctr["state"]["terminated"].get("finishedAt")
-                    if not finishedTime:
-                        expired = False
-                        break
-                    if parse_rfc3339(finishedTime) > cutoff_date:
-                        expired = False
-                        break
-                if not expired:
-                    pods.append(pod)
-                    continue
-
-                # We are ignoring this pod
-                expired_count += 1
-
-            return {'items': pods, 'expired_count': expired_count}
+            if cutoff_date:
+                f = ExpiredPodFilter(cutoff_date)
+                podlist = json.load(podlist_stream.raw, object_hook=f.json_hook)
+                # Wrap items in a generator to filter our None items
+                podlist['items'] = (p for p in podlist['items'] if p is not None)
+                podlist['expired_count'] = f.expired_count
+            else:
+                podlist = json.load(podlist_stream.raw)
+            return podlist
         except Exception as e:
             self.log.debug('failed to retrieve pod list from the kubelet at %s : %s'
                            % (self.pod_list_url, str(e)))

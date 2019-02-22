@@ -1,3 +1,1 @@
-ijson==2.3
-cffi==1.11.5
 kubernetes==8.0.1
