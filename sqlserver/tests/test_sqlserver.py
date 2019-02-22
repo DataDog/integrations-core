@@ -53,7 +53,7 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
         instance_docker['password'],)
     conn = pyodbc.connect(conn_str, timeout=30)
 
-    # # Create cursor associated with connection
+    # Create cursor associated with connection
     cursor = conn.cursor()
 
     # Stored Procedure Drop Statement
