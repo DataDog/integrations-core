@@ -541,7 +541,13 @@ class SQLServer(AgentCheck):
 
             try:
                 self.log.debug("Calling Stored Procedure : {}".format(proc))
-                cursor.callproc(proc)
+                if self._get_connector(instance) == 'adodbapi':
+                    cursor.callproc(proc)
+                else:
+                    # pyodbc does not support callproc; use execute instead.
+                    # Reference: https://github.com/mkleehammer/pyodbc/wiki/Cursor#callprocprocname-parameters
+                    cursor.execute(proc)
+
                 rows = cursor.fetchall()
                 self.log.debug("Row count ({}) : {}".format(proc, cursor.rowcount))
 
