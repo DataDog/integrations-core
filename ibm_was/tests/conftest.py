@@ -7,7 +7,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import LazyFunction, docker_run, run_command
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.ibm_was import IbmWasCheck
 from . import common
 
@@ -28,7 +28,8 @@ def dd_environment():
         compose_file,
         conditions=[
             CheckDockerLogs(compose_file, 'Server server1 open for e-business', attempts=120),
-            StartPerfServlet()
+            StartPerfServlet(),
+            CheckEndpoints(common.INSTANCE['servlet_url']),
         ],
     ):
         yield common.INSTANCE
