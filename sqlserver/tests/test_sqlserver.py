@@ -46,6 +46,10 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
 
+    proc = 'pyStoredProc'
+    sp_tags = "foo:bar,baz:qux"
+
+    # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
         instance_docker['driver'],
         instance_docker['host'],
@@ -58,12 +62,9 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
 
     # Stored Procedure Drop Statement
     sqlDropSP = "IF EXISTS (SELECT * FROM sys.objects \
-               WHERE type='P' AND name='pyStoredProc') \
-               DROP PROCEDURE pyStoredProc"
+               WHERE type='P' AND name='{0}') \
+               DROP PROCEDURE {0}".format(proc)
     cursor.execute(sqlDropSP)
-
-    proc = 'pyStoredProc'
-    sp_tags = "foo:bar,baz:qux"
 
     # Stored Procedure Create Statement
     sqlCreateSP = 'CREATE PROCEDURE {0} AS \
