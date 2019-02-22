@@ -8,7 +8,6 @@ from operator import itemgetter
 from a7 import validate_py3
 
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
-from ...constants import get_root
 from ...utils import get_valid_checks, get_version_file
 
 
