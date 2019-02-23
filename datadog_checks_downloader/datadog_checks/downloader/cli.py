@@ -110,4 +110,4 @@ def download():
         except UnknownTargetError:
             raise NoSuchDatadogPackageOrVersion(standard_distribution_name, version)
 
-        print(target_abspath)
+        print(target_abspath)  # pylint: disable=print-statement
