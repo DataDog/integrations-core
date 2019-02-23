@@ -1,10 +1,8 @@
 # (C) Datadog, Inc. 2013-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# datadog
 try:
-    from datadog_checks.checks.win import PDHBaseCheck
+    from datadog_checks.base import PDHBaseCheck
 except ImportError:
     class PDHBaseCheck:
         pass

@@ -12,8 +12,8 @@ from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import SessionWrapper, Api
 from datadog_checks.utils.containers import hash_mutable
 
-import conftest
-from .common import FIXTURE_LIST_FILE_MAP
+from . import common
+from .mock_sender import mock_send
 
 log = logging.getLogger('test_cisco_aci')
 
@@ -21,7 +21,7 @@ log = logging.getLogger('test_cisco_aci')
 class FakeSess(SessionWrapper):
     """ This mock:
      1. Takes the requested path and replace all special characters to underscore
-     2. Fetch the corresponding hash from FIXTURE_LIST_FILE_MAP
+     2. Fetch the corresponding hash from common.FIXTURE_LIST_FILE_MAP
      3. Returns the corresponding file content
      """
     def make_request(self, path):
@@ -38,8 +38,8 @@ class FakeSess(SessionWrapper):
         mock_path = mock_path.replace('[', '_')
         mock_path = mock_path.replace(']', '_')
         mock_path = mock_path.replace('|', '_')
-        mock_path = FIXTURE_LIST_FILE_MAP[mock_path]
-        for p in conftest.ALL_FICTURE_DIR:
+        mock_path = common.FIXTURE_LIST_FILE_MAP[mock_path]
+        for p in common.ALL_FICTURE_DIR:
             path = os.path.join(p, mock_path)
             path += '.txt'
 
@@ -55,16 +55,16 @@ class FakeSess(SessionWrapper):
 @pytest.fixture
 def session_mock():
     session = Session()
-    setattr(session, 'send', conftest.mock_send)
-    fake_session_wrapper = FakeSess(conftest.ACI_URL, session, 'cookie')
+    setattr(session, 'send', mock_send)
+    fake_session_wrapper = FakeSess(common.ACI_URL, session, 'cookie')
     return fake_session_wrapper
 
 
 def test_cisco(aggregator, session_mock):
-    cisco_aci_check = CiscoACICheck(conftest.CHECK_NAME, {}, {})
-    api = Api(conftest.ACI_URLS, conftest.USERNAME,
-              password=conftest.PASSWORD, log=cisco_aci_check.log, sessions=[session_mock])
+    cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, {})
+    api = Api(common.ACI_URLS, common.USERNAME,
+              password=common.PASSWORD, log=cisco_aci_check.log, sessions=[session_mock])
     api._refresh_sessions = False
-    cisco_aci_check._api_cache[hash_mutable(conftest.CONFIG)] = api
+    cisco_aci_check._api_cache[hash_mutable(common.CONFIG)] = api
 
-    cisco_aci_check.check(conftest.CONFIG)
+    cisco_aci_check.check(common.CONFIG)

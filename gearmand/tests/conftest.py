@@ -8,11 +8,11 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.gearmand import Gearman
 
-from .common import HERE, CHECK_NAME
+from .common import HERE, CHECK_NAME, INSTANCE
 
 
 @pytest.fixture(scope="session")
-def spin_up_gearmand(request):
+def dd_environment():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
@@ -23,7 +23,7 @@ def spin_up_gearmand(request):
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     with docker_run(compose_file):
-        yield
+        yield INSTANCE
 
 
 @pytest.fixture

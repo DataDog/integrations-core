@@ -28,7 +28,7 @@ def go_expvar_mock():
 
 
 @pytest.fixture(scope="session")
-def spin_up_go_expvar():
+def dd_environment():
     """
     Spin up a simple container that contains a simple go expvar app
     """
@@ -39,7 +39,7 @@ def spin_up_go_expvar():
     ):
         for _ in range(9):
             requests.get(common.URL + "?user=123456")
-        yield
+        yield common.INSTANCE
 
 
 @pytest.fixture

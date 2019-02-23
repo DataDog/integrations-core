@@ -421,6 +421,38 @@ init_config:
             alias: kafka.net.bytes_rejected.rate
 
     #
+    # Brokers: Per Topic Metrics
+    #
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesOutPerSec,topic=.*'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topics.net.bytes_out.rate
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesInPerSec,topic=.*'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topics.net.bytes_in.rate
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=MessagesInPerSec,topic=.*'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topics.messages_in.rate
+    - include:
+        domain: 'kafka.server'
+        bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesRejectedPerSec,topic=.*'
+        attribute:
+          Count:
+            metric_type: rate
+            alias: kafka.topics.net.bytes_rejected.rate
+
+    #
     # Request timings
     #
     - include:
@@ -519,12 +551,30 @@ init_config:
             metric_type: gauge
             alias: kafka.request.offsets.time.99percentile
     - include:
+        domain: 'kafka.network'
+        bean: 'kafka.network:type=RequestChannel,name=RequestQueueSize'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.request.channel.queue.size
+    - include:
+        domain: 'kafka.network'
+        bean: 'kafka.network:type=SocketServer,name=NetworkProcessorAvgIdlePercent'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.net.handler.avg.idle.pct.rate
+    - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent'
         attribute:
           OneMinuteRate:
             metric_type: gauge
             alias: kafka.request.handler.avg.idle.pct.rate
+
+    #
+    # Request Purgatory (only v0.8.2.x)
+    #
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ProducerRequestPurgatory,name=PurgatorySize'
@@ -535,6 +585,24 @@ init_config:
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=FetchRequestPurgatory,name=PurgatorySize'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.request.fetch_request_purgatory.size
+
+    #
+    # Request Purgatory (v0.9.0.x onwards)
+    #
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Produce'
+        attribute:
+          Value:
+            metric_type: gauge
+            alias: kafka.request.producer_request_purgatory.size
+    - include:
+        domain: 'kafka.server'
+        bean: 'kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Fetch'
         attribute:
           Value:
             metric_type: gauge

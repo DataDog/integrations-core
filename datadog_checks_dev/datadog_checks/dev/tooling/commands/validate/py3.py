@@ -8,8 +8,7 @@ from operator import itemgetter
 from a7 import validate_py3
 
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
-from ...constants import get_root, NOT_CHECKS
-from ...utils import get_valid_checks
+from ...utils import get_valid_checks, get_version_file
 
 
 @click.command(
@@ -22,11 +21,8 @@ def py3(check):
     can be an integration name or a valid path to a Python module or package folder.
     """
 
-    root = get_root()
-    if check == 'datadog_checks_base':
-        path_to_module = os.path.join(root, check, 'datadog_checks', 'base')
-    elif check in get_valid_checks() and check not in NOT_CHECKS:
-        path_to_module = os.path.join(root, check, 'datadog_checks', check)
+    if check in get_valid_checks():
+        path_to_module = os.path.dirname(get_version_file(check))
     else:
         path_to_module = check
 

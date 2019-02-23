@@ -14,7 +14,28 @@ def test_instance():
     """
     Simply assert the class can be instantiated
     """
-    AgentCheck()
+    # rely on default
+    check = AgentCheck()
+    assert check.init_config == {}
+    assert check.instances == []
+
+    # pass dict for 'init_config', a list for 'instances'
+    init_config = {'foo': 'bar'}
+    instances = [{'bar': 'baz'}]
+    check = AgentCheck(init_config=init_config, instances=instances)
+    assert check.init_config == {'foo': 'bar'}
+    assert check.instances == [{'bar': 'baz'}]
+
+
+def test_load_config():
+    assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
+
+
+def test_log_critical_error():
+    check = AgentCheck()
+
+    with pytest.raises(NotImplementedError):
+        check.log.critical('test')
 
 
 class TestMetricNormalization:

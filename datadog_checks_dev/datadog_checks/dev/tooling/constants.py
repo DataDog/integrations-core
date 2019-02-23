@@ -35,6 +35,7 @@ AGENT_V5_ONLY = {
 
 BETA_PACKAGES = {
     'datadog_checks_dev',
+    'datadog_checks_downloader',
 }
 
 NOT_CHECKS = {

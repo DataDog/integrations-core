@@ -3,75 +3,40 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import subprocess
 from time import sleep
 
 import pytest
 import requests
 
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckEndpoints
+
 from .common import (
-    HERE, GITLAB_TEST_TOKEN, GITLAB_RUNNER_URL, GITLAB_LOCAL_RUNNER_PORT, GITLAB_LOCAL_MASTER_PORT
+    HERE, GITLAB_TEST_TOKEN, GITLAB_RUNNER_URL, GITLAB_LOCAL_RUNNER_PORT, GITLAB_LOCAL_MASTER_PORT, CONFIG
 )
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 @pytest.fixture(scope="session", autouse=True)
-def gitlab_runner_service(request):
+def dd_environment():
     """
     Spin up and initialize gitlab_runner
     """
 
     # specify couchbase container name
-    env = os.environ
-    env['GITLAB_TEST_TOKEN'] = GITLAB_TEST_TOKEN
-    env['GITLAB_LOCAL_MASTER_PORT'] = str(GITLAB_LOCAL_MASTER_PORT)
-    env['GITLAB_LOCAL_RUNNER_PORT'] = str(GITLAB_LOCAL_RUNNER_PORT)
+    env = {
+        'GITLAB_TEST_TOKEN': GITLAB_TEST_TOKEN,
+        'GITLAB_LOCAL_MASTER_PORT': str(GITLAB_LOCAL_MASTER_PORT),
+        'GITLAB_LOCAL_RUNNER_PORT': str(GITLAB_LOCAL_RUNNER_PORT),
+    }
 
-    args = [
-        'docker-compose',
-        '-f', os.path.join(HERE, 'compose', 'docker-compose.yml')
-    ]
+    with docker_run(
+        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
+        env_vars=env,
+        conditions=[CheckEndpoints(GITLAB_RUNNER_URL, attempts=180)],
+    ):
+        # run pre-test commands
+        for _ in range(100):
+            requests.get(GITLAB_RUNNER_URL)
+        sleep(2)
 
-    # always stop and remove the container even if there's an exception at setup
-    def teardown():
-        subprocess.check_call(args + ["down"], env=env)
-    request.addfinalizer(teardown)
-
-    # spin up the docker container
-    subprocess.check_call(args + ['up', '-d'], env=env)
-
-    # wait for gitlab_runner to be up, it depends on gitlab
-    if not wait_for(GITLAB_RUNNER_URL):
-        raise Exception("gitlab_runner container timed out!")
-
-    # run pre-test commands
-    for _ in range(100):
-        requests.get(GITLAB_RUNNER_URL)
-    sleep(2)
-
-    yield
-
-
-def wait_for(URL):
-    """
-    Wait for specified URL
-    """
-
-    for _ in range(180):
-        try:
-            r = requests.get(URL)
-            r.raise_for_status()
-            return True
-        except Exception:
-            pass
-
-        sleep(1)
-
-    return False
+        yield CONFIG

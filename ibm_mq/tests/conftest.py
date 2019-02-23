@@ -34,6 +34,18 @@ def instance():
 
 
 @pytest.fixture
+def instance_pattern():
+    inst = copy.deepcopy(common.INSTANCE_PATTERN)
+    return inst
+
+
+@pytest.fixture
+def instance_collect_all():
+    inst = copy.deepcopy(common.INSTANCE_COLLECT_ALL)
+    return inst
+
+
+@pytest.fixture
 def seed_data():
     publish()
     consume()
@@ -90,7 +102,7 @@ def consume():
 
 
 @pytest.fixture(scope='session')
-def spin_up_ibmmq():
+def dd_environment():
 
     if common.MQ_VERSION == '9':
         log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
@@ -107,4 +119,4 @@ def spin_up_ibmmq():
         log_patterns=log_pattern,
         sleep=10
     ):
-        yield
+        yield common.INSTANCE

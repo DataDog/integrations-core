@@ -18,13 +18,13 @@ Note that if you're using the agent in a container, setting `DD_CRI_SOCKET_PATH`
 
 1. Edit the `cri.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    Agent's configuration directory to start collecting your crio performance data.
-   See the [sample cri.d/conf.yaml][2] for all available configuration options.
+   See the [sample cri.d/conf.yaml][1] for all available configuration options.
 
-2. [Restart the Agent][3]
+2. [Restart the Agent][2]
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `cri` under the Checks section.
+[Run the Agent's `status` subcommand][3] and look for `cri` under the Checks section.
 
 ## Data Collected
 
@@ -35,7 +35,7 @@ CRI collect metrics about the resource usage of your containers running through 
 CPU and memory metrics are collected out of the box and you can additionally collect some disk metrics
 if they are supported by your CRI (CRI-O doesn't support them for now)
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -47,11 +47,10 @@ CRI does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][5].
 
-[1]: https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/
-[2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/cri.d/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/help/
-[7]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv
+[1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/cri.d/conf.yaml.example
+[2]: 
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv
+[5]: https://docs.datadoghq.com/help

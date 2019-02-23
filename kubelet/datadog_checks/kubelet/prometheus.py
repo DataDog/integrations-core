@@ -1,13 +1,15 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
 
-# project
 from copy import deepcopy
+
+from six import iteritems
+
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from tagger import get_tags
 
-# check
 from .common import is_static_pending_pod, get_pod_by_uid
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
@@ -105,7 +107,7 @@ class CadvisorPrometheusScraperMixin(object):
             if lbl == 'container_name':
                 if lbl in labels:
                     if labels[lbl] == '' or labels[lbl] == 'POD':
-                            return False
+                        return False
             if lbl not in labels:
                 return False
         return True
@@ -159,7 +161,7 @@ class CadvisorPrometheusScraperMixin(object):
         container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
         return self.pod_list_utils.get_cid_by_name_tuple((namespace, pod_name, container_name))
 
-    def _get_container_id_if_container_metric(self, labels):
+    def _get_entity_id_if_container_metric(self, labels):
         """
         Checks the labels indicate a container metric,
         then extract the container id from them.
@@ -168,6 +170,11 @@ class CadvisorPrometheusScraperMixin(object):
         :return str or None
         """
         if CadvisorPrometheusScraperMixin._is_container_metric(labels):
+            pod = self._get_pod_by_metric_label(labels)
+            if is_static_pending_pod(pod):
+                # If the pod is static, ContainerStatus is unavailable.
+                # Return the pod UID so that we can collect metrics from it later on.
+                return self._get_pod_uid(labels)
             return self._get_container_id(labels)
 
     def _get_pod_uid(self, labels):
@@ -265,8 +272,8 @@ class CadvisorPrometheusScraperMixin(object):
             self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
             return
 
-        samples = self._sum_values_by_context(metric, self._get_container_id_if_container_metric)
-        for c_id, sample in samples.iteritems():
+        samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
+        for c_id, sample in iteritems(samples):
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
@@ -299,7 +306,7 @@ class CadvisorPrometheusScraperMixin(object):
             return
 
         samples = self._sum_values_by_context(metric, self._get_pod_uid_if_pod_metric)
-        for pod_uid, sample in samples.iteritems():
+        for pod_uid, sample in iteritems(samples):
             if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                 continue
             tags = get_tags('kubernetes_pod://%s' % pod_uid, True)
@@ -316,8 +323,8 @@ class CadvisorPrometheusScraperMixin(object):
         # track containers that still exist in the cache
         seen_keys = {k: False for k in cache}
 
-        samples = self._sum_values_by_context(metric, self._get_container_id_if_container_metric)
-        for c_id, sample in samples.iteritems():
+        samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
+        for c_id, sample in iteritems(samples):
             c_name = self._get_container_label(sample[self.SAMPLE_LABELS], 'name')
             if not c_name:
                 continue
@@ -342,7 +349,7 @@ class CadvisorPrometheusScraperMixin(object):
             self.gauge(m_name, val, tags)
 
         # purge the cache
-        for k, seen in seen_keys.iteritems():
+        for k, seen in iteritems(seen_keys):
             if not seen:
                 del cache[k]
 
@@ -352,8 +359,8 @@ class CadvisorPrometheusScraperMixin(object):
         and optionally checks in the given cache if there's a usage
         for each sample in the metric and reports the usage_pct
         """
-        samples = self._sum_values_by_context(metric, self._get_container_id_if_container_metric)
-        for c_id, sample in samples.iteritems():
+        samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
+        for c_id, sample in iteritems(samples):
             limit = sample[self.SAMPLE_VALUE]
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):

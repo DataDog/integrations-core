@@ -165,7 +165,7 @@ def get_attributes(obj):
     if not obj or type(obj) is not dict:
         return {}
 
-    keys = obj.keys()
+    keys = list(obj.keys())
     if len(keys) > 0:
         key = keys[0]
     else:
@@ -175,7 +175,7 @@ def get_attributes(obj):
         # if the object is not a dict
         # it is probably already scoped to attributes
         return obj
-    if key is not "attributes":
+    if key != "attributes":
         attrs = key_obj.get('attributes')
         if type(attrs) is not dict:
             # if the attributes doesn't exist,

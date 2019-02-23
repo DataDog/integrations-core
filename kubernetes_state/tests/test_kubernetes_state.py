@@ -6,8 +6,8 @@ import os
 import mock
 import pytest
 
-from datadog_checks.stubs import aggregator as _aggregator
 from datadog_checks.kubernetes_state import KubernetesState
+from datadog_checks.utils.common import ensure_unicode
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -42,11 +42,18 @@ METRICS = [
     NAMESPACE + '.daemonset.scheduled',
     NAMESPACE + '.daemonset.misscheduled',
     NAMESPACE + '.daemonset.desired',
+    NAMESPACE + '.daemonset.updated',
     # hpa
     NAMESPACE + '.hpa.min_replicas',
     NAMESPACE + '.hpa.max_replicas',
     NAMESPACE + '.hpa.desired_replicas',
     NAMESPACE + '.hpa.current_replicas',
+    NAMESPACE + '.hpa.condition',
+    # pdb
+    NAMESPACE + '.pdb.disruptions_allowed',
+    NAMESPACE + '.pdb.pods_desired',
+    NAMESPACE + '.pdb.pods_healthy',
+    NAMESPACE + '.pdb.pods_total',
     # pods
     NAMESPACE + '.pod.ready',
     NAMESPACE + '.pod.scheduled',
@@ -142,6 +149,12 @@ TAGS = {
         'job:hello',
         'job_name:hello2',
     ],
+    NAMESPACE + '.hpa.condition': [
+        'namespace:default',
+        'hpa:myhpa',
+        'condition:true',
+        'status:AbleToScale',
+    ],
 }
 
 JOINED_METRICS = {
@@ -198,17 +211,11 @@ class MockResponse:
         self.headers = {'Content-Type': content_type}
 
     def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
-            yield elt
+        for elt in self.content.split(b"\n"):
+            yield ensure_unicode(elt)
 
     def close(self):
         pass
-
-
-@pytest.fixture
-def aggregator():
-    _aggregator.reset()
-    return _aggregator
 
 
 @pytest.fixture

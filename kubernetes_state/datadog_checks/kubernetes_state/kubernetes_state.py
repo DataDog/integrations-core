@@ -6,6 +6,7 @@ import re
 import time
 from collections import defaultdict, Counter
 from copy import deepcopy
+from six import iteritems
 
 from datadog_checks.errors import CheckException
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -98,9 +99,9 @@ class KubernetesState(OpenMetricsBaseCheck):
         scraper_config = self.config_map[endpoint]
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
 
-        for job_tags, job_count in self.job_succeeded_count.iteritems():
+        for job_tags, job_count in iteritems(self.job_succeeded_count):
             self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count, list(job_tags))
-        for job_tags, job_count in self.job_failed_count.iteritems():
+        for job_tags, job_count in iteritems(self.job_failed_count):
             self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count, list(job_tags))
 
     def _create_kubernetes_state_prometheus_instance(self, instance):
@@ -122,6 +123,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_daemonset_status_desired_number_scheduled': 'daemonset.desired',
                 'kube_daemonset_status_number_misscheduled': 'daemonset.misscheduled',
                 'kube_daemonset_status_number_ready': 'daemonset.ready',
+                'kube_daemonset_updated_number_scheduled': 'daemonset.updated',
                 'kube_deployment_spec_paused': 'deployment.paused',
                 'kube_deployment_spec_replicas': 'deployment.replicas_desired',
                 'kube_deployment_spec_strategy_rollingupdate_max_unavailable': 'deployment.rollingupdate.max_unavailable',  # noqa: E501
@@ -136,6 +138,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_hpa_spec_max_replicas': 'hpa.max_replicas',
                 'kube_hpa_status_desired_replicas': 'hpa.desired_replicas',
                 'kube_hpa_status_current_replicas': 'hpa.current_replicas',
+                'kube_hpa_status_condition': 'hpa.condition',
                 'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
                 'kube_node_status_allocatable_memory_bytes': 'node.memory_allocatable',
                 'kube_node_status_allocatable_pods': 'node.pods_allocatable',
@@ -160,6 +163,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.limit',
                 'kube_pod_status_ready': 'pod.ready',
                 'kube_pod_status_scheduled': 'pod.scheduled',
+                'kube_poddisruptionbudget_status_current_healthy': 'pdb.pods_healthy',
+                'kube_poddisruptionbudget_status_desired_healthy': 'pdb.pods_desired',
+                'kube_poddisruptionbudget_status_pod_disruptions_allowed': 'pdb.disruptions_allowed',
+                'kube_poddisruptionbudget_status_expected_pods': 'pdb.pods_total',
                 'kube_replicaset_spec_replicas': 'replicaset.replicas_desired',
                 'kube_replicaset_status_fully_labeled_replicas': 'replicaset.fully_labeled_replicas',
                 'kube_replicaset_status_ready_replicas': 'replicaset.replicas_ready',
@@ -196,14 +203,22 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'kube_pod_owner',
                 'kube_pod_start_time',
                 'kube_pod_labels',
+                'kube_poddisruptionbudget_created',
                 'kube_replicaset_created',
                 'kube_replicationcontroller_created',
                 'kube_resourcequota_created',
+                'kube_replicaset_owner',
                 'kube_service_created',
                 'kube_service_info',
                 'kube_service_labels',
+                'kube_service_spec_external_ip',
+                'kube_service_status_load_balancer_ingress',
                 'kube_statefulset_labels',
                 'kube_statefulset_created',
+                'kube_statefulset_status_current_revision',
+                'kube_statefulset_status_update_revision',
+                # Already provided by the kubelet integration
+                'kube_pod_container_status_last_terminated_reason',
                 # _generation metrics are more metadata than metrics, no real use case for now
                 'kube_daemonset_metadata_generation',
                 'kube_deployment_metadata_generation',
@@ -262,7 +277,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 ksm_instance['label_to_hostname_suffix'] = "-" + clustername
 
         if 'labels_mapper' in ksm_instance and not isinstance(ksm_instance['labels_mapper'], dict):
-                self.log.warning("Option labels_mapper should be a dictionary for {}".format(endpoint))
+            self.log.warning("Option labels_mapper should be a dictionary for {}".format(endpoint))
 
         return ksm_instance
 
@@ -396,7 +411,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             ] + scraper_config['custom_tags']
             status_phase_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in status_phase_counter.iteritems():
+        for tags, count in iteritems(status_phase_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
     def _submit_metric_kube_pod_container_status_reason(self, metric, metric_suffix, whitelisted_status_reasons,
@@ -443,7 +458,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             on_schedule = int(sample[self.SAMPLE_VALUE]) - curr_time
             tags = [self._format_tag(label_name, label_value, scraper_config)
-                    for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems()]
+                    for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS])]
             tags += scraper_config['custom_tags']
             if on_schedule < 0:
                 message = "The service check scheduled at {} is {} seconds late".format(
@@ -457,7 +472,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         service_check_name = scraper_config['namespace'] + '.job.complete'
         for sample in metric.samples:
             tags = []
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
@@ -469,7 +484,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         service_check_name = scraper_config['namespace'] + '.job.complete'
         for sample in metric.samples:
             tags = []
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
@@ -480,7 +495,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     def kube_job_status_failed(self, metric, scraper_config):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
@@ -491,7 +506,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
@@ -518,7 +533,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             ] + scraper_config['custom_tags']
             by_condition_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in by_condition_counter.iteritems():
+        for tags, count in iteritems(by_condition_counter):
             self.gauge(metric_name, count, tags=list(tags))
 
     def kube_node_status_ready(self, metric, scraper_config):
@@ -568,7 +583,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if metric.type in METRIC_TYPES:
             for sample in metric.samples:
                 tags = [self._format_tag(label_name, label_value, scraper_config)
-                        for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems()]
+                        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS])]
                 tags += scraper_config['custom_tags']
                 status = statuses[int(sample[self.SAMPLE_VALUE])]  # value can be 0 or 1
                 tags.append(self._format_tag('status', status, scraper_config))
@@ -636,5 +651,5 @@ class KubernetesState(OpenMetricsBaseCheck):
             ] + scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in object_counter.iteritems():
+        for tags, count in iteritems(object_counter):
             self.gauge(metric_name, count, tags=list(tags))
