@@ -109,5 +109,3 @@ def download():
             target_abspath = tuf_downloader.download(target_relpath)
         except UnknownTargetError:
             raise NoSuchDatadogPackageOrVersion(standard_distribution_name, version)
-
-        print(target_abspath)  # pylint: disable=print-statement
