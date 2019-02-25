@@ -20,21 +20,24 @@ instances:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
 
-## Log section (Available for Agent >=6.0)
-## - type : (mandatory) type of log input source (tcp / udp / file)
-##   port / path : (mandatory) Use port for types tcp or udp. Use path for type file.
-##   service : (mandatory) name of the service owning the log
-##   source : (mandatory) attribute that defines which integration is sending the logs
-##   sourcecategory : (optional) Multiple value attribute used to refine the source attribute.
-##   tags: (optional) Add tags to each log collected.
+## Log Section (Available for Agent >=6.0)
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
+## service - mandatory - Name of the service owning the log
+## source  - mandatory - Attribute that defines which integration is sending the logs
+## sourcecategory - optional - Multiple value attribute. Can be used to refine the source attribtue
+## tags: - optional - Add tags to each logs collected
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 
 #logs:
-  # - type: file
-  #   path: /var/log/nginx/access.log
-  #   service: webapp
-  #   source: kong
+#  - type: file
+#    path: /var/log/nginx/access.log
+#    service: webapp
+#    source: kong
 
-  # - type: file
-  #   path: /var/log/nginx/error.log
-  #   service: webapp
-  #   source: kong
+#  - type: file
+#    path: /var/log/nginx/error.log
+#    service: webapp
+#    source: kong
