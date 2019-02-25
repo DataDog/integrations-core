@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 1.4.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#3040](https://github.com/DataDog/integrations-core/pull/3040).
+
 ## 1.3.0 / 2018-10-12
 
 * [Added] Pin pywin32 dependency. See [#2322][1].

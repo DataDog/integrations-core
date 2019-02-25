@@ -1,5 +1,10 @@
 # CHANGELOG - istio
 
+## 2.1.0 / 2019-02-18
+
+* [Fixed] Update example config to match docs. See [#3046](https://github.com/DataDog/integrations-core/pull/3046).
+* [Added] Support Python 3. See [#3014](https://github.com/DataDog/integrations-core/pull/3014).
+
 ## 2.0.0 / 2018-09-04
 
 * [Changed] Update istio to use the new OpenMetricsBaseCheck. See [#1979][1].

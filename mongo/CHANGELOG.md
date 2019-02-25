@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+## 1.8.0 / 2019-02-18
+
+* [Added] Finish Support Python 3. See [#2916](https://github.com/DataDog/integrations-core/pull/2916).
+* [Fixed] Only run `top` against the admin database. See [#2937](https://github.com/DataDog/integrations-core/pull/2937).
+* [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
+
 ## 1.7.0 / 2018-11-30
 
 * [Added] Support Python 3. See [#2623][1].

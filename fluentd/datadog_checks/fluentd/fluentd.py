@@ -59,11 +59,21 @@ class Fluentd(AgentCheck):
             for p in status['plugins']:
                 tag = "%s:%s" % (tag_by, p.get(tag_by))
                 for m in self.GAUGES:
-                    if p.get(m) is None:
+                    metric = p.get(m)
+                    if metric is None:
                         continue
+                    if m == 'retry_count':
+                        # Since v1, retry_count counts the total number of errors.
+                        # Use retry/steps field for temporal retry count instead.
+                        rs = p.get("retry")
+                        if rs is not None:
+                            if rs.get("steps") is not None:
+                                metric = rs.get("steps")
+                            else:
+                                metric = 0
                     # Filter unspecified plugins to keep backward compatibility.
                     if len(plugin_ids) == 0 or p.get('plugin_id') in plugin_ids:
-                        self.gauge('fluentd.%s' % (m), p.get(m), [tag] + custom_tags)
+                        self.gauge('fluentd.%s' % (m), metric, [tag] + custom_tags)
         except Exception as e:
             msg = "No stats could be retrieved from %s : %s" % (url, str(e))
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,

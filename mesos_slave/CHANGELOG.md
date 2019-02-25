@@ -1,5 +1,9 @@
 # CHANGELOG - mesos_slave
 
+## 1.3.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#2874](https://github.com/DataDog/integrations-core/pull/2874).
+
 ## 1.2.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].

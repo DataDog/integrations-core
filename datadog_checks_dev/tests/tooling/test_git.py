@@ -6,7 +6,7 @@ import mock
 from datadog_checks.dev.tooling.constants import set_root
 from datadog_checks.dev.tooling.git import (
     get_current_branch, files_changed, get_commits_since, git_show_file,
-    git_commit, git_tag, git_tag_list, git_ls_files
+    git_commit, git_tag, git_tag_list
 )
 
 
@@ -50,15 +50,6 @@ def test_git_show_file():
             git_show_file('path-string', 'git-ref-string')
             chdir.assert_called_once_with('/foo/')
             run.assert_called_once_with('git show git-ref-string:path-string', capture=True)
-
-
-def test_git_ls_files():
-    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
-        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
-            set_root('/foo/')
-            git_ls_files(['bar1', 'bar2'])
-            chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git ls-files --error-unmatch bar1 bar2', capture=True)
 
 
 def test_git_commit():

@@ -1,5 +1,10 @@
 # CHANGELOG - etcd
 
+## 1.7.0 / 2019-02-18
+
+* [Fixed] Use alpha grpc gateway endpoint. See [#3125](https://github.com/DataDog/integrations-core/pull/3125).
+* [Added] Make `is_leader` tag optional. See [#3114](https://github.com/DataDog/integrations-core/pull/3114).
+
 ## 1.6.1 / 2019-01-04
 
 * [Fixed] Postpone deprecation warning to 6.10. See [#2844][1].

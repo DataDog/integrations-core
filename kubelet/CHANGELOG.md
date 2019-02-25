@@ -1,5 +1,12 @@
 # CHANGELOG - kubelet
 
+## 2.4.0 / 2019-02-18
+
+* [Fixed] Fix usage metrics collection for static pods. See [#3079](https://github.com/DataDog/integrations-core/pull/3079).
+* [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
+* [Added] Support Python 3. See [#3028](https://github.com/DataDog/integrations-core/pull/3028).
+* [Fixed] Fix pods/container.running metrics to exclude non running ones. See [#3025](https://github.com/DataDog/integrations-core/pull/3025).
+
 ## 2.3.1 / 2019-01-04
 
 * [Fixed] document kubernetes.pods.running and kubernetes.containers.running. See [#2792][1].

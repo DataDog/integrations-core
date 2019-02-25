@@ -1,5 +1,10 @@
 # CHANGELOG - pgbouncer
 
+## 1.5.0 / 2019-02-18
+
+* [Added] Add support for database metrics. See [#2777](https://github.com/DataDog/integrations-core/pull/2777). Thanks [joekohlsdorf](https://github.com/joekohlsdorf).
+* [Added] Support Python 3. See [#3039](https://github.com/DataDog/integrations-core/pull/3039).
+
 ## 1.4.0 / 2019-01-04
 
 * [Added] Bump psycopg2-binary version to 2.7.5. See [#2799][1].
