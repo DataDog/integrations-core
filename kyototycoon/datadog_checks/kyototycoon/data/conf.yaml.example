@@ -1,15 +1,23 @@
 init_config:
-# The Kyoto Tycoon check does not require any init_config
 
 instances:
-#  Add one or more instances, which accept report_url,
-#  name, and optionally tags keys. The report URL should
-#  be a URL to the Kyoto Tycoon "report" RPC endpoint.
-#
-#  Complete example:
-#
-- report_url: http://localhost:1978/rpc/report
-#   name: my_kyoto_instance
-#   tags:
-#     - "foo:bar"
-#     - "baz:bat"
+
+  ## @param report_url - string - required
+  ## The report URL should be a URL to the Kyoto Tycoon "report" RPC endpoint.
+  #
+  - report_url: http://localhost:1978/rpc/report
+
+  ## @param name - string - optional
+  ## Name of your Kyoto instance. Enter a name for your Kyoto instance 
+  ## if you have multiple ones.
+  #
+  #  name: <KYOTO_INSTANCE_NAME>
+  
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
