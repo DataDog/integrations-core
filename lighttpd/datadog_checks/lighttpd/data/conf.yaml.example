@@ -1,24 +1,33 @@
 init_config:
 
 instances:
-  # For each instance, you have an `lighttpd_status_url` and (optionally)
-  # a list of tags.
-
+  
+  ## @param apache_status_url - string - required
+  ## Status url of your Lighttpd server.
+  #
   - lighttpd_status_url: http://localhost/server-status?auto
-  #   auth: basic
-  #   user: username
-  #   password: password
-  #   tags:
-  #     - instance:foo
+
+  ## @param auth - string - optional
+  ## Type of authentication to use to collect data from the Lighttpd server url.
+  ## Available value are "basic", "digest".
+  # 
+  #  auth: <AUTH_TYPE>
+  
+  ## @param user - string - optional
+  ## Username for the Lighttpd status endpoint authentication.
   #
-  # - lighttpd_status_url: http://example2.com:1234/server-status?auto
-  #   auth: digest
-  #   user: username
-  #   password: password
-  #   tags:
-  #     - instance:bar
+  #  user: <USERNAME>
+
+  ## @param password - string - optional
+  ## Password for the Lighttpd status endpoint authentication.
   #
-  # # Lighttpd2 status url
-  # - lighttpd_status_url: http://example.com/server-status?format=plain
-  #   tags:
-  #     - instance:l2
+  #  password: <PASSWORD>
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
