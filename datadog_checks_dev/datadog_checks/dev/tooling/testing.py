@@ -141,7 +141,9 @@ def fix_coverage_report(check, report_file):
     write_file_binary(report_file, report)
 
 
-def construct_pytest_options(verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False):
+def construct_pytest_options(
+    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter=''
+):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
 
@@ -168,6 +170,12 @@ def construct_pytest_options(verbose=0, enter_pdb=False, debug=False, bench=Fals
             # This will be formatted to the appropriate coverage paths for each package
             ' {}'
         )
+
+    if marker:
+        pytest_options += ' -m {}'.format(marker)
+
+    if test_filter:
+        pytest_options += ' -k {}'.format(test_filter)
 
     return pytest_options
 
