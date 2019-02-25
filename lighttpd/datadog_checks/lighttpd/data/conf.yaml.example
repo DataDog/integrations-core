@@ -2,7 +2,7 @@ init_config:
 
 instances:
   
-  ## @param apache_status_url - string - required
+  ## @param lighttpd_status_url - string - required
   ## Status url of your Lighttpd server.
   #
   - lighttpd_status_url: http://localhost/server-status?auto
