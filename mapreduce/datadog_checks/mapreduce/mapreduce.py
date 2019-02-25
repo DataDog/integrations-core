@@ -168,9 +168,8 @@ class MapReduceCheck(AgentCheck):
 
         # Report success after gathering all metrics from Application Master
         if running_jobs:
-            for job_id, metrics in iteritems(running_jobs):
-                am_address = self._get_url_base(metrics['tracking_url'])
-                break
+            job_id, metrics = next(iteritems(running_jobs))
+            am_address = self._get_url_base(metrics['tracking_url'])
 
             self.service_check(
                 self.MAPREDUCE_SERVICE_CHECK,

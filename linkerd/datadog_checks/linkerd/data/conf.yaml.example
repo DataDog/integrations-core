@@ -2,33 +2,43 @@ init_config:
 
 instances:
 
-    # The linkerd prometheus endpoint
-    #
+  ## @param prometheus_url - string - required
+  ## The URL where your application linkerd metrics are exposed by Prometheus.
+  #
   - prometheus_url: http://localhost:9990/admin/metrics/prometheus
 
-    # Set (optional) custom tags for each metric
-    #
-    # tags:
-    #   - "mytag1:myValue1"
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+  
+  ## @param prometheus_metrics_prefix - string - optional
+  ## <PREFIX> for exposed Prometheus metrics.
+  ## It should be the same as what's in your linkerd config
+  #
+  #  prometheus_metrics_prefix: <PREFIX>
 
-    # Set (optional) prefix for exposed Prometheus metrics (should be the same
-    # as what's in your linkerd config)
-    #
-    # prometheus_metrics_prefix: namerd_
+  ## @param metrics - list of key:value element - optional
+  ## Metrics to be extracted from linkerd
+  #
+  #  metrics:
+  #    - "jvm:start_time": "jvm.start_time"
+  #    - "<LINKERED_METRIC_NAME>": "<DATADOG_METRIC_NAME>" 
 
-    # Metrics to be extracted from linkerd
-    #
-    #  metrics:
-    #    - "jvm:start_time": "jvm.start_time"
+  ## @param type_overrides - list of key:value element - optional
+  ## Overrides the type of prometheus metrics /!\ All untyped metric will be ignored /!\
+  ## Valid prometheus types are : ['counter', 'gauge', 'summary', 'histogram']
+  ## You can use 'rate' if you want to get the derivative of a counter/gauge
+  #
+  #  type_overrides:
+  #    - "jvm:start_time": "gauge"
+  #    - "<LINKERED_METRIC_NAME>": "<DATADOG_METRIC_TYPE>"
 
-
-    # Type of the metrics
-    # /!\ All untyped metric will be ignored /!\
-    # Valid prometheus types are : ['counter', 'gauge', 'summary', 'histogram']
-    # You can use 'rate' if you want to get the derivative of a counter/gauge
-    #
-    # type_overrides:
-    #   "jvm:start_time": "gauge"
-
-    # Set a timeout for the prometheus query, defaults to 10
-    # prometheus_timeout: 10
+  ## @param prometheus_timeout - integer - optional - default: 10
+  ## The timeout for connecting to the prometheus_url.
+  #
+  #  prometheus_timeout: 10

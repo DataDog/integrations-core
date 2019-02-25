@@ -1,5 +1,10 @@
 # CHANGELOG - exchange_server
 
+## 1.3.0 / 2019-02-18
+
+* [Fixed] Fix flake8. See [#3077](https://github.com/DataDog/integrations-core/pull/3077).
+* [Added] Support Python 3. See [#2988](https://github.com/DataDog/integrations-core/pull/2988).
+
 ## 1.2.1 / 2019-01-04
 
 * [Fixed] Change example config from "localhost" to ".". See [#2779][1].

@@ -2,14 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from os import path
+
+from datadog_checks.dev import get_docker_hostname, get_here
 
 
-HERE = path.dirname(path.abspath(__file__))
-FIXTURE_DIR = os.path.join(HERE, "fixtures/")
+HERE = get_here()
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
+HOST = get_docker_hostname()
+PORT = '9080'
 
 INSTANCE = {
-    'servlet_url': 'http://localhost/wasPerfTool/servlet/perfservlet',
+    'servlet_url': 'http://{}:{}/wasPerfTool/servlet/perfservlet'.format(HOST, PORT),
     'collect_thread_pool_stats': True,
     'collect_servlet_session_stats': True,
     'collect_jdbc_stats': True,
@@ -50,7 +53,7 @@ MISSING_REQ_FIELD_INSTANCE = {
 }
 
 MALFORMED_CUSTOM_QUERY_INSTANCE = {
-    'servlet_url': 'http://hostname/wasPerfTool/servlet/perfservlet',
+    'servlet_url': 'http://{}:{}/wasPerfTool/servlet/perfservlet'.format(HOST, PORT),
     'collect_thread_pool_stats': True,
     'collect_servlet_session_stats': True,
     'collect_jdbc_stats': True,
@@ -67,10 +70,10 @@ MALFORMED_CUSTOM_QUERY_INSTANCE = {
 }
 
 METRICS_ALWAYS_PRESENT = [
-    'ibm_was.jdbc.create_count',
-    'ibm_was.jvm.free_memory',
-    'ibm_was.servlet_session.life_time',
-    'ibm_was.thread_pools.create_count'
+    'ibm_was.jdbc.percent_used',
+    'ibm_was.jvm.heap_size',
+    'ibm_was.servlet_session.live_count',
+    'ibm_was.thread_pools.pool_size'
 ]
 
 DEFAULT_SERVICE_CHECK_TAGS = [

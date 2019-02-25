@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 1.1.0 / 2019-02-18
+
+* [Added] Autodiscover queues. See [#3061](https://github.com/DataDog/integrations-core/pull/3061).
+
 ## 1.0.1 / 2019-01-04
 
 * [Fixed] Fix Oldest Message Age. See [#2859][1].

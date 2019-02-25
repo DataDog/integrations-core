@@ -1,5 +1,10 @@
 # CHANGELOG - consul
 
+## 1.7.0 / 2019-02-18
+
+* [Added] Add `consul.can_connect` service check for every HTTP request to consul. See [#3003](https://github.com/DataDog/integrations-core/pull/3003).
+* [Added] Finish supporting Py3. See [#2906](https://github.com/DataDog/integrations-core/pull/2906).
+
 ## 1.6.0 / 2018-11-30
 
 * [Added] Add option to run the full check on any node. See [#2461][1].

@@ -1,5 +1,11 @@
 # CHANGELOG - snmp
 
+## 1.5.0 / 2019-02-18
+
+* [Added] Improve performance by querying only necessary columns from a table. See [#3059](https://github.com/DataDog/integrations-core/pull/3059).
+* [Fixed] Log the correct information about snmpnext result. See [#3021](https://github.com/DataDog/integrations-core/pull/3021).
+* [Added] Support Python 3. See [#3016](https://github.com/DataDog/integrations-core/pull/3016).
+
 ## 1.4.2 / 2018-10-12
 
 * [Fixed] Fix `enforce_mib_constraints` parameter having no effect.. See [#2340][1].

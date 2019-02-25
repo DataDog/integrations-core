@@ -21,7 +21,7 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 1. Create a read-only login to connect to your server:
 
     ```
-        CREATE LOGIN datadog WITH PASSWORD = 'YOUR_PASSWORD';
+        CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
         CREATE USER datadog FOR LOGIN datadog;
         GRANT SELECT on sys.dm_os_performance_counters to datadog;
         GRANT VIEW SERVER STATE to datadog;
@@ -114,7 +114,7 @@ brew install freetds --with-unixodbc
 * [Custom SQL Server metrics for detailed monitoring][18]
 
 
- [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/datadog_checks/sqlserver/data/conf.yaml.example

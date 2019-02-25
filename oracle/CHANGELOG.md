@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 1.5.0 / 2019-02-18
+
+* [Added] Support Python 3. See [#3037](https://github.com/DataDog/integrations-core/pull/3037).
+* [Fixed] Fix tablespace metrics. See [#2841](https://github.com/DataDog/integrations-core/pull/2841).
+
 ## 1.4.0 / 2018-09-04
 
 * [Added] Add process metrics. See [#1856][1].

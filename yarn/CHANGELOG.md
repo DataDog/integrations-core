@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.6.0 / 2019-02-18
+
+* [Added] Support Kerberos auth. See [#2824](https://github.com/DataDog/integrations-core/pull/2824).
+
 ## 1.5.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2786][1].
