@@ -3,13 +3,14 @@ init_config:
 instances:
 
 ## @param servlet_url - string - required
-## The URL of the PerfServlet configured to report metrics
+## The URL of the PerfServlet configured to report metrics.
+## Note: The default port is usually 9080.
 #
   - servlet_url: http://localhost:<PORT>/wasPerfTool/servlet/perfservlet
 
   ## @param skip_proxy - boolean - optional - default: False
   ## Wheter or not to skip the proxy configured in the Agent's config file when
-  ## making the request to the PerfServlet 
+  ## making the request to the PerfServlet
   #
   #  skip_proxy: False
 
@@ -38,8 +39,8 @@ instances:
   ## Each must contain a `metric_prefix` and `stat` element
   ## If the `stat` node has sub `stat` nodes, the name of these nodes must be specified
   ## in the order they occur within the XML document and will be displayed as tags.
-  ## The metric will be named `ibmwas.<metric_prefix>.<xml_attribute_name>` and be tagged with the 
-  ## `name` value of the corresponding `tag_keys` attributes. 
+  ## The metric will be named `ibmwas.<metric_prefix>.<xml_attribute_name>` and be tagged with the
+  ## `name` value of the corresponding `tag_keys` attributes.
   ##
   ## <Stat name="Thread Pools Custom">
   ##   <Stat name="AriesThreadPool">
