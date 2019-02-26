@@ -1,19 +1,37 @@
 init_config:
+  
+  ## @param default_timeout - integer - required
+  ## Default timeout to use when connecting to Mesos master url.
+  #
   default_timeout: 10
 
 instances:
+
+  ## @param url - string - required
+  ## url used to connect to the Mesos instance.
+  #
   - url: "http://localhost:5051"
-    #  master_port: 5050
-    #  tasks:
-    #    - "hello"
 
-    # The (optional) disable_ssl_validation will instruct the check
-    # to skip the validation of the SSL certificate of the slave metric endpoint.
-    # This is mostly useful for certificates that are not signed by a
-    # public authority.
-    # When true, the check logs a warning in collector.log
-    # Defaults to false, set to true if you want to disable
-    # SSL certificate validation.
-    #
-    # disable_ssl_validation: true
+  ## @param master_port - integer - optional - default: 5050
+  ## Port of your Mesos master instance.
+  #  master_port: 5050
+    
+  ## @param tasks - list of strings - optional
+  ##
+  #  tasks:
+  #    - "hello"
 
+  ## @param disable_ssl_validation - boolean - optional - default: false
+  ## Instructs the check to skip the validation of the SSL certificate of the URL being tested for Mesos master.
+  ## Defaults to false, set to true if you want to disable SSL certificate validation.
+  #
+  #  disable_ssl_validation: false
+  
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
