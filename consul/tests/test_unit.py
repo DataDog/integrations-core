@@ -329,11 +329,11 @@ def test_network_latency_checks(aggregator):
     assert 19 == len(latency)
 
     # Only 3 dc-latency metrics since we only do source = self
-    dc = [m for m in latency if b'.dc.latency.' in m[0]]
+    dc = [m for m in latency if '.dc.latency.' in m[0]]
     assert 3 == len(dc)
     assert 1.6746410750238774 == dc[0][2]
 
     # 16 latency metrics, 2 nodes * 8 metrics each
-    node = [m for m in latency if b'.node.latency.' in m[0]]
+    node = [m for m in latency if '.node.latency.' in m[0]]
     assert 16 == len(node)
     assert 0.26577747932995816 == node[0][2]
