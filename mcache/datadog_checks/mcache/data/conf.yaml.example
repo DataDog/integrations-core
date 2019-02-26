@@ -38,8 +38,8 @@ instances:
   #    - <KEY_2>:<VALUE_2>
 
   ## @param option - object - optional
-  ## Set "items" to true if you wish to collect items memcached stats. 
-  ## Set "slabs" to true if you wish to collect slabs memcached stats.
+  ## Set "items" to true if you wish to collect items Mcache stats. 
+  ## Set "slabs" to true if you wish to collect slabs Mcache stats.
   #
   #  options:
   #    items: false
