@@ -6,4 +6,3 @@ services:
     image: aerospike/aerospike-server:${AEROSPIKE_VERSION}
     ports:
       - "3000:3000"
-      - "3003:3003"

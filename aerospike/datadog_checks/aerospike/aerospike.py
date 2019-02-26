@@ -32,6 +32,8 @@ AEROSPIKE_CAP_CONFIG_KEY_MAP = {
     SINDEX_METRIC_TYPE: "max_sindexs",
     SET_METRIC_TYPE: "max_sets",
 }
+ENABLED_VALUES = {'true', 'on', 'enable', 'enabled'}
+DISABLED_VALUES = {'false', 'off', 'disable', 'disabled'}
 
 
 def parse_namespace(data, namespace, secondary):
@@ -69,6 +71,7 @@ class AerospikeCheck(AgentCheck):
         self._metrics = set(self.instance.get('metrics', []))
         self._namespace_metrics = set(self.instance.get('namespace_metrics', []))
         self._required_namespaces = self.instance.get('namespaces')
+        self._rate_metrics = set(self.init_config.get('mappings', []))
         self._tags = self.instance.get('tags', [])
 
         # We'll connect on the first check run
@@ -134,7 +137,7 @@ class AerospikeCheck(AgentCheck):
                 return
 
         for key, value in iteritems(required_data):
-            self._send(metric_type, key, value, tags)
+            self.send(metric_type, key, value, tags)
 
     def get_namespaces(self):
         namespaces = self.get_info('namespaces')
@@ -200,41 +203,36 @@ class AerospikeCheck(AgentCheck):
             namespace_tags = ['namespace:{}'.format(ns)]
             namespace_tags.extend(self._tags)
             val = data.pop(0).split(',')[1]
-            self._send(NAMESPACE_TPS_METRIC_TYPE, key, val, namespace_tags)
+            self.send(NAMESPACE_TPS_METRIC_TYPE, key, val, namespace_tags)
 
-    def _send(self, metric_type, key, val, tags):
+    def send(self, metric_type, key, val, tags):
         if re.match('^{(.+)}-(.*)hist-track', key):
             self.log.debug("Histogram config skipped: %s=%s", key, str(val))
-            return  # skip histogram configuration
+            return
 
         if key == 'cluster_key':
             val = str(int(val, 16))
 
-        if val.isdigit():
-            if key in self.init_config.get('mappings', []):
+        datatype = 'gauge'
+        try:
+            val = float(val)
+            if key in self._rate_metrics:
                 datatype = 'rate'
+        except ValueError:
+            val_lower = val.lower()
+            if val_lower in ENABLED_VALUES:
+                val = 1
+            elif val_lower in DISABLED_VALUES:
+                val = 0
             else:
-                datatype = 'gauge'
-        elif val.lower() in ('true', 'on', 'enable', 'enabled'):  # boolean : true
-            val = 1
-            datatype = 'gauge'
-        elif val.lower() in ('false', 'off', 'disable', 'disabled'):  # boolean : false
-            val = 0
-            datatype = 'gauge'
-        else:
-            try:
-                float(val)
-                datatype = 'gauge'
-            except ValueError:
-                datatype = 'event'
+                # Non numeric/boolean metric, discard
+                return
 
-        if datatype == 'gauge':
-            self.gauge(self._make_key(metric_type, key), val, tags=tags)
-        elif datatype == 'rate':
-            self.rate(self._make_key(metric_type, key), val, tags=tags)
+        if datatype == 'rate':
+            self.rate(self.make_key(metric_type, key), val, tags=tags)
         else:
-            return  # Non numeric/boolean metric, discard
+            self.gauge(self.make_key(metric_type, key), val, tags=tags)
 
     @staticmethod
-    def _make_key(event_type, n):
+    def make_key(event_type, n):
         return '%s.%s' % (event_type, n.replace('-', '_'))
