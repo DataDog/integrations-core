@@ -322,7 +322,7 @@ def test_network_latency_checks(aggregator):
 
     latency = []
     for m_name, metrics in aggregator._metrics.items():
-        if m_name.startswith(b'consul.net.'):
+        if m_name.startswith('consul.net.'):
             latency.extend(metrics)
     latency.sort()
     # Make sure we have the expected number of metrics
