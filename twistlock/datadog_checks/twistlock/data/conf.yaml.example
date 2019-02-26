@@ -16,8 +16,8 @@ instances:
   #
     password: '<PASSWORD>'
 
-logs:
-  - type: docker
-    image: twistlock/private  # or whatever
-    source: twistlock
-    service: twistlock
+# logs:
+#   - type: docker
+#     image: twistlock/private  # or whatever
+#     source: twistlock
+#     service: twistlock
