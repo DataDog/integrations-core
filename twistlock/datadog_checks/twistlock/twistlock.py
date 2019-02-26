@@ -12,7 +12,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 
-# from .config import Config
+from .config import Config
 
 REGISTRY_SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -105,12 +105,12 @@ class TwistlockCheck(AgentCheck):
 
             self._report_layer_count(image, namespace, image_tags)
             self._report_service_check(image,
-                                       namespace + '.image',
+                                       namespace,
                                        REGISTRY_SCAN_DATE_FORMAT,
                                        tags=image_tags,
                                        message="Last scan: " + image.get("scanTime"))
-            self._report_vuln_info(namespace + '.image', image, image_tags)
-            self._report_compliance_information(namespace + '.image', image, image_tags)
+            self._report_vuln_info(namespace, image, image_tags)
+            self._report_compliance_information(namespace, image, image_tags)
 
     def report_images_scan(self):
         namespace = self.NAMESPACE + ".images"
@@ -138,12 +138,12 @@ class TwistlockCheck(AgentCheck):
 
             self._report_layer_count(image, namespace, image_tags)
             self._report_service_check(image,
-                                       namespace + '.image',
+                                       namespace,
                                        SCAN_DATE_FORMAT,
                                        tags=image_tags,
                                        message="Last scan: " + image.get("scanTime"))
-            self._report_vuln_info(namespace + '.image', image, image_tags)
-            self._report_compliance_information(namespace + '.image', image, image_tags)
+            self._report_vuln_info(namespace, image, image_tags)
+            self._report_compliance_information(namespace, image, image_tags)
 
     def report_hosts_scan(self):
         namespace = self.NAMESPACE + ".hosts"
@@ -164,12 +164,12 @@ class TwistlockCheck(AgentCheck):
             host_tags = ["scanned_host:" + hostname] + self.config.tags
 
             self._report_service_check(host,
-                                       namespace + '.host',
+                                       namespace,
                                        SCAN_DATE_FORMAT,
                                        tags=host_tags,
                                        message="Last scan: " + host.get("scanTime"))
-            self._report_vuln_info(namespace + '.host', host, host_tags)
-            self._report_compliance_information(namespace + '.host', host, host_tags)
+            self._report_vuln_info(namespace, host, host_tags)
+            self._report_compliance_information(namespace, host, host_tags)
 
     def report_container_compliance(self):
         namespace = self.NAMESPACE + ".containers"
@@ -197,11 +197,11 @@ class TwistlockCheck(AgentCheck):
             container_tags += self.config.tags
 
             self._report_service_check(container,
-                                       namespace + '.container',
+                                       namespace,
                                        SCAN_DATE_FORMAT,
                                        tags=container_tags,
                                        message="Last scan: " + container.get("scanTime"))
-            self._report_compliance_information(namespace + '.container', container, container_tags)
+            self._report_compliance_information(namespace, container, container_tags)
 
     def report_vulnerabilities(self):
         vuln_containers = self._retrieve_json('/api/v1/stats/vulnerabilities')
