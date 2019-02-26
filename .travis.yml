@@ -204,7 +204,7 @@ jobs:
     - stage: test
       env: CHECK=openldap PYTHON3=true
     - stage: test
-      env: CHECK=openmetrics PYTHON3=true  
+      env: CHECK=openmetrics PYTHON3=true
     - stage: test
       env: CHECK=openstack PYTHON3=true
     - stage: test
