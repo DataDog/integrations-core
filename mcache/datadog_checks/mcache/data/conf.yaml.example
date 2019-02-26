@@ -1,15 +1,46 @@
 init_config:
 
 instances:
-  - url: localhost  # url used to connect to the memcached instance
-  #   socket: /socket/path # if url missing; 'dd-agent' user must have read/write permission
-  #   port: 11211 # If this line is not present, port will default to 11211
-  #   username: my_username
-  #   password: my_password
-  #   tags:
-  #     - optional_tag
 
-  #   options:
-  #     items: false  # set to true if you wish to collect items memcached stats.
-  #     slabs: false  # set to true if you wish to collect slabs memcached stats.
+  ## @param url - string - required
+  ## url used to connect to the memcached instance.
+  #
+  - url: localhost
+  
+  ## @param socket - string - optional
+  ## Set the socket to use.
+  ## If url missing; 'dd-agent' user must have read/write permission.
+  #
+  #  socket: <SOCKET_PATH>
 
+  ## @param port - integer - optional - default: 11211
+  ## Port to use when connecting to "url".
+  #
+  #  port: 11211
+
+  ## @param username - string - optional
+  ## Username for the Mcache status endpoint authentication.
+  #
+  #  username: <USERNAME>
+
+  ## @param password - string - optional
+  ## Password for the Mcache status endpoint authentication.
+  #
+  #  password: <PASSWORD>
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+  ## @param option - object - optional
+  ## Set "items" to true if you wish to collect items Mcache stats. 
+  ## Set "slabs" to true if you wish to collect slabs Mcache stats.
+  #
+  #  options:
+  #    items: false
+  #    slabs: false
