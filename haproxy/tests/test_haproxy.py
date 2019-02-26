@@ -108,7 +108,6 @@ def test_check(aggregator, check, instance):
 
     aggregator.assert_all_metrics_covered()
 
-
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
@@ -132,7 +131,6 @@ def test_check_service_check(aggregator, check, instance):
     _test_service_checks(aggregator)
 
     aggregator.assert_all_metrics_covered()
-
 
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
