@@ -17,7 +17,7 @@ def dd_environment(instance):
     with docker_run(
         compose_file,
         service_name="mesos-slave",
-        log_patterns=['New master detected at master'],
+        log_patterns=['Finished recovery'],
     ):
         yield instance
 
