@@ -33,7 +33,7 @@ instances:
   ## Optional SSL parameters, see https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
   ## for more details
   #
-  #  ssl: False
+  #  ssl: false
 
   ## @param ssl_keyfile - string - optional
   ## Path to the private keyfile used to identify the local.
