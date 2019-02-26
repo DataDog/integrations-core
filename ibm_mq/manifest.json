@@ -14,7 +14,8 @@
   ],
   "public_title": "Datadog-Ibm_mq Integration",
   "categories": [
-    "Message Queue"
+    "Message Queue",
+    "log collection"
   ],
   "type": "check",
   "is_public": true
