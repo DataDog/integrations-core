@@ -17,9 +17,10 @@ instances:
   #  master_port: 5050
     
   ## @param tasks - list of strings - optional
-  ##
+  ## Specify the tasks from which you want to send metrics to Datadog.
+  #
   #  tasks:
-  #    - "hello"
+  #    - <TASK_NAME>
 
   ## @param disable_ssl_validation - boolean - optional - default: false
   ## Instructs the check to skip the validation of the SSL certificate of the URL being tested for Mesos master.
