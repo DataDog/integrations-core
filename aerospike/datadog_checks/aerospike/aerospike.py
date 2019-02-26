@@ -4,15 +4,18 @@
 # (C) 2015 Pippio, Inc. All rights reserved.
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import absolute_import
+
 import re
-import socket
-from collections import namedtuple
-from contextlib import closing
+
+import aerospike
+from six import iteritems
 
 from datadog_checks.base import AgentCheck
 
 SOURCE_TYPE_NAME = 'aerospike'
-SERVICE_CHECK_NAME = '%s.cluster_up' % SOURCE_TYPE_NAME
+SERVICE_CHECK_UP = '%s.cluster_up' % SOURCE_TYPE_NAME
+SERVICE_CHECK_CONNECT = '%s.can_connect' % SOURCE_TYPE_NAME
 CLUSTER_METRIC_TYPE = SOURCE_TYPE_NAME
 NAMESPACE_METRIC_TYPE = '%s.namespace' % SOURCE_TYPE_NAME
 NAMESPACE_TPS_METRIC_TYPE = '%s.namespace.tps' % SOURCE_TYPE_NAME
@@ -30,12 +33,10 @@ AEROSPIKE_CAP_CONFIG_KEY_MAP = {
     SET_METRIC_TYPE: "max_sets",
 }
 
-Addr = namedtuple('Addr', ['host', 'port'])
-
 
 def parse_namespace(data, namespace, secondary):
     idxs = []
-    while data != []:
+    while data:
         line = data.pop(0)
 
         # $ asinfo -v 'sindex/phobos_sindex'
@@ -58,86 +59,122 @@ def parse_namespace(data, namespace, secondary):
 
 class AerospikeCheck(AgentCheck):
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self.connections = {}
+    def __init__(self, name, init_config, instances):
+        super(AerospikeCheck, self).__init__(name, init_config, instances)
+
+        host = self.instance.get('host', 'localhost')
+        port = int(self.instance.get('port', 3000))
+
+        self._host = (host, port)
+        self._metrics = set(self.instance.get('metrics', []))
+        self._namespace_metrics = set(self.instance.get('namespace_metrics', []))
+        self._required_namespaces = self.instance.get('namespaces')
+        self._tags = self.instance.get('tags', [])
+
+        # We'll connect on the first check run
+        self._client = None
 
     def check(self, instance):
-        addr, metrics, namespace_metrics, required_namespaces, tags = \
-            self._get_config(instance)
+        if self._client is None:
+            client = self.get_client()
+            if client is None:
+                return
 
-        try:
-            conn = self._get_connection(addr)
+            self._client = client
 
-            with closing(conn.makefile('r')) as fp:
-                conn.send('statistics\r')
-                self._process_data(instance, fp, CLUSTER_METRIC_TYPE, metrics, tags=tags)
+        self.collect_info('statistics', CLUSTER_METRIC_TYPE, required_keys=self._metrics, tags=self._tags)
 
-                namespaces = self._get_namespaces(conn, fp, required_namespaces)
+        namespaces = self.get_namespaces()
 
-                for ns in namespaces:
-                    conn.send('namespace/%s\r' % ns)
-                    self._process_data(
-                        instance, fp, NAMESPACE_METRIC_TYPE, namespace_metrics, tags+['namespace:%s' % ns]
-                    )
+        for ns in namespaces:
+            namespace_tags = ['namespace:{}'.format(ns)]
+            namespace_tags.extend(self._tags)
 
-                    conn.send('sindex/%s\r' % ns)
-                    for idx in parse_namespace(fp.readline().split(';')[:-1], ns, 'indexname'):
-                        conn.send('sindex/%s/%s\r' % (ns, idx))
-                        self._process_data(instance, fp, SINDEX_METRIC_TYPE, [],
-                                           tags+['namespace:%s' % ns, 'sindex:%s' % idx])
+            self.collect_info(
+                'namespace/{}'.format(ns),
+                NAMESPACE_METRIC_TYPE,
+                required_keys=self._namespace_metrics,
+                tags=namespace_tags
+            )
 
-                    conn.send('sets/%s\r' % ns)
-                    for s in parse_namespace(fp.readline().split(';'), ns, 'set'):
-                        conn.send('sets/%s/%s\r' % (ns, s))
-                        self._process_data(instance, fp, SET_METRIC_TYPE, [],
-                                           tags+['namespace:%s' % ns, 'set:%s' % s], delim=':')
+            sindex = self.get_info('sindex/{}'.format(ns))
+            for idx in parse_namespace(sindex[:-1], ns, 'indexname'):
+                sindex_tags = ['sindex:{}'.format(idx)]
+                sindex_tags.extend(namespace_tags)
+                self.collect_info('sindex/{}/{}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)
 
-                conn.send('throughput:\r')
-                self._process_throughput(fp.readline().rstrip().split(';'), NAMESPACE_TPS_METRIC_TYPE, namespaces, tags)
+            sets = self.get_info('sets/{}'.format(ns))
+            for s in parse_namespace(sets, ns, 'set'):
+                set_tags = ['set:{}'.format(s)]
+                set_tags.extend(namespace_tags)
+                self.collect_info('sets/{}/{}'.format(ns, s), SET_METRIC_TYPE, separator=':', tags=set_tags)
 
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
-        except Exception as e:
-            self.log.exception('Error while collectin Aerospike metrics at %s: %s', addr, e)
-            self.connections.pop(addr, None)
-            raise e
+        self.collect_throughput(namespaces)
 
-    @staticmethod
-    def _get_config(instance):
-        host = instance.get('host', 'localhost')
-        port = int(instance.get('port', 3003))
-        metrics = set(instance.get('metrics', []))
-        namespace_metrics = set(instance.get('namespace_metrics', []))
-        required_namespaces = instance.get('namespaces', None)
-        tags = instance.get('tags', [])
+        self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
 
-        return (Addr(host, port), metrics, namespace_metrics, required_namespaces, tags)
+    def collect_info(self, command, metric_type, separator=';', required_keys=None, tags=None):
+        entries = self.get_info(command, separator=separator)
 
-    def _get_namespaces(self, conn, fp, required_namespaces=[]):
-        conn.send('namespaces\r')
-        namespaces = fp.readline().rstrip().split(';')
-        if required_namespaces:
-            return [v for v in namespaces if v in required_namespaces]
+        if required_keys:
+            required_data = {}
+            for entry in entries:
+                key, value = entry.split('=', 1)
+                if key in required_keys:
+                    required_data[key] = value
         else:
-            return namespaces
+            required_data = dict(entry.split('=', 1) for entry in entries)
 
-    def _get_connection(self, addr):
-        conn = self.connections.get(addr, None)
+        if metric_type in AEROSPIKE_CAP_MAP:
+            cap = self.instance.get(AEROSPIKE_CAP_CONFIG_KEY_MAP[metric_type], AEROSPIKE_CAP_MAP[metric_type])
+            if len(required_data) > cap:
+                self.log.warn(
+                    'Exceeded cap `{}` for metric type `{}` - please contact support'.format(cap, metric_type)
+                )
+                return
 
-        if conn is None:
-            conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            conn.connect(addr)
-            self.connections[addr] = conn
+        for key, value in iteritems(required_data):
+            self._send(metric_type, key, value, tags)
 
-        return conn
+    def get_namespaces(self):
+        namespaces = self.get_info('namespaces')
 
-    def _process_throughput(self, data, metric_type, namespaces, tags={}):
-        while data != []:
+        if self._required_namespaces:
+            return [ns for ns in namespaces if ns in self._required_namespaces]
+
+        return namespaces
+
+    def get_client(self):
+        try:
+            client = aerospike.client({'hosts': [self._host]}).connect()
+        except Exception as e:
+            self.log.error('Unable to connect to database: {}'.format(e))
+            self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
+        else:
+            self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+            return client
+
+    def get_info(self, command, separator=';'):
+        # command\tKEY=VALUE;KEY=VALUE;...
+        data = self._client.info_node(command, self._host)
+
+        # Get rid of command and whitespace
+        data = data[len(command):].strip()
+
+        if not separator:
+            return data
+
+        return data.split(separator)
+
+    def collect_throughput(self, namespaces):
+        data = self.get_info('throughput:')
+
+        while data:
             line = data.pop(0)
 
             # skip errors
             while line.startswith('error-'):
-                if data == []:
+                if not data:
                     return
                 line = data.pop(0)
 
@@ -156,35 +193,16 @@ class AerospikeCheck(AgentCheck):
                 continue
 
             key = match.groups()[1]
-            if data == []:
-                return  # unexpected EOF
-
-            val = data.pop(0).split(',')[1]
-            self._send(metric_type, key, val, tags + ['namespace:%s' % ns])
-
-    def _process_data(self, instance, fp, metric_type, required_keys=[], tags={}, delim=';'):
-        d = dict(x.split('=', 1) for x in fp.readline().rstrip().split(delim))
-        if required_keys:
-            required_data = {k: d[k] for k in required_keys if k in d}
-        else:
-            required_data = d
-
-        if metric_type in AEROSPIKE_CAP_MAP:
-            cap = instance.get(
-                AEROSPIKE_CAP_CONFIG_KEY_MAP[metric_type],
-                AEROSPIKE_CAP_MAP[metric_type]
-            )
-            if len(required_data) > cap:
-                self.log.warn("Exceeding cap(%s) for metric type: %s - please contact support",
-                              cap, metric_type)
+            if not data:
+                # unexpected EOF
                 return
 
-        for key, value in required_data.items():
-            self._send(metric_type, key, value, tags)
+            namespace_tags = ['namespace:{}'.format(ns)]
+            namespace_tags.extend(self._tags)
+            val = data.pop(0).split(',')[1]
+            self._send(NAMESPACE_TPS_METRIC_TYPE, key, val, namespace_tags)
 
-    def _send(self, metric_type, key, val, tags={}):
-        datatype = 'event'
-
+    def _send(self, metric_type, key, val, tags):
         if re.match('^{(.+)}-(.*)hist-track', key):
             self.log.debug("Histogram config skipped: %s=%s", key, str(val))
             return  # skip histogram configuration

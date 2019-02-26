@@ -8,7 +8,7 @@ from datadog_checks.aerospike import AerospikeCheck
 
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, instance):
-    check = AerospikeCheck('aerospike', {}, {})
+    check = AerospikeCheck('aerospike', {}, [instance])
     check.check(instance)
 
     # This hasn't been working
