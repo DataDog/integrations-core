@@ -36,7 +36,7 @@ instances:
   #  ssl: false
 
   ## @param ssl_keyfile - string - optional
-  ## Path to the private keyfile used to identify the local.
+  ## Path to the private key file used to identify the local connection against Mongodb.
   #
   # ssl_keyfile: <SSL_KEY_FILE_PATH>
 
