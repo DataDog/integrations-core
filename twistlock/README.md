@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Twistlock][1].
+[Twistlock][1] is a security scanner. It scans containers, hosts and packages to find vulnerabilities and compliance issues.
 
 ## Setup
 
@@ -27,22 +27,23 @@ need to install anything else on your server.
 
 ### Metrics
 
-Twistlock does not include any metrics.
+Twistlock collects metrics on compliance and vulnerabilities. Look in the [metadata.csv][6] to see more
 
 ### Service Checks
 
-Twistlock does not include any service checks.
+Twistlock sends service checks when a scan fails.
 
 ### Events
 
-Twistlock does not include any events.
+Twistlock sends an event when a new CVE is found.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: https://www.twistlock.com/
 [2]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://docs.datadoghq.com/help/
+[6]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
