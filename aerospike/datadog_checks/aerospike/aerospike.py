@@ -64,10 +64,20 @@ class AerospikeCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(AerospikeCheck, self).__init__(name, init_config, instances)
 
+        # https://www.aerospike.com/apidocs/python/aerospike.html#aerospike.client
         host = self.instance.get('host', 'localhost')
         port = int(self.instance.get('port', 3000))
+        tls_name = self.instance.get('tls_name')
+        self._host = (host, port, tls_name) if tls_name else (host, port)
 
-        self._host = (host, port)
+        # https://www.aerospike.com/apidocs/python/client.html#aerospike.Client.connect
+        self._username = self.instance.get('username')
+        self._password = self.instance.get('password')
+
+        # In milliseconds, see https://www.aerospike.com/apidocs/python/client.html#aerospike-info-policies
+        timeout = int(self.instance.get('timeout', 10)) * 1000
+        self._info_policies = {'timeout': timeout}
+
         self._metrics = set(self.instance.get('metrics', []))
         self._namespace_metrics = set(self.instance.get('namespace_metrics', []))
         self._required_namespaces = self.instance.get('namespaces')
@@ -85,14 +95,17 @@ class AerospikeCheck(AgentCheck):
 
             self._client = client
 
+        # https://www.aerospike.com/docs/reference/info/#statistics
         self.collect_info('statistics', CLUSTER_METRIC_TYPE, required_keys=self._metrics, tags=self._tags)
 
+        # https://www.aerospike.com/docs/reference/info/#namespaces
         namespaces = self.get_namespaces()
 
         for ns in namespaces:
             namespace_tags = ['namespace:{}'.format(ns)]
             namespace_tags.extend(self._tags)
 
+            # https://www.aerospike.com/docs/reference/info/#namespace
             self.collect_info(
                 'namespace/{}'.format(ns),
                 NAMESPACE_METRIC_TYPE,
@@ -100,18 +113,21 @@ class AerospikeCheck(AgentCheck):
                 tags=namespace_tags
             )
 
+            # https://www.aerospike.com/docs/reference/info/#sindex
             sindex = self.get_info('sindex/{}'.format(ns))
             for idx in parse_namespace(sindex[:-1], ns, 'indexname'):
                 sindex_tags = ['sindex:{}'.format(idx)]
                 sindex_tags.extend(namespace_tags)
                 self.collect_info('sindex/{}/{}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)
 
+            # https://www.aerospike.com/docs/reference/info/#sets
             sets = self.get_info('sets/{}'.format(ns))
             for s in parse_namespace(sets, ns, 'set'):
                 set_tags = ['set:{}'.format(s)]
                 set_tags.extend(namespace_tags)
                 self.collect_info('sets/{}/{}'.format(ns, s), SET_METRIC_TYPE, separator=':', tags=set_tags)
 
+        # https://www.aerospike.com/docs/reference/info/#throughput
         self.collect_throughput(namespaces)
 
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
@@ -149,7 +165,7 @@ class AerospikeCheck(AgentCheck):
 
     def get_client(self):
         try:
-            client = aerospike.client({'hosts': [self._host]}).connect()
+            client = aerospike.client({'hosts': [self._host]}).connect(self._username, self._password)
         except Exception as e:
             self.log.error('Unable to connect to database: {}'.format(e))
             self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
@@ -158,8 +174,9 @@ class AerospikeCheck(AgentCheck):
             return client
 
     def get_info(self, command, separator=';'):
-        # command\tKEY=VALUE;KEY=VALUE;...
-        data = self._client.info_node(command, self._host)
+        # See https://www.aerospike.com/docs/reference/info/
+        # Example output: command\tKEY=VALUE;KEY=VALUE;...
+        data = self._client.info_node(command, self._host, self._info_policies)
 
         # Get rid of command and whitespace
         data = data[len(command):].strip()
