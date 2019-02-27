@@ -78,14 +78,14 @@ class IIS(PDHBaseCheck):
                         if not counter.is_single_instance():
                             # Skip any sites we don't specifically want.
                             if not sites:
-                                tags.append("site:{0}".format(self.normalize(sitename)))
+                                tags.append("site:{0}".format(ensure_unicode(self.normalize(sitename))))
                             # always report total
                             elif sitename == "_Total":
-                                tags.append("site:{0}".format(self.normalize(sitename)))
+                                tags.append("site:{0}".format(ensure_unicode(self.normalize(sitename))))
                             elif sitename not in sites:
                                 continue
                             else:
-                                tags.append("site:{0}".format(self.normalize(sitename)))
+                                tags.append("site:{0}".format(ensure_unicode(self.normalize(sitename))))
                     except Exception as e:
                         self.log.error("Caught exception {} setting tags".format(str(e)))
 
@@ -114,5 +114,5 @@ class IIS(PDHBaseCheck):
             tags = []
             if key in self._tags:
                 tags = list(self._tags[key])
-            tags.append("site:{}".format(self.normalize(site)))
+            tags.append("site:{}".format(ensure_unicode(self.normalize(site))))
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)
