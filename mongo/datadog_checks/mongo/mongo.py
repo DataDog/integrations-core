@@ -11,7 +11,7 @@ import pymongo
 from six import PY3, iteritems, itervalues
 from six.moves.urllib.parse import unquote_plus, urlsplit
 
-from datadog_checks.base import AgentCheck, is_affirmative, ensure_unicode
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
 
