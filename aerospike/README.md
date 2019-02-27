@@ -7,8 +7,6 @@ Get metrics from Aerospike Database in real time to:
 * Visualize and monitor Aerospike states
 * Be notified about Aerospike failovers and events.
 
-Note: Authentication and TLS are not supported.
-
 ## Setup
 
 ### Installation
@@ -34,7 +32,8 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-Aerospike does not include any service checks.
+- `aerospike.can_connect`
+- `aerospike.cluster_up`
 
 ### Events
 
