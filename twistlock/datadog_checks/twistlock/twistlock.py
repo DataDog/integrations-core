@@ -68,6 +68,7 @@ class TwistlockCheck(AgentCheck):
         except Exception as e:
             self.warning("cannot retrieve license data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
+            raise e
             return None
 
         expiration_date = datetime.strptime(license.get("expiration_date"), LICENCE_DATE_FORMAT)
@@ -288,8 +289,8 @@ class TwistlockCheck(AgentCheck):
         for layer in data.get('info', {}).get('history', []):
             layer_count += 1
             layer_sizes += layer.get('sizeBytes', 0)
-        self.gauge(namespace + '.image.size', float(layer_sizes), tags)
-        self.gauge(namespace + '.image.layer_count', float(layer_count), tags)
+        self.gauge(namespace + '.size', float(layer_sizes), tags)
+        self.gauge(namespace + '.layer_count', float(layer_count), tags)
 
     def _report_service_check(self, data, prefix, format, tags=[], message=""):
         # Last scan service check
@@ -316,6 +317,6 @@ class TwistlockCheck(AgentCheck):
                 return {}
             return j
         except Exception as e:
-            self.warning("cannot get stuff: {} response is: {}".format(e, response.text))
+            self.log.debug("cannot get a response: {} response is: {}".format(e, response.text))
             raise e
             return {}

@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
 import os
 import mock
+import json
 
 from datadog_checks.twistlock import TwistlockCheck
-from datadog_checks.twistlock.config import Config
 
 customtag = "custom:tag"
 
@@ -17,42 +16,55 @@ instance = {
     'ssl_verify': False
 }
 
+METRICS = [
+    'twistlock.registry.cve.details',
+    'twistlock.registry.cve.count',
+    'twistlock.registry.compliance.count',
+    'twistlock.registry.size',
+    'twistlock.registry.layer_count',
+    'twistlock.images.cve.details',
+    'twistlock.images.cve.count',
+    'twistlock.images.compliance.count',
+    'twistlock.images.size',
+    'twistlock.images.layer_count',
+    'twistlock.hosts.cve.details',
+    'twistlock.hosts.cve.count',
+    'twistlock.hosts.compliance.count',
+    'twistlock.containers.compliance.count',
+]
 
-@pytest.fixture()
-def mock_get():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+class MockResponse:
+    def __init__(self, j):
+        self.text = j
+        self._json = j
+        self.status_code = 200
+
+    def json(self):
+        return json.loads(self._json)
+
+
+def mock_get(url, *args, **kwargs):
+    split_url = url.split('/')
+    path = split_url[-1]
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', path)
     with open(f_name, 'r') as f:
         text_data = f.read()
-    with mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"}
-        )
-    ):
-        yield
+        return MockResponse(text_data)
 
 
-def test_check(aggregator, mock_get):
-
-    metrics = []
+def test_check(aggregator):
 
     check = TwistlockCheck('twistlock', {}, {})
-    check.check(instance)
-    check.check(instance)
 
-    for metric in metrics:
+    with mock.patch('requests.get', side_effect=mock_get, autospec=True):
+        check.check(instance)
+        check.check(instance)
+
+    for metric in METRICS:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, customtag)
 
-    import logging
-    log = logging.getLogger(__file__)
-
-    from six import iteritems
-    for metric, value in iteritems(aggregator._metrics):
-        log.warning("{} {}".format(metric, value))
-
     aggregator.assert_all_metrics_covered()
-
-    assert False
