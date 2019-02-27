@@ -11,6 +11,7 @@
 manifest.json         @DataDog/baklava @DataDog/agent-integrations
 
 # Container monitoring
+/containerd/               @DataDog/container-integrations @DataDog/agent-integrations
 /cri/                      @DataDog/container-integrations @DataDog/agent-integrations
 /crio/                     @DataDog/container-integrations @DataDog/agent-integrations
 /datadog_checks_base/      @DataDog/container-integrations @DataDog/agent-integrations
@@ -23,6 +24,7 @@ manifest.json         @DataDog/baklava @DataDog/agent-integrations
 /kubernetes/               @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes_state/         @DataDog/container-integrations @DataDog/agent-integrations
 /nginx_ingress_controller/ @DataDog/container-integrations @DataDog/agent-integrations
+/openmetrics/              @DataDog/container-integrations @DataDog/agent-integrations
 
 # Agent core team
 /datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations
