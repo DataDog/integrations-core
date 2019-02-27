@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, PDHBaseCheck, ensure_unicode
+from datadog_checks.base import AgentCheck, PDHBaseCheck
 from datadog_checks.utils.containers import hash_mutable
 
 
