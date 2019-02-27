@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 1.7.0 / 2019-02-27
+
+* [Added] Remove Encrypted column from results. See [#3174](https://github.com/DataDog/integrations-core/pull/3174).
+
 ## 1.6.0 / 2019-02-18
 
 * [Added] Finish Python 3 Support. See [#2948](https://github.com/DataDog/integrations-core/pull/2948).
