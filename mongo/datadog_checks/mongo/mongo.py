@@ -563,7 +563,7 @@ class MongoDb(AgentCheck):
             metric_name = re.compile(pattern).sub(repl, metric_name)
 
         # Normalize, and wrap
-        return "{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
+        return u"{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
             normalized_metric_name=self.normalize(metric_name.lower()),
             metric_prefix=metric_prefix, metric_suffix=metric_suffix
         )
