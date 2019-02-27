@@ -15,3 +15,10 @@ instances:
   ## The twistlock prometheus endpoint
   #
     password: '<PASSWORD>'
+
+
+# logs:
+#   - type: docker
+#     image: twistlock/private
+#     source: twistlock
+#     service: twistlock
