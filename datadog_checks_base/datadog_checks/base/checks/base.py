@@ -317,9 +317,9 @@ class __AgentCheckPy3(object):
         name = re.sub(br"_\.", b".", name)
 
         if prefix is not None:
-            return ensure_bytes(prefix) + b"." + name
-        else:
-            return name
+            name = ensure_bytes(prefix) + b"." + name
+
+        return ensure_unicode(name)
 
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')

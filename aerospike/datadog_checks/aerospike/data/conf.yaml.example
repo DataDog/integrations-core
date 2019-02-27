@@ -10,8 +10,29 @@ instances:
   #
     port: 3000
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## @param username - string - optional
+  ## The database user to authenticate as.
+  #
+  #  username: <USERNAME>
+
+  ## @param password - string - optional
+  ## The password of `username`.
+  #
+  #  password: <PASSWORD>
+
+  ## @param tls_name - string - optional
+  ## This must match the tls-name specified in the node’s server
+  ## configuration file and match the server’s CA certificate.
+  #
+  #  tls_name: <TLS_NAME>
+
+  ## @param timeout - integer - optional - default: 10
+  ## The read timeout in seconds.
+  #
+  #  timeout: 10
+
+  ## @param tags  - list of key:value strings - optional
+  ## List of tags to attach to every metric and service check emitted by this integration.
   ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #

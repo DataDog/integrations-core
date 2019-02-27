@@ -4,7 +4,6 @@
 import socket
 import time
 
-from datadog_checks.base import ensure_unicode
 from datadog_checks.base.checks import NetworkCheck, Status
 
 
@@ -104,7 +103,7 @@ class TCPCheck(NetworkCheck):
         return Status.UP, "UP"
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):
-        instance_name = ensure_unicode(self.normalize(instance['name']))
+        instance_name = self.normalize(instance['name'])
         host = instance.get('host', None)
         port = instance.get('port', None)
         custom_tags = instance.get('tags', [])
