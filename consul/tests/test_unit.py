@@ -117,7 +117,7 @@ def test_get_nodes_with_service_critical(aggregator):
 
 def test_consul_request(aggregator, instance):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
-    with mock.patch("datadog_checks.consul.consul.requests") as mock_requests:
+    with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
         consul_check.consul_request(instance, "foo")
         url = "{}/{}".format(instance["url"], "foo")
         aggregator.assert_service_check(
@@ -128,7 +128,7 @@ def test_consul_request(aggregator, instance):
         )
 
         aggregator.reset()
-        mock_requests.get.side_effect = Exception("message")
+        mock_requests_get.side_effect = Exception("message")
         with pytest.raises(Exception):
             consul_check.consul_request(instance, "foo")
         aggregator.assert_service_check(
