@@ -11,7 +11,7 @@ import pymongo
 from six import PY3, iteritems, itervalues
 from six.moves.urllib.parse import unquote_plus, urlsplit
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative, ensure_unicode
 from datadog_checks.base.utils.common import round_value
 
 
@@ -561,7 +561,6 @@ class MongoDb(AgentCheck):
         # Replace case-sensitive metric name characters
         for pattern, repl in iteritems(self.CASE_SENSITIVE_METRIC_NAME_SUFFIXES):
             metric_name = re.compile(pattern).sub(repl, metric_name)
-
         # Normalize, and wrap
         return "{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
             normalized_metric_name=self.normalize(metric_name.lower()),

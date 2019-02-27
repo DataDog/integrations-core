@@ -75,7 +75,7 @@ class HTTPCheck(NetworkCheck):
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
         tags_list.append('url:{}'.format(addr))
-        instance_name = ensure_unicode(self.normalize(instance['name']))
+        instance_name = self.normalize(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         r = None
@@ -237,7 +237,7 @@ class HTTPCheck(NetworkCheck):
         return service_checks
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):
-        instance_name = ensure_unicode(self.normalize(instance['name']))
+        instance_name = self.normalize(instance['name'])
         url = instance.get('url', None)
         if url is not None:
             url = ensure_unicode(url)
