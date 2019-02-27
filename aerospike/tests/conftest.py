@@ -6,7 +6,7 @@ from copy import deepcopy
 import aerospike
 import pytest
 
-from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 from .common import COMPOSE_FILE, HOST, INSTANCE, PORT
 
@@ -14,7 +14,7 @@ from .common import COMPOSE_FILE, HOST, INSTANCE, PORT
 def init_db():
     # sample Aerospike Python Client code
     # https://www.aerospike.com/docs/client/python/usage/kvs/write.html
-    client = aerospike.client({'hosts': [(HOST, 3000)]}).connect()
+    client = aerospike.client({'hosts': [(HOST, PORT)]}).connect()
 
     key = ('test', 'characters', 'bender')
     bins = {
@@ -38,7 +38,6 @@ def dd_environment():
     with docker_run(
         COMPOSE_FILE,
         conditions=[
-            CheckEndpoints(['http://{}:{}'.format(HOST, PORT)]),
             CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']),
             WaitFor(init_db),
         ],

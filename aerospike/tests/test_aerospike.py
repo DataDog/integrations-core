@@ -8,7 +8,7 @@ from datadog_checks.aerospike import AerospikeCheck
 
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, instance):
-    check = AerospikeCheck('aerospike', {}, {})
+    check = AerospikeCheck('aerospike', {}, [instance])
     check.check(instance)
 
     # This hasn't been working
@@ -29,4 +29,5 @@ def test_check(aggregator, instance):
         'aerospike.set.stop_writes_count', 0, tags=['namespace:test', 'set:characters', 'tag:value']
     )
 
+    aggregator.assert_service_check('aerospike.can_connect', check.OK)
     aggregator.assert_service_check('aerospike.cluster_up', check.OK)

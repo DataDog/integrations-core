@@ -117,7 +117,7 @@ def test_get_nodes_with_service_critical(aggregator):
 
 def test_consul_request(aggregator, instance):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
-    with mock.patch("datadog_checks.consul.consul.requests") as mock_requests:
+    with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
         consul_check.consul_request(instance, "foo")
         url = "{}/{}".format(instance["url"], "foo")
         aggregator.assert_service_check(
@@ -128,7 +128,7 @@ def test_consul_request(aggregator, instance):
         )
 
         aggregator.reset()
-        mock_requests.get.side_effect = Exception("message")
+        mock_requests_get.side_effect = Exception("message")
         with pytest.raises(Exception):
             consul_check.consul_request(instance, "foo")
         aggregator.assert_service_check(
@@ -322,18 +322,18 @@ def test_network_latency_checks(aggregator):
 
     latency = []
     for m_name, metrics in aggregator._metrics.items():
-        if m_name.startswith(b'consul.net.'):
+        if m_name.startswith('consul.net.'):
             latency.extend(metrics)
     latency.sort()
     # Make sure we have the expected number of metrics
     assert 19 == len(latency)
 
     # Only 3 dc-latency metrics since we only do source = self
-    dc = [m for m in latency if b'.dc.latency.' in m[0]]
+    dc = [m for m in latency if '.dc.latency.' in m[0]]
     assert 3 == len(dc)
     assert 1.6746410750238774 == dc[0][2]
 
     # 16 latency metrics, 2 nodes * 8 metrics each
-    node = [m for m in latency if b'.node.latency.' in m[0]]
+    node = [m for m in latency if '.node.latency.' in m[0]]
     assert 16 == len(node)
     assert 0.26577747932995816 == node[0][2]

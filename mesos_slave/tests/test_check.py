@@ -17,12 +17,6 @@ from datadog_checks.mesos_slave import MesosSlave
 CHECK_NAME = 'mesos_master'
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 
-INSTANCE = {
-    'url': 'http://localhost:5051',
-    'tasks': ['hello'],
-    'tags': ['instance:mytag1']
-}
-
 
 def read_fixture(name):
     with open(os.path.join(FIXTURE_DIR, name)) as f:
@@ -38,8 +32,8 @@ def check():
     return check
 
 
-def test_check(check, aggregator):
-    check.check(INSTANCE)
+def test_check(check, instance, aggregator):
+    check.check(instance)
     metrics = {}
     for d in (check.SLAVE_TASKS_METRICS, check.SYSTEM_METRICS, check.SLAVE_RESOURCE_METRICS,
               check.SLAVE_EXECUTORS_METRICS, check.STATS_METRICS):
