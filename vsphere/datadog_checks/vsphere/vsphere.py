@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
 from collections import defaultdict
 from datetime import timedelta
 import re
+from six import iteritems
+from six.moves import range
 import ssl
 import time
 import traceback
@@ -14,13 +16,13 @@ from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
 from pyVmomi import vmodl  # pylint: disable=E0611
 
+from datadog_checks.base import ensure_unicode
 from datadog_checks.config import is_affirmative
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool, SENTINEL
 from datadog_checks.checks.libs.timer import Timer
-from datadog_checks.utils.common import ensure_bytes
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .errors import BadConfigError, ConnectionError
@@ -273,7 +275,7 @@ class VSphereCheck(AgentCheck):
         tags = instance.get('tags', [])
 
         service_check_tags = [
-            b'vcenter_server:{}'.format(instance.get('name')),
+            'vcenter_server:{}'.format(instance.get('name')),
             'vcenter_host:{}'.format(instance.get('host')),
         ] + tags
         service_check_tags = list(set(service_check_tags))
@@ -333,7 +335,7 @@ class VSphereCheck(AgentCheck):
         for instance in self.instances:
             i_key = self._instance_key(instance)
             if not self.mor_cache.contains(i_key):
-                self.log.warning(b"Unable to extract host tags for vSphere instance: {}".format(i_key))
+                self.log.warning("Unable to extract host tags for vSphere instance: {}".format(i_key))
                 continue
 
             for _, mor in self.mor_cache.mors(i_key):
@@ -349,9 +351,10 @@ class VSphereCheck(AgentCheck):
         properties = all_objects.get(mor, {})
         parent = properties.get("parent")
         if parent:
-            parent_name = all_objects.get(parent, {}).get("name", "unknown")
+            parent_name = ensure_unicode(all_objects.get(parent, {}).get("name", "unknown"))
             tag = []
             if isinstance(parent, vim.HostSystem):
+                import pdb; pdb.set_trace()
                 tag.append('vsphere_host:{}'.format(parent_name))
             elif isinstance(parent, vim.Folder):
                 tag.append('vsphere_folder:{}'.format(parent_name))
@@ -488,7 +491,6 @@ class VSphereCheck(AgentCheck):
                     hostname = properties.get("guest.hostName", properties.get("name", "unknown"))
                 else:
                     hostname = properties.get("name", "unknown")
-                hostname = ensure_bytes(hostname)
                 if properties.get("parent"):
                     instance_tags += self._get_parent_tags(obj, all_objects)
 
@@ -503,7 +505,7 @@ class VSphereCheck(AgentCheck):
                     host_mor = properties.get("runtime.host")
                     host = "unknown"
                     if host_mor:
-                        host = all_objects.get(host_mor, {}).get("name", "unknown")
+                        host = ensure_unicode(all_objects.get(host_mor, {}).get("name", "unknown"))
                     instance_tags.append('vsphere_host:{}'.format(host))
                 elif isinstance(obj, vim.HostSystem):
                     vsphere_type = 'vsphere_type:host'
@@ -604,7 +606,7 @@ class VSphereCheck(AgentCheck):
         discovery.
         """
         i_key = self._instance_key(instance)
-        self.log.debug(b"Caching the morlist for vcenter instance {}".format(i_key))
+        self.log.debug("Caching the morlist for vcenter instance {}".format(i_key))
 
         # If the queue is not completely empty, don't do anything
         for resource_type in RESOURCE_TYPE_METRICS:
@@ -615,7 +617,7 @@ class VSphereCheck(AgentCheck):
                                "(latest refresh was {}s ago)".format(resource_type, time.time() - last))
                 return
 
-        tags = [b"vcenter_server:{}".format(instance.get('name'))]
+        tags = ["vcenter_server:{}".format(ensure_unicode(instance.get('name')))]
         regexes = {
             'host_include': instance.get('host_include_only_regex'),
             'vm_include': instance.get('vm_include_only_regex')
@@ -667,7 +669,7 @@ class VSphereCheck(AgentCheck):
         self.mor_cache.init_instance(i_key)
 
         if not self.mor_objects_queue.contains(i_key):
-            self.log.debug(b"Objects queue is not initialized yet for instance {}, skipping processing".format(i_key))
+            self.log.debug("Objects queue is not initialized yet for instance {}, skipping processing".format(i_key))
             return
 
         for resource_type in RESOURCE_TYPE_METRICS:
@@ -676,7 +678,7 @@ class VSphereCheck(AgentCheck):
             batch_size = self.batch_morlist_size or self.mor_objects_queue.size(i_key, resource_type)
             while self.mor_objects_queue.size(i_key, resource_type):
                 mors = []
-                for _ in xrange(batch_size):
+                for _ in range(batch_size):
                     mor = self.mor_objects_queue.pop(i_key, resource_type)
                     if mor is None:
                         self.log.debug("No more objects of type '{}' left in the queue".format(resource_type))
@@ -709,7 +711,7 @@ class VSphereCheck(AgentCheck):
 
         i_key = self._instance_key(instance)
         self.metadata_cache.init_instance(i_key)
-        self.log.info(b"Warming metrics metadata cache for instance {}".format(i_key))
+        self.log.info("Warming metrics metadata cache for instance {}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
         custom_tags = instance.get('tags', [])
@@ -737,7 +739,7 @@ class VSphereCheck(AgentCheck):
                 # Build the list of metrics we will want to collect
                 metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter.key, instance="*"))
 
-        self.log.info(b"Finished metadata collection for instance {}".format(i_key))
+        self.log.info("Finished metadata collection for instance {}".format(i_key))
         # Reset metadata
         self.metadata_cache.set_metadata(i_key, new_metadata)
         self.metadata_cache.set_metric_ids(i_key, metric_ids)
@@ -853,17 +855,17 @@ class VSphereCheck(AgentCheck):
         """
         i_key = self._instance_key(instance)
         if not self.mor_cache.contains(i_key):
-            self.log.debug(b"Not collecting metrics for instance '{}', nothing to do yet.".format(i_key))
+            self.log.debug("Not collecting metrics for instance '{}', nothing to do yet.".format(i_key))
             return
 
         vm_count = 0
         custom_tags = instance.get('tags', [])
-        tags = [b"vcenter_server:{}".format(instance.get('name'))] + custom_tags
+        tags = ["vcenter_server:{}".format(ensure_unicode(instance.get('name')))] + custom_tags
 
         n_mors = self.mor_cache.instance_size(i_key)
         if not n_mors:
             self.gauge('vsphere.vm.count', vm_count, tags=tags)
-            self.log.debug(b"No Mor objects to process for instance '{}', skip...".format(i_key))
+            self.log.debug("No Mor objects to process for instance '{}', skip...".format(i_key))
             return
 
         self.log.debug("Collecting metrics for {} mors".format(n_mors))
@@ -873,7 +875,7 @@ class VSphereCheck(AgentCheck):
         batch_size = self.batch_morlist_size or n_mors
         for batch in self.mor_cache.mors_batch(i_key, batch_size):
             query_specs = []
-            for _, mor in batch.iteritems():
+            for _, mor in iteritems(batch):
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
                 if mor['mor_type'] not in REALTIME_RESOURCES and ('metrics' not in mor or not mor['metrics']):

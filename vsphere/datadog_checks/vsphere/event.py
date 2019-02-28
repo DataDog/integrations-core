@@ -9,6 +9,7 @@ from datetime import datetime
 from pyVmomi import vim
 
 from .common import SOURCE_TYPE
+from datadog_checks.base import ensure_unicode
 
 
 EXCLUDE_FILTERS = {
@@ -111,10 +112,10 @@ class VSphereEvent(object):
 
         self.payload['host'] = self.raw_event.vm.name
         self.payload['tags'] = [
-            'vsphere_host:%s' % pre_host,
-            'vsphere_host:%s' % new_host,
-            'vsphere_datacenter:%s' % pre_dc,
-            'vsphere_datacenter:%s' % new_dc,
+            'vsphere_host:{}'.format(ensure_unicode(pre_host)),
+            'vsphere_host:{}'.format(ensure_unicode(new_host)),
+            'vsphere_datacenter:{}'.format(ensure_unicode(pre_dc)),
+            'vsphere_datacenter:{}'.format(ensure_unicode(new_dc)),
         ]
         return self.payload
 
