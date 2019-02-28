@@ -34,7 +34,32 @@ logs_enabled: true
 
 ##### Kubernetes
 
+If you're using Kubernetes, add the config to replication controller section of twistlock_console.yaml before deploying:
 
+```yaml
+...
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: twistlock-console
+  namespace: twistlock
+spec:
+  replicas: 1
+  selector:
+    name: twistlock-console
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/twistlock.check_names: '[twistlock]'
+        ad.datadoghq.com/twistlock.init_configs: '[{}]'
+        ad.datadoghq.com/twistlock.instances: '[{"url":"http://%%host%%:%%port%%", "username":"USERNAME", "password": "PASSWORD"}]'
+        ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
+      name: twistlock-console
+      namespace: twistlock
+      labels:
+        name: twistlock-console
+...
+```
 
 ##### Docker
 
