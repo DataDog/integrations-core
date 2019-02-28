@@ -6,6 +6,7 @@ import logging
 
 import mock
 
+from datadog_checks.base import ensure_unicode
 from datadog_checks.nfsstat import NfsStatCheck
 
 metrics = [
@@ -48,7 +49,7 @@ class TestNfsstat:
         instance = self.INSTANCES['main']
         c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
         with mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output',
-                        return_value=(b'No NFS mount points were found', '', 0)):
+                        return_value=('No NFS mount points were found', '', 0)):
             c.check(instance)
 
     def test_check(self, aggregator):
@@ -56,7 +57,7 @@ class TestNfsstat:
         c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
 
         with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
-            mock_output = f.read()
+            mock_output = ensure_unicode(f.read())
 
         with mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output',
                         return_value=(mock_output, '', 0)):
