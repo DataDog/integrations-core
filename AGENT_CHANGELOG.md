@@ -151,7 +151,6 @@
 * Elasticsearch [1.9.1](https://github.com/DataDog/integrations-core/blob/master/elastic/CHANGELOG.md)
 * etcd [1.6.0](https://github.com/DataDog/integrations-core/blob/master/etcd/CHANGELOG.md)
 * Go-Expvar [1.0.5](https://github.com/DataDog/integrations-core/blob/master/go_expvar/CHANGELOG.md)
-* go_metro [1.1.0](https://github.com/DataDog/integrations-core/blob/master/go_metro/CHANGELOG.md)
 * Gunicorn [1.4.0](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
 * HAProxy [1.3.2](https://github.com/DataDog/integrations-core/blob/master/haproxy/CHANGELOG.md)
 * HDFS Datanode [1.5.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/CHANGELOG.md)
@@ -173,6 +172,7 @@
 * Redis [1.8.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
 * SQL Server [1.8.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
 * SSH [1.4.0](https://github.com/DataDog/integrations-core/blob/master/ssh_check/CHANGELOG.md)
+* Supervisord [1.1.4](https://github.com/DataDog/integrations-core/blob/master/supervisord/CHANGELOG.md)
 * System Core [1.2.0](https://github.com/DataDog/integrations-core/blob/master/system_core/CHANGELOG.md)
 * System Swap [1.3.0](https://github.com/DataDog/integrations-core/blob/master/system_swap/CHANGELOG.md)
 * TCP [2.1.0](https://github.com/DataDog/integrations-core/blob/master/tcp_check/CHANGELOG.md)
@@ -182,7 +182,7 @@
 
 ## Datadog Agent version [6.7.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#670)
 
-* Supervisord [1.1.4](https://github.com/DataDog/integrations-core/blob/master/supervisord/CHANGELOG.md)
+* There were no integration updates for this version of the Agent.
 
 ## Datadog Agent version [6.6.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#660)
 
