@@ -14,26 +14,6 @@ The Twistlock check is included in the [Datadog Agent][2] package, so you do not
 
 Edit the `twistlock.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your twistlock performance data. See the [sample twistlock.d/conf.yaml][2] for all available configuration options.
 
-If you're using Kubernetes, add the config to the Twistlock Console.
-
-[Restart the Agent][3]
-
-### Validation
-
-[Run the Agent's `status` subcommand][4] and look for `twistlock` under the Checks section.
-
-#### Log Collection
-
-**Available for Agent >6.0**
-
-Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
-
-```yaml
-logs_enabled: true
-```
-
-##### Kubernetes
-
 If you're using Kubernetes, add the config to replication controller section of twistlock_console.yaml before deploying:
 
 ```yaml
@@ -58,6 +38,49 @@ spec:
       namespace: twistlock
       labels:
         name: twistlock-console
+...
+```
+
+
+[Restart the Agent][3]
+
+### Validation
+
+[Run the Agent's `status` subcommand][4] and look for `twistlock` under the Checks section.
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
+
+```yaml
+logs_enabled: true
+```
+
+##### Kubernetes
+
+If you're using Kubernetes, add the config to replication controller section of twistlock_defender.yaml before deploying:
+
+```yaml
+...
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: twistlock-defender
+  namespace: twistlock
+spec:
+  replicas: 1
+  selector:
+    name: twistlock-defender
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
+      name: twistlock-defender
+      namespace: twistlock
+      labels:
+        name: twistlock-defender
 ...
 ```
 
