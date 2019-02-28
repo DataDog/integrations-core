@@ -60,28 +60,17 @@ logs_enabled: true
 
 ##### Kubernetes
 
-If you're using Kubernetes, add the config to replication controller section of twistlock_console.yaml as annotations before deploying:
+If you're using Kubernetes, add an env variable for
 
 ```yaml
-...
-apiVersion: v1
-kind: ReplicationController
-metadata:
-  name: twistlock-defender
-  namespace: twistlock
-spec:
-  replicas: 1
-  selector:
-    name: twistlock-defender
-  template:
-    metadata:
-      annotations:
-        ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
-      name: twistlock-defender
-      namespace: twistlock
-      labels:
-        name: twistlock-defender
-...
+    - name: DD_LOGS_ENABLED
+        value: "true"
+```
+
+and an annotation for the config for the defender:
+
+```yaml
+ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
 ```
 
 ##### Docker

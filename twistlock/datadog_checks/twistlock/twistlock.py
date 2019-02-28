@@ -2,13 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from collections import defaultdict
 import time
+
+from collections import defaultdict
 from datetime import datetime, timedelta
 
-from six import iteritems
-
 import requests
+
+from six import iteritems
 
 from datadog_checks.base import AgentCheck
 

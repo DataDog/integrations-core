@@ -25,6 +25,11 @@ instances:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
 
+  ## @param ssl_verify - boolean - optional - default: true
+  ## Instruct the check to validate SSL certificates when connecting to `server` and `query_monitoring_url`.
+  #
+  #  ssl_verify: true
+
 # logs:
 #   - type: docker
 #     image: twistlock/private
