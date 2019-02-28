@@ -200,7 +200,7 @@ jobs:
     - stage: test
       env: CHECK=nginx_ingress_controller PYTHON3=true
     - stage: test
-      env: CHECK=ntp PYTHON3=true
+      env: CHECK=ntp
     - stage: test
       env: CHECK=openldap PYTHON3=true
     - stage: test
