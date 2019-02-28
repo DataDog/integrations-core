@@ -6,6 +6,8 @@ import os
 import mock
 import json
 
+from six import iteritems
+
 from datadog_checks.dev import get_here
 
 from datadog_checks.twistlock import TwistlockCheck
@@ -18,7 +20,7 @@ instance = {
     'ssl_verify': False
 }
 
-METRICS = [
+METRICS = {
     'twistlock.registry.cve.details',
     'twistlock.registry.cve.count',
     'twistlock.registry.compliance.count',
@@ -33,7 +35,7 @@ METRICS = [
     'twistlock.hosts.cve.count',
     'twistlock.hosts.compliance.count',
     'twistlock.containers.compliance.count',
-]
+}
 
 HERE = get_here()
 
@@ -65,7 +67,7 @@ def test_check(aggregator):
         check.check(instance)
         check.check(instance)
 
-    for metric in METRICS:
+    for metric, tags in (METRICS):
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, customtag)
 
