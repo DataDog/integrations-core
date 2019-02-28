@@ -4,12 +4,12 @@ twistlock.registry.cve.count,gauge,,occurance,,the number of CVEs an image has,-
 twistlock.registry.compliance.count,gauge,,occurance,,the number of compliance violations an image has,-1,twistlock,compliance_count
 twistlock.registry.size,gauge,,byte,,the size of an image in a registry,0,twistlock,size
 twistlock.registry.layer_count,gauge,,occurance,,the count of layers in an image in a registry,0,twistlock,layer_count
-twistlock.images.cve.details,gauge,,occurance,,
-twistlock.images.cve.count,gauge,,occurance,,
-twistlock.images.compliance.count,gauge,,occurance,,
-twistlock.images.size,gauge,,byte,,
-twistlock.images.layer_count,gauge,,occurance,,
-twistlock.hosts.cve.details,gauge,,occurance,,
-twistlock.hosts.cve.count,gauge,,occurance,,
-twistlock.hosts.compliance.count,gauge,,occurance,,
-twistlock.containers.compliance.count,gauge,,occurance,,
+twistlock.images.cve.details,gauge,,occurance,,the details of a CVE,-1,twistlock,cve_details
+twistlock.images.cve.count,gauge,,occurance,,the number of CVEs an image has,-1,twistlock,cve_count
+twistlock.images.compliance.count,gauge,,occurance,,the number of compliance violations an image has,-1,twistlock,compliance_count
+twistlock.images.size,gauge,,byte,,the size of a local image,0,twistlock,size
+twistlock.images.layer_count,gauge,,occurance,,the count of layers in a local image,0,twistlock,layer_count
+twistlock.hosts.cve.details,gauge,,occurance,,the details of a CVE,-1,twistlock,cve_details
+twistlock.hosts.cve.count,gauge,,occurance,,the number of CVEs a host has,-1,twistlock,cve_count
+twistlock.hosts.compliance.count,gauge,,occurance,,the number of compliance violations a host has,-1,twistlock,compliance_count
+twistlock.containers.compliance.count,gauge,,occurance,,the number of compliance violations a container has,-1,twistlock,compliance_count
