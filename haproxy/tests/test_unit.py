@@ -189,7 +189,6 @@ def test_count_hosts_statuses(aggregator, haproxy_mock):
     # backend hosts
     agg_statuses = haproxy_check._process_backend_hosts_metric(expected_hosts_statuses)
     expected_agg_statuses = {
-        'a': {'available': 0, 'unavailable': 0},
         'b': {'available': 3, 'unavailable': 2},
     }
     print(expected_agg_statuses)
