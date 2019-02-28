@@ -9,6 +9,7 @@ from collections import defaultdict
 BASE_CONFIG = {
     'url': 'http://localhost/admin?stats',
     'collect_status_metrics': True,
+    'enable_service_check': True,
 }
 
 
@@ -227,8 +228,8 @@ def test_optional_tags(aggregator, haproxy_mock):
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'new-tag')
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'my:new:tag')
     aggregator.assert_metric_has_tag('haproxy.count_per_status', 'my:new:tag')
-    # tags = ['service:a', 'new-tag', 'my:new:tag', 'backend:BACKEND']
-    # aggregator.assert_service_check('haproxy.backend_up', tags=tags)
+    tags = ['service:a', 'new-tag', 'my:new:tag', 'backend:BACKEND']
+    aggregator.assert_service_check('haproxy.backend_up', tags=tags)
 
 
 def test_regex_tags(aggregator, haproxy_mock):
@@ -251,11 +252,11 @@ def test_regex_tags(aggregator, haproxy_mock):
                      ]
     aggregator.assert_metric('haproxy.backend.session.current', value=1, count=1, tags=expected_tags)
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'app:elk-kibana', 1)
-    # tags = ['service:be_edge_http_sre-production_elk-kibana',
-    #         'region:infra',
-    #         'security:edge_http',
-    #         'app:elk-kibana',
-    #         'env:production',
-    #         'team:sre',
-    #         'backend:i-1']
-    # aggregator.assert_service_check('haproxy.backend_up', tags=tags)
+    tags = ['service:be_edge_http_sre-production_elk-kibana',
+            'region:infra',
+            'security:edge_http',
+            'app:elk-kibana',
+            'env:production',
+            'team:sre',
+            'backend:i-1']
+    aggregator.assert_service_check('haproxy.backend_up', tags=tags)
