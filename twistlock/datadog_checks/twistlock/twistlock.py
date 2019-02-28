@@ -48,6 +48,8 @@ class TwistlockCheck(AgentCheck):
 
         self.config = Config(instance)
 
+        # alert if a scan hasn't been able to run in a few hours and then in a day
+        # only calculate this once per check run
         self.current_date = datetime.now()
         self.warning_date = self.current_date - timedelta(hours=7)
         self.critical_date = self.current_date - timedelta(days=1)
@@ -71,6 +73,7 @@ class TwistlockCheck(AgentCheck):
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             raise e
 
+        # alert if your license will expire in 30 days and then in a week
         expiration_date = datetime.strptime(license.get("expiration_date"), LICENSE_DATE_FORMAT)
         current_date = datetime.now()
         warning_date = current_date + timedelta(days=30)
@@ -125,6 +128,7 @@ class TwistlockCheck(AgentCheck):
             return None
 
         for image in scan_result:
+            # if it's not a valid image result, skip it
             if '_id' not in image:
                 continue
 
@@ -158,6 +162,7 @@ class TwistlockCheck(AgentCheck):
             return None
 
         for host in scan_result:
+            # if there's no hostname, skip it
             if 'hostname' not in host:
                 continue
 
@@ -184,6 +189,7 @@ class TwistlockCheck(AgentCheck):
             return None
 
         for container in scan_result:
+            # if there's no id, skip it
             if '_id' not in container:
                 continue
 
@@ -222,6 +228,7 @@ class TwistlockCheck(AgentCheck):
 
     def _analyze_vulnerability(self, vuln, host=False, image=False):
         cve_id = vuln.get('id')
+        # if it doesn't have a cve id, it's probably an invalid record
         if not cve_id:
             return
 
@@ -315,7 +322,7 @@ class TwistlockCheck(AgentCheck):
         response = requests.get(url,
                                 auth=auth,
                                 verify=self.config.ssl_verify,
-                                proxies=self.get_instance_proxy(instance, url))
+                                proxies=self.get_instance_proxy(self.config.instance, url))
         try:
             j = response.json()
             # it's possible to get a null response from the server
