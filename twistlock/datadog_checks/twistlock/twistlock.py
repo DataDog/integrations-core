@@ -311,7 +311,10 @@ class TwistlockCheck(AgentCheck):
     def _retrieve_json(self, path):
         url = self.config.url + path
         auth = (self.config.username, self.config.password)
-        response = requests.get(url, auth=auth, verify=self.config.ssl_verify)
+        response = requests.get(url,
+                                auth=auth,
+                                verify=self.config.ssl_verify,
+                                proxies=self.get_instance_proxy(instance, url))
         try:
             j = response.json()
             # it's possible to get a null response from the server

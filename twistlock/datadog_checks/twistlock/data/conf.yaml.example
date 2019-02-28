@@ -16,6 +16,14 @@ instances:
   #
     password: '<PASSWORD>'
 
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
 # logs:
 #   - type: docker

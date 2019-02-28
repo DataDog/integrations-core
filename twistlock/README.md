@@ -60,7 +60,7 @@ logs_enabled: true
 
 ##### Kubernetes
 
-If you're using Kubernetes, add the config to replication controller section of twistlock_defender.yaml before deploying:
+If you're using Kubernetes, add the config to replication controller section of twistlock_console.yaml as annotations before deploying:
 
 ```yaml
 ...
