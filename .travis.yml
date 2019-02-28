@@ -112,6 +112,7 @@ jobs:
     - stage: test
       env: CHECK=disk PYTHON3=true
     - stage: test
+    # python 2 support only
       env: CHECK=dns_check
     - stage: test
       env: CHECK=dotnetclr PYTHON3=true
@@ -246,6 +247,7 @@ jobs:
     - stage: test
       env: CHECK=statsd PYTHON3=true
     - stage: test
+    # python 2 support only
       env: CHECK=supervisord
     - stage: test
       env: CHECK=squid PYTHON3=true
@@ -258,6 +260,7 @@ jobs:
     - stage: test
       env: CHECK=teamcity PYTHON3=true
     - stage: test
+    # python 2 support only
       env: CHECK=tokumx
     - stage: test
       env: CHECK=twemproxy PYTHON3=true
