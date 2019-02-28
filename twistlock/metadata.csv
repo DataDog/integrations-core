@@ -1,1 +1,15 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+twistlock.registry.cve.details,gauge,,occurance,,the details of a CVE,-1,twistlock,cve_details
+twistlock.registry.cve.count,gauge,,occurance,,the number of CVEs an image has,-1,twistlock,cve_count
+twistlock.registry.compliance.count,gauge,,occurance,,the number of compliance violations an image has,-1,twistlock,compliance_count
+twistlock.registry.size,gauge,,byte,,the size of an image in a registry,0,twistlock,size
+twistlock.registry.layer_count,gauge,,occurance,,the count of layers in an image in a registry,0,twistlock,layer_count
+twistlock.images.cve.details,gauge,,occurance,,
+twistlock.images.cve.count,gauge,,occurance,,
+twistlock.images.compliance.count,gauge,,occurance,,
+twistlock.images.size,gauge,,byte,,
+twistlock.images.layer_count,gauge,,occurance,,
+twistlock.hosts.cve.details,gauge,,occurance,,
+twistlock.hosts.cve.count,gauge,,occurance,,
+twistlock.hosts.compliance.count,gauge,,occurance,,
+twistlock.containers.compliance.count,gauge,,occurance,,
