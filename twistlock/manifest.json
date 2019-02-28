@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "twistlock",
   "metric_prefix": "twistlock.",
-  "metric_to_check": "",
+  "metric_to_check": "twistlock.registry.cve.count",
   "creates_events": false,
   "short_description": "",
   "guid": "59082b73-62f4-48d4-83f8-af3d5576eae1",
@@ -16,7 +16,7 @@
   ],
   "public_title": "Datadog-Twistlock Integration",
   "categories": [
-    ""
+    "security"
   ],
   "type": "check",
   "is_public": false
