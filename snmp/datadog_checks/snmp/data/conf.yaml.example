@@ -14,6 +14,71 @@ init_config:
 ## 
 #  ignore_nonincreasing_oid: false
 
+## @param metrics - list of elements - required
+## Specify metrics you want to monitor by using MIBS for Counter and Gauge, i.e:
+## - MIB: UDP-MIB
+##   symbol: udpInDatagrams
+##
+## If it's just a scalar, you can specify by OID and name it:
+##
+## - OID: 1.3.6.1.2.1.6.5
+##   name: tcpPassiveOpens
+##
+## Optional parameters:
+##
+## Use the 'metric_tags' parameter to specify a specific tag for a collected metric:
+##
+## - OID: 1.3.6.1.2.1.6.5
+##   name: tcpPassiveOpens
+##   metric_tags:
+##     - TCP
+##
+## User the 'forced_type' parameter to enforce a data type for OIDs if the
+## auto-detection for OID data types from the remote agent's response is failing.
+## Example: When a F5 Networks load balancer is queried for this OID, it returns
+## it as a Counter64 when it should be a gauge. So, this configuration forces
+## the data type to gauge:
+##
+## - OID: 1.3.6.1.4.1.3375.2.1.1.2.1.8.0
+##   name: F5_TotalCurrentConnections
+##   forced_type: gauge
+##
+## Query a table with the 'table' parameter and specify:
+##  - which columns to report as value with the 'symbols' parameter.
+##  - which columns / indexes to use as tags with the 'metric_tags' parameter.
+##  - which column to read the tag value from with the 'column' parameter.
+##  - which index you want to read the tag value from with the 'index' parameter.
+##
+## Example:
+##
+##  - MIB: IF-MIB
+##    table: ifTable
+##    symbols:
+##      - ifInOctets
+##      - ifOutOctets
+##    metric_tags:
+##      - tag: interface
+##        column: ifDescr
+##  - MIB: IP-MIB
+##    table: ipSystemStatsTable
+##    symbols:
+##      - ipSystemStatsInReceives
+##         metric_tags:
+##           - tag: ipversion
+##             index: 1
+#
+#  metrics:
+#    - MIB: UDP-MIB
+#      symbol: udpInDatagrams
+#    - MIB: TCP-MIB
+#      symbol: tcpActiveOpens
+#    - OID: 1.3.6.1.2.1.6.5
+#      name: tcpPassiveOpens
+#    - OID: 1.3.6.1.2.1.6.5
+#      name: tcpPassiveOpens
+#      metric_tags:
+#        - TCP
+
 instances:
   
   ## @param ip_address - string - required
