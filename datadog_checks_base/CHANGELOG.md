@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks_base
 
-## 6.1.0 / 2019-02-20
+## 6.0.1 / 2019-02-20
 
 * [Fixed] Import kubernetes lazily to reduce memory footprint. See [#3166](https://github.com/DataDog/integrations-core/pull/3166).
 
