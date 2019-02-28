@@ -41,11 +41,11 @@ class TwistlockCheck(AgentCheck):
         self.log.debug(msg)
         self.last_run = datetime.now() - timedelta(days=1)
 
-        self.config = Config(instances[0])
-
     def check(self, instance):
         if 'url' not in instance:
             raise Exception('Instance missing "url" value.')
+
+        self.config = Config(instance)
 
         self.current_date = datetime.now()
         self.warning_date = self.current_date - timedelta(hours=7)
