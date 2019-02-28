@@ -80,6 +80,7 @@ jobs:
     - stage: test
       env: CHECK=aerospike PYTHON3=true
     - stage: test
+    # Agent <=5.x.x integration - only supporting py2 is needed
       env: CHECK=agent_metrics
     - stage: test
       env: CHECK=apache PYTHON3=true
