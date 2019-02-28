@@ -191,7 +191,7 @@ def test_count_hosts_statuses(aggregator, haproxy_mock):
     expected_agg_statuses = {
         'b': {'available': 3, 'unavailable': 2},
     }
-    
+
     assert expected_agg_statuses == dict(agg_statuses)
 
     # with process_events set to True
