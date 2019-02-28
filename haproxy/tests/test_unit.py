@@ -9,6 +9,7 @@ from collections import defaultdict
 BASE_CONFIG = {
     'url': 'http://localhost/admin?stats',
     'collect_status_metrics': True,
+    'enable_service_check': True,
 }
 
 
