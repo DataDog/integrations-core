@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from collections import Counter
+from collections import defaultdict
 import time
 from datetime import datetime, timedelta
 
@@ -16,7 +16,7 @@ from .config import Config
 
 REGISTRY_SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-LICENCE_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+LICENSE_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 DOCKERIO_PREFIX = "docker.io/"
 
@@ -41,11 +41,11 @@ class TwistlockCheck(AgentCheck):
         self.log.debug(msg)
         self.last_run = datetime.now() - timedelta(days=1)
 
+        self.config = Config(instances[0])
+
     def check(self, instance):
         if 'url' not in instance:
             raise Exception('Instance missing "url" value.')
-
-        self.config = Config(instance)
 
         self.current_date = datetime.now()
         self.warning_date = self.current_date - timedelta(hours=7)
@@ -69,9 +69,8 @@ class TwistlockCheck(AgentCheck):
             self.warning("cannot retrieve license data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             raise e
-            return None
 
-        expiration_date = datetime.strptime(license.get("expiration_date"), LICENCE_DATE_FORMAT)
+        expiration_date = datetime.strptime(license.get("expiration_date"), LICENSE_DATE_FORMAT)
         current_date = datetime.now()
         warning_date = current_date + timedelta(days=30)
         critical_date = current_date + timedelta(days=7)
@@ -258,7 +257,11 @@ class TwistlockCheck(AgentCheck):
 
     def _report_vuln_info(self, namespace, data, tags):
         # CVE vulnerabilities
-        summary = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+        summary = defaultdict(int)
+        types = ["critical", "high", "medium", "low"]
+        for type in types:
+            summary[type] = 0
+
         cves = data.get('info', {}).get('cveVulnerabilities', []) or []
         for cve in cves:
             summary[cve['severity']] += 1
@@ -274,7 +277,7 @@ class TwistlockCheck(AgentCheck):
             self.gauge(namespace + '.cve.count', float(count), cve_tags)
 
     def _report_compliance_information(self, namespace, data, tags):
-        compliance = Counter({"critical": 0, "high": 0, "medium": 0, "low": 0})
+        compliance = defaultdict(int)
         vulns = data.get('info', {}).get('complianceDistribution', {}) or {}
         types = ["critical", "high", "medium", "low"]
         for type in types:
@@ -305,7 +308,7 @@ class TwistlockCheck(AgentCheck):
                            tags=tags,
                            message=message)
 
-    def _retrieve_json(self, path, page=0):
+    def _retrieve_json(self, path):
         url = self.config.url + path
         auth = (self.config.username, self.config.password)
         response = requests.get(url, auth=auth, verify=self.config.ssl_verify)
@@ -313,10 +316,7 @@ class TwistlockCheck(AgentCheck):
             j = response.json()
             # it's possible to get a null response from the server
             # {} is a bit easier to deal with
-            if not j:
-                return {}
-            return j
+            return j or {}
         except Exception as e:
             self.log.debug("cannot get a response: {} response is: {}".format(e, response.text))
             raise e
-            return {}
