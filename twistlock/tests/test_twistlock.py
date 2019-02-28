@@ -6,6 +6,8 @@ import os
 import mock
 import json
 
+from datadog_checks.dev import get_here
+
 from datadog_checks.twistlock import TwistlockCheck
 
 customtag = "custom:tag"
@@ -33,7 +35,7 @@ METRICS = [
     'twistlock.containers.compliance.count',
 ]
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
 
 
 class MockResponse:
@@ -49,7 +51,7 @@ class MockResponse:
 def mock_get(url, *args, **kwargs):
     split_url = url.split('/')
     path = split_url[-1]
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', path)
+    f_name = os.path.join(HERE, 'fixtures', path)
     with open(f_name, 'r') as f:
         text_data = f.read()
         return MockResponse(text_data)
