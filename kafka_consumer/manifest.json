@@ -20,5 +20,5 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "kafka"
+  "integration_id": "kafka-consumer"
 }
