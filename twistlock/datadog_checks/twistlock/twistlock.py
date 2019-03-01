@@ -41,7 +41,7 @@ class TwistlockCheck(AgentCheck):
 
         self.config = None
         if instances:
-            self.config = Config(instance[0])
+            self.config = Config(instances[0])
 
     def check(self, instance):
         if 'url' not in instance:
