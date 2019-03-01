@@ -102,6 +102,15 @@ class MockStreamResponse:
     def raw(self):
         return open(os.path.join(HERE, 'fixtures', self.filename))
 
+    def json(self):
+        with open(os.path.join(HERE, 'fixtures', self.filename)) as f:
+            return json.load(f)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
 
 @pytest.fixture
 def aggregator():
