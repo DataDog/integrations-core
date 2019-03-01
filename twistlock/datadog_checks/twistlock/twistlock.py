@@ -37,10 +37,7 @@ class TwistlockCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        msg = 'This check has not run before, '
-        msg += 'it will send all the new vulnerabilities that happened in the past day'
-        self.log.debug(msg)
-        self.last_run = datetime.now() - timedelta(days=1)
+        self.last_run = datetime.now()
 
     def check(self, instance):
         if 'url' not in instance:
