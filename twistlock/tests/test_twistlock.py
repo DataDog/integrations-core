@@ -6,8 +6,6 @@ import os
 import mock
 import json
 
-from six import iteritems
-
 from datadog_checks.dev import get_here
 
 from datadog_checks.twistlock import TwistlockCheck
@@ -69,7 +67,7 @@ def test_check(aggregator):
         check.check(instance)
         check.check(instance)
 
-    for metric, in METRICS:
+    for metric in METRICS:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, customtag)
 
