@@ -15,6 +15,8 @@ from datadog_checks.twistlock import TwistlockCheck
 customtag = "custom:tag"
 
 instance = {
+    'username': 'admin',
+    'password': 'password',
     'url': 'http://localhost:8081',
     'tags': [customtag],
     'ssl_verify': False
