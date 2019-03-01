@@ -14,9 +14,9 @@ init_config:
 ## 
 #  ignore_nonincreasing_oid: false
 
-## @param metrics - list of elements - optional
-## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
-## metrics are applied to all instances but can be overridden at the instance config level.
+## @param global_metrics - list of elements - optional
+## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
+## global_metrics are applied to all instances as long as use_global_metrics is set to true at the instance level.
 ## i.e:
 ## - MIB: UDP-MIB
 ##   symbol: udpInDatagrams
@@ -69,7 +69,7 @@ init_config:
 ##           - tag: ipversion
 ##             index: 1
 #
-#  metrics:
+#  global_metrics:
 #    - MIB: UDP-MIB
 #      symbol: udpInDatagrams
 #    - MIB: TCP-MIB
@@ -177,7 +177,9 @@ instances:
 
   ## @param metrics - list of elements - optional
   ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
-  ## metrics set here will override metrics set in the init_config section.
+  ## metrics set here will override global_metrics set in the init_config section if use_global_metrics is set to false.
+  ## Otherwise, they will be used in addition of global_metrics.
+  ##
   ## i.e:
   ## - MIB: UDP-MIB
   ##   symbol: udpInDatagrams

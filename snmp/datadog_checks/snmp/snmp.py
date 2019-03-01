@@ -73,7 +73,7 @@ class SnmpCheck(NetworkCheck):
         ip_address = instance["ip_address"]
         metrics = []
         if instance.get('use_global_metrics', True) and self.init_config is not None:
-            metrics = self.init_config.get('metrics', [])
+            metrics = self.init_config.get('global_metrics', [])
         if instance.get('metrics') is not None:
             metrics.extend(instance.get('metrics', []))
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
