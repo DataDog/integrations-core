@@ -16,6 +16,8 @@ init_config:
 ##                          this particular query.
 ## 4. tags (optional) - A list of tags to apply to each metric.
 ##
+## custom_queries are applied to all instance unless if the config is overridden.
+##
 ## This:
 ##
 ##  self.gauge('oracle.custom_query.metric1', value, tags=['tester:oracle', 'tag1:value'])
@@ -95,6 +97,8 @@ instances:
   ##                          and will be applied to every metric collected by
   ##                          this particular query.
   ## 4. tags (optional) - A list of tags to apply to each metric.
+  ##
+  ## custom_queries defined at instance level takes precedence over custom_queries defined in the init_config section.
   ##
   ## This:
   ##

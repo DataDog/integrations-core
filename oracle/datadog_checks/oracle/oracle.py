@@ -90,7 +90,8 @@ class Oracle(AgentCheck):
         custom_queries = []
         if self.init_config is not None:
             custom_queries = self.init_config.get('custom_queries', [])
-        custom_queries.extend(instance.get('custom_queries', []))
+        if instance.get('custom_queries'):
+            custom_queries = instance.get('custom_queries', [])
         return self.server, user, password, service, jdbc_driver, tags, custom_queries
 
     def _get_connection(self, server, user, password, service, jdbc_driver, tags):
