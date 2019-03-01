@@ -69,7 +69,7 @@ def test_check(aggregator):
         check.check(instance)
         check.check(instance)
 
-    for metric, tags in iteritems(METRICS):
+    for metric, in METRICS:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, customtag)
 

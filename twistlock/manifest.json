@@ -20,5 +20,5 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false
+  "is_public": true
 }
