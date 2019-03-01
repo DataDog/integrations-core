@@ -22,7 +22,7 @@ instance = {
     'ssl_verify': False
 }
 
-METRICS = {
+METRICS = [
     'twistlock.registry.cve.details',
     'twistlock.registry.cve.count',
     'twistlock.registry.compliance.count',
@@ -37,7 +37,7 @@ METRICS = {
     'twistlock.hosts.cve.count',
     'twistlock.hosts.compliance.count',
     'twistlock.containers.compliance.count',
-}
+]
 
 HERE = get_here()
 
