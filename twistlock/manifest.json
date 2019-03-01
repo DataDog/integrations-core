@@ -5,7 +5,7 @@
   "name": "twistlock",
   "metric_prefix": "twistlock.",
   "metric_to_check": "twistlock.registry.cve.count",
-  "creates_events": false,
+  "creates_events": true,
   "short_description": "Twistlock is a container security scanner",
   "guid": "59082b73-62f4-48d4-83f8-af3d5576eae1",
   "support": "core",
