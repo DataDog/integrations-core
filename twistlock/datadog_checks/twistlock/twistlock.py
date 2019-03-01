@@ -39,6 +39,7 @@ class TwistlockCheck(AgentCheck):
 
         self.last_run = datetime.now()
 
+        self.config = None
         if instances:
             self.config = Config(instance[0])
 
