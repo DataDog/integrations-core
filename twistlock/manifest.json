@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-Twistlock Integration",
   "categories": [
-    "security"
+    "security",
+    "log collection"
   ],
   "type": "check",
   "is_public": false
