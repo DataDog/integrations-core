@@ -170,6 +170,11 @@ instances:
   #
   #  context_name: <CONTEXT_NAME>
 
+  ## @param use_global_metrics - boolean - optional - default: true
+  ## Whether or not global_metrics should be included for this instance.
+  #
+  #  use_global_metrics: true
+
   ## @param metrics - list of elements - optional
   ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
   ## metrics set here will override metrics set in the init_config section.
