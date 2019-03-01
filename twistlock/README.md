@@ -52,43 +52,48 @@ spec:
 
 **Available for Agent >6.0**
 
-Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
-
-```yaml
-logs_enabled: true
-```
-
 ##### Kubernetes
 
-If you're using Kubernetes, add an env variable for
+* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration](https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection):
 
-```yaml
+```
+(...)
+  env:
+    (...)
     - name: DD_LOGS_ENABLED
         value: "true"
+    - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+        value: "true"
+(...)
 ```
 
-and an annotation for the config for the defender:
+* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest](https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest).
+
+* Make sure the log section is included in the Pod annotation for the defender:
+
+```yaml
+        ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
+```
+
+* [Restart the Agent][3] to begin sending Twistlock logs to Datadog.
+
+##### Docker
+
+* Collecting logs is disabled by default in the Datadog Agent. Enable it by adding those two environment variables:
+
+```
+DD_LOGS_ENABLED=true
+```
+
+* Add a label on the defender container: 
 
 ```yaml
 ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
 ```
 
-##### Docker
+* Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation](https://docs.datadoghq.com/logs/log_collection/docker/?tab=containerinstallation)
 
-If you're running on docker, uncomment this block in your `twistlock.d/conf.yaml` file to start collecting your Twistlock logs:
-
-```yaml
-logs:
-  - type: docker
-    image: twistlock/private
-    source: twistlock
-    service: twistlock
-```
-
-[Restart the Agent][3] to begin sending Twistlock logs to Datadog.
-
-**Learn more about log collection [in the log documentation][7]**
-
+* [Restart the Agent][3] to begin sending Twistlock logs to Datadog.
 
 ## Data Collected
 
