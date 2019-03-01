@@ -13,5 +13,5 @@ def dd_environment():
 def instance():
     return {
         'url': "http://www.google.com",
-        'ssl_version': "tls_1.2"
+        # 'ssl_version': "tls_1.2"
     }
