@@ -14,8 +14,10 @@ init_config:
 ## 
 #  ignore_nonincreasing_oid: false
 
-## @param metrics - list of elements - required
-## Specify metrics you want to monitor by using MIBS for Counter and Gauge, i.e:
+## @param metrics - list of elements - optional
+## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
+## metrics are applied to all instances but can be overridden at the instance config level.
+## i.e:
 ## - MIB: UDP-MIB
 ##   symbol: udpInDatagrams
 ##
@@ -168,8 +170,10 @@ instances:
   #
   #  context_name: <CONTEXT_NAME>
 
-  ## @param metrics - list of elements - required
-  ## Specify metrics you want to monitor by using MIBS for Counter and Gauge, i.e:
+  ## @param metrics - list of elements - optional
+  ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
+  ## metrics set here will override metrics set in the init_config section.
+  ## i.e:
   ## - MIB: UDP-MIB
   ##   symbol: udpInDatagrams
   ## 

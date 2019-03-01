@@ -71,10 +71,9 @@ class SnmpCheck(NetworkCheck):
     def _load_conf(self, instance):
         tags = instance.get("tags", [])
         ip_address = instance["ip_address"]
-        metrics = []
-        if self.init_config is not None:
+        metrics = instance.get('metrics', [])
+        if self.init_config is not None and self.init_config.get('metrics') is not None:
             metrics = self.init_config.get('metrics', [])
-        metrics.extend(instance.get('metrics', []))
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
         enforce_constraints = _is_affirmative(instance.get('enforce_mib_constraints', True))
