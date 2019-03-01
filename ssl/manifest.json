@@ -1,0 +1,23 @@
+{
+  "display_name": "Ssl",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "ssl",
+  "metric_prefix": "ssl.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "4e27a211-a034-42dd-9939-9ef967b1da50",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Ssl Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false
+}
