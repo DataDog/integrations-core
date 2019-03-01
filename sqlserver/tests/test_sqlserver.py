@@ -2,6 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+try:
+    import pyodbc
+except ImportError:
+    pyodbc = None
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
@@ -33,6 +37,71 @@ def test_check_docker(aggregator, init_config, instance_docker):
     sqlserver_check.check(instance_docker)
     expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
     _assert_metrics(aggregator, expected_tags)
+
+
+@pytest.mark.docker
+@pytest.mark.usefixtures("dd_environment")
+def test_check_stored_procedure(aggregator, init_config, instance_docker):
+    proc = 'pyStoredProc'
+    sp_tags = "foo:bar,baz:qux"
+
+    instance_docker['stored_procedure'] = proc
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
+
+    # Make DB connection
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        instance_docker['driver'],
+        instance_docker['host'],
+        instance_docker['username'],
+        instance_docker['password'],)
+    conn = pyodbc.connect(conn_str, timeout=30)
+
+    # Create cursor associated with connection
+    cursor = conn.cursor()
+
+    # Stored Procedure Drop Statement
+    sqlDropSP = "IF EXISTS (SELECT * FROM sys.objects \
+               WHERE type='P' AND name='{0}') \
+               DROP PROCEDURE {0}".format(proc)
+    cursor.execute(sqlDropSP)
+
+    # Stored Procedure Create Statement
+    sqlCreateSP = 'CREATE PROCEDURE {0} AS \
+                BEGIN \
+                    CREATE TABLE #Datadog \
+                    ( \
+                      [metric] varchar(255) not null, \
+                      [type] varchar(50) not null, \
+                      [value] float not null, \
+                      [tags] varchar(255) \
+                    ) \
+                    SET NOCOUNT ON; \
+                    INSERT INTO #Datadog (metric, type, value, tags) VALUES \
+                        ("sql.sp.testa", "gauge", 100, "{1}"), \
+                        ("sql.sp.testb", "gauge", 1, "{1}"), \
+                        ("sql.sp.testb", "gauge", 2, "{1}"); \
+                    SELECT * FROM #Datadog; \
+                END;'.format(proc, sp_tags)
+    cursor.execute(sqlCreateSP)
+
+    # For debugging. Calls the stored procedure and prints the results.
+    # cursor.execute(proc)
+    # rows = cursor.fetchall()
+    # while rows:
+    #     print(rows)
+    #     if cursor.nextset():
+    #         rows = cursor.fetchall()
+    #     else:
+    #         rows = None
+
+    cursor.commit()
+    cursor.close()
+
+    sqlserver_check.check(instance_docker)
+
+    expected_tags = instance_docker.get('tags', []) + sp_tags.split(',')
+    aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
+    aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
 
 @pytest.mark.docker
