@@ -63,9 +63,10 @@ def generate_data(couch_version):
     """
     # pass in authentication info for version 2
     auth = (common.USER, common.PASSWORD) if couch_version == "2" else None
+    headers = {'Accept': 'text/json'}
 
     # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=auth)
+    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
 
     # Populate the database
     data = {
@@ -79,7 +80,7 @@ def generate_data(couch_version):
             }
         }
     }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth)
+    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
 
     urls = [
         "{}/_node/node1@127.0.0.1/_stats".format(common.URL),
@@ -93,7 +94,7 @@ def generate_data(couch_version):
         try:
             for url in urls:
                 if not ready[url]:
-                    res = requests.get(url, auth=auth)
+                    res = requests.get(url, auth=auth, headers=headers)
                     if res.json():
                         ready[url] = True
             if len(ready) and all(ready.values()):
