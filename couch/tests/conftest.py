@@ -88,7 +88,7 @@ def generate_data(couch_version):
     ]
 
     ready = defaultdict(bool)
-    for i in range(60):
+    for i in range(120):
         print("Waiting for stats to be generated on the nodes...")
         try:
             for url in urls:
