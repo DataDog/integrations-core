@@ -945,7 +945,7 @@ class OpenStackCheck(AgentCheck):
                 self.log.debug("Removing server from cache: %s", new_server)
                 try:
                     del self.server_details_by_id[new_server['server_id']]
-                except KeyError as e:
+                except KeyError:
                     self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
 
         return self.server_details_by_id
@@ -1302,7 +1302,7 @@ class OpenStackCheck(AgentCheck):
                 self.warning("Error reaching nova API")
 
             return
-        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             # exponential backoff
             self.do_backoff(instance)
             self.warning("There were some problems reaching the nova API - applying exponential backoff")

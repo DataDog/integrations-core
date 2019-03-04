@@ -116,7 +116,7 @@ class MesosSlave(AgentCheck):
             else:
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at %s " % url
-        except requests.exceptions.Timeout as e:
+        except requests.exceptions.Timeout:
             # If there's a timeout
             msg = "%s seconds timeout when hitting %s" % (timeout, url)
             status = AgentCheck.CRITICAL
