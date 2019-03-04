@@ -1,2 +1,2 @@
 -e ../datadog_checks_dev
-pika==0.10.0
+pika==0.13.0
