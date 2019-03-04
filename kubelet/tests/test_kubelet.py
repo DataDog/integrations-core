@@ -9,7 +9,8 @@ from datetime import datetime
 import mock
 import pytest
 from six import iteritems
-from kubernetes.config.dateutil import parse_rfc3339, UTC
+from pyrfc3339 import parse as parse_rfc3339
+from pytz import utc as UTC
 
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
 
@@ -111,6 +112,7 @@ class MockStreamResponse:
 
     def __exit__(self, *args):
         pass
+
 
 @pytest.fixture
 def aggregator():

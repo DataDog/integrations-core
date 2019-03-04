@@ -11,7 +11,8 @@ from datetime import datetime, timedelta
 import json
 
 import requests
-from kubernetes.config.dateutil import parse_rfc3339, UTC
+from pyrfc3339 import parse as parse_rfc3339
+from pytz import utc as UTC
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -273,7 +274,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             return podlist
         except Exception as e:
             self.log.warning('failed to retrieve pod list from the kubelet at %s : %s'
-                           % (self.pod_list_url, str(e)))
+                             % (self.pod_list_url, str(e)))
             return None
 
     @staticmethod
