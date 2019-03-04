@@ -258,19 +258,20 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
     def retrieve_pod_list(self):
         try:
             cutoff_date = self._compute_pod_expiration_datetime()
-
-            if cutoff_date:
-                f = ExpiredPodFilter(cutoff_date)
-                with self.perform_kubelet_query(self.pod_list_url, stream=True) as r:
+            with self.perform_kubelet_query(self.pod_list_url, stream=True) as r:
+                if cutoff_date:
+                    f = ExpiredPodFilter(cutoff_date)
                     podlist = json.load(r.raw, object_hook=f.json_hook)
-                # Wrap items in a generator to filter our None items
-                podlist['items'] = (p for p in podlist['items'] if p is not None)
-                podlist['expired_count'] = f.expired_count
-            else:
-                podlist = self.perform_kubelet_query(self.pod_list_url).json()
-                if podlist.get("items") is None:
-                    # Sanitize input: if no pod are running, 'items' is a NoneObject
-                    podlist['items'] = []
+                    podlist['expired_count'] = f.expired_count
+                    if podlist.get("items") is not None:
+                        # Wrap items in a generator to filter our None items
+                        podlist['items'] = (p for p in podlist['items'] if p is not None)
+                else:
+                    podlist = json.load(r.raw)
+
+            if podlist.get("items") is None:
+                # Sanitize input: if no pod are running, 'items' is a NoneObject
+                podlist['items'] = []
             return podlist
         except Exception as e:
             self.log.warning('failed to retrieve pod list from the kubelet at %s : %s'
