@@ -1,4 +1,5 @@
 version: '{branch}.{build}'
+image: Visual Studio 2017
 clone_depth: 3
 build: off
 test: off
@@ -9,7 +10,7 @@ services:
   # We can't start more than one MSSQL instance to avoid conflicts on TCP port 1433. The only workaround to test a check
   # against multiple versions is letting the test code to start/stop the corresponding services so that they run one at
   # a time. See https://www.appveyor.com/docs/services-databases/ for details.
-  - mssql2008r2sp2
+  - mssql2017
 
 skip_branch_with_pr: true
 skip_tags: true
@@ -19,15 +20,15 @@ branches:
 
 environment:
   PYTHON2: C:\Python27-x64
-  PYTHON3: C:\Python36-x64
+  PYTHON3: C:\Python37-x64
 
 init:
-  # Add Python 3 to PATH
-  - set PATH=%PYTHON3%;%PYTHON3%\Scripts;%PATH%
+  # Add Python 2 to PATH
+  - set PATH=%PYTHON2%;%PYTHON2%\Scripts;%PATH%
   - python -c "import sys; print(sys.version)"
 
-  # Add Python 2 to PATH before Python 3
-  - set PATH=%PYTHON2%;%PYTHON2%\Scripts;%PATH%
+  # Add Python 3 to PATH before Python 2
+  - set PATH=%PYTHON3%;%PYTHON3%\Scripts;%PATH%
   - python -c "import sys; print(sys.version)"
 
   # Decide how we'll run tests

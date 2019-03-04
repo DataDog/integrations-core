@@ -36,8 +36,8 @@ INSTANCE_DOCKER = {
     'tags': ['optional:tag1'],
 }
 
-INSTANCE_SQL2008 = {
-    'host': r'(local)\SQL2008R2SP2',
+INSTANCE_SQL2017 = {
+    'host': r'(local)\SQL2017',
     'username': 'sa',
     'password': 'Password12!',
 }

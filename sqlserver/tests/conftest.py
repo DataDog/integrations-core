@@ -14,7 +14,7 @@ except ImportError:
 from datadog_checks.dev import docker_run, WaitFor
 
 from .common import (
-    INIT_CONFIG, INIT_CONFIG_OBJECT_NAME, INSTANCE_SQL2008, INSTANCE_DOCKER, HOST, PORT, HERE, FULL_CONFIG, lib_tds_path
+    INIT_CONFIG, INIT_CONFIG_OBJECT_NAME, INSTANCE_SQL2017, INSTANCE_DOCKER, HOST, PORT, HERE, FULL_CONFIG, lib_tds_path
 )
 
 
@@ -29,8 +29,8 @@ def init_config_object_name():
 
 
 @pytest.fixture
-def instance_sql2008():
-    return deepcopy(INSTANCE_SQL2008)
+def instance_sql2017():
+    return deepcopy(INSTANCE_SQL2017)
 
 
 @pytest.fixture
