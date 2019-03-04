@@ -1,13 +1,10 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 from collections import defaultdict
 import pystemd
 from pystemd.systemd1 import Manager
 from pystemd.systemd1 import Unit
-
-from datetime import datetime
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.utils.subprocess_output import (
@@ -20,10 +17,10 @@ class SystemdCheck(AgentCheck):
 
     UNIT_STATUS_SC = 'systemd.unit.active'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         if instances is not None and len(instances) > 1:
             raise ConfigurationError('Systemd check only supports one configured instance.')
-        super(SystemdCheck, self).__init__(name, init_config, agentConfig, instances)
+        super(SystemdCheck, self).__init__(name, init_config, instances)
 
         instance = instances[0]
         self.collect_all = is_affirmative(instance.get('collect_all_units', False))
@@ -37,32 +34,32 @@ class SystemdCheck(AgentCheck):
         #        "cron.service": "inactive",
         #        "ssh.service": "active"
         #    }
-        #}
-      
+        # }
+
     def check(self, instance):
         if self.units:
-            # self.log.info(units)
             for unit in self.units:
                 self.get_unit_state(unit)
                 self.get_number_processes(unit)
-        if self.collect_all == True:
+        if self.collect_all:
             # we display status for all units if no unit has been specified in the configuration file
             self.get_active_inactive_units()
-        
+
         self.get_all_units(self.units)
 
-    def get_all_units(self, instance):
-        cached_units = self.unit_cache.get('units')
-        if cached_units is None:
-            updated_units = self.get_listed_units()
-        else:
-            updated_units = self.update_unit_cache()
+    def get_all_units(self):
+        if not cached_units:
+            cached_units = self.unit_cache.get('units')
+
+        updated_units = self.get_listed_units()
 
         # Initialize or update cache for this instance
         self.unit_cache = {
             'units': updated_units
         }
-    
+
+        return self.unit_cache, cached_units
+
     def get_listed_units(self):
         manager = Manager()
         manager.load()
@@ -70,7 +67,7 @@ class SystemdCheck(AgentCheck):
 
         return {unit: self.get_state_single_unit(unit) for unit in units}
 
-    def update_unit_cache(self, cached_units):
+    def update_unit_cache(self):
         returned_cache = {}
         returned_cache = self.get_listed_units()
 
@@ -88,10 +85,10 @@ class SystemdCheck(AgentCheck):
         active_units = inactive_units = 0
 
         for unit in unit_names:
-        # full unit name includes path e.g. /lib/systemd/system/networking.service - we take the string before the last "/"
+            # full unit name includes path - we take the string before the last "/"
             unit_short_name = unit.rpartition('/')[2]
             # self.log.info(unit_short_name)
-            try:   
+            try:
                 unit_loaded = Unit(unit_short_name, _autoload=True)
                 unit_state = unit_loaded.Unit.ActiveState
                 if unit_state == b'active':
@@ -99,8 +96,8 @@ class SystemdCheck(AgentCheck):
                 if unit_state == b'inactive':
                     inactive_units += 1
             except pystemd.dbusexc.DBusInvalidArgsError as e:
-                self.log.debug("Cannot retrieve unit status for {}".format(unit_short_name))
-        
+                self.log.debug("Cannot retrieve unit status for {}".format(unit_short_name), e)
+
         self.gauge('systemd.units.active', active_units)
         self.gauge('systemd.units.inactive', inactive_units)
 
@@ -110,8 +107,8 @@ class SystemdCheck(AgentCheck):
             state = unit.Unit.ActiveState
             return state
         except pystemd.dbusexc.DBusInvalidArgsError as e:
-            self.log.info("Unit name invalid for {}".format(unit_id))
-        
+            self.log.info("Unit name invalid for {}".format(unit_id), e)
+
     def get_unit_state(self, unit_id):
         try:
             unit = Unit(unit_id, _autoload=True)
@@ -140,12 +137,12 @@ class SystemdCheck(AgentCheck):
                         "tags": ["unit:status_changed"]
                     })
                     self.unit_cache['units'][unit_id] = state
-                
+
             else:
                 self.unit_cache['units'][unit_id] = state
 
         except pystemd.dbusexc.DBusInvalidArgsError as e:
-            self.log.info("Unit name invalid for {}".format(unit_id))
+            self.log.info("Unit name invalid for {}".format(unit_id), e)
 
     def get_number_processes(self, unit_id):
         systemctl_flags = ['status', unit_id]

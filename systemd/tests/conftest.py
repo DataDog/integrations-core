@@ -5,19 +5,16 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
 from datadog_checks.systemd import SystemdCheck
 
-from . import common
+from .common import CONFIG
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml')
-    ):
-    yield CONFIG
+    yield CONFIG, "local"
 
 
 @pytest.fixture
@@ -29,22 +26,24 @@ def instance_ko():
         'collect_all_units': False
     }
 
+
 @pytest.fixture
 def instance():
     return {
         'units': [
             "httpd.service"
-			],
+        ],
         'collect_all_units': False
     }
+
 
 @pytest.fixture
 def instance_collect_all():
     return {
         'units': [
-			"httpd.service"
-			],
-    'collect_all_units': True
+            "httpd.service"
+        ],
+        'collect_all_units': True
     }
 
 
