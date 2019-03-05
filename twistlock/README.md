@@ -30,9 +30,9 @@ spec:
   template:
     metadata:
       annotations:
-        ad.datadoghq.com/twistlock.check_names: '[twistlock]'
+        ad.datadoghq.com/twistlock.check_names: '["twistlock"]'
         ad.datadoghq.com/twistlock.init_configs: '[{}]'
-        ad.datadoghq.com/twistlock.instances: '[{"url":"http://%%host%%:%%port%%", "username":"USERNAME", "password": "PASSWORD"}]'
+        ad.datadoghq.com/twistlock.instances: '[{"url":"http://%%host%%:8083", "username":"USERNAME", "password": "PASSWORD"}]'
         ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
       name: twistlock-console
       namespace: twistlock
@@ -85,7 +85,7 @@ spec:
 DD_LOGS_ENABLED=true
 ```
 
-* Add a label on the defender container: 
+* Add a label on the defender container:
 
 ```yaml
 ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
