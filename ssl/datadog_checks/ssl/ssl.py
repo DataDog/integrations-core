@@ -17,8 +17,16 @@ DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 class SslCheck(AgentCheck):
     SERVICE_CHECK_CAN_CONNECT = 'ssl_cert.can_connect'
     SERVICE_CHECK_EXPIRATION = 'ssl_cert.expiration'
+    SERVICE_CHECK_IS_VALID = 'ssl_cert.is_valid'
+    DEFAULT_EXPIRE_DAYS_WARNING = 14
+    DEFAULT_EXPIRE_DAYS_CRITICAL = 7
+    DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
+    DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 
     def check(self, instance):
+
+        print("this is roman logging stuff")
+
         url = instance.get('url')
         ssl_version = "unknown"
         tags = ['url:%s' % url]
