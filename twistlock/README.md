@@ -88,7 +88,7 @@ DD_LOGS_ENABLED=true
 * Add a label on the defender container:
 
 ```yaml
-ad.datadoghq.com/twistlock.logs: '[{"source": "twistlock", "service": "twistlock"}]'
+ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
 ```
 
 * Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation](https://docs.datadoghq.com/logs/log_collection/docker/?tab=containerinstallation)
