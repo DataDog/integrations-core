@@ -69,10 +69,10 @@ spec:
 
 * Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest](https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest).
 
-* Make sure the log section is included in the Pod annotation for the defender:
+* Make sure the log section is included in the Pod annotation for the defender, where the container name can be found just below in the pod spec.:
 
 ```yaml
-        ad.datadoghq.com/twistlock.logs: '[{"source": "twistlock", "service": "twistlock"}]'
+ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
 ```
 
 * [Restart the Agent][3] to begin sending Twistlock logs to Datadog.
