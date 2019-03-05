@@ -30,7 +30,7 @@ spec:
   template:
     metadata:
       annotations:
-        ad.datadoghq.com/twistlock.check_names: '["twistlock"]'
+        ad.datadoghq.com/twistlock.check_name: '["twistlock"]'
         ad.datadoghq.com/twistlock.init_configs: '[{}]'
         ad.datadoghq.com/twistlock.instances: '[{"url":"http://%%host%%:8083", "username":"USERNAME", "password": "PASSWORD"}]'
         ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
