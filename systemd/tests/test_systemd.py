@@ -22,3 +22,7 @@ def test_get_state_single_unit():
     tags = ["unit:ssh.service"]
 
     aggregator.assert_service_check(check.UNIT_STATUS_SC, tags=tags, count=1)
+
+def test_all_metrics(aggregator, instance_collect_all):
+    check.check(instance_collect_all)
+    aggregator.assert_all_metrics_covered()

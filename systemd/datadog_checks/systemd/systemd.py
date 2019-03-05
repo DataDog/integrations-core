@@ -47,7 +47,7 @@ class SystemdCheck(AgentCheck):
 
         self.get_all_units(self.units)
 
-    def get_all_units(self):
+    def get_all_units(self, cached_units):
         if not cached_units:
             cached_units = self.unit_cache.get('units')
 

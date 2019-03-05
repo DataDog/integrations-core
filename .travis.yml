@@ -235,6 +235,8 @@ jobs:
     - stage: test
       env: CHECK=system_core PYTHON3=true
     - stage: test
+      env: CHECK=systemd PYTHON3=true
+    - stage: test
       env: CHECK=system_swap PYTHON3=true
     - stage: test
       env: CHECK=tcp_check
@@ -263,6 +265,7 @@ install:
   - ddev config set core .
   # since on PRs it only runs test_changed we have to do this globally
   - bash .travis/install_ibm_mq.sh
+  - bash .travis/systemd.sh
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
 before_cache:

@@ -40,6 +40,7 @@ pyro4==4.73; sys_platform == 'win32'
 pysmi==0.2.2
 pysnmp==4.4.3
 pysnmp-mibs==0.1.6
+pystemd==0.5.0
 python-binary-memcached==0.26.1; sys_platform != 'win32'
 pyvmomi==v6.5.0.2017.5-1
 pywin32==224; sys_platform == 'win32'
