@@ -11,7 +11,7 @@ import requests
 import semver
 from six import string_types
 
-from .constants import NOT_CHECKS, VERSION_BUMP, get_root
+from .constants import NOT_CHECKS, NOT_TILES, VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
 
 # match integration's version within the __about__.py module
@@ -113,7 +113,7 @@ def get_valid_checks():
 
 
 def get_valid_tile_checks():
-    return {path for path in os.listdir(get_root()) if file_exists(get_manifest_file(path))}
+    return {path for path in os.listdir(get_root()) if file_exists(get_manifest_file(path)) and path not in NOT_TILES}
 
 
 def get_testable_checks():
