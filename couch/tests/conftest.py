@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import json
+import time
+
 import pytest
 import requests
 
@@ -52,7 +54,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
         env_vars=env,
-        conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version)],
+        conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version), lambda: time.sleep(10)],
     ):
         yield common.BASIC_CONFIG
 
@@ -63,9 +65,10 @@ def generate_data(couch_version):
     """
     # pass in authentication info for version 2
     auth = (common.USER, common.PASSWORD) if couch_version == "2" else None
+    headers = {'Accept': 'text/json'}
 
     # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=auth)
+    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
 
     # Populate the database
     data = {
@@ -79,7 +82,7 @@ def generate_data(couch_version):
             }
         }
     }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth)
+    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
 
     urls = [
         "{}/_node/node1@127.0.0.1/_stats".format(common.URL),
@@ -88,12 +91,12 @@ def generate_data(couch_version):
     ]
 
     ready = defaultdict(bool)
-    for i in range(60):
+    for i in range(120):
         print("Waiting for stats to be generated on the nodes...")
         try:
             for url in urls:
                 if not ready[url]:
-                    res = requests.get(url, auth=auth)
+                    res = requests.get(url, auth=auth, headers=headers)
                     if res.json():
                         ready[url] = True
             if len(ready) and all(ready.values()):

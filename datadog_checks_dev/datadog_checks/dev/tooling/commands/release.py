@@ -34,7 +34,6 @@ from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
     get_version_string, format_commit_id
 )
-from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
     basepath, chdir, dir_exists, ensure_unicode, get_next, remove_path, resolve_path, stream_file_lines,
@@ -876,7 +875,7 @@ def upload(ctx, check, sdist, dry_run):
     auth_env_vars = {'TWINE_USERNAME': username, 'TWINE_PASSWORD': password}
     echo_waiting('Building and publishing `{}` to PyPI...'.format(check))
 
-    with EnvVars(auth_env_vars):
+    with chdir(check_dir, env_vars=auth_env_vars):
         result = build_wheel(check_dir, sdist)
         if result.code != 0:
             abort(result.stdout, result.code)

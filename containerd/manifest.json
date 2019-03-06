@@ -13,9 +13,12 @@
     "windows"
   ],
   "public_title": "Datadog-Containerd Integration",
-  "categories": ["containers"],
+  "categories": [
+    "containers"
+  ],
   "type": "check",
   "is_public": true,
   "display_name": "Containerd",
-  "creates_events": true
+  "creates_events": true,
+  "integration_id": "containerd"
 }

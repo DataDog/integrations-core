@@ -15,6 +15,7 @@ import threading
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
 from pyVmomi import vmodl  # pylint: disable=E0611
+from six.moves import range
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.config import is_affirmative

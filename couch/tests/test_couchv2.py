@@ -497,8 +497,13 @@ def test_view_compaction_metrics(aggregator, check, gauges, instance):
         metric_found = False
         while not metric_found and tries < 40:
             tries += 1
-            for config in [common.NODE1, common.NODE2, common.NODE3]:
-                check.check(config)
+
+            try:
+                for config in [common.NODE1, common.NODE2, common.NODE3]:
+                    check.check(config)
+            except Exception:
+                time.sleep(1)
+                continue
 
             for m_name in aggregator._metrics:
                 if re.search(r'view_compaction\.progress', str(m_name)) is not None:

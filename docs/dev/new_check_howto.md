@@ -396,6 +396,7 @@ Find below the complete list of mandatory and optional attributes for your `mani
 
 | Attribute            | Type            | Mandatory/Optional | Description                                                                                                                                                                                                              |
 | -------------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `integration_id` | String | Mandatory           | The unique identifying name of this integration. Usually kebab case of the Display Name |
 | `categories`         | Array of String | Mandatory          | Integration categories used on the [public documentation Integrations page][10].                                                                                                                                         |
 | `creates_events`     | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                   |
 | `display_name`       | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation Integrations page][10]                                                                                 |
@@ -415,6 +416,7 @@ Find below the complete list of mandatory and optional attributes for your `mani
 | `metric_to_check`    | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
 | `metric_prefix`      | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                               |
 | `process_signatures` | Array of String | Optional           | A list of signatures that matches the command line of this integration.                                                                                                                                                  |
+
 
 #### metadata.csv
 
