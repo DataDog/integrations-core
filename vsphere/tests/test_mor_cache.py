@@ -4,7 +4,6 @@
 import pytest
 from six.moves import range
 import time
-from six.moves import range
 
 from datadog_checks.vsphere.mor_cache import MorCache, MorNotFoundError
 
