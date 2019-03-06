@@ -354,7 +354,6 @@ class VSphereCheck(AgentCheck):
             parent_name = ensure_unicode(all_objects.get(parent, {}).get("name", "unknown"))
             tag = []
             if isinstance(parent, vim.HostSystem):
-                import pdb; pdb.set_trace()
                 tag.append('vsphere_host:{}'.format(parent_name))
             elif isinstance(parent, vim.Folder):
                 tag.append('vsphere_folder:{}'.format(parent_name))
@@ -539,29 +538,11 @@ class VSphereCheck(AgentCheck):
                     "mor_type": mor_type,
                     "mor": obj,
                     "hostname": hostname,
-                    "tags": self.encode_tags(tags + instance_tags)
+                    "tags": self._normalize_tags_type(tags + instance_tags)
                 })
 
         self.log.debug("All objects with attributes cached in {} seconds.".format(time.time() - start))
         return obj_list
-
-    # TODO: Remove this method when Agent 5 is EOL.
-    # This method is a copy/past from AgentCheck class in Agent 6 so we have backward compatibility with Agent 5
-    def encode_tags(self, tags):
-        """
-        Encode tags to bytes so that they are properly handled by the agent
-        """
-        encoded_tags = []
-        if tags is not None:
-            for tag in tags:
-                if not isinstance(tag, bytes):
-                    try:
-                        tag = tag.encode('utf-8')
-                    except UnicodeError as e:
-                        self.log.exception('Error encoding tag `{}` as utf-8, ignoring tag: {}'.format(tag, e))
-                        continue
-                encoded_tags.append(tag)
-        return encoded_tags
 
     @staticmethod
     def _is_excluded(obj, properties, regexes, include_only_marked):
