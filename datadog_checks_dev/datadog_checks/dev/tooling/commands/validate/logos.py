@@ -9,7 +9,7 @@ from PIL import Image
 
 from ...constants import NOT_TILES, get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_waiting
-from ...utils import get_valid_integrations
+from ...utils import get_valid_integrations, load_manifest
 
 
 REQUIRED_IMAGES = {
@@ -39,8 +39,9 @@ def logos(check):
     error_checks = set()
 
     for check in checks:
+        display_name = load_manifest(check).get('display_name', check)
         if check in NOT_TILES:
-            blacklisted_integrations_msg += 'Check {} is a blacklisted integration.\n'.format(check)
+            blacklisted_integrations_msg += '{} does not currently have an integration tile.\n'.format(display_name)
             continue
 
         path_to_check_logos = os.path.join(get_root(), check, 'logos')
@@ -48,7 +49,7 @@ def logos(check):
         for logo, required_size in REQUIRED_IMAGES.items():
             logo_file_name = os.path.join(path_to_check_logos, logo)
             if not os.path.isfile(logo_file_name):
-                errors[logo] = '    {} is missing for {}'.format(logo, check)
+                errors[logo] = '    {} is missing for {}'.format(logo, display_name)
             else:
                 width, height = get_resolution(logo_file_name)
                 if (width, height) != required_size:
@@ -56,27 +57,30 @@ def logos(check):
                         logo, (width, height), required_size
                     )
 
-        if errors.get(logo):
-            echo_waiting('{}:'.format(check))
+        if errors:
+            echo_waiting('{}:'.format(display_name))
             echo_failure('\n'.join(errors.values()))
             error_checks.add(check)
-
             errors = dict()
         else:
             count_successful += 1
 
-        if len(checks) == 1 and check not in error_checks:
-            echo_waiting('Validating {}... '.format(check), nl=False)
-            echo_success('success! :)')
+    blacklisted_integrations_msg = blacklisted_integrations_msg.rstrip()
 
-    if not error_checks:
-        if len(checks) == 1:
-            echo_success('Congrats, all {} logos are valid!'.format(check))
-        else:
-            echo_success('Congrats, all {} check\'s logo files are valid!'.format(count_successful))
-    else:
+    if error_checks:
         echo_success(blacklisted_integrations_msg)
         abort()
+    elif len(checks) == 1:
+        if blacklisted_integrations_msg:
+            echo_success(blacklisted_integrations_msg)
+        else:
+            echo_success('Congrats, all {} logos are valid!'.format(display_name))
+    else:
+        echo_success(
+            'Congrats, all {} checks\' logo files are valid! {} checks were blacklisted and skipped.'.format(
+                count_successful, len(NOT_TILES)
+            )
+        )
 
 
 def get_resolution(path):

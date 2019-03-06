@@ -44,17 +44,35 @@ NOT_CHECKS = {
 
 # Some integrations do not have an associated tile, mostly system integrations
 NOT_TILES = [
-    'disk',
+    'active_directory',
+    'aerospike',
     'agent_metrics',
     'directory',
+    'disk',
+    'dns_check',
     'docker_daemon',
+    'dotnetclr',
+    'go-metro',
+    'go_expvar',
+    'http_check',
+    'kube_dns',
+    'kube_proxy',
+    'kubelet',
     'linux_proc_extras',
+    'mysql',
     'network',
     'nfsstat',
+    'ntp',
     'process',
+    'riakcs',
+    'ssh_check',
+    'statsd',
     'system_core',
     'system_swap',
-    'tcp_check'
+    'tcp_check',
+    'twemproxy',
+    'win32_event_log',
+    'wmi_check'
 ]
 
 # If a file changes in a PR with any of these file extensions,

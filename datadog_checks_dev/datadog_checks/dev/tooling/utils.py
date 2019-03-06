@@ -11,7 +11,7 @@ import requests
 import semver
 from six import string_types
 
-from .constants import NOT_CHECKS, NOT_TILES, VERSION_BUMP, get_root
+from .constants import NOT_CHECKS, VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
 
 # match integration's version within the __about__.py module
