@@ -33,9 +33,10 @@ def logos(check):
     else:
         checks = sorted(get_valid_integrations())
 
+    blacklisted_integrations_msg = ''
+    count_successful = 0
     errors = dict()
     error_checks = set()
-    blacklisted_integrations_msg = ''
 
     for check in checks:
         if check in NOT_TILES:
@@ -61,13 +62,18 @@ def logos(check):
             error_checks.add(check)
 
             errors = dict()
+        else:
+            count_successful += 1
 
         if len(checks) == 1 and check not in error_checks:
             echo_waiting('Validating {}... '.format(check), nl=False)
             echo_success('success! :)')
 
     if not error_checks:
-        echo_success('Congrats, all {} logos are valid!'.format('' if len(checks) > 1 else check))
+        if len(checks) == 1:
+            echo_success('Congrats, all {} logos are valid!'.format(check))
+        else:
+            echo_success('Congrats, all {} check\'s logo files are valid!'.format(count_successful))
     else:
         echo_success(blacklisted_integrations_msg)
         abort()
