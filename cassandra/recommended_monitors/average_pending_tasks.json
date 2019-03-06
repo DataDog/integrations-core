@@ -4,7 +4,7 @@
 	"query": "avg(last_2h):sum:cassandra.pending_tasks{} by {cluster}",
 	"message": "This can happen if a task is taking too long, and Cassandra builds a backlog. Investigate i.e. if compaction is taking too long.",
 	"tags": [
-		"service:cassandra"
+		"service:cassandra", "team:DRE"
 	],
 	"options": {
 		"notify_audit": false,
