@@ -55,6 +55,7 @@ jobs:
         - ddev validate agent-reqs
         - ddev validate config
         - ddev validate dep
+        - ddev validate logos
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
@@ -66,6 +67,7 @@ jobs:
         - ddev validate agent-reqs
         - ddev validate config
         - ddev validate dep
+        - ddev validate logos
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
