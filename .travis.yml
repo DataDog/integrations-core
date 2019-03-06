@@ -36,6 +36,7 @@ stages:
     if: ((branch = master) AND (type != pull_request)) OR ((commit_message =~ /ci run all/) AND (type = pull_request))
 
 script:
+  - ddev validate logos ${CHECK}
   - travis_retry ddev test --cov ${CHECK}
   - ddev test ${CHECK} --bench || true
   - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
