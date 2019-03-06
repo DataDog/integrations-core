@@ -1,0 +1,10 @@
+{
+    "name": null,
+	"type": "",
+	"query": "",
+	"message": "",
+	"tags": [
+		"service:cassandra"
+	],
+	"options": {}
+}
