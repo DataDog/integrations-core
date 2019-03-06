@@ -35,10 +35,11 @@ def logos(check):
 
     errors = dict()
     error_checks = set()
+    blacklisted_integrations_msg = ''
 
     for check in checks:
         if check in NOT_TILES:
-            echo_success('Check {} is a blacklisted integration.'.format(check))
+            blacklisted_integrations_msg += 'Check {} is a blacklisted integration.\n'.format(check)
             continue
 
         path_to_check_logos = os.path.join(get_root(), check, 'logos')
@@ -49,7 +50,7 @@ def logos(check):
                 errors[logo] = '    {} is missing for {}'.format(logo, check)
             else:
                 width, height = get_resolution(logo_file_name)
-                if not (width, height) == required_size:
+                if (width, height) != required_size:
                     errors[logo] = '    {} has improper resolution: {}. Should be {}'.format(
                         logo, (width, height), required_size
                     )
@@ -68,6 +69,7 @@ def logos(check):
     if not error_checks:
         echo_success('Congrats, all {} logos are valid!'.format('' if len(checks) > 1 else check))
     else:
+        echo_success(blacklisted_integrations_msg)
         abort()
 
 
