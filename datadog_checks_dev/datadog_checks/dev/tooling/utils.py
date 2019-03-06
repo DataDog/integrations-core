@@ -112,8 +112,8 @@ def get_valid_checks():
     return {path for path in os.listdir(get_root()) if file_exists(get_version_file(path))}
 
 
-def get_valid_tile_checks():
-    return {path for path in os.listdir(get_root()) if file_exists(get_manifest_file(path)) and path not in NOT_TILES}
+def get_valid_integrations():
+    return {path for path in os.listdir(get_root()) if file_exists(get_manifest_file(path))}
 
 
 def get_testable_checks():

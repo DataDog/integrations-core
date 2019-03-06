@@ -6,9 +6,10 @@ import os
 import click
 from PIL import Image
 
+
 from ...constants import NOT_TILES, get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_waiting
-from ...utils import get_valid_tile_checks
+from ...utils import get_valid_integrations
 
 
 REQUIRED_IMAGES = {
@@ -28,50 +29,46 @@ def logos(check):
     """Validate logo files."""
 
     if check:
-        if check in NOT_TILES:
-            echo_success(text='Check {} is a blacklisted integration.'.format(check))
-            return
-        else:
-            checks = [check]
+        checks = [check]
     else:
-        checks = sorted(get_valid_tile_checks())
+        checks = sorted(get_valid_integrations())
 
     errors = dict()
     error_checks = set()
 
     for check in checks:
+        if check in NOT_TILES:
+            echo_success('Check {} is a blacklisted integration.'.format(check))
+            continue
+
         path_to_check_logos = os.path.join(get_root(), check, 'logos')
 
         for logo, required_size in REQUIRED_IMAGES.items():
-            # echo_waiting('Validating {} file...'.format(logo), nl=False)
             logo_file_name = os.path.join(path_to_check_logos, logo)
             if not os.path.isfile(logo_file_name):
-                errors[logo] = '{} is missing for {}'.format(logo, check)
+                errors[logo] = '    {} is missing for {}'.format(logo, check)
             else:
                 width, height = get_resolution(logo_file_name)
                 if not (width, height) == required_size:
-                    errors[logo] = '{} has improper resolution: {}. Should be {}'.format(
+                    errors[logo] = '    {} has improper resolution: {}. Should be {}'.format(
                         logo, (width, height), required_size
                     )
 
-            if errors.get(logo):
-                echo_waiting('Validation of {} for {} failed'.format(logo, check))
-                echo_failure(errors[logo])
-                error_checks.add(check)
+        if errors.get(logo):
+            echo_waiting('{}:'.format(check))
+            echo_failure('\n'.join(errors.values()))
+            error_checks.add(check)
 
             errors = dict()
 
-        if check not in error_checks:
-            echo_waiting('Validating {}...'.format(check), nl=False)
-            echo_success('Success')
+        if len(checks) == 1 and check not in error_checks:
+            echo_waiting('Validating {}... '.format(check), nl=False)
+            echo_success('success! :)')
 
-    if error_checks:
-        error_checks_string = ', '.join((e for e in sorted(error_checks)))
-        abort(
-            text='Validation of {} logos failed. See above errors'.format(error_checks_string)
-        )
-    else:
+    if not error_checks:
         echo_success('Congrats, all {} logos are valid!'.format('' if len(checks) > 1 else check))
+    else:
+        abort()
 
 
 def get_resolution(path):
