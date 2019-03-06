@@ -351,16 +351,17 @@ class __AgentCheckPy3(object):
 
         if tags is not None:
             for tag in tags:
-                if not isinstance(tag, str):
-                    try:
-                        tag = tag.decode('utf-8')
-                    except UnicodeError:
-                        self.log.warning(
-                            'Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
-                        )
-                        continue
+                if not tag:
+                    if not isinstance(tag, str):
+                        try:
+                            tag = tag.decode('utf-8')
+                        except UnicodeError:
+                            self.log.warning(
+                                'Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
+                            )
+                            continue
 
-                normalized_tags.append(tag)
+                    normalized_tags.append(tag)
 
         return normalized_tags
 

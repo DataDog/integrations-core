@@ -211,6 +211,12 @@ class TestTags:
         in_str.encode.side_effect = Exception
         assert check._to_bytes(in_str) is None
 
+    def test_none_value(self):
+        check = AgentCheck()
+        tags = [None, 'tag:foo']
+
+        normalized_tags = check._normalize_tags_type(tags, None)
+        assert len(normalized_tags) == 1
 
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
