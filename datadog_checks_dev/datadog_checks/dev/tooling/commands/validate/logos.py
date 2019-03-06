@@ -6,7 +6,7 @@ import os
 import click
 from PIL import Image
 
-from ...constants import get_root
+from ...constants import NOT_TILES, get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting
 from ...utils import get_valid_tile_checks
 
@@ -28,7 +28,11 @@ def logos(check):
     """Validate logo files."""
 
     if check:
-        checks = [check]
+        if check in NOT_TILES:
+            echo_success(text='Check {} is a blacklisted integration.'.format(check))
+            return
+        else:
+            checks = [check]
     else:
         checks = sorted(get_valid_tile_checks())
 
