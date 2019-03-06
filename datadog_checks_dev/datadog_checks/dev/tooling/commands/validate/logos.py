@@ -42,25 +42,30 @@ def logos(check):
     for check in checks:
         path_to_check_logos = os.path.join(get_root(), check, 'logos')
 
-        echo_info('Validating logos for {}'.format(path_to_check_logos))
-
-        for logo in REQUIRED_IMAGES:
-            echo_waiting('Validating {} file...'.format(logo), nl=False)
+        for logo, required_size in REQUIRED_IMAGES.items():
+            # echo_waiting('Validating {} file...'.format(logo), nl=False)
             logo_file_name = os.path.join(path_to_check_logos, logo)
             if not os.path.isfile(logo_file_name):
                 errors[logo] = '{} is missing for {}'.format(logo, check)
             else:
                 width, height = get_resolution(logo_file_name)
-                if not (width, height) == REQUIRED_IMAGES[logo]:
-                    errors[logo] = '{} has improper resolution: {}. Should be {}'.format(logo, (width, height), REQUIRED_IMAGES[logo])
+                if not (width, height) == required_size:
+                    errors[logo] = '{} has improper resolution: {}. Should be {}'.format(
+                        logo, (width, height), required_size
+                    )
 
             if errors.get(logo):
+                echo_waiting('Validation of {} for {} failed'.format(logo, check))
                 echo_failure(errors[logo])
                 error_checks.add(check)
-            else:
-                echo_info('done')
 
-    if errors:
+            errors = dict()
+
+        if check not in error_checks:
+            echo_waiting('Validating {}...'.format(check), nl=False)
+            echo_success('Success')
+
+    if error_checks:
         error_checks_string = ', '.join((e for e in sorted(error_checks)))
         abort(
             text='Validation of {} logos failed. See above errors'.format(error_checks_string)
