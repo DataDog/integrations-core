@@ -35,10 +35,10 @@ def logos(check):
 
     blacklisted_integrations_msg = ''
     count_successful = 0
-    errors = dict()
     error_checks = set()
 
     for check in checks:
+        errors = dict()
         display_name = load_manifest(check).get('display_name', check)
         if check in NOT_TILES:
             blacklisted_integrations_msg += '{} does not currently have an integration tile.\n'.format(display_name)
@@ -51,17 +51,16 @@ def logos(check):
             if not os.path.isfile(logo_file_name):
                 errors[logo] = '    {} is missing for {}'.format(logo, display_name)
             else:
-                width, height = get_resolution(logo_file_name)
-                if (width, height) != required_size:
+                size = get_resolution(logo_file_name)
+                if size != required_size:
                     errors[logo] = '    {} has improper resolution: {}. Should be {}'.format(
-                        logo, (width, height), required_size
+                        logo, size, required_size
                     )
 
         if errors:
             echo_waiting('{}:'.format(display_name))
             echo_failure('\n'.join(errors.values()))
             error_checks.add(check)
-            errors = dict()
         else:
             count_successful += 1
 
