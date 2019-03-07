@@ -351,6 +351,8 @@ class __AgentCheckPy3(object):
 
         if tags is not None:
             for tag in tags:
+                if tag is None:
+                    continue
                 if not isinstance(tag, str):
                     try:
                         tag = tag.decode('utf-8')
