@@ -28,10 +28,15 @@ def logos(check):
 
     """Validate logo files. Specifying no check will validate all logos"""
 
+    valid_checks = get_valid_integrations()
     if check:
-        checks = [check]
+        if check in valid_checks:
+            checks = [check]
+        else:
+            echo_success('{} does not have a tile, skipping.'.format(check))
+            return
     else:
-        checks = sorted(get_valid_integrations())
+        checks = sorted(valid_checks)
 
     blacklisted_integrations_msg = ''
     count_successful = 0
