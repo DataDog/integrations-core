@@ -21,12 +21,12 @@ REQUIRED_IMAGES = {
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help='Validate logos files'
+    short_help='Validate logos files, specifying no check will validate all logos'
 )
 @click.argument('check', required=False)
 def logos(check):
 
-    """Validate logo files."""
+    """Validate logo files. Specifying no check will validate all logos"""
 
     if check:
         checks = [check]
