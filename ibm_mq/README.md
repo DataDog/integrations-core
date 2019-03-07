@@ -57,9 +57,6 @@ respawn
 respawn limit 10 5
 normal exit 0
 
-# Logging to console from the Agent is disabled since the Agent already logs using file or
-# syslog depending on its configuration. We make Upstart log what the process still outputs in order
-# to log panics/crashes to /var/log/upstart/datadog-agent.log
 console log
 env DD_LOG_TO_CONSOLE=false
 env LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
@@ -79,14 +76,16 @@ Each time there is an agent update, these files are wiped and will need to be up
 
 Alternatively, if you are using Linux, after the MQ Client is installed ensure the runtime linker can find the libraries. For example, using ldconfig:
 
-```
-# Put the library location in an ld configuration file.
+Put the library location in an ld configuration file.
 
+```
 sudo sh -c "echo /opt/mqm/lib64 > /etc/ld.so.conf.d/mqm64.conf"
 sudo sh -c "echo /opt/mqm/lib > /etc/ld.so.conf.d/mqm.conf"
+```
 
-# Update the bindings.
+Update the bindings.
 
+```
 sudo ldconfig
 ```
 
