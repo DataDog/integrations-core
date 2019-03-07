@@ -33,7 +33,7 @@ def logos(check):
         if check in valid_checks:
             checks = [check]
         else:
-            echo_success('{} does not have a tile, skipping.'.format(check))
+            echo_info('{} is not an integration.'.format(check))
             return
     else:
         checks = sorted(valid_checks)
