@@ -8,7 +8,7 @@ from PIL import Image
 
 
 from ...constants import NOT_TILES, get_root
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_waiting
+from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_failure, echo_success, echo_waiting
 from ...utils import get_valid_integrations, load_manifest
 
 
@@ -28,10 +28,15 @@ def logos(check):
 
     """Validate logo files. Specifying no check will validate all logos"""
 
+    valid_checks = get_valid_integrations()
     if check:
-        checks = [check]
+        if check in valid_checks:
+            checks = [check]
+        else:
+            echo_info('{} is not an integration.'.format(check))
+            return
     else:
-        checks = sorted(get_valid_integrations())
+        checks = sorted(valid_checks)
 
     blacklisted_integrations_msg = ''
     count_successful = 0
