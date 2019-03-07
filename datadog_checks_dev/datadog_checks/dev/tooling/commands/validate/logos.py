@@ -8,7 +8,7 @@ from PIL import Image
 
 
 from ...constants import NOT_TILES, get_root
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_waiting
+from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_failure, echo_success, echo_waiting
 from ...utils import get_valid_integrations, load_manifest
 
 
