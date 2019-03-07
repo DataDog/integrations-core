@@ -357,7 +357,7 @@ class __AgentCheckPy3(object):
                         tag = tag.decode('utf-8')
                     except UnicodeError:
                         self.log.warning(
-                            'TESTEST Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
+                            'Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
                         )
                         continue
 
