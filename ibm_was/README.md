@@ -8,7 +8,7 @@ This check monitors [IBM Websphere Application Server (WAS)][1] through the Data
 
 The IBM WAS Datadog integration collects enabled PMI Counters from the WebSphere Application Server environment. Setup requires enabling the PerfServlet, which provides a way for Datadog to retrieve performance data from WAS.
 
-By default, this check collects JDBC, JVM, thread pool and Servlet Session Manager metrics. You may optionally specify additional metrics to collect via the the "custom_queries" section, as demonstrated in the [example check configuration][2].
+By default, this check collects JDBC, JVM, thread pool, and Servlet Session Manager metrics. You may optionally specify additional metrics to collect in the "custom_queries" section. See the [sample check configuration][2] for examples.
 
 ### Installation
 
