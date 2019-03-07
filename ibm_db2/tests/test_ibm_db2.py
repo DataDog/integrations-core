@@ -88,7 +88,7 @@ def test_custom_queries(aggregator, instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries_init_config(aggregator, instance):
     init_config = {
-        'custom_queries': [{
+        'global_custom_queries': [{
             'metric_prefix': 'ibm_db2',
             'tags': ['test:ibm_db2'],
             'query': 'SELECT files_closed, tbsp_name FROM TABLE(MON_GET_TABLESPACE(NULL, -1))',

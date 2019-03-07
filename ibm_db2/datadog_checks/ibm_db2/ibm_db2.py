@@ -8,7 +8,8 @@ from time import time as timestamp
 
 import ibm_db
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.containers import iter_unique
 from .utils import scrub_connection_string, status_to_service_check
 from . import queries
 
@@ -28,7 +29,6 @@ class IbmDb2Check(AgentCheck):
         self._host = self.instance.get('host', '')
         self._port = self.instance.get('port', 5000)
         self._tags = self.instance.get('tags', [])
-        self._custom_queries = self.instance.get('custom_queries', self.init_config.get('custom_queries', []))
 
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))
@@ -38,6 +38,18 @@ class IbmDb2Check(AgentCheck):
 
         # We'll connect on the first check run
         self._conn = None
+
+        custom_queries = self.instance.get('custom_queries', [])
+        use_global_custom_queries = self.instance.get('use_global_custom_queries', True)
+
+        # Handle overrides
+        if use_global_custom_queries == 'extend':
+            custom_queries.extend(self.init_config.get('global_custom_queries', []))
+        elif 'global_custom_queries' in self.init_config and is_affirmative(use_global_custom_queries):
+            custom_queries = self.init_config.get('global_custom_queries', [])
+
+        # Deduplicate
+        self._custom_queries = list(iter_unique(custom_queries))
 
     def check(self, instance):
         if self._conn is None:

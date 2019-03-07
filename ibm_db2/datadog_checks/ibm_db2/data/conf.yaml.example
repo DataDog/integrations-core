@@ -1,3 +1,16 @@
+init_config:
+## @param global_custom_queries - list - optional
+## See `custom_queries` defined below.
+##
+## Global custom queries can be applied to all instances using the
+## `use_global_custom_queries` setting at the instance level.
+#
+#  global_custom_queries:
+#    - metric_prefix: ibm_db2
+#      query: <QUERY>
+#      columns: <COLUMNS>
+#      tags: <TAGS>
+
 instances:
   ## @param db - string - required
   ## The name of the database to establish a connection with.
@@ -33,8 +46,17 @@ instances:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
 
+  ## @param use_global_custom_queries - (boolean|string) - optional - default: true
+  ## How `global_custom_queries` should be used for this instance. There are 3 options:
+  ##
+  ## 1. true - `global_custom_queries` will override `custom_queries`
+  ## 2. false - `custom_queries` will override `global_custom_queries`
+  ## 2. extend - `global_custom_queries` will be used in addition to any `custom_queries`
+  #
+  #  use_global_custom_queries: true
+
   ## @param custom_queries - list - optional
-  ## Instance level custom queries override those in init_config. Each query must have 3 fields:
+  ## Each query must have 3 fields:
   ##
   ## 1. metric_prefix - This is what each metric will start with.
   ## 2. query - This is the SQL to execute. It can be a simple statement or a multi-line script.
@@ -67,42 +89,6 @@ instances:
   #          type: tag
   #      tags:
   #        - test:ibm_db2
-
-init_config:
-## @param custom_queries - list - optional
-## Custom queries that every instance will execute. Each query must have 3 fields:
-##
-## 1. metric_prefix - This is what each metric will start with.
-## 2. query - This is the SQL to execute. It can be a simple statement or a multi-line script.
-## 3. columns - This is a list representing each column, ordered sequentially
-##              from left to right. The number of columns must equal the number
-##              of columns returned in the query.
-##              There are 2 required pieces of data:
-##                a. name - This is the suffix to append to the metric_prefix
-##                          in order to form the full metric name. If `type` is
-##                          `tag`, this column will instead be considered a tag
-##                          and will be applied to every metric collected by
-##                          this particular query.
-##                b. type - This is the submission method (gauge, count, rate, etc.).
-##                          This can also be set to 'tag' to tag each metric in the row
-##                          with the name and value of the item in this column.
-## 4. tags (optional) - A list of tags to apply to each metric.
-#
-#  custom_queries:
-#    - metric_prefix: ibm_db2
-#      query: |  # Use the pipe if you require a multi-line script.
-#        SELECT files_closed,
-#               tbsp_name
-#        FROM TABLE(MON_GET_TABLESPACE(NULL, -1))
-#      columns:
-#        # Columns without a name are ignored, put this for any column you wish to skip:
-#        # - {}
-#        - name: tablespace.files_closed
-#          type: monotonic_count
-#        - name: tablespace
-#          type: tag
-#      tags:
-#        - test:ibm_db2
 
 ## Log Section (Available for Agent >=6.0)
 ##
