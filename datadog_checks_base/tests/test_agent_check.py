@@ -218,6 +218,7 @@ class TestTags:
         normalized_tags = check._normalize_tags_type(tags, None)
         assert normalized_tags == ['tag:foo']
 
+
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
 
