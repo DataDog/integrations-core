@@ -34,7 +34,7 @@ Collecting logs is disabled by default in the Datadog Agent, you need to enable 
     logs_enabled: true
 ```
 
-Next, point the config file to the proper WAS log files. You can uncomment the lines at the bottom of the WAS integration's config file, and amend them as you see fit:
+Next, edit `ibm_was.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your WAS log files. 
 
 ```yaml
 logs:
