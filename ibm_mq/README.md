@@ -57,9 +57,6 @@ respawn
 respawn limit 10 5
 normal exit 0
 
-# Logging to console from the Agent is disabled since the Agent already logs using file or
-# syslog depending on its configuration. We make Upstart log what the process still outputs in order
-# to log panics/crashes to /var/log/upstart/datadog-agent.log
 console log
 env DD_LOG_TO_CONSOLE=false
 env LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
