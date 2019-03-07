@@ -6,7 +6,7 @@
   "metric_prefix": "ibm_was.",
   "metric_to_check": "ibm_was.can_connect",
   "creates_events": false,
-  "short_description": "IBM Websphere Application Server (WAS) is a framework that hosts Java-based applications",
+  "short_description": "IBM Websphere Application Server is a framework that hosts Java applications",
   "guid": "ba177bb7-1bad-4ea8-ac59-1bc8a016f4f7",
   "support": "core",
   "supported_os": [
