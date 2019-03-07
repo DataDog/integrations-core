@@ -76,14 +76,16 @@ Each time there is an agent update, these files are wiped and will need to be up
 
 Alternatively, if you are using Linux, after the MQ Client is installed ensure the runtime linker can find the libraries. For example, using ldconfig:
 
-```
-# Put the library location in an ld configuration file.
+Put the library location in an ld configuration file.
 
+```
 sudo sh -c "echo /opt/mqm/lib64 > /etc/ld.so.conf.d/mqm64.conf"
 sudo sh -c "echo /opt/mqm/lib > /etc/ld.so.conf.d/mqm.conf"
+```
 
-# Update the bindings.
+Update the bindings.
 
+```
 sudo ldconfig
 ```
 
