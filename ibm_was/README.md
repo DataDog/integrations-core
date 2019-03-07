@@ -19,7 +19,7 @@ The servlet's .ear file (PerfServletApp.ear) is located in the `<WAS_HOME>/insta
 
 The performance servlet is deployed exactly as any other servlet. Deploy the servlet on a single application server instance within the domain.
 
-Note: Starting with version 6.1, you must enable application security to get the PerfServlet working.
+**Note**: Starting with version 6.1, you must enable application security to get the PerfServlet working.
 
 ### Configuration
 
