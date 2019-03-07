@@ -21,5 +21,6 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false
+  "is_public": false,
+  "integration_id": "ibm-was"
 }

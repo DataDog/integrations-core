@@ -30,10 +30,10 @@ spec:
   template:
     metadata:
       annotations:
-        ad.datadoghq.com/twistlock.check_names: '[twistlock]'
-        ad.datadoghq.com/twistlock.init_configs: '[{}]'
-        ad.datadoghq.com/twistlock.instances: '[{"url":"http://%%host%%:%%port%%", "username":"USERNAME", "password": "PASSWORD"}]'
-        ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
+        ad.datadoghq.com/twistlock-console.check_name: '["twistlock"]'
+        ad.datadoghq.com/twistlock-console.init_configs: '[{}]'
+        ad.datadoghq.com/twistlock-console.instances: '[{"url":"http://%%host%%:8083", "username":"USERNAME", "password": "PASSWORD"}]'
+        ad.datadoghq.com/twistlock-console.logs: '[{"source": "twistlock", "service": "twistlock"}]'
       name: twistlock-console
       namespace: twistlock
       labels:
@@ -69,10 +69,10 @@ spec:
 
 * Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest](https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest).
 
-* Make sure the log section is included in the Pod annotation for the defender:
+* Make sure the log section is included in the Pod annotation for the defender, where the container name can be found just below in the pod spec:
 
 ```yaml
-        ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
+ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
 ```
 
 * [Restart the Agent][3] to begin sending Twistlock logs to Datadog.
@@ -85,10 +85,10 @@ spec:
 DD_LOGS_ENABLED=true
 ```
 
-* Add a label on the defender container: 
+* Add a label on the defender container:
 
 ```yaml
-ad.datadoghq.com/twistlock.logs: '[[{"source": "twistlock", "service": "twistlock"}]]'
+ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
 ```
 
 * Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation](https://docs.datadoghq.com/logs/log_collection/docker/?tab=containerinstallation)
