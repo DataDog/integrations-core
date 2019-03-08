@@ -54,7 +54,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
         env_vars=env,
-        conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version), lambda: time.sleep(10)],
+        conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version), lambda: time.sleep(20)],
     ):
         yield common.BASIC_CONFIG
 
