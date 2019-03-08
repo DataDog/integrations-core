@@ -1,15 +1,21 @@
 import socket
 import ssl
 import requests
+from datetime import datetime
 from datadog_checks.checks import AgentCheck
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
+
+DEFAULT_EXPIRE_DAYS_WARNING = 14
+DEFAULT_EXPIRE_DAYS_CRITICAL = 7
+DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
+DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 
 
 def main():
     # get and check config
     hostname = 'google.com'
-    #hostname = ''
+    # hostname = ''
     ip = '1.1.1.1'
     port = '443'
     local_cert_path = 'mock.cert'
@@ -36,17 +42,27 @@ def main():
     # some exceptions we can use: https://cryptography.io/en/latest/x509/reference/#cryptography.x509.InvalidVersion
     # will probably need to make some invalid certs: https://cryptography.io/en/latest/x509/reference/#x-509-certificate-builder
 
-    # calculate expiration, send metrics, tags
-    check_expiration(cert_data.not_valid_after)
-
-
-def check_expiration(cert_expiration):
-    print(cert_expiration)
-
     # remote_cert = x509.load_der_x509_certificate(peer_cert, default_backend())
     # print(cert_data.version)
     # print(peer_cert['notAfter'])
     # print(remote_cert.not_valid_after)
+
+    # calculate expiration, send metrics, tags
+    check_expiration(cert_data.not_valid_after)
+
+
+def check_expiration(exp_date):
+    # add variables for custom configured thresholds
+    seconds_warning = \
+        DEFAULT_EXPIRE_WARNING
+    seconds_critical = \
+        DEFAULT_EXPIRE_CRITICAL
+    time_left = exp_date - datetime.utcnow()
+    days_left = time_left.days
+    seconds_left = time_left.total_seconds()
+    print("Exp_date: {}".format(exp_date))
+    print("seconds_left: {}".format(seconds_left))
+    print("days_left: {}".format(days_left))
 
 
 def can_connect(status, message=''):
