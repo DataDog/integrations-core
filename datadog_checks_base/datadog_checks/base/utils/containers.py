@@ -10,7 +10,7 @@ def freeze(o):
     Accepts nested dictionaries.
     """
     if isinstance(o, (tuple, list)):
-        return tuple(freeze(e) for e in sorted(o))
+        return tuple(sorted(freeze(e) for e in o))
 
     if isinstance(o, dict):
         return tuple(sorted((k, freeze(v)) for k, v in iteritems(o)))
