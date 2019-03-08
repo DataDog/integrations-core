@@ -6,6 +6,9 @@ from datadog_checks.ssl import SslCheck
 
 def test_check(aggregator, instance):
     check = SslCheck('ssl', {}, {})
+    instance = {
+        'url': 'www.google.com'
+    }
     check.check(instance)
 
     aggregator.assert_all_metrics_covered()

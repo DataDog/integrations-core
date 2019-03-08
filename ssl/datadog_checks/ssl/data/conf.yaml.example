@@ -3,6 +3,7 @@ init_config:
 instances:
   - name: My first service
     host: myhost.example.com
+    url: google.com
     port: 443
     timeout: 10
     # The (optional) collect_response_time parameter will instruct the
