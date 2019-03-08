@@ -31,10 +31,10 @@ from ....utils import dir_exists, file_exists, path_join
     )
 )
 @click.option(
-    '--env-vars', '-v', default='',
+    '--env-vars', '-e', multiple=True,
     help=(
-        'A quoted, space separated list of ENV Variables that should be passed to the Agent container. '
-        'Ex: \'DD_URL=app.datadoghq.com DD_API_KEY=123456\''
+        'ENV Variable that should be passed to the Agent container. '
+        'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
     )
 )
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
@@ -42,6 +42,7 @@ from ....utils import dir_exists, file_exists, path_join
 @click.pass_context
 def start(ctx, check, env, agent, dev, base, env_vars):
     """Start an environment."""
+
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
 

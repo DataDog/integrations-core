@@ -24,7 +24,7 @@ class DockerInterface(object):
     ):
         self.check = check
         self.env = env
-        self.env_vars = env_vars.split()
+        self.env_vars = env_vars
         self.base_package = base_package
         self.config = config or {}
         self.metadata = metadata or {}
@@ -122,7 +122,7 @@ class DockerInterface(object):
             ]
 
             # Any environment variables passed to the start command
-            command.extend(['-e {}'.format(var) for var in self.env_vars])
+            command.extend('-e {}'.format(var) for var in self.env_vars)
 
             if self.base_package:
                 # Mount the check directory
