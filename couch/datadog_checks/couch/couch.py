@@ -69,8 +69,8 @@ class CouchDb(AgentCheck):
 
             try:
                 version = self.get(self.get_server(instance), instance, tags, True)['version']
-            except Exception:
-                raise errors.ConnectionError("Unable to talk to the server")
+            except Exception as e:
+                raise errors.ConnectionError("Unable to talk to the server: {}".format(e))
 
             if version.startswith('1.'):
                 self.checker = CouchDB1(self)
