@@ -19,9 +19,10 @@ from ...utils import path_join
 class DockerInterface(object):
     ENV_TYPE = 'docker'
 
-    def __init__(self, check, env, base_package=None, config=None, metadata=None, agent_build=None, api_key=None):
+    def __init__(self, check, env, base_package=None, config=None, env_vars=None, metadata=None, agent_build=None, api_key=None):
         self.check = check
         self.env = env
+        self.env_vars = env_vars.split()
         self.base_package = base_package
         self.config = config or {}
         self.metadata = metadata or {}
@@ -117,6 +118,9 @@ class DockerInterface(object):
                 # Mount the check directory
                 '-v', '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
             ]
+
+            # Any environment variables passed to the start command
+            command.extend(['-e {}'.format(var) for var in self.env_vars])
 
             if self.base_package:
                 # Mount the check directory

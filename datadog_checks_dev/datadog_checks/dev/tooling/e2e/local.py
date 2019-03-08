@@ -24,11 +24,13 @@ from ...subprocess import run_command
 class LocalAgentInterface(object):
     ENV_TYPE = 'local'
 
-    def __init__(self, check, env, base_package=None, config=None, metadata=None, agent_build=None, api_key=None):
+    def __init__(self, check, env, base_package=None, config=None, env_vars=None, metadata=None, agent_build=None, api_key=None):
         self.check = check
         self.env = env
         self.base_package = base_package
         self.config = config or {}
+        # Env vars are not currently used in local E2E
+        self.env_vars = env_vars
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY

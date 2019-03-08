@@ -30,10 +30,17 @@ from ....utils import dir_exists, file_exists, path_join
         'config (agent5, agent6, etc.)'
     )
 )
+@click.option(
+    '--env-vars', '-v', default='',
+    help=(
+        'A quoted, space separated list of ENV Variables that should be passed to the Agent container. '
+        'Ex: \'DD_URL=app.datadoghq.com DD_API_KEY=123456\''
+    )
+)
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
 @click.pass_context
-def start(ctx, check, env, agent, dev, base):
+def start(ctx, check, env, agent, dev, base, env_vars):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
@@ -102,7 +109,7 @@ def start(ctx, check, env, agent, dev, base):
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    environment = interface(check, env, base_package, config, metadata, agent_build, api_key)
+    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key)
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)
     environment.update_agent()
