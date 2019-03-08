@@ -129,9 +129,9 @@ The Agent tags `rabbitmq.queue.*` metrics by queue name, and `rabbitmq.node.*` m
 
 ### Events
 
-For performance reasons, the RabbitMQ check self-limits the number of queues and nodes it will collect metrics for. If and when the check nears this limit, it emits a warning-level event to your event stream.
+For performance reasons, the RabbitMQ check limits the number of exchanges, queues, and nodes it collects metrics for. If the check nears this limit, it emits a warning-level event to your event stream.
 
-See the [example check configuration][4] for details about these limits.
+If you require an increase in the number of exchanges, queues, or nodes, contact [Datadog support][16].
 
 ### Service Checks
 
@@ -172,3 +172,4 @@ Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, oth
 [13]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
 [14]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
 [15]: https://app.datadoghq.com/account/settings#integrations/rabbitmq
+[16]: https://docs.datadoghq.com/help/
