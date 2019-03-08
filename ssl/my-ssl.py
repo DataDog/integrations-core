@@ -61,8 +61,14 @@ def check_expiration(exp_date):
     days_left = time_left.days
     seconds_left = time_left.total_seconds()
     print("Exp_date: {}".format(exp_date))
-    print("seconds_left: {}".format(seconds_left))
-    print("days_left: {}".format(days_left))
+    if seconds_left < seconds_critical:
+        print('critical', days_left, seconds_left,
+              "This cert TTL is critical: only {} days before it expires".format(days_left))
+    elif seconds_left < seconds_warning:
+        print('warning', days_left, seconds_left,
+              "This cert is almost expired, only {} days left".format(days_left))
+    else:
+        print('up', days_left, seconds_left, "Days left: {}".format(days_left))
 
 
 def can_connect(status, message=''):
