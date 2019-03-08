@@ -19,7 +19,9 @@ from ...utils import path_join
 class DockerInterface(object):
     ENV_TYPE = 'docker'
 
-    def __init__(self, check, env, base_package=None, config=None, env_vars=None, metadata=None, agent_build=None, api_key=None):
+    def __init__(
+        self, check, env, base_package=None, config=None, env_vars=None, metadata=None, agent_build=None, api_key=None
+    ):
         self.check = check
         self.env = env
         self.env_vars = env_vars.split()
