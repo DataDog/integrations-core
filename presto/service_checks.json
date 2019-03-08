@@ -1,6 +1,6 @@
 [
   {
-      "agent_version": "1.0.0",
+      "agent_version": "6.11.0",
       "integration":"presto",
       "groups": ["host", "instance"],
       "check": "presto.can_connect",
