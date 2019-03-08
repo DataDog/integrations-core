@@ -5,16 +5,21 @@ import os
 
 import pytest
 
-from datadog_checks.systemd import SystemdCheck
-
+from .metrics import CORE_GAUGES
 from .common import CONFIG
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
+@pytest.fixture
+def systemctl_mocks():
+    mock_systemctl = mock.patch('Unit(unit_id)', return_value=MockSystemdUnit(), __name__='unit_state')
+    return mock_systemctl
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield CONFIG, "local"
+    yield CONFIG, "local"  # cannot run the e2e tests due to not being able to
 
 
 @pytest.fixture
@@ -31,7 +36,9 @@ def instance_ko():
 def instance():
     return {
         'units': [
-            "httpd.service"
+            "ssh.service",
+            "cron.service",
+            "networking.service"
         ],
         'collect_all_units': False
     }
@@ -41,12 +48,12 @@ def instance():
 def instance_collect_all():
     return {
         'units': [
-            "httpd.service"
+            "ssh.service"
         ],
         'collect_all_units': True
     }
 
 
-@pytest.fixture
-def check():
-    return SystemdCheck({"systemd", {}, {}})
+@pytest.fixture(scope='session')
+def gauge_metrics():
+    return CORE_GAUGES

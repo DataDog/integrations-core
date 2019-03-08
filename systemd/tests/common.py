@@ -20,3 +20,6 @@ CONFIG = {
         }
     ]
 }
+
+DEFAULT_UNIT_ID = 'ssh.service'
+DEFAULT_UNIT_STATE = 'active'

@@ -79,8 +79,7 @@ class SystemdCheck(AgentCheck):
         manager.load()
         list_units = manager.Manager.ListUnitFiles()
 
-        # remove units that have an @ symbol in their names - cannot seem to get unit info then - to investigate
-        unit_names = [unit[0] for unit in list_units if '@' not in unit[0]]
+        unit_names = [unit[0] for unit in list_units]
 
         active_units = inactive_units = 0
 
