@@ -30,6 +30,8 @@ from ....utils import dir_exists, file_exists, path_join
         'config (agent5, agent6, etc.)'
     )
 )
+@click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
+@click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
 @click.option(
     '--env-vars', '-e', multiple=True,
     help=(
@@ -37,12 +39,9 @@ from ....utils import dir_exists, file_exists, path_join
         'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
     )
 )
-@click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
-@click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
 @click.pass_context
 def start(ctx, check, env, agent, dev, base, env_vars):
     """Start an environment."""
-
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
 
