@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 1.8.0 / 2019-03-08
+
+* [Added] Add support for SASL_PLAINTEXT authentication with Kafka broker. See [#3056](https://github.com/DataDog/integrations-core/pull/3056).
+
 ## 1.7.0 / 2019-02-18
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
