@@ -4,7 +4,7 @@ version: '3'
 services:
   coordinator:
     build:
-      context: datadog/docker-library:presto
+      context: ./config
       args:
         NODE_TYPE: coordinator
         NODE_ID: coordinator
@@ -18,7 +18,7 @@ services:
 
   worker1:
     build:
-      context: datadog/docker-library:presto
+      context: ./config
       args:
         NODE_TYPE: worker
         NODE_ID: worker1
@@ -32,7 +32,7 @@ services:
 
   worker2:
     build:
-      context: datadog/docker-library:presto
+      context: ./config
       args:
         NODE_TYPE: worker
         NODE_ID: worker2
