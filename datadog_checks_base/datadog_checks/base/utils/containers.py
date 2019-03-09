@@ -36,4 +36,4 @@ def iter_unique(*iterables):
                 continue
 
             seen.add(item_id)
-            yield item_id
+            yield item
