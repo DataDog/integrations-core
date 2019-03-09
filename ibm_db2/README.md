@@ -56,20 +56,22 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-See [service_checks.json][6] for a list of service checks provided by this integration.
+- `ibm_db2.can_connect` returns `CRITICAL` if the Agent is unable to connect to
+  the monitored IBM Db2 database, or `OK` otherwise.
+- `ibm_db2.status` returns `CRITICAL` if the monitored IBM Db2 database is
+  quiesced, `WARNING` for quiesce-pending or rollforwards, or `OK` otherwise.
 
 ### Events
 
-- `ibm_db2.tablespace_state_change` is triggered whenever the state of a tablespace changes
+- `ibm_db2.tablespace_state_change` is triggered whenever the state of a tablespace changes.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][6].
 
 [1]: https://www.ibm.com/analytics/us/en/db2
 [2]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/datadog_checks/ibm_db2/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
-[6]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/service_checks.json
-[7]: https://docs.datadoghq.com/help
+[6]: https://docs.datadoghq.com/help
