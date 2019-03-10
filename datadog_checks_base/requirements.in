@@ -1,7 +1,7 @@
 ddtrace==0.13.0
 kubernetes==8.0.1
 prometheus-client==0.3.0
-protobuf==3.5.1
+protobuf==3.7.0
 pywin32==224; sys_platform == 'win32'
 pyyaml==3.13
 requests==2.21.0
