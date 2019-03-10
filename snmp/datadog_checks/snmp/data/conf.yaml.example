@@ -16,7 +16,7 @@ init_config:
 
 ## @param global_metrics - list of elements - optional
 ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
-## global_metrics are applied to all instances as long as use_global_metrics is set to true at the instance level.
+## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
 ## i.e:
 ## - MIB: UDP-MIB
 ##   symbol: udpInDatagrams
