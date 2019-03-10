@@ -66,7 +66,7 @@ class IIS(PDHBaseCheck):
                 try:
                     vals = counter.get_all_values()
                 except Exception as e:
-                    self.log.error("Failed to get_all_values {} {}".format(inst_name, dd_name))
+                    self.log.error("Failed to get_all_values {} {}: {}".format(inst_name, dd_name, e))
                     continue
 
                 for sitename, val in iteritems(vals):

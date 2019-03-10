@@ -13,6 +13,7 @@ import threading
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
 from pyVmomi import vmodl  # pylint: disable=E0611
+from six.moves import range
 
 from datadog_checks.config import is_affirmative
 from datadog_checks.checks import AgentCheck
@@ -676,7 +677,7 @@ class VSphereCheck(AgentCheck):
             batch_size = self.batch_morlist_size or self.mor_objects_queue.size(i_key, resource_type)
             while self.mor_objects_queue.size(i_key, resource_type):
                 mors = []
-                for _ in xrange(batch_size):
+                for _ in range(batch_size):
                     mor = self.mor_objects_queue.pop(i_key, resource_type)
                     if mor is None:
                         self.log.debug("No more objects of type '{}' left in the queue".format(resource_type))

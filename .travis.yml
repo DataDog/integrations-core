@@ -1,3 +1,4 @@
+dist: xenial
 sudo: required
 services:
   - docker
@@ -8,6 +9,7 @@ addons:
   apt:
     packages:
       - tdsodbc
+      - unixodbc-dev
 cache:
   directories:
     - "$HOME/.cache/pip"
@@ -34,6 +36,7 @@ stages:
     if: ((branch = master) AND (type != pull_request)) OR ((commit_message =~ /ci run all/) AND (type = pull_request))
 
 script:
+  - ddev validate logos ${CHECK}
   - travis_retry ddev test --cov ${CHECK}
   - ddev test ${CHECK} --bench || true
   - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
@@ -53,6 +56,7 @@ jobs:
         - ddev validate agent-reqs
         - ddev validate config
         - ddev validate dep
+        - ddev validate logos
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
@@ -64,6 +68,7 @@ jobs:
         - ddev validate agent-reqs
         - ddev validate config
         - ddev validate dep
+        - ddev validate logos
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
@@ -277,7 +282,7 @@ jobs:
       env: CHECK=zk PYTHON3=true
 before_install:
   - bash .travis/prepare.sh
-  - PATH="$PATH:$(pyenv root)/versions/3.6/bin"
+  - PATH="$(pyenv root)/versions/3.7.1/bin:$PATH:$(pyenv root)/versions/3.6.7/bin"
 install:
   - pip install -U pip setuptools codecov
   - pip install ./datadog_checks_dev[cli]

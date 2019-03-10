@@ -73,6 +73,10 @@ def get_version_file(check_name):
         return os.path.join(get_root(), check_name, 'datadog_checks', check_name, '__about__.py')
 
 
+def get_manifest_file(check_name):
+    return os.path.join(get_root(), check_name, 'manifest.json')
+
+
 def get_tox_file(check_name):
     return os.path.join(get_root(), check_name, 'tox.ini')
 
@@ -106,6 +110,10 @@ def get_config_files(check_name):
 
 def get_valid_checks():
     return {path for path in os.listdir(get_root()) if file_exists(get_version_file(path))}
+
+
+def get_valid_integrations():
+    return {path for path in os.listdir(get_root()) if file_exists(get_manifest_file(path))}
 
 
 def get_testable_checks():

@@ -1,5 +1,8 @@
 {
-  "categories": ["data store", "os & system"],
+  "categories": [
+    "data store",
+    "os & system"
+  ],
   "creates_events": false,
   "display_name": "Ceph",
   "guid": "8a60c34f-ecde-4269-bcae-636e6cbce98f",
@@ -9,10 +12,18 @@
   "metric_prefix": "ceph.",
   "metric_to_check": "ceph.write_bytes_sec",
   "name": "ceph",
-  "process_signatures": ["ceph-mon", "ceph-mgr", "ceph-osd"],
+  "process_signatures": [
+    "ceph-mon",
+    "ceph-mgr",
+    "ceph-osd"
+  ],
   "public_title": "Datadog-Ceph Integration",
   "short_description": "Collect per-pool performance metrics and monitor overall cluster status.",
   "support": "core",
-  "supported_os": ["linux", "mac_os"],
-  "type": "check"
+  "supported_os": [
+    "linux",
+    "mac_os"
+  ],
+  "type": "check",
+  "integration_id": "ceph"
 }

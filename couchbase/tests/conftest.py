@@ -45,11 +45,11 @@ def dd_environment():
         compose_file=os.path.join(HERE, 'compose', 'standalone.compose'),
         env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
         conditions=[
-            WaitFor(couchbase_container, attempts=15),
-            WaitFor(couchbase_init, attempts=15),
-            WaitFor(couchbase_setup, attempts=15),
-            WaitFor(node_stats, attempts=15),
-            WaitFor(bucket_stats, attempts=15),
+            WaitFor(couchbase_container),
+            WaitFor(couchbase_init),
+            WaitFor(couchbase_setup),
+            WaitFor(node_stats),
+            WaitFor(bucket_stats),
         ]
     ):
         yield DEFAULT_INSTANCE
