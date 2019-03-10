@@ -250,6 +250,13 @@ def metadata(check):
                 reader._fieldnames = reader.fieldnames
 
             for row in reader:
+
+                # Number of rows is correct. Since metric is first in the list, should be safe to access
+                if len(row) != len(ALL_HEADERS):
+                    errors = True
+                    echo_failure('{}: {} Has the wrong amount of columns'.format(current_check, row['metric_name']))
+                    continue
+
                 if PY2:
                     for key, value in iteritems(row):
                         if value is not None:

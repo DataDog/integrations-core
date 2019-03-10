@@ -115,9 +115,15 @@ def update_agent_requirements(req_file, check, newline):
     write_file_lines(req_file, sorted(lines))
 
 
-def build_wheel(package_path, sdist):
+def build_package(package_path, sdist):
     with chdir(package_path):
-        return run_command('python setup.py bdist_wheel --universal', capture='out')
+        result = run_command('python setup.py bdist_wheel --universal', capture='out')
+        if result.code != 0:
+            return result
 
         if sdist:
-            return run_command('python setup.py sdist', capture='out')
+            result = run_command('python setup.py sdist', capture='out')
+            if result.code != 0:
+                return result
+
+    return result

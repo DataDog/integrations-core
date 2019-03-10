@@ -1,3 +1,4 @@
+dist: xenial
 sudo: required
 services:
   - docker
@@ -8,6 +9,7 @@ addons:
   apt:
     packages:
       - tdsodbc
+      - unixodbc-dev
 cache:
   directories:
     - "$HOME/.cache/pip"
@@ -34,6 +36,7 @@ stages:
     if: ((branch = master) AND (type != pull_request)) OR ((commit_message =~ /ci run all/) AND (type = pull_request))
 
 script:
+  - ddev validate logos ${CHECK}
   - travis_retry ddev test --cov ${CHECK}
   - ddev test ${CHECK} --bench || true
   - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
@@ -53,6 +56,7 @@ jobs:
         - ddev validate agent-reqs
         - ddev validate config
         - ddev validate dep
+        - ddev validate logos
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
@@ -64,6 +68,7 @@ jobs:
         - ddev validate agent-reqs
         - ddev validate config
         - ddev validate dep
+        - ddev validate logos
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
@@ -80,6 +85,7 @@ jobs:
     - stage: test
       env: CHECK=aerospike PYTHON3=true
     - stage: test
+    # Agent <=5.x.x integration - only supporting py2 is needed
       env: CHECK=agent_metrics
     - stage: test
       env: CHECK=apache PYTHON3=true
@@ -112,6 +118,7 @@ jobs:
     - stage: test
       env: CHECK=disk PYTHON3=true
     - stage: test
+    # python 2 support only
       env: CHECK=dns_check
     - stage: test
       env: CHECK=dotnetclr PYTHON3=true
@@ -200,7 +207,7 @@ jobs:
     - stage: test
       env: CHECK=nginx_ingress_controller PYTHON3=true
     - stage: test
-      env: CHECK=ntp PYTHON3=true
+      env: CHECK=ntp
     - stage: test
       env: CHECK=openldap PYTHON3=true
     - stage: test
@@ -246,6 +253,7 @@ jobs:
     - stage: test
       env: CHECK=statsd PYTHON3=true
     - stage: test
+    # python 2 support only
       env: CHECK=supervisord
     - stage: test
       env: CHECK=squid PYTHON3=true
@@ -258,6 +266,7 @@ jobs:
     - stage: test
       env: CHECK=teamcity PYTHON3=true
     - stage: test
+    # python 2 support only
       env: CHECK=tokumx
     - stage: test
       env: CHECK=twemproxy PYTHON3=true
@@ -273,7 +282,7 @@ jobs:
       env: CHECK=zk PYTHON3=true
 before_install:
   - bash .travis/prepare.sh
-  - PATH="$PATH:$(pyenv root)/versions/3.6/bin"
+  - PATH="$(pyenv root)/versions/3.7.1/bin:$PATH:$(pyenv root)/versions/3.6.7/bin"
 install:
   - pip install -U pip setuptools codecov
   - pip install ./datadog_checks_dev[cli]

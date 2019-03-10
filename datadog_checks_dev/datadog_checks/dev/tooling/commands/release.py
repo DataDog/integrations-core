@@ -27,14 +27,13 @@ from ..github import (
 )
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
-    update_version_module, build_wheel
+    update_version_module, build_package
 )
 from ..trello import TrelloClient
 from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
     get_version_string, format_commit_id
 )
-from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
     basepath, chdir, dir_exists, ensure_unicode, get_next, remove_path, resolve_path, stream_file_lines,
@@ -839,11 +838,11 @@ def build(check, sdist):
     dist_dir = os.path.join(check_dir, 'dist')
     remove_path(dist_dir)
 
-    result = build_wheel(check_dir, sdist)
+    result = build_package(check_dir, sdist)
     if result.code != 0:
         abort(result.stdout, result.code)
 
-    echo_info('Build done, wheel file in: {}'.format(dist_dir))
+    echo_info('Build done, artifact(s) in: {}'.format(dist_dir))
     echo_success('Success!')
 
 
@@ -876,8 +875,8 @@ def upload(ctx, check, sdist, dry_run):
     auth_env_vars = {'TWINE_USERNAME': username, 'TWINE_PASSWORD': password}
     echo_waiting('Building and publishing `{}` to PyPI...'.format(check))
 
-    with EnvVars(auth_env_vars):
-        result = build_wheel(check_dir, sdist)
+    with chdir(check_dir, env_vars=auth_env_vars):
+        result = build_package(check_dir, sdist)
         if result.code != 0:
             abort(result.stdout, result.code)
         echo_waiting('Uploading the package...')

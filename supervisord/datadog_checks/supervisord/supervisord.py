@@ -64,7 +64,7 @@ class SupervisordCheck(AgentCheck):
                 'An error occurred while reading process information: %s %s'
                 % (error.faultCode, error.faultString)
             )
-        except socket.error, e:
+        except socket.error:
             host = instance.get('host', DEFAULT_HOST)
             port = instance.get('port', DEFAULT_PORT)
             sock = instance.get('socket')

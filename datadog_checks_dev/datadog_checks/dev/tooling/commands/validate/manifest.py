@@ -20,6 +20,7 @@ REQUIRED_ATTRIBUTES = {
     'creates_events',
     'display_name',
     'guid',
+    'integration_id',
     'is_public',
     'maintainer',
     'manifest_version',
@@ -35,7 +36,8 @@ OPTIONAL_ATTRIBUTES = {
     'aliases',
     'description',
     'is_beta',
-    # Move these two below (metric_to_check and metric_prefix) to mandatory when all integration are fixed
+    # Move these three below (integration_id, metric_to_check, metric_prefix)
+    # to mandatory when all integration are fixed
     'metric_to_check',
     'metric_prefix',
     'process_signatures',

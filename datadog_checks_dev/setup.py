@@ -78,6 +78,7 @@ setup(
             'in-toto==0.2.3',
             'pip-tools',
             'pylint',
+            'Pillow',
             'pyperclip>=1.7.0',
             'semver',
             'setuptools>=38.6.0',
