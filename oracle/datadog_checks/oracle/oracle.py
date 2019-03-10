@@ -88,10 +88,9 @@ class Oracle(AgentCheck):
         jdbc_driver = instance.get('jdbc_driver_path', None)
         tags = instance.get('tags', [])
         custom_queries = []
-        if self.init_config is not None:
-            custom_queries = self.init_config.get('custom_queries', [])
-        if instance.get('custom_queries'):
-            custom_queries = instance.get('custom_queries', [])
+        if instance.get('use_global_custom_queries', True) and self.init_config is not None:
+            custom_queries = self.init_config.get('global_custom_queries', [])
+        custom_queries.extend(instance.get('custom_queries', []))
         return self.server, user, password, service, jdbc_driver, tags, custom_queries
 
     def _get_connection(self, server, user, password, service, jdbc_driver, tags):

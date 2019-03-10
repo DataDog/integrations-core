@@ -1,6 +1,6 @@
 init_config:
 
-## @param custom_queries - object - optional
+## @param global_custom_queries - object - optional
 ## Providing custom queries is also supported. Each query must have 3 fields:
 ##
 ## 1. metric_prefix - This is what each metric will start with.
@@ -16,7 +16,7 @@ init_config:
 ##                          this particular query.
 ## 4. tags (optional) - A list of tags to apply to each metric.
 ##
-## custom_queries are applied to all instance unless if the config is overridden.
+## global_custom_queries are applied to all instances where use_global_custom_queries is set to true at the instance level.
 ##
 ## This:
 ##
@@ -81,6 +81,10 @@ instances:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
 
+  ## @param use_global_custom_queries - boolean - optional - default: true
+  ## Whether or not global_custom_queries should be included for this instance.
+  #
+  #  use_global_custom_queries: true
    
   ## @param custom_queries - object - optional 
   ## Providing custom queries is also supported. Each query must have 3 fields:
@@ -98,7 +102,8 @@ instances:
   ##                          this particular query.
   ## 4. tags (optional) - A list of tags to apply to each metric.
   ##
-  ## custom_queries defined at instance level takes precedence over custom_queries defined in the init_config section.
+  ## custom_queries set here will override global_custom_queries set in the init_config section if use_global_custom_queries is set to false.
+  ## Otherwise, they will be used in addition of global_custom_queries.
   ##
   ## This:
   ##
