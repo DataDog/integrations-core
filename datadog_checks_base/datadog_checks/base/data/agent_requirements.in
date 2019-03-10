@@ -56,7 +56,7 @@ securesystemslib[crypto,pynacl]==0.11.3
 selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 serpent==1.27; sys_platform == 'win32'
 simplejson==3.6.5
-six==1.11.0
+six==1.12.0
 supervisor==3.3.3; python_version < '3.0'
 tuf==0.11.2.dev3
 uptime==3.0.1
