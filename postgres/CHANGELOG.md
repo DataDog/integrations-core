@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 2.6.0 / 2019-03-11
+
+* [Added] Support multiple rows for custom queries. See [#3242](https://github.com/DataDog/integrations-core/pull/3242).
+
 ## 2.5.0 / 2019-02-18
 
 * [Added] Finish Python3 Support. See [#2949](https://github.com/DataDog/integrations-core/pull/2949).
