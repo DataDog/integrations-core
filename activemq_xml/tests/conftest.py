@@ -24,7 +24,7 @@ def dd_environment():
             os.mkdir(activemq_data_dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
-               raise 
+                raise
         with tarfile.open(fixture_archive, "r:gz") as f:
             f.extractall(path=activemq_data_dir)
         os.chmod(os.path.join(activemq_data_dir, "kahadb"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
