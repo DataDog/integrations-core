@@ -458,8 +458,7 @@ class Network(AgentCheck):
             with open(proc_conntrack_max_path, 'r') as conntrack_max_file:
                 # Starting at 0 as the last line has a line return
                 conntrack_max = conntrack_max_file.read().rstrip()
-                if conntrack_max.isdigit():
-                    self.gauge('system.net.conntrack.max', conntrack_max, tags=custom_tags)
+                self.gauge('system.net.conntrack.max', conntrack_max, tags=custom_tags)
         except IOError:
             self.log.debug("Unable to read %s. Skipping nf_conntrack_max metrics pull.", proc_conntrack_max_path)
 
