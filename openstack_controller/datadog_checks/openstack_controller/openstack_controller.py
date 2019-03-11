@@ -216,14 +216,15 @@ class OpenStackControllerCheck(AgentCheck):
         """
         # Create a dictionary with hypervisor hostname as key and the list of project names as value
         hyp_project_names = {}
-        for _, server in iteritems(servers):
-            if not server['hypervisor_hostname']:
+        for server in itervalues(servers):
+            hypervisor_hostname = server.get('hypervisor_hostname')
+            if not hypervisor_hostname:
                 self.log.debug("hypervisor_hostname is None for server %s. "
                                "Check that your user is an administrative users.", server['server_id'])
             else:
-                if not hyp_project_names.get(server['hypervisor_hostname']):
-                    hyp_project_names[server['hypervisor_hostname']] = set()
-                hyp_project_names[server['hypervisor_hostname']].add(server['project_name'])
+                if not hyp_project_names.get(hypervisor_hostname):
+                    hyp_project_names[hypervisor_hostname] = set()
+                hyp_project_names[hypervisor_hostname].add(server['project_name'])
 
         hypervisors = self.get_os_hypervisors_detail()
         for hyp in hypervisors:
@@ -724,7 +725,7 @@ class OpenStackControllerCheck(AgentCheck):
             if collect_server_diagnostic_metrics or collect_server_flavor_metrics:
                 if collect_server_diagnostic_metrics:
                     self.log.debug("Fetch stats from %s server(s)" % len(servers))
-                    for _, server in iteritems(servers):
+                    for server in itervalues(servers):
                         self.collect_server_diagnostic_metrics(server, tags=custom_tags,
                                                                use_shortname=use_shortname)
                 if collect_server_flavor_metrics:
@@ -734,7 +735,7 @@ class OpenStackControllerCheck(AgentCheck):
                         flavors = self.get_flavors()
                     else:
                         flavors = None
-                    for _, server in iteritems(servers):
+                    for server in itervalues(servers):
                         self.collect_server_flavor_metrics(server, flavors, tags=custom_tags,
                                                            use_shortname=use_shortname)
 
