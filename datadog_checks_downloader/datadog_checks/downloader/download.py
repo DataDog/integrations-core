@@ -164,9 +164,8 @@ class TUFDownloader:
 
 
     def __verify_in_toto_metadata(self, target_relpath, in_toto_metadata_relpaths, pubkey_relpaths):
-        # Make a temporary directory.
-        tempdir = tempfile.mkdtemp()
-        prev_cwd = os.getcwd()
+        # Make a temporary directory in a parent directory we control.
+        tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
 
         try:
             # Copy files over into temp dir.
@@ -192,7 +191,9 @@ class TUFDownloader:
             logger.exception('in-toto failed to verify {}'.format(target_relpath))
             raise
         finally:
-            os.chdir(prev_cwd)
+            # Switch back to a parent directory we control, so that we can
+            # safely delete temp dir.
+            os.chdir(REPOSITORIES_DIR)
             # Delete temp dir.
             shutil.rmtree(tempdir)
 
