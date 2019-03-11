@@ -9,6 +9,8 @@ import jpype
 import cx_Oracle
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
+
 from . import queries
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
@@ -88,6 +90,9 @@ class Oracle(AgentCheck):
         jdbc_driver = instance.get('jdbc_driver_path', None)
         tags = instance.get('tags', [])
         custom_queries = instance.get('custom_queries', [])
+        if is_affirmative(instance.get('use_global_custom_queries', True)):
+            custom_queries.extend(self.init_config.get('global_custom_queries', []))
+
         return self.server, user, password, service, jdbc_driver, tags, custom_queries
 
     def _get_connection(self, server, user, password, service, jdbc_driver, tags):
