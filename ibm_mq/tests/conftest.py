@@ -16,6 +16,7 @@ from . import common
 
 log = logging.getLogger(__file__)
 
+
 @pytest.fixture
 def check():
     return IbmMqCheck('ibm_mq', {}, {})
