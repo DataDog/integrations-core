@@ -8,14 +8,31 @@ from . import common
 from datadog_checks.cassandra_nodetool import CassandraNodetoolCheck
 
 
-def mock_output(*args, **kwargs):
-    with open(path.join(common.HERE, 'fixtures', 'nodetool_output')) as f:
+def _read_fixture(filename):
+    with open(path.join(common.HERE, 'fixtures', filename)) as f:
         contents = f.read()
         return contents, "", 0
 
 
+def mock_output(*args, **kwargs):
+    return _read_fixture('nodetool_output')
+
+
+def mock_output_old_format(*args, **kwargs):
+    return _read_fixture('nodetool_output_1.2')
+
+
 @patch('datadog_checks.cassandra_nodetool.cassandra_nodetool.get_subprocess_output', side_effect=mock_output)
 def test_check(mock_output, aggregator):
+    _check(mock_output, aggregator)
+
+
+@patch('datadog_checks.cassandra_nodetool.cassandra_nodetool.get_subprocess_output', side_effect=mock_output_old_format)
+def test_check_old_format(mock_output, aggregator):
+    _check(mock_output, aggregator)
+
+
+def _check(mock_output, aggregator):
     integration = CassandraNodetoolCheck(common.CHECK_NAME, {}, {})
     integration.check(common.CONFIG_INSTANCE)
 
