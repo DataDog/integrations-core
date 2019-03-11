@@ -18,7 +18,7 @@ EXCEPTIONS = {
 }
 
 
-def substitute(target_relpath):
+def substitute(target_relpath, python):
     filename = os.path.basename(target_relpath)
     name, ext = os.path.splitext(filename)
     wheel_distribution_name, package_version, _, _, _ = name.split('-')
@@ -40,8 +40,10 @@ def substitute(target_relpath):
         package_github_dir = wheel_distribution_name[8:]
 
     return {
-        'wheel_distribution_name': wheel_distribution_name,
         'package_version': package_version,
         'package_github_dir': package_github_dir,
-        'standard_distribution_name': standard_distribution_name
+        # The Python interpreter used to inspect wheels.
+        'python': python,
+        'standard_distribution_name': standard_distribution_name,
+        'wheel_distribution_name': wheel_distribution_name,
     }

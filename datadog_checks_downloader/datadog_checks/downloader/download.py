@@ -49,6 +49,7 @@ from .exceptions import (
 
 # CONSTANTS.
 here = os.path.abspath(os.path.dirname(__file__))
+PYTHON = 'python'
 REPOSITORIES_DIR = os.path.join(here, 'data')
 # abspath = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
 REPOSITORY_DIR = 'repo'
@@ -163,41 +164,44 @@ class TUFDownloader:
         return target_relpaths
 
 
-    def __verify_in_toto_metadata(self, target_relpath, in_toto_metadata_relpaths, pubkey_relpaths):
+    def __verify_in_toto_metadata(self, target_relpath, in_toto_inspection_packet, python=PYTHON):
         # Make a temporary directory.
         tempdir = tempfile.mkdtemp()
         prev_cwd = os.getcwd()
 
+        # Copy files over into temp dir.
+        for rel_path in in_toto_inspection_packet:
+            # Don't confuse Python with any leading path separator.
+            rel_path = rel_path.lstrip('/')
+            abs_path = os.path.join(self.__targets_dir, rel_path)
+            shutil.copy(abs_path, tempdir)
+
+        # Switch to the temp dir.
+        os.chdir(tempdir)
+
+        # Load the root layout and public keys.
+        layout = Metablock.load('root.layout')
+        pubkeys = glob.glob('*.pub')
+        layout_key_dict = import_public_keys_from_files_as_dict(pubkeys)
+
+        # Parameter substitution.
+        params = substitute(target_relpath, python)
+
         try:
-            # Copy files over into temp dir.
-            rel_paths = [target_relpath] + in_toto_metadata_relpaths + pubkey_relpaths
-            for rel_path in rel_paths:
-                # Don't confuse Python with any leading path separator.
-                rel_path = rel_path.lstrip('/')
-                abs_path = os.path.join(self.__targets_dir, rel_path)
-                shutil.copy(abs_path, tempdir)
-
-            # Switch to the temp dir.
-            os.chdir(tempdir)
-
-            # Load the root layout and public keys.
-            layout = Metablock.load('root.layout')
-            pubkeys = glob.glob('*.pub')
-            layout_key_dict = import_public_keys_from_files_as_dict(pubkeys)
             # Verify and inspect.
-            params = substitute(target_relpath)
             verifylib.in_toto_verify(layout, layout_key_dict, substitution_parameters=params)
-            logger.info('in-toto verified {}'.format(target_relpath))
         except:
             logger.exception('in-toto failed to verify {}'.format(target_relpath))
             raise
+        else:
+            logger.info('in-toto verified {}'.format(target_relpath))
         finally:
             os.chdir(prev_cwd)
             # Delete temp dir.
             shutil.rmtree(tempdir)
 
 
-    def __download_and_verify_in_toto_metadata(self, target, target_relpath):
+    def __download_and_verify_in_toto_metadata(self, target, target_relpath, python=PYTHON):
         in_toto_metadata_relpaths = self.__download_in_toto_metadata(target)
 
         if not len(in_toto_metadata_relpaths):
@@ -210,10 +214,14 @@ class TUFDownloader:
                 raise NoInTotoRootLayoutPublicKeysFound(target_relpath)
 
             else:
-                self.__verify_in_toto_metadata(target_relpath, in_toto_metadata_relpaths, pubkey_relpaths)
+                # Everything we need for in-toto inspection to work: the wheel,
+                # the in-toto root layout, in-toto links, and public keys to
+                # verify the in-toto layout.
+                in_toto_inspection_packet = [target_relpath] + in_toto_metadata_relpaths + pubkey_relpaths
+                self.__verify_in_toto_metadata(target_relpath, in_toto_inspection_packet, python=python)
 
 
-    def __get_target(self, target_relpath, download_in_toto_metadata=True):
+    def __get_target(self, target_relpath, download_in_toto_metadata=True, python=PYTHON):
         target = self.__updater.get_one_valid_targetinfo(target_relpath)
         updated_targets = self.__updater.updated_targets((target,), self.__targets_dir)
 
@@ -236,7 +244,7 @@ class TUFDownloader:
         # All other files, presumably packages, should also be
         # inspected.
         if download_in_toto_metadata:
-            self.__download_and_verify_in_toto_metadata(target, target_relpath)
+            self.__download_and_verify_in_toto_metadata(target, target_relpath, python=python)
         else:
             logger.debug('Switched off in-toto verification for {}'.format(target_relpath))
 
@@ -244,10 +252,10 @@ class TUFDownloader:
         return target_path
 
 
-    def download(self, target_relpath, download_in_toto_metadata=True):
+    def download(self, target_relpath, download_in_toto_metadata=True, python=PYTHON):
         '''
         Returns:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         '''
-        return self.__get_target(target_relpath, download_in_toto_metadata=download_in_toto_metadata)
+        return self.__get_target(target_relpath, download_in_toto_metadata=download_in_toto_metadata, python=python)

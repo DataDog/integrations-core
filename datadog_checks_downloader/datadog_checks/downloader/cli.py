@@ -8,7 +8,10 @@ import argparse
 import re
 
 # 2nd party.
-from .download import TUFDownloader
+from .download import (
+    PYTHON,
+    TUFDownloader
+)
 from .exceptions import (
     InconsistentSimpleIndex,
     MissingVersions,
@@ -78,6 +81,9 @@ def download():
     parser.add_argument('standard_distribution_name', type=str,
                         help='Standard distribution name of the desired Datadog check.')
 
+    parser.add_argument('--python', type=str, default=PYTHON,
+                        help='The path to the Python interpreter used to inspect wheels.')
+
     parser.add_argument('--version', type=str, default=None,
                         help='The version number of the desired Datadog check.')
 
@@ -85,6 +91,7 @@ def download():
                         help='Show verbose information about TUF and in-toto.')
 
     args = parser.parse_args()
+    python = args.python
     standard_distribution_name = args.standard_distribution_name
     version = args.version
     verbose = args.verbose
@@ -106,7 +113,7 @@ def download():
                                  wheel_distribution_name, version)
 
         try:
-            target_abspath = tuf_downloader.download(target_relpath)
+            target_abspath = tuf_downloader.download(target_relpath, python=python)
         except UnknownTargetError:
             raise NoSuchDatadogPackageOrVersion(standard_distribution_name, version)
 
