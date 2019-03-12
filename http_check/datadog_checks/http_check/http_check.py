@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
-import _strptime # noqa
+import _strptime  # noqa
 import re
 import socket
+from six import PY3
 import ssl
 import time
 import warnings
@@ -176,7 +177,7 @@ class HTTPCheck(NetworkCheck):
                     expected_code = http_response_status_code
 
                 message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
-                        addr, expected_code, str(r.status_code))
+                    addr, expected_code, str(r.status_code))
 
                 if include_content:
                     message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
@@ -295,15 +296,17 @@ class HTTPCheck(NetworkCheck):
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
-        except ssl.CertificateError as e:
-            self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
-            return Status.CRITICAL, 0, 0, str(e)
-        except ssl.SSLError as e:
-            self.log.debug("error: {}. Cert might be expired.".format(e))
-            return Status.DOWN, 0, 0, str(e)
         except Exception as e:
-            self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
-            return Status.DOWN, 0, 0, str(e)
+            msg = e.verify_message if PY3 and isinstance(e, ssl.CertificateError) else str(e)
+            if 'expiration' in msg:
+                self.log.debug("error: {}. Cert might be expired.".format(e))
+                return Status.DOWN, 0, 0, msg
+            elif 'Hostname mismatch' in msg or "doesn't match" in msg:
+                self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
+                return Status.CRITICAL, 0, 0, msg
+            else:
+                self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
+                return Status.DOWN, 0, 0, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()
