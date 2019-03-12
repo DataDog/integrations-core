@@ -1,6 +1,4 @@
 import logging
-import requests
-import time
 
 from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.dev import get_here
@@ -26,17 +24,3 @@ instance_2 = {
 }
 
 CONFIG_STUBS = [instance_1, instance_2]
-
-
-def wait_for_cluster():
-    for _ in range(0, 100):
-        res = None
-        try:
-            res = requests.get(STATUS_URL)
-            res.raise_for_status()
-            return True
-        except Exception as e:
-            log.debug("exception: {0} res: {1}".format(e, res))
-            time.sleep(2)
-
-    return False

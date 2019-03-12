@@ -15,8 +15,7 @@ def dd_environment():
 
     with docker_run(
         compose_file=os.path.join(compose_directory, 'docker-compose.yml'),
-        env_vars={'COMPOSE_DIRECTORY_PATH': compose_directory}
+        env_vars={'COMPOSE_DIRECTORY_PATH': compose_directory},
+        endpoints=common.STATUS_URL
     ):
-        if not common.wait_for_cluster():
-            raise Exception("Kong cluster boot timed out!")
         yield common.instance_1
