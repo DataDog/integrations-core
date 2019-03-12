@@ -11,8 +11,8 @@ from datetime import datetime, timedelta
 import json
 
 import requests
-from kubernetes.config.dateutil import parse_rfc3339, UTC
 
+from datadog_checks.base.utils.date import parse_rfc3339, UTC
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
