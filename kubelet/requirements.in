@@ -1,2 +1,1 @@
-pyRFC3339==1.1
-pytz==2018.9
+kubernetes==8.0.1

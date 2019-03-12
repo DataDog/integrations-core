@@ -38,14 +38,12 @@ pymongo==3.5.1
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.8.0
 pyodbc==4.0.22
-pyRFC3339==1.1
 pyro4==4.73; sys_platform == 'win32'
 pysmi==0.2.2
 pysnmp==4.4.3
 pysnmp-mibs==0.1.6
 python-binary-memcached==0.26.1; sys_platform != 'win32'
 python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
-pytz==2018.9
 pyvmomi==v6.5.0.2017.5-1
 pywin32==224; sys_platform == 'win32'
 pyyaml==3.13
