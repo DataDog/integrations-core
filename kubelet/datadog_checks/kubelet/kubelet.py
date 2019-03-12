@@ -76,19 +76,19 @@ class ExpiredPodFilter(object):
         self.expired_count = 0
         self.cutoff_date = cutoff_date
 
-    def json_hook(self, pod):
+    def json_hook(self, obj):
         # Not a pod (hook is called for all objects)
-        if 'metadata' not in pod or 'status' not in pod:
-            return pod
+        if 'metadata' not in obj or 'status' not in obj:
+            return obj
 
         # Quick exit for running/pending containers
-        pod_phase = pod.get('status', {}).get('phase')
+        pod_phase = obj.get('status', {}).get('phase')
         if pod_phase in ["Running", "Pending"]:
-            return pod
+            return obj
 
         # Filter out expired terminated pods, based on container finishedAt time
         expired = True
-        for ctr in pod['status'].get('containerStatuses', []):
+        for ctr in obj['status'].get('containerStatuses', []):
             if "terminated" not in ctr.get("state", {}):
                 expired = False
                 break
@@ -100,7 +100,7 @@ class ExpiredPodFilter(object):
                 expired = False
                 break
         if not expired:
-            return pod
+            return obj
 
         # We are ignoring this pod
         self.expired_count += 1
