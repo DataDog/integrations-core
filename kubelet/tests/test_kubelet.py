@@ -112,6 +112,7 @@ class MockStreamResponse:
     def __exit__(self, *args):
         pass
 
+
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator

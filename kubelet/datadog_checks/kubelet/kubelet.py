@@ -274,7 +274,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             return pod_list
         except Exception as e:
             self.log.warning('failed to retrieve pod list from the kubelet at %s : %s'
-                           % (self.pod_list_url, str(e)))
+                             % (self.pod_list_url, str(e)))
             return None
 
     @staticmethod
