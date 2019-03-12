@@ -5,6 +5,7 @@ import re
 import copy
 import requests
 
+from collections import defaultdict
 from six import iteritems, itervalues, next
 from datetime import datetime
 
@@ -215,7 +216,7 @@ class OpenStackControllerCheck(AgentCheck):
         Raises specific exceptions based on response code
         """
         # Create a dictionary with hypervisor hostname as key and the list of project names as value
-        hyp_project_names = {}
+        hyp_project_names = defaultdict(set)
         for server in itervalues(servers):
             hypervisor_hostname = server.get('hypervisor_hostname')
             if not hypervisor_hostname:
