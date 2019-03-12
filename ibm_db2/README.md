@@ -57,9 +57,9 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 ### Service Checks
 
 - `ibm_db2.can_connect` returns `CRITICAL` if the Agent is unable to connect to
-  the monitored IBM Db2 database, or `OK` otherwise.
+  the monitored IBM Db2 database, otherwise returns `OK`.
 - `ibm_db2.status` returns `CRITICAL` if the monitored IBM Db2 database is
-  quiesced, `WARNING` for quiesce-pending or rollforwards, or `OK` otherwise.
+  quiesced, `WARNING` for quiesce-pending or rollforwards, otherwise returns `OK`.
 
 ### Events
 
