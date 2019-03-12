@@ -36,3 +36,5 @@ requirements.txt                                          @DataDog/prodsec
 datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec
 # As well as the secure downloader.
 /datadog_checks_downloader/                               @DataDog/prodsec
+# As well as the wheel building process
+.gitlab-ci.yml                                            @DataDog/prodsec
