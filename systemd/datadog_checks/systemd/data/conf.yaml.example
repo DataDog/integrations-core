@@ -1,9 +1,31 @@
 init_config:
 
 instances:
+  ## @param units - list - required
+  ## Systemd units you want to watch.
+  #
   - units:
       - networking.service
       - cron.service
       - ssh.service
 
-    collect_all_units: false
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ## Note: server metrics override the host tag and thus do not get the host-level tags specified in datadog.(conf/yaml)
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+
+  ## @param report_status - optional - boolean - default:false
+  ## Whether to enable metric collection for all active and inactive systemd units. Defaults to false.
+  #
+  #  report_status: false
+
+
+  ## @param report_processes - optional - boolean - default:true
+  ## Whether to enable process information for listed systemd units (above). Defaults to true.
+  #
+  #  report_processes: true

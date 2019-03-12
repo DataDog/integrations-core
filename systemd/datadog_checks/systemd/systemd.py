@@ -1,12 +1,15 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
+
 from collections import defaultdict
+from six import iteritems
 import pystemd
 from pystemd.systemd1 import Manager
 from pystemd.systemd1 import Unit
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.utils.subprocess_output import (
     get_subprocess_output,
     SubprocessOutputEmptyError,
@@ -23,79 +26,137 @@ class SystemdCheck(AgentCheck):
         super(SystemdCheck, self).__init__(name, init_config, instances)
 
         instance = instances[0]
-        self.collect_all = is_affirmative(instance.get('collect_all_units', False))
-        self.units = instance.get('units', [])
+        self.units_watched = instance.get('units', [])
+        self.tags = instance.get('tags', [])
+        self.report_status = instance.get('report_status', False)
+        self.report_processes = instance.get('report_processes', True)
+
+        # self.collect_all = is_affirmative(instance.get('collect_all_units', False))
+        # self.units = instance.get('units', [])
         # to store the state of a unit and compare it at the next run
         self.unit_cache = defaultdict(dict)
 
         # unit_cache = {
-        #    "units": {
-        #        "<unit_name>": "<unit_status>",
-        #        "cron.service": "inactive",
-        #        "ssh.service": "active"
-        #    }
+        #   "<unit_name>": "<unit_status>",
+        #   "cron.service": "inactive",
+        #   "ssh.service": "active"
         # }
 
     def check(self, instance):
-        if self.units:
-            for unit in self.units:
-                self.get_unit_state(unit)
-                self.get_number_processes(unit)
-        if self.collect_all:
-            # we display status for all units if no unit has been specified in the configuration file
-            self.get_active_inactive_units()
+        # units_watched = instance.get('units', [])
+        # populate unit cache
+        current_unit_status = self.get_all_unit_status()
+        # initialize the cache if it's empty
+        if not self.unit_cache:
+            self.unit_cache = current_unit_status
 
-        self.get_all_units(self.units)
+        for unit in self.units_watched:
+            if self.report_processes:
+                self.report_number_processes(unit, self.tags)
+            self.send_service_checks(unit, self.get_state_single_unit(unit), self.tags)
 
-    def get_all_units(self, cached_units):
-        if not cached_units:
-            cached_units = self.unit_cache.get('units')
+        changed_units, deleted_units, created_units = self.list_status_change(current_unit_status)
+        # self.log.info("created units: ", created_units)
 
-        updated_units = self.get_listed_units()
+        self.report_changed_units(changed_units, self.tags)
+        self.report_deleted_units(deleted_units, self.tags)
+        self.report_created_units(created_units, self.tags)
 
-        # Initialize or update cache for this instance
-        self.unit_cache = {
-            'units': updated_units
-        }
+        if self.report_status:
+            self.report_statuses(current_unit_status, self.tags, self.report_processes)
 
-        return self.unit_cache, cached_units
-
-    def get_listed_units(self):
+    def get_all_unit_status(self):
         manager = Manager()
         manager.load()
-        units = self.units
 
-        return {unit: self.get_state_single_unit(unit) for unit in units}
+        list_unit_files = manager.Manager.ListUnitFiles()
 
-    def update_unit_cache(self):
-        returned_cache = {}
-        returned_cache = self.get_listed_units()
+        unit_status = defaultdict(dict)
 
-        return returned_cache
-
-    def get_active_inactive_units(self):
-        # returns the number of active and inactive units
-        manager = Manager()
-        manager.load()
-        list_units = manager.Manager.ListUnitFiles()
-
-        unit_names = [unit[0] for unit in list_units]
-
-        active_units = inactive_units = 0
-
-        for unit in unit_names:
+        for unit in list_unit_files:
             # full unit name includes path - we take the string before the last "/"
-            unit_short_name = unit.rpartition('/')[2]
-            # self.log.info(unit_short_name)
+            unit_short_name = unit[0].rpartition('/')[2]
+            unit_short_name = bytes(unit_short_name)
+            # if unit has an @ symbol in its name/id
+            unit_state = self.get_state_single_unit(unit_short_name)
+            unit_status[unit_short_name] = unit_state
+
+        return unit_status
+
+    def list_status_change(self, current_unit_status):
+        changed = deleted = defaultdict(dict)
+        created = copy.deepcopy(current_unit_status)
+        for unit_short_name, previous_unit_status in iteritems(self.unit_cache):
+            # We remove all previous cached entries from the current unit status
+            del created[unit_short_name]
+            # We check status changes between the previous cached unit status and the current unit status
+            current_status = current_unit_status.get(unit_short_name)
+            if current_status:
+                if current_status != previous_unit_status:
+                    changed[unit_short_name] = current_status
+            else:
+                # We list all previous cached unit status that do not exist anymore
+                deleted[unit_short_name] = previous_unit_status
+
+        return changed, created, deleted
+
+    def report_changed_units(self, units, tags):
+        for unit, state in iteritems(units):
+            self.log.info(units)
+            self.event({
+                "event_type": "unit.status.changed",
+                "msg_title": "unit {} changed state".format(unit),
+                "msg_text": "it is now: {}".format(state),
+                "tags": tags
+            })
+
+    def report_deleted_units(self, units, tags):
+        for unit, state in iteritems(units):
+            self.event({
+                "event_type": "unit.status.deleted",
+                "msg_title": "unit {} cannot be found".format(unit), # TODO: check wording
+                "msg_text": "last reported status was: {}".format(state),
+                "tags": tags
+            })
+
+    def report_created_units(self, units, tags):
+        for unit, state in iteritems(units):
+            self.event({
+                "event_type": "unit.status.created",
+                "msg_title": "new unit {} has been found".format(unit), # TODO: check wording
+                "msg_text": "status is: {}".format(state),
+                "tags": tags
+            })
+
+    def report_statuses(self, units, tags, report_processes):
+        active_units = inactive_units = 0
+        for unit, state in iteritems(units):
+            # self.log.info("state_debug:{}".format(state))
             try:
-                unit_loaded = Unit(unit_short_name, _autoload=True)
-                unit_state = unit_loaded.Unit.ActiveState
-                if unit_state == b'active':
+                if state == b'active':
                     active_units += 1
-                if unit_state == b'inactive':
+                    """
+                    self.service_check(
+                        self.UNIT_STATUS_SC,
+                        AgentCheck.OK,
+                        tags=["unit:{}".format(unit)] + tags
+                    )
+                    """
+                    # if report_processes:
+                    #    self.report_number_processes(unit, tags)
+                    # active_units += 1
+                if state == b'inactive':
                     inactive_units += 1
+                    """
+                    self.service_check(
+                        self.UNIT_STATUS_SC,
+                        AgentCheck.CRITICAL,
+                        tags=["unit:{}".format(unit)] + tags
+                    )
+                    """
+                    # inactive_units += 1
             except pystemd.dbusexc.DBusInvalidArgsError as e:
-                self.log.debug("Cannot retrieve unit status for {}".format(unit_short_name), e)
+                self.log.debug("Cannot retrieve unit status for {}".format(unit), e)
 
         self.gauge('systemd.units.active', active_units)
         self.gauge('systemd.units.inactive', inactive_units)
@@ -103,52 +164,44 @@ class SystemdCheck(AgentCheck):
     def get_state_single_unit(self, unit_id):
         try:
             unit = Unit(unit_id, _autoload=True)
+            self.log.info(type(unit_id))
             state = unit.Unit.ActiveState
             return state
         except pystemd.dbusexc.DBusInvalidArgsError as e:
             self.log.info("Unit name invalid for {}".format(unit_id), e)
 
-    def get_unit_state(self, unit_id):
-        try:
-            unit = Unit(unit_id, _autoload=True)
-            state = unit.Unit.ActiveState
-            # Send a service check: OK if the unit is active, CRITICAL if inactive
-            if state == b'active':
-                self.service_check(
-                    self.UNIT_STATUS_SC,
-                    AgentCheck.OK,
-                    tags=["unit:{}".format(unit_id)]
-                )
-            elif state == b'inactive':
-                self.service_check(
-                    self.UNIT_STATUS_SC,
-                    AgentCheck.CRITICAL,
-                    tags=["unit:{}".format(unit_id)]
-                )
+    def send_service_checks(self, unit_id, state, tags):
+        if state == b'active' or b'activating':
+            self.service_check(
+                self.UNIT_STATUS_SC,
+                AgentCheck.OK,
+                tags=["unit:{}".format(unit_id)] + tags
+            )
+        elif state == b'inactive' or state == b'failed':
+            self.service_check(
+                self.UNIT_STATUS_SC,
+                AgentCheck.CRITICAL,
+                tags=["unit:{}".format(unit_id)] + tags
+            )
+        elif state == b'deactivating':
+            self.service_check(
+                self.UNIT_STATUS_SC,
+                AgentCheck.WARN,
+                tags=["unit:{}".format(unit_id)] + tags
+            )
+        else:
+            self.service_check(
+                self.UNIT_STATUS_SC,
+                AgentCheck.CRITICAL,
+                tags=["unit:{}".format(unit_id)] + tags
+            )
 
-            if unit_id in self.unit_cache.get('units', {}):
-                previous_status = self.unit_cache['units'][unit_id]
-                if previous_status != state:
-                    self.event({
-                        "event_type": "unit.status.changed",
-                        "msg_title": "unit {} changed state".format(unit_id),
-                        "msg_text": "it is now: {}".format(state),
-                        "tags": ["unit:status_changed"]
-                    })
-                    self.unit_cache['units'][unit_id] = state
-
-            else:
-                self.unit_cache['units'][unit_id] = state
-
-        except pystemd.dbusexc.DBusInvalidArgsError as e:
-            self.log.info("Unit name invalid for {}".format(unit_id), e)
-
-    def get_number_processes(self, unit_id):
-        systemctl_flags = ['status', unit_id]
+    def report_number_processes(self, unit, tags):
+        systemctl_flags = ['status', unit]
         try:
             output = get_subprocess_output(["systemctl"] + systemctl_flags, self.log)
             output_to_parse = output[0].split()
             number_of_pids = output_to_parse.count(u'Process:')
-            self.gauge('systemd.unit.processes', number_of_pids, tags=["unit:{}".format(unit_id)])
+            self.gauge('systemd.unit.processes', number_of_pids, tags=["unit:{}".format(unit)] + tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting systemctl stats.")

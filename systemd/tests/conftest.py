@@ -5,22 +5,13 @@ import os
 
 import pytest
 
-from .metrics import CORE_GAUGES
+from .metrics import CORE_UNITS
 from .common import CONFIG
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-
-
-@pytest.fixture
-def systemctl_mocks():
-    mock_systemctl = mock.patch('Unit(unit_id)', return_value=MockSystemdUnit(), __name__='unit_state')
-    return mock_systemctl
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield CONFIG, "local"  # cannot run the e2e tests due to not being able to
-
+    yield CONFIG, "local"  # cannot run the e2e tests - cannot call D-Bus inside a container
 
 @pytest.fixture
 def instance_ko():
@@ -28,7 +19,8 @@ def instance_ko():
         'units': [
             "nonexisting.service"
         ],
-        'collect_all_units': False
+        'report_status': False,
+        'report_process': False
     }
 
 
@@ -40,7 +32,8 @@ def instance():
             "cron.service",
             "networking.service"
         ],
-        'collect_all_units': False
+        'report_status': False,
+        'report_processes': True
     }
 
 
@@ -50,10 +43,22 @@ def instance_collect_all():
         'units': [
             "ssh.service"
         ],
-        'collect_all_units': True
+        'report_status': True,
+        'report_processes': True
+    }
+
+
+@pytest.fixture
+def instance_with_at_symbol():
+    return {
+        'units': [
+            "..."
+        ],
+        'report_status': False,
+        'report_process': False
     }
 
 
 @pytest.fixture(scope='session')
 def gauge_metrics():
-    return CORE_GAUGES
+    return CORE_UNITS
