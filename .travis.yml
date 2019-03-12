@@ -8,6 +8,7 @@ addons:
   apt:
     packages:
       - tdsodbc
+      - libsystemd-dev
 cache:
   directories:
     - "$HOME/.cache/pip"
@@ -265,7 +266,6 @@ install:
   - ddev config set core .
   # since on PRs it only runs test_changed we have to do this globally
   - bash .travis/install_ibm_mq.sh
-  - bash .travis/systemd.sh
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
 before_cache:
