@@ -1,7 +1,6 @@
 import logging
 
-from datadog_checks.utils.common import get_docker_hostname
-from datadog_checks.dev import get_here
+from datadog_checks.dev import get_here, get_docker_hostname
 
 log = logging.getLogger('test_kong')
 
@@ -11,7 +10,7 @@ CHECK_NAME = 'kong'
 HOST = get_docker_hostname()
 PORT = 8001
 
-STATUS_URL = 'http://{0}:{1}/status/'.format(HOST, PORT)
+STATUS_URL = 'http://{}:{}/status/'.format(HOST, PORT)
 
 instance_1 = {
     'kong_status_url': STATUS_URL,
