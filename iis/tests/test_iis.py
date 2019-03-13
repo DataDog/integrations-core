@@ -46,19 +46,20 @@ def test_check_on_specific_websites(aggregator):
     instance = INSTANCE
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
+    iis_host = c.get_iishost(instance)
 
     site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']
     for metric_def in DEFAULT_COUNTERS:
         metric = metric_def[3]
         for site_tag in site_tags:
-            aggregator.assert_metric(metric, tags=["site:{0}".format(site_tag)], count=1)
+            aggregator.assert_metric(metric, tags=["site:{0}".format(site_tag), iis_host], count=1)
 
     for site_tag in site_tags:
         aggregator.assert_service_check('iis.site_up', IIS.OK,
-                                        tags=["site:{0}".format(site_tag)], count=1)
+                                        tags=["site:{0}".format(site_tag), iis_host], count=1)
 
     aggregator.assert_service_check('iis.site_up', IIS.CRITICAL,
-                                    tags=["site:{0}".format('Non_Existing_Website')], count=1)
+                                    tags=["site:{0}".format('Non_Existing_Website'), iis_host], count=1)
 
     aggregator.assert_all_metrics_covered()
 
