@@ -4,11 +4,15 @@
 import json
 import os
 import sys
+from datetime import datetime
 
 import mock
 import pytest
 from six import iteritems
+from datadog_checks.base.utils.date import parse_rfc3339, UTC
+
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
+
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -87,6 +91,28 @@ EXPECTED_METRICS_PROMETHEUS = [
 ]
 
 
+class MockStreamResponse:
+    """
+    Mocks raw contents of a stream request for the podlist get
+    """
+    def __init__(self, filename):
+        self.filename = filename
+
+    @property
+    def raw(self):
+        return open(os.path.join(HERE, 'fixtures', self.filename))
+
+    def json(self):
+        with open(os.path.join(HERE, 'fixtures', self.filename)) as f:
+            return json.load(f)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
@@ -103,6 +129,7 @@ def mock_kubelet_check(monkeypatch, instances):
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+    monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
     def mocked_poll(*args, **kwargs):
         scraper_config = args[0]
@@ -445,8 +472,10 @@ def test_report_container_spec_metrics(monkeypatch):
 
 def test_report_container_state_metrics(monkeypatch):
     check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list',
-                        mock.Mock(return_value=json.loads(mock_from_file('pods_crashed.json'))))
+    check.pod_list_url = "dummyurl"
+    monkeypatch.setattr(check, 'perform_kubelet_query',
+                        mock.Mock(return_value=MockStreamResponse('pods_crashed.json')))
+    monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
     attrs = {'is_excluded.return_value': False}
@@ -486,6 +515,37 @@ def test_report_container_state_metrics(monkeypatch):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
 
+def test_pod_expiration(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.pod_list_url = "dummyurl"
+
+    # Fixtures contains four pods:
+    #   - dd-agent-ntepl old but running
+    #   - hello1-1550504220-ljnzx succeeded and old enough to expire
+    #   - hello5-1550509440-rlgvf succeeded but not old enough
+    #   - hello8-1550505780-kdnjx has one old container and a recent container, don't expire
+    monkeypatch.setattr(check, 'perform_kubelet_query',
+                        mock.Mock(return_value=MockStreamResponse('pods_expired.json')))
+    monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(
+        return_value=parse_rfc3339("2019-02-18T16:00:06Z")
+        ))
+
+    attrs = {'is_excluded.return_value': False}
+    check.pod_list_utils = mock.Mock(**attrs)
+
+    pod_list = check.retrieve_pod_list()
+    assert pod_list['expired_count'] == 1
+
+    expected_names = ['dd-agent-ntepl', 'hello5-1550509440-rlgvf', 'hello8-1550505780-kdnjx']
+    collected_names = [p['metadata']['name'] for p in pod_list['items']]
+    assert collected_names == expected_names
+
+    # Test .pods.expired gauge is submitted
+    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", return_value=[]):
+        check._report_container_state_metrics(pod_list, ["custom:tag"])
+    aggregator.assert_metric("kubernetes.pods.expired", value=1, tags=["custom:tag"])
+
+
 class MockResponse(mock.Mock):
     @staticmethod
     def iter_lines():
@@ -504,8 +564,8 @@ def test_perform_kubelet_check(monkeypatch):
         check._perform_kubelet_check(instance_tags)
 
     get.assert_has_calls([
-        mock.call('http://127.0.0.1:10255/healthz', cert=None, headers=None, params={'verbose': True}, timeout=10,
-                  verify=None)])
+        mock.call('http://127.0.0.1:10255/healthz', cert=None, headers=None,
+                  params={'verbose': True}, stream=False, timeout=10, verify=None)])
     calls = [mock.call('kubernetes.kubelet.check', 0, tags=instance_tags)]
     check.service_check.assert_has_calls(calls)
 
@@ -523,17 +583,11 @@ def test_report_node_metrics(monkeypatch):
 
 
 def test_retrieve_pod_list_success(monkeypatch):
-    class MockResponse:
-        def __init__(self, json_data):
-            self.json_data = json_data
-
-        def json(self):
-            return (json.loads(self.json_data))
-
     check = KubeletCheck('kubelet', None, {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query',
-                        mock.Mock(return_value=MockResponse(mock_from_file('pod_list_raw.dat'))))
+                        mock.Mock(return_value=MockStreamResponse('pod_list_raw.dat')))
+    monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("pod_list_raw.json"))
@@ -541,7 +595,7 @@ def test_retrieve_pod_list_success(monkeypatch):
 
 
 def test_retrieved_pod_list_failure(monkeypatch):
-    def mock_perform_kubelet_query(s):
+    def mock_perform_kubelet_query(s, stream=False):
         raise Exception("network error")
 
     check = KubeletCheck('kubelet', None, {}, [{}])
@@ -550,3 +604,22 @@ def test_retrieved_pod_list_failure(monkeypatch):
 
     retrieved = check.retrieve_pod_list()
     assert retrieved is None
+
+
+def test_compute_pod_expiration_datetime(monkeypatch):
+    # Invalid input
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value=""):
+        assert KubeletCheck._compute_pod_expiration_datetime() is None
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="invalid"):
+        assert KubeletCheck._compute_pod_expiration_datetime() is None
+
+    # Disabled
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="0"):
+        assert KubeletCheck._compute_pod_expiration_datetime() is None
+
+    # Set to 15 minutes
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="15"):
+        expire = KubeletCheck._compute_pod_expiration_datetime()
+        assert expire is not None
+        now = datetime.utcnow().replace(tzinfo=UTC)
+        assert abs((now-expire).seconds - 60*15) < 2
