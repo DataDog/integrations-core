@@ -69,8 +69,9 @@ def test_service_check_with_invalid_host(aggregator):
     instance = INVALID_HOST_INSTANCE
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
+    iis_host = c.get_iishost(instance)
 
-    aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=["site:{0}".format('Total')])
+    aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=["site:{0}".format('Total'), iis_host])
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
