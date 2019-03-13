@@ -92,7 +92,7 @@ See [MSDN][8] for more information.
 
 `tag_by` optionally lets you tag each metric with a property from the WMI class you're using. This is only useful when you will have multiple values for your WMI query. The examples below show how you can tag your process metrics with the process name (giving a tag of "name:app_name").
 
-`constant_tags` optionally lets you tag each metric with a set of fixed values.
+`constant_tags` optionally lets you tag each metric with a set of fixed values. *Will become deprecated in future versions. Please move towards using tags instead. 
 
 `tag_queries` optionally lets you specify a list of queries, to tag metrics with a target class property. Each item in the list is a set of `[link source property, target class, link target class property, target property]` where:
 
