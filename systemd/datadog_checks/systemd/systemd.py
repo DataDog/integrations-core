@@ -75,8 +75,8 @@ class SystemdCheck(AgentCheck):
 
         for unit in list_unit_files:
             # full unit name includes path - we take the string before the last "/"
-            unit_short_name = unit[0].rpartition('/')[2]
-            unit_short_name = bytes(unit_short_name)
+            u = unit[0].decode('utf-8')
+            unit_short_name = u.rpartition('/')[2]
             # if unit has an @ symbol in its name/id
             unit_state = self.get_state_single_unit(unit_short_name)
             unit_status[unit_short_name] = unit_state
@@ -156,7 +156,7 @@ class SystemdCheck(AgentCheck):
                     """
                     # inactive_units += 1
             except pystemd.dbusexc.DBusInvalidArgsError as e:
-                self.log.debug("Cannot retrieve unit status for {}".format(unit), e)
+                self.log.debug("Cannot retrieve unit status for {}, {}".format(unit_id, e))
 
         self.gauge('systemd.units.active', active_units)
         self.gauge('systemd.units.inactive', inactive_units)
@@ -168,7 +168,7 @@ class SystemdCheck(AgentCheck):
             state = unit.Unit.ActiveState
             return state
         except pystemd.dbusexc.DBusInvalidArgsError as e:
-            self.log.info("Unit name invalid for {}".format(unit_id), e)
+            self.log.info("Unit name invalid for {}, {}".format(unit_id, e))
 
     def send_service_checks(self, unit_id, state, tags):
         if state == b'active' or b'activating':
