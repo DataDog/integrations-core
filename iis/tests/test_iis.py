@@ -116,15 +116,16 @@ def test_check_without_sites_specified(aggregator):
     instance = WIN_SERVICES_MINIMAL_CONFIG
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
+    iis_host = c.get_iishost(instance)
 
     site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']
     for metric_def in DEFAULT_COUNTERS:
         mname = metric_def[3]
 
         for site_tag in site_tags:
-            aggregator.assert_metric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_tag)], count=1)
+            aggregator.assert_metric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_tag), iis_host], count=1)
 
     for site_tag in site_tags:
         aggregator.assert_service_check('iis.site_up', status=IIS.OK,
-                                        tags=["mytag1", "mytag2", "site:{0}".format(site_tag)], count=1)
+                                        tags=["mytag1", "mytag2", "site:{0}".format(site_tag), iis_host], count=1)
     aggregator.assert_all_metrics_covered()
