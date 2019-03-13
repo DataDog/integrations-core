@@ -13,19 +13,14 @@ from . import common
 
 
 @pytest.fixture(scope="session")
-def dd_environment(instance):
+def dd_environment():
     compose_file = os.path.join(common.HERE, "compose", "docker-compose.yml")
     with docker_run(
         compose_file=compose_file,
     ):
-        yield instance
+        yield common.get_config_stubs(".")[0]
 
 
 @pytest.fixture
 def check():
     return DirectoryCheck(common.CHECK_NAME)
-
-
-@pytest.fixture(scope='session')
-def instance():
-    return common.get_config_stubs(".")[0]
