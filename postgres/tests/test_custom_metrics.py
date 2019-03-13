@@ -68,6 +68,7 @@ def test_custom_queries(aggregator, pg_instance):
     postgres_check = PostgreSql('postgres', {}, {})
     postgres_check.check(pg_instance)
     tags = ['db:{}'.format(pg_instance['dbname'])]
+    tags.extend('pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']))
     tags.extend(pg_instance['tags'])
 
     for tag in ('a', 'b', 'c'):
