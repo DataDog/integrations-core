@@ -82,6 +82,7 @@ def test_check(aggregator):
     instance = WIN_SERVICES_CONFIG
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
+    iis_host = c.get_iishost(instance)
 
     # Test metrics
     # ... normalize site-names
@@ -92,13 +93,13 @@ def test_check(aggregator):
     for site_name in [default_site_name, ok_site_name, 'Total']:
         for metric_def in DEFAULT_COUNTERS:
             mname = metric_def[3]
-            aggregator.assert_metric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
+            aggregator.assert_metric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_name), iis_host], count=1)
 
         aggregator.assert_service_check('iis.site_up', status=IIS.OK,
-                                        tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
+                                        tags=["mytag1", "mytag2", "site:{0}".format(site_name), iis_host], count=1)
 
     aggregator.assert_service_check('iis.site_up', status=IIS.CRITICAL,
-                                    tags=["mytag1", "mytag2", "site:{0}".format(fail_site_name)], count=1)
+                                    tags=["mytag1", "mytag2", "site:{0}".format(fail_site_name), iis_host], count=1)
 
     # Check completed with no warnings
     # self.assertFalse(logger.warning.called)
