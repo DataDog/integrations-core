@@ -26,6 +26,7 @@ def test_basic_check(aggregator):
     c = IIS(CHECK_NAME, {}, {}, [instance])
     c.check(instance)
     iis_host = c.get_iishost(instance)
+    print(iis_host)
 
     site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']
     for metric_def in DEFAULT_COUNTERS:
