@@ -114,7 +114,7 @@ To send custom metrics by listening to DogStatsD packets from other containers, 
 Enable Datadog's [Process Agent][22] with the environment variable `DD_PROCESS_AGENT_ENABLED` set to `true` in the Datadog Agent container. Because Amazon controls the underlying hosts for Fargate, live processes can only be collected from the Datadog Agent container.
 
 #### Other environment variables
-For environment variable available with the Docker Agent container, see the [Docker Agent][23] page. **Note**: Some variables are not be available for Fargate.
+For environment variables available with the Docker Agent container, see the [Docker Agent][23] page. **Note**: Some variables are not be available for Fargate.
 
 ### Log Collection
 
