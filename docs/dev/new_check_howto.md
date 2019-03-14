@@ -469,11 +469,11 @@ Find below the description for each attributes-each one of them is mandatory-of 
 `setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][15]
 
 Once your `setup.py` is ready, create a wheel:
-- With the `ddev` tooling (recommended).
-```
-ddev release build /path/to/package or check_name
-```
-- without the `ddev` tooling.
+- With the `ddev` tooling (recommended).  
+If working on an integration in integrations-extras or integrations-core,
+`ddev release build <INTEGRATION_NAME>`, otherwise `ddev release build /path/to/package`
+
+- Without the `ddev` tooling.
 ```
 cd {integration}
 python setup.py bdist_wheel
