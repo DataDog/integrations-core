@@ -2,22 +2,19 @@
 
 ## Overview
 
-This check monitors the kubernetes [NGINX Ingress Controller][1].
+This check monitors the kubernetes [NGINX Ingress Controller][1]. This check is available for Agent > 6.9.
 
 ## Setup
 
 ### Installation
 
-The `nginx-ingress-controller` check is included in the [Datadog Agent][2] package, so you do not
-need to install anything else on your server.
+The `nginx-ingress-controller` check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
 #### Metric collection
 
-1. Edit the `nginx_ingress_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your NGINX ingress controller metrics.
-   See the [sample nginx_ingress_controller.d/conf.yaml][2] for all available configuration options.
+1. Edit the `nginx_ingress_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your NGINX ingress controller metrics. See the [sample nginx_ingress_controller.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3].
 
@@ -42,13 +39,13 @@ need to install anything else on your server.
 
 * [Restart the Agent][3].
 
-### Configuration of the nginx check (optional)
+### Configuration of the NGINX check (optional)
 
-By default nginx metrics are collected by the nginx-ingress-controller check but for convenience you might want to run the regular `nginx` check on the ingress controller.
+By default, NGINX metrics are collected by the `nginx-ingress-controller` check, but for convenience you might want to run the regular `nginx` check on the ingress controller.
 
-You achieve so by making the nginx status page reachable from the agent by using the `nginx-status-ipv4-whitelist` setting on the controller and adding autodiscovery annotations to the controller pod.
+You can achieve this by making the NGINX status page reachable from the Agent. To do this, use the `nginx-status-ipv4-whitelist` setting on the controller and add Autodiscovery annotations to the controller pod.
 
-For example these annotations enable both the `nginx` and `nginx-ingress-controller` checks and the log collection:
+For example these annotations, enable both the `nginx` and `nginx-ingress-controller` checks and the log collection:
 
 ```text
 ad.datadoghq.com/nginx-ingress-controller.check_names: '["nginx","nginx_ingress_controller"]'
