@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 6.3.0 / 2019-03-14
+
+* [Added] Add rfc3339 utilities. See [#3189](https://github.com/DataDog/integrations-core/pull/3189).
+* [Added] Backport Agent V6 utils to the AgentCheck class. See [#3261](https://github.com/DataDog/integrations-core/pull/3261).
+
 ## 6.2.0 / 2019-03-10
 
 * [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
