@@ -297,7 +297,7 @@ class HTTPCheck(NetworkCheck):
             cert = ssl_sock.getpeercert()
 
         except Exception as e:
-            msg = e.verify_message if PY3 and isinstance(e, ssl.CertificateError) else str(e)
+            msg = str(e)
             if 'expiration' in msg:
                 self.log.debug("error: {}. Cert might be expired.".format(e))
                 return Status.DOWN, 0, 0, msg
