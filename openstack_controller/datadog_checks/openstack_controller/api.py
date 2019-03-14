@@ -365,7 +365,7 @@ class SimpleApi(AbstractApi):
                     query_params['limit'] //= 2
                     retry += 1
             else:
-                raise e
+                raise Exception("Error making request to {}".format(url))
 
             objects = resp.get(obj, [])
             result.extend(objects)

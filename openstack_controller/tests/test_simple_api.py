@@ -659,7 +659,7 @@ def test__get_paginated_list():
                 "obj": [{"id": 2}, {"id": 3}]
             },
             {
-                "obj": [{"id": 4},]
+                "obj": [{"id": 4}]
             }
         ]
     ):
@@ -667,7 +667,6 @@ def test__get_paginated_list():
         result = api._get_paginated_list("url", "obj", {})
         assert log.debug.call_count == 1
         assert result == [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
-
 
 
 def get_server_diagnostics_post_v2_48_response(url, headers, params=None, timeout=None):
