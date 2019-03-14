@@ -352,28 +352,29 @@ class SimpleApi(AbstractApi):
         result = []
         query_params = query_params or {}
         query_params['limit'] = self.paginated_limit
-        resp = self._make_request(url, self.headers, params=query_params)
-        result.extend(resp.get(obj, []))
-        # Avoid the extra request since we know we're done when the response has anywhere between
-        # 0 and paginated_server_limit servers
-        while len(resp) == self.paginated_limit:
-            query_params['marker'] = resp[-1]['id']
-            query_params['limit'] = self.paginated_limit
+        while True:
             retry = 0
             while retry < DEFAULT_MAX_RETRY:
-                # `details` endpoints are typically expensive calls,
-                # If it fails, we retry DEFAULT_RETRY times while reducing the `limit` param
-                # otherwise we will backoff
                 try:
                     resp = self._make_request(url, self.headers, params=query_params)
-                    result.extend(resp.get(obj, []))
-
                     break
                 except Exception as e:
-                    query_params['limit'] /= 2
+                    self.logger.debug("Error making paginated request to {}, lowering limit from {} to {}: {}".format(
+                        url, query_params['limit'], query_params['limit']//2, e
+                    ))
+                    query_params['limit'] //= 2
                     retry += 1
-                    if retry == DEFAULT_MAX_RETRY:
-                        raise e
+            else:
+                raise e
+
+            objects = resp.get(obj, [])
+            result.extend(objects)
+            # Avoid the extra request since we know we're done when the response has anywhere between
+            # 0 and paginated_limit servers
+            if len(objects) < query_params['limit']:
+                break
+
+            query_params['marker'] = objects[-1]['id']
 
         return result
 
