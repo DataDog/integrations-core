@@ -7,7 +7,7 @@ import copy
 import pytest
 import simplejson as json
 
-from datadog_checks.openstack_controller.api import SimpleApi, Authenticator, Credential
+from datadog_checks.openstack_controller.api import ApiFactory, SimpleApi, Authenticator, Credential
 from datadog_checks.openstack_controller.exceptions import (IncompleteIdentity, MissingNovaEndpoint,
                                                             MissingNeutronEndpoint)
 from . import common
@@ -603,6 +603,71 @@ def test_get_servers_detail(aggregator):
                 "user_id": "fake"
             }
         ]
+
+
+def test__get_paginated_list():
+
+    log = mock.MagicMock()
+
+    instance = copy.deepcopy(common.MOCK_CONFIG["instances"][0])
+    instance["paginated_limit"] = 4
+
+    with mock.patch("datadog_checks.openstack_controller.api.SimpleApi.connect"):
+        api = ApiFactory.create(log, None, instance)
+    with mock.patch(
+        "datadog_checks.openstack_controller.api.SimpleApi._make_request",
+        side_effect=[
+            # First call: 3 exceptions -> failure
+            Exception,
+            Exception,
+            Exception,
+        ]
+    ):
+        # First call
+        with pytest.raises(Exception):
+            api._get_paginated_list("url", "obj", {})
+        assert log.debug.call_count == 3
+        log.reset_mock()
+
+    with mock.patch(
+        "datadog_checks.openstack_controller.api.SimpleApi._make_request",
+        side_effect=[
+            # Second call: all good, 1 page with 4 results, one with 1
+            {
+                "obj": [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}]
+            },
+            {
+                "obj": [{"id": 4}]
+            },
+        ]
+    ):
+        # Second call
+        assert api.paginated_limit == 4
+        result = api._get_paginated_list("url", "obj", {})
+        assert log.debug.call_count == 0
+        assert result == [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
+
+    with mock.patch(
+        "datadog_checks.openstack_controller.api.SimpleApi._make_request",
+        side_effect=[
+            # Third call: 1 exception, limit is divided once by 2
+            Exception,
+            {
+                "obj": [{"id": 0}, {"id": 1}]
+            },
+            {
+                "obj": [{"id": 2}, {"id": 3}]
+            },
+            {
+                "obj": [{"id": 4},]
+            }
+        ]
+    ):
+        # Third call
+        result = api._get_paginated_list("url", "obj", {})
+        assert log.debug.call_count == 1
+        assert result == [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
+
 
 
 def get_server_diagnostics_post_v2_48_response(url, headers, params=None, timeout=None):

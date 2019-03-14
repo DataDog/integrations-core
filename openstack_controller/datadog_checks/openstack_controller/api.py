@@ -23,8 +23,8 @@ class ApiFactory(object):
     def create(logger, proxies, instance_config):
         keystone_server_url = instance_config.get("keystone_server_url")
         ssl_verify = is_affirmative(instance_config.get("ssl_verify", True))
-        paginated_limit = instance_config.get('paginated_limit')
-        request_timeout = instance_config.get('request_timeout')
+        paginated_limit = instance_config.get('paginated_limit', DEFAULT_PAGINATED_LIMIT)
+        request_timeout = instance_config.get('request_timeout', DEFAULT_API_REQUEST_TIMEOUT)
         user = instance_config.get("user")
         openstack_config_file_path = instance_config.get("openstack_config_file_path")
         openstack_cloud_name = instance_config.get("openstack_cloud_name")
