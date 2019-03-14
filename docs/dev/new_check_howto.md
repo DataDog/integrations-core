@@ -473,11 +473,11 @@ Once your `setup.py` is ready, create a wheel:
 If working on an integration in integrations-extras or integrations-core,
 `ddev release build <INTEGRATION_NAME>`, otherwise `ddev release build /path/to/package`
 
-- Without the `ddev` tooling.
-```
-cd {integration}
-python setup.py bdist_wheel
-```
+- Without the `ddev` tooling.  
+  ```
+  cd {integration}
+  python setup.py bdist_wheel
+  ```
 
 ### Installing
 
