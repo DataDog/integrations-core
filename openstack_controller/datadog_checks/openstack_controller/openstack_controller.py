@@ -5,6 +5,7 @@ import re
 import copy
 import requests
 
+from collections import defaultdict
 from six import iteritems, itervalues, next
 from datetime import datetime
 
@@ -205,7 +206,8 @@ class OpenStackControllerCheck(AgentCheck):
         uptime = self.get_os_hypervisor_uptime(hyp_id)
         return self._parse_uptime_string(uptime)
 
-    def collect_hypervisors_metrics(self, custom_tags=None,
+    def collect_hypervisors_metrics(self, servers,
+                                    custom_tags=None,
                                     use_shortname=False,
                                     collect_hypervisor_metrics=True,
                                     collect_hypervisor_load=False):
@@ -213,16 +215,27 @@ class OpenStackControllerCheck(AgentCheck):
         Submits stats for all hypervisors registered to this control plane
         Raises specific exceptions based on response code
         """
+        # Create a dictionary with hypervisor hostname as key and the list of project names as value
+        hyp_project_names = defaultdict(set)
+        for server in itervalues(servers):
+            hypervisor_hostname = server.get('hypervisor_hostname')
+            if not hypervisor_hostname:
+                self.log.debug("hypervisor_hostname is None for server %s. "
+                               "Check that your user is an administrative users.", server['server_id'])
+            else:
+                hyp_project_names[hypervisor_hostname].add(server['project_name'])
+
         hypervisors = self.get_os_hypervisors_detail()
         for hyp in hypervisors:
-            self.get_stats_for_single_hypervisor(hyp, custom_tags=custom_tags,
+            self.get_stats_for_single_hypervisor(hyp, hyp_project_names,
+                                                 custom_tags=custom_tags,
                                                  use_shortname=use_shortname,
                                                  collect_hypervisor_metrics=collect_hypervisor_metrics,
                                                  collect_hypervisor_load=collect_hypervisor_load)
         if not hypervisors:
             self.warning("Unable to collect any hypervisors from Nova response.")
 
-    def get_stats_for_single_hypervisor(self, hyp, custom_tags=None,
+    def get_stats_for_single_hypervisor(self, hyp, hyp_project_names, custom_tags=None,
                                         use_shortname=False,
                                         collect_hypervisor_metrics=True,
                                         collect_hypervisor_load=True):
@@ -234,6 +247,12 @@ class OpenStackControllerCheck(AgentCheck):
             'virt_type:{}'.format(hyp['hypervisor_type']),
             'status:{}'.format(hyp['status']),
         ]
+
+        # add hypervisor project names as tags
+        project_names = hyp_project_names.get(hyp_hostname, set())
+        for project_name in project_names:
+            tags.append('project_name:{}'.format(project_name))
+
         host_tags = self._get_host_aggregate_tag(hyp_hostname, use_shortname=use_shortname)
         tags.extend(host_tags)
         tags.extend(custom_tags)
@@ -334,7 +353,19 @@ class OpenStackControllerCheck(AgentCheck):
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
-    def get_all_servers(self, tenant_to_name, instance_name, exclude_server_id_rules):
+    def populate_servers_cache(self, projects, exclude_server_id_rules):
+        # projects is being fetched from
+        # https://developer.openstack.org/api-ref/identity/v3/?expanded=list-projects-detail#list-projects
+        # It has an id (project id) and a name (project name)
+        # The id is referenced as the tenant_id in other endpoints like
+        # https://developer.openstack.org/api-ref/compute/?expanded=list-servers-detail#list-servers
+        # as mentioned in a note:
+        # "tenant_id can also be requested which is alias of project_id but that is not
+        # recommended to use as that will be removed in future."
+        tenant_to_name = {}
+        for name, p in iteritems(projects):
+            tenant_to_name[p.get('id')] = name
+
         cached_servers = self.servers_cache.get('servers')
         # NOTE: updated_time need to be set at the beginning of this method in order to no miss servers changes.
         changes_since = datetime.utcnow().isoformat()
@@ -355,6 +386,7 @@ class OpenStackControllerCheck(AgentCheck):
             'servers': servers,
             'changes_since': changes_since
         }
+        return servers
 
     def collect_server_diagnostic_metrics(self, server_details, tags=None, use_shortname=False):
         def _is_valid_metric(label):
@@ -681,22 +713,18 @@ class OpenStackControllerCheck(AgentCheck):
                 for name, project in iteritems(projects):
                     self.collect_project_limit(project, custom_tags)
 
-            self.collect_hypervisors_metrics(custom_tags=custom_tags,
+            servers = self.populate_servers_cache(projects, exclude_server_id_rules)
+
+            self.collect_hypervisors_metrics(servers,
+                                             custom_tags=custom_tags,
                                              use_shortname=use_shortname,
                                              collect_hypervisor_metrics=collect_hypervisor_metrics,
                                              collect_hypervisor_load=collect_hypervisor_load)
 
             if collect_server_diagnostic_metrics or collect_server_flavor_metrics:
-                # This updates the server cache directly
-                tenant_id_to_name = {}
-                for name, p in iteritems(projects):
-                    tenant_id_to_name[p.get('id')] = name
-                self.get_all_servers(tenant_id_to_name, self.instance_name, exclude_server_id_rules)
-
-                servers = self.servers_cache['servers']
                 if collect_server_diagnostic_metrics:
                     self.log.debug("Fetch stats from %s server(s)" % len(servers))
-                    for _, server in iteritems(servers):
+                    for server in itervalues(servers):
                         self.collect_server_diagnostic_metrics(server, tags=custom_tags,
                                                                use_shortname=use_shortname)
                 if collect_server_flavor_metrics:
@@ -706,7 +734,7 @@ class OpenStackControllerCheck(AgentCheck):
                         flavors = self.get_flavors()
                     else:
                         flavors = None
-                    for _, server in iteritems(servers):
+                    for server in itervalues(servers):
                         self.collect_server_flavor_metrics(server, flavors, tags=custom_tags,
                                                            use_shortname=use_shortname)
 
