@@ -188,6 +188,11 @@ IBM MQ does not include any events.
 
 Need help? Contact [Datadog support][8].
 
+## Further Reading
+Additional helpful documentation, links, and articles:
+
+* [Monitor IBM MQ metrics and logs with Datadog][9]
+
 [1]: https://www.ibm.com/products/mq
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://developer.ibm.com/messaging/mq-downloads
@@ -196,3 +201,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
 [8]: https://docs.datadoghq.com/help
+[9]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog/
