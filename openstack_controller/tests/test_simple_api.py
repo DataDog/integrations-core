@@ -497,12 +497,6 @@ def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=No
                 "updated": "2017-10-10T15:49:09Z",
                 "user_id": "fake"
             }
-        ],
-        "servers_links": [
-            {
-                "href": "http://openstack.example.com/v2.1/6f70656e737461636b20342065766572/servers/detail?limit=1&marker=569f39f9-7c76-42a1-9c2d-8394e2638a6d",
-                "rel": "next"
-            }
         ]
     }""")  # noqa: E501
 
@@ -634,7 +628,8 @@ def test__get_paginated_list():
         side_effect=[
             # Second call: all good, 1 page with 4 results, one with 1
             {
-                "obj": [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}]
+                "obj": [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}],
+                "obj_links": "test"
             },
             {
                 "obj": [{"id": 4}]
@@ -653,10 +648,12 @@ def test__get_paginated_list():
             # Third call: 1 exception, limit is divided once by 2
             Exception,
             {
-                "obj": [{"id": 0}, {"id": 1}]
+                "obj": [{"id": 0}, {"id": 1}],
+                "obj_links": "test"
             },
             {
-                "obj": [{"id": 2}, {"id": 3}]
+                "obj": [{"id": 2}, {"id": 3}],
+                "obj_links": "test"
             },
             {
                 "obj": [{"id": 4}]

@@ -369,9 +369,9 @@ class SimpleApi(AbstractApi):
 
             objects = resp.get(obj, [])
             result.extend(objects)
-            # Avoid the extra request since we know we're done when the response has anywhere between
-            # 0 and paginated_limit servers
-            if len(objects) < query_params['limit']:
+            # If there is no link to the next object, it means we're done.
+            # For servers, see https://developer.openstack.org/api-ref/compute/?expanded=list-servers-detailed-detail
+            if resp.get("{}_links".format(obj)) is None:
                 break
 
             query_params['marker'] = objects[-1]['id']
