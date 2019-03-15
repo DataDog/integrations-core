@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import absolute_import
+
 import json
 import os
 from base64 import urlsafe_b64encode
