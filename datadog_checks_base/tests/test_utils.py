@@ -1,9 +1,11 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from decimal import ROUND_HALF_DOWN, ROUND_HALF_UP
 
-from datadog_checks.utils.common import pattern_filter
-from datadog_checks.utils.limiter import Limiter
+from datadog_checks.base.utils.common import pattern_filter, round_value
+from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.limiter import Limiter
 
 
 class Item:
@@ -105,3 +107,42 @@ class TestLimiter():
         assert limiter.get_status() == (0, 10, False)
         assert limiter.is_reached("dummy1") is False
         assert limiter.get_status() == (1, 10, False)
+
+
+class TestRounding():
+    def test_round_half_up(self):
+        assert round_value(3.5) == 4.0
+
+    def test_round_modify_method(self):
+        assert round_value(3.5, rounding_method=ROUND_HALF_DOWN) == 3.0
+
+    def test_round_modify_sig_digits(self):
+        assert round_value(2.555, precision=2) == 2.560
+        assert round_value(4.2345, precision=2) == 4.23
+        assert round_value(4.2345, precision=3) == 4.235
+
+
+class TestContainers:
+    def test_iter_unique(self):
+        custom_queries = [
+            {
+                'metric_prefix': 'database',
+                'tags': ['test:database'],
+                'query': 'SELECT thing1, thing2 FROM TABLE',
+                'columns': [
+                    {'name': 'database.metric', 'type': 'count'},
+                    {'name': 'tablespace', 'type': 'tag'},
+                ],
+            },
+            {
+                'tags': ['test:database'],
+                'columns': [
+                    {'name': 'tablespace', 'type': 'tag'},
+                    {'name': 'database.metric', 'type': 'count'},
+                ],
+                'query': 'SELECT thing1, thing2 FROM TABLE',
+                'metric_prefix': 'database',
+            },
+        ]
+
+        assert len(list(iter_unique(custom_queries))) == 1

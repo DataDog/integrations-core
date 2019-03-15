@@ -11,18 +11,30 @@
 manifest.json         @DataDog/baklava @DataDog/agent-integrations
 
 # Container monitoring
-/datadog_checks_base/ @DataDog/container-integrations @DataDog/agent-integrations
-/docker_daemon/       @DataDog/container-integrations @DataDog/agent-integrations
-/ecs_fargate/         @DataDog/container-integrations @DataDog/agent-integrations
-/kube_dns/            @DataDog/container-integrations @DataDog/agent-integrations
-/kube_proxy/          @DataDog/container-integrations @DataDog/agent-integrations
-/kubelet/             @DataDog/container-integrations @DataDog/agent-integrations
-/kubernetes/          @DataDog/container-integrations @DataDog/agent-integrations
-/kubernetes_state/    @DataDog/container-integrations @DataDog/agent-integrations
+/containerd/               @DataDog/container-integrations @DataDog/agent-integrations
+/cri/                      @DataDog/container-integrations @DataDog/agent-integrations
+/crio/                     @DataDog/container-integrations @DataDog/agent-integrations
+/datadog_checks_base/      @DataDog/container-integrations @DataDog/agent-integrations
+/docker_daemon/            @DataDog/container-integrations @DataDog/agent-integrations
+/ecs_fargate/              @DataDog/container-integrations @DataDog/agent-integrations
+/kube_controller_manager/  @DataDog/container-integrations @DataDog/agent-integrations
+/kube_dns/                 @DataDog/container-integrations @DataDog/agent-integrations
+/kube_proxy/               @DataDog/container-integrations @DataDog/agent-integrations
+/kubelet/                  @DataDog/container-integrations @DataDog/agent-integrations
+/kubernetes/               @DataDog/container-integrations @DataDog/agent-integrations
+/kubernetes_state/         @DataDog/container-integrations @DataDog/agent-integrations
+/nginx_ingress_controller/ @DataDog/container-integrations @DataDog/agent-integrations
+/openmetrics/              @DataDog/container-integrations @DataDog/agent-integrations
 
 # Agent core team
 /datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations
 
 # To keep ProdSec up-to-date with changes to requirements.txt.
-requirements.in       @DataDog/prodsec
-requirements.txt      @DataDog/prodsec
+requirements.in                                           @DataDog/prodsec
+requirements.txt                                          @DataDog/prodsec
+# As well as the signing tool.
+datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec
+# As well as the secure downloader.
+/datadog_checks_downloader/                               @DataDog/prodsec
+# As well as the wheel building process
+.gitlab-ci.yml                                            @DataDog/prodsec

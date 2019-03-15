@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import division
+
 from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import islice
@@ -48,6 +50,7 @@ class ConsulCheckInstanceState(object):
 
 class ConsulCheck(AgentCheck):
     CONSUL_CHECK = 'consul.up'
+    CONSUL_CAN_CONNECT = 'consul.can_connect'
     HEALTH_CHECK = 'consul.check'
 
     CONSUL_CATALOG_CHECK = 'consul.catalog'
@@ -81,6 +84,7 @@ class ConsulCheck(AgentCheck):
 
     def consul_request(self, instance, endpoint):
         url = urljoin(instance.get('url'), endpoint)
+        service_check_tags = ["url:{}".format(url)] + instance.get("tags", [])
         try:
 
             clientcertfile = instance.get('client_cert_file', self.init_config.get('client_cert_file', False))
@@ -101,11 +105,31 @@ class ConsulCheck(AgentCheck):
             else:
                 resp = requests.get(url, verify=cabundlefile, headers=headers)
 
-        except requests.exceptions.Timeout:
-            self.log.exception('Consul request to {} timed out'.format(url))
-            raise
+            resp.raise_for_status()
 
-        resp.raise_for_status()
+        except requests.exceptions.Timeout as e:
+            msg = 'Consul request to {} timed out'.format(url)
+            self.log.exception(msg)
+            self.service_check(
+                self.CONSUL_CAN_CONNECT,
+                self.CRITICAL,
+                tags=service_check_tags,
+                message="{}: {}".format(msg, e)
+            )
+            raise
+        except Exception as e:
+            msg = "Consul request to {} failed".format(url)
+            self.log.exception(msg)
+            self.service_check(
+                self.CONSUL_CAN_CONNECT,
+                self.CRITICAL,
+                tags=service_check_tags,
+                message="{}: {}".format(msg, e)
+            )
+            raise
+        else:
+            self.service_check(self.CONSUL_CAN_CONNECT, self.OK, tags=service_check_tags)
+
         return resp.json()
 
     # Consul Config Accessors
@@ -460,7 +484,7 @@ class ConsulCheck(AgentCheck):
                     tags = main_tags + ['source_datacenter:{}'.format(name),
                                         'dest_datacenter:{}'.format(other_name)]
                     n = len(latencies)
-                    half_n = int(n // 2)
+                    half_n = n // 2
                     if n % 2:
                         median = latencies[half_n]
                     else:
@@ -487,7 +511,7 @@ class ConsulCheck(AgentCheck):
                     latencies.append(distance(node, other))
                 latencies.sort()
                 n = len(latencies)
-                half_n = int(n // 2)
+                half_n = n // 2
                 if n % 2:
                     median = latencies[half_n]
                 else:

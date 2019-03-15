@@ -27,17 +27,16 @@ from ..github import (
 )
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
-    update_version_module
+    update_version_module, build_package
 )
 from ..trello import TrelloClient
 from ..utils import (
     get_bump_function, get_current_agent_version, get_valid_checks,
     get_version_string, format_commit_id
 )
-from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
-    basepath, chdir, ensure_unicode, get_next, remove_path, stream_file_lines,
+    basepath, chdir, dir_exists, ensure_unicode, get_next, remove_path, resolve_path, stream_file_lines,
     write_file
 )
 
@@ -819,15 +818,52 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
 
 @release.command(
     context_settings=CONTEXT_SETTINGS,
+    short_help='Build a wheel for a check'
+)
+@click.argument('check')
+@click.option('--sdist', '-s', is_flag=True)
+def build(check, sdist):
+    """Build a wheel for a check as it is on the repo HEAD"""
+    if check in get_valid_checks():
+        check_dir = os.path.join(get_root(), check)
+    else:
+        check_dir = resolve_path(check)
+        if not dir_exists(check_dir):
+            abort('`{}` is not an Agent-based Integration or Python package'.format(check))
+
+        check = basepath(check_dir)
+
+    echo_waiting('Building `{}`...'.format(check))
+
+    dist_dir = os.path.join(check_dir, 'dist')
+    remove_path(dist_dir)
+
+    result = build_package(check_dir, sdist)
+    if result.code != 0:
+        abort(result.stdout, result.code)
+
+    echo_info('Build done, artifact(s) in: {}'.format(dist_dir))
+    echo_success('Success!')
+
+
+@release.command(
+    context_settings=CONTEXT_SETTINGS,
     short_help='Build and upload a check to PyPI'
 )
 @click.argument('check')
+@click.option('--sdist', '-s', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def upload(ctx, check, dry_run):
+def upload(ctx, check, sdist, dry_run):
     """Release a specific check to PyPI as it is on the repo HEAD."""
-    if check not in get_valid_checks():
-        abort('Check `{}` is not an Agent-based Integration'.format(check))
+    if check in get_valid_checks():
+        check_dir = os.path.join(get_root(), check)
+    else:
+        check_dir = resolve_path(check)
+        if not dir_exists(check_dir):
+            abort('`{}` is not an Agent-based Integration or Python package'.format(check))
+
+        check = basepath(check_dir)
 
     # retrieve credentials
     pypi_config = ctx.obj.get('pypi', {})
@@ -839,16 +875,11 @@ def upload(ctx, check, dry_run):
     auth_env_vars = {'TWINE_USERNAME': username, 'TWINE_PASSWORD': password}
     echo_waiting('Building and publishing `{}` to PyPI...'.format(check))
 
-    check_dir = os.path.join(get_root(), check)
-    remove_path(os.path.join(check_dir, 'dist'))
-
-    with chdir(check_dir), EnvVars(auth_env_vars):
-        result = run_command('python setup.py bdist_wheel --universal', capture='out')
+    with chdir(check_dir, env_vars=auth_env_vars):
+        result = build_package(check_dir, sdist)
         if result.code != 0:
             abort(result.stdout, result.code)
-
-        echo_waiting('Build done, uploading the package...')
-
+        echo_waiting('Uploading the package...')
         if not dry_run:
             result = run_command('twine upload --skip-existing dist{}*'.format(os.path.sep))
             if result.code != 0:

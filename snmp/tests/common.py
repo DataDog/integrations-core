@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 HOST = get_docker_hostname()
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
+COMPOSE_DIR = os.path.join(HERE, 'compose')
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
@@ -20,7 +21,6 @@ AUTH_KEY = 'doggiepass'
 PRIV_KEY = 'doggiePRIVkey'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
-
 
 SNMP_CONF = {
     'name': 'snmp_conf',
@@ -159,7 +159,7 @@ INVALID_METRICS = [
     {
         'MIB': "IF-MIB",
         'table': "noIdeaWhatIAmDoingHere",
-        'symbols': ["ifInOctets", "ifOutOctets"],
+        'symbols': ["ImWrong", "MeToo"],
     }
 ]
 

@@ -1,28 +1,35 @@
 # (C) Datadog, Inc. 2016-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
 
-# stdlib
 import logging
 import re
 from collections import defaultdict
-from urlparse import urljoin
 from copy import deepcopy
+from datetime import datetime, timedelta
+import json
 
-# 3p
 import requests
 
-# project
+from datadog_checks.base.utils.date import parse_rfc3339, UTC
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 from kubeutil import get_connection_info
+from six import iteritems
+from six.moves.urllib.parse import urljoin
 from tagger import get_tags
 
-# check
 from .common import CADVISOR_DEFAULT_PORT, PodListUtils, KubeletCredentials
 from .cadvisor import CadvisorScraper
 from .prometheus import CadvisorPrometheusScraperMixin
+
+try:
+    from datadog_agent import get_config
+except ImportError:
+    def get_config(key):
+        return ""
 
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
@@ -58,6 +65,45 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
 
 
 log = logging.getLogger('collector')
+
+
+class ExpiredPodFilter(object):
+    """
+    Allows to filter old pods out of the podlist by providing a decoding hook
+    """
+    def __init__(self, cutoff_date):
+        self.expired_count = 0
+        self.cutoff_date = cutoff_date
+
+    def json_hook(self, obj):
+        # Not a pod (hook is called for all objects)
+        if 'metadata' not in obj or 'status' not in obj:
+            return obj
+
+        # Quick exit for running/pending containers
+        pod_phase = obj.get('status', {}).get('phase')
+        if pod_phase in ["Running", "Pending"]:
+            return obj
+
+        # Filter out expired terminated pods, based on container finishedAt time
+        expired = True
+        for ctr in obj['status'].get('containerStatuses', []):
+            if "terminated" not in ctr.get("state", {}):
+                expired = False
+                break
+            finishedTime = ctr["state"]["terminated"].get("finishedAt")
+            if not finishedTime:
+                expired = False
+                break
+            if parse_rfc3339(finishedTime) > self.cutoff_date:
+                expired = False
+                break
+        if not expired:
+            return obj
+
+        # We are ignoring this pod
+        self.expired_count += 1
+        return None
 
 
 class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, CadvisorScraper):
@@ -194,7 +240,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.pod_list = None
         self.pod_list_utils = None
 
-    def perform_kubelet_query(self, url, verbose=True, timeout=10):
+    def perform_kubelet_query(self, url, verbose=True, timeout=10, stream=False):
         """
         Perform and return a GET request against kubelet. Support auth and TLS validation.
         """
@@ -204,19 +250,46 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             verify=self.kubelet_credentials.verify(),
             cert=self.kubelet_credentials.cert_pair(),
             headers=self.kubelet_credentials.headers(url),
-            params={'verbose': verbose}
+            params={'verbose': verbose},
+            stream=stream
         )
 
     def retrieve_pod_list(self):
         try:
-            pod_list = self.perform_kubelet_query(self.pod_list_url).json()
+            cutoff_date = self._compute_pod_expiration_datetime()
+            with self.perform_kubelet_query(self.pod_list_url, stream=True) as r:
+                if cutoff_date:
+                    f = ExpiredPodFilter(cutoff_date)
+                    pod_list = json.load(r.raw, object_hook=f.json_hook)
+                    pod_list['expired_count'] = f.expired_count
+                    if pod_list.get("items") is not None:
+                        # Wrap items in a generator to filter our None items
+                        pod_list['items'] = (p for p in pod_list['items'] if p is not None)
+                else:
+                    pod_list = json.load(r.raw)
+
             if pod_list.get("items") is None:
                 # Sanitize input: if no pod are running, 'items' is a NoneObject
                 pod_list['items'] = []
             return pod_list
         except Exception as e:
-            self.log.debug('failed to retrieve pod list from the kubelet at %s : %s'
-                           % (self.pod_list_url, str(e)))
+            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s'
+                             % (self.pod_list_url, str(e)))
+            return None
+
+    @staticmethod
+    def _compute_pod_expiration_datetime():
+        """
+        Looks up the agent's kubernetes_pod_expiration_minutes option and returns either:
+          - None if expiration is disabled (set to 0)
+          - A (timezone aware) datetime object to compare against
+        """
+        try:
+            minutes = int(get_config("kubernetes_pod_expiration_minutes"))
+            if minutes == 0:  # Expiration disabled
+                return None
+            return datetime.utcnow().replace(tzinfo=UTC) - timedelta(minutes=minutes)
+        except (ValueError, TypeError):
             return None
 
     def _retrieve_node_spec(self):
@@ -283,7 +356,26 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         pods_tag_counter = defaultdict(int)
         containers_tag_counter = defaultdict(int)
         for pod in pods['items']:
+            # Containers reporting
+            containers = pod.get('status', {}).get('containerStatuses', [])
+            has_container_running = False
+            for container in containers:
+                container_id = container.get('containerID')
+                if not container_id:
+                    self.log.debug('skipping container with no id')
+                    continue
+                if "running" not in container.get('state', {}):
+                    continue
+                has_container_running = True
+                tags = get_tags(container_id, False) or None
+                if not tags:
+                    continue
+                tags += instance_tags
+                hash_tags = tuple(sorted(tags))
+                containers_tag_counter[hash_tags] += 1
             # Pod reporting
+            if not has_container_running:
+                continue
             pod_id = pod.get('metadata', {}).get('uid')
             if not pod_id:
                 self.log.debug('skipping pod with no uid')
@@ -294,22 +386,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             tags += instance_tags
             hash_tags = tuple(sorted(tags))
             pods_tag_counter[hash_tags] += 1
-            # Containers reporting
-            containers = pod.get('status', {}).get('containerStatuses', [])
-            for container in containers:
-                container_id = container.get('containerID')
-                if not container_id:
-                    self.log.debug('skipping container with no id')
-                    continue
-                tags = get_tags(container_id, False) or None
-                if not tags:
-                    continue
-                tags += instance_tags
-                hash_tags = tuple(sorted(tags))
-                containers_tag_counter[hash_tags] += 1
-        for tags, count in pods_tag_counter.iteritems():
+        for tags, count in iteritems(pods_tag_counter):
             self.gauge(self.NAMESPACE + '.pods.running', count, list(tags))
-        for tags, count in containers_tag_counter.iteritems():
+        for tags, count in iteritems(containers_tag_counter):
             self.gauge(self.NAMESPACE + '.containers.running', count, list(tags))
 
     def _report_container_spec_metrics(self, pod_list, instance_tags):
@@ -341,14 +420,14 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 tags = get_tags('%s' % cid, True) + instance_tags
 
                 try:
-                    for resource, value_str in ctr.get('resources', {}).get('requests', {}).iteritems():
+                    for resource, value_str in iteritems(ctr.get('resources', {}).get('requests', {})):
                         value = self.parse_quantity(value_str)
                         self.gauge('{}.{}.requests'.format(self.NAMESPACE, resource), value, tags)
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
 
                 try:
-                    for resource, value_str in ctr.get('resources', {}).get('limits', {}).iteritems():
+                    for resource, value_str in iteritems(ctr.get('resources', {}).get('limits', {})):
                         value = self.parse_quantity(value_str)
                         self.gauge('{}.{}.limits'.format(self.NAMESPACE, resource), value, tags)
                 except (KeyError, AttributeError) as e:
@@ -356,6 +435,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     def _report_container_state_metrics(self, pod_list, instance_tags):
         """Reports container state & reasons by looking at container statuses"""
+        if pod_list.get('expired_count'):
+            self.gauge(self.NAMESPACE + '.pods.expired', pod_list.get('expired_count'), tags=instance_tags)
+
         for pod in pod_list['items']:
             pod_name = pod.get('metadata', {}).get('name')
             pod_uid = pod.get('metadata', {}).get('uid')

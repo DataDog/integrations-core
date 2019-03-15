@@ -756,13 +756,11 @@ GROUP BY datid, datname
             # [(metric-map, value), (metric-map, value), ...]
             # metric-map is: (dd_name, "rate"|"gauge")
             # shift the results since the first columns will be the "descriptors"
-            values = zip([scope['metrics'][c] for c in cols], row[len(desc):])
-
             # To submit simply call the function for each value v
             # v[0] == (metric_name, submit_function)
             # v[1] == the actual value
             # tags are
-            for v in values:
+            for v in zip([scope['metrics'][c] for c in cols], row[len(desc):]):
                 v[0][1](self, v[0][0], v[1], tags=tags)
 
         return len(results)
@@ -909,75 +907,77 @@ GROUP BY datid, datname
                 try:
                     self.log.debug("Running query: {}".format(query))
                     cursor.execute(query)
-                    row = cursor.fetchone()
                 except programming_error as e:
                     self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
                     db.rollback()
                     continue
 
-                if not row:
-                    self.log.debug("query result for metric_prefix {}: returned an empty result".format(metric_prefix))
-                    continue
-
-                if len(columns) != len(row):
-                    self.log.error(
-                        "query result for metric_prefix {}: expected {} columns, got {}".format(
-                            metric_prefix, len(columns), len(row)
+                for row in cursor:
+                    if not row:
+                        self.log.debug(
+                            "query result for metric_prefix {}: returned an empty result".format(metric_prefix)
                         )
-                    )
-                    continue
-
-                metric_info = []
-                query_tags = custom_query.get('tags', [])
-                query_tags.extend(tags)
-
-                for column, value in zip(columns, row):
-                    # Columns can be ignored via configuration.
-                    if not column:
                         continue
 
-                    name = column.get('name')
-                    if not name:
+                    if len(columns) != len(row):
                         self.log.error(
-                            "column field `name` is required for metric_prefix `{}`".format(metric_prefix)
+                            "query result for metric_prefix {}: expected {} columns, got {}".format(
+                                metric_prefix, len(columns), len(row)
+                            )
                         )
-                        break
+                        continue
 
-                    column_type = column.get('type')
-                    if not column_type:
-                        self.log.error(
-                            "column field `type` is required for column `{}` "
-                            "of metric_prefix `{}`".format(name, metric_prefix)
-                        )
-                        break
+                    metric_info = []
+                    query_tags = custom_query.get('tags', [])
+                    query_tags.extend(tags)
 
-                    if column_type == 'tag':
-                        query_tags.append('{}:{}'.format(name, value))
+                    for column, value in zip(columns, row):
+                        # Columns can be ignored via configuration.
+                        if not column:
+                            continue
+
+                        name = column.get('name')
+                        if not name:
+                            self.log.error(
+                                "column field `name` is required for metric_prefix `{}`".format(metric_prefix)
+                            )
+                            break
+
+                        column_type = column.get('type')
+                        if not column_type:
+                            self.log.error(
+                                "column field `type` is required for column `{}` "
+                                "of metric_prefix `{}`".format(name, metric_prefix)
+                            )
+                            break
+
+                        if column_type == 'tag':
+                            query_tags.append('{}:{}'.format(name, value))
+                        else:
+                            if not hasattr(self, column_type):
+                                self.log.error(
+                                    "invalid submission method `{}` for column `{}` of "
+                                    "metric_prefix `{}`".format(column_type, name, metric_prefix)
+                                )
+                                break
+                            try:
+                                metric_info.append((
+                                    '{}.{}'.format(metric_prefix, name),
+                                    float(value),
+                                    column_type
+                                ))
+                            except (ValueError, TypeError):
+                                self.log.error(
+                                    "non-numeric value `{}` for metric column `{}` of "
+                                    "metric_prefix `{}`".format(value, name, metric_prefix)
+                                )
+                                break
+
+                    # Only submit metrics if there were absolutely no errors - all or nothing.
                     else:
-                        if not hasattr(self, column_type):
-                            self.log.error(
-                                "invalid submission method `{}` for column `{}` of "
-                                "metric_prefix `{}`".format(column_type, name, metric_prefix)
-                            )
-                            break
-                        try:
-                            metric_info.append((
-                                '{}.{}'.format(metric_prefix, name),
-                                float(value),
-                                column_type
-                            ))
-                        except (ValueError, TypeError):
-                            self.log.error(
-                                "non-numeric value `{}` for metric column `{}` of "
-                                "metric_prefix `{}`".format(value, name, metric_prefix)
-                            )
-                            break
-
-                # Only submit metrics if there were absolutely no errors - all or nothing.
-                else:
-                    for info in metric_info:
-                        metric, value, method = info
-                        getattr(self, method)(metric, value, tags=query_tags)
+                        for info in metric_info:
+                            metric, value, method = info
+                            getattr(self, method)(metric, value, tags=query_tags)
 
     def _get_custom_metrics(self, custom_metrics, key):
         # Pre-processed cached custom_metrics

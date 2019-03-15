@@ -1,6 +1,7 @@
 {
   "categories": [
-    "Collaboration"
+    "Collaboration",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Postfix",
@@ -22,5 +23,6 @@
     "linux",
     "mac_os"
   ],
-  "type": "check"
+  "type": "check",
+  "integration_id": "postfix"
 }

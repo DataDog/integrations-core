@@ -353,8 +353,8 @@ def test_relocated_procfs(aggregator):
     try:
         with patch('socket.AF_PACKET', create=True), \
                 patch('sys.platform', 'linux'), \
-                patch('psutil._psutil_linux'), \
-                patch('psutil._psutil_posix'):
+                patch('psutil._psutil_linux', create=True), \
+                patch('psutil._psutil_posix', create=True):
             process.check(config["instances"][0])
     finally:
         shutil.rmtree(my_procfs)

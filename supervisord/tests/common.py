@@ -2,15 +2,23 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.checks.base import AgentCheck
-from datadog_checks.supervisord.supervisord import SupervisordCheck
+import os
 
+from datadog_checks.checks.base import ServiceCheck
+from datadog_checks.dev import get_docker_hostname
 
-CHECK_NAME = 'supervisord'
 PROCESSES = ["program_0", "program_1", "program_2"]
 STATUSES = ["down", "up", "unknown"]
 
-supervisor_check = SupervisordCheck(CHECK_NAME, {}, {})
+HOST = get_docker_hostname()
+PORT = 19001
+HERE = os.path.dirname(os.path.abspath(__file__))
+URL = "http://{}:{}".format(HOST, PORT)
+
+# Supervisord should run 3 programs for 10, 20 and 30 seconds
+# respectively.
+# The following dictionnary shows the processes by state for each iteration.
+PROCESSES_BY_STATE_BY_ITERATION = [dict(up=PROCESSES[x:], down=PROCESSES[:x], unknown=[]) for x in range(4)]
 
 # Configs for Integration Tests
 SUPERVISORD_CONFIG = {'name': "travis", 'host': "localhost", 'port': '19001'}
@@ -56,19 +64,19 @@ TEST_CASES = [
         },
         'expected_service_checks': {
             'server1': [
-                {'status': AgentCheck.OK, 'tags': ['supervisord_server:server1'], 'check': 'supervisord.can_connect'},
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server1'], 'check': 'supervisord.can_connect'},
                 {
-                    'status': AgentCheck.OK,
+                    'status': ServiceCheck.OK,
                     'tags': ['supervisord_server:server1', 'supervisord_process:mysql'],
                     'check': 'supervisord.process.status',
                 },
                 {
-                    'status': AgentCheck.CRITICAL,
+                    'status': ServiceCheck.CRITICAL,
                     'tags': ['supervisord_server:server1', 'supervisord_process:java'],
                     'check': 'supervisord.process.status',
                 },
                 {
-                    'status': AgentCheck.UNKNOWN,
+                    'status': ServiceCheck.UNKNOWN,
                     'tags': ['supervisord_server:server1', 'supervisord_process:python'],
                     'check': 'supervisord.process.status',
                 },
@@ -140,22 +148,22 @@ TEST_CASES = [
         },
         'expected_service_checks': {
             'server0': [
-                {'status': AgentCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
                 {
-                    'status': AgentCheck.CRITICAL,
+                    'status': ServiceCheck.CRITICAL,
                     'tags': ['supervisord_server:server0', 'supervisord_process:apache2'],
                     'check': 'supervisord.process.status',
                 },
                 {
-                    'status': AgentCheck.CRITICAL,
+                    'status': ServiceCheck.CRITICAL,
                     'tags': ['supervisord_server:server0', 'supervisord_process:webapp'],
                     'check': 'supervisord.process.status',
                 },
             ],
             'server1': [
-                {'status': AgentCheck.OK, 'tags': ['supervisord_server:server1'], 'check': 'supervisord.can_connect'},
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server1'], 'check': 'supervisord.can_connect'},
                 {
-                    'status': AgentCheck.CRITICAL,
+                    'status': ServiceCheck.CRITICAL,
                     'tags': ['supervisord_server:server1', 'supervisord_process:ruby'],
                     'check': 'supervisord.process.status',
                 },
@@ -202,9 +210,9 @@ TEST_CASES = [
         },
         'expected_service_checks': {
             'server0': [
-                {'status': AgentCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
                 {
-                    'status': AgentCheck.OK,
+                    'status': ServiceCheck.OK,
                     'tags': ['supervisord_server:server0', 'supervisord_process:mysql'],
                     'check': 'supervisord.process.status',
                 },
@@ -241,9 +249,9 @@ TEST_CASES = [
         },
         'expected_service_checks': {
             'server0': [
-                {'status': AgentCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
                 {
-                    'status': AgentCheck.OK,
+                    'status': ServiceCheck.OK,
                     'tags': ['supervisord_server:server0', 'supervisord_process:mysql'],
                     'check': 'supervisord.process.status',
                 },

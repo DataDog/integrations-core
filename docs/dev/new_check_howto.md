@@ -19,13 +19,13 @@ These requirements are used during the code review process as a checklist. This 
 
 ## Prerequisites
 
-Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][5] in order to isolate the development environment. See the [Python Environment documentation][6] for more information.
+Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][1] in order to isolate the development environment. See the [Python Environment documentation][2] for more information.
 
 You'll also need `docker-compose` in order to run the test harness.
 
 ## Setup
 
-Clone the [integrations-extras repository][7]. By default, that tooling expects you to be working in the `$HOME/dd/` directory — this is optional and can be adjusted via configuration later.
+Clone the [integrations-extras repository][3]. By default, that tooling expects you to be working in the `$HOME/dd/` directory — this is optional and can be adjusted via configuration later.
 
 ```shell
 mkdir $HOME/dd && cd $HOME/dd       # optional
@@ -34,7 +34,7 @@ git clone https://github.com/DataDog/integrations-extras.git
 
 ### Developer toolkit
 
-The [developer toolkit][17] is comprehensive and includes a lot of functionality. Here's what you need to get started:
+The [developer toolkit][4] is comprehensive and includes a lot of functionality. Here's what you need to get started:
 
 ```
 cd integrations-extras
@@ -125,17 +125,17 @@ class MyCheck(AgentCheck):
                 # Page is accessible but the string was not found.
                 self.service_check('my_check.all_good', self.WARNING)
         except Exception as e:
-            # Something went horribly wrong. Ideally we'd be more specific…
+            # Something went horribly wrong. Ideally we'd be more specific...
             self.service_check('my_check.all_good', self.CRITICAL, e)
 ```
 
-To learn more about the base Python class, see the [Python API documentation][2]. Moving along, let's dive into tests, which are an important part of any project (and *required* for inclusion in `integrations-extras`).
+To learn more about the base Python class, see the [Python API documentation][5]. Moving along, let's dive into tests, which are an important part of any project (and *required* for inclusion in `integrations-extras`).
 
 ### Writing tests
 
-There are two basic types of tests: unit tests for specific elements, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][3] and [tox][4] are used to run the tests.
+There are two basic types of tests: unit tests for specific elements, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][6] and [tox][7] are used to run the tests.
 
-For more information, see the [Datadog Checks Dev documentation][15].
+For more information, see the [Datadog Checks Dev documentation][8].
 
 The first part of the `check` method below retrieves two pieces of information we need from the configuration file. This is a good candidate for a unit test. Open the file at `my_check/tests/test_check.py` and replace the contents with something like this:
 
@@ -281,7 +281,7 @@ The check is almost done. Let's add the final touches by adding the integration 
 
 Parameters in a configuration file follow these rules:
 
-* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>` according to the documentation [contributing guidelines][16]:
+* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>` according to the documentation [contributing guidelines][9]:
 * All required parameters are **not** commented by default.
 * All optional parameters are commented by default.
 * If a placeholders has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
@@ -396,10 +396,11 @@ Find below the complete list of mandatory and optional attributes for your `mani
 
 | Attribute            | Type            | Mandatory/Optional | Description                                                                                                                                                                                                              |
 | -------------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `categories`         | Array of String | Mandatory          | Integration categories used on the [public documentation Integrations page][12].                                                                                                                                         |
+| `integration_id` | String | Mandatory           | The unique identifying name of this integration. Usually kebab case of the Display Name |
+| `categories`         | Array of String | Mandatory          | Integration categories used on the [public documentation Integrations page][10].                                                                                                                                         |
 | `creates_events`     | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                   |
-| `display_name`       | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation Integrations page][12]                                                                                 |
-| `guid`               | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][13]                                                                                                                                                                     |
+| `display_name`       | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation Integrations page][10]                                                                                 |
+| `guid`               | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][11]                                                                                                                                                                     |
 | `is_public`          | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not indexed by bots in the Datadog public documentation.                                                                                                        |
 | `maintainer`         | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                   |
 | `manifest_version`   | String          | Mandatory          | Version of the current manifest.                                                                                                                                                                                         |
@@ -416,6 +417,7 @@ Find below the complete list of mandatory and optional attributes for your `mani
 | `metric_prefix`      | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                               |
 | `process_signatures` | Array of String | Optional           | A list of signatures that matches the command line of this integration.                                                                                                                                                  |
 
+
 #### metadata.csv
 
 Our example check doesn't send any metrics, so in this case we will leave it empty but find below the description for each column of your `metadata.csv` file:
@@ -423,9 +425,9 @@ Our example check doesn't send any metrics, so in this case we will leave it emp
 | Column name     | Mandatory/Optional | Description                                                                                                                                                                     |
 | ---             | ----               | ----                                                                                                                                                                            |
 | `metric_name`   | Mandatory          | Name of the metric.                                                                                                                                                             |
-| `metric_type`   | Mandatory          | [Type of the metric][10].                                                                                                                                                       |
+| `metric_type`   | Mandatory          | [Type of the metric][12].                                                                                                                                                       |
 | `interval`      | Optional           | Collection interval of the metric in second.                                                                                                                                    |
-| `unit_name`     | Optional           | Unit of the metric. [Complete list of supported units][11].                                                                                                                     |
+| `unit_name`     | Optional           | Unit of the metric. [Complete list of supported units][13].                                                                                                                     |
 | `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                       |
 | `description`   | Optional           | Description of the metric.                                                                                                                                                      |
 | `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`. |
@@ -464,28 +466,40 @@ Find below the description for each attributes-each one of them is mandatory-of 
 
 ### Building
 
-`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][9]
+`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][15]
 
 Once your `setup.py` is ready, create a wheel:
+- With the `ddev` tooling (recommended).  
+If working on an integration in integrations-extras or integrations-core,
+`ddev release build <INTEGRATION_NAME>`, otherwise `ddev release build /path/to/package`
 
+- Without the `ddev` tooling.  
+  ```
+  cd {integration}
+  python setup.py bdist_wheel
+  ```
+
+### Installing
+
+To install your integration, you will need to build your python wheel first. See Building section above.
+Then run the following command:
 ```
-cd {integration}
-python setup.py bdist_wheel
+datadog-agent integration install -w /path/to/wheel.whl
 ```
 
-[1]: https://github.com/audreyr/cookiecutter
-[2]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
-[3]: https://docs.pytest.org/en/latest/
-[4]: https://tox.readthedocs.io/en/latest/
-[5]: https://virtualenv.pypa.io/en/stable/
-[6]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
-[7]: https://github.com/DataDog/integrations-extras
-[9]: https://packaging.python.org/tutorials/distributing-packages/
-[10]: https://docs.datadoghq.com/developers/metrics/#metric-types
-[11]: https://docs.datadoghq.com/developers/metrics/#units
-[12]: https://docs.datadoghq.com/integrations/
-[13]: https://www.uuidgenerator.net/
-[14]: https://docs.datadoghq.com/getting_started/tagging/
-[15]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
-[16]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
-[17]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev
+
+[1]: https://virtualenv.pypa.io/en/stable
+[2]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
+[3]: https://github.com/DataDog/integrations-extras
+[4]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev
+[5]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
+[6]: https://docs.pytest.org/en/latest
+[7]: https://tox.readthedocs.io/en/latest
+[8]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
+[9]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
+[10]: https://docs.datadoghq.com/integrations
+[11]: https://www.uuidgenerator.net
+[12]: https://docs.datadoghq.com/developers/metrics/#metric-types
+[13]: https://docs.datadoghq.com/developers/metrics/#units
+[14]: https://docs.datadoghq.com/getting_started/tagging
+[15]: https://packaging.python.org/tutorials/distributing-packages

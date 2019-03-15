@@ -11,7 +11,7 @@ The PgBouncer check is included in the [Datadog Agent][1] package, so you don't 
 
 ### Configuration
 
-Edit the `pgbouncer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. See the [sample pgbouncer.d/conf.yaml][2] for all available configuration options:
+Edit the `pgbouncer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample pgbouncer.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -42,20 +42,20 @@ Next, in your PgBouncer pgbouncer.ini file add
 stats_users = datadog
 ```
 
-[Restart the Agent][3] to start sending PgBouncer metrics to Datadog.
+[Restart the Agent][4] to start sending PgBouncer metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `pgbouncer` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `pgbouncer` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][5] for a list of metrics provided by this check.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 Note: Not all metrics are available with all versions of PgBouncer.
 
 ### Events
-The PgBouncer check does not include any events at this time.
+The PgBouncer check does not include any events.
 
 ### Service Checks
 
@@ -64,12 +64,12 @@ The PgBouncer check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to PgBouncer to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/datadog_checks/pgbouncer/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
-[6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/datadog_checks/pgbouncer/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
+[7]: https://docs.datadoghq.com/help

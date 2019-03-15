@@ -5,6 +5,8 @@
 
 from collections import defaultdict
 
+from six import iteritems
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.subprocess_output import get_subprocess_output
 
@@ -44,7 +46,7 @@ class MoreUnixCheck(AgentCheck):
             "entropy_info": "sys/kernel/random/entropy_avail",
         }
 
-        for key, path in self.proc_path_map.iteritems():
+        for key, path in iteritems(self.proc_path_map):
             self.proc_path_map[key] = "{procfs}/{path}".format(procfs=proc_location, path=path)
 
     def get_inode_info(self):

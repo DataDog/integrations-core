@@ -5,6 +5,8 @@ import binascii
 import os
 from stat import ST_INO, ST_SIZE
 
+from .common import ensure_bytes
+
 
 class TailFile(object):
 
@@ -36,7 +38,7 @@ class TailFile(object):
         crc = None
         if size >= self.CRC_SIZE:
             tmp_file = open(self._path, 'r')
-            data = tmp_file.read(self.CRC_SIZE)
+            data = ensure_bytes(tmp_file.read(self.CRC_SIZE))
             crc = binascii.crc32(data)
 
         if already_open:

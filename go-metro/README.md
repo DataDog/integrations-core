@@ -56,7 +56,7 @@ Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See th
 
 ### Validation
 
-To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you [Run the Agent's `status` subcommand][6], you should see something similar to the following:
+To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you [Run the Agent's `status` subcommand][3], you should see something similar to the following:
 
 ```
 ● datadog-agent.service - "Datadog Agent"
@@ -80,19 +80,19 @@ If the TCP RTT check has started you should see something similar to the go-metr
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][3] for a list of metrics provided by this check.
+See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
-The Go-metro check does not include any events at this time.
+The Go-metro check does not include any events.
 
 ### Service Checks
-The Go-metro check does not include any service checks at this time.
+The Go-metro check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][4].
+Need help? Contact [Datadog support][5].
 
 [1]: https://github.com/DataDog/go-metro
 [2]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
-[3]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
-[4]: https://docs.datadoghq.com/help/
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
+[5]: https://docs.datadoghq.com/help

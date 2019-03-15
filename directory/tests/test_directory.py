@@ -12,73 +12,11 @@ from datadog_checks.dev.utils import create_file, temp_dir as temp_directory
 from datadog_checks.directory import DirectoryCheck
 from datadog_checks.errors import ConfigurationError
 
-CHECK_NAME = 'directory'
+from . import common
 
-FILE_METRICS = [
-    "system.disk.directory.file.bytes",
-    "system.disk.directory.file.modified_sec_ago",
-    "system.disk.directory.file.created_sec_ago"
-]
-
-DIRECTORY_METRICS = [
-    "system.disk.directory.file.bytes",
-    "system.disk.directory.file.modified_sec_ago",
-    "system.disk.directory.file.created_sec_ago"
-]
-
-COMMON_METRICS = [
-    "system.disk.directory.files",
-    "system.disk.directory.bytes"
-]
 
 temp_dir = None
 dir_check = DirectoryCheck('directory', {}, {})
-
-
-def get_config_stubs(dir_name, filegauges=False):
-    """
-    Helper to generate configs from a directory name
-    """
-    return [
-        {
-            'directory': dir_name,
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
-            'directory': dir_name,
-            'name': "my_beloved_directory",
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
-            'directory': dir_name,
-            'dirtagname': "directory_custom_tagname",
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
-            'directory': dir_name,
-            'filetagname': "file_custom_tagname",
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
-            'directory': dir_name,
-            'dirtagname': "recursive_check",
-            'recursive': True,
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
-            'directory': dir_name,
-            'dirtagname': "glob_pattern_check",
-            'pattern': "*.log",
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }, {
-            'directory': dir_name,
-            'dirtagname': "relative_pattern_check",
-            'pattern': "file_*",
-            'filegauges': filegauges,
-            'tags': ['optional:tag1']
-        }
-    ]
 
 
 def setup_module(module):
@@ -124,8 +62,8 @@ def test_directory_metrics(aggregator):
     """
     Directory metric coverage
     """
-    config_stubs = get_config_stubs(temp_dir)
-    countonly_stubs = get_config_stubs(temp_dir)
+    config_stubs = common.get_config_stubs(temp_dir)
+    countonly_stubs = common.get_config_stubs(temp_dir)
 
     # Try all the configurations in countonly mode as well
     for stub in countonly_stubs:
@@ -168,7 +106,7 @@ def test_file_metrics(aggregator):
     """
     File metric coverage
     """
-    config_stubs = get_config_stubs(temp_dir, filegauges=True)
+    config_stubs = common.get_config_stubs(temp_dir, filegauges=True)
 
     for config in config_stubs:
         aggregator.reset()
@@ -179,7 +117,7 @@ def test_file_metrics(aggregator):
         dir_tags = [dirtagname + ":%s" % name, 'optional:tag1']
 
         # File metrics
-        for mname in FILE_METRICS:
+        for mname in common.FILE_METRICS:
             if config.get('pattern') != "file_*":
                 # 2 '*.log' files in 'temp_dir'
                 for i in range(1, 3):
@@ -218,7 +156,7 @@ def test_file_metrics(aggregator):
                             count=1)
 
         # Common metrics
-        for mname in COMMON_METRICS:
+        for mname in common.COMMON_METRICS:
             aggregator.assert_metric(mname, tags=dir_tags, count=1)
 
         # Raises when coverage < 100%

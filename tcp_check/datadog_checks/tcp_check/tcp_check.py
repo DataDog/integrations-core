@@ -1,13 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import socket
 import time
 
-# project
-from datadog_checks.checks import NetworkCheck, Status
+from datadog_checks.base.checks import NetworkCheck, Status
 
 
 class BadConfException(Exception):

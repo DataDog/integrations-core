@@ -12,10 +12,12 @@
   "supported_os": [
     "linux"
   ],
-  "public_title": "Datadog-Ibm_mq Integration",
+  "public_title": "Datadog-IBM MQ Integration",
   "categories": [
-    "Message Queue"
+    "Message Queue",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false
+  "is_public": true,
+  "integration_id": "ibm-mq"
 }

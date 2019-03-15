@@ -10,9 +10,12 @@ This check monitors [IBM MQ][1].
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
-In order to use the IBM MQ check, you need to install the [IBM MQ Client][3], unless the IBM MQ server is already installed on the box. Take note of where you installed it.
+In order to use the IBM MQ check, you need to:
 
-Update your LD_LIBRARY_PATH to include the location of the libraries. For example:
+1. Make sure the [IBM MQ Client][3] is installed (unless the IBM MQ server is already installed)
+2. Update your LD_LIBRARY_PATH to include the location of the libraries
+
+For example:
 
 ```
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
@@ -54,9 +57,6 @@ respawn
 respawn limit 10 5
 normal exit 0
 
-# Logging to console from the Agent is disabled since the Agent already logs using file or
-# syslog depending on its configuration. We make Upstart log what the process still outputs in order
-# to log panics/crashes to /var/log/upstart/datadog-agent.log
 console log
 env DD_LOG_TO_CONSOLE=false
 env LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
@@ -76,20 +76,40 @@ Each time there is an agent update, these files are wiped and will need to be up
 
 Alternatively, if you are using Linux, after the MQ Client is installed ensure the runtime linker can find the libraries. For example, using ldconfig:
 
-```
-# Put the library location in an ld configuration file.
+Put the library location in an ld configuration file.
 
+```
 sudo sh -c "echo /opt/mqm/lib64 > /etc/ld.so.conf.d/mqm64.conf"
 sudo sh -c "echo /opt/mqm/lib > /etc/ld.so.conf.d/mqm.conf"
+```
 
-# Update the bindings.
+Update the bindings.
 
+```
 sudo ldconfig
 ```
 
 #### Permissions and Authentication
 
 There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
+
+Note: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done via the MQ UI or with an mqsc command:
+
+```
+> /opt/mqm/bin/runmqsc
+5724-H72 (C) Copyright IBM Corp. 1994, 2018.
+Starting MQSC for queue manager datadog.
+
+
+ALTER QMGR MONQ(MEDIUM) MONCHL(MEDIUM)
+     1 : ALTER QMGR MONQ(MEDIUM) MONCHL(MEDIUM)
+AMQ8005I: IBM MQ queue manager changed.
+
+       :
+One MQSC command read.
+No commands have a syntax error.
+All valid MQSC commands were processed.
+```
 
 
 ### Configuration
@@ -124,10 +144,9 @@ queues:
 #### Log Collection
 
 Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
-
-    ```yaml
+```
     logs_enabled: true
-    ```
+```
 
 Next, point the config file to the proper MQ log files. You can uncomment the lines at the bottom of the MQ integration's config file, and amend them as you see fit:
 
@@ -151,7 +170,7 @@ logs:
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -167,13 +186,13 @@ IBM MQ does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 [1]: https://www.ibm.com/products/mq
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://developer.ibm.com/messaging/mq-downloads/
+[3]: https://developer.ibm.com/messaging/mq-downloads
 [4]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[7]: https://docs.datadoghq.com/help/
-[8]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
+[7]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
+[8]: https://docs.datadoghq.com/help

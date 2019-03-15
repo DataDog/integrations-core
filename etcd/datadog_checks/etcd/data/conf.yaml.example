@@ -11,6 +11,11 @@ instances:
   #
   #  prometheus_url: http://localhost:2379/metrics
 
+  ## @param leader_tag - boolean - optional - default: true
+  ## Whether or not to tag with `is_leader:true` or `is_leader:false`.
+  #
+  #  leader_tag: true
+
   ## @param send_histograms_buckets - boolean - optional - default: true
   ## Histogram buckets can be noisy and generate many tags.
   ## Set send_histograms_buckets to true to pull them.

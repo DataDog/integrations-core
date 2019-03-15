@@ -5,6 +5,7 @@
 Utilities functions abstracting common operations, specially designed to be used
 by Integrations within tests.
 """
+import inspect
 import os
 import platform
 import shutil
@@ -12,6 +13,7 @@ from contextlib import contextmanager
 from io import open
 from tempfile import mkdtemp
 
+import yaml
 from six import PY3, text_type
 from six.moves.urllib.request import urlopen
 
@@ -107,8 +109,12 @@ def ensure_dir_exists(d):
         os.makedirs(d)
 
 
+def get_parent_dir(path):
+    return os.path.dirname(os.path.abspath(path))
+
+
 def ensure_parent_dir_exists(path):
-    ensure_dir_exists(os.path.dirname(os.path.abspath(path)))
+    ensure_dir_exists(get_parent_dir(path))
 
 
 def create_file(fname):
@@ -171,6 +177,28 @@ def basepath(path):
 
 def get_next(obj):
     return next(iter(obj))
+
+
+def get_here():
+    return get_parent_dir(inspect.currentframe().f_back.f_code.co_filename)
+
+
+def load_jmx_config():
+    root = get_parent_dir(inspect.currentframe().f_back.f_code.co_filename)
+    while True:
+        if file_exists(path_join(root, 'setup.py')):
+            break
+
+        new_root = os.path.dirname(root)
+        if new_root == root:
+            raise OSError('No check found')
+
+        root = new_root
+
+    check = basepath(root)
+    jmx_config = path_join(root, 'datadog_checks', check, 'data', 'metrics.yaml')
+
+    return yaml.safe_load(read_file(jmx_config))
 
 
 @contextmanager

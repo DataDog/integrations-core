@@ -1,3 +1,4 @@
+dist: xenial
 sudo: required
 services:
   - docker
@@ -26,6 +27,8 @@ env:
     # if the c include path doesn't have the proper path pymqi will not compile
     - C_INCLUDE_PATH="/opt/mqm/inc:$C_INCLUDE_PATH"
     - LD_LIBRARY_PATH="/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH"
+    # https://github.com/travis-ci/travis-ci/issues/7940
+    - BOTO_CONFIG=/dev/null
 
 stages:
   - name: test_changed
@@ -34,8 +37,10 @@ stages:
     if: ((branch = master) AND (type != pull_request)) OR ((commit_message =~ /ci run all/) AND (type = pull_request))
 
 script:
+  - ddev validate logos ${CHECK}
   - travis_retry ddev test --cov ${CHECK}
   - ddev test ${CHECK} --bench || true
+  - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
 
 # Conditional jobs are currently buggy and verbose.
 #
@@ -52,6 +57,7 @@ jobs:
         - ddev validate agent-reqs
         - ddev validate config
         - ddev validate dep
+        - ddev validate logos
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
@@ -63,6 +69,7 @@ jobs:
         - ddev validate agent-reqs
         - ddev validate config
         - ddev validate dep
+        - ddev validate logos
         - ddev validate manifest --include-extras
         - ddev validate metadata
         - ddev validate service-checks
@@ -71,15 +78,20 @@ jobs:
     - stage: test
       env: CHECK=datadog_checks_dev PYTHON3=true
     - stage: test
-      env: CHECK=active_directory
+      env: CHECK=datadog_checks_downloader PYTHON3=true
+    - stage: test
+      env: CHECK=active_directory PYTHON3=true
     - stage: test
       env: CHECK=activemq_xml PYTHON3=true
     - stage: test
+      env: CHECK=aerospike PYTHON3=true
+    - stage: test
+    # Agent <=5.x.x integration - only supporting py2 is needed
       env: CHECK=agent_metrics
     - stage: test
       env: CHECK=apache PYTHON3=true
     - stage: test
-      env: CHECK=aspdotnet
+      env: CHECK=aspdotnet PYTHON3=true
     - stage: test
       env: CHECK=btrfs PYTHON3=true
     - stage: test
@@ -87,9 +99,9 @@ jobs:
     - stage: test
       env: CHECK=cassandra_nodetool PYTHON3=true
     - stage: test
-      env: CHECK=ceph
+      env: CHECK=ceph PYTHON3=true
     - stage: test
-      env: CHECK=cisco_aci
+      env: CHECK=cisco_aci PYTHON3=true
     - stage: test
       env: CHECK=cockroachdb PYTHON3=true
     - stage: test
@@ -99,7 +111,7 @@ jobs:
     - stage: test
       env: CHECK=couch PYTHON3=true
     - stage: test
-      env: CHECK=couchbase
+      env: CHECK=couchbase PYTHON3=true
     - stage: test
       env: CHECK=crio PYTHON3=true
     - stage: test
@@ -107,11 +119,12 @@ jobs:
     - stage: test
       env: CHECK=disk PYTHON3=true
     - stage: test
+    # python 2 support only
       env: CHECK=dns_check
     - stage: test
-      env: CHECK=dotnetclr
+      env: CHECK=dotnetclr PYTHON3=true
     - stage: test
-      env: CHECK=ecs_fargate
+      env: CHECK=ecs_fargate PYTHON3=true
     - stage: test
       env: CHECK=elastic PYTHON3=true
     - stage: test
@@ -119,7 +132,7 @@ jobs:
     - stage: test
       env: CHECK=etcd PYTHON3=true
     - stage: test
-      env: CHECK=exchange_server
+      env: CHECK=exchange_server PYTHON3=true
     - stage: test
       env: CHECK=fluentd PYTHON3=true
     - stage: test
@@ -127,91 +140,101 @@ jobs:
     - stage: test
       env: CHECK=gitlab PYTHON3=true
     - stage: test
+      env: CHECK=gitlab_runner PYTHON3=true
+    - stage: test
       env: CHECK=go_expvar PYTHON3=true
     - stage: test
       env: CHECK=gunicorn PYTHON3=true
     - stage: test
-      env: CHECK=haproxy
+      env: CHECK=haproxy PYTHON3=true
     - stage: test
-      env: CHECK=hdfs_datanode
+      env: CHECK=hdfs_datanode PYTHON3=true
     - stage: test
-      env: CHECK=hdfs_namenode
+      env: CHECK=hdfs_namenode PYTHON3=true
     - stage: test
       env: CHECK=http_check PYTHON3=true
     - stage: test
-      env: CHECK=ibm_mq
+      env: CHECK=ibm_mq PYTHON3=true
     - stage: test
-      env: CHECK=iis
+      env: CHECK=ibm_was PYTHON3=true
     - stage: test
-      env: CHECK=istio
+      env: CHECK=iis PYTHON3=true
+    - stage: test
+      env: CHECK=istio PYTHON3=true
     - stage: test
       env: CHECK=kafka_consumer PYTHON3=true
     - stage: test
       env: CHECK=kong PYTHON3=true
     - stage: test
-      env: CHECK=kube_dns
+      env: CHECK=kube_controller_manager PYTHON3=true
     - stage: test
-      env: CHECK=kube_proxy
+      env: CHECK=kube_dns PYTHON3=true
     - stage: test
-      env: CHECK=kubelet
+      env: CHECK=kube_proxy PYTHON3=true
     - stage: test
-      env: CHECK=kubernetes_state
+      env: CHECK=kubelet PYTHON3=true
     - stage: test
-      env: CHECK=kyototycoon
+      env: CHECK=kubernetes_state PYTHON3=true
+    - stage: test
+      env: CHECK=kyototycoon PYTHON3=true
     - stage: test
       env: CHECK=lighttpd PYTHON3=true
     - stage: test
       env: CHECK=linkerd
     - stage: test
-      env: CHECK=linux_proc_extras
+      env: CHECK=linux_proc_extras PYTHON3=true
     - stage: test
-      env: CHECK=mapreduce
+      env: CHECK=mapreduce PYTHON3=true
     - stage: test
-      env: CHECK=marathon
+      env: CHECK=marathon PYTHON3=true
     - stage: test
       env: CHECK=mcache PYTHON3=true
     - stage: test
-      env: CHECK=mesos_slave
+      env: CHECK=mesos_slave PYTHON3=true
     - stage: test
-      env: CHECK=mesos_master
+      env: CHECK=mesos_master PYTHON3=true
     - stage: test
       env: CHECK=mongo PYTHON3=true
     - stage: test
       env: CHECK=mysql PYTHON3=true
     - stage: test
-      env: CHECK=nagios
+      env: CHECK=nagios PYTHON3=true
     - stage: test
-      env: CHECK=network
+      env: CHECK=network PYTHON3=true
     - stage: test
       env: CHECK=nfsstat PYTHON3=true
     - stage: test
       env: CHECK=nginx PYTHON3=true
     - stage: test
+      env: CHECK=nginx_ingress_controller PYTHON3=true
+    - stage: test
       env: CHECK=ntp
     - stage: test
       env: CHECK=openldap PYTHON3=true
     - stage: test
-      env: CHECK=openstack
+      env: CHECK=openmetrics PYTHON3=true
+    - stage: test
+      env: CHECK=openstack PYTHON3=true
     - stage: test
       env: CHECK=openstack_controller PYTHON3=true
     - stage: test
-      env: CHECK=oracle
+      env: CHECK=oracle PYTHON3=true
     - stage: test
-      env: CHECK=pdh_check
+      env: CHECK=pdh_check PYTHON3=true
     - stage: test
-      env: CHECK=pgbouncer
+      env: CHECK=pgbouncer PYTHON3=true
     - stage: test
       env: CHECK=php_fpm PYTHON3=true
     - stage: test
       env: CHECK=postgres PYTHON3=true
     - stage: test
-      env: CHECK=postfix
+      env: CHECK=postfix PYTHON3=true
     - stage: test
       env: CHECK=powerdns_recursor PYTHON3=true
     - stage: test
       env: CHECK=process PYTHON3=true
     - stage: test
-      env: CHECK=prometheus
+      env: CHECK=prometheus PYTHON3=true
     - stage: test
       env: CHECK=rabbitmq PYTHON3=true
     - stage: test
@@ -221,16 +244,17 @@ jobs:
     - stage: test
       env: CHECK=riakcs PYTHON3=true
     - stage: test
-      env: CHECK=snmp
+      env: CHECK=snmp PYTHON3=true
     - stage: test
-      env: CHECK=spark
+      env: CHECK=spark PYTHON3=true
     - stage: test
-      env: CHECK=sqlserver
+      env: CHECK=sqlserver PYTHON3=true
     - stage: test
       env: CHECK=ssh_check PYTHON3=true
     - stage: test
       env: CHECK=statsd PYTHON3=true
     - stage: test
+    # python 2 support only
       env: CHECK=supervisord
     - stage: test
       env: CHECK=squid PYTHON3=true
@@ -241,11 +265,12 @@ jobs:
     - stage: test
       env: CHECK=system_swap PYTHON3=true
     - stage: test
-      env: CHECK=tcp_check
+      env: CHECK=tcp_check PYTHON3=true
     - stage: test
-      env: CHECK=teamcity
+      env: CHECK=teamcity PYTHON3=true
     - stage: test
-      env: CHECK=tokumx PYTHON3=true
+    # python 2 support only
+      env: CHECK=tokumx
     - stage: test
       env: CHECK=twemproxy PYTHON3=true
     - stage: test
@@ -260,7 +285,7 @@ jobs:
       env: CHECK=zk PYTHON3=true
 before_install:
   - bash .travis/prepare.sh
-  - PATH="$PATH:$(pyenv root)/versions/3.6/bin"
+  - PATH="$(pyenv root)/versions/3.7.1/bin:$PATH:$(pyenv root)/versions/3.6.7/bin"
 install:
   - pip install -U pip setuptools codecov
   - pip install ./datadog_checks_dev[cli]

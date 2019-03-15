@@ -13,7 +13,6 @@ import xml.parsers.expat  # python 2.4 compatible
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.subprocess_output import get_subprocess_output
-from datadog_checks.base import ensure_unicode
 
 if PY3:
     long = int
@@ -58,7 +57,7 @@ class Varnish(AgentCheck):
 
     def _end_element(self, name, tags):
         if name == "stat":
-            m_name = ensure_unicode(self.normalize(self._current_metric))
+            m_name = self.normalize(self._current_metric)
             if self._current_type in ("a", "c"):
                 self.rate(m_name, long(self._current_value), tags=tags)
             elif self._current_type in ("i", "g"):
@@ -232,7 +231,7 @@ class Varnish(AgentCheck):
                     self.rate(self.normalize(name, prefix="varnish"), long(value), tags=tags)
                 elif metric["flag"] in ("g", "i"):
                     self.gauge(self.normalize(name, prefix="varnish"), long(value), tags=tags)
-                    if 'n_purges' in ensure_unicode(self.normalize(name, prefix="varnish")):
+                    if 'n_purges' in self.normalize(name, prefix="varnish"):
                         self.rate('varnish.n_purgesps', long(value), tags=tags)
         elif varnishstat_format == "text":
             for line in output.split("\n"):

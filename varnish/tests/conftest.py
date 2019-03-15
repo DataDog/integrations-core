@@ -4,22 +4,25 @@
 
 import pytest
 import os
-import subprocess
-import time
+
+from datadog_checks.dev import docker_run
+from datadog_checks.varnish import Varnish
 
 from . import common
 
 
-@pytest.fixture(scope="session")
-def spin_up_varnish():
-    env = os.environ
-    target = "varnish{}".format(env["VARNISH_VERSION"].split(".")[0])
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
-    ]
-    subprocess.check_call(args + ["down"], env=env)
-    subprocess.check_call(args + ["up", "-d", target], env=env)
-    time.sleep(2)
-    yield
-    subprocess.check_call(args + ["down"], env=env)
+@pytest.fixture
+def check():
+    return Varnish(common.CHECK_NAME, {}, {})
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+    with docker_run(compose_file, sleep=2):
+        yield common.get_config_by_version(), 'local'
+
+
+@pytest.fixture
+def instance():
+    return common.get_config_by_version()

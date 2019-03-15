@@ -3,15 +3,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
+from __future__ import division
+
 import time
 import re
 from collections import defaultdict
 
-# 3rd party
 import requests
 
-# project
+from six import string_types
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 from datadog_checks.utils.containers import hash_mutable
@@ -278,23 +279,25 @@ class Couchbase(AgentCheck):
 
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
-            metric_tags = list(tags)
+            metric_tags = [] if tags is None else tags[:]
             metric_tags.append('bucket:{}'.format(bucket_name))
+            metric_tags.append('device:{}'.format(bucket_name))
             for metric_name, val in bucket_stats.items():
                 if val is not None:
                     norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                     if norm_metric_name in self.BUCKET_STATS:
                         full_metric_name = 'couchbase.by_bucket.{}'.format(norm_metric_name)
-                        self.gauge(full_metric_name, val[0], tags=metric_tags, device_name=bucket_name)
+                        self.gauge(full_metric_name, val[0], tags=metric_tags)
 
         # Get node metrics
         for node_name, node_stats in data['nodes'].items():
-            metric_tags = list(tags)
+            metric_tags = [] if tags is None else tags[:]
             metric_tags.append('node:{}'.format(node_name))
+            metric_tags.append('device:{}'.format(node_name))
             for metric_name, val in node_stats['interestingStats'].items():
                 if val is not None:
                     metric_name = 'couchbase.by_node.{}'.format(self.camel_case_to_joined_lower(metric_name))
-                    self.gauge(metric_name, val, tags=metric_tags, device_name=node_name)
+                    self.gauge(metric_name, val, tags=metric_tags)
 
             # Get cluster health data
             self._process_cluster_health_data(node_name, node_stats, tags)
@@ -305,7 +308,7 @@ class Couchbase(AgentCheck):
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:
                     # for query times, the unit is part of the value, we need to extract it
-                    if isinstance(val, basestring):
+                    if isinstance(val, string_types):
                         val = self.extract_seconds_value(val)
 
                     full_metric_name = 'couchbase.query.{}'.format(self.camel_case_to_joined_lower(norm_metric_name))
@@ -447,7 +450,7 @@ class Couchbase(AgentCheck):
                 raise Exception("No data returned from couchbase endpoint: {}".format(url))
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags, message=str(e.message))
+                               tags=service_check_tags, message=str(e))
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))

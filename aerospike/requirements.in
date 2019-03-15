@@ -1,0 +1,1 @@
+aerospike==3.6.0; sys_platform != 'win32'

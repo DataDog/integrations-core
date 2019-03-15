@@ -177,19 +177,17 @@ EXAMPLE_PROJECTS_RESPONSE = {
 
 # .. server/network
 SERVERS_CACHE_MOCK = {
-    "test_name": {
-        'servers': {
-            "server-1": {"id": "server-1", "name": "server-name-1",
-                         "status": "ACTIVE", "project_name": "testproj"},
-            "server-2": {"id": "server-2", "name": "server-name-2",
-                         "status": "ACTIVE", "project_name": "testproj"},
-            "other-1": {"id": "other-1", "name": "server-name-other-1",
-                        "status": "ACTIVE", "project_name": "blacklist_1"},
-            "other-2": {"id": "other-2", "name": "server-name-other-2",
-                        "status": "ACTIVE", "project_name": "blacklist_2"}
-        },
-        'change_since': datetime.datetime.utcnow().isoformat()
-    }
+    'servers': {
+        "server-1": {"id": "server-1", "name": "server-name-1",
+                     "status": "ACTIVE", "project_name": "testproj"},
+        "server-2": {"id": "server-2", "name": "server-name-2",
+                     "status": "ACTIVE", "project_name": "testproj"},
+        "other-1": {"id": "other-1", "name": "server-name-other-1",
+                    "status": "ACTIVE", "project_name": "blacklist_1"},
+        "other-2": {"id": "other-2", "name": "server-name-other-2",
+                    "status": "ACTIVE", "project_name": "blacklist_2"}
+    },
+    'change_since': datetime.datetime.utcnow().isoformat()
 }
 
 EMPTY_NOVA_SERVERS = []
@@ -299,5 +297,107 @@ MOCK_NOVA_SERVERS = [
         "tenant_id": "6f70656e737461636b20342065766572",
         "updated": "2017-02-14T19:24:43Z",
         "user_id": "fake"
+    }
+]
+
+EXAMPLE_GET_FLAVORS_DETAIL_RETURN_VALUE = [
+    {
+        'id': u'10',
+        'disk': 10,
+        'vcpus': 2,
+        'ram': 1024,
+        'OS-FLV-EXT-DATA:ephemeral': 0,
+        'swap': 0
+    },
+    {
+        'id': u'625c2e4b-0a1f-4236-bb67-5ceee1a766e5',
+        'disk': 48,
+        'vcpus': 8,
+        'ram': 5934,
+        'OS-FLV-EXT-DATA:ephemeral': 0,
+        'swap': 0
+    }
+]
+
+EXAMPLE_GET_OS_AGGREGATES_RETURN_VALUE = [
+    {
+        'hosts': [
+            "compute"
+        ],
+        'name': "name",
+        'availability_zone': "london"
+    }
+]
+
+EXAMPLE_GET_OS_HYPERVISORS_RETURN_VALUE = [
+    {
+        "cpu_info": {
+            "arch": "x86_64",
+            "model": "Nehalem",
+            "vendor": "Intel",
+            "features": [
+                "pge",
+                "clflush"
+            ],
+            "topology": {
+                "cores": 1,
+                "threads": 1,
+                "sockets": 4
+            }
+        },
+        "current_workload": 0,
+        "status": "enabled",
+        "state": "up",
+        "disk_available_least": 0,
+        "host_ip": "1.1.1.1",
+        "free_disk_gb": 1028,
+        "free_ram_mb": 7680,
+        "hypervisor_hostname": "host1",
+        "hypervisor_type": "fake",
+        "hypervisor_version": 1000,
+        "id": 2,
+        "local_gb": 1028,
+        "local_gb_used": 0,
+        "memory_mb": 8192,
+        "memory_mb_used": 512,
+        "running_vms": 0,
+        "service": {
+            "host": "host1",
+            "id": 7,
+            "disabled_reason": None
+        },
+        "vcpus": 2,
+        "vcpus_used": 0
+    }
+]
+
+EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE = {
+    "maxImageMeta": 128,
+    "maxPersonality": 5,
+    "maxPersonalitySize": 10240,
+    "maxSecurityGroupRules": 20,
+    "maxSecurityGroups": 10,
+    "maxServerMeta": 128,
+    "maxTotalCores": 20,
+    "maxTotalFloatingIps": 10,
+    "maxTotalInstances": 10,
+    "maxTotalKeypairs": 100,
+    "maxTotalRAMSize": 51200,
+    "maxServerGroups": 10,
+    "maxServerGroupMembers": 10,
+    "totalCoresUsed": 0,
+    "totalInstancesUsed": 0,
+    "totalRAMUsed": 0,
+    "totalSecurityGroupsUsed": 0,
+    "totalFloatingIpsUsed": 0,
+    "totalServerGroupsUsed": 0
+}
+
+EXAMPLE_GET_NETWORKS_RETURN_VALUE = [
+    {
+        'id': u'2755452c-4fe8-4ba1-9b26-8898665b0958',
+        'name': u'net2',
+        'tenant_id': u'680031a39ce040e1b81289ea8c73fb11',
+        'admin_state_up': True
     }
 ]

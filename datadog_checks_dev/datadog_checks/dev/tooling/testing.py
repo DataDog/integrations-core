@@ -7,12 +7,11 @@ from .utils import get_testable_checks
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
 
-STYLE_ENVS = {
-    'flake8',
-}
+STYLE_CHECK_ENVS = {'flake8', 'style'}
+STYLE_ENVS = {'flake8', 'style', 'format_style'}
 
 
-def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only=False, sort=False):
+def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every=False, changed_only=False, sort=False):
     testable_checks = get_testable_checks()
     # Run `get_changed_checks` at most once because git calls are costly
     changed_checks = get_changed_checks() if not checks or changed_only else None
@@ -36,10 +35,15 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
         envs_selected = envs_selected.split(',') if envs_selected else []
         envs_available = get_available_tox_envs(check, sort=sort)
 
-        if style:
+        if format_style:
             envs_selected[:] = [
                 e for e in envs_available
-                if e in STYLE_ENVS
+                if 'format_style' in e
+            ]
+        elif style:
+            envs_selected[:] = [
+                e for e in envs_available
+                if e in STYLE_CHECK_ENVS
             ]
         elif benchmark:
             envs_selected[:] = [
@@ -64,7 +68,7 @@ def get_tox_envs(checks, style=False, benchmark=False, every=False, changed_only
             else:
                 envs_selected[:] = [
                     e for e in envs_available
-                    if 'bench' not in e
+                    if 'bench' not in e and 'format_style' not in e
                 ]
 
         yield check, envs_selected
@@ -124,6 +128,8 @@ def coverage_sources(check):
         package_path = 'datadog_checks/base'
     elif check == 'datadog_checks_dev':
         package_path = 'datadog_checks/dev'
+    elif check == 'datadog_checks_downloader':
+        package_path = 'datadog_checks/downloader'
     else:
         package_path = 'datadog_checks/{}'.format(check)
 
@@ -139,7 +145,9 @@ def fix_coverage_report(check, report_file):
     write_file_binary(report_file, report)
 
 
-def construct_pytest_options(verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False):
+def construct_pytest_options(
+    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter=''
+):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
 
@@ -166,6 +174,12 @@ def construct_pytest_options(verbose=0, enter_pdb=False, debug=False, bench=Fals
             # This will be formatted to the appropriate coverage paths for each package
             ' {}'
         )
+
+    if marker:
+        pytest_options += ' -m {}'.format(marker)
+
+    if test_filter:
+        pytest_options += ' -k {}'.format(test_filter)
 
     return pytest_options
 

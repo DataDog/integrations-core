@@ -1,6 +1,6 @@
 # Mesos_master Check
 
-![Mesos master Dashboard][106]
+![Mesos master Dashboard][1]
 
 ## Overview
 
@@ -32,7 +32,7 @@ Substitute your Datadog API key and Mesos Master's API URL into the command abov
 
 ### Configuration
 
-If you passed the correct Master URL when starting datadog-agent, the Agent is already using a default `mesos_master.d/conf.yaml` to collect metrics from your masters; you don't need to configure anything else. See the [sample mesos_master.d/conf.yaml][101] for all available configuration options.
+If you passed the correct Master URL when starting datadog-agent, the Agent is already using a default `mesos_master.d/conf.yaml` to collect metrics from your masters; you don't need to configure anything else. See the [sample mesos_master.d/conf.yaml][2] for all available configuration options.
 
 Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.d/conf.yaml`.
 
@@ -62,7 +62,7 @@ docker run -d --name datadog-agent \
   datadog/agent:latest
 ```
 
-Use the [autodiscovery feature][105] for logs to override the `service` and `source` attribute to make sure you benefit from the integration automatic setup.
+Use the [autodiscovery feature][3] for logs to override the `service` and `source` attribute to make sure you benefit from the integration automatic setup.
 
 ### Validation
 
@@ -71,10 +71,10 @@ In Datadog, search for `mesos.cluster` in the Metrics Explorer.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][102] for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The Mesos-master check does not include any events at this time.
+The Mesos-master check does not include any events.
 
 ### Service Checks
 
@@ -83,16 +83,16 @@ The Mesos-master check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][103].
+Need help? Contact [Datadog support][5].
 
 ## Further Reading
 
-* [Installing Datadog on Mesos with DC/OS][104]
+* [Installing Datadog on Mesos with DC/OS][6]
 
 
-[101]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/datadog_checks/mesos_master/data/conf.yaml.example
-[102]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
-[103]: https://docs.datadoghq.com/help/
-[104]: https://www.datadoghq.com/blog/deploy-datadog-dcos/
-[105]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-autodiscovery
-[106]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_master/images/mesos_dashboard.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_master/images/mesos_dashboard.png
+[2]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/datadog_checks/mesos_master/data/conf.yaml.example
+[3]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-autodiscovery
+[4]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
+[5]: https://docs.datadoghq.com/help
+[6]: https://www.datadoghq.com/blog/deploy-datadog-dcos

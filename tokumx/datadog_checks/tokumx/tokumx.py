@@ -2,17 +2,19 @@
 # (C) Leif Walsh <leif.walsh@gmail.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
+
 import time
 from six import iteritems, PY3
 
-import bson
-from pymongo import (
+from datadog_checks.tokumx.vendor.pymongo import (
     MongoClient,
     ReadPreference,
     errors,
     uri_parser,
     version as py_version,
 )
+from datadog_checks.tokumx.vendor import bson
 
 from datadog_checks.checks import AgentCheck
 
@@ -419,84 +421,81 @@ class TokuMX(AgentCheck):
                 self.gauge('tokumx.sharding.chunks', doc['count'], tags=chunk_tags)
 
     def collect_metrics(self, instance, server, conn, db, tags):
-            status = db["$cmd"].find_one({"serverStatus": 1})
-            status['stats'] = db.command('dbstats')
+        status = db["$cmd"].find_one({"serverStatus": 1})
+        status['stats'] = db.command('dbstats')
 
-            # Handle replica data, if any
-            # See http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus
-            conn, db = self._get_replica_metrics(instance, conn, db, tags, server, status)
+        # Handle replica data, if any
+        # See http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus
+        conn, db = self._get_replica_metrics(instance, conn, db, tags, server, status)
 
-            for dbname in conn.database_names():
-                db_tags = list(tags)
-                db_tags.append('db:%s' % dbname)
-                db = conn[dbname]
-                try:
-                    stats = db.command('dbstats')
-                except errors.OperationFailure:
-                    self.log.warning("Cannot access dbstats on database %s" % dbname)
+        for dbname in conn.database_names():
+            db_tags = list(tags)
+            db_tags.append('db:%s' % dbname)
+            db = conn[dbname]
+            try:
+                stats = db.command('dbstats')
+            except errors.OperationFailure:
+                self.log.warning("Cannot access dbstats on database %s" % dbname)
+                continue
+            for m, v in stats.items():
+                if m in ['db', 'ok']:
                     continue
+                m = 'stats.db.%s' % m
+                m = self.normalize(m, 'tokumx')
+                # FIXME: here tokumx.stats.db.* are potentially unbounded
+                self.gauge(m, v, db_tags)
+            for collname in db.collection_names(False):
+                stats = db.command('collStats', collname)
                 for m, v in stats.items():
                     if m in ['db', 'ok']:
                         continue
-                    m = 'stats.db.%s' % m
-                    m = self.normalize(m, 'tokumx')
-                    # FIXME: here tokumx.stats.db.* are potentially unbounded
-                    self.gauge(m, v, db_tags)
-                for collname in db.collection_names(False):
-                    stats = db.command('collStats', collname)
-                    for m, v in stats.items():
-                        if m in ['db', 'ok']:
-                            continue
-                        if m == 'indexDetails':
-                            for idx_stats in v:
-                                for k in ['count', 'size', 'avgObjSize', 'storageSize']:
-                                    value = idx_stats[k]
-                                    if self.isNumeric(value):
-                                        self.histogram('tokumx.stats.idx.%s' % k, idx_stats[k], tags=db_tags)
-                                for k in ['queries', 'nscanned', 'nscannedObjects', 'inserts', 'deletes']:
-                                    key = (dbname, collname, idx_stats['name'], k)
-                                    self.submit_idx_rate('tokumx.statsd.idx.%s' % k,
-                                                         idx_stats[k],
-                                                         tags=db_tags,
-                                                         key=key)
-                        # FIXME: here tokumx.stats.coll.* are potentially unbounded
-                        elif self.isNumeric(v):
-                            self.histogram('tokumx.stats.coll.%s' % m, v, db_tags)
+                    if m == 'indexDetails':
+                        for idx_stats in v:
+                            for k in ['count', 'size', 'avgObjSize', 'storageSize']:
+                                value = idx_stats[k]
+                                if self.isNumeric(value):
+                                    self.histogram('tokumx.stats.idx.%s' % k, idx_stats[k], tags=db_tags)
+                            for k in ['queries', 'nscanned', 'nscannedObjects', 'inserts', 'deletes']:
+                                key = (dbname, collname, idx_stats['name'], k)
+                                self.submit_idx_rate('tokumx.statsd.idx.%s' % k, idx_stats[k], tags=db_tags, key=key)
+                    # FIXME: here tokumx.stats.coll.* are potentially unbounded
+                    elif self.isNumeric(v):
+                        self.histogram('tokumx.stats.coll.%s' % m, v, db_tags)
 
-            # If these keys exist, remove them for now as they cannot be serialized
+        # If these keys exist, remove them for now as they cannot be serialized
+        try:
+            status['backgroundFlushing'].pop('last_finished')
+        except KeyError:
+            pass
+        try:
+            status.pop('localTime')
+        except KeyError:
+            pass
+
+        # Go through the metrics and save the values
+        for m in self.METRICS:
+            # each metric is of the form: x.y.z with z optional
+            # and can be found at status[x][y][z]
+            value = status
             try:
-                status['backgroundFlushing'].pop('last_finished')
+                for c in m.split("."):
+                    value = value[c]
             except KeyError:
-                pass
-            try:
-                status.pop('localTime')
-            except KeyError:
-                pass
+                continue
 
-            # Go through the metrics and save the values
-            for m in self.METRICS:
-                # each metric is of the form: x.y.z with z optional
-                # and can be found at status[x][y][z]
-                value = status
-                try:
-                    for c in m.split("."):
-                        value = value[c]
-                except KeyError:
-                    continue
+            # value is now status[x][y][z]
+            if type(value) == bson.int64.Int64:
+                value = long(value)
+            else:
+                if not self.isNumeric(value):
+                    self.log.warning("Value found that is not of type int, int64,long, or float")
 
-                # value is now status[x][y][z]
-                if type(value) == bson.int64.Int64:
-                    value = long(value)
-                else:
-                    if not self.isNumeric(value):
-                        self.log.warning("Value found that is not of type int, int64,long, or float")
+            # Check if metric is a gauge or rate
+            if m in self.GAUGES:
+                self.gauge('tokumx.%s' % m, value, tags=tags)
 
-                # Check if metric is a gauge or rate
-                if m in self.GAUGES:
-                    self.gauge('tokumx.%s' % m, value, tags=tags)
-
-                if m in self.RATES:
-                    self.rate('tokumx.%sps' % m, value, tags=tags)
+            if m in self.RATES:
+                self.rate('tokumx.%sps' % m, value, tags=tags)
 
     def isNumeric(self, value):
         return isinstance(value, (int, long, float))

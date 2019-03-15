@@ -1,14 +1,43 @@
 init_config:
 
 instances:
-  # For every instance, you need an `kong_status_url` and can optionally
-  # supply a list of tags.
+  ## @param kong_status_url - string - required
+  ## URL where Kong exposes its status.
   #
   - kong_status_url: http://localhost:8001/status/
-  #   ssl_validation: true
-  #   tags:
-  #     - instance:foo
+
+  ## @param ssl_validation - boolean - optional - default: true
+  ## Instructs the check to not skip the validation of the SSL certificate of the URL being tested.
   #
-  # - kong_status_url: http://example2.com:8001/status/
-  #   tags:
-  #     - instance:bar
+  #  ssl_validation: true
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
+
+## Log Section (Available for Agent >=6.0)
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
+## service - mandatory - Name of the service owning the log
+## source  - mandatory - Attribute that defines which integration is sending the logs
+## sourcecategory - optional - Multiple value attribute. Can be used to refine the source attribtue
+## tags: - optional - Add tags to each logs collected
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+
+#logs:
+#  - type: file
+#    path: /var/log/nginx/access.log
+#    service: webapp
+#    source: kong
+
+#  - type: file
+#    path: /var/log/nginx/error.log
+#    service: webapp
+#    source: kong

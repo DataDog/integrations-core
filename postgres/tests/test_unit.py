@@ -196,7 +196,7 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query['columns'] = [malformed_custom_query_column]
     query_return = ['num', 1337]
     db.cursor().execute.side_effect = None
-    db.cursor().fetchone.return_value = query_return
+    db.cursor().__iter__.return_value = iter([query_return])
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.error.assert_called_once_with("query result for metric_prefix {}: expected {} columns, got {}".format(
                                             malformed_custom_query['metric_prefix'],
@@ -204,7 +204,7 @@ def test_malformed_get_custom_queries(check):
     check.log.reset_mock()
 
     # Make sure the query does not return an empty result
-    db.cursor().fetchone.return_value = []
+    db.cursor().__iter__.return_value = iter([[]])
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.debug.assert_called_with("query result for metric_prefix {}: returned an empty result".format(
                                        malformed_custom_query['metric_prefix']))
@@ -212,7 +212,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'name' is defined in each column
     malformed_custom_query_column['some_key'] = 'some value'
-    db.cursor().fetchone.return_value = [1337]
+    db.cursor().__iter__.return_value = iter([[1337]])
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.error.assert_called_once_with("column field `name` is required for metric_prefix `{}`".format(
                                             malformed_custom_query['metric_prefix']))
@@ -220,6 +220,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'type' is defined in each column
     malformed_custom_query_column['name'] = 'num'
+    db.cursor().__iter__.return_value = iter([[1337]])
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.error.assert_called_once_with("column field `type` is required for column `{}` "
                                             "of metric_prefix `{}`".format(malformed_custom_query_column['name'],
@@ -228,6 +229,7 @@ def test_malformed_get_custom_queries(check):
 
     # Make sure 'type' is a valid metric type
     malformed_custom_query_column['type'] = 'invalid_type'
+    db.cursor().__iter__.return_value = iter([[1337]])
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.error.assert_called_once_with("invalid submission method `{}` for column `{}` of "
                                             "metric_prefix `{}`".format(malformed_custom_query_column['type'],
@@ -239,7 +241,7 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query_column['type'] = 'gauge'
     query_return = MagicMock()
     query_return.__float__.side_effect = ValueError('Mocked exception')
-    db.cursor().fetchone.return_value = [query_return]
+    db.cursor().__iter__.return_value = iter([[query_return]])
     check._get_custom_queries(db, [], [malformed_custom_query], programming_error)
     check.log.error.assert_called_once_with("non-numeric value `{}` for metric column `{}` of "
                                             "metric_prefix `{}`".format(query_return,

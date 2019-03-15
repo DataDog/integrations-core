@@ -165,7 +165,7 @@ def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_pr
 
     check = mocked_prometheus_check
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check._submit(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
@@ -186,7 +186,7 @@ def test_submit_gauge_with_labels_and_hostname_override(
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check._submit(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
@@ -200,7 +200,7 @@ def test_submit_gauge_with_labels_and_hostname_override(
     mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
     mocked_prometheus_scraper_config['label_to_hostname_suffix'] = '-cluster-blue'
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check2._submit(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    check2.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config)
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
@@ -222,7 +222,7 @@ def test_submit_gauge_with_labels_and_hostname_already_overridden(
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check._submit(metric_name, ref_gauge, mocked_prometheus_scraper_config, hostname='bar')
+    check.submit_openmetric(metric_name, ref_gauge, mocked_prometheus_scraper_config, hostname='bar')
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
@@ -243,10 +243,10 @@ def test_labels_not_added_as_tag_once_for_each_metric(
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['custom_tags'] = ['test']
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check._submit(metric, ref_gauge, mocked_prometheus_scraper_config)
+    check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
     # Call a second time to check that the labels were not added once more to the tags list and
     # avoid regression on https://github.com/DataDog/dd-agent/pull/3359
-    check._submit(metric, ref_gauge, mocked_prometheus_scraper_config)
+    check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
 
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
@@ -264,7 +264,7 @@ def test_submit_gauge_with_custom_tags(
     mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
     mocked_prometheus_scraper_config['_metric_tags'] = ['foo:bar']
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check._submit(metric, ref_gauge, mocked_prometheus_scraper_config)
+    check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
@@ -291,7 +291,7 @@ def test_submit_gauge_with_labels_mapper(aggregator, mocked_prometheus_check, mo
     }
     mocked_prometheus_scraper_config['custom_tags'] = ['env:dev', 'app:my_pretty_app']
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check._submit(metric, ref_gauge, mocked_prometheus_scraper_config)
+    check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
@@ -323,7 +323,7 @@ def test_submit_gauge_with_exclude_labels(aggregator, mocked_prometheus_check, m
         'env',
     ]  # custom tags are not filtered out
     metric = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
-    check._submit(metric, ref_gauge, mocked_prometheus_scraper_config)
+    check.submit_openmetric(metric, ref_gauge, mocked_prometheus_scraper_config)
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
@@ -336,7 +336,7 @@ def test_submit_counter(aggregator, mocked_prometheus_check, mocked_prometheus_s
     _counter = CounterMetricFamily('my_counter', 'Random counter')
     _counter.add_metric([], 42)
     check = mocked_prometheus_check
-    check._submit('custom.counter', _counter, mocked_prometheus_scraper_config)
+    check.submit_openmetric('custom.counter', _counter, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.counter', 42, tags=[], count=1)
     aggregator.assert_all_metrics_covered()
 
@@ -348,7 +348,7 @@ def test_submit_summary(aggregator, mocked_prometheus_check, mocked_prometheus_s
     _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
     _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
     check = mocked_prometheus_check
-    check._submit('custom.summary', _sum, mocked_prometheus_scraper_config)
+    check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1)
     aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
@@ -363,7 +363,7 @@ def test_submit_histogram(aggregator, mocked_prometheus_check, mocked_prometheus
         [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 1), ("4.324e+08", 1), ("+Inf", 3)], sum_value=3
     )
     check = mocked_prometheus_check
-    check._submit('custom.histogram', _histo, mocked_prometheus_scraper_config)
+    check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.histogram.sum', 3, tags=[], count=1)
     aggregator.assert_metric('prometheus.custom.histogram.count', 3, tags=[], count=1)
     aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1)
@@ -376,7 +376,7 @@ def test_submit_rate(aggregator, mocked_prometheus_check, mocked_prometheus_scra
     _rate = GaugeMetricFamily('my_rate', 'Random rate')
     _rate.add_metric([], 42)
     check = mocked_prometheus_check
-    check._submit('custom.rate', _rate, mocked_prometheus_scraper_config)
+    check.submit_openmetric('custom.rate', _rate, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.rate', 42, tags=[], count=1)
 
 

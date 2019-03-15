@@ -5,11 +5,12 @@ import os
 
 import click
 import pyperclip
+from six import string_types
 
 from ..console import (
     CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 )
-from ...e2e import derive_interface, start_environment, stop_environment
+from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...testing import get_available_tox_envs
 from ...utils import get_tox_file
 from ....utils import dir_exists, file_exists, path_join
@@ -31,8 +32,15 @@ from ....utils import dir_exists, file_exists, path_join
 )
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
+@click.option(
+    '--env-vars', '-e', multiple=True,
+    help=(
+        'ENV Variable that should be passed to the Agent container. '
+        'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
+    )
+)
 @click.pass_context
-def start(ctx, check, env, agent, dev, base):
+def start(ctx, check, env, agent, dev, base, env_vars):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
@@ -57,7 +65,6 @@ def start(ctx, check, env, agent, dev, base):
         echo_info('See what is available via `ddev env ls {}`.'.format(check))
         abort()
 
-    agent_build = ctx.obj.get('agent{}'.format(agent), agent)
     api_key = ctx.obj['dd_api_key']
     if api_key is None:
         echo_warning(
@@ -76,6 +83,19 @@ def start(ctx, check, env, agent, dev, base):
     echo_success('success!')
 
     env_type = metadata['env_type']
+
+    # Support legacy config where agent5 and agent6 were strings
+    agent_ver = ctx.obj.get('agent{}'.format(agent), agent)
+    if isinstance(agent_ver, string_types):
+        agent_build = agent_ver
+        if agent_ver != agent:
+            echo_warning(
+                'Agent fields missing from ddev config, please update to the latest config via '
+                '`ddev config update`, falling back to latest docker image...'
+            )
+    else:
+        agent_build = agent_ver.get(env_type, env_type)
+
     interface = derive_interface(env_type)
     if interface is None:
         echo_failure('`{}` is an unsupported environment type.'.format(env_type))
@@ -83,13 +103,13 @@ def start(ctx, check, env, agent, dev, base):
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    if env_type != 'docker' and agent.isdigit():
+    if env_type not in E2E_SUPPORTED_TYPES and agent.isdigit():
         echo_failure('Configuration for default Agents are only for Docker. You must specify the full build.')
         echo_waiting('Stopping the environment...')
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    environment = interface(check, env, base_package, config, metadata, agent_build, api_key)
+    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key)
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)
     environment.update_agent()
@@ -121,15 +141,27 @@ def start(ctx, check, env, agent, dev, base):
             'Will install the development version of the check too so the base package can import it (in editable mode)'
         )
 
-    if dev:
-        echo_waiting('Upgrading `{}` check to the development version... '.format(check), nl=False)
-        environment.update_check()
-        echo_success('success!')
+    editable_warning = (
+        '\nEnv will started with an editable check install for the {} package. '
+        'This check will remain in an editable install after '
+        'the environment is torn down. Would you like to proceed?'
+    )
 
     if base:
         echo_waiting('Upgrading the base package to the development version... ', nl=False)
-        environment.update_base_package()
-        echo_success('success!')
+        if environment.ENV_TYPE == 'local' and not click.confirm(editable_warning.format('base')):
+            echo_success('skipping')
+        else:
+            environment.update_base_package()
+            echo_success('success!')
+
+    if dev:
+        echo_waiting('Upgrading `{}` check to the development version... '.format(check), nl=False)
+        if environment.ENV_TYPE == 'local' and not click.confirm(editable_warning.format(environment.check)):
+            echo_success('skipping')
+        else:
+            environment.update_check()
+            echo_success('success!')
 
     click.echo()
 
@@ -147,4 +179,7 @@ def start(ctx, check, env, agent, dev, base):
     echo_info('ddev env check {} {}'.format(check, env))
 
     echo_success('To stop this check, do: ', nl=False)
-    echo_info('ddev env stop {} {}'.format(check, env))
+    if ctx.obj['repo_choice'] == 'extras' and not ctx.obj.get('repo') == 'extras':
+        echo_info('ddev -e env stop {} {}'.format(check, env))
+    else:
+        echo_info('ddev env stop {} {}'.format(check, env))

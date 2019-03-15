@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
+
 import random
 from collections import defaultdict
 from time import time, sleep
@@ -159,10 +161,16 @@ class KafkaCheck(AgentCheck):
             cli = KafkaClient(bootstrap_servers=kafka_conn_str,
                               client_id='dd-agent',
                               security_protocol=instance.get('security_protocol', 'PLAINTEXT'),
+                              sasl_mechanism=instance.get('sasl_mechanism'),
+                              sasl_plain_username=instance.get('sasl_plain_username'),
+                              sasl_plain_password=instance.get('sasl_plain_password'),
+                              sasl_kerberos_service_name=instance.get('sasl_kerberos_service_name', 'kafka'),
+                              sasl_kerberos_domain_name=instance.get('sasl_kerberos_domain_name'),
                               ssl_cafile=instance.get('ssl_cafile'),
                               ssl_check_hostname=instance.get('ssl_check_hostname', True),
                               ssl_certfile=instance.get('ssl_certfile'),
                               ssl_keyfile=instance.get('ssl_keyfile'),
+                              ssl_crlfile=instance.get('ssl_crlfile'),
                               ssl_password=instance.get('ssl_password'))
             self.kafka_clients[instance_key] = cli
 
@@ -179,7 +187,7 @@ class KafkaCheck(AgentCheck):
                                node_id, DEFAULT_KAFKA_RETRIES)
                 break
             attempts = attempts + 1
-            delay = (2 ** attempts) + (random.randint(0, 1000) / 1000) * 0.01  # starting at 20 ms
+            delay = (2 ** attempts) + (random.randint(0, 1000) // 1000) * 0.01  # starting at 20 ms
 
             future = client.cluster.request_update()
             client.poll(future=future)
@@ -215,7 +223,7 @@ class KafkaCheck(AgentCheck):
                 try:
                     coord_resp = self._make_blocking_req(client, request, node_id=broker.nodeId)
                     # 0 means that there is no error
-                    if coord_resp and coord_resp.error_code is 0:
+                    if coord_resp and coord_resp.error_code == 0:
                         client.cluster.add_group_coordinator(group, coord_resp)
                         coord_id = client.cluster.coordinator_for_group(group)
                         if coord_id is not None and coord_id >= 0:
@@ -476,7 +484,7 @@ class KafkaCheck(AgentCheck):
             response = self._make_blocking_req(client, request, node_id=broker_id)
             for (topic, partition_offsets) in response.topics:
                 for partition, offset, _, error_code in partition_offsets:
-                    if error_code is not 0:
+                    if error_code != 0:
                         continue
                     consumer_offsets[(topic, partition)] = offset
 

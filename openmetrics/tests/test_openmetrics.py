@@ -206,13 +206,13 @@ def test_openmetrics_mixed_instance(aggregator):
     aggregator.assert_metric(
         CHECK_NAME + '.renamed.metric1',
         hostname='host1',
-        tags=['node:host1', 'flavor:test', 'matched_label:foobar', 'timestamp:123', 'extra:foo'],
+        tags=['extra:foo', 'matched_label:foobar', 'flavor:test', 'node:host1'],
         metric_type=aggregator.GAUGE
     )
     aggregator.assert_metric(
         CHECK_NAME + '.metric2',
         hostname='host2',
-        tags=['timestamp:123', 'node:host2', 'matched_label:foobar', 'extra:foo'],
+        tags=['extra:foo', 'matched_label:foobar', 'timestamp:123', 'node:host2'],
         metric_type=aggregator.GAUGE
     )
     aggregator.assert_all_metrics_covered()

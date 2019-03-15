@@ -5,7 +5,7 @@ import os
 
 import click
 
-from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
+from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from ...subprocess import run_command
@@ -24,17 +24,35 @@ def display_envs(check_envs):
     short_help='Run tests'
 )
 @click.argument('checks', nargs=-1)
+@click.option('--format-style', '-fs', is_flag=True, help='Run only the code style formatter')
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
-@click.option('--cov-missing', '-m', is_flag=True, help='Show line numbers of statements that were not executed')
+@click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
+@click.option('--marker', '-m', help='Only run tests matching given marker expression')
+@click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--pdb', 'enter_pdb', is_flag=True, help='Drop to PDB on first failure, then end test session')
 @click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
 @click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='List available test environments')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
-def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose, list_envs, changed, cov_keep):
+def test(
+    checks,
+    format_style,
+    style,
+    bench,
+    coverage,
+    cov_missing,
+    marker,
+    test_filter,
+    enter_pdb,
+    debug,
+    verbose,
+    list_envs,
+    changed,
+    cov_keep,
+):
     """Run tests for Agent-based checks.
 
     If no checks are specified, this will only test checks that
@@ -53,12 +71,18 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
     root = get_root()
     testing_on_ci = running_on_ci()
 
+    # Implicitly track coverage
+    if cov_missing:
+        coverage = True
+
     pytest_options = construct_pytest_options(
         verbose=verbose,
         enter_pdb=enter_pdb,
         debug=debug,
         bench=bench,
-        coverage=coverage
+        coverage=coverage,
+        marker=marker,
+        test_filter=test_filter,
     )
     coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 
@@ -76,11 +100,11 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
         'PYTEST_ADDOPTS': pytest_options,
     }
 
-    check_envs = get_tox_envs(checks, style=style, benchmark=bench, changed_only=changed)
+    check_envs = get_tox_envs(checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed)
     tests_ran = False
 
     for check, envs in check_envs:
-        # Many check don't have benchmark envs, etc.
+        # Many checks don't have benchmark envs, etc.
         if not envs:
             continue
 
@@ -99,7 +123,9 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
             echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))
 
         with chdir(os.path.join(root, check), env_vars=test_env_vars):
-            if style:
+            if format_style:
+                test_type_display = 'the code formatter'
+            elif style:
                 test_type_display = 'only style checks'
             elif bench:
                 test_type_display = 'only benchmarks'
@@ -151,4 +177,8 @@ def test(checks, style, bench, coverage, cov_missing, enter_pdb, debug, verbose,
         echo_success('\nPassed!')
 
     if not tests_ran:
-        echo_info('Nothing to test!')
+        if format_style:
+            echo_warning('Code formatting is not enabled!')
+            echo_info('To enabled it, put `dd_check_style = true` under the `[testenv]` section of `tox.ini`.')
+        else:
+            echo_info('Nothing to test!')

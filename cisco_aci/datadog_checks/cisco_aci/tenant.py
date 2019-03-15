@@ -6,6 +6,8 @@ import re
 import time
 import datetime
 
+from six import iteritems
+
 from . import helpers
 from . import exceptions
 
@@ -54,14 +56,14 @@ class Tenant:
                         list_epgs = self.api.get_epgs(t, app_name)
                         self.log.info("collecting %s endpoint groups from %s" % (len(list_epgs), app_name))
                         self._submit_epg_data(t, app_name, list_epgs)
-                    except exceptions.APIConnectionException, exceptions.APIParsingException:
+                    except (exceptions.APIConnectionException, exceptions.APIParsingException):
                         pass
-            except exceptions.APIConnectionException, exceptions.APIParsingException:
+            except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
             self._submit_ten_data(t)
             try:
                 self.collect_events(t)
-            except exceptions.APIConnectionException, exceptions.APIParsingException:
+            except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
 
     def _submit_app_data(self, tenant, app):
@@ -90,12 +92,12 @@ class Tenant:
             stats = self.api.get_tenant_stats(tenant)
             tags = ["tenant:" + tenant]
             self.submit_raw_obj(stats, tags, 'tenant')
-        except exceptions.APIConnectionException, exceptions.APIParsingException:
+        except (exceptions.APIConnectionException, exceptions.APIParsingException):
             pass
 
     def submit_raw_obj(self, raw_stats, tags, obj_type):
         for s in raw_stats:
-            name = s.keys()[0]
+            name = list(s.keys())[0]
             # we only want to collect the 15 minutes metrics.
             if '15min' not in name:
                 continue
@@ -109,10 +111,10 @@ class Tenant:
 
             tenant_metrics = self.tenant_metrics.get(obj_type, {})
 
-            for n, ms in tenant_metrics.iteritems():
+            for n, ms in iteritems(tenant_metrics):
                 if n not in name:
                     continue
-                for cisco_metric, dd_metric in ms.iteritems():
+                for cisco_metric, dd_metric in iteritems(ms):
                     mval = s.get(name, {}).get("attributes", {}).get(cisco_metric)
                     json_attrs = s.get(name, {}).get("attributes", {})
                     if mval and helpers.check_metric_can_be_zero(cisco_metric, mval, json_attrs):

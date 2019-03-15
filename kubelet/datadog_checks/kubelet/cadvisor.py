@@ -1,20 +1,19 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
 
 """kubernetes check
 Collects metrics from cAdvisor instance
 """
-# stdlib
 from fnmatch import fnmatch
 import numbers
-from urlparse import urlparse
+from six import iteritems
+from six.moves.urllib.parse import urlparse
 import logging
 
-# 3p
 import requests
 
-# check
 from .common import tags_for_docker, tags_for_pod, is_static_pending_pod, get_pod_by_uid
 from tagger import get_tags
 
@@ -138,7 +137,7 @@ class CadvisorScraper(object):
                 self.gauge(metric, float(dat), tags)
 
         elif isinstance(dat, dict):
-            for k, v in dat.iteritems():
+            for k, v in iteritems(dat):
                 self._publish_raw_metrics(metric + '.%s' % k.lower(), v, tags, is_pod, depth + 1)
 
         elif isinstance(dat, list):

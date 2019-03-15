@@ -27,7 +27,7 @@ from copy import deepcopy
 
 import pythoncom
 import pywintypes
-from six import iteritems, string_types
+from six import iteritems, string_types, with_metaclass
 from six.moves import zip
 from win32com.client import Dispatch
 
@@ -60,12 +60,10 @@ class ProviderArchitectureMeta(type):
         return provider in cls._AVAILABLE_PROVIDER_ARCHITECTURES
 
 
-class ProviderArchitecture(object):
+class ProviderArchitecture(with_metaclass(ProviderArchitectureMeta, object)):
     """
     Enumerate WMI Provider Architectures.
     """
-    __metaclass__ = ProviderArchitectureMeta
-
     # Available Provider Architecture(s)
     DEFAULT = 0
     _32BIT = 32

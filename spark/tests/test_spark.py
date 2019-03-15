@@ -1,23 +1,21 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from urlparse import urlparse, parse_qsl
-from urllib import unquote_plus
-from urlparse import urljoin
 import json
-import BaseHTTPServer
 import threading
 import ssl
 import time
-import requests
+
 import mock
 import pytest
+import requests
+import urllib3
+from six import iteritems
+from six.moves import BaseHTTPServer
+from six.moves.urllib.parse import parse_qsl, unquote_plus, urljoin, urlparse
 
-from datadog_checks.stubs import aggregator as _aggregator
 from datadog_checks.spark import SparkCheck
 
 # IDs
@@ -57,9 +55,9 @@ CUSTOM_TAGS = ['optional:tag1']
 
 
 def join_url_dir(url, *args):
-    '''
+    """
     Join a URL with multiple directories
-    '''
+    """
     for path in args:
         url = url.rstrip('/') + '/'
         url = urljoin(url, path.lstrip('/'))
@@ -68,9 +66,9 @@ def join_url_dir(url, *args):
 
 
 class Url(object):
-    '''A url object that can be compared with other url orbjects
+    """A url object that can be compared with other url orbjects
     without regard to the vagaries of encoding, escaping, and ordering
-    of parameters in query strings.'''
+    of parameters in query strings."""
 
     def __init__(self, url):
         parts = urlparse(url)
@@ -131,12 +129,6 @@ FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
 
-@pytest.fixture
-def aggregator():
-    _aggregator.reset()
-    return _aggregator
-
-
 def yarn_requests_get_mock(*args, **kwargs):
 
     class MockResponse:
@@ -153,37 +145,37 @@ def yarn_requests_get_mock(*args, **kwargs):
     arg_url = Url(args[0])
 
     if arg_url == YARN_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'yarn_apps'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'yarn_apps'), 'rb') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif arg_url == YARN_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif arg_url == YARN_SPARK_JOB_URL:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif arg_url == YARN_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif arg_url == YARN_SPARK_EXECUTOR_URL:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif arg_url == YARN_SPARK_RDD_URL:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif arg_url == YARN_SPARK_STREAMING_STATISTICS_URL:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
             body = f.read()
             return MockResponse(body, 200)
 
@@ -215,37 +207,37 @@ def mesos_requests_get_mock(*args, **kwargs):
     arg_url = Url(args[0])
 
     if arg_url == MESOS_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'mesos_apps'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'mesos_apps'), 'rb') as f:
             body = f.read()
             return MockMesosResponse(body, 200)
 
     elif arg_url == MESOS_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
             body = f.read()
             return MockMesosResponse(body, 200)
 
     elif arg_url == MESOS_SPARK_JOB_URL:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
             body = f.read()
             return MockMesosResponse(body, 200)
 
     elif arg_url == MESOS_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
             body = f.read()
             return MockMesosResponse(body, 200)
 
     elif arg_url == MESOS_SPARK_EXECUTOR_URL:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
             body = f.read()
             return MockMesosResponse(body, 200)
 
     elif arg_url == MESOS_SPARK_RDD_URL:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
             body = f.read()
             return MockMesosResponse(body, 200)
 
     elif arg_url == MESOS_SPARK_STREAMING_STATISTICS_URL:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
             body = f.read()
             return MockMesosResponse(body, 200)
 
@@ -269,42 +261,42 @@ def standalone_requests_get_mock(*args, **kwargs):
     arg_url = Url(args[0])
 
     if arg_url == STANDALONE_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_APP_HTML_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_app'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_app'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_JOB_URL:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_STAGE_URL:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_RDD_URL:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
@@ -328,17 +320,17 @@ def standalone_requests_pre20_get_mock(*args, **kwargs):
     arg_url = Url(args[0])
 
     if arg_url == STANDALONE_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_APP_HTML_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_app'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_app'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_APP_URL:
-        with open(os.path.join(FIXTURE_DIR, 'spark_apps_pre20'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_apps_pre20'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
@@ -358,27 +350,27 @@ def standalone_requests_pre20_get_mock(*args, **kwargs):
         return MockStandaloneResponse("{}", 404)
 
     elif arg_url == STANDALONE_SPARK_JOB_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_STAGE_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_EXECUTOR_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_RDD_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20:
-        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
@@ -599,56 +591,50 @@ def test_yarn(aggregator):
         c = SparkCheck('spark', None, {}, [YARN_CONFIG])
         c.check(YARN_CONFIG)
 
-        # Check the running job metrics
-        for metric, value in SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
-            aggregator.assert_metric(
-                metric,
-                tags=SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS, value=value)
-
         # Check the succeeded job metrics
-        for metric, value in SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the running stage metrics
-        for metric, value in SPARK_STAGE_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the complete stage metrics
-        for metric, value in SPARK_STAGE_COMPLETE_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the driver metrics
-        for metric, value in SPARK_DRIVER_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the executor metrics
-        for metric, value in SPARK_EXECUTOR_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
-        for metric, value in SPARK_RDD_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the streaming statistics metrics
-        for metric, value in SPARK_STREAMING_STATISTICS_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
@@ -695,56 +681,56 @@ def test_mesos(aggregator):
         c.check(MESOS_CONFIG)
 
         # Check the running job metrics
-        for metric, value in SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the succeeded job metrics
-        for metric, value in SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the running stage metrics
-        for metric, value in SPARK_STAGE_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the complete stage metrics
-        for metric, value in SPARK_STAGE_COMPLETE_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the driver metrics
-        for metric, value in SPARK_DRIVER_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the executor metrics
-        for metric, value in SPARK_EXECUTOR_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
-        for metric, value in SPARK_RDD_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
 
         # Check the streaming statistics metrics
-        for metric, value in SPARK_STREAMING_STATISTICS_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
@@ -781,69 +767,69 @@ def test_mesos_filter(aggregator):
         assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_standalone(aggregator):
+def test_standalone_unit(aggregator):
     with mock.patch('requests.get', standalone_requests_get_mock):
         c = SparkCheck('spark', None, {}, [STANDALONE_CONFIG])
         c.check(STANDALONE_CONFIG)
 
         # Check the running job metrics
-        for metric, value in SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_RUNNING_METRIC_TAGS)
 
         # Check the running job metrics
-        for metric, value in SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_RUNNING_METRIC_TAGS)
 
         # Check the succeeded job metrics
-        for metric, value in SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS)
 
         # Check the running stage metrics
-        for metric, value in SPARK_STAGE_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_STAGE_RUNNING_METRIC_TAGS)
 
         # Check the complete stage metrics
-        for metric, value in SPARK_STAGE_COMPLETE_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_STAGE_COMPLETE_METRIC_TAGS)
 
         # Check the driver metrics
-        for metric, value in SPARK_DRIVER_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS)
 
         # Check the executor metrics
-        for metric, value in SPARK_EXECUTOR_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS)
 
         # Check the RDD metrics
-        for metric, value in SPARK_RDD_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS)
 
         # Check the streaming statistics metrics
-        for metric, value in SPARK_STREAMING_STATISTICS_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
@@ -867,63 +853,63 @@ def test_standalone_pre20(aggregator):
         c.check(STANDALONE_CONFIG_PRE_20)
 
         # Check the running job metrics
-        for metric, value in SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_RUNNING_METRIC_TAGS)
 
         # Check the running job metrics
-        for metric, value in SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_RUNNING_METRIC_TAGS)
 
         # Check the succeeded job metrics
-        for metric, value in SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS)
 
         # Check the running stage metrics
-        for metric, value in SPARK_STAGE_RUNNING_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_STAGE_RUNNING_METRIC_TAGS)
 
         # Check the complete stage metrics
-        for metric, value in SPARK_STAGE_COMPLETE_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_STAGE_COMPLETE_METRIC_TAGS)
 
         # Check the driver metrics
-        for metric, value in SPARK_DRIVER_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS)
 
         # Check the executor metrics
-        for metric, value in SPARK_EXECUTOR_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS)
 
         # Check the RDD metrics
-        for metric, value in SPARK_RDD_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
                 tags=SPARK_METRIC_TAGS)
 
         # Check the streaming statistics metrics
-        for metric, value in SPARK_STREAMING_STATISTICS_METRIC_VALUES.iteritems():
+        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
             aggregator.assert_metric(
                 metric,
                 value=value,
@@ -951,7 +937,7 @@ def test_ssl():
 
 def test_ssl_no_verify():
     # Disable ssl warning for self signed cert/no verify
-    requests.packages.urllib3.disable_warnings()
+    urllib3.disable_warnings()
     run_ssl_server()
     c = SparkCheck('spark', None, {}, [SSL_NO_VERIFY_CONFIG])
 
@@ -960,7 +946,7 @@ def test_ssl_no_verify():
 
 def test_ssl_cert():
     # Disable ssl warning for self signed cert/no verify
-    requests.packages.urllib3.disable_warnings()
+    urllib3.disable_warnings()
     run_ssl_server()
     c = SparkCheck('spark', None, {}, [SSL_CERT_CONFIG])
 
@@ -972,7 +958,7 @@ class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'r') as f:
+        with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'rb') as f:
             self.wfile.write(f.read())
 
 
@@ -986,3 +972,49 @@ def run_ssl_server():
     threading.Thread(target=httpd.handle_request).start()
     time.sleep(.5)
     return httpd
+
+
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_standalone(aggregator, instance_standalone):
+    c = SparkCheck('spark', None, {}, [instance_standalone])
+    c.check(instance_standalone)
+
+    # Check the running job metrics
+    for metric in SPARK_JOB_RUNNING_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the succeeded job metrics
+    for metric in SPARK_JOB_SUCCEEDED_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the running stage metrics
+    for metric in SPARK_STAGE_RUNNING_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the complete stage metrics
+    for metric in SPARK_STAGE_COMPLETE_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the driver metrics
+    for metric in SPARK_DRIVER_METRIC_VALUES:
+        aggregator.assert_metric(metric)
+
+    # Check the streaming statistics metrics and remove 2 we're not getting for now
+    streaming_statistics = set(SPARK_STREAMING_STATISTICS_METRIC_VALUES) - {
+        'spark.streaming.statistics.avg_processing_time',
+        'spark.streaming.statistics.avg_total_delay',
+    }
+
+    for metric in streaming_statistics:
+        aggregator.assert_metric(metric)
+
+    # TODO: Further investigate why we aren't getting these, it may be Docker networking
+    #
+    # # Check the executor metrics
+    # for metric in SPARK_EXECUTOR_METRIC_VALUES:
+    #     aggregator.assert_metric(metric)
+    #
+    # # Check the RDD metrics
+    # for metric in SPARK_RDD_METRIC_VALUES:
+    #     aggregator.assert_metric(metric)

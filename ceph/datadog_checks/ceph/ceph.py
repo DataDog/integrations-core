@@ -1,22 +1,16 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-"""ceph check
-Collects metrics from ceph clusters
-"""
-
-# stdlib
+from __future__ import division
 import os
 import re
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.subprocess_output import get_subprocess_output
 from datadog_checks.config import _is_affirmative
 
-# third party
 import simplejson as json
+from six import iteritems
 
 
 class Ceph(AgentCheck):
@@ -127,7 +121,7 @@ class Ceph(AgentCheck):
             # so we won't send the metric osd.pct_used
             if 'checks' in raw['health_detail']:
                 checks = raw['health_detail']['checks']
-                for check_name, check_detail in checks.iteritems():
+                for check_name, check_detail in iteritems(checks):
                     if check_name == 'OSD_NEARFULL':
                         health['num_near_full_osds'] = len(check_detail['detail'])
                     if check_name == 'OSD_FULL':
@@ -252,15 +246,15 @@ class Ceph(AgentCheck):
             self.log.debug('Error retrieving df_detail metrics')
 
     def _osd_pct_used(self, health):
-            """Take a single health check string, return (OSD name, percentage used)"""
-            # Full string looks like: osd.2 is full at 95%
-            # Near full string: osd.1 is near full at 94%
-            pct = re.compile(r'\d+%').findall(health)
-            osd = re.compile(r'osd.\d+').findall(health)
-            if len(pct) > 0 and len(osd) > 0:
-                return osd[0], int(pct[0][:-1])
-            else:
-                return None, None
+        """Take a single health check string, return (OSD name, percentage used)"""
+        # Full string looks like: osd.2 is full at 95%
+        # Near full string: osd.1 is near full at 94%
+        pct = re.compile(r'\d+%').findall(health)
+        osd = re.compile(r'osd.\d+').findall(health)
+        if len(pct) > 0 and len(osd) > 0:
+            return osd[0], int(pct[0][:-1])
+        else:
+            return None, None
 
     def _perform_service_checks(self, raw, tags, health_checks):
         if 'status' in raw:

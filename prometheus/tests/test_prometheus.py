@@ -1,15 +1,14 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 import mock
 
-# 3p
 from prometheus_client import generate_latest, CollectorRegistry, Gauge, Counter
 
-# project
+from datadog_checks.base import ensure_unicode
 from datadog_checks.prometheus import PrometheusCheck
+
 
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
@@ -33,6 +32,7 @@ def aggregator():
     aggregator.reset()
     return aggregator
 
+
 @pytest.fixture(scope="module")
 def poll_mock():
     registry = CollectorRegistry()
@@ -50,12 +50,13 @@ def poll_mock():
         'requests.get',
         return_value=mock.MagicMock(
             status_code=200,
-            iter_lines=lambda **kwargs: generate_latest(registry).split("\n"),
+            iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
             headers={'Content-Type': "text/plain"}
         )
     )
     yield poll_mock.start()
     poll_mock.stop()
+
 
 def test_prometheus_check(aggregator, poll_mock):
     """
@@ -64,10 +65,13 @@ def test_prometheus_check(aggregator, poll_mock):
 
     c = PrometheusCheck('prometheus', None, {}, [instance])
     c.check(instance)
-    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1', tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.metric2', tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1',
+                             tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.metric2',
+                             tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
     aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT)
     assert aggregator.metrics_asserted_pct == 100.0
+
 
 def test_prometheus_check_counter_gauge(aggregator, poll_mock):
     """
@@ -77,10 +81,13 @@ def test_prometheus_check_counter_gauge(aggregator, poll_mock):
     instance["send_monotonic_counter"] = False
     c = PrometheusCheck('prometheus', None, {}, [instance])
     c.check(instance)
-    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1', tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.metric2', tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1',
+                             tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.metric2',
+                             tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
     aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.GAUGE)
     assert aggregator.metrics_asserted_pct == 100.0
+
 
 def test_invalid_metric(aggregator, poll_mock):
     """
@@ -100,6 +107,7 @@ def test_invalid_metric(aggregator, poll_mock):
     c.check(bad_metric_instance)
     assert aggregator.metrics('metric3') == []
 
+
 def test_prometheus_wildcard(aggregator, poll_mock):
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
@@ -109,9 +117,12 @@ def test_prometheus_wildcard(aggregator, poll_mock):
 
     c = PrometheusCheck('prometheus', None, {}, [instance_wildcard])
     c.check(instance)
-    aggregator.assert_metric(CHECK_NAME + '.metric1', tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.metric2', tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.metric1',
+                             tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.metric2',
+                             tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
     assert aggregator.metrics_asserted_pct == 100.0
+
 
 def test_prometheus_default_instance(aggregator, poll_mock):
     """
@@ -131,9 +142,12 @@ def test_prometheus_default_instance(aggregator, poll_mock):
     c.check({
         'prometheus_url': 'http://custom:1337/metrics',
     })
-    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1', tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.metric2', tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1',
+                             tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.metric2',
+                             tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
     assert aggregator.metrics_asserted_pct == 100.0
+
 
 def test_prometheus_mixed_instance(aggregator, poll_mock):
     """
@@ -180,6 +194,10 @@ def test_prometheus_mixed_instance(aggregator, poll_mock):
             'label_to_hostname':'node',
             'tags': ['extra:foo']
         })
-    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1', hostname="host1", tags=['node:host1', 'flavor:test', 'matched_label:foobar', 'timestamp:123', 'extra:foo'], metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.metric2', hostname="host2", tags=['timestamp:123', 'node:host2', 'matched_label:foobar', 'timestamp:123', 'extra:foo'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1', hostname="host1",
+                             tags=['node:host1', 'flavor:test', 'matched_label:foobar', 'timestamp:123', 'extra:foo'],
+                             metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.metric2', hostname="host2",
+                             tags=['timestamp:123', 'node:host2', 'matched_label:foobar', 'timestamp:123', 'extra:foo'],
+                             metric_type=aggregator.GAUGE)
     assert aggregator.metrics_asserted_pct == 100.0

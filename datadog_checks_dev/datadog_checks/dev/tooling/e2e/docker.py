@@ -3,7 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from .agent import DEFAULT_AGENT_VERSION, FAKE_API_KEY, get_agent_exe, get_agent_conf_dir, get_rate_flag
+from .agent import (
+    DEFAULT_AGENT_VERSION, FAKE_API_KEY, MANIFEST_VERSION_PATTERN,
+    get_agent_exe, get_agent_conf_dir,
+    get_agent_version_manifest, get_rate_flag
+)
 from .config import (
     config_file_name, env_exists, locate_config_dir, locate_config_file, remove_env_data, write_env_data
 )
@@ -11,13 +15,16 @@ from ..constants import get_root
 from ...subprocess import run_command
 from ...utils import path_join
 
-MANIFEST_VERSION_PATTERN = r'agent (\d)'
-
 
 class DockerInterface(object):
-    def __init__(self, check, env, base_package=None, config=None, metadata=None, agent_build=None, api_key=None):
+    ENV_TYPE = 'docker'
+
+    def __init__(
+        self, check, env, base_package=None, config=None, env_vars=None, metadata=None, agent_build=None, api_key=None
+    ):
         self.check = check
         self.env = env
+        self.env_vars = env_vars
         self.base_package = base_package
         self.config = config or {}
         self.metadata = metadata or {}
@@ -69,8 +76,8 @@ class DockerInterface(object):
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:
             command = [
-                'docker', 'run', '-e', 'DD_API_KEY={}'.format(self.api_key), self.agent_build,
-                'head', '--lines=1', '/opt/datadog-agent/version-manifest.txt'
+                'docker', 'run', '--rm', '-e', 'DD_API_KEY={}'.format(self.api_key), self.agent_build,
+                'head', '--lines=1', '{}'.format(get_agent_version_manifest('linux'))
             ]
             result = run_command(command, capture=True)
             match = re.search(MANIFEST_VERSION_PATTERN, result.stdout)
@@ -114,6 +121,9 @@ class DockerInterface(object):
                 '-v', '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
             ]
 
+            # Any environment variables passed to the start command
+            command.extend('-e {}'.format(var) for var in self.env_vars)
+
             if self.base_package:
                 # Mount the check directory
                 command.append('-v')
@@ -128,6 +138,9 @@ class DockerInterface(object):
         # Only error for exit code if config actually exists
         run_command(['docker', 'stop', self.container_name], capture=True, check=self.exists())
         run_command(['docker', 'rm', self.container_name], capture=True, check=self.exists())
+
+    def restart_agent(self):
+        return run_command(['docker', 'restart', self.container_name], capture=True)
 
 
 def get_docker_networks():

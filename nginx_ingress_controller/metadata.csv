@@ -1,0 +1,18 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+nginx_ingress.nginx.connections.current,gauge,,connection,,Current number of client connections with state,0,nginx_ingress,current conn
+nginx_ingress.nginx.connections.total,counter,,connection,,Total number of connections with state,0,nginx_ingress,total conn
+nginx_ingress.nginx.requests.total,counter,,request,,Total number of client requests,0,nginx_ingress,total reqs
+nginx_ingress.nginx.process.count,gauge,,process,,Number of nginx processes,0,nginx_ingress,proc count
+nginx_ingress.nginx.bytes.read,counter,,byte,,Number of bytes read,0,nginx_ingress,bytes read
+nginx_ingress.nginx.bytes.write,counter,,byte,,Number of bytes written,0,nginx_ingress,bytes written
+nginx_ingress.nginx.cpu.time,counter,,second,,Cpu usage in seconds,0,nginx_ingress,cpu
+nginx_ingress.nginx.mem.resident,gauge,,byte,,Resident memory size in bytes,0,nginx_ingress,mem rss
+nginx_ingress.nginx.mem.virtual,gauge,,byte,,Virtual memory size in bytes,0,nginx_ingress,mem virt
+nginx_ingress.controller.reload.success,counter,,,,Cumulative number of Ingress controller reload operations,0,nginx_ingress,nb reload
+nginx_ingress.controller.upstream.latency.count,gauge,,,,Count of upstream service latency per Ingress,0,nginx_ingress,upstream latency count
+nginx_ingress.controller.upstream.latency.sum,gauge,,second,,Sum of upstream service latency per Ingress,0,nginx_ingress,upstream latency sum
+nginx_ingress.controller.upstream.latency.quantile,gauge,,second,,Quantiles of upstream service latency per Ingress,0,nginx_ingress,upstream latency quant
+nginx_ingress.controller.requests,counter,,request,,The total number of client requests,0,nginx_ingress,nb reqs
+nginx_ingress.controller.cpu.time,counter,,second,,Cpu usage in seconds,0,nginx_ingress,cpu
+nginx_ingress.controller.mem.resident,gauge,,byte,,Resident memory size in bytes,0,nginx_ingress,mem rss
+nginx_ingress.controller.mem.virtual,gauge,,byte,,Virtual memory size in bytes,0,nginx_ingress,mem virt
