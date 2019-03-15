@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import _strptime  # noqa
 import re
 import socket
-from six import PY3
 import ssl
 import time
 import warnings
