@@ -223,8 +223,6 @@ class OpenStackControllerCheck(AgentCheck):
                 self.log.debug("hypervisor_hostname is None for server %s. "
                                "Check that your user is an administrative users.", server['server_id'])
             else:
-                if not hyp_project_names.get(hypervisor_hostname):
-                    hyp_project_names[hypervisor_hostname] = set()
                 hyp_project_names[hypervisor_hostname].add(server['project_name'])
 
         hypervisors = self.get_os_hypervisors_detail()
@@ -251,7 +249,7 @@ class OpenStackControllerCheck(AgentCheck):
         ]
 
         # add hypervisor project names as tags
-        project_names = hyp_project_names.get(hyp_hostname, {})
+        project_names = hyp_project_names.get(hyp_hostname, set())
         for project_name in project_names:
             tags.append('project_name:{}'.format(project_name))
 
