@@ -32,6 +32,7 @@ except ImportError:
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
+from ..utils.agent.debug import enter_pdb
 from ..utils.common import ensure_bytes, ensure_unicode
 from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
@@ -387,7 +388,13 @@ class __AgentCheckPy3(object):
 
     def run(self):
         try:
-            self.check(copy.deepcopy(self.instances[0]))
+            instance = copy.deepcopy(self.instances[0])
+
+            if 'debug_check' in self.init_config:
+                enter_pdb(self.check, line=self.init_config['debug_check'], args=(instance,))
+            else:
+                self.check(instance)
+
             result = ''
         except Exception as e:
             result = json.dumps([
@@ -773,7 +780,13 @@ class __AgentCheckPy2(object):
 
     def run(self):
         try:
-            self.check(copy.deepcopy(self.instances[0]))
+            instance = copy.deepcopy(self.instances[0])
+
+            if 'debug_check' in self.init_config:
+                enter_pdb(self.check, line=self.init_config['debug_check'], args=(instance,))
+            else:
+                self.check(instance)
+
             result = b''
         except Exception as e:
             result = json.dumps([
