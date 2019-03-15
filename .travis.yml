@@ -9,6 +9,7 @@ addons:
     packages:
       - tdsodbc
       - libsystemd-dev
+      - unixodbc-dev
 cache:
   directories:
     - "$HOME/.cache/pip"

@@ -31,3 +31,24 @@ def test_cache(instance):
     current_unit_status = {'ssh.service': 'active', 'cron.service': 'active', 'networking.service': 'inactive'}
     assert check.list_status_change(current_unit_status) is not None
     assert len(check.list_status_change(current_unit_status)) == 3
+
+    # we fill the cache and test a change of unit state
+    check.unit_cache = {'ssh.service': 'active', 'cron.service': 'active', 'networking.service': 'inactive'}
+    current_unit_status = {'ssh.service': 'active', 'cron.service': 'inactive', 'networking.service': 'inactive'}
+
+    # check that we are getting changed units - returned_units is a tuple of 3 elements
+    changed_units, created_units, deleted_units = check.list_status_change(current_unit_status)
+    assert changed_units is not None
+    assert changed_units['cron.service'] == 'inactive'
+    assert len(created_units) == 0
+    assert len(deleted_units) == 0
+
+    # we fill the cache and test a unit that can no longer be found
+    check.unit_cache = {'ssh.service': 'active', 'cron.service': 'active', 'networking.service': 'inactive'}
+    current_unit_status = {'ssh.service': 'active', 'networking.service': 'inactive'}
+    # check that we are getting deleted units
+    changed_units, created_units, deleted_units = check.list_status_change(current_unit_status)
+    assert deleted_units is not None
+    assert deleted_units['cron.service'] == 'active'
+    assert len(created_units) == 0
+    assert len(changed_units) == 0

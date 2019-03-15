@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 
 import pytest
 
@@ -12,6 +11,7 @@ from .common import CONFIG
 @pytest.fixture(scope='session')
 def dd_environment():
     yield CONFIG, "local"  # cannot run the e2e tests - cannot call D-Bus inside a container
+
 
 @pytest.fixture
 def instance_ko():
