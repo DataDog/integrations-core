@@ -9,10 +9,22 @@ from os import environ
 from six.moves.urllib.parse import urljoin
 from datadog_checks.config import is_affirmative
 
-from .settings import (DEFAULT_API_REQUEST_TIMEOUT, DEFAULT_KEYSTONE_API_VERSION, DEFAULT_NEUTRON_API_VERSION,
-                       DEFAULT_PAGINATED_LIMIT, DEFAULT_MAX_RETRY)
-from .exceptions import (InstancePowerOffFailure, AuthenticationNeeded, KeystoneUnreachable, MissingNovaEndpoint,
-                         MissingNeutronEndpoint, IncompleteIdentity)
+from .settings import (
+    DEFAULT_API_REQUEST_TIMEOUT,
+    DEFAULT_KEYSTONE_API_VERSION,
+    DEFAULT_NEUTRON_API_VERSION,
+    DEFAULT_PAGINATED_LIMIT,
+    DEFAULT_MAX_RETRY
+)
+from .exceptions import (
+    InstancePowerOffFailure,
+    AuthenticationNeeded,
+    KeystoneUnreachable,
+    MissingNovaEndpoint,
+    MissingNeutronEndpoint,
+    IncompleteIdentity,
+    RetryLimitExceeded,
+)
 
 UNSCOPED_AUTH = 'unscoped'
 
@@ -362,13 +374,15 @@ class SimpleApi(AbstractApi):
                     resp = self._make_request(url, self.headers, params=query_params)
                     break
                 except requests.exceptions.HTTPError as e:
+                    # Only catch HTTPErrors to enable the retry mechanism.
+                    # Other exceptions raised by _make_request (e.g. AuthenticationNeeded) should be caught downstream
                     self.logger.debug("Error making paginated request to {}, lowering limit from {} to {}: {}".format(
                         url, query_params['limit'], query_params['limit']//2, e
                     ))
                     query_params['limit'] //= 2
                     retry += 1
             else:
-                raise Exception("Reached retry limit while making request to {}".format(url))
+                raise RetryLimitExceeded("Reached retry limit while making request to {}".format(url))
 
             objects = resp.get(obj, [])
             result.extend(objects)
