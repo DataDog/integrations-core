@@ -16,6 +16,7 @@ from datadog_checks.openstack_controller.exceptions import (
     MissingNeutronEndpoint,
     AuthenticationNeeded,
     InstancePowerOffFailure,
+    RetryLimitExceeded,
 )
 from . import common
 
@@ -625,7 +626,7 @@ def test__get_paginated_list():
         ]
     ):
         # First call
-        with pytest.raises(Exception):
+        with pytest.raises(RetryLimitExceeded):
             api._get_paginated_list("url", "obj", {})
         assert log.debug.call_count == 3
         log.reset_mock()
