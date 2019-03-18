@@ -24,6 +24,13 @@ except ImportError:
     init_logging()
 
 try:
+    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
+    from datadog_agent import set_external_tags as _set_external_tags
+except ImportError:
+    # Agent < 6.0: the Agent pulls tags invoking `VSphereCheck.get_external_host_tags`
+    _set_external_tags = None
+
+try:
     import aggregator
     using_stub_aggregator = False
 except ImportError:
@@ -290,6 +297,11 @@ class __AgentCheckPy3(object):
     def check(self, instance):
         raise NotImplementedError
 
+    def set_external_tags(self, tags):
+        tags = self._normalize_tags_type(tags)
+        if _set_external_tags is not None:
+            _set_external_tags(tags)
+
     def normalize(self, metric, prefix=None, fix_case=False):
         """
         Turn a metric into a well-formed metric name
@@ -451,6 +463,7 @@ class __AgentCheckPy2(object):
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
+        self.set_external_tags = _set_external_tags
 
         if len(args) > 0:
             self.name = args[0]
@@ -700,6 +713,11 @@ class __AgentCheckPy2(object):
         metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
+
+    def set_external_tags(self, tags):
+        tags = self._normalize_tags_type(tags)
+        if _set_external_tags is not None:
+            _set_external_tags(tags)
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """

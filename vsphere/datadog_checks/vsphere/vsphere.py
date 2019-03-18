@@ -21,6 +21,7 @@ from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool, SENTINEL
 from datadog_checks.checks.libs.timer import Timer
+from datadog_checks.utils.agent import set_external_tags
 from datadog_checks.utils.common import ensure_bytes
 from .common import SOURCE_TYPE
 from .event import VSphereEvent
@@ -29,12 +30,6 @@ from .cache_config import CacheConfig
 from .objects_queue import ObjectsQueue
 from .mor_cache import MorCache, MorNotFoundError
 from .metadata_cache import MetadataCache, MetadataNotFoundError
-try:
-    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
-    from datadog_agent import set_external_tags
-except ImportError:
-    # Agent < 6.0: the Agent pulls tags invoking `VSphereCheck.get_external_host_tags`
-    set_external_tags = None
 
 
 # Default vCenter sampling interval
@@ -917,8 +912,7 @@ class VSphereCheck(AgentCheck):
 
             self._query_event(instance)
 
-            if set_external_tags is not None:
-                set_external_tags(self.get_external_host_tags())
+            set_external_tags(self.get_external_host_tags())
 
             self.stop_pool()
             if self.exception_printed > 0:
