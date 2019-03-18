@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -11,14 +11,15 @@ from six import PY3, iteritems
 
 from datadog_checks.network import Network
 
+from . import common
+
 import mock
 import pytest
 
 if PY3:
     long = int
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-FIXTURE_DIR = os.path.join(HERE, 'fixtures')
+FIXTURE_DIR = os.path.join(common.HERE, 'fixtures')
 
 CX_STATE_GAUGES_VALUES = {
     'system.net.udp4.connections': 2,
