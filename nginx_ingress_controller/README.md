@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors the kubernetes [NGINX Ingress Controller][1]. This check is available for Agent > 6.9.
+This check monitors the kubernetes [NGINX Ingress Controller][1].
 
 ## Setup
 
