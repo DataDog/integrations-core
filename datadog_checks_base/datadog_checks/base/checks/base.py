@@ -299,7 +299,7 @@ class __AgentCheckPy3(object):
 
     def set_external_tags(self, tags):
         tags = self._normalize_tags_type(tags)
-        if _set_external_tags is not None:
+        if _set_external_tags is not None and tags is not None:
             _set_external_tags(tags)
 
     def normalize(self, metric, prefix=None, fix_case=False):
@@ -716,7 +716,7 @@ class __AgentCheckPy2(object):
 
     def set_external_tags(self, tags):
         tags = self._normalize_tags_type(tags)
-        if _set_external_tags is not None:
+        if _set_external_tags is not None and tags is not None:
             _set_external_tags(tags)
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
