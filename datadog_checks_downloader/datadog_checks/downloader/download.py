@@ -7,6 +7,7 @@ import glob
 import logging
 import logging.config
 import os
+import re
 import shutil
 import tempfile
 
@@ -18,6 +19,7 @@ tuf.settings.SOCKET_TIMEOUT = 60
 
 # Import what we need from TUF.
 from tuf.client.updater import Updater
+from tuf.exceptions import UnknownTargetError
 
 # Import what we need from in-toto.
 from in_toto import verifylib
@@ -29,6 +31,10 @@ logging.config.dictConfig({
     'disable_existing_loggers': True,
     'version': 1,
 })
+
+# Other 3rd-party imports.
+# NOTE: We assume that setuptools is installed by default.
+from pkg_resources import parse_version
 
 # NOTE: A module with a function that substitutes parameters for
 # in-toto inspections. The function is expected to be called
@@ -42,8 +48,11 @@ from .parameters import substitute
 
 # Exceptions.
 from .exceptions import (
+    InconsistentSimpleIndex,
+    MissingVersions,
     NoInTotoLinkMetadataFound,
     NoInTotoRootLayoutPublicKeysFound,
+    NoSuchDatadogPackage,
 )
 
 
@@ -251,3 +260,39 @@ class TUFDownloader:
             return the complete filepath to the desired target.
         '''
         return self.__get_target(target_relpath, download_in_toto_metadata=download_in_toto_metadata)
+
+
+    def get_latest_version(self, standard_distribution_name, wheel_distribution_name):
+        '''
+        Returns:
+            If download over TUF is successful, this function will return the
+            latest known version of the Datadog integration.
+        '''
+        target_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
+
+        try:
+            # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
+            target_abspath = self.download(target_relpath, download_in_toto_metadata=False)
+        except UnknownTargetError:
+            raise NoSuchDatadogPackage(standard_distribution_name)
+
+        pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-py2\\.py3-none-any\\.whl)'>(.*?)</a><br />"
+        versions = []
+
+        with open(target_abspath) as simple_index:
+            for line in simple_index:
+                match = re.match(pattern, line)
+                if match:
+                    href = match.group(1)
+                    version = match.group(2)
+                    text = match.group(3)
+                    if href != text:
+                        raise InconsistentSimpleIndex(href, text)
+                    else:
+                        # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
+                        versions.append(parse_version(version))
+
+        if not len(versions):
+            raise MissingVersions(standard_distribution_name)
+        else:
+            return max(versions)

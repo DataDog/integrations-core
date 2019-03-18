@@ -10,52 +10,15 @@ import re
 # 2nd party.
 from .download import TUFDownloader
 from .exceptions import (
-    InconsistentSimpleIndex,
-    MissingVersions,
     NonCanonicalVersion,
     NonDatadogPackage,
-    NoSuchDatadogPackage,
-    NoSuchDatadogPackageOrVersion,
 )
 
 # 3rd party.
-# NOTE: We assume that setuptools is installed by default.
-from pkg_resources import parse_version
 from tuf.exceptions import UnknownTargetError
 
 
 # Private module functions.
-
-
-def __get_latest_version(tuf_downloader, standard_distribution_name, wheel_distribution_name):
-    target_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
-
-    try:
-        # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
-        target_abspath = tuf_downloader.download(target_relpath, download_in_toto_metadata=False)
-    except UnknownTargetError:
-        raise NoSuchDatadogPackage(standard_distribution_name)
-
-    pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-py2\\.py3-none-any\\.whl)'>(.*?)</a><br />"
-    versions = []
-
-    with open(target_abspath) as simple_index:
-        for line in simple_index:
-            match = re.match(pattern, line)
-            if match:
-                href = match.group(1)
-                version = match.group(2)
-                text = match.group(3)
-                if href != text:
-                    raise InconsistentSimpleIndex(href, text)
-                else:
-                    # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
-                    versions.append(parse_version(version))
-
-    if not len(versions):
-        raise MissingVersions(standard_distribution_name)
-    else:
-        return max(versions)
 
 
 def __is_canonical(version):
@@ -67,9 +30,12 @@ def __is_canonical(version):
     return re.match(P, version) is not None
 
 
-def __wheel_distribution_name(standard_distribution_name):
+def __get_wheel_distribution_name(standard_distribution_name):
     # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
     return re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)
+
+
+# Public module functions.
 
 
 def download():
@@ -92,11 +58,11 @@ def download():
     if not standard_distribution_name.startswith('datadog-'):
         raise NonDatadogPackage(standard_distribution_name)
     else:
-        wheel_distribution_name = __wheel_distribution_name(standard_distribution_name)
+        wheel_distribution_name = __get_wheel_distribution_name(standard_distribution_name)
         tuf_downloader = TUFDownloader(verbose=verbose)
 
         if not version:
-            version = __get_latest_version(tuf_downloader, standard_distribution_name, wheel_distribution_name)
+            version = tuf_downloader.get_latest_version(standard_distribution_name, wheel_distribution_name)
         else:
             if not __is_canonical(version):
                 raise NonCanonicalVersion(version)
