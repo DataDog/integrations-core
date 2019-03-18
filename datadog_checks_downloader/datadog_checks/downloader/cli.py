@@ -12,6 +12,7 @@ from .download import TUFDownloader
 from .exceptions import (
     NonCanonicalVersion,
     NonDatadogPackage,
+    NoSuchDatadogPackageOrVersion,
 )
 
 # 3rd party.
