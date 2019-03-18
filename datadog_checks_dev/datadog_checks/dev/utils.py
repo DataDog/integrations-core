@@ -196,7 +196,7 @@ def load_jmx_config():
         root = new_root
 
     check = basepath(root)
-    jmx_config = path_join(root, 'datadog_checks', check, 'data', 'metrics.yaml')
+    jmx_config = path_join(root, 'datadog_checks', check, 'data', 'conf.yaml.example')
 
     return yaml.safe_load(read_file(jmx_config))
 
