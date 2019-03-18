@@ -52,7 +52,7 @@ See the [sample  cassandra.d/conf.yaml][5] for all available configuration optio
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample  cassandra.d/conf.yaml][5] for all available configuration options.
 
-To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][] can be added.
+To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][13] can be added.
 
 * [Restart the Agent][6].
 
