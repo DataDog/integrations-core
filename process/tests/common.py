@@ -46,7 +46,7 @@ EXPECTED_METRICS = [
     'system.processes.run_time.min',
 ]
 
-instance = {
+INSTANCE = {
     "name": "instance",
     "pid": 1,
 }

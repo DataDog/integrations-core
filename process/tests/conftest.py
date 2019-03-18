@@ -10,7 +10,7 @@ from . import common
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    yield common.instance
+    yield common.INSTANCE
 
 
 @pytest.fixture
