@@ -463,7 +463,6 @@ class __AgentCheckPy2(object):
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
-        self.set_external_tags = _set_external_tags
 
         if len(args) > 0:
             self.name = args[0]
