@@ -58,7 +58,7 @@ def get_ssl_connection(config):
     cd.SSLCipherSpec = config.ssl_cipher_spec
 
     sco = pymqi.SCO()
-    sco.KeyRepository = config.key_repo_location
+    sco.KeyRepository = config.ssl_key_repository_location
 
     queue_manager = pymqi.QueueManager(None)
     queue_manager.connect_with_options(config.queue_manager, cd, sco)
