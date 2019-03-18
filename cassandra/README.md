@@ -52,6 +52,8 @@ See the [sample  cassandra.d/conf.yaml][5] for all available configuration optio
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample  cassandra.d/conf.yaml][5] for all available configuration options.
 
+To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][] can be added.
+
 * [Restart the Agent][6].
 
 ### Validation
@@ -92,3 +94,4 @@ Need help? Contact [Datadog support][9].
 [10]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
 [11]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [12]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
+[13]: https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#multi-line-aggregation
