@@ -34,7 +34,7 @@ instances:
   #  acs_url: https://<SERVER>:<PORT>
 
   ## @param group - string - optional
-  ## To get metrics from just one application group.
+  ## Enter a Specific Aplication group name to get only it's related metrics.
   #
   #  group: product
 
