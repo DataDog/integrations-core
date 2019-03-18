@@ -24,13 +24,6 @@ except ImportError:
     init_logging()
 
 try:
-    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
-    from datadog_agent import set_external_tags as _set_external_tags
-except ImportError:
-    # Agent < 6.0: the Agent pulls tags invoking `VSphereCheck.get_external_host_tags`
-    _set_external_tags = None
-
-try:
     import aggregator
     using_stub_aggregator = False
 except ImportError:
@@ -297,10 +290,18 @@ class __AgentCheckPy3(object):
     def check(self, instance):
         raise NotImplementedError
 
-    def set_external_tags(self, tags):
-        tags = self._normalize_tags_type(tags)
-        if _set_external_tags is not None and tags is not None:
-            _set_external_tags(tags)
+    def set_external_tags(self, external_tags):
+        from datadog_agent import set_external_tags as _set_external_tags
+        # Example of external_tags format
+        # [
+        #     ('hostname', {'src_name': ['test:t1']}),
+        #     ('hostname2', {'src2_name': ['test2:t3']})
+        # ]
+        for x in external_tags:
+            for src_name, tags in iteritems(x[1]):
+                x[1][src_name] = self._normalize_tags_type(tags)
+
+        _set_external_tags(external_tags)
 
     def normalize(self, metric, prefix=None, fix_case=False):
         """
@@ -713,10 +714,18 @@ class __AgentCheckPy2(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def set_external_tags(self, tags):
-        tags = self._normalize_tags_type(tags)
-        if _set_external_tags is not None and tags is not None:
-            _set_external_tags(tags)
+    def set_external_tags(self, external_tags):
+        from datadog_agent import set_external_tags as _set_external_tags
+        # Example of external_tags format
+        # [
+        #     ('hostname', {'src_name': ['test:t1']}),
+        #     ('hostname2', {'src2_name': ['test2:t3']})
+        # ]
+        for x in external_tags:
+            for src_name, tags in iteritems(x[1]):
+                x[1][src_name] = self._normalize_tags_type(tags)
+
+        _set_external_tags(external_tags)
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """
