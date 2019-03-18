@@ -119,6 +119,8 @@ class DockerInterface(object):
                 '-v', '{}:{}'.format(self.config_dir, get_agent_conf_dir(self.check, self.agent_version)),
                 # Mount the check directory
                 '-v', '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
+                # Mount the /proc directory
+                '-v', '/proc:/host/proc',
             ]
 
             # Any environment variables passed to the start command
