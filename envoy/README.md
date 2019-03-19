@@ -11,7 +11,7 @@ The Envoy check is included in the [Datadog Agent][2] package, so you don't need
 
 #### via Istio
 
-If you are using Envoy as part of [Istio][6], to access Envoy's [admin endpoint][5] you need to set Istio's [proxyAdminPort][7].
+If you are using Envoy as part of [Istio][3], to access Envoy's [admin endpoint][4] you need to set Istio's [proxyAdminPort][5].
 
 #### Standard
 
@@ -34,7 +34,7 @@ admin:
 
 Create a listener/vhost that routes to the admin endpoint (Envoy connecting to itself), but only has a route for `/stats`; all other routes get a static/error response. Additionally, this allows nice integration with L3 filters for auth, for example.
 
-Here's an example config (from [this gist][13]):
+Here's an example config (from [this gist][6]):
 
 ```yaml
 admin:
@@ -84,12 +84,12 @@ static_resources:
 
 ### Configuration
 
-1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][14] to start collecting your Envoy performance data.
-  See the [sample envoy.d/conf.yaml][4] for all available configuration options.
+1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your Envoy performance data.
+  See the [sample envoy.d/conf.yaml][8] for all available configuration options.
 
-2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
+2. Check if the Datadog Agent can access Envoy's [admin endpoint][4].
 
-3. [Restart the Agent][3]
+3. [Restart the Agent][9]
 
 Setting | Description
 --- | ---
@@ -108,7 +108,7 @@ Setting | Description
 
 Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, then whitelist is applied first, and then blacklist is applied on the resulting set.
 
-The filtering occurs before tag extraction, so you have the option to have certain tags decide whether or not to keep or ignore metrics. An exhaustive list of all metrics and tags can be found in [metrics.py][15]. Let's walk through an example of Envoy metric tagging!
+The filtering occurs before tag extraction, so you have the option to have certain tags decide whether or not to keep or ignore metrics. An exhaustive list of all metrics and tags can be found in [metrics.py][10]. Let's walk through an example of Envoy metric tagging!
 
 ```python
 ...
@@ -133,18 +133,18 @@ If you care only about the cluster name and grpc service, you would add this to 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `envoy` under the Checks section.
+[Run the Agent's `status` subcommand][11] and look for `envoy` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this integration.
+See [metadata.csv][12] for a list of metrics provided by this integration.
 
-See [metrics.py][10] for a list of tags sent by each metric.
+See [metrics.py][13] for a list of tags sent by each metric.
 
 ### Events
 
-The Envoy check does not include any events at this time.
+The Envoy check does not include any events.
 
 ### Service Checks
 
@@ -154,20 +154,20 @@ Returns CRITICAL if the Agent cannot connect to Envoy to collect metrics, otherw
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][14].
 
 
 [1]: https://www.envoyproxy.io
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/data/conf.yaml.example
-[5]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
-[6]: https://istio.io
-[7]: https://istio.io/docs/reference/config/
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
+[3]: https://istio.io
+[4]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
+[5]: https://istio.io/docs/reference/config
+[6]: https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[8]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/data/conf.yaml.example
+[9]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [10]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
-[11]: https://docs.datadoghq.com/help/
-[13]: https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
-[14]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
-[15]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
+[11]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[12]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
+[13]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
+[14]: https://docs.datadoghq.com/help

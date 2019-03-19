@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 import time
+from six.moves import range
 
 from datadog_checks.vsphere.mor_cache import MorCache, MorNotFoundError
 
@@ -73,7 +74,7 @@ def test_set_metrics(cache):
 
 def test_mors(cache):
     cache._mor['foo_instance'] = {}
-    for i in xrange(9):
+    for i in range(9):
         # For the sake of this test, Mor name is `i` and Mor object is `None`
         cache._mor['foo_instance'][i] = None
 
@@ -83,7 +84,7 @@ def test_mors(cache):
 
 def test_mors_batch(cache):
     cache._mor['foo_instance'] = {}
-    for i in xrange(9):
+    for i in range(9):
         # For the sake of this test, Mor name is `i` and Mor object is `None`
         cache._mor['foo_instance'][i] = None
 
@@ -113,7 +114,7 @@ def test_mors_batch(cache):
 
 def test_purge(cache):
     cache._mor['foo_instance'] = {}
-    for i in xrange(3):
+    for i in range(3):
         # set last access to 0, these will be purged
         cache._mor['foo_instance'][i] = {'creation_time': 0}
     # this entry should stay

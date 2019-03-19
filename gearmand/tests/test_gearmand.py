@@ -12,7 +12,8 @@ from . import common
 log = logging.getLogger('test_gearmand')
 
 
-def test_metrics(spin_up_gearmand, check, aggregator):
+@pytest.mark.usefixtures("dd_environment")
+def test_metrics(check, aggregator):
     tags = ['first_tag', 'second_tag']
     service_checks_tags = [
         'server:{}'.format(common.HOST),
@@ -33,7 +34,8 @@ def test_metrics(spin_up_gearmand, check, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_service_check(spin_up_gearmand, check, aggregator):
+@pytest.mark.usefixtures("dd_environment")
+def test_service_check(check, aggregator):
     service_checks_tags_ok = [
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT)
@@ -56,7 +58,8 @@ def test_service_check(spin_up_gearmand, check, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_service_check_broken(spin_up_gearmand, check, aggregator):
+@pytest.mark.usefixtures("dd_environment")
+def test_service_check_broken(check, aggregator):
     service_checks_tags_not_ok = [
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.BAD_PORT)

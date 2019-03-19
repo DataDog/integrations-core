@@ -1,82 +1,95 @@
 instances:
-  #
-  # The MapReduce check retrieves metrics from YARN's ResourceManager. This
-  # check must be run from the Master Node and the ResourceManager URI must
-  # be specified below. The ResourceManager URI is composed of the
-  # ResourceManager's hostname and port.
-  #
-  # The ResourceManager hostname can be found in the yarn-site.xml conf file
-  # under the property yarn.resourcemanager.address
-  #
-  # The ResourceManager port can be found in the yarn-site.xml conf file under
-  # the property yarn.resourcemanager.webapp.address
+
+  ## @param resourcemanager_uri - string - required
+  ## The MapReduce check retrieves metrics from YARN's ResourceManager. This
+  ## check must be run from the Master Node and the ResourceManager URI must
+  ## be specified below. The ResourceManager URI is composed of the
+  ## ResourceManager's hostname and port.
+  ##
+  ## The ResourceManager hostname can be found in the yarn-site.xml conf file
+  ## under the property yarn.resourcemanager.address
+  ##
+  ## The ResourceManager port can be found in the yarn-site.xml conf file under
+  ## the property yarn.resourcemanager.webapp.address
   #
   - resourcemanager_uri: http://localhost:8088
 
-    # A Required friendly name for the cluster.
-    # cluster_name: MyMapReduceCluster
+  ## @param cluster_name - string - required
+  ## A Required friendly name for the cluster.
+  #
+    cluster_name: <MAPREDUCE_CLUSTER_NAME>
 
-    # Set to true to collect histograms on the elapsed time of
-    # map and reduce tasks (default: false)
-    # collect_task_metrics: false
+  ## @param collect_task_metrics - boolean - default: false
+  ## Set to true to collect histograms on the elapsed time of map and reduce tasks.
+  # 
+  #  collect_task_metrics: false
 
-    # Optional tags to be applied to every emitted metric.
-    # tags:
-    #   - key:value
-    #   - instance:production
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
-    # If your service uses basic HTTP authentication, you can optionally
-    # specify a username and password that will be used in the check.
-    # username: user
-    # password: pass
+  ## @param username - string - optional
+  ## If your service uses basic HTTP authentication, set here the username required.
+  #
+  #  user: <USERNAME>
 
-    # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
-    # need to set to false when using self-signed certs
-    # ssl_verify: true
+  ## @param password - string - optional
+  ## If your service uses basic HTTP authentication, set here the password required.
+  #
+  #  password: <PASSWORD>
+
+  ## @param ssl_verify - boolean - optional - default: true
+  ## Instruct the check to validate SSL certificates when connecting to "resourcemanager_uri"
+  #
+  #  ssl_verify: true
 
 init_config:
+
+  ## @param general_counters - list of objects - optional
+  ## 
+  ## general_counters are job agnostic metrics that create a metric for each specified counter
+  ## Create a an object with the following layout:
+  ## 
+  ## - counter_group_name: '<COUNTER_GROUP_NAME>'
+  ##   counters:
+  ##     - counter_name: 'MAP_INPUT_RECORDS'
+  ##     - counter_name: 'MAP_OUTPUT_RECORDS'
+  ##     - counter_name: 'REDUCE_INPUT_RECORDS'
+  ##     - counter_name: 'REDUCE_OUTPUT_RECORDS'
+  ##
+  ## For more information on counters visit the MapReduce documentation page:
+  ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API
   #
-  # Optional metrics can be specified for counters. For more information on
-  # counters visit the MapReduce documentation page:
-  # https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API
+  #  general_counters:
+  #    - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
+  #      counters:
+  #        - counter_name: 'HDFS_BYTES_READ'
+
+  ## @param job_specific_counters - list of objects - optional
+  ## job_specific_counters are metrics that are specific to a particular job.
+  ## Create an object with the following layout:
+  ##
+  ## - job_name: <JOB_NAME>
+  ##   metrics:
+  ##   - counter_group_name: <COUNTER_GROUP_NAME>
+  ##       counters:
+  ##         - counter_name: <COUNTER_NAME>
+  ##
+  ## For more information on counters visit the MapReduce documentation page:
+  ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API
   #
-
-  general_counters:
-    #
-    # general_counters are job agnostic metrics that create a metric for each
-    # specified counter
-    #
-    # - counter_group_name: 'org.apache.hadoop.mapreduce.TaskCounter'
-    #   counters:
-    #     - counter_name: 'MAP_INPUT_RECORDS'
-    #     - counter_name: 'MAP_OUTPUT_RECORDS'
-    #     - counter_name: 'REDUCE_INPUT_RECORDS'
-    #     - counter_name: 'REDUCE_OUTPUT_RECORDS'
-    #
-    # Additional counter's can be specified as following
-    #
-
-    # - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
-    #   counters:
-    #     - counter_name: 'HDFS_BYTES_READ'
-
-  job_specific_counters:
-    #
-    # job_specific_counters are metrics that are specific to a particular job.
-    # The following example specifies counters for the jobs 'Foo' and 'Bar'.
-    #
-
-    # - job_name: 'Foo'
-    #   metrics:
-    #     - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
-    #       counters:
-    #         - counter_name: 'FILE_BYTES_WRITTEN'
-    #         - counter_name: 'HDFS_BYTES_WRITTEN'
-    #     - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
-    #       counters:
-    #         - counter_name: 'HDFS_BYTES_READ'
-    # - job_name: 'Bar'
-    #   metrics:
-    #     - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
-    #       counters:
-    #         - counter_name: 'FILE_BYTES_WRITTEN'
+  #  job_specific_counters:
+  #    - job_name: '<JOB_NAME>'
+  #      metrics:
+  #        - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
+  #          counters:
+  #            - counter_name: 'FILE_BYTES_WRITTEN'
+  #            - counter_name: 'HDFS_BYTES_WRITTEN'
+  #        - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
+  #           counters:
+  #             - counter_name: 'HDFS_BYTES_READ'

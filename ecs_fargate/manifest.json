@@ -13,7 +13,7 @@
   "metric_prefix": "ecs.",
   "metric_to_check": "ecs.fargate.cpu.user",
   "name": "ecs_fargate",
-  "public_title": "Datadog-ECS-Fargate Integration",
+  "public_title": "Datadog-ECS Fargate Integration",
   "short_description": "Track metrics for containers running with ECS Fargate",
   "support": "core",
   "supported_os": [
@@ -21,5 +21,6 @@
     "mac_os",
     "windows"
   ],
-  "type": "check"
+  "type": "check",
+  "integration_id": "aws-fargate"
 }

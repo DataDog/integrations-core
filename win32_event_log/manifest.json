@@ -1,6 +1,7 @@
 {
   "aliases": [
-    "/integrations/event_viewer/"
+    "/integrations/event_viewer/",
+    "/integrations/eventviewer/"
   ],
   "categories": [
     "os & system",
@@ -20,5 +21,6 @@
   "supported_os": [
     "windows"
   ],
-  "type": "check"
+  "type": "check",
+  "integration_id": "win32-event-log"
 }

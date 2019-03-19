@@ -1,19 +1,17 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import copy
 import re
 import time
 
-# 3p
 import mock
 import pytest
+from six import iteritems
 
-# project
-import common
+from . import common
 
+from datadog_checks.checks import AgentCheck
 from datadog_checks.openstack.openstack import (
     OpenStackCheck,
     OpenStackProjectScope,
@@ -24,9 +22,8 @@ from datadog_checks.openstack.openstack import (
     IncompleteIdentity
 )
 
-from datadog_checks.checks import AgentCheck
-
-instance = common.MOCK_CONFIG["instances"][0]
+instances = common.MOCK_CONFIG['instances']
+instance = common.MOCK_CONFIG['instances'][0]
 instance['tags'] = ['optional:tag1']
 init_config = common.MOCK_CONFIG['init_config']
 openstack_check = OpenStackCheck('openstack', init_config, {}, instances=[instance])
@@ -146,7 +143,7 @@ def test_unscoped_from_config():
 
                 assert scope.auth_token == 'fake_token'
                 assert len(scope.project_scope_map) == 1
-                for _, scope in scope.project_scope_map.iteritems():
+                for _, scope in iteritems(scope.project_scope_map):
                     assert isinstance(scope, OpenStackProjectScope)
                     assert scope.auth_token == 'fake_token'
                     assert scope.tenant_id == '263fd9'
@@ -172,7 +169,7 @@ def test_from_auth_response():
 
 
 def test_ensure_auth_scope(aggregator):
-    instance = common.MOCK_CONFIG["instances"][0]
+    instance = common.MOCK_CONFIG['instances'][0]
     instance['tags'] = ['optional:tag1']
 
     with pytest.raises(KeyError):
@@ -230,7 +227,7 @@ def test_server_exclusion(*args):
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=common.MOCK_CONFIG)
+    }, {}, instances=instances)
 
     # Retrieve servers
     openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
@@ -284,7 +281,7 @@ def test_cache_between_runs(self, *args):
         'keystone_server_url': 'http://10.0.2.15:5000',
         'ssl_verify': False,
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=common.MOCK_CONFIG)
+    }, {}, instances=instances)
 
     # Start off with a list of servers
     openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)

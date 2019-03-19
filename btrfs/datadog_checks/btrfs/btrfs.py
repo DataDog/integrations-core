@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
 
 import array
 from collections import defaultdict
@@ -11,8 +12,10 @@ import struct
 
 import psutil
 from six import iteritems
+from six.moves import range
 
 from datadog_checks.checks import AgentCheck
+
 
 MIXED = "mixed"
 DATA = "data"
@@ -123,7 +126,7 @@ class BTRFS(AgentCheck):
             fcntl.ioctl(fd, BTRFS_IOC_SPACE_INFO, data)
 
         _, total_spaces = TWO_LONGS_STRUCT.unpack_from(ret, 0)
-        for offset in xrange(TWO_LONGS_STRUCT.size, buffer_size, THREE_LONGS_STRUCT.size):
+        for offset in range(TWO_LONGS_STRUCT.size, buffer_size, THREE_LONGS_STRUCT.size):
             # https://github.com/spotify/linux/blob/master/fs/btrfs/ioctl.h#L40-L44
             flags, total_bytes, used_bytes = THREE_LONGS_STRUCT.unpack_from(data, offset)
             results.append((flags, total_bytes, used_bytes))
@@ -142,7 +145,7 @@ class BTRFS(AgentCheck):
             max_id, num_devices = fs_info[0], fs_info[1]
 
             # Loop through all devices, and sum the number of unallocated bytes on each one
-            for dev_id in xrange(max_id + 1):
+            for dev_id in range(max_id + 1):
                 if num_devices == 0:
                     break
                 try:
@@ -185,7 +188,7 @@ class BTRFS(AgentCheck):
                 tags.extend(custom_tags)
 
                 free = total_bytes - used_bytes
-                usage = float(used_bytes) / float(total_bytes)
+                usage = used_bytes / total_bytes
 
                 self.gauge('system.disk.btrfs.total', total_bytes, tags=tags)
                 self.gauge('system.disk.btrfs.used', used_bytes, tags=tags)

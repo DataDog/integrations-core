@@ -11,8 +11,8 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
 
 ### Configuration
 
-1. Edit the `kyototycoon.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][8].
-    See the [sample kyototycoon.d/conf.yaml][2] for all available configuration options:
+1. Edit the `kyototycoon.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2].
+    See the [sample kyototycoon.d/conf.yaml][3] for all available configuration options:
 
     ```yaml
     init_config:
@@ -31,20 +31,20 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
         #     baz: bat
     ```
 
-2. [Restart the Agent][7] to begin sending Kong metrics to Datadog.
+2. [Restart the Agent][4] to begin sending Kong metrics to Datadog.
 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][3] and look for `kyototycoon` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `kyototycoon` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][4] for a list of metrics provided by this check.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
-The KyotoTycoon check does not include any events at this time.
+The KyotoTycoon check does not include any events.
 
 ### Service Checks
 
@@ -53,12 +53,12 @@ The KyotoTycoon check does not include any events at this time.
 Returns CRITICAL if the Agent cannot connect to KyotoTycoon to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/datadog_checks/kyototycoon/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[4]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv
-[5]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/datadog_checks/kyototycoon/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv
+[7]: https://docs.datadoghq.com/help

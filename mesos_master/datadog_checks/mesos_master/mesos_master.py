@@ -6,13 +6,12 @@
 
 Collects metrics from mesos master node, only the leader is sending metrics.
 """
-# stdlib
-from urlparse import urlparse
 
-# 3rd party
 import requests
 
-# project
+from six import iteritems
+from six.moves.urllib.parse import urlparse
+
 from datadog_checks.checks import AgentCheck
 from datadog_checks.errors import CheckException
 from datadog_checks.config import _is_affirmative
@@ -185,7 +184,7 @@ class MesosMaster(AgentCheck):
             else:
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at %s " % url
-        except requests.exceptions.Timeout as e:
+        except requests.exceptions.Timeout:
             # If there's a timeout
             msg = "%s seconds timeout when hitting %s" % (timeout, url)
             status = AgentCheck.CRITICAL
@@ -226,7 +225,7 @@ class MesosMaster(AgentCheck):
         self.leader = False
 
         if state_metrics is not None:
-            self.version = map(int, state_metrics['version'].split('.'))
+            self.version = list(map(int, state_metrics['version'].split('.')))
             if state_metrics['leader'] == state_metrics['pid']:
                 self.leader = True
 
@@ -262,7 +261,7 @@ class MesosMaster(AgentCheck):
                     framework_tags = ['framework_name:' + framework['name']] + tags
                     self.GAUGE('mesos.framework.total_tasks', len(framework['tasks']), tags=framework_tags)
                     resources = framework['used_resources']
-                    for key_name, (metric_name, metric_func) in self.FRAMEWORK_METRICS.iteritems():
+                    for key_name, (metric_name, metric_func) in iteritems(self.FRAMEWORK_METRICS):
                         metric_func(self, metric_name, resources[key_name], tags=framework_tags)
 
                 role_metrics = self._get_master_roles(url, timeout, ssl_verify, instance_tags)
@@ -271,7 +270,7 @@ class MesosMaster(AgentCheck):
                         role_tags = ['mesos_role:' + role['name']] + tags
                         self.GAUGE('mesos.role.frameworks.count', len(role['frameworks']), tags=role_tags)
                         self.GAUGE('mesos.role.weight', role['weight'], tags=role_tags)
-                        for key_name, (metric_name, metric_func) in self.ROLE_RESOURCES_METRICS.iteritems():
+                        for key_name, (metric_name, metric_func) in iteritems(self.ROLE_RESOURCES_METRICS):
                             metric_func(self, metric_name, role['resources'][key_name], tags=role_tags)
 
             stats_metrics = self._get_master_stats(url, timeout, ssl_verify, instance_tags)
@@ -282,7 +281,7 @@ class MesosMaster(AgentCheck):
                                 self.CLUSTER_RESOURCES_METRICS, self.CLUSTER_REGISTRAR_METRICS,
                                 self.CLUSTER_FRAMEWORK_METRICS, self.STATS_METRICS]
                 for m in metrics:
-                    for key_name, (metric_name, metric_func) in m.iteritems():
+                    for key_name, (metric_name, metric_func) in iteritems(m):
                         if key_name in stats_metrics:
                             metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
 

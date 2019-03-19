@@ -97,7 +97,7 @@ def test__get_tls_object(check, mocker):
     check.log = log_mock
     check._get_tls_object(ssl_params)
     log_mock.warning.assert_called_once()
-    assert b"Incorrect configuration" in log_mock.warning.call_args[0][0]
+    assert "Incorrect configuration" in log_mock.warning.call_args[0][0]
     ldap3_tls_mock.assert_called_once_with(
         local_private_key_file=None,
         local_certificate_file=None,

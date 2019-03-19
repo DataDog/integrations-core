@@ -4,6 +4,8 @@
 
 from copy import deepcopy
 
+from six import iteritems
+
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 
@@ -86,8 +88,10 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
         """
         metric_name = scraper_config['namespace'] + metric_suffix
         for sample in metric.samples:
-            _tags = scraper_config['custom_tags']
-            for label_name, label_value in sample[self.SAMPLE_LABELS].iteritems():
+            # Explicit shallow copy of the instance tags
+            _tags = list(scraper_config['custom_tags'])
+
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 _tags.append('{}:{}'.format(label_name, label_value))
             # submit raw metric
             self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)

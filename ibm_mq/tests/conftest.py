@@ -1,25 +1,20 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import pytest
 import copy
 import logging
 import pymqi
 import re
 
-from datadog_checks.dev import docker_run  # , temp_dir
+from six.moves import range
+
+from datadog_checks.dev import docker_run
 from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
 
 log = logging.getLogger(__file__)
-
-# python3 compatability
-try:
-    zrange = xrange
-except NameError:
-    zrange = range
 
 
 @pytest.fixture
@@ -30,6 +25,18 @@ def check():
 @pytest.fixture
 def instance():
     inst = copy.deepcopy(common.INSTANCE)
+    return inst
+
+
+@pytest.fixture
+def instance_pattern():
+    inst = copy.deepcopy(common.INSTANCE_PATTERN)
+    return inst
+
+
+@pytest.fixture
+def instance_collect_all():
+    inst = copy.deepcopy(common.INSTANCE_COLLECT_ALL)
     return inst
 
 
@@ -46,9 +53,7 @@ def publish():
 
     queue = pymqi.Queue(qmgr, common.QUEUE)
 
-    range = 10
-
-    for i in zrange(range):
+    for i in range(10):
         try:
             message = 'Hello from Python! Message {}'.format(i)
             log.info("sending message: {}".format(message))
@@ -70,9 +75,7 @@ def consume():
 
     queue = pymqi.Queue(qmgr, common.QUEUE)
 
-    range = 10
-
-    for i in zrange(range):
+    for _ in range(10):
         try:
             message = queue.get()
             print("got a new message: {}".format(message))
@@ -90,7 +93,7 @@ def consume():
 
 
 @pytest.fixture(scope='session')
-def spin_up_ibmmq():
+def dd_environment():
 
     if common.MQ_VERSION == '9':
         log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
@@ -107,4 +110,4 @@ def spin_up_ibmmq():
         log_patterns=log_pattern,
         sleep=10
     ):
-        yield
+        yield common.INSTANCE

@@ -67,7 +67,6 @@ COMMON_METRICS = [
     "varnish.n_purgesps",
 ]
 
-VARNISH_DEFAULT_VERSION = "4.1.7"
 VARNISHADM_PATH = "varnishadm"
 SECRETFILE_PATH = "secretfile"
 DAEMON_ADDRESS = "localhost:6082"
@@ -90,5 +89,4 @@ def get_config_by_version(name=None):
 
 
 def get_varnish_stat_path():
-    varnish_version = os.environ.get("VARNISH_VERSION", VARNISH_DEFAULT_VERSION).split(".")[0]
-    return "docker exec ci_varnish{} varnishstat".format(varnish_version)
+    return "docker exec ci_varnish varnishstat"

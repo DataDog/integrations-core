@@ -12,8 +12,8 @@ The Redis check is included in the [Datadog Agent][1] package, so you don't need
 
 ### Configuration
 
-Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9] to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
-See the [sample redis.d/conf.yaml][2] for all available configuration options.
+Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample redis.d/conf.yaml][3] for all available configuration options.
 
 #### Metric Collection
 
@@ -40,9 +40,9 @@ Configuration Options:
         set the value here. Warning: It may impact the performance of your Redis instance
 * `command_stats` - (Optional) - Collect INFO COMMANDSTATS output as metrics.
 
-See the [sample redisdb.d/conf.yaml][2] for all available configuration options.
+See the [sample redisdb.d/conf.yaml][3] for all available configuration options.
 
-[Restart the Agent][3] to begin sending Redis metrics to Datadog.
+[Restart the Agent][4] to begin sending Redis metrics to Datadog.
 
 #### Log Collection
 
@@ -66,23 +66,23 @@ See the [sample redisdb.d/conf.yaml][2] for all available configuration options.
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample redisdb.yaml][2] for all available configuration options.
+  See the [sample redisdb.yaml][3] for all available configuration options.
 
-* [Restart the Agent][3] to begin sending Redis logs to Datadog.
+* [Restart the Agent][4] to begin sending Redis logs to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `redisdb` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `redisdb` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
-The Redis check does not include any events at this time.
+The Redis check does not include any events.
 
 ### Service Checks
 
@@ -96,7 +96,7 @@ Returns `CRITICAL` if this Redis instance is unable to connect to its master ins
 
 ## Troubleshooting
 
-* [Redis Integration Error: "unknown command 'CONFIG'"][6]
+* [Redis Integration Error: "unknown command 'CONFIG'"][7]
 
 ### Agent cannot connect
 
@@ -122,7 +122,7 @@ Configure a `password` in `redisdb.yaml`.
 
 ## Development
 
-See the [main documentation][7] for more details about how to test and develop Agent based integrations.
+See the [main documentation][8] for more details about how to test and develop Agent based integrations.
 
 ### Testing Guidelines
 
@@ -220,15 +220,15 @@ pytest -m"not integration"
 
 ## Further Reading
 
-Read our [series of blog posts][8] about how to monitor your Redis servers with Datadog. We detail the key performance metrics, how to collect them, and how to use Datadog to monitor Redis.
+Read our [series of blog posts][9] about how to monitor your Redis servers with Datadog. We detail the key performance metrics, how to collect them, and how to use Datadog to monitor Redis.
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
-[6]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
-[7]: https://docs.datadoghq.com/developers/integrations/
-[8]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/
-[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
+[7]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
+[8]: https://docs.datadoghq.com/developers/integrations
+[9]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics

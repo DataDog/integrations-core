@@ -188,6 +188,8 @@ PROVIDER_INTEGRATIONS = {
     'prometheus',
 }
 
+MAX_DESCRIPTION_LENGTH = 400
+
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -248,6 +250,13 @@ def metadata(check):
                 reader._fieldnames = reader.fieldnames
 
             for row in reader:
+
+                # Number of rows is correct. Since metric is first in the list, should be safe to access
+                if len(row) != len(ALL_HEADERS):
+                    errors = True
+                    echo_failure('{}: {} Has the wrong amount of columns'.format(current_check, row['metric_name']))
+                    continue
+
                 if PY2:
                     for key, value in iteritems(row):
                         if value is not None:
@@ -309,6 +318,12 @@ def metadata(check):
                 # empty description field, description is recommended
                 if not row['description']:
                     empty_warning_count['description'] += 1
+                # exceeds max allowed length of description
+                elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
+                    errors = True
+                    echo_failure('{}: `{}` exceeds the max length: {} for descriptions.'.format(
+                        current_check, row['metric_name'], MAX_DESCRIPTION_LENGTH)
+                    )
 
         for header, count in iteritems(empty_count):
             errors = True

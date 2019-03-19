@@ -6,11 +6,13 @@ import click
 from ..console import CONTEXT_SETTINGS
 from .changelog import changelog
 from .requirements import requirements
+from .integrations import integrations
 
 
 ALL_COMMANDS = (
     changelog,
     requirements,
+    integrations,
 )
 
 

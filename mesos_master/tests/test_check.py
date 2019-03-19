@@ -6,16 +6,13 @@ import os
 import pytest
 import json
 
+from six import iteritems
+
 from datadog_checks.mesos_master import MesosMaster
 
 
 CHECK_NAME = 'mesos_master'
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
-
-INSTANCE = {
-    'url': 'http://localhost:5050',
-    'tags': ['instance:mytag1']
-}
 
 
 def read_fixture(name):
@@ -33,19 +30,19 @@ def check():
     return check
 
 
-def test_check(check, aggregator):
-    check.check(INSTANCE)
+def test_check(check, instance, aggregator):
+    check.check(instance)
     metrics = {}
     for d in (check.CLUSTER_TASKS_METRICS, check.CLUSTER_SLAVES_METRICS,
               check.CLUSTER_RESOURCES_METRICS, check.CLUSTER_REGISTRAR_METRICS,
               check.CLUSTER_FRAMEWORK_METRICS, check.SYSTEM_METRICS, check.STATS_METRICS):
         metrics.update(d)
 
-    for _, v in check.FRAMEWORK_METRICS.iteritems():
+    for _, v in iteritems(check.FRAMEWORK_METRICS):
         aggregator.assert_metric(v[0])
-    for _, v in metrics.iteritems():
+    for _, v in iteritems(metrics):
         aggregator.assert_metric(v[0])
-    for _, v in check.ROLE_RESOURCES_METRICS.iteritems():
+    for _, v in iteritems(check.ROLE_RESOURCES_METRICS):
         aggregator.assert_metric(v[0])
 
     aggregator.assert_metric('mesos.cluster.total_frameworks')

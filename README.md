@@ -36,7 +36,7 @@ to idiomatic Python package delivery.
 ## Contributing
 
 Working with integrations is easy, the main page of the [development docs][6]
-contains all the info you need to get your dev enviroment up and running in minutes
+contains all the info you need to get your dev environment up and running in minutes
 to run, test and build a Check. More advanced API documentation can be found [here][20]
 
 ## Reporting Issues
@@ -95,4 +95,3 @@ fingerprints known to correspond to developers who, at the time of writing (Nov
 [18]: https://codecov.io/github/DataDog/integrations-core?branch=master
 [19]: https://readthedocs.org/projects/datadog-checks-base/badge/?version=latest
 [20]: https://datadog-checks-base.readthedocs.io/en/latest/?badge=latest
-

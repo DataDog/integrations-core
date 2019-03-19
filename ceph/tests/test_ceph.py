@@ -7,7 +7,6 @@ from datadog_checks.ceph import Ceph
 import os
 import copy
 import mock
-import pytest
 import simplejson as json
 
 # Constants
@@ -31,13 +30,6 @@ EXPECTED_METRICS = [
     'ceph.pgstate.active_clean'
 ]
 EXPECTED_SERVICE_TAGS = ['optional:tag1']
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 def mock_data(file):

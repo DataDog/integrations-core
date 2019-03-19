@@ -9,7 +9,7 @@ from datadog_checks.cassandra_nodetool import CassandraNodetoolCheck
 
 
 @pytest.mark.integration
-def test_integration(aggregator, cassandra_cluster):
+def test_integration(aggregator, dd_environment):
     """
     Testing Cassandra Nodetool Integration
     """

@@ -4,6 +4,8 @@
 import requests
 import simplejson as json
 
+from openstack import connection
+from os import environ
 from six.moves.urllib.parse import urljoin
 from datadog_checks.config import is_affirmative
 
@@ -24,10 +26,21 @@ class ApiFactory(object):
         paginated_limit = instance_config.get('paginated_limit')
         request_timeout = instance_config.get('request_timeout')
         user = instance_config.get("user")
+        openstack_config_file_path = instance_config.get("openstack_config_file_path")
+        openstack_cloud_name = instance_config.get("openstack_cloud_name")
 
-        api = SimpleApi(logger, keystone_server_url, timeout=request_timeout, ssl_verify=ssl_verify, proxies=proxies,
-                        limit=paginated_limit)
-        api.connect(user)
+        api = None
+
+        # If an openstack configuration is specified, an OpenstackSDKApi will be created, and the authentification
+        # will be made directly from the openstack configuration file
+        if openstack_cloud_name is None:
+            api = SimpleApi(logger, keystone_server_url, timeout=request_timeout, ssl_verify=ssl_verify,
+                            proxies=proxies, limit=paginated_limit)
+            api.connect(user)
+        else:
+            api = OpenstackSDKApi(logger)
+            api.connect(openstack_config_file_path, openstack_cloud_name)
+
         return api
 
 
@@ -69,6 +82,161 @@ class AbstractApi(object):
         raise NotImplementedError()
 
     def get_networks(self):
+        raise NotImplementedError()
+
+
+class OpenstackSDKApi(AbstractApi):
+    def __init__(self, logger):
+        super(OpenstackSDKApi, self).__init__(logger)
+
+        self.connection = None
+        self.services = {}
+        self.endpoints = {}
+        self.projects = None
+
+    def connect(self, openstack_sdk_config_file_path, openstack_sdk_cloud_name):
+        if openstack_sdk_config_file_path is not None:
+            # Set the environment variable to the path of the config file for openstacksdk to find it
+            environ["OS_CLIENT_CONFIG_FILE"] = openstack_sdk_config_file_path
+
+        self.connection = connection.Connection(cloud=openstack_sdk_cloud_name)
+        # Raise error if the connection failed
+        self.connection.authorize()
+
+    def _check_authentication(self):
+        if self.connection is None:
+            raise AuthenticationNeeded()
+
+    def _get_service(self, service_name):
+        self._check_authentication()
+
+        if service_name not in self.services:
+            self.services[service_name] = self.connection.get_service(service_name)
+        return self.services[service_name]
+
+    def _get_endpoint(self, service_name):
+        self._check_authentication()
+
+        if service_name not in self.endpoints:
+            try:
+                service_filter = {u'service_id': self._get_service(service_name)[u'id']}
+                endpoints_list = self.connection.search_endpoints(filters=service_filter)
+
+                if not endpoints_list:
+                    return None
+
+                self.endpoints[service_name] = None
+                # Get the public or the internal endpoint
+                for endpoint in endpoints_list:
+                    if endpoint[u'interface'] == u'public':
+                        self.endpoints[service_name] = endpoint
+                        return self.endpoints[service_name]
+                    elif endpoint[u'interface'] == u'internal':
+                        self.endpoints[service_name] = endpoint
+            except Exception as e:
+                self.logger.debug("Error contacting openstack endpoint with openstacksdk: %s", e)
+
+        return self.endpoints[service_name]
+
+    def get_keystone_endpoint(self):
+        keystone_endpoint = self._get_endpoint(u'keystone')
+
+        if keystone_endpoint is None:
+            raise KeystoneUnreachable()
+        return keystone_endpoint[u'links'][u'self']
+
+    def get_nova_endpoint(self):
+        nova_endpoint = self._get_endpoint(u'nova')
+
+        if nova_endpoint is None:
+            raise MissingNovaEndpoint()
+        return nova_endpoint[u'links'][u'self']
+
+    def get_neutron_endpoint(self):
+        neutron_endpoint = self._get_endpoint(u'neutron')
+
+        if neutron_endpoint is None:
+            raise MissingNeutronEndpoint()
+        return neutron_endpoint[u'links'][u'self']
+
+    def get_projects(self):
+        self._check_authentication()
+
+        if self.projects is None:
+            self.projects = self.connection.search_projects()
+
+        return self.projects
+
+    def get_project_limits(self, project_id):
+        self._check_authentication()
+
+        # Raise exception if the project is not found
+        project_limits_raw = self.connection.get_compute_limits(project_id)
+        project_limits = project_limits_raw["properties"]
+
+        # Used to convert the project_limits_raw key name
+        key_name_conversion = {
+            "max_personality": "maxPersonality",
+            "max_personality_size": "maxPersonalitySize",
+            "max_server_groups": "maxServerGroups",
+            "max_server_group_members": "maxServerGroupMembers",
+            "max_server_meta": "maxServerMeta",
+            "max_total_cores": "maxTotalCores",
+            "max_total_keypairs": "maxTotalKeypairs",
+            "max_total_instances": "maxTotalInstances",
+            "max_total_ram_size": "maxTotalRAMSize",
+            "total_cores_used": "totalCoresUsed",
+            "total_instances_used": "totalInstancesUsed",
+            "total_ram_used": "totalRAMUsed",
+            "total_server_groups_used": "totalServerGroupsUsed"
+        }
+
+        for raw_value, value in key_name_conversion.items():
+            project_limits[value] = project_limits_raw[raw_value]
+
+        return project_limits
+
+    def get_os_hypervisors_detail(self):
+        self._check_authentication()
+
+        return self.connection.list_hypervisors()
+
+    def get_os_hypervisor_uptime(self, hypervisor_id):
+        # Hypervisor uptime is not available in openstacksdk 0.24.0.
+        self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
+        raise NotImplementedError()
+
+    def get_os_aggregates(self):
+        # Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi
+        self._check_authentication()
+
+        return self.connection.list_aggregates()
+
+    def get_flavors_detail(self, query_params):
+        self._check_authentication()
+
+        return self.connection.search_flavors(filters=query_params)
+
+    def get_networks(self):
+        self._check_authentication()
+
+        return self.connection.list_networks()
+
+    def get_servers_detail(self, query_params):
+        # Each server is missing some attributes compared to what is returned by SimpleApi.
+        # They are all unused for the moment.
+        # SimpleApi:
+        # https://developer.openstack.org/api-ref/compute/?expanded=list-flavors-with-details-detail,list-servers-detailed-detail#list-servers-detailed
+        # OpenstackSDKApi:
+        # https://docs.openstack.org/openstacksdk/latest/user/connection.html#openstack.connection.Connection
+
+        self._check_authentication()
+
+        return self.connection.list_servers(detailed=True, all_projects=True, filters=query_params)
+
+    def get_server_diagnostics(self, server_id):
+        # Server diagnostics is not available in openstacksdk 0.24.0. It should be available in the next release.
+        self.logger.warning("Server diagnostics is not available with this version of openstacksdk")
         raise NotImplementedError()
 
 

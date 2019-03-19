@@ -2,6 +2,8 @@
 # (C) Datadog, Inc. Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from __future__ import division
+
 import re
 import traceback
 from collections import defaultdict
@@ -850,7 +852,8 @@ class MySql(AgentCheck):
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute("SHOW BINARY LOGS;")
-                master_logs = dict(cursor.fetchall())
+                cursor_results = cursor.fetchall()
+                master_logs = {result[0]: result[1] for result in cursor_results}
 
                 binary_log_space = 0
                 for key, value in iteritems(master_logs):

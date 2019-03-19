@@ -7,7 +7,7 @@ import time
 
 from kafka import KafkaConsumer, KafkaProducer
 from kazoo.client import KazooClient
-from six import iteritems
+from six import iteritems, binary_type
 
 from .common import KAFKA_CONNECT_STR, PARTITIONS, ZK_CONNECT_STR
 
@@ -96,7 +96,7 @@ class ZKConsumer(StoppableThread):
                 node = zk_conn.exists(node_path)
                 if not node:
                     zk_conn.ensure_path(node_path)
-                    zk_conn.set(node_path, str(0))
+                    zk_conn.set(node_path, b"0")
 
         consumer = KafkaConsumer(bootstrap_servers=[self.kafka_connect_str],
                                  group_id="my_consumer",
@@ -120,7 +120,7 @@ class ZKConsumer(StoppableThread):
                 if offset:
                     zk_trans.set_data(
                         os.path.join(zk_path_topic_tmpl.format(topic), str(partition)),
-                        str(offset)
+                        binary_type(offset)
                     )
 
             zk_trans.commit()

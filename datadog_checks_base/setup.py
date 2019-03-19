@@ -18,9 +18,18 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     LONG_DESC = f.read()
 
 
-def get_requirements(fpath):
+def get_requirements(fpath, exclude=[], only=[]):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
-        return f.readlines()
+        requirements = []
+        for line in f:
+            name = line.split("==")[0]
+            if only:
+                if name in only:
+                    requirements.append(line.rstrip())
+            else:
+                if name not in exclude:
+                    requirements.append(line.rstrip())
+        return requirements
 
 
 setup(
@@ -51,6 +60,7 @@ setup(
     include_package_data=True,
 
     extras_require={
-        'deps': get_requirements('requirements.in'),
+        'deps': get_requirements('requirements.in', exclude=['kubernetes']),
+        'kube': get_requirements('requirements.in', only=['kubernetes']),
     },
 )

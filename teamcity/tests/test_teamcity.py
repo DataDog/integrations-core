@@ -22,13 +22,6 @@ CONFIG = {
 }
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
 @pytest.mark.integration
 def test_build_event(aggregator):
     teamcity = TeamCityCheck('teamcity', {}, {})

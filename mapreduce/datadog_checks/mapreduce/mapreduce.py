@@ -40,17 +40,13 @@ MapReduce Reduce Task Metrics
 mapreduce.job.reduce.task.progress      The distribution of all reduce task progresses
 """
 
-# stdlib
-from urlparse import urljoin
-from urlparse import urlsplit
-from urlparse import urlunsplit
 
-# 3rd party
 import requests
 from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
 from simplejson import JSONDecodeError
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
+from six import iteritems
 
-# Project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 
@@ -172,7 +168,7 @@ class MapReduceCheck(AgentCheck):
 
         # Report success after gathering all metrics from Application Master
         if running_jobs:
-            job_id, metrics = running_jobs.items()[0]
+            job_id, metrics = next(iteritems(running_jobs))
             am_address = self._get_url_base(metrics['tracking_url'])
 
             self.service_check(
@@ -319,7 +315,7 @@ class MapReduceCheck(AgentCheck):
         """
         running_jobs = {}
 
-        for app_id, (app_name, tracking_url) in running_apps.iteritems():
+        for app_id, (app_name, tracking_url) in iteritems(running_apps):
 
             metrics_json = self._rest_request_to_json(
                 tracking_url, auth, ssl_verify, self.MAPREDUCE_JOBS_PATH, self.MAPREDUCE_SERVICE_CHECK
@@ -359,7 +355,7 @@ class MapReduceCheck(AgentCheck):
         """
         Get custom metrics specified for each counter
         """
-        for job_id, job_metrics in running_jobs.iteritems():
+        for job_id, job_metrics in iteritems(running_jobs):
             job_name = job_metrics['job_name']
 
             # Check if the job_name exist in the custom metrics
@@ -419,7 +415,7 @@ class MapReduceCheck(AgentCheck):
         Get metrics for each MapReduce task
         Return a dictionary of {task_id: 'tracking_url'} for each MapReduce task
         """
-        for job_id, job_stats in running_jobs.iteritems():
+        for job_id, job_stats in iteritems(running_jobs):
 
             metrics_json = self._rest_request_to_json(
                 job_stats['tracking_url'], auth, ssl_verify, 'tasks', self.MAPREDUCE_SERVICE_CHECK, tags=addl_tags
@@ -451,7 +447,7 @@ class MapReduceCheck(AgentCheck):
         """
         Parse the JSON response and set the metrics
         """
-        for status, (metric_name, metric_type) in metrics.iteritems():
+        for status, (metric_name, metric_type) in iteritems(metrics):
             metric_status = metrics_json.get(status)
 
             if metric_status is not None:
@@ -491,7 +487,7 @@ class MapReduceCheck(AgentCheck):
 
         # Add kwargs as arguments
         if kwargs:
-            query = '&'.join(['{}={}'.format(key, value) for key, value in kwargs.iteritems()])
+            query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(kwargs)])
             url = urljoin(url, '?' + query)
 
         try:

@@ -20,6 +20,7 @@ REQUIRED_ATTRIBUTES = {
     'creates_events',
     'display_name',
     'guid',
+    'integration_id',
     'is_public',
     'maintainer',
     'manifest_version',
@@ -35,7 +36,8 @@ OPTIONAL_ATTRIBUTES = {
     'aliases',
     'description',
     'is_beta',
-    # Move these two below (metric_to_check and metric_prefix) to mandatory when all integration are fixed
+    # Move these three below (integration_id, metric_to_check, metric_prefix)
+    # to mandatory when all integration are fixed
     'metric_to_check',
     'metric_prefix',
     'process_signatures',
@@ -200,22 +202,23 @@ def manifest(fix, include_extras):
                             display_queue.append((echo_failure, '  invalid `version`: {}'.format(version)))
 
             # maintainer
-            correct_maintainer = 'help@datadoghq.com'
-            maintainer = decoded.get('maintainer')
-            if maintainer != correct_maintainer:
-                file_failures += 1
-                output = '  incorrect `maintainer`: {}'.format(maintainer)
+            if root_name == 'integrations-core':
+                correct_maintainer = 'help@datadoghq.com'
+                maintainer = decoded.get('maintainer')
+                if maintainer != correct_maintainer:
+                    file_failures += 1
+                    output = '  incorrect `maintainer`: {}'.format(maintainer)
 
-                if fix:
-                    decoded['maintainer'] = correct_maintainer
+                    if fix:
+                        decoded['maintainer'] = correct_maintainer
 
-                    display_queue.append((echo_warning, output))
-                    display_queue.append((echo_success, '  new `maintainer`: {}'.format(correct_maintainer)))
+                        display_queue.append((echo_warning, output))
+                        display_queue.append((echo_success, '  new `maintainer`: {}'.format(correct_maintainer)))
 
-                    file_failures -= 1
-                    file_fixed = True
-                else:
-                    display_queue.append((echo_failure, output))
+                        file_failures -= 1
+                        file_fixed = True
+                    else:
+                        display_queue.append((echo_failure, output))
 
             # name
             correct_name = check_name
@@ -245,7 +248,7 @@ def manifest(fix, include_extras):
                 display_queue.append((echo_failure, '  should contain 80 characters maximum: short_description'))
 
             # support
-            correct_support = 'contrib' if root_name == 'extras' else 'core'
+            correct_support = 'contrib' if root_name == 'integrations-extras' else 'core'
             support = decoded.get('support')
             if support != correct_support:
                 file_failures += 1

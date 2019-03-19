@@ -4,10 +4,15 @@
 import json
 import os
 import sys
+from datetime import datetime
 
 import mock
 import pytest
+from six import iteritems
+from datadog_checks.base.utils.date import parse_rfc3339, UTC
+
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
+
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -86,6 +91,28 @@ EXPECTED_METRICS_PROMETHEUS = [
 ]
 
 
+class MockStreamResponse:
+    """
+    Mocks raw contents of a stream request for the podlist get
+    """
+    def __init__(self, filename):
+        self.filename = filename
+
+    @property
+    def raw(self):
+        return open(os.path.join(HERE, 'fixtures', self.filename))
+
+    def json(self):
+        with open(os.path.join(HERE, 'fixtures', self.filename)) as f:
+            return json.load(f)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
@@ -102,6 +129,7 @@ def mock_kubelet_check(monkeypatch, instances):
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+    monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
     def mocked_poll(*args, **kwargs):
         scraper_config = args[0]
@@ -141,7 +169,7 @@ def test_bad_config():
 
 
 def test_parse_quantity():
-    for raw, res in QUANTITIES.iteritems():
+    for raw, res in iteritems(QUANTITIES):
         assert KubeletCheck.parse_quantity(raw) == res
 
 
@@ -209,7 +237,7 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
             'kube_container_name:fluentd-gcp',
             'kube_deployment:fluentd-gcp-v2.0.10'
         ]),
-        mock.call('kubernetes.cpu.usage.total', 7756358313.0, ['pod_name=demo-app-success-c485bc67b-klj45']),
+        mock.call('kubernetes.cpu.usage.total', 7756358313.0, ['pod_name:demo-app-success-c485bc67b-klj45']),
     ]
     check.rate.assert_has_calls(calls, any_order=True)
 
@@ -241,7 +269,7 @@ def test_prometheus_net_summed(monkeypatch, aggregator):
     #
     calls = [
         mock.call('kubernetes.network.rx_bytes', 35276103554.0, ['pod_name:dd-agent-q6hpw']),
-        mock.call('kubernetes.network.rx_bytes', 58107648.0, ['pod_name:fluentd-gcp-v2.0.10-fkeuj']),
+        mock.call('kubernetes.network.rx_bytes', 58107648.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
     ]
     check.rate.assert_has_calls(calls, any_order=True)
 
@@ -307,7 +335,7 @@ def mocked_get_tags(entity, _):
             "pod_name:fluentd-gcp-v2.0.10-9q9t4"
         ],
         "kubernetes_pod://2fdfd4d9-10ce-11e8-bd5a-42010af00137": [
-            "pod_name:fluentd-gcp-v2.0.10-fkeuj"
+            "pod_name:fluentd-gcp-v2.0.10-p13r3"
         ],
         'docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
             'kube_container_name:fluentd-gcp',
@@ -326,13 +354,16 @@ def mocked_get_tags(entity, _):
             'kube_deployment:fluentd-gcp-v2.0.10'
         ],
         "docker://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
-            "pod_name=demo-app-success-c485bc67b-klj45"
+            "pod_name:demo-app-success-c485bc67b-klj45"
         ],
         "kubernetes_pod://d2e71e36-10d0-11e8-bd5a-42010af00137": [
             'pod_name:dd-agent-q6hpw'
         ],
         "kubernetes_pod://260c2b1d43b094af6d6b4ccba082c2db": [
             'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
+        ],
+        "kubernetes_pod://24d6daa3-10d8-11e8-bd5a-42010af00137": [
+            'pod_name:demo-app-success-c485bc67b-klj45'
         ],
         "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": [
             'pod_name:pi-kff76'
@@ -355,7 +386,8 @@ def test_report_pods_running(monkeypatch):
 
     calls = [
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
-        mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-fkeuj"]),
+        mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-p13r3"]),
+        mock.call('kubernetes.pods.running', 1, ['pod_name:demo-app-success-c485bc67b-klj45']),
         mock.call('kubernetes.containers.running', 2, [
             "kube_container_name:fluentd-gcp",
             "kube_deployment:fluentd-gcp-v2.0.10"
@@ -364,8 +396,16 @@ def test_report_pods_running(monkeypatch):
             "kube_container_name:prometheus-to-sd-exporter",
             "kube_deployment:fluentd-gcp-v2.0.10"
         ]),
+        mock.call('kubernetes.containers.running', 1, ['pod_name:demo-app-success-c485bc67b-klj45']),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
+    # Make sure non running container/pods are not sent
+    bad_calls = [
+        mock.call('kubernetes.pods.running', 1, ['pod_name:dd-agent-q6hpw']),
+        mock.call('kubernetes.containers.running', 1, ['pod_name:dd-agent-q6hpw']),
+    ]
+    for c in bad_calls:
+        assert c not in check.gauge.mock_calls
 
 
 def test_report_pods_running_none_ids(monkeypatch):
@@ -423,7 +463,7 @@ def test_report_container_spec_metrics(monkeypatch):
         mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
         mock.call('kubernetes.cpu.limits', 0.25, instance_tags),
         mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name=demo-app-success-c485bc67b-klj45"] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
     if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
@@ -432,8 +472,10 @@ def test_report_container_spec_metrics(monkeypatch):
 
 def test_report_container_state_metrics(monkeypatch):
     check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list',
-                        mock.Mock(return_value=json.loads(mock_from_file('pods_crashed.json'))))
+    check.pod_list_url = "dummyurl"
+    monkeypatch.setattr(check, 'perform_kubelet_query',
+                        mock.Mock(return_value=MockStreamResponse('pods_crashed.json')))
+    monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
     attrs = {'is_excluded.return_value': False}
@@ -473,6 +515,37 @@ def test_report_container_state_metrics(monkeypatch):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
 
+def test_pod_expiration(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.pod_list_url = "dummyurl"
+
+    # Fixtures contains four pods:
+    #   - dd-agent-ntepl old but running
+    #   - hello1-1550504220-ljnzx succeeded and old enough to expire
+    #   - hello5-1550509440-rlgvf succeeded but not old enough
+    #   - hello8-1550505780-kdnjx has one old container and a recent container, don't expire
+    monkeypatch.setattr(check, 'perform_kubelet_query',
+                        mock.Mock(return_value=MockStreamResponse('pods_expired.json')))
+    monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(
+        return_value=parse_rfc3339("2019-02-18T16:00:06Z")
+        ))
+
+    attrs = {'is_excluded.return_value': False}
+    check.pod_list_utils = mock.Mock(**attrs)
+
+    pod_list = check.retrieve_pod_list()
+    assert pod_list['expired_count'] == 1
+
+    expected_names = ['dd-agent-ntepl', 'hello5-1550509440-rlgvf', 'hello8-1550505780-kdnjx']
+    collected_names = [p['metadata']['name'] for p in pod_list['items']]
+    assert collected_names == expected_names
+
+    # Test .pods.expired gauge is submitted
+    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", return_value=[]):
+        check._report_container_state_metrics(pod_list, ["custom:tag"])
+    aggregator.assert_metric("kubernetes.pods.expired", value=1, tags=["custom:tag"])
+
+
 class MockResponse(mock.Mock):
     @staticmethod
     def iter_lines():
@@ -491,8 +564,8 @@ def test_perform_kubelet_check(monkeypatch):
         check._perform_kubelet_check(instance_tags)
 
     get.assert_has_calls([
-        mock.call('http://127.0.0.1:10255/healthz', cert=None, headers=None, params={'verbose': True}, timeout=10,
-                  verify=None)])
+        mock.call('http://127.0.0.1:10255/healthz', cert=None, headers=None,
+                  params={'verbose': True}, stream=False, timeout=10, verify=None)])
     calls = [mock.call('kubernetes.kubelet.check', 0, tags=instance_tags)]
     check.service_check.assert_has_calls(calls)
 
@@ -510,17 +583,11 @@ def test_report_node_metrics(monkeypatch):
 
 
 def test_retrieve_pod_list_success(monkeypatch):
-    class MockResponse:
-        def __init__(self, json_data):
-            self.json_data = json_data
-
-        def json(self):
-            return (json.loads(self.json_data))
-
     check = KubeletCheck('kubelet', None, {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query',
-                        mock.Mock(return_value=MockResponse(mock_from_file('pod_list_raw.dat'))))
+                        mock.Mock(return_value=MockStreamResponse('pod_list_raw.dat')))
+    monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("pod_list_raw.json"))
@@ -528,7 +595,7 @@ def test_retrieve_pod_list_success(monkeypatch):
 
 
 def test_retrieved_pod_list_failure(monkeypatch):
-    def mock_perform_kubelet_query(s):
+    def mock_perform_kubelet_query(s, stream=False):
         raise Exception("network error")
 
     check = KubeletCheck('kubelet', None, {}, [{}])
@@ -537,3 +604,22 @@ def test_retrieved_pod_list_failure(monkeypatch):
 
     retrieved = check.retrieve_pod_list()
     assert retrieved is None
+
+
+def test_compute_pod_expiration_datetime(monkeypatch):
+    # Invalid input
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value=""):
+        assert KubeletCheck._compute_pod_expiration_datetime() is None
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="invalid"):
+        assert KubeletCheck._compute_pod_expiration_datetime() is None
+
+    # Disabled
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="0"):
+        assert KubeletCheck._compute_pod_expiration_datetime() is None
+
+    # Set to 15 minutes
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="15"):
+        expire = KubeletCheck._compute_pod_expiration_datetime()
+        assert expire is not None
+        now = datetime.utcnow().replace(tzinfo=UTC)
+        assert abs((now-expire).seconds - 60*15) < 2

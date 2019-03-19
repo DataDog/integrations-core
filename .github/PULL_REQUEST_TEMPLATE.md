@@ -6,14 +6,15 @@ A brief description of the change being made with this pull request.
 
 What inspired you to submit this pull request?
 
-### Review checklist
-
-- [ ] PR has a [meaningful title](https://github.com/DataDog/integrations-core/blob/master/CONTRIBUTING.md#pull-request-title) or PR has the `no-changelog` label attached
-- [ ] Feature or bugfix has tests
-- [ ] Git history is clean
-- [ ] If PR impacts documentation, docs team has been notified or an issue has been opened on the [documentation repo](https://github.com/DataDog/documentation/issues/new)
-- [ ] If PR adds a configuration option, it has been added to the configuration file.
-
 ### Additional Notes
 
 Anything else we should know when reviewing?
+
+### Review checklist (to be filled by reviewers)
+
+- [ ] PR title must be written as a CHANGELOG entry [(see why)](https://github.com/DataDog/integrations-core/blob/master/CONTRIBUTING.md#pull-request-title)
+- [ ] Files changes must correspond to the primary purpose of the PR as described in the title (small unrelated changes should have their own PR)
+- [ ] PR must have `changelog/` and `integration/` labels attached
+- [ ] Feature or bugfix must have tests
+- [ ] Git history [must be clean](https://github.com/DataDog/integrations-core/blob/master/CONTRIBUTING.md#commit-messages)
+- [ ] If PR adds a configuration option, it must be added to the configuration file.

@@ -5,6 +5,21 @@ instances:
   ## The URL where your application metrics are exposed by Prometheus.
   #
   - prometheus_url: http://localhost:8080/_status/vars
+  
+  ## @param ssl_cert - string - optional 
+  ## If the certificate contains the ssl_private_key you can use this optional param instead of ssl_private_key and ssl_ca_cert
+  #
+  #  ssl_cert: <PATH_TO_CERT_PEM>
+
+  ## @param ssl_private_key - string - optional
+  ## Needed if the certificate does not include the private key. Currently, Requests does not support using encrypted keys.
+  #
+  #  ssl_private_key: <PATH_TO_CERT_KEY>
+
+  ## @param ssl_ca_cert - string - optional
+  ## The path to the trusted CA used for generating custom certificates
+  #
+  #  ssl_ca_cert: <PATH_TO_CERT_PEM>
 
   ## @param prometheus_timeout - integer - optional - default: 10
   ## The timeout for connecting to the prometheus_url.

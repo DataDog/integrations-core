@@ -81,32 +81,32 @@ etcd.process.open.fds,gauge,,item,,Number of open file descriptors.,0,etcd,
 etcd.process.resident.memory.bytes,gauge,,byte,,Resident memory size in bytes.,0,etcd,
 etcd.process.start.time.seconds,gauge,,second,,Start time of the process since unix epoch in seconds.,0,etcd,
 etcd.process.virtual.memory.bytes,gauge,,byte,,Virtual memory size in bytes.,0,etcd,
-etcd.store.gets.success,gauge,,request,second,Rate of successful get requests,0,etcd,get success
-etcd.store.gets.fail,gauge,,request,second,Rate of failed get requests,-1,etcd,get failure
-etcd.store.sets.success,gauge,,request,second,Rate of successful set requests,0,etcd,set success
-etcd.store.sets.fail,gauge,,request,second,Rate of failed set requests,-1,etcd,set failure
-etcd.store.delete.success,gauge,,request,second,Rate of successful delete requests,0,etcd,delete success
-etcd.store.delete.fail,gauge,,request,second,Rate of failed delete requests,-1,etcd,delete failure
-etcd.store.update.success,gauge,,request,second,Rate of successful update requests,0,etcd,update success
-etcd.store.update.fail,gauge,,request,second,Rate of failed update requests,-1,etcd,update failure
-etcd.store.create.success,gauge,,request,second,Rate of successful create requests,0,etcd,create success
-etcd.store.create.fail,gauge,,request,second,Rate of failed create requests,-1,etcd,create failure
-etcd.store.compareandswap.success,gauge,,request,second,Rate of compare and swap requests success,0,etcd,compare and swap success
-etcd.store.compareandswap.fail,gauge,,request,second,Rate of compare and swap requests failure,-1,etcd,compare and swap failure
-etcd.store.compareanddelete.success,gauge,,request,second,Rate of compare and delete requests success,0,etcd,compare and delete success
-etcd.store.compareanddelete.fail,gauge,,request,second,Rate of compare and delete requests failure,-1,etcd,compare and delete failure
-etcd.store.expire.count,gauge,,eviction,second,Rate of expired keys,0,etcd,expired keys
-etcd.store.watchers,gauge,,,,Rate of watchers,0,etcd,watcher number
-etcd.self.send.pkgrate,gauge,,packet,second,Rate of packets sent,0,etcd,packets received
-etcd.self.send.bandwidthrate,gauge,,byte,second,Rate of bytes sent,0,etcd,bytes received
-etcd.self.recv.pkgrate,gauge,,packet,second,Rate of packets received,0,etcd,packets sent
-etcd.self.recv.bandwidthrate,gauge,,byte,second,Rate of bytes received,0,etcd,bytes sent
-etcd.self.recv.appendrequest.count,gauge,,request,second,Rate of append requests this node has processed,0,etcd,append requests received
-etcd.self.send.appendrequest.count,gauge,,request,second,Rate of append requests this node has sent,0,etcd,append requests sent
-etcd.leader.counts.fail,gauge,,request,second,Rate of failed Raft RPC requests,-1,etcd,raft success
-etcd.leader.counts.success,gauge,,request,second,Rate of successful Raft RPC requests,0,etcd,raft failure
-etcd.leader.latency.current,gauge,,millisecond,,Current latency to each peer in the cluster,0,etcd,current latency
-etcd.leader.latency.avg,gauge,,millisecond,,Average latency to each peer in the cluster,0,etcd,avg latency
-etcd.leader.latency.min,gauge,,millisecond,,Minimum latency to each peer in the cluster,0,etcd,min latency
-etcd.leader.latency.max,gauge,,millisecond,,Maximum latency to each peer in the cluster,0,etcd,max latency
-etcd.leader.latency.stddev,gauge,,millisecond,,Standard deviation latency to each peer in the cluster,0,etcd,stddev latency
+etcd.store.gets.success,gauge,,request,second,Rate of successful get requests (ETCD API V2 only),0,etcd,get success
+etcd.store.gets.fail,gauge,,request,second,Rate of failed get requests (ETCD API V2 only),-1,etcd,get failure
+etcd.store.sets.success,gauge,,request,second,Rate of successful set requests (ETCD API V2 only),0,etcd,set success
+etcd.store.sets.fail,gauge,,request,second,Rate of failed set requests (ETCD API V2 only),-1,etcd,set failure
+etcd.store.delete.success,gauge,,request,second,Rate of successful delete requests (ETCD API V2 only),0,etcd,delete success
+etcd.store.delete.fail,gauge,,request,second,Rate of failed delete requests (ETCD API V2 only),-1,etcd,delete failure
+etcd.store.update.success,gauge,,request,second,Rate of successful update requests (ETCD API V2 only),0,etcd,update success
+etcd.store.update.fail,gauge,,request,second,Rate of failed update requests (ETCD API V2 only),-1,etcd,update failure
+etcd.store.create.success,gauge,,request,second,Rate of successful create requests (ETCD API V2 only),0,etcd,create success
+etcd.store.create.fail,gauge,,request,second,Rate of failed create requests (ETCD API V2 only),-1,etcd,create failure
+etcd.store.compareandswap.success,gauge,,request,second,Rate of compare and swap requests success (ETCD API V2 only),0,etcd,compare and swap success
+etcd.store.compareandswap.fail,gauge,,request,second,Rate of compare and swap requests failure (ETCD API V2 only),-1,etcd,compare and swap failure
+etcd.store.compareanddelete.success,gauge,,request,second,Rate of compare and delete requests success (ETCD API V2 only),0,etcd,compare and delete success
+etcd.store.compareanddelete.fail,gauge,,request,second,Rate of compare and delete requests failure (ETCD API V2 only),-1,etcd,compare and delete failure
+etcd.store.expire.count,gauge,,eviction,second,Rate of expired keys (ETCD API V2 only),0,etcd,expired keys
+etcd.store.watchers,gauge,,,,Rate of watchers(ETCD API V2 only),0,etcd,watcher number
+etcd.self.send.pkgrate,gauge,,packet,second,Rate of packets sent (ETCD API V2 only),0,etcd,packets received
+etcd.self.send.bandwidthrate,gauge,,byte,second,Rate of bytes sent (ETCD API V2 only),0,etcd,bytes received
+etcd.self.recv.pkgrate,gauge,,packet,second,Rate of packets received (ETCD API V2 only),0,etcd,packets sent
+etcd.self.recv.bandwidthrate,gauge,,byte,second,Rate of bytes received (ETCD API V2 only),0,etcd,bytes sent
+etcd.self.recv.appendrequest.count,gauge,,request,second,Rate of append requests this node has processed (ETCD API V2 only),0,etcd,append requests received
+etcd.self.send.appendrequest.count,gauge,,request,second,Rate of append requests this node has sent (ETCD API V2 only),0,etcd,append requests sent
+etcd.leader.counts.fail,gauge,,request,second,Rate of failed Raft RPC requests (ETCD API V2 only),-1,etcd,raft success
+etcd.leader.counts.success,gauge,,request,second,Rate of successful Raft RPC requests (ETCD API V2 only),0,etcd,raft failure
+etcd.leader.latency.current,gauge,,millisecond,,Current latency to each peer in the cluster (ETCD API V2 only),0,etcd,current latency
+etcd.leader.latency.avg,gauge,,millisecond,,Average latency to each peer in the cluster (ETCD API V2 only),0,etcd,avg latency
+etcd.leader.latency.min,gauge,,millisecond,,Minimum latency to each peer in the cluster (ETCD API V2 only),0,etcd,min latency
+etcd.leader.latency.max,gauge,,millisecond,,Maximum latency to each peer in the cluster (ETCD API V2 only),0,etcd,max latency
+etcd.leader.latency.stddev,gauge,,millisecond,,Standard deviation latency to each peer in the cluster (ETCD API V2 only),0,etcd,stddev latency

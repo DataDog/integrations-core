@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.checks import AgentCheck
-from datadog_checks.checks.win import PDHBaseCheck
+from six import iteritems
+
+from datadog_checks.base import AgentCheck, PDHBaseCheck
 from datadog_checks.utils.containers import hash_mutable
 
 
@@ -48,7 +49,6 @@ class IIS(PDHBaseCheck):
         PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
 
     def check(self, instance):
-
         sites = instance.get('sites')
         if sites is None:
             expected_sites = set()
@@ -59,17 +59,17 @@ class IIS(PDHBaseCheck):
         if "_Total" not in expected_sites:
             expected_sites.add("_Total")
 
-        self.log.debug("expected sites is %s" % str(expected_sites))
+        self.log.debug("expected sites is {}".format(str(expected_sites)))
         key = hash_mutable(instance)
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             try:
                 try:
                     vals = counter.get_all_values()
                 except Exception as e:
-                    self.log.error("Failed to get_all_values %s %s" % (inst_name, dd_name))
+                    self.log.error("Failed to get_all_values {} {}: {}".format(inst_name, dd_name, e))
                     continue
 
-                for sitename, val in vals.iteritems():
+                for sitename, val in iteritems(vals):
                     tags = []
                     if key in self._tags:
                         tags = list(self._tags[key])
@@ -87,12 +87,12 @@ class IIS(PDHBaseCheck):
                             else:
                                 tags.append("site:{0}".format(self.normalize(sitename)))
                     except Exception as e:
-                        self.log.error("Caught exception %s setting tags" % str(e))
+                        self.log.error("Caught exception {} setting tags".format(str(e)))
 
                     try:
                         metric_func(dd_name, val, tags)
                     except Exception as e:
-                        self.log.error("metric_func: %s %s %s" % (dd_name, str(val), str(e)))
+                        self.log.error("metric_func: {} {} {}".format(dd_name, str(val), str(e)))
                         pass
 
                     if dd_name == "iis.uptime":
@@ -100,19 +100,19 @@ class IIS(PDHBaseCheck):
                         status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
                         self.service_check(self.SERVICE_CHECK, status, tags)
                         if sitename in expected_sites:
-                            self.log.debug("Removing %s from expected sites" % sitename)
+                            self.log.debug("Removing {} from expected sites".format(sitename))
                             expected_sites.remove(sitename)
                         else:
-                            self.log.warning("site not in expected_sites %s" % sitename)
+                            self.log.warning("site not in expected_sites {}".format(sitename))
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error("IIS Failed to get metric data for %s %s: %s" % (inst_name, dd_name, str(e)))
+                self.log.error("IIS Failed to get metric data for {} {}: {}" .format(inst_name, dd_name, str(e)))
                 pass
 
         for site in expected_sites:
             tags = []
             if key in self._tags:
                 tags = list(self._tags[key])
-            tags.append("site:{0}".format(self.normalize(site)))
+            tags.append("site:{}".format(self.normalize(site)))
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)

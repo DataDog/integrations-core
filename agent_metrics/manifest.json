@@ -19,5 +19,6 @@
     "mac_os",
     "windows"
   ],
-  "type": "check"
+  "type": "check",
+  "integration_id": "datadog-agent"
 }

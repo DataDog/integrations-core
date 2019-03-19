@@ -241,24 +241,12 @@ def test_get_os_aggregates(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_aggregates_response):
         api = SimpleApi(None, None)
-        assert api.get_os_aggregates() == [
-            {
-                "availability_zone": "london",
-                "created_at": "2016-12-27T23:47:32.911515",
-                "deleted": False,
-                "deleted_at": None,
-                "hosts": [
-                    "compute"
-                ],
-                "id": 1,
-                "metadata": {
-                    "availability_zone": "london"
-                },
-                "name": "name",
-                "updated_at": None,
-                "uuid": "6ba28ba7-f29b-45cc-a30b-6e3a40c2fb14"
-            }
-        ]
+
+        aggregates = api.get_os_aggregates()
+
+        for i in range(len(aggregates)):
+            for key, value in common.EXAMPLE_GET_OS_AGGREGATES_RETURN_VALUE[i].items():
+                assert value == aggregates[i][key]
 
 
 def get_os_hypervisors_detail_post_v2_33_response(url, headers, params=None, timeout=None):
@@ -369,47 +357,7 @@ def test_get_os_hypervisors_detail(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_33_response):
         api = SimpleApi(None, None)
-        assert api.get_os_hypervisors_detail() == [
-            {
-                "cpu_info": {
-                    "arch": "x86_64",
-                    "model": "Nehalem",
-                    "vendor": "Intel",
-                    "features": [
-                        "pge",
-                        "clflush"
-                    ],
-                    "topology": {
-                        "cores": 1,
-                        "threads": 1,
-                        "sockets": 4
-                    }
-                },
-                "current_workload": 0,
-                "status": "enabled",
-                "state": "up",
-                "disk_available_least": 0,
-                "host_ip": "1.1.1.1",
-                "free_disk_gb": 1028,
-                "free_ram_mb": 7680,
-                "hypervisor_hostname": "host1",
-                "hypervisor_type": "fake",
-                "hypervisor_version": 1000,
-                "id": 2,
-                "local_gb": 1028,
-                "local_gb_used": 0,
-                "memory_mb": 8192,
-                "memory_mb_used": 512,
-                "running_vms": 0,
-                "service": {
-                    "host": "host1",
-                    "id": 7,
-                    "disabled_reason": None
-                },
-                "vcpus": 2,
-                "vcpus_used": 0
-            }
-        ]
+        assert api.get_os_hypervisors_detail() == common.EXAMPLE_GET_OS_HYPERVISORS_RETURN_VALUE
 
     with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_os_hypervisors_detail_post_v2_53_response):
@@ -832,24 +780,4 @@ def test_get_project_limits(aggregator):
     with mock.patch('datadog_checks.openstack_controller.api.SimpleApi._make_request',
                     side_effect=get_project_limits_response):
         api = SimpleApi(None, None)
-        assert api.get_project_limits(None) == {
-                "maxImageMeta": 128,
-                "maxPersonality": 5,
-                "maxPersonalitySize": 10240,
-                "maxSecurityGroupRules": 20,
-                "maxSecurityGroups": 10,
-                "maxServerMeta": 128,
-                "maxTotalCores": 20,
-                "maxTotalFloatingIps": 10,
-                "maxTotalInstances": 10,
-                "maxTotalKeypairs": 100,
-                "maxTotalRAMSize": 51200,
-                "maxServerGroups": 10,
-                "maxServerGroupMembers": 10,
-                "totalCoresUsed": 0,
-                "totalInstancesUsed": 0,
-                "totalRAMUsed": 0,
-                "totalSecurityGroupsUsed": 0,
-                "totalFloatingIpsUsed": 0,
-                "totalServerGroupsUsed": 0
-            }
+        assert api.get_project_limits(None) == common.EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE

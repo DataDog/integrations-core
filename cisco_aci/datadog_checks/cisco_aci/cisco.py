@@ -4,13 +4,13 @@
 
 import datetime
 
+from six import iteritems
+
 from datadog_checks.checks import AgentCheck
-
 from datadog_checks.utils.containers import hash_mutable
-
 from datadog_checks.config import _is_affirmative
 
-import aci_metrics
+from . import aci_metrics
 from .capacity import Capacity
 from .tenant import Tenant
 from .fabric import Fabric
@@ -150,7 +150,7 @@ class CiscoACICheck(AgentCheck):
 
     def submit_metrics(self, metrics, tags, instance={}, obj_type="gauge", hostname=None):
         user_tags = instance.get('tags', [])
-        for mname, mval in metrics.iteritems():
+        for mname, mval in iteritems(metrics):
             tags_to_send = []
             if mval:
                 if hostname:
@@ -167,7 +167,7 @@ class CiscoACICheck(AgentCheck):
 
     def get_external_host_tags(self):
         external_host_tags = []
-        for hostname, tags in self.external_host_tags.iteritems():
+        for hostname, tags in iteritems(self.external_host_tags):
             host_tags = tags + self.check_tags
             external_host_tags.append((hostname, {SOURCE_TYPE: host_tags}))
         return external_host_tags

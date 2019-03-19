@@ -70,15 +70,15 @@ instances:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
 
-  ## @param send_histograms_buckets - boolean - optional - default: false
+  ## @param send_histograms_buckets - boolean - optional - default: true
   ## Set send_histograms_buckets to true to send the histograms bucket.
   #
-  #  send_histograms_buckets: false
+  #  send_histograms_buckets: true
 
-  ## @param send_monotonic_counter - boolean - optional - default: false
+  ## @param send_monotonic_counter - boolean - optional - default: true
   ## Set send_monotonic_counter to true to send counters as monotonic counter.
   #
-  #  send_monotonic_counter: false
+  #  send_monotonic_counter: true
 
   ## @param exclude_labels - list of strings - optional
   ## List of label to be excluded
