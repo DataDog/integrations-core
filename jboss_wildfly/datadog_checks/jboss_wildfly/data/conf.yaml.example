@@ -16,7 +16,7 @@ instances:
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
-  #    - environment: default_environment
+  #    - environment: <DEFAULT_ENVIRONMENT>
 
   ## @param user - string - optional
   ## JMX username
@@ -24,7 +24,7 @@ instances:
   #  user: <USERNAME>
 
   ## @param password - string - optional
-  ## XXXXXXXXXXX
+  ## JMX User Password.
   #
   #  password: <PASSWORD>
 
@@ -65,7 +65,7 @@ instances:
   ## trust_store_password should be set if ssl is enabled
   ## password for your TrustStore.jks file
   #
-  #  trust_store_password: password
+  #  trust_store_password: <PASSWORD>
 
   ## @param key_store_path - string - optional
   ## key_store_path should be set if client authentication is enabled on the target JVM.
@@ -79,7 +79,7 @@ instances:
   #
   #  key_store_password: <PASSWORD>
 
-  ## @param rmi_registry_ssl - boolean - optional
+  ## @param rmi_registry_ssl - boolean - optional - default: false
   ## Whether or not the agent should connect to the rmi registry using ssl.
   #
   #  rmi_registry_ssl: false

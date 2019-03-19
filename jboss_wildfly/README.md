@@ -2,31 +2,31 @@
 
 ## Overview
 
-This check monitors [JBoss][1] and [Wildfly][2] applications.
+This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ## Setup
 
 ### Installation
 
-The JBoss/Wildfly check is included in the [Datadog Agent][3] package, so you do not
-need to install anything else on your server.
+The JBoss/WildFly check is included in the [Datadog Agent][3] package.
+No additional installation is needed on your server.
 
 ### Configuration
 
 1. Edit the `jboss_wildfly.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your jboss or wildfly application server's
+   Agent's configuration directory to start collecting your JBoss or WildFly application server's
    performance data. See the [sample jboss_wildfly.d/conf.yaml][3] for all available configuration options.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below. 
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][4] for more detailed instructions.
-   If you need to monitor more metrics, please send us an email at support@datadoghq.com
+   To learn how to customize the collected metrics, visit the [JMX Checks documentation][4] for more detailed instructions.
+   If you need to monitor more metrics, contact [Datadog support][8].
 
-2. [Restart the Agent][5]
+2. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `jboss_wildfly` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `jboss_wildfly` under the Checks section.
 
 ## Data Collected
 
@@ -36,11 +36,11 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-JBoss/Wildfly does not include any service checks.
+The JBoss/WildFly integration does not include any service checks.
 
 ### Events
 
-JBoss/Wildfly does not include any events.
+The JBoss/WildFly integration does not include any events.
 
 ## Troubleshooting
 
