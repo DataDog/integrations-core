@@ -291,7 +291,6 @@ class __AgentCheckPy3(object):
         raise NotImplementedError
 
     def set_external_tags(self, external_tags):
-        from datadog_agent import set_external_tags as _set_external_tags
         # Example of external_tags format
         # [
         #     ('hostname', {'src_name': ['test:t1']}),
@@ -301,7 +300,7 @@ class __AgentCheckPy3(object):
             for x in external_tags:
                 for src_name, tags in iteritems(x[1]):
                     x[1][src_name] = self._normalize_tags_type(tags)
-            _set_external_tags(external_tags)
+            datadog_agent.set_external_tags(external_tags)
         except IndexError:
             self.log.debug('Unexpected external tags format. Not sending: {}'.format(external_tags))
 
@@ -717,7 +716,6 @@ class __AgentCheckPy2(object):
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
     def set_external_tags(self, external_tags):
-        from datadog_agent import set_external_tags as _set_external_tags
         # Example of external_tags format
         # [
         #     ('hostname', {'src_name': ['test:t1']}),
@@ -727,7 +725,7 @@ class __AgentCheckPy2(object):
             for x in external_tags:
                 for src_name, tags in iteritems(x[1]):
                     x[1][src_name] = self._normalize_tags_type(tags)
-            _set_external_tags(external_tags)
+            datadog_agent.set_external_tags(external_tags)
         except IndexError:
             self.log.debug('Unexpected external tags format. Not sending: {}'.format(external_tags))
 

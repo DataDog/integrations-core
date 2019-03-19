@@ -9,6 +9,7 @@ import mock
 import pytest
 from six import PY3
 
+from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.base import AgentCheck
 
 
@@ -225,13 +226,8 @@ class TestTags:
         Tests that th external_host_tag modifies in place the list of tags in the provided object
         """
         check = AgentCheck()
-
-        # Mock the `datadog_agent` module as its not the point of this test and not
-        # available in the testing framework
-        datadog_agent = sys.modules['datadog_agent'] = mock.Mock()
         external_host_tags = [('hostname', {'src_name': ['key1:val1']})]
         with mock.patch.object(check, '_normalize_tags_type', return_value=['normalize:tag']):
-            datadog_agent.set_external_tags.return_value = ['normalize:tag']
             check.set_external_tags(external_host_tags)
             assert external_host_tags == [('hostname', {'src_name': ['normalize:tag']})]
 
