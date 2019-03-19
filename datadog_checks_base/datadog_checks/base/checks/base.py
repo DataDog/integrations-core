@@ -297,11 +297,13 @@ class __AgentCheckPy3(object):
         #     ('hostname', {'src_name': ['test:t1']}),
         #     ('hostname2', {'src2_name': ['test2:t3']})
         # ]
-        for x in external_tags:
-            for src_name, tags in iteritems(x[1]):
-                x[1][src_name] = self._normalize_tags_type(tags)
-
-        _set_external_tags(external_tags)
+        try:
+            for x in external_tags:
+                for src_name, tags in iteritems(x[1]):
+                    x[1][src_name] = self._normalize_tags_type(tags)
+            _set_external_tags(external_tags)
+        except IndexError:
+            self.log.debug('Unexpected external tags format. Not sending: {}'.format(external_tags))
 
     def normalize(self, metric, prefix=None, fix_case=False):
         """
@@ -721,11 +723,13 @@ class __AgentCheckPy2(object):
         #     ('hostname', {'src_name': ['test:t1']}),
         #     ('hostname2', {'src2_name': ['test2:t3']})
         # ]
-        for x in external_tags:
-            for src_name, tags in iteritems(x[1]):
-                x[1][src_name] = self._normalize_tags_type(tags)
-
-        _set_external_tags(external_tags)
+        try:
+            for x in external_tags:
+                for src_name, tags in iteritems(x[1]):
+                    x[1][src_name] = self._normalize_tags_type(tags)
+            _set_external_tags(external_tags)
+        except IndexError:
+            self.log.debug('Unexpected external tags format. Not sending: {}'.format(external_tags))
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """
