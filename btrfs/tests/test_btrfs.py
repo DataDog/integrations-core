@@ -13,14 +13,6 @@ from datadog_checks.btrfs import BTRFS
 btrfs_check = BTRFS('btrfs', {}, {})
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 def mock_get_usage():
 
     return [
