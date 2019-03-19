@@ -204,34 +204,35 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb', value=7982.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.server.rx_errors', value=0.0,
                                      tags=['nova_managed_server', 'project_name:admin',
                                            'hypervisor:compute4.openstack.local', 'server_name:server_take_zero-2',
@@ -387,34 +388,35 @@ def test_scenario(make_request, aggregator):
                                      hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.current_workload', value=0.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.limits.max_total_floating_ips', value=10.0,
                                      tags=['tenant_id:***************************4bfc1', 'project_name:service'],
                                      hostname='')
@@ -513,34 +515,35 @@ def test_scenario(make_request, aggregator):
                                      hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=3886.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=2862.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=5934.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=2862.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=3886.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=5934.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=2862.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=3886.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=5934.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.free_ram_mb', value=2862.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.server.rx_packets', value=207.0,
                                      tags=['nova_managed_server', 'project_name:admin',
                                            'hypervisor:compute1.openstack.local', 'server_name:jenga',
@@ -759,34 +762,35 @@ def test_scenario(make_request, aggregator):
                                      hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=4.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=6.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=0.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=6.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=4.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=0.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=6.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=4.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=0.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus_used', value=6.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                      tags=['nova_managed_server', 'project_name:admin',
                                            'hypervisor:compute2.openstack.local', 'server_name:jnrgjoner',
@@ -835,34 +839,35 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=2.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=3.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=0.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=3.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=2.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=0.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=3.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=2.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=0.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.running_vms', value=3.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                      tags=['nova_managed_server', 'project_name:admin',
                                            'hypervisor:compute1.openstack.local', 'server_name:Rocky',
@@ -870,34 +875,35 @@ def test_scenario(make_request, aggregator):
                                      hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.vcpus', value=8.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.server.tx_packets', value=9.0,
                                      tags=['nova_managed_server', 'project_name:admin',
                                            'hypervisor:compute5.openstack.local', 'server_name:moarserver-13',
@@ -963,64 +969,66 @@ def test_scenario(make_request, aggregator):
                                      hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=26.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=16.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=46.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=16.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=26.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=46.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=16.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=26.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=46.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.free_disk_gb', value=16.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=22.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=32.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=2.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=32.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=22.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=2.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=32.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=22.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=2.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
                                            'virt_type:QEMU', 'status:enabled'], hostname='')
             aggregator.assert_metric('openstack.nova.local_gb_used', value=32.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.server.memory', value=1048576.0,
                                      tags=['nova_managed_server', 'project_name:admin',
                                            'hypervisor:compute10.openstack.local', 'server_name:finalDestination-6',
@@ -1749,11 +1757,11 @@ def test_scenario(make_request, aggregator):
                                      hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
@@ -1761,11 +1769,12 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
@@ -1773,11 +1782,11 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
@@ -1785,7 +1794,7 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.local_gb', value=48.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.server.tx_errors', value=0.0,
                                      tags=['nova_managed_server', 'project_name:admin',
@@ -1862,11 +1871,11 @@ def test_scenario(make_request, aggregator):
                                      hostname=u'57030997-f1b5-4f79-9429-8cb285318633')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=14.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=-2.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=38.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
@@ -1874,11 +1883,12 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=2.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=14.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=37.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
@@ -1886,11 +1896,11 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=3.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=13.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=3.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
@@ -1898,7 +1908,7 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.disk_available_least', value=3.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.server.tx', value=0.0,
                                      tags=['nova_managed_server', 'project_name:admin',
@@ -2140,11 +2150,11 @@ def test_scenario(make_request, aggregator):
                                      hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=4096.0,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=5120.0,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=2048.0,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8',
@@ -2152,11 +2162,12 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=5120.0,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=4096.0,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=2048.0,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11',
@@ -2164,11 +2175,11 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=5120.0,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=4096.0,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=2048.0,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14',
@@ -2176,7 +2187,7 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.memory_mb_used', value=5120.0,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.server.tx_packets', value=9.0,
                                      tags=['nova_managed_server', 'project_name:admin',
@@ -2784,11 +2795,11 @@ def test_scenario(make_request, aggregator):
 
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU',
@@ -2796,11 +2807,12 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU',
@@ -2808,11 +2820,11 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU',
@@ -2820,15 +2832,15 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.14,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU',
@@ -2836,11 +2848,12 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU',
@@ -2848,11 +2861,11 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU',
@@ -2860,26 +2873,27 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.12,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute2.openstack.local', 'hypervisor_id:2',
-                                           'virt_type:QEMU', 'status:enabled'], hostname='')
+                                           'virt_type:QEMU', 'status:enabled', 'project_name:admin'], hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU',
                                            'status:enabled'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute4.openstack.local', 'hypervisor_id:9',
-                                           'virt_type:QEMU', 'status:enabled'],
+                                           'virt_type:QEMU', 'status:enabled',
+                                           'project_name:testProj1', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute5.openstack.local', 'hypervisor_id:10', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
 
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
@@ -2888,11 +2902,11 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute7.openstack.local', 'hypervisor_id:12', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute8.openstack.local', 'hypervisor_id:13', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU',
@@ -2900,7 +2914,7 @@ def test_scenario(make_request, aggregator):
                                      hostname='')
             aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.2,
                                      tags=['hypervisor:compute10.openstack.local', 'hypervisor_id:15', 'virt_type:QEMU',
-                                           'status:enabled'],
+                                           'status:enabled', 'project_name:admin'],
                                      hostname='')
 
         # Assert coverage for this check on this instance

@@ -13,8 +13,7 @@ from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, string_types
 
 from .. import AgentCheck
-
-from datadog_checks.config import is_affirmative
+from ...config import is_affirmative
 
 if PY3:
     long = int

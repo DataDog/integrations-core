@@ -21,7 +21,7 @@ def test_parse_uptime_string(aggregator):
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
             return_value=common.MOCK_NOVA_SERVERS)
-def test_get_all_servers_between_runs(servers_detail, aggregator):
+def test_populate_servers_cache_between_runs(servers_detail, aggregator):
     """
     Ensure the cache contains the expected VMs between check runs.
     """
@@ -35,9 +35,9 @@ def test_get_all_servers_between_runs(servers_detail, aggregator):
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers({'6f70656e737461636b20342065766572': 'testproj',
-                           'blacklist_1': 'blacklist_1',
-                           'blacklist_2': 'blacklist_2'}, "test_name", [])
+    check.populate_servers_cache({'testproj': {"id": '6f70656e737461636b20342065766572', "name": "testproj"},
+                                  'blacklist_1': {"id": 'blacklist_1', "name": 'blacklist_1'},
+                                  'blacklist_2': {"id": 'blacklist_2', "name": 'blacklist_2'}}, [])
     servers = check.servers_cache['servers']
     assert 'server-1' not in servers
     assert 'server_newly_added' in servers
@@ -47,7 +47,7 @@ def test_get_all_servers_between_runs(servers_detail, aggregator):
 
 @mock.patch('datadog_checks.openstack_controller.OpenStackControllerCheck.get_servers_detail',
             return_value=common.MOCK_NOVA_SERVERS)
-def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
+def test_populate_servers_cache_with_project_name_none(servers_detail, aggregator):
     """
     Ensure the cache contains the expected VMs between check runs.
     """
@@ -60,9 +60,9 @@ def test_get_all_servers_with_project_name_none(servers_detail, aggregator):
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
     # Update the cached list of servers based on what the endpoint returns
-    check.get_all_servers({'6f70656e737461636b20342065766572': None,
-                           'blacklist_1': 'blacklist_1',
-                           'blacklist_2': 'blacklist_2'}, "test_name", [])
+    check.populate_servers_cache({'': {"id": '6f70656e737461636b20342065766572', "name": None},
+                                  'blacklist_1': {"id": 'blacklist_1', "name": 'blacklist_1'},
+                                  'blacklist_2': {"id": 'blacklist_2', "name": 'blacklist_2'}}, [])
     servers = check.servers_cache['servers']
     assert 'server_newly_added' not in servers
     assert 'server-1' not in servers
@@ -89,7 +89,7 @@ def test_get_paginated_server(servers_detail, aggregator):
         'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         'paginated_server_limit': 1
     }, {}, instances=instances)
-    check.get_all_servers({"6f70656e737461636b20342065766572": "testproj"}, "test_name", [])
+    check.populate_servers_cache({'testproj': {"id": "6f70656e737461636b20342065766572", "name": "testproj"}}, [])
     servers = check.servers_cache['servers']
     assert 'server-1' in servers
     assert 'other-1' not in servers

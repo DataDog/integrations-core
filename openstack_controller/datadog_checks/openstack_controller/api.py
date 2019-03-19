@@ -23,8 +23,8 @@ class ApiFactory(object):
     def create(logger, proxies, instance_config):
         keystone_server_url = instance_config.get("keystone_server_url")
         ssl_verify = is_affirmative(instance_config.get("ssl_verify", True))
-        paginated_limit = instance_config.get('paginated_limit')
-        request_timeout = instance_config.get('request_timeout')
+        paginated_limit = instance_config.get('paginated_limit', DEFAULT_PAGINATED_LIMIT)
+        request_timeout = instance_config.get('request_timeout', DEFAULT_API_REQUEST_TIMEOUT)
         user = instance_config.get("user")
         openstack_config_file_path = instance_config.get("openstack_config_file_path")
         openstack_cloud_name = instance_config.get("openstack_cloud_name")
@@ -352,28 +352,29 @@ class SimpleApi(AbstractApi):
         result = []
         query_params = query_params or {}
         query_params['limit'] = self.paginated_limit
-        resp = self._make_request(url, self.headers, params=query_params)
-        result.extend(resp.get(obj, []))
-        # Avoid the extra request since we know we're done when the response has anywhere between
-        # 0 and paginated_server_limit servers
-        while len(resp) == self.paginated_limit:
-            query_params['marker'] = resp[-1]['id']
-            query_params['limit'] = self.paginated_limit
+        while True:
             retry = 0
             while retry < DEFAULT_MAX_RETRY:
-                # `details` endpoints are typically expensive calls,
-                # If it fails, we retry DEFAULT_RETRY times while reducing the `limit` param
-                # otherwise we will backoff
                 try:
                     resp = self._make_request(url, self.headers, params=query_params)
-                    result.extend(resp.get(obj, []))
-
                     break
                 except Exception as e:
-                    query_params['limit'] /= 2
+                    self.logger.debug("Error making paginated request to {}, lowering limit from {} to {}: {}".format(
+                        url, query_params['limit'], query_params['limit']//2, e
+                    ))
+                    query_params['limit'] //= 2
                     retry += 1
-                    if retry == DEFAULT_MAX_RETRY:
-                        raise e
+            else:
+                raise Exception("Error making request to {}".format(url))
+
+            objects = resp.get(obj, [])
+            result.extend(objects)
+            # If there is no link to the next object, it means we're done.
+            # For servers, see https://developer.openstack.org/api-ref/compute/?expanded=list-servers-detailed-detail
+            if resp.get("{}_links".format(obj)) is None:
+                break
+
+            query_params['marker'] = objects[-1]['id']
 
         return result
 

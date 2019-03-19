@@ -83,14 +83,15 @@ setup(
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',
-            'tox',
+            'tox>=3.7.0',
             'twine>=1.11.0',
             'wheel>=0.31.0',
         ],
     },
 
     entry_points={
-        'pytest11': ['datadog_checks = datadog_checks.dev.plugin.plugin'],
+        'pytest11': ['datadog_checks = datadog_checks.dev.plugin.pytest'],
+        'tox': ['datadog_checks = datadog_checks.dev.plugin.tox'],
         'console_scripts': [
             'ddev = datadog_checks.dev.tooling.cli:ddev',
         ],

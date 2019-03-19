@@ -56,7 +56,10 @@ def dd_environment():
         env_vars=env,
         conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version), lambda: time.sleep(20)],
     ):
-        yield common.BASIC_CONFIG
+        if couch_version == '1':
+            yield common.BASIC_CONFIG
+        elif couch_version == '2':
+            yield common.BASIC_CONFIG_V2
 
 
 def generate_data(couch_version):
