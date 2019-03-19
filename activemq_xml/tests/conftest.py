@@ -8,9 +8,9 @@ import tarfile
 
 import pytest
 
-from datadog_checks.dev import docker_run, TempDir
+from datadog_checks.dev import TempDir, docker_run
 
-from .common import HERE, URL, CONFIG
+from .common import CONFIG, HERE, URL
 
 
 @pytest.fixture(scope="session", autouse=True)

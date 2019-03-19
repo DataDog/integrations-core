@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .activemq_xml import ActiveMQXML
 from .__about__ import __version__
+from .activemq_xml import ActiveMQXML
 
-__all__ = [
-    "__version__",
-    "ActiveMQXML"
-]
+__all__ = ["__version__", "ActiveMQXML"]
