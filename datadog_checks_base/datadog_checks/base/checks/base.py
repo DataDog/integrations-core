@@ -315,9 +315,9 @@ class __AgentCheckPy3(object):
         #     ('hostname2', {'src2_name': ['test2:t3']})
         # ]
         try:
-            for x in external_tags:
-                for src_name, tags in iteritems(x[1]):
-                    x[1][src_name] = self._normalize_tags_type(tags)
+            for _, source_map in external_tags:
+                for src_name, tags in iteritems(source_map):
+                    source_map[src_name] = self._normalize_tags_type(tags)
             datadog_agent.set_external_tags(external_tags)
         except IndexError:
             self.log.exception('Unexpected external tags format: {}'.format(external_tags))
@@ -757,10 +757,11 @@ class __AgentCheckPy2(object):
         #     ('hostname', {'src_name': ['test:t1']}),
         #     ('hostname2', {'src2_name': ['test2:t3']})
         # ]
+
         try:
-            for x in external_tags:
-                for src_name, tags in iteritems(x[1]):
-                    x[1][src_name] = self._normalize_tags_type(tags)
+            for _, source_map in external_tags:
+                for src_name, tags in iteritems(source_map):
+                    source_map[src_name] = self._normalize_tags_type(tags)
             datadog_agent.set_external_tags(external_tags)
         except IndexError:
             self.log.exception('Unexpected external tags format: {}'.format(external_tags))
