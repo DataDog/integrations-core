@@ -31,6 +31,7 @@ STANDARD_FIELDS = {
     'timeout': 10,
     'username': None,
 }
+# For any known legacy fields that may be widespread
 DEFAULT_REMAPPED_FIELDS = {
     # TODO: Remove in 6.13
     'no_proxy': {'name': 'skip_proxy'},
@@ -128,6 +129,10 @@ class RequestsWrapper(object):
         if is_affirmative(config['skip_proxy']):
             proxies = PROXY_SETTINGS_DISABLED.copy()
         else:
+            # Order of precedence is:
+            # 1. instance
+            # 2. init_config
+            # 3. agent config
             proxies = config['proxy'] or init_config.get('proxy')
 
             # TODO: Deprecate this flag now that we support skip_proxy in init_config
