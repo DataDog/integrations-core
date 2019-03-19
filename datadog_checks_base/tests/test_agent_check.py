@@ -223,7 +223,7 @@ class TestTags:
 
     def test_external_host_tag_normalization(self):
         """
-        Tests that th external_host_tag modifies in place the list of tags in the provided object
+        Tests that the external_host_tag modifies in place the list of tags in the provided object
         """
         check = AgentCheck()
         external_host_tags = [('hostname', {'src_name': ['key1:val1']})]
