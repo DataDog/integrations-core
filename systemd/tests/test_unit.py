@@ -2,9 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import six
+
 import pytest
 
 from datadog_checks.systemd import SystemdCheck
+
+import mock
+from six import iteritems
 
 
 def test_config_options(instance):
@@ -52,3 +57,32 @@ def test_cache(instance):
     assert deleted_units['cron.service'] == 'active'
     assert len(created_units) == 0
     assert len(changed_units) == 0
+
+
+
+def test_active_inactive(aggregator, instance):
+
+    all_unit_status = {
+        'ssh.service': 'active',
+        'networking.service': 'active',
+        'cron.service': 'inactive',
+        'systemd-journald.service': 'inactive',
+        'setvtrgb.service': 'active'
+    }
+
+    units = {
+        'systemd.units.active': 3,
+        'systemd.units.inactive': 2
+    }
+
+    with mock.patch('datadog_checks.systemd.systemd.pystemd') as mock_pystemd_units:
+        mock_pystemd_units.pystemd.units.info = list_unit_files_mock
+        check = SystemdCheck('systemd', {}, [instance])
+        unit_status = check.get_all_unit_status()
+        assert len(unit_status) > 0
+        """
+        check.report_statuses(unit_status, tags)
+        
+        for _, m in iteritems(aggregator._metrics):
+            assert bytes(units[m[0].name]) == m[0].value
+        """

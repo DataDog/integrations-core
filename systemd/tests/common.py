@@ -7,19 +7,16 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-CONFIG = {
-    'instances': [
-        {
-            "units": [
-                "networking.service",
-                "cron.service",
-                "ssh.service"
-            ],
-            'collect_all_units': False
+EXPECTED_METRICS = [
+    'systemd.units.inactive',
+    'systemd.units.active',
+    'systemd.unit.processes'
+]
 
-        }
-    ]
-}
+EXPECTED_TAGS = [
+    'unit:ssh.service',
+    'unit:cron.service',
+    'unit:networking.service'
+]
 
-DEFAULT_UNIT_ID = 'ssh.service'
-DEFAULT_UNIT_STATE = 'active'
+EXPECTED_SERVICE_CHECK = 'systemd.unit.active'

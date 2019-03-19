@@ -26,15 +26,16 @@ The Systemd check is included in the [Datadog Agent][2] package. No additional i
 
 ### Metrics
 
-Systemd does not include any metrics.
+See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Service Checks
 
-Systemd does not include any service checks.
+**systemd.unit.active**:  
+Returns `CRITICAL` if the unit's state is 'active' or 'failed', `WARN` if it's 'deactivating', otherwise returns `OK`.
 
 ### Events
 
-Systemd does not include any events.
+The Systemd check emits an event to Datadog each time a unit in the configuration file changes state.
 
 ## Troubleshooting
 
@@ -44,4 +45,5 @@ Need help? Contact [Datadog support][5].
 [2]: https://github.com/DataDog/integrations-core/blob/master/systemd/datadog_checks/systemd/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://docs.datadoghq.com/help/
+[5]: https://github.com/DataDog/integrations-core/blob/master/systemd/metadata.csv
+[6]: https://docs.datadoghq.com/help/

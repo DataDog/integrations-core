@@ -1,1 +1,2 @@
-pystemd==0.5.0
+pystemd==0.5.0; python_version < '3.5'
+pystemd==0.6.0; python_version > '3.5'

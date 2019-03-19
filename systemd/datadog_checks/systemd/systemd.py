@@ -6,7 +6,7 @@ import copy
 from collections import defaultdict
 from six import iteritems
 import pystemd
-from pystemd.systemd1 import Manager
+# from pystemd.systemd1 import Manager
 from pystemd.systemd1 import Unit
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -31,9 +31,7 @@ class SystemdCheck(AgentCheck):
         self.report_status = instance.get('report_status', False)
         self.report_processes = instance.get('report_processes', True)
 
-        # self.collect_all = is_affirmative(instance.get('collect_all_units', False))
-        # self.units = instance.get('units', [])
-        # to store the state of a unit and compare it at the next run
+        # cache to store the state of a unit and compare it at the next run
         self.unit_cache = defaultdict(dict)
 
         # unit_cache = {
@@ -65,27 +63,22 @@ class SystemdCheck(AgentCheck):
         self.report_created_units(created_units, self.tags)
 
         if self.report_status:
-            self.report_statuses(current_unit_status, self.tags, self.report_processes)
+            all_units = self.get_all_unit_status()
+            self.report_statuses(all_units, self.tags)
 
         # we update the cache at the end of the check run
         self.unit_cache = current_unit_status
 
     def get_all_unit_status(self):
         m = pystemd.systemd1.Manager(_autoload=True)
+        # list_unit_files is a list of tuples including the unit names and status
         list_unit_files = m.Manager.ListUnits()
-        manager = Manager()
-        manager.load()
-
-        # list_unit_files = manager.Manager.ListUnitFiles()
 
         unit_status = defaultdict(dict)
 
         for unit in list_unit_files:
-            # full unit name includes path - we take the string before the last "/"
-            unit_short_name = unit[0]
-            # unit_short_name = u.rpartition('/')[2]
-            unit_state = unit[3]
-            # unit_state = self.get_state_single_unit(unit_short_name)
+            unit_short_name = unit[0] # unit name/id
+            unit_state = unit[3] # unit state
             unit_status[unit_short_name] = unit_state
 
         return unit_status
@@ -104,9 +97,8 @@ class SystemdCheck(AgentCheck):
             if current_status:
                 if current_status != previous_unit_status:
                     changed[unit_short_name] = current_status
-                    self.log.info("current status IS found")
             else:
-                self.log.info("current unit not found")
+                self.log.debug("unit {} not found".format(unit_short_name))
                 # We list all previous cached unit status that do not exist anymore
                 deleted[unit_short_name] = previous_unit_status
 
@@ -114,8 +106,6 @@ class SystemdCheck(AgentCheck):
 
     def report_changed_units(self, units, tags):
         for unit, state in iteritems(units):
-            # self.log.info("changed units:")
-            # self.log.info(units)
             self.event({
                 "event_type": "unit.status.changed",
                 "msg_title": "unit {} changed state".format(unit),
@@ -125,8 +115,6 @@ class SystemdCheck(AgentCheck):
 
     def report_deleted_units(self, units, tags):
         for unit, state in iteritems(units):
-            # self.log.info("deleted units:")
-            # self.log.info(units)
             self.event({
                 "event_type": "unit.status.deleted",
                 "msg_title": "unit {} cannot be found".format(unit),  # TODO: check wording
@@ -136,8 +124,6 @@ class SystemdCheck(AgentCheck):
 
     def report_created_units(self, units, tags):
         for unit, state in iteritems(units):
-            # self.log.info("created units:")
-            # self.log.info(units)
             self.event({
                 "event_type": "unit.status.created",
                 "msg_title": "new unit {} has been found".format(unit),  # TODO: check wording
@@ -145,38 +131,22 @@ class SystemdCheck(AgentCheck):
                 "tags": tags
             })
 
-    def report_statuses(self, units, tags, report_processes):
+    def report_statuses(self, units, tags):
         active_units = inactive_units = 0
         for unit, state in iteritems(units):
-            # self.log.info("state_debug:{}".format(state))
             try:
                 if state == b'active':
                     active_units += 1
-                    """
-                    self.service_check(
-                        self.UNIT_STATUS_SC,
-                        AgentCheck.OK,
-                        tags=["unit:{}".format(unit)] + tags
-                    )
-                    """
                     # if report_processes:
                     #    self.report_number_processes(unit, tags)
                     # active_units += 1
                 if state == b'inactive':
                     inactive_units += 1
-                    """
-                    self.service_check(
-                        self.UNIT_STATUS_SC,
-                        AgentCheck.CRITICAL,
-                        tags=["unit:{}".format(unit)] + tags
-                    )
-                    """
-                    # inactive_units += 1
             except pystemd.dbusexc.DBusInvalidArgsError as e:
                 self.log.debug("Cannot retrieve unit status for {}, {}".format(unit, e))
 
-        self.gauge('systemd.units.active', active_units)
-        self.gauge('systemd.units.inactive', inactive_units)
+        self.gauge('systemd.units.active', active_units, tags)
+        self.gauge('systemd.units.inactive', inactive_units, tags)
 
     def get_state_single_unit(self, unit_id):
         try:
@@ -213,6 +183,9 @@ class SystemdCheck(AgentCheck):
             )
 
     def report_number_processes(self, unit, tags):
+        """
+        We use systemctl directly here since the unit.Service.GetProcesses() method requires elevated privileges
+        """
         systemctl_flags = ['status', unit]
         try:
             output = get_subprocess_output(["systemctl"] + systemctl_flags, self.log)

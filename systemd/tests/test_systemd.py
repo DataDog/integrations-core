@@ -4,16 +4,21 @@
 
 from datadog_checks.systemd import SystemdCheck
 
+from . import common
 
-def test_check(aggregator, instance):
-    check = SystemdCheck('systemd', {}, [instance])
-    check.check(instance)
-    # expected service checks
-    aggregator.assert_service_check('systemd.unit.active', status=SystemdCheck.OK, tags=['unit:ssh.service'])
+
+def test_check(aggregator, instance_collect_all):
+    check = SystemdCheck('systemd', {}, [instance_collect_all])
+    check.check(instance_collect_all)
+    # expected service check
+    status = SystemdCheck.OK
+
+    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status, tags=['unit:ssh.service'])
+    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status, tags=['unit:networking.service'])
+    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status, tags=['unit:cron.service'])
+
     # expected metric
-    aggregator.assert_metric('systemd.unit.processes')
+    for metric in common.EXPECTED_METRICS:
+        aggregator.assert_metric(metric)
 
-
-def test_check_inactive_units(aggregator, instance):
-    check = SystemdCheck('systemd', {}, [instance])
-    check.check(instance)
+    aggregator.assert_all_metrics_covered()
