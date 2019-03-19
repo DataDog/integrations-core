@@ -390,8 +390,8 @@ class __AgentCheckPy3(object):
         try:
             instance = copy.deepcopy(self.instances[0])
 
-            if 'debug_check' in self.init_config:
-                enter_pdb(self.check, line=self.init_config['debug_check'], args=(instance,))
+            if 'set_break_point' in self.init_config:
+                enter_pdb(self.check, line=self.init_config['set_break_point'], args=(instance,))
             else:
                 self.check(instance)
 
@@ -782,8 +782,8 @@ class __AgentCheckPy2(object):
         try:
             instance = copy.deepcopy(self.instances[0])
 
-            if 'debug_check' in self.init_config:
-                enter_pdb(self.check, line=self.init_config['debug_check'], args=(instance,))
+            if 'set_break_point' in self.init_config:
+                enter_pdb(self.check, line=self.init_config['set_break_point'], args=(instance,))
             else:
                 self.check(instance)
 
