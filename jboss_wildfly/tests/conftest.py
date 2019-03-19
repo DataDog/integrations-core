@@ -9,11 +9,10 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.utils import load_jmx_config
 
-from .common import HERE, HOST, JMX_PORT
+from .common import HERE
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    env_vars = {'JMX_HOST': HOST, 'JMX_PORT': JMX_PORT}
-    with docker_run(os.path.join(HERE, 'docker', 'docker-compose.yml', env_vars=env_vars)):
+    with docker_run(os.path.join(HERE, 'docker', 'docker-compose.yml')):
         yield load_jmx_config(), 'local'

@@ -7,4 +7,3 @@ CHECK_NAME = 'jboss_wildfly'
 
 HERE = get_here()
 HOST = get_docker_hostname()
-JMX_PORT = 7091

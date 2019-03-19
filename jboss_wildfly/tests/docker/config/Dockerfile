@@ -1,5 +1,5 @@
-FROM jboss/wildfly:8.2.1.Final
+FROM jboss/wildfly:latest
 
-COPY standalone.conf /opt/jboss/wildfly/bin
+RUN /opt/jboss/wildfly/bin/add-user.sh datadog dog --silent
 
-CMD ["/opt/jboss/wildfly/bin/standalone.sh"]
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]

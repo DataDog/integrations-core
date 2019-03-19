@@ -1,14 +1,9 @@
 instances:
 
-  ## @param host - string - required
-  ## JBoss/WildFly host to connect to
+  ## @param jmx_url - string - required
+  ## JBoss/WildFly URL to connect to
   #
-  - host: localhost
-
-  ## @param port - integer - required
-  ## JBoss/WildFly port to connect to
-  #
-    port: 7091
+  - jmx_url: "service:jmx:remote+http://localhost:9990"
 
   ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.

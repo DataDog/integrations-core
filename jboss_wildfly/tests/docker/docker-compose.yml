@@ -4,7 +4,4 @@ services:
     build:
       context: ./config
     ports:
-     - "${JMX_PORT}:${JMX_PORT}"
-    environment:
-     - JMX_HOST
-     - JMX_PORT
+     - 9990:9990
