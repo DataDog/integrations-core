@@ -19,5 +19,6 @@
     "web"
   ],
   "type": "check",
+  "integration_id": "jboss-wildfly",
   "is_public": false
 }
