@@ -303,7 +303,8 @@ class __AgentCheckPy3(object):
                     x[1][src_name] = self._normalize_tags_type(tags)
             _set_external_tags(external_tags)
         except IndexError:
-            self.log.debug('Unexpected external tags format. Not sending: {}'.format(external_tags))
+            self.log.exception('Unexpected external tags format: {}'.format(external_tags))
+            raise
 
     def normalize(self, metric, prefix=None, fix_case=False):
         """
@@ -729,7 +730,8 @@ class __AgentCheckPy2(object):
                     x[1][src_name] = self._normalize_tags_type(tags)
             _set_external_tags(external_tags)
         except IndexError:
-            self.log.debug('Unexpected external tags format. Not sending: {}'.format(external_tags))
+            self.log.exception('Unexpected external tags format: {}'.format(external_tags))
+            raise
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """
