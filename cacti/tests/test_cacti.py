@@ -103,14 +103,6 @@ CACTI_CONFIG = {'mysql_host': 'nohost', 'mysql_user': 'mocked', 'rrd_path': '/rr
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture
 def check():
     return Cacti(CHECK_NAME, {}, {})
 
