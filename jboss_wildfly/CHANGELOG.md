@@ -1,2 +1,2 @@
-# CHANGELOG - JBoss/Wildfly
+# CHANGELOG - JBoss/WildFly
 

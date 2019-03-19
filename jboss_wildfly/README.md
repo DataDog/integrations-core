@@ -1,4 +1,4 @@
-# Agent Check: JBoss/Wildfly
+# Agent Check: JBoss/WildFly
 
 ## Overview
 

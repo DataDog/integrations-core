@@ -24,7 +24,7 @@ CHECKS_BASE_REQ = 'datadog-checks-base'
 setup(
     name='datadog-jboss_wildfly',
     version=ABOUT['__version__'],
-    description='The JBoss/Wildfly check',
+    description='The JBoss/WildFly check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent jboss wildfly check',
