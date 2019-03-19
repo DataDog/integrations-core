@@ -3,6 +3,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import sys
+
 import mock
 import pytest
 from six import PY3
@@ -217,6 +219,21 @@ class TestTags:
 
         normalized_tags = check._normalize_tags_type(tags, None)
         assert normalized_tags == ['tag:foo']
+
+    def test_external_host_tag_normalization(self):
+        """
+        Tests that th external_host_tag modifies in place the list of tags in the provided object
+        """
+        check = AgentCheck()
+
+        # Mock the `datadog_agent` module as its not the point of this test and not
+        # available in the testing framework
+        datadog_agent = sys.modules['datadog_agent'] = mock.Mock()
+        external_host_tags = [('hostname', {'src_name': ['key1:val1']})]
+        with mock.patch.object(check, '_normalize_tags_type', return_value=['normalize:tag']):
+            datadog_agent.set_external_tags.return_value = ['normalize:tag']
+            check.set_external_tags(external_host_tags)
+            assert external_host_tags == [('hostname', {'src_name': ['normalize:tag']})]
 
 
 class LimitedCheck(AgentCheck):
