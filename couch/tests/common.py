@@ -44,6 +44,12 @@ BASIC_CONFIG = {
     "server": URL
 }
 
+BASIC_CONFIG_V2 = {
+    "server": URL,
+    "user": "dduser",
+    "password": "pawprint",
+}
+
 BASIC_CONFIG_TAGS = [
     "instance:{}".format(URL)
 ]
