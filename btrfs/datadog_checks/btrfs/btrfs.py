@@ -4,18 +4,17 @@
 from __future__ import division
 
 import array
-from collections import defaultdict
 import fcntl
 import itertools
 import os
 import struct
+from collections import defaultdict
 
 import psutil
 from six import iteritems
 from six.moves import range
 
 from datadog_checks.checks import AgentCheck
-
 
 MIXED = "mixed"
 DATA = "data"
@@ -33,41 +32,44 @@ GLB_RSV = "globalreserve"
 
 # https://github.com/torvalds/linux/blob/98820a7e244b17b8a4d9e9d1ff9d3b4e5bfca58b/include/uapi/linux/btrfs_tree.h#L829-L840
 # https://github.com/torvalds/linux/blob/98820a7e244b17b8a4d9e9d1ff9d3b4e5bfca58b/include/uapi/linux/btrfs_tree.h#L879
-FLAGS_MAPPER = defaultdict(lambda: (SINGLE, UNKNOWN), {
-    1: (SINGLE, DATA),
-    2: (SINGLE, SYSTEM),
-    4: (SINGLE, METADATA),
-    5: (SINGLE, MIXED),
-    9: (RAID0, DATA),
-    10: (RAID0, SYSTEM),
-    12: (RAID0, METADATA),
-    13: (RAID0, MIXED),
-    17: (RAID1, DATA),
-    18: (RAID1, SYSTEM),
-    20: (RAID1, METADATA),
-    21: (RAID1, MIXED),
-    33: (DUP, DATA),
-    34: (DUP, SYSTEM),
-    36: (DUP, METADATA),
-    37: (DUP, MIXED),
-    65: (RAID10, DATA),
-    66: (RAID10, SYSTEM),
-    68: (RAID10, METADATA),
-    69: (RAID10, MIXED),
-    129: (RAID5, DATA),
-    130: (RAID5, SYSTEM),
-    132: (RAID5, METADATA),
-    133: (RAID5, MIXED),
-    257: (RAID6, DATA),
-    258: (RAID6, SYSTEM),
-    260: (RAID6, METADATA),
-    261: (RAID6, MIXED),
-    562949953421312: (SINGLE, GLB_RSV)
-})
+FLAGS_MAPPER = defaultdict(
+    lambda: (SINGLE, UNKNOWN),
+    {
+        1: (SINGLE, DATA),
+        2: (SINGLE, SYSTEM),
+        4: (SINGLE, METADATA),
+        5: (SINGLE, MIXED),
+        9: (RAID0, DATA),
+        10: (RAID0, SYSTEM),
+        12: (RAID0, METADATA),
+        13: (RAID0, MIXED),
+        17: (RAID1, DATA),
+        18: (RAID1, SYSTEM),
+        20: (RAID1, METADATA),
+        21: (RAID1, MIXED),
+        33: (DUP, DATA),
+        34: (DUP, SYSTEM),
+        36: (DUP, METADATA),
+        37: (DUP, MIXED),
+        65: (RAID10, DATA),
+        66: (RAID10, SYSTEM),
+        68: (RAID10, METADATA),
+        69: (RAID10, MIXED),
+        129: (RAID5, DATA),
+        130: (RAID5, SYSTEM),
+        132: (RAID5, METADATA),
+        133: (RAID5, MIXED),
+        257: (RAID6, DATA),
+        258: (RAID6, SYSTEM),
+        260: (RAID6, METADATA),
+        261: (RAID6, MIXED),
+        562949953421312: (SINGLE, GLB_RSV),
+    },
+)
 
-BTRFS_IOC_SPACE_INFO = 0xc0109414
-BTRFS_IOC_DEV_INFO = 0xd000941e
-BTRFS_IOC_FS_INFO = 0x8400941f
+BTRFS_IOC_SPACE_INFO = 0xC0109414
+BTRFS_IOC_DEV_INFO = 0xD000941E
+BTRFS_IOC_FS_INFO = 0x8400941F
 
 TWO_LONGS_STRUCT = struct.Struct("=2Q")  # 2 Longs
 THREE_LONGS_STRUCT = struct.Struct("=3Q")  # 3 Longs
@@ -83,7 +85,6 @@ def sized_array(count):
 
 
 class FileDescriptor(object):
-
     def __init__(self, mountpoint):
         self.fd = os.open(mountpoint, os.O_DIRECTORY)
 
@@ -101,7 +102,6 @@ class FileDescriptor(object):
 
 
 class BTRFS(AgentCheck):
-
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
         if instances is not None and len(instances) > 1:
@@ -183,7 +183,7 @@ class BTRFS(AgentCheck):
                 tags = [
                     'usage_type:{}'.format(usage_type),
                     'replication_type:{}'.format(replication_type),
-                    "device:{}".format(device)
+                    "device:{}".format(device),
                 ]
                 tags.extend(custom_tags)
 
