@@ -97,10 +97,12 @@ init_config:
   #
   collect_default_metrics: true
 
-  # Additional section to allow jmx connection to JBoss/WildFly.
-  # See documentation: https://docs.datadoghq.com/integrations/java/#monitoring-jboss-wildfly-applications
-  custom_jar_paths:
-  - /path/to/jboss-cli-client.jar
+  ## @param custom_jar_paths - list - optional
+  ## When using JBoss default JMX implementation, the client JAR which allows connecting to it. 
+  ## See documentation: https://docs.datadoghq.com/integrations/java/#monitoring-jboss-wildfly-applications
+  #
+  #  custom_jar_paths:
+  #  - /path/to/jboss-cli-client.jar
 
   ## List of metrics to be collected by the integration
   ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it

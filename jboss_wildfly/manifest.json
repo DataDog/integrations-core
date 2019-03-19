@@ -16,7 +16,7 @@
   ],
   "public_title": "Datadog-JBoss/WildFly Integration",
   "categories": [
-    ""
+    "web"
   ],
   "type": "check",
   "is_public": false
