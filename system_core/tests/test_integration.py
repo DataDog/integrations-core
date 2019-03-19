@@ -15,4 +15,4 @@ def test_check(aggregator, check):
     check.check(deepcopy(common.INSTANCE))
 
     for metric in common.EXPECTED_METRICS:
-        aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, common.INSTANCE["tags"][0])

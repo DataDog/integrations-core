@@ -10,7 +10,7 @@ HERE = get_here()
 CHECK_NAME = "system_core"
 
 INSTANCE = {
-    "integ": {}
+    "tags": ["tag1:value1"]
 }
 
 if Platform.is_mac():
