@@ -5,7 +5,6 @@
 import collections
 
 import mock
-import pytest
 
 # project
 from datadog_checks.btrfs import BTRFS
