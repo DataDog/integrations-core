@@ -16,6 +16,7 @@ from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 from six import iteritems, itervalues, string_types, text_type
 
+from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.base import AgentCheck, is_affirmative
 
 # Kafka Errors
@@ -80,15 +81,7 @@ class KafkaCheck(AgentCheck):
             self._validate_explicit_consumer_groups(consumer_groups)
 
         zk_consumer_offsets = None
-
-        if isinstance(zk_hosts_ports, list):
-            zk_hosts_ports = [
-                zk_host_port for zk_host_port in zk_hosts_ports if self._should_zk(
-                    zk_host_port, zk_interval, get_kafka_consumer_offsets
-                )
-            ]
-
-        if zk_hosts_ports:
+        if zk_hosts_ports and self._should_zk(zk_hosts_ports, zk_interval, get_kafka_consumer_offsets):
             zk_consumer_offsets, consumer_groups = self._get_zk_consumer_offsets(
                 zk_hosts_ports, consumer_groups, zk_prefix)
 
@@ -370,9 +363,9 @@ class KafkaCheck(AgentCheck):
         try:
             children = zk_conn.get_children(zk_path)
         except NoNodeError:
-            self.log.info('No zookeeper node at {}'.format(zk_path))
-        except Exception as e:
-            self.log.exception('Could not read {} from {}. Exception: {}'.format(name_for_error, zk_path, e))
+            self.log.info('No zookeeper node at %s', zk_path)
+        except Exception:
+            self.log.exception('Could not read %s from %s', name_for_error, zk_path)
         return children
 
     def _get_zk_consumer_offsets(self, zk_hosts_ports, consumer_groups=None, zk_prefix=''):
@@ -498,16 +491,16 @@ class KafkaCheck(AgentCheck):
 
         return consumer_offsets
 
-    def _should_zk(self, zk_host_port, interval, kafka_collect=False):
+    def _should_zk(self, zk_hosts_ports, interval, kafka_collect=False):
         if not kafka_collect or not interval:
             return True
-
+        zk_hosts_ports_hash = hash_mutable(zk_hosts_ports)
         now = time()
-        last = self._zk_last_ts.get(zk_host_port, 0)
+        last = self._zk_last_ts.get(zk_hosts_ports_hash, 0)
 
         should_zk = False
         if now - last >= interval:
-            self._zk_last_ts[zk_host_port] = last
+            self._zk_last_ts[zk_hosts_ports_hash] = last
             should_zk = True
 
         return should_zk

@@ -7,6 +7,7 @@ import time
 import pytest
 from six import iteritems
 
+from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.kafka_consumer import KafkaCheck
 from .common import HOST, PARTITIONS, TOPICS, ZK_CONNECT_STR, is_supported
 
@@ -103,9 +104,10 @@ def test_check_nogroups_zk(aggregator, zk_instance):
 def test_should_zk():
     check = KafkaCheck('kafka_consumer', {}, {})
     # Kafka Consumer Offsets set to True and we have a zk_connect_str that hasn't been run yet
-    assert (check._should_zk(ZK_CONNECT_STR, 10, True) is True)
+    assert (check._should_zk([ZK_CONNECT_STR, ZK_CONNECT_STR], 10, True) is True)
     # Kafka Consumer Offsets is set to False, should immediately ZK
     assert (check._should_zk(ZK_CONNECT_STR, 10, False) is True)
     # Last time we checked ZK_CONNECT_STR was less than interval ago, shouldn't ZK
-    check._zk_last_ts[ZK_CONNECT_STR] = time.time()
+    zk_connect_hash = hash_mutable(ZK_CONNECT_STR)
+    check._zk_last_ts[zk_connect_hash] = time.time()
     assert (check._should_zk(ZK_CONNECT_STR, 100, True) is False)
