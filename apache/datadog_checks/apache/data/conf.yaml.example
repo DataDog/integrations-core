@@ -1,7 +1,7 @@
 init_config:
 
 instances:
-    
+
   ## @param apache_status_url - string - required
   ## Status url of your Apache server.
   #
@@ -33,14 +33,14 @@ instances:
   #  disable_ssl_validation: false
 
   ## @param connect_timeout - integer - optional
-  ## Overrides the default connection timeout value, 
-  ## and fails the check if the time to establish the (TCP) connection 
+  ## Overrides the default connection timeout value,
+  ## and fails the check if the time to establish the (TCP) connection
   ## exceeds the connect_timeout value (in seconds)
   #
   #  connect_timeout: <VALUE_IN_SECOND>
-    
+
   ## @param receive_timeout - integer - optional
-  ## Overrides the default received timeout value, and fails the check if the time to receive 
+  ## Overrides the default received timeout value, and fails the check if the time to receive
   ## the server status from the Apache server exceeds the receive_timeout value (in seconds)
   #
   #  receive_timeout: <VALUE_IN_SECOND>

@@ -4,9 +4,9 @@ instances:
 
   ## @param host - string - required
   ## By default, this check runs against a single instance - the current
-  ## machine that the Agent is running on. It checks the PDH (Performance 
+  ## machine that the Agent is running on. It checks the PDH (Performance
   ## Data Helper) performance counters for IIS on that machine.
-  ## 
+  ##
   ## "." means the current host, any other value makes the Agent attempt to connect to a remote host.
   ## Note: Remote access requires additional permissions - https://support.microsoft.com/en-us/help/922775/how-to-troubleshoot-monitoring-and-logging-issues-for-performance-coun
   #
@@ -14,7 +14,7 @@ instances:
 
   ## @param username - string - optional
   ## Username for the remote access.
-  # 
+  #
   #  username: <USERNAME>
 
   ## @param password - string - optional
@@ -31,7 +31,7 @@ instances:
   #  sites:
   #    - <WEB_SITE_1>
   #    - <WEB_SITE_2>
-  
+
   ## @param tags  - list of key:value elements - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
   ##
@@ -46,27 +46,26 @@ instances:
   ## can be specified using the `additional_metrics` configuration.
   ## The additional metrics is a list of additional counters to collect.  The
   ## list is formatted as follows:
-  ##  
+  ##
   ## ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
   ##
   ## <COUNTERSET_NAME> is the name of the PDH Counter Set (the name of the counter).
-  ## <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example 
+  ## <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example
   ##                        "Default Web Site".  Specify 'none' For all instances of the counter.
   ## <COUNTER_NAME> is the individual counter to report.
   ## <METRIC_NAME> is the name you want to show up in Datadog.
   ## <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge,
   ##                rate, histogram or counter
-  #   
+  #
   #  additional_metrics:
   #    - ['Web Service', none, 'CGI Requests/sec', iis.httpd_request_method.cgi, gauge]
 
   ## @param is_2008 - boolean - optional - default: false
   ## Necause of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as
   ## TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
-  #   
+  #
   #  is_2008: false
-  
-  
+
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
@@ -78,7 +77,7 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 
-#logs:    
+#logs:
 #  - type: file
 #    path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
 #    service: iis

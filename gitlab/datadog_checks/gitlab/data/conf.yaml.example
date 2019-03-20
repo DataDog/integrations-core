@@ -11,7 +11,7 @@ instances:
   ## URL of the metrics endpoint of prometheus
   #
     prometheus_endpoint: http://<PROMETHEUS_ENDPOINT>:<PROMETHEUS_PORT>/metrics
-    
+
   ## @param send_histograms_buckets - boolean - optional - default: true
   ## The histogram buckets can be noisy and generate a lot of tags.
   ## send_histograms_buckets controls whether or not you want to pull them.
@@ -25,7 +25,7 @@ instances:
   #  connect_timeout: 5
 
   ## @param receive_timeout - integer - optional - default: 15
-  ## This parameter overrides the default value, and fails the check if the time 
+  ## This parameter overrides the default value, and fails the check if the time
   ## to receive the server status from the Apache server exceeds the receive_timeout value (in seconds).
   #
   #  receive_timeout: 15
@@ -38,7 +38,7 @@ instances:
   ## @param ssl_ca_certs - string - optional
   ## If ssl_cert_validation is enabled, provide with this parameter a file path
   ## that lists trusted CA certificates.
-  # 
+  #
   #  ssl_ca_certs: <CERT_PATH>
 
   ## @param tags  - list of key:value string - optional
@@ -51,7 +51,7 @@ instances:
   #    - <KEY_2>:<VALUE_2>
 
 init_config:
-  
+
   ## @param allowed_metrics - list of strings - required
   ## List of metrics to extract from Prometheus
   #

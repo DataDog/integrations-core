@@ -38,7 +38,7 @@ instances:
     #   source : (mandatory) attribute that defines which integration is sending the logs
     #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
     #   tags: (optional) add tags to each logs collected
-    
+
     # - type: file
     #   path: /var/log/couchdb/couch.log
     #   source: couchdb
