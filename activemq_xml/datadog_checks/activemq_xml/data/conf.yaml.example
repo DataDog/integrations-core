@@ -10,20 +10,20 @@ instances:
   - url: http://localhost:8161
 
   ## @param username - string - optional
-  ## Username from the credentials needed to connect to the url. 
+  ## Username from the credentials needed to connect to the url.
   #
   #  username: <USERNAME>
-  
+
   ## @param password - string - optional
-  ## Password from the credentials needed to connect to the host. 
+  ## Password from the credentials needed to connect to the host.
   #
   #  password: <PASSWORD>
-  
+
   ## @param suppress_errors - boolean - optional - default: false
   ## Suppresses connection errors if url is expected to be sometimes offline (e.g. standby host).
   #
   #  suppress_errors: false
-     
+
   ## @param detailed_queues - list of string - optional
   ## If you have more than 300 queues you need to list the ones you want to track.
   #

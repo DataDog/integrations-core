@@ -23,32 +23,32 @@ init_config:
   ## should be >=104 (to accomodate for the largest possible TCP header)
   #
   snaplen: 512
-  
+
   ## @param idle_ttl - integer - required
   ## Time after which an idle flow (no traffic received) is flushed.
   #
   idle_ttl: 300
-    
+
   ## @param exp_ttl - integer - required
   ## Time after which a finished flow is flushed.
   #
   exp_ttl: 60
-    
+
   ## @param statsd_ip - string - required
   ## StatsD IP.
   #
   statsd_ip: 127.0.0.1
-  
+
   ## @param statsd_port - integer - required
   ## StatsD Port.
   #
   statsd_port: 8125
-    
+
   ## @param log_to_file - boolean - required
   ## Whether or not this check should log in the Agent log file.
   #
   log_to_file: true
-  
+
   ## @param log_level - string - required
   ## Minimum level of logs logged by this check.
   ## available levels: trace, debug, info, warning, error, critical
@@ -65,13 +65,13 @@ instances:
   ## @param ips - list of strings - required
   ## Whitelist by IP - The check performs name lookup and tag with hostname if available.
   ## Which avoid having go-metro inspect every incoming/outgoing packet through the interface.
-  # 
-    ips: 
+  #
+    ips:
       - <IP>
 
   ## @param hosts - list of strings - required
   ## Whitelist by hostname - The check performs ip lookup and filter by hosts ip's
-  ## Which avoid having go-metro inspect every incoming/outgoing packet through the interface. 
+  ## Which avoid having go-metro inspect every incoming/outgoing packet through the interface.
   #
     hosts:
       - <HOSTNAME>
