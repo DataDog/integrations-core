@@ -67,7 +67,7 @@ class KafkaCheck(AgentCheck):
         zk_hosts_ports = instance.get('zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
         zk_interval = int(instance.get('zk_iteration_ival', 0))
-        get_kafka_consumer_offsets = is_affirmative(instance.get('kafka_consumer_offsets', zk_hosts_ports is None))
+        get_kafka_consumer_offsets = is_affirmative(instance.get('kafka_consumer_offsets', zk_hosts_ports) is None)
 
         custom_tags = instance.get('tags', [])
 
@@ -80,12 +80,13 @@ class KafkaCheck(AgentCheck):
             self._validate_explicit_consumer_groups(consumer_groups)
 
         zk_consumer_offsets = None
-        zk_hosts_ports = [
-            zk_host_port for zk_host_port in zk_hosts_ports if self._should_zk(
-                zk_host_port, zk_interval, get_kafka_consumer_offsets
-            )
-        ]
-        if zk_hosts_ports and self._should_zk(zk_hosts_ports, zk_interval, get_kafka_consumer_offsets):
+
+        if zk_hosts_ports:
+            zk_hosts_ports = [
+                zk_host_port for zk_host_port in zk_hosts_ports if self._should_zk(
+                    zk_host_port, zk_interval, get_kafka_consumer_offsets
+                )
+            ]
             zk_consumer_offsets, consumer_groups = self._get_zk_consumer_offsets(
                 zk_hosts_ports, consumer_groups, zk_prefix)
 
