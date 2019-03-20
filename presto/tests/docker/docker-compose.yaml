@@ -10,8 +10,6 @@ services:
         NODE_ID: coordinator
         VERSION: latest
     container_name: presto_coordinator
-    # labels:
-      # com.datadoghq.ad.logs: '[{"source":"presto"}]'
     ports:
       - "8080:8080"
       - "9997:9999"
@@ -24,8 +22,6 @@ services:
         NODE_ID: worker1
         VERSION: latest
     container_name: presto_worker1
-    # labels:
-      # com.datadoghq.ad.logs: '["source":"presto"]'
     ports:
       - "8081:8080"
       - "9998:9999"
@@ -38,8 +34,6 @@ services:
         NODE_ID: worker2
         VERSION: latest
     container_name: presto_worker2
-    # labels:
-      # com.datadoghq.ad.logs: '["source":"presto"]'
     ports:
       - "8082:8080"
       - "9999:9999"

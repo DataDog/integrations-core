@@ -4,8 +4,8 @@
 import pytest
 
 
-## We don't test JMXFetch based integrations in this repo
-## This is required to allow E2E to spin up the environment
+# We don't test JMXFetch based integrations in this repo
+# This is required to allow E2E to spin up the environment
 @pytest.mark.usefixtures('dd_environment')
 def test():
     pass

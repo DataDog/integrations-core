@@ -10,8 +10,9 @@ from datadog_checks.dev import docker_run, get_here
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-    with docker_run(os.path.join(get_here(), 'docker','docker-compose.yaml')):
+    with docker_run(os.path.join(get_here(), 'docker', 'docker-compose.yaml')):
         yield instance
+
 
 @pytest.fixture(scope='session', autouse=True)
 @pytest.mark.usefixtures('dd_environment')
