@@ -51,7 +51,7 @@ class IIS(PDHBaseCheck):
     def get_iishost(self, instance):
         inst_host = instance.get("host")
         if inst_host in [".", "localhost"]:
-            # Use agen'ts hostname if local
+            # Use agent's hostname if connecting to local machine.
             iis_host = self.hostname
         else:
             iis_host = inst_host
