@@ -45,7 +45,8 @@ instances:
     # secretfile: /etc/varnish/secret
 
     # The (optional) parameters for specifying the host and port to connect to varnishadm
-    # Defaults to "localhost" and "6082" 
+    # Used in version 4.1.0 and above.
+    # Defaults to "localhost" and "6082".
     # daemon_host: localhost
     # daemon_port: 6082
     
