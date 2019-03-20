@@ -1,0 +1,26 @@
+{
+	"name": "Postgres is not running on a replica host",
+	"type": "check",
+	"query": "\"postgres.can_connect\".over(\"*\").last(6).count_by_status()",
+	"message": "This should probably be investigated, try checking the logs for errors.\n",
+	"tags": [
+		"service:postgres"
+	],
+	"threshold_suggestion": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla eget tortor quis urna pharetra accumsan. Nullam mattis purus arcu, sed cursus lacus sodales sed. Suspendisse ut orci sapien. Nam tristique eget massa quis vestibulum. Sed imperdiet tortor at ultricies imperdiet. Nunc pretium, elit eu congue eleifend, justo odio ullamcorper dui, eu consectetur enim arcu et felis. Vestibulum ut elit urna.",
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": true,
+		"no_data_timeframe": 20,
+		"new_host_delay": 7200,
+		"notify_no_data": true,
+		"renotify_interval": 0,
+		"thresholds": {
+			"warning": 1,
+			"ok": 1,
+			"critical": 5
+		}
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"name": "[etcd] cluster has no leader",
+	"type": "metric alert",
+	"query": "max(last_1m):sum:kube_etcd.etcd_server_has_leader{} by {kubernetes_cluster} <= 0",
+	"message": "etcd is reporting that there is no leader for the cluster.\n",
+	"tags": [
+		"service:etcd"
+	],
+	"threshold_suggestion": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla eget tortor quis urna pharetra accumsan. Nullam mattis purus arcu, sed cursus lacus sodales sed. Suspendisse ut orci sapien. Nam tristique eget massa quis vestibulum. Sed imperdiet tortor at ultricies imperdiet. Nunc pretium, elit eu congue eleifend, justo odio ullamcorper dui, eu consectetur enim arcu et felis. Vestibulum ut elit urna.",
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": false,
+		"no_data_timeframe": 10,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": true,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 0
+		}
+	}
+}

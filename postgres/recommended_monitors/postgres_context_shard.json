@@ -1,0 +1,25 @@
+{
+	"name": "[postgres][availability] Context Shard Replica Lag",
+	"type": "query alert",
+	"query": "min(last_5m):avg:postgresql.replication_delay{} by {host} > 60",
+	"message": "The Context shard replica is more than one minute behind. ",
+	"tags": [
+		"service:postgres"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": false,
+		"no_data_timeframe": null,
+		"new_host_delay": 18000,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 60
+		}
+	}
+}

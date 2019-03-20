@@ -1,0 +1,26 @@
+{
+	"name": "[etcd] a high number of leader changes within the etcd cluster are happening",
+	"type": "query alert",
+	"query": "sum(last_1h):sum:kube_etcd.etcd_server_leader_changes_seen_total{*} by {kubernetes_cluster}.as_count() > 100",
+	"message": "Lorem ipsum",
+	"tags": [
+		"service:etcd"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": true,
+		"no_data_timeframe": 10,
+		"require_full_window": true,
+		"new_host_delay": 300,
+		"notify_no_data": true,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 100,
+			"warning": 6
+		}
+	}
+}
