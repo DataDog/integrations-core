@@ -81,12 +81,14 @@ class KafkaCheck(AgentCheck):
 
         zk_consumer_offsets = None
 
-        if zk_hosts_ports:
+        if isinstance(zk_hosts_ports, list):
             zk_hosts_ports = [
                 zk_host_port for zk_host_port in zk_hosts_ports if self._should_zk(
                     zk_host_port, zk_interval, get_kafka_consumer_offsets
                 )
             ]
+
+        if zk_hosts_ports:
             zk_consumer_offsets, consumer_groups = self._get_zk_consumer_offsets(
                 zk_hosts_ports, consumer_groups, zk_prefix)
 
