@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 1.11.0 / 2019-03-20
+
+* [Added] docs update to clarify fields. See [#3336](https://github.com/DataDog/integrations-core/pull/3336).
+
 ## 1.10.0 / 2019-02-18
 
 * [Added] adds redis_db tag to redis.key.length. See [#3008](https://github.com/DataDog/integrations-core/pull/3008).
