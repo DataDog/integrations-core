@@ -98,7 +98,8 @@ def start(ctx, check, env, agent, dev, base, env_vars):
     else:
         agent_build = agent_ver.get(env_type, env_type)
 
-    agent_build = '{}-jmx'.format(agent_build) if use_jmx else agent_build
+    if not agent and use_jmx:
+        agent_build = '{}-jmx'.format(agent_build)
 
     interface = derive_interface(env_type)
     if interface is None:
