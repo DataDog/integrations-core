@@ -68,7 +68,7 @@ See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**presto.can_connect**
+**presto.can_connect**  
 Returns CRITICAL if the Agent is unable to connect to and collect metrics from the monitored Presto instance. Returns OK otherwise.
 
 ### Events
