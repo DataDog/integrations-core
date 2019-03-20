@@ -1,0 +1,122 @@
+# Default metrics collected by this check. You should not have to modify this.
+# See presto metrics.yaml as an example
+# https://github.com/DataDog/integrations-core/blob/master/presto/datadog_checks/presto/data/metrics.yaml
+
+jmx_metrics:
+  - include:
+      bean: presto.execution:name=QueryManager
+      attribute:
+        - AbandonedQueries.OneMinute.Count
+        - AbandonedQueries.OneMinute.Rate
+        - AbandonedQueries.TotalCount
+        - CanceledQueries.OneMinute.Count
+        - CanceledQueries.OneMinute.Rate
+        - CanceledQueries.TotalCount
+        - CompletedQueries.OneMinute.Count
+        - CompletedQueries.OneMinute.Rate
+        - CompletedQueries.TotalCount
+        - ConsumedCpuTimeSecs.OneMinute.Count
+        - ConsumedCpuTimeSecs.OneMinute.Rate
+        - ConsumedCpuTimeSecs.TotalCount
+        - CpuInputByteRate.AllTime.Avg
+        - CpuInputByteRate.AllTime.P75
+        - CpuInputByteRate.AllTime.P95
+        - CpuInputByteRate.OneMinute.Avg
+        - CpuInputByteRate.OneMinute.Count
+        - CpuInputByteRate.OneMinute.Max
+        - CpuInputByteRate.OneMinute.Min
+        - CpuInputByteRate.OneMinute.P75
+        - CpuInputByteRate.OneMinute.P95
+        - CpuInputByteRate.OneMinute.Total
+        - ExecutionTime.AllTime.Avg
+        - ExecutionTime.AllTime.Count
+        - ExecutionTime.AllTime.Max
+        - ExecutionTime.AllTime.Min
+        - ExecutionTime.AllTime.P75
+        - ExecutionTime.AllTime.P95
+        - ExecutionTime.OneMinute.Avg
+        - ExecutionTime.OneMinute.Max
+        - ExecutionTime.OneMinute.Min
+        - ExecutionTime.OneMinute.P75
+        - ExecutionTime.OneMinute.P95
+        - Executor.ActiveCount
+        - Executor.CompletedTaskCount
+        - Executor.CorePoolSize
+        - Executor.PoolSize
+        - Executor.QueuedTaskCount
+        - Executor.TaskCount
+        - ExternalFailures.OneMinute.Count
+        - ExternalFailures.OneMinute.Rate
+        - ExternalFailures.TotalCount
+        - FailedQueries.OneMinute.Count
+        - FailedQueries.OneMinute.Rate
+        - FailedQueries.TotalCount
+        - InsufficientResourcesFailures.OneMinute.Count
+        - InsufficientResourcesFailures.OneMinute.Rate
+        - InsufficientResourcesFailures.TotalCount
+        - InternalFailures.OneMinute.Count
+        - InternalFailures.OneMinute.Rate
+        - InternalFailures.TotalCount
+        - ManagementExecutor.ActiveCount
+        - ManagementExecutor.CompletedTaskCount
+        - ManagementExecutor.QueuedTaskCount
+        - RunningQueries
+        - StartedQueries.OneMinute.Count
+        - StartedQueries.OneMinute.Rate
+        - StartedQueries.TotalCount
+        - UserErrorFailures.OneMinute.Count
+        - UserErrorFailures.OneMinute.Rate
+        - UserErrorFailures.TotalCount
+        - WallInputBytesRate.OneMinute.Avg
+        - WallInputBytesRate.OneMinute.Max
+        - WallInputBytesRate.OneMinute.Min
+        - WallInputBytesRate.OneMinute.P75
+        - WallInputBytesRate.OneMinute.P95
+  - include:
+      bean: presto.execution.executor:name=TaskExecutor
+      attribute:
+        - BlockedSplits
+        - ProcessorExecutor.QueuedTaskCount
+        - RunningSplits
+        - TotalSplits
+        - WaitingSplits
+
+  - include:
+      bean: presto.execution:name=TaskManager
+      attribute:
+        - InputDataSize.OneMinute.Count
+        - InputDataSize.OneMinute.Rate
+        - InputDataSize.TotalCount
+        - InputPositions.OneMinute.Count
+        - InputPositions.OneMinute.Rate
+        - InputPositions.TotalCount
+        - OutputDataSize.OneMinute.Count
+        - OutputDataSize.OneMinute.Rate
+        - OutputDataSize.TotalCount
+        - OutputPositions.OneMinute.Count
+        - OutputPositions.OneMinute.Rate
+        - OutputPositions.TotalCount
+        - TaskNotificationExecutor.ActiveCount
+        - TaskNotificationExecutor.CompletedTaskCount
+        - TaskNotificationExecutor.PoolSize
+        - TaskNotificationExecutor.QueuedTaskCount
+  - include:
+      bean:
+        - presto.failureDetector:name=HeartbeatFailureDetector
+      attribute:
+        - ActiveCount
+  - include:
+      domain: presto.memory
+      attribute:
+        - AssignedQueries
+        - BlockedNodes
+        - ClusterMemoryBytes
+        - FreeBytes
+        - FreeDistributedBytes
+        - MaxBytes
+        - Nodes
+        - ReservedBytes
+        - ReservedDistributedBytes
+        - ReservedRevocableBytes
+        - ReservedRevocableDistributedBytes
+        - TotalDistributedBytes
