@@ -1,7 +1,7 @@
 {
 	"name": "[cassandra] Too many pending tasks",
 	"type": "query alert",
-	"query": "avg(last_2h):sum:cassandra.pending_tasks{} by {cluster}",
+	"query": "avg(last_2h):sum:cassandra.pending_tasks{*} by {cluster}",
 	"message": "This can happen if a task is taking too long, and Cassandra builds a backlog. Investigate i.e. if compaction is taking too long.",
 	"tags": [
 		"service:cassandra", "team:DRE"

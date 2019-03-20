@@ -1,7 +1,7 @@
 {
 	"name": "[etcd] cluster has no leader",
 	"type": "metric alert",
-	"query": "max(last_1m):sum:kube_etcd.etcd_server_has_leader{} by {kubernetes_cluster} <= 0",
+	"query": "max(last_1m):sum:kube_etcd.etcd_server_has_leader{*} by {kubernetes_cluster} <= 0",
 	"message": "etcd is reporting that there is no leader for the cluster.\n",
 	"tags": [
 		"service:etcd"

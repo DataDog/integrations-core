@@ -1,7 +1,7 @@
 {
 	"name": "[cassandra][error] Cassandra is reporting a high number of exceptions in cluster {{name.name}}",
 	"type": "query alert",
-	"query": "change(avg(last_5m),last_5m):max:cassandra.exceptions.count{} by {name} > 10",
+	"query": "change(avg(last_5m),last_5m):max:cassandra.exceptions.count{*} by {name} > 10",
 	"message": "This should probably be investigated, try checking the logs for errors.\n",
 	"tags": [
 		"service:cassandra"

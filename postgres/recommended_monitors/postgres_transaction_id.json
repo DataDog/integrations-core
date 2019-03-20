@@ -1,7 +1,7 @@
 {
 	"name": "[Postgres] Transaction ID wraparound imminent on {{master_id.name}}",
 	"type": "query alert",
-	"query": "avg(last_5m):min:postgresql.before_xid_wraparound{} by {master_id} <= 500000000",
+	"query": "avg(last_5m):min:postgresql.before_xid_wraparound{*} by {master_id} <= 500000000",
 	"message": "The Transaction ID wraparound is imminent. This means a VACUUM may be stuck, check if something is blocking the VACUUM.\n\n{{#is_warning}}Check if a VACUUM is blocked, if not we may need to start a \"split\" to run the VACUUM on.",
 	"tags": [
 		"service:postgres"
