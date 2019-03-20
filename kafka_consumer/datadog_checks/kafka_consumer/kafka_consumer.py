@@ -67,7 +67,7 @@ class KafkaCheck(AgentCheck):
         zk_hosts_ports = instance.get('zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
         zk_interval = int(instance.get('zk_iteration_ival', 0))
-        get_kafka_consumer_offsets = is_affirmative(instance.get('kafka_consumer_offsets', zk_hosts_ports) is None)
+        get_kafka_consumer_offsets = is_affirmative(instance.get('kafka_consumer_offsets', zk_hosts_ports is None))
 
         custom_tags = instance.get('tags', [])
 
