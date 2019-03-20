@@ -9,7 +9,6 @@ import mock
 import pytest
 from six import PY3
 
-from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.base import AgentCheck
 
 
