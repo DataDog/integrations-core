@@ -15,7 +15,7 @@ instances:
     user: datadog
 
   ## @param pass - string - required
-  ## Password associated to the datadog user.
+  ## Password associated with the datadog user.
   #
     pass: <UNIQUEPASSWORD>
 
@@ -118,7 +118,7 @@ instances:
     ## @param schema_size_metrics - boolean - optional - default: false
     ## Set schema_size_metrics parameter to collect schema size metrics. Note that it runs a heavy query
     ## against your DB to compute the relevant metrics for all your existing schemas.
-    ## Due to the nature of these calls, if you have a high number of tables and/or schemas,
+    ## Due to the nature of these calls, if you have a high number of tables and schemas,
     ## you may be subject to some negative impact in the performance of your DB.
     ## See the Datadog-MySQL metrics section to learn more:
     ## https://docs.datadoghq.com/integrations/mysql/#metrics
