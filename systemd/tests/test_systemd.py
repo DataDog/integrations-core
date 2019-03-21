@@ -12,12 +12,16 @@ def test_check(aggregator, instance_collect_all):
     check.check(instance_collect_all)
     # expected service check
     status = SystemdCheck.OK
+    expected_tags = ['env:test']
 
-    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status, tags=['unit:ssh.service'])
-    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status, tags=['unit:networking.service'])
-    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status, tags=['unit:cron.service'])
+    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status,
+                                    tags=['unit:ssh.service'] + expected_tags)
+    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status,
+                                    tags=['unit:networking.service'] + expected_tags)
+    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status,
+                                    tags=['unit:cron.service'] + expected_tags)
 
-    # expected metric
+    # expected metrics
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
 

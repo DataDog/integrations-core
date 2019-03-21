@@ -1,10 +1,10 @@
 [
     {
-        "agent_version": "6.9.0",
+        "agent_version": "6.11.0",
         "integration":"systemd",
         "check": "systemd.unit.active",
         "statuses": ["ok", "warn", "critical"],
-        "groups": ["host", "unit_id"],
+        "groups": ["host", "unit"],
         "name": "Unit active",
         "description": "Returns the `status` of a systemd unit: OK if active and CRITICAL if inactive"
     }

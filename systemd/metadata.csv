@@ -1,4 +1,3 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 systemd.units.active,gauge,,,,Number of active systemd units,0,systemd,active units
 systemd.units.inactive,gauge,,,,Number of inactive systemd units,0,systemd,inactive units
-systemd.unit.processes,gauge,,,,Number of PIDs for a given systemd units,0,systemd,pid numbers

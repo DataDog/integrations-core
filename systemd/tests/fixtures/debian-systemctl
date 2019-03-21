@@ -1,4 +1,0 @@
-UNIT                ACTIVE
-ssh.service         active
-cron.service        active
-networking.servive  inactive

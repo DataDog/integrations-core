@@ -41,7 +41,7 @@ The Systemd check emits an event to Datadog each time a unit in the configuratio
 
 Need help? Contact [Datadog support][5].
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/systemd/datadog_checks/systemd/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

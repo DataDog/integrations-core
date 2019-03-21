@@ -5,15 +5,12 @@ import copy
 
 from collections import defaultdict
 from six import iteritems
+
 import pystemd
-# from pystemd.systemd1 import Manager
 from pystemd.systemd1 import Unit
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.utils.subprocess_output import (
-    get_subprocess_output,
-    SubprocessOutputEmptyError,
-)
+from datadog_checks.base import ensure_unicode
 
 
 class SystemdCheck(AgentCheck):
@@ -28,10 +25,10 @@ class SystemdCheck(AgentCheck):
         instance = instances[0]
         self.units_watched = instance.get('units', [])
         self.tags = instance.get('tags', [])
+        # report state of all systemd units found
         self.report_status = instance.get('report_status', False)
-        self.report_processes = instance.get('report_processes', True)
 
-        # cache to store the state of a unit and compare it at the next run
+        # cache to store unit states and compare them at the next check run
         self.unit_cache = defaultdict(dict)
 
         # unit_cache = {
@@ -41,9 +38,6 @@ class SystemdCheck(AgentCheck):
         # }
 
     def check(self, instance):
-        # units_watched = instance.get('units', [])
-        # populate unit cache
-        # current_unit_status = self.get_all_unit_status()
         current_unit_status = defaultdict(dict)
         for u in self.units_watched:
             current_unit_status[u] = self.get_state_single_unit(u)
@@ -52,10 +46,9 @@ class SystemdCheck(AgentCheck):
             self.unit_cache = current_unit_status
 
         for unit in self.units_watched:
-            if self.report_processes:
-                self.report_number_processes(unit, self.tags)
             self.send_service_checks(unit, self.get_state_single_unit(unit), self.tags)
 
+        # find out which units have changed state, units that can no longer be found or units found
         changed_units, created_units, deleted_units = self.list_status_change(current_unit_status)
 
         self.report_changed_units(changed_units, self.tags)
@@ -71,19 +64,20 @@ class SystemdCheck(AgentCheck):
 
     def get_all_unit_status(self):
         m = pystemd.systemd1.Manager(_autoload=True)
-        # list_unit_files is a list of tuples including the unit names and status
+        # list_unit_files is a list of tuples including the unit names/ids and status
         list_unit_files = m.Manager.ListUnits()
 
         unit_status = defaultdict(dict)
 
         for unit in list_unit_files:
-            unit_short_name = unit[0] # unit name/id
-            unit_state = unit[3] # unit state
+            unit_short_name = unit[0]  # unit name/id
+            unit_state = unit[3]  # unit state
             unit_status[unit_short_name] = unit_state
 
         return unit_status
 
     def list_status_change(self, current_unit_status):
+        # returns a tuple of dicts for unit changes
         changed = defaultdict(dict)
         deleted = defaultdict(dict)
         created = copy.deepcopy(current_unit_status)
@@ -96,6 +90,7 @@ class SystemdCheck(AgentCheck):
             current_status = current_unit_status.get(unit_short_name)
             if current_status:
                 if current_status != previous_unit_status:
+                    self.log.debug("unit {} changed state, it is now {}".format(unit_short_name, current_status))
                     changed[unit_short_name] = current_status
             else:
                 self.log.debug("unit {} not found".format(unit_short_name))
@@ -134,13 +129,11 @@ class SystemdCheck(AgentCheck):
     def report_statuses(self, units, tags):
         active_units = inactive_units = 0
         for unit, state in iteritems(units):
+            state = ensure_unicode(state)
             try:
-                if state == b'active':
+                if state == 'active':
                     active_units += 1
-                    # if report_processes:
-                    #    self.report_number_processes(unit, tags)
-                    # active_units += 1
-                if state == b'inactive':
+                if state == 'inactive':
                     inactive_units += 1
             except pystemd.dbusexc.DBusInvalidArgsError as e:
                 self.log.debug("Cannot retrieve unit status for {}, {}".format(unit, e))
@@ -157,19 +150,20 @@ class SystemdCheck(AgentCheck):
             self.log.info("Unit name invalid for {}, {}".format(unit_id, e))
 
     def send_service_checks(self, unit_id, state, tags):
-        if state == b'active' or b'activating':
+        state = ensure_unicode(state)
+        if state == 'active' or 'activating':
             self.service_check(
                 self.UNIT_STATUS_SC,
                 AgentCheck.OK,
                 tags=["unit:{}".format(unit_id)] + tags
             )
-        elif state == b'inactive' or state == b'failed':
+        elif state == 'inactive' or state == 'failed':
             self.service_check(
                 self.UNIT_STATUS_SC,
                 AgentCheck.CRITICAL,
                 tags=["unit:{}".format(unit_id)] + tags
             )
-        elif state == b'deactivating':
+        elif state == 'deactivating':
             self.service_check(
                 self.UNIT_STATUS_SC,
                 AgentCheck.WARN,
@@ -181,16 +175,3 @@ class SystemdCheck(AgentCheck):
                 AgentCheck.CRITICAL,
                 tags=["unit:{}".format(unit_id)] + tags
             )
-
-    def report_number_processes(self, unit, tags):
-        """
-        We use systemctl directly here since the unit.Service.GetProcesses() method requires elevated privileges
-        """
-        systemctl_flags = ['status', unit]
-        try:
-            output = get_subprocess_output(["systemctl"] + systemctl_flags, self.log)
-            output_to_parse = output[0].split()
-            number_of_pids = output_to_parse.count(u'Process:')
-            self.gauge('systemd.unit.processes', number_of_pids, tags=["unit:{}".format(unit)] + tags)
-        except SubprocessOutputEmptyError:
-            self.log.exception("Error collecting systemctl stats.")

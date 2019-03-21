@@ -13,8 +13,7 @@ def instance():
             "cron.service",
             "networking.service"
         ],
-        'report_status': False,
-        'report_processes': True
+        'report_status': False
     }
 
 
@@ -24,8 +23,8 @@ def instance_collect_all():
         'units': [
             "ssh.service",
             "cron.service",
-            "networking.service"
+            "networking.service",
         ],
-        'report_status': True,
-        'report_processes': True
+        'tags': ['env:test'],
+        'report_status': True
     }

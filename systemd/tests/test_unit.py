@@ -2,21 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import six
-
 import pytest
 
 from datadog_checks.systemd import SystemdCheck
-
-import mock
-from six import iteritems
 
 
 def test_config_options(instance):
     check = SystemdCheck('systemd', {}, [instance])
 
     assert check.report_status is False
-    assert check.report_processes is True
     assert len(check.units_watched) == 3
 
 
@@ -43,7 +37,6 @@ def test_cache(instance):
 
     # check that we are getting changed units - returned_units is a tuple of 3 elements
     changed_units, created_units, deleted_units = check.list_status_change(current_unit_status)
-    assert changed_units is not None
     assert changed_units['cron.service'] == 'inactive'
     assert len(created_units) == 0
     assert len(deleted_units) == 0
@@ -53,36 +46,43 @@ def test_cache(instance):
     current_unit_status = {'ssh.service': 'active', 'networking.service': 'inactive'}
     # check that we are getting deleted units
     changed_units, created_units, deleted_units = check.list_status_change(current_unit_status)
-    assert deleted_units is not None
     assert deleted_units['cron.service'] == 'active'
     assert len(created_units) == 0
     assert len(changed_units) == 0
 
+    # check created units
+    check.unit_cache = {'ssh.service': 'active', 'networking.service': 'inactive'}
+    current_unit_status = {'ssh.service': 'active', 'cron.service': 'active', 'networking.service': 'inactive'}
+    changed_units, created_units, deleted_units = check.list_status_change(current_unit_status)
+    assert created_units['cron.service'] == 'active'
+    assert len(changed_units) == 0
+    assert len(deleted_units) == 0
+
+    # check created units, deleted units and changed units
+    check.unit_cache = {'ssh.service': 'active', 'networking.service': 'inactive', 'cron.service': 'active'}
+    current_unit_status = {'docker.service': 'active', 'cron.service': 'inactive', 'networking.service': 'inactive'}
+    changed_units, created_units, deleted_units = check.list_status_change(current_unit_status)
+    assert created_units['docker.service'] == 'active'
+    assert deleted_units['ssh.service'] == 'active'
+    assert changed_units['cron.service'] == 'inactive'
 
 
-def test_active_inactive(aggregator, instance):
-
-    all_unit_status = {
-        'ssh.service': 'active',
-        'networking.service': 'active',
-        'cron.service': 'inactive',
-        'systemd-journald.service': 'inactive',
-        'setvtrgb.service': 'active'
-    }
-
+def test_report_statuses(aggregator, instance_collect_all):
+    tags = ['env:test', 'systemd:units']
     units = {
-        'systemd.units.active': 3,
-        'systemd.units.inactive': 2
-    }
+        'cron.service': 'active',
+        'networking.service': 'active',
+        'ssh.service': 'inactive',
 
-    with mock.patch('datadog_checks.systemd.systemd.pystemd') as mock_pystemd_units:
-        mock_pystemd_units.pystemd.units.info = list_unit_files_mock
-        check = SystemdCheck('systemd', {}, [instance])
-        unit_status = check.get_all_unit_status()
-        assert len(unit_status) > 0
-        """
-        check.report_statuses(unit_status, tags)
-        
-        for _, m in iteritems(aggregator._metrics):
-            assert bytes(units[m[0].name]) == m[0].value
-        """
+    }
+    check = SystemdCheck('systemd', {}, [instance_collect_all])
+    check.report_statuses(units, tags)
+
+    aggregator.assert_metric('systemd.units.active', value=2, tags=tags)
+    aggregator.assert_metric('systemd.units.inactive', value=1, tags=tags)
+
+
+def test_get_all_unit_status(instance_collect_all):
+    check = SystemdCheck('systemd', {}, [instance_collect_all])
+    assert isinstance(check.get_all_unit_status(), dict) is True
+    assert len(check.get_all_unit_status()) >= 1

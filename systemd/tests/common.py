@@ -9,8 +9,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 EXPECTED_METRICS = [
     'systemd.units.inactive',
-    'systemd.units.active',
-    'systemd.unit.processes'
+    'systemd.units.active'
 ]
 
 EXPECTED_TAGS = [
