@@ -25,12 +25,12 @@ instances:
   #
   #  excluded_interface_re: <NETWORK_INTERFACE_NAME>.*
 
-  ## combine_connection_states - boolean - optional - default: false
+  ## combine_connection_states - boolean - optional - default: true
   ## Set to true to not combine connection states.
   ## By default we combine states like fin_wait_1 and fin_wait_2
-  ## together into one state: 'closing' enable this option to get more granular data.
+  ## together into one state: 'closing' disable this option to get more granular data.
   #
-  #  combine_connection_states: false
+  #  combine_connection_states: true
 
   ## collect_rate_metrics - boolean - optional - default: true
   ## By default, most metrics are submitted as rates.
