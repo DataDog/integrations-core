@@ -28,15 +28,29 @@ class SslConfig:
         self.check_hostname = instance.get('check_hostname', 'true')
         self.ssl_hostname = instance.get('ssl_hostname')
         self.custom_tags = instance.get('tags', [])
+        self.cert_path = instance.get('cert_path')
+        self.cert_remote = True
+
+        # check if remote/local
+        if self.cert_path:
+            print("getting local")
+            self.cert_remote = false
+
+        # self.get_config
 
     # def check_properly_configured(self):
+    # check if cert_remote is set
         # if not self.channel or not self.queue_manager_name or not self.host or not self.port:
         #     msg = "channel, queue_manager, host and port are all required configurations"
         #     raise ConfigurationError(msg)
 
-    # def add_queues(self, new_queues):
+    def check_remote():
+
+        # def add_queues(self, new_queues):
         # add queues without duplication
         #        self.queues = list(set(self.queues + new_queues))
+
+    def
 
     @property
     def tags(self):
