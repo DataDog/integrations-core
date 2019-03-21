@@ -12,12 +12,13 @@ instances:
   - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
 
   ## @param mixer_endpoint - string - required
-  ## 
+  ## Define the mixer endpoint in order to collect all Prometheus metrics on the Mixer process as well
+  ## as gRPC metrics related to API calls and metrics on adapter dispatch.
   #
     mixer_endpoint: http://istio-telemetry.istio-system:9093/metrics
 
   ## @param send_histograms_buckets - boolean - required
-  ##
+  ## Set send_histograms_buckets to true to send the histograms bucket from Istio. 
   #
     send_histograms_buckets: true
 
