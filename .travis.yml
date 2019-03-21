@@ -171,6 +171,8 @@ jobs:
     - stage: test
       env: CHECK=kube_proxy PYTHON3=true
     - stage: test
+      env: CHECK=kube_scheduler PYTHON3=true
+    - stage: test
       env: CHECK=kubelet PYTHON3=true
     - stage: test
       env: CHECK=kubernetes_state PYTHON3=true

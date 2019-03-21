@@ -20,6 +20,7 @@ manifest.json         @DataDog/baklava @DataDog/agent-integrations
 /kube_controller_manager/  @DataDog/container-integrations @DataDog/agent-integrations
 /kube_dns/                 @DataDog/container-integrations @DataDog/agent-integrations
 /kube_proxy/               @DataDog/container-integrations @DataDog/agent-integrations
+/kube_scheduler/           @DataDog/container-integrations @DataDog/agent-integrations
 /kubelet/                  @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes/               @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes_state/         @DataDog/container-integrations @DataDog/agent-integrations
