@@ -309,6 +309,21 @@ class __AgentCheckPy3(object):
     def check(self, instance):
         raise NotImplementedError
 
+    def set_external_tags(self, external_tags):
+        # Example of external_tags format
+        # [
+        #     ('hostname', {'src_name': ['test:t1']}),
+        #     ('hostname2', {'src2_name': ['test2:t3']})
+        # ]
+        try:
+            for _, source_map in external_tags:
+                for src_name, tags in iteritems(source_map):
+                    source_map[src_name] = self._normalize_tags_type(tags)
+            datadog_agent.set_external_tags(external_tags)
+        except IndexError:
+            self.log.exception('Unexpected external tags format: {}'.format(external_tags))
+            raise
+
     def normalize(self, metric, prefix=None, fix_case=False):
         """
         Turn a metric into a well-formed metric name
@@ -742,6 +757,22 @@ class __AgentCheckPy2(object):
         metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
+
+    def set_external_tags(self, external_tags):
+        # Example of external_tags format
+        # [
+        #     ('hostname', {'src_name': ['test:t1']}),
+        #     ('hostname2', {'src2_name': ['test2:t3']})
+        # ]
+
+        try:
+            for _, source_map in external_tags:
+                for src_name, tags in iteritems(source_map):
+                    source_map[src_name] = self._normalize_tags_type(tags)
+            datadog_agent.set_external_tags(external_tags)
+        except IndexError:
+            self.log.exception('Unexpected external tags format: {}'.format(external_tags))
+            raise
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """

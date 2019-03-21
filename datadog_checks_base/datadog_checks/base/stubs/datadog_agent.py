@@ -25,3 +25,7 @@ def error(msg, *args, **kwargs):
 
 def debug(msg, *args, **kwargs):
     pass
+
+
+def set_external_tags(*args, **kwargs):
+    pass
