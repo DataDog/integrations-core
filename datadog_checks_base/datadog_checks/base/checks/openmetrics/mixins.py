@@ -593,6 +593,7 @@ class OpenMetricsScraperMixin(object):
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
 
+
 def text_fd_to_metric_families(fd):
     """Parse Prometheus text format from a file descriptor.
     This is a laxer parser than the main Go parser,
@@ -670,3 +671,4 @@ def text_fd_to_metric_families(fd):
 
     if name != '':
         yield build_metric(name, documentation, typ, samples)
+    
