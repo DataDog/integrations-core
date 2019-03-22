@@ -92,13 +92,17 @@ class ConsulCheck(AgentCheck):
 
             if clientcertfile:
                 if privatekeyfile:
+<<<<<<< HEAD
                     resp = requests.get(
+=======
+                    resp = self.http.get(
+>>>>>>> update style and add proxy support
                         url, cert=(clientcertfile, privatekeyfile), verify=cabundlefile, headers=headers
                     )
                 else:
-                    resp = requests.get(url, cert=clientcertfile, verify=cabundlefile, headers=headers)
+                    resp = self.http.get(url, cert=clientcertfile, verify=cabundlefile, headers=headers)
             else:
-                resp = requests.get(url, verify=cabundlefile, headers=headers)
+                resp = self.http.get(url, verify=cabundlefile, headers=headers)
 
             resp.raise_for_status()
 
@@ -252,12 +256,20 @@ class ConsulCheck(AgentCheck):
             services = {s: services[s] for s in whitelisted_services[:max_services]}
         else:
             if len(services) <= max_services:
+<<<<<<< HEAD
                 log_line = 'Consul service whitelist not defined. Agent will poll for all {} services found'.format(
+=======
+                log_line = 'Consul service whitelist not defined. ' 'Agent will poll for all {} services found'.format(
+>>>>>>> update style and add proxy support
                     len(services)
                 )
                 self.log.debug(log_line)
             else:
+<<<<<<< HEAD
                 log_line = 'Consul service whitelist not defined. Agent will poll for at most {} services'.format(
+=======
+                log_line = 'Consul service whitelist not defined. ' 'Agent will poll for at most {} services'.format(
+>>>>>>> update style and add proxy support
                     max_services
                 )
                 self.warning(log_line)
