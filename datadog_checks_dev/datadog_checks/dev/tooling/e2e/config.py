@@ -69,7 +69,7 @@ def remove_env_data(check, env):
 def read_env_data(check, env):
     config_file = locate_config_file(check, env)
     if file_exists(config_file):
-        config = yaml.load(read_file(config_file))
+        config = yaml.safe_load(read_file(config_file))
     else:
         config = {}
 

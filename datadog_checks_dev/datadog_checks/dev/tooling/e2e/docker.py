@@ -56,12 +56,41 @@ class DockerInterface(object):
             get_agent_exe(self.agent_version)
         )
 
-    def run_check(self, capture=False, rate=False):
-        command = '{} check {}{}'.format(
-            self.agent_command,
-            self.check,
-            ' {}'.format(get_rate_flag(self.agent_version)) if rate else ''
-        )
+    def run_check(
+        self,
+        capture=False,
+        rate=False,
+        times=None,
+        pause=None,
+        delay=None,
+        log_level=None,
+        as_json=False,
+        break_point=None,
+    ):
+        command = '{} check {}'.format(self.agent_command, self.check)
+
+        if rate:
+            command += ' {}'.format(get_rate_flag(self.agent_version))
+
+        # These are only available for Agent 6+
+        if times is not None:
+            command += ' --check-times {}'.format(times)
+
+        if pause is not None:
+            command += ' --pause {}'.format(pause)
+
+        if delay is not None:
+            command += ' --delay {}'.format(delay)
+
+        if log_level is not None:
+            command += ' --log-level {}'.format(log_level)
+
+        if as_json:
+            command += ' --json {}'.format(as_json)
+
+        if break_point is not None:
+            command += ' --breakpoint {}'.format(break_point)
+
         return run_command(command, capture=capture)
 
     def exists(self):
