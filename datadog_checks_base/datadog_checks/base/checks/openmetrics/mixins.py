@@ -671,4 +671,3 @@ def text_fd_to_metric_families(fd):
 
     if name != '':
         yield build_metric(name, documentation, typ, samples)
-    
