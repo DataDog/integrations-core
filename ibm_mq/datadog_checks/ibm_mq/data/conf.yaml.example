@@ -44,6 +44,12 @@ instances:
   #    - 'DEV.*'
   #    - 'SYSTEM.*'
 
+  ## @param channels - list of string - optional
+  ## Check the status of the following channels
+  #
+  #  channels:
+  #    - '<CHANNEL_NAME>'
+
   ## @param auto_discover_queues - string - optional - default: false
   ## Autodiscover the queues to monitor
   ## Warning: this will lead to some warnings in your logs

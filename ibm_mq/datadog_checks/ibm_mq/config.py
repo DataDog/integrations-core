@@ -41,6 +41,8 @@ class IBMMQConfig:
         self.queues = instance.get('queues', [])
         self.queue_patterns = instance.get('queue_patterns', [])
 
+        self.channels = instance.get('channels', [])
+
         self.custom_tags = instance.get('tags', [])
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
