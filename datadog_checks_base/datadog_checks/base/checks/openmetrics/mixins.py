@@ -8,7 +8,8 @@ import requests
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from math import isnan, isinf
-from prometheus_client.parser import text_fd_to_metric_families
+from prometheus_client.core import Metric
+from prometheus_client import parser
 
 from six import PY3, iteritems, string_types
 
@@ -591,3 +592,81 @@ class OpenMetricsScraperMixin(object):
 
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
+
+def text_fd_to_metric_families(fd):
+    """Parse Prometheus text format from a file descriptor.
+    This is a laxer parser than the main Go parser,
+    so successful parsing does not imply that the parsed
+    text meets the specification.
+    Yields core.Metric's.
+    """
+    name = ''
+    documentation = ''
+    typ = 'untyped'
+    samples = []
+    allowed_names = []
+
+    def build_metric(name, documentation, typ, samples):
+        metric = Metric(name, documentation, typ)
+        metric.samples = samples
+        return metric
+
+    for line in fd:
+        line = line.strip()
+
+        if line.startswith('#'):
+            parts = line.split(None, 3)
+            if len(parts) < 2:
+                continue
+            if parts[1] == 'HELP':
+                if parts[2] != name:
+                    if name != '':
+                        yield build_metric(name, documentation, typ, samples)
+                    # New metric
+                    name = parts[2]
+                    typ = 'untyped'
+                    samples = []
+                    allowed_names = [parts[2]]
+                if len(parts) == 4:
+                    documentation = parser._replace_help_escaping(parts[3])
+                else:
+                    documentation = ''
+            elif parts[1] == 'TYPE':
+                if parts[2] != name:
+                    if name != '':
+                        yield build_metric(name, documentation, typ, samples)
+                    # New metric
+                    name = parts[2]
+                    documentation = ''
+                    samples = []
+                typ = parts[3]
+                allowed_names = {
+                    'counter': [''],
+                    'gauge': [''],
+                    'summary': ['_count', '_sum', ''],
+                    'histogram': ['_count', '_sum', '_bucket'],
+                }.get(typ, [''])
+                allowed_names = [name + n for n in allowed_names]
+            else:
+                # Ignore other comment tokens
+                pass
+        elif line == '':
+            # Ignore blank lines
+            pass
+        else:
+            sample = parser._parse_sample(line)
+            if sample[0] not in allowed_names:
+                if name != '':
+                    yield build_metric(name, documentation, typ, samples)
+                # New metric, yield immediately as untyped singleton
+                name = ''
+                documentation = ''
+                typ = 'untyped'
+                samples = []
+                allowed_names = []
+                yield build_metric(sample[0], documentation, typ, [sample])
+            else:
+                samples.append(sample)
+
+    if name != '':
+        yield build_metric(name, documentation, typ, samples)

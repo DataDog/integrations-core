@@ -156,15 +156,15 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
     messages = list(check.parse_metric_family(response))
     # total metrics are 41 but one is typeless and we expect it not to be
     # parsed...
-    assert len(messages) == 40
+    assert len(messages) == 39
     # ...unless the check ovverrides the type manually
     check.type_overrides = {"go_goroutines": "gauge"}
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     messages = list(check.parse_metric_family(response))
-    assert len(messages) == 41
+    assert len(messages) == 40
     # Tests correct parsing of counters
     _counter = metrics_pb2.MetricFamily()
-    _counter.name = 'skydns_skydns_dns_cachemiss_count_total'
+    _counter.name = 'skydns_skydns_dns_cachemiss_count'
     _counter.help = 'Counter of DNS requests that result in a cache miss.'
     _counter.type = 0  # COUNTER
     _c = _counter.metric.add()
@@ -349,7 +349,7 @@ def test_poll_text_plain(mocked_prometheus_check, text_data):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
         messages.sort(key=lambda x: x.name)
-        assert len(messages) == 40
+        assert len(messages) == 39
         assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
 
 
@@ -681,7 +681,7 @@ def test_parse_one_counter(p_check):
 
     expected_etcd_metric = metrics_pb2.MetricFamily()
     expected_etcd_metric.help = "Total number of mallocs."
-    expected_etcd_metric.name = "go_memstats_mallocs_total"
+    expected_etcd_metric.name = "go_memstats_mallocs"
     expected_etcd_metric.type = 0
     expected_etcd_metric.metric.add().counter.value = 18713
 

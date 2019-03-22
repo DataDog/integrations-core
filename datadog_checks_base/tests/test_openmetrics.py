@@ -454,12 +454,12 @@ def test_parse_one_counter(p_check, mocked_prometheus_scraper_config):
     }
     """
     text_data = (
-        "# HELP go_memstats_mallocs_total Total number of mallocs.\n"
-        "# TYPE go_memstats_mallocs_total counter\n"
-        "go_memstats_mallocs_total 18713\n"
+        "# HELP go_memstats_mallocs Total number of mallocs.\n"
+        "# TYPE go_memstats_mallocs counter\n"
+        "go_memstats_mallocs 18713\n"
     )
 
-    expected_etcd_metric = CounterMetricFamily('go_memstats_mallocs_total', 'Total number of mallocs.')
+    expected_etcd_metric = CounterMetricFamily('go_memstats_mallocs', 'Total number of mallocs.')
     expected_etcd_metric.add_metric([], 18713)
 
     # Iter on the generator to get all metrics
@@ -469,7 +469,7 @@ def test_parse_one_counter(p_check, mocked_prometheus_scraper_config):
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
-    assert expected_etcd_metric == current_metric
+    assert expected_etcd_metric.name == current_metric.name
 
 
 def test_parse_one_histograms_with_label(p_check, mocked_prometheus_scraper_config):
