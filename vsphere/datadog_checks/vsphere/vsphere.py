@@ -212,7 +212,7 @@ class VSphereCheck(AgentCheck):
         self.latest_event_query[i_key] = last_time
 
     def _instance_key(self, instance):
-        i_key = instance.get('name')
+        i_key = ensure_unicode(instance.get('name'))
         if i_key is None:
             raise BadConfigError("Must define a unique 'name' per vCenter instance")
         return i_key
@@ -275,7 +275,7 @@ class VSphereCheck(AgentCheck):
         tags = instance.get('tags', [])
 
         service_check_tags = [
-            'vcenter_server:{}'.format(instance.get('name')),
+            'vcenter_server:{}'.format(self._instance_key(instance)),
             'vcenter_host:{}'.format(instance.get('host')),
         ] + tags
         service_check_tags = list(set(service_check_tags))
