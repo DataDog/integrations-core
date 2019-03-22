@@ -2,9 +2,9 @@ init_config:
 
 instances:
 
-  ## @param expvar_url - string - required 
+  ## @param expvar_url - string - required
   ## Expvar URL to gather your metrics from.
-  #  
+  #
   - expvar_url: http://localhost:8080
 
   ## @param ssl_verify - boolean - optional - default: false
@@ -35,15 +35,15 @@ instances:
   #  tags:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
-    
+
   ## @param metrics - list of objects - optionals
   ## These metrics are just here as examples.
-  ## Most memstats metrics are collected by default without configuration needed. 
+  ## Most memstats metrics are collected by default without configuration needed.
   ## See http://godoc.org/runtime#MemStats for their explanation
-  ## 
+  ##
   ## For each metric you want to collect, specify its "path" and its "alias".
   ## with no alias specified, the metric name defaults to a path based name.
-  ## 
+  ##
   ## Note: You can use a regex when you want to report for all elements matching a certain pattern
   ##
   ## You can also specify a `type` for the metrics. One of:
@@ -59,13 +59,13 @@ instances:
   #        - "<TAG_KEY>:<TAG_VALUE>"
   #    - path: memstats/Alloc
   #    - path: memstats/Lookups
-  #      type: rate                      
-  #    - path: memstats/Mallocs          
-  #      type: counter                   
+  #      type: rate
+  #    - path: memstats/Mallocs
+  #      type: counter
   #    - path: memstats/Frees
   #      type: rate
-  #    - path: memstats/BySize/1/Mallocs 
+  #    - path: memstats/BySize/1/Mallocs
   #    - path: myvariable
   #      alias: go_expvar.my_custom_name
   #      type: gauge
-  #    - path: routes/get_.*/count       
+  #    - path: routes/get_.*/count

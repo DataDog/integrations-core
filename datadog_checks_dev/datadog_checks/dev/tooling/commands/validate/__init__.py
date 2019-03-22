@@ -6,6 +6,7 @@ import click
 from .agent_reqs import agent_reqs
 from .config import config
 from .dep import dep
+from .logos import logos
 from .manifest import manifest
 from .metadata import metadata
 from .service_checks import service_checks
@@ -16,6 +17,7 @@ ALL_COMMANDS = (
     agent_reqs,
     config,
     dep,
+    logos,
     manifest,
     metadata,
     py3,

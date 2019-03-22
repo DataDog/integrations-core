@@ -8,15 +8,15 @@ instances:
   ## Note: Remote access requires additional permissions - https://support.microsoft.com/en-us/help/922775/how-to-troubleshoot-monitoring-and-logging-issues-for-performance-coun
   #
   - host: .
-  
+
   ## @param port - integer - required
-  ## ASP .NET port to connect to. 
+  ## ASP .NET port to connect to.
   #
     port: 26379
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:

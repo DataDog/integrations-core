@@ -33,9 +33,16 @@ TO_BYTES = {
 class CassandraNodetoolCheck(AgentCheck):
 
     datacenter_name_re = re.compile('^Datacenter: (.*)')
+    # 1.
+    # --  Address    Load       Tokens  Owns    Host ID                               Rack
+    # UN  127.0.0.1  47.66 KB   1       33.3%   aaa1b7c1-6049-4a08-ad3e-3697a0e30e10  rack1
+    # 2. old nodetool output format
+    # --  Address    Load       Owns    Host ID                               Token                     Rack
+    # UN  127.0.0.1  47.66 KB   33.3%   aaa1b7c1-6049-4a08-ad3e-3697a0e30e10  4035225268091337308       rack1
     node_status_re = re.compile(r'^(?P<status>[UD])[NLJM] +(?P<address>\d+\.\d+\.\d+\.\d+) +'
-                                r'(?P<load>\d+(\.\d*)?) (?P<load_unit>(K|M|G|T)?i?B) +\d+ +'
-                                r'(?P<owns>(\d+(\.\d+)?)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(?P<rack>.*)')
+                                r'(?P<load>\d+(\.\d*)?) (?P<load_unit>(K|M|G|T)?i?B) +(\d+ +)?'
+                                r'(?P<owns>(\d+(\.\d+)?)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(-?\d+ +)?'
+                                r'(?P<rack>.*)')
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)

@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "twistlock",
   "metric_prefix": "twistlock.",
-  "metric_to_check": "twistlock.registry.cve.count",
+  "metric_to_check": "twistlock.images.cve.details",
   "creates_events": true,
   "short_description": "Twistlock is a container security scanner",
   "guid": "59082b73-62f4-48d4-83f8-af3d5576eae1",
@@ -20,5 +20,6 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": true
+  "is_public": true,
+  "integration_id": "twistlock"
 }

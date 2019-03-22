@@ -1,25 +1,20 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import pytest
 import copy
 import logging
 import pymqi
 import re
 
-from datadog_checks.dev import docker_run  # , temp_dir
+from six.moves import range
+
+from datadog_checks.dev import docker_run
 from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
 
 log = logging.getLogger(__file__)
-
-# python3 compatability
-try:
-    zrange = xrange
-except NameError:
-    zrange = range
 
 
 @pytest.fixture
@@ -58,9 +53,7 @@ def publish():
 
     queue = pymqi.Queue(qmgr, common.QUEUE)
 
-    range = 10
-
-    for i in zrange(range):
+    for i in range(10):
         try:
             message = 'Hello from Python! Message {}'.format(i)
             log.info("sending message: {}".format(message))
@@ -82,9 +75,7 @@ def consume():
 
     queue = pymqi.Queue(qmgr, common.QUEUE)
 
-    range = 10
-
-    for i in zrange(range):
+    for _ in range(10):
         try:
             message = queue.get()
             print("got a new message: {}".format(message))

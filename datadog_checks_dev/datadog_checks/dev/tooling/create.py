@@ -34,6 +34,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         if re.match(SIMPLE_NAME, integration_name)
         else integration_name
     )
+    check_name_kebab = re.sub('_| ', '-', integration_name)
 
     if repo_choice == 'core':
         author = 'Datadog'
@@ -71,6 +72,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         ),
         'check_name': normalized_integration_name,
         'check_name_cap': check_name_cap,
+        'check_name_kebab': check_name_kebab,
         'email': email,
         'email_packages': email_packages,
         'guid': uuid4(),

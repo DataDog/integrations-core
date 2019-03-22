@@ -32,8 +32,15 @@ from ....utils import dir_exists, file_exists, path_join
 )
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
+@click.option(
+    '--env-vars', '-e', multiple=True,
+    help=(
+        'ENV Variable that should be passed to the Agent container. '
+        'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
+    )
+)
 @click.pass_context
-def start(ctx, check, env, agent, dev, base):
+def start(ctx, check, env, agent, dev, base, env_vars):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
@@ -68,6 +75,7 @@ def start(ctx, check, env, agent, dev, base):
 
     echo_waiting('Setting up environment `{}`... '.format(env), nl=False)
     config, metadata, error = start_environment(check, env)
+
     if error:
         echo_failure('failed!')
         echo_waiting('Stopping the environment...')
@@ -76,6 +84,7 @@ def start(ctx, check, env, agent, dev, base):
     echo_success('success!')
 
     env_type = metadata['env_type']
+    use_jmx = metadata.get('use_jmx', False)
 
     # Support legacy config where agent5 and agent6 were strings
     agent_ver = ctx.obj.get('agent{}'.format(agent), agent)
@@ -88,6 +97,9 @@ def start(ctx, check, env, agent, dev, base):
             )
     else:
         agent_build = agent_ver.get(env_type, env_type)
+
+    if not isinstance(agent_ver, string_types) and use_jmx:
+        agent_build = '{}-jmx'.format(agent_build)
 
     interface = derive_interface(env_type)
     if interface is None:
@@ -102,7 +114,7 @@ def start(ctx, check, env, agent, dev, base):
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    environment = interface(check, env, base_package, config, metadata, agent_build, api_key)
+    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key)
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)
     environment.update_agent()

@@ -211,6 +211,23 @@ class TestTags:
         in_str.encode.side_effect = Exception
         assert check._to_bytes(in_str) is None
 
+    def test_none_value(self):
+        check = AgentCheck()
+        tags = [None, 'tag:foo']
+
+        normalized_tags = check._normalize_tags_type(tags, None)
+        assert normalized_tags == ['tag:foo']
+
+    def test_external_host_tag_normalization(self):
+        """
+        Tests that the external_host_tag modifies in place the list of tags in the provided object
+        """
+        check = AgentCheck()
+        external_host_tags = [('hostname', {'src_name': ['key1:val1']})]
+        with mock.patch.object(check, '_normalize_tags_type', return_value=['normalize:tag']):
+            check.set_external_tags(external_host_tags)
+            assert external_host_tags == [('hostname', {'src_name': ['normalize:tag']})]
+
 
 class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10

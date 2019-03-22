@@ -16,6 +16,7 @@ from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 from six import iteritems, itervalues, string_types, text_type
 
+from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.base import AgentCheck, is_affirmative
 
 # Kafka Errors
@@ -493,13 +494,13 @@ class KafkaCheck(AgentCheck):
     def _should_zk(self, zk_hosts_ports, interval, kafka_collect=False):
         if not kafka_collect or not interval:
             return True
-
+        zk_hosts_ports_hash = hash_mutable(zk_hosts_ports)
         now = time()
-        last = self._zk_last_ts.get(zk_hosts_ports, 0)
+        last = self._zk_last_ts.get(zk_hosts_ports_hash, 0)
 
         should_zk = False
         if now - last >= interval:
-            self._zk_last_ts[zk_hosts_ports] = last
+            self._zk_last_ts[zk_hosts_ports_hash] = last
             should_zk = True
 
         return should_zk

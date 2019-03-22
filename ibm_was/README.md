@@ -2,31 +2,57 @@
 
 ## Overview
 
-This check monitors [IBM WAS][1] through the Datadog Agent.
+This check monitors [IBM Websphere Application Server (WAS)][1] through the Datadog Agent. This check supports IBM WAS versions >= 8.5.5.
 
 ## Setup
 
-The IBM WAS Datadog integration collects enabled PMI Counters from the WebSphere Application Server environment. Setup requires enabling the PerfServlet as documented on the [IBM documentation][2].
+The IBM WAS Datadog integration collects enabled PMI Counters from the WebSphere Application Server environment. Setup requires enabling the PerfServlet, which provides a way for Datadog to retrieve performance data from WAS.
+
+By default, this check collects JDBC, JVM, thread pool, and Servlet Session Manager metrics. You may optionally specify additional metrics to collect in the "custom_queries" section. See the [sample check configuration][2] for examples.
 
 ### Installation
 
-The IBM WAS check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
+The IBM WAS check is included in the [Datadog Agent][3] package.
+
+#### Enable the PerfServlet
+The servlet's .ear file (PerfServletApp.ear) is located in the `<WAS_HOME>/installableApps` directory, where `<WAS_HOME>` is the installation path for WebSphere Application Server.
+
+The performance servlet is deployed exactly as any other servlet. Deploy the servlet on a single application server instance within the domain.
+
+**Note**: Starting with version 6.1, you must enable application security to get the PerfServlet working.
 
 ### Configuration
 
-1. Edit the `ibm_was.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your IBM WAS performance data. See the [sample ibm_was.d/conf.yaml][4] for all available configuration options.
+1. Edit the `ibm_was.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your IBM WAS performance data. See the [sample ibm_was.d/conf.yaml][2] for all available configuration options.
 
-2. [Restart the Agent][5].
+2. [Restart the Agent][4].
+
+#### Log Collection
+
+Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+```
+    logs_enabled: true
+```
+
+Next, edit `ibm_was.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your WAS log files. 
+
+```yaml
+logs:
+ - type: file
+   path: /opt/IBM/WebSphere/AppServer/profiles/InfoSphere/logs/server1/*.log
+   source: ibm_was
+   service: websphere
+```
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `ibm_was` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `ibm_was` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
@@ -35,17 +61,16 @@ Returns `CRITICAL` if the Agent cannot connect to the PerfServlet for any reason
 
 ### Events
 
-IBM WAS does not include any events at this time.
+IBM WAS does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][7].
 
 [1]: https://www.ibm.com/cloud/websphere-application-platform
-[2]: https://www.ibm.com/support/knowledgecenter/en/SSAW57_8.5.5/com.ibm.websphere.nd.multiplatform.doc/ae/tprf_devprfservlet.html
+[2]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/datadog_checks/ibm_was/data/conf.yaml.example
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/datadog_checks/ibm_was/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
+[7]: https://docs.datadoghq.com/help

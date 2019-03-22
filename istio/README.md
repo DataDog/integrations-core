@@ -54,6 +54,11 @@ The Istio check does not include any service checks.
 ## Troubleshooting
 Need help? Contact [Datadog support][8].
 
+## Further Reading
+Additional helpful documentation, links, and articles:
+
+- [Monitor your Istio service mesh with Datadog][9]
+
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on
 [3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
@@ -62,3 +67,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/faq/agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv
 [8]: https://docs.datadoghq.com/help
+[9]: https://www.datadoghq.com/blog/monitor-istio-with-datadog/

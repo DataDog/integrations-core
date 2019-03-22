@@ -1,11 +1,46 @@
 init_config:
-# check_freq: 15 # default is 15
+
+## @param check_freq - integer - optional - default: 15
+## This parameter defines the check execution frequency.
+#
+#  check_freq: 15
 
 instances:
+
+  ## @param nagios_conf - string - required
+  ## Define the path to your Nagios configuration file.
+  ## The Agent reads the main Nagios configuration file to get the locations of the Nagios log files it should watch.
+  ## The integration also works with Icinga. If you use Icinga, set `nagios_conf` to the location of your Icinga configuration file.
+  #
   - nagios_conf: /etc/nagios3/nagios.cfg
-#   collect_events: True                   # default is True
-#   passive_checks_events: True            # default is False
-#   collect_host_performance_data: True    # default is False
-#   collect_service_performance_data: True # default is False
-#   tags:								   # default is []
-#     - optional:tag1
+
+  ## @param collect_events - boolean - optional - default: true
+  ## Set collect_events to false to disable Nagios Event collection.
+  #
+  #  collect_events: true
+
+  ## @param passive_checks_events - boolean - optional - default: false
+  ## Set passive_checks_events to collect Nagios checks events.
+  #  
+  #  passive_checks_events: false
+
+  ## @param collect_host_performance_data - boolean - optional - default: false
+  ## With the default configuration, the Nagios check doesn't collect any metrics.
+  ## Set `collect_host_performance_data` to `true` to collect Nagios host performance data.
+  #
+  #  collect_host_performance_data: false
+
+  ## @param collect_service_performance_data - boolean - optional - default: false
+  ## With the default configuration, the Nagios check doesn't collect any metrics.
+  ## Set `collect_service_performance_data` to `true` to collect Nagios service performance data.
+  #
+  #  collect_service_performance_data: false
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>

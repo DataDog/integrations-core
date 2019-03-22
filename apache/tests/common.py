@@ -13,19 +13,11 @@ BASE_URL = "http://{0}:{1}".format(HOST, PORT)
 STATUS_URL = "{0}/server-status".format(BASE_URL)
 AUTO_STATUS_URL = "{0}?auto".format(STATUS_URL)
 
-STATUS_CONFIG = {
-    'apache_status_url': STATUS_URL,
-    'tags': ['instance:first']
-}
+STATUS_CONFIG = {'apache_status_url': STATUS_URL, 'tags': ['instance:first']}
 
-AUTO_CONFIG = {
-    'apache_status_url': AUTO_STATUS_URL,
-    'tags': ['instance:second']
-}
+AUTO_CONFIG = {'apache_status_url': AUTO_STATUS_URL, 'tags': ['instance:second']}
 
-BAD_CONFIG = {
-    'apache_status_url': 'http://localhost:1234/server-status',
-}
+BAD_CONFIG = {'apache_status_url': 'http://localhost:1234/server-status'}
 
 APACHE_GAUGES = [
     'apache.performance.idle_workers',
@@ -37,10 +29,7 @@ APACHE_GAUGES = [
     'apache.conns_total',
     'apache.conns_async_writing',
     'apache.conns_async_keep_alive',
-    'apache.conns_async_closing'
+    'apache.conns_async_closing',
 ]
 
-APACHE_RATES = [
-    'apache.net.bytes_per_s',
-    'apache.net.request_per_s'
-]
+APACHE_RATES = ['apache.net.bytes_per_s', 'apache.net.request_per_s']

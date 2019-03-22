@@ -1,5 +1,20 @@
 # CHANGELOG - datadog_checks_base
 
+## 6.3.0 / 2019-03-14
+
+* [Added] Add rfc3339 utilities. See [#3189](https://github.com/DataDog/integrations-core/pull/3189).
+* [Added] Backport Agent V6 utils to the AgentCheck class. See [#3261](https://github.com/DataDog/integrations-core/pull/3261).
+
+## 6.2.0 / 2019-03-10
+
+* [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
+* [Added] Upgrade requests to 2.21.0. See [#3274](https://github.com/DataDog/integrations-core/pull/3274).
+* [Added] Upgrade six to 1.12.0. See [#3276](https://github.com/DataDog/integrations-core/pull/3276).
+* [Added] Add iter_unique util. See [#3269](https://github.com/DataDog/integrations-core/pull/3269).
+* [Fixed] Fixed decoding warning for None tags. See [#3249](https://github.com/DataDog/integrations-core/pull/3249).
+* [Added] Upgrade aerospike dependency. See [#3235](https://github.com/DataDog/integrations-core/pull/3235).
+* [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
+
 ## 6.1.0 / 2019-02-20
 
 * [Added] Add openstacksdk option to openstack_controller. See [#3109](https://github.com/DataDog/integrations-core/pull/3109).

@@ -1,3 +1,7 @@
+## Datadog Agent version [6.10.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#6101)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [6.10.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#6100)
 
 * Active Directory [1.3.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)

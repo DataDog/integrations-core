@@ -1,0 +1,7 @@
+# TODO: port this to pyproject.toml when supported: https://gitlab.com/pycqa/flake8/merge_requests/245
+
+[flake8]
+select = B,C,E,F,W,B001,B003,B006,B007,B301,B305,B306,B902
+ignore = E203,E722,W503
+exclude = .eggs,.tox,build,compat.py,__init__.py,datadog_checks/dev/tooling/templates/*,datadog_checks/*/vendor/*
+max-line-length = 120

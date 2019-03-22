@@ -1,7 +1,7 @@
 init_config:
 
 instances:
-  
+
   ## @param mysql_host - string - required
   ## url of your MySQL database
   #
@@ -14,7 +14,7 @@ instances:
 
   ## @param mysql_password - string - required
   ## Password to use to connect to MySQL in order to gather metrics
-  # 
+  #
     mysql_password: <MYSQL_PASSWORD>
 
   ## @param rrd_path - string - required
@@ -28,7 +28,7 @@ instances:
     rrd_path: /path/to/cacti/rra
 
     ## @param field_names - list of string - optional
-    ## The `field_names` specifies which field_names should be used 
+    ## The `field_names` specifies which field_names should be used
     ## to determine if a device is a real device. You can let it commented
     ## out as the default values should satisfy your needs.
     ## You can run the following query to determine your field names:
@@ -57,9 +57,9 @@ instances:
     #
     rrd_whitelist: /path/to/rrd_whitelist.txt
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
