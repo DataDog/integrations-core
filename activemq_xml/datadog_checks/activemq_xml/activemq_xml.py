@@ -61,7 +61,7 @@ class ActiveMQXML(AgentCheck):
         url = "%s%s" % (base_url, xml_url)
         self.log.debug("ActiveMQ Fetching queue data from: %s" % url)
         try:
-            r = requests.get(url, auth=auth)
+            r = self.http.get(url, auth=auth)
             r.raise_for_status()
         except requests.exceptions.ConnectionError:
             if suppress_errors:

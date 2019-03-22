@@ -1,4 +1,19 @@
 init_config:
+  ## @param skip_proxy - boolean - optional - default: false
+  ## The (optional) skip_proxy parameter bypasses any proxy
+  ## settings enabled.
+  #
+  #  skip_proxy: false
+
+  ## @param proxy - list of string - optional
+  ## Set HTTP or HTTPS proxy for all instances.
+  ## Use the no_proxy list to specify hosts that must bypass proxy
+  #  proxy:
+  #    https: https://<SSL_PROXY_SERVER_FOR_HTTPS>:<PORT>
+  #    http: https://<SSL_PROXY_SERVER_FOR_HTTP>:<PORT>
+  #    no_proxy:
+  #      - host1
+  #      - host2
 
 instances:
 
@@ -9,38 +24,54 @@ instances:
     #
   - url: http://localhost:8161
 
-    ## @param username - string - optional
-    ## Username from the credentials needed to connect to the url.
-    #
-    # username: <USERNAME>
+  ## @param username - string - optional
+  ## Username from the credentials needed to connect to the url.
+  #
+  #  username: <USERNAME>
 
-    ## @param password - string - optional
-    ## Password from the credentials needed to connect to the host.
-    #
-    # password: <PASSWORD>
+  ## @param password - string - optional
+  ## Password from the credentials needed to connect to the host.
+  #
+  #  password: <PASSWORD>
 
-    ## @param suppress_errors - boolean - optional - default: false
-    ## Suppresses connection errors if url is expected to be sometimes offline (e.g. standby host).
-    #
-    # suppress_errors: false
+  ## @param suppress_errors - boolean - optional - default: false
+  ## Suppresses connection errors if url is expected to be sometimes offline (e.g. standby host).
+  #
+  #  suppress_errors: false
 
-    ## @param detailed_queues - list of string - optional
-    ## If you have more than 300 queues you need to list the ones you want to track.
-    #
-    # detailed_queues:
-    #   - <QUEUE_1>
-    #   - <QUEUE_2>
+  ## @param detailed_queues - list of string - optional
+  ## If you have more than 300 queues you need to list the ones you want to track.
+  #
+  #  detailed_queues:
+  #    - <QUEUE_1>
+  #    - <QUEUE_2>
 
-    ## @param detailed_topics - list of string - optional
-    ## If you have more than 300 topics you need to list the ones you want to track.
-    #
-    # detailed_topics:
-    #   - <TOPIC_1>
-    #   - <TOPIC_2>
+  ## @param detailed_topics - list of string - optional
+  ## If you have more than 300 topics you need to list the ones you want to track.
+  #
+  #  detailed_topics:
+  #    - <TOPIC_1>
+  #    - <TOPIC_2>
 
-    ## @param detailed_subscribers - list of string - optional
-    ## If you have more than 300 subscribers you need to list the ones you want to track.
-    #
-    # detailed_subscribers:
-    #  - <SUBSCRIBER_1>
-    #  - <SUBSCRIBER_2>
+  ## @param detailed_subscribers - list of string - optional
+  ## If you have more than 300 subscribers you need to list the ones you want to track.
+  #
+  #  detailed_subscribers:
+  #   - <SUBSCRIBER_1>
+  #   - <SUBSCRIBER_2>
+
+  ## @param skip_proxy - boolean - optional - default: false
+  ## The (optional) skip_proxy parameter bypasses any proxy
+  ## settings enabled.
+  #
+  #  skip_proxy: false
+
+  ## @param proxy - list of string - optional
+  ## Set HTTP or HTTPS proxy for all requests.
+  ## Use the no_proxy list to specify hosts that must bypass proxy
+  #  proxy:
+  #    https: https://<SSL_PROXY_SERVER_FOR_HTTPS>:<PORT>
+  #    http: https://<SSL_PROXY_SERVER_FOR_HTTP>:<PORT>
+  #    no_proxy:
+  #      - host1
+  #      - host2
