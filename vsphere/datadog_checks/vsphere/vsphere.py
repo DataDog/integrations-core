@@ -637,7 +637,7 @@ class VSphereCheck(AgentCheck):
         # so we call perfManager.QueryAvailablePerfMetric for each cluster, datacenter, datastore
         # This should be okay since the number of such entities shouldn't be excessively large
         for mor in mors:
-            mor_name = mor['mor']
+            mor_name = str(mor['mor'])
             available_metrics = {m.counterId for m in perfManager.QueryAvailablePerfMetric(entity=mor["mor"])}
             try:
                 self.mor_cache.set_metrics(i_key, mor_name, self._compute_needed_metrics(instance, available_metrics))
