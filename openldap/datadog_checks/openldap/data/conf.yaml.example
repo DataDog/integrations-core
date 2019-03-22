@@ -13,7 +13,7 @@ instances:
   ## @param username - string - optional
   ## The DN of the user that can read the monitor database.
   #
-  #  username: dc=monitor,dc=<DOMAINE_NAME>
+  #  username: <USER_DISTINGUISHED_NAME>
 
   ## @param password - string - optional
   ## Password associated with `username`
@@ -67,10 +67,10 @@ instances:
   #
   #  custom_queries:
   #    - name: <CUSTOM_QUERY_NAME>
-  #      search_base: dc=<DOMAIN_NAME
+  #      search_base: <SEARCH_BASE>
   #      search_filter: (objectClass=*)
   #      search_scope: subtree
   #      attributes:
   #        - *
-  #      username: dc=user,dc=<DOMAIN_NAME>
+  #      username: <USER_DISTINGUISHED_NAME>
   #      password: <PASSWORD>
