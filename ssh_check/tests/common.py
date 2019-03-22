@@ -36,6 +36,14 @@ INSTANCES = {
     },
 }
 
+INSTANCE_INTEGRATION = {
+    "host": "127.0.0.1",
+    "port": 8022,
+    "password": "secured_password",
+    "username": "root",
+    "add_missing_keys": True,
+}
+
 
 def wait_for_threads():
     for thread in threading.enumerate():
