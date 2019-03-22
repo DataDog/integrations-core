@@ -51,5 +51,5 @@ def poll_mock():
             headers={'Content-Type': "text/plain"}
         )
     )
-    yield poll_mock_patch.start()
-    poll_mock_patch.stop()
+    with poll_mock_patch:
+        yield
