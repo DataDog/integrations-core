@@ -28,7 +28,11 @@ from ...e2e import create_interface, get_configured_envs
 @click.option('--log-level', '-l', help='Set the log level (default `off`)')
 @click.option('--json', 'as_json', is_flag=True, help='Format the aggregator and check runner output as JSON')
 @click.option(
-    '--breakpoint', '-b', type=click.INT, help='Line number to start a PDB session (0: first line, -1: last line)'
+    '--breakpoint',
+    '-b',
+    'break_point',
+    type=click.INT,
+    help='Line number to start a PDB session (0: first line, -1: last line)',
 )
 def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_point):
     """Run an Agent check."""
