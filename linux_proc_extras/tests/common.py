@@ -14,9 +14,7 @@ INSTANCE = {
     "tags": ["foo:bar"]
 }
 
-EXPECTED_TAGS = [
-    "foo:bar"
-]
+EXPECTED_TAG = "foo:bar"
 
 EXPECTED_METRICS = [
     'system.inodes.total',
