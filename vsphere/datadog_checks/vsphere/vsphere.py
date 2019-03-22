@@ -511,13 +511,17 @@ class VSphereCheck(AgentCheck):
                     mor_type = "host"
                 elif isinstance(obj, vim.Datastore):
                     vsphere_type = 'vsphere_type:datastore'
-                    instance_tags.append('vsphere_datastore:{}'.format(ensure_unicode(properties.get("name", "unknown"))))
+                    instance_tags.append('vsphere_datastore:{}'.format(
+                        ensure_unicode(properties.get("name", "unknown"))
+                    ))
                     hostname = None
                     vimtype = vim.Datastore
                     mor_type = "datastore"
                 elif isinstance(obj, vim.Datacenter):
                     vsphere_type = 'vsphere_type:datacenter'
-                    instance_tags.append("vsphere_datacenter:{}".format(ensure_unicode(properties.get("name", "unknown"))))
+                    instance_tags.append("vsphere_datacenter:{}".format(
+                        ensure_unicode(properties.get("name", "unknown"))
+                    ))
                     hostname = None
                     vimtype = vim.Datacenter
                     mor_type = "datacenter"
@@ -592,11 +596,13 @@ class VSphereCheck(AgentCheck):
         for resource_type in RESOURCE_TYPE_METRICS:
             if self.mor_objects_queue.contains(i_key) and self.mor_objects_queue.size(i_key, resource_type):
                 last = self.cache_config.get_last(CacheConfig.Morlist, i_key)
-                self.log.debug("Skipping morlist collection: the objects queue for the "
-                               "resource type '{}' is still being processed "
-                               "(latest refresh was {}s ago)".format(
-                                   ensure_unicode(resource_type), time.time() - last)
-                                )
+                self.log.debug(
+                    "Skipping morlist collection: the objects queue for the "
+                    "resource type '{}' is still being processed "
+                    "(latest refresh was {}s ago)".format(
+                        ensure_unicode(resource_type), time.time() - last
+                    )
+                )
                 return
 
         tags = ["vcenter_server:{}".format(ensure_unicode(instance.get('name')))]
@@ -663,7 +669,9 @@ class VSphereCheck(AgentCheck):
                 for _ in range(batch_size):
                     mor = self.mor_objects_queue.pop(i_key, resource_type)
                     if mor is None:
-                        self.log.debug("No more objects of type '{}' left in the queue".format(ensure_unicode(resource_type)))
+                        self.log.debug("No more objects of type '{}' left in the queue".format(
+                            ensure_unicode(resource_type)
+                        ))
                         break
 
                     mor_name = str(mor['mor'])
