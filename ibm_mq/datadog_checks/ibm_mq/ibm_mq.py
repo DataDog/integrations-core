@@ -180,17 +180,30 @@ class IbmMqCheck(AgentCheck):
             mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
             self.gauge(mname, channels, tags=tags)
 
+        # grab all the discoverable channels
+        self._get_channel_status(queue_manager, '*', tags, config)
+
+        # check specific channels as well
+        # if a channel is not listed in the above one, a user may want to check it specifically,
+        # in this case it'll fail
+        for channel in config.channels:
+            self._get_channel_status(queue_manager, channel, tags, config)
+
+    def _get_channel_status(queue_manager, channel, tags, config):
+        channel_tags = tags + ["channel:{}".format(channel)]
         try:
+            args = {
+                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(channel)
+            }
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
         except pymqi.MQMIError as e:
             self.log.warning("Error getting CHANNEL stats {}".format(e))
+            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, channel_tags)
         else:
             for channel_info in response:
                 name = channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]
                 name = name.strip()
-
-                channel_tags = tags + ["channel:{}".format(name)]
 
                 # running = 3, stopped = 4
                 status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
@@ -198,27 +211,3 @@ class IbmMqCheck(AgentCheck):
                     self.service_check(self.SERVICE_CHECK, AgentCheck.OK, channel_tags)
                 elif status == 4:
                     self.service_check(self.SERVICE_CHECK, AgentCheck.WARNING, channel_tags)
-
-        for channel in config.channels:
-
-            channel_tags = tags + ["channel:{}".format(channel)]
-            try:
-                args = {
-                    pymqi.CMQCFC.MQCACH_CHANNEL_NAME: channel
-                }
-                pcf = pymqi.PCFExecute(queue_manager)
-                response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
-            except pymqi.MQMIError as e:
-                self.log.warning("Error getting CHANNEL stats {}".format(e))
-                self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, channel_tags)
-            else:
-                for channel_info in response:
-                    name = channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]
-                    name = name.strip()
-
-                    # running = 3, stopped = 4
-                    status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
-                    if status == 3:
-                        self.service_check(self.SERVICE_CHECK, AgentCheck.OK, channel_tags)
-                    elif status == 4:
-                        self.service_check(self.SERVICE_CHECK, AgentCheck.WARNING, channel_tags)
