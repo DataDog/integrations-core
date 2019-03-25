@@ -159,12 +159,8 @@ These are pause containers (docker_image:gcr.io/google_containers/pause.*) that 
 The docker_daemon check ignores them through a default exclusion list, but they will show up for K8s metrics like *kubernetes.cpu.usage.total* and *kubernetes.filesystem.usage*.
 
 ## Further Reading
-### Datadog Blog
-To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts][13] about it.
 
-### Knowledge Base
-* [How to get more out of your Kubernetes integration?][14]
-* [How to report host disk metrics when dd-agent runs in a docker container?][15]
+To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts][13] about it.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kubernetes/images/kubernetes_dashboard.png
 [2]: https://github.com/DataDog/datadog-agent/blob/master/docs/agent/changes.md#kubernetes-support
@@ -179,5 +175,3 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 [11]: https://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
 [12]: https://github.com/DataDog/dd-agent/pull/3051
 [13]: https://www.datadoghq.com/blog/monitoring-kubernetes-era
-[14]: how-to-get-more-out-of-your-kubernetes-integration
-[15]: how-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container
