@@ -52,6 +52,8 @@ class IbmMqCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, config.tags)
             return
 
+        self.get_pcf_channel_metrics(queue_manager, tags, config)
+
         self.discover_queues(queue_manager, config)
 
         try:
@@ -170,7 +172,7 @@ class IbmMqCheck(AgentCheck):
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
         try:
             pcf = pymqi.PCFExecute(queue_manager)
-            response = pcf.MQCMD_INQUIRE_CHANNEL(CHANNEL_ARGS)
+            response = pcf.MQCMD_INQUIRE_CHANNEL(self.CHANNEL_ARGS)
         except pymqi.MQMIError as e:
             self.warning("Error getting CHANNEL stats {}".format(e))
         else:
@@ -180,7 +182,7 @@ class IbmMqCheck(AgentCheck):
 
         try:
             pcf = pymqi.PCFExecute(queue_manager)
-            response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(CHANNEL_ARGS)
+            response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(self.CHANNEL_ARGS)
         except pymqi.MQMIError as e:
             self.warning("Error getting CHANNEL stats {}".format(e))
         else:

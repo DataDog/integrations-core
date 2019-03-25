@@ -42,6 +42,7 @@ METRICS = [
     'ibm_mq.queue.depth_percent',
     'ibm_mq.queue_manager.dist_lists',
     'ibm_mq.queue_manager.max_msg_list',
+    'ibm_mq.channel.channels',
 ]
 
 OPTIONAL_METRICS = [
