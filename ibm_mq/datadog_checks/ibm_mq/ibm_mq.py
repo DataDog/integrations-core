@@ -48,7 +48,7 @@ class IbmMqCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, config.tags)
             return
 
-        self.get_pcf_channel_metrics(queue_manager, config.tags, config)
+        self.get_pcf_channel_metrics(queue_manager, config.tags_no_channel, config)
 
         self.discover_queues(queue_manager, config)
 

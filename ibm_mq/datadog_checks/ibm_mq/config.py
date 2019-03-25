@@ -74,3 +74,11 @@ class IBMMQConfig:
             "port:{}".format(self.port),
             "channel:{}".format(self.channel)
         ] + self.custom_tags
+
+    @property
+    def tags_no_channel(self):
+        return [
+            "queue_manager:{}".format(self.queue_manager_name),
+            "host:{}".format(self.host),
+            "port:{}".format(self.port),
+        ] + self.custom_tags
