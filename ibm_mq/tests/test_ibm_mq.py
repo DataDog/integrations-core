@@ -8,6 +8,8 @@ import pytest
 
 from datadog_checks.ibm_mq import IbmMqCheck
 
+from . import common
+
 log = logging.getLogger(__file__)
 
 METRICS = [
@@ -68,6 +70,11 @@ def test_check(aggregator, instance, seed_data):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+    tags = ['channel:{}'.format(common.CHANNEL)]
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=tags)
+    tags = ['channel:{}'.format(common.BAD_CHANNEL)]
+    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=tags)
 
 
 @pytest.mark.usefixtures("dd_environment")
