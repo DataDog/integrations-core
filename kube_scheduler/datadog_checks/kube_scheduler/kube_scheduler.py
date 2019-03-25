@@ -12,24 +12,24 @@ from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 
 DEFAULT_COUNTERS = {
     # Counter of audit events generated and sent to the audit backend.
-    'apiserver_audit_event_total': 'apiserver.audit.event.count',
+    'apiserver_audit_event_total': 'apiserver.audit.events',
     # Counter of apiserver requests rejected due to an error in audit logging backend.
-    'apiserver_audit_requests_rejected_total': 'apiserver.audit.requests_rejected.count',
+    'apiserver_audit_requests_rejected_total': 'apiserver.audit.requests_rejected',
     # Total number of failed data encryption key(DEK) generation operations.
-    'apiserver_storage_data_key_generation_failures_total': 'apiserver.storage.data_key_generation_failures.count',
+    'apiserver_storage_data_key_generation_failures_total': 'apiserver.storage.data_key_generation_failures',
     # Total number of cache misses while accessing key decryption key(KEK).
     'apiserver_storage_envelope_transformation_cache_misses_total': \
-    'apiserver.storage.envelope_transformation_cache_misses.count',
+    'apiserver.storage.envelope_transformation_cache_misses',
 
     # Number of HTTP requests, partitioned by status code, method, and host.
     'rest_client_requests_total': 'client.http.requests',
     # Total number of equivalence cache lookups, by whether or not a cache entry was found
-    'scheduler_equiv_cache_lookups_total': 'cache.lookups.count',
+    'scheduler_equiv_cache_lookups_total': 'cache.lookups',
     # Number of attempts to schedule pods, by the result. 'unschedulable' means a pod could not
     # be scheduled, while 'error' means an internal scheduler problem.
-    'scheduler_schedule_attempts_total': 'schedule_attempts.count',
+    'scheduler_schedule_attempts_total': 'schedule_attempts',
     # Total preemption attempts in the cluster till now
-    'scheduler_total_preemption_attempts': 'preemption_attempts.count',
+    'scheduler_total_preemption_attempts': 'pod_preemption.attempts',
 }
 
 DEFAULT_HISTOGRAMS = {
@@ -85,7 +85,7 @@ DEPRECARED_SUMMARIES = {
 
 DEFAULT_GAUGES = {
     # Number of selected preemption victims
-    'scheduler_pod_preemption_victims': 'pod_preemption_victims.count',
+    'scheduler_pod_preemption_victims': 'pod_preemption.victims',
 }
 
 DEFAULT_GO_METRICS = {
