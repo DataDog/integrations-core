@@ -199,7 +199,7 @@ class IbmMqCheck(AgentCheck):
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
         except pymqi.MQMIError as e:
             self.log.warning("Error getting CHANNEL stats {}".format(e))
-            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, channel_tags)
+            self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, channel_tags)
         else:
             for channel_info in response:
                 name = channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]
@@ -208,6 +208,6 @@ class IbmMqCheck(AgentCheck):
                 # running = 3, stopped = 4
                 status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
                 if status == 3:
-                    self.service_check(self.SERVICE_CHECK, AgentCheck.OK, channel_tags)
+                    self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, channel_tags)
                 elif status == 4:
-                    self.service_check(self.SERVICE_CHECK, AgentCheck.WARNING, channel_tags)
+                    self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.WARNING, channel_tags)
