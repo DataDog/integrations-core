@@ -168,11 +168,11 @@ class IbmMqCheck(AgentCheck):
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
         if PY3:
             args = {
-                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ByteString('*')
+                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: '*'
             }
         else:
             args = {
-                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: '*'
+                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')
             }
 
         try:
