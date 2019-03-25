@@ -27,8 +27,8 @@ instances:
   #
   #  password: <PASSWORD>
 
-  ## @param use_cached - boolean - optional
-  ## XXXXXXX
+  ## @param use_cached - boolean - optional - default: true
+  ## Cache and re-use PostgreSQL connection or create a new one at each check run.
   #
   #  use_cached: true
 
