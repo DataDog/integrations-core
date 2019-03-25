@@ -189,7 +189,7 @@ class IbmMqCheck(AgentCheck):
         for channel in config.channels:
             self._get_channel_status(queue_manager, channel, tags, config)
 
-    def _get_channel_status(queue_manager, channel, tags, config):
+    def _get_channel_status(self, queue_manager, channel, tags, config):
         channel_tags = tags + ["channel:{}".format(channel)]
         try:
             args = {
