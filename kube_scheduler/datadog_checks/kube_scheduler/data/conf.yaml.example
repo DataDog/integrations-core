@@ -24,6 +24,3 @@ instances:
   ## Overrides the default timeout value in second
   #
   #  prometheus_timeout: 10
-
-
-

@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "kube_scheduler",
   "metric_prefix": "kube_scheduler.",
-  "metric_to_check": "",
+  "metric_to_check": "kube_scheduler.threads",
   "creates_events": false,
   "short_description": "Monitors the Kubernetes Scheduler",
   "guid": "ec7c029f-86c2-4202-9368-1904998a646c",
@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-Kube_scheduler Integration",
   "categories": [
-    ""
+    "orchestration",
+    "containers"
   ],
   "type": "check",
   "is_public": false,
