@@ -71,10 +71,6 @@ def test_check(aggregator, instance, seed_data):
 
     aggregator.assert_all_metrics_covered()
 
-    from six import iteritems
-    for sc, data in iteritems(aggregator._service_checks):
-        log.warning("{} {}".format(sc, data))
-
     tags = ['queue_manager:datadog', 'host:localhost', 'port:11414']
 
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
