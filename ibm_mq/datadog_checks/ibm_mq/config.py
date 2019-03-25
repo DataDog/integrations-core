@@ -41,6 +41,8 @@ class IBMMQConfig:
         self.queues = instance.get('queues', [])
         self.queue_patterns = instance.get('queue_patterns', [])
 
+        self.channels = instance.get('channels', [])
+
         self.custom_tags = instance.get('tags', [])
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
@@ -71,4 +73,12 @@ class IBMMQConfig:
             "host:{}".format(self.host),
             "port:{}".format(self.port),
             "channel:{}".format(self.channel)
+        ] + self.custom_tags
+
+    @property
+    def tags_no_channel(self):
+        return [
+            "queue_manager:{}".format(self.queue_manager_name),
+            "host:{}".format(self.host),
+            "port:{}".format(self.port),
         ] + self.custom_tags

@@ -8,6 +8,8 @@ import pytest
 
 from datadog_checks.ibm_mq import IbmMqCheck
 
+from . import common
+
 log = logging.getLogger(__file__)
 
 METRICS = [
@@ -42,6 +44,7 @@ METRICS = [
     'ibm_mq.queue.depth_percent',
     'ibm_mq.queue_manager.dist_lists',
     'ibm_mq.queue_manager.max_msg_list',
+    'ibm_mq.channel.channels',
 ]
 
 OPTIONAL_METRICS = [
@@ -67,6 +70,13 @@ def test_check(aggregator, instance, seed_data):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+    tags = ['queue_manager:datadog', 'host:localhost', 'port:11414']
+
+    channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags)
+    bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
+    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags)
 
 
 @pytest.mark.usefixtures("dd_environment")

@@ -20,6 +20,8 @@ CHANNEL = 'DEV.ADMIN.SVRCONN'
 
 QUEUE = 'DEV.QUEUE.1'
 
+BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
+
 MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
 
 COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_VERSION)
@@ -35,6 +37,10 @@ INSTANCE = {
     'password': PASSWORD,
     'queues': [
         QUEUE
+    ],
+    'channels': [
+        CHANNEL,
+        BAD_CHANNEL,
     ]
 }
 
@@ -48,6 +54,10 @@ INSTANCE_PATTERN = {
     'queue_patterns': [
         'DEV.*',
         'SYSTEM.*'
+    ],
+    'channels': [
+        CHANNEL,
+        BAD_CHANNEL,
     ]
 }
 
@@ -59,4 +69,8 @@ INSTANCE_COLLECT_ALL = {
     'username': USERNAME,
     'password': PASSWORD,
     'auto_discover_queues': True,
+    'channels': [
+        CHANNEL,
+        BAD_CHANNEL,
+    ]
 }
