@@ -13,12 +13,5 @@ def dd_environment():
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture
 def check():
     return MoreUnixCheck(common.CHECK_NAME, {}, {})
