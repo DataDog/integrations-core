@@ -33,7 +33,7 @@ class IbmMqCheck(AgentCheck):
     CHANNEL_SERVICE_CHECK = 'ibm_mq.channel'
 
     CHANNEL_ARGS = {
-        pymqi.CMQCFC.MQCACH_CHANNEL_NAME: '*'
+        pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ByteString('*')
     }
 
     def check(self, instance):
