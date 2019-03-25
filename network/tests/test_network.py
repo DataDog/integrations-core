@@ -49,11 +49,6 @@ else:
         return s.decode("utf-8")
 
 
-@pytest.fixture
-def network_check():
-    return Network('network', {}, {})
-
-
 def ss_subprocess_mock(*args, **kwargs):
     if args[0][-1] == '-4' and args[0][-3] == '-u':
         file_name = 'ss_ipv4_udp'
@@ -79,18 +74,18 @@ def netstat_subprocess_mock(*args, **kwargs):
 
 
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
-def test_cx_state(aggregator, network_check):
+def test_cx_state(aggregator, check):
     instance = {'collect_connection_state': True}
     with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
-        network_check._collect_cx_state = True
-        network_check.check(instance)
+        check._collect_cx_state = True
+        check.check(instance)
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
         aggregator.reset()
 
         out.side_effect = netstat_subprocess_mock
-        network_check.check(instance)
+        check.check(instance)
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
 
@@ -99,30 +94,30 @@ def test_cx_state(aggregator, network_check):
 @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_solaris', return_value=False)
 @mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
-def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, network_check):
-    with mock.patch.object(network_check, '_check_psutil') as _check_psutil:
-        network_check.check({})
-        network_check._check_psutil = mock.MagicMock()
+def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, check):
+    with mock.patch.object(check, '_check_psutil') as _check_psutil:
+        check.check({})
+        check._check_psutil = mock.MagicMock()
         _check_psutil.assert_called_once_with({})
 
 
-def test_check_psutil(aggregator, network_check):
-    with mock.patch.object(network_check, '_cx_state_psutil') as _cx_state_psutil, \
-            mock.patch.object(network_check, '_cx_counters_psutil') as _cx_counters_psutil:
-        network_check._collect_cx_state = False
-        network_check._check_psutil({})
+def test_check_psutil(aggregator, check):
+    with mock.patch.object(check, '_cx_state_psutil') as _cx_state_psutil, \
+            mock.patch.object(check, '_cx_counters_psutil') as _cx_counters_psutil:
+        check._collect_cx_state = False
+        check._check_psutil({})
         _cx_state_psutil.assert_not_called()
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
-    with mock.patch.object(network_check, '_cx_state_psutil') as _cx_state_psutil, \
-            mock.patch.object(network_check, '_cx_counters_psutil') as _cx_counters_psutil:
-        network_check._collect_cx_state = True
-        network_check._check_psutil({})
+    with mock.patch.object(check, '_cx_state_psutil') as _cx_state_psutil, \
+            mock.patch.object(check, '_cx_counters_psutil') as _cx_counters_psutil:
+        check._collect_cx_state = True
+        check._check_psutil({})
         _cx_state_psutil.assert_called_once_with(tags=[])
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
 
-def test_cx_state_psutil(aggregator, network_check):
+def test_cx_state_psutil(aggregator, check):
     sconn = namedtuple(
         'sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])
     conn = [
@@ -184,14 +179,14 @@ def test_cx_state_psutil(aggregator, network_check):
 
     with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
         mock_psutil.net_connections.return_value = conn
-        network_check = Network('network', {}, {})
-        network_check._setup_metrics({})
-        network_check._cx_state_psutil()
+        check = Network('network', {}, {})
+        check._setup_metrics({})
+        check._cx_state_psutil()
         for _, m in iteritems(aggregator._metrics):
             assert results[m[0].name] == m[0].value
 
 
-def test_cx_counters_psutil(aggregator, network_check):
+def test_cx_counters_psutil(aggregator, check):
     snetio = namedtuple(
         'snetio',
         ['bytes_sent', 'bytes_recv', 'packets_sent',
@@ -212,28 +207,28 @@ def test_cx_counters_psutil(aggregator, network_check):
     }
     with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
         mock_psutil.net_io_counters.return_value = counters
-        network_check._excluded_ifaces = ['Loopback Pseudo-Interface 1']
-        network_check._exclude_iface_re = ''
-        network_check._cx_counters_psutil()
+        check._excluded_ifaces = ['Loopback Pseudo-Interface 1']
+        check._exclude_iface_re = ''
+        check._cx_counters_psutil()
         for _, m in iteritems(aggregator._metrics):
             assert 'device:Ethernet' in m[0].tags
             if 'bytes_rcvd' in m[0].name:
                 assert m[0].value == 3280598526
 
 
-def test_parse_protocol_psutil(aggregator, network_check):
+def test_parse_protocol_psutil(aggregator, check):
     import socket
     conn = mock.MagicMock()
 
-    protocol = network_check._parse_protocol_psutil(conn)
+    protocol = check._parse_protocol_psutil(conn)
     assert protocol == ''
 
     conn.type = socket.SOCK_STREAM
     conn.family = socket.AF_INET6
-    protocol = network_check._parse_protocol_psutil(conn)
+    protocol = check._parse_protocol_psutil(conn)
     assert protocol == 'tcp6'
 
     conn.type = socket.SOCK_DGRAM
     conn.family = socket.AF_INET
-    protocol = network_check._parse_protocol_psutil(conn)
+    protocol = check._parse_protocol_psutil(conn)
     assert protocol == 'udp4'
