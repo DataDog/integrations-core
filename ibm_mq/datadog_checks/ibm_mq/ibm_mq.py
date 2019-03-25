@@ -174,7 +174,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL(self.CHANNEL_ARGS)
         except pymqi.MQMIError as e:
-            self.warning("Error getting CHANNEL stats {}".format(e))
+            self.log.warning("Error getting CHANNEL stats {}".format(e))
         else:
             channels = len(response)
             mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
@@ -184,7 +184,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(self.CHANNEL_ARGS)
         except pymqi.MQMIError as e:
-            self.warning("Error getting CHANNEL stats {}".format(e))
+            self.log.warning("Error getting CHANNEL stats {}".format(e))
         else:
             for channel_info in response:
                 name = channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]
@@ -209,7 +209,7 @@ class IbmMqCheck(AgentCheck):
                 pcf = pymqi.PCFExecute(queue_manager)
                 response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
             except pymqi.MQMIError as e:
-                self.warning("Error getting CHANNEL stats {}".format(e))
+                self.log.warning("Error getting CHANNEL stats {}".format(e))
                 self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, channel_tags)
             else:
                 for channel_info in response:
