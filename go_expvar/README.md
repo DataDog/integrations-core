@@ -74,10 +74,10 @@ Need help? Contact [Datadog support][11].
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://golang.org/pkg/expvar
 [5]: https://golang.org/pkg/net/http/#ListenAndServe
-[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [7]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/datadog_checks/go_expvar/data/conf.yaml.example
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
 [11]: https://docs.datadoghq.com/help
 [12]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog

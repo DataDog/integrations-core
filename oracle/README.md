@@ -115,26 +115,26 @@ Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your 
 
 [Run the Agent's status subcommand][8] and look for `oracle` under the Checks section.
 
-## Custom Query 
+## Custom Query
 
 Providing custom queries is also supported. Each query must have 3 parameters:
 
 | Parameter | Description |
 | ----      | ---         |
-| `metric_prefix`  | This is what each metric starts with. | 
+| `metric_prefix`  | This is what each metric starts with. |
 | `query`  | This is the SQL to execute. It can be a simple statement or a multi-line script. Only the first row of the result is read. |
 | `columns` | This is a list representing each column, ordered sequentially from left to right. There are 2 required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix to append to the `metric_prefix` in order to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
 
 Optionally use the `tags` parameter to apply a list of tags to each metric collected.
 
-The following: 
+The following:
 
 ```
 self.gauge('oracle.custom_query.metric1', value, tags=['tester:oracle', 'tag1:value'])
 self.count('oracle.custom_query.metric2', value, tags=['tester:oracle', 'tag1:value'])
 ```
 
-is what the following example configuration would become: 
+is what the following example configuration would become:
 
 ```
 - metric_prefix: oracle.custom_query
@@ -166,7 +166,7 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 The Oracle Database check does not include any events.
 
 ### Service Checks
-**oracle.can_connect**  
+**oracle.can_connect**
 Verifies the database is available and accepting connections.
 
 ## Troubleshooting
@@ -178,7 +178,7 @@ Need help? Contact [Datadog support][10].
 [4]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
 [5]: http://upstart.ubuntu.com/cookbook/#environment-variables
 [6]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
-[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [10]: https://docs.datadoghq.com/help

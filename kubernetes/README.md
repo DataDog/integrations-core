@@ -166,7 +166,6 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 * [How to get more out of your Kubernetes integration?][14]
 * [How to report host disk metrics when dd-agent runs in a docker container?][15]
 
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kubernetes/images/kubernetes_dashboard.png
 [2]: https://github.com/DataDog/datadog-agent/blob/master/docs/agent/changes.md#kubernetes-support
 [3]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes
@@ -175,10 +174,10 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 [6]: https://kubernetes.io/docs/api-reference/v1.7/#configmap-v1-core
 [7]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account
 [8]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/datadog_checks/kubernetes/data/conf.yaml.example#L118
-[9]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/metadata.csv
 [11]: https://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
 [12]: https://github.com/DataDog/dd-agent/pull/3051
 [13]: https://www.datadoghq.com/blog/monitoring-kubernetes-era
-[14]: https://docs.datadoghq.com/agent/faq/how-to-get-more-out-of-your-kubernetes-integration
-[15]: https://docs.datadoghq.com/agent/faq/how-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container
+[14]: how-to-get-more-out-of-your-kubernetes-integration
+[15]: how-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container

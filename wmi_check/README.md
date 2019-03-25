@@ -137,6 +137,6 @@ Need help? Contact [Datadog support][11].
 [6]: https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
 [7]: https://technet.microsoft.com/en-us/library/Hh921475.aspx
 [8]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
-[9]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
 [11]: https://docs.datadoghq.com/help

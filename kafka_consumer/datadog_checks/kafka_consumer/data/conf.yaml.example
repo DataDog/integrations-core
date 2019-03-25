@@ -26,7 +26,7 @@ init_config:
   ## must stat zookeeper more than the number of consumers * topic_partitions
   ## that you're monitoring. If that number is greater than 100, it's recommended
   ## to increase this value to avoid hitting zookeeper too hard.
-  ## https://docs.datadoghq.com/agent/faq/how-do-i-change-the-frequency-of-an-agent-check/
+  ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
   #
   #  min_collection_interval: 600
 
@@ -34,7 +34,7 @@ instances:
 
   ## @param kafka_connect_str - list of strings - required
   ## Kafka endpoints and port to connect to.
-  ## 
+  ##
   ## In a production environment, it's often useful to specify multiple
   ## Kafka nodes for a single check instance. This way you
   ## only generate a single check process, but if one host goes down,
@@ -62,7 +62,7 @@ instances:
   - zk_connect_str:
     - localhost:2181
     - <ZOOKEEPER_ENDPOINT>:2181
-  
+
   ## @param zk_iteration_ival - integer - optional
   ## Set how many seconds the check should wait between two ZK consumer offset
   ## collections. If kafka consumer offsets is disabled, this has no effect.
@@ -70,7 +70,7 @@ instances:
   #  zk_iteration_ival: 1
 
   ## @param zk_prefix - string - optional
-  ## Zookeeper chroot prefix under which kafka data is living in zookeeper. 
+  ## Zookeeper chroot prefix under which kafka data is living in zookeeper.
   ## If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
   #
   #  zk_prefix: <ZK_PREFIX>
@@ -90,7 +90,7 @@ instances:
   #    <CONSUMER_NAME_2>:
   #      <TOPIC_NAME_2>:
   #    <CONSUMER_NAME_3>
-  
+
   ## @param monitor_unlisted_consumer_groups - boolean - required
   ## Setting monitor_unlisted_consumer_groups to True tells the check to
   ## discover and fetch all offsets for all consumer groups stored in zookeeper.
@@ -112,15 +112,15 @@ instances:
   #  tags:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
-  
+
   ## @param security_protocol - string - required
-  ## Protocol used to communicate with brokers. 
+  ## Protocol used to communicate with brokers.
   ## Valid values are: PLAINTEXT, SSL. Default: PLAINTEXT.
   #
     security_protocol: PLAINTEXT
-  
+
   ## @param sasl_mechanism - string - optional
-  ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL. 
+  ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
   ## Currently only PLAIN is supported.
   #
   #  sasl_mechanism: PLAIN
@@ -138,21 +138,21 @@ instances:
   ## @param sasl_kerberos_service_name - string - optional - default: kafka
   ## Service name to include in GSSAPI sasl mechanism handshake.
   #
-  #  sasl_kerberos_service_name: kafka 
+  #  sasl_kerberos_service_name: kafka
 
   ## @param sasl_kerberos_domain_name - string - optional - default: one of the bootstrap servers
-  ## Kerberos domain name to use in GSSAPI sasl mechanism handshake. 
+  ## Kerberos domain name to use in GSSAPI sasl mechanism handshake.
   #
   #  sasl_kerberos_domain_name: localhost
 
   ## @param ssl_context - string - optional
-  ## Pre-configured SSLContext for wrapping socket connections. 
-  ## If provided, all other ssl_* configurations are ignored. 
+  ## Pre-configured SSLContext for wrapping socket connections.
+  ## If provided, all other ssl_* configurations are ignored.
   #
   #  ssl_context: <SSL_CONTEXT>
 
   ## @param ssl_check_hostname - string - optional - default: true
-  ## Flag to configure whether SSL handshake should verify that the 
+  ## Flag to configure whether SSL handshake should verify that the
   ## certificate matches the broker’s hostname.
   #
   #  ssl_check_hostname: true
@@ -163,7 +163,7 @@ instances:
   #  ssl_cafile: <CA_FILE_PATH>
 
   ## @param ssl_certfile - string - optional
-  ## Filename path of file in PEM format containing the client certificate, 
+  ## Filename path of file in PEM format containing the client certificate,
   ## as well as any CA certificates needed to establish the certificate’s authenticity.
   #
   #  ssl_certfile: <CERT_FILE_PATH>
@@ -174,13 +174,13 @@ instances:
   #  ssl_keyfile: <KEY_FILE_PATH>
 
   ## @param ssl_password - string - optional
-  ## Password to be used when loading the certificate chain. 
+  ## Password to be used when loading the certificate chain.
   #
   #  ssl_password: <PASSWORD>
 
   ## @param ssl_crlfile - string - optional
   ## Filename path containing the CRL to check for certificate expiration.
   ## By default, no CRL check is done. When providing a file, only the leaf certificate
-  ## will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+. 
+  ## will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+.
   #
   #  ssl_crlfile: <SSL_FILE_PATH>
