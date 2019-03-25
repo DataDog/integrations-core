@@ -1,6 +1,7 @@
 import mock
 
 from datadog_checks.envoy import Envoy
+
 from .common import INSTANCES, response
 
 

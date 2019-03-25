@@ -18,21 +18,13 @@ class TestParseMetric:
         metric = 'runtime.num_keys'
         tags = [tag for tags in METRICS[metric]['tags'] for tag in tags]
 
-        assert parse_metric(metric) == (
-            METRIC_PREFIX + metric,
-            list(tags),
-            METRICS[metric]['method']
-        )
+        assert parse_metric(metric) == (METRIC_PREFIX + metric, list(tags), METRICS[metric]['method'])
 
     def test_cds(self):
         metric = 'cluster_manager.cds.config_reload'
         tags = [tag for tags in METRICS[metric]['tags'] for tag in tags]
 
-        assert parse_metric(metric) == (
-            METRIC_PREFIX + metric,
-            list(tags),
-            METRICS[metric]['method']
-        )
+        assert parse_metric(metric) == (METRIC_PREFIX + metric, list(tags), METRICS[metric]['method'])
 
     def test_http_router_filter(self):
         metric = 'http{}.rq_total'
@@ -44,7 +36,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_http_router_filter_vhost(self):
@@ -58,7 +50,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_http_rate_limit(self):
@@ -71,7 +63,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_ip_tagging(self):
@@ -85,7 +77,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_grpc(self):
@@ -100,7 +92,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1), '{}:{}'.format(tags[2], tag2)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_dynamodb_operation(self):
@@ -114,7 +106,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_dynamodb_table(self):
@@ -128,7 +120,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_dynamodb_error(self):
@@ -143,7 +135,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1), '{}:{}'.format(tags[2], tag2)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_http_buffer_filter(self):
@@ -156,7 +148,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_rds(self):
@@ -170,7 +162,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_tcp_proxy(self):
@@ -183,7 +175,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_tls(self):
@@ -196,7 +188,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_network_rate_limit(self):
@@ -209,7 +201,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_redis(self):
@@ -222,7 +214,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_redis_splitter(self):
@@ -235,7 +227,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_redis_command(self):
@@ -249,7 +241,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_mongo(self):
@@ -262,7 +254,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_mongo_command(self):
@@ -276,7 +268,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_mongo_collection(self):
@@ -290,7 +282,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_listener(self):
@@ -304,18 +296,14 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_listener_manager(self):
         metric = 'listener_manager.listener_added'
         tags = [tag for tags in METRICS[metric]['tags'] for tag in tags]
 
-        assert parse_metric(metric) == (
-            METRIC_PREFIX + metric,
-            list(tags),
-            METRICS[metric]['method']
-        )
+        assert parse_metric(metric) == (METRIC_PREFIX + metric, list(tags), METRICS[metric]['method'])
 
     def test_http(self):
         metric = 'http{}.downstream_cx_total'
@@ -327,7 +315,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_http_user_agent(self):
@@ -341,7 +329,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_http_listener(self):
@@ -355,28 +343,20 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_http2(self):
         metric = 'http2.rx_reset'
         tags = [tag for tags in METRICS[metric]['tags'] for tag in tags]
 
-        assert parse_metric(metric) == (
-            METRIC_PREFIX + metric,
-            list(tags),
-            METRICS[metric]['method']
-        )
+        assert parse_metric(metric) == (METRIC_PREFIX + metric, list(tags), METRICS[metric]['method'])
 
     def test_cluster_manager(self):
         metric = 'cluster_manager.cluster_added'
         tags = [tag for tags in METRICS[metric]['tags'] for tag in tags]
 
-        assert parse_metric(metric) == (
-            METRIC_PREFIX + metric,
-            list(tags),
-            METRICS[metric]['method']
-        )
+        assert parse_metric(metric) == (METRIC_PREFIX + metric, list(tags), METRICS[metric]['method'])
 
     def test_cluster(self):
         metric = 'cluster{}.upstream_cx_total'
@@ -388,7 +368,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_cluster_health_check(self):
@@ -401,7 +381,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_cluster_outlier_detection(self):
@@ -414,7 +394,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_cluster_dynamic_http(self):
@@ -427,7 +407,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_cluster_dynamic_http_zones(self):
@@ -442,7 +422,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1), '{}:{}'.format(tags[2], tag2)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_cluster_load_balancer(self):
@@ -455,7 +435,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_cluster_load_balancer_subsets(self):
@@ -468,7 +448,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
     def test_tag_with_dots(self):
@@ -481,7 +461,7 @@ class TestParseMetric:
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
             ['{}:{}'.format(tags[0], tag0)],
-            METRICS[untagged_metric]['method']
+            METRICS[untagged_metric]['method'],
         )
 
 
@@ -496,9 +476,7 @@ class TestParseHistogram:
         metric = 'envoy.http.downstream_rq_time'
         value = 'P0(0,0) P25(nan,0)'
 
-        assert list(parse_histogram(metric, value)) == [
-            ('envoy.http.downstream_rq_time.0percentile', 0.0),
-        ]
+        assert list(parse_histogram(metric, value)) == [('envoy.http.downstream_rq_time.0percentile', 0.0)]
 
     def test_correct(self):
         metric = 'envoy.http.downstream_rq_time'
