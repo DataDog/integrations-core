@@ -9,7 +9,25 @@ This check monitors [IBM Db2][1] through the Datadog Agent.
 ### Installation
 
 The IBM Db2 check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+
+#### Dependencies
+
+The [ibm_db][3] client library is required. To install it, ensure you have a working compiler and run:
+
+Unix:
+
+```
+/opt/datadog-agent/embedded/bin/pip install ibm_db==3.0.1
+```
+
+Windows:
+
+```
+"C:\Program Files\Datadog\Datadog Agent\embedded\Scrips\python.exe" -m pip install ibm_db==3.0.1
+```
+
+Additionally, on Linux there may be need for XML functionality. If you encounter errors during
+the build process, install `libxslt-dev` (or `libxslt-devel` for RPM).
 
 #### Privileges
 
@@ -40,19 +58,19 @@ Now if you run `get dbm cfg`, you should see the following:
 
 ### Configuration
 
-1. Edit the `ibm_db2.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `ibm_db2` performance data. See the [sample ibm_db2.d/conf.yaml][2] for all available configuration options.
+1. Edit the `ibm_db2.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `ibm_db2` performance data. See the [sample ibm_db2.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][3].
+2. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's status subcommand][4] and look for `ibm_db2` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `ibm_db2` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -67,11 +85,13 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][8].
 
 [1]: https://www.ibm.com/analytics/us/en/db2
-[2]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/datadog_checks/ibm_db2/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
-[6]: https://docs.datadoghq.com/help
+[2]: https://docs.datadoghq.com/agent
+[3]: https://github.com/ibmdb/python-ibmdb/tree/master/IBM_DB/ibm_db
+[4]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/datadog_checks/ibm_db2/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
+[8]: https://docs.datadoghq.com/help

@@ -1,1 +1,2 @@
 -e ../datadog_checks_dev
+ibm_db==3.0.1
