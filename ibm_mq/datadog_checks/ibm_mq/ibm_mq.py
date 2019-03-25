@@ -175,7 +175,7 @@ class IbmMqCheck(AgentCheck):
             self.warning("Error getting CHANNEL stats {}".format(e))
         else:
             channels = len(response)
-            mname = '{}.channels'.format(self.METRIC_PREFIX)
+            mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
             self.gauge(mname, channels, tags=tags)
 
         try:
