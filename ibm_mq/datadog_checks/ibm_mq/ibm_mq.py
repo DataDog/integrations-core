@@ -177,7 +177,7 @@ class IbmMqCheck(AgentCheck):
 
         try:
             pcf = pymqi.PCFExecute(queue_manager)
-            response = pcf.MQCMD_INQUIRE_CHANNEL(self.CHANNEL_ARGS)
+            response = pcf.MQCMD_INQUIRE_CHANNEL(args)
         except pymqi.MQMIError as e:
             self.log.warning("Error getting CHANNEL stats {}".format(e))
         else:
@@ -187,7 +187,7 @@ class IbmMqCheck(AgentCheck):
 
         try:
             pcf = pymqi.PCFExecute(queue_manager)
-            response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(self.CHANNEL_ARGS)
+            response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
         except pymqi.MQMIError as e:
             self.log.warning("Error getting CHANNEL stats {}".format(e))
         else:
