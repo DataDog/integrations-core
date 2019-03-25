@@ -166,14 +166,9 @@ class IbmMqCheck(AgentCheck):
                         log.debug(msg)
 
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
-        if PY3:
-            args = {
-                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')
-            }
-        else:
-            args = {
-                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: '*'
-            }
+        args = {
+            pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')
+        }
 
         try:
             pcf = pymqi.PCFExecute(queue_manager)
