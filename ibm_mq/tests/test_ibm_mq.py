@@ -71,9 +71,13 @@ def test_check(aggregator, instance, seed_data):
 
     aggregator.assert_all_metrics_covered()
 
-    tags = ['channel:{}'.format(common.CHANNEL)]
+    from six import iteritems
+    for sc, data in iteritems(aggregator._service_checks):
+        log.warning("{} {}".format(sc, data))
+
+    channel_tags = ['channel:{}'.format(common.CHANNEL)]
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=tags)
-    tags = ['channel:{}'.format(common.BAD_CHANNEL)]
+    bad_channel_tags = ['channel:{}'.format(common.BAD_CHANNEL)]
     aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=tags)
 
 
