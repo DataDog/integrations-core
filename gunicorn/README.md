@@ -156,14 +156,14 @@ To get a better idea of how (or why) to integrate your Gunicorn apps with Datado
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/gunicorn/images/gunicorn-dash.png
-[2]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [3]: https://pypi.python.org/pypi/setproctitle
-[4]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/datadog_checks/gunicorn/data/conf.yaml.example
 [6]: https://docs.gunicorn.org/en/stable/settings.html#statsd-host
 [7]: https://docs.datadoghq.com/guides/dogstatsd
 [8]: https://docs.gunicorn.org/en/stable/settings.html#accesslog
 [9]: https://docs.gunicorn.org/en/stable/settings.html#errorlog
-[10]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv
 [12]: https://www.datadoghq.com/blog/monitor-gunicorn-performance

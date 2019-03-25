@@ -77,9 +77,9 @@ If your php-fpm installation uses unix sockets, you have to use the below syntax
 init_config:
 
 instances:
-  - status_url: unix:///path/to/file.sock/status 
-    ping_url: unix:///path/to/file.sock/ping    
-    ping_reply: pong                   
+  - status_url: unix:///path/to/file.sock/status
+    ping_url: unix:///path/to/file.sock/ping
+    ping_reply: pong
     use_fastcgi: true
 ```
 
@@ -106,9 +106,9 @@ Need help? Contact [Datadog support][8].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/php_fpm/images/phpfpmoverview.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/datadog_checks/php_fpm/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
 [8]: https://docs.datadoghq.com/help

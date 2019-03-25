@@ -37,12 +37,12 @@ Starting with version 3.3.0 of the check, shipped in Agent version 6.5.0/5.27.0,
 
 By default, starting with version 3.3.0, the `collection_level` is set to 1 and the new metric names with the additional suffix are sent by the integration.
 
-The following scenarios are possible when using the vSphere integration:  
+The following scenarios are possible when using the vSphere integration:
 1. You never used the integration before, and you just installed an Agent with version 6.5.0+ / 5.27.0+. There is nothing specific in this case. Use the integration, configure the `collection_level`, and view your metrics in Datadog.
 
 2. You used the integration with an Agent older than 6.5.0/5.27.0, and upgraded to a newer version.
     - If your configuration specifically set the `all_metrics` parameter to either `true` or `false`, nothing changes (the same metrics are sent to Datadog). You should then update your dashboards and monitors to use the new metric names before switching to the new `collection_level` parameter, since `all_metrics` is deprecated and will eventually be removed.
-    - If your configuration did not specify the `all_metrics` parameter, upon upgrade the integration defaults to the `collection_level` parameter set to 1 and sends the metrics with the new name to Datadog.  
+    - If your configuration did not specify the `all_metrics` parameter, upon upgrade the integration defaults to the `collection_level` parameter set to 1 and sends the metrics with the new name to Datadog.
     **Warning**: this breaks your dashboard graphs and monitors scoped on the deprecated metrics, which stop being sent. To prevent this, you should explicitly set `all_metrics: false` in your configuration to continue reporting the same metrics, then update your dashboards and monitors to use the new metrics before switching back to using `collection_level`.
 
 #### Configuration Options
@@ -90,7 +90,7 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 
 ### Service Checks
 
-`vcenter.can_connect`:  
+`vcenter.can_connect`:
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
 
 ## Troubleshooting
@@ -103,10 +103,10 @@ See our [blog post][9] on monitoring vSphere environments with Datadog.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
 [8]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
 [9]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers

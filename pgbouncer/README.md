@@ -23,7 +23,7 @@ instances:
     password: <YOUR_PASSWORD>
     # tags:
     #   - env:prod
-    
+
   # Note: when the instance is configured with `database_url`, `host`, `port`, `username` and `password` are ignored.
   - database_url: postgresql://<DB_USER>:<DB_PASS>@<DB_HOST>:<DB_PORT>/dbname?sslmode=require
     # tags:
@@ -67,9 +67,9 @@ Returns CRITICAL if the Agent cannot connect to PgBouncer to collect metrics, ot
 Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/datadog_checks/pgbouncer/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
 [7]: https://docs.datadoghq.com/help

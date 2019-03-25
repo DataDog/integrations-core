@@ -103,7 +103,7 @@ For more information about building custom Docker containers with the Datadog Ag
 
 [Run the Agent's status subcommand][14] and look for `docker_daemon` under the Checks section.
 
-## Agent v6 
+## Agent v6
 
 The latest Docker check is named `docker` and written in Go to take advantage of the new internal architecture. Starting from version 6.0, the Agent won't load the `docker_daemon` check anymore, even if it is still available and maintained for Agent v5. All features are ported on version >6.0 , except the following deprecations:
 
@@ -145,13 +145,13 @@ The Docker integration produces the following events:
 
 ### Service Checks
 
-**docker.service_up**:  
+**docker.service_up**:
 Returns `CRITICAL` if the Agent is unable to collect the list of containers from the Docker daemon, otherwise returns `OK`.
 
-**docker.container_health**:  
+**docker.container_health**:
 This Service Check is only available for Agent v5. It returns `CRITICAL` if a container is unhealthy, `UNKNOWN` if the health is unknown, and `OK` otherwise.
 
-**docker.exit**:  
+**docker.exit**:
 Returns `CRITICAL` if a container exited with a non-zero exit code, otherwise returns `OK`.
 
 **Note**: To use `docker.exit`, add `collect_exit_code: true` in your [Docker YAML file][20] and restart the Agent.
@@ -192,7 +192,7 @@ We've also written several other in-depth blog posts to help you get the most ou
 [11]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy
 [12]: https://docs.datadoghq.com/agent/autodiscovery
 [13]: https://alpinelinux.org
-[14]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[14]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [15]: https://docs.docker.com/engine/reference/commandline/cli/#environment-variables
 [16]: https://hub.docker.com/r/datadog/docker-dd-agent
 [17]: https://hub.docker.com/r/datadog/agent
