@@ -4,7 +4,7 @@ init_config:
       # Where your identity server lives. Note that the server must support Identity API v3
       keystone_server_url: "https://my-keystone-server.com:<port>/"
 
-      # The hostname of this machine registered with Nova. 
+      # The hostname of this machine registered with Nova.
       # Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
       # os_host: my_hostname
 
@@ -60,7 +60,7 @@ instances:
           #     domain:
           #         id: default
 
-      # All projects in a domain can be collected by enabling collect_all_projects 
+      # All projects in a domain can be collected by enabling collect_all_projects
       # Note: `domain` field must be set in project
       #
       # collect_all_projects: true
@@ -83,7 +83,7 @@ instances:
 
       # Please note that server metrics override the host tag and thus do not get
       # the host-level tags specified in datadog.(conf/yaml)
-      # To apply tags to all openstack metrics, you can use the following "tags" option 
+      # To apply tags to all openstack metrics, you can use the following "tags" option
       #
       # Set (optional) custom tags for each metric
       # tags:

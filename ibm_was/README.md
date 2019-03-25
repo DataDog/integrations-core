@@ -34,7 +34,7 @@ Collecting logs is disabled by default in the Datadog Agent, you need to enable 
     logs_enabled: true
 ```
 
-Next, edit `ibm_was.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your WAS log files. 
+Next, edit `ibm_was.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your WAS log files.
 
 ```yaml
 logs:
@@ -56,7 +56,7 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**ibm_was.can_connect**  
+**ibm_was.can_connect**
 Returns `CRITICAL` if the Agent cannot connect to the PerfServlet for any reason. Returns `OK` otherwise.
 
 ### Events
@@ -70,7 +70,7 @@ Need help? Contact [Datadog support][7].
 [1]: https://www.ibm.com/cloud/websphere-application-platform
 [2]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/datadog_checks/ibm_was/data/conf.yaml.example
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
 [7]: https://docs.datadoghq.com/help

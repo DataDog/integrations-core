@@ -93,7 +93,7 @@ JMXFetch
   ==================
     kafka
       instance_name : kafka-localhost-9999
-      message : 
+      message :
       metric_count : 46
       service_check_count : 0
       status : OK
@@ -107,7 +107,7 @@ See [metadata.csv][13] for a list of metrics provided by this check.
 The Kafka check does not include any events.
 
 ### Service Checks
-**kafka.can_connect**  
+**kafka.can_connect**
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance, otherwise returns `OK`.
 
 ## Troubleshooting
@@ -128,13 +128,13 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [3]: https://docs.datadoghq.com/integrations/kafka/#agent-check-kafka-consumer
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://github.com/DataDog/jmxfetch
-[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [7]: https://github.com/DataDog/dd-agent/wiki/Deprecated-instructions-to-install-python-dependencies-for-the-Datadog-Agent
 [8]: https://github.com/DataDog/integrations-core/blob/master/kafka/datadog_checks/kafka/data/conf.yaml.example
-[9]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [11]: https://docs.datadoghq.com/logs
-[12]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[12]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
 [14]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka
 [15]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub

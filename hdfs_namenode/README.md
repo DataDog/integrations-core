@@ -71,10 +71,10 @@ Need help? Contact [Datadog support][118].
 
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png
 [112]: https://app.datadoghq.com/account/settings#agent
-[113]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[113]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [114]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/datadog_checks/hdfs_namenode/data/conf.yaml.example
-[115]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[116]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[115]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[116]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [117]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/metadata.csv
 [118]: https://docs.datadoghq.com/help
 [119]: https://www.datadoghq.com/blog/hadoop-architecture-overview

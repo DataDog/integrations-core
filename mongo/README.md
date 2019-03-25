@@ -99,22 +99,22 @@ See the [MongoDB 3.0 Manual][9] for more detailed descriptions of some of these 
 
 **NOTE**: The following metrics are NOT collected by default:
 
-|||
-|---|---|
-|metric prefix|what to add to `additional_metrics` to collect it|
-|mongodb.collection|collection|
-|mongodb.commands|top|
-|mongodb.getmore|top|
-|mongodb.insert|top|
-|mongodb.queries|top|
-|mongodb.readLock|top|
-|mongodb.writeLock|top|
-|mongodb.remove|top|
-|mongodb.total|top|
-|mongodb.update|top|
-|mongodb.writeLock|top|
-|mongodb.tcmalloc|tcmalloc|
-|mongodb.metrics.commands|metrics.commands|
+|                          |                                                   |
+| ---                      | ---                                               |
+| metric prefix            | what to add to `additional_metrics` to collect it |
+| mongodb.collection       | collection                                        |
+| mongodb.commands         | top                                               |
+| mongodb.getmore          | top                                               |
+| mongodb.insert           | top                                               |
+| mongodb.queries          | top                                               |
+| mongodb.readLock         | top                                               |
+| mongodb.writeLock        | top                                               |
+| mongodb.remove           | top                                               |
+| mongodb.total            | top                                               |
+| mongodb.update           | top                                               |
+| mongodb.writeLock        | top                                               |
+| mongodb.tcmalloc         | tcmalloc                                          |
+| mongodb.metrics.commands | metrics.commands                                  |
 
 ### Events
 
@@ -140,11 +140,11 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/mongo/datadog_checks/mongo/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/logs
-[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
 [9]: https://docs.mongodb.org/manual/reference/command/dbStats
 [10]: https://docs.datadoghq.com/help

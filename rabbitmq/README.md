@@ -135,10 +135,10 @@ If you require an increase in the number of exchanges, queues, or nodes, contact
 
 ### Service Checks
 
-**rabbitmq.aliveness**:  
+**rabbitmq.aliveness**:
 The Agent submits this service check for all vhosts (if `vhosts` is not configured) OR a subset of vhosts (those configured in `vhosts`). Each service check is tagged with `vhost:<vhost_name>`. Returns CRITICAL if the aliveness check failed, otherwise returns OK.
 
-**rabbitmq.status**:  
+**rabbitmq.status**:
 Returns CRITICAL if the Agent cannot connect to RabbitMQ to collect metrics, otherwise returns OK.
 
 ## Troubleshooting
@@ -157,13 +157,13 @@ Need help? Contact [Datadog support][15].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/datadog_checks/rabbitmq/data/conf.yaml.example
 [5]: https://www.rabbitmq.com/management.html
 [6]: https://www.rabbitmq.com/rabbitmqctl.8.html#set_permissions
 [7]: https://www.rabbitmq.com/management.html
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
 [11]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family
 [12]: https://www.datadoghq.com/blog/rabbitmq-monitoring

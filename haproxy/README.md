@@ -16,7 +16,7 @@ Capture HAProxy activity in Datadog to:
 
 The HAProxy check is packaged with the Agent. To start gathering your HAProxy metrics and logs, you need to:
 
-1. [Install the Agent][2] on your HAProxy servers. 
+1. [Install the Agent][2] on your HAProxy servers.
 2. Make sure that stats are enabled on your HAProxy configuration. [Read our blog post on collecting HAProxy metrics for more information][3].
 
 ### Configuration
@@ -118,12 +118,12 @@ Need help? Contact [Datadog support][11].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
-[4]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [6]: https://www.haproxy.org/download/1.7/doc/management.txt
-[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/logs
-[9]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv
 [11]: https://docs.datadoghq.com/help
 [12]: https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics

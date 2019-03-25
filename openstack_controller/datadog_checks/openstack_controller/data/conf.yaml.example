@@ -29,7 +29,7 @@ instances:
         name: <USER_NAME>
         domain:
             id: <DOMAIN_ID>
-            
+
   ## @param whitelist_project_names - list of strings - optional - default: []
   ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
   ## Regex expressions for the project names are supported.
@@ -135,9 +135,9 @@ instances:
   #  collect_server_diagnostic_metrics: true
 
   ## @param use_shortname - boolean - optional - default: false
-  ## In some OpenStack environments, the hostname registered to Nova is the shortname. 
+  ## In some OpenStack environments, the hostname registered to Nova is the shortname.
   ## Enabling this enforces the check to split the hostname up to the first period when
-  ## comparing against nova responses. Only affects aggregate tagging. 
+  ## comparing against nova responses. Only affects aggregate tagging.
   #
   #  use_shortname: false
 

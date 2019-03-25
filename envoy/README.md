@@ -91,18 +91,18 @@ static_resources:
 
 3. [Restart the Agent][9]
 
-Setting | Description
---- | ---
-`stats_url` | (REQUIRED) The admin stats endpoint, e.g. `http://localhost:80/stats`. Add a `?usedonly` on the end if you wish to ignore unused metrics instead of reporting them as `0`.
-`tags` | A list of custom tags to apply to this instance.
-`metric_whitelist` | A list of regular expressions.
-`metric_blacklist` | A list of regular expressions.
-`cache_metrics` | Cache results of whitelist/blacklist to decrease CPU utilization, at the expense of some memory (default is `true`).
-`username` | The username to authenticate with if behind basic auth.
-`password` | The password to authenticate with if behind basic auth.
-`verify_ssl` | This instructs the check to validate SSL certificates when connecting to Envoy. Defaulting to `true`, set to `false` if you want to disable SSL certificate validation.
-`skip_proxy` | If `true`, the check bypasses any proxy settings enabled and attempt to reach Envoy directly.
-`timeout` | A custom timeout for network requests in seconds (default is 20).
+| Setting            | Description                                                                                                                                                                |
+| ---                | ---                                                                                                                                                                        |
+| `stats_url`        | (REQUIRED) The admin stats endpoint, e.g. `http://localhost:80/stats`. Add a `?usedonly` on the end if you wish to ignore unused metrics instead of reporting them as `0`. |
+| `tags`             | A list of custom tags to apply to this instance.                                                                                                                           |
+| `metric_whitelist` | A list of regular expressions.                                                                                                                                             |
+| `metric_blacklist` | A list of regular expressions.                                                                                                                                             |
+| `cache_metrics`    | Cache results of whitelist/blacklist to decrease CPU utilization, at the expense of some memory (default is `true`).                                                       |
+| `username`         | The username to authenticate with if behind basic auth.                                                                                                                    |
+| `password`         | The password to authenticate with if behind basic auth.                                                                                                                    |
+| `verify_ssl`       | This instructs the check to validate SSL certificates when connecting to Envoy. Defaulting to `true`, set to `false` if you want to disable SSL certificate validation.    |
+| `skip_proxy`       | If `true`, the check bypasses any proxy settings enabled and attempt to reach Envoy directly.                                                                              |
+| `timeout`          | A custom timeout for network requests in seconds (default is 20).                                                                                                          |
 
 #### Metric filtering
 
@@ -163,11 +163,11 @@ Need help? Contact [Datadog support][14].
 [4]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
 [5]: https://istio.io/docs/reference/config
 [6]: https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
-[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/data/conf.yaml.example
-[9]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [10]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
-[11]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
 [14]: https://docs.datadoghq.com/help

@@ -323,7 +323,7 @@ The Tomcat check does not include any events.
 
 ### Service Checks
 
-**tomcat.can_connect**  
+**tomcat.can_connect**
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Tomcat instance. Returns `OK` otherwise.
 
 ## Troubleshooting
@@ -354,13 +354,13 @@ Additional helpful documentation, links, and articles:
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
-[4]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/integrations/java
 [8]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
 [9]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[10]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
 [12]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
 [13]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance
