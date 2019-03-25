@@ -1,16 +1,42 @@
 init_config:
 
 instances:
-#   - host: localhost
-#     port: 15433
-#     username: my_username
-#     password: my_password
-#     use_cached: True
-#     tags:
-#       - optional_tag1
-#       - optional_tag2
-#
-#   - database_url: postgresql://user:pass@host:5432/dbname?sslmode=require
-#     tags:
-#       - optional_tag3
-#       - optional_tag4
+
+  ## @param database_url - string - required
+  ## `database_url` parameter should point to PgBouncer stats database url
+  #
+  - database_url: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
+
+  ## @param host - string - optional
+  ## If `database_url` is not used, set up the host to connect to with the `host` parameter.
+  #
+  #  host: <HOSTNAME>
+
+  ## @param port - integer - optional
+  ## If `database_url` is not used, set up the port to connect to with the `port` parameter.
+  #
+  #  port: <PORT>
+
+  ## @param username - string - optional
+  ## If `database_url` is not used, set up the user name to use with the `username` parameter.
+  #
+  #  username: <USERNAME>
+
+  ## @param password - string - optional
+  ## If `database_url` is not used, set up the password to use with the `password` parameter.
+  #
+  #  password: <PASSWORD>
+
+  ## @param use_cached - boolean - optional
+  ## XXXXXXX
+  #
+  #  use_cached: true
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
