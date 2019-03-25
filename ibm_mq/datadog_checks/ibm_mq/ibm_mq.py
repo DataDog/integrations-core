@@ -6,7 +6,7 @@ from datadog_checks.checks import AgentCheck
 
 from datadog_checks.base import ensure_bytes
 
-from six import iteritems, PY3
+from six import iteritems
 import logging
 
 from . import errors, metrics, connection
