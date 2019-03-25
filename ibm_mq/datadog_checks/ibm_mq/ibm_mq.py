@@ -6,7 +6,7 @@ from datadog_checks.checks import AgentCheck
 
 from datadog_checks.base import ensure_bytes
 
-from six import iteritems
+from six import iteritems, PY3
 import logging
 
 from . import errors, metrics, connection
@@ -31,10 +31,6 @@ class IbmMqCheck(AgentCheck):
     QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
 
     CHANNEL_SERVICE_CHECK = 'ibm_mq.channel'
-
-    CHANNEL_ARGS = {
-        pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ByteString('*')
-    }
 
     def check(self, instance):
         config = IBMMQConfig(instance)
@@ -170,6 +166,15 @@ class IbmMqCheck(AgentCheck):
                         log.debug(msg)
 
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
+        if PY3:
+            args = {
+                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ByteString('*')
+            }
+        else:
+            args = {
+                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: '*'
+            }
+
         try:
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL(self.CHANNEL_ARGS)
