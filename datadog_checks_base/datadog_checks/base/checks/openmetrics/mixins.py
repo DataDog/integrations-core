@@ -8,8 +8,8 @@ import requests
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 from math import isnan, isinf
-from prometheus_client.core import Metric
 from prometheus_client import parser
+from prometheus_client.core import Metric
 
 from six import PY3, iteritems, string_types
 
