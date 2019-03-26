@@ -90,7 +90,7 @@ instances:
   ## Available values are: Logfile, SourceName, EventCode, Message, InsertionStrings, TimeGenerated, Type
   #
   #  event_format:
-  #   - Message
+  #    - Message
 
   ## @param tags  - list of key:value elements - optional
   ## List of tags to attach to every metric, event, and service check emitted by this Integration.
