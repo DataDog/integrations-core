@@ -1,74 +1,131 @@
 init_config:
 
 instances:
+
+  ## @param spark_url - string - required
+  ## The Spark check can retrieve metrics from Standalone Spark, YARN and Mesos.
+  ##
+  ## For Spark Standalone, `spark_url` must be set to the Spark master's web UI. 
+  ## This is "http://localhost:8080" by default.
+  ##
+  ## For YARN, `spark_url` must be set to YARN's resource manager address. The
+  ## ResourceManager host name can be found in the yarn-site.xml conf file
+  ## under the `property yarn.resourcemanager.address` The ResourceManager port
+  ## can be found in the yarn-site.xml conf file under the property
+  ## `yarn.resourcemanager.webapp.address`. This is "http://localhost:8088"
+  ## by default.
+  ##
+  ## For Mesos, `spark_url` must be set to the Mesos master's web UI. This is
+  ## "http://<master_ip>:5050" by default, where `<master_ip>` is the IP
+  ## address or resolvable host name for the Mesos master.
   #
-  # The Spark check can retrieve metrics from Standalone Spark, YARN and
-  # Mesos. All methods require the `spark_url` to be configured.
-  #
-  # For Spark Standalone, `spark_url` must be set to the Spark master's web
-  # UI. This is "http://localhost:8080" by default.
-  #
-  # For YARN, `spark_url` must be set to YARN's resource manager address. The
-  # ResourceManager host name can be found in the yarn-site.xml conf file
-  # under the `property yarn.resourcemanager.address` The ResourceManager port
-  # can be found in the yarn-site.xml conf file under the property
-  # `yarn.resourcemanager.webapp.address`. This is "http://localhost:8088"
-  # by default.
-  #
-  # For Mesos, `spark_url` must be set to the Mesos master's web UI. This is
-  # "http://<master_ip>:5050" by default, where `<master_ip>` is the IP
-  # address or resolvable host name for the Mesos master.
-  #
-  # The use of `resourcemanager_uri` has been deprecated, but is still functional.
   - spark_url: http://localhost:8088
 
-    # A Required friendly name for the cluster.
-    # cluster_name: MySparkCluster
+  ## @param cluster_name - string - required
+  ## A friendly name for the cluster.
+  #
+    cluster_name: <CLUSTER_NAME>
 
-    # To enable monitoring of a Standalone Spark cluster, the spark cluster
-    # mode must be set. Uncomment the cluster mode that applies.
-    # spark_cluster_mode: spark_yarn_mode
-    # spark_cluster_mode: spark_standalone_mode
-    # spark_cluster_mode: spark_mesos_mode
+  ## @param spark_cluster_mode - string - optional - default: spark_yarn_mode
+  ## To enable monitoring of a Standalone Spark cluster, the spark cluster
+  ## mode must be set. Choose the cluster mode between :
+  ##  * `spark_yarn_mode`
+  ##  * `spark_standalone_mode`
+  ##  * `spark_mesos_mode`
+  #
+  #  spark_cluster_mode: spark_yarn_mode
 
-    # If you're using multiple frameworks with Mesos, you can specify which
-    # port(s) the Spark Web UI runs on and the check will filter out the frameworks
-    # whose port don't match. If the check attempts to connect to a framework that
-    # requires authentication it will fail; this is to prevent that.
-    # spark_ui_ports:
-    #   - 4040
-    #   - 4041
+  ## @param spark_ui_ports - list of integers - optional
+  ## If you're using multiple frameworks with Mesos, you can specify which
+  ## port(s) the Spark Web UI runs on and the check filters out the frameworks
+  ## whose port don't match. If the check attempts to connect to a framework that
+  ## requires authentication it will fail; this is to prevent that.
+  #
+  #  spark_ui_ports:
+  #    - <PORT_1>
+  #    - <PORT_2>
 
-    # To use an older (versions prior to 2.0) Standalone Spark cluster,
-    # the 'spark_pre_20_mode' must be set
-    # spark_pre_20_mode: true
-    #
-    # If you have enabled the spark UI proxy, you may set this to `true`
-    # spark_proxy_enabled: false
+  ## @param spark_pre_20_mode - boolean - optional - default: false
+  ## To use an older (versions prior to 2.0) Standalone Spark cluster,
+  ## the 'spark_pre_20_mode' must be set to true
+  #
+  #  spark_pre_20_mode: false
 
-    # Optional tags to be applied to every emitted metric.
-    # tags:
-    #   - key:value
-    #   - instance:production
+  ## @param spark_proxy_enabled - boolean - optional - default: false
+  ## If you have enabled the spark UI proxy, set this to `true`
+  #
+  #  spark_proxy_enabled: false
 
-    # If your service uses basic HTTP authentication, you can optionally
-    # specify a username and password that will be used in the check.
-    # username: user
-    # password: pass
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
-    # If your service uses Kerberos authentication, you can optionally
-    # specify the Kerberos strategy to use.
-    # See https://github.com/requests/requests-kerberos#mutual-authentication
-    # kerberos: "required|optional|disabled"
-    # kerberos_delegate: false
-    # kerberos_force_initiate: false
-    # kerberos_hostname: null
-    # kerberos_principal: null
-    # kerberos_keytab: /path/to/keytab_file
+  ## @param username - string - optional
+  ## If your service uses basic HTTP authentication, specify a username to be used in the check.
+  #
+  #  username: <USERNAME>
 
-    # SSL configuration.
-    # ssl_verify: false
-    # ssl_cert: /path/to/cert.pem
-    # ssl_key: /path/to/cert.key
+  ## @param password - string - optional
+  ## If your service uses basic HTTP authentication, specify a password to be used in the check.
+  #
+  #  password: <PASSWORD>
 
-    # streaming_metrics: true
+  ## @param streaming_metrics - boolean - optional - default: true
+  ## XXXXXX
+  #
+  #  streaming_metrics: true
+
+  ## @param ssl_verify - boolean - optional - default: false
+  ## Instruct the check to validate SSL certificates when connecting to `spark_url`.
+  #
+  #  ssl_verify: false
+
+  ## @param ssl_cert - boolean - optional
+  ## Path to the certificate file used to identify the connection to `spark_url`.
+  #
+  #  ssl_cert: <CERT_PEM_PATH>
+
+  ## @param ssl_key - boolean - optional
+  ## Path to the private keyfile used to identify the connection to `spark_url`.
+  #
+  #  ssl_key: <CERT_KEY_PATH>
+
+  ## @param kerberos - string - optional - default: disabled
+  ## If your service uses Kerberos authentication, you can specify the Kerberos
+  ## strategy to use between:
+  ##  * required
+  ##  * optional
+  ##  * disabled
+  ##
+  ## See https://github.com/requests/requests-kerberos#mutual-authentication
+  #
+  #  kerberos: disabled
+
+  ## @param kerberos_delegate - boolean - optional - default: false
+  ## XXXXXX
+  #  kerberos_delegate: false
+
+  ## @param kerberos_force_initiate - boolean - optional - default: false
+  ## XXXXXX
+  #
+  #  kerberos_force_initiate: false
+
+  ## @param kerberos_hostname - string - optional
+  ## XXXXXX
+  #
+  #  kerberos_hostname: null
+
+  ## @param kerberos_principal - string - optional
+  ## XXXXXX
+  #
+  #  kerberos_principal: null
+
+  ## @param kerberos_keytab - string - optional
+  ## XXXXX
+  #
+  #  kerberos_keytab: <KEYTAB_FILE_PATH>
