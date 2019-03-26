@@ -99,8 +99,8 @@ instances:
   ## the metrics is collected on all the exchanges by default.
   #
   #  exchanges:
-  #    - exchange1
-  #    - exchange2
+  #    - <EXCHANGE_1>
+  #    - <EXCHANGE_2>
 
   ## @param exchanges_regexes - list of strings - optional
   ## Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
