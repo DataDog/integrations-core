@@ -8,12 +8,12 @@ instances:
   - host: localhost
 
   ## @param username - string - required
-  ## Username to connect to with SSH.
+  ## Username to use for the SSH connection.
   #
     username: <USERNAME>
 
   ## @param password - string - optional
-  ## Password to use for the SSH check.
+  ## Password to use for the SSH connection.
   #
   #  password: <PASSWORD>
 
@@ -23,7 +23,7 @@ instances:
   #  port: 22
 
   ## @param sftp_check - boolean - optional - default: true
-  ##
+  ## Open SFTP session on the existing connection to check the status of SFTP.
   #
   #  sftp_check: true
 
@@ -38,7 +38,7 @@ instances:
   #  private_key_type: rsa
 
   ## @param add_missing_keys - boolean - optional - default: false
-  ## XXXXXXX
+  ## Automatically add host key to known hosts when it is missing
   #
   # add_missing_keys: false
 
