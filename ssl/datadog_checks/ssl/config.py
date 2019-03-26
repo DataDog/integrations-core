@@ -24,7 +24,7 @@ class SslConfig:
         self.host_and_port = "{}({})".format(self.host, self.port)
         self.timeout = instance.get('timeout')
         self.days_warning = instance.get('days_warning', '14')
-        self.days_critical = instance.get('days_critical', '14')
+        self.days_critical = instance.get('days_critical', '7')
         self.check_hostname = instance.get('check_hostname', 'true')
         self.ssl_hostname = instance.get('ssl_hostname')
         self.custom_tags = instance.get('tags', [])
@@ -48,17 +48,18 @@ class SslConfig:
 
         # self.get_config
 
-    # def check_properly_configured(self):
-    # check if cert_remote is set
+    def check_properly_configured(self):
+        return True
+        # check if cert_remote is set
         # if not self.channel or not self.queue_manager_name or not self.host or not self.port:
         #     msg = "channel, queue_manager, host and port are all required configurations"
         #     raise ConfigurationError(msg)
 
-# costly since it would be executed every time
-    # @property
-    # def tags(self):
-    #     return [
-    #         "host:{}".format(self.host),
-    #         "port:{}".format(self.port),
-    #         "name:{}".format(self.name)
-    #     ] + self.custom_tags
+        # costly since it would be executed every time
+        # @property
+        # def tags(self):
+        #     return [
+        #         "host:{}".format(self.host),
+        #         "port:{}".format(self.port),
+        #         "name:{}".format(self.name)
+        #     ] + self.custom_tags

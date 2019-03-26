@@ -1,8 +1,8 @@
 import socket
 import ssl
-import requests
+# import requests
 from datetime import datetime
-from datadog_checks.checks import AgentCheck
+# from datadog_checks.checks import AgentCheck
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
@@ -16,23 +16,34 @@ def main():
     # get and check config
     hostname = 'google.com'
     # hostname = ''
-    ip = '1.1.1.1'
+    # ip = '1.1.1.1'
     port = '443'
-    local_cert_path = 'mock.cert'
+    # local_cert_path = 'mock.cert'
+
+
+###
+
+# for hash event storing to check for changes:
+# hash_mutable function in datadogchecksdev
+# pass dictionary (certificate name, expirtation, etc), it will give you hash
+
+# config.check_properly_configured()
 
     # config must include local or remote endpoint for checking SSL cert
     # check if path/URL is valid
 
     # try to connect/read local file
     # if can't can_connect critical, otherwise up
-    if len(hostname) > 1:
-        print("getting remote")
-        cert_data = check_remote_cert(hostname, port)
-    elif len(local_cert_path) > 1:
-        print("getting local")
-        cert_data = check_local_cert(local_cert_path)
-    else:
-        print("Hostname or local path to certificate are required config options.")
+    # if len(hostname) > 1:
+    #     print("getting remote")
+    #     cert_data = check_remote_cert(hostname, port)
+    # elif len(local_cert_path) > 1:
+    #     print("getting local")
+    #     cert_data = check_local_cert(local_cert_path)
+    # else:
+    #     print("Hostname or local path to certificate are required config options.")
+
+# self.check_function = check_properly_configured
 
     # TLS/SSL protocol only applies to remote certs, maybe not useful?
     # https://www.sslsupportdesk.com/clearing-confusion-tls-ssl-certificates-are-the-same-thing/
@@ -40,7 +51,8 @@ def main():
 
     # read cert, check is_valid
     # some exceptions we can use: https://cryptography.io/en/latest/x509/reference/#cryptography.x509.InvalidVersion
-    # will probably need to make some invalid certs: https://cryptography.io/en/latest/x509/reference/#x-509-certificate-builder
+    # will probably need to make some invalid certs:
+    # https://cryptography.io/en/latest/x509/reference/#x-509-certificate-builder
 
     # remote_cert = x509.load_der_x509_certificate(peer_cert, default_backend())
     # print(cert_data.version)
@@ -48,7 +60,7 @@ def main():
     # print(remote_cert.not_valid_after)
 
     # calculate expiration, send metrics, tags
-    check_expiration(cert_data.not_valid_after)
+    # check_expiration(cert_data.not_valid_after)
 
 
 def check_expiration(exp_date):
