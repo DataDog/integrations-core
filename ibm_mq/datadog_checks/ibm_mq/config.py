@@ -4,6 +4,8 @@
 
 import logging
 
+from six import iteritems
+
 from datadog_checks.config import is_affirmative
 
 # compatability layer for agents under 6.6.0
