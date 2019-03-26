@@ -88,7 +88,7 @@ class IBMMQConfig:
                     [t.strip() for t in tags.split(',')]
                 ])
             except TypeError:
-                self.log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
+                log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         return queue_tag_list
 
     @property
