@@ -13,23 +13,7 @@ The Nagios check is included in the [Datadog Agent][1] package, so you don't nee
 
 ### Configuration
 
-Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample nagios.d/conf.yaml][3] for all available configuration options:
-
-```
-init_config:
-  check_freq: 15 # default is 15
-
-instances:
-  - nagios_conf: /etc/nagios3/nagios.cfg   # or wherever your main nagios conf is
-    collect_events: True                   # default is True
-    passive_checks_events: True            # default is False
-    collect_host_performance_data: True    # default is False
-    collect_service_performance_data: True # default is False
-```
-
-The Agent reads the main Nagios configuration file to get the locations of the Nagios log files it should watch.
-
-This check also works with Icinga, a popular fork of Nagios. If you use Icinga, just set `nagios_conf` to the location of your Icinga configuration file.
+Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample nagios.d/conf.yaml][3] for all available configuration options.
 
 [Restart the Agent][4] to start sending Nagios events and (optionally) performance data metrics to Datadog.
 
@@ -71,9 +55,9 @@ Need help? Contact [Datadog support][6].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/nagios/datadog_checks/nagios/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://docs.datadoghq.com/help
 [7]: https://www.datadoghq.com/blog/nagios-monitoring

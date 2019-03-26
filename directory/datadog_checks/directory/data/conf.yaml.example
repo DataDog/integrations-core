@@ -4,7 +4,7 @@
 init_config:
 
 instances:
-  
+
   ## @param directory - string - required
   ## The directory to monitor. On windows, please make sure you escape back-slashes otherwise the YAML
   ##  parser fails (eg. - directory: "C:\\Users\\foo\\Downloads").
@@ -17,30 +17,30 @@ instances:
   #  name: <DIRECTORY>
 
   ## @param dirtagname - string - optional - default: <NAME>
-  ## The name of the key for the tag used for the directory, the value is the value of "name" (see above). 
+  ## The name of the key for the tag used for the directory, the value is the value of "name" (see above).
   ## The resulting tag attached is "<dirtagname>:<name>".
-  # 
+  #
   #  dirtagname: <DIRECTORY_TAG_KEY>
 
   ## @param filetagname - string - optional - default: <FILE_NAME>
-  ## The name of the key for the tag used for each file, the value is the filename. 
+  ## The name of the key for the tag used for each file, the value is the filename.
   ## The resulting tag is "<filetagname>:<filename>".
-  # 
+  #
   #  filetagname: <TAG_KEY_FILENAME>
 
   ## @param filegauges - boolean - optional - default: false
   ## When true stats are an individual gauge per file (max. 20 files!) and not a histogram of the whole directory.
-  # 
+  #
   #  filegauges: false
 
   ## @param pattern - string - optional - default: *
-  ## the `fnmatch` pattern to use when reading the "directory"'s files. 
+  ## the `fnmatch` pattern to use when reading the "directory"'s files.
   ## The pattern is matched against the files' absolute paths and relative paths in "directory".
   #
   #  pattern: *
 
   ## @param exclude_dirs - list of strings - optional
-  ## a list of regular expressions used to blacklist directory names. 
+  ## a list of regular expressions used to blacklist directory names.
   ## e.g. node_modules, vendor
   #
   #  exclude_dirs:
@@ -52,7 +52,7 @@ instances:
   ## @param dirs_patterns_full - boolean - optional - default: false
   ## Make exclude_dirs patterns operate on the full directory path (may be slightly slower)
   ## Setting this option to False excludes any directory in the traversal with the provided name.
-  ## Setting this option to True allows you to specify the absolute path. This ensures multiple directories with the same 
+  ## Setting this option to True allows you to specify the absolute path. This ensures multiple directories with the same
   ## name aren't all excluded.
   #
   #  dirs_patterns_full: false
@@ -63,7 +63,7 @@ instances:
   #  recursive: false
 
   ## @param countonly - boolean - optional - default: false
-  ## When true the stats only count the number of files matching the pattern. 
+  ## When true the stats only count the number of files matching the pattern.
   #
   #  countonly: false
 

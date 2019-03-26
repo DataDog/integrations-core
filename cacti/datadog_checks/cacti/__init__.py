@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .cacti import Cacti
 
-__all__ = [
-    '__version__',
-    'Cacti'
-]
+__all__ = ['__version__', 'Cacti']

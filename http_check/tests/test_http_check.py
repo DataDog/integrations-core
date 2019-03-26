@@ -57,7 +57,7 @@ def test_check_cert_expiration(http_check):
     assert status == 'CRITICAL'
     assert days_left == 0
     assert seconds_left == 0
-    assert msg == "hostname 'wrong.host.badssl.com' doesn't match either of '*.badssl.com', 'badssl.com'"
+    assert 'Hostname mismatch' in msg or "doesn't match" in msg
 
     # site is down
     instance = {

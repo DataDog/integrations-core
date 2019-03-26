@@ -13,11 +13,11 @@ instances:
   - name: My first service
 
   ## @param url - string - required
-  ## Url to check 
+  ## Url to check
   ## Non-standard ports are supported using http://hostname:port syntax
-  #  
+  #
     url: http://some.url.example.com
-    
+
   ## @param timeout - integer - required
   ## Timeout for your HTTP check
   #
@@ -27,7 +27,7 @@ instances:
   ## The method parameter allows you to change the HTTP method used in the request.
   #
   #  method: get
-   
+
   ## @param data - list of key:value elements - optional
   ## If any one of the POST, PUT, DELETE, or PATCH method is specified, you can choose to send data in the body of the
   ## request with the data parameter.
@@ -49,10 +49,10 @@ instances:
   ## Examples:
   ## content_match: 'In Stock'
   ## content_match: '^(Bread|Apples|Very small rocks|Cider|Gravy|Cherries|Mud|Churches|Lead) float(s)? in water'
-  # 
+  #
   #  content_match: '<REGEX>''
 
-  ## @param reverse_content_match - boolean - optional - default: false 
+  ## @param reverse_content_match - boolean - optional - default: false
   ## The reverse_content_match parameter will allow the content_match
   ## to work the other way around. That means that the check will report
   ## as DOWN if the string is found.
@@ -84,7 +84,7 @@ instances:
   ## specify a client certificate file that will be used in the check.
   #
   #  client_cert: /opt/client.crt
-  
+
   ## @param client_key - string - optional
   ## If your service uses client side certificates, you can optionally
   ## specify a client key file that will be used in the check.
@@ -92,7 +92,7 @@ instances:
   #
   #  client_key: /opt/client.key
 
-    
+
   ## @param http_response_status_code - integer - optional - default: (1|2|3)\d\d
   ## The http_response_status_code parameter will instruct the check
   ## to look for a particular HTTP response status code or a Regex identifying
@@ -102,7 +102,7 @@ instances:
   #
   #  http_response_status_code: (1|2|3)\d\d
 
-  ## @param include_content - boolean - optional - default: false    
+  ## @param include_content - boolean - optional - default: false
   ## The include_content parameter will instruct the check
   ## to include the first 200 characters of the HTTP response body
   ## in notifications sent by this plugin. This is best used with
@@ -158,7 +158,7 @@ instances:
   ## The SSL certificate will always be validated for this additional
   ## service check regardless of the value of disable_ssl_validation.
   ## By default, for the expiration check, the Agent validates the SSL certificate
-  ## hostname against the host of the provided url. 
+  ## hostname against the host of the provided url.
   #
   #  check_certificate_expiration: true
 
@@ -173,15 +173,15 @@ instances:
   #  days_critical: <THRESHOLD_DAYS>
 
   ## @param seconds_warning - integer - optional
-  ## Alternatively to days_warning, seconds_warning expresses 
+  ## Alternatively to days_warning, seconds_warning expresses
   ## the warning threshold for the HTTP check in second
-  # 
+  #
   #  seconds_warning: <THRESHOLD_SECONDS>
 
   ## @param seconds_critical - integer - optional
-  ## Alternatively to days_critical, seconds_critical expresses 
+  ## Alternatively to days_critical, seconds_critical expresses
   ## the critical threshold for the HTTP check in second
-  # 
+  #
   #  seconds_critical: <THRESHOLD_SECONDS>
 
   ## @param check_hostname - boolean - optional - default: true
@@ -190,9 +190,9 @@ instances:
   #  check_hostname: true
 
   ## @param ssl_server_name - string - optional
-  ## If necessary and check_hostname is set to true, 
+  ## If necessary and check_hostname is set to true,
   ## override the hostname to match with ssl_server_name.
-  # 
+  #
   #  ssl_server_name: <HOSTNAME>
 
   ## @param headers: list of key:value elements - optional
@@ -236,9 +236,9 @@ instances:
   #
   #  include_default_headers: true
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:

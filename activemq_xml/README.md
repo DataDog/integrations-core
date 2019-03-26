@@ -43,10 +43,10 @@ Need help? Contact [Datadog support][117].
 
 
 [111]: https://app.datadoghq.com/account/settings#agent
-[112]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[112]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [113]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/datadog_checks/activemq_xml/data/conf.yaml.example
-[114]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[115]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[114]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[115]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [116]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/metadata.csv
 [117]: https://docs.datadoghq.com/help
 [118]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance

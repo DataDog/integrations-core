@@ -56,7 +56,7 @@ instances:
 
   ## @param ssl_ca_certs - string - optional
   ## Path to the ca_certs file.
-  # 
+  #
   #  ssl_ca_certs: <CA_CERT_FILE_PATH>
 
   ## @param additional_metrics - list of strings - optional

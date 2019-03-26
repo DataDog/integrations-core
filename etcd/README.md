@@ -4,27 +4,27 @@
 
 ## Overview
 
-Collect etcd metrics to:
+Collect Etcd metrics to:
 
-* Monitor the health of your etcd cluster.
+* Monitor the health of your Etcd cluster.
 * Know when host configurations may be out of sync.
-* Correlate the performance of etcd with the rest of your applications.
+* Correlate the performance of Etcd with the rest of your applications.
 
 ## Setup
 ### Installation
 
-The etcd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your etcd instance(s).
+The etcd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Etcd instance(s).
 
 ### Configuration
 
-1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your etcd performance data.
+1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Etcd performance data.
     See the [sample etcd.d/conf.yaml][4] for all available configuration options.
 
     ```yaml
 	init_config:
 
 	instances:
-		- url: "https://server:port" # API endpoint of your etcd instance
+		- url: "https://server:port" # API endpoint of your Etcd instance
     ```
 
 2. [Restart the Agent][5]
@@ -38,7 +38,7 @@ The etcd check is included in the [Datadog Agent][2] package, so you don't need 
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-etcd metrics are tagged with `etcd_state:leader` or `etcd_state:follower`, depending on the node status, so you can easily aggregate metrics by status.
+Etcd metrics are tagged with `etcd_state:leader` or `etcd_state:follower`, depending on the node status, so you can easily aggregate metrics by status.
 
 ### Events
 The Etcd check does not include any events.
@@ -47,7 +47,7 @@ The Etcd check does not include any events.
 
 `etcd.can_connect`:
 
-Returns 'Critical' if the Agent cannot collect metrics from your etcd API endpoint.
+Returns 'Critical' if the Agent cannot collect metrics from your Etcd API endpoint.
 
 `etcd.healthy`:
 
@@ -62,10 +62,10 @@ To get a better idea of how (or why) to integrate etcd with Datadog, check out o
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/etcd/images/etcd_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/etcd/datadog_checks/etcd/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/monitor-etcd-performance

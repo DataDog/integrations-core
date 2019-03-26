@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .envoy import Envoy
 
-__all__ = [
-    '__version__',
-    'Envoy'
-]
+__all__ = ['__version__', 'Envoy']

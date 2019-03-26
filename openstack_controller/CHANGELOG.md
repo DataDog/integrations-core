@@ -1,5 +1,9 @@
 # CHANGELOG - Openstack_controller
 
+## 1.1.1 / 2019-03-21
+
+* [Fixed] Fix issue with exception handling preventing re-authentication in case of token expiration. See [#3321](https://github.com/DataDog/integrations-core/pull/3321).
+
 ## 1.1.0 / 2019-03-15
 
 * [Added] Add project tags to hypervisor metrics. See [#3277](https://github.com/DataDog/integrations-core/pull/3277).

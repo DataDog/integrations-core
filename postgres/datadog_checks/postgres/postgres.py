@@ -418,6 +418,13 @@ GROUP BY datid, datname
         # Let's use pg8000
         return pg8000.connect, pg8000.InterfaceError, pg8000.ProgrammingError
 
+    def _get_replication_role(self, key, db):
+        cursor = db.cursor()
+        cursor.execute('SELECT pg_is_in_recovery();')
+        role = cursor.fetchone()[0]
+        # value fetched for role is of <type 'bool'>
+        return "standby" if role else "master"
+
     def _get_version(self, key, db):
         if key not in self.versions:
             cursor = db.cursor()
@@ -838,7 +845,7 @@ GROUP BY datid, datname
             "host:%s" % host,
             "port:%s" % port,
         ]
-        service_check_tags.extend(tags)
+        service_check_tags.extend([t for t in tags if not t.startswith('pg_instance')])
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
 
@@ -1026,6 +1033,7 @@ GROUP BY datid, datname
         collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         collect_default_db = is_affirmative(instance.get('collect_default_database', False))
+        tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
 
         if relations and not dbname:
             self.warning('"dbname" parameter must be set when using the "relations" parameter.')
@@ -1045,6 +1053,9 @@ GROUP BY datid, datname
         else:
             tags = list(set(tags))
 
+        # preset tags to host (if using socket) or host-port
+        tags.extend(["pg_instance:%s" % (host if host.startswith('/') else "{}-{}".format(host, port))])
+
         # preset tags to the database name
         tags.extend(["db:%s" % dbname])
 
@@ -1058,6 +1069,8 @@ GROUP BY datid, datname
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags)
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
+            if tag_replication_role:
+                tags.extend(["replication_role:{}".format(self._get_replication_role(key, db))])
             self._collect_stats(key, db, tags, relations, custom_metrics, collect_function_metrics,
                                 collect_count_metrics, collect_activity_metrics, collect_database_size_metrics,
                                 collect_default_db, interface_error, programming_error)

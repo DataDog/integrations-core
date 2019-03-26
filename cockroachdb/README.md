@@ -14,7 +14,7 @@ need to install anything else on your server.
 ### Configuration
 
 1. Edit the `cockroachdb.d/conf.yaml` file, in the `conf.d/` folder [at the root of your
-   Agent's configuration directory][8] to start collecting your cockroachdb performance data.
+   [Agent's configuration directory][8] to start collecting your cockroachdb performance data.
    See the [sample cockroachdb.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4]
@@ -49,8 +49,8 @@ Additional helpful documentation, links, and articles:
 [1]: https://www.cockroachlabs.com/product/cockroachdb
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/metadata.csv
 [7]: https://docs.datadoghq.com/help
 [8]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/

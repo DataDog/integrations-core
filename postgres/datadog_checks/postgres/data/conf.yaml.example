@@ -119,6 +119,10 @@ instances:
 #    collect_default_database: False
 #
 
+#    Tag metrics and checks with `replication_role:<master|standby>`, default to false
+#    tag_replication_role: False
+#
+
 ## log Section (Available for Agent >=6.0)
 #logs:
 

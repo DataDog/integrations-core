@@ -12,17 +12,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 URL = "http://{}:8161".format(get_docker_hostname())
 
-CONFIG = {
-    'url': URL,
-    'username': "admin",
-    'password': "admin"
-}
+CONFIG = {'url': URL, 'username': "admin", 'password': "admin"}
 
-GENERAL_METRICS = [
-    "activemq.subscriber.count",
-    "activemq.topic.count",
-    "activemq.queue.count",
-]
+GENERAL_METRICS = ["activemq.subscriber.count", "activemq.topic.count", "activemq.queue.count"]
 
 QUEUE_METRICS = [
     "activemq.queue.consumer_count",

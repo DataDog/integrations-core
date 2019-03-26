@@ -87,7 +87,7 @@ The Apache check does not include any events.
 
 ### Service Checks
 
-**apache.can_connect**:  
+**apache.can_connect**:
 Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
 
 ## Troubleshooting
@@ -106,11 +106,11 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/logs
-[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
 [9]: https://docs.datadoghq.com/integrations/faq/issues-with-apache-integration
 [10]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues

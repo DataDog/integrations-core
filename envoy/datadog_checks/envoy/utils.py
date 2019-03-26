@@ -30,8 +30,6 @@ def make_metric_tree(metrics):
                 tree['|_tags_|'].append(tags)
 
                 # Sort possible tag configurations by length in reverse order.
-                tree['|_tags_|'] = sorted(
-                    tree['|_tags_|'], key=lambda t: len(t), reverse=True
-                )
+                tree['|_tags_|'] = sorted(tree['|_tags_|'], key=lambda t: len(t), reverse=True)
 
     return metric_tree

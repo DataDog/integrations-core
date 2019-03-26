@@ -44,8 +44,8 @@ Need help? Contact [Datadog support][117].
 
 [111]: https://docs.gitlab.com/runner/monitoring/README.html
 [112]: https://app.datadoghq.com/account/settings#agent
-[113]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[113]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [114]: https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/datadog_checks/gitlab_runner/data/conf.yaml.example
-[115]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[115]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [116]: https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/metadata.csv
 [117]: https://docs.datadoghq.com/help

@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.dev import get_here
+
+HERE = get_here()
+
 CHECK_NAME = 'process'
 
 PROCESS_METRIC = [
@@ -31,6 +35,20 @@ PAGEFAULT_STAT = [
 
 UNIX_TO_WINDOWS_MAP = {
     'system.processes.open_file_descriptors': 'system.processes.open_handles'
+}
+
+EXPECTED_TAGS = ['process_name:instance', 'instance']
+
+EXPECTED_METRICS = [
+    'system.processes.number',
+    'system.processes.run_time.avg',
+    'system.processes.run_time.max',
+    'system.processes.run_time.min',
+]
+
+INSTANCE = {
+    "name": "instance",
+    "pid": 1,
 }
 
 

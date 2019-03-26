@@ -97,7 +97,7 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 The ActiveMQ check does not include any events.
 
 ### Service Checks
-**activemq.can_connect**:  
+**activemq.can_connect**:
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise.
 
 ## Troubleshooting
@@ -114,10 +114,10 @@ Additional helpful documentation, links, and articles:
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/jmxfetch
 [4]: https://activemq.apache.org/jmx.html
-[5]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [6]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/conf.yaml.example
-[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
 [10]: https://docs.datadoghq.com/help
 [11]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics

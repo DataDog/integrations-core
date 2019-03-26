@@ -120,7 +120,7 @@ See [metadata.csv][8] for a list of metrics provided by this check.
 The Varnish check does not include any events.
 
 ### Service Checks
-**varnish.backend_healthy**:  
+**varnish.backend_healthy**:
 The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<backend_name>`.
 
 ## Troubleshooting
@@ -136,11 +136,11 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/varnish/datadog_checks/varnish/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/logs
-[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/top-varnish-performance-metrics

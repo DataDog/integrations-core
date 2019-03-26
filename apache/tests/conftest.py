@@ -11,9 +11,7 @@ from datadog_checks.apache import Apache
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
-from .common import (
-    HERE, STATUS_URL, STATUS_CONFIG, BASE_URL, CHECK_NAME
-)
+from .common import BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
 
 
 @pytest.fixture(scope="session")
@@ -25,11 +23,8 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'apache.yaml'),
         env_vars=env,
-        conditions=[
-            CheckEndpoints([STATUS_URL]),
-            generate_metrics,
-        ],
-        sleep=20
+        conditions=[CheckEndpoints([STATUS_URL]), generate_metrics],
+        sleep=20,
     ):
         yield STATUS_CONFIG
 

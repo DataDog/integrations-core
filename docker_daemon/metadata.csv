@@ -114,3 +114,5 @@ docker.metadata.used,gauge,,byte,,Storage pool metadata space used,0,docker,meta
 docker.metadata.free,gauge,,byte,,Storage pool metadata space free,0,docker,metadata space free
 docker.metadata.total,gauge,,byte,,Storage pool metadata space total,0,docker,metadata space total
 docker.metadata.percent,gauge,,percent,,The percent of storage pool metadata used,0,docker,percent of metadata space total
+docker.thread.count,gauge,,thread,,"Current thread count for the container",0,docker,thread.count
+docker.thread.limit,gauge,,thread,,"Thread count limit for the container, if set",0,docker,thread.limit

@@ -22,7 +22,7 @@ instances:
   #  tags:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
-  
+
 
 ## Log Section (Available for Agent >=6.0)
 ##
@@ -36,7 +36,7 @@ instances:
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 
 #logs:
-    
+
 #  - type: file
 #    path: /var/log/gunicorn/access.log
 #    service: <SERVICE>

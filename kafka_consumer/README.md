@@ -51,8 +51,8 @@ The Kafka-consumer check does not include any service checks.
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
 [112]: https://app.datadoghq.com/account/settings#agent
 [113]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
-[114]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[115]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[114]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[115]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv
 [117]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
 [118]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/

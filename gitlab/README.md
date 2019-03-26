@@ -40,8 +40,8 @@ Need help? Contact [Datadog support][7].
 
 [1]: https://docs.gitlab.com/ee/administration/monitoring/prometheus
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [7]: https://docs.datadoghq.com/help

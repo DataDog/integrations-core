@@ -1,5 +1,14 @@
 # CHANGELOG - datadog_checks_base
 
+## 6.4.0 / 2019-03-22
+
+* [Added] Add external_host_tags wrapper to checks_base. See [#3316](https://github.com/DataDog/integrations-core/pull/3316).
+* [Added] Add ability to debug checks with pdb. See [#2690](https://github.com/DataDog/integrations-core/pull/2690).
+* [Added] Add a wrapper for requests. See [#3310](https://github.com/DataDog/integrations-core/pull/3310).
+* [Fixed] Ensure the use of relative imports to avoid circular dependencies. See [#3326](https://github.com/DataDog/integrations-core/pull/3326).
+* [Fixed] Remove uuid dependency. See [#3309](https://github.com/DataDog/integrations-core/pull/3309).
+* [Fixed] Properly ship flup on Python 3. See [#3304](https://github.com/DataDog/integrations-core/pull/3304).
+
 ## 6.3.0 / 2019-03-14
 
 * [Added] Add rfc3339 utilities. See [#3189](https://github.com/DataDog/integrations-core/pull/3189).

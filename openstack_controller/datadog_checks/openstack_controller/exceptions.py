@@ -41,3 +41,7 @@ class KeystoneUnreachable(Exception):
 
 class AuthenticationNeeded(Exception):
     pass
+
+
+class RetryLimitExceeded(Exception):
+    pass

@@ -32,7 +32,9 @@ except ImportError:
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
+from ..utils.agent.debug import enter_pdb
 from ..utils.common import ensure_bytes, ensure_unicode
+from ..utils.http import RequestsWrapper
 from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
 
@@ -54,6 +56,9 @@ class __AgentCheckPy3(object):
     The base class for any Agent based integrations
     """
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
+
+    # Used by `self.http` RequestsWrapper
+    HTTP_CONFIG_REMAPPER = None
 
     """
     DEFAULT_METRIC_LIMIT allows to set a limit on the number of metric name and tags combination
@@ -103,6 +108,11 @@ class __AgentCheckPy3(object):
         # the agent5 'AgentCheck' setup a log attribute.
         self.log = logging.getLogger('{}.{}'.format(__name__, self.name))
 
+        # Provides logic to yield consistent network behavior based on user configuration.
+        # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
+        self._http = None
+
+        # TODO: Remove with Agent 5
         # Set proxy settings
         self.proxies = self._get_requests_proxy()
         if not self.init_config:
@@ -110,6 +120,7 @@ class __AgentCheckPy3(object):
         else:
             self._use_agent_proxy = is_affirmative(self.init_config.get('use_agent_proxy', True))
 
+        # TODO: Remove with Agent 5
         self.default_integration_http_timeout = float(self.agentConfig.get('default_integration_http_timeout', 9))
 
         self._deprecations = {
@@ -135,7 +146,7 @@ class __AgentCheckPy3(object):
                 False,
                 (
                     'DEPRECATION NOTICE: The `no_proxy` config option has been renamed '
-                    'to `skip_proxy` and will be removed in a future release.'
+                    'to `skip_proxy` and will be removed in Agent version 6.13.'
                 ),
             ],
         }
@@ -163,11 +174,19 @@ class __AgentCheckPy3(object):
         return yaml.safe_load(yaml_str)
 
     @property
+    def http(self):
+        if self._http is None:
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER)
+
+        return self._http
+
+    @property
     def in_developer_mode(self):
         self._log_deprecation('in_developer_mode')
         return False
 
     def get_instance_proxy(self, instance, uri, proxies=None):
+        # TODO: Remove with Agent 5
         proxies = proxies if proxies is not None else self.proxies.copy()
 
         deprecated_skip = instance.get('no_proxy', None)
@@ -290,6 +309,21 @@ class __AgentCheckPy3(object):
     def check(self, instance):
         raise NotImplementedError
 
+    def set_external_tags(self, external_tags):
+        # Example of external_tags format
+        # [
+        #     ('hostname', {'src_name': ['test:t1']}),
+        #     ('hostname2', {'src2_name': ['test2:t3']})
+        # ]
+        try:
+            for _, source_map in external_tags:
+                for src_name, tags in iteritems(source_map):
+                    source_map[src_name] = self._normalize_tags_type(tags)
+            datadog_agent.set_external_tags(external_tags)
+        except IndexError:
+            self.log.exception('Unexpected external tags format: {}'.format(external_tags))
+            raise
+
     def normalize(self, metric, prefix=None, fix_case=False):
         """
         Turn a metric into a well-formed metric name
@@ -387,7 +421,13 @@ class __AgentCheckPy3(object):
 
     def run(self):
         try:
-            self.check(copy.deepcopy(self.instances[0]))
+            instance = copy.deepcopy(self.instances[0])
+
+            if 'set_breakpoint' in self.init_config:
+                enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
+            else:
+                self.check(instance)
+
             result = ''
         except Exception as e:
             result = json.dumps([
@@ -403,6 +443,7 @@ class __AgentCheckPy3(object):
         return result
 
     def _get_requests_proxy(self):
+        # TODO: Remove with Agent 5
         no_proxy_settings = {
             'http': None,
             'https': None,
@@ -438,6 +479,9 @@ class __AgentCheckPy2(object):
     See https://github.com/DataDog/integrations-core/pull/2093 for more information
     """
     DEFAULT_METRIC_LIMIT = 0
+
+    # Used by `self.http` RequestsWrapper
+    HTTP_CONFIG_REMAPPER = None
 
     def __init__(self, *args, **kwargs):
         """
@@ -475,6 +519,11 @@ class __AgentCheckPy2(object):
         # the agent5 'AgentCheck' setup a log attribute.
         self.log = logging.getLogger('%s.%s' % (__name__, self.name))
 
+        # Provides logic to yield consistent network behavior based on user configuration.
+        # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
+        self._http = None
+
+        # TODO: Remove with Agent 5
         # Set proxy settings
         self.proxies = self._get_requests_proxy()
         if not self.init_config:
@@ -503,7 +552,7 @@ class __AgentCheckPy2(object):
             'no_proxy': [
                 False,
                 "DEPRECATION NOTICE: The `no_proxy` config option has been renamed "
-                "to `skip_proxy` and will be removed in a future release.",
+                "to `skip_proxy` and will be removed in Agent version 6.13.",
             ],
         }
 
@@ -528,11 +577,19 @@ class __AgentCheckPy2(object):
         return yaml.safe_load(yaml_str)
 
     @property
+    def http(self):
+        if self._http is None:
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER)
+
+        return self._http
+
+    @property
     def in_developer_mode(self):
         self._log_deprecation('in_developer_mode')
         return False
 
     def get_instance_proxy(self, instance, uri, proxies=None):
+        # TODO: Remove with Agent 5
         proxies = proxies if proxies is not None else self.proxies.copy()
 
         deprecated_skip = instance.get('no_proxy', None)
@@ -701,6 +758,22 @@ class __AgentCheckPy2(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
+    def set_external_tags(self, external_tags):
+        # Example of external_tags format
+        # [
+        #     ('hostname', {'src_name': ['test:t1']}),
+        #     ('hostname2', {'src2_name': ['test2:t3']})
+        # ]
+
+        try:
+            for _, source_map in external_tags:
+                for src_name, tags in iteritems(source_map):
+                    source_map[src_name] = self._normalize_tags_type(tags)
+            datadog_agent.set_external_tags(external_tags)
+        except IndexError:
+            self.log.exception('Unexpected external tags format: {}'.format(external_tags))
+            raise
+
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """
         Normalize tags contents and type:
@@ -773,7 +846,13 @@ class __AgentCheckPy2(object):
 
     def run(self):
         try:
-            self.check(copy.deepcopy(self.instances[0]))
+            instance = copy.deepcopy(self.instances[0])
+
+            if 'set_breakpoint' in self.init_config:
+                enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
+            else:
+                self.check(instance)
+
             result = b''
         except Exception as e:
             result = json.dumps([
@@ -789,6 +868,7 @@ class __AgentCheckPy2(object):
         return result
 
     def _get_requests_proxy(self):
+        # TODO: Remove with Agent 5
         no_proxy_settings = {
             "http": None,
             "https": None,

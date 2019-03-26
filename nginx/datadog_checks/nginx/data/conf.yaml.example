@@ -1,7 +1,7 @@
 init_config:
 
 instances:
-  
+
 ## @param nginx_status_url - string - required
 ## For every instance, you need an `nginx_status_url` and can optionally
 ## supply a list of tags.  This plugin requires nginx to be compiled with
@@ -12,7 +12,7 @@ instances:
 ##   http://docs.datadoghq.com/integrations/nginx/
 #
   - nginx_status_url: http://localhost:81/nginx_status/
-  
+
   ## @param use_plus_api - boolean - optional - default: false
   ## If you are using the commercial version of nginx, for releases R13 and above,
   ## there is a new API to replace the extended status API.

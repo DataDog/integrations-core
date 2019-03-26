@@ -6,7 +6,6 @@ from six.moves import range, zip
 from .errors import UnknownMetric, UnknownTags
 from .metrics import METRIC_PREFIX, METRIC_TREE, METRICS
 
-
 HISTOGRAM = re.compile(r'([P0-9.]+)\(([^,]+)')
 PERCENTILE_SUFFIX = {
     'P0': '.0percentile',
@@ -84,10 +83,7 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
     if unknown_tags:
         raise UnknownTags('{}'.format('|||'.join(unknown_tags)))
 
-    tags = [
-        '{}:{}'.format(tag_name, tag_value)
-        for tag_name, tag_value in zip(tag_names, tag_values)
-    ]
+    tags = ['{}:{}'.format(tag_name, tag_value) for tag_name, tag_value in zip(tag_names, tag_values)]
 
     return METRIC_PREFIX + metric, tags, METRICS[metric]['method']
 

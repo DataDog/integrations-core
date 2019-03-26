@@ -13,7 +13,7 @@ instances:
   #  plugin_ids:
   #    - <PLUGIN_ID_1>
   #    - <PLUGIN_ID_2>
-       
+
   ## @param tag_by - string - optional
   ## Set 'tag_by' to specify how to tag metrics. By default, metrics are tagged with `plugin_id`.
   #
