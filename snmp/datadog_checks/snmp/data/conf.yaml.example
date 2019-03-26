@@ -11,7 +11,8 @@ init_config:
 #  mibs_folder: /path/to/your/mibs/folder
 
 ## @param ignore_nonincreasing_oid - boolean - optional - default: false
-## XXXX
+## Set to true to ignore non increasing oid.
+## See http://snmplabs.com/pysnmp/faq/oids-not-increasing.html?highlight=ignorenonincreasingoid
 #  ignore_nonincreasing_oid: false
 
 ## @param global_metrics - list of elements - optional
@@ -85,7 +86,7 @@ instances:
 
   ## @param ip_address - string - required
   ## For SNMP v1 & v2 enter localhost
-  ## For SNMP v3 enter 192.168.34.10
+  ## For SNMP v3 enter the IP address of the device to monitor.
   #
   - ip_address: localhost
 
