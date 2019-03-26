@@ -6,7 +6,7 @@ from __future__ import absolute_import
 # import pdb
 from datadog_checks.base import AgentCheck
 from datadog_checks.errors import CheckException
-from config import SslConfig
+from .config import SslConfig
 import ssl
 import socket
 
