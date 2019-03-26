@@ -71,7 +71,7 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
 * `class` is the name of the WMI class, for example `Win32_OperatingSystem` or `Win32_PerfFormattedData_PerfProc_Process`. You can find many of the standard class names on the [MSDN docs][6]. The `Win32_FormattedData_*` classes provide many useful performance counters by default.
 
 * `metrics` is a list of metrics you want to capture, with each item in the
-list being a set of [<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]: 
+list being a set of `[<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]`: 
   *  `<WMI_PROPERTY_NAME>` is something like `NumberOfUsers` or `ThreadCount`. The standard properties are also available on the MSDN docs for each class.
   *  `<METRIC_NAME>` is the name you want to show up in Datadog.
   * `<METRIC_TYPE>` is from the standard choices for all agent checks, such as gauge, rate, histogram or counter.
@@ -95,9 +95,8 @@ See [MSDN][8] for more information.
   * `<LINK_TARGET_CLASS_PROPERTY>` is the target class property to link to
   * `<TARGET_PROPERTY>` contains the value to tag with
 
-It translates to a WMI query:
-
-    SELECT '<TARGET_PROPERTY>' FROM '<TARGET_CLASS>' WHERE '<LINK_TARGET_CLASS_PROPERTY>' = '<LINK_SOURCE_PROPERTY>'
+  It translates to a WMI query:
+  `SELECT '<TARGET_PROPERTY>' FROM '<TARGET_CLASS>' WHERE '<LINK_TARGET_CLASS_PROPERTY>' = '<LINK_SOURCE_PROPERTY>'`
 
 <div class="alert alert-info">
 Setting this causes any instance number to be removed from tag_by values i.e. name:process#1 => name:process
