@@ -1,11 +1,33 @@
 init_config:
 
 instances:
+
+  ## @param url - string - required
+  ## Riak stats url to connect to.
+  #
   - url: http://127.0.0.1:8098/stats
-    # Riak statistics are calculated on a per-minute sliding window
+
+  ## @param min_collection_interval - integer - required - default: 60
+  ## Riak statistics are calculated on a per-minute sliding window,
+  ## Change the default collection interval if need be
+  #
     min_collection_interval: 60
-    # cacert: /path/to/ca.pem
-    # disable_cert_verify: false
-    # tags:
-    #  - optional_tag1
-    #  - optional_tag2
+
+  ## @paral cacert - string - optional
+  ## Path to the TLS CA certificate file (ca.pem).
+  #
+  #  cacert: <TLS_CA_CERT_PATH>
+
+  ## @param disable_cert_verify - boolean - optional - default: false
+  ## Set to true to disable CA cert verification.
+  #
+  #  disable_cert_verify: false
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
