@@ -123,6 +123,7 @@ def test_check_regex(aggregator, instance_queue_regex_tag, seed_data):
         'host:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'channel:{}'.format(common.CHANNEL),
+        'queue:{}'.format(common.QUEUE),
         'foo:bar',
     ]
 
