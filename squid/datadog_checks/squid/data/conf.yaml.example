@@ -1,12 +1,37 @@
 init_config:
 
 instances:
-  # A list of squid instances identified by their name
-  
-  - name: my_squid
-  #   host: localhost  # The hostname or ip address of the squid server. Default to 'localhost'
-  #   port: 3128  # The port where the squid server is listening. Default to 3128
-  #   cachemgr_username: foo  # The username, if needed, to access the counters report of the cache manager.
-  #   cachemgr_password: bar  # The password, if needed, to access the counters report of the cache manager.
-  #   port: 3128  # The port where the squid server is listening. Default to 3128
-  #   tags: ['custom:tag']  # A optional list of tags that you wish to send with your squid metrics
+
+  ## @param name - string - required
+  ## Name of your squid instance.
+  #
+  - name: <SQUID_INSTANCE_NAME>
+
+  ## @param host - string - optional - default: localhost
+  ## The hostname or ip address of the squid server.
+  #
+  #  host: localhost
+
+  ## @param port - integer - optional - default: 3128
+  ## The port where the squid server is listening.
+  #
+  #  port: 3128
+
+  ## @param cachemgr_username - string - optional
+  ## The username, if needed, to access the counters report of the cache manager.
+  #
+  #  cachemgr_username: <CACHEMGR_USERNAME>
+
+  ## @param cachemgr_password - string - optional
+  ## The password, if needed, to access the counters report of the cache manager.
+  #
+  #  cachemgr_password: <CACHEMGR_PASSWORD>
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
