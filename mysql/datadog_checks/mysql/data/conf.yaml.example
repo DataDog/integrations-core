@@ -148,9 +148,8 @@ instances:
     ##   - mysql.performance.query_run_time.avg (per schema)
     ##   - mysql.performance.digest_95th_percentile.avg_us
     ##
-    ## With the addition of new metrics to the MySQL catalog starting with agent >=5.7.0, because
-    ## the Agent queries additional schemas to get this full set of metrics. Some of these require the user
-    ## defined for the instance to have PROCESS and SELECT privileges. Take a look at the
+    ## Note that some of these require the user defined for this instance 
+    ## to have PROCESS and SELECT privileges. Take a look at the
     ## MySQL integration tile in the Datadog WebUI for further instructions.
     #
     #  extra_performance_metrics: true
