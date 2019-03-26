@@ -31,8 +31,8 @@ instances:
   - name: <PROCESS_METRIC_NAME>
 
   ## @param search_string - list of strings - required
-  ## If one of the elements in the list matches, it return the counter of
-  ## all the processes that contain the string.
+  ## If one of the elements in the list matches, it return the count of
+  ## all the processes that match the string exactly by default. Change this behavior with the parameter `exact_match: false`.
   #
   #  search_string:
   #    - <SEARCH_STRING_1>
@@ -54,7 +54,7 @@ instances:
   ## https://docs.datadoghq.com/integrations/process/#configuration
   ## Regex is also supported when this flag is set to False.
   #
-  #  exact_match: false
+  #  exact_match: true
 
   ## @param ignore_denied_access - boolean - optional - default: true
   ## When getting the number of files descriptors, dd-agent user might
