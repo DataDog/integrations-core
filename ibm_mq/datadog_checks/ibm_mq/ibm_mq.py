@@ -57,6 +57,11 @@ class IbmMqCheck(AgentCheck):
 
             for queue_name in config.queues:
                 queue_tags = config.tags + ["queue:{}".format(queue_name)]
+
+                for regex, q_tags in config.queue_tag_re:
+                    if regex.match(queue_name):
+                        queue_tags.extend(q_tags)
+
                 try:
                     queue = pymqi.Queue(queue_manager, queue_name)
                     self.queue_stats(queue, queue_tags)
