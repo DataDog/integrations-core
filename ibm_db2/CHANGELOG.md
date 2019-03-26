@@ -1,0 +1,2 @@
+# CHANGELOG - IBM Db2
+
