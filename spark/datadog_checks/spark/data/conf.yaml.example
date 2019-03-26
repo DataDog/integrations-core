@@ -76,7 +76,7 @@ instances:
   #  password: <PASSWORD>
 
   ## @param streaming_metrics - boolean - optional - default: true
-  ## XXXXXX
+  ## Enable collection of streaming statistics.
   #
   #  streaming_metrics: true
 
@@ -107,25 +107,30 @@ instances:
   #  kerberos: disabled
 
   ## @param kerberos_delegate - boolean - optional - default: false
-  ## XXXXXX
+  ## Set to true to enable kerberos delegation of credentials to a server that requests delegation.
+  ## See https://github.com/requests/requests-kerberos#delegation
   #  kerberos_delegate: false
 
   ## @param kerberos_force_initiate - boolean - optional - default: false
-  ## XXXXXX
+  ## Set to true to preemptively initiate the Kerberos GSS exchange and present a Kerberos ticket on the initial request (and all subsequent).
+  ## See https://github.com/requests/requests-kerberos#preemptive-authentication
   #
   #  kerberos_force_initiate: false
 
   ## @param kerberos_hostname - string - optional
-  ## XXXXXX
+  ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't match its kerberos
+  ## hostname (eg, behind a content switch or load balancer).
+  ## See https://github.com/requests/requests-kerberos#hostname-override
   #
   #  kerberos_hostname: null
 
   ## @param kerberos_principal - string - optional
-  ## XXXXXX
+  ## Set an explicit principal, to force Kerberos to look for a matching credential cache for the named user.
+  ## See https://github.com/requests/requests-kerberos#explicit-principal
   #
   #  kerberos_principal: null
 
   ## @param kerberos_keytab - string - optional
-  ## XXXXX
+  ## Set the path to your Kerberos key tab file.
   #
   #  kerberos_keytab: <KEYTAB_FILE_PATH>
