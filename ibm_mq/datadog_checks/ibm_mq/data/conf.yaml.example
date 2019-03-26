@@ -80,6 +80,17 @@ instances:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
 
+  ## @param queue_tag_re - list of regex:tags string - optional
+  ## Instruct the check to apply additional tags to matching
+  ## queues
+  ##
+  ## Multiple comma-separated tags are supported. You must properly quote the string if the
+  ## pattern contains special characters e.g. colons.
+  #
+  #  queue_tag_re:
+  #    'SYSTEM.*': queue_type:system
+  #    'DEV.*': role:dev,queue_type:default
+
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)

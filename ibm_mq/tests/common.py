@@ -74,3 +74,18 @@ INSTANCE_COLLECT_ALL = {
         BAD_CHANNEL,
     ]
 }
+
+INSTANCE_QUEUE_REGEX_TAG = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [
+        QUEUE
+    ],
+    'queue_tag_re': {
+        'DEV.QUEUE.*': "foo:bar"
+    }
+}
