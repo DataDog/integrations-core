@@ -27,8 +27,8 @@ instances:
   #
   #  port: 8080
 
-  ## @param s3_root - string - optional
-  ## XXXXXXX
+  ## @param s3_root - string - optional - default: s3.amazonaws.com
+  ## The S3 hostname.
   #
   #  s3_root: s3.amazonaws.com
 
