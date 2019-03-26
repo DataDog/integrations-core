@@ -19,7 +19,10 @@ instances:
   #  unix_socket_path: /var/run/redis/redis.sock
 
   ## @param db - integer - optional - default: 0
-  ## XXXXXXXX
+  ## Index of the database (keyspace) to use. 
+  ## The index 0 is the default and any other index will result in a SELECT command to be sent upon connection
+  ## to select the desired database. For redis.clone this can also be NA in which case the same database is 
+  ## used as in rc.
   #
   #  db: 0
 
