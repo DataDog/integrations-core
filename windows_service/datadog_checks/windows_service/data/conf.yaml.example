@@ -5,7 +5,7 @@ instances:
   ## List of services to monitor e.g. Dnscache, wmiApSrv, etc.
   ##
   ## If any service is set to `ALL`, all services registered with the SCM will be monitored.
-  ##  
+  ##
   ## This matches all services starting with service, as if service.* is configured.
   ## For an exact match, use ^service$
   #
