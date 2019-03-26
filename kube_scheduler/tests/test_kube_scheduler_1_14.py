@@ -21,7 +21,7 @@ NAMESPACE = 'kube_scheduler'
 
 @pytest.fixture()
 def mock_metrics():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.14.0.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
@@ -49,7 +49,7 @@ def mock_leader():
         yield
 
 
-def test_check_metrics(aggregator, mock_metrics, mock_leader):
+def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     c = KubeSchedulerCheck(CHECK_NAME, None, {}, [instance])
     c.check(instance)
 
@@ -58,34 +58,35 @@ def test_check_metrics(aggregator, mock_metrics, mock_leader):
         aggregator.assert_metric(NAMESPACE + name, **kwargs)
 
     assert_metric('.pod_preemption.victims', value=0.0, tags=[])
-    assert_metric('.pod_preemption.attempts', value=10.0, tags=[])
+    assert_metric('.pod_preemption.attempts', value=6.0, tags=[])
     assert_metric('.binding_duration.count', value=0.0, tags=['upper_bound:0.001'])
-    assert_metric('.binding_duration.sum', value=4.08376, tags=[])
-    assert_metric('.scheduling.scheduling_duration.count', value=15.0, tags=['operation:binding'])
-    assert_metric('.scheduling.scheduling_duration.sum', value=0.40872890000000006, tags=['operation:binding'])
-    assert_metric('.scheduling.algorithm.predicate_duration.sum', value=0.0278, tags=[])
+    assert_metric('.binding_duration.sum', value=0.16221686500000002, tags=[])
+    assert_metric('.scheduling.scheduling_duration.count', value=14.0, tags=['operation:binding'])
+    assert_metric('.scheduling.scheduling_duration.sum', value=0.16236949099999998, tags=['operation:binding'])
+    assert_metric('.scheduling.algorithm.predicate_duration.sum', value=0.01379, tags=[])
     assert_metric('.scheduling.e2e_scheduling_duration.count', value=0.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm_duration.count', value=14.0, tags=['upper_bound:0.001'])
-    assert_metric('.scheduling.e2e_scheduling_duration.sum', value=4.32862, tags=[])
-    assert_metric('.scheduling.scheduling_duration.quantile', value=0.0225032,
+    assert_metric('.scheduling.e2e_scheduling_duration.sum', value=0.166793941, tags=[])
+    assert_metric('.scheduling.scheduling_duration.quantile', value=0.01050672,
                   tags=['operation:binding', 'quantile:0.5'])
-    assert_metric('.scheduling.algorithm.priority_duration.sum', value=0.00237, tags=[])
-    assert_metric('.scheduling.algorithm.priority_duration.count', value=15.0, tags=['upper_bound:0.004'])
-    assert_metric('.scheduling.algorithm.preemption_duration.sum', value=0.51777, tags=[])
-    assert_metric('.scheduling.algorithm.predicate_duration.count', value=15.0, tags=['upper_bound:0.001'])
+    assert_metric('.scheduling.algorithm.priority_duration.sum', value=0.0, tags=[])
+    assert_metric('.scheduling.algorithm.priority_duration.count', value=14.0, tags=['upper_bound:0.004'])
+    assert_metric('.scheduling.algorithm.preemption_duration.sum', value=0.5524, tags=[])
+    assert_metric('.scheduling.algorithm.predicate_duration.count', value=14.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm.preemption_duration.count', value=0.0, tags=['upper_bound:0.001'])
-    assert_metric('.schedule_attempts', value=15.0, tags=['result:scheduled'])
+    assert_metric('.schedule_attempts', value=14.0, tags=['result:scheduled'])
     assert_metric('.apiserver.audit.requests_rejected', value=0.0, tags=[])
     assert_metric('.apiserver.audit.events', value=0.0, tags=[])
     assert_metric('.apiserver.storage.data_key_generation_failures', value=0.0, tags=[])
     assert_metric('.apiserver.client_certificate_expiration.sum', value=0.0, tags=[])
     assert_metric('.apiserver.client_certificate_expiration.count', value=0.0, tags=['upper_bound:43200.0'])
     assert_metric('.apiserver.storage.envelope_transformation_cache_misses', value=0.0, tags=[])
-    assert_metric('.cache.lookups')
-    assert_metric('.volume_scheduling_duration.sum', value=0.0003541, tags=['operation:assume'])
+    assert_metric('.volume_scheduling_duration.sum', value=3.3576e-05, tags=['operation:assume'])
+    assert_metric('.volume_scheduling_duration.count',
+                  value=14.0, tags=['upper_bound:1000.0', 'operation:assume'])
     assert_metric('.client.http.requests_duration.count',
                   tags=['url:https://172.17.0.2:6443/%7Bprefix%7D', 'upper_bound:0.001', 'verb:GET'])
-    assert_metric('.client.http.requests_duration.sum', value=86.3256595999997,
+    assert_metric('.client.http.requests_duration.sum', value=24.374537649,
                   tags=['url:https://172.17.0.2:6443/%7Bprefix%7D', 'verb:GET'])
     assert_metric('.goroutines')
     assert_metric('.gc_duration_seconds.sum')
@@ -95,10 +96,8 @@ def test_check_metrics(aggregator, mock_metrics, mock_leader):
     assert_metric('.open_fds')
     assert_metric('.max_fds')
     assert_metric('.client.http.requests')
-    assert_metric('.volume_scheduling_duration.count',
-                  value=15.0, tags=['operation:predicate', 'upper_bound:1024000.0'])
     # check historgram transformation from microsecond to second
-    assert_metric('.scheduling.algorithm_duration.sum', value=0.06377, tags=[])
+    assert_metric('.scheduling.algorithm_duration.sum', value=0.0018508010000000002, tags=[])
     # Leader election mixin
     expected_le_tags = [
       "record_kind:endpoints",

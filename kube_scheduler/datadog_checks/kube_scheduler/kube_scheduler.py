@@ -172,11 +172,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             if not self._is_value_valid(val):
                 self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
                 continue
-            if sample[self.SAMPLE_NAME].endswith("_sum"):
-                lst = list(sample)
-                lst[self.SAMPLE_VALUE] = float(val) / 100000
-                metric.samples[index] = tuple(lst)
-            elif sample[self.SAMPLE_NAME].endswith("_count"):
+            if sample[self.SAMPLE_NAME].endswith("_count"):
                 continue
             else:
                 lst = list(sample)
