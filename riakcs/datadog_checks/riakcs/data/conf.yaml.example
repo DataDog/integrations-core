@@ -1,13 +1,42 @@
 init_config:
 
 instances:
-  - access_id: access-key
-    access_secret: access-secret
-    # is_secure: True # Uncomment and change to false if you are not using ssl
-    # host: localhost # Hostname/IP of your riakcs node
-    # port: 8080 # port used by your riakcs node
-    # s3_root: s3.amazonaws.com # 
-    # Optional instance level tags that will be applied to metrics and service checks
-    # tags:
-        # - optional:tag1
-        # - optional:tag2
+
+  ## @param access_id - string - required
+  ## Enter you RiakCS access key.
+  #
+  - access_id: <ACCESS_KEY>
+
+  ## @param access_secret - string - required
+  ## Enter the corresponding RiakCS access secret.
+  #
+    access_secret: <ACCESS_SECRET>
+
+  ## @param is_secure - boolean - optional - default: true
+  ## Uncomment and change to false if you are not using ssl.
+  #
+  #  is_secure: true
+
+  ## @param host - string - optional
+  ## Hostname/IP of your RiakCS node.
+  #
+  #  host: localhost
+
+  ## @param port - integer - optional - default: 8080
+  ## Port used by your RiakCS node.
+  #
+  #  port: 8080
+
+  ## @param s3_root - string - optional - default: s3.amazonaws.com
+  ## The S3 hostname.
+  #
+  #  s3_root: s3.amazonaws.com
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
