@@ -13,37 +13,31 @@ init_config:
 instances:
 
   ## @param host - string - required
-  ## Presto host to connect to
+  ## Presto host to connect to.
   #
   - host: localhost
 
   ## @param port - integer - required
-  ## Presto port to connect to
+  ## Presto port to connect to.
   #
     port: 9999
 
-  ## @param tags  - list of key:value element - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ## The 'environment' tag depends on the <node_environment> in the Presto node.properties configuration:
-  ##   - if the environment information (eg 'prod' or 'test') is included in the <node_environment>, just use <node_environment>.
-  ##   - otherwise it's good to add the information to the 'environment' tag (eg 'prod-<node_environment>').
-  ## This will prevent aggregation of metrics from like-named clusters in distinct environments.
-  ## The 'node_type' tag should be the Presto server type (coordinator or worker) to differentiate metrics
-  ## collected from each instance type.
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
   ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
-  #    - environment: <NODE_ENVIRONMENT>
-  #    - node_type: <NODE_TYPE>   # e.g. coordinator or worker
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
   ## @param user - string - optional
-  ##
+  ## Username to use when connecting to presto.
   #
   #  user: <USERNAME>
 
   ## @param password - string - optional
-  ##
+  ## Password to use when connecting to presto.
   #
   #  password: <PASSWORD>
 
@@ -56,13 +50,14 @@ instances:
   #  process_name_regex: .*process_name.*
 
   ## @param tools_jar_path - string - optional
+  ## Path to the tool.jar file to use with `process_name_regex` parameter.
   #
   #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
   ## @param name - string - optional
   ##
   #
-  #   name: coordinator_instance
+  #  name: coordinator_instance
 
   ## @param java_bin_path - string - optional
   ## java_bin_path should be set if the agent cannot find your java executable
@@ -98,7 +93,7 @@ instances:
   #
   #  key_store_password: <PASSWORD>
 
-  ## @param rmi_registry_ssl - boolean - optional
+  ## @param rmi_registry_ssl - boolean - optional - default: false
   ## Whether or not the agent should connect to the rmi registry using ssl.
   #
   #  rmi_registry_ssl: false
