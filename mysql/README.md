@@ -101,7 +101,7 @@ Query OK, 0 rows affected (0.00 sec)
       port: <YOUR_MYSQL_PORT> # e.g. 3306
       options:
           replication: 0
-          galera_cluster: 1
+          galera_cluster: true
           extra_status_metrics: true
           extra_innodb_metrics: true
           extra_performance_metrics: true
