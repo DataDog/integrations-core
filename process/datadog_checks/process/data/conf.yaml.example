@@ -1,74 +1,99 @@
+## The `system.processes.cpu.pct` metric sent by this check is only accurate for processes that live
+## for more than 30 seconds. Do not expect its value to be accurate for shorter-lived processes.
+## One and only one of search_string, pid or pid_file must be specified per instance.
+
 init_config:
-  # the check will refresh the matching pid list every X seconds
-  # except if it detects a change before. You might want to set it
-  # low if you want to alert on process service checks.
-  # pid_cache_duration: 120
+
+  ## @param pid_cache_duration - integer - optional - default: 120
+  ## Changes the check refresh rate of the matching pid list every X seconds except if it
+  ## detects a change before. You might want to set it low if you want to
+  ## alert on process service checks.
   #
-  # the check maintains a list of PIDs for which it got access denied. It won't try to look at them again for the 
-  # duration in seconds specified by access_denied_cache_duration. Default value is 120 seconds.
-  # access_denied_cache_duration: 120
+  #  pid_cache_duration: 120
+
+  ## @param access_denied_cache_duration - integer - optional - default: 120
+  ## The check maintains a list of PIDs for which it got access denied. It won't try to look at them again for the
+  ## duration in seconds specified by access_denied_cache_duration.
   #
-  # used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
-  # DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
-  # procfs_path: /proc
+  #  access_denied_cache_duration: 120
+
+  ## @param procfs_path - string - optional
+  ## Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
+  ## DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
+  #
+  #  procfs_path: /proc
 
 instances:
-# The `system.processes.cpu.pct` metric sent by this check is only accurate for processes that live
-# for more than 30 seconds. Do not expect its value to be accurate for shorter-lived processes.
-#
-#  One and only one of search_string, pid or pid_file must be specified
-#  - name: (required) STRING. It will be used to uniquely identify your metrics as they will be tagged with this name
-#    search_string: LIST OF STRINGS. If one of the elements in the list matches,
-#                   return the counter of all the processes that contain the string
-#    pid: STRING. A Process id.
-#    pid_file: STRING. A Pid file.
-#    exact_match: (optional) Boolean. Default value of True matches your search_string on proc.name().
-#                 If you want to match on a substring within proc.cmdline(), set this to False
-#                 https://docs.datadoghq.com/integrations/process/#configuration
-#                 Regex is also supported when this flag is set to False.
-#    ignore_denied_access: (optional) Boolean. Default to True, when getting the number of files descriptors, dd-agent user might
-#    get a denied access. Set this to true to not issue a warning if that happens.
-#    thresholds: (optional) Two ranges: critical and warning
-#         warning: (optional) List of two values: If the number of processes found is below the first value or
-#                  above the second one, the process check will return WARNING.
-#         critical: (optional) List of two values: If the number of processes found is below the first value or
-#                   above the second one, the process check will return CRITICAL.
-#     In this example, process check will return OK for 3 to 5 process. WARNING for 1, 2, 6, 7 processes and Critical below 1 or above 7.
-#     CRITICAL is always dominant in case of overlapping.
-#    collect_children: BOOLEAN. If true, the check will also collect metrics from all child processes of a matched process. Default to false.
-#                      Please be aware that the collection is recursive, and might take some time depending on the use case.
-#    user: STRING. Only report processes belonging to a specific user.
-#    try_sudo: (optional) Boolean. If set to True (default is False), the check will try to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
-#
-# Examples:
-#
-#  - name: ssh
-#    search_string: ['ssh', 'sshd']
-#    tags:
-#      - env:staging
-#      - cluster:big-data
-#    thresholds:
-#      critical if no sshd or more than 7 sshd are running
-#      critical: [1, 7]
-#      warning if 1, 2, 6, 7 sshd processes are running
-#      warning: [3, 5]
-#      ok if 3, 4, 5 processes are running
-#    try_sudo: False
-#
-#  - name: django_management_commands
-#    search_string: ['python manage\.py \w+']
-#    exact_match: False
-#
-#  - name: postgres
-#    search_string: ['postgres']
-#    ignore_denied_access: True
-#
-#  - name: nodeserver
-#    search_string: ['node server.js']
-#
-#  - name: pid_process
-#    pid: 1278
-#    Do not use search_string when searching by pid or multiple processes will be grabbed
-#
-#  - name: pid_file
-#    pid_file: /var/run/sshd.pid
+
+  ## @param name - string - required
+  ## Used to uniquely identify your metrics as they are tagged with this name in Datadog.
+  #
+  - name: <PROCESS_METRIC_NAME>
+
+  ## @param search_string - list of strings - required
+  ## If one of the elements in the list matches, it return the count of
+  ## all the processes that match the string exactly by default. Change this behavior with the parameter `exact_match: false`.
+  #
+  #  search_string:
+  #    - <SEARCH_STRING_1>
+  #    - <SEARCH_STRING_2>
+
+  ## @param pid - string - optional
+  ## A Process id to match.
+  #
+  #  pid: <PROCESS_PID>
+
+  ## @param pid_file - string - optional
+  ## A Pid file to match.
+  #
+  #  pid_file: <PID_FILE>
+
+  ## @param exact_match - boolean - optional - default: true
+  ## Matches your search_string on proc.name().
+  ## If you want to match on a substring within proc.cmdline(), set this to false
+  ## https://docs.datadoghq.com/integrations/process/#configuration
+  ## Regex is also supported when this flag is set to False.
+  #
+  #  exact_match: true
+
+  ## @param ignore_denied_access - boolean - optional - default: true
+  ## When getting the number of files descriptors, dd-agent user might
+  ## get a denied access. Set this to false to not ignore issue a warning if that happens.
+  #
+  #  ignore_denied_access: true
+
+  ## @param thresholds - custom object - optional
+  ## The threshold paramter is composed of two ranges: critical and warning
+  ##   * warning: (optional) List of two values: If the number of processes found is below the first value or
+  ##             above the second one, the process check will return WARNING.
+  ##   * critical: (optional) List of two values: If the number of processes found is below the first value or
+  ##             above the second one, the process check will return CRITICAL.
+  #
+  #  thresholds:
+  #    warning: [<BELOW_VALUE> , <TOP_VALUE>]
+  #    critical: [<BELOW_VALUE> , <TOP_VALUE>]
+
+  ## @param collect_children - boolean - optional - default: false
+  ## If true, the check also collects metrics from all child processes of a matched process.
+  ## Please be aware that the collection is recursive, and might take some time depending on the use case.
+  #
+  #  collect_children: false
+
+  ## @param user - string - optional
+  ## Only report processes belonging to a specific user.
+  #
+  #  user: <USER_NAME>
+
+  ## @param try_sudo - boolean - optional - default: false
+  ## If set to True, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
+  #
+  #  try_sudo: false
+
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
