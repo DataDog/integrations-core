@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   couch:
-    image: klaemo/couchdb:${COUCH_VERSION}
+    image: datadog/docker-library:couch_2_3
     ports:
       - ${COUCH_PORT}:5984
     command: --admin=dduser:pawprint --with-haproxy
