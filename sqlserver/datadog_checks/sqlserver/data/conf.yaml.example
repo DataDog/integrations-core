@@ -10,7 +10,6 @@ init_config:
  #   - name: sqlserver.clr.execution
  #     counter_name: CLR Execution
 
-
 instances:
 
 ## Note: All '%' characters must be escaped as '%%'.

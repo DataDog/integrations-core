@@ -8,11 +8,11 @@ instances:
   - report_url: http://localhost:1978/rpc/report
 
   ## @param name - string - optional
-  ## Name of your Kyoto instance. Enter a name for your Kyoto instance 
+  ## Name of your Kyoto instance. Enter a name for your Kyoto instance
   ## if you have multiple ones.
   #
   #  name: <KYOTO_INSTANCE_NAME>
-  
+
   ## @param tags  - list of key:value elements - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
   ##

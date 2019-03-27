@@ -94,14 +94,14 @@ instances:
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
-## service - mandatory - Name of the service owning the log
-## source  - mandatory - Attribute that defines which integration is sending the logs
-## sourcecategory - optional - Multiple value attribute. Can be used to refine the source attribtue
-## tags: - optional - Add tags to each logs collected
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
-
+#
 # logs:
 #   - type: file
 #     path: /var/mqm/log/<APPNAME>/active/AMQERR01.LOG

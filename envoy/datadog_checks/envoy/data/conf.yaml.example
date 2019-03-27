@@ -22,7 +22,6 @@ instances:
   #  metric_whitelist:
   #    - cluster\.(in|out)\..*
 
-
   ## @param metric_whitelist - optional - list of strings
   ## Blacklist metrics using regular expressions.
   ## The filtering occurs before tag extraction, so you have the option
