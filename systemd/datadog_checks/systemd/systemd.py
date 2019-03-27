@@ -29,13 +29,12 @@ class SystemdCheck(AgentCheck):
         self.report_status = instance.get('report_status', False)
 
         # cache to store unit states and compare them at the next check run
-        self.unit_cache = defaultdict(dict)
-
         # unit_cache = {
         #   "<unit_name>": "<unit_status>",
         #   "cron.service": "inactive",
         #   "ssh.service": "active"
         # }
+        self.unit_cache = defaultdict(dict)
 
     def check(self, instance):
         current_unit_status = defaultdict(dict)
@@ -85,7 +84,6 @@ class SystemdCheck(AgentCheck):
         for unit_short_name, previous_unit_status in iteritems(self.unit_cache):
             # We remove all previous cached entries from the current unit status
             created.pop(unit_short_name, None)
-            # del created[unit_short_name]
             # We check status changes between the previous cached unit status and the current unit status
             current_status = current_unit_status.get(unit_short_name)
             if current_status:
