@@ -12,7 +12,7 @@ def dd_environment():
 @pytest.fixture
 def instance_local_cert():
     return {
-        'url': "http://www.google.com",
+        'local_cert_path': "mock.cert",
         # 'ssl_version': "tls_1.2"
     }
 
@@ -20,6 +20,6 @@ def instance_local_cert():
 @pytest.fixture
 def instance_remote_cert():
     return {
-        'url': "http://www.google.com",
+        'host': "http://www.google.com",
         # 'ssl_version': "tls_1.2"
     }
