@@ -75,12 +75,6 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     assert_metric('.scheduling.algorithm.predicate_duration.count', value=14.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm.preemption_duration.count', value=0.0, tags=['upper_bound:0.001'])
     assert_metric('.schedule_attempts', value=14.0, tags=['result:scheduled'])
-    assert_metric('.apiserver.audit.requests_rejected', value=0.0, tags=[])
-    assert_metric('.apiserver.audit.events', value=0.0, tags=[])
-    assert_metric('.apiserver.storage.data_key_generation_failures', value=0.0, tags=[])
-    assert_metric('.apiserver.client_certificate_expiration.sum', value=0.0, tags=[])
-    assert_metric('.apiserver.client_certificate_expiration.count', value=0.0, tags=['upper_bound:43200.0'])
-    assert_metric('.apiserver.storage.envelope_transformation_cache_misses', value=0.0, tags=[])
     assert_metric('.volume_scheduling_duration.sum', value=3.3576e-05, tags=['operation:assume'])
     assert_metric('.volume_scheduling_duration.count',
                   value=14.0, tags=['upper_bound:1000.0', 'operation:assume'])

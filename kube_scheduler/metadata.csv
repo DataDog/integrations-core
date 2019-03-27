@@ -1,10 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-kube_scheduler.apiserver.audit.events,count,,,,"Number of audit events generated and sent to the audit backend",0,kube_scheduler,apiserver.audit.events
-kube_scheduler.apiserver.audit.requests_rejected,count,,,,"Number of apiserver requests rejected due to an error in audit logging backend",-1,kube_scheduler,apiserver.audit.requests_rejected
-kube_scheduler.apiserver.client_certificate_expiration.count,gauge,,,,"Number of the remaining lifetime on the certificate used to authenticate a request",0,kube_scheduler,apiserver.client_certificate_expiration.count
-kube_scheduler.apiserver.client_certificate_expiration.sum,gauge,,,,"Sum of the remaining lifetime on the certificate used to authenticate a request",0,kube_scheduler,apiserver.client_certificate_expiration.sum
-kube_scheduler.apiserver.storage.data_key_generation_failures,gauge,,,,"Number of failed data encryption key(DEK) generation operations",-1,kube_scheduler,apiserver.storage.data_key_generation_failures
-kube_scheduler.apiserver.storage.envelope_transformation_cache_misses,gauge,,,,"Number of cache misses while accessing key decryption key(KEK)",-1,kube_scheduler,apiserver.storage.envelope_transformation_cache_misses
 kube_scheduler.binding_duration.count,gauge,,,,"Number of latency in seconds",0,kube_scheduler,binding_duration.count
 kube_scheduler.binding_duration.sum,gauge,,,,"Total binding latency in seconds",0,kube_scheduler,binding_duration.sum
 kube_scheduler.cache.lookups,count,,,,"Number of equivalence cache lookups, by whether or not a cache entry was found",0,kube_scheduler,cache.lookups

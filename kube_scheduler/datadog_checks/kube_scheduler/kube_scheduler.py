@@ -11,16 +11,6 @@ from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 
 
 DEFAULT_COUNTERS = {
-    # Counter of audit events generated and sent to the audit backend.
-    'apiserver_audit_event_total': 'apiserver.audit.events',
-    # Counter of apiserver requests rejected due to an error in audit logging backend.
-    'apiserver_audit_requests_rejected_total': 'apiserver.audit.requests_rejected',
-    # Total number of failed data encryption key(DEK) generation operations.
-    'apiserver_storage_data_key_generation_failures_total': 'apiserver.storage.data_key_generation_failures',
-    # Total number of cache misses while accessing key decryption key(KEK).
-    'apiserver_storage_envelope_transformation_cache_misses_total': \
-    'apiserver.storage.envelope_transformation_cache_misses',
-
     # Number of HTTP requests, partitioned by status code, method, and host.
     'rest_client_requests_total': 'client.http.requests',
     # Total number of equivalence cache lookups, by whether or not a cache entry was found
@@ -33,11 +23,6 @@ DEFAULT_COUNTERS = {
 }
 
 DEFAULT_HISTOGRAMS = {
-    # Distribution of the remaining lifetime on the certificate used to authenticate a request.
-    'apiserver_client_certificate_expiration_seconds': 'apiserver.client_certificate_expiration',
-    # Total number of failed data encryption key(DEK) generation operations.
-    # 'apiserver_storage_data_key_generation_latencies_microseconds': '',
-
     # Request latency in seconds. Broken down by verb and URL.
     'rest_client_request_latency_seconds': 'client.http.requests_duration',
     # Volume scheduling stage latency
@@ -101,6 +86,10 @@ IGNORE_METRICS = [
     'http_request_size_bytes',
     'http_response_size_bytes',
     'http_request_duration_microseconds',
+    'apiserver_audit_event_total',
+    'apiserver_audit_requests_rejected_total',
+    'apiserver_storage_data_key_generation_failures_total',
+    'apiserver_storage_envelope_transformation_cache_misses_total',
 ]
 
 
