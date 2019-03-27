@@ -33,7 +33,7 @@ class SslConfig:
         # TLS version. If possible to protocols, tag by protocol.
         # Tags would be added to all the metrics and service checks.
         self.tags = [
-            "name:{}".format(self.name)
+            "name:{}".format(self.name), "ssl_version:unknown"
         ] + self.custom_tags
         if not self.local_cert_path:
             self.tags = self.tags + ["host:{}".format(self.host),

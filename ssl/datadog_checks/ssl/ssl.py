@@ -8,6 +8,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.errors import CheckException
 from .config import SslConfig
 from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+
 from datetime import datetime
 import ssl
 import socket
@@ -19,7 +21,6 @@ DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
 
 
 class SslCheck(AgentCheck):
-    # tcp SOURCE_TYPE_NAME = 'system'
     SERVICE_CHECK_CAN_CONNECT = 'ssl_cert.can_connect'
     SERVICE_CHECK_EXPIRATION = 'ssl_cert.expiration'
     SERVICE_CHECK_IS_VALID = 'ssl_cert.is_valid'
@@ -27,6 +28,12 @@ class SslCheck(AgentCheck):
     def check(self, instance):
         config = SslConfig(instance)
         config.check_properly_configured()
+
+        if config.cert_remote:
+            self.check_remote_cert(config.host, config.port)
+        else:
+            self.check_local_cert(config.local_cert_path)
+
         url = config.host_and_port
         ssl_version = "unknown"
         tags = ['url:%s' % url]
@@ -82,11 +89,11 @@ class SslCheck(AgentCheck):
         ssock = context.wrap_socket(sock, server_hostname=hostname)
         print(ssock.version())
 
-    def check_remote_cert(self, hostname, port):
+    def check_remote_cert(self, host, port):
         try:
             context = ssl.create_default_context()
-            sock = socket.create_connection((hostname, port))
-            ssock = context.wrap_socket(sock, server_hostname=hostname)
+            sock = socket.create_connection((host, port))
+            ssock = context.wrap_socket(sock, server_hostname=host)
             return x509.load_der_x509_certificate(ssock.getpeercert(binary_form=True), default_backend())
         except Exception as e:
             self.can_connect('critical', e)
