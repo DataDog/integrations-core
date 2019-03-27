@@ -19,9 +19,9 @@ These requirements are used during the code review process as a checklist. This 
 
 ## Prerequisites
 
-Python 2.7 or 3.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][1] in order to isolate the development environment. See the [Python Environment documentation][2] for more information.
+Python 2.7 or 3.7 needs to be available on your system. Datadog recommends creating and activating a [Python virtual environment][1] to isolate the development environment. For more information, see the [Python Environment documentation][2].
 
-You'll also need `docker` in order to run the full test suite.
+You'll also need `docker` to run the full test suite.
 
 ## Setup
 
@@ -52,7 +52,7 @@ If you intend to work primarily on `integrations-extras`, set it as the default 
 ddev config set repo extras
 ```
 
-**Note**: If you do not do this step, you'll need to use `-e` for every invokation to ensure the context is `integrations-extras`:
+**Note**: If you do not do this step, you'll need to use `-e` for every invocation to ensure the context is `integrations-extras`:
 
 ```
 ddev -e COMMAND [OPTIONS]
@@ -138,11 +138,11 @@ class AwesomeCheck(AgentCheck):
                 self.service_check('awesome.search', self.WARNING)
 ```
 
-To learn more about the base Python class, see the [Python API documentation][5]. Moving along, let's dive into tests, which are an important part of any project (and _required_ for inclusion in `integrations-extras`).
+To learn more about the base Python class, see the [Python API documentation][5].
 
 ### Writing tests
 
-There are two basic types of tests: unit tests for specific functionality, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][6] and [tox][7] are used to run the tests.
+There are two basic types of tests: unit tests for specific functionality, and integration tests that execute the `check` method and verify proper metrics collection. Tests are _required_ if you want your integration to be included in `integrations-extras`). Note that [pytest][6] and [tox][7] are used to run the tests.
 
 For more information, see the [Datadog Checks Dev documentation][8].
 
