@@ -8,12 +8,12 @@ instances:
   - server: http://localhost:5984
 
   ## @param username - string - optional
-  ## The username to use if `server`is behind basic auth.
+  ## The username to use if `server` is behind basic auth.
   #
   #  user: <USERNAME>
 
   ## @param password - string - optional
-  ## The password to use if `server`is behind basic auth.
+  ## The password to use if `server` is behind basic auth.
   #
   #  password: <PASSWORD>
 
