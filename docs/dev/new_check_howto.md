@@ -146,7 +146,7 @@ There are two basic types of tests: unit tests for specific functionality, and i
 
 For more information, see the [Datadog Checks Dev documentation][8].
 
-The first part of the `check` method we wrote retrieves and verifies two pieces of information we need from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
+The first part of the `check` method retrieves and verifies two pieces of information we need from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
 
 ```python
 import pytest
