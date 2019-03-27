@@ -173,11 +173,11 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 [3]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
 [4]: https://nginx.org/en/docs/http/ngx_http_status_module.html
 [5]: https://www.nginx.com/blog/nginx-plus-r13-released
-[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [7]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [9]: https://docs.datadoghq.com/logs
-[10]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
 [12]: https://nginx.org/en/docs/http/ngx_http_status_module.html#data
 [13]: https://docs.datadoghq.com/help/

@@ -132,8 +132,8 @@ for more details about how to test and develop Agent based integrations.
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/openldap/datadog_checks/openldap/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
 [6]: https://docs.datadoghq.com/help
 [7]: https://docs.datadoghq.com/developers

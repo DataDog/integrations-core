@@ -68,12 +68,11 @@ You can also contact our Support Team via email at [support@datadoghq.com][10].
 
 Reach out to our team and other Datadog users on [Slack][11].
 
-
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/squid/datadog_checks/squid/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/squid/metadata.csv
 [7]: https://docs.datadoghq.com
 [8]: https://datadog.zendesk.com/agent

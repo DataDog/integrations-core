@@ -48,6 +48,15 @@ class IIS(PDHBaseCheck):
     def __init__(self, name, init_config, agentConfig, instances):
         PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
 
+    def get_iishost(self, instance):
+        inst_host = instance.get("host")
+        if inst_host in [".", "localhost", "127.0.0.1", None]:
+            # Use agent's hostname if connecting to local machine.
+            iis_host = self.hostname
+        else:
+            iis_host = inst_host
+        return "iis_host:{}".format(self.normalize(iis_host))
+
     def check(self, instance):
         sites = instance.get('sites')
         if sites is None:
@@ -73,6 +82,7 @@ class IIS(PDHBaseCheck):
                     tags = []
                     if key in self._tags:
                         tags = list(self._tags[key])
+                    tags.append(self.get_iishost(instance))
 
                     try:
                         if not counter.is_single_instance():
@@ -114,5 +124,6 @@ class IIS(PDHBaseCheck):
             tags = []
             if key in self._tags:
                 tags = list(self._tags[key])
+            tags.append(self.get_iishost(instance))
             tags.append("site:{}".format(self.normalize(site)))
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)

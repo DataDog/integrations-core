@@ -160,11 +160,11 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/consul/images/consul-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/consul/datadog_checks/consul/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/logs
-[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv
 [9]: https://www.consul.io/docs/agent/telemetry.html
 [10]: https://www.consul.io/docs/internals/coordinates.html

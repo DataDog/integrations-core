@@ -2,6 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
+import re
+
+from six import iteritems
+
 from datadog_checks.config import is_affirmative
 
 # compatability layer for agents under 6.6.0
@@ -9,6 +14,8 @@ try:
     from datadog_checks.errors import ConfigurationError
 except ImportError:
     ConfigurationError = Exception
+
+log = logging.getLogger(__file__)
 
 
 class IBMMQConfig:
@@ -41,6 +48,8 @@ class IBMMQConfig:
         self.queues = instance.get('queues', [])
         self.queue_patterns = instance.get('queue_patterns', [])
 
+        self.channels = instance.get('channels', [])
+
         self.custom_tags = instance.get('tags', [])
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
@@ -55,6 +64,9 @@ class IBMMQConfig:
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
+        self._queue_tag_re = instance.get('queue_tag_re', {})
+        self.queue_tag_re = self._compile_tag_re()
+
     def check_properly_configured(self):
         if not self.channel or not self.queue_manager_name or not self.host or not self.port:
             msg = "channel, queue_manager, host and port are all required configurations"
@@ -64,6 +76,21 @@ class IBMMQConfig:
         # add queues without duplication
         self.queues = list(set(self.queues + new_queues))
 
+    def _compile_tag_re(self):
+        """
+        Compile regex strings from queue_tag_re option and return list of compiled regex/tag pairs
+        """
+        queue_tag_list = []
+        for regex_str, tags in iteritems(self._queue_tag_re):
+            try:
+                queue_tag_list.append([
+                    re.compile(regex_str),
+                    [t.strip() for t in tags.split(',')]
+                ])
+            except TypeError:
+                log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
+        return queue_tag_list
+
     @property
     def tags(self):
         return [
@@ -71,4 +98,12 @@ class IBMMQConfig:
             "host:{}".format(self.host),
             "port:{}".format(self.port),
             "channel:{}".format(self.channel)
+        ] + self.custom_tags
+
+    @property
+    def tags_no_channel(self):
+        return [
+            "queue_manager:{}".format(self.queue_manager_name),
+            "host:{}".format(self.host),
+            "port:{}".format(self.port),
         ] + self.custom_tags

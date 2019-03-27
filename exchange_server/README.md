@@ -13,7 +13,7 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
 
 ### Configuration
 
-1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Exchange Server performance data.  
+1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Exchange Server performance data.
   ```yaml
   init_config:
 
@@ -32,7 +32,7 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
     #   <metric name> is the name you want to show up in Datadog
     #   <metric type> is from the standard choices for all agent checks, such as gauge,
     #       rate, histogram or counter
-    #   
+    #
     #   additional_metrics:
     #     - - MSExchange Content Filter Agent
     #       - none
@@ -59,7 +59,7 @@ The Exchange server check does not include any service checks.
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv

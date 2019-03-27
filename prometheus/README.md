@@ -58,7 +58,7 @@ Need help? Contact [Datadog support][3].
 * [Writing a custom Prometheus Check][6]
 
 [1]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
-[2]: https://docs.datadoghq.com/agent/faq/agent-status-and-information
+[2]:https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [3]: https://docs.datadoghq.com/help
 [4]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
 [5]: https://docs.datadoghq.com/agent/prometheus

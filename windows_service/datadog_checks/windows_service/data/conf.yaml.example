@@ -6,8 +6,8 @@ instances:
   ##
   ## If any service is set to `ALL`, all services registered with the SCM will be monitored.
   ##
-  ## The services are treated as regular expressions to allow for advanced matching. So if
-  ## you say `Event.*`, the check will monitor any service starting with the word `Event`.
+  ## This matches all services starting with service, as if service.* is configured.
+  ## For an exact match, use ^service$
   #
   - services:
       - <SERVICE_NAME_1>

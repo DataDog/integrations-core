@@ -34,7 +34,7 @@ instances:
   #  acs_url: https://<SERVER>:<PORT>
 
   ## @param group - string - optional
-  ## Enter a Specific Aplication group name to get only it's related metrics.
+  ## Enter a Specific Application group name to get only it's related metrics.
   #
   #  group: product
 
@@ -48,7 +48,7 @@ instances:
   #    - <KEY_2>:<VALUE_2>
 
   ## @param label_tags - list of strings - optional
-  ## Dynamic tags for metrics. The tag value is taken from the label in marathon
+  ## Dynamic tags for metrics. The tag value is taken from the label in marathon.
   #
   #  label_tags:
   #    - <MARATHON_LABEL_NAME>

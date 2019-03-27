@@ -69,7 +69,7 @@ When it prompts for a password, enter the one used in the first command.
 
 For PostgreSQL versions 9.6 and below, run the following and create a `SECURITY DEFINER` to read from `pg_stat_activity`.
 ```
-CREATE FUNCTION pg_stat_activity() RETURNS SETOF pg_catalog.pg_stat_activity AS 
+CREATE FUNCTION pg_stat_activity() RETURNS SETOF pg_catalog.pg_stat_activity AS
 $$ SELECT * from pg_catalog.pg_stat_activity; $$
 LANGUAGE sql VOLATILE SECURITY DEFINER;
 
@@ -141,7 +141,7 @@ The PostgreSQL check does not include any events.
 
 ### Service Checks
 
-**postgres.can_connect**  
+**postgres.can_connect**
 Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance. Returns `OK` otherwise.
 
 ## Further Reading
@@ -158,11 +158,11 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/logs
-[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [9]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
 [10]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line

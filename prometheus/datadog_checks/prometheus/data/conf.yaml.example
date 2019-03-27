@@ -36,7 +36,6 @@ instances:
   #
   #  label_to_hostname: <LABEL>
 
-
   ## @param label_joins - custom - optional
   ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping
   #
@@ -45,7 +44,6 @@ instances:
   #      label_to_match: <MATCHED_LABEL>
   #      labels_to_get:
   #        - <LABEL_TO_GET>
-
 
   ## @param labels_mapper - list of key:value element - optional
   ## The label mapper allows you to rename some labels

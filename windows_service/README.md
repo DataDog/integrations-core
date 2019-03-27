@@ -22,8 +22,8 @@ instances:
   ##
   ## If any service is set to `ALL`, all services registered with the SCM will be monitored.
   ##
-  ## The services are treated as regular expressions to allow for advanced matching. So if
-  ## you say `Event.*`, the check will monitor any service starting with the word `Event`.
+  ## This matches all services starting with service, as if service.* is configured.
+  ## For an exact match, use ^service$
   #
   - services:
       - <SERVICE_NAME_1>
@@ -61,16 +61,16 @@ The Windows Service check does not include any events.
 
 The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
 
-|Windows status|windows_service.state|
-|---|---|
-|Stopped|CRITICAL|
-|Start Pending|WARNING|
-|Stop Pending|WARNING|
-|Running|OK|
-|Continue Pending|WARNING|
-|Pause Pending|WARNING|
-|Paused|WARNING|
-|Unknown|UNKNOWN|
+| Windows status   | windows_service.state |
+| ---              | ---                   |
+| Stopped          | CRITICAL              |
+| Start Pending    | WARNING               |
+| Stop Pending     | WARNING               |
+| Running          | OK                    |
+| Continue Pending | WARNING               |
+| Pause Pending    | WARNING               |
+| Paused           | WARNING               |
+| Unknown          | UNKNOWN               |
 
 ## Troubleshooting
 Need help? Contact [Datadog support][6].
@@ -83,10 +83,10 @@ Need help? Contact [Datadog support][6].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/windows_service/datadog_checks/windows_service/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://docs.datadoghq.com/help
 [7]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
 [8]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics

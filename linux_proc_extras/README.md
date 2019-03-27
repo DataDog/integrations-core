@@ -34,7 +34,7 @@ The Linux proc extras check does not include any service checks.
 Need help? Contact [Datadog support][5].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/datadog_checks/linux_proc_extras/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://docs.datadoghq.com/help

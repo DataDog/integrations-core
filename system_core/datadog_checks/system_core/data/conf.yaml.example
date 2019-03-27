@@ -1,9 +1,13 @@
 init_config:
 
 instances:
-  # No configuration is needed for this check. However, you can add tags.
-  # A single instance needs to be defined with any value.
-  - foo: bar
-  # tags:
-  #  - tag1:value1
-  #  - tag2:value2
+
+  -
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
