@@ -7,7 +7,7 @@ from __future__ import absolute_import
 from datadog_checks.base import AgentCheck
 from datadog_checks.errors import CheckException
 from .config import SslConfig
-# from cryptography import x509
+from cryptography import x509
 from datetime import datetime
 import ssl
 import socket
@@ -82,21 +82,21 @@ class SslCheck(AgentCheck):
         ssock = context.wrap_socket(sock, server_hostname=hostname)
         print(ssock.version())
 
-    # def check_remote_cert(self, hostname, port):
-    #     try:
-    #         context = ssl.create_default_context()
-    #         sock = socket.create_connection((hostname, port))
-    #         ssock = context.wrap_socket(sock, server_hostname=hostname)
-    #         return x509.load_der_x509_certificate(ssock.getpeercert(binary_form=True), default_backend())
-    #     except Exception as e:
-    #         self.can_connect('critical', e)
+    def check_remote_cert(self, hostname, port):
+        try:
+            context = ssl.create_default_context()
+            sock = socket.create_connection((hostname, port))
+            ssock = context.wrap_socket(sock, server_hostname=hostname)
+            return x509.load_der_x509_certificate(ssock.getpeercert(binary_form=True), default_backend())
+        except Exception as e:
+            self.can_connect('critical', e)
 
-    # def check_local_cert(self, local_cert_path):
-    #     try:
-    #         local_cert_file = open(local_cert_path, 'rb')
-    #         local_cert_data = x509.load_pem_x509_certificate(local_cert_file.read(), default_backend())
-    #         self.can_connect('up')
-    #         return local_cert_data
-    #     except Exception as e:
-    #         self.can_connect('critical', e)
-    #         # self.service_check('my_check.all_good', self.CRITICAL, e)
+    def check_local_cert(self, local_cert_path):
+        try:
+            local_cert_file = open(local_cert_path, 'rb')
+            local_cert_data = x509.load_pem_x509_certificate(local_cert_file.read(), default_backend())
+            self.can_connect('up')
+            return local_cert_data
+        except Exception as e:
+            self.can_connect('critical', e)
+            # self.service_check('my_check.all_good', self.CRITICAL, e)
