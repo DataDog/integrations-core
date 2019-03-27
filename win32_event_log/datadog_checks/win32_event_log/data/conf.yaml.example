@@ -16,7 +16,7 @@ instances:
 
   -
 
-  ## @param host - string - required - default: localhost
+  ## @param host - string - optional - default: localhost
   ## By default, the local machine's event logs are captured. To capture a remote
   ## machine's event logs, specify the machine name (DCOM has to be enabled on
   ## the remote machine).
@@ -45,7 +45,7 @@ instances:
   ## or application-specific LogFile).
   #
   #  log_file:
-  #    - Security
+  #    - <LOG_FILE>
 
   ## @param source_name - list of strings - optional
   ## The `source_name` filter instructs the check to only capture events
