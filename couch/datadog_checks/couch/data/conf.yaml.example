@@ -29,18 +29,19 @@ instances:
     # max_dbs_per_check: 20       # Optional. How many databases to scan. Default to 50.
 
 ## Log Section (Available for Agent >=6.0)
-
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
 #logs:
-
-    # - type : (mandatory) type of log input source (tcp / udp / file)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
-    #   tags: (optional) add tags to each logs collected
-
-    # - type: file
-    #   path: /var/log/couchdb/couch.log
-    #   source: couchdb
-    #   sourcecategory: database
-    #   service: couch
+#  - type: file
+#    path: /var/log/couchdb/couch.log
+#    source: couchdb
+#    sourcecategory: database
+#    service: couch

@@ -36,7 +36,6 @@ init_config:
 #
 #  refresh_metrics_metadata_interval: 600
 
-
 ## Define your list of instances here each item is a
 ## vCenter instance you want to connect to and fetch metrics from
 

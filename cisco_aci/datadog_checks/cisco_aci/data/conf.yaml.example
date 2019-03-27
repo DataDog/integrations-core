@@ -40,8 +40,6 @@ instances:
       # If there is a password to the key, add it here
       # cert_key_password: datadog
 
-
-
       timeout: 15
       ssl_verify: True
       tags: []

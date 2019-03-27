@@ -32,7 +32,7 @@ instances:
   #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
   ## @param name - string - optional
-  ## Set your instance name
+  ## Set your instance name.
   #
   #   name: solr_instance
 
@@ -238,7 +238,6 @@ init_config:
         avgTimePerRequest:
           alias: solr.search_handler.avg_time_per_req
           metric_type: gauge
-
 
   ## Solr version < 7 MBeans
   - include:

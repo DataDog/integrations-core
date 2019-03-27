@@ -37,7 +37,7 @@ instances:
   #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
   ## @param name - string - optional
-  ## XXXXXXXXXXX
+  ## Set your instance name.
   #
   #   name: activemq_instance
 

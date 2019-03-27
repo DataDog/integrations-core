@@ -92,7 +92,6 @@ instances:
   #
   #  client_key: /opt/client.key
 
-
   ## @param http_response_status_code - integer - optional - default: (1|2|3)\d\d
   ## The http_response_status_code parameter will instruct the check
   ## to look for a particular HTTP response status code or a Regex identifying
@@ -227,7 +226,6 @@ instances:
   ## response time of URLs that return an endless stream of data.
   #
   #  stream: false
-
 
   ## @param include_default_headers - boolean - optional - default: true
   ## The (optional) include_default_headers parameter instructs the check to include the default headers.
