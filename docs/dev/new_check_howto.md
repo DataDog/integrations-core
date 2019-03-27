@@ -142,7 +142,7 @@ To learn more about the base Python class, see the [Python API documentation][5]
 
 ### Writing tests
 
-There are two basic types of tests: unit tests for specific functionality, and integration tests that execute the `check` method and verify proper metrics collection. Tests are _required_ if you want your integration to be included in `integrations-extras`). Note that [pytest][6] and [tox][7] are used to run the tests.
+There are two basic types of tests: unit tests for specific functionality, and integration tests that execute the `check` method and verify proper metrics collection. Tests are _required_ if you want your integration to be included in `integrations-extras`. Note that [pytest][6] and [tox][7] are used to run the tests.
 
 For more information, see the [Datadog Checks Dev documentation][8].
 
