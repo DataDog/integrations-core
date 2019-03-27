@@ -85,8 +85,7 @@ init_config:
 instances:
 
   ## @param ip_address - string - required
-  ## For SNMP v1 & v2 enter localhost
-  ## For SNMP v3 enter the IP address of the device to monitor.
+  ## The IP address of the device to monitor.
   #
   - ip_address: localhost
 
