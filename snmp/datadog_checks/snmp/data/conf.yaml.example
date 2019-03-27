@@ -1,6 +1,6 @@
-## WARNING: This configuration files is for SNMP v1, v2 and v3 
+## WARNING: This configuration files is for SNMP v1, v2 and v3
 ## Check carefully all variables depending of your SNMP version.
-## To learn more about SNMP v3 configuration check: 
+## To learn more about SNMP v3 configuration check:
 ## http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
 
 init_config:
@@ -11,7 +11,8 @@ init_config:
 #  mibs_folder: /path/to/your/mibs/folder
 
 ## @param ignore_nonincreasing_oid - boolean - optional - default: false
-## 
+## Set to true to ignore non increasing oid.
+## See http://snmplabs.com/pysnmp/faq/oids-not-increasing.html?highlight=ignorenonincreasingoid
 #  ignore_nonincreasing_oid: false
 
 ## @param global_metrics - list of elements - optional
@@ -82,10 +83,9 @@ init_config:
 #        - TCP
 
 instances:
-  
+
   ## @param ip_address - string - required
-  ## For SNMP v1 & v2 enter localhost
-  ## For SNMP v3 enter 192.168.34.10 
+  ## The IP address of the device to monitor.
   #
   - ip_address: localhost
 
@@ -93,12 +93,12 @@ instances:
   ## Default SNMP port.
   #
     port: 161
-  
+
   ## @param community_string - string - optional
   ## Only useful for SNMP v1 & v2.
   #
   #  community_string: public
-  
+
   ## @param snmp_version - integer - optional - default: 2
   ## If you are using SNMP v1 set snmp_version to 1 (required)
   ## If you are using SNMP v3 set snmp_version to 3 (required)
@@ -111,18 +111,18 @@ instances:
   #  timeout: 1
 
   ## @param retries - integer - optional - default: 5
-  ## Amount of retries before failure.  
-  #  
+  ## Amount of retries before failure.
+  #
   #  retries: 5
 
   ## @param enforce_mib_constraints - boolean - optional - default: true
   ## If set to false we will not check the values returned meet the MIB constraints.
-  #  
+  #
   #  enforce_mib_constraints: true
 
-  ## @param tags  - list of key:value element - optional 
+  ## @param tags  - list of key:value element - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## 
+  ##
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
@@ -141,7 +141,7 @@ instances:
 
   ## @param authProtocol - string -required
   ## Authentication type to use when connecting to your SNMP devices.
-  # 
+  #
   #  authProtocol: <AUTHENTICATION_PROTOCOL>
 
   ## @param authKey - string - required
@@ -162,7 +162,7 @@ instances:
   ## @param context_engine_id - string - optional
   ## ID of your context engine; typically unneeded.
   ## (optional SNMP v3-only parameter)
-  #  
+  #
   #  context_engine_id: <CONTEXT_ENGINE_ID>
 
   ## @param context_name - string - optional
@@ -183,12 +183,12 @@ instances:
   ## i.e:
   ## - MIB: UDP-MIB
   ##   symbol: udpInDatagrams
-  ## 
+  ##
   ## If it's just a scalar, you can specify by OID and name it:
   ##
   ## - OID: 1.3.6.1.2.1.6.5
   ##   name: tcpPassiveOpens
-  ## 
+  ##
   ## Optional parameters:
   ##
   ## Use the 'metric_tags' parameter to specify a specific tag for a collected metric:
@@ -198,10 +198,10 @@ instances:
   ##   metric_tags:
   ##     - TCP
   ##
-  ## User the 'forced_type' parameter to enforce a data type for OIDs if the 
+  ## User the 'forced_type' parameter to enforce a data type for OIDs if the
   ## auto-detection for OID data types from the remote agent's response is failing.
   ## Example: When a F5 Networks load balancer is queried for this OID, it returns
-  ## it as a Counter64 when it should be a gauge. So, this configuration forces 
+  ## it as a Counter64 when it should be a gauge. So, this configuration forces
   ## the data type to gauge:
   ##
   ## - OID: 1.3.6.1.4.1.3375.2.1.1.2.1.8.0
@@ -214,8 +214,8 @@ instances:
   ##  - which column to read the tag value from with the 'column' parameter.
   ##  - which index you want to read the tag value from with the 'index' parameter.
   ##
-  ## Example: 
-  ##  
+  ## Example:
+  ##
   ##  - MIB: IF-MIB
   ##    table: ifTable
   ##    symbols:
@@ -223,14 +223,14 @@ instances:
   ##      - ifOutOctets
   ##    metric_tags:
   ##      - tag: interface
-  ##        column: ifDescr  
+  ##        column: ifDescr
   ##  - MIB: IP-MIB
   ##    table: ipSystemStatsTable
   ##    symbols:
   ##      - ipSystemStatsInReceives
   ##         metric_tags:
   ##           - tag: ipversion
-  ##             index: 1     
+  ##             index: 1
   #
     metrics:
       - MIB: UDP-MIB
