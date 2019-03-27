@@ -1,125 +1,126 @@
 init_config:
-    # The (optional) `tag_event_id` setting will add an event id tag to each
-    # event sent from this check. Defaults to false.
-    # tag_event_id: false
 
-    # Set priority level in event stream for all events created by integration
-    # Options are 'low' or 'normal', defaults to 'normal'
-    # default_event_priority: normal
+  ## @param tag_event_id - boolean - optional - default: false
+  ## The `tag_event_id` setting adds an event id tag to each
+  ## event sent from this check.
+  #
+  #  tag_event_id: false
+
+  ## @param default_event_priority - string - optional - default: normal
+  ## Set priority level in event stream for all events created by integration
+  ## Options available are 'low' or 'normal'.
+  #
+  #  default_event_priority: normal
 
 instances:
-  # Each Event Log instance lets you define the type of events you want to
-  # match and how to tag those events.
 
   -
-    # By default, the local machine's event logs are captured. To capture a remote
-    # machine's event logs, specify the machine name (DCOM has to be enabled on
-    # the remote machine). If authentication is needed, specify a `username` and a
-    # `password`.
-    # host: remote_machine_name
-    # username: user
-    # password: pass
 
-    # Override default event priority by setting it per instance
-    # event_priority: low
+  ## @param host - string - optional - default: localhost
+  ## By default, the local machine's event logs are captured. To capture a remote
+  ## machine's event logs, specify the machine name (DCOM has to be enabled on
+  ## the remote machine).
+  #
+  #  host: <REMOTE_HOSNAME>
 
-    # The (optional) `log_file` filter will instruct the check to only capture events
-    # that belong to one of the specified LogFiles (Application, System, Setup, Security,
-    # or application-specific LogFile).
-    # log_file:
-    #   - Security
+  ## @param password - string - optional
+  ## If authentication is needed, specify a `username` here.
+  #
+  #  username: <USERNAME>
 
-    # The (optional) `source_name` filter will instruct the check to only capture events
-    # that come from one of the specified SourceNames.
-    # source_name:
-    #   - Microsoft-Windows-Security-Auditing
+  ## @param password - string - optional
+  ## If authentication is needed, specify a `password` here.
+  #
+  #  password: <PASSWORD>
 
-    # The (optional) `type` filter will instruct the check to only capture events
-    # that have one of the specified Types.
-    # Standard values are: Critical, Error, Warning, Information, Audit Success, Audit Failure.
-    # type:
-    #   - Audit Failure
+  ## @param event_priority - string - optional - default: normal
+  ## Override default event priority by setting it per instance
+  ## Available values are: `normal` and `low`
+  #
+  #  event_priority: normal
 
-    # The (optional) `event_id` filter will instruct the check to only capture events
-    # that have one of the specified EventCodes.
-    # The event ID can be found through http://www.eventid.net/ and viewed in the
-    # Windows Event Viewer.
-    # event_id:
-    #   - 4776
-    #   - 4672
+  ## @param log_file - list of strings - optional
+  ## The `log_file` filter instructs the check to only capture events
+  ## that belong to one of the specified LogFiles (Application, System, Setup, Security,
+  ## or application-specific LogFile).
+  #
+  #  log_file:
+  #    - <LOG_FILE>
 
-    # The (optional) `message_filters` filter will instruct the check to only capture
-    # events which Message field matches all of the specified filters.
-    # Use % as a wildcard. See http://msdn.microsoft.com/en-us/library/aa392263(v=vs.85).aspx
-    # for more on the format for LIKE queries.
-    # NOTE: Any filter that starts with "-" will be a NOT query, e.g.: '-%success%'
-    # will search for events without 'success' in the message.
-    # message_filters:
-    #   - "-%success%"
-    #   - "%SYSTEM%"
+  ## @param source_name - list of strings - optional
+  ## The `source_name` filter instructs the check to only capture events
+  ## that come from one of the specified SourceNames.
+  #
+  #  source_name:
+  #    - <SOURCE_NAME>
 
-    # The (optional) `tags` parameter will instruct the check to tag the captured
-    # events with the specified tags.
-    # tags:
-    #   - security
+  ## @param type - list of strings - optional - default: information
+  ## The `type` filter instructs the check to only capture events
+  ## that have one of the specified Types.
+  ## Standard values are: Critical, Error, Warning, Information, Audit Success, Audit Failure.
+  #
+  #  type:
+  #    - information
 
-    # The (optional) `event_format` parameter will instruct the check to generate
-    # Datadog's event bodies with the specified list of event properties.
-    # If unspecified, the EventLog's `Message` or `InsertionStrings` are used by default.
-    # event_format:
-    #   - Logfile
-    #   - SourceName
-    #   - EventCode
-    #   - Message
-    #   - InsertionStrings
-    #   - TimeGenerated
-    #   - Type
+  ## @param event_id - list of strings - optional
+  ## The `event_id` filter instructs the check to only capture events
+  ## that have one of the specified EventCodes.
+  ## The event ID can be found through http://www.eventid.net/ and viewed in the
+  ## Windows Event Viewer.
+  #
+  #  event_id:
+  #    - <EVENT_ID>
 
-  # Here are a couple basic examples:
+  ## @param message_filters - list of strings - optional
+  ## The `message_filters` filter instructs the check to only capture
+  ## events which Message field matches all of the specified filters.
+  ## Use % as a wildcard. See http://msdn.microsoft.com/en-us/library/aa392263(v=vs.85).aspx
+  ## for more on the format for LIKE queries.
+  ##
+  ## NOTE: Any filter that starts with "-" is NOT a query, e.g.: '-%success%'
+  ## searches for events without 'success' in the message.
+  #
+  #  message_filters:
+  #    - <MESSAGE_FILTER>
 
-  # The following instance will capture errors and warnings from SQL Server which
-  # puts all events under the MSSQLSERVER source and tag them with #sqlserver.
+  ## @param event_format - list of strings - optional - default: Message
+  ## The `event_format` parameter instructs the check to generate
+  ## Datadog's event bodies with the specified list of event properties.
+  ## If unspecified, the EventLog's `Message` or `InsertionStrings` are used by default.
+  ## Available values are: Logfile, SourceName, EventCode, Message, InsertionStrings, TimeGenerated, Type
+  #
+  #  event_format:
+  #    - Message
 
-  # - log_file:
-  #     - Application
-  #   source_name:
-  #     - MSSQLSERVER
-  #   type:
-  #     - Warning
-  #     - Error
-  #   message_filters:
-  #     - "%error%"
-  #   tags:
-  #     - sqlserver
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
-  # This instance will capture all system errors and tag them with #system.
-
-  # - log_file:
-  #     - System
-  #   type:
-  #     - Error
-  #   tags:
-  #     - system
-  
 ## Log Section (Available for Agent >=6.0)
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
+## service - mandatory - Name of the service owning the log
+## source  - mandatory - Attribute that defines which integration is sending the logs
+## sourcecategory - optional - Multiple value attribute. Can be used to refine the source attribtue
+## tags: - optional - Add tags to each logs collected
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+
 #logs:
+#  - type: windows_event
+#    channel_path: <CHANNEL_1>
+#    source: <CHANNEL_1>
+#    service: <SERVICE_NAME>
+#    sourcecategory: windowsevent
 
-    # - type : (mandatory) type of log input source (tcp / udp / file / windows_event)
-    #   port / path /channel: (mandatory) Set port if type is tcp or udp. Set path if type is file and channel if windows_event
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
-    #   tags: (optional) add tags to each logs collected
-  
-    # - type: windows_event
-    #   channel_path: <CHANNEL_1>
-    #   source: <CHANNEL_1>
-    #   service: myservice
-    #   sourcecategory: windowsevent
-    
-    # - type: windows_event
-    #   channel_path: <CHANNEL_2>
-    #   source: <CHANNEL_2>
-    #   service: myservice
-    #   sourcecategory: windowsevent
-
+#  - type: windows_event
+#    channel_path: <CHANNEL_2>
+#    source: <CHANNEL_2>
+#    service: <SERVICE_NAME>
+#    sourcecategory: windowsevent
