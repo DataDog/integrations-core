@@ -82,6 +82,6 @@ instances:
 #
 #logs:
 #  - type: file
-#   path: /var/log/consul_server.log
-#   source: consul
-#   service: <SERVICE_NAME>
+#    path: /var/log/consul_server.log
+#    source: consul
+#    service: <SERVICE_NAME>
