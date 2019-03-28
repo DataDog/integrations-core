@@ -120,19 +120,15 @@ class AwesomeCheck(AgentCheck):
         try:
             response = requests.get(url)
             response.raise_for_status()
-
         # Something went horribly wrong
         except Exception as e:
             # Ideally we'd use a more specific message...
             self.service_check('awesome.search', self.CRITICAL, message=str(e))
-
         # Page is accessible
         else:
-
             # search_string is present
             if search_string in response.text:
                 self.service_check('awesome.search', self.OK)
-
             # search_string was not found
             else:
                 self.service_check('awesome.search', self.WARNING)
@@ -185,7 +181,7 @@ The scaffolding has already been set up to run all tests located in `awesome/tes
 ddev test awesome
 ```
 
-This test doesn't check our collection _logic_ though, so let's add an integration test. Use `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
+This test doesn't check our collection _logic_ though, so let's add an integration test. We use `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
 
 ```yaml
 version: '3'
