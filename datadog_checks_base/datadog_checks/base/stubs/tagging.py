@@ -4,20 +4,28 @@
 
 
 class TaggerStub(object):
+    """
+    Used for unit testing checks, this stub makes possible to execute
+    a check without a running Agent.
+    """
     LOW, ORCHESTRATOR, HIGH = range(3)
 
     def __init__(self):
         self.reset()
 
     def reset(self):
+        # Used in unit checks: allows to reset the state between tests
         self._store = {}
         self._calls = []
         self._default_tags = []
 
     def set_default_tags(self, default):
+        # Used in unit tests: change the tags returned when
+        # an entity is not found (default is [])
         self._default_tags = default
 
     def set_tags(self, tags):
+        # Used in unit tests: pass a dict of entity->tags mapping
         self._store = tags
 
     def assert_called(self, entity, cardinality):
