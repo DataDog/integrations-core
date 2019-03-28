@@ -17,7 +17,7 @@
   "public_title": "Datadog-IBM WAS Integration",
   "categories": [
     "web",
-    "os and system",
+    "os & system",
     "log collection"
   ],
   "type": "check",
