@@ -3,7 +3,7 @@ kubernetes.containers.last_state.terminated,gauge,,,,The number of containers th
 kubernetes.pods.running,gauge,,,,The number of running pods,1,kubelet,k8s.pods.running
 kubernetes.pods.expired,gauge,,,,The number of expired pods the check ignored,-1,kubelet,k8s.pods.expired
 kubernetes.containers.running,gauge,,,,The number of running containers,1,kubelet,k8s.containers.running
-kubernetes.containers.restarts,gauge,,,,The number of times the container has been restarted,1,kubelet,k8s.containers.restarts
+kubernetes.containers.restarts,counter,,,,The number of times the container has been restarted,-1,kubelet,k8s.containers.restarts
 kubernetes.containers.state.terminated,gauge,,,,The number of currently terminated containers,0,kubelet,k8s.containers.state.terminated
 kubernetes.containers.state.waiting,gauge,,,,The number of currently waiting containers,0,kubelet,k8s.containers.state.waiting
 kubernetes.cpu.load.10s.avg,gauge,,,,Container cpu load average over the last 10 seconds,0,kubelet,k8s.cpu.load.10s

@@ -474,6 +474,7 @@ def test_report_container_state_metrics(monkeypatch, tagger):
                         mock.Mock(return_value=MockStreamResponse('pods_crashed.json')))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
+    monkeypatch.setattr(check, 'monotonic_count', mock.Mock())
 
     attrs = {'is_excluded.return_value': False}
     check.pod_list_utils = mock.Mock(**attrs)
@@ -483,7 +484,7 @@ def test_report_container_state_metrics(monkeypatch, tagger):
     instance_tags = ["one:1", "two:2"]
     check._report_container_state_metrics(pod_list, instance_tags)
 
-    calls = [
+    gauge_calls = [
         mock.call('kubernetes.containers.last_state.terminated', 1, [
             'kube_container_name:fluentd-gcp',
             'kube_deployment:fluentd-gcp-v2.0.10'
@@ -492,6 +493,8 @@ def test_report_container_state_metrics(monkeypatch, tagger):
             'kube_container_name:prometheus-to-sd-exporter',
             'kube_deployment:fluentd-gcp-v2.0.10'
         ] + instance_tags + ['reason:CrashLoopBackOff']),
+    ]
+    mcount_calls = [
         mock.call('kubernetes.containers.restarts', 1, [
             'kube_container_name:fluentd-gcp',
             'kube_deployment:fluentd-gcp-v2.0.10'
@@ -501,7 +504,11 @@ def test_report_container_state_metrics(monkeypatch, tagger):
             'kube_deployment:fluentd-gcp-v2.0.10'
         ] + instance_tags),
     ]
-    check.gauge.assert_has_calls(calls, any_order=True)
+
+    check.gauge.assert_has_calls(gauge_calls, any_order=True)
+    check.monotonic_count.assert_has_calls(mcount_calls, any_order=True)
+    tagger.assert_called("docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561",
+                         tagger.ORCHESTRATOR)
 
     container_state_gauges = [x[0][2] for x in check.gauge.call_args_list
                               if x[0][0].startswith('kubernetes.containers.state')]
