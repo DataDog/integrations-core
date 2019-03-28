@@ -67,7 +67,7 @@ One of the developer toolkit features is the `create` command, which creates the
 Let's try a dry-run using the `-n/--dry-run` flag, which won't write anything to disk.
 
 ```
-ddev create -n my_check
+ddev create -n awesome
 ```
 
 This will display the path where the files would have been written, as well as the structure itself. For now, just make sure that the path in the *first line* of output matches your Extras repository.
@@ -331,7 +331,7 @@ The `README.md` file provided by our scaffolding already has the correct format.
 The directory structure for images and logos:
 
 ```
-    my_check/
+    awesome/
     ├── images
     │   └── an_awesome_image.png
     └── logos
@@ -343,7 +343,7 @@ The directory structure for images and logos:
 The `images` folder contains all images that are used in the Integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
 
 ```markdown
-![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/my_check/images/snapshot.png)
+![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/awesome/images/snapshot.png)
 ```
 
 The `logos` folder must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
