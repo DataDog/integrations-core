@@ -237,7 +237,7 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /data/var/log/*.log
+#     path: /var/log/presto/*.log
 #     source: presto
 #     sourcecategory: database
 #     service: myapplication
