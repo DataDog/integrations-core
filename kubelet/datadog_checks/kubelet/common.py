@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from tagger import get_tags
+from datadog_checks.base.utils.tagging import tagger
 
 try:
     from containers import is_excluded
@@ -25,7 +25,7 @@ def tags_for_pod(pod_id, cardinality):
     Queries the tagger for a given pod uid
     :return: string array, empty if pod not found
     """
-    return get_tags('kubernetes_pod://%s' % pod_id, cardinality)
+    return tagger.tag('kubernetes_pod://%s' % pod_id, cardinality)
 
 
 def tags_for_docker(cid, cardinality):
@@ -33,7 +33,7 @@ def tags_for_docker(cid, cardinality):
     Queries the tagger for a given container id
     :return: string array, empty if container not found
     """
-    return get_tags('docker://%s' % cid, cardinality)
+    return tagger.tag('docker://%s' % cid, cardinality)
 
 
 def get_pod_by_uid(uid, podlist):
