@@ -42,6 +42,8 @@ NODE_SPEC = {
 }
 
 EXPECTED_METRICS_COMMON = [
+    'kubernetes.pods.running',
+    'kubernetes.containers.running',
     'kubernetes.containers.restarts',
     'kubernetes.cpu.capacity',
     'kubernetes.cpu.usage.total',
@@ -90,6 +92,46 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.volume.stats.inodes_used',
 ]
 
+COMMON_TAGS = {
+    "kubernetes_pod://2edfd4d9-10ce-11e8-bd5a-42010af00137": [
+        "pod_name:fluentd-gcp-v2.0.10-9q9t4"
+    ],
+    "kubernetes_pod://2fdfd4d9-10ce-11e8-bd5a-42010af00137": [
+        "pod_name:fluentd-gcp-v2.0.10-p13r3"
+    ],
+    'docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
+        'kube_container_name:fluentd-gcp',
+        'kube_deployment:fluentd-gcp-v2.0.10'
+    ],
+    "docker://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
+        'kube_container_name:prometheus-to-sd-exporter',
+        'kube_deployment:fluentd-gcp-v2.0.10'
+    ],
+    'docker://6941ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
+        'kube_container_name:fluentd-gcp',
+        'kube_deployment:fluentd-gcp-v2.0.10'
+    ],
+    "docker://690cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
+        'kube_container_name:prometheus-to-sd-exporter',
+        'kube_deployment:fluentd-gcp-v2.0.10'
+    ],
+    "docker://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
+        "pod_name:demo-app-success-c485bc67b-klj45"
+    ],
+    "kubernetes_pod://d2e71e36-10d0-11e8-bd5a-42010af00137": [
+        'pod_name:dd-agent-q6hpw'
+    ],
+    "kubernetes_pod://260c2b1d43b094af6d6b4ccba082c2db": [
+        'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
+    ],
+    "kubernetes_pod://24d6daa3-10d8-11e8-bd5a-42010af00137": [
+        'pod_name:demo-app-success-c485bc67b-klj45'
+    ],
+    "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": [
+        'pod_name:pi-kff76'
+    ]
+}
+
 
 class MockStreamResponse:
     """
@@ -118,6 +160,14 @@ def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
+
+
+@pytest.fixture
+def tagger():
+    from datadog_checks.base.stubs import tagger
+    tagger.reset()
+    tagger.set_tags(COMMON_TAGS)
+    return tagger
 
 
 def mock_kubelet_check(monkeypatch, instances):
@@ -182,15 +232,15 @@ def test_kubelet_default_options():
     assert isinstance(check.kubelet_scraper_config, dict)
 
 
-def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator):
-    _test_kubelet_check_prometheus(monkeypatch, aggregator, ["instance:tag"])
+def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator, tagger):
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, ["instance:tag"])
 
 
-def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator):
-    _test_kubelet_check_prometheus(monkeypatch, aggregator, None)
+def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator, tagger):
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, None)
 
 
-def _test_kubelet_check_prometheus(monkeypatch, aggregator, instance_tags):
+def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, instance_tags):
     instance = {}
     if instance_tags:
         instance["tags"] = instance_tags
@@ -221,12 +271,10 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, instance_tags):
     assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_prometheus_cpu_summed(monkeypatch, aggregator):
+def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger):
     check = mock_kubelet_check(monkeypatch, [{}])
     monkeypatch.setattr(check, 'rate', mock.Mock())
-
-    with mock.patch("datadog_checks.kubelet.prometheus.get_tags", side_effect=mocked_get_tags):
-        check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
     # Make sure we submit the summed rates correctly for containers:
     # - fluentd-gcp-v2.0.10-9q9t4 uses two cpus, we need to sum (1228.32 + 825.32) * 10**9 = 2053640000000
@@ -256,12 +304,10 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
         assert c not in check.rate.mock_calls
 
 
-def test_prometheus_net_summed(monkeypatch, aggregator):
+def test_prometheus_net_summed(monkeypatch, aggregator, tagger):
     check = mock_kubelet_check(monkeypatch, [{}])
     monkeypatch.setattr(check, 'rate', mock.Mock())
-
-    with mock.patch("datadog_checks.kubelet.prometheus.get_tags", side_effect=mocked_get_tags):
-        check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
     # Make sure we submit the summed rates correctly for pods:
     # - dd-agent-q6hpw has two interfaces, we need to sum (1.2638051777 + 2.2638051777) * 10**10 = 35276103554
@@ -329,60 +375,13 @@ def test_kubelet_check_instance_config(monkeypatch):
     check.check({"cadvisor_port": 0, "metrics_endpoint": "", "kubelet_metrics_endpoint": "http://dummy"})
 
 
-def mocked_get_tags(entity, _):
-    tag_store = {
-        "kubernetes_pod://2edfd4d9-10ce-11e8-bd5a-42010af00137": [
-            "pod_name:fluentd-gcp-v2.0.10-9q9t4"
-        ],
-        "kubernetes_pod://2fdfd4d9-10ce-11e8-bd5a-42010af00137": [
-            "pod_name:fluentd-gcp-v2.0.10-p13r3"
-        ],
-        'docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ],
-        "docker://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
-            'kube_container_name:prometheus-to-sd-exporter',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ],
-        'docker://6941ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
-            'kube_container_name:fluentd-gcp',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ],
-        "docker://690cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
-            'kube_container_name:prometheus-to-sd-exporter',
-            'kube_deployment:fluentd-gcp-v2.0.10'
-        ],
-        "docker://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
-            "pod_name:demo-app-success-c485bc67b-klj45"
-        ],
-        "kubernetes_pod://d2e71e36-10d0-11e8-bd5a-42010af00137": [
-            'pod_name:dd-agent-q6hpw'
-        ],
-        "kubernetes_pod://260c2b1d43b094af6d6b4ccba082c2db": [
-            'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
-        ],
-        "kubernetes_pod://24d6daa3-10d8-11e8-bd5a-42010af00137": [
-            'pod_name:demo-app-success-c485bc67b-klj45'
-        ],
-        "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": [
-            'pod_name:pi-kff76'
-        ]
-    }
-    # Match agent 6.5 behaviour of not accepting None
-    if entity is None:
-        raise ValueError("None is not a valid entity id")
-    return tag_store.get(entity, [])
-
-
-def test_report_pods_running(monkeypatch):
+def test_report_pods_running(monkeypatch, tagger):
     check = KubeletCheck('kubelet', None, {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     pod_list = check.retrieve_pod_list()
 
-    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
-        check._report_pods_running(pod_list, [])
+    check._report_pods_running(pod_list, [])
 
     calls = [
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
@@ -408,7 +407,7 @@ def test_report_pods_running(monkeypatch):
         assert c not in check.gauge.mock_calls
 
 
-def test_report_pods_running_none_ids(monkeypatch):
+def test_report_pods_running_none_ids(monkeypatch, tagger):
     # Make sure the method is resilient to inconsistent podlists
     podlist = json.loads(mock_from_file('pods.json'))
     podlist["items"][0]['metadata']['uid'] = None
@@ -419,8 +418,7 @@ def test_report_pods_running_none_ids(monkeypatch):
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     pod_list = check.retrieve_pod_list()
 
-    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
-        check._report_pods_running(pod_list, [])
+    check._report_pods_running(pod_list, [])
 
     calls = [
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
@@ -432,7 +430,7 @@ def test_report_pods_running_none_ids(monkeypatch):
     check.gauge.assert_has_calls(calls, any_order=True)
 
 
-def test_report_container_spec_metrics(monkeypatch):
+def test_report_container_spec_metrics(monkeypatch, tagger):
     check = KubeletCheck('kubelet', None, {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
@@ -442,8 +440,7 @@ def test_report_container_spec_metrics(monkeypatch):
 
     pod_list = check.retrieve_pod_list()
     instance_tags = ["one:1", "two:2"]
-    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
-        check._report_container_spec_metrics(pod_list, instance_tags)
+    check._report_container_spec_metrics(pod_list, instance_tags)
 
     calls = [
         mock.call('kubernetes.cpu.requests', 0.1, [
@@ -470,7 +467,7 @@ def test_report_container_spec_metrics(monkeypatch):
     check.gauge.assert_has_calls(calls, any_order=True)
 
 
-def test_report_container_state_metrics(monkeypatch):
+def test_report_container_state_metrics(monkeypatch, tagger):
     check = KubeletCheck('kubelet', None, {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query',
@@ -484,8 +481,7 @@ def test_report_container_state_metrics(monkeypatch):
     pod_list = check.retrieve_pod_list()
 
     instance_tags = ["one:1", "two:2"]
-    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
-        check._report_container_state_metrics(pod_list, instance_tags)
+    check._report_container_state_metrics(pod_list, instance_tags)
 
     calls = [
         mock.call('kubernetes.containers.last_state.terminated', 1, [
@@ -515,7 +511,7 @@ def test_report_container_state_metrics(monkeypatch):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
 
-def test_pod_expiration(monkeypatch, aggregator):
+def test_pod_expiration(monkeypatch, aggregator, tagger):
     check = KubeletCheck('kubelet', None, {}, [{}])
     check.pod_list_url = "dummyurl"
 
@@ -541,8 +537,7 @@ def test_pod_expiration(monkeypatch, aggregator):
     assert collected_names == expected_names
 
     # Test .pods.expired gauge is submitted
-    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", return_value=[]):
-        check._report_container_state_metrics(pod_list, ["custom:tag"])
+    check._report_container_state_metrics(pod_list, ["custom:tag"])
     aggregator.assert_metric("kubernetes.pods.expired", value=1, tags=["custom:tag"])
 
 
