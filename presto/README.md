@@ -46,13 +46,13 @@ logs_enabled: true
 ```
 logs:
   - type: file
-    path: /data/var/log/*.log
+    path: /var/log/presto/*.log
     source: presto
     sourcecategory: database
     service: myapplication
 ```
 
-Change the path and service parameter values and configure them for your environment. See the sample [presto.d/conf.yaml][2] for all available configuration options.
+Change the `path` and `service` parameter values and configure them for your environment. See the sample [presto.d/conf.yaml][2] for all available configuration options.
 
 [Restart the Agent][4].
 
