@@ -454,7 +454,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % cid, tagger.HIGH) + instance_tags
+                tags = tagger.tag('%s' % cid, tagger.ORCHESTRATOR) + instance_tags
 
                 restart_count = ctr_status.get('restartCount', 0)
                 self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)

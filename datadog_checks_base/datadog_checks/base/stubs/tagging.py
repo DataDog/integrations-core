@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 class TaggerStub(object):
     LOW, ORCHESTRATOR, HIGH = range(3)
 
@@ -34,5 +35,6 @@ class TaggerStub(object):
             return self.tag(entity, self.HIGH)
         else:
             return self.tag(entity, self.LOW)
+
 
 tagger = TaggerStub()
