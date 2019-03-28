@@ -13,16 +13,24 @@ git remote set-url origin git@github.com:DataDog/integrations-core.git
 git config --global user.email "$TAGGER_EMAIL"
 git config --global user.name "$TAGGER_NAME"
 
-set +e
-ddev release tag all
-status=$?
-set -e
+git pull origin master
+git checkout master
+touch bad.txt
+echo "nooooo" > bad.txt
+git add --all
+git commit -m "bad!"
+git push origin master
 
-# Only build packages if there were new releases
-if [[ $status -eq 0 ]]; then
-    ./.gitlab/build-packages.sh
-elif [[ $status -eq 2 ]]; then
-    echo "No new releases, skipping the build pipeline trigger"
-else
-    exit $status
-fi
+# set +e
+# ddev release tag all
+# status=$?
+# set -e
+
+# # Only build packages if there were new releases
+# if [[ $status -eq 0 ]]; then
+#     ./.gitlab/build-packages.sh
+# elif [[ $status -eq 2 ]]; then
+#     echo "No new releases, skipping the build pipeline trigger"
+# else
+#     exit $status
+# fi
