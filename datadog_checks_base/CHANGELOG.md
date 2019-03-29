@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 6.6.0 / 2019-03-29
+
+* [Added] Upgrade in-toto. See [#3411](https://github.com/DataDog/integrations-core/pull/3411).
+* [Added] Support Python 3. See [#3425](https://github.com/DataDog/integrations-core/pull/3425).
+
 ## 6.5.0 / 2019-03-29
 
 * [Added] Add tagging utility and stub to access the new tagger API. See [#3413](https://github.com/DataDog/integrations-core/pull/3413).
