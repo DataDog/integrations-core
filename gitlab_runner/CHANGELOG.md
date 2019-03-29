@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab_runner
 
+## 2.2.0 / 2019-03-29
+
+* [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
+
 ## 2.1.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#2886](https://github.com/DataDog/integrations-core/pull/2886).
