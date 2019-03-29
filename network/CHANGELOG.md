@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 1.10.0 / 2019-03-29
+
+* [Added] Strip white space when reading from proc_conntrack_max_path. See [#3365](https://github.com/DataDog/integrations-core/pull/3365).
+
 ## 1.9.0 / 2019-02-18
 
 * [Added] Add conntrack basic metrics to the network integration.. See [#2981](https://github.com/DataDog/integrations-core/pull/2981). Thanks [aerostitch](https://github.com/aerostitch).

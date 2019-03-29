@@ -1,5 +1,9 @@
 # CHANGELOG - activemq_xml
 
+## 1.2.0 / 2019-03-29
+
+* [Added] Adhere to code style. See [#3323](https://github.com/DataDog/integrations-core/pull/3323).
+
 ## 1.1.0 / 2018-11-30
 
 * [Added] Add Python3 Support. See [#2583][1].

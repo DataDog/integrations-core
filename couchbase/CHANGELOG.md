@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.7.1 / 2019-03-29
+
+* [Fixed] Fixed a typo in the example config file. See [#3173](https://github.com/DataDog/integrations-core/pull/3173).
+
 ## 1.7.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2851][1].

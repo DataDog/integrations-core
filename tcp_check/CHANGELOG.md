@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 2.2.1 / 2019-03-29
+
+* [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
+
 ## 2.2.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#2964](https://github.com/DataDog/integrations-core/pull/2964).

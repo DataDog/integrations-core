@@ -1,5 +1,9 @@
 # CHANGELOG - Kube-dns
 
+## 2.2.0 / 2019-03-29
+
+* [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
+
 ## 2.1.0 / 2019-02-18
 
 * [Fixed] Fix growing CPU and memory usage. See [#3066](https://github.com/DataDog/integrations-core/pull/3066).

@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.5.0 / 2019-03-29
+
+* [Added] Adhere to style. See [#3366](https://github.com/DataDog/integrations-core/pull/3366).
+
 ## 1.4.0 / 2018-09-05
 
 * [Changed] Change order of precedence of whitelist and blacklist for pattern filtering. See [#2174][1].

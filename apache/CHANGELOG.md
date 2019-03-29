@@ -1,5 +1,9 @@
 # CHANGELOG - apache
 
+## 1.5.0 / 2019-03-29
+
+* [Added] Adhere to code style. See [#3322](https://github.com/DataDog/integrations-core/pull/3322).
+
 ## 1.4.0 / 2018-11-30
 
 * [Added] Add python3 support. See [#2497][1].
