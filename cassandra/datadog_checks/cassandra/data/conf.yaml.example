@@ -26,8 +26,8 @@ instances:
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   #
   #  tags:
-  #    - environment: default_environment
-  #    - datacenter: default_datacenter
+  #    environment: default_environment
+  #    datacenter: default_datacenter
 
   ## @param user - string - optional
   ## Username from the credentials needed to connect to the host.
