@@ -14,7 +14,7 @@ flup-py3==1.0.3; python_version > '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 httplib2==0.10.3
 in-toto==0.3.0
-ipaddress==1.0.22
+ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.1.1
 jpype1==0.6.3
 kafka-python==1.4.4; sys_platform != 'win32'
@@ -56,6 +56,7 @@ scandir==1.8
 securesystemslib[crypto,pynacl]==0.11.3
 selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 serpent==1.27; sys_platform == 'win32'
+service_identity[idna]==18.1.0
 simplejson==3.6.5
 six==1.12.0
 supervisor==3.3.3; python_version < '3.0'

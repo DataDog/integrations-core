@@ -2,9 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .ssl import SslCheck
+from .tls import TLSCheck
 
-__all__ = [
-    '__version__',
-    'SslCheck'
-]
+__all__ = ['__version__', 'TLSCheck']

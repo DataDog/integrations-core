@@ -1,0 +1,3 @@
+cryptography==2.3.1
+ipaddress==1.0.22; python_version < '3.0'
+service_identity[idna]==18.1.0

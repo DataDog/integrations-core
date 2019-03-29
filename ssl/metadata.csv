@@ -1,3 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-ssl_cert.days_left,gauge,,day,,Days until SSL certificate expiration,1,network,days till expiration
-ssl_cert.seconds_left,gauge,,second,,Seconds until SSL certificate expiration,1,network,seconds till expiration
