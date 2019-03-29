@@ -1,5 +1,9 @@
 # CHANGELOG - fluentd
 
+## 1.1.1 / 2019-03-29
+
+* [Fixed] Support fluentd v1's monitor_agent metrics. See [#2965](https://github.com/DataDog/integrations-core/pull/2965). Thanks [repeatedly](https://github.com/repeatedly).
+
 ## 1.1.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2735][1].
