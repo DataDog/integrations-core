@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.4.0 / 2019-03-29
+
+* [Added] Adhere to code style. See [#3325](https://github.com/DataDog/integrations-core/pull/3325).
+
 ## 1.3.0 / 2019-02-18
 
 * [Added] Finish Python 3 Support. See [#2901](https://github.com/DataDog/integrations-core/pull/2901).
