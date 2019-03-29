@@ -23,7 +23,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base >= 6.5.0'
+CHECKS_BASE_REQ = 'datadog_checks_base'
 
 setup(
     name='datadog-kubelet',

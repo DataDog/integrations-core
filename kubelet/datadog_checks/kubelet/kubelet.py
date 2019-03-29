@@ -13,13 +13,13 @@ import json
 import requests
 
 from datadog_checks.base.utils.date import parse_rfc3339, UTC
-from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 from kubeutil import get_connection_info
 from six import iteritems
 from six.moves.urllib.parse import urljoin
+from tagger import get_tags
 
 from .common import CADVISOR_DEFAULT_PORT, PodListUtils, KubeletCredentials
 from .cadvisor import CadvisorScraper
@@ -367,7 +367,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if "running" not in container.get('state', {}):
                     continue
                 has_container_running = True
-                tags = tagger.tag(container_id, tagger.LOW) or None
+                tags = get_tags(container_id, False) or None
                 if not tags:
                     continue
                 tags += instance_tags
@@ -380,7 +380,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             if not pod_id:
                 self.log.debug('skipping pod with no uid')
                 continue
-            tags = tagger.tag('kubernetes_pod://%s' % pod_id, tagger.LOW) or None
+            tags = get_tags('kubernetes_pod://%s' % pod_id, False) or None
             if not tags:
                 continue
             tags += instance_tags
@@ -417,7 +417,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % cid, tagger.HIGH) + instance_tags
+                tags = get_tags('%s' % cid, True) + instance_tags
 
                 try:
                     for resource, value_str in iteritems(ctr.get('resources', {}).get('requests', {})):
@@ -454,7 +454,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % cid, tagger.ORCHESTRATOR) + instance_tags
+                tags = get_tags('%s' % cid, True) + instance_tags
 
                 restart_count = ctr_status.get('restartCount', 0)
                 self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)
