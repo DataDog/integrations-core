@@ -1,5 +1,9 @@
 # CHANGELOG - varnish
 
+## 1.3.1 / 2019-03-29
+
+* [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
+
 ## 1.3.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2810][1].
