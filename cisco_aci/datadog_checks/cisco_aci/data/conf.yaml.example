@@ -38,17 +38,17 @@ instances:
   ## the check balances its requests between them.
   #
   #  aci_urls:
-  #    - localhost:<PORT>
+  #    - <HOST>:<PORT>
 
   ## @param cert_name - string - optional
   ## Certificate Authentication. When adding a cert to the ACI, it requires a name.
   #
-  #  cert_name: datadog
+  #  cert_name: <CERT_NAME>
 
   ## @param cert_key_password - string - optional
   ## If there is a password to the key, add it here
   #
-  #  cert_key_password: datadog
+  #  cert_key_password: <CERT_KEY_PASSWORD>
 
   ## @param cert_key - string - optional
   ## Certificate Authentication: Add the whole cert in the configuration file
@@ -75,7 +75,7 @@ instances:
   ## Certificate Authentication:
   ## If you want to keep the cert in a separate file, enter the file path here
   #
-  #  cert_key_path: /etc/datadog-agent/conf.d/cisco_aci.d/cert.key
+  #  cert_key_path: <CERT_KEY_PATH>
 
   ## @param timeout - integer - optional - default: 15
   ## The read timeout in seconds for aci_url.
