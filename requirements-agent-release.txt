@@ -1,5 +1,5 @@
 datadog-active-directory==1.3.0; sys_platform == 'win32'
-datadog-activemq-xml==1.1.0
+datadog-activemq-xml==1.2.0
 datadog-activemq==1.1.0
 datadog-aerospike==1.1.0; sys_platform != 'win32'
 datadog-apache==1.4.0
