@@ -1,5 +1,10 @@
 # CHANGELOG - iis
 
+## 2.4.0 / 2019-03-29
+
+* [Added] [iis] adds `iis_host` tag to metrics. See [#3294](https://github.com/DataDog/integrations-core/pull/3294).
+* [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
+
 ## 2.3.0 / 2019-02-18
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
