@@ -2,7 +2,7 @@ datadog-active-directory==1.3.0; sys_platform == 'win32'
 datadog-activemq-xml==1.2.0
 datadog-activemq==1.1.0
 datadog-aerospike==1.2.0; sys_platform != 'win32'
-datadog-apache==1.4.0
+datadog-apache==1.5.0
 datadog-aspdotnet==1.1.0; sys_platform == 'win32'
 datadog-btrfs==1.5.0; sys_platform != 'win32'
 datadog-cacti==1.3.0; sys_platform == 'linux2'
