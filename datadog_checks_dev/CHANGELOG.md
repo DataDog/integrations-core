@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.21.0 / 2019-03-29
+
+* [Added] Upgrade in-toto. See [#3411](https://github.com/DataDog/integrations-core/pull/3411).
+
 ## 0.20.0 / 2019-03-28
 
 * [Added] Remove flake8 from tox.ini template. See [#3358](https://github.com/DataDog/integrations-core/pull/3358).
