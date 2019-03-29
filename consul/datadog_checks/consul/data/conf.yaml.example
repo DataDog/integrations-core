@@ -9,18 +9,18 @@ instances:
   #
   - url: http://localhost:8500
 
-  ## @param catalog_checks - boolean - required
+  ## @param catalog_checks - boolean - optional - default: false
   ## Set to true to perform checks against the Consul service Catalog.
   #
-    catalog_checks: true
+  #  catalog_checks: false
 
-  ## @param network_latency_checks - boolean - optional
+  ## @param network_latency_checks - boolean - optional - default: false
   ## Whether to enable network latency metrics collection. When enabled
   ## consul network coordinates is retrieved and latency calculated for
   ## each node and between data centers.
   ## See https://www.consul.io/docs/internals/coordinates.html
   #
-    network_latency_checks: true
+  #  network_latency_checks: false
 
   ## @param self_leader_check - boolean - optional - default: false
   ## Whether to enable self leader checks. Each instance with this enabled
@@ -53,7 +53,7 @@ instances:
   ## Whether to verifiy SSL certificates for HTTPS requests.
   ## Possible values: True, False or '<TRUSTED_CA_BUNDLE_FILE_PATH>'
   #
-  #  ca_bundle_file: 'true'
+  #  ca_bundle_file: true
 
   ## @param acl_token - string - optional
   ## ACL token to use for authentication.
