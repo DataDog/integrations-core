@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 4.3.0 / 2019-03-29
+
+* [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
+
 ## 4.2.0 / 2019-02-18
 
 * [Added] Collect .hpa.condition gauges. See [#3107](https://github.com/DataDog/integrations-core/pull/3107).
