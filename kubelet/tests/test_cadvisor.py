@@ -27,6 +27,15 @@ def mock_request():
         yield m
 
 
+@pytest.fixture
+def tagger():
+    from datadog_checks.base.stubs import tagger
+    tagger.reset()
+    # We filter out slices unknown by the tagger, mock a non-empty taglist
+    tagger.set_default_tags(["foo:bar"])
+    return tagger
+
+
 def test_detect_cadvisor_nominal(mock_request):
     mock_request.head('http://kubelet:4192/api/v1.3/subcontainers/', text='{}')
     url = KubeletCheck.detect_cadvisor("http://kubelet:10250", 4192)
@@ -46,7 +55,7 @@ def test_detect_cadvisor_port_zero():
         assert url == ""
 
 
-def test_kubelet_check_cadvisor(monkeypatch, aggregator):
+def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
     instance_with_tag = {"tags": ["instance:tag"], "cadvisor_port": 4194}
     cadvisor_url = "http://valid:port/url"
     check = KubeletCheck('kubelet', None, {}, [instance_with_tag])
@@ -58,11 +67,6 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator):
                         mock.Mock(return_value=json.loads(mock_from_file('cadvisor_1.2.json'))))
     monkeypatch.setattr(check, 'detect_cadvisor', mock.Mock(return_value=cadvisor_url))
     monkeypatch.setattr(check, 'process', mock.Mock(return_value=None))
-    # We filter out slices unknown by the tagger, mock a non-empty taglist
-    monkeypatch.setattr('datadog_checks.kubelet.cadvisor.get_tags',
-                        mock.Mock(return_value=["foo:bar"]))
-    monkeypatch.setattr('datadog_checks.kubelet.cadvisor.tags_for_pod',
-                        mock.Mock(return_value=["foo:bar"]))
 
     check.check(instance_with_tag)
     assert check.cadvisor_legacy_url == cadvisor_url
@@ -79,4 +83,5 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator):
     for metric in EXPECTED_METRICS_CADVISOR:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, "instance:tag")
+
     assert aggregator.metrics_asserted_pct == 100.0
