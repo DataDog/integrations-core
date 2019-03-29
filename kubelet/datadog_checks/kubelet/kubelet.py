@@ -280,15 +280,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
     @staticmethod
     def _compute_pod_expiration_datetime():
         """
-        Looks up the agent's kubernetes_pod_expiration_minutes option and returns either:
+        Looks up the agent's kubernetes_pod_expiration_duration option and returns either:
           - None if expiration is disabled (set to 0)
           - A (timezone aware) datetime object to compare against
         """
         try:
-            minutes = int(get_config("kubernetes_pod_expiration_minutes"))
-            if minutes == 0:  # Expiration disabled
+            seconds = int(get_config("kubernetes_pod_expiration_duration"))
+            if seconds == 0:  # Expiration disabled
                 return None
-            return datetime.utcnow().replace(tzinfo=UTC) - timedelta(minutes=minutes)
+            return datetime.utcnow().replace(tzinfo=UTC) - timedelta(seconds=seconds)
         except (ValueError, TypeError):
             return None
 

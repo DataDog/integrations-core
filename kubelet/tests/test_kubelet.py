@@ -608,8 +608,10 @@ def test_retrieved_pod_list_failure(monkeypatch):
 
 def test_compute_pod_expiration_datetime(monkeypatch):
     # Invalid input
-    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value=""):
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="") as p:
         assert KubeletCheck._compute_pod_expiration_datetime() is None
+        p.assert_called_with("kubernetes_pod_expiration_duration")
+
     with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="invalid"):
         assert KubeletCheck._compute_pod_expiration_datetime() is None
 
@@ -618,7 +620,7 @@ def test_compute_pod_expiration_datetime(monkeypatch):
         assert KubeletCheck._compute_pod_expiration_datetime() is None
 
     # Set to 15 minutes
-    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="15"):
+    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="900"):
         expire = KubeletCheck._compute_pod_expiration_datetime()
         assert expire is not None
         now = datetime.utcnow().replace(tzinfo=UTC)
