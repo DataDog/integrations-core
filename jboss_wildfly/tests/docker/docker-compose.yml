@@ -1,0 +1,7 @@
+version: '3'
+services:
+  jboss_wildfly:
+    build:
+      context: ./config
+    ports:
+     - 9990:9990
