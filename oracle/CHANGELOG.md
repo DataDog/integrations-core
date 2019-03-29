@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 1.6.0 / 2019-03-29
+
+* [Added] Add custom_queries config globally. See [#3231](https://github.com/DataDog/integrations-core/pull/3231).
+
 ## 1.5.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#3037](https://github.com/DataDog/integrations-core/pull/3037).
