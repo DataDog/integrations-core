@@ -1,5 +1,10 @@
 # CHANGELOG - kubelet
 
+## 3.0.0 / 2019-03-29
+
+* [Changed] Do not tag container restarts/state metrics by container_id anymore. See [#3424](https://github.com/DataDog/integrations-core/pull/3424).
+* [Added] Allow to filter out old pods when parsing the podlist to reduce memory usage. See [#3189](https://github.com/DataDog/integrations-core/pull/3189).
+
 ## 2.4.0 / 2019-02-18
 
 * [Fixed] Fix usage metrics collection for static pods. See [#3079](https://github.com/DataDog/integrations-core/pull/3079).
