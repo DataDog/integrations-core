@@ -5,7 +5,7 @@ instances:
   ## @param url - string - required
   ## The URL where elasticsearch accepts HTTP requests. This is used to
   ## fetch statistics from the nodes and information about the cluster health.
-  # 
+  #
   - url: http://localhost:9200
 
   ## @param username - string - optional
@@ -38,7 +38,7 @@ instances:
   #  ssl_key: <CERT_KEY_PATH>
 
   ## @param node_name_as_host - boolean - optional - default: false
-  ## If each machine only runs a single Elasticsearch node per cluster, you 
+  ## If each machine only runs a single Elasticsearch node per cluster, you
   ## want to set each Elasticsearch `node.name` to the machine hostname. You may
   ## then set `node_name_as_host` to `true` to avoid duplicate hostnames. See:
   ## https://www.elastic.co/guide/en/elasticsearch/reference/current/node.name.html
@@ -72,7 +72,7 @@ instances:
 
   ## @param pshard_graceful_timeout - boolean - optional - default: false
   ## Continue gracefully if pshard stats TO
-  #  pshard_graceful_timeout: false 
+  #  pshard_graceful_timeout: false
 
   ## @param pending_task_stats - boolean - optional - default: true
   ## It specifies whether to collect data exposed by the `pending_tasks` cluster endpoint.
@@ -83,7 +83,7 @@ instances:
   #  pending_task_stats: true
 
   ## @param admin_forwarder - boolean - optional - default: false
-  ## It is used to signify a URL that includes a context root 
+  ## It is used to signify a URL that includes a context root
   ## needed for a forwarder application to access Elasticsearch REST services
   ## for example: https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
   #
@@ -101,14 +101,14 @@ instances:
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
-## service - mandatory - Name of the service that generates the log
-## source  - mandatory - Attribute that defines which Integration is sending the logs
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
-## tags: - optional - Add tags to each logs collected
+## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
-
+#
 #logs:
 #  - type: file
 #    path: /var/log/elasticsearch/*.log

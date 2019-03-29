@@ -118,8 +118,7 @@ jobs:
     - stage: test
       env: CHECK=disk PYTHON3=true
     - stage: test
-    # python 2 support only
-      env: CHECK=dns_check
+      env: CHECK=dns_check PYTHON3=true
     - stage: test
       env: CHECK=dotnetclr PYTHON3=true
     - stage: test
@@ -153,6 +152,8 @@ jobs:
     - stage: test
       env: CHECK=http_check PYTHON3=true
     - stage: test
+      env: CHECK=ibm_db2 PYTHON3=true
+    - stage: test
       env: CHECK=ibm_mq PYTHON3=true
     - stage: test
       env: CHECK=ibm_was PYTHON3=true
@@ -170,6 +171,8 @@ jobs:
       env: CHECK=kube_dns PYTHON3=true
     - stage: test
       env: CHECK=kube_proxy PYTHON3=true
+    - stage: test
+      env: CHECK=kube_scheduler PYTHON3=true
     - stage: test
       env: CHECK=kubelet PYTHON3=true
     - stage: test

@@ -1,12 +1,7 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import pytest
-import mock
 
-from prometheus_client import generate_latest, CollectorRegistry, Gauge, Counter
-
-from datadog_checks.base import ensure_unicode
 from datadog_checks.prometheus import PrometheusCheck
 
 
@@ -25,37 +20,6 @@ instance = {
 # Constants
 CHECK_NAME = 'prometheus'
 NAMESPACE = 'prometheus'
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture(scope="module")
-def poll_mock():
-    registry = CollectorRegistry()
-    # pylint: disable=E1123,E1101
-    g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
-    g1.labels(matched_label="foobar", node="host1", flavor="test").set(99.9)
-    g2 = Gauge('metric2', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g2.labels(matched_label="foobar", node="host2", timestamp="123").set(12.2)
-    c1 = Counter('counter1', 'hits', ['node'], registry=registry)
-    c1.labels(node="host2").inc(42)
-    g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
-
-    poll_mock = mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
-            headers={'Content-Type': "text/plain"}
-        )
-    )
-    yield poll_mock.start()
-    poll_mock.stop()
 
 
 def test_prometheus_check(aggregator, poll_mock):
@@ -201,3 +165,12 @@ def test_prometheus_mixed_instance(aggregator, poll_mock):
                              tags=['timestamp:123', 'node:host2', 'matched_label:foobar', 'timestamp:123', 'extra:foo'],
                              metric_type=aggregator.GAUGE)
     assert aggregator.metrics_asserted_pct == 100.0
+
+
+def test_integration(aggregator, dd_environment):
+    c = PrometheusCheck('prometheus', None, {}, [dd_environment])
+    c.check(dd_environment)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        CHECK_NAME + '.go_memstats_mallocs_total', metric_type=aggregator.MONOTONIC_COUNT)

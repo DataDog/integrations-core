@@ -1,36 +1,78 @@
 init_config:
 
 instances:
+
+  ## @param hdfs_namenode_jmx_uri - string - required
+  ## The HDFS DataNode check retrieves metrics from the HDFS DataNode's JMX
+  ## interface. This check must be installed on a HDFS DataNode. The HDFS
+  ## DataNode JMX URI is composed of the DataNode's hostname and port.
+  ##
+  ## The hostname and port can be found in the hdfs-site.xml conf file under
+  ## the property dfs.datanode.http.address
   #
-  # The HDFS NameNode check retrieves metrics from the HDFS NameNode's JMX
-  # interface. This check must be installed on the NameNode. The HDFS
-  # NameNode JMX URI is composed of the NameNode's hostname and port.
+  - hdfs_namenode_jmx_uri: http://localhost:50075
+
+  ## @param username - string - optional
+  ## The username to use if the `hdfs_namenode_jmx_uri` is behind basic auth.
   #
-  # The hostname and port can be found in the hdfs-site.xml conf file under
-  # the property dfs.http.address or dfs.namenode.http-address
+  #  username: <USERNAME>
+
+  ## @param password - string - optional
+  ## The password to use if the `hdfs_namenode_jmx_uri` is behind basic auth.
   #
-  -  hdfs_namenode_jmx_uri: http://localhost:50070
+  #  password: <PASSWORD>
 
-  # If your service uses basic HTTP authentication, you can optionally
-  # specify a username and password that will be used in the check.
-  # username: user
-  # password: pass
+  ## @param tags  - list of key:value element - optional
+  ## List of tags to attach to every metric, event, and service check emitted by this integration.
+  ##
+  ## Learn more about tagging at https://docs.datadoghq.com/tagging
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
-  # If your service uses Kerberos authentication, you can optionally
-  # specify the Kerberos strategy to use.
-  # See https://github.com/requests/requests-kerberos#mutual-authentication
-  # kerberos: "required|optional|disabled"
-  # kerberos_delegate: false
-  # kerberos_force_initiate: false
-  # kerberos_hostname: null
-  # kerberos_principal: null
-  # kerberos_keytab: /path/to/keytab_file
+  ## @param kerberos - string - optional - default: disabled
+  ## If your service uses Kerberos authentication, you can specify the Kerberos
+  ## strategy to use between:
+  ##  * required
+  ##  * optional
+  ##  * disabled
+  ##
+  ## See https://github.com/requests/requests-kerberos#mutual-authentication
+  #
+  #  kerberos: disabled
 
-  # Optionally disable SSL validation. Sometimes when using proxies or self-signed certs
-  # we'll want to override validation.
-  # disable_ssl_validation: false
+  ## @param kerberos_delegate - boolean - optional - default: false
+  ## Set to true to enable kerberos delegation of credentials to a server that requests delegation.
+  ## See https://github.com/requests/requests-kerberos#delegation
+  #  kerberos_delegate: false
 
-  # Optional tags to be applied to every emitted metric and service check.
-  # tags:
-  #    - optional:tag1
-  #    - optional:tag2
+  ## @param kerberos_force_initiate - boolean - optional - default: false
+  ## Set to true to preemptively initiate the Kerberos GSS exchange and present a Kerberos ticket on the initial request (and all subsequent).
+  ## See https://github.com/requests/requests-kerberos#preemptive-authentication
+  #
+  #  kerberos_force_initiate: false
+
+  ## @param kerberos_hostname - string - optional
+  ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't match its kerberos
+  ## hostname (eg, behind a content switch or load balancer).
+  ## See https://github.com/requests/requests-kerberos#hostname-override
+  #
+  #  kerberos_hostname: null
+
+  ## @param kerberos_principal - string - optional
+  ## Set an explicit principal, to force Kerberos to look for a matching credential cache for the named user.
+  ## See https://github.com/requests/requests-kerberos#explicit-principal
+  #
+  #  kerberos_principal: null
+
+  ## @param kerberos_keytab - string - optional
+  ## Set the path to your Kerberos key tab file.
+  #
+  #  kerberos_keytab: <KEYTAB_FILE_PATH>
+
+  ## @param disable_ssl_validation - boolean - optional - default: false
+  ## Instructs the check to skip the validation of the SSL certificate of the URL being tested.
+  ## Defaults to false, set to true if you want to disable SSL certificate validation.
+  #
+  #  disable_ssl_validation: false

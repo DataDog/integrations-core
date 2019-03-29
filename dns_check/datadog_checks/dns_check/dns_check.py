@@ -79,7 +79,7 @@ class DNSCheck(NetworkCheck):
         t0 = time_func()
 
         try:
-            self.log.debug('Querying "{0}" record for hostname "{1}"...'.format(record_type, hostname))
+            self.log.debug('Querying "{}" record for hostname "{}"...'.format(record_type, hostname))
             if record_type == "NXDOMAIN":
                 try:
                     resolver.query(hostname)
@@ -96,18 +96,18 @@ class DNSCheck(NetworkCheck):
             response_time = time_func() - t0
 
         except dns.exception.Timeout:
-            self.log.error('DNS resolution of {0} timed out'.format(hostname))
-            return Status.CRITICAL, 'DNS resolution of {0} timed out'.format(hostname)
+            self.log.error('DNS resolution of {} timed out'.format(hostname))
+            return Status.CRITICAL, 'DNS resolution of {} timed out'.format(hostname)
 
         except Exception:
-            self.log.exception('DNS resolution of {0} has failed.'.format(hostname))
-            return Status.CRITICAL, 'DNS resolution of {0} has failed'.format(hostname)
+            self.log.exception('DNS resolution of {} has failed.'.format(hostname))
+            return Status.CRITICAL, 'DNS resolution of {} has failed'.format(hostname)
 
         else:
             tags = self._get_tags(instance)
             if response_time > 0:
                 self.gauge('dns.response_time', response_time, tags=tags)
-            self.log.debug('Resolved hostname: {0}'.format(hostname))
+            self.log.debug('Resolved hostname: {}'.format(hostname))
             return Status.UP, 'UP'
 
     def _check_answer(self, answer, resolves_as):
@@ -138,12 +138,12 @@ class DNSCheck(NetworkCheck):
         except IndexError:
             self.log.error('No DNS server was found on this host.')
 
-        tags = custom_tags + ['nameserver:{0}'.format(nameserver),
-                              'resolved_hostname:{0}'.format(hostname),
-                              'instance:{0}'.format(instance_name),
-                              'record_type:{0}'.format(record_type)]
+        tags = custom_tags + ['nameserver:{}'.format(nameserver),
+                              'resolved_hostname:{}'.format(hostname),
+                              'instance:{}'.format(instance_name),
+                              'record_type:{}'.format(record_type)]
         if resolved_as:
-            tags.append('resolved_as:{0}'.format(resolved_as))
+            tags.append('resolved_as:{}'.format(resolved_as))
 
         return tags
 

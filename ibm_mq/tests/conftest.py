@@ -41,6 +41,12 @@ def instance_collect_all():
 
 
 @pytest.fixture
+def instance_queue_regex_tag():
+    inst = copy.deepcopy(common.INSTANCE_QUEUE_REGEX_TAG)
+    return inst
+
+
+@pytest.fixture
 def seed_data():
     publish()
     consume()

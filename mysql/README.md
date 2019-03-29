@@ -101,7 +101,7 @@ Query OK, 0 rows affected (0.00 sec)
       port: <YOUR_MYSQL_PORT> # e.g. 3306
       options:
           replication: 0
-          galera_cluster: 1
+          galera_cluster: true
           extra_status_metrics: true
           extra_innodb_metrics: true
           extra_performance_metrics: true
@@ -353,10 +353,10 @@ The MySQL check does not include any events.
 
 ### Service Checks
 
-`mysql.replication.slave_running`:  
+`mysql.replication.slave_running`:
 Returns CRITICAL for a slave that's not running, otherwise OK.
 
-`mysql.can_connect`:  
+`mysql.can_connect`:
 Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherwise OK.
 
 ## Troubleshooting
@@ -376,14 +376,14 @@ Read our [series of blog posts][21] about monitoring MySQL with Datadog.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
 [5]: https://dev.mysql.com/doc/refman/5.7/en/adding-users.html
 [6]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
 [7]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [9]: https://docs.datadoghq.com/logs
-[10]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
 [12]: https://docs.datadoghq.com/integrations/faq/connection-issues-with-the-sql-server-integration
 [13]: https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1

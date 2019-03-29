@@ -5,7 +5,8 @@
 from itertools import product
 
 from datadog_checks.activemq_xml import ActiveMQXML
-from .common import CHECK_NAME, CONFIG, URL, GENERAL_METRICS, QUEUE_METRICS, TOPIC_METRICS, SUBSCRIBER_METRICS
+
+from .common import CHECK_NAME, CONFIG, GENERAL_METRICS, QUEUE_METRICS, SUBSCRIBER_METRICS, TOPIC_METRICS, URL
 
 
 def test_check(aggregator):
@@ -34,7 +35,7 @@ def test_check(aggregator):
             "subscriptionName:my_subscriber",
             "destinationName:my_topic",
             "selector:jms_selector",
-            "active:no"
+            "active:no",
         ]
         aggregator.assert_metric(mname, count=1, tags=subscriber_tags)
 

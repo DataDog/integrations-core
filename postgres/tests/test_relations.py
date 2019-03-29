@@ -52,8 +52,18 @@ def test_relations_metrics(aggregator, pg_instance):
     posgres_check = PostgreSql('postgres', {}, {})
     posgres_check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['db:%s' % pg_instance['dbname'], 'table:persons', 'schema:public']
-    expected_size_tags = pg_instance['tags'] + ['db:%s' % pg_instance['dbname'], 'table:persons']
+    expected_tags = pg_instance['tags'] + [
+        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'db:%s' % pg_instance['dbname'],
+        'table:persons', 'schema:public',
+    ]
+
+    expected_size_tags = pg_instance['tags'] + [
+        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'db:%s' % pg_instance['dbname'],
+        'table:persons',
+    ]
+
     for name in RELATION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
@@ -74,7 +84,10 @@ def test_index_metrics(aggregator, pg_instance):
     posgres_check = PostgreSql('postgres', {}, {})
     posgres_check.check(pg_instance)
 
-    expected_tags = ['db:dogs', 'table:breed', 'index:breed_names', 'schema:public']
-    expected_tags += pg_instance['tags']
+    expected_tags = pg_instance['tags'] + [
+        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'db:dogs', 'table:breed', 'index:breed_names', 'schema:public',
+    ]
+
     for name in IDX_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)

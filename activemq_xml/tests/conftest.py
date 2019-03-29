@@ -8,9 +8,9 @@ import tarfile
 
 import pytest
 
-from datadog_checks.dev import docker_run, TempDir
+from datadog_checks.dev import TempDir, docker_run
 
-from .common import HERE, URL, CONFIG
+from .common import CONFIG, HERE, URL
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -19,7 +19,10 @@ def dd_environment():
     with TempDir() as tmp_dir:
         activemq_data_dir = os.path.join(tmp_dir, "data")
         fixture_archive = os.path.join(HERE, "fixtures", "apache-activemq-kahadb.tar.gz")
-        os.mkdir(activemq_data_dir)
+
+        if not os.path.exists(activemq_data_dir):
+            os.mkdir(activemq_data_dir)
+
         with tarfile.open(fixture_archive, "r:gz") as f:
             f.extractall(path=activemq_data_dir)
         os.chmod(os.path.join(activemq_data_dir, "kahadb"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)

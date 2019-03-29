@@ -173,9 +173,8 @@ class TUFDownloader:
 
 
     def __verify_in_toto_metadata(self, target_relpath, in_toto_inspection_packet):
-        # Make a temporary directory.
-        tempdir = tempfile.mkdtemp()
-        prev_cwd = os.getcwd()
+        # Make a temporary directory in a parent directory we control.
+        tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
 
         # Copy files over into temp dir.
         for rel_path in in_toto_inspection_packet:
@@ -202,7 +201,9 @@ class TUFDownloader:
         else:
             logger.info('in-toto verified {}'.format(target_relpath))
         finally:
-            os.chdir(prev_cwd)
+            # Switch back to a parent directory we control, so that we can
+            # safely delete temp dir.
+            os.chdir(REPOSITORIES_DIR)
             # Delete temp dir.
             shutil.rmtree(tempdir)
 

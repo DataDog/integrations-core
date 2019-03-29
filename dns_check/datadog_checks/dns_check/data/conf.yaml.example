@@ -1,12 +1,12 @@
 init_config:
-  
+
   ## @param default_timeout - string - optional - default: 5
   ## Timeout to use as a default for all your instances.
   #
   #  default_timeout: 5
 
 instances:
-  
+
   ## @param name - string - required
   ## Name of your DNS check instance.
   ## To create multiple DNS checks, create multiple instances with unique names.

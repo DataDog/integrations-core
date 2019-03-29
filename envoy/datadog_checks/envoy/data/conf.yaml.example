@@ -3,7 +3,7 @@ init_config:
 instances:
 
   ## @param stats_url - string - required
-  ## The admin endpoint to connect to. It must be accessible: 
+  ## The admin endpoint to connect to. It must be accessible:
   ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
   ## Add a `?usedonly` on the end if you wish to ignore
   ## unused metrics instead of reporting them as `0`.
@@ -22,7 +22,6 @@ instances:
   #  metric_whitelist:
   #    - cluster\.(in|out)\..*
 
-
   ## @param metric_whitelist - optional - list of strings
   ## Blacklist metrics using regular expressions.
   ## The filtering occurs before tag extraction, so you have the option
@@ -31,7 +30,7 @@ instances:
   ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
   ##
   ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
-  # 
+  #
   #  metric_blacklist:
   #    - ^http\..*
 
@@ -41,7 +40,7 @@ instances:
   #
   #  cache_metrics: true
 
-  ## @param username - string - optional 
+  ## @param username - string - optional
   ## Enter your username if the stats page is behind basic auth.
   ## Note: The Envoy admin endpoint does not support auth until:
   ## https://github.com/envoyproxy/envoy/issues/2763
@@ -50,7 +49,7 @@ instances:
   #
   #  username: <USERNAME>
 
-  ## @param password - string - optional 
+  ## @param password - string - optional
   ## Enter your password if the stats page is behind basic auth.
   ## Note: The Envoy admin endpoint does not support auth until:
   ## https://github.com/envoyproxy/envoy/issues/2763

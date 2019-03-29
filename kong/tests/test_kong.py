@@ -1,34 +1,9 @@
 import pytest
-import os
-import subprocess
-import logging
-import requests
-import time
 
 from datadog_checks.kong import Kong
-from datadog_checks.utils.common import get_docker_hostname
 
-log = logging.getLogger('test_kong')
+from . import common
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-
-CHECK_NAME = 'kong'
-HOST = get_docker_hostname()
-PORT = 8001
-
-STATUS_URL = 'http://{0}:{1}/status/'.format(HOST, PORT)
-
-instance_1 = {
-    'kong_status_url': STATUS_URL,
-    'tags': ['first_instance']
-}
-
-instance_2 = {
-    'kong_status_url': STATUS_URL,
-    'tags': ['second_instance']
-}
-
-CONFIG_STUBS = [instance_1, instance_2]
 
 BAD_CONFIG = {
     'kong_status_url': 'http://localhost:1111/status/'
@@ -49,43 +24,9 @@ DATABASES = [
 ]
 
 
-def wait_for_cluster():
-    for _ in range(0, 100):
-        res = None
-        try:
-            res = requests.get(STATUS_URL)
-            res.raise_for_status()
-            return True
-        except Exception as e:
-            log.debug("exception: {0} res: {1}".format(e, res))
-            time.sleep(2)
-
-    return False
-
-
-@pytest.fixture(scope="session")
-def dd_environment():
-    """
-    Start a kong cluster
-    """
-    compose_directory = os.path.join(HERE, 'compose')
-    os.environ['COMPOSE_DIRECTORY_PATH'] = compose_directory
-
-    args = [
-        "docker-compose",
-        "-f", os.path.join(compose_directory, 'docker-compose.yml')
-    ]
-    subprocess.check_call(args + ["up", "-d"])
-    if not wait_for_cluster():
-        subprocess.check_call(args + ["down"])
-        raise Exception("Kong cluster boot timed out!")
-    yield instance_1
-    subprocess.check_call(args + ["down"])
-
-
 @pytest.fixture
 def check():
-    return Kong(CHECK_NAME, {}, {})
+    return Kong(common.CHECK_NAME, {}, {})
 
 
 @pytest.fixture
@@ -97,7 +38,7 @@ def aggregator():
 
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, check):
-    for stub in CONFIG_STUBS:
+    for stub in common.CONFIG_STUBS:
         check.check(stub)
         expected_tags = stub['tags']
 

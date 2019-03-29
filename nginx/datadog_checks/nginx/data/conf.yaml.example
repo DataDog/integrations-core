@@ -1,7 +1,7 @@
 init_config:
 
 instances:
-  
+
 ## @param nginx_status_url - string - required
 ## For every instance, you need an `nginx_status_url` and can optionally
 ## supply a list of tags.  This plugin requires nginx to be compiled with
@@ -12,7 +12,7 @@ instances:
 ##   http://docs.datadoghq.com/integrations/nginx/
 #
   - nginx_status_url: http://localhost:81/nginx_status/
-  
+
   ## @param use_plus_api - boolean - optional - default: false
   ## If you are using the commercial version of nginx, for releases R13 and above,
   ## there is a new API to replace the extended status API.
@@ -66,11 +66,11 @@ instances:
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
-## service - mandatory - Name of the service that generates the log
-## source  - mandatory - Attribute that defines which Integration is sending the logs
+## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
-## tags: - optional - Add tags to each logs collected
+## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 

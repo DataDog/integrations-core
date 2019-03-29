@@ -99,19 +99,7 @@ CHECK_NAME = 'cacti'
 
 CUSTOM_TAGS = ['optional:tag1']
 
-CACTI_CONFIG = {
-    'mysql_host': 'nohost',
-    'mysql_user': 'mocked',
-    'rrd_path': '/rrdtool/is/mocked',
-    'tags': CUSTOM_TAGS,
-}
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
+CACTI_CONFIG = {'mysql_host': 'nohost', 'mysql_user': 'mocked', 'rrd_path': '/rrdtool/is/mocked', 'tags': CUSTOM_TAGS}
 
 
 @pytest.fixture

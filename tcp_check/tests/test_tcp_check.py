@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.tcp_check import TCPCheck
 import pytest
+from copy import deepcopy
 
-CHECK_NAME = 'tcp_check'
+from . import common
 
 
 @pytest.fixture
@@ -14,57 +14,31 @@ def aggregator():
     return aggregator
 
 
-@pytest.fixture
-def check():
-    return TCPCheck(CHECK_NAME, {}, {})
-
-
-@pytest.fixture
-def instance_ko():
-    return {
-        'host': '127.0.0.1',
-        'port': 65530,
-        'timeout': 1.5,
-        'name': 'DownService',
-        'tags': ["foo:bar"],
-    }
-
-
-@pytest.fixture
-def instance():
-    return {
-        'host': 'datadoghq.com',
-        'port': 80,
-        'timeout': 1.5,
-        'name': 'UpService',
-        'tags': ["foo:bar"]
-    }
-
-
-def test_down(aggregator, check, instance_ko):
+def test_down(aggregator, check):
     """
     Service expected to be down
     """
-    check.check(instance_ko)
+    check.check(deepcopy(common.INSTANCE_KO))
     expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530", "foo:bar"]
     aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
 
 
-def test_up(aggregator, check, instance):
+def test_up(aggregator, check):
     """
     Service expected to be up
     """
-    check.check(instance)
+    check.check(deepcopy(common.INSTANCE))
     expected_tags = ["instance:UpService", "target_host:datadoghq.com", "port:80", "foo:bar"]
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
 
 
-def test_response_time(aggregator, check, instance):
+def test_response_time(aggregator, check):
     """
     Test the response time from a server expected to be up
     """
+    instance = deepcopy(common.INSTANCE)
     instance['collect_response_time'] = True
     instance['name'] = 'instance:response_time'
     check.check(instance)

@@ -6,9 +6,7 @@ import pytest
 
 from datadog_checks.apache import Apache
 
-from .common import (
-    BAD_CONFIG, STATUS_CONFIG, APACHE_GAUGES, APACHE_RATES, HOST, PORT, AUTO_CONFIG
-)
+from .common import APACHE_GAUGES, APACHE_RATES, AUTO_CONFIG, BAD_CONFIG, HOST, PORT, STATUS_CONFIG
 
 
 @pytest.mark.usefixtures("dd_environment")

@@ -5,6 +5,7 @@ from .utils import make_metric_tree
 
 METRIC_PREFIX = 'envoy.'
 
+# fmt: off
 METRICS = {
     'stats.overflow': {
         'tags': (
@@ -2454,5 +2455,6 @@ METRICS = {
         'method': 'monotonic_count',
     },
 }
+# fmt: on
 
 METRIC_TREE = make_metric_tree(METRICS)

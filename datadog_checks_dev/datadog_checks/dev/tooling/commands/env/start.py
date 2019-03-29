@@ -75,6 +75,7 @@ def start(ctx, check, env, agent, dev, base, env_vars):
 
     echo_waiting('Setting up environment `{}`... '.format(env), nl=False)
     config, metadata, error = start_environment(check, env)
+
     if error:
         echo_failure('failed!')
         echo_waiting('Stopping the environment...')
@@ -83,6 +84,7 @@ def start(ctx, check, env, agent, dev, base, env_vars):
     echo_success('success!')
 
     env_type = metadata['env_type']
+    use_jmx = metadata.get('use_jmx', False)
 
     # Support legacy config where agent5 and agent6 were strings
     agent_ver = ctx.obj.get('agent{}'.format(agent), agent)
@@ -95,6 +97,9 @@ def start(ctx, check, env, agent, dev, base, env_vars):
             )
     else:
         agent_build = agent_ver.get(env_type, env_type)
+
+    if not isinstance(agent_ver, string_types) and use_jmx:
+        agent_build = '{}-jmx'.format(agent_build)
 
     interface = derive_interface(env_type)
     if interface is None:

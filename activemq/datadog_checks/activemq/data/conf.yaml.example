@@ -37,9 +37,9 @@ instances:
   #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
   ## @param name - string - optional
-  ## XXXXXXXXXXX
+  ## Set your instance name.
   #
-  #   name: activemq_instance
+  #  name: activemq_instance
 
   ## @param java_bin_path - string - optional
   ## java_bin_path should be set if the agent cannot find your java executable

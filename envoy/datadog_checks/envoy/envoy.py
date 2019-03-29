@@ -59,9 +59,7 @@ class Envoy(AgentCheck):
             self.caching_metrics = instance.get('cache_metrics', True)
 
         try:
-            response = requests.get(
-                stats_url, auth=auth, verify=verify_ssl, proxies=proxies, timeout=timeout
-            )
+            response = requests.get(stats_url, auth=auth, verify=verify_ssl, proxies=proxies, timeout=timeout)
         except requests.exceptions.Timeout:
             msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(stats_url, timeout)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)

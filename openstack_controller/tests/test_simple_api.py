@@ -7,9 +7,17 @@ import copy
 import pytest
 import simplejson as json
 
+import requests
+
 from datadog_checks.openstack_controller.api import ApiFactory, SimpleApi, Authenticator, Credential
-from datadog_checks.openstack_controller.exceptions import (IncompleteIdentity, MissingNovaEndpoint,
-                                                            MissingNeutronEndpoint)
+from datadog_checks.openstack_controller.exceptions import (
+    IncompleteIdentity,
+    MissingNovaEndpoint,
+    MissingNeutronEndpoint,
+    AuthenticationNeeded,
+    InstancePowerOffFailure,
+    RetryLimitExceeded,
+)
 from . import common
 
 log = logging.getLogger('test_openstack_controller')
@@ -612,13 +620,13 @@ def test__get_paginated_list():
         "datadog_checks.openstack_controller.api.SimpleApi._make_request",
         side_effect=[
             # First call: 3 exceptions -> failure
-            Exception,
-            Exception,
-            Exception,
+            requests.exceptions.HTTPError,
+            requests.exceptions.HTTPError,
+            requests.exceptions.HTTPError,
         ]
     ):
         # First call
-        with pytest.raises(Exception):
+        with pytest.raises(RetryLimitExceeded):
             api._get_paginated_list("url", "obj", {})
         assert log.debug.call_count == 3
         log.reset_mock()
@@ -646,7 +654,7 @@ def test__get_paginated_list():
         "datadog_checks.openstack_controller.api.SimpleApi._make_request",
         side_effect=[
             # Third call: 1 exception, limit is divided once by 2
-            Exception,
+            requests.exceptions.HTTPError,
             {
                 "obj": [{"id": 0}, {"id": 1}],
                 "obj_links": "test"
@@ -664,6 +672,53 @@ def test__get_paginated_list():
         result = api._get_paginated_list("url", "obj", {})
         assert log.debug.call_count == 1
         assert result == [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}, {"id": 4}]
+        log.reset_mock()
+
+    with mock.patch(
+        "datadog_checks.openstack_controller.api.SimpleApi._make_request",
+        side_effect=[
+            # Fourth call: 1 AuthenticationNeeded exception -> no retries
+            AuthenticationNeeded,
+            # Fifth call: any other exception -> no retries
+            Exception,
+        ]
+    ):
+        with pytest.raises(AuthenticationNeeded):
+            api._get_paginated_list("url", "obj", {})
+        with pytest.raises(Exception):
+            api._get_paginated_list("url", "obj", {})
+
+
+def test__make_request_failure():
+    log = mock.MagicMock()
+
+    instance = copy.deepcopy(common.MOCK_CONFIG["instances"][0])
+    instance["paginated_limit"] = 4
+
+    with mock.patch("datadog_checks.openstack_controller.api.SimpleApi.connect"):
+        api = ApiFactory.create(log, None, instance)
+
+    response_mock = mock.MagicMock()
+    with mock.patch(
+        "datadog_checks.openstack_controller.api.requests.get",
+        return_value=response_mock
+    ):
+        response_mock.raise_for_status.side_effect = requests.exceptions.HTTPError
+        response_mock.status_code = 401
+        with pytest.raises(AuthenticationNeeded):
+            api._make_request("", {})
+
+        response_mock.status_code = 409
+        with pytest.raises(InstancePowerOffFailure):
+            api._make_request("", {})
+
+        response_mock.status_code = 500
+        with pytest.raises(requests.exceptions.HTTPError):
+            api._make_request("", {})
+
+        response_mock.raise_for_status.side_effect = Exception
+        with pytest.raises(Exception):
+            api._make_request("", {})
 
 
 def get_server_diagnostics_post_v2_48_response(url, headers, params=None, timeout=None):
