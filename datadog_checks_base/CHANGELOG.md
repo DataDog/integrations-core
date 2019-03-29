@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 6.5.0 / 2019-03-29
+
+* [Added] Add tagging utility and stub to access the new tagger API. See [#3413](https://github.com/DataDog/integrations-core/pull/3413).
+
 ## 6.4.0 / 2019-03-22
 
 * [Added] Add external_host_tags wrapper to checks_base. See [#3316](https://github.com/DataDog/integrations-core/pull/3316).
