@@ -49,7 +49,7 @@ logs:
     path: /var/log/presto/*.log
     source: presto
     sourcecategory: database
-     service: <SERVICE_NAME>
+    service: <SERVICE_NAME>
 ```
 
 Change the `path` and `service` parameter values and configure them for your environment. See the sample [presto.d/conf.yaml][2] for all available configuration options.
