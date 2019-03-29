@@ -12,7 +12,7 @@ class MockDNSAnswer:
     class MockRrset:
         def __init__(self, address):
             addresses = [x.strip().lower() for x in address.split(',')]
-            if addresses > 1:
+            if len(addresses) > 1:
                 items = []
                 for address in addresses:
                     items.append(MockDNSAnswer.MockItem(address))

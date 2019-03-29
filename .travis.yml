@@ -118,8 +118,7 @@ jobs:
     - stage: test
       env: CHECK=disk PYTHON3=true
     - stage: test
-    # python 2 support only
-      env: CHECK=dns_check
+      env: CHECK=dns_check PYTHON3=true
     - stage: test
       env: CHECK=dotnetclr PYTHON3=true
     - stage: test
