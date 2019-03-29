@@ -39,7 +39,7 @@ datadog-hdfs-datanode==1.6.0; sys_platform != 'win32'
 datadog-hdfs-namenode==1.5.0; sys_platform != 'win32'
 datadog-http-check==3.2.1
 datadog-hyperv==1.0.1; sys_platform == 'win32'
-datadog-ibm-mq==1.1.0; sys_platform == 'linux2'
+datadog-ibm-mq==1.2.0; sys_platform == 'linux2'
 datadog-ibm-was==1.0.0
 datadog-iis==2.3.0; sys_platform == 'win32'
 datadog-istio==2.1.0
