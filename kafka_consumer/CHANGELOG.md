@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 1.8.1 / 2019-03-29
+
+* [Fixed] Properly cache zookeeper connection strings. See [#3333](https://github.com/DataDog/integrations-core/pull/3333).
+
 ## 1.8.0 / 2019-03-08
 
 * [Added] Add support for SASL_PLAINTEXT authentication with Kafka broker. See [#3056](https://github.com/DataDog/integrations-core/pull/3056).
