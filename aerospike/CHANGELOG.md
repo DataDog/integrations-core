@@ -2,7 +2,6 @@
 
 ## 1.2.0 / 2019-03-29
 
-* [Added] Enforce new integration_id field. See [#3264](https://github.com/DataDog/integrations-core/pull/3264).
 * [Added] Upgrade aerospike dependency. See [#3235](https://github.com/DataDog/integrations-core/pull/3235).
 
 ## 1.1.0 / 2019-02-27
