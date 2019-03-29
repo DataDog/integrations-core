@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 0.4.0 / 2019-03-29
+
+* [Added] Refactor CLI code. See [#3317](https://github.com/DataDog/integrations-core/pull/3317).
+* [Added] Upgrade in-toto. See [#3411](https://github.com/DataDog/integrations-core/pull/3411).
+* [Fixed] Never chdir back to a directory we don't control. See [#3282](https://github.com/DataDog/integrations-core/pull/3282).
+* [Fixed] Fix pylint. See [#3190](https://github.com/DataDog/integrations-core/pull/3190).
+
 ## 0.3.0 / 2019-02-22
 
 * [Added] Allow `datadog_checks_downloader` to be securely updated. See [#3184](https://github.com/DataDog/integrations-core/pull/3184).
