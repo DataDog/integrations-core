@@ -1,6 +1,6 @@
 init_config:
   ## @param skip_proxy - boolean - optional - default: false
-  ## The (optional) skip_proxy parameter bypasses any proxy
+  ## Set `skip_proxy` parameter to `true` bypass any proxy settings
   ## settings enabled.
   #
   #  skip_proxy: false
@@ -8,12 +8,13 @@ init_config:
   ## @param proxy - list of string - optional
   ## Set HTTP or HTTPS proxy for all instances.
   ## Use the no_proxy list to specify hosts that must bypass proxy
-  #  proxy:
+  #  
+  # proxy:
   #    https: https://<SSL_PROXY_SERVER_FOR_HTTPS>:<PORT>
   #    http: https://<SSL_PROXY_SERVER_FOR_HTTP>:<PORT>
   #    no_proxy:
-  #      - host1
-  #      - host2
+  #      - <HOSTNAME_1>
+  #      - <HOSTNAME_2>
 
 instances:
 
@@ -67,7 +68,7 @@ instances:
     # tls_ignore_warning: false
 
   ## @param skip_proxy - boolean - optional - default: false
-  ## The (optional) skip_proxy parameter bypasses any proxy
+  ## Set `skip_proxy` parameter to `true` bypass any proxy settings
   ## settings enabled.
   #
   #  skip_proxy: false
@@ -75,12 +76,13 @@ instances:
   ## @param proxy - list of string - optional
   ## Set HTTP or HTTPS proxy for all instances.
   ## Use the no_proxy list to specify hosts that must bypass proxy
-  #  proxy:
+  #  
+  # proxy:
   #    https: https://<SSL_PROXY_SERVER_FOR_HTTPS>:<PORT>
   #    http: https://<SSL_PROXY_SERVER_FOR_HTTP>:<PORT>
   #    no_proxy:
-  #      - host1
-  #      - host2
+  #      - <HOSTNAME_1>
+  #      - <HOSTNAME_2>
 
 
 ## Log Section (Available for Agent >=6.0)
