@@ -85,6 +85,11 @@ class ConsulCheck(AgentCheck):
             privatekeyfile = instance.get('private_key_file', self.init_config.get('private_key_file', False))
             cabundlefile = instance.get('ca_bundle_file', self.init_config.get('ca_bundle_file', True))
             acl_token = instance.get('acl_token', None)
+            HTTP_CONFIG_REMAPPER = {
+                'ssl_cert': clientcertfile,
+                'ssl_private_key': privatekeyfile,
+            }
+
 
             headers = {}
             if acl_token:
