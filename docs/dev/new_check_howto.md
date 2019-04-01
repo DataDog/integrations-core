@@ -19,9 +19,9 @@ These requirements are used during the code review process as a checklist. This 
 
 ## Prerequisites
 
-Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][1] in order to isolate the development environment. See the [Python Environment documentation][2] for more information.
+Python 2.7 or 3.7 needs to be available on your system. Datadog recommends creating and activating a [Python virtual environment][1] to isolate the development environment. For more information, see the [Python Environment documentation][2].
 
-You'll also need `docker-compose` in order to run the test harness.
+You'll also need `docker` to run the full test suite.
 
 ## Setup
 
@@ -37,7 +37,6 @@ git clone https://github.com/DataDog/integrations-extras.git
 The [developer toolkit][4] is comprehensive and includes a lot of functionality. Here's what you need to get started:
 
 ```
-cd integrations-extras
 pip install "datadog-checks-dev[cli]"
 ```
 
@@ -53,18 +52,22 @@ If you intend to work primarily on `integrations-extras`, set it as the default 
 ddev config set repo extras
 ```
 
+**Note**: If you do not do this step, you'll need to use `-e` for every invocation to ensure the context is `integrations-extras`:
+
+```
+ddev -e COMMAND [OPTIONS]
+```
+
 ## Scaffolding
 
 One of the developer toolkit features is the `create` command, which creates the basic file and path structure (or "scaffolding") necessary for a new Integration.
 
 ### Dry-run
 
-Let's try a dry-run, which won't write anything to disk. There are two important elements to note in the following command:
-1. `-e`, which ensures that the scaffolding is created in the Extras repository.
-2. `-n`, which is a dry-run (nothing gets written).
+Let's try a dry-run using the `-n/--dry-run` flag, which won't write anything to disk.
 
 ```
-ddev -e create -n my_check
+ddev create -n awesome
 ```
 
 This will display the path where the files would have been written, as well as the structure itself. For now, just make sure that the path in the *first line* of output matches your Extras repository.
@@ -74,7 +77,7 @@ This will display the path where the files would have been written, as well as t
 The interactive mode is a wizard for creating new Integrations. By answering a handful of questions, the scaffolding will be set up and lightly pre-configured for you.
 
 ```
-ddev -e create my_check
+ddev create awesome
 ```
 
 After answering the questions, the output will match that of the dry-run above, except in this case the scaffolding for your new Integration will actually exist!
@@ -88,187 +91,162 @@ A Check is a Python class with the following requirements:
 * It must derive from `AgentCheck`
 * It must provide a method with this signature: `check(self, instance)`
 
-Checks are organized in regular Python packages under the `datadog_checks` namespace, so your code should live under `my_check/datadog_checks/my_check`. The only requirement is that the name of the package has to be the same as the check name. There are no particular restrictions on the name of the Python modules within that package, nor on the name of the class implementing the check.
+Checks are organized in regular Python packages under the `datadog_checks` namespace, so your code should live under `awesome/datadog_checks/awesome`. The only requirement is that the name of the package has to be the same as the check name. There are no particular restrictions on the name of the Python modules within that package, nor on the name of the class implementing the check.
 
 ### Implement check logic
 
-Let's say we want to create a Service Check named `my_check` that checks for a string on a web page. It will result in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible.
+Let's say we want to create a Service Check named `awesome.search` that searches for a string on a web page. It will result in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible.
 
 The code would look something like this:
 
 ```python
 import requests
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 
-# MyCheck derives from AgentCheck, and provides the required check method.
-class MyCheck(AgentCheck):
+class AwesomeCheck(AgentCheck):
+    """AwesomeCheck derives from AgentCheck, and provides the required check method."""
+
     def check(self, instance):
         url = instance.get('url')
         search_string = instance.get('search_string')
 
-        # It's a good idea to do some basic sanity checking. Try to be as
-        # specific as possible, with the exceptions; you can fall back to
-        # CheckException when in doubt though.
+        # It's a very good idea to do some basic sanity checking.
+        # Try to be as specific as possible with the exceptions.
         if not url or not search_string:
-            raise CheckException("Configuration error, please fix my_check.yaml")
+            raise ConfigurationError('Configuration error, please fix awesome.yaml')
 
         try:
-            r = requests.get(url)
-            r.raise_for_status()
-            if search_string in r.text:
-                # Page is accessible and the string is present.
-                self.service_check('my_check.all_good', self.OK)
-            else:
-                # Page is accessible but the string was not found.
-                self.service_check('my_check.all_good', self.WARNING)
+            response = requests.get(url)
+            response.raise_for_status()
+        # Something went horribly wrong
         except Exception as e:
-            # Something went horribly wrong. Ideally we'd be more specific...
-            self.service_check('my_check.all_good', self.CRITICAL, e)
+            # Ideally we'd use a more specific message...
+            self.service_check('awesome.search', self.CRITICAL, message=str(e))
+        # Page is accessible
+        else:
+            # search_string is present
+            if search_string in response.text:
+                self.service_check('awesome.search', self.OK)
+            # search_string was not found
+            else:
+                self.service_check('awesome.search', self.WARNING)
 ```
 
-To learn more about the base Python class, see the [Python API documentation][5]. Moving along, let's dive into tests, which are an important part of any project (and *required* for inclusion in `integrations-extras`).
+To learn more about the base Python class, see the [Python API documentation][5].
 
 ### Writing tests
 
-There are two basic types of tests: unit tests for specific elements, and integration tests that execute the `check` method and verify proper metrics collection. Note that [pytest][6] and [tox][7] are used to run the tests.
+There are two basic types of tests: unit tests for specific functionality, and integration tests that execute the `check` method and verify proper metrics collection. Tests are _required_ if you want your integration to be included in `integrations-extras`. Note that [pytest][6] and [tox][7] are used to run the tests.
 
 For more information, see the [Datadog Checks Dev documentation][8].
 
-The first part of the `check` method below retrieves two pieces of information we need from the configuration file. This is a good candidate for a unit test. Open the file at `my_check/tests/test_check.py` and replace the contents with something like this:
+The first part of the `check` method retrieves and verifies two pieces of information we need from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
 
 ```python
 import pytest
 
 # Don't forget to import your Integration!
-from datadog_checks.my_check import MyCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.awesome import AwesomeCheck
+from datadog_checks.base import ConfigurationError
 
 
+@pytest.mark.unit
 def test_config():
-    c = MyCheck('my_check', {}, {}, None)
+    instance = {}
+    c = AwesomeCheck('awesome', {}, [instance])
 
     # empty instance
-    instance = {}
-    with pytest.raises(CheckException):
+    with pytest.raises(ConfigurationError):
         c.check(instance)
 
-    # only url
-    with pytest.raises(CheckException):
+    # only the url
+    with pytest.raises(ConfigurationError):
         c.check({'url': 'http://foobar'})
 
-    # only string
-    with pytest.raises(CheckException):
+    # only the search string
+    with pytest.raises(ConfigurationError):
         c.check({'search_string': 'foo'})
 
-    # this should be ok
+    # this should not fail
     c.check({'url': 'http://foobar', 'search_string': 'foo'})
 ```
 
-The scaffolding has already set up `tox` to run tests located at `my_check/tests`. Run the test:
+`pytest` has the concept of _markers_ that can be used to group tests into categories. Notice we've marked `test_config` as a `unit` test.
+
+The scaffolding has already been set up to run all tests located in `awesome/tests`. Run the tests:
 
 ```
-ddev -e test my_check
+ddev test awesome
 ```
 
-The test we just wrote doesn't check our collection _logic_ though, so let's add an integration test. We will use `docker-compose` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `my_check/tests/docker-compose.yml` with the following contents:
+This test doesn't check our collection _logic_ though, so let's add an integration test. We use `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
 
 ```yaml
 version: '3'
+
 services:
-  web:
+  nginx:
     image: nginx:stable-alpine
     ports:
       - "8000:80"
 ```
 
-Now add a dedicated `tox` environment to manage the tests, so that either the unit or integration tests can be run selectively during development. Note that the CI runs _all_ of the `tox` environments. Change your `tox.ini` file to this:
-
-```ini
-[tox]
-minversion = 2.0
-basepython = py27
-envlist = unit, integration, flake8
-
-[testenv]
-platform = linux2|darwin
-deps =
-    datadog-checks-base
-    -rrequirements-dev.txt
-
-[testenv:unit]
-commands =
-    pip install --require-hashes -r requirements.txt
-    pytest -v -m"not integration"
-
-[testenv:integration]
-commands =
-    pip install --require-hashes -r requirements.txt
-    pytest -v -m"integration"
-
-[testenv:flake8]
-skip_install = true
-deps = flake8
-commands = flake8 .
-
-[flake8]
-exclude = .eggs,.tox
-max-line-length = 120
-```
-
-Note that when invoking `pytest` above, there is an extra argument: `-m"integration"` in one case, and `-m"not integration"` in another. These are called _attributes_ in pytest terms and `-m"integration"` tells pytest to only run tests that are marked with the `integration` attribute (or not, if `not integration` is specified).
-
-Add the integration test to our `my_check/tests/test_check.py` module:
+Now, open the file at `awesome/tests/conftest.py` and replace the contents with something like this:
 
 ```python
-import subprocess
 import os
-import time
 
-from datadog_checks.utils.common import get_docker_hostname
+import pytest
+
+from datadog_checks.dev import docker_run, get_docker_hostname, get_here
+
+URL = 'http://{}:8000'.format(get_docker_hostname())
+SEARCH_STRING = 'Thank you for using nginx.'
+INSTANCE = {'url': URL, 'search_string': SEARCH_STRING}
 
 
+@pytest.fixture(scope='session')
+def dd_environment():
+    compose_file = os.path.join(get_here(), 'docker-compose.yml')
+
+    # This does 3 things:
+    #
+    # 1. Spins up the services defined in the compose file
+    # 2. Waits for the url to be available before running the tests
+    # 3. Tears down the services when the tests are finished
+    with docker_run(compose_file, endpoints=[URL]):
+        yield INSTANCE
+
+
+@pytest.fixture
+def instance():
+    return INSTANCE.copy()
+```
+
+Finally, add an integration test to our `awesome/tests/test_awesome.py` file:
+
+```python
 @pytest.mark.integration
-def test_service_check(aggregator):
-    c = MyCheck('my_check', {}, {}, None)
-
-    HERE = os.path.dirname(os.path.abspath(__file__))
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'docker-compose.yml')
-    ]
-
-    # start the Nginx container
-    subprocess.check_call(args + ["up", "-d"])
-    time.sleep(5)  # we should implement a better wait strategy :)
+@pytest.mark.usefixtures('dd_environment')
+def test_service_check(aggregator, instance):
+    c = AwesomeCheck('awesome', {}, [instance])
 
     # the check should send OK
-    instance = {
-        'url': 'http://{}:8000'.format(get_docker_hostname()),
-        'search_string': "Thank you for using nginx."
-    }
     c.check(instance)
-    aggregator.assert_service_check('my_check.all_good', MyCheck.OK)
+    aggregator.assert_service_check('awesome.search', AwesomeCheck.OK)
 
     # the check should send WARNING
-    instance['search_string'] = "Apache"
+    instance['search_string'] = 'Apache'
     c.check(instance)
-    aggregator.assert_service_check('my_check.all_good', MyCheck.WARNING)
-
-    # stop the container
-    subprocess.check_call(args + ["down"])
-
-    # the check should send CRITICAL
-    c.check(instance)
-    aggregator.assert_service_check('my_check.all_good', MyCheck.CRITICAL)
+    aggregator.assert_service_check('awesome.search', AwesomeCheck.WARNING)
 ```
 
-Run only the integration tests for faster iterations:
+Run only integration tests for faster development using the `-m/--marker` option:
 
 ```
-tox -e integration
+ddev test -m integration awesome
 ```
 
 The check is almost done. Let's add the final touches by adding the integration configurations.
@@ -353,7 +331,7 @@ The `README.md` file provided by our scaffolding already has the correct format.
 The directory structure for images and logos:
 
 ```
-    my_check/
+    awesome/
     ├── images
     │   └── an_awesome_image.png
     └── logos
@@ -365,7 +343,7 @@ The directory structure for images and logos:
 The `images` folder contains all images that are used in the Integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
 
 ```markdown
-![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/MyCheck/images/snapshot.png)
+![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/awesome/images/snapshot.png)
 ```
 
 The `logos` folder must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
@@ -442,12 +420,12 @@ Our check sends a Service Check, so we need to add it to the `service_checks.jso
 [
     {
         "agent_version": "6.0.0",
-        "integration":"my_check",
-        "check": "my_check.all_good",
+        "integration":"awesome",
+        "check": "awesome.search",
         "statuses": ["ok", "warning", "critical"],
-        "groups": ["host", "port"],
-        "name": "All Good!",
-        "description": "Returns `CRITICAL` if the check can't access the page."
+        "groups": [],
+        "name": "Awesome search!",
+        "description": "Returns `CRITICAL` if the check can't access the page, `WARNING` if the search string was not found, or `OK` otherwise."
     }
 ]
 ```
@@ -469,11 +447,11 @@ Find below the description for each attributes-each one of them is mandatory-of 
 `setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][15]
 
 Once your `setup.py` is ready, create a wheel:
-- With the `ddev` tooling (recommended).  
+- With the `ddev` tooling (recommended).
 If working on an integration in integrations-extras or integrations-core,
 `ddev release build <INTEGRATION_NAME>`, otherwise `ddev release build /path/to/package`
 
-- Without the `ddev` tooling.  
+- Without the `ddev` tooling.
   ```
   cd {integration}
   python setup.py bdist_wheel
