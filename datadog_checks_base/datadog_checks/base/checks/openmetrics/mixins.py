@@ -360,6 +360,9 @@ class OpenMetricsScraperMixin(object):
         if metric.name in scraper_config['ignore_metrics']:
             return  # Ignore the metric
 
+        if self._filter_metric(metric):
+            return  # Ignore the metric
+
         # Filter metric to see if we can enrich with joined labels
         self._join_labels(metric, scraper_config)
 
