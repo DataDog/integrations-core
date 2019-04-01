@@ -1,0 +1,24 @@
+{
+  "display_name": "Ambari",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "ambari",
+  "metric_prefix": "ambari.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "4f518f2c-cfa7-4763-ac33-b1c8846eb738",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Ambari Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "ambari"
+}
