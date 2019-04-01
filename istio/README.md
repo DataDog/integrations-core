@@ -29,7 +29,7 @@ init_config:
 
 instances:
   - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
-    mixer_endpoint: http://istio-telemetry.istio-system:9093/metrics
+    mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
     send_histograms_buckets: true
 ```
 
