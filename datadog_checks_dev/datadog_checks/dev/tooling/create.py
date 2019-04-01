@@ -63,7 +63,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         license_header = ''
         support_type = 'contrib'
         test_dev_dep = 'datadog-checks-dev'
-        tox_base_dep = 'datadog-checks-base[deps]'
+        tox_base_dep = 'datadog-checks-base[deps]>=6.6.0'
 
     config = {
         'author': author,
