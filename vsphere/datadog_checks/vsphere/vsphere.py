@@ -917,12 +917,12 @@ class VSphereCheck(AgentCheck):
 
             self._query_event(instance)
 
-            if set_external_tags is not None:
-                set_external_tags(self.get_external_host_tags())
-
             self.stop_pool()
             if self.exception_printed > 0:
                 self.log.error("One thread in the pool crashed, check the logs")
         except Exception:
             self.terminate_pool()
             raise
+        else:
+            if set_external_tags is not None:
+                set_external_tags(self.get_external_host_tags())
