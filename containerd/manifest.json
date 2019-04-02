@@ -8,9 +8,7 @@
   "guid": "5cdc0363-a0df-469b-8346-2da4ab84128c",
   "support": "core",
   "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
+    "linux"
   ],
   "public_title": "Datadog-Containerd Integration",
   "categories": [
