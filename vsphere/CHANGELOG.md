@@ -1,5 +1,8 @@
 # CHANGELOG - vsphere
 
+## 4.0.1-rc.1 / 2019-04-02
+
+
 ## 4.0.0 / 2019-01-29
 
 * [Changed] Wait for jobs to finish before returning from check function. See [#3034](https://github.com/DataDog/integrations-core/pull/3034).
