@@ -348,9 +348,9 @@ def test_prometheus_filtering(monkeypatch, aggregator):
         mock_method.assert_called_once()
         metric = mock_method.call_args[0][0]
         assert len(metric.samples) == 12
-        for name, labels, _ in metric.samples:
-            assert name == "container_cpu_usage_seconds_total"
-            assert labels["pod_name"] != ""
+        for s in metric.samples:
+            assert s.name == "container_cpu_usage_seconds_total"
+            assert s.labels["pod_name"] != ""
 
 
 def test_kubelet_check_instance_config(monkeypatch):

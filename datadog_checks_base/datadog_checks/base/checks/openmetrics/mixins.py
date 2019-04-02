@@ -228,7 +228,7 @@ class OpenMetricsScraperMixin(object):
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
         for metric in text_fd_to_metric_families(input_gen):
-            metric.type = scraper_config['type_overrides'].get(metric.name, metric.type)
+            metric.type = self._match_metric_in_mapping(metric, scraper_config['type_overrides']) or metric.type
             if metric.type not in self.METRIC_TYPES:
                 continue
             metric.name = self._remove_metric_prefix(metric.name, scraper_config)
@@ -295,8 +295,9 @@ class OpenMetricsScraperMixin(object):
 
     def _store_labels(self, metric, scraper_config):
         # If targeted metric, store labels
-        if metric.name in scraper_config['label_joins']:
-            matching_label = scraper_config['label_joins'][metric.name]['label_to_match']
+        join_config = self._match_metric_in_mapping(metric, scraper_config['label_joins'])
+        if join_config:
+            matching_label = join_config['label_to_match']
             for sample in metric.samples:
                 # metadata-only metrics that are used for label joins are always equal to 1
                 # this is required for metrics where all combinations of a state are sent
@@ -309,7 +310,7 @@ class OpenMetricsScraperMixin(object):
                 for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                     if label_name == matching_label:
                         matching_value = label_value
-                    elif label_name in scraper_config['label_joins'][metric.name]['labels_to_get']:
+                    elif label_name in join_config['labels_to_get']:
                         label_dict[label_name] = label_value
                 try:
                     if scraper_config['_label_mapping'][matching_label].get(matching_value):
@@ -352,7 +353,7 @@ class OpenMetricsScraperMixin(object):
         # If targeted metric, store labels
         self._store_labels(metric, scraper_config)
 
-        if metric.name in scraper_config['ignore_metrics']:
+        if self._is_metric_in_list(metric, scraper_config['ignore_metrics']):
             return  # Ignore the metric
 
         # Filter metric to see if we can enrich with joined labels
@@ -361,29 +362,30 @@ class OpenMetricsScraperMixin(object):
         if scraper_config['_dry_run']:
             return
 
-        try:
-            self.submit_openmetric(scraper_config['metrics_mapper'][metric.name], metric, scraper_config)
-        except KeyError:
-            if metric_transformers is not None:
-                if metric.name in metric_transformers:
-                    try:
-                        # Get the transformer function for this specific metric
-                        transformer = metric_transformers[metric.name]
-                        transformer(metric, scraper_config)
-                    except Exception as err:
-                        self.log.warning("Error handling metric: {} - error: {}".format(metric.name, err))
-                else:
-                    self.log.debug("Unable to handle metric: {0} - error: "
-                                   "No handler function named '{0}' defined".format(metric.name))
-            else:
-                # build the wildcard list if first pass
-                if scraper_config['_metrics_wildcards'] is None:
-                    scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'] if '*' in x]
+        mapped_name = self._match_metric_in_mapping(metric, scraper_config['metrics_mapper'])
+        if mapped_name:
+            self.submit_openmetric(mapped_name, metric, scraper_config)
+            return
 
-                # try matching wildcard (generic check)
-                for wildcard in scraper_config['_metrics_wildcards']:
-                    if fnmatchcase(metric.name, wildcard):
-                        self.submit_openmetric(metric.name, metric, scraper_config)
+        if metric_transformers is not None:
+            transformer = self._match_metric_in_mapping(metric, metric_transformers)
+            if transformer:
+                try:
+                    transformer(metric, scraper_config)
+                except Exception as err:
+                    self.log.warning("Error handling metric: {} - error: {}".format(metric.name, err))
+            else:
+                self.log.debug("Unable to handle metric: {0} - error: "
+                               "No handler function named '{0}' defined".format(metric.name))
+        else:
+            # build the wildcard list if first pass
+            if scraper_config['_metrics_wildcards'] is None:
+                scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'] if '*' in x]
+
+            # try matching wildcard (generic check)
+            for wildcard in scraper_config['_metrics_wildcards']:
+                if fnmatchcase(metric.name, wildcard):
+                    self.submit_openmetric(metric.name, metric, scraper_config)
 
     def poll(self, scraper_config, headers=None):
         """
@@ -591,3 +593,22 @@ class OpenMetricsScraperMixin(object):
 
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
+
+    @staticmethod
+    def _match_metric_in_mapping(metric, mapping):
+        """
+
+        """
+        if metric.name in mapping:
+            return mapping.get(metric.name)
+        elif metric.type == "counter":
+            return mapping.get(metric.name + "_total")
+
+    @staticmethod
+    def _is_metric_in_list(metric, name_list):
+        """
+
+        """
+        if metric.name in name_list:
+            return True
+        return metric.type == "counter" and metric.name + "_total" in name_list
