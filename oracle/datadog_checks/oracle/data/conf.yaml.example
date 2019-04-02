@@ -25,7 +25,7 @@ init_config:
 ##
 ## is what the following example configuration would become.
 #
-#  custom_queries:
+#  global_custom_queries:
 #   - metric_prefix: oracle.custom_query
 #     query: |  # Use the pipe if you require a multi-line script.
 #       SELECT columns
