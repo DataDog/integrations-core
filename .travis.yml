@@ -182,7 +182,7 @@ jobs:
     - stage: test
       env: CHECK=lighttpd PYTHON3=true
     - stage: test
-      env: CHECK=linkerd
+      env: CHECK=linkerd PYTHON3=true
     - stage: test
       env: CHECK=linux_proc_extras PYTHON3=true
     - stage: test
