@@ -17,32 +17,17 @@ from datadog_checks.dev import EnvVars
 pytestmark = pytest.mark.http
 
 
-def test_default_timeout():
-    # Assert the timeout is slightly larger than a multiple of 3,
-    # which is the default TCP packet retransmission window. See:
-    # https://tools.ietf.org/html/rfc2988
-    assert 0 < STANDARD_FIELDS['timeout'] % 3 <= 1
-
-
 class TestAttribute:
     def test_default(self):
         check = AgentCheck('test', {}, [{}])
 
         assert check._http is None
 
-    def test_flag(self):
+    def test_activate(self):
         check = AgentCheck('test', {}, [{}])
 
         assert check.http == check._http
         assert isinstance(check.http, RequestsWrapper)
-
-    def test_remapper_no_trigger(self):
-        class TestCheck(AgentCheck):
-            HTTP_CONFIG_REMAPPER = {'foo': {}}
-
-        check = TestCheck('test', {}, [{}])
-
-        assert check._http is None
 
 
 class TestTimeout:
@@ -51,14 +36,17 @@ class TestTimeout:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['timeout'] == STANDARD_FIELDS['timeout']
+        # Assert the timeout is slightly larger than a multiple of 3,
+        # which is the default TCP packet retransmission window. See:
+        # https://tools.ietf.org/html/rfc2988
+        assert 0 < http.options['timeout'] % 3 <= 1
 
     def test_config_timeout(self):
-        instance = {'timeout': 25}
+        instance = {'timeout': 24.5}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['timeout'] == 25
+        assert http.options['timeout'] == 24.5
 
 
 class TestHeaders:
