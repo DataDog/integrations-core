@@ -58,7 +58,7 @@ class RequestsWrapper(object):
         # Update the default behavior for skipping proxies
         default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
 
-        # Populate with the default values
+        # Populate with the default value 
         config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
 
         # Support non-standard (usually legacy) configurations, for example:

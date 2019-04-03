@@ -4,8 +4,14 @@
 from datadog_checks.ambari import AmbariCheck
 
 
-def test_check(aggregator, instance):
-    check = AmbariCheck('ambari', {}, {})
-    check.check(instance)
+def test_check(aggregator):
+    instance = [{
+        "url": "http://c6801.ambari.apache.org:8080/api/v1/",
+        "username": "admin",
+        "password": "admin"
+    }]
+    check = AmbariCheck('ambari', {}, instance)
+
+    check.check(instance[0])
 
     aggregator.assert_all_metrics_covered()
