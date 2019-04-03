@@ -1545,9 +1545,7 @@ def mock_filter_get():
 
 class FilterOpentMetricsCheck(OpenMetricsBaseCheck):
     def _filter_metric(self, metric):
-        if metric.documentation.startswith("(Deprecated)"):
-            return True
-        return False
+        return metric.documentation.startswith("(Deprecated)")
 
 
 @pytest.fixture
@@ -1584,3 +1582,4 @@ def test_filter_metrics(aggregator, mocked_filter_openmetrics_check,
         ],
         value=42,
     )
+    aggregator.assert_all_metrics_covered()
