@@ -146,6 +146,8 @@ class GenericPrometheusCheck(AgentCheck):
                 metrics_mapper[metric] = metric
             else:
                 metrics_mapper.update(metric)
+        # update metrics mapper with values provided by user
+        metrics_mapper.update(instance.get("metrics_mapper", {}))
 
         scraper.metrics_mapper = metrics_mapper
         scraper.labels_mapper = default_instance.get("labels_mapper", {})
