@@ -420,7 +420,7 @@ Our check sends a Service Check, so we need to add it to the `service_checks.jso
 [
     {
         "agent_version": "6.0.0",
-        "integration":"awesome",
+        "integration": "awesome",
         "check": "awesome.search",
         "statuses": ["ok", "warning", "critical"],
         "groups": [],
@@ -430,7 +430,7 @@ Our check sends a Service Check, so we need to add it to the `service_checks.jso
 ]
 ```
 
-Find below the description for each attributes-each one of them is mandatory-of your `service_checks.json` file:
+The `service_checks.json` file contains the following mandatory attributes:
 
 | Attribute       | Description                                                                                                              |
 | ----            | ----                                                                                                                     |
@@ -444,23 +444,16 @@ Find below the description for each attributes-each one of them is mandatory-of 
 
 ### Building
 
-`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][15]
+`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official Python documentation][15].
 
 Once your `setup.py` is ready, create a wheel:
-- With the `ddev` tooling (recommended).
-If working on an integration in integrations-extras or integrations-core,
-`ddev release build <INTEGRATION_NAME>`, otherwise `ddev release build /path/to/package`
 
-- Without the `ddev` tooling.
-  ```
-  cd {integration}
-  python setup.py bdist_wheel
-  ```
+- With the `ddev` tooling (recommended): `ddev release build <INTEGRATION_NAME>`
+- Without the `ddev` tooling: `cd <INTEGRATION_DIR> && python setup.py bdist_wheel`
 
 ### Installing
 
-To install your integration, you will need to build your python wheel first. See Building section above.
-Then run the following command:
+To install your integration, build your Python wheel first (see the [Building](#building) section above), then run the following command:
 ```
 datadog-agent integration install -w /path/to/wheel.whl
 ```
