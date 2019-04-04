@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 6.6.1 / 2019-04-04
+
+* [Fixed] Don't ship `pyodbc` on macOS as SQLServer integration is not shipped on macOS. See [#3461](https://github.com/DataDog/integrations-core/pull/3461).
+
 ## 6.6.0 / 2019-03-29
 
 * [Added] Upgrade in-toto. See [#3411](https://github.com/DataDog/integrations-core/pull/3411).
