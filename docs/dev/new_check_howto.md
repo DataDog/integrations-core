@@ -453,7 +453,7 @@ Once your `setup.py` is ready, create a wheel:
 
 ### Installing
 
-To install your Integration, you will need to build your Python wheel first (see the Building section above), then run the following command:
+To install your integration, build your Python wheel first (see the [Building](#building) section above), then run the following command:
 ```
 datadog-agent integration install -w /path/to/wheel.whl
 ```
