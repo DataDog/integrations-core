@@ -1,5 +1,10 @@
 # CHANGELOG - kubelet
 
+## 3.0.1 / 2019-04-04
+
+* [Fixed] Fix podlist multiple iterations when using pod expiration. See [#3456](https://github.com/DataDog/integrations-core/pull/3456).
+* [Fixed] Fix health check during first check run. See [#3457](https://github.com/DataDog/integrations-core/pull/3457).
+
 ## 3.0.0 / 2019-03-29
 
 * [Changed] Do not tag container restarts/state metrics by container_id anymore. See [#3424](https://github.com/DataDog/integrations-core/pull/3424).
