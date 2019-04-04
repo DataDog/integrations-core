@@ -6,7 +6,8 @@ from datadog_checks.ambari import AmbariCheck
 
 def test_check(aggregator):
     instance = [{
-        "url": "http://c6801.ambari.apache.org:8080/api/v1/",
+        "url": "c6801.ambari.apache.org",
+        "port": "8080",
         "username": "admin",
         "password": "admin"
     }]
