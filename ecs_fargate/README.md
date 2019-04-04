@@ -178,7 +178,7 @@ Need help? Contact [Datadog support][16].
 
 [1]: https://aws.amazon.com/cli
 [2]: https://aws.amazon.com/console
-[3]: https://docs.datadoghq.com/json/datadog-agent-ecs-fargate.json
+[3]: https://docs.datadoghq.com/resources/json/datadog-agent-ecs-fargate.json
 [4]: https://app.datadoghq.com/account/settings#api
 [5]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate
 [6]: http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html#ecs-config-s3
