@@ -263,8 +263,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     pod_list = json.load(r.raw, object_hook=f.json_hook)
                     pod_list['expired_count'] = f.expired_count
                     if pod_list.get("items") is not None:
-                        # Wrap items in a generator to filter our None items
-                        pod_list['items'] = (p for p in pod_list['items'] if p is not None)
+                        # Filter out None items from the list
+                        pod_list['items'] = [p for p in pod_list['items'] if p is not None]
                 else:
                     pod_list = json.load(r.raw)
 
