@@ -175,6 +175,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
         self.instance_tags = instance.get('tags', [])
+        self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
 
         # Test the kubelet health ASAP
         self._perform_kubelet_check(self.instance_tags)
@@ -193,7 +194,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                                                                      urljoin(endpoint, KUBELET_METRICS_PATH))
 
         # Kubelet credentials handling
-        self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
         self.kubelet_credentials.configure_scraper(
             self.cadvisor_scraper_config
         )
