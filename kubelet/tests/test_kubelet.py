@@ -129,6 +129,12 @@ COMMON_TAGS = {
     ],
     "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": [
         'pod_name:pi-kff76'
+    ],
+    "kubernetes_pod://12ceeaa9-33ca-11e6-ac8f-42010af00003": [
+        'pod_name:dd-agent-ntepl'
+    ],
+    "docker://32fc50ecfe24df055f6d56037acb966337eef7282ad5c203a1be58f2dd2fe743": [
+        'pod_name:dd-agent-ntepl'
     ]
 }
 
@@ -539,6 +545,11 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
     # Test .pods.expired gauge is submitted
     check._report_container_state_metrics(pod_list, ["custom:tag"])
     aggregator.assert_metric("kubernetes.pods.expired", value=1, tags=["custom:tag"])
+
+    # Ensure we can iterate twice over the podlist
+    check._report_pods_running(pod_list, [])
+    aggregator.assert_metric("kubernetes.pods.running", value=1, tags=["pod_name:dd-agent-ntepl"])
+    aggregator.assert_metric("kubernetes.containers.running", value=1, tags=["pod_name:dd-agent-ntepl"])
 
 
 class MockResponse(mock.Mock):
