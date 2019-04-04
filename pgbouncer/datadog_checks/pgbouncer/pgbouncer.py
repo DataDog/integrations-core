@@ -66,7 +66,7 @@ class PgBouncer(AgentCheck):
 
     DATABASES_METRICS = {
         'descriptors': [
-            ('database', 'db'),
+            ('name', 'name'),
         ],
         'metrics': [
             ('pool_size',            ('pgbouncer.databases.pool_size', GAUGE)),
