@@ -2,41 +2,30 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
+
+import mock
+import pytest
+
 from datadog_checks.ceph import Ceph
 
-import os
-import copy
-import mock
-import simplejson as json
+from .common import (
+    CHECK_NAME, BASIC_CONFIG, EXPECTED_SERVICE_TAGS, mock_data
+)
 
-# Constants
-CHECK_NAME = 'ceph'
-HERE = os.path.abspath(os.path.dirname(__file__))
-FIXTURE_DIR = os.path.join(HERE, 'fixtures')
-
-BASIC_CONFIG = {
-    'host': 'foo',
-    'tags': ['optional:tag1'],
-}
+EXPECTED_METRICS = [
+    'ceph.num_mons',
+    'ceph.total_objects',
+    'ceph.pgstate.active_clean'
+]
 
 EXPECTED_TAGS = [
     'ceph_fsid:e0efcf84-e8ed-4916-8ce1-9c70242d390a',
     'ceph_mon_state:peon',
     'optional:tag1'
 ]
-EXPECTED_METRICS = [
-    'ceph.num_mons',
-    'ceph.total_objects',
-    'ceph.pgstate.active_clean'
-]
-EXPECTED_SERVICE_TAGS = ['optional:tag1']
 
-
-def mock_data(file):
-    filepath = os.path.join(FIXTURE_DIR, file)
-    with open(filepath, "r") as f:
-        data = f.read()
-    return json.loads(data)
+pytestmark = pytest.mark.unit
 
 
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("raw.json"))
