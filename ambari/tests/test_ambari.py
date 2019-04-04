@@ -11,7 +11,7 @@ def test_check(aggregator):
         "username": "admin",
         "password": "admin"
     }]
-    check = AmbariCheck('ambari', {}, instance)
+    check = AmbariCheck('ambari', {}, {}, instance)
 
     check.check(instance[0])
 
