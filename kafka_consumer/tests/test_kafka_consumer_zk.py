@@ -48,6 +48,7 @@ def test_check_zk(aggregator, zk_instance):
 
     # let's reassert for the __consumer_offsets - multiple partitions
     aggregator.assert_metric('kafka.broker_offset', at_least=1)
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
@@ -74,6 +75,7 @@ def test_multiple_servers_zk(aggregator, zk_instance):
                     aggregator.assert_metric(mname, tags=tags +
                                              ["source:zk", "consumer_group:{}".format(name)], at_least=1)
 
+    aggregator.assert_all_metrics_covered()
 
 @pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
 def test_check_nogroups_zk(aggregator, zk_instance):
@@ -100,6 +102,7 @@ def test_check_nogroups_zk(aggregator, zk_instance):
             for mname in BROKER_METRICS + CONSUMER_METRICS:
                 aggregator.assert_metric(mname, at_least=1)
 
+    aggregator.assert_all_metrics_covered()
 
 def test_should_zk():
     check = KafkaCheck('kafka_consumer', {}, {})
