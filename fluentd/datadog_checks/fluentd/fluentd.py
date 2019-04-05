@@ -4,6 +4,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # 3rd party
+import requests
+
 from six.moves.urllib.parse import urlparse
 
 # project
@@ -48,10 +50,9 @@ class Fluentd(AgentCheck):
             service_check_tags = ['fluentd_host:%s' % monitor_agent_host, 'fluentd_port:%s'
                                   % monitor_agent_port] + custom_tags
 
-            self.HTTP_CONFIG_REMAPPER = {
-                'headers': headers(self.agentConfig),
-            }
-            r = self.http.get(url)
+            timeout = float(instance.get('timeout', self.default_timeout))
+
+            r = requests.get(url, headers=headers(self.agentConfig), timeout=timeout)
             r.raise_for_status()
             status = r.json()
 
