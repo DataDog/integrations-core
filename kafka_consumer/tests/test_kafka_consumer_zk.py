@@ -77,6 +77,7 @@ def test_multiple_servers_zk(aggregator, zk_instance):
 
     aggregator.assert_all_metrics_covered()
 
+
 @pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
 def test_check_nogroups_zk(aggregator, zk_instance):
     """
@@ -103,6 +104,7 @@ def test_check_nogroups_zk(aggregator, zk_instance):
                 aggregator.assert_metric(mname, at_least=1)
 
     aggregator.assert_all_metrics_covered()
+
 
 def test_should_zk():
     check = KafkaCheck('kafka_consumer', {}, {})
