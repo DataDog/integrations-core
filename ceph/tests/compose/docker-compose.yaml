@@ -12,3 +12,4 @@ services:
       - CEPH_DEMO_SECRET_KEY=demo
       - CEPH_DEMO_BUCKET=demo
       - DEBUG=verbose
+      - SREE_VERSION=leseb-Sree-v0.1-0-g4ab9969
