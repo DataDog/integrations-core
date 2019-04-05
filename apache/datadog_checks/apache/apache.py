@@ -52,23 +52,15 @@ class Apache(AgentCheck):
             raise Exception("Missing 'apache_status_url' in Apache config")
 
         url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
-
         connect_timeout = int(instance.get('connect_timeout', 5))
         receive_timeout = int(instance.get('receive_timeout', 15))
-
         tags = instance.get('tags', [])
 
-        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', False))
-
-        auth = None
-        if 'apache_user' in instance and 'apache_password' in instance:
-            auth = (instance['apache_user'], instance['apache_password'])
-
         self.HTTP_CONFIG_REMAPPER = {
-            'auth': auth,
-            'headers': headers(self.agentConfig),
-            'verify': not disable_ssl_validation,
-            'timeout': (connect_timeout, receive_timeout),
+            'apache_user': {'name': 'username', 'default': None, 'invert': False},
+            'apache_password': {'name': 'password', 'default': None, 'invert': False},
+            'disable_ssl_validation': {'name': 'ssl_verify', 'default': False, 'invert': True},
+            'headers': {'name': 'headers', 'default': headers(self.agentConfig)},
         }
 
         # Submit a service check for status page availability.
