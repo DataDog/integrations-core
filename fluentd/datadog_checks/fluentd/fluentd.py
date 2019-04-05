@@ -18,6 +18,11 @@ class Fluentd(AgentCheck):
     GAUGES = ['retry_count', 'buffer_total_queued_size', 'buffer_queue_length']
     _AVAILABLE_TAGS = frozenset(['plugin_id', 'type'])
 
+    HTTP_CONFIG_REMAPPER = {
+    'headers': {'name': 'headers', 'default': headers(self.agentConfig)},
+    'timeout': {'name': 'timeout', 'default': self.default_timeout}
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.default_timeout = init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
@@ -52,9 +57,7 @@ class Fluentd(AgentCheck):
                 'fluentd_port:%s' % monitor_agent_port,
             ] + custom_tags
 
-            timeout = float(instance.get('timeout', self.default_timeout))
-
-            r = requests.get(url, headers=headers(self.agentConfig), timeout=timeout)
+            r = self.http.get(url)
             r.raise_for_status()
             status = r.json()
 
