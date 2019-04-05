@@ -6,20 +6,98 @@ from six.moves.urllib.parse import quote, urljoin
 
 
 CLUSTERS_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters"
-HOSTS_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/hosts/{host_name}"
 HOST_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/hosts/{host_name}"
+HOSTS_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/hosts?fields=metrics"
+SERVICES_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/services"
 
 class AmbariCheck(AgentCheck):
-    # def __init__(self, name, init_config, agentConfig, instances=None):
-    #     super(AmbariCheck, self).__init__(name, init_config, agentConfig, instances)
-    #     self.hosts = []
-    #     self.clusters = []
-    #     self.services = []
+    
+    METRIC_PREFIX = 'ambari'
+
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        super(AmbariCheck, self).__init__(name, init_config, agentConfig, instances)
+        self.hosts = []
+        self.clusters = []
+        self.services = []
+
+        # use as template from ibm_was check
+        # self.metric_type_mapping = {
+        #     'AverageStatistic': self.gauge,
+        #     'BoundedRangeStatistic': self.gauge,
+        #     'CountStatistic': self.monotonic_count,
+        #     'DoubleStatistic': self.rate,
+        #     'RangeStatistic': self.gauge,
+        #     'TimeStatistic': self.gauge
+        # }
 
     def check(self, instance):
-        import pdb; pdb.set_trace()
         server = instance.get("url")
         port = instance.get("port")
-        endpoint = CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
-        url = urljoin(server, endpoint)
-        response = self.http.get(url).json()
+        tags = []
+        clusters_endpoint = CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
+
+        clusters = self.get_clusters(clusters_endpoint)
+        self.get_hosts_metrics(clusters, server, port, tags)
+        
+
+        
+    def get_clusters(self, url):
+        cluster_list = []
+        try:
+            r = self.http.get(url)
+            r.raise_for_status()
+        except:
+            raise
+
+        clusters = r.json().get('items')
+        for cluster in clusters:
+            cluster_list.append(cluster.get('Clusters').get('cluster_name'))
+        return cluster_list
+
+    def get_hosts_metrics(self, clusters, server, port, tags):
+
+        for cluster in clusters:
+            hosts_endpoint = HOSTS_URL.format(ambari_server=server, ambari_port=port, cluster_name=cluster)
+
+            try:
+                resp = self.http.get(hosts_endpoint)
+                resp.raise_for_status()
+            except:
+                raise
+
+        hosts_list = resp.json().get('items')
+        for host in hosts_list:
+            import pdb; pdb.set_trace()
+            host_tags = []
+            host_tags.append("ambari_host:" + host.get('Hosts').get('host_name'))
+            self.submit_metrics("test.value",host.get('metrics').get('cpu').get('cpu_idle'), host_tags)
+        return
+
+    # def get_service_metrics(self, clusters, server, port):
+    #     service_list = []
+
+    #     services_endpoint = SERVICES_URL.format(ambari_server=server, ambari_port=port, cluster_name=cluster)
+
+    #         try:
+    #             service_response = self.http.get(services_endpoint)
+    #             service_response.raise_for_status()
+    #         except:
+    #             raise
+
+    #     services = service_response.json().get('items')
+    #     for service in services:
+    #         hosts_and_services_list["service_list"].append(service.get('ServiceInfo').get('service_name'))
+
+    #     return service_list
+
+
+    def submit_metrics(self, name, value, tags):
+        # value = child.get(metrics.METRIC_VALUE_FIELDS[child.tag])
+        # metric_name = self.normalize(
+        #     ensure_unicode(child.get('name')),
+        #     prefix='{}.{}'.format(self.METRIC_PREFIX, prefix),
+        #     fix_case=True
+        # )
+        # self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
+        import pdb; pdb.set_trace()
+        self.gauge(name, value, tags)
