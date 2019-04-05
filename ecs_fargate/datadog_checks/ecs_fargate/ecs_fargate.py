@@ -54,7 +54,7 @@ class FargateCheck(AgentCheck):
         custom_tags = instance.get('tags', [])
 
         try:
-            request = requests.get(metadata_endpoint, timeout=timeout)
+            request = self.http.get(metadata_endpoint)
         except requests.exceptions.Timeout:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(metadata_endpoint, timeout)
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg, tags=custom_tags)
@@ -108,7 +108,7 @@ class FargateCheck(AgentCheck):
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
 
         try:
-            request = requests.get(stats_endpoint, timeout=timeout)
+            request = self.http.get(stats_endpoint)
         except requests.exceptions.Timeout:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, timeout)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
