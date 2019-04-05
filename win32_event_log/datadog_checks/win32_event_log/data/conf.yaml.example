@@ -103,7 +103,7 @@ instances:
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file and channel if windows_event
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file and channel_path if windows_event
 ## service - mandatory - Name of the service owning the log
 ## source  - mandatory - Attribute that defines which integration is sending the logs
 ## sourcecategory - optional - Multiple value attribute. Can be used to refine the source attribtue
