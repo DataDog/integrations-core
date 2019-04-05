@@ -4,7 +4,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # 3rd party
-import requests
 from six.moves.urllib.parse import urlparse
 
 # project
