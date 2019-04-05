@@ -45,12 +45,17 @@ instances:
 
   ## @param pid_file - string - optional
   ## A Pid file to match.
+  ## NOTE: agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make
+  ## sure to grant it read access to the PID files you specify in this option.
   #
   #  pid_file: <PID_FILE>
 
   ## @param exact_match - boolean - optional - default: true
   ## Matches your search_string on proc.name().
   ## If you want to match on a substring within proc.cmdline(), set this to false
+  ## NOTE: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have
+  ## acces to the full command line of processes running under a different user. This option
+  ## cannot be used in such cases.
   ## https://docs.datadoghq.com/integrations/process/#configuration
   ## Regex is also supported when this flag is set to False.
   #
@@ -81,6 +86,8 @@ instances:
 
   ## @param user - string - optional
   ## Only report processes belonging to a specific user.
+  ## NOTE: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that may not have
+  ## access to the name of the user running the processes. This option cannot be used in such cases.
   #
   #  user: <USER_NAME>
 
