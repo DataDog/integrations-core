@@ -2,16 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import AgentCheck
-from six.moves.urllib.parse import quote, urljoin
-
 
 CLUSTERS_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters"
+HOST_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/hosts/{host_name}"
 HOSTS_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/hosts?fields=metrics"
 SERVICES_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/services"
 
 
 class AmbariCheck(AgentCheck):
-    
     METRIC_PREFIX = 'ambari'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -38,16 +36,11 @@ class AmbariCheck(AgentCheck):
 
         clusters = self.get_clusters(clusters_endpoint)
         self.get_hosts_metrics(clusters, server, port, tags)
-        
 
-        
     def get_clusters(self, url):
         cluster_list = []
-        try:
-            r = self.http.get(url)
-            r.raise_for_status()
-        except:
-            raise
+        r = self.http.get(url)
+        r.raise_for_status()
 
         clusters = r.json().get('items')
         for cluster in clusters:
@@ -55,23 +48,18 @@ class AmbariCheck(AgentCheck):
         return cluster_list
 
     def get_hosts_metrics(self, clusters, server, port, tags):
-
         for cluster in clusters:
             hosts_endpoint = HOSTS_URL.format(ambari_server=server, ambari_port=port, cluster_name=cluster)
+            resp = self.http.get(hosts_endpoint)
+            resp.raise_for_status()
+            hosts_list = resp.json().get('items')
+            cluster_tag = "ambari_cluster:{}".format(cluster)
 
-            try:
-                resp = self.http.get(hosts_endpoint)
-                resp.raise_for_status()
-            except:
-                raise
-
-        hosts_list = resp.json().get('items')
-        for host in hosts_list:
-            import pdb; pdb.set_trace()
-            host_tags = []
-            host_tags.append("ambari_host:" + host.get('Hosts').get('host_name'))
-            self.submit_metrics("test.value",host.get('metrics').get('cpu').get('cpu_idle'), host_tags)
-        return
+            for host in hosts_list:
+                import pdb;
+                pdb.set_trace()
+                host_tags = [cluster_tag, "ambari_host:" + host.get('Hosts').get('host_name')]
+                self.submit_metrics("test.value", host.get('metrics').get('cpu').get('cpu_idle'), host_tags)
 
     # def get_service_metrics(self, clusters, server, port):
     #     service_list = []
@@ -90,7 +78,6 @@ class AmbariCheck(AgentCheck):
 
     #     return service_list
 
-
     def submit_metrics(self, name, value, tags):
         # value = child.get(metrics.METRIC_VALUE_FIELDS[child.tag])
         # metric_name = self.normalize(
@@ -99,5 +86,6 @@ class AmbariCheck(AgentCheck):
         #     fix_case=True
         # )
         # self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
-        import pdb; pdb.set_trace()
+        import pdb
+        pdb.set_trace()
         self.gauge(name, value, tags)
