@@ -53,13 +53,15 @@ def test_relations_metrics(aggregator, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:persons', 'schema:public',
     ]
 
     expected_size_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:persons',
     ]
@@ -85,7 +87,8 @@ def test_index_metrics(aggregator, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
         'db:dogs', 'table:breed', 'index:breed_names', 'schema:public',
     ]
 
