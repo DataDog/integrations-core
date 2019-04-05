@@ -14,5 +14,4 @@ def test_check(aggregator):
     check = AmbariCheck('ambari', {}, {}, instance)
 
     check.check(instance[0])
-
     aggregator.assert_all_metrics_covered()
