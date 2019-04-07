@@ -354,7 +354,7 @@ class KafkaCheck(AgentCheck):
             # Report the consumer group offsets and consumer lag
             if (topic, partition) not in highwater_offsets:
                 self.log.warn(
-                    "[%s] topic: %s partition: %s was not available in the consumer " "- skipping consumer submission",
+                    "[%s] topic: %s partition: %s was not available in the consumer - skipping consumer submission",
                     consumer_group,
                     topic,
                     partition,
