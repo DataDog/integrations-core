@@ -9,8 +9,8 @@ import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
-from .common import PORT, PASSWORD, HOST
 
+from .common import HOST, PASSWORD, PORT
 
 TEST_KEY = "testkey"
 

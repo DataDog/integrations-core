@@ -30,68 +30,59 @@ class Redis(AgentCheck):
 
     GAUGE_KEYS = {
         # Append-only metrics
-        'aof_last_rewrite_time_sec':    'redis.aof.last_rewrite_time',
-        'aof_rewrite_in_progress':      'redis.aof.rewrite',
-        'aof_current_size':             'redis.aof.size',
-        'aof_buffer_length':            'redis.aof.buffer_length',
-
+        'aof_last_rewrite_time_sec': 'redis.aof.last_rewrite_time',
+        'aof_rewrite_in_progress': 'redis.aof.rewrite',
+        'aof_current_size': 'redis.aof.size',
+        'aof_buffer_length': 'redis.aof.buffer_length',
         # Network
-        'connected_clients':            'redis.net.clients',
-        'connected_slaves':             'redis.net.slaves',
-        'rejected_connections':         'redis.net.rejected',
-
+        'connected_clients': 'redis.net.clients',
+        'connected_slaves': 'redis.net.slaves',
+        'rejected_connections': 'redis.net.rejected',
         # clients
-        'blocked_clients':              'redis.clients.blocked',
-        'client_biggest_input_buf':     'redis.clients.biggest_input_buf',
-        'client_longest_output_list':   'redis.clients.longest_output_list',
-
+        'blocked_clients': 'redis.clients.blocked',
+        'client_biggest_input_buf': 'redis.clients.biggest_input_buf',
+        'client_longest_output_list': 'redis.clients.longest_output_list',
         # Keys
-        'evicted_keys':                 'redis.keys.evicted',
-        'expired_keys':                 'redis.keys.expired',
-
+        'evicted_keys': 'redis.keys.evicted',
+        'expired_keys': 'redis.keys.expired',
         # stats
-        'latest_fork_usec':             'redis.perf.latest_fork_usec',
-        'bytes_received_per_sec':       'redis.bytes_received_per_sec',
-        'bytes_sent_per_sec':           'redis.bytes_sent_per_sec',
+        'latest_fork_usec': 'redis.perf.latest_fork_usec',
+        'bytes_received_per_sec': 'redis.bytes_received_per_sec',
+        'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
         # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
         # available on Azure Redis
-
         # pubsub
-        'pubsub_channels':              'redis.pubsub.channels',
-        'pubsub_patterns':              'redis.pubsub.patterns',
-
+        'pubsub_channels': 'redis.pubsub.channels',
+        'pubsub_patterns': 'redis.pubsub.patterns',
         # rdb
-        'rdb_bgsave_in_progress':       'redis.rdb.bgsave',
-        'rdb_changes_since_last_save':  'redis.rdb.changes_since_last',
-        'rdb_last_bgsave_time_sec':     'redis.rdb.last_bgsave_time',
-
+        'rdb_bgsave_in_progress': 'redis.rdb.bgsave',
+        'rdb_changes_since_last_save': 'redis.rdb.changes_since_last',
+        'rdb_last_bgsave_time_sec': 'redis.rdb.last_bgsave_time',
         # memory
-        'mem_fragmentation_ratio':      'redis.mem.fragmentation_ratio',
-        'used_memory':                  'redis.mem.used',
-        'used_memory_lua':              'redis.mem.lua',
-        'used_memory_peak':             'redis.mem.peak',
-        'used_memory_rss':              'redis.mem.rss',
-        'maxmemory':                    'redis.mem.maxmemory',
-
+        'mem_fragmentation_ratio': 'redis.mem.fragmentation_ratio',
+        'used_memory': 'redis.mem.used',
+        'used_memory_lua': 'redis.mem.lua',
+        'used_memory_peak': 'redis.mem.peak',
+        'used_memory_rss': 'redis.mem.rss',
+        'maxmemory': 'redis.mem.maxmemory',
         # replication
-        'master_last_io_seconds_ago':   'redis.replication.last_io_seconds_ago',
-        'master_sync_in_progress':      'redis.replication.sync',
-        'master_sync_left_bytes':       'redis.replication.sync_left_bytes',
-        'repl_backlog_histlen':         'redis.replication.backlog_histlen',
-        'master_repl_offset':           'redis.replication.master_repl_offset',
-        'slave_repl_offset':            'redis.replication.slave_repl_offset',
+        'master_last_io_seconds_ago': 'redis.replication.last_io_seconds_ago',
+        'master_sync_in_progress': 'redis.replication.sync',
+        'master_sync_left_bytes': 'redis.replication.sync_left_bytes',
+        'repl_backlog_histlen': 'redis.replication.backlog_histlen',
+        'master_repl_offset': 'redis.replication.master_repl_offset',
+        'slave_repl_offset': 'redis.replication.slave_repl_offset',
     }
 
     RATE_KEYS = {
         # cpu
-        'used_cpu_sys':                 'redis.cpu.sys',
-        'used_cpu_sys_children':        'redis.cpu.sys_children',
-        'used_cpu_user':                'redis.cpu.user',
-        'used_cpu_user_children':       'redis.cpu.user_children',
-
+        'used_cpu_sys': 'redis.cpu.sys',
+        'used_cpu_sys_children': 'redis.cpu.sys_children',
+        'used_cpu_user': 'redis.cpu.user',
+        'used_cpu_user_children': 'redis.cpu.user_children',
         # stats
-        'keyspace_hits':                'redis.stats.keyspace_hits',
-        'keyspace_misses':              'redis.stats.keyspace_misses',
+        'keyspace_hits': 'redis.stats.keyspace_hits',
+        'keyspace_misses': 'redis.stats.keyspace_misses',
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -131,9 +122,20 @@ class Redis(AgentCheck):
             try:
                 # Only send useful parameters to the redis client constructor
                 list_params = [
-                    'host', 'port', 'db', 'password', 'socket_timeout',
-                    'connection_pool', 'charset', 'errors', 'unix_socket_path', 'ssl',
-                    'ssl_certfile', 'ssl_keyfile', 'ssl_ca_certs', 'ssl_cert_reqs'
+                    'host',
+                    'port',
+                    'db',
+                    'password',
+                    'socket_timeout',
+                    'connection_pool',
+                    'charset',
+                    'errors',
+                    'unix_socket_path',
+                    'ssl',
+                    'ssl_certfile',
+                    'ssl_keyfile',
+                    'ssl_ca_certs',
+                    'ssl_cert_reqs',
                 ]
 
                 # Set a default timeout (in seconds) if no timeout is specified in the instance config
@@ -153,15 +155,9 @@ class Redis(AgentCheck):
         tags = set(custom_tags or [])
 
         if 'unix_socket_path' in instance:
-            tags_to_add = [
-                "redis_host:%s" % instance.get("unix_socket_path"),
-                "redis_port:unix_socket",
-            ]
+            tags_to_add = ["redis_host:%s" % instance.get("unix_socket_path"), "redis_port:unix_socket"]
         else:
-            tags_to_add = [
-                "redis_host:%s" % instance.get('host'),
-                "redis_port:%s" % instance.get('port')
-            ]
+            tags_to_add = ["redis_host:%s" % instance.get('host'), "redis_port:%s" % instance.get('port')]
 
         tags = sorted(tags.union(tags_to_add))
 
@@ -265,7 +261,7 @@ class Redis(AgentCheck):
             if db not in databases:
                 self.warning("Cannot find database {}".format(instance['db']))
                 return
-            databases = [db, ]
+            databases = [db]
 
         # maps a key to the total length across databases
         lengths_overall = defaultdict(int)
@@ -282,7 +278,7 @@ class Redis(AgentCheck):
                 if re.search(r"(?<!\\)[*?[]", key_pattern):
                     keys = db_conn.scan_iter(match=key_pattern)
                 else:
-                    keys = [key_pattern, ]
+                    keys = [key_pattern]
 
                 for key in keys:
                     text_key = ensure_unicode(key)
@@ -329,19 +325,15 @@ class Redis(AgentCheck):
                     self.gauge(
                         'redis.key.length',
                         total["length"],
-                        tags=tags + [
-                            'key:{}'.format(key),
-                            'key_type:{}'.format(total["key_type"]),
-                            'redis_db:db{}'.format(db)])
+                        tags=tags
+                        + ['key:{}'.format(key), 'key_type:{}'.format(total["key_type"]), 'redis_db:db{}'.format(db)],
+                    )
 
         # Warn if a key is missing from the entire redis instance.
         # Send 0 if the key is missing/empty from the entire redis instance.
         for key, total in iteritems(lengths_overall):
             if total == 0 and instance.get("warn_on_missing_keys", True):
-                self.gauge(
-                    'redis.key.length',
-                    total,
-                    tags=tags + ['key:{}'.format(key)])
+                self.gauge('redis.key.length', total, tags=tags + ['key:{}'.format(key)])
                 self.warning("{0} key not found in redis".format(key))
 
     def _check_replication(self, info, tags):
@@ -386,9 +378,12 @@ class Redis(AgentCheck):
             try:
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
                 if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
-                    self.warning("Redis {0} is higher than {1}. Defaulting to {1}."
-                                 "If you need a higher value, please set {0} in your check config"
-                                 .format(MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES))
+                    self.warning(
+                        "Redis {0} is higher than {1}. Defaulting to {1}."
+                        "If you need a higher value, please set {0} in your check config".format(
+                            MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES
+                        )
+                    )
                     max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
             # No config on AWS Elasticache
             except redis.ResponseError:
@@ -435,8 +430,9 @@ class Redis(AgentCheck):
         try:
             command_stats = conn.info("commandstats")
         except Exception:
-            self.warning("Could not retrieve command stats from Redis."
-                         "INFO COMMANDSTATS only works with Redis >= 2.6.")
+            self.warning(
+                "Could not retrieve command stats from Redis." "INFO COMMANDSTATS only works with Redis >= 2.6."
+            )
             return
 
         for key, stats in iteritems(command_stats):
