@@ -63,7 +63,7 @@ def test_check(aggregator, mocked_request):
         aggregator.assert_metric(metric, value=value, tags=YARN_QUEUE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Queue Metrics from excluded queues are absent
-    for metric, value in YARN_QUEUE_METRICS.values():
+    for metric, _ in YARN_QUEUE_METRICS.values():
         aggregator.assert_metric(metric, tags=YARN_QUEUE_NOFOLLOW_METRICS_TAGS + CUSTOM_TAGS, count=0)
 
     aggregator.assert_all_metrics_covered()
@@ -77,7 +77,7 @@ def test_check_excludes_app_metrics(aggregator, mocked_request):
     yarn.check(YARN_CONFIG_EXCLUDING_APP['instances'][0])
 
     # Check that the YARN App metrics is empty
-    for metric, type in YARN_APP_METRICS.values():
+    for metric, _ in YARN_APP_METRICS.values():
         aggregator.assert_metric(metric, count=0)
 
     # Check that our service is up
@@ -121,7 +121,7 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
         )
         pass
     else:
-        assert False, "Should have thrown an SSLError due to a badly configured certificate"
+        raise AssertionError('Should have thrown an SSLError due to a badly configured certificate')
 
     # Run the check on the same configuration, but with verify=False. We shouldn't get an exception.
     yarn.check(YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0])
