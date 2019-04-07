@@ -4,10 +4,9 @@
 
 from six import iteritems
 
+from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.config import is_affirmative
-
-from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 
 
 class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
@@ -27,9 +26,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         "persistentvolume_protection_controller",
         "persistentvolumeclaim_protection_controller",
         "replicaset_controller",
-        "replication_controller"
-        "resource_quota_controller"
-        "root_ca_cert_publisher",
+        "replication_controller" "resource_quota_controller" "root_ca_cert_publisher",
         "route_controller",
         "service_controller",
         "serviceaccount_controller",
@@ -111,7 +108,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                     ],
                 }
             },
-            default_namespace="kube_controller_manager"
+            default_namespace="kube_controller_manager",
         )
 
     def check(self, instance):
@@ -141,7 +138,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         if not metric.name.endswith(tag_value_trim):
             self.debug("Cannot process metric {} with expected suffix {}".format(metric.name, tag_value_trim))
             return
-        tag_value = metric.name[:-len(tag_value_trim)]
+        tag_value = metric.name[: -len(tag_value_trim)]
 
         for sample in metric.samples:
             sample[self.SAMPLE_LABELS][tag_name] = tag_value
@@ -149,31 +146,19 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         self.submit_openmetric(metric_name, metric, scraper_config)
 
     def rate_limiter_use(self, metric, scraper_config):
-        self._tag_and_submit(
-            metric, scraper_config, "rate_limiter.use", "limiter", "_rate_limiter_use"
-        )
+        self._tag_and_submit(metric, scraper_config, "rate_limiter.use", "limiter", "_rate_limiter_use")
 
     def queue_adds(self, metric, scraper_config):
-        self._tag_and_submit(
-            metric, scraper_config, "queue.adds", "queue", "_adds"
-        )
+        self._tag_and_submit(metric, scraper_config, "queue.adds", "queue", "_adds")
 
     def queue_depth(self, metric, scraper_config):
-        self._tag_and_submit(
-            metric, scraper_config, "queue.depth", "queue", "_depth"
-        )
+        self._tag_and_submit(metric, scraper_config, "queue.depth", "queue", "_depth")
 
     def queue_latency(self, metric, scraper_config):
-        self._tag_and_submit(
-            metric, scraper_config, "queue.latency", "queue", "_queue_latency"
-        )
+        self._tag_and_submit(metric, scraper_config, "queue.latency", "queue", "_queue_latency")
 
     def queue_retries(self, metric, scraper_config):
-        self._tag_and_submit(
-            metric, scraper_config, "queue.retries", "queue", "_retries"
-        )
+        self._tag_and_submit(metric, scraper_config, "queue.retries", "queue", "_retries")
 
     def queue_work_duration(self, metric, scraper_config):
-        self._tag_and_submit(
-            metric, scraper_config, "queue.work_duration", "queue", "_work_duration"
-        )
+        self._tag_and_submit(metric, scraper_config, "queue.work_duration", "queue", "_work_duration")
