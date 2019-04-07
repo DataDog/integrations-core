@@ -9,18 +9,18 @@ import mock
 import pytest
 from six import iteritems
 
-from . import common
-
 from datadog_checks.checks import AgentCheck
 from datadog_checks.openstack.openstack import (
+    IncompleteAuthScope,
+    IncompleteConfig,
+    IncompleteIdentity,
+    KeystoneCatalog,
     OpenStackCheck,
     OpenStackProjectScope,
     OpenStackUnscoped,
-    KeystoneCatalog,
-    IncompleteConfig,
-    IncompleteAuthScope,
-    IncompleteIdentity
 )
+
+from . import common
 
 instances = common.MOCK_CONFIG['instances']
 instance = common.MOCK_CONFIG['instances'][0]
@@ -32,6 +32,7 @@ openstack_check = OpenStackCheck('openstack', init_config, {}, instances=[instan
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -46,8 +47,8 @@ class MockHTTPResponse(object):
 
 
 MOCK_HTTP_RESPONSE = MockHTTPResponse(
-    response_dict=common.EXAMPLE_AUTH_RESPONSE, headers={
-        "X-Subject-Token": "fake_token"})
+    response_dict=common.EXAMPLE_AUTH_RESPONSE, headers={"X-Subject-Token": "fake_token"}
+)
 MOCK_HTTP_PROJECTS_RESPONSE = MockHTTPResponse(response_dict=common.EXAMPLE_PROJECTS_RESPONSE, headers={})
 
 
@@ -92,15 +93,16 @@ def test_from_config():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
     bad_instance_config = {}
 
-    good_instance_config = {'user': common.GOOD_USERS[0]['user'],
-                            'auth_scope': common.GOOD_AUTH_SCOPES[0]['auth_scope']}
+    good_instance_config = {
+        'user': common.GOOD_USERS[0]['user'],
+        'auth_scope': common.GOOD_AUTH_SCOPES[0]['auth_scope'],
+    }
 
     with pytest.raises(IncompleteConfig):
         OpenStackProjectScope.from_config(init_config, bad_instance_config)
 
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token',
-        return_value=MOCK_HTTP_RESPONSE
+        'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token', return_value=MOCK_HTTP_RESPONSE
     ):
         append_config = good_instance_config.copy()
         append_config['append_tenant_id'] = True
@@ -117,24 +119,25 @@ def test_from_config():
 def test_unscoped_from_config():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
 
-    good_instance_config = {'user': common.GOOD_USERS[0]['user'],
-                            'auth_scope': common.GOOD_UNSCOPED_AUTH_SCOPES[0]['auth_scope']}
+    good_instance_config = {
+        'user': common.GOOD_USERS[0]['user'],
+        'auth_scope': common.GOOD_UNSCOPED_AUTH_SCOPES[0]['auth_scope'],
+    }
 
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_http_response['token'].pop('catalog')
     mock_http_response['token'].pop('project')
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackUnscoped.request_auth_token',
-        return_value=mock_response
+        'datadog_checks.openstack.openstack.OpenStackUnscoped.request_auth_token', return_value=mock_response
     ):
         with mock.patch(
             'datadog_checks.openstack.openstack.OpenStackUnscoped.request_project_list',
-            return_value=MOCK_HTTP_PROJECTS_RESPONSE
+            return_value=MOCK_HTTP_PROJECTS_RESPONSE,
         ):
             with mock.patch(
                 'datadog_checks.openstack.openstack.OpenStackUnscoped.get_token_for_project',
-                return_value=MOCK_HTTP_RESPONSE
+                return_value=MOCK_HTTP_RESPONSE,
             ):
                 append_config = good_instance_config.copy()
                 append_config['append_tenant_id'] = True
@@ -150,11 +153,14 @@ def test_unscoped_from_config():
 
 
 def test_get_nova_endpoint():
-    assert KeystoneCatalog.get_nova_endpoint(
-        common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
-    assert KeystoneCatalog.get_nova_endpoint(
-        common.EXAMPLE_AUTH_RESPONSE,
-        nova_api_version='v2') == u'http://10.0.2.15:8773/'
+    assert (
+        KeystoneCatalog.get_nova_endpoint(common.EXAMPLE_AUTH_RESPONSE)
+        == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
+    )
+    assert (
+        KeystoneCatalog.get_nova_endpoint(common.EXAMPLE_AUTH_RESPONSE, nova_api_version='v2')
+        == u'http://10.0.2.15:8773/'
+    )
 
 
 def test_get_neutron_endpoint():
@@ -176,16 +182,15 @@ def test_ensure_auth_scope(aggregator):
         openstack_check.get_scope_for_instance(instance)
 
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token',
-        return_value=MOCK_HTTP_RESPONSE
+        'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token', return_value=MOCK_HTTP_RESPONSE
     ):
         scope = openstack_check.ensure_auth_scope(instance)
 
         assert openstack_check.get_scope_for_instance(instance) == scope
         openstack_check._send_api_service_checks(scope, ['optional:tag1'])
         aggregator.assert_service_check(
-            OpenStackCheck.IDENTITY_API_SC, status=AgentCheck.OK, tags=[
-                'optional:tag1', 'server:http://10.0.2.15:5000'])
+            OpenStackCheck.IDENTITY_API_SC, status=AgentCheck.OK, tags=['optional:tag1', 'server:http://10.0.2.15:5000']
+        )
 
         # URLs are nonexistant, so return CRITICAL
         aggregator.assert_service_check(OpenStackCheck.COMPUTE_API_SC, status=AgentCheck.CRITICAL)
@@ -201,7 +206,8 @@ def test_ensure_auth_scope(aggregator):
 
 def test_parse_uptime_string():
     uptime_parsed = openstack_check._parse_uptime_string(
-        u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n')
+        u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
+    )
     assert uptime_parsed.get('loads') == [0.04, 0.14, 0.19]
 
 
@@ -210,8 +216,7 @@ def test_cache_utils():
     expected_aggregates = {'hyp_1': ['aggregate:staging', 'availability_zone:test']}
 
     with mock.patch(
-        'datadog_checks.openstack.OpenStackCheck.get_all_aggregate_hypervisors',
-        return_value=expected_aggregates
+        'datadog_checks.openstack.OpenStackCheck.get_all_aggregate_hypervisors', return_value=expected_aggregates
     ):
         assert openstack_check._get_and_set_aggregate_list() == expected_aggregates
         time.sleep(1.5)
@@ -223,11 +228,16 @@ def test_server_exclusion(*args):
     """
     Exclude servers using regular expressions.
     """
-    openstackCheck = OpenStackCheck("test", {
-        'keystone_server_url': 'http://10.0.2.15:5000',
-        'ssl_verify': False,
-        'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=instances)
+    openstackCheck = OpenStackCheck(
+        "test",
+        {
+            'keystone_server_url': 'http://10.0.2.15:5000',
+            'ssl_verify': False,
+            'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
+        },
+        {},
+        instances=instances,
+    )
 
     # Retrieve servers
     openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
@@ -248,8 +258,9 @@ def test_network_exclusion(*args):
     """
     Exclude networks using regular expressions.
     """
-    with mock.patch('datadog_checks.openstack.OpenStackCheck.get_stats_for_single_network') \
-            as mock_get_stats_single_network:
+    with mock.patch(
+        'datadog_checks.openstack.OpenStackCheck.get_stats_for_single_network'
+    ) as mock_get_stats_single_network:
 
         openstack_check.exclude_network_id_rules = set([re.compile(rule) for rule in common.EXCLUDED_NETWORK_IDS])
 
@@ -266,10 +277,12 @@ def test_network_exclusion(*args):
 
 
 @mock.patch(
-    'datadog_checks.openstack.OpenStackCheck._make_request_with_auth_fallback',
-    return_value=common.MOCK_NOVA_SERVERS)
-@mock.patch('datadog_checks.openstack.OpenStackCheck.get_nova_endpoint',
-            return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
+    'datadog_checks.openstack.OpenStackCheck._make_request_with_auth_fallback', return_value=common.MOCK_NOVA_SERVERS
+)
+@mock.patch(
+    'datadog_checks.openstack.OpenStackCheck.get_nova_endpoint',
+    return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876",
+)
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_auth_token', return_value="test_auth_token")
 @mock.patch('datadog_checks.openstack.OpenStackCheck.get_project_name_from_id', return_value="tenant-1")
 def test_cache_between_runs(self, *args):
@@ -277,11 +290,16 @@ def test_cache_between_runs(self, *args):
     Ensure the cache contains the expected VMs between check runs.
     """
 
-    openstackCheck = OpenStackCheck("test", {
-        'keystone_server_url': 'http://10.0.2.15:5000',
-        'ssl_verify': False,
-        'exclude_server_ids': common.EXCLUDED_SERVER_IDS
-    }, {}, instances=instances)
+    openstackCheck = OpenStackCheck(
+        "test",
+        {
+            'keystone_server_url': 'http://10.0.2.15:5000',
+            'ssl_verify': False,
+            'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
+        },
+        {},
+        instances=instances,
+    )
 
     # Start off with a list of servers
     openstackCheck.server_details_by_id = copy.deepcopy(common.ALL_SERVER_DETAILS)
