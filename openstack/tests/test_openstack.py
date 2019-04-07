@@ -29,14 +29,6 @@ init_config = common.MOCK_CONFIG['init_config']
 openstack_check = OpenStackCheck('openstack', init_config, {}, instances=[instance])
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 class MockHTTPResponse(object):
     def __init__(self, response_dict, headers):
         self.response_dict = response_dict
