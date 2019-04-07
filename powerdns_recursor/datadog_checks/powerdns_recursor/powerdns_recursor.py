@@ -1,14 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 from collections import namedtuple
 
-# 3p
 import requests
 
-# Datadog
 from datadog_checks.checks import AgentCheck
 
 
