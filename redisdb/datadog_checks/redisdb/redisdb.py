@@ -213,7 +213,7 @@ class Redis(AgentCheck):
                     self.gauge(metric, val, tags=db_tags)
 
         # Save a subset of db-wide statistics
-        for info_name, value in iteritems(info):
+        for info_name in info:
             if info_name in self.GAUGE_KEYS:
                 self.gauge(self.GAUGE_KEYS[info_name], info[info_name], tags=tags)
             elif info_name in self.RATE_KEYS:
@@ -379,7 +379,7 @@ class Redis(AgentCheck):
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
                 if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
                     self.warning(
-                        "Redis {0} is higher than {1}. Defaulting to {1}."
+                        "Redis {0} is higher than {1}. Defaulting to {1}. "
                         "If you need a higher value, please set {0} in your check config".format(
                             MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES
                         )
@@ -431,7 +431,7 @@ class Redis(AgentCheck):
             command_stats = conn.info("commandstats")
         except Exception:
             self.warning(
-                "Could not retrieve command stats from Redis." "INFO COMMANDSTATS only works with Redis >= 2.6."
+                "Could not retrieve command stats from Redis. INFO COMMANDSTATS only works with Redis >= 2.6."
             )
             return
 

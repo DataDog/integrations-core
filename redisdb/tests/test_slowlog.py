@@ -24,7 +24,7 @@ def test_slowlog(aggregator, redis_instance):
     db.flushdb()
 
     # Generate some slow commands
-    for i in range(100):
+    for _ in range(100):
         db.lpush(TEST_KEY, random.random())
     db.sort(TEST_KEY)
 
@@ -48,7 +48,7 @@ def test_custom_slowlog(aggregator, redis_instance):
     db.flushdb()
 
     # Generate some slow commands
-    for i in range(100):
+    for _ in range(100):
         db.lpush(TEST_KEY, random.random())
     db.sort(TEST_KEY)
 
