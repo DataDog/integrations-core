@@ -1,13 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import json
-
-# stdlib
 import os
 
-# 3rd party
 import pytest
 from mock import patch
 
@@ -20,14 +16,6 @@ from .common import (
     TEST_USERNAME,
     YARN_APPS_URL_BASE,
 )
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
 
 
 @pytest.fixture
