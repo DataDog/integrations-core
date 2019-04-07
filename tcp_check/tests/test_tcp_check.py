@@ -3,8 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from copy import deepcopy
 
-import pytest
-
 from . import common
 
 
