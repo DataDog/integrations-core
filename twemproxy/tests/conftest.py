@@ -4,9 +4,10 @@
 import pytest
 import requests
 
-from . import common
 from datadog_checks.dev import docker_run
 from datadog_checks.twemproxy import Twemproxy
+
+from . import common
 
 
 def setup_post_data():

@@ -8,44 +8,30 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_unicode
 
+GLOBAL_STATS = set(['curr_connections'])
 
-GLOBAL_STATS = set([
-    'curr_connections',
-])
+GLOBAL_STATS_RATES = set(['total_connections'])
 
-GLOBAL_STATS_RATES = set([
-    'total_connections'
-])
+POOL_STATS = set(['client_connections', 'server_ejects'])
 
-POOL_STATS = set([
-    'client_connections',
-    'server_ejects',
-])
+POOL_STATS_RATES = set(['client_eof', 'client_err', 'forward_error', 'fragments'])
 
-POOL_STATS_RATES = set([
-    'client_eof',
-    'client_err',
-    'forward_error',
-    'fragments'
-])
+SERVER_STATS = set(['server_connections', 'server_timedout'])
 
-SERVER_STATS = set([
-    'server_connections',
-    'server_timedout',
-])
-
-SERVER_STATS_RATES = set([
-    'in_queue',
-    'out_queue',
-    'in_queue_bytes',
-    'out_queue_bytes',
-    'requests',
-    'request_bytes',
-    'responses',
-    'response_bytes',
-    'server_err',
-    'server_eof'
-])
+SERVER_STATS_RATES = set(
+    [
+        'in_queue',
+        'out_queue',
+        'in_queue_bytes',
+        'out_queue_bytes',
+        'requests',
+        'request_bytes',
+        'responses',
+        'response_bytes',
+        'server_err',
+        'server_eof',
+    ]
+)
 
 
 class Twemproxy(AgentCheck):
@@ -115,10 +101,7 @@ class Twemproxy(AgentCheck):
                 else:
                     self.rate(name, value, tags)
             except Exception as e:
-                self.log.error(
-                    u'Could not submit metric: %s: %s',
-                    repr(row), str(e)
-                )
+                self.log.error(u'Could not submit metric: %s: %s', repr(row), str(e))
 
     def _get_data(self, instance):
         host = instance.get('host')
@@ -134,8 +117,7 @@ class Twemproxy(AgentCheck):
             addrs = socket.getaddrinfo(host, port, 0, 0, socket.IPPROTO_TCP)
         except socket.gaierror as e:
             self.log.warning("unable to retrieve address info for %s:%s - %s", host, port, e)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
             return None
 
         response = ""
@@ -178,11 +160,9 @@ class Twemproxy(AgentCheck):
                     if isinstance(server_val, dict):
                         # server
                         server_tags = pool_tags + ['server:%s' % server_key]
-                        for stat in (SERVER_STATS | SERVER_STATS_RATES):
+                        for stat in SERVER_STATS | SERVER_STATS_RATES:
                             metric_name = '%s.%s' % (metric_base, stat)
-                            output.append(
-                                (metric_name, server_val.get(stat), server_tags)
-                            )
+                            output.append((metric_name, server_val.get(stat), server_tags))
 
                     elif server_key in (POOL_STATS | POOL_STATS_RATES):
                         metric_name = '%s.%s' % (metric_base, server_key)
