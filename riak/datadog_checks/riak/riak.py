@@ -2,17 +2,12 @@
 # (C) Stefan Mees <stefan.mees@wooga.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import socket
 import unicodedata
 
 import simplejson as json
-
-# 3rd party
 from httplib2 import Http, HttpLib2Error
 
-# project
 from datadog_checks.checks import AgentCheck
 
 
@@ -256,7 +251,7 @@ class Riak(AgentCheck):
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
                 tags=service_check_tags,
-                message="Unexpected status of %s when fetching Riak stats, " "response: %s" % (resp.status, content),
+                message="Unexpected status of %s when fetching Riak stats, response: %s" % (resp.status, content),
             )
 
         stats = json.loads(content)
