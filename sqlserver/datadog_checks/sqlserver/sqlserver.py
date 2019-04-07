@@ -162,7 +162,7 @@ class SQLServer(AgentCheck):
                         # not much : we expect it. leave checks disabled
                         self.do_check[instance_key] = False
                         self.log.warning(
-                            "Database {} does not exist. " "Disabling checks for this instance.".format(context)
+                            "Database {} does not exist. Disabling checks for this instance.".format(context)
                         )
                     else:
                         # yes we do. Keep trying
