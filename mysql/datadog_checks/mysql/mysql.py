@@ -302,7 +302,7 @@ class MySql(AgentCheck):
             queries,
             ssl,
             connect_timeout,
-            max_custom_queries
+            max_custom_queries,
         ) = self._get_config(instance)
 
         self._set_qcache_stats()
