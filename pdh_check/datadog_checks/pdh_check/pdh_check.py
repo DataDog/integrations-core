@@ -52,7 +52,7 @@ class PDHCheck(AgentCheck):
 
     def check(self, instance):
         key = hash_mutable(instance)
-        for inst_name, dd_name, metric_func, counter in self._metrics[key]:
+        for _, dd_name, metric_func, counter in self._metrics[key]:
             vals = counter.get_all_values()
             for key, val in iteritems(vals):
                 tags = []
