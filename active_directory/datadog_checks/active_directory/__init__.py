@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .active_directory import ActiveDirectoryCheck
 
-__all__ = [
-    '__version__',
-    'ActiveDirectoryCheck'
-]
+__all__ = ['__version__', 'ActiveDirectoryCheck']
