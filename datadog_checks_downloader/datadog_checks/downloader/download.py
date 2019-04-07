@@ -12,29 +12,28 @@ import shutil
 import tempfile
 
 import tuf.settings
-# Turn off TUF file logging.
-tuf.settings.ENABLE_FILE_LOGGING = False
-# Increase requests timeout.
-tuf.settings.SOCKET_TIMEOUT = 60
-
-# Import what we need from TUF.
-from tuf.client.updater import Updater
-from tuf.exceptions import UnknownTargetError
 
 # Import what we need from in-toto.
 from in_toto import verifylib
 from in_toto.models.metadata import Metablock
 from in_toto.util import import_public_keys_from_files_as_dict
 
-# After we import everything we neeed, shut off all existing loggers.
-logging.config.dictConfig({
-    'disable_existing_loggers': True,
-    'version': 1,
-})
-
 # Other 3rd-party imports.
 # NOTE: We assume that setuptools is installed by default.
 from pkg_resources import parse_version
+
+# Import what we need from TUF.
+from tuf.client.updater import Updater
+from tuf.exceptions import UnknownTargetError
+
+# Exceptions.
+from .exceptions import (
+    InconsistentSimpleIndex,
+    MissingVersions,
+    NoInTotoLinkMetadataFound,
+    NoInTotoRootLayoutPublicKeysFound,
+    NoSuchDatadogPackage,
+)
 
 # NOTE: A module with a function that substitutes parameters for
 # in-toto inspections. The function is expected to be called
@@ -46,14 +45,14 @@ from pkg_resources import parse_version
 # The module is expected to live here.
 from .parameters import substitute
 
-# Exceptions.
-from .exceptions import (
-    InconsistentSimpleIndex,
-    MissingVersions,
-    NoInTotoLinkMetadataFound,
-    NoInTotoRootLayoutPublicKeysFound,
-    NoSuchDatadogPackage,
-)
+# Turn off TUF file logging.
+tuf.settings.ENABLE_FILE_LOGGING = False
+# Increase requests timeout.
+tuf.settings.SOCKET_TIMEOUT = 60
+
+
+# After we import everything we neeed, shut off all existing loggers.
+logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})
 
 
 # CONSTANTS.
@@ -66,7 +65,7 @@ REPOSITORY_MIRRORS = {
         'url_prefix': 'https://dd-integrations-core-wheels-build-stable.datadoghq.com',
         'metadata_path': 'metadata.staged',
         'targets_path': 'targets',
-        'confined_target_dirs': ['']
+        'confined_target_dirs': [''],
     }
 }
 
@@ -76,8 +75,6 @@ logger = logging.getLogger(__name__)
 
 
 class TUFDownloader:
-
-
     def __init__(self, verbose=0):
         # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
@@ -109,7 +106,6 @@ class TUFDownloader:
         # NOTE: Update to the latest top-level role metadata only ONCE, so that
         # we use the same consistent snapshot to download targets.
         self.__updater.refresh()
-
 
     def __download_in_toto_metadata(self, target):
         # A list to collect where in-toto metadata targets live.
@@ -145,7 +141,6 @@ class TUFDownloader:
         # Return list of where in-toto metadata files live.
         return target_relpaths
 
-
     def __update_in_toto_layout_pubkeys(self):
         '''
         NOTE: We assume that all the public keys needed to verify any in-toto
@@ -170,7 +165,6 @@ class TUFDownloader:
                 target_relpaths.append(target_relpath)
 
         return target_relpaths
-
 
     def __verify_in_toto_metadata(self, target_relpath, in_toto_inspection_packet):
         # Make a temporary directory in a parent directory we control.
@@ -207,7 +201,6 @@ class TUFDownloader:
             # Delete temp dir.
             shutil.rmtree(tempdir)
 
-
     def __download_and_verify_in_toto_metadata(self, target, target_relpath):
         in_toto_metadata_relpaths = self.__download_in_toto_metadata(target)
 
@@ -226,7 +219,6 @@ class TUFDownloader:
                 # verify the in-toto layout.
                 in_toto_inspection_packet = [target_relpath] + in_toto_metadata_relpaths + pubkey_relpaths
                 self.__verify_in_toto_metadata(target_relpath, in_toto_inspection_packet)
-
 
     def __get_target(self, target_relpath, download_in_toto_metadata=True):
         target = self.__updater.get_one_valid_targetinfo(target_relpath)
@@ -258,7 +250,6 @@ class TUFDownloader:
         target_path = os.path.join(self.__targets_dir, target_relpath)
         return target_path
 
-
     def download(self, target_relpath, download_in_toto_metadata=True):
         '''
         Returns:
@@ -266,7 +257,6 @@ class TUFDownloader:
             return the complete filepath to the desired target.
         '''
         return self.__get_target(target_relpath, download_in_toto_metadata=download_in_toto_metadata)
-
 
     def get_latest_version(self, standard_distribution_name, wheel_distribution_name):
         '''

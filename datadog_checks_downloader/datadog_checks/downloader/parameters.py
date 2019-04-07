@@ -10,12 +10,7 @@ import os.path
 # NOTE: We assume that setuptools is installed by default.
 from pkg_resources import safe_name
 
-
-EXCEPTIONS = {
-    'datadog_checks_base',
-    'datadog_checks_dev',
-    'datadog_checks_downloader',
-}
+EXCEPTIONS = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'}
 
 
 def substitute(target_relpath):
@@ -43,5 +38,5 @@ def substitute(target_relpath):
         'wheel_distribution_name': wheel_distribution_name,
         'package_version': package_version,
         'package_github_dir': package_github_dir,
-        'standard_distribution_name': standard_distribution_name
+        'standard_distribution_name': standard_distribution_name,
     }

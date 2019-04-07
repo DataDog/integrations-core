@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
 
+from setuptools import setup
 
 HERE = path.abspath(path.dirname(__file__))
 
@@ -26,7 +26,6 @@ def get_requirements(fpath):
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
-
     name='datadog_checks_downloader',
     description='The Datadog Checks Downloader',
     long_description=LONG_DESC,
@@ -36,7 +35,6 @@ setup(
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
-
     # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -49,7 +47,6 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-
     packages=['datadog_checks.downloader'],
     # NOTE: Copy over TUF directories, and root metadata.
     package_data={
@@ -61,10 +58,5 @@ setup(
         ]
     },
     include_package_data=True,
-
-    entry_points={
-        'console_scripts': [
-            'datadog-checks-downloader=datadog_checks.downloader.cli:download'
-        ],
-    },
+    entry_points={'console_scripts': ['datadog-checks-downloader=datadog_checks.downloader.cli:download']},
 )
