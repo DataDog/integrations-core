@@ -1,13 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import pytest
-
-# 3p
 from mock import MagicMock, patch
 
-# project
 from datadog_checks.teamcity import TeamCityCheck
 
 CONFIG = {
@@ -64,7 +60,9 @@ def get_mock_first_build(url, *args, **kwargs):
         # looking for new builds
         json = {
             "count": 0,
-            "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,status:SUCCESS",
+            "href": (
+                "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,status:SUCCESS"
+            ),
         }
     else:
         json = {
@@ -112,7 +110,9 @@ def get_mock_one_more_build(url, *args, **kwargs):
     elif 'sinceBuild:id:2' in url:
         json = {
             "count": 0,
-            "href": "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:2,status:SUCCESS",
+            "href": (
+                "/guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:2,status:SUCCESS"
+            ),
         }
 
     mock_resp.json.return_value = json
