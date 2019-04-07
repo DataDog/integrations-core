@@ -35,50 +35,20 @@ GLOBAL_GAUGES = [
     "couchdb.httpd_status_codes.404",
 ]
 
-CHECK_GAUGES = [
-    "couchdb.by_db.disk_size",
-    "couchdb.by_db.doc_count",
-]
+CHECK_GAUGES = ["couchdb.by_db.disk_size", "couchdb.by_db.doc_count"]
 
-BASIC_CONFIG = {
-    "server": URL
-}
+BASIC_CONFIG = {"server": URL}
 
-BASIC_CONFIG_V2 = {
-    "server": URL,
-    "user": "dduser",
-    "password": "pawprint",
-}
+BASIC_CONFIG_V2 = {"server": URL, "user": "dduser", "password": "pawprint"}
 
-BASIC_CONFIG_TAGS = [
-    "instance:{}".format(URL)
-]
+BASIC_CONFIG_TAGS = ["instance:{}".format(URL)]
 
-BAD_CONFIG = {
-    "server": "http://localhost:11111"
-}
+BAD_CONFIG = {"server": "http://localhost:11111"}
 
-BAD_CONFIG_TAGS = [
-    "instance:http://localhost:11111"
-]
+BAD_CONFIG_TAGS = ["instance:http://localhost:11111"]
 
-NODE1 = {
-    "server": URL,
-    "user": USER,
-    "password": PASSWORD,
-    "name": "node1@127.0.0.1"
-}
+NODE1 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node1@127.0.0.1"}
 
-NODE2 = {
-    "server": URL,
-    "user": USER,
-    "password": PASSWORD,
-    "name": "node2@127.0.0.1"
-}
+NODE2 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node2@127.0.0.1"}
 
-NODE3 = {
-    "server": URL,
-    "user": USER,
-    "password": PASSWORD,
-    "name": "node3@127.0.0.1"
-}
+NODE3 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node3@127.0.0.1"}
