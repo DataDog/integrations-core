@@ -2,18 +2,13 @@
 # (C) Jon Glick <jglick@basho.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 from collections import defaultdict
 from copy import deepcopy
 
 import simplejson as json
-
-# 3rd party
 from boto.s3.connection import S3Connection
 from six import iteritems
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 
