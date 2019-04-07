@@ -6,10 +6,7 @@ import pytest
 
 from . import common, metrics
 
-pytestmark = [
-    pytest.mark.integration,
-    pytest.mark.usefixtures("dd_environment"),
-]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
 def test_check(aggregator, check):
