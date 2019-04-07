@@ -1,15 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# 3rd party
 import requests
 import simplejson as json
-
-# stdlib
 from six.moves.urllib.parse import urlparse
 
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 

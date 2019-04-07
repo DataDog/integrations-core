@@ -24,14 +24,6 @@ def check():
     return Kong(common.CHECK_NAME, {}, {})
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, check):
     for stub in common.CONFIG_STUBS:
