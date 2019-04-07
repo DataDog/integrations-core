@@ -22,7 +22,7 @@ def test_build_metric_list(check):
     Print a warning when an option has no match.
     """
     # Initialize check
-    setattr(check, "log", mock.Mock())
+    check.log = mock.Mock()
 
     build_metric_list = check._build_metric_list_to_collect
 

@@ -301,30 +301,30 @@ class MongoDb(AgentCheck):
     WiredTiger storage engine.
     """
     WIREDTIGER_METRICS = {
-        "wiredTiger.cache.bytes currently in the cache": (GAUGE, "wiredTiger.cache.bytes_currently_in_cache"),  # noqa
+        "wiredTiger.cache.bytes currently in the cache": (GAUGE, "wiredTiger.cache.bytes_currently_in_cache"),
         "wiredTiger.cache.failed eviction of pages that exceeded the in-memory maximum": (
             RATE,
             "wiredTiger.cache.failed_eviction_of_pages_exceeding_the_in-memory_maximum",
-        ),  # noqa
+        ),
         "wiredTiger.cache.in-memory page splits": GAUGE,
         "wiredTiger.cache.maximum bytes configured": GAUGE,
         "wiredTiger.cache.maximum page size at eviction": GAUGE,
         "wiredTiger.cache.modified pages evicted": GAUGE,
-        "wiredTiger.cache.pages read into cache": GAUGE,  # noqa
-        "wiredTiger.cache.pages written from cache": GAUGE,  # noqa
+        "wiredTiger.cache.pages read into cache": GAUGE,
+        "wiredTiger.cache.pages written from cache": GAUGE,
         "wiredTiger.cache.pages currently held in the cache": (
             GAUGE,
             "wiredTiger.cache.pages_currently_held_in_cache",
-        ),  # noqa
+        ),
         "wiredTiger.cache.pages evicted because they exceeded the in-memory maximum": (
             RATE,
             "wiredTiger.cache.pages_evicted_exceeding_the_in-memory_maximum",
-        ),  # noqa
+        ),
         "wiredTiger.cache.pages evicted by application threads": RATE,
         "wiredTiger.cache.tracked dirty bytes in the cache": (
             GAUGE,
             "wiredTiger.cache.tracked_dirty_bytes_in_cache",
-        ),  # noqa
+        ),
         "wiredTiger.cache.unmodified pages evicted": GAUGE,
         "wiredTiger.concurrentTransactions.read.available": GAUGE,
         "wiredTiger.concurrentTransactions.read.out": GAUGE,
@@ -433,7 +433,7 @@ class MongoDb(AgentCheck):
         self.metrics_to_collect_by_instance = {}
 
         self.collection_metrics_names = []
-        for key, value in iteritems(self.COLLECTION_METRICS):
+        for key in self.COLLECTION_METRICS:
             self.collection_metrics_names.append(key.split('.')[1])
 
     @classmethod
@@ -518,15 +518,15 @@ class MongoDb(AgentCheck):
             if not additional_metrics:
                 if option in self.DEFAULT_METRICS:
                     self.log.warning(
-                        u"`%s` option is deprecated." u" The corresponding metrics are collected by default.", option
+                        u"`%s` option is deprecated. The corresponding metrics are collected by default.", option
                     )
                 else:
                     self.log.warning(
-                        u"Failed to extend the list of metrics to collect:" u" unrecognized `%s` option", option
+                        u"Failed to extend the list of metrics to collect: unrecognized `%s` option", option
                     )
                 continue
 
-            self.log.debug(u"Adding `%s` corresponding metrics to the list" u" of metrics to collect.", option)
+            self.log.debug(u"Adding `%s` corresponding metrics to the list of metrics to collect.", option)
             metrics_to_collect.update(additional_metrics)
 
         return metrics_to_collect
