@@ -257,7 +257,7 @@ class SnmpCheck(NetworkCheck):
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
                     self.log.debug("Running SNMP command getNext on OIDS {}".format(missing_results))
-                    for error_indication, error_status, error_index, var_binds_table in hlapi.nextCmd(
+                    for error_indication, error_status, _, var_binds_table in hlapi.nextCmd(
                         snmp_engine,
                         auth_data,
                         transport_target,
