@@ -20,11 +20,7 @@ PROCESS_STATES = {
     'Z': 'zombie',
 }
 
-PROCESS_PRIOS = {
-    '<': 'high',
-    'N': 'low',
-    'L': 'locked'
-}
+PROCESS_PRIOS = {'<': 'high', 'N': 'low', 'L': 'locked'}
 
 
 class MoreUnixCheck(AgentCheck):
