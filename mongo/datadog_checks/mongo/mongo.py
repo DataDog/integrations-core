@@ -312,19 +312,13 @@ class MongoDb(AgentCheck):
         "wiredTiger.cache.modified pages evicted": GAUGE,
         "wiredTiger.cache.pages read into cache": GAUGE,
         "wiredTiger.cache.pages written from cache": GAUGE,
-        "wiredTiger.cache.pages currently held in the cache": (
-            GAUGE,
-            "wiredTiger.cache.pages_currently_held_in_cache",
-        ),
+        "wiredTiger.cache.pages currently held in the cache": (GAUGE, "wiredTiger.cache.pages_currently_held_in_cache"),
         "wiredTiger.cache.pages evicted because they exceeded the in-memory maximum": (
             RATE,
             "wiredTiger.cache.pages_evicted_exceeding_the_in-memory_maximum",
         ),
         "wiredTiger.cache.pages evicted by application threads": RATE,
-        "wiredTiger.cache.tracked dirty bytes in the cache": (
-            GAUGE,
-            "wiredTiger.cache.tracked_dirty_bytes_in_cache",
-        ),
+        "wiredTiger.cache.tracked dirty bytes in the cache": (GAUGE, "wiredTiger.cache.tracked_dirty_bytes_in_cache"),
         "wiredTiger.cache.unmodified pages evicted": GAUGE,
         "wiredTiger.concurrentTransactions.read.available": GAUGE,
         "wiredTiger.concurrentTransactions.read.out": GAUGE,
