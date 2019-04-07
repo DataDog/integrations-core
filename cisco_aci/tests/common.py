@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License see LICENSE
 
-import os
 import hashlib
+import os
 
 CHECK_NAME = 'cisco_aci'
 
@@ -17,22 +17,13 @@ USERNAME = 'datadog'
 PASSWORD = 'datadog'
 ACI_URL = 'https://datadoghq.com'
 ACI_URLS = [ACI_URL]
-CONFIG = {
-    'aci_urls': ACI_URLS,
-    'username': USERNAME,
-    'pwd': PASSWORD,
-    'tenant': [
-        'DataDog',
-    ]
-}
+CONFIG = {'aci_urls': ACI_URLS, 'username': USERNAME, 'pwd': PASSWORD, 'tenant': ['DataDog']}
 
 CONFIG_WITH_TAGS = {
     'aci_urls': ACI_URLS,
     'username': USERNAME,
     'pwd': PASSWORD,
-    'tenant': [
-        'DataDog',
-    ],
+    'tenant': ['DataDog'],
     "tags": ["project:cisco_aci"],
 }
 
@@ -44,7 +35,6 @@ FIXTURE_LIST = [
     # 4b07d389b109401afcc2c42bdca0f2b2 - Api.get_epgs
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_json_query_target_subtree_target_subtree_class_fvAEPg',
     # 43410607b378cfa340146247a8b422b9 - Api.get_epgs
-
     '_api_mo_topology_pod_1_node_102_sys_phys__eth1_25__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # 29fd45826b0bb763e5c8b4e92fe53216 - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_201_sys_phys__eth1_11__json_rsp_subtree_include_stats_no_scoped_page_size_50',
@@ -501,7 +491,6 @@ FIXTURE_LIST = [
     # 0d65a35670e5e6911748ffad58aefe97 - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_102_sys_phys__eth1_51__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # 39eadf19ae6f6506492894d5b7eb451d - Api.get_eth_stats
-
     '_api_mo_topology_pod_1_node_201_sys_json_rsp_subtree_include_stats_no_scoped_page_size_20',
     # bd2db6fd496f3b1ee12ac533e3224c21 - Api.get_node_stats
     '_api_mo_topology_pod_1_node_102_sys_json_rsp_subtree_include_stats_no_scoped_page_size_20',
@@ -510,7 +499,6 @@ FIXTURE_LIST = [
     # 7660dffc9226f865526ffe82fe4694fa - Api.get_node_stats
     '_api_mo_topology_pod_1_node_101_sys_json_rsp_subtree_include_stats_no_scoped_page_size_20',
     # d121d04c8171c3095561ca593dc2de5d - Api.get_node_stats
-
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti1_json_rsp_subtree_include_stats_no_scoped',
     # f44f8e9a9afe5d47c8b27d06b6458200 - Api.get_epg_stats
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti2_json_rsp_subtree_include_stats_no_scoped',
@@ -529,7 +517,6 @@ FIXTURE_LIST = [
     # 7034a3d481f3cd6b47f86783c7ec4c63 - Api.get_epg_stats
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Pay_json_rsp_subtree_include_stats_no_scoped',
     # b05ed9fa4f7f2f6e52e78976da725716 - Api.get_epg_stats
-
     '_api_class_fvBD_json_rsp_subtree_include_count',
     # 2b77c071f172dc404574adca6de263d1 - Api.get_apic_capacity_metrics
     '_api_class_fvTenant_json_rsp_subtree_include_count',
@@ -542,24 +529,20 @@ FIXTURE_LIST = [
     # c0526b62f52c9e8956990035baa96382 - Api.get_apic_capacity_metrics
     '_api_class_fvCtx_json_rsp_subtree_include_count',
     # d8ea046fd4b1831561393f0b0e7055ab - Api.get_apic_capacity_metrics
-
     '_api_mo_uni_fabric_compcat_default_fvsw_default_capabilities_json_query_target_children_target_subtree_class_fvcapRule',
     # d9a173b8bee4de1024bdf1671cb09aa2 - Api.get_apic_capacity_limits
-
     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_l2BD',
     # 16c2a93c855b8b0039fa41f7d1fd87c7 - Api.get_capacity_contexts
     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_l3Dom',
     # caf41b4bc51dc6f145c5379828a9762e - Api.get_capacity_contexts
     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_fvEpP',
     # 3a3b3fccaf27c95600f33e9c238916d6 - Api.get_capacity_contexts
-
     '_api_node_mo_topology_pod_1_node_1_sys_proc_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procMemHist5min_procCPUHist5min',
     # da3cc25775b42c6e85bf8e389cde346c - Api.get_controller_proc_metrics
     '_api_node_mo_topology_pod_1_node_2_sys_proc_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procMemHist5min_procCPUHist5min',
     # 363740b68eff24d19f99f62266029e66 - Api.get_controller_proc_metrics
     '_api_node_mo_topology_pod_1_node_3_sys_proc_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procMemHist5min_procCPUHist5min',
     # ee5cd35d0ce16d8d0b7c8057d9d53f37 - Api.get_controller_proc_metrics
-
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jetty_Controller_json_query_target_subtree_target_subtree_class_fvCEp',
     # 28431f4c95e37bbfce84c0d5b82c08e6 - Api.get_epg_meta
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_MiscAppVMs_json_query_target_subtree_target_subtree_class_fvCEp',
@@ -578,7 +561,6 @@ FIXTURE_LIST = [
     # 603cc1278c410b07905c2c35b49afbe6 - Api.get_epg_meta
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Ord_json_query_target_subtree_target_subtree_class_fvCEp',
     # b9ec4494d631d05122fd7fb4baf0877d - Api.get_epg_meta
-
     '_api_mo_topology_pod_1_node_102_sys_json_query_target_subtree_target_subtree_class_l1PhysIf',
     # 79af98fe9c1069b329af3b4828712ddd - Api.get_eth_list
     '_api_mo_topology_pod_1_node_202_sys_json_query_target_subtree_target_subtree_class_l1PhysIf',
@@ -587,7 +569,6 @@ FIXTURE_LIST = [
     # ded65ac48170a7a3d8914950607e4e18 - Api.get_eth_list
     '_api_mo_topology_pod_1_node_101_sys_json_query_target_subtree_target_subtree_class_l1PhysIf',
     # dace1ecad6f3d9a50eb8d4a15631ba88 - Api.get_eth_list
-
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti1_json_query_target_subtree_target_subtree_class_fvRsCEpToPathEp',
     # e2b226f554c9f77aafd9b66b4cf59383 - Api.get_eth_list_for_epg
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Ecomm_json_query_target_subtree_target_subtree_class_fvRsCEpToPathEp',
@@ -606,17 +587,14 @@ FIXTURE_LIST = [
     # 192e2d8a58b2117282557295dc503b0a - Api.get_eth_list_for_epg
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Pay_json_query_target_subtree_target_subtree_class_fvRsCEpToPathEp',
     # e001f001b7ac8da3335f8ef8bad17129 - Api.get_eth_list_for_epg
-
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_json_rsp_subtree_include_stats_no_scoped',
     # 363e27e35a42bb987c121709284b529f - Api.get_app_stats
     '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_json_rsp_subtree_include_stats_no_scoped',
     # 1c7d7ebf0b75333689662feb19f63ede - Api.get_app_stats
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_json_rsp_subtree_include_stats_no_scoped',
     # 10b987e92abaab8d843e6bee5ab6aef0 - Api.get_app_stats
-
     '_api_mo_topology_json_query_target_subtree_target_subtree_class_fabricNode',
     # 2e82232a722241e59f27ac3742934e7e - Api.get_fabric_nodes
-
     '_api_node_mo_topology_pod_1_node_102_sys_procsys_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procSysMemHist5min_procSysCPUHist5min',
     # 39d31c3f91411cd6018abd79e222d0cf - Api.get_spine_proc_metrics
     '_api_node_mo_topology_pod_1_node_202_sys_procsys_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procSysMemHist5min_procSysCPUHist5min',
@@ -625,10 +603,8 @@ FIXTURE_LIST = [
     # b0c46630b68d344089f7209c814e216e - Api.get_spine_proc_metrics
     '_api_node_mo_topology_pod_1_node_101_sys_procsys_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procSysMemHist5min_procSysCPUHist5min',
     # 1df5692a384c4dd76bb6aaeec9e5f922 - Api.get_spine_proc_metrics
-
     '_api_mo_topology_pod_1_json_rsp_subtree_include_stats_no_scoped_page_size_20',
     # 0d11d458b6d31906696642f74bf016cc - Api.get_pod_stats
-
     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityL3TotalUsage5min',
     # cb5f39f666fdef06a4438813d0814611 - Api.get_eqpt_capacity
     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityVlanUsage5min',
@@ -639,16 +615,12 @@ FIXTURE_LIST = [
     # 1e4f33f96dd87955dc6e04b62fdb10f1 - Api.get_eqpt_capacity
     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityL3TotalUsageCap5min',
     # 0d6ca781810665156211b355129ba2f1 - Api.get_eqpt_capacity
-
     '_api_mo_topology_json_query_target_subtree_target_subtree_class_fabricPod',
     # 643d217904f09445fbc9f7b43cd131f0 - Api.get_fabric_pods
-
     '_api_node_mo_uni_tn_DataDog_json_rsp_subtree_include_event_logs_no_scoped_subtree_order_by_eventRecord_created_desc_page_0_page_size_15',
     # d0260e4832537b43b1acb38bcfa58063 - Api.get_tenant_events
-
     '_api_mo_uni_tn_DataDog_json_query_target_subtree_target_subtree_class_fvAp',
     # 4efe80304d50330f5ed0f79252ef0a84 - Api.get_apps
-
     '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped',
     # c8e9a0dbceac67fb1149684f7fc7772c - Api.get_tenant_stats
 ]

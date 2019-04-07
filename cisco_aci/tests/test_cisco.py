@@ -2,14 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import os
-import pytest
 import logging
+import os
+
+import pytest
 import simplejson as json
 from requests import Session
 
 from datadog_checks.cisco_aci import CiscoACICheck
-from datadog_checks.cisco_aci.api import SessionWrapper, Api
+from datadog_checks.cisco_aci.api import Api, SessionWrapper
 from datadog_checks.utils.containers import hash_mutable
 
 from . import common
@@ -24,6 +25,7 @@ class FakeSess(SessionWrapper):
      2. Fetch the corresponding hash from common.FIXTURE_LIST_FILE_MAP
      3. Returns the corresponding file content
      """
+
     def make_request(self, path):
         mock_path = path.replace('/', '_')
         mock_path = mock_path.replace('?', '_')
@@ -62,8 +64,9 @@ def session_mock():
 
 def test_cisco(aggregator, session_mock):
     cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, {})
-    api = Api(common.ACI_URLS, common.USERNAME,
-              password=common.PASSWORD, log=cisco_aci_check.log, sessions=[session_mock])
+    api = Api(
+        common.ACI_URLS, common.USERNAME, password=common.PASSWORD, log=cisco_aci_check.log, sessions=[session_mock]
+    )
     api._refresh_sessions = False
     cisco_aci_check._api_cache[hash_mutable(common.CONFIG)] = api
 
