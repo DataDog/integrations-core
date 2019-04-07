@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from six import iteritems
-
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.config import is_affirmative
@@ -134,9 +132,9 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         scraper_config = self.get_scraper_config(instance)
         # Set up metric_transformers
         transformers = {}
-        for metric, mapping in iteritems(TRANSFORM_VALUE_HISTOGRAMS):
+        for metric in TRANSFORM_VALUE_HISTOGRAMS:
             transformers[metric] = self._histogram_from_microseconds_to_second
-        for metric, mapping in iteritems(TRANSFORM_VALUE_SUMMARIES):
+        for metric in TRANSFORM_VALUE_SUMMARIES:
             transformers[metric] = self._summary_from_microseconds_to_second
 
         self.process(scraper_config, metric_transformers=transformers)
