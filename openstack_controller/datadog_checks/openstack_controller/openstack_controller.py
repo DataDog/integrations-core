@@ -224,7 +224,7 @@ class OpenStackControllerCheck(AgentCheck):
             hypervisor_hostname = server.get('hypervisor_hostname')
             if not hypervisor_hostname:
                 self.log.debug(
-                    "hypervisor_hostname is None for server %s. " "Check that your user is an administrative users.",
+                    "hypervisor_hostname is None for server %s. Check that your user is an administrative users.",
                     server['server_id'],
                 )
             else:
@@ -725,7 +725,7 @@ class OpenStackControllerCheck(AgentCheck):
             projects = self.get_projects(include_project_name_rules, exclude_project_name_rules)
 
             if collect_project_metrics:
-                for name, project in iteritems(projects):
+                for project in itervalues(projects):
                     self.collect_project_limit(project, custom_tags)
 
             servers = self.populate_servers_cache(projects, exclude_server_id_rules)

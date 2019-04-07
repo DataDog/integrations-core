@@ -62,93 +62,93 @@ def make_request_responses(url, header, params=None, timeout=None):
         mock_path = "v2.1_4bfc1_flavors_detail.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/ff2f581c-5d03-4a27-a0ba-f102603fe38f/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/ff2f581c-5d03-4a27-a0ba-f102603fe38f/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_ff2f581c-5d03-4a27-a0ba-f102603fe38f_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/acb4197c-f54e-488e-a40a-1b7f59cc9117/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/acb4197c-f54e-488e-a40a-1b7f59cc9117/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_acb4197c-f54e-488e-a40a-1b7f59cc9117_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/b3c8eee3-7e22-4a7c-9745-759073673cbe/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/b3c8eee3-7e22-4a7c-9745-759073673cbe/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_b3c8eee3-7e22-4a7c-9745-759073673cbe_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/412c79b2-25f2-44d6-8e3b-be4baee11a7f/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/412c79b2-25f2-44d6-8e3b-be4baee11a7f/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_412c79b2-25f2-44d6-8e3b-be4baee11a7f_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/7e622c28-4b12-4a58-8ac2-4a2e854f84eb/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/7e622c28-4b12-4a58-8ac2-4a2e854f84eb/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_7e622c28-4b12-4a58-8ac2-4a2e854f84eb_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/4ceb4c69-a332-4b9d-907b-e99635aae644/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/4ceb4c69-a332-4b9d-907b-e99635aae644/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_4ceb4c69-a332-4b9d-907b-e99635aae644_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/1cc21586-8d43-40ea-bdc9-6f54a79957b4/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/1cc21586-8d43-40ea-bdc9-6f54a79957b4/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_1cc21586-8d43-40ea-bdc9-6f54a79957b4_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/836f724f-0028-4dc0-b9bd-e0843d767ca2/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/836f724f-0028-4dc0-b9bd-e0843d767ca2/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_836f724f-0028-4dc0-b9bd-e0843d767ca2_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/7eaa751c-1e37-4963-a836-0a28bc283a9a/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/7eaa751c-1e37-4963-a836-0a28bc283a9a/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_7eaa751c-1e37-4963-a836-0a28bc283a9a_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/5357e70e-f12c-4bb7-85a2-b40d642a7e92/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/5357e70e-f12c-4bb7-85a2-b40d642a7e92/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_5357e70e-f12c-4bb7-85a2-b40d642a7e92_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/f2dd3f90-e738-4135-84d4-1a2d30d04929/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/f2dd3f90-e738-4135-84d4-1a2d30d04929/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_f2dd3f90-e738-4135-84d4-1a2d30d04929_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/30888944-fb39-4590-9073-ef977ac1f039/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/30888944-fb39-4590-9073-ef977ac1f039/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_30888944-fb39-4590-9073-ef977ac1f039_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/4d7cb923-788f-4b61-9061-abfc576ecc1a/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/4d7cb923-788f-4b61-9061-abfc576ecc1a/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_4d7cb923-788f-4b61-9061-abfc576ecc1a_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/2e1ce152-b19d-4c4a-9cc7-0d150fa97a18/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/2e1ce152-b19d-4c4a-9cc7-0d150fa97a18/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_2e1ce152-b19d-4c4a-9cc7-0d150fa97a18_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/52561f29-e479-43d7-85de-944d29ef178d/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/52561f29-e479-43d7-85de-944d29ef178d/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_52561f29-e479-43d7-85de-944d29ef178d_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/1b7a987f-c4fb-4b6b-aad9-3b461df2019d/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/1b7a987f-c4fb-4b6b-aad9-3b461df2019d/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_1b7a987f-c4fb-4b6b-aad9-3b461df2019d_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/7324440d-915b-4e12-8b85-ec8c9a524d6c/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/7324440d-915b-4e12-8b85-ec8c9a524d6c/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_7324440d-915b-4e12-8b85-ec8c9a524d6c_diagnostics.json"
     elif (
         url
-        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/57030997-f1b5-4f79-9429-8cb285318633/diagnostics"
-    ):  # noqa E501
+        == "http://10.0.2.15:8774/v2.1/***************************4bfc1/servers/57030997-f1b5-4f79-9429-8cb285318633/diagnostics"  # noqa: E501
+    ):
         mock_path = "v2.1_4bfc1_servers_57030997-f1b5-4f79-9429-8cb285318633_diagnostics.json"
     elif url == "http://10.0.2.15:9696/v2.0/networks":
         mock_path = "v2.0_networks.json"

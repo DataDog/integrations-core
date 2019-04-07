@@ -355,8 +355,8 @@ def get_os_hypervisors_detail_post_v2_33_response(url, headers, params=None, tim
                 "rel": "next"
             }
         ]
-    }"""
-    )  # noqa: E501
+    }"""  # noqa: E501
+    )
 
 
 def get_os_hypervisors_detail_post_v2_53_response(url, headers, params=None, timeout=None):
@@ -409,8 +409,8 @@ def get_os_hypervisors_detail_post_v2_53_response(url, headers, params=None, tim
                 "rel": "next"
             }
         ]
-    }"""
-    )  # noqa: E501
+    }"""  # noqa: E501
+    )
 
 
 def test_get_os_hypervisors_detail(aggregator):
@@ -553,8 +553,8 @@ def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=No
                 "user_id": "fake"
             }
         ]
-    }"""
-    )  # noqa: E501
+    }"""  # noqa: E501
+    )
 
 
 def test_get_servers_detail(aggregator):
