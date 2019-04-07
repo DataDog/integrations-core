@@ -430,9 +430,7 @@ class Redis(AgentCheck):
         try:
             command_stats = conn.info("commandstats")
         except Exception:
-            self.warning(
-                "Could not retrieve command stats from Redis. INFO COMMANDSTATS only works with Redis >= 2.6."
-            )
+            self.warning('Could not retrieve command stats from Redis. INFO COMMANDSTATS only works with Redis >= 2.6.')
             return
 
         for key, stats in iteritems(command_stats):
