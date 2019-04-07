@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.nginx import VTS_METRIC_MAP
+
 from .common import TAGS, USING_VTS
 
 pytestmark = pytest.mark.skipif(not USING_VTS, reason='Not using VTS')
