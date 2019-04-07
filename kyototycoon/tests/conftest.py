@@ -26,7 +26,7 @@ def dd_environment():
         data = {'dddd': 'dddd'}
         headers = {'X-Kt-Mode': 'set'}
 
-        for i in range(100):
+        for _ in range(100):
             requests.put(URL, data=data, headers=headers)
             requests.get(URL)
 
