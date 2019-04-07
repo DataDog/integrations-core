@@ -14,7 +14,12 @@ def check():
 
 
 class MockSampler:
-    def __init__(self, wmi_objects=[], properties=[], filters=[]):
+    def __init__(self, wmi_objects=None, properties=None, filters=None):
+        if wmi_objects is None:
+            wmi_objects = []
+        if properties is None:
+            properties = []
+
         self._wmi_objects = []
         self._mock_wmi_objects = wmi_objects
         self.property_names = properties
