@@ -194,7 +194,7 @@ class ProcessCheck(AgentCheck):
                     try:
                         result[acc] = getattr(res, acc)
                     except AttributeError:
-                        self.log.debug("psutil.{}().{} attribute does" "not exist".format(method, acc))
+                        self.log.debug("psutil.{}().{} attribute does not exist".format(method, acc))
         except (NotImplementedError, AttributeError):
             self.log.debug("psutil method {} not implemented".format(method))
         except psutil.AccessDenied:
@@ -209,7 +209,7 @@ class ProcessCheck(AgentCheck):
 
                 except subprocess.CalledProcessError as e:
                     self.log.exception(
-                        "trying to retrieve {} with sudo failed with " "return code {}".format(method, e.returncode)
+                        "trying to retrieve {} with sudo failed with return code {}".format(method, e.returncode)
                     )
                 except Exception:
                     self.log.exception("trying to retrieve {} with sudo also failed".format(method))
@@ -276,7 +276,7 @@ class ProcessCheck(AgentCheck):
                 if cpu_count > 0 and cpu_percent is not None:
                     st['cpu_norm'].append(cpu_percent / cpu_count)
                 else:
-                    self.log.debug('could not calculate the normalized ' 'cpu pct, cpu_count: {}'.format(cpu_count))
+                    self.log.debug('could not calculate the normalized cpu pct, cpu_count: {}'.format(cpu_count))
             st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
             st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
 
@@ -324,7 +324,7 @@ class ProcessCheck(AgentCheck):
             data = file_to_string('/{}/{}/stat'.format(psutil.PROCFS_PATH, pid))
         except Exception:
             self.log.debug(
-                'error getting proc stats: file_to_string failed', 'for /{}/{}/stat'.format(psutil.PROCFS_PATH, pid)
+                'error getting proc stats: file_to_string failed for /{}/{}/stat'.format(psutil.PROCFS_PATH, pid)
             )
             return None
         return (int(i) for i in data.split()[9:13])
