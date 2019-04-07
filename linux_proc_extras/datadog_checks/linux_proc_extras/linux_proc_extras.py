@@ -76,7 +76,7 @@ class MoreUnixCheck(AgentCheck):
         ps = get_subprocess_output(['ps', '--no-header', '-eo', 'stat'], self.log)
         for state in ps[0]:
             # Each process state is a flag in a list of characters. See ps(1) for details.
-            for flag in list(state):
+            for _ in list(state):
                 if state in PROCESS_STATES:
                     state_counts[PROCESS_STATES[state]] += 1
                 elif state in PROCESS_PRIOS:
