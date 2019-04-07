@@ -84,7 +84,7 @@ class SupervisordCheck(AgentCheck):
             if e.errcode == 401:  # authorization error
                 msg = 'Username or password to %s are incorrect.' % server_name
             else:
-                msg = "An error occurred while connecting to %s: " "%s %s " % (server_name, e.errcode, e.errmsg)
+                msg = 'An error occurred while connecting to %s: %s %s' % (server_name, e.errcode, e.errmsg)
 
             self.service_check(SERVER_SERVICE_CHECK, AgentCheck.CRITICAL, tags=instance_tags, message=msg)
             raise Exception(msg)
