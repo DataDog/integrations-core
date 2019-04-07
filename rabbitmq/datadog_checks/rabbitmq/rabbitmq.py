@@ -2,8 +2,6 @@
 # (C) Brett Langdon <brett@blangdon.com> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import re
 import time
 import warnings
@@ -13,11 +11,8 @@ import requests
 from requests.exceptions import RequestException
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from six import iteritems
-
-# 3p
 from six.moves.urllib.parse import quote_plus, urljoin, urlparse
 
-# project
 from datadog_checks.base import AgentCheck, is_affirmative
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
