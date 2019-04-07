@@ -22,12 +22,7 @@ PRIV_KEY = 'doggiePRIVkey'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
-SNMP_CONF = {
-    'name': 'snmp_conf',
-    'ip_address': HOST,
-    'port': PORT,
-    'community_string': 'public',
-}
+SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
 
 SNMP_V3_CONF = {
     'name': 'snmp_v3_conf',
@@ -41,136 +36,58 @@ SNMP_V3_CONF = {
     'context_name': 'public',
 }
 
-MIBS_FOLDER = {
-    'mibs_folder': os.path.join(HERE, "mibs")
-}
+MIBS_FOLDER = {'mibs_folder': os.path.join(HERE, "mibs")}
 
-IGNORE_NONINCREASING_OID = {
-    'ignore_nonincreasing_oid': True
-}
+IGNORE_NONINCREASING_OID = {'ignore_nonincreasing_oid': True}
 
 SUPPORTED_METRIC_TYPES = [
-    {
-        'OID': "1.3.6.1.2.1.7.1.0",             # Counter32
-        'name': "IAmACounter32"
-    }, {
-        'OID': "1.3.6.1.2.1.4.31.1.1.6.1",      # Counter64
-        'name': "IAmACounter64"
-    }, {
-        'OID': "1.3.6.1.2.1.4.24.6.0",          # Gauge32
-        'name': "IAmAGauge32"
-    }, {
-        'OID': "1.3.6.1.2.1.88.1.1.1.0",        # Integer
-        'name': "IAmAnInteger"
-    }
+    {'OID': "1.3.6.1.2.1.7.1.0", 'name': "IAmACounter32"},  # Counter32
+    {'OID': "1.3.6.1.2.1.4.31.1.1.6.1", 'name': "IAmACounter64"},  # Counter64
+    {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32"},  # Gauge32
+    {'OID': "1.3.6.1.2.1.88.1.1.1.0", 'name': "IAmAnInteger"},  # Integer
 ]
 
-UNSUPPORTED_METRICS = [
-    {
-        'OID': "1.3.6.1.2.1.25.6.3.1.5.1",    # String (not supported)
-        'name': "IAmString"
-    }
-]
+UNSUPPORTED_METRICS = [{'OID': "1.3.6.1.2.1.25.6.3.1.5.1", 'name': "IAmString"}]  # String (not supported)
 
-CONSTRAINED_OID = [
-    {
-        "MIB": "RFC1213-MIB",
-        "symbol": "tcpRtoAlgorithm",
-    }
-]
+CONSTRAINED_OID = [{"MIB": "RFC1213-MIB", "symbol": "tcpRtoAlgorithm"}]
 
-DUMMY_MIB_OID = [
-    {
-        "MIB": "DUMMY-MIB",
-        "symbol": "scalar",
-    }
-]
+DUMMY_MIB_OID = [{"MIB": "DUMMY-MIB", "symbol": "scalar"}]
 
 FORCED_METRICS = [
-    {
-        'OID': "1.3.6.1.2.1.4.24.6.0",          # Gauge32
-        'name': "IAmAGauge32",
-        'forced_type': 'counter'
-
-    }, {
-        'OID': "1.3.6.1.2.1.4.31.1.1.6.1",      # Counter32
-        'name': "IAmACounter64",
-        'forced_type': 'gauge'
-    }
+    {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32
+    {'OID': "1.3.6.1.2.1.4.31.1.1.6.1", 'name': "IAmACounter64", 'forced_type': 'gauge'},  # Counter32
 ]
 INVALID_FORCED_METRICS = [
-    {
-        'OID': "1.3.6.1.2.1.4.24.6.0",          # Gauge32
-        'name': "IAmAGauge32",
-        'forced_type': 'counter'
-
-    }, {
-        'OID': "1.3.6.1.2.1.4.31.1.1.6.1",      # Counter32
-        'name': "IAmACounter64",
-        'forced_type': 'histogram'
-    }
+    {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32
+    {'OID': "1.3.6.1.2.1.4.31.1.1.6.1", 'name': "IAmACounter64", 'forced_type': 'histogram'},  # Counter32
 ]
 
 SCALAR_OBJECTS = [
-    {
-        'OID': "1.3.6.1.2.1.7.1.0",
-        'name': "udpDatagrams"
-    }, {
-        'OID': "1.3.6.1.2.1.6.10.0",
-        'name': "tcpInSegs"
-    }, {
-        'MIB': "TCP-MIB",
-        'symbol': "tcpCurrEstab",
-    }
+    {'OID': "1.3.6.1.2.1.7.1.0", 'name': "udpDatagrams"},
+    {'OID': "1.3.6.1.2.1.6.10.0", 'name': "tcpInSegs"},
+    {'MIB': "TCP-MIB", 'symbol': "tcpCurrEstab"},
 ]
 
 SCALAR_OBJECTS_WITH_TAGS = [
-    {
-        'OID': "1.3.6.1.2.1.7.1.0",
-        'name': "udpDatagrams",
-        'metric_tags': ['udpdgrams', 'UDP']
-    }, {
-        'OID': "1.3.6.1.2.1.6.10.0",
-        'name': "tcpInSegs",
-        'metric_tags': ['tcpinsegs', 'TCP']
-    }, {
-        'MIB': "TCP-MIB",
-        'symbol': "tcpCurrEstab",
-        'metric_tags': ['MIB', 'TCP', 'estab']
-    }
+    {'OID': "1.3.6.1.2.1.7.1.0", 'name': "udpDatagrams", 'metric_tags': ['udpdgrams', 'UDP']},
+    {'OID': "1.3.6.1.2.1.6.10.0", 'name': "tcpInSegs", 'metric_tags': ['tcpinsegs', 'TCP']},
+    {'MIB': "TCP-MIB", 'symbol': "tcpCurrEstab", 'metric_tags': ['MIB', 'TCP', 'estab']},
 ]
 
-TABULAR_OBJECTS = [{
-    'MIB': "IF-MIB",
-    'table': "ifTable",
-    'symbols': ["ifInOctets", "ifOutOctets"],
-    'metric_tags': [
-        {
-            'tag': "interface",
-            'column': "ifDescr"
-        }, {
-            'tag': "dumbindex",
-            'index': 1
-        }
-    ]
-}]
-
-INVALID_METRICS = [
+TABULAR_OBJECTS = [
     {
         'MIB': "IF-MIB",
-        'table': "noIdeaWhatIAmDoingHere",
-        'symbols': ["ImWrong", "MeToo"],
+        'table': "ifTable",
+        'symbols': ["ifInOctets", "ifOutOctets"],
+        'metric_tags': [{'tag': "interface", 'column': "ifDescr"}, {'tag': "dumbindex", 'index': 1}],
     }
 ]
 
+INVALID_METRICS = [{'MIB': "IF-MIB", 'table': "noIdeaWhatIAmDoingHere", 'symbols': ["ImWrong", "MeToo"]}]
+
 PLAY_WITH_GET_NEXT_METRICS = [
-    {
-        "OID": "1.3.6.1.2.1.4.31.3.1.3.2",
-        "name": "needFallback"
-    }, {
-        "OID": "1.3.6.1.2.1.4.31.3.1.3.2.1",
-        "name": "noFallbackAndSameResult"
-    }
+    {"OID": "1.3.6.1.2.1.4.31.3.1.3.2", "name": "needFallback"},
+    {"OID": "1.3.6.1.2.1.4.31.3.1.3.2.1", "name": "noFallbackAndSameResult"},
 ]
 
 
@@ -182,8 +99,7 @@ def generate_instance_config(metrics, template=None):
     return instance_config
 
 
-def generate_v3_instance_config(metrics, name=None, user=None,
-                                auth=None, auth_key=None, priv=None, priv_key=None):
+def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_key=None, priv=None, priv_key=None):
     instance_config = generate_instance_config(metrics, SNMP_V3_CONF)
 
     if name:
