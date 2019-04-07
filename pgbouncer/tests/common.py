@@ -3,9 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 
-from datadog_checks.utils.common import get_docker_hostname
 import psycopg2
 
+from datadog_checks.utils.common import get_docker_hostname
 
 HOST = get_docker_hostname()
 PORT = '6432'
@@ -13,18 +13,9 @@ USER = 'postgres'
 PASS = 'datadog'
 DB = 'datadog_test'
 
-DEFAULT_INSTANCE = {
-    'host': HOST,
-    'port': PORT,
-    'username': USER,
-    'password': PASS,
-    'tags': ['optional:tag1']
-}
+DEFAULT_INSTANCE = {'host': HOST, 'port': PORT, 'username': USER, 'password': PASS, 'tags': ['optional:tag1']}
 
-INSTANCE_URL = {
-    'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test',
-    'tags': ['optional:tag1']
-}
+INSTANCE_URL = {'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test', 'tags': ['optional:tag1']}
 
 
 def get_version():
@@ -32,8 +23,7 @@ def get_version():
     Retrieve PgBouncer version
     """
     regex = r'\d\.\d\.\d'
-    conn = psycopg2.connect(host=HOST, port=PORT, user=USER, password=PASS,
-                            database='pgbouncer', connect_timeout=1)
+    conn = psycopg2.connect(host=HOST, port=PORT, user=USER, password=PASS, database='pgbouncer', connect_timeout=1)
     conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
     cur.execute('SHOW VERSION;')
