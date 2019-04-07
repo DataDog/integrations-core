@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .gearmand import Gearman
 
-__all__ = [
-    '__version__',
-    'Gearman'
-]
+__all__ = ['__version__', 'Gearman']
