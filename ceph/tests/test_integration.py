@@ -8,9 +8,7 @@ import pytest
 
 from datadog_checks.ceph import Ceph
 
-from .common import (
-    CHECK_NAME, BASIC_CONFIG, EXPECTED_METRICS, EXPECTED_SERVICE_CHECKS, EXPECTED_SERVICE_TAGS
-)
+from .common import BASIC_CONFIG, CHECK_NAME, EXPECTED_METRICS, EXPECTED_SERVICE_CHECKS, EXPECTED_SERVICE_TAGS
 
 
 @pytest.mark.integration
