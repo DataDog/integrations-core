@@ -59,8 +59,6 @@ zk_max_file_descriptor_count    4096
 import re
 import socket
 import struct
-
-# stdlib
 from collections import defaultdict
 from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 
@@ -373,7 +371,7 @@ class ZookeeperCheck(AgentCheck):
                 continue
             except Exception:
                 self.log.exception(
-                    u"Unexpected exception occurred while parsing `mntr` command content:\n" u"{buf}".format(buf=buf)
+                    u"Unexpected exception occurred while parsing `mntr` command content:\n{buf}".format(buf=buf)
                 )
 
         return (metrics, mode)
