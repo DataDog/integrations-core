@@ -7,10 +7,7 @@ import os
 import mock
 import pytest
 
-# project
 from datadog_checks.kube_proxy import KubeProxyCheck
-
-# 3p
 
 
 instance = {'prometheus_url': 'http://localhost:10249/metrics'}
@@ -18,14 +15,6 @@ instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 # Constants
 CHECK_NAME = 'kube_proxy'
 NAMESPACE = 'kubeproxy'
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
 
 
 @pytest.fixture()
