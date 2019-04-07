@@ -312,7 +312,7 @@ class TwistlockCheck(AgentCheck):
         self.gauge(namespace + '.size', float(layer_sizes), tags)
         self.gauge(namespace + '.layer_count', float(layer_count), tags)
 
-    def _report_service_check(self, data, prefix, format, tags=[], message=""):
+    def _report_service_check(self, data, prefix, format, tags=None, message=""):
         # Last scan service check
         scan_date = datetime.strptime(data.get("scanTime"), format)
         scan_status = AgentCheck.OK
