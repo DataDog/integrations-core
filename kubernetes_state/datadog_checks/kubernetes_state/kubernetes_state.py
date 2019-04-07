@@ -144,14 +144,14 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_pod_container_status_terminated': 'container.terminated',
                         'kube_pod_container_status_waiting': 'container.waiting',
                         'kube_persistentvolumeclaim_status_phase': 'persistentvolumeclaim.status',
-                        'kube_persistentvolumeclaim_resource_requests_storage_bytes': 'persistentvolumeclaim.request_storage',
+                        'kube_persistentvolumeclaim_resource_requests_storage_bytes': 'persistentvolumeclaim.request_storage',  # noqa: E501
                         'kube_pod_container_resource_limits_cpu_cores': 'container.cpu_limit',
                         'kube_pod_container_resource_limits_memory_bytes': 'container.memory_limit',
                         'kube_pod_container_resource_requests_cpu_cores': 'container.cpu_requested',
                         'kube_pod_container_resource_requests_memory_bytes': 'container.memory_requested',
                         'kube_pod_container_status_ready': 'container.ready',
                         'kube_pod_container_status_restarts': 'container.restarts',  # up to kube-state-metrics 1.1.x
-                        'kube_pod_container_status_restarts_total': 'container.restarts',  # from kube-state-metrics 1.2.0
+                        'kube_pod_container_status_restarts_total': 'container.restarts',  # noqa: E501, from kube-state-metrics 1.2.0
                         'kube_pod_container_status_running': 'container.running',
                         'kube_pod_container_resource_requests_nvidia_gpu_devices': 'container.gpu.request',
                         'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.limit',
@@ -166,7 +166,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_replicaset_status_ready_replicas': 'replicaset.replicas_ready',
                         'kube_replicaset_status_replicas': 'replicaset.replicas',
                         'kube_replicationcontroller_spec_replicas': 'replicationcontroller.replicas_desired',
-                        'kube_replicationcontroller_status_available_replicas': 'replicationcontroller.replicas_available',
+                        'kube_replicationcontroller_status_available_replicas': 'replicationcontroller.replicas_available',  # noqa: E501
                         'kube_replicationcontroller_status_fully_labeled_replicas': 'replicationcontroller.fully_labeled_replicas',  # noqa: E501
                         'kube_replicationcontroller_status_ready_replicas': 'replicationcontroller.replicas_ready',
                         'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
