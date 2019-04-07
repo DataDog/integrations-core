@@ -12,13 +12,15 @@ from contextlib import closing, contextmanager
 import pymysql
 from six import PY3, iteritems, itervalues, text_type
 
+from datadog_checks.base import AgentCheck, is_affirmative
+
 try:
     import psutil
+
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
 
-from datadog_checks.base import AgentCheck, is_affirmative
 
 if PY3:
     long = int
@@ -86,7 +88,7 @@ VARIABLES_VARS = {
     'max_connections': ('mysql.net.max_connections_available', GAUGE),
     'query_cache_size': ('mysql.performance.qcache_size', GAUGE),
     'table_open_cache': ('mysql.performance.table_open_cache', GAUGE),
-    'thread_cache_size': ('mysql.performance.thread_cache_size', GAUGE)
+    'thread_cache_size': ('mysql.performance.thread_cache_size', GAUGE),
 }
 
 INNODB_VARS = {
@@ -112,9 +114,7 @@ INNODB_VARS = {
 
 
 # Calculated from "SHOW MASTER LOGS;"
-BINLOG_VARS = {
-    'Binlog_space_usage_bytes': ('mysql.binlog.disk_use', GAUGE),
-}
+BINLOG_VARS = {'Binlog_space_usage_bytes': ('mysql.binlog.disk_use', GAUGE)}
 
 # Additional Vars found in "SHOW STATUS;"
 # Will collect if [FLAG NAME] is True
@@ -151,7 +151,7 @@ OPTIONAL_STATUS_VARS = {
     'Table_locks_immediate': ('mysql.performance.table_locks_immediate', GAUGE),
     'Table_locks_immediate_rate': ('mysql.performance.table_locks_immediate.rate', RATE),
     'Threads_cached': ('mysql.performance.threads_cached', GAUGE),
-    'Threads_created': ('mysql.performance.threads_created', MONOTONIC)
+    'Threads_created': ('mysql.performance.threads_created', MONOTONIC),
 }
 
 # Status Vars added in Mysql 5.6.6
@@ -262,9 +262,7 @@ PERFORMANCE_VARS = {
     'perf_digest_95th_percentile_avg_us': ('mysql.performance.digest_95th_percentile.avg_us', GAUGE),
 }
 
-SCHEMA_VARS = {
-    'information_schema_size': ('mysql.info.schema.size', GAUGE),
-}
+SCHEMA_VARS = {'information_schema_size': ('mysql.info.schema.size', GAUGE)}
 
 REPLICA_VARS = {
     'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
@@ -292,18 +290,16 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, instance):
-        host, port, user, password, mysql_sock, \
-            defaults_file, tags, options, queries, ssl, \
-            connect_timeout, max_custom_queries = \
-            self._get_config(instance)
+        host, port, user, password, mysql_sock, defaults_file, tags, options, queries, ssl, connect_timeout, max_custom_queries = self._get_config(
+            instance
+        )
 
         self._set_qcache_stats()
 
         if not (host and user) and not defaults_file:
             raise Exception("Mysql host and user are needed.")
 
-        with self._connect(host, port, mysql_sock, user,
-                           password, defaults_file, ssl, connect_timeout, tags) as db:
+        with self._connect(host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags) as db:
             try:
                 # Metadata collection
                 self._collect_metadata(db)
@@ -333,8 +329,20 @@ class MySql(AgentCheck):
         connect_timeout = instance.get('connect_timeout', 10)
         max_custom_queries = instance.get('max_custom_queries', self.DEFAULT_MAX_CUSTOM_QUERIES)
 
-        return (self.host, self.port, user, password, self.mysql_sock,
-                self.defaults_file, tags, options, queries, ssl, connect_timeout, max_custom_queries)
+        return (
+            self.host,
+            self.port,
+            user,
+            password,
+            self.mysql_sock,
+            self.defaults_file,
+            tags,
+            options,
+            queries,
+            ssl,
+            connect_timeout,
+            max_custom_queries,
+        )
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
@@ -346,11 +354,7 @@ class MySql(AgentCheck):
 
     def _put_qcache_stats(self):
         host_key = self._get_host_key()
-        self.qcache_stats[host_key] = (
-            self._qcache_hits,
-            self._qcache_inserts,
-            self._qcache_not_cached
-        )
+        self.qcache_stats[host_key] = (self._qcache_hits, self._qcache_inserts, self._qcache_not_cached)
 
     def _get_host_key(self):
         if self.defaults_file:
@@ -368,7 +372,7 @@ class MySql(AgentCheck):
     def _connect(self, host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags):
         self.service_check_tags = [
             'server:%s' % (mysql_sock if mysql_sock != '' else host),
-            'port:%s' % ('unix_socket' if port == 0 else port)
+            'port:%s' % ('unix_socket' if port == 0 else port),
         ]
 
         if tags is not None:
@@ -379,47 +383,24 @@ class MySql(AgentCheck):
             ssl = dict(ssl) if ssl else None
 
             if defaults_file != '':
-                db = pymysql.connect(
-                    read_default_file=defaults_file,
-                    ssl=ssl,
-                    connect_timeout=connect_timeout
-                )
+                db = pymysql.connect(read_default_file=defaults_file, ssl=ssl, connect_timeout=connect_timeout)
             elif mysql_sock != '':
-                self.service_check_tags = [
-                    'server:{0}'.format(mysql_sock),
-                    'port:unix_socket'
-                ] + tags
+                self.service_check_tags = ['server:{0}'.format(mysql_sock), 'port:unix_socket'] + tags
                 db = pymysql.connect(
-                    unix_socket=mysql_sock,
-                    user=user,
-                    passwd=password,
-                    connect_timeout=connect_timeout
+                    unix_socket=mysql_sock, user=user, passwd=password, connect_timeout=connect_timeout
                 )
             elif port:
                 db = pymysql.connect(
-                    host=host,
-                    port=port,
-                    user=user,
-                    passwd=password,
-                    ssl=ssl,
-                    connect_timeout=connect_timeout
+                    host=host, port=port, user=user, passwd=password, ssl=ssl, connect_timeout=connect_timeout
                 )
             else:
-                db = pymysql.connect(
-                    host=host,
-                    user=user,
-                    passwd=password,
-                    ssl=ssl,
-                    connect_timeout=connect_timeout
-                )
+                db = pymysql.connect(host=host, user=user, passwd=password, ssl=ssl, connect_timeout=connect_timeout)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(self.service_check_tags))
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=self.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
             yield db
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=self.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
             raise
         finally:
             if db:
@@ -450,32 +431,37 @@ class MySql(AgentCheck):
 
             try:
                 innodb_page_size = results['Innodb_page_size']
-                innodb_buffer_pool_pages_used = results['Innodb_buffer_pool_pages_total'] - \
-                    results['Innodb_buffer_pool_pages_free']
+                innodb_buffer_pool_pages_used = (
+                    results['Innodb_buffer_pool_pages_total'] - results['Innodb_buffer_pool_pages_free']
+                )
 
                 if 'Innodb_buffer_pool_bytes_data' not in results:
-                    results[
-                        'Innodb_buffer_pool_bytes_data'] = results['Innodb_buffer_pool_pages_data'] * innodb_page_size
+                    results['Innodb_buffer_pool_bytes_data'] = (
+                        results['Innodb_buffer_pool_pages_data'] * innodb_page_size
+                    )
 
                 if 'Innodb_buffer_pool_bytes_dirty' not in results:
-                    results[
-                        'Innodb_buffer_pool_bytes_dirty'] = results['Innodb_buffer_pool_pages_dirty'] * innodb_page_size
+                    results['Innodb_buffer_pool_bytes_dirty'] = (
+                        results['Innodb_buffer_pool_pages_dirty'] * innodb_page_size
+                    )
 
                 if 'Innodb_buffer_pool_bytes_free' not in results:
-                    results[
-                        'Innodb_buffer_pool_bytes_free'] = results['Innodb_buffer_pool_pages_free'] * innodb_page_size
+                    results['Innodb_buffer_pool_bytes_free'] = (
+                        results['Innodb_buffer_pool_pages_free'] * innodb_page_size
+                    )
 
                 if 'Innodb_buffer_pool_bytes_total' not in results:
-                    results[
-                        'Innodb_buffer_pool_bytes_total'] = results['Innodb_buffer_pool_pages_total'] * innodb_page_size
+                    results['Innodb_buffer_pool_bytes_total'] = (
+                        results['Innodb_buffer_pool_pages_total'] * innodb_page_size
+                    )
 
                 if 'Innodb_buffer_pool_pages_utilization' not in results:
-                    results['Innodb_buffer_pool_pages_utilization'] = innodb_buffer_pool_pages_used / \
-                        results['Innodb_buffer_pool_pages_total']
+                    results['Innodb_buffer_pool_pages_utilization'] = (
+                        innodb_buffer_pool_pages_used / results['Innodb_buffer_pool_pages_total']
+                    )
 
                 if 'Innodb_buffer_pool_bytes_used' not in results:
-                    results[
-                        'Innodb_buffer_pool_bytes_used'] = innodb_buffer_pool_pages_used * innodb_page_size
+                    results['Innodb_buffer_pool_bytes_used'] = innodb_buffer_pool_pages_used * innodb_page_size
             except (KeyError, TypeError) as e:
                 self.log.error("Not all InnoDB buffer pool metrics are available, unable to compute: {0}".format(e))
 
@@ -485,8 +471,7 @@ class MySql(AgentCheck):
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
-            results[
-                'Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
+            results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
         # Compute key cache utilization metric
         key_blocks_unused = self._collect_scalar('Key_blocks_unused', results)
@@ -500,10 +485,10 @@ class MySql(AgentCheck):
                 key_cache_utilization = 1 - ((key_blocks_unused * key_cache_block_size) / key_buffer_size)
                 results['Key_cache_utilization'] = key_cache_utilization
 
-            results['Key_buffer_bytes_used'] = self._collect_scalar(
-                'Key_blocks_used', results) * key_cache_block_size
-            results['Key_buffer_bytes_unflushed'] = self._collect_scalar(
-                'Key_blocks_not_flushed', results) * key_cache_block_size
+            results['Key_buffer_bytes_used'] = self._collect_scalar('Key_blocks_used', results) * key_cache_block_size
+            results['Key_buffer_bytes_unflushed'] = (
+                self._collect_scalar('Key_blocks_not_flushed', results) * key_cache_block_size
+            )
         except TypeError as e:
             self.log.error("Not all Key metrics are available, unable to compute: {0}".format(e))
 
@@ -604,8 +589,10 @@ class MySql(AgentCheck):
                 metrics.pop(k, None)
 
         # add duped metrics - reporting some as both rate and gauge
-        dupes = [('Table_locks_waited', 'Table_locks_waited_rate'),
-                 ('Table_locks_immediate', 'Table_locks_immediate_rate')]
+        dupes = [
+            ('Table_locks_waited', 'Table_locks_waited_rate'),
+            ('Table_locks_immediate', 'Table_locks_immediate_rate'),
+        ]
         for src, dst in dupes:
             if src in results:
                 results[dst] = results[src]
@@ -617,15 +604,12 @@ class MySql(AgentCheck):
         if isinstance(queries, list):
             for index, check in enumerate(queries[:max_custom_queries]):
                 total_tags = tags + check.get('tags', [])
-                self._collect_dict(check['type'],
-                                   {check['field']: check['metric']},
-                                   check['query'],
-                                   db,
-                                   tags=total_tags)
+                self._collect_dict(
+                    check['type'], {check['field']: check['metric']}, check['query'], db, tags=total_tags
+                )
 
             if len(queries) > max_custom_queries:
-                self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest."
-                             % max_custom_queries)
+                self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest." % max_custom_queries)
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
@@ -663,8 +647,7 @@ class MySql(AgentCheck):
         try:
             mysql_version = self._get_version(db)
         except Exception as e:
-            self.warning("Cannot compute mysql version, assuming it's older.: %s"
-                         % str(e))
+            self.warning("Cannot compute mysql version, assuming it's older.: %s" % str(e))
             return False
         self.log.debug("MySQL version %s" % mysql_version)
 
@@ -745,8 +728,7 @@ class MySql(AgentCheck):
                             col_idx = [d[0].lower() for d in cursor.description].index(field.lower())
                             self.log.debug("Collecting metric: %s" % metric)
                             if result[col_idx] is not None:
-                                self.log.debug(
-                                    "Collecting done, value %s" % result[col_idx])
+                                self.log.debug("Collecting done, value %s" % result[col_idx])
                                 if metric_type == GAUGE:
                                     self.gauge(metric, float(result[col_idx]), tags=tags)
                                 elif metric_type == RATE:
@@ -754,14 +736,11 @@ class MySql(AgentCheck):
                                 else:
                                     self.gauge(metric, float(result[col_idx]), tags=tags)
                             else:
-                                self.log.debug(
-                                    "Received value is None for index %d" % col_idx)
+                                self.log.debug("Received value is None for index %d" % col_idx)
                         except ValueError:
-                            self.log.exception("Cannot find %s in the columns %s"
-                                               % (field, cursor.description))
+                            self.log.exception("Cannot find %s in the columns %s" % (field, cursor.description))
         except Exception:
-            self.warning("Error while running %s\n%s" %
-                         (query, traceback.format_exc()))
+            self.warning("Error while running %s\n%s" % (query, traceback.format_exc()))
             self.log.exception("Error while running %s" % query)
 
     def _collect_system_metrics(self, host, db, tags):
@@ -786,11 +765,10 @@ class MySql(AgentCheck):
                     self.rate("mysql.performance.user_time", ucpu, tags=tags)
                     # should really be system_time
                     self.rate("mysql.performance.kernel_time", scpu, tags=tags)
-                    self.rate("mysql.performance.cpu_time", ucpu+scpu, tags=tags)
+                    self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags)
 
             except Exception:
-                self.warning("Error while reading mysql (pid: %s) procfs data\n%s"
-                             % (pid, traceback.format_exc()))
+                self.warning("Error while reading mysql (pid: %s) procfs data\n%s" % (pid, traceback.format_exc()))
 
     def _get_pid_file_variable(self, db):
         """
@@ -961,16 +939,21 @@ class MySql(AgentCheck):
             with closing(db.cursor()) as cursor:
                 cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
-            self.warning("Privilege error or engine unavailable accessing the INNODB status \
-                         tables (must grant PROCESS): %s" % str(e))
+            self.warning(
+                "Privilege error or engine unavailable accessing the INNODB status \
+                         tables (must grant PROCESS): %s"
+                % str(e)
+            )
             return {}
 
         if cursor.rowcount < 1:
             # No data from SHOW ENGINE STATUS, even though the engine is enabled.
             # EG: This could be an Aurora Read Instance
-            self.warning("""'SHOW ENGINE INNODB STATUS' returned no data.
+            self.warning(
+                """'SHOW ENGINE INNODB STATUS' returned no data.
                 If you are running an Aurora Read Instace, \
-                this is expected and you should disable the innodb metrics collection""")
+                this is expected and you should disable the innodb metrics collection"""
+            )
             return {}
 
         innodb_status = cursor.fetchone()
@@ -1024,8 +1007,7 @@ class MySql(AgentCheck):
             elif line.find('seconds the semaphore:') > 0:
                 # --Thread 907205 has waited at handler/ha_innodb.cc line 7156 for 1.00 seconds the semaphore:
                 results['Innodb_semaphore_waits'] += 1
-                results[
-                    'Innodb_semaphore_wait_time'] += long(float(row[9])) * 1000
+                results['Innodb_semaphore_wait_time'] += long(float(row[9])) * 1000
 
             # TRANSACTIONS
             elif line.find('Trx id counter') == 0:
@@ -1086,10 +1068,12 @@ class MySql(AgentCheck):
                     elif len(row) == 16:
                         # (len(row) == 16) Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
                         if self._are_values_numeric(row[4:8]) and self._are_values_numeric(row[11:15]):
-                            results['Innodb_pending_normal_aio_reads'] = (long(row[4]) + long(row[5]) +
-                                                                          long(row[6]) + long(row[7]))
-                            results['Innodb_pending_normal_aio_writes'] = (long(row[11]) + long(row[12]) +
-                                                                           long(row[13]) + long(row[14]))
+                            results['Innodb_pending_normal_aio_reads'] = (
+                                long(row[4]) + long(row[5]) + long(row[6]) + long(row[7])
+                            )
+                            results['Innodb_pending_normal_aio_writes'] = (
+                                long(row[11]) + long(row[12]) + long(row[13]) + long(row[14])
+                            )
 
                         # (len(row) == 16) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0] ,
                         elif self._are_values_numeric(row[4:9]) and self._are_values_numeric(row[12:15]):
@@ -1148,8 +1132,11 @@ class MySql(AgentCheck):
                 results['Innodb_ibuf_merged_inserts'] = long(row[1])
                 results['Innodb_ibuf_merged_delete_marks'] = long(row[4])
                 results['Innodb_ibuf_merged_deletes'] = long(row[6])
-                results['Innodb_ibuf_merged'] = results['Innodb_ibuf_merged_inserts'] + results[
-                    'Innodb_ibuf_merged_delete_marks'] + results['Innodb_ibuf_merged_deletes']
+                results['Innodb_ibuf_merged'] = (
+                    results['Innodb_ibuf_merged_inserts']
+                    + results['Innodb_ibuf_merged_delete_marks']
+                    + results['Innodb_ibuf_merged_deletes']
+                )
             elif line.find(' merged recs, ') > 0:
                 # 19817685 inserts, 19817684 merged recs, 3552620 merges
                 results['Innodb_ibuf_merged_inserts'] = long(row[0])
@@ -1161,8 +1148,7 @@ class MySql(AgentCheck):
                 # Hash table size 57374437, node heap has 72964 buffer(s) <--
                 # no used cells
                 results['Innodb_hash_index_cells_total'] = long(row[3])
-                results['Innodb_hash_index_cells_used'] = long(
-                    row[6]) if line.find('used cells') > 0 else 0
+                results['Innodb_hash_index_cells_used'] = long(row[6]) if line.find('used cells') > 0 else 0
 
             # LOG
             elif line.find(" log i/o's done, ") > 0:
@@ -1261,8 +1247,7 @@ class MySql(AgentCheck):
 
         # We need to calculate this metric separately
         try:
-            results['Innodb_checkpoint_age'] = results[
-                'Innodb_lsn_current'] - results['Innodb_lsn_last_checkpoint']
+            results['Innodb_checkpoint_age'] = results['Innodb_lsn_current'] - results['Innodb_lsn_last_checkpoint']
         except KeyError as e:
             self.log.error("Not all InnoDB LSN metrics available, unable to compute: {0}".format(e))
 
@@ -1295,8 +1280,10 @@ class MySql(AgentCheck):
                 cursor.execute(sql_95th_percentile)
 
                 if cursor.rowcount < 1:
-                    self.warning("Failed to fetch records from the perf schema \
-                                 'events_statements_summary_by_digest' table.")
+                    self.warning(
+                        "Failed to fetch records from the perf schema \
+                                 'events_statements_summary_by_digest' table."
+                    )
                     return None
 
                 row = cursor.fetchone()
@@ -1322,8 +1309,10 @@ class MySql(AgentCheck):
                 cursor.execute(sql_avg_query_run_time)
 
                 if cursor.rowcount < 1:
-                    self.warning("Failed to fetch records from the perf schema \
-                                 'events_statements_summary_by_digest' table.")
+                    self.warning(
+                        "Failed to fetch records from the perf schema \
+                                 'events_statements_summary_by_digest' table."
+                    )
                     return None
 
                 schema_query_avg_run_time = {}
@@ -1377,20 +1366,23 @@ class MySql(AgentCheck):
             if not int(results['Qcache_hits']):
                 results['Qcache_utilization'] = 0
             else:
-                results['Qcache_utilization'] = (float(results['Qcache_hits']) /
-                                                 (int(results['Qcache_inserts']) +
-                                                  int(results['Qcache_not_cached']) +
-                                                  int(results['Qcache_hits'])) * 100)
+                results['Qcache_utilization'] = (
+                    float(results['Qcache_hits'])
+                    / (int(results['Qcache_inserts']) + int(results['Qcache_not_cached']) + int(results['Qcache_hits']))
+                    * 100
+                )
 
             if all(v is not None for v in (self._qcache_hits, self._qcache_inserts, self._qcache_not_cached)):
                 if not (int(results['Qcache_hits']) - self._qcache_hits):
                     results['Qcache_instant_utilization'] = 0
                 else:
                     top = float(results['Qcache_hits']) - self._qcache_hits
-                    bottom = ((int(results['Qcache_inserts']) - self._qcache_inserts) +
-                              (int(results['Qcache_not_cached']) - self._qcache_not_cached) +
-                              (int(results['Qcache_hits']) - self._qcache_hits))
-                    results['Qcache_instant_utilization'] = ((top / bottom) * 100)
+                    bottom = (
+                        (int(results['Qcache_inserts']) - self._qcache_inserts)
+                        + (int(results['Qcache_not_cached']) - self._qcache_not_cached)
+                        + (int(results['Qcache_hits']) - self._qcache_hits)
+                    )
+                    results['Qcache_instant_utilization'] = (top / bottom) * 100
 
             # update all three, or none - for consistent samples.
             self._qcache_hits = int(results['Qcache_hits'])
