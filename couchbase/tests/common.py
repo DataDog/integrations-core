@@ -23,10 +23,4 @@ CB_CONTAINER_NAME = 'couchbase-standalone'
 USER = 'Administrator'
 PASSWORD = 'password'
 
-DEFAULT_INSTANCE = {
-    'server': URL,
-    'user': USER,
-    'password': PASSWORD,
-    'timeout': 0.5,
-    'tags': CUSTOM_TAGS,
-}
+DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 0.5, 'tags': CUSTOM_TAGS}
