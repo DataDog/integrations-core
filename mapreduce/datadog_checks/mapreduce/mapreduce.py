@@ -42,10 +42,10 @@ mapreduce.job.reduce.task.progress      The distribution of all reduce task prog
 
 
 import requests
-from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
-from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 from six import iteritems
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
