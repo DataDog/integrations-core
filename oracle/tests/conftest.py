@@ -7,7 +7,6 @@ import pytest
 
 from datadog_checks.oracle import Oracle
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 CHECK_NAME = "oracle"
 
@@ -15,6 +14,7 @@ CHECK_NAME = "oracle"
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -31,5 +31,5 @@ def instance():
         'user': 'system',
         'password': 'oracle',
         'service_name': 'xe',
-        'tags': ['optional:tag1']
+        'tags': ['optional:tag1'],
     }
