@@ -37,7 +37,7 @@ def test_vts(check, instance_vts, aggregator):
         'nginx.upstream.peers.backup',
     ]
 
-    for vts, mapped in VTS_METRIC_MAP.items():
+    for mapped in VTS_METRIC_MAP.values():
         if mapped in skip_metrics:
             continue
         aggregator.assert_metric(mapped, tags=TAGS)
