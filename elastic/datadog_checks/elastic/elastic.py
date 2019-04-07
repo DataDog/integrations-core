@@ -13,8 +13,11 @@ from datadog_checks.base.utils.headers import headers
 
 from .config import from_instance
 from .metrics import (
-    stats_for_version, pshard_stats_for_version, health_stats_for_version, index_stats_for_version,
-    CLUSTER_PENDING_TASKS
+    CLUSTER_PENDING_TASKS,
+    health_stats_for_version,
+    index_stats_for_version,
+    pshard_stats_for_version,
+    stats_for_version,
 )
 
 
@@ -92,11 +95,7 @@ class ESCheck(AgentCheck):
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
         # If we're here we did not have any ES conn issues
-        self.service_check(
-            self.SERVICE_CHECK_CONNECT_NAME,
-            AgentCheck.OK,
-            tags=config.service_check_tags
-        )
+        self.service_check(self.SERVICE_CHECK_CONNECT_NAME, AgentCheck.OK, tags=config.service_check_tags)
 
     def _get_es_version(self, config):
         """
@@ -111,11 +110,7 @@ class ESCheck(AgentCheck):
         except AuthenticationError:
             raise
         except Exception as e:
-            self.warning(
-                "Error while trying to get Elasticsearch version "
-                "from %s %s"
-                % (config.url, str(e))
-            )
+            self.warning("Error while trying to get Elasticsearch version " "from %s %s" % (config.url, str(e)))
             version = [1, 0, 0]
 
         self.service_metadata('version', version)
@@ -143,13 +138,13 @@ class ESCheck(AgentCheck):
             # we need to remap metric names because the ones from elastic
             # contain dots and that would confuse `_process_metric()` (sic)
             index_data = {
-                'docs_count':         idx.get('docs.count'),
-                'docs_deleted':       idx.get('docs.deleted'),
-                'primary_shards':     idx.get('pri'),
-                'replica_shards':     idx.get('rep'),
+                'docs_count': idx.get('docs.count'),
+                'docs_deleted': idx.get('docs.deleted'),
+                'primary_shards': idx.get('pri'),
+                'replica_shards': idx.get('rep'),
                 'primary_store_size': idx.get('pri.store.size'),
-                'store_size':         idx.get('store.size'),
-                'health':             idx.get('health'),
+                'store_size': idx.get('store.size'),
+                'health': idx.get('health'),
             }
 
             # Convert the health status value
@@ -216,12 +211,7 @@ class ESCheck(AgentCheck):
         resp = None
         try:
             resp = requests.get(
-                url,
-                timeout=config.timeout,
-                headers=headers(self.agentConfig),
-                auth=auth,
-                verify=verify,
-                cert=cert
+                url, timeout=config.timeout, headers=headers(self.agentConfig), auth=auth, verify=verify, cert=cert
             )
             resp.raise_for_status()
         except Exception as e:
@@ -234,7 +224,7 @@ class ESCheck(AgentCheck):
                     self.SERVICE_CHECK_CONNECT_NAME,
                     AgentCheck.CRITICAL,
                     message="Error {} when hitting {}".format(e, url),
-                    tags=config.service_check_tags
+                    tags=config.service_check_tags,
                 )
             raise
 
@@ -252,11 +242,11 @@ class ESCheck(AgentCheck):
 
         total = sum(itervalues(p_tasks))
         node_data = {
-            'pending_task_total':               total,
-            'pending_tasks_priority_high':      p_tasks['high'],
-            'pending_tasks_priority_urgent':    p_tasks['urgent'],
+            'pending_task_total': total,
+            'pending_tasks_priority_high': p_tasks['high'],
+            'pending_tasks_priority_urgent': p_tasks['urgent'],
             # if total is 0 default to 1
-            'pending_tasks_time_in_queue':      average_time_in_queue // (total or 1),
+            'pending_tasks_time_in_queue': average_time_in_queue // (total or 1),
         }
 
         for metric in CLUSTER_PENDING_TASKS:
@@ -272,9 +262,7 @@ class ESCheck(AgentCheck):
             # Resolve the node's name
             node_name = node_data.get('name')
             if node_name:
-                metrics_tags.append(
-                    'node_name:{}'.format(node_name)
-                )
+                metrics_tags.append('node_name:{}'.format(node_name))
 
             # Resolve the node's hostname
             if config.node_name_as_host:
@@ -287,17 +275,13 @@ class ESCheck(AgentCheck):
                         break
 
             for metric, desc in iteritems(stats_metrics):
-                self._process_metric(
-                    node_data, metric, *desc,
-                    tags=metrics_tags, hostname=metric_hostname
-                )
+                self._process_metric(node_data, metric, *desc, tags=metrics_tags, hostname=metric_hostname)
 
     def _process_pshard_stats_data(self, data, config, pshard_stats_metrics):
         for metric, desc in iteritems(pshard_stats_metrics):
             self._process_metric(data, metric, *desc, tags=config.tags)
 
-    def _process_metric(self, data, metric, xtype, path, xform=None,
-                        tags=None, hostname=None):
+    def _process_metric(self, data, metric, xtype, path, xform=None, tags=None, hostname=None):
         """
         data: dictionary containing all the stats
         metric: datadog metric
@@ -352,25 +336,25 @@ class ESCheck(AgentCheck):
             status = AgentCheck.CRITICAL
             data['tag'] = "ALERT"
 
-        msg = "{tag} on cluster \"{cluster_name}\" "\
-              "| active_shards={active_shards} "\
-              "| initializing_shards={initializing_shards} "\
-              "| relocating_shards={relocating_shards} "\
-              "| unassigned_shards={unassigned_shards} "\
-              "| timed_out={timed_out}" \
-              .format(tag=data.get('tag'),
-                      cluster_name=data.get('cluster_name'),
-                      active_shards=data.get('active_shards'),
-                      initializing_shards=data.get('initializing_shards'),
-                      relocating_shards=data.get('relocating_shards'),
-                      unassigned_shards=data.get('unassigned_shards'),
-                      timed_out=data.get('timed_out'))
+        msg = (
+            "{tag} on cluster \"{cluster_name}\" "
+            "| active_shards={active_shards} "
+            "| initializing_shards={initializing_shards} "
+            "| relocating_shards={relocating_shards} "
+            "| unassigned_shards={unassigned_shards} "
+            "| timed_out={timed_out}".format(
+                tag=data.get('tag'),
+                cluster_name=data.get('cluster_name'),
+                active_shards=data.get('active_shards'),
+                initializing_shards=data.get('initializing_shards'),
+                relocating_shards=data.get('relocating_shards'),
+                unassigned_shards=data.get('unassigned_shards'),
+                timed_out=data.get('timed_out'),
+            )
+        )
 
         self.service_check(
-            self.SERVICE_CHECK_CLUSTER_STATUS,
-            status,
-            message=msg,
-            tags=config.service_check_tags + config.health_tags
+            self.SERVICE_CHECK_CLUSTER_STATUS, status, message=msg, tags=config.service_check_tags + config.health_tags
         )
 
     def _create_event(self, status, tags=None):
@@ -399,5 +383,5 @@ class ESCheck(AgentCheck):
             'alert_type': alert_type,
             'source_type_name': "elasticsearch",
             'event_object': hostname,
-            'tags': tags
+            'tags': tags,
         }
