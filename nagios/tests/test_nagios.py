@@ -109,7 +109,7 @@ class TestEventLogTailer:
         # Set up the check
         nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
 
-        for i in range(ITERATIONS):
+        for _ in range(ITERATIONS):
             log_file.write(test_data)
             log_file.flush()
             nagios.check(config['instances'][0])
