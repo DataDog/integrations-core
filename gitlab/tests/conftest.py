@@ -12,7 +12,13 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
 from .common import (
-    HERE, GITLAB_URL, PROMETHEUS_ENDPOINT, GITLAB_TEST_PASSWORD, GITLAB_LOCAL_PORT, GITLAB_LOCAL_PROMETHEUS_PORT, CONFIG
+    CONFIG,
+    GITLAB_LOCAL_PORT,
+    GITLAB_LOCAL_PROMETHEUS_PORT,
+    GITLAB_TEST_PASSWORD,
+    GITLAB_URL,
+    HERE,
+    PROMETHEUS_ENDPOINT,
 )
 
 
@@ -32,10 +38,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
         env_vars=env,
-        conditions=[
-            CheckEndpoints(GITLAB_URL, attempts=200),
-            CheckEndpoints(PROMETHEUS_ENDPOINT),
-        ]
+        conditions=[CheckEndpoints(GITLAB_URL, attempts=200), CheckEndpoints(PROMETHEUS_ENDPOINT)],
     ):
         # run pre-test commands
         for i in range(100):
