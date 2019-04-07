@@ -22,14 +22,7 @@ CUSTOM_TAGS = ["cluster_name:hdfs_dev", "instance:level_tags"]
 TEST_USERNAME = 'Picard'
 TEST_PASSWORD = 'NCC-1701'
 
-HDFS_NAMENODE_CONFIG = {
-    'instances': [
-        {
-            'hdfs_namenode_jmx_uri': NAMENODE_URI,
-            'tags': list(CUSTOM_TAGS)
-        }
-    ]
-}
+HDFS_NAMENODE_CONFIG = {'instances': [{'hdfs_namenode_jmx_uri': NAMENODE_URI, 'tags': list(CUSTOM_TAGS)}]}
 
 HDFS_NAMENODE_AUTH_CONFIG = {
     'instances': [
@@ -66,13 +59,8 @@ HDFS_NAMESYSTEM_STATE_METRICS_VALUES = {
     'hdfs.namenode.num_stale_storages': 0,
 }
 
-HDFS_NAMESYSTEM_METRICS_VALUES = {
-    'hdfs.namenode.missing_blocks': 0,
-    'hdfs.namenode.corrupt_blocks': 1,
-}
+HDFS_NAMESYSTEM_METRICS_VALUES = {'hdfs.namenode.missing_blocks': 0, 'hdfs.namenode.corrupt_blocks': 1}
 
-HDFS_NAMESYSTEM_MUTUAL_METRICS_VALUES = {
-    'hdfs.namenode.capacity_in_use': None
-}
+HDFS_NAMESYSTEM_MUTUAL_METRICS_VALUES = {'hdfs.namenode.capacity_in_use': None}
 
 HDFS_NAMESYSTEM_METRIC_TAGS = ['namenode_url:' + NAMENODE_URI]
