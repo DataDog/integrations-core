@@ -3,15 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+import xmlrpclib
 from copy import deepcopy
 
 import pytest
-import xmlrpclib
 
-from datadog_checks.supervisord.supervisord import SupervisordCheck
 from datadog_checks.dev import docker_run
+from datadog_checks.supervisord.supervisord import SupervisordCheck
 
-from .common import HERE, URL, SUPERVISORD_CONFIG, BAD_SUPERVISORD_CONFIG
+from .common import BAD_SUPERVISORD_CONFIG, HERE, SUPERVISORD_CONFIG, URL
 
 
 @pytest.fixture
@@ -31,10 +31,7 @@ def bad_instance():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'supervisord.yaml'),
-        endpoints=URL,
-    ):
+    with docker_run(compose_file=os.path.join(HERE, 'compose', 'supervisord.yaml'), endpoints=URL):
         server = xmlrpclib.Server('http://localhost:19001/RPC2')
         server.supervisor.startAllProcesses()
         yield SUPERVISORD_CONFIG
