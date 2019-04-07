@@ -1,36 +1,36 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from os import environ
+
 import requests
 import simplejson as json
-
 from openstack import connection
-from os import environ
 from six.moves.urllib.parse import urljoin
+
 from datadog_checks.config import is_affirmative
 
+from .exceptions import (
+    AuthenticationNeeded,
+    IncompleteIdentity,
+    InstancePowerOffFailure,
+    KeystoneUnreachable,
+    MissingNeutronEndpoint,
+    MissingNovaEndpoint,
+    RetryLimitExceeded,
+)
 from .settings import (
     DEFAULT_API_REQUEST_TIMEOUT,
     DEFAULT_KEYSTONE_API_VERSION,
+    DEFAULT_MAX_RETRY,
     DEFAULT_NEUTRON_API_VERSION,
     DEFAULT_PAGINATED_LIMIT,
-    DEFAULT_MAX_RETRY
-)
-from .exceptions import (
-    InstancePowerOffFailure,
-    AuthenticationNeeded,
-    KeystoneUnreachable,
-    MissingNovaEndpoint,
-    MissingNeutronEndpoint,
-    IncompleteIdentity,
-    RetryLimitExceeded,
 )
 
 UNSCOPED_AUTH = 'unscoped'
 
 
 class ApiFactory(object):
-
     @staticmethod
     def create(logger, proxies, instance_config):
         keystone_server_url = instance_config.get("keystone_server_url")
@@ -46,8 +46,14 @@ class ApiFactory(object):
         # If an openstack configuration is specified, an OpenstackSDKApi will be created, and the authentification
         # will be made directly from the openstack configuration file
         if openstack_cloud_name is None:
-            api = SimpleApi(logger, keystone_server_url, timeout=request_timeout, ssl_verify=ssl_verify,
-                            proxies=proxies, limit=paginated_limit)
+            api = SimpleApi(
+                logger,
+                keystone_server_url,
+                timeout=request_timeout,
+                ssl_verify=ssl_verify,
+                proxies=proxies,
+                limit=paginated_limit,
+            )
             api.connect(user)
         else:
             api = OpenstackSDKApi(logger)
@@ -200,7 +206,7 @@ class OpenstackSDKApi(AbstractApi):
             "total_cores_used": "totalCoresUsed",
             "total_instances_used": "totalInstancesUsed",
             "total_ram_used": "totalRAMUsed",
-            "total_server_groups_used": "totalServerGroupsUsed"
+            "total_server_groups_used": "totalServerGroupsUsed",
         }
 
         for raw_value, value in key_name_conversion.items():
@@ -253,8 +259,15 @@ class OpenstackSDKApi(AbstractApi):
 
 
 class SimpleApi(AbstractApi):
-    def __init__(self, logger, keystone_endpoint, ssl_verify=False, proxies=None,
-                 timeout=DEFAULT_API_REQUEST_TIMEOUT, limit=DEFAULT_PAGINATED_LIMIT):
+    def __init__(
+        self,
+        logger,
+        keystone_endpoint,
+        ssl_verify=False,
+        proxies=None,
+        timeout=DEFAULT_API_REQUEST_TIMEOUT,
+        limit=DEFAULT_PAGINATED_LIMIT,
+    ):
         super(SimpleApi, self).__init__(logger)
 
         self.keystone_endpoint = keystone_endpoint
@@ -270,8 +283,9 @@ class SimpleApi(AbstractApi):
         self.cache = {}
 
     def connect(self, user):
-        credentials = Authenticator.from_config(self.logger, self.keystone_endpoint, user, self.ssl_verify,
-                                                self.proxies, self.timeout)
+        credentials = Authenticator.from_config(
+            self.logger, self.keystone_endpoint, user, self.ssl_verify, self.proxies, self.timeout
+        )
         self.logger.debug("Nova Url: %s", credentials.nova_endpoint)
         self.nova_endpoint = credentials.nova_endpoint
         self.logger.debug("Neutron Url: %s", credentials.neutron_endpoint)
@@ -294,12 +308,7 @@ class SimpleApi(AbstractApi):
 
         try:
             resp = requests.get(
-                url,
-                headers=headers,
-                verify=self.ssl_verify,
-                params=params,
-                timeout=self.timeout,
-                proxies=self.proxies,
+                url, headers=headers, verify=self.ssl_verify, params=params, timeout=self.timeout, proxies=self.proxies
             )
             resp.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -376,9 +385,11 @@ class SimpleApi(AbstractApi):
                 except requests.exceptions.HTTPError as e:
                     # Only catch HTTPErrors to enable the retry mechanism.
                     # Other exceptions raised by _make_request (e.g. AuthenticationNeeded) should be caught downstream
-                    self.logger.debug("Error making paginated request to {}, lowering limit from {} to {}: {}".format(
-                        url, query_params['limit'], query_params['limit']//2, e
-                    ))
+                    self.logger.debug(
+                        "Error making paginated request to {}, lowering limit from {} to {}: {}".format(
+                            url, query_params['limit'], query_params['limit'] // 2, e
+                        )
+                    )
                     query_params['limit'] //= 2
                     retry += 1
             else:
@@ -424,17 +435,26 @@ class Authenticator(object):
         pass
 
     @classmethod
-    def from_config(cls, logger, keystone_endpoint, user, ssl_verify=False, proxies=None,
-                    timeout=DEFAULT_API_REQUEST_TIMEOUT):
+    def from_config(
+        cls, logger, keystone_endpoint, user, ssl_verify=False, proxies=None, timeout=DEFAULT_API_REQUEST_TIMEOUT
+    ):
         # Make Token authentication with explicit unscoped authorization
         identity = cls._get_user_identity(user)
-        post_auth_token_resp = cls._post_auth_token(logger, keystone_endpoint, identity, ssl_verify=ssl_verify,
-                                                    proxies=proxies, timeout=timeout, scope=UNSCOPED_AUTH)
+        post_auth_token_resp = cls._post_auth_token(
+            logger,
+            keystone_endpoint,
+            identity,
+            ssl_verify=ssl_verify,
+            proxies=proxies,
+            timeout=timeout,
+            scope=UNSCOPED_AUTH,
+        )
         keystone_auth_token = post_auth_token_resp.headers.get('X-Subject-Token')
         # List all projects using retrieved auth token
         headers = {'X-Auth-Token': keystone_auth_token}
-        projects = cls._get_auth_projects(logger, keystone_endpoint, headers=headers, ssl_verify=ssl_verify,
-                                          proxies=proxies, timeout=timeout)
+        projects = cls._get_auth_projects(
+            logger, keystone_endpoint, headers=headers, ssl_verify=ssl_verify, proxies=proxies, timeout=timeout
+        )
 
         # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict
         last_auth_token = None
@@ -445,8 +465,15 @@ class Authenticator(object):
             identity = {"methods": ['token'], "token": {"id": keystone_auth_token}}
             scope = {'project': {'id': project.get('id')}}
             # Make Token authentication with project id scoped authorization
-            token_resp = cls._post_auth_token(logger, keystone_endpoint, identity, ssl_verify=ssl_verify,
-                                              proxies=proxies, timeout=timeout, scope=scope)
+            token_resp = cls._post_auth_token(
+                logger,
+                keystone_endpoint,
+                identity,
+                ssl_verify=ssl_verify,
+                proxies=proxies,
+                timeout=timeout,
+                scope=scope,
+            )
 
             # Retrieved token, nova and neutron endpoints
             auth_token = token_resp.headers.get('X-Subject-Token')
@@ -474,20 +501,22 @@ class Authenticator(object):
         return None
 
     @staticmethod
-    def _post_auth_token(logger, keystone_endpoint, identity, ssl_verify=False, proxies=None,
-                         timeout=DEFAULT_API_REQUEST_TIMEOUT, scope=UNSCOPED_AUTH):
+    def _post_auth_token(
+        logger,
+        keystone_endpoint,
+        identity,
+        ssl_verify=False,
+        proxies=None,
+        timeout=DEFAULT_API_REQUEST_TIMEOUT,
+        scope=UNSCOPED_AUTH,
+    ):
         auth_url = urljoin(keystone_endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         try:
             payload = {'auth': {'identity': identity, 'scope': scope}}
             headers = {'Content-Type': 'application/json'}
 
             resp = requests.post(
-                auth_url,
-                headers=headers,
-                data=json.dumps(payload),
-                verify=ssl_verify,
-                timeout=timeout,
-                proxies=proxies,
+                auth_url, headers=headers, data=json.dumps(payload), verify=ssl_verify, timeout=timeout, proxies=proxies
             )
             resp.raise_for_status()
             logger.debug("url: %s || response: %s", auth_url, resp.json())
@@ -495,25 +524,19 @@ class Authenticator(object):
 
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             msg = "Failed keystone auth with identity:{identity} scope:{scope} @{url}".format(
-                identity=identity,
-                scope=scope,
-                url=auth_url)
+                identity=identity, scope=scope, url=auth_url
+            )
             logger.debug(msg)
             raise KeystoneUnreachable(msg)
 
     @staticmethod
-    def _get_auth_projects(logger, keystone_endpoint, headers=None, ssl_verify=False, proxies=None,
-                           timeout=DEFAULT_API_REQUEST_TIMEOUT):
+    def _get_auth_projects(
+        logger, keystone_endpoint, headers=None, ssl_verify=False, proxies=None, timeout=DEFAULT_API_REQUEST_TIMEOUT
+    ):
         auth_url = ""
         try:
             auth_url = urljoin(keystone_endpoint, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
-            resp = requests.get(
-                auth_url,
-                headers=headers,
-                verify=ssl_verify,
-                timeout=timeout,
-                proxies=proxies
-            )
+            resp = requests.get(auth_url, headers=headers, verify=ssl_verify, timeout=timeout, proxies=proxies)
             resp.raise_for_status()
             jresp = resp.json()
             logger.debug("url: %s || response: %s", auth_url, jresp)
@@ -521,8 +544,8 @@ class Authenticator(object):
             return projects
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
-                    url=auth_url,
-                    ex=e)
+                url=auth_url, ex=e
+            )
             logger.debug(msg)
             raise KeystoneUnreachable(msg)
 
@@ -537,8 +560,9 @@ class Authenticator(object):
                   }
         }
         """
-        if not (user and user.get('name') and user.get('password') and user.get("domain")
-                and user.get("domain").get("id")):
+        if not (
+            user and user.get('name') and user.get('password') and user.get("domain") and user.get("domain").get("id")
+        ):
             raise IncompleteIdentity()
 
         identity = {"methods": ['password'], "password": {"user": user}}
@@ -576,8 +600,12 @@ class Authenticator(object):
         """
         catalog = resp.get('token', {}).get('catalog', [])
         for entry in catalog:
-            if entry.get('name') and entry.get('type') and entry.get('name') == name and \
-                            entry.get('type') == entry_type:
+            if (
+                entry.get('name')
+                and entry.get('type')
+                and entry.get('name') == name
+                and entry.get('type') == entry_type
+            ):
                 # Collect any endpoints on the public or internal interface
                 valid_endpoints = {}
                 for ep in entry.get('endpoints'):

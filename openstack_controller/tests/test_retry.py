@@ -3,9 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import time
-from . import common
 
 from datadog_checks.openstack_controller.retry import BackOffRetry
+
+from . import common
 
 
 def test_retry():
