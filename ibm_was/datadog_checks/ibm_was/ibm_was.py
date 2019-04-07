@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import requests
-from lxml import etree
 from xml.etree.ElementTree import ParseError
 
+import requests
+from lxml import etree
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
@@ -25,7 +25,7 @@ class IbmWasCheck(AgentCheck):
             'CountStatistic': self.monotonic_count,
             'DoubleStatistic': self.rate,
             'RangeStatistic': self.gauge,
-            'TimeStatistic': self.gauge
+            'TimeStatistic': self.gauge,
         }
 
     def check(self, instance):
@@ -88,17 +88,13 @@ class IbmWasCheck(AgentCheck):
             if child.tag in metrics.METRIC_VALUE_FIELDS:
                 self.submit_metrics(child, prefix, tags)
             elif child.tag in metrics.CATEGORY_FIELDS:
-                recursion_tags = tags + ["{}:{}".format(
-                    nested_tags.get(prefix)[recursion_level], child.get('name')
-                )]
-                self.process_stats(child, prefix, metric_categories, nested_tags, recursion_tags, recursion_level+1)
+                recursion_tags = tags + ["{}:{}".format(nested_tags.get(prefix)[recursion_level], child.get('name'))]
+                self.process_stats(child, prefix, metric_categories, nested_tags, recursion_tags, recursion_level + 1)
 
     def submit_metrics(self, child, prefix, tags):
         value = child.get(metrics.METRIC_VALUE_FIELDS[child.tag])
         metric_name = self.normalize(
-            ensure_unicode(child.get('name')),
-            prefix='{}.{}'.format(self.METRIC_PREFIX, prefix),
-            fix_case=True
+            ensure_unicode(child.get('name')), prefix='{}.{}'.format(self.METRIC_PREFIX, prefix), fix_case=True
         )
         self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
 
@@ -109,8 +105,8 @@ class IbmWasCheck(AgentCheck):
             self.submit_service_checks(tags, AgentCheck.OK)
         except (requests.HTTPError, requests.ConnectionError) as e:
             self.warning(
-                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
-                .format(url, e))
+                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable".format(url, e)
+            )
             self.submit_service_checks(tags, AgentCheck.CRITICAL)
             raise e
         return resp.content
@@ -130,7 +126,7 @@ class IbmWasCheck(AgentCheck):
             collect_stats[query['stat']] = True
         return (
             dict(metrics.NESTED_TAGS, **custom_recursion_tags),
-            dict(metrics.METRIC_CATEGORIES, **custom_metric_categories)
+            dict(metrics.METRIC_CATEGORIES, **custom_metric_categories),
         )
 
     def setup_configured_stats(self, instance):
