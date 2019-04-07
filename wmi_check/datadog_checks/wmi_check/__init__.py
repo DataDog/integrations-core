@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .wmi_check import WMICheck
 
-__all__ = [
-    '__version__',
-    'WMICheck'
-]
+__all__ = ['__version__', 'WMICheck']
