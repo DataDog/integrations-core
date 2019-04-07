@@ -2,15 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+
 # stdlib
 import os
-import json
-from mock import patch
 
 # 3rd party
 import pytest
+from mock import patch
 
-from .common import HERE, TEST_USERNAME, TEST_PASSWORD
+from .common import HERE, TEST_PASSWORD, TEST_USERNAME
 
 
 @pytest.fixture
