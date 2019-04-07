@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .vault import Vault
 
-__all__ = [
-    '__version__',
-    'Vault'
-]
+__all__ = ['__version__', 'Vault']
