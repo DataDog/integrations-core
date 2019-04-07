@@ -290,9 +290,20 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, instance):
-        host, port, user, password, mysql_sock, defaults_file, tags, options, queries, ssl, connect_timeout, max_custom_queries = self._get_config(
-            instance
-        )
+        (
+            host,
+            port,
+            user,
+            password,
+            mysql_sock,
+            defaults_file,
+            tags,
+            options,
+            queries,
+            ssl,
+            connect_timeout,
+            max_custom_queries
+        ) = self._get_config(instance)
 
         self._set_qcache_stats()
 
@@ -602,7 +613,7 @@ class MySql(AgentCheck):
         # Collect custom query metrics
         # Max of 20 queries allowed
         if isinstance(queries, list):
-            for index, check in enumerate(queries[:max_custom_queries]):
+            for check in queries[:max_custom_queries]:
                 total_tags = tags + check.get('tags', [])
                 self._collect_dict(
                     check['type'], {check['field']: check['metric']}, check['query'], db, tags=total_tags
@@ -834,7 +845,7 @@ class MySql(AgentCheck):
                 master_logs = {result[0]: result[1] for result in cursor_results}
 
                 binary_log_space = 0
-                for key, value in iteritems(master_logs):
+                for value in itervalues(master_logs):
                     binary_log_space += value
 
                 return binary_log_space
