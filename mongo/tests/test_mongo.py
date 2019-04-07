@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from . import common
-
 import pytest
 from six import itervalues
 
 from datadog_checks.base import to_string
+
+from . import common
 
 METRIC_VAL_CHECKS = {
     'mongodb.asserts.msgps': lambda x: x >= 0,
@@ -40,7 +40,7 @@ METRIC_VAL_CHECKS_OLD = {
     'mongodb.connections.available': lambda x: x >= 1,
     'mongodb.uptime': lambda x: x >= 0,
     'mongodb.mem.resident': lambda x: x > 0,
-    'mongodb.mem.virtual': lambda x: x > 0
+    'mongodb.mem.virtual': lambda x: x > 0,
 }
 
 
@@ -77,8 +77,7 @@ def test_mongo2(aggregator, check, instance_user):
     for sc in service_checks[0]:
         assert to_string('host:{}'.format(common.HOST)) in sc.tags
         assert (
-            to_string('port:{}'.format(common.PORT1)) in sc.tags
-            or to_string('port:{}'.format(common.PORT2)) in sc.tags
+            to_string('port:{}'.format(common.PORT1)) in sc.tags or to_string('port:{}'.format(common.PORT2)) in sc.tags
         )
         assert 'db:test' in sc.tags
 
