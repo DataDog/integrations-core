@@ -1,34 +1,31 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from requests.exceptions import SSLError
 from six import iteritems
 
-from requests.exceptions import SSLError
 from datadog_checks.yarn import YarnCheck
-
-from datadog_checks.yarn.yarn import (
-    SERVICE_CHECK_NAME, YARN_QUEUE_METRICS, YARN_APP_METRICS
-)
+from datadog_checks.yarn.yarn import SERVICE_CHECK_NAME, YARN_APP_METRICS, YARN_QUEUE_METRICS
 
 from .common import (
+    CUSTOM_TAGS,
+    RM_ADDRESS,
+    YARN_APP_METRICS_TAGS,
+    YARN_APP_METRICS_VALUES,
+    YARN_AUTH_CONFIG,
+    YARN_CLUSTER_METRICS_TAGS,
+    YARN_CLUSTER_METRICS_VALUES,
     YARN_CONFIG,
     YARN_CONFIG_EXCLUDING_APP,
-    YARN_AUTH_CONFIG,
-    YARN_APP_METRICS_TAGS,
-    YARN_CLUSTER_METRICS_TAGS,
     YARN_NODE_METRICS_TAGS,
-    YARN_ROOT_QUEUE_METRICS_TAGS,
-    YARN_QUEUE_METRICS_TAGS,
-    YARN_QUEUE_NOFOLLOW_METRICS_TAGS,
-    YARN_CLUSTER_METRICS_VALUES,
-    YARN_APP_METRICS_VALUES,
     YARN_NODE_METRICS_VALUES,
-    YARN_ROOT_QUEUE_METRICS_VALUES,
+    YARN_QUEUE_METRICS_TAGS,
     YARN_QUEUE_METRICS_VALUES,
-    YARN_SSL_VERIFY_TRUE_CONFIG,
+    YARN_QUEUE_NOFOLLOW_METRICS_TAGS,
+    YARN_ROOT_QUEUE_METRICS_TAGS,
+    YARN_ROOT_QUEUE_METRICS_VALUES,
     YARN_SSL_VERIFY_FALSE_CONFIG,
-    RM_ADDRESS,
-    CUSTOM_TAGS,
+    YARN_SSL_VERIFY_TRUE_CONFIG,
 )
 
 
@@ -120,7 +117,7 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
             SERVICE_CHECK_NAME,
             status=YarnCheck.CRITICAL,
             tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
-            count=1
+            count=1,
         )
         pass
     else:
