@@ -16,7 +16,9 @@ def test_custom_metrics(aggregator, pg_instance):
                 {
                     'descriptors': [('letter', 'customdb')],
                     'metrics': {'num': ['custom.num', 'Gauge']},
-                    'query': "SELECT letter, %s FROM (VALUES (21, 'a'), (22, 'b'), (23, 'c')) AS t (num,letter) LIMIT 1",
+                    'query': (
+                        "SELECT letter, %s FROM (VALUES (21, 'a'), (22, 'b'), (23, 'c')) AS t (num,letter) LIMIT 1"
+                    ),
                     'relation': False,
                 }
             ],
