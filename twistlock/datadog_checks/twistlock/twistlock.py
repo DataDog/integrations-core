@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import time
-
 from collections import defaultdict
 from datetime import datetime, timedelta
 
 import requests
-
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -26,8 +24,13 @@ SEVERITY_TAGS = {
     "low": ["severity:low", "min_severity:low"],
     "medium": ["severity:medium", "min_severity:low", "min_severity:medium"],
     "high": ["severity:high", "min_severity:low", "min_severity:medium", "min_severity:high"],
-    "critical": ["severity:critical", "min_severity:low", "min_severity:medium",
-                 "min_severity:high", "min_severity:critical"]
+    "critical": [
+        "severity:critical",
+        "min_severity:low",
+        "min_severity:medium",
+        "min_severity:high",
+        "min_severity:critical",
+    ],
 }
 
 
@@ -89,8 +92,9 @@ class TwistlockCheck(AgentCheck):
             licence_status = AgentCheck.WARNING
         if expiration_date < critical_date:
             licence_status = AgentCheck.CRITICAL
-        self.service_check(service_check_name, licence_status,
-                           tags=self.config.tags, message=license.get("expiration_date"))
+        self.service_check(
+            service_check_name, licence_status, tags=self.config.tags, message=license.get("expiration_date")
+        )
 
     def report_registry_scan(self):
         namespace = self.NAMESPACE + ".registry"
@@ -109,15 +113,17 @@ class TwistlockCheck(AgentCheck):
 
             image_name = image['_id']
             if image_name.startswith(DOCKERIO_PREFIX):
-                image_name = image_name[len(DOCKERIO_PREFIX):]
+                image_name = image_name[len(DOCKERIO_PREFIX) :]
             image_tags = ["scanned_image:" + image_name] + self.config.tags
 
             self._report_layer_count(image, namespace, image_tags)
-            self._report_service_check(image,
-                                       namespace,
-                                       REGISTRY_SCAN_DATE_FORMAT,
-                                       tags=image_tags,
-                                       message="Last scan: " + image.get("scanTime"))
+            self._report_service_check(
+                image,
+                namespace,
+                REGISTRY_SCAN_DATE_FORMAT,
+                tags=image_tags,
+                message="Last scan: " + image.get("scanTime"),
+            )
             self._report_vuln_info(namespace, image, image_tags)
             self._report_compliance_information(namespace, image, image_tags)
 
@@ -143,15 +149,13 @@ class TwistlockCheck(AgentCheck):
             if not image_name:
                 continue
             if image_name.startswith(DOCKERIO_PREFIX):
-                image_name = image_name[len(DOCKERIO_PREFIX):]
+                image_name = image_name[len(DOCKERIO_PREFIX) :]
             image_tags = ["scanned_image:" + image_name] + self.config.tags
 
             self._report_layer_count(image, namespace, image_tags)
-            self._report_service_check(image,
-                                       namespace,
-                                       SCAN_DATE_FORMAT,
-                                       tags=image_tags,
-                                       message="Last scan: " + image.get("scanTime"))
+            self._report_service_check(
+                image, namespace, SCAN_DATE_FORMAT, tags=image_tags, message="Last scan: " + image.get("scanTime")
+            )
             self._report_vuln_info(namespace, image, image_tags)
             self._report_compliance_information(namespace, image, image_tags)
 
@@ -174,11 +178,9 @@ class TwistlockCheck(AgentCheck):
             hostname = host['hostname']
             host_tags = ["scanned_host:" + hostname] + self.config.tags
 
-            self._report_service_check(host,
-                                       namespace,
-                                       SCAN_DATE_FORMAT,
-                                       tags=host_tags,
-                                       message="Last scan: " + host.get("scanTime"))
+            self._report_service_check(
+                host, namespace, SCAN_DATE_FORMAT, tags=host_tags, message="Last scan: " + host.get("scanTime")
+            )
             self._report_vuln_info(namespace, host, host_tags)
             self._report_compliance_information(namespace, host, host_tags)
 
@@ -208,11 +210,13 @@ class TwistlockCheck(AgentCheck):
                 container_tags += ["image_name:" + image_name]
             container_tags += self.config.tags
 
-            self._report_service_check(container,
-                                       namespace,
-                                       SCAN_DATE_FORMAT,
-                                       tags=container_tags,
-                                       message="Last scan: " + container.get("scanTime"))
+            self._report_service_check(
+                container,
+                namespace,
+                SCAN_DATE_FORMAT,
+                tags=container_tags,
+                message="Last scan: " + container.get("scanTime"),
+            )
             self._report_compliance_information(namespace, container, container_tags)
 
     def report_vulnerabilities(self):
@@ -254,7 +258,9 @@ class TwistlockCheck(AgentCheck):
             msg_text = """
             There is a new CVE affecting your {}:
             {}
-            """.format(type, description)
+            """.format(
+                type, description
+            )
 
             event = {
                 'timestamp': time.mktime(published_date.timetuple()),
@@ -263,7 +269,7 @@ class TwistlockCheck(AgentCheck):
                 'msg_text': msg_text,
                 "tags": self.config.tags,
                 "aggregation_key": cve_id,
-                'host': self.hostname
+                'host': self.hostname,
             }
 
             self.event(event)
@@ -278,9 +284,7 @@ class TwistlockCheck(AgentCheck):
         cves = data.get('info', {}).get('cveVulnerabilities', []) or []
         for cve in cves:
             summary[cve['severity']] += 1
-            cve_tags = [
-                'cve:' + cve['cve'],
-            ] + SEVERITY_TAGS.get(cve['severity'], []) + tags
+            cve_tags = ['cve:' + cve['cve']] + SEVERITY_TAGS.get(cve['severity'], []) + tags
             if 'packageName' in cve:
                 cve_tags += ["package:" + cve['packageName']]
             self.gauge(namespace + '.cve.details', float(1), cve_tags)
@@ -316,18 +320,14 @@ class TwistlockCheck(AgentCheck):
             scan_status = AgentCheck.WARNING
         if scan_date < self.critical_date:
             scan_status = AgentCheck.CRITICAL
-        self.service_check(prefix + '.is_scanned',
-                           scan_status,
-                           tags=tags,
-                           message=message)
+        self.service_check(prefix + '.is_scanned', scan_status, tags=tags, message=message)
 
     def _retrieve_json(self, path):
         url = self.config.url + path
         auth = (self.config.username, self.config.password)
-        response = requests.get(url,
-                                auth=auth,
-                                verify=self.config.ssl_verify,
-                                proxies=self.get_instance_proxy(self.config.instance, url))
+        response = requests.get(
+            url, auth=auth, verify=self.config.ssl_verify, proxies=self.get_instance_proxy(self.config.instance, url)
+        )
         try:
             j = response.json()
             # it's possible to get a null response from the server
