@@ -77,10 +77,10 @@ The only option in ECS Fargate is to run the task as a [Replica Service][9]. The
 Run the following commands using the [AWS CLI tools][1]. **Note**: Fargate version 1.1.0 or greater is required, so the command below specifies the platform version.
 
 ```
-# If needed, create a cluster
+## If needed, create a cluster
 aws ecs create-cluster --cluster-name "<CLUSTER_NAME>"
 
-# Run the task as a service for your cluster
+## Run the task as a service for your cluster
 aws ecs run-task --cluster <CLUSTER_NAME> \
 --network-configuration "awsvpcConfiguration={subnets=["<PRIVATE_SUBNET>"],securityGroups=["<SECURITY_GROUP>"]}" \
 --task-definition arn:aws:ecs:us-east-1:<AWS_ACCOUNT_NUMBER>:task-definition/<TASK_NAME>:1 \
@@ -88,6 +88,7 @@ aws ecs run-task --cluster <CLUSTER_NAME> \
 ```
 
 ##### Web UI
+
 1. Log in to your [AWS Web Console][2] and navigate to the ECS section. If needed, create a cluster with the **Networking only** cluster template.
 2. Choose the cluster to run the Datadog Agent on.
 3. On the **Services** tab, click the **Create** button.
