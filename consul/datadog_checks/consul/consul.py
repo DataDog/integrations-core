@@ -253,12 +253,12 @@ class ConsulCheck(AgentCheck):
             services = {s: services[s] for s in whitelisted_services[:max_services]}
         else:
             if len(services) <= max_services:
-                log_line = 'Consul service whitelist not defined. ' 'Agent will poll for all {} services found'.format(
+                log_line = 'Consul service whitelist not defined. Agent will poll for all {} services found'.format(
                     len(services)
                 )
                 self.log.debug(log_line)
             else:
-                log_line = 'Consul service whitelist not defined. ' 'Agent will poll for at most {} services'.format(
+                log_line = 'Consul service whitelist not defined. Agent will poll for at most {} services'.format(
                     max_services
                 )
                 self.warning(log_line)
