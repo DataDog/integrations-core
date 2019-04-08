@@ -37,7 +37,7 @@ def _get_ca_certs_paths():
         embedded_root = os.path.dirname(embedded_root)
     else:
         raise OSError(
-            'Unable to locate `embedded` directory. ' 'Please specify ca_certs in your http yaml configuration file.'
+            'Unable to locate `embedded` directory. Please specify ca_certs in your http yaml configuration file.'
         )
 
     try:

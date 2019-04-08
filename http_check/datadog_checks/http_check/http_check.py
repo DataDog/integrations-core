@@ -46,9 +46,33 @@ class HTTPCheck(NetworkCheck):
             self.ca_certs = get_ca_certs_path()
 
     def _check(self, instance):
-        addr, ntlm_domain, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content, headers, response_time, content_match, reverse_content_match, tags, disable_ssl_validation, ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects, stream = from_instance(
-            instance, self.ca_certs
-        )
+        (
+            addr,
+            ntlm_domain,
+            username,
+            password,
+            client_cert,
+            client_key,
+            method,
+            data,
+            http_response_status_code,
+            timeout,
+            include_content,
+            headers,
+            response_time,
+            content_match,
+            reverse_content_match,
+            tags,
+            disable_ssl_validation,
+            ssl_expire,
+            instance_ca_certs,
+            weakcipher,
+            check_hostname,
+            ignore_ssl_warning,
+            skip_proxy,
+            allow_redirects,
+            stream,
+        ) = from_instance(instance, self.ca_certs)
 
         start = time.time()
 
