@@ -248,4 +248,4 @@ class GoExpvar(AgentCheck):
             for new_key, new_content in iteritems(object):
                 yield str(new_key), new_content
         else:
-            self.log.warning("Could not parse this object, check the json" "served by the expvar")
+            self.log.warning("Could not parse this object, check the json served by the expvar")
