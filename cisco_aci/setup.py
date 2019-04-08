@@ -18,12 +18,6 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-# Parse requirements
-def get_requirements(fpath):
-    with open(path.join(HERE, fpath), encoding='utf-8') as f:
-        return f.readlines()
-
-
 CHECKS_BASE_REQ = 'datadog_checks_base'
 
 setup(
@@ -50,7 +44,6 @@ setup(
     packages=['datadog_checks.cisco_aci'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-    setup_requires=['pytest-runner'],
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
