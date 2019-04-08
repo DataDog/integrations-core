@@ -1,13 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 from copy import deepcopy
 
 import requests
-
-# 3rd party
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck

@@ -41,7 +41,7 @@ def dd_environment():
         conditions=[CheckEndpoints(GITLAB_URL, attempts=200), CheckEndpoints(PROMETHEUS_ENDPOINT)],
     ):
         # run pre-test commands
-        for i in range(100):
+        for _ in range(100):
             requests.get(GITLAB_URL)
         sleep(2)
 
