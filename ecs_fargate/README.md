@@ -56,6 +56,7 @@ The instructions below show you how to configure the task using the [AWS CLI too
 2. Update the json with a **TASK_NAME** and your [Datadog API Key][4]. Note that the environment variable `ECS_FARGATE` is already set to `"true"`.
 3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][5].
 3. Execute the following command to register the ECS task definition:
+
 ```
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
 ```
