@@ -110,7 +110,7 @@ class ESCheck(AgentCheck):
         except AuthenticationError:
             raise
         except Exception as e:
-            self.warning("Error while trying to get Elasticsearch version " "from %s %s" % (config.url, str(e)))
+            self.warning("Error while trying to get Elasticsearch version from %s %s" % (config.url, str(e)))
             version = [1, 0, 0]
 
         self.service_metadata('version', version)

@@ -83,7 +83,7 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
     # node stats, blacklist metrics that can't be tested in a small, single node instance
     blacklist = ['elasticsearch.indices.segments.index_writer_max_memory_in_bytes']
     blacklist.extend(ADDITIONAL_METRICS_1_x)
-    for m_name, desc in iteritems(stats_for_version(es_version)):
+    for m_name in stats_for_version(es_version):
         if m_name in blacklist:
             continue
         aggregator.assert_metric(m_name, count=1, tags=node_tags)
@@ -91,7 +91,7 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
     # cluster stats
     expected_metrics = health_stats_for_version(es_version)
     expected_metrics.update(CLUSTER_PENDING_TASKS)
-    for m_name, desc in iteritems(expected_metrics):
+    for m_name in expected_metrics:
         aggregator.assert_metric(m_name, count=1, tags=cluster_tags)
 
     aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK, tags=config.service_check_tags)
@@ -141,8 +141,7 @@ def test_index_metrics(dd_environment, aggregator, elastic_check, instance, clus
         pytest.skip("Index metrics are only tested in version 1.0.0+")
 
     elastic_check.check(instance)
-    print(aggregator._metrics)
-    for m_name, desc in iteritems(index_stats_for_version(es_version)):
+    for m_name in index_stats_for_version(es_version):
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
 
 
