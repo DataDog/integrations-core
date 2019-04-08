@@ -256,7 +256,7 @@ def test_only_max_dbs_are_scanned(aggregator, check, gauges, instance):
         check.check(config)
 
     for db in ['_users', '_metadata']:
-        expected_tags = ["instance:{}".format(node["name"])]
+        expected_tags = ["instance:{}".format(node["name"]), "db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
@@ -480,7 +480,7 @@ def test_view_compaction_metrics(aggregator, check, gauges, instance):
             t.join()
 
     if tries >= 20:
-        assert False, "Could not find the view_compaction happening"
+        raise AssertionError('Could not find the view_compaction happening')
 
 
 @pytest.mark.usefixtures('dd_environment')
