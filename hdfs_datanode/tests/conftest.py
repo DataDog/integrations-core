@@ -3,23 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-
-# stdlib
 import os
 
-# 3rd party
 import pytest
 from mock import patch
 
 from .common import HERE, TEST_PASSWORD, TEST_USERNAME
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
 
 
 @pytest.fixture
