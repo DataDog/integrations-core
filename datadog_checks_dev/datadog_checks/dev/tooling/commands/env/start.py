@@ -140,6 +140,25 @@ def start(ctx, check, env, agent, dev, base, env_vars):
         abort()
     echo_success('success!')
 
+    start_commands = metadata.get('start_commands', [])
+    if start_commands:
+        echo_waiting('Running extra start-up commands... ', nl=False)
+
+        for command in start_commands:
+            result = environment.exec_command(command, capture=True)
+            if result.code:
+                click.echo()
+                echo_info(result.stdout + result.stderr)
+                echo_failure('An error occurred.')
+                echo_waiting('Stopping the environment...')
+                stop_environment(check, env, metadata=metadata)
+                echo_waiting('Stopping the Agent...')
+                environment.stop_agent()
+                environment.remove_config()
+                abort()
+
+        echo_success('success!')
+
     if base and not dev:
         dev = True
         echo_info(
