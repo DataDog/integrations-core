@@ -3,9 +3,11 @@ init_config:
   ## @param nodetool - string - required
   ## command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
   ## can be overwritten on an instance
-  ## NOTE: agent v6.11+ on windows runs as an unprivileged `ddagentuser` and needs to be granted
-  ## access to the nodetool executable in order for the check to work. Similarly, the nodetool executable
-  ## might require some environment variables (e.g. `CASSANDRA_HOME` or `DSCINSTALLDIR`) to work, so make sure these are visible by `ddagentuser`.
+  ## Note: Agent v6.11+ on Windows runs as an unprivileged user (`ddagentuser`). That user needs to be granted
+  ## access to the nodetool installation directory for the check to work.  
+  ## The nodetool installation also sets some environment variables (e.g. `CASSANDRA_HOME` and `DSCINSTALLDIR`),
+  ## but sets them as variables only for the user doing the nodetool installation. Those environment variables should
+  ## be set as system-wide variables.
   #
   #  nodetool: /usr/bin/nodetool
 
