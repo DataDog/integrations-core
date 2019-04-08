@@ -161,7 +161,10 @@ class CiscoACICheck(AgentCheck):
             log_line += ", took {}".format(end - start)
         self.log.info(log_line)
 
-    def submit_metrics(self, metrics, tags, instance={}, obj_type="gauge", hostname=None):
+    def submit_metrics(self, metrics, tags, instance=None, obj_type="gauge", hostname=None):
+        if instance is None:
+            instance = {}
+
         user_tags = instance.get('tags', [])
         for mname, mval in iteritems(metrics):
             tags_to_send = []

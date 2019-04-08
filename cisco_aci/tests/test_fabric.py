@@ -57,7 +57,7 @@ class FakeSess(SessionWrapper):
 @pytest.fixture
 def session_mock():
     session = Session()
-    setattr(session, 'send', mock_send)
+    session.send = mock_send
     fake_session_wrapper = FakeSess(common.ACI_URL, session, 'cookie')
 
     return fake_session_wrapper
