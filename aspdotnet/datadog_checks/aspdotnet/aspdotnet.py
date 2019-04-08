@@ -26,29 +26,23 @@ DEFAULT_COUNTERS = [
         "Requests In Application Queue",
         "aspdotnet.applications.requests.in_queue",
         "gauge",
-    ],  # noqa: E501
-    [
-        "ASP.NET Applications",
-        None,
-        "Requests Executing",
-        "aspdotnet.applications.requests.executing",
-        "gauge",
-    ],  # noqa: E501
-    ["ASP.NET Applications", None, "Requests/Sec", "aspdotnet.applications.requests.persec", "gauge"],  # noqa: E501
+    ],
+    ["ASP.NET Applications", None, "Requests Executing", "aspdotnet.applications.requests.executing", "gauge"],
+    ["ASP.NET Applications", None, "Requests/Sec", "aspdotnet.applications.requests.persec", "gauge"],
     [
         "ASP.NET Applications",
         None,
         "Forms Authentication Failure",
         "aspdotnet.applications.forms_authentication.failure",
         "gauge",
-    ],  # noqa: E501
+    ],
     [
         "ASP.NET Applications",
         None,
         "Forms Authentication Success",
         "aspdotnet.applications.forms_authentication.successes",
         "gauge",
-    ],  # noqa: E501
+    ],
 ]
 
 
