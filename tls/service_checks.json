@@ -6,7 +6,7 @@
         "check": "tls.can_connect",
         "statuses": ["ok", "critical"],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored endpoint, or `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored endpoint, otherwise returns `OK`."
     },
     {
         "agent_version": "6.12.0",
@@ -15,7 +15,7 @@
         "check": "tls.version",
         "statuses": ["ok", "critical"],
         "name": "Allowed TLS/SSL version",
-        "description": "Returns `CRITICAL` if a connection is made with a protocol version that is not allowed, or `OK` otherwise."
+        "description": "Returns `CRITICAL` if a connection is made with a protocol version that is not allowed, otherwise returns `OK`."
     },
     {
         "agent_version": "6.12.0",
@@ -24,7 +24,7 @@
         "check": "tls.cert_validation",
         "statuses": ["ok", "critical"],
         "name": "Certificate validation",
-        "description": "Returns `CRITICAL` if the certificate is malformed or does not match the server hostname, or `OK` otherwise."
+        "description": "Returns `CRITICAL` if the certificate is malformed or does not match the server hostname, otherwise returns `OK`."
     },
     {
         "agent_version": "6.12.0",
@@ -33,6 +33,6 @@
         "check": "tls.cert_expiration",
         "statuses": ["ok", "warning", "critical"],
         "name": "Certificate expiration",
-        "description": "Returns `CRITICAL` if the certificate has expired or will expire in less than `days_critical`, `WARNING` if the certificate will expire in less than `days_warning`, or `OK` otherwise."
+        "description": "Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`, returns `WARNING` if the certificate expires in less than `days_warning`, otherwise returns `OK`."
     }
 ]
