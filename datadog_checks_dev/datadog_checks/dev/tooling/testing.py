@@ -146,7 +146,7 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
-    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter=''
+    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter='', junit_xml=''
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
@@ -172,7 +172,7 @@ def construct_pytest_options(
             # Show no coverage report until the end
             ' --cov-report='
             # This will be formatted to the appropriate coverage paths for each package
-            ' {}'
+            ' {coverage}'
         )
 
     if marker:
@@ -180,6 +180,10 @@ def construct_pytest_options(
 
     if test_filter:
         pytest_options += ' -k {}'.format(test_filter)
+
+    if junit_xml:
+        # This will be formatted with a generated path
+        pytest_options += ' --junit-xml={junit_xml}'
 
     return pytest_options
 

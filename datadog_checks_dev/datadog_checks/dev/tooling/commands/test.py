@@ -37,6 +37,7 @@ def display_envs(check_envs):
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='List available test environments')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
+@click.option('--junit-xml', help='Create junit-xml style report files inside given path')
 def test(
     checks,
     format_style,
@@ -52,6 +53,7 @@ def test(
     list_envs,
     changed,
     cov_keep,
+    junit_xml
 ):
     """Run tests for Agent-based checks.
 
@@ -83,6 +85,7 @@ def test(
         coverage=coverage,
         marker=marker,
         test_filter=test_filter,
+        junit_xml=junit_xml,
     )
     coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 
@@ -116,8 +119,16 @@ def test(
         # need a way to tell if anything ran since we don't know anything upfront.
         tests_ran = True
 
+        coverage_opt = None
         if coverage:
-            test_env_vars['PYTEST_ADDOPTS'] = pytest_options.format(pytest_coverage_sources(check))
+            coverage_opt = pytest_coverage_sources(check)
+
+        junit_opt = None
+        if junit_xml:
+            junit_opt = os.path.join(junit_xml, "{}-$TOX_ENV_NAME.xml".format(check))
+
+        test_env_vars['PYTEST_ADDOPTS'] = test_env_vars['PYTEST_ADDOPTS'].format(
+            coverage=coverage_opt, junit_xml=junit_opt)
 
         if verbose:
             echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))
