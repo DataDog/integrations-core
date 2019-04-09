@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-import time
 from six.moves import range
+import time
 
 from datadog_checks.vsphere.mor_cache import MorCache, MorNotFoundError
 
