@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
+from datadog_checks.dev import get_here
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
 
 # Namenode URI
 NAMENODE_URI = 'http://localhost:50070/'
@@ -21,6 +21,33 @@ CUSTOM_TAGS = ["cluster_name:hdfs_dev", "instance:level_tags"]
 # Authentication Parameters
 TEST_USERNAME = 'Picard'
 TEST_PASSWORD = 'NCC-1701'
+
+INSTANCE_INTEGRATION = {
+    "hdfs_namenode_jmx_uri": NAMENODE_URI,
+}
+
+EXPECTED_METRICS = [
+    'hdfs.namenode.capacity_total',
+    'hdfs.namenode.capacity_used',
+    'hdfs.namenode.capacity_remaining',
+    'hdfs.namenode.total_load',
+    'hdfs.namenode.blocks_total',
+    'hdfs.namenode.max_objects',
+    'hdfs.namenode.files_total',
+    'hdfs.namenode.pending_replication_blocks',
+    'hdfs.namenode.under_replicated_blocks',
+    'hdfs.namenode.scheduled_replication_blocks',
+    'hdfs.namenode.pending_deletion_blocks',
+    'hdfs.namenode.num_live_data_nodes',
+    'hdfs.namenode.num_dead_data_nodes',
+    'hdfs.namenode.num_decom_live_data_nodes',
+    'hdfs.namenode.num_decom_dead_data_nodes',
+    'hdfs.namenode.volume_failures_total',
+    'hdfs.namenode.estimated_capacity_lost_total',
+    'hdfs.namenode.num_decommissioning_data_nodes',
+    'hdfs.namenode.num_stale_data_nodes',
+    'hdfs.namenode.num_stale_storages',
+]
 
 HDFS_NAMENODE_CONFIG = {
     'instances': [
