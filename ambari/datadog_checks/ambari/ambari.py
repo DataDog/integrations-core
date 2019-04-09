@@ -4,9 +4,9 @@
 
 from six import iteritems
 import requests
-from xml.etree.ElementTree import ParseError
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.utils.common import pattern_filter
 
 from . import common
 
@@ -20,13 +20,18 @@ class AmbariCheck(AgentCheck):
         self.services = []
 
     def check(self, instance):
-        server = instance.get("url")
-        port = instance.get("port")
-        tags = instance.get('tags', [])
+        server = instance.get("url", "")
+        port = instance.get("port", "")
+        tags = instance.get("tags", [])
+        services = instance.get("services", [])
+        headers = instance.get("metric_headers", [])
         clusters_endpoint = common.CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
-        clusters = self.get_clusters(clusters_endpoint)
-        self.get_host_metrics(clusters, server, port, tags)
-        self.get_service_metrics(clusters, server, port, tags)
+        cluster_list = self.get_clusters(clusters_endpoint)
+        clusters = pattern_filter(cluster_list)
+        if instance.get("collect_host_metrics", True):
+            self.get_host_metrics(clusters, server, port, tags)
+        if instance.get("collect_service_metrics", True):
+            self.get_service_metrics(clusters, server, port, services, headers, tags)
 
     def get_clusters(self, url):
         cluster_list = []
@@ -55,11 +60,11 @@ class AmbariCheck(AgentCheck):
                 resp = self.make_request(hosts_endpoint)
                 hosts_list = resp.get('items')
                 cluster_tag = "ambari_cluster:{}".format(cluster)
-            except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+            except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError):
                 hosts_list = []
 
             for host in hosts_list:
-                metrics = self.metrics_iterate(host.get('metrics'), "")
+                metrics = self.host_metrics_iterate(host.get('metrics'), "")
                 for metric_name, value in iteritems(metrics):
                     host_tag = "ambari_host:" + host.get('Hosts').get('host_name')
                     metric_tags = []
@@ -68,52 +73,52 @@ class AmbariCheck(AgentCheck):
                     if isinstance(value, float):
                         self.submit_metrics(metric_name, value, metric_tags)
 
-    def get_service_metrics(self, clusters, server, port, tags):
+    def get_service_metrics(self, clusters, server, port, services, headers, tags):
         for cluster in clusters:
-            services_endpoint = common.SERVICES_URL.format(
-                ambari_server=server,
-                ambari_port=port,
-                cluster_name=cluster
-            )
-            services_list = []
-            try:
-                # resp = self.make_request("http://bad_endpoint.com") #for testing
-                resp = self.make_request(services_endpoint)
-                for service in resp.get('items'):
-                    services_list.append(service.get('ServiceInfo').get('service_name'))
-                cluster_tag = "ambari_cluster:{}".format(cluster)
-            except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
-                # import pdb; pdb.set_trace()
-                print e
-
-            for service in services_list:
+            for service, components in iteritems(services):
+                components = [c.upper() for c in components]
                 service_metrics_endpoint = common.SERVICE_METRICS_URL.format(
                     ambari_server=server,
                     ambari_port=port,
                     cluster_name=cluster,
-                    service_name=service
+                    service_name=service.upper()
                 )
-                resp = self.make_request(service_metrics_endpoint)
+                try:
+                    # resp = self.make_request("http://bad_endpoint.com") #for testing
+                    resp = self.make_request(service_metrics_endpoint)
+                except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+                    print e
+                cluster_tag = "ambari_cluster:{}".format(cluster)
+
                 for component in resp.get('items'):
-                    if component.get('metrics'):
-                        metrics = self.metrics_iterate(component.get('metrics'), "")
-                        for metric_name, value in iteritems(metrics):
-                            component_name = component.get('ServiceComponentInfo').get('component_name')
-                            service_tag = "ambari_service:" + service.lower()
-                            component_tag = "ambari_component:" + component_name
-                            metric_tags = []
-                            metric_tags += tags
-                            metric_tags.extend((service_tag, component_tag, cluster_tag))
+                    component_name = component.get('ServiceComponentInfo').get('component_name')
+                    if component_name in components:
+                        for header in headers:
+                            metrics = self.service_metrics_iterate(component.get('metrics')[header], header)
+                            for metric_name, value in iteritems(metrics):
+                                service_tag = "ambari_service:" + service.lower()
+                                component_tag = "ambari_component:" + component_name.lower()
+                                metric_tags = []
+                                metric_tags += tags
+                                metric_tags.extend((service_tag, component_tag, cluster_tag))
 
-                            if isinstance(value, float):
-                                self.submit_metrics(metric_name, value, metric_tags)
+                                if isinstance(value, float):
+                                    self.submit_metrics(metric_name, value, metric_tags)
 
-    def metrics_iterate(self, metric_dict, prev_heading, prev_metrics={}):
+    def service_metrics_iterate(self, metric_dict, header, prev_metrics={}):
+        for key, value in iteritems(metric_dict):
+            if isinstance(value, dict):
+                self.service_metrics_iterate(value, header, prev_metrics)
+            else:
+                prev_metrics['{}.{}'.format(header, key)] = value
+        return prev_metrics
+
+    def host_metrics_iterate(self, metric_dict, prev_heading, prev_metrics={}):
         for key, value in iteritems(metric_dict):
             if key == "boottime":
                 prev_metrics["boottime"] = value
             elif isinstance(value, dict):
-                self.metrics_iterate(value, key, prev_metrics)
+                self.host_metrics_iterate(value, key, prev_metrics)
             else:
                 prev_metrics['{}.{}'.format(prev_heading, key)] = value
         return prev_metrics

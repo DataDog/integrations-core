@@ -11,7 +11,14 @@ def test_check(aggregator):
         "username": "admin",
         "password": "admin",
         "tags": ["test:abc", "test1:xyz"],
-        "timeout": 30
+        "timeout": 30,
+        "services": {
+            "HDFS": ["NAMENODE", "DATANODE"],
+            "YARN": ["NODEMANANGER", "YARNCLIENT"]
+        },
+        "metric_headers": ["cpu", "jvm"],
+        "collect_host_metrics": True,
+        "collect_service_metrics": True
     }]
     check = AmbariCheck('ambari', {}, {}, instance)
     check.check(instance[0])
