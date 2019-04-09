@@ -1,6 +1,6 @@
 [
     {
-        "agent_version": "6.11.0",
+        "agent_version": "6.12.0",
         "integration":"systemd",
         "check": "systemd.unit.active",
         "statuses": ["ok", "warn", "critical"],

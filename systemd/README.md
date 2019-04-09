@@ -31,7 +31,7 @@ See [metadata.csv][5] for a list of metrics provided by this check.
 ### Service Checks
 
 **systemd.unit.active**:  
-Returns `CRITICAL` if the unit's state is 'active' or 'failed', `WARN` if it's 'deactivating', otherwise returns `OK`.
+Returns `CRITICAL` if the unit's state is 'inactive' or 'failed', `WARN` if it's 'deactivating', otherwise returns `OK`.
 
 ### Events
 
@@ -41,9 +41,10 @@ The Systemd check emits an event to Datadog each time a unit in the configuratio
 
 Need help? Contact [Datadog support][5].
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/systemd/datadog_checks/systemd/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/systemd/metadata.csv
-[6]: https://docs.datadoghq.com/help/
+[1]: https://www.freedesktop.org/wiki/Software/systemd/
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://github.com/DataDog/integrations-core/blob/master/systemd/datadog_checks/systemd/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/systemd/metadata.csv
+[7]: https://docs.datadoghq.com/help/

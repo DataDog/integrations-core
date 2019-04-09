@@ -3,10 +3,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "systemd",
-  "metric_prefix": "Systemd is suite of basic building blocks for a Linux system",
+  "metric_prefix": "systemd",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "systemd",
+  "short_description": "Systemd is suite of basic building blocks for a Linux system",
   "guid": "acd470e7-5413-4deb-95fc-4b034d904691",
   "support": "core",
   "supported_os": [

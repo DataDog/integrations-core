@@ -17,9 +17,9 @@ def test_check(aggregator, instance_collect_all):
     aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status,
                                     tags=['unit:ssh.service'] + expected_tags)
     aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status,
-                                    tags=['unit:networking.service'] + expected_tags)
-    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status,
                                     tags=['unit:cron.service'] + expected_tags)
+    aggregator.assert_service_check(common.EXPECTED_SERVICE_CHECK, status=status,
+                                    tags=['unit:networking.service'] + expected_tags)
 
     # expected metrics
     for metric in common.EXPECTED_METRICS:

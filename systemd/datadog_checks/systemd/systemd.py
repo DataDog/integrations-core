@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import time
 
 from collections import defaultdict
 from six import iteritems
@@ -15,7 +16,16 @@ from datadog_checks.base import ensure_unicode
 
 class SystemdCheck(AgentCheck):
 
+    # Source
+    SOURCE_TYPE_NAME = 'systemd'
+
+    # Service check
     UNIT_STATUS_SC = 'systemd.unit.active'
+
+    # Unit states
+    ACTIVE_STATES = ['active', 'activating']
+    INACTIVE_STATES = ['inactive', 'failed']
+    WARN_STATES = ['deactivating']
 
     def __init__(self, name, init_config, instances):
         if instances is not None and len(instances) > 1:
@@ -38,17 +48,18 @@ class SystemdCheck(AgentCheck):
 
     def check(self, instance):
         current_unit_status = defaultdict(dict)
-        for u in self.units_watched:
-            current_unit_status[u] = self.get_state_single_unit(u)
+        for unit in self.units_watched:
+            current_unit_status[unit] = self.get_state_single_unit(unit)
         # initialize the cache if it's empty
         if not self.unit_cache:
             self.unit_cache = current_unit_status
+            changed_units, created_units, deleted_units = self.list_status_change(self.unit_cache)
+        else:
+            # find out which units have changed state, units that can no longer be found or units found
+            changed_units, created_units, deleted_units = self.list_status_change(current_unit_status)
 
         for unit in self.units_watched:
             self.send_service_checks(unit, self.get_state_single_unit(unit), self.tags)
-
-        # find out which units have changed state, units that can no longer be found or units found
-        changed_units, created_units, deleted_units = self.list_status_change(current_unit_status)
 
         self.report_changed_units(changed_units, self.tags)
         self.report_deleted_units(deleted_units, self.tags)
@@ -86,7 +97,7 @@ class SystemdCheck(AgentCheck):
             created.pop(unit_short_name, None)
             # We check status changes between the previous cached unit status and the current unit status
             current_status = current_unit_status.get(unit_short_name)
-            if current_status:
+            if current_status is not None:
                 if current_status != previous_unit_status:
                     self.log.debug("unit {} changed state, it is now {}".format(unit_short_name, current_status))
                     changed[unit_short_name] = current_status
@@ -100,6 +111,8 @@ class SystemdCheck(AgentCheck):
     def report_changed_units(self, units, tags):
         for unit, state in iteritems(units):
             self.event({
+                "timestamp": int(time.time()),
+                "source_type_name": self.SOURCE_TYPE_NAME,
                 "event_type": "unit.status.changed",
                 "msg_title": "unit {} changed state".format(unit),
                 "msg_text": "it is now: {}".format(state),
@@ -109,6 +122,8 @@ class SystemdCheck(AgentCheck):
     def report_deleted_units(self, units, tags):
         for unit, state in iteritems(units):
             self.event({
+                "timestamp": int(time.time()),
+                "source_type_name": self.SOURCE_TYPE_NAME,
                 "event_type": "unit.status.deleted",
                 "msg_title": "unit {} cannot be found".format(unit),  # TODO: check wording
                 "msg_text": "last reported status was: {}".format(state),
@@ -118,6 +133,8 @@ class SystemdCheck(AgentCheck):
     def report_created_units(self, units, tags):
         for unit, state in iteritems(units):
             self.event({
+                "timestamp": int(time.time()),
+                "source_type_name": self.SOURCE_TYPE_NAME,
                 "event_type": "unit.status.created",
                 "msg_title": "new unit {} has been found".format(unit),  # TODO: check wording
                 "msg_text": "status is: {}".format(state),
@@ -128,13 +145,10 @@ class SystemdCheck(AgentCheck):
         active_units = inactive_units = 0
         for unit, state in iteritems(units):
             state = ensure_unicode(state)
-            try:
-                if state == 'active':
-                    active_units += 1
-                if state == 'inactive':
-                    inactive_units += 1
-            except pystemd.dbusexc.DBusInvalidArgsError as e:
-                self.log.debug("Cannot retrieve unit status for {}, {}".format(unit, e))
+            if state in self.ACTIVE_STATES:
+                active_units += 1
+            if state in self.INACTIVE_STATES:
+                inactive_units += 1
 
         self.gauge('systemd.units.active', active_units, tags)
         self.gauge('systemd.units.inactive', inactive_units, tags)
@@ -149,19 +163,19 @@ class SystemdCheck(AgentCheck):
 
     def send_service_checks(self, unit_id, state, tags):
         state = ensure_unicode(state)
-        if state == 'active' or 'activating':
+        if state in self.ACTIVE_STATES:
             self.service_check(
                 self.UNIT_STATUS_SC,
                 AgentCheck.OK,
                 tags=["unit:{}".format(unit_id)] + tags
             )
-        elif state == 'inactive' or state == 'failed':
+        elif state in self.INACTIVE_STATES:
             self.service_check(
                 self.UNIT_STATUS_SC,
                 AgentCheck.CRITICAL,
                 tags=["unit:{}".format(unit_id)] + tags
             )
-        elif state == 'deactivating':
+        elif state in self.WARN_STATES:
             self.service_check(
                 self.UNIT_STATUS_SC,
                 AgentCheck.WARN,
