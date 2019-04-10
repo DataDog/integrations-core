@@ -6,12 +6,18 @@ import itertools
 import re
 import socket
 import time
-import xmlrpclib
 from collections import defaultdict
 
+import six
 import supervisor.xmlrpc
 
 from datadog_checks.base import AgentCheck
+
+if six.PY3:
+    import xmlrpc.client as xmlrpclib
+elif six.PY2:
+    import xmlrpclib
+
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'
@@ -48,7 +54,7 @@ class SupervisordCheck(AgentCheck):
             raise Exception("Supervisor server name not specified in yaml configuration.")
 
         instance_tags = instance.get('tags', [])
-        instance_tags.append('%s:%s' % (SERVER_TAG, server_name))
+        instance_tags.append('{}:{}'.format(SERVER_TAG, server_name))
         supe = self._connect(instance)
         count_by_status = defaultdict(int)
 
@@ -57,7 +63,7 @@ class SupervisordCheck(AgentCheck):
             processes = supe.getAllProcessInfo()
         except xmlrpclib.Fault as error:
             raise Exception(
-                'An error occurred while reading process information: %s %s' % (error.faultCode, error.faultString)
+                'An error occurred while reading process information: {} {}'.format(error.faultCode, error.faultString)
             )
         except socket.error:
             host = instance.get('host', DEFAULT_HOST)
@@ -65,15 +71,15 @@ class SupervisordCheck(AgentCheck):
             sock = instance.get('socket')
             if sock is None:
                 msg = (
-                    'Cannot connect to http://%s:%s. '
+                    'Cannot connect to http://{}:{}. '
                     'Make sure supervisor is running and XML-RPC '
-                    'inet interface is enabled.' % (host, port)
+                    'inet interface is enabled.'.format(host, port)
                 )
             else:
                 msg = (
-                    'Cannot connect to %s. Make sure sure supervisor '
+                    'Cannot connect to {}. Make sure sure supervisor '
                     'is running and socket is enabled and socket file'
-                    ' has the right permissions.' % sock
+                    ' has the right permissions.'.format(sock)
                 )
 
             self.service_check(SERVER_SERVICE_CHECK, AgentCheck.CRITICAL, tags=instance_tags, message=msg)
@@ -82,9 +88,9 @@ class SupervisordCheck(AgentCheck):
 
         except xmlrpclib.ProtocolError as e:
             if e.errcode == 401:  # authorization error
-                msg = 'Username or password to %s are incorrect.' % server_name
+                msg = 'Username or password to {} are incorrect.'.format(server_name)
             else:
-                msg = 'An error occurred while connecting to %s: %s %s' % (server_name, e.errcode, e.errmsg)
+                msg = 'An error occurred while connecting to {}: {} {}'.format(server_name, e.errcode, e.errmsg)
 
             self.service_check(SERVER_SERVICE_CHECK, AgentCheck.CRITICAL, tags=instance_tags, message=msg)
             raise Exception(msg)
@@ -119,7 +125,7 @@ class SupervisordCheck(AgentCheck):
         # Report service checks and uptime for each process
         for proc in monitored_processes:
             proc_name = proc['name']
-            tags = instance_tags + ['%s:%s' % (PROCESS_TAG, proc_name)]
+            tags = instance_tags + ['{}:{}'.format(PROCESS_TAG, proc_name)]
 
             # Report Service Check
             status = DD_STATUS[proc['statename']]
@@ -135,7 +141,7 @@ class SupervisordCheck(AgentCheck):
             self.gauge(
                 'supervisord.process.count',
                 count_by_status[status],
-                tags=instance_tags + ['status:%s' % PROCESS_STATUS[status]],
+                tags=instance_tags + ['status:{}'.format(PROCESS_STATUS[status])],
             )
 
     @staticmethod
@@ -150,8 +156,8 @@ class SupervisordCheck(AgentCheck):
             port = instance.get('port', DEFAULT_PORT)
             user = instance.get('user')
             password = instance.get('pass')
-            auth = '%s:%s@' % (user, password) if user and password else ''
-            server = xmlrpclib.Server('http://%s%s:%s/RPC2' % (auth, host, port))
+            auth = '{}:{}@'.format(user, password) if user and password else ''
+            server = xmlrpclib.Server('http://{}{}:{}/RPC2'.format(auth, host, port))
         return server.supervisor
 
     @staticmethod

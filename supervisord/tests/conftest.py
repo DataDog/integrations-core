@@ -3,15 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import xmlrpclib
 from copy import deepcopy
 
 import pytest
+import six
 
 from datadog_checks.dev import docker_run
 from datadog_checks.supervisord.supervisord import SupervisordCheck
 
 from .common import BAD_SUPERVISORD_CONFIG, HERE, SUPERVISORD_CONFIG, URL
+
+if six.PY3:
+    import xmlrpc.client as xmlrpclib
+elif six.PY2:
+    import xmlrpclib
 
 
 @pytest.fixture

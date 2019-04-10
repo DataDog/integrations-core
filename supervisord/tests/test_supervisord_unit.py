@@ -2,15 +2,21 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import xmlrpclib
 from socket import socket
 
 import pytest
+import six
 from mock import patch
 
 from datadog_checks.supervisord.supervisord import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
 
 from .common import TEST_CASES
+
+if six.PY3:
+    import xmlrpc.client as xmlrpclib
+elif six.PY2:
+    import xmlrpclib
+
 
 # Mark all tests in this file as unit tests
 pytestmark = pytest.mark.unit
@@ -20,36 +26,43 @@ def mock_server(url):
     return MockXmlRcpServer(url)
 
 
-@patch('xmlrpclib.Server', side_effect=mock_server)
-def test_check(mock_server, aggregator, check):
+def test_check(aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
-    for tc in TEST_CASES:
-        for instance in tc['instances']:
-            name = instance['name']
+    if six.PY3:
+        xmlrpc_server = 'xmlrpc.client.Server'
+    elif six.PY2:
+        xmlrpc_server = 'xmlrpclib.Server'
 
-            try:
-                # Run the check
-                check.check(instance)
-            except Exception as e:
-                if 'error_message' in tc:  # excepted error
-                    assert str(e) == tc['error_message']
+    with patch(xmlrpc_server, side_effect=mock_server):
+        for tc in TEST_CASES:
+            for instance in tc['instances']:
+                name = instance['name']
+
+                try:
+                    # Run the check
+                    check.check(instance)
+                except Exception as e:
+                    if 'error_message' in tc:  # excepted error
+                        print(tc)
+                        print(e)
+                        assert str(e) == tc['error_message']
+                    else:
+                        raise e
                 else:
-                    raise e
-            else:
-                expected_metrics = tc['expected_metrics'][name]
-                for m in expected_metrics:
-                    m_name = m[0]
-                    m_value = m[1]
-                    m_tags = m[2]['tags']
-                    aggregator.assert_metric(m_name, value=m_value, tags=m_tags)
+                    expected_metrics = tc['expected_metrics'][name]
+                    for m in expected_metrics:
+                        m_name = m[0]
+                        m_value = m[1]
+                        m_tags = m[2]['tags']
+                        aggregator.assert_metric(m_name, value=m_value, tags=m_tags)
 
-                # Assert that the check generated the right service checks
-                expected_service_checks = tc['expected_service_checks'][name]
-                for sc in expected_service_checks:
-                    aggregator.assert_service_check(sc['check'], status=sc['status'], tags=sc['tags'])
+                    # Assert that the check generated the right service checks
+                    expected_service_checks = tc['expected_service_checks'][name]
+                    for sc in expected_service_checks:
+                        aggregator.assert_service_check(sc['check'], status=sc['status'], tags=sc['tags'])
 
-                aggregator.reset()
+                    aggregator.reset()
 
 
 def test_build_message(check):
@@ -225,7 +238,7 @@ class MockSupervisor:
         for proc in self.MOCK_PROCESSES[self.url]:
             if proc['name'] == proc_name:
                 return proc
-        raise Exception('Process not found: %s' % proc_name)
+        raise Exception('Process not found: {}'.format(proc_name))
 
     def _validate_request(self, proc=None):
         '''Validates request and simulates errors when not valid'''

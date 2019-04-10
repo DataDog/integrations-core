@@ -1,2 +1,2 @@
-supervisor==3.3.3; python_version < '3.0'
 meld3==1.0.2
+supervisor==4.0.0
