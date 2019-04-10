@@ -311,7 +311,7 @@ Arguments:
 
 #### Example configuration
 
-The `config.yaml.example` for the Awesome service check (above):
+The `conf.yaml.example` for the Awesome service check (above):
 
 ```yaml
 init_config:
