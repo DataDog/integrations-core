@@ -13,7 +13,7 @@ CUSTOM_TAGS = ['optional:tag1']
 TEST_USERNAME = 'AzureDiamond'
 TEST_PASSWORD = 'hunter2'
 
-INSTANCE_INTEGRATION = { "hdfs_datanode_jmx_uri": "http://localhost:50075" }
+INSTANCE_INTEGRATION = {"hdfs_datanode_jmx_uri": "http://localhost:50075"}
 
 EXPECTED_METRICS = [
     'hdfs.datanode.dfs_remaining',
