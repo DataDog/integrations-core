@@ -13,14 +13,7 @@ CUSTOM_TAGS = ['optional:tag1']
 TEST_USERNAME = 'AzureDiamond'
 TEST_PASSWORD = 'hunter2'
 
-HDFS_DATANODE_CONFIG = {
-    'instances': [
-        {
-            'hdfs_datanode_jmx_uri': DATANODE_URI,
-            'tags': list(CUSTOM_TAGS)
-        }
-    ]
-}
+HDFS_DATANODE_CONFIG = {'instances': [{'hdfs_datanode_jmx_uri': DATANODE_URI, 'tags': list(CUSTOM_TAGS)}]}
 
 HDFS_DATANODE_AUTH_CONFIG = {
     'instances': [
@@ -47,6 +40,4 @@ HDFS_DATANODE_METRICS_VALUES = {
     'hdfs.datanode.num_blocks_failed_to_uncache': 0,
 }
 
-HDFS_DATANODE_METRIC_TAGS = [
-    'datanode_url:{}'.format(DATANODE_URI),
-]
+HDFS_DATANODE_METRIC_TAGS = ['datanode_url:{}'.format(DATANODE_URI)]
