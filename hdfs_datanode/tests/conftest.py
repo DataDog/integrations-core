@@ -4,9 +4,9 @@
 
 import json
 import os
+from copy import deepcopy
 
 import pytest
-from copy import deepcopy
 from mock import patch
 
 from datadog_checks.dev import docker_run
