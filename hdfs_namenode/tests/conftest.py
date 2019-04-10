@@ -7,10 +7,10 @@ import os
 import pytest
 from mock import patch
 
-from datadog_checks.hdfs_namenode import HDFSNameNode
 from datadog_checks.dev import docker_run
+from datadog_checks.hdfs_namenode import HDFSNameNode
 
-from .common import HERE, INSTANCE_INTEGRATION, NAME_SYSTEM_STATE_URL, NAME_SYSTEM_URL, TEST_USERNAME, TEST_PASSWORD
+from .common import HERE, INSTANCE_INTEGRATION, NAME_SYSTEM_STATE_URL, NAME_SYSTEM_URL, TEST_PASSWORD, TEST_USERNAME
 
 
 @pytest.fixture(scope="session")
