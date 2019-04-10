@@ -87,7 +87,7 @@ class IbmDb2Check(AgentCheck):
             self.gauge(self.m('application.executing'), db['appls_in_db2'], tags=self._tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002225.html
-            self.monotonic_count(self.m('connection.max'), db['connections_top'], tags=self._tags)
+            self.gauge(self.m('connection.max'), db['connections_top'], tags=self._tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001200.html
             self.monotonic_count(self.m('connection.total'), db['total_cons'], tags=self._tags)
