@@ -458,6 +458,8 @@ To install your integration, build your Python wheel first (see the [Building](#
 datadog-agent integration install -w /path/to/wheel.whl
 ```
 
+Note that it may require to use a specific user to run that command, such as `dd-agent`.
+
 
 [1]: https://virtualenv.pypa.io/en/stable
 [2]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
