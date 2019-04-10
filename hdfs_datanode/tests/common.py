@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
+from datadog_checks.dev import get_here
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
 
 DATANODE_URI = 'http://localhost:50070/'
 
@@ -12,6 +12,21 @@ CUSTOM_TAGS = ['optional:tag1']
 
 TEST_USERNAME = 'AzureDiamond'
 TEST_PASSWORD = 'hunter2'
+
+INSTANCE_INTEGRATION = { "hdfs_datanode_jmx_uri": "http://localhost:50075" }
+
+EXPECTED_METRICS = [
+    'hdfs.datanode.dfs_remaining',
+    'hdfs.datanode.dfs_capacity',
+    'hdfs.datanode.dfs_used',
+    'hdfs.datanode.cache_capacity',
+    'hdfs.datanode.cache_used',
+    'hdfs.datanode.last_volume_failure_date',
+    'hdfs.datanode.estimated_capacity_lost_total',
+    'hdfs.datanode.num_blocks_cached',
+    'hdfs.datanode.num_failed_volumes',
+    'hdfs.datanode.num_blocks_failed_to_cache',
+]
 
 HDFS_DATANODE_CONFIG = {'instances': [{'hdfs_datanode_jmx_uri': DATANODE_URI, 'tags': list(CUSTOM_TAGS)}]}
 

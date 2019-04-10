@@ -6,9 +6,32 @@ import json
 import os
 
 import pytest
+from copy import deepcopy
 from mock import patch
 
-from .common import HERE, TEST_PASSWORD, TEST_USERNAME
+from datadog_checks.dev import docker_run
+from datadog_checks.hdfs_datanode import HDFSDataNode
+
+from .common import HERE, INSTANCE_INTEGRATION, TEST_PASSWORD, TEST_USERNAME
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    with docker_run(
+        compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
+        log_patterns='Got finalize command for block pool',
+    ):
+        yield INSTANCE_INTEGRATION
+
+
+@pytest.fixture
+def check():
+    return HDFSDataNode('hdfs_datanode')
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE_INTEGRATION)
 
 
 @pytest.fixture
