@@ -11,7 +11,6 @@ def test_check(aggregator):
         "username": "admin",
         "password": "admin",
         "tags": ["test:abc", "test1:xyz"],
-        "timeout": 30,
         "services": {
             "HDFS": ["NAMENODE", "DATANODE"],
             "YARN": ["NODEMANANGER", "YARNCLIENT"]

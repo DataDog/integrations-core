@@ -6,7 +6,6 @@ from six import iteritems
 import requests
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.utils.common import pattern_filter
 
 from . import common
 
@@ -27,22 +26,26 @@ class AmbariCheck(AgentCheck):
         headers = instance.get("metric_headers", [])
         clusters_endpoint = common.CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
         cluster_list = self.get_clusters(clusters_endpoint)
-        clusters = pattern_filter(cluster_list)
+        perform_service_check = True
         if instance.get("collect_host_metrics", True):
-            self.get_host_metrics(clusters, server, port, tags)
+            self.get_host_metrics(cluster_list, server, port, tags)
+            perform_service_check = False
         if instance.get("collect_service_metrics", True):
-            self.get_service_metrics(clusters, server, port, services, headers, tags)
+            self.get_service_metrics(cluster_list, server, port, services, headers, tags, perform_service_check)
 
     def get_clusters(self, url):
         cluster_list = []
-        try:
-            resp = self.http.get(url)
-            resp.raise_for_status()
-        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+
+        resp = self.make_request(url)
+
+        if resp is None:
             self.warning(
-                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
-                .format(url, e))
-            raise e
+                "Couldn't connect to URL: {}. Please verify the address is reachable"
+                .format(url))
+            self.submit_service_checks("can.connect", self.CRITICAL, ["url:{}".format(url)])
+            raise
+
+        self.submit_service_checks("can.connect", self.OK, ["url:{}".format(url)])
         clusters = resp.json()
         for cluster in clusters.get('items'):
             cluster_list.append(cluster.get('Clusters').get('cluster_name'))
@@ -55,13 +58,14 @@ class AmbariCheck(AgentCheck):
                 ambari_port=port,
                 cluster_name=cluster
             )
-            try:
-                # resp = self.make_request("http://bad_endpoint.com") #for testing
-                resp = self.make_request(hosts_endpoint)
-                hosts_list = resp.get('items')
-                cluster_tag = "ambari_cluster:{}".format(cluster)
-            except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError):
-                hosts_list = []
+            # resp = self.make_request("http://bad_endpoint.com") #for testing
+            resp = self.make_request(hosts_endpoint)
+
+            if resp is None:
+                continue
+
+            hosts_list = resp.get('items')
+            cluster_tag = "ambari_cluster:{}".format(cluster)
 
             for host in hosts_list:
                 metrics = self.host_metrics_iterate(host.get('metrics'), "")
@@ -73,7 +77,7 @@ class AmbariCheck(AgentCheck):
                     if isinstance(value, float):
                         self.submit_metrics(metric_name, value, metric_tags)
 
-    def get_service_metrics(self, clusters, server, port, services, headers, tags):
+    def get_service_metrics(self, clusters, server, port, services, headers, tags, perform_service_check):
         for cluster in clusters:
             for service, components in iteritems(services):
                 components = [c.upper() for c in components]
@@ -83,12 +87,15 @@ class AmbariCheck(AgentCheck):
                     cluster_name=cluster,
                     service_name=service.upper()
                 )
-                try:
-                    # resp = self.make_request("http://bad_endpoint.com") #for testing
-                    resp = self.make_request(service_metrics_endpoint)
-                except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
-                    print e
+
+                resp = self.make_request(service_metrics_endpoint)
+                # resp = self.make_request("http://bad_endpoint.com") #for testing
                 cluster_tag = "ambari_cluster:{}".format(cluster)
+
+                if resp is None:
+                    continue
+
+                self.submit_service_checks("can.connect", resp, ["url:{}".format(url)])
 
                 for component in resp.get('items'):
                     component_name = component.get('ServiceComponentInfo').get('component_name')
@@ -126,12 +133,14 @@ class AmbariCheck(AgentCheck):
     def make_request(self, url):
         try:
             resp = self.http.get(url)
+            return resp.json()
         except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
             self.warning(
                 "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
                 .format(url, e))
-            raise e
-        return resp.json()
 
     def submit_metrics(self, name, value, tags):
         self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
+
+    def submit_service_checks(self, name, value, tags):
+        self.service_check('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
