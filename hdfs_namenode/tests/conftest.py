@@ -17,7 +17,7 @@ from .common import HERE, INSTANCE_INTEGRATION, NAME_SYSTEM_STATE_URL, NAME_SYST
 def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-        log_patterns='Got finalize command for block pool'
+        log_patterns='Got finalize command for block pool',
     ):
         yield INSTANCE_INTEGRATION
 
