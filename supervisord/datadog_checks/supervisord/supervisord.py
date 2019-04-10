@@ -8,16 +8,10 @@ import socket
 import time
 from collections import defaultdict
 
-import six
 import supervisor.xmlrpc
+from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.base import AgentCheck
-
-if six.PY3:
-    import xmlrpc.client as xmlrpclib
-elif six.PY2:
-    import xmlrpclib
-
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'

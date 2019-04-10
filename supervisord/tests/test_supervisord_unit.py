@@ -5,18 +5,12 @@
 from socket import socket
 
 import pytest
-import six
 from mock import patch
+from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.supervisord.supervisord import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
 
 from .common import TEST_CASES
-
-if six.PY3:
-    import xmlrpc.client as xmlrpclib
-elif six.PY2:
-    import xmlrpclib
-
 
 # Mark all tests in this file as unit tests
 pytestmark = pytest.mark.unit
@@ -29,12 +23,7 @@ def mock_server(url):
 def test_check(aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
-    if six.PY3:
-        xmlrpc_server = 'xmlrpc.client.Server'
-    elif six.PY2:
-        xmlrpc_server = 'xmlrpclib.Server'
-
-    with patch(xmlrpc_server, side_effect=mock_server):
+    with patch.object(xmlrpclib, 'Server', side_effect=mock_server):
         for tc in TEST_CASES:
             for instance in tc['instances']:
                 name = instance['name']

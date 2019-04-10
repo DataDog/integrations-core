@@ -6,17 +6,12 @@ import os
 from copy import deepcopy
 
 import pytest
-import six
+from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.dev import docker_run
 from datadog_checks.supervisord.supervisord import SupervisordCheck
 
 from .common import BAD_SUPERVISORD_CONFIG, HERE, SUPERVISORD_CONFIG, URL
-
-if six.PY3:
-    import xmlrpc.client as xmlrpclib
-elif six.PY2:
-    import xmlrpclib
 
 
 @pytest.fixture
