@@ -24,9 +24,7 @@ TEST_PASSWORD = 'NCC-1701'
 
 HDFS_NAMENODE_CONFIG = {'instances': [{'hdfs_namenode_jmx_uri': NAMENODE_URI, 'tags': list(CUSTOM_TAGS)}]}
 
-INSTANCE_INTEGRATION = {
-    "hdfs_namenode_jmx_uri": NAMENODE_URI,
-}
+INSTANCE_INTEGRATION = {'hdfs_namenode_jmx_uri': NAMENODE_URI}
 
 EXPECTED_METRICS = [
     'hdfs.namenode.capacity_total',
