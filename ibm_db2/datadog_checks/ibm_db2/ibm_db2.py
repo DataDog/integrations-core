@@ -10,8 +10,9 @@ import ibm_db
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
-from .utils import scrub_connection_string, status_to_service_check
+
 from . import queries
+from .utils import scrub_connection_string, status_to_service_check
 
 
 class IbmDb2Check(AgentCheck):
@@ -480,16 +481,18 @@ class IbmDb2Check(AgentCheck):
         previous_state = self._table_space_states.get(name)
         if state:
             if previous_state is not None and state != previous_state:
-                self.event({
-                    'timestamp': timestamp(),
-                    'event_type': self.EVENT_TABLE_SPACE_STATE,
-                    'msg_title': 'Table space state change',
-                    'msg_text': 'State of `{}` changed from `{}` to `{}`.'.format(name, previous_state, state),
-                    'alert_type': 'info',
-                    'source_type_name': self.METRIC_PREFIX,
-                    'host': self.hostname,
-                    'tags': tags,
-                })
+                self.event(
+                    {
+                        'timestamp': timestamp(),
+                        'event_type': self.EVENT_TABLE_SPACE_STATE,
+                        'msg_title': 'Table space state change',
+                        'msg_text': 'State of `{}` changed from `{}` to `{}`.'.format(name, previous_state, state),
+                        'alert_type': 'info',
+                        'source_type_name': self.METRIC_PREFIX,
+                        'host': self.hostname,
+                        'tags': tags,
+                    }
+                )
             self._table_space_states[name] = state
 
     def get_connection(self):

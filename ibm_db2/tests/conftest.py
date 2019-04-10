@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.ibm_db2 import IbmDb2Check
+
 from .common import COMPOSE_FILE, CONFIG
 
 
