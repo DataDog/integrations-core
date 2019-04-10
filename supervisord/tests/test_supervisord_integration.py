@@ -9,10 +9,7 @@ import pytest
 from .common import PROCESSES, PROCESSES_BY_STATE_BY_ITERATION, STATUSES
 
 # Mark all tests in this file as integration tests
-pytestmark = [
-    pytest.mark.integration,
-    pytest.mark.usefixtures("dd_environment")
-]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
 def test_check(aggregator, check, instance):
