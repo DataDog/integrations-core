@@ -259,7 +259,7 @@ The `README.md` file provided by our scaffolding already has the correct format.
 
 ### Configuration file
 
-Every active integration has a configuration file named `config.yaml`, which contains data that is specific to the local instantiation. When preparing a new integration, you must include a `config.yaml.example` which contains the necessary options and sane defaults (where possible).
+Every active integration has a configuration file named `conf.yaml`, which contains data that is specific to the local instantiation. When preparing a new integration, you must include a `conf.yaml.example` which contains the necessary options and sane defaults (where possible).
 
 Parameters in the configuration file follow these rules:
 
