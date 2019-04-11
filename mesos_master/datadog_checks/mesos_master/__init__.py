@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .mesos_master import MesosMaster
 
-__all__ = [
-    '__version__',
-    'MesosMaster'
-]
+__all__ = ['__version__', 'MesosMaster']
