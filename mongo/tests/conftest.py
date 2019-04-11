@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
+
 from . import common
 
 
@@ -17,34 +18,24 @@ def dd_environment(instance):
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
 
     with docker_run(
-        compose_file,
-        conditions=[
-            WaitFor(setup_sharding, args=(compose_file, ), attempts=5, wait=5),
-            InitializeDB(),
-        ],
+        compose_file, conditions=[WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5), InitializeDB()]
     ):
         yield instance
 
 
 @pytest.fixture(scope='session')
 def instance():
-    return {
-        'server': common.MONGODB_SERVER,
-    }
+    return {'server': common.MONGODB_SERVER}
 
 
 @pytest.fixture
 def instance_user():
-    return {
-        'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1),
-    }
+    return {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1)}
 
 
 @pytest.fixture
 def instance_authdb():
-    return {
-        'server': 'mongodb://testUser:testPass@{}:{}/test?authSource=authDB'.format(common.HOST, common.PORT1),
-    }
+    return {'server': 'mongodb://testUser:testPass@{}:{}/test?authSource=authDB'.format(common.HOST, common.PORT1)}
 
 
 @pytest.fixture
@@ -72,9 +63,8 @@ def setup_sharding(compose_file):
 class InitializeDB(LazyFunction):
     def __call__(self):
         cli = pymongo.mongo_client.MongoClient(
-            common.MONGODB_SERVER,
-            socketTimeoutMS=30000,
-            read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED, )
+            common.MONGODB_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+        )
 
         foos = []
         for _ in range(70):
