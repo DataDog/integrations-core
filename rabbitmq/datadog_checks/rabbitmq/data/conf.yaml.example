@@ -144,7 +144,7 @@ instances:
 
 #logs:
 # - type: file
-#   path: /var/log/rabbit/*.log
+#   path: /var/log/rabbitmq/*.log
 #   source: rabbitmq
 #   service: myservice
 #   log_processing_rules:
