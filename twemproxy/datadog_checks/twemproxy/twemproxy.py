@@ -8,30 +8,28 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_unicode
 
-GLOBAL_STATS = set(['curr_connections'])
+GLOBAL_STATS = {'curr_connections'}
 
-GLOBAL_STATS_RATES = set(['total_connections'])
+GLOBAL_STATS_RATES = {'total_connections'}
 
-POOL_STATS = set(['client_connections', 'server_ejects'])
+POOL_STATS = {'client_connections', 'server_ejects'}
 
-POOL_STATS_RATES = set(['client_eof', 'client_err', 'forward_error', 'fragments'])
+POOL_STATS_RATES = {'client_eof', 'client_err', 'forward_error', 'fragments'}
 
-SERVER_STATS = set(['server_connections', 'server_timedout'])
+SERVER_STATS = {'server_connections', 'server_timedout'}
 
-SERVER_STATS_RATES = set(
-    [
-        'in_queue',
-        'out_queue',
-        'in_queue_bytes',
-        'out_queue_bytes',
-        'requests',
-        'request_bytes',
-        'responses',
-        'response_bytes',
-        'server_err',
-        'server_eof',
-    ]
-)
+SERVER_STATS_RATES = {
+    'in_queue',
+    'out_queue',
+    'in_queue_bytes',
+    'out_queue_bytes',
+    'requests',
+    'request_bytes',
+    'responses',
+    'response_bytes',
+    'server_err',
+    'server_eof',
+}
 
 
 class Twemproxy(AgentCheck):
