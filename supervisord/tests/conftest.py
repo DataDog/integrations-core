@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import xmlrpclib
 from copy import deepcopy
 
 import pytest
+from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.dev import docker_run
 from datadog_checks.supervisord.supervisord import SupervisordCheck
