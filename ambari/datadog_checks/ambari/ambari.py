@@ -20,10 +20,11 @@ class AmbariCheck(AgentCheck):
 
     def check(self, instance):
         server = instance.get("url", "")
-        port = instance.get("port", "")
+        port = str(instance.get("port", ""))
         tags = instance.get("tags", [])
         services = instance.get("services", [])
         headers = instance.get("metric_headers", [])
+        headers = [str(h) for h in headers]
         clusters_endpoint = common.CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
         cluster_list = self.get_clusters(clusters_endpoint, server)
         self.get_host_metrics(cluster_list, server, port, tags)
