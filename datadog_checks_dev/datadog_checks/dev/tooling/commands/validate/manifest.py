@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 import json
 import uuid
 from collections import OrderedDict
@@ -36,7 +37,7 @@ OPTIONAL_ATTRIBUTES = {
     'aliases',
     'description',
     'is_beta',
-    # Move these three below (integration_id, metric_to_check, metric_prefix)
+    # Move these two below (metric_to_check, metric_prefix)
     # to mandatory when all integration are fixed
     'metric_to_check',
     'metric_prefix',
@@ -44,6 +45,8 @@ OPTIONAL_ATTRIBUTES = {
 }
 
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
+
+INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 
 
 @click.command(
@@ -200,6 +203,13 @@ def manifest(fix, include_extras):
                             display_queue.append((echo_failure, '  required non-null string: version'))
                         else:
                             display_queue.append((echo_failure, '  invalid `version`: {}'.format(version)))
+
+            # integration_id
+            integration_id = decoded.get('integration_id')
+            if not re.search(INTEGRATION_ID_REGEX, integration_id):
+                file_failures += 1
+                output = 'integration_id contains invalid characters'
+                display_queue.append((echo_failure, output))
 
             # maintainer
             if root_name == 'integrations-core':

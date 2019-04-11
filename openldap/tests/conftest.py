@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.dev import TempDir, docker_run
 from datadog_checks.dev.utils import create_file, path_exists
 from datadog_checks.openldap import OpenLDAP
+
 from .common import DEFAULT_INSTANCE, HERE, HOST
 
 

@@ -1,132 +1,124 @@
 init_config:
 
 instances:
+
+  ## @param host - string - required
+  ## The hostname to connect to.
+  ## NOTE: Even if the server name is "localhost", the agent connects to PostgreSQL using TCP/IP, unless you also
+  ## provide a value for the sock key.
+  ## If `use_psycopg2` is enabled, use the directory containing the UNIX socket (ex: `/run/postgresql/`)
+  ## otherwise, use the full path to the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
+  #
   - host: localhost
+
+  ## @param port - integer - required
+  ## Port to use when connecting to PostgreSQL.
+  #
     port: 5432
-#    username: my_username
-#    password: my_password
-#    dbname: db_name
-#    ssl: False
-#    use_psycopg2: False # Force using psycogp2 instead of pg8000 to connect. WARNING: psycopg2 doesn't support ssl mode.
-#    tags:
-#      - optional_tag1
-#      - optional_tag2
 
-# Connect using a UNIX socket (host must begin with a /)
-# If `use_psycopg2` is enabled, use the directory containing the UNIX socket (ex: `/run/postgresql/`)
-# otherwise, use the full path to the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
-#  - host: /run/postgresql/.s.PGSQL.5433
-#    dbname: db_name
+  ## @param user - string - required
+  ## Datadog Username created to connect to PostgreSQL.
+  #
+    username: datadog
 
-# Track per-relation (table) metrics
-# The list of relations/tables must be specified here.
-# Each relation generates many metrics (10 + 10 per index)
-#
-#    relations:
-#      - my_table
-#      - my_other_table
-#
-# By default all schemas are included. To track relations from specific schemas only,
-# use the following syntax:
-#
-#    relations:
-#      - relation_name: another_table
-#        schemas:
-#          - public
-#          - prod
-#
+  ## @param pass - string - required
+  ## Password associated with the Datadog user.
+  #
+    password: <UNIQUEPASSWORD>
 
-# Custom metrics
-# Providing custom queries is also supported. Each query must have 3 fields:
-#
-# 1. metric_prefix - This is what each metric will start with.
-# 2. query - This is the SQL to execute. It can be a simple statement or a
-#            multi-line script. Only the first row of the result is read.
-# 3. columns - This is a list representing each column, ordered sequentially
-#              from left to right. The number of columns must equal the number
-#              of columns returned in the query.
-#              There are 2 required pieces of data:
-#                a. name - This is the suffix to append to the metric_prefix
-#                          in order to form the full metric name. If `type` is
-#                          `tag`, this column will instead be considered a tag
-#                          and will be applied to every metric collected by
-#                          this particular query.
-#                b. type - This is the submission method (gauge, count, rate, etc.).
-#                          This can also be set to `tag` to tag each metric in the row
-#                          with the name and value of the item in this column. You can
-#                          use the `count` type to perform aggregation for queries that
-#                          return multiple rows with the same or no tags.
-# 4. tags (optional) - A list of tags to apply to each metric.
-#
-#    custom_queries:
-#      - metric_prefix: postgresql
-#        query: |  # Use the pipe if you require a multi-line script.
-#          SELECT consumer_name,
-#                 GREATEST(0, EXTRACT(EPOCH FROM lag)) as lag,
-#                 GREATEST(0, EXTRACT(EPOCH FROM lag)) as last_seen,
-#                 pending_events
-#          FROM pgq.get_consumer_info()
-#          WHERE consumer_name !~ 'watermark$';
-#        columns:
-#          # Columns without a name are ignored, put this for any column you wish to skip:
-#          # - {}
-#          - name: consumer_name
-#            type: tag
-#          - name: londiste_lag
-#            type: gauge
-#          - name: londiste_last_seen
-#            type: gauge
-#          - name: londiste_pending_events
-#            type: gauge
-#        tags:
-#          - tester:postgresql
+  ## @param dbname - string - optional
+  ## Name of the PostgresSQL
+  #
+  #  dbname: <DB_NAME>
 
-#    /!\ DEPRECATION: Please use custom_queries instead of the now deprecated custom_metrics.
-#    Please visit our FAQ article for a guide on collecting custom metrics from PostgreSQL:
-#    https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
-#
-#    custom_metrics:
-#    - # Londiste 3 replication lag
-#      descriptors:
-#        - [consumer_name, consumer_name]
-#      metrics:
-#         GREATEST(0, EXTRACT(EPOCH FROM lag)) as lag: [postgresql.londiste_lag, GAUGE]
-#         GREATEST(0, EXTRACT(EPOCH FROM lag)) as last_seen: [postgresql.londiste_last_seen, GAUGE]
-#         pending_events: [postgresql.londiste_pending_events, GAUGE]
-#      query: SELECT consumer_name, %s from pgq.get_consumer_info() where consumer_name !~ 'watermark$';
-#      relation: false
-#
+  ## @param ssl - boolean - optional - default: false
+  ## Whether or not the agent should connect to the PostgreSQL Database using SSL.
+  #
+  #  ssl: false
 
-#    Collect metrics regarding PL/pgSQL functions from pg_stat_user_functions
-#    collect_function_metrics: False
-#
+  ## @param use_psycopg2 - boolean - optional - default: false
+  ## Force using psycogp2 instead of pg8000 to connect.
+  ## WARNING: psycopg2 doesn't support SSL mode.
+  #
+  #  use_psycopg2: false
 
-#    Collect count metrics, default value is True for backward compatibility but they might be slow,
-#    suggested value is False.
-#    collect_count_metrics: False
-#
+  ## @param tags  - list of key:value elements - optional
+  ## List of tags to attach to every metric, event and service check emitted by this integration.
+  ##
+  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+  #
+  #  tags:
+  #    - <KEY_1>:<VALUE_1>
+  #    - <KEY_2>:<VALUE_2>
 
-#    Collect metrics regarding transactions from pg_stat_activity, default value is False. Please make sure the user
-#    has sufficient privileges to read from pg_stat_activity before enabling this option.
-#    collect_activity_metrics: False
-#
+  ## @param relations - list of strings - optional
+  ## The list of relations/tables must be specified here to track per-relation (table) metrics.
+  ## Each relation generates many metrics (10 + 10 per index)
+  #
+  #  relations:
+  #    - <TABLE_NAME_1>
+  #    - <TABLE_NAME_1>
 
-#    Collect database size metrics. Default value is True but they might be slow with large databases
-#    collect_database_size_metrics: False
-#
+  ## @param relations - custom objects - optional
+  ## By default all schemas are included. To track relations from specific schemas only,
+  ## use the following syntax:
+  #
+  #  relations:
+  #    - relation_name: <TABLE_NAME>
+  #      schemas:
+  #          - <SCHEMA_NAME>
 
-#    Include statistics from the default database 'postgres' in the check metrics, default to false
-#    collect_default_database: False
-#
+  ## @param collect_function_metrics - boolean - optional - default: false
+  ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions
+  #
+  #  collect_function_metrics: false
 
-#    Tag metrics and checks with `replication_role:<master|standby>`, default to false
-#    tag_replication_role: False
-#
+  ## @param collect_count_metrics - boolean - optional - default: true
+  ## Collect count metrics.
+  #
+  #  collect_count_metrics: true
+
+  ## @param collect_activity_metrics - boolean - optional - default: false
+  ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
+  #  has sufficient privileges to read from pg_stat_activity before enabling this option.
+  #
+  #  collect_activity_metrics: false
+
+  ## @param collect_database_size_metrics - boolean - optional - default: true
+  ## Collect database size metrics.
+  #
+  #  collect_database_size_metrics: true
+
+  ## @param collect_default_database - boolean - optional - default: false
+  ## Include statistics from the default database 'postgres' in the check metrics.
+  #
+  #  collect_default_database: false
+
+  ## @param tag_replication_role - boolean - optional - default: false
+  ## Tag metrics and checks with `replication_role:<master|standby>`.
+  #
+  #  tag_replication_role: False
+
+  ## @param custom_queries - custom object - optional
+  ## Define custom queries to collect custom metrics from your PostgreSQL
+  ## See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
+  ## https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
+  #
+  #  custom_queries:
+  #    - metric_prefix: postgresql
+  #      query: <QUERY>
+  #      columns:
+  #        - name: <COLUNMS_1_NAME>
+  #          type: <COLUMNS_1_TYPE>
+  #        - name: <COLUNMS_2_NAME>
+  #          type: <COLUMNS_2_TYPE>
+  #      tags:
+  #        - <TAG_KEY>:<TAG_VALUE>
 
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
@@ -139,7 +131,7 @@ instances:
 #    path: /path/to/postgres.log
 #    source: postgresql
 #    sourcecategory: database
-#    service: myapp
+#    service: <SERVICE>
 #    #To handle multi line that starts with yyyy-mm-dd or yyyy-dd-mm use the following pattern
 #    log_processing_rules:
 #      - type: multi_line

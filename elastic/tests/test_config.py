@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.elastic.config import from_instance, DEFAULT_TIMEOUT
+from datadog_checks.elastic.config import DEFAULT_TIMEOUT, from_instance
 
 
 @pytest.mark.unit
@@ -41,10 +41,7 @@ def test_from_instance_defaults():
 
 @pytest.mark.unit
 def test_from_instance_cluster_stats():
-    c = from_instance({
-        'url': 'http://example.com',
-        'is_external': True,
-    })
+    c = from_instance({'url': 'http://example.com', 'is_external': True})
     assert c.cluster_stats is True
 
 
@@ -67,9 +64,7 @@ def test_from_instance():
     assert c.timeout == DEFAULT_TIMEOUT
     assert c.service_check_tags == ["host:foo.bar", "port:None", "a", "b:c"]
 
-    instance = {
-        "url": "http://192.168.42.42:12999",
-        "timeout": 15}
+    instance = {"url": "http://192.168.42.42:12999", "timeout": 15}
     c = from_instance(instance)
     assert c.username is None
     assert c.password is None
@@ -86,7 +81,7 @@ def test_from_instance():
         "ssl_verify": "true",
         "ssl_cert": "/path/to/cert.pem",
         "ssl_key": "/path/to/cert.key",
-        "admin_forwarder": "1"
+        "admin_forwarder": "1",
     }
     c = from_instance(instance)
     assert c.username == "user"

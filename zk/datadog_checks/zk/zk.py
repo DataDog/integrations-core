@@ -56,13 +56,13 @@ zk_max_file_descriptor_count    4096
 ```
 
 """
-# stdlib
-from collections import defaultdict
-from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
-from six import iteritems, PY3, StringIO
 import re
 import socket
 import struct
+from collections import defaultdict
+from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
+
+from six import PY3, StringIO, iteritems
 
 from datadog_checks.base import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
@@ -73,6 +73,7 @@ if PY3:
 
 class ZKConnectionFailure(Exception):
     """ Raised when we are unable to connect or get the output of a command. """
+
     pass
 
 
@@ -81,6 +82,7 @@ class ZKMetric(tuple):
     A Zookeeper metric.
     Tuple with an optional metric type (default is 'gauge').
     """
+
     def __new__(cls, name, value, m_type="gauge"):
         return super(ZKMetric, cls).__new__(cls, [name, value, m_type])
 
@@ -91,28 +93,17 @@ class ZookeeperCheck(AgentCheck):
 
     Parse content from `stat` and `mntr`(if available) commmands to retrieve health cluster metrics.
     """
+
     # example match:
     # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
     version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
 
-    STATUS_TYPES = [
-        'leader',
-        'follower',
-        'observer',
-        'standalone',
-        'down',
-        'inactive',
-    ]
+    STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive']
 
     # `mntr` information to report as `rate`
-    _MNTR_RATES = set(
-        [
-            'zk_packets_received',
-            'zk_packets_sent',
-        ]
-    )
+    _MNTR_RATES = set(['zk_packets_received', 'zk_packets_sent'])
 
     def check(self, instance):
         host = instance.get('host', 'localhost')
@@ -149,9 +140,7 @@ class ZookeeperCheck(AgentCheck):
                 status = AgentCheck.WARNING
             message = u'Response from the server: %s' % ruok
         finally:
-            self.service_check(
-                'zookeeper.ruok', status, message=message, tags=sc_tags
-            )
+            self.service_check('zookeeper.ruok', status, message=message, tags=sc_tags)
 
         # Read metrics from the `stat` output
         try:
@@ -186,10 +175,8 @@ class ZookeeperCheck(AgentCheck):
                     message = u"Server is in %s mode" % mode
                 else:
                     status = AgentCheck.CRITICAL
-                    message = u"Server is in %s mode but check expects %s mode"\
-                              % (mode, expected_mode)
-                self.service_check('zookeeper.mode', status, message=message,
-                                   tags=sc_tags)
+                    message = u"Server is in %s mode but check expects %s mode" % (mode, expected_mode)
+                self.service_check('zookeeper.mode', status, message=message, tags=sc_tags)
 
         # Read metrics from the `mntr` output
         if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
@@ -250,8 +237,7 @@ class ZookeeperCheck(AgentCheck):
                 while chunk:
                     if num_reads > max_reads:
                         # Safeguard against an infinite loop
-                        raise Exception("Read %s bytes before exceeding max reads of %s. "
-                                        % (buf.tell(), max_reads))
+                        raise Exception("Read %s bytes before exceeding max reads of %s. " % (buf.tell(), max_reads))
                     chunk = ensure_unicode(sock.recv(chunk_size))
                     buf.write(chunk)
                     num_reads += 1
@@ -381,18 +367,11 @@ class ZookeeperCheck(AgentCheck):
                 metrics.append(ZKMetric(metric_name, metric_value, metric_type))
 
             except ValueError:
-                self.log.warning(
-                    u"Cannot format `mntr` value. key={key}, value{value}".format(
-                        key=key, value=value
-                    )
-                )
+                self.log.warning(u"Cannot format `mntr` value. key={key}, value{value}".format(key=key, value=value))
                 continue
             except Exception:
                 self.log.exception(
-                    u"Unexpected exception occurred while parsing `mntr` command content:\n"
-                    u"{buf}".format(
-                        buf=buf
-                    )
+                    u"Unexpected exception occurred while parsing `mntr` command content:\n{buf}".format(buf=buf)
                 )
 
         return (metrics, mode)

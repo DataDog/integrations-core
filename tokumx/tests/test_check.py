@@ -24,17 +24,10 @@ def test_check(aggregator, check):
     for msuff in metrics.DB_STATS:
         for dbname in ('admin', 'local', 'test'):
             aggregator.assert_metric(
-                'tokumx.stats.db.{}'.format(msuff),
-                count=1,
-                tags=[server_tag, 'db:{}'.format(dbname), "optional:tag1"]
+                'tokumx.stats.db.{}'.format(msuff), count=1, tags=[server_tag, 'db:{}'.format(dbname), "optional:tag1"]
             )
 
-    sc_tags = [
-        'db:admin',
-        'host:{}'.format(common.HOST),
-        'port:{}'.format(common.PORT),
-        'optional:tag1'
-    ]
+    sc_tags = ['db:admin', 'host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'optional:tag1']
 
     aggregator.assert_service_check('tokumx.can_connect', count=1, status=check.OK, tags=sc_tags)
 

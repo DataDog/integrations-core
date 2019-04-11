@@ -5,7 +5,7 @@ import os
 
 import requests
 import requests_kerberos
-from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems
 from six.moves.urllib.parse import urljoin
@@ -129,7 +129,7 @@ class HDFSDataNode(AgentCheck):
                 delegate=is_affirmative(instance.get('kerberos_delegate', False)),
                 force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
                 hostname_override=instance.get('kerberos_hostname'),
-                principal=instance.get('kerberos_principal')
+                principal=instance.get('kerberos_principal'),
             )
 
         disable_ssl_validation = is_affirmative(instance.get('disable_ssl_validation', False))

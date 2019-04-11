@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import threading
+from six import iteritems
 import time
 
 
@@ -82,7 +83,7 @@ class MorCache:
         Generator returning all the mors in the cache for the given instance key.
         """
         with self._mor_lock:
-            for k, v in self._mor.get(key, {}).iteritems():
+            for k, v in iteritems(self._mor.get(key, {})):
                 yield k, v
 
     def mors_batch(self, key, batch_size):
@@ -100,7 +101,7 @@ class MorCache:
             if mors_dict is None:
                 yield {}
 
-            mor_names = mors_dict.keys()
+            mor_names = list(mors_dict)
             mor_names.sort()
             total = len(mor_names)
             for idx in range(0, total, batch_size):
@@ -118,7 +119,7 @@ class MorCache:
         with self._mor_lock:
             # Don't change the dict during iteration!
             # First collect the names of the Mors to remove...
-            for name, mor in self._mor[key].iteritems():
+            for name, mor in iteritems(self._mor[key]):
                 age = now - mor['creation_time']
                 if age > ttl:
                     mors_to_purge.append(name)
