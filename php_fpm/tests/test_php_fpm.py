@@ -3,10 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-pytestmark = [
-    pytest.mark.integration,
-    pytest.mark.usefixtures("dd_environment")
-]
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
 def test_bad_ping_reply(check, instance, aggregator, ping_url_tag):

@@ -10,7 +10,6 @@ import pytest
 from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.php_fpm import PHPFPMCheck
 
-
 HOST = get_docker_hostname()
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -53,10 +52,7 @@ def ping_url_tag_fastcgi():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yml'),
-        endpoints='http://{}:8080'.format(HOST)
-    ):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), endpoints='http://{}:8080'.format(HOST)):
         yield DEFAULT_INSTANCE
 
 
@@ -65,7 +61,8 @@ def payload():
     """
     example payload from /status?json
     """
-    return json.loads("""{
+    return json.loads(
+        """{
         "pool":"www",
         "process manager":"dynamic",
         "start time":1530722898,
@@ -80,4 +77,5 @@ def payload():
         "max active processes":1,
         "max children reached":0,
         "slow requests":0
-    }""")
+    }"""
+    )
