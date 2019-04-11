@@ -1,8 +1,4 @@
 # CHANGELOG - IBM MQ
-## 2.0.0 / 2019-04-12
-
-* [Removed] host from config file
-* [Added] mq_host to config file. This replaces previous host to avoid collision with agent host tag
 
 ## 1.2.0 / 2019-03-29
 

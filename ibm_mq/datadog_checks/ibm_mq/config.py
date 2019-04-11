@@ -38,9 +38,9 @@ class IBMMQConfig:
         self.channel = instance.get('channel')
         self.queue_manager_name = instance.get('queue_manager', 'default')
 
-        self.mq_host = instance.get('mq_host', 'localhost')
+        self.host = instance.get('host', 'localhost')
         self.port = instance.get('port', '1414')
-        self.host_and_port = "{}({})".format(self.mq_host, self.port)
+        self.host_and_port = "{}({})".format(self.host, self.port)
 
         self.username = instance.get('username')
         self.password = instance.get('password')
@@ -68,7 +68,7 @@ class IBMMQConfig:
         self.queue_tag_re = self._compile_tag_re()
 
     def check_properly_configured(self):
-        if not self.channel or not self.queue_manager_name or not self.mq_host or not self.port:
+        if not self.channel or not self.queue_manager_name or not self.host or not self.port:
             msg = "channel, queue_manager, host and port are all required configurations"
             raise ConfigurationError(msg)
 
@@ -95,7 +95,7 @@ class IBMMQConfig:
     def tags(self):
         return [
             "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.mq_host),
+            "mq_host:{}".format(self.host),  # host tag already used for agent host
             "port:{}".format(self.port),
             "channel:{}".format(self.channel)
         ] + self.custom_tags
@@ -104,6 +104,6 @@ class IBMMQConfig:
     def tags_no_channel(self):
         return [
             "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.mq_host),
+            "mq_host:{}".format(self.host),  # host tag already used for agent host
             "port:{}".format(self.port),
         ] + self.custom_tags
