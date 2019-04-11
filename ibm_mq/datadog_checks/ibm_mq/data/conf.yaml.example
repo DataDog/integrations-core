@@ -11,10 +11,10 @@ instances:
   #
     queue_manager: 'datadog'
 
-  ## @param host - string - required - default: localhost
+  ## @param mq_host - string - required - default: localhost
   ## The host IBM MQ is running on.
   #
-    host: 'localhost'
+    mq_host: 'localhost'
 
   ## @param port - string - required - default: 1414
   ## The port IBM MQ is listening on.
