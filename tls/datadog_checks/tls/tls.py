@@ -101,7 +101,7 @@ class TLSCheck(AgentCheck):
         if self._name:
             self._tags.append('name:{}'.format(self._name))
 
-        # Decide the method of collection for this instance
+        # Decide the method of collection for this instance (local file vs remote connection)
         if self._local_cert_path:
             self.check = self.check_local
             if self._validate_hostname and self._server_hostname:
@@ -112,7 +112,7 @@ class TLSCheck(AgentCheck):
             self._tags.append('server:{}'.format(self._server))
             self._tags.append('port:{}'.format(self._port))
 
-        # Cache lazily
+        # Assign lazily since these aren't used by both collection methods
         self._validation_data = None
         self._local_cert_loader = None
         self._tls_context = None
@@ -129,6 +129,7 @@ class TLSCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CAN_CONNECT, self.OK, tags=self._tags)
 
+        # Get the cert & TLS version from the connection
         with closing(sock):
             try:
                 with closing(self.tls_context.wrap_socket(sock, server_hostname=self._server_hostname)) as secure_sock:
@@ -150,6 +151,7 @@ class TLSCheck(AgentCheck):
 
                 return
 
+        # Load https://cryptography.io/en/latest/x509/reference/#cryptography.x509.Certificate
         try:
             cert = load_der_x509_certificate(der_cert, default_backend())
         except Exception as e:
@@ -185,6 +187,7 @@ class TLSCheck(AgentCheck):
             )
             return
 
+        # Load https://cryptography.io/en/latest/x509/reference/#cryptography.x509.Certificate
         try:
             cert = self.local_cert_loader(cert)
         except Exception as e:
@@ -308,10 +311,12 @@ class TLSCheck(AgentCheck):
     @property
     def local_cert_loader(self):
         if self._local_cert_loader is None:
-            if self._local_cert_path.endswith(('.cer', '.crt', '.der')):
-                self._local_cert_loader = lambda cert: load_der_x509_certificate(cert, default_backend())
-            else:
-                self._local_cert_loader = lambda cert: load_pem_x509_certificate(cert, default_backend())
+            loader = (
+                load_der_x509_certificate
+                if self._local_cert_path.endswith(('.cer', '.crt', '.der'))
+                else load_pem_x509_certificate
+            )
+            self._local_cert_loader = lambda cert: loader(cert, default_backend())
 
         return self._local_cert_loader
 
