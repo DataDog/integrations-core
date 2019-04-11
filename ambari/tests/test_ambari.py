@@ -17,9 +17,10 @@ def test_check(aggregator):
         },
         "metric_headers": ["cpu", "jvm"],
         "collect_host_metrics": True,
-        "collect_service_metrics": True
+        "collect_service_metrics": True,
+        "timeout":30
     }]
     check = AmbariCheck('ambari', {}, {}, instance)
     check.check(instance[0])
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     aggregator.assert_all_metrics_covered()
