@@ -131,12 +131,7 @@ RATES = [
 ]
 
 
-IDX_HISTS = [
-    'size',
-    'count',
-    'avgObjSize',
-    'storageSize',
-]
+IDX_HISTS = ['size', 'count', 'avgObjSize', 'storageSize']
 
 COLL_HISTS = [
     'totalIndexSize',
@@ -157,5 +152,5 @@ DB_STATS = [
     'indexStorageSize',
     'indexes',
     'objects',
-    'storageSize'
+    'storageSize',
 ]
