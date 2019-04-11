@@ -35,7 +35,7 @@ class AmbariCheck(AgentCheck):
         resp = self.make_request(cluster_url)
 
         if resp is None:
-            self.warning(
+            self.error(
                 "Couldn't connect to URL: {}. Please verify the address is reachable"
                 .format(cluster_url))
             self.submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
@@ -56,13 +56,14 @@ class AmbariCheck(AgentCheck):
             # resp = self.make_request("http://bad_endpoint.com") #for testing
             resp = self.make_request(hosts_endpoint)
 
-            if resp.get('metrics') is None:
-                continue
-
             hosts_list = resp.get('items')
             cluster_tag = "ambari_cluster:{}".format(cluster)
 
             for host in hosts_list:
+                if host.get('metrics') is None:
+                    self.log.warning("No metrics received for host {}".format(host.get('Hosts').get('host_name')))
+                    continue
+
                 metrics = self.host_metrics_iterate(host.get('metrics'), "")
                 for metric_name, value in iteritems(metrics):
                     host_tag = "ambari_host:" + host.get('Hosts').get('host_name')
@@ -79,38 +80,56 @@ class AmbariCheck(AgentCheck):
                 components = [c.upper() for c in components]
                 metrics_endpoint = self.create_endpoint(server, port, cluster, service, "/components?fields=metrics")
                 service_check_endpoint = self.create_endpoint(server, port, cluster, service, "?fields=ServiceInfo")
+
                 resp = self.make_request(metrics_endpoint)
                 # resp = self.make_request("http://bad_endpoint.com") #for testing
                 service_tag = "ambari_service:" + service.lower()
 
-                if resp.get('items') is None:
+                if resp is None:
+                    self.log.warning("No components found for service {}.".format(service))
                     continue
 
                 for component in resp.get('items'):
                     component_name = component.get('ServiceComponentInfo').get('component_name')
                     component_tag = "ambari_component:" + component_name.lower()
-                    if component_name in components:
-                        for header in headers:
-                            if (component.get('metrics') is not None) and (header in component.get('metrics')):
-                                metrics = self.service_metrics_iterate(component.get('metrics')[header], header)
-                                for metric_name, value in iteritems(metrics):
-                                    metric_tags = []
-                                    metric_tags += tags
-                                    metric_tags.extend((service_tag, component_tag, cluster_tag))
 
-                                    if isinstance(value, float):
-                                        self.submit_metrics(metric_name, value, metric_tags)
+                    if component_name not in components:
+                        continue
+                    if component.get('metrics') is None:
+                        self.log.warning(
+                            "No metrics found for component {} for service {}"
+                            .format(component_name, service)
+                        )
+                        continue
+
+                    for header in headers:
+                        if header not in component.get('metrics'):
+                            self.log.warning(
+                                "No {} metrics found for component {} for service {}"
+                                .format(header, component_name, service)
+                            )
+                            continue
+
+                        metrics = self.service_metrics_iterate(component.get('metrics')[header], header)
+                        for metric_name, value in iteritems(metrics):
+                            metric_tags = []
+                            metric_tags += tags
+                            metric_tags.extend((service_tag, component_tag, cluster_tag))
+
+                            if isinstance(value, float):
+                                self.submit_metrics(metric_name, value, metric_tags)
+
+                # service health check
                 service_resp = self.make_request(service_check_endpoint)
-
                 service_check_tags = []
                 service_check_tags += tags
                 service_check_tags.extend((service_tag, cluster_tag))
                 if service_resp is None:
                     self.submit_service_checks("state", self.CRITICAL, service_check_tags)
+                    self.log.warning("No response received for service {}{}".format(component_name, service))
                 else:
                     state = service_resp.get('ServiceInfo').get('state')
                     self.submit_service_checks("state", common.STATUS[state], service_check_tags)
-                    self.log.debug(state)
 
     def create_endpoint(self, server, port, cluster, service, ending):
         return common.SERVICE_URL.format(
@@ -147,6 +166,8 @@ class AmbariCheck(AgentCheck):
             self.warning(
                 "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
                 .format(url, e))
+        except (requests.exceptions.Timeout):
+            self.warning("Connection timeout when connecting to {}".format(url))
 
     def submit_metrics(self, name, value, tags):
         self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
