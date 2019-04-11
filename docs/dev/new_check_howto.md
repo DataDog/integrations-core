@@ -19,13 +19,14 @@ These requirements are used during the code review process as a checklist. This 
 
 ## Prerequisites
 
-Python 2.7 or 3.7 needs to be available on your system. Datadog recommends creating and activating a [Python virtual environment][1] to isolate the development environment. For more information, see the [Python Environment documentation][2].
+* Python 3.7+ needs to be available on your system; Python 2.7 is optional but recommended.
+* Docker to run the full test suite.
 
-You'll also need `docker` to run the full test suite.
+In general, creating and activating [Python virtual environments][1] to isolate the development environment is good practice; however, it is not mandatory. For more information, see the [Python Environment documentation][2].
 
 ## Setup
 
-Clone the [integrations-extras repository][3]. By default, that tooling expects you to be working in the `$HOME/dd/` directory — this is optional and can be adjusted via configuration later.
+Clone the [integrations-extras repository][3]. By default, that tooling expects you to be working in the `$HOME/dd/` directory—this is optional and can be adjusted via configuration later.
 
 ```shell
 mkdir $HOME/dd && cd $HOME/dd       # optional
@@ -34,7 +35,7 @@ git clone https://github.com/DataDog/integrations-extras.git
 
 ### Developer toolkit
 
-The [developer toolkit][4] is comprehensive and includes a lot of functionality. Here's what you need to get started:
+The [Developer Toolkit][4] is comprehensive and includes a lot of functionality. Here's what you need to get started:
 
 ```
 pip install "datadog-checks-dev[cli]"
@@ -97,7 +98,7 @@ Checks are organized in regular Python packages under the `datadog_checks` names
 
 Let's say we want to create a Service Check named `awesome.search` that searches for a string on a web page. It will result in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible.
 
-The code would look something like this:
+The code contained within `awesome/datadog_checks/awesome/awesome.py` would look something like this:
 
 ```python
 import requests
@@ -255,42 +256,31 @@ The check is almost done. Let's add the final touches by adding the integration 
 
 ### Populate the README
 
-The `README.md` file provided by our scaffolding already has the correct format. You must fill out the document with the relevant information.
+The `awesome/README.md` file provided by our scaffolding already has the correct format. You must fill out the document with the relevant information.
 
 ### Configuration file
 
-Every active integration has a configuration file named `conf.yaml`, which contains data that is specific to the local instantiation. When preparing a new integration, you must include a `conf.yaml.example` which contains the necessary options and sane defaults (where possible).
+When preparing a new integration, you must include an example configuration that contains the necessary options and reasonable defaults. The example configuration file, which in this case is located at `awesome/datadog_checks/awesome/data/conf.yaml.example`, has two top-level elements: `init_config` and `instances`. The configuration under `init_config` is applied to the integration globally, and is used in every instantiation of the integration, whereas anything within `instances` is specific to a given instantiation.
 
-Parameters in the configuration file follow these rules:
+Configuration blocks in either section take the following form:
 
-* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>` according to the documentation [contributing guidelines][9]:
+```yaml
+## @<COMMAND> [- <ARGS>]
+## <DESCRIPTION>
+#
+<KEY>: <VALUE>
+```
+
+Configuration blocks follow a few guidelines:
+
+* Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`, as per the documentation [contributing guidelines][9]:
 * All required parameters are **not** commented by default.
 * All optional parameters are commented by default.
 * If a placeholder has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
 
-Each parameter in the configuration file must have a special comment block with the following format:
-
-```yaml
-## @<COMMAND_1> <ARG_COMMAND_1>
-## @<COMMAND_2> <ARG_COMMAND_2>
-## <DESCRIPTION>
-#
-<YAML_PARAM>: <PLACEHOLDER>
-```
-
-This paragraph contains **commands** which are a special string in the form `@command`. A command is valid only when the comment line containing it starts with a double `#` char:
-
-```yaml
-## @command this is valid
-
-# @command this is not valid and will be ignored
-```
-
-`<DESCRIPTION>` is the description of the parameter. It can span across multiple lines in a special comment block.
-
 #### @param specification
 
-The `@param` command describes the parameter for documentation purposes.
+Practically speaking, the only command is `@param`, which is used to describe configuration blocks—primarily for documentation purposes. `@param` is implemented using this form:
 
 ```
 @param <name> - <type> - <required> - default:<defval>
@@ -298,20 +288,20 @@ The `@param` command describes the parameter for documentation purposes.
 
 Arguments:
 
-* `name`: the name of the parameter, e.g. `apache_status_url`
-* `type`: the data type for the parameter value. Possible values:
+* `name`: the name of the parameter, e.g. `search_string` (mandatory).
+* `type`: the data type for the parameter value (mandatory). Possible values:
   * *integer*
   * *double*
   * *string*
-  * comma separated list of <*integer*|*double*|*string*>
-* `required`: whether the parameter is required or not. Possible values:
+  * comma separated list comprising **one** of those three types
+* `required`: whether the parameter is required or not (mandatory). Possible values:
     * *required*
     * *optional*
-* `defval`: default value for the parameter, can be empty.
+* `defval`: default value for the parameter; can be empty (optional).
 
 #### Example configuration
 
-The `conf.yaml.example` for the Awesome service check (above):
+The `awesome/datadog_checks/awesome/data/conf.yaml.example` for the Awesome service check:
 
 ```yaml
 init_config:
@@ -329,9 +319,11 @@ instances:
     search_string: "Example Domain"
 ```
 
+Note that the `url` block contains a dash character, but the `search_string` block does not. For more information about YAML syntax, see [Wikipedia][17], and play around with the [Online YAML Parser][18].
+
 ### Manifest file
 
-Every integration contains a `manifest.json` file that describes operating parameters, positioning, and other such items.
+Every integration contains a `manifest.json` file that describes operating parameters, positioning within the greater Datadog integration eco-system, and other such items.
 
 The complete list of mandatory and optional attributes for the `manifest.json` file:
 
@@ -360,7 +352,7 @@ The complete list of mandatory and optional attributes for the `manifest.json` f
 
 ##### Example manifest config
 
-Our example integration has a very simple manifest, the bulk of which is generated by the tooling. Note that the `guid` must be unique (and valid), so do *not* use the one from this example.
+Our example integration has a very simple `awesome/manifest.json`, the bulk of which is generated by the tooling. Note that the `guid` must be unique (and valid), so do *not* use the one from this example.
 
 ```json
 {
@@ -409,7 +401,7 @@ Descriptions of each column of the `metadata.csv` file:
 
 ##### Example metadata config
 
-Our example integration doesn't send any metrics, so in this case we will leave it empty.
+Our example integration doesn't send any metrics, so in this case the generated `awesome/metadata.csv` remains empty.
 
 #### Service check file
 
@@ -429,7 +421,7 @@ The `service_checks.json` file contains the following mandatory attributes:
 
 ##### Example service check config
 
-Our example integration contains a service check, so we need to add it to the `service_checks.json` file:
+Our example integration contains a service check, so we need to add it to the `awesome/service_checks.json` file:
 
 ```json
 [
@@ -492,9 +484,13 @@ Once your `setup.py` is ready, create a wheel:
 - With the `ddev` tooling (recommended): `ddev release build <INTEGRATION_NAME>`
 - Without the `ddev` tooling: `cd <INTEGRATION_DIR> && python setup.py bdist_wheel`
 
+#### What's in the wheel?
+
+The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check itself, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including images, metadata files, and so forth, are *not* meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and eco-system.
+
 ### Installing
 
-The wheel is installed via the Agent `integration` command. Depending on your environment, you may need to execute this command as a specific user or with particular privileges:
+The wheel is installed via the Agent `integration` command, available in [Agent v6.10.0 and up][16]. Depending on your environment, you may need to execute this command as a specific user or with particular privileges:
 
 **Linux** (as `dd-agent`):
 ```
@@ -527,3 +523,6 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 [13]: https://docs.datadoghq.com/developers/metrics/#units
 [14]: https://docs.datadoghq.com/getting_started/tagging
 [15]: https://packaging.python.org/tutorials/distributing-packages
+[16]: https://docs.datadoghq.com/agent/?tab=agentv6
+[17]: https://en.wikipedia.org/wiki/YAML
+[18]: http://yaml-online-parser.appspot.com/
