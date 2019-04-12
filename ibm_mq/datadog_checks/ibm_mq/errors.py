@@ -7,5 +7,3 @@ class PymqiException(Exception):
     """
     PymqiException is used when there's an issue running pymqi
     """
-
-    pass
