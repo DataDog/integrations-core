@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.ibm_db2 import IbmDb2Check
+
 from . import metrics
 
 pytestmark = pytest.mark.integration
@@ -61,15 +62,17 @@ def test_table_space_state_change(aggregator, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, instance):
-    instance['custom_queries'] = [{
-        'metric_prefix': 'ibm_db2',
-        'tags': ['test:ibm_db2'],
-        'query': 'SELECT files_closed, tbsp_name FROM TABLE(MON_GET_TABLESPACE(NULL, -1))',
-        'columns': [
-            {'name': 'tablespace.files_closed', 'type': 'monotonic_count'},
-            {'name': 'tablespace', 'type': 'tag'},
-        ],
-    }]
+    instance['custom_queries'] = [
+        {
+            'metric_prefix': 'ibm_db2',
+            'tags': ['test:ibm_db2'],
+            'query': 'SELECT files_closed, tbsp_name FROM TABLE(MON_GET_TABLESPACE(NULL, -1))',
+            'columns': [
+                {'name': 'tablespace.files_closed', 'type': 'monotonic_count'},
+                {'name': 'tablespace', 'type': 'tag'},
+            ],
+        }
+    ]
 
     check = IbmDb2Check('ibm_db2', {}, [instance])
     check.check(instance)
@@ -81,22 +84,24 @@ def test_custom_queries(aggregator, instance):
         aggregator.assert_metric(
             'ibm_db2.tablespace.files_closed',
             metric_type=3,
-            tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)]
+            tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
         )
 
 
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries_init_config(aggregator, instance):
     init_config = {
-        'global_custom_queries': [{
-            'metric_prefix': 'ibm_db2',
-            'tags': ['test:ibm_db2'],
-            'query': 'SELECT files_closed, tbsp_name FROM TABLE(MON_GET_TABLESPACE(NULL, -1))',
-            'columns': [
-                {'name': 'tablespace.files_closed', 'type': 'monotonic_count'},
-                {'name': 'tablespace', 'type': 'tag'},
-            ],
-        }]
+        'global_custom_queries': [
+            {
+                'metric_prefix': 'ibm_db2',
+                'tags': ['test:ibm_db2'],
+                'query': 'SELECT files_closed, tbsp_name FROM TABLE(MON_GET_TABLESPACE(NULL, -1))',
+                'columns': [
+                    {'name': 'tablespace.files_closed', 'type': 'monotonic_count'},
+                    {'name': 'tablespace', 'type': 'tag'},
+                ],
+            }
+        ]
     }
 
     check = IbmDb2Check('ibm_db2', init_config, [instance])
@@ -109,5 +114,5 @@ def test_custom_queries_init_config(aggregator, instance):
         aggregator.assert_metric(
             'ibm_db2.tablespace.files_closed',
             metric_type=3,
-            tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)]
+            tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
         )

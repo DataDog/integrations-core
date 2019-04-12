@@ -1,23 +1,35 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import json
 import os
+
 import pytest
 from mock import patch
 
-# 3rd party
-import json
+from datadog_checks.dev import docker_run
+from datadog_checks.hdfs_namenode import HDFSNameNode
 
-from .common import HERE, NAME_SYSTEM_STATE_URL, NAME_SYSTEM_URL, TEST_USERNAME, TEST_PASSWORD
+from .common import HERE, INSTANCE_INTEGRATION, NAME_SYSTEM_STATE_URL, NAME_SYSTEM_URL, TEST_PASSWORD, TEST_USERNAME
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    with docker_run(
+        compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
+        log_patterns='Got finalize command for block pool',
+    ):
+        yield
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
+def instance():
+    return INSTANCE_INTEGRATION
 
-    aggregator.reset()
-    return aggregator
+
+@pytest.fixture
+def check():
+    return HDFSNameNode("hdfs_namenode", {}, {})
 
 
 @pytest.fixture

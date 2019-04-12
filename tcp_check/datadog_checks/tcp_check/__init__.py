@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .tcp_check import TCPCheck
 
-__all__ = [
-    '__version__',
-    'TCPCheck'
-]
+__all__ = ['__version__', 'TCPCheck']

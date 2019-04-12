@@ -3,9 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six import iteritems
 
-from datadog_checks.checks.win import WinPDHCounter
 from datadog_checks.checks import AgentCheck
-
+from datadog_checks.checks.win import WinPDHCounter
 from datadog_checks.utils.containers import hash_mutable
 
 
@@ -15,6 +14,7 @@ class PDHCheck(AgentCheck):
 
     Windows only.
     """
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._countersettypes = {}
@@ -52,7 +52,7 @@ class PDHCheck(AgentCheck):
 
     def check(self, instance):
         key = hash_mutable(instance)
-        for inst_name, dd_name, metric_func, counter in self._metrics[key]:
+        for _, dd_name, metric_func, counter in self._metrics[key]:
             vals = counter.get_all_values()
             for key, val in iteritems(vals):
                 tags = []

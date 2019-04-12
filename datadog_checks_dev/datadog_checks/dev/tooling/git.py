@@ -94,7 +94,7 @@ def git_tag(tag_name, push=False):
         if push:
             if result.code != 0:
                 return result
-            return run_command('git push origin {}'.format(tag_name))
+            return run_command('git push origin {}'.format(tag_name), capture=True)
 
         return result
 

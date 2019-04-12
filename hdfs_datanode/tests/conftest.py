@@ -2,23 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
-import os
 import json
+import os
+
+import pytest
 from mock import patch
 
-# 3rd party
-import pytest
-
-from .common import HERE, TEST_USERNAME, TEST_PASSWORD
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
+from .common import HERE, TEST_PASSWORD, TEST_USERNAME
 
 
 @pytest.fixture
