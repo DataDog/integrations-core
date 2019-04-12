@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+
 import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.fluentd import Fluentd
 
-from .common import HERE, CHECK_NAME, DEFAULT_INSTANCE
+from .common import CHECK_NAME, DEFAULT_INSTANCE, HERE
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +29,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         log_patterns="type monitor_agent",
-        env_vars=env
+        env_vars=env,
     ):
         yield DEFAULT_INSTANCE
 
