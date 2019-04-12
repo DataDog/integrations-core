@@ -95,7 +95,7 @@ class IBMMQConfig:
     def tags(self):
         return [
             "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.host),  # host tag already used for agent host
+            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
             "port:{}".format(self.port),
             "channel:{}".format(self.channel)
         ] + self.custom_tags
@@ -104,6 +104,6 @@ class IBMMQConfig:
     def tags_no_channel(self):
         return [
             "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.host),  # host tag already used for agent host
+            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
             "port:{}".format(self.port),
         ] + self.custom_tags
