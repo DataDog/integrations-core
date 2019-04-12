@@ -2,15 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
+
 import os
 import re
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.subprocess_output import get_subprocess_output
-from datadog_checks.config import _is_affirmative
-
 import simplejson as json
 from six import iteritems
+
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
+from datadog_checks.utils.subprocess_output import get_subprocess_output
 
 
 class Ceph(AgentCheck):
