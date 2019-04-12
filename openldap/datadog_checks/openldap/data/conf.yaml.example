@@ -4,7 +4,7 @@ init_config:
 
 instances:
 
-    ##@param url - string - required
+    ## @param url - string - required
     ## Full URL of your ldap server. Use `ldaps` or `ldap` as the scheme to
     ## use TLS or not, or `ldapi` to connect to a UNIX socket.
     #

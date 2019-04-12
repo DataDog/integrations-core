@@ -11,7 +11,7 @@ init_config:
   # batch_morlist_size: 50
 
   ## @param batch_property_collector_size - integer - optional - default: 500
-  ##  This value is used to determine the maximum number of MORs returned by vCenter in the same API call,
+  ## This value is used to determine the maximum number of MORs returned by vCenter in the same API call,
   ## when exploring the infrastructure
   ## If too many API calls are made by the check, consider increasing this value
   ## If payloads are too large, consider decreasing this value

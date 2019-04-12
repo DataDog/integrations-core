@@ -43,7 +43,7 @@ instances:
     #
   - kafka_connect_str:
     - localhost:9092
-    - <KAFKA_BROKER_ENDPOINT>:9092
+    # - <KAFKA_BROKER_ENDPOINT>:9092
 
     ## @param zk_connect_str - list of objects - required
     ## Zookeeper endpoints and port to connect to.
@@ -61,7 +61,7 @@ instances:
     #
   - zk_connect_str:
     - localhost:2181
-    - <ZOOKEEPER_ENDPOINT>:2181
+    # - <ZOOKEEPER_ENDPOINT>:2181
 
     ## @param zk_iteration_ival - integer - optional
     ## Set how many seconds the check should wait between two ZK consumer offset

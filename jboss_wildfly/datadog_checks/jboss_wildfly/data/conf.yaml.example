@@ -11,7 +11,8 @@ instances:
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
     # tags:
-    #   - environment: <DEFAULT_ENVIRONMENT>
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
     ## @param user - string - optional
     ## JMX username

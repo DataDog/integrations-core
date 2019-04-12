@@ -56,10 +56,10 @@ instances:
     ## self.gauge('ibm_was.thread_pools.DeclaredThreadHungCount', value=0, tags=['threadKey:Default', ...])
     #
     # custom_queries:
-    #  - metric_prefix: "thread_pools"
-    #    stat: "Thread Pools Custom"
-    #    tag_keys:
-    #      - "threadKey"
+    #   - metric_prefix: "thread_pools"
+    #     stat: "Thread Pools Custom"
+    #     tag_keys:
+    #       - "threadKey"
 
     ## @param tags  - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.

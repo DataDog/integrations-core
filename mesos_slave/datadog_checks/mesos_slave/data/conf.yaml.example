@@ -14,7 +14,8 @@ instances:
 
     ## @param master_port - integer - optional - default: 5050
     ## Port of your Mesos master instance.
-    #  master_port: 5050
+    #
+    # master_port: 5050
 
     ## @param tasks - list of strings - optional
     ## Specify the tasks from which you want to send metrics to Datadog.

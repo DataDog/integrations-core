@@ -71,7 +71,7 @@ instances:
 
     ## @param url - string - optional
     ## Note: the following configuration param is only available when the `use_preview` param is set to 'false'.
-    ##  API endpoint of your etcd instance.
+    ## API endpoint of your etcd instance.
     #
     # url: "https://server:port"
 
