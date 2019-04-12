@@ -96,7 +96,7 @@ class RequestsWrapper(object):
             config[field] = value
 
         # http://docs.python-requests.org/en/master/user/advanced/#timeouts
-        timeout = int(config['timeout'])
+        timeout = float(config['timeout'])
 
         # http://docs.python-requests.org/en/master/user/quickstart/#custom-headers
         # http://docs.python-requests.org/en/master/user/advanced/#header-ordering
