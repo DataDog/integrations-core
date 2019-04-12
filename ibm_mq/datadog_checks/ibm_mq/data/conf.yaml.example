@@ -1,95 +1,95 @@
 init_config:
 
 instances:
-  ## @param channel - string - required
-  ## The IBMMQ Channel to connect to.
-  #
+    ## @param channel - string - required
+    ## The IBMMQ Channel to connect to.
+    #
   - channel: 'DEV.ADMIN.SVRCONN'
 
-  ## @param queue_manager - string - required
-  ## The name of the queue manager.
-  #
+    ## @param queue_manager - string - required
+    ## The name of the queue manager.
+    #
     queue_manager: 'datadog'
 
-  ## @param host - string - required - default: localhost
-  ## The host IBM MQ is running on.
-  #
+    ## @param host - string - required - default: localhost
+    ## The host IBM MQ is running on.
+    #
     host: 'localhost'
 
-  ## @param port - string - required - default: 1414
-  ## The port IBM MQ is listening on.
-  #
+    ## @param port - string - required - default: 1414
+    ## The port IBM MQ is listening on.
+    #
     port: '1414'
 
-  ## @param username - string - optional
-  ## <USERNAME> of the IBMMQ Channel to connect to.
-  #
-  #  username: '<USERNAME>'
+    ## @param username - string - optional
+    ## <USERNAME> of the IBMMQ Channel to connect to.
+    #
+    # username: '<USERNAME>'
 
-  ## @param password - string - optional
-  ## <PASSWORD> of the IBMMQ Channel to connect to.
-  #
-  #  password: '<PASSWORD>'
+    ## @param password - string - optional
+    ## <PASSWORD> of the IBMMQ Channel to connect to.
+    #
+    # password: '<PASSWORD>'
 
-  ## @param queues - list of string - optional
-  ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
-  #
-  #  queues:
-  #    - '<QUEUE_NAME>'
+    ## @param queues - list of string - optional
+    ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+    #
+    # queues:
+    #   - '<QUEUE_NAME>'
 
-  ## @param queue_patterns - list of string - optional
-  ## Collect from queues that match a pattern
-  #
-  #  queue_patterns:
-  #    - 'DEV.*'
-  #    - 'SYSTEM.*'
+    ## @param queue_patterns - list of string - optional
+    ## Collect from queues that match a pattern
+    #
+    # queue_patterns:
+    #   - 'DEV.*'
+    #   - 'SYSTEM.*'
 
-  ## @param channels - list of string - optional
-  ## Check the status of the following channels
-  #
-  #  channels:
-  #    - '<CHANNEL_NAME>'
+    ## @param channels - list of string - optional
+    ## Check the status of the following channels
+    #
+    # channels:
+    #   - '<CHANNEL_NAME>'
 
-  ## @param auto_discover_queues - string - optional - default: false
-  ## Autodiscover the queues to monitor
-  ## Warning: this will lead to some warnings in your logs
-  #
-  #  auto_discover_queues: false
+    ## @param auto_discover_queues - string - optional - default: false
+    ## Autodiscover the queues to monitor
+    ## Warning: this will lead to some warnings in your logs
+    #
+    # auto_discover_queues: false
 
-  ## @param ssl_auth - string - optional
-  ## Whether or not to use SSL auth while connecting to the channel.
-  #
-  #  ssl_auth: 'no'
+    ## @param ssl_auth - string - optional
+    ## Whether or not to use SSL auth while connecting to the channel.
+    #
+    # ssl_auth: 'no'
 
-  ## @param ssl_cipher_spec - string - optional - default: 'TLS_RSA_WITH_AES_256_CBC_SHA'
-  ## The ssl cipher to use.
-  #
-  #  ssl_cipher_spec: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+    ## @param ssl_cipher_spec - string - optional - default: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+    ## The ssl cipher to use.
+    #
+    # ssl_cipher_spec: 'TLS_RSA_WITH_AES_256_CBC_SHA'
 
-  ## @param ssl_key_repository_location - string - optional - default: '/var/mqm/ssl-db/client/KeyringClient'
-  ## The location of the ssl keyring.
-  #
-  #  ssl_key_repository_location: '/var/mqm/ssl-db/client/KeyringClient'
+    ## @param ssl_key_repository_location - string - optional - default: '/var/mqm/ssl-db/client/KeyringClient'
+    ## The location of the ssl keyring.
+    #
+    # ssl_key_repository_location: '/var/mqm/ssl-db/client/KeyringClient'
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-  ## @param queue_tag_re - list of regex:tags string - optional
-  ## Instruct the check to apply additional tags to matching
-  ## queues
-  ##
-  ## Multiple comma-separated tags are supported. You must properly quote the string if the
-  ## pattern contains special characters e.g. colons.
-  #
-  #  queue_tag_re:
-  #    'SYSTEM.*': queue_type:system
-  #    'DEV.*': role:dev,queue_type:default
+    ## @param queue_tag_re - list of regex:tags string - optional
+    ## Instruct the check to apply additional tags to matching
+    ## queues
+    ##
+    ## Multiple comma-separated tags are supported. You must properly quote the string if the
+    ## pattern contains special characters e.g. colons.
+    #
+    # queue_tag_re:
+    #   'SYSTEM.*': queue_type:system
+    #   'DEV.*': role:dev,queue_type:default
 
 ## Log Section (Available for Agent >=6.0)
 ##

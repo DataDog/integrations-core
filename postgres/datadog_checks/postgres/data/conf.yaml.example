@@ -2,118 +2,118 @@ init_config:
 
 instances:
 
-  ## @param host - string - required
-  ## The hostname to connect to.
-  ## NOTE: Even if the server name is "localhost", the agent connects to PostgreSQL using TCP/IP, unless you also
-  ## provide a value for the sock key.
-  ## If `use_psycopg2` is enabled, use the directory containing the UNIX socket (ex: `/run/postgresql/`)
-  ## otherwise, use the full path to the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
-  #
+    ## @param host - string - required
+    ## The hostname to connect to.
+    ## NOTE: Even if the server name is "localhost", the agent connects to PostgreSQL using TCP/IP, unless you also
+    ## provide a value for the sock key.
+    ## If `use_psycopg2` is enabled, use the directory containing the UNIX socket (ex: `/run/postgresql/`)
+    ## otherwise, use the full path to the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
+    #
   - host: localhost
 
-  ## @param port - integer - required
-  ## Port to use when connecting to PostgreSQL.
-  #
+    ## @param port - integer - required
+    ## Port to use when connecting to PostgreSQL.
+    #
     port: 5432
 
-  ## @param user - string - required
-  ## Datadog Username created to connect to PostgreSQL.
-  #
+    ## @param user - string - required
+    ## Datadog Username created to connect to PostgreSQL.
+    #
     username: datadog
 
-  ## @param pass - string - required
-  ## Password associated with the Datadog user.
-  #
+    ## @param pass - string - required
+    ## Password associated with the Datadog user.
+    #
     password: <UNIQUEPASSWORD>
 
-  ## @param dbname - string - optional
-  ## Name of the PostgresSQL
-  #
-  #  dbname: <DB_NAME>
+    ## @param dbname - string - optional
+    ## Name of the PostgresSQL
+    #
+    # dbname: <DB_NAME>
 
-  ## @param ssl - boolean - optional - default: false
-  ## Whether or not the agent should connect to the PostgreSQL Database using SSL.
-  #
-  #  ssl: false
+    ## @param ssl - boolean - optional - default: false
+    ## Whether or not the agent should connect to the PostgreSQL Database using SSL.
+    #
+    # ssl: false
 
-  ## @param use_psycopg2 - boolean - optional - default: false
-  ## Force using psycogp2 instead of pg8000 to connect.
-  ## WARNING: psycopg2 doesn't support SSL mode.
-  #
-  #  use_psycopg2: false
+    ## @param use_psycopg2 - boolean - optional - default: false
+    ## Force using psycogp2 instead of pg8000 to connect.
+    ## WARNING: psycopg2 doesn't support SSL mode.
+    #
+    # use_psycopg2: false
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-  ## @param relations - list of strings - optional
-  ## The list of relations/tables must be specified here to track per-relation (table) metrics.
-  ## Each relation generates many metrics (10 + 10 per index)
-  #
-  #  relations:
-  #    - <TABLE_NAME_1>
-  #    - <TABLE_NAME_1>
+    ## @param relations - list of strings - optional
+    ## The list of relations/tables must be specified here to track per-relation (table) metrics.
+    ## Each relation generates many metrics (10 + 10 per index)
+    #
+    # relations:
+    #   - <TABLE_NAME_1>
+    #   - <TABLE_NAME_1>
 
-  ## @param relations - custom objects - optional
-  ## By default all schemas are included. To track relations from specific schemas only,
-  ## use the following syntax:
-  #
-  #  relations:
-  #    - relation_name: <TABLE_NAME>
-  #      schemas:
-  #          - <SCHEMA_NAME>
+    ## @param relations - custom objects - optional
+    ## By default all schemas are included. To track relations from specific schemas only,
+    ## use the following syntax:
+    #
+    # relations:
+    #   - relation_name: <TABLE_NAME>
+    #     schemas:
+    #         - <SCHEMA_NAME>
 
-  ## @param collect_function_metrics - boolean - optional - default: false
-  ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions
-  #
-  #  collect_function_metrics: false
+    ## @param collect_function_metrics - boolean - optional - default: false
+    ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions
+    #
+    # collect_function_metrics: false
 
-  ## @param collect_count_metrics - boolean - optional - default: true
-  ## Collect count metrics.
-  #
-  #  collect_count_metrics: true
+    ## @param collect_count_metrics - boolean - optional - default: true
+    ## Collect count metrics.
+    #
+    # collect_count_metrics: true
 
-  ## @param collect_activity_metrics - boolean - optional - default: false
-  ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
-  #  has sufficient privileges to read from pg_stat_activity before enabling this option.
-  #
-  #  collect_activity_metrics: false
+    ## @param collect_activity_metrics - boolean - optional - default: false
+    ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
+    #  has sufficient privileges to read from pg_stat_activity before enabling this option.
+    #
+    # collect_activity_metrics: false
 
-  ## @param collect_database_size_metrics - boolean - optional - default: true
-  ## Collect database size metrics.
-  #
-  #  collect_database_size_metrics: true
+    ## @param collect_database_size_metrics - boolean - optional - default: true
+    ## Collect database size metrics.
+    #
+    # collect_database_size_metrics: true
 
-  ## @param collect_default_database - boolean - optional - default: false
-  ## Include statistics from the default database 'postgres' in the check metrics.
-  #
-  #  collect_default_database: false
+    ## @param collect_default_database - boolean - optional - default: false
+    ## Include statistics from the default database 'postgres' in the check metrics.
+    #
+    # collect_default_database: false
 
-  ## @param tag_replication_role - boolean - optional - default: false
-  ## Tag metrics and checks with `replication_role:<master|standby>`.
-  #
-  #  tag_replication_role: False
+    ## @param tag_replication_role - boolean - optional - default: false
+    ## Tag metrics and checks with `replication_role:<master|standby>`.
+    #
+    # tag_replication_role: False
 
-  ## @param custom_queries - custom object - optional
-  ## Define custom queries to collect custom metrics from your PostgreSQL
-  ## See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
-  ## https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
-  #
-  #  custom_queries:
-  #    - metric_prefix: postgresql
-  #      query: <QUERY>
-  #      columns:
-  #        - name: <COLUNMS_1_NAME>
-  #          type: <COLUMNS_1_TYPE>
-  #        - name: <COLUNMS_2_NAME>
-  #          type: <COLUMNS_2_TYPE>
-  #      tags:
-  #        - <TAG_KEY>:<TAG_VALUE>
+    ## @param custom_queries - custom object - optional
+    ## Define custom queries to collect custom metrics from your PostgreSQL
+    ## See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
+    ## https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
+    #
+    # custom_queries:
+    #   - metric_prefix: postgresql
+    #     query: <QUERY>
+    #     columns:
+    #       - name: <COLUNMS_1_NAME>
+    #         type: <COLUMNS_1_TYPE>
+    #       - name: <COLUNMS_2_NAME>
+    #         type: <COLUMNS_2_TYPE>
+    #     tags:
+    #       - <TAG_KEY>:<TAG_VALUE>
 
 ## Log Section (Available for Agent >=6.0)
 ##
@@ -126,14 +126,14 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
-#logs:
-#  - type: file
-#    path: /path/to/postgres.log
-#    source: postgresql
-#    sourcecategory: database
-#    service: <SERVICE>
-#    #To handle multi line that starts with yyyy-mm-dd or yyyy-dd-mm use the following pattern
-#    log_processing_rules:
-#      - type: multi_line
-#        pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-#        name: new_log_start_with_date
+# logs:
+#   - type: file
+#     path: /path/to/postgres.log
+#     source: postgresql
+#     sourcecategory: database
+#     service: <SERVICE>
+#     #To handle multi line that starts with yyyy-mm-dd or yyyy-dd-mm use the following pattern
+#     log_processing_rules:
+#       - type: multi_line
+#         pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#         name: new_log_start_with_date
