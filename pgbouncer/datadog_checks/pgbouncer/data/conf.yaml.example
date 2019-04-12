@@ -2,41 +2,41 @@ init_config:
 
 instances:
 
-  ## @param database_url - string - required
-  ## `database_url` parameter should point to PgBouncer stats database url
-  #
+    ## @param database_url - string - required
+    ## `database_url` parameter should point to PgBouncer stats database url
+    #
   - database_url: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
 
-  ## @param host - string - optional
-  ## If `database_url` is not used, set up the host to connect to with the `host` parameter.
-  #
-  #  host: <HOSTNAME>
+    ## @param host - string - optional
+    ## If `database_url` is not used, set up the host to connect to with the `host` parameter.
+    #
+    # host: <HOSTNAME>
 
-  ## @param port - integer - optional
-  ## If `database_url` is not used, set up the port to connect to with the `port` parameter.
-  #
-  #  port: <PORT>
+    ## @param port - integer - optional
+    ## If `database_url` is not used, set up the port to connect to with the `port` parameter.
+    #
+    # port: <PORT>
 
-  ## @param username - string - optional
-  ## If `database_url` is not used, set up the user name to use with the `username` parameter.
-  #
-  #  username: <USERNAME>
+    ## @param username - string - optional
+    ## If `database_url` is not used, set up the user name to use with the `username` parameter.
+    #
+    # username: <USERNAME>
 
-  ## @param password - string - optional
-  ## If `database_url` is not used, set up the password to use with the `password` parameter.
-  #
-  #  password: <PASSWORD>
+    ## @param password - string - optional
+    ## If `database_url` is not used, set up the password to use with the `password` parameter.
+    #
+    # password: <PASSWORD>
 
-  ## @param use_cached - boolean - optional - default: true
-  ## Cache and re-use PostgreSQL connection or create a new one at each check run.
-  #
-  #  use_cached: true
+    ## @param use_cached - boolean - optional - default: true
+    ## Cache and re-use PostgreSQL connection or create a new one at each check run.
+    #
+    # use_cached: true
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

@@ -2,66 +2,66 @@ init_config:
 
 instances:
 
-## @param nginx_status_url - string - required
-## For every instance, you need an `nginx_status_url` and can optionally
-## supply a list of tags.  This plugin requires nginx to be compiled with
-## the nginx stub status module option, and activated with the correct
-## configuration stanza.  On debian/ubuntu, this is included in the
-## `nginx-extras` package.  For more details, see:
-##
-##   http://docs.datadoghq.com/integrations/nginx/
-#
+    ## @param nginx_status_url - string - required
+    ## For every instance, you need an `nginx_status_url` and can optionally
+    ## supply a list of tags.  This plugin requires nginx to be compiled with
+    ## the nginx stub status module option, and activated with the correct
+    ## configuration stanza.  On debian/ubuntu, this is included in the
+    ## `nginx-extras` package.  For more details, see:
+    ##
+    ##   http://docs.datadoghq.com/integrations/nginx/
+    #
   - nginx_status_url: http://localhost:81/nginx_status/
 
-  ## @param use_plus_api - boolean - optional - default: false
-  ## If you are using the commercial version of nginx, for releases R13 and above,
-  ## there is a new API to replace the extended status API.
-  ## See https://www.nginx.com/blog/nginx-plus-r13-released/
-  ## To use it set `use_plus_api` to true
-  #
-  #  use_plus_api: false
+    ## @param use_plus_api - boolean - optional - default: false
+    ## If you are using the commercial version of nginx, for releases R13 and above,
+    ## there is a new API to replace the extended status API.
+    ## See https://www.nginx.com/blog/nginx-plus-r13-released/
+    ## To use it set `use_plus_api` to true
+    #
+    # use_plus_api: false
 
-  ## @param plus_api_version - integer - optional - default: 2
-  ## Specify the version of the Plus API to use. The check supports versions 1 & 2.
-  #
-  #  plus_api_version: 2
+    ## @param plus_api_version - integer - optional - default: 2
+    ## Specify the version of the Plus API to use. The check supports versions 1 & 2.
+    #
+    # plus_api_version: 2
 
-  ## @param use_vts - boolean - optional - default: false
-  ## Set this option to true if you are using the nginx vhost_traffic_status module. 
-  ## If you are using VTS, set the nginx_status_url to something like http://localhost/nginx_stats/format/json.
-  #
-  #  use_vts: false
+    ## @param use_vts - boolean - optional - default: false
+    ## Set this option to true if you are using the nginx vhost_traffic_status module.
+    ## If you are using VTS, set the nginx_status_url to something like http://localhost/nginx_stats/format/json.
+    #
+    # use_vts: false
 
-  ## @param ssl_validation - boolean - optional - default: false
-  ## Instructs the check to not skip the validation of the SSL certificate of the URL being tested.
-  ## Defaults to false. Set to true if you want to enable SSL certificate validation.
-  #
-  #  ssl_validation: false
+    ## @param ssl_validation - boolean - optional - default: false
+    ## Instructs the check to not skip the validation of the SSL certificate of the URL being tested.
+    ## Defaults to false. Set to true if you want to enable SSL certificate validation.
+    #
+    # ssl_validation: false
 
-  ## @param skip_proxy - boolean - optional - default: false
-  ## If set to true, the check bypasses any enabled proxy
-  ## settings and attempts to reach the URL directly.
-  ##
-  #  skip_proxy: false
+    ## @param skip_proxy - boolean - optional - default: false
+    ## If set to true, the check bypasses any enabled proxy
+    ## settings and attempts to reach the URL directly.
+    ##
+    # skip_proxy: false
 
-  ## @param apache_user - string - optional
-  ## Username for the Nginx status endpoint authentication.
-  #
-  #  user: <USERNAME>
+    ## @param apache_user - string - optional
+    ## Username for the Nginx status endpoint authentication.
+    #
+    # user: <USERNAME>
 
-  ## @param apache_password - string - optional
-  ## Password for the Nginx status endpoint authentication.
-  #
-  #  password: <PASSWORD>
+    ## @param apache_password - string - optional
+    ## Password for the Nginx status endpoint authentication.
+    #
+    # password: <PASSWORD>
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
 ##
@@ -73,16 +73,16 @@ instances:
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
-
-#logs:
-# - type: file
-#   path: /var/log/nginx/access.log
-#   service: nginx
-#   source: nginx
-#   sourcecategory: http_web_access
-
-# - type: file
-#   path: /var/log/nginx/error.log
-#   service: nginx
-#   source: nginx
-#   sourcecategory: http_web_access
+#
+# logs:
+#  - type: file
+#    path: /var/log/nginx/access.log
+#    service: nginx
+#    source: nginx
+#    sourcecategory: http_web_access
+#
+#  - type: file
+#    path: /var/log/nginx/error.log
+#    service: nginx
+#    source: nginx
+#    sourcecategory: http_web_access

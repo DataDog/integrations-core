@@ -2,54 +2,54 @@ init_config:
 
 instances:
 
-  ## @param name - string - required
-  ## A custom unique name per build configuration that is shown
-  ## in the events.
-  #
+    ## @param name - string - required
+    ## A custom unique name per build configuration that is shown
+    ## in the events.
+    #
   - name: <BUILD_NAME>
 
-  ## @param server - string - required
-  ## Specify the server name of your teamcity instance
-  ## Guest authentication must be on if you want the check to be able to get data
-  ## When using the optional `basic_http_authentication` use:
-  ##
-  ##  server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
-  #
+    ## @param server - string - required
+    ## Specify the server name of your teamcity instance
+    ## Guest authentication must be on if you want the check to be able to get data
+    ## When using the optional `basic_http_authentication` use:
+    ##
+    ##  server: http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com
+    #
     server: http://teamcity.<ACCOUNT_NAME>.com
 
-  ## @param build_configuration - string - required
-  ## This is the internal build ID of the build configuration you wish to track.
-  ## You can find it labelled as "Build configuration ID" when editing the configuration in question.
-  #
+    ## @param build_configuration - string - required
+    ## This is the internal build ID of the build configuration you wish to track.
+    ## You can find it labelled as "Build configuration ID" when editing the configuration in question.
+    #
     build_configuration: <BUILD_CONFIGURATION_ID>
 
-  ## @param basic_http_authentication - boolean - optional - default: false
-  ## Set to true to turn on basic http authentication.
-  #
-  #  basic_http_authentication: false
+    ## @param basic_http_authentication - boolean - optional - default: false
+    ## Set to true to turn on basic http authentication.
+    #
+    # basic_http_authentication: false
 
-  ## @param host_affected - string - optional
-  ## Use this parameter to override the host that is affected by this build configuration.
-  ## Defaults to the host that the agent is running on.
-  #
-  #  host_affected: <HOSTNAME>
+    ## @param host_affected - string - optional
+    ## Use this parameter to override the host that is affected by this build configuration.
+    ## Defaults to the host that the agent is running on.
+    #
+    # host_affected: <HOSTNAME>
 
-  ## @param is_deployment - boolean - optional - default: false
-  ## Set to true to change the event message slightly to specify that TeamCity was used to deploy something
-  ## rather than just that a successful build happened
-  #
-  #  is_deployment: false
+    ## @param is_deployment - boolean - optional - default: false
+    ## Set to true to change the event message slightly to specify that TeamCity was used to deploy something
+    ## rather than just that a successful build happened
+    #
+    # is_deployment: false
 
-  ## @param ssl_validation - boolean - optional - default: true
-  ## Set this to `false` to disable ssl certificate validation.
-  #
-  #  ssl_validation: true
+    ## @param ssl_validation - boolean - optional - default: true
+    ## Set this to `false` to disable ssl certificate validation.
+    #
+    # ssl_validation: true
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

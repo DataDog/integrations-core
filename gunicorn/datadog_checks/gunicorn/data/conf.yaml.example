@@ -5,23 +5,23 @@ init_config:
 
 instances:
 
-  ## @param proc_name - string - required
-  ## The name of the gunicorn process. For the following gunicorn server:
-  ##
-  ## gunicorn --name <WEB_APP_NAME> <WEB_APP_CONFIG>.ini
-  ##
-  ## the name is `<WEB_APP_NAME>`
-  #
+    ## @param proc_name - string - required
+    ## The name of the gunicorn process. For the following gunicorn server:
+    ##
+    ## gunicorn --name <WEB_APP_NAME> <WEB_APP_CONFIG>.ini
+    ##
+    ## the name is `<WEB_APP_NAME>`
+    #
   - proc_name: <WEB_APP_NAME>
 
-  ## @param tags  - list of key:value string - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging at https://docs.datadoghq.com/tagging
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
 ##
@@ -34,20 +34,19 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
-#logs:
-#  - type: file
-#    path: /var/log/gunicorn/access.log
-#    service: <SERVICE>
-#    source: gunicorn
-#    sourcecategory: http_web_access
+# logs:
+#   - type: file
+#     path: /var/log/gunicorn/access.log
+#     service: <SERVICE>
+#     source: gunicorn
+#     sourcecategory: http_web_access
 
-#  - type: file
-#    path: /var/log/gunicorn/error.log
-#    service: <SERVICE>
-#    source: gunicorn
-#    sourcecategory: sourcecode
-#    log_processing_rules:
-#       - type: multi_line
-#         name: log_start_with_date
-#         pattern: \[\d{4}-\d{2}-\d{2}
-
+#   - type: file
+#     path: /var/log/gunicorn/error.log
+#     service: <SERVICE>
+#     source: gunicorn
+#     sourcecategory: sourcecode
+#     log_processing_rules:
+#        - type: multi_line
+#          name: log_start_with_date
+#          pattern: \[\d{4}-\d{2}-\d{2}

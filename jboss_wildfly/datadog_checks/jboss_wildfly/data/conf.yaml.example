@@ -1,84 +1,83 @@
 instances:
 
-  ## @param jmx_url - string - required
-  ## JBoss/WildFly URL to connect to
-  #
+    ## @param jmx_url - string - required
+    ## JBoss/WildFly URL to connect to
+    #
   - jmx_url: "service:jmx:remote+http://localhost:9990"
 
-  ## @param tags  - list of key:value element - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - environment: <DEFAULT_ENVIRONMENT>
+    ## @param tags  - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - environment: <DEFAULT_ENVIRONMENT>
 
-  ## @param user - string - optional
-  ## JMX username
-  #
-  #  user: <USERNAME>
+    ## @param user - string - optional
+    ## JMX username
+    #
+    # user: <USERNAME>
 
-  ## @param password - string - optional
-  ## JMX User Password.
-  #
-  #  password: <PASSWORD>
+    ## @param password - string - optional
+    ## JMX User Password.
+    #
+    # password: <PASSWORD>
 
-  ## @param process_name_regex - string - optional
-  ## XXXXXXXXXXX
-  #
-  #  process_name_regex: .*process_name.*
+    ## @param process_name_regex - string - optional
+    ## XXXXXXXXXXX
+    #
+    # process_name_regex: .*process_name.*
 
-  ## @param tools_jar_path - string - optional
-  ## Instead of specifying a host, and port. The agent can connect using the attach api.
-  ## This requires the JDK to be installed and the path to tools.jar to be set below.
-  ## Note: It needs to be set when process_name_regex parameter is set
-  #
-  #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## @param tools_jar_path - string - optional
+    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below.
+    ## Note: It needs to be set when process_name_regex parameter is set
+    #
+    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
-  ## @param name - string - optional
-  ## XXXXXXXXXXX
-  #
-  #   name: jboss_instance
+    ## @param name - string - optional
+    ## XXXXXXXXXXX
+    #
+    # name: jboss_instance
 
-  ## @param java_bin_path - string - optional
-  ## java_bin_path should be set if the agent cannot find your java executable
-  #
-  #  java_bin_path: <JAVA_PATH>
+    ## @param java_bin_path - string - optional
+    ## java_bin_path should be set if the agent cannot find your java executable
+    #
+    # java_bin_path: <JAVA_PATH>
 
-  ## @param java_options - string - optional
-  ## List of Java JVM options.
-  #
-  #  java_options: "-Xmx200m -Xms50m"
+    ## @param java_options - string - optional
+    ## List of Java JVM options.
+    #
+    # java_options: "-Xmx200m -Xms50m"
 
-  ## @param trust_store_path - string - optional
-  ## trust_store_path should be set if ssl is enabled.
-  ## path to your trusted store
-  #
-  #  trust_store_path: <TRUSTSTORE.JKS_PATH>
+    ## @param trust_store_path - string - optional
+    ## trust_store_path should be set if ssl is enabled.
+    ## path to your trusted store
+    #
+    # trust_store_path: <TRUSTSTORE.JKS_PATH>
 
-  ## @param trust_store_password - string - optional
-  ## trust_store_password should be set if ssl is enabled
-  ## password for your TrustStore.jks file
-  #
-  #  trust_store_password: <PASSWORD>
+    ## @param trust_store_password - string - optional
+    ## trust_store_password should be set if ssl is enabled
+    ## password for your TrustStore.jks file
+    #
+    # trust_store_password: <PASSWORD>
 
-  ## @param key_store_path - string - optional
-  ## key_store_path should be set if client authentication is enabled on the target JVM.
-  ## path to your key store
-  #
-  #  key_store_path: <KEYSTORE.JKS_PATH>
+    ## @param key_store_path - string - optional
+    ## key_store_path should be set if client authentication is enabled on the target JVM.
+    ## path to your key store
+    #
+    # key_store_path: <KEYSTORE.JKS_PATH>
 
-  ## @param key_store_password - string - optional
-  ## key_store_password should be set if client authentication is enabled on the target JVM.
-  ## password for your KeyStore.jks file
-  #
-  #  key_store_password: <PASSWORD>
+    ## @param key_store_password - string - optional
+    ## key_store_password should be set if client authentication is enabled on the target JVM.
+    ## password for your KeyStore.jks file
+    #
+    # key_store_password: <PASSWORD>
 
-  ## @param rmi_registry_ssl - boolean - optional - default: false
-  ## Whether or not the agent should connect to the rmi registry using ssl.
-  #
-  #  rmi_registry_ssl: false
-
+    ## @param rmi_registry_ssl - boolean - optional - default: false
+    ## Whether or not the agent should connect to the rmi registry using ssl.
+    #
+    # rmi_registry_ssl: false
 
 init_config:
 
@@ -93,11 +92,11 @@ init_config:
   collect_default_metrics: true
 
   ## @param custom_jar_paths - list - optional
-  ## When using JBoss default JMX implementation, the client JAR which allows connecting to it. 
+  ## When using JBoss default JMX implementation, the client JAR which allows connecting to it.
   ## See documentation: https://docs.datadoghq.com/integrations/java/#monitoring-jboss-wildfly-applications
   #
-  #  custom_jar_paths:
-  #  - /path/to/jboss-cli-client.jar
+  # custom_jar_paths:
+  #   - /path/to/jboss-cli-client.jar
 
   ## List of metrics to be collected by the integration
   ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
@@ -106,9 +105,9 @@ init_config:
 
   conf:
 
-  # inspired from:
-  # https://github.com/nlighten/wildfly_exporter/blob/master/client/src/main/java/nl/nlighten/prometheus/wildfly/JbossJdbcPoolExports.java
-  # https://github.com/prometheus/jmx_exporter/blob/master/example_configs/wildfly-10.yaml
+  ## inspired from:
+  ## https://github.com/nlighten/wildfly_exporter/blob/master/client/src/main/java/nl/nlighten/prometheus/wildfly/JbossJdbcPoolExports.java
+  ## https://github.com/prometheus/jmx_exporter/blob/master/example_configs/wildfly-10.yaml
   - include:
       bean_regex:
         - jboss\.as:subsystem=datasources,(?:xa-)*data-source=(.*),statistics=(.*)
@@ -184,9 +183,9 @@ init_config:
 
 
 
-  # Undertow
-  # inspired from:
-  # https://github.com/nlighten/wildfly_exporter/blob/master/client/src/main/java/nl/nlighten/prometheus/wildfly/UndertowExports.java
+  ## Undertow
+  ## inspired from:
+  ## https://github.com/nlighten/wildfly_exporter/blob/master/client/src/main/java/nl/nlighten/prometheus/wildfly/UndertowExports.java
 
   - include:
       bean_regex:
@@ -232,4 +231,3 @@ init_config:
         sessionMaxAliveTime:
           alias: jboss.undertow_session.alivetime_max
           metric_type: gauge
-
