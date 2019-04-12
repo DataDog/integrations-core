@@ -82,21 +82,21 @@ class TestVerify:
         assert http.options['verify'] is True
 
     def test_config_verify(self):
-        instance = {'ssl_verify': False}
+        instance = {'tls_verify': False}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['verify'] is False
 
     def test_config_ca_cert(self):
-        instance = {'ssl_ca_cert': 'ca_cert'}
+        instance = {'tls_ca_cert': 'ca_cert'}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['verify'] == 'ca_cert'
 
     def test_config_verify_and_ca_cert(self):
-        instance = {'ssl_verify': True, 'ssl_ca_cert': 'ca_cert'}
+        instance = {'tls_verify': True, 'tls_ca_cert': 'ca_cert'}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
@@ -112,14 +112,14 @@ class TestCert:
         assert http.options['cert'] is None
 
     def test_config_cert(self):
-        instance = {'ssl_cert': 'cert'}
+        instance = {'tls_cert': 'cert'}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['cert'] == 'cert'
 
     def test_config_cert_and_private_key(self):
-        instance = {'ssl_cert': 'cert', 'ssl_private_key': 'key'}
+        instance = {'tls_cert': 'cert', 'tls_private_key': 'key'}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
@@ -294,20 +294,20 @@ class TestProxies:
         http.get('https://www.google.com')
 
 
-class TestIgnoreSSLWarning:
+class TestIgnoreTLSWarning:
     def test_config_default(self):
         instance = {}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.ignore_ssl_warning is False
+        assert http.ignore_tls_warning is False
 
     def test_config_flag(self):
-        instance = {'ssl_ignore_warning': True}
+        instance = {'tls_ignore_warning': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.ignore_ssl_warning is True
+        assert http.ignore_tls_warning is True
 
     def test_default_no_ignore(self):
         instance = {}
@@ -318,7 +318,7 @@ class TestIgnoreSSLWarning:
             http.get('https://www.google.com', verify=False)
 
     def test_ignore(self):
-        instance = {'ssl_ignore_warning': True}
+        instance = {'tls_ignore_warning': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
@@ -336,7 +336,7 @@ class TestIgnoreSSLWarning:
             http.get('https://www.google.com', verify=False)
 
     def test_ignore_session(self):
-        instance = {'ssl_ignore_warning': True, 'persist_connections': True}
+        instance = {'tls_ignore_warning': True, 'persist_connections': True}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
@@ -392,15 +392,15 @@ class TestRemapper:
     def test_invert(self):
         instance = {'disable_ssl_validation': False}
         init_config = {}
-        remapper = {'disable_ssl_validation': {'name': 'ssl_verify', 'default': False, 'invert': True}}
+        remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
         http = RequestsWrapper(instance, init_config, remapper)
 
         assert http.options['verify'] is True
 
     def test_standard_override(self):
-        instance = {'disable_ssl_validation': True, 'ssl_verify': False}
+        instance = {'disable_ssl_validation': True, 'tls_verify': False}
         init_config = {}
-        remapper = {'disable_ssl_validation': {'name': 'ssl_verify', 'default': False, 'invert': True}}
+        remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
         http = RequestsWrapper(instance, init_config, remapper)
 
         assert http.options['verify'] is False
@@ -408,7 +408,7 @@ class TestRemapper:
     def test_unknown_name_default(self):
         instance = {}
         init_config = {}
-        remapper = {'verify_ssl': {'name': 'verify', 'default': False}}
+        remapper = {'verify_tls': {'name': 'verify', 'default': False}}
         http = RequestsWrapper(instance, init_config, remapper)
 
         assert http.options['verify'] is True
