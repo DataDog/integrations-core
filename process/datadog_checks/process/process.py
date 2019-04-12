@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from collections import defaultdict
-import time
 import os
 import re
 import subprocess
+import time
+from collections import defaultdict
 
 import psutil
 import sys
@@ -18,41 +18,40 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.platform import Platform
 
-
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
 
 
 ATTR_TO_METRIC = {
-    'thr':              'threads',
-    'cpu':              'cpu.pct',
-    'cpu_norm':         'cpu.normalized_pct',
-    'rss':              'mem.rss',
-    'vms':              'mem.vms',
-    'real':             'mem.real',
-    'open_fd':          'open_file_descriptors',
-    'open_handle':      'open_handles',  # win32 only
+    'thr': 'threads',
+    'cpu': 'cpu.pct',
+    'cpu_norm': 'cpu.normalized_pct',
+    'rss': 'mem.rss',
+    'vms': 'mem.vms',
+    'real': 'mem.real',
+    'open_fd': 'open_file_descriptors',
+    'open_handle': 'open_handles',  # win32 only
     # FIXME: namespace me correctly (8.x), io.r_count
-    'r_count':          'ioread_count',
+    'r_count': 'ioread_count',
     # FIXME: namespace me correctly (8.x) io.r_bytes
-    'w_count':          'iowrite_count',
+    'w_count': 'iowrite_count',
     # FIXME: namespace me correctly (8.x) io.w_count
-    'r_bytes':          'ioread_bytes',
+    'r_bytes': 'ioread_bytes',
     # FIXME: namespace me correctly (8.x) io.w_bytes
-    'w_bytes':          'iowrite_bytes',
+    'w_bytes': 'iowrite_bytes',
     # FIXME: namespace me correctly (8.x), ctx_swt.voluntary
-    'ctx_swtch_vol':    'voluntary_ctx_switches',
+    'ctx_swtch_vol': 'voluntary_ctx_switches',
     # FIXME: namespace me correctly (8.x), ctx_swt.involuntary
-    'ctx_swtch_invol':  'involuntary_ctx_switches',
-    'run_time':         'run_time',
-    'mem_pct':          'mem.pct'
+    'ctx_swtch_invol': 'involuntary_ctx_switches',
+    'run_time': 'run_time',
+    'mem_pct': 'mem.pct',
 }
 
 ATTR_TO_METRIC_RATE = {
-    'minflt':           'mem.page_faults.minor_faults',
-    'cminflt':          'mem.page_faults.children_minor_faults',
-    'majflt':           'mem.page_faults.major_faults',
-    'cmajflt':          'mem.page_faults.children_major_faults'
+    'minflt': 'mem.page_faults.minor_faults',
+    'cminflt': 'mem.page_faults.children_minor_faults',
+    'majflt': 'mem.page_faults.major_faults',
+    'cmajflt': 'mem.page_faults.children_major_faults',
 }
 
 
@@ -66,10 +65,7 @@ class ProcessCheck(AgentCheck):
         self.last_ad_cache_ts = {}
         self.ad_cache = set()
         self.access_denied_cache_duration = int(
-            init_config.get(
-                'access_denied_cache_duration',
-                DEFAULT_AD_CACHE_DURATION
-            )
+            init_config.get('access_denied_cache_duration', DEFAULT_AD_CACHE_DURATION)
         )
 
         # By default cache the PID list for a while
@@ -77,12 +73,7 @@ class ProcessCheck(AgentCheck):
         # This cache is indexed per instance
         self.last_pid_cache_ts = {}
         self.pid_cache = {}
-        self.pid_cache_duration = int(
-            init_config.get(
-                'pid_cache_duration',
-                DEFAULT_PID_CACHE_DURATION
-            )
-        )
+        self.pid_cache_duration = int(init_config.get('pid_cache_duration', DEFAULT_PID_CACHE_DURATION))
 
         self._conflicting_procfs = False
         self._deprecated_init_procfs = False
@@ -205,8 +196,7 @@ class ProcessCheck(AgentCheck):
                     try:
                         result[acc] = getattr(res, acc)
                     except AttributeError:
-                        self.log.debug("psutil.{}().{} attribute does"
-                                       "not exist".format(method, acc))
+                        self.log.debug("psutil.{}().{} attribute does not exist".format(method, acc))
         except (NotImplementedError, AttributeError):
             self.log.debug("psutil method {} not implemented".format(method))
         except psutil.AccessDenied:
@@ -220,8 +210,9 @@ class ProcessCheck(AgentCheck):
                     result = len(process_ls.splitlines())
 
                 except subprocess.CalledProcessError as e:
-                    self.log.exception("trying to retrieve {} with sudo failed with "
-                                       "return code {}".format(method, e.returncode))
+                    self.log.exception(
+                        "trying to retrieve {} with sudo failed with return code {}".format(method, e.returncode)
+                    )
                 except Exception:
                     self.log.exception("trying to retrieve {} with sudo also failed".format(method))
         except psutil.NoSuchProcess:
@@ -243,7 +234,7 @@ class ProcessCheck(AgentCheck):
 
             new_process = False
             # If the pid's process is not cached, retrieve it
-            if (pid not in self.process_cache[name] or not self.process_cache[name][pid].is_running()):
+            if pid not in self.process_cache[name] or not self.process_cache[name][pid].is_running():
                 new_process = True
                 try:
                     self.process_cache[name][pid] = psutil.Process(pid)
@@ -285,15 +276,15 @@ class ProcessCheck(AgentCheck):
                 # so save the value only on non-new processes
                 st['cpu'].append(cpu_percent)
                 if cpu_count > 0 and cpu_percent is not None:
-                    st['cpu_norm'].append(cpu_percent/cpu_count)
+                    st['cpu_norm'].append(cpu_percent / cpu_count)
                 else:
-                    self.log.debug('could not calculate the normalized '
-                                   'cpu pct, cpu_count: {}'.format(cpu_count))
+                    self.log.debug('could not calculate the normalized cpu pct, cpu_count: {}'.format(cpu_count))
             st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
             st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
 
-            ioinfo = self.psutil_wrapper(p, 'io_counters',
-                                         ['read_count', 'write_count', 'read_bytes', 'write_bytes'], try_sudo)
+            ioinfo = self.psutil_wrapper(
+                p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'], try_sudo
+            )
             st['r_count'].append(ioinfo.get('read_count'))
             st['w_count'].append(ioinfo.get('write_count'))
             st['r_bytes'].append(ioinfo.get('read_bytes'))
@@ -334,8 +325,9 @@ class ProcessCheck(AgentCheck):
         try:
             data = file_to_string('/{}/{}/stat'.format(psutil.PROCFS_PATH, pid))
         except Exception:
-            self.log.debug('error getting proc stats: file_to_string failed',
-                           'for /{}/{}/stat'.format(psutil.PROCFS_PATH, pid))
+            self.log.debug(
+                'error getting proc stats: file_to_string failed for /{}/{}/stat'.format(psutil.PROCFS_PATH, pid)
+            )
             return None
         return (int(i) for i in data.split()[9:13])
 
@@ -365,12 +357,16 @@ class ProcessCheck(AgentCheck):
         try_sudo = instance.get('try_sudo', False)
 
         if self._conflicting_procfs:
-            self.warning('The `procfs_path` defined in `process.yaml is different from the one defined in '
-                         '`datadog.conf` This is currently not supported by the Agent. Defaulting to the '
-                         'value defined in `datadog.conf`:{}'.format(psutil.PROCFS_PATH))
+            self.warning(
+                'The `procfs_path` defined in `process.yaml is different from the one defined in '
+                '`datadog.conf` This is currently not supported by the Agent. Defaulting to the '
+                'value defined in `datadog.conf`:{}'.format(psutil.PROCFS_PATH)
+            )
         elif self._deprecated_init_procfs:
-            self.warning('DEPRECATION NOTICE: Specifying `procfs_path` in process.yaml` is deprecated. '
-                         'Please specify it in `datadog.conf` instead')
+            self.warning(
+                'DEPRECATION NOTICE: Specifying `procfs_path` in process.yaml` is deprecated. '
+                'Please specify it in `datadog.conf` instead'
+            )
 
         if not isinstance(search_string, list) and pid is None and pid_file is None:
             raise ValueError('"search_string" or "pid" or "pid_file" parameter is required')
@@ -378,19 +374,16 @@ class ProcessCheck(AgentCheck):
         # FIXME 8.x remove me
         if search_string is not None:
             if "All" in search_string:
-                self.warning('Deprecated: Having "All" in your search_string will greatly reduce the '
-                             'performance of the check and will be removed in a future version of the agent.')
+                self.warning(
+                    'Deprecated: Having "All" in your search_string will greatly reduce the '
+                    'performance of the check and will be removed in a future version of the agent.'
+                )
 
         if name is None:
             raise KeyError('The "name" of process groups is mandatory')
 
         if search_string is not None:
-            pids = self.find_pids(
-                name,
-                search_string,
-                exact_match,
-                ignore_ad=ignore_ad
-            )
+            pids = self.find_pids(name, search_string, exact_match, ignore_ad=ignore_ad)
         elif pid is not None:
             # we use Process(pid) as a means to search, if pid not found
             # psutil.NoSuchProcess is raised.
@@ -429,7 +422,7 @@ class ProcessCheck(AgentCheck):
             # skip []
             if vals:
                 if attr == 'run_time':
-                    self.gauge('system.processes.{}.avg'.format(mname), sum(vals)/len(vals), tags=tags)
+                    self.gauge('system.processes.{}.avg'.format(mname), sum(vals) / len(vals), tags=tags)
                     self.gauge('system.processes.{}.max'.format(mname), max(vals), tags=tags)
                     self.gauge('system.processes.{}.min'.format(mname), min(vals), tags=tags)
 
@@ -460,11 +453,7 @@ class ProcessCheck(AgentCheck):
         # FIXME 8.x remove the `process:name` tag
         service_check_tags = tags + ["process:{}".format(name)]
         status = AgentCheck.OK
-        status_str = {
-            AgentCheck.OK: "OK",
-            AgentCheck.WARNING: "WARNING",
-            AgentCheck.CRITICAL: "CRITICAL"
-        }
+        status_str = {AgentCheck.OK: "OK", AgentCheck.WARNING: "WARNING", AgentCheck.CRITICAL: "CRITICAL"}
 
         if not bounds and nb_procs < 1:
             status = AgentCheck.CRITICAL
@@ -481,7 +470,7 @@ class ProcessCheck(AgentCheck):
             "process.up",
             status,
             tags=service_check_tags,
-            message="PROCS {}: {} processes found for {}".format(status_str[status], nb_procs, name)
+            message="PROCS {}: {} processes found for {}".format(status_str[status], nb_procs, name),
         )
 
     def _filter_by_user(self, user, pids):

@@ -51,9 +51,7 @@ RATE_METRICS = [
     'unexpected-packets',
     'unreachables',
 ]
-GAUGE_METRICS_V4 = [
-    'fd-usage',
-]
+GAUGE_METRICS_V4 = ['fd-usage']
 RATE_METRICS_V4 = [
     'auth4-answers-slow',
     'auth4-answers0-1',

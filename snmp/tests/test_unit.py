@@ -16,16 +16,12 @@ def test_parse_metrics(hlapi_mock, check):
         check.parse_metrics(metrics, False)
 
     # Unsupported metric
-    metrics = [{
-        "foo": "bar"
-    }]
+    metrics = [{"foo": "bar"}]
     with pytest.raises(Exception):
         check.parse_metrics(metrics, False)
 
     # Simple OID
-    metrics = [{
-        "OID": "1.2.3"
-    }]
+    metrics = [{"OID": "1.2.3"}]
     table, raw, mibs = check.parse_metrics(metrics, False)
     assert table == []
     assert mibs == set()
@@ -34,17 +30,12 @@ def test_parse_metrics(hlapi_mock, check):
     hlapi_mock.reset_mock()
 
     # MIB with no symbol or table
-    metrics = [{
-        "MIB": "foo_mib"
-    }]
+    metrics = [{"MIB": "foo_mib"}]
     with pytest.raises(Exception):
         check.parse_metrics(metrics, False)
 
     # MIB with symbol
-    metrics = [{
-        "MIB": "foo_mib",
-        "symbol": "foo",
-    }]
+    metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
     table, raw, mibs = check.parse_metrics(metrics, False)
     assert raw == []
     assert mibs == {"foo_mib"}
@@ -53,19 +44,12 @@ def test_parse_metrics(hlapi_mock, check):
     hlapi_mock.reset_mock()
 
     # MIB with table, no symbols
-    metrics = [{
-        "MIB": "foo_mib",
-        "table": "foo",
-    }]
+    metrics = [{"MIB": "foo_mib", "table": "foo"}]
     with pytest.raises(Exception):
         check.parse_metrics(metrics, False)
 
     # MIB with table and symbols
-    metrics = [{
-        "MIB": "foo_mib",
-        "table": "foo",
-        "symbols": ["foo", "bar"],
-    }]
+    metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
     table, raw, mibs = check.parse_metrics(metrics, True)
     assert raw == []
     assert mibs == set()
@@ -75,32 +59,19 @@ def test_parse_metrics(hlapi_mock, check):
     hlapi_mock.reset_mock()
 
     # MIB with table, symbols, bad metrics_tags
-    metrics = [{
-        "MIB": "foo_mib",
-        "table": "foo",
-        "symbols": ["foo", "bar"],
-        "metric_tags": [{}]
-    }]
+    metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
     with pytest.raises(Exception):
         check.parse_metrics(metrics, False)
 
     # MIB with table, symbols, bad metrics_tags
-    metrics = [{
-        "MIB": "foo_mib",
-        "table": "foo",
-        "symbols": ["foo", "bar"],
-        "metric_tags": [{"tag": "foo"}]
-    }]
+    metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo"}]}]
     with pytest.raises(Exception):
         check.parse_metrics(metrics, False)
 
     # MIB with table, symbols, metrics_tags index
-    metrics = [{
-        "MIB": "foo_mib",
-        "table": "foo",
-        "symbols": ["foo", "bar"],
-        "metric_tags": [{"tag": "foo", "index": "1"}]
-    }]
+    metrics = [
+        {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
+    ]
     table, raw, mibs = check.parse_metrics(metrics, True)
     assert raw == []
     assert mibs == set()
@@ -110,12 +81,9 @@ def test_parse_metrics(hlapi_mock, check):
     hlapi_mock.reset_mock()
 
     # MIB with table, symbols, metrics_tags column
-    metrics = [{
-        "MIB": "foo_mib",
-        "table": "foo",
-        "symbols": ["foo", "bar"],
-        "metric_tags": [{"tag": "foo", "column": "baz"}]
-    }]
+    metrics = [
+        {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
+    ]
     table, raw, mibs = check.parse_metrics(metrics, True)
     assert raw == []
     assert mibs == set()

@@ -8,13 +8,12 @@ Collects metrics from mesos master node, only the leader is sending metrics.
 """
 
 import requests
-
 from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException
 from datadog_checks.config import _is_affirmative
+from datadog_checks.errors import CheckException
 
 
 class MesosMaster(AgentCheck):
@@ -117,50 +116,23 @@ class MesosMaster(AgentCheck):
 
     # These metrics are aggregated only on the elected master
     STATS_METRICS = {
-        'master/dropped_messages': (
-            'mesos.cluster.dropped_messages',
-            GAUGE
-        ),
-        'master/outstanding_offers': (
-            'mesos.cluster.outstanding_offers',
-            GAUGE
-        ),
-        'master/event_queue_dispatches': (
-            'mesos.cluster.event_queue_dispatches',
-            GAUGE
-        ),
-        'master/event_queue_http_requests': (
-            'mesos.cluster.event_queue_http_requests',
-            GAUGE
-        ),
-        'master/event_queue_messages': (
-            'mesos.cluster.event_queue_messages',
-            GAUGE
-        ),
+        'master/dropped_messages': ('mesos.cluster.dropped_messages', GAUGE),
+        'master/outstanding_offers': ('mesos.cluster.outstanding_offers', GAUGE),
+        'master/event_queue_dispatches': ('mesos.cluster.event_queue_dispatches', GAUGE),
+        'master/event_queue_http_requests': ('mesos.cluster.event_queue_http_requests', GAUGE),
+        'master/event_queue_messages': ('mesos.cluster.event_queue_messages', GAUGE),
         'master/invalid_framework_to_executor_messages': (
             'mesos.cluster.invalid_framework_to_executor_messages',
-            GAUGE
+            GAUGE,
         ),
         'master/invalid_status_update_acknowledgements': (
             'mesos.cluster.invalid_status_update_acknowledgements',
-            GAUGE
+            GAUGE,
         ),
-        'master/invalid_status_updates': (
-            'mesos.cluster.invalid_status_updates',
-            GAUGE
-        ),
-        'master/valid_framework_to_executor_messages': (
-            'mesos.cluster.valid_framework_to_executor_messages',
-            GAUGE
-        ),
-        'master/valid_status_update_acknowledgements': (
-            'mesos.cluster.valid_status_update_acknowledgements',
-            GAUGE
-        ),
-        'master/valid_status_updates': (
-            'mesos.cluster.valid_status_updates',
-            GAUGE
-        ),
+        'master/invalid_status_updates': ('mesos.cluster.invalid_status_updates', GAUGE),
+        'master/valid_framework_to_executor_messages': ('mesos.cluster.valid_framework_to_executor_messages', GAUGE),
+        'master/valid_status_update_acknowledgements': ('mesos.cluster.valid_status_update_acknowledgements', GAUGE),
+        'master/valid_status_updates': ('mesos.cluster.valid_status_updates', GAUGE),
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -194,12 +166,10 @@ class MesosMaster(AgentCheck):
         finally:
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             if self.service_check_needed:
-                self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags,
-                                   message=msg)
+                self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
                 self.service_check_needed = False
             if status is AgentCheck.CRITICAL:
-                self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags,
-                                   message=msg)
+                self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
                 raise CheckException('Cannot connect to mesos. Error: {0}'.format(msg))
 
         if r.encoding is None:
@@ -245,10 +215,7 @@ class MesosMaster(AgentCheck):
 
         state_metrics = self._check_leadership(url, timeout, ssl_verify, instance_tags)
         if state_metrics:
-            tags = [
-                'mesos_pid:{0}'.format(state_metrics['pid']),
-                'mesos_node:master',
-            ]
+            tags = ['mesos_pid:{0}'.format(state_metrics['pid']), 'mesos_node:master']
             if 'cluster' in state_metrics:
                 tags.append('mesos_cluster:{0}'.format(state_metrics['cluster']))
 
@@ -277,9 +244,14 @@ class MesosMaster(AgentCheck):
             if stats_metrics is not None:
                 metrics = [self.SYSTEM_METRICS]
                 if self.leader:
-                    metrics += [self.CLUSTER_TASKS_METRICS, self.CLUSTER_SLAVES_METRICS,
-                                self.CLUSTER_RESOURCES_METRICS, self.CLUSTER_REGISTRAR_METRICS,
-                                self.CLUSTER_FRAMEWORK_METRICS, self.STATS_METRICS]
+                    metrics += [
+                        self.CLUSTER_TASKS_METRICS,
+                        self.CLUSTER_SLAVES_METRICS,
+                        self.CLUSTER_RESOURCES_METRICS,
+                        self.CLUSTER_REGISTRAR_METRICS,
+                        self.CLUSTER_FRAMEWORK_METRICS,
+                        self.STATS_METRICS,
+                    ]
                 for m in metrics:
                     for key_name, (metric_name, metric_func) in iteritems(m):
                         if key_name in stats_metrics:

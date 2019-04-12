@@ -36,16 +36,9 @@ def test_plus_api(check, instance, aggregator):
 
 def test_nest_payload(check):
     keys = ["foo", "bar"]
-    payload = {
-        "key1": "val1",
-        "key2": "val2"
-    }
+    payload = {"key1": "val1", "key2": "val2"}
 
     result = check._nest_payload(keys, payload)
-    expected = {
-        "foo": {
-            "bar": payload
-        }
-    }
+    expected = {"foo": {"bar": payload}}
 
     assert result == expected

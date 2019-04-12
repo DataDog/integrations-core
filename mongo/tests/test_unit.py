@@ -22,15 +22,14 @@ def test_build_metric_list(check):
     Print a warning when an option has no match.
     """
     # Initialize check
-    setattr(check, "log", mock.Mock())
+    check.log = mock.Mock()
 
     build_metric_list = check._build_metric_list_to_collect
 
     # Default metric list
     DEFAULT_METRICS = {
-        m_name: m_type for d in [
-            check.BASE_METRICS, check.DURABILITY_METRICS,
-            check.LOCKS_METRICS, check.WIREDTIGER_METRICS, ]
+        m_name: m_type
+        for d in [check.BASE_METRICS, check.DURABILITY_METRICS, check.LOCKS_METRICS, check.WIREDTIGER_METRICS]
         for m_name, m_type in iteritems(d)
     }
 
@@ -61,12 +60,7 @@ def test_metric_resolution(check):
     Resolve metric names and types.
     """
 
-    metrics_to_collect = {
-        'foobar': (GAUGE, 'barfoo'),
-        'foo.bar': (RATE, 'bar.foo'),
-        'fOoBaR': GAUGE,
-        'fOo.baR': RATE,
-    }
+    metrics_to_collect = {'foobar': (GAUGE, 'barfoo'), 'foo.bar': (RATE, 'bar.foo'), 'fOoBaR': GAUGE, 'fOo.baR': RATE}
 
     resolve_metric = check._resolve_metric
 
@@ -89,13 +83,7 @@ def test_metric_normalization(check):
     Metric names suffixed with `.R`, `.r`, `.W`, `.w` are renamed.
     """
     # Initialize check and tests
-    metrics_to_collect = {
-        'foo.bar': GAUGE,
-        'foobar.r': GAUGE,
-        'foobar.R': RATE,
-        'foobar.w': RATE,
-        'foobar.W': GAUGE,
-    }
+    metrics_to_collect = {'foo.bar': GAUGE, 'foobar.r': GAUGE, 'foobar.R': RATE, 'foobar.w': RATE, 'foobar.W': GAUGE}
     resolve_metric = check._resolve_metric
 
     # Assert
