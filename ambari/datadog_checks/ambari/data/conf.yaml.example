@@ -1,3 +1,6 @@
+init_config:
+
+instances:
 
 ## @param url - string - required
 ## The URL of the Ambari Server
