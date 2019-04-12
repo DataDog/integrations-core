@@ -76,7 +76,7 @@ def test_check(aggregator, instance, seed_data):
 
     tags = [
         'queue_manager:{}'.format(common.QUEUE_MANAGER),
-        'host:{}'.format(common.HOST),
+        'mq_host:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
     ]
 
