@@ -10,6 +10,7 @@ import re
 import subprocess
 
 import psutil
+import sys
 
 from six import iteritems
 
@@ -188,7 +189,7 @@ class ProcessCheck(AgentCheck):
             result = {}
 
         # Ban certain method that we know fail
-        if method == 'memory_info' and Platform.is_win32() or Platform.is_solaris():
+        if method == 'memory_info' and ProcessCheck._is_win32() or Platform.is_solaris():
             return result
         elif method == 'num_fds' and not Platform.is_unix():
             return result
@@ -503,3 +504,9 @@ class ProcessCheck(AgentCheck):
                 pass
 
         return filtered_pids
+
+    @staticmethod
+    def _is_win32():
+        is_64bits = sys.maxsize > 2 ** 32
+        # Python returns 'win32' for all versions of Windows for compatibility reasons
+        return Platform.is_win32() and not is_64bits
