@@ -1,8 +1,8 @@
-# Always prefer setuptools over distutils
 # To use a consistent encoding
 from codecs import open
 from os import path
 
+# Always prefer setuptools over distutils
 from setuptools import setup
 
 HERE = path.abspath(path.dirname(__file__))
