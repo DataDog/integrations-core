@@ -13,7 +13,5 @@ pytestmark = pytest.mark.integration
 def test_check(aggregator, check, instance):
     check.check(instance)
 
-    print(aggregator._metrics)
-
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)

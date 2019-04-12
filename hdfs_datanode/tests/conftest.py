@@ -21,7 +21,7 @@ def dd_environment():
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
         log_patterns='Got finalize command for block pool',
     ):
-        yield INSTANCE_INTEGRATION
+        yield
 
 
 @pytest.fixture

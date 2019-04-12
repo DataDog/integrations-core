@@ -2,18 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.dev import get_here
+from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
+HOST = get_docker_hostname()
 
-DATANODE_URI = 'http://localhost:50070/'
+DATANODE_URI = 'http://{}:50070/'.format(HOST)
 
 CUSTOM_TAGS = ['optional:tag1']
 
 TEST_USERNAME = 'AzureDiamond'
 TEST_PASSWORD = 'hunter2'
 
-INSTANCE_INTEGRATION = {"hdfs_datanode_jmx_uri": "http://localhost:50075"}
+INSTANCE_INTEGRATION = {"hdfs_datanode_jmx_uri": "http://{}:50075".format(HOST)}
 
 EXPECTED_METRICS = [
     'hdfs.datanode.dfs_remaining',
