@@ -14,11 +14,6 @@ def dd_environment():
 
 
 @pytest.fixture
-def instance_local_no_cert():
-    return {}
-
-
-@pytest.fixture
 def instance_local_no_server_hostname():
     return {'local_cert_path': 'cert.pem'}
 

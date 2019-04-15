@@ -7,13 +7,6 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.tls import TLSCheck
 
 
-def test_no_cert(instance_local_no_cert):
-    c = TLSCheck('tls', {}, [instance_local_no_cert])
-
-    with pytest.raises(ConfigurationError):
-        c.check(None)
-
-
 def test_no_server_hostname(instance_local_no_server_hostname):
     c = TLSCheck('tls', {}, [instance_local_no_server_hostname])
 

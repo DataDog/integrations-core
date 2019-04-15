@@ -94,7 +94,9 @@ class TLSCheck(AgentCheck):
         )
 
         # https://docs.python.org/3/library/ssl.html#ssl.SSLSocket.version
-        self._allowed_versions = get_protocol_versions(self.instance.get('allowed_versions', []))
+        self._allowed_versions = get_protocol_versions(
+            self.instance.get('allowed_versions', self.init_config.get('allowed_versions', []))
+        )
 
         # Global tags
         self._tags = self.instance.get('tags', [])
@@ -168,9 +170,7 @@ class TLSCheck(AgentCheck):
         self.check_age(cert)
 
     def check_local(self, instance):
-        if not self._local_cert_path:
-            raise ConfigurationError('You must specify `local_cert_path` in your configuration file.')
-        elif self._validate_hostname and not self._server_hostname:
+        if self._validate_hostname and not self._server_hostname:
             raise ConfigurationError(
                 'You must specify `server_hostname` in your configuration file, or disable `validate_hostname`.'
             )
