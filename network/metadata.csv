@@ -1,8 +1,43 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 system.net.bytes_rcvd,gauge,,byte,second,The number of bytes received on a device per second.,0,system,bytes rcvd
 system.net.bytes_sent,gauge,,byte,second,The number of bytes sent from a device per second.,0,system,bytes sent
+system.net.conntrack.acct,gauge,,unit,,Boolean to enable connection tracking flow accounting. 64-bit byte and packet counters per flow are added.,0,system,acct
+system.net.conntrack.buckets,gauge,,unit,,Size of the hash table.,0,system,buckets
+system.net.conntrack.checksum,gauge,,unit,,Boolean to verify checksum of incoming packets.,0,system,checksum
 system.net.conntrack.count,gauge,,connection,connection,The number of connections present in the conntrack table.,0,system,connections
+system.net.conntrack.drop,count,,unit,,The number of drop in the conntrack table.,0,system,drop
+system.net.conntrack.early_drop,count,,unit,,The number of early drop in the conntrack table.,0,system,early drop
+system.net.conntrack.error,count,,unit,,The number of error in the conntrack table.,0,system,err
+system.net.conntrack.events,count,,unit,,Boolean to enable the connection tracking code will provide userspace with connection tracking events via ctnetlink.,0,system,evts
+system.net.conntrack.events_retry_timeout,gauge,,unit,,TODO,0,system,evts retry tiemout
+system.net.conntrack.expect_max,gauge,,unit,,Maximum size of expectation table.,0,system,expect max
+system.net.conntrack.found,count,,unit,,The number of currently allocated flow entries.,0,system,connt found
+system.net.conntrack.generic_timeout,gauge,,unit,,Default for generic timeout. This refers to layer 4 unknown/unsupported protocols.,0,system,generic timeout
+system.net.conntrack.helper,gauge,,unit,,Boolean to enable automatic conntrack helper assignment.,0,system,helper
+system.net.conntrack.icmp_timeout,gauge,,second,,Default for ICMP timeout.,0,system,tcmp timeout
+system.net.conntrack.ignore,count,,unit,,The number of ignored in the conntrack table.,0,system,ignore
+system.net.conntrack.invalid,count,,unit,,The number of invalid in the conntrack table.,0,system,invalid
+system.net.conntrack.insert,count,,unit,,The number of insertion in the conntrack table.,0,system,insert
+system.net.conntrack.insert_failed,count,,unit,,The number of failed insertion in the conntrack table.,0,system,insert failed
+system.net.conntrack.log_invalid,gauge,,unit,,Log invalid packets of a type specified by value.,0,system,log invalid
 system.net.conntrack.max,gauge,,connection,entry,Conntrack table max capacity.,0,system,table entries
+system.net.conntrack.search_restart,count,,unit,,TODO,0,system,search re
+system.net.conntrack.tcp_be_liberal,gauge,,unit,,Boolean to mark only out of window RST segments as INVALID.,0,system,liberal
+system.net.conntrack.tcp_loose,gauge,,unit,,Boolean to enable picking up already established connections.,0,system,tcp loose
+system.net.conntrack.tcp_max_retrans,gauge,,packet,,Maximum number of packets that can be retransmitted without received an (acceptable) ACK from the destination.,0,system,max retrans
+system.net.conntrack.tcp_timeout_close,gauge,,second,,TODO,0,system,timeout close
+system.net.conntrack.tcp_timeout_close_wait,gauge,,second,,TODO,0,system,timeout close wait
+system.net.conntrack.tcp_timeout_established,gauge,,second,,TODO,0,system,timeout estab
+system.net.conntrack.tcp_timeout_fin_wait,gauge,,second,,TODO,0,system,timeout fin
+system.net.conntrack.tcp_timeout_last_ack,gauge,,second,,TODO,0,system,timeout last ack
+system.net.conntrack.tcp_timeout_max_retrans,gauge,,second,,TODO,0,system,timeout max retrans
+system.net.conntrack.tcp_timeout_syn_recv,gauge,,second,,TODO,0,system,timeout syn recv
+system.net.conntrack.tcp_timeout_syn_sent,gauge,,second,,TODO,0,system,timeout syn sent
+system.net.conntrack.tcp_timeout_time_wait,gauge,,second,,TODO,0,system,timeout time wait
+system.net.conntrack.tcp_timeout_unacknowledged,gauge,,second,,TODO,0,system,timeout unack
+system.net.conntrack.tcp_timeout,gauge,,second,,TODO,0,system,timeout
+system.net.conntrack.tcp_timeout_stream,gauge,,second,,TODO,0,system,timeout stream
+system.net.conntrack.timestamp,gauge,,unit,,Boolean to enable connection tracking flow timestamping.,0,system,timestamp
 system.net.packets_in.count,gauge,,packet,second,The number of packets of data received by the interface.,0,system,packets in
 system.net.packets_in.error,gauge,,error,second,The number of packet receive errors detected by the device driver.,-1,system,pkts in err
 system.net.packets_out.count,gauge,,packet,second,The number of packets of data transmitted by the interface.,0,system,packets out

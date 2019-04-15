@@ -6,6 +6,7 @@
 Collects network metrics.
 """
 
+import os
 import re
 import socket
 from collections import defaultdict
@@ -279,6 +280,8 @@ class Network(AgentCheck):
         For that procfs_path can be set to something like "/host/proc"
         When a custom procfs_path is set, the collect_connection_state option is ignored
         """
+        import pyroute2
+
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
         custom_tags = instance.get('tags', [])
 
@@ -413,29 +416,46 @@ class Network(AgentCheck):
                         nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
                     )
 
-        proc_conntrack_path = "{}/net/nf_conntrack".format(proc_location)
-        try:
-            with open(proc_conntrack_path, 'r') as conntrack_file:
-                # Starting at 0 as the last line has a line return
-                conntrack_count = 0
-                while 1:
-                    # Reading the file by chucks (64k being a randomly chosen buffer size)
-                    conntrack_buffer = conntrack_file.read(65536)
-                    if not conntrack_buffer:
-                        break
-                    conntrack_count += conntrack_buffer.count('\n')
-                self.gauge('system.net.conntrack.count', conntrack_count, tags=custom_tags)
-        except IOError:
-            self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", proc_conntrack_path)
+        conntrack = pyroute2.conntrack.Conntrack()
+        for cpu in conntrack.stat():
+            """
+            [
+                {
+                    'cpu': 0, 'found': 27644, 'invalid': 19060, 'ignore': 485633411, 'insert': 0,
+                    'insert_failed': 1, 'drop': 1, 'early_drop': 0, 'error': 0, 'search_restart': 39936711
+                },
+                {
+                    'cpu': 1, 'found': 21960, 'invalid': 17288, 'ignore': 475938848, 'insert': 0,
+                    'insert_failed': 1, 'drop': 1, 'early_drop': 0, 'error': 0, 'search_restart': 36983181
+                },
+            ]
+            """
+            cpu_tag = ['cpu:{}'.format(cpu['cpu'])]
+            for metric, value in iteritems(cpu):
+                if metric != 'cpu':
+                    self.monotonic_count('system.net.conntrack.{}'.format(metric), value, tags=custom_tags + cpu_tag)
 
-        proc_conntrack_max_path = "{}/sys/net/nf_conntrack_max".format(proc_location)
-        try:
-            with open(proc_conntrack_max_path, 'r') as conntrack_max_file:
-                # Starting at 0 as the last line has a line return
-                conntrack_max = conntrack_max_file.read().rstrip()
-                self.gauge('system.net.conntrack.max', conntrack_max, tags=custom_tags)
-        except IOError:
-            self.log.debug("Unable to read %s. Skipping nf_conntrack_max metrics pull.", proc_conntrack_max_path)
+        self.gauge('system.net.conntrack.count', conntrack.count(), tags=custom_tags)
+
+        # Get the rest of the metric by reading the files
+        conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
+        # Count has already been done by conntrack.count()
+        blacklisted_files = ['nf_conntrack_count']
+
+        for metric_file in os.listdir(conntrack_files_location):
+            metric_file_location = os.path.join(conntrack_files_location, metric_file)
+            if (
+                os.path.isfile(metric_file_location)
+                and 'nf_conntrack_' in metric_file
+                and metric_file not in blacklisted_files
+            ):
+                try:
+                    with open(metric_file_location, 'r') as conntrack_file:
+                        value = conntrack_file.read().rstrip()
+                        metric_name = metric_file[len('nf_conntrack_') :]
+                        self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
+                except IOError:
+                    self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", metric_file_location)
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
