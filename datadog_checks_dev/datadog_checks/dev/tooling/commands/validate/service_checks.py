@@ -10,7 +10,7 @@ from six import string_types
 
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 from ...constants import get_root
-from ...utils import parse_version_parts
+from ...utils import load_manifest, parse_version_parts
 from ....compat import JSONDecodeError
 from ....utils import file_exists, read_file
 
@@ -65,15 +65,12 @@ def service_checks():
                     display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
 
                 # integration name matches display_name from manifest.json
-                manifest_file = os.path.join(root, check_name, 'manifest.json')
-                try:
-                    decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
-                except JSONDecodeError as e:
+                manifest_json = load_manifest(check_name)
+                if not manifest_json:
                     file_failed = True
                     display_queue.append((echo_failure('{}/manifest.json doesn\'t exist'.format(check_name))))
                     echo_info('{}/manifest.json... '.format(check_name), nl=False)
-
-                if decoded.get('display_name').lower() != service_check.get('integration').lower():
+                elif manifest_json.get('display_name').lower() != service_check.get('integration').lower():
                     file_failed = True
                     display_queue.append(
                         (
