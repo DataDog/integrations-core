@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "6.11.0",
-        "integration": "ibm_db2",
+        "integration": "IBM Db2",
         "groups": ["host", "db"],
         "check": "ibm_db2.can_connect",
         "statuses": ["ok", "critical"],
@@ -10,7 +10,7 @@
     },
     {
         "agent_version": "6.11.0",
-        "integration": "ibm_db2",
+        "integration": "IBM Db2",
         "groups": ["host", "db"],
         "check": "ibm_db2.status",
         "statuses": ["ok", "warning", "critical", "unknown"],
