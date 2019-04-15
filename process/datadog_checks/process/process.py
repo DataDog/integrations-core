@@ -178,9 +178,7 @@ class ProcessCheck(AgentCheck):
             result = {}
 
         # Ban certain method that we know fail
-        if method == 'memory_info' and Platform.is_win32() or Platform.is_solaris():
-            return result
-        elif method == 'num_fds' and not Platform.is_unix():
+        if method == 'num_fds' and not Platform.is_unix():
             return result
         elif method == 'num_handles' and not Platform.is_win32():
             return result
