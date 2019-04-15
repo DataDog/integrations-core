@@ -64,6 +64,24 @@ def service_checks():
                     file_failed = True
                     display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
 
+                # integration name matches display_name from manifest.json
+                manifest_file = os.path.join(root, check_name, 'manifest.json')
+                try:
+                    decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
+                except JSONDecodeError as e:
+                    file_failed = True
+                    display_queue.append((echo_failure('{}/manifest.json doesn\'t exist'.format(check_name))))
+                    echo_info('{}/manifest.json... '.format(check_name), nl=False)
+
+                if decoded.get('display_name').lower() != service_check.get('integration').lower():
+                    file_failed = True
+                    display_queue.append(
+                        (
+                            echo_failure,
+                            'Integration field must match the display_name from {}/manifest.json'.format(check_name),
+                        )
+                    )
+
                 # agent_version
                 agent_version = service_check.get('agent_version')
                 version_parts = parse_version_parts(agent_version)
