@@ -1,54 +1,54 @@
 init_config:
-  
+
   ## @param default_timeout - integer - optional - default: 5
   ## Time to wait on a Marathon API request before timeout.
   #
-  #  - default_timeout: 5
+  # default_timeout: 5
 
 instances:
 
-  ## @param url - string - required
-  ## The API endpoint of your Marathon master.
-  #
+    ## @param url - string - required
+    ## The API endpoint of your Marathon master.
+    #
   - url: "https://<SERVER>:<PORT>"
 
-  ## @param apache_user - string - optional
-  ## User for marathon API basic auth or ACS token authentication.
-  #
-  #  user: <USERNAME>
+    ## @param apache_user - string - optional
+    ## User for marathon API basic auth or ACS token authentication.
+    #
+    # user: <USERNAME>
 
-  ## @param apache_password - string - optional
-  ## Password for marathon API basic auth or ACS token authentication.
-  #
-  #  password: <PASSWORD>
+    ## @param apache_password - string - optional
+    ## Password for marathon API basic auth or ACS token authentication.
+    #
+    # password: <PASSWORD>
 
-  ## @param disable_ssl_validation - boolean - optional - default: false
-  ## Instructs the check to skip the validation of the SSL certificate of the URL being tested.
-  ## Defaults to false, set to true if you want to disable SSL certificate validation.
-  #
-  #  disable_ssl_validation: false
+    ## @param disable_ssl_validation - boolean - optional - default: false
+    ## Instructs the check to skip the validation of the SSL certificate of the URL being tested.
+    ## Defaults to false, set to true if you want to disable SSL certificate validation.
+    #
+    # disable_ssl_validation: false
 
-  ## @param acs_url - string - optional
-  ## The base ACS endpoint url if an ACS token is required to access the marathon API.
-  #
-  #  acs_url: https://<SERVER>:<PORT>
+    ## @param acs_url - string - optional
+    ## The base ACS endpoint url if an ACS token is required to access the marathon API.
+    #
+    # acs_url: https://<SERVER>:<PORT>
 
-  ## @param group - string - optional
-  ## Enter a Specific Application group name to get only it's related metrics.
-  #
-  #  group: product
+    ## @param group - string - optional
+    ## Enter a Specific Application group name to get only it's related metrics.
+    #
+    # group: product
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-  ## @param label_tags - list of strings - optional
-  ## Dynamic tags for metrics. The tag value is taken from the label in marathon.
-  #
-  #  label_tags:
-  #    - <MARATHON_LABEL_NAME>
+    ## @param label_tags - list of strings - optional
+    ## Dynamic tags for metrics. The tag value is taken from the label in marathon.
+    #
+    # label_tags:
+    #   - <MARATHON_LABEL_NAME>

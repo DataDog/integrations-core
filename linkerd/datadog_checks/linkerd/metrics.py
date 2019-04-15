@@ -24,7 +24,6 @@ METRIC_MAP = {
     'jvm:mem:current:Par_Survivor_Space:used': 'jvm.mem.current.Par_Survivor_Space.used',
     'jvm:mem:current:CMS_Old_Gen:used': 'jvm.mem.current.CMS_Old_Gen.used',
     'jvm:gc:eden:pause_msec': 'jvm.gc.eden.pause_msec',
-
     'rt:client:requests': 'rt.client.requests_s',
     'rt:client:success': 'rt.client.success_s',
     'rt:client:connections': 'rt.client.connections',
@@ -40,7 +39,6 @@ METRIC_MAP = {
     'rt:client:pool_size': 'rt.client.pool_size',
     'rt:client:pool_waiters': 'rt.client.pool_waiters',
     'rt:client:request_latency_ms': 'rt.client.request_latency_ms',
-
     'rt:server:connections': 'rt.server.connections',
     'rt:server:connects': 'rt.server.connects_s',
     'rt:server:request_latency_ms': 'rt.server.request_latency_ms',
@@ -68,7 +66,6 @@ TYPE_OVERRIDES = {
     'jvm:mem:current:Par_Survivor_Space:used': 'gauge',
     'jvm:mem:current:CMS_Old_Gen:used': 'gauge',
     'jvm:gc:eden:pause_msec': 'summary',
-
     'rt:client:requests': 'rate',
     'rt:client:success': 'rate',
     'rt:client:connections': 'gauge',
@@ -84,7 +81,6 @@ TYPE_OVERRIDES = {
     'rt:client:pool_size': 'gauge',
     'rt:client:pool_waiters': 'gauge',
     'rt:client:request_latency_ms': 'summary',
-
     'rt:server:connections': 'gauge',
     'rt:server:connects': 'rate',
     'rt:server:request_latency_ms': 'summary',

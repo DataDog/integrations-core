@@ -101,7 +101,7 @@ def test_git_tag():
             git_tag('tagname', push=True)
             chdir.assert_called_once_with('/foo/')
             run.assert_any_call('git tag -a tagname -m "tagname"', capture=True)
-            run.assert_any_call('git push origin tagname')
+            run.assert_any_call('git push origin tagname', capture=True)
             chdir.reset_mock()
             run.reset_mock()
 

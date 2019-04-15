@@ -51,10 +51,18 @@ class DockerInterface(object):
 
     @property
     def agent_command(self):
-        return 'docker exec {} {}'.format(
-            self.container_name,
-            get_agent_exe(self.agent_version)
-        )
+        return get_agent_exe(self.agent_version)
+
+    def exec_command(self, command, **kwargs):
+        cmd = 'docker exec'
+
+        if kwargs.pop('interactive', False):
+            cmd += ' -it'
+
+        cmd += ' {}'.format(self.container_name)
+        cmd += ' {}'.format(command)
+
+        return run_command(cmd, **kwargs)
 
     def run_check(
         self,
@@ -91,7 +99,7 @@ class DockerInterface(object):
         if break_point is not None:
             command += ' --breakpoint {}'.format(break_point)
 
-        return run_command(command, capture=capture)
+        return self.exec_command(command, capture=capture, interactive=break_point is not None)
 
     def exists(self):
         return env_exists(self.check, self.env)

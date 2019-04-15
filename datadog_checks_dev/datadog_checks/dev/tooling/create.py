@@ -57,13 +57,13 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         author = 'U.N. Owen'
         email = email_packages = 'friend@datadog.community'
         install_info = (
-            'The {} check is not included in the [Datadog Agent][2] package, so you will\n'
-            'need to install it yourself.'.format(check_name_cap)
+            'The {} check is not included in the [Datadog Agent][2] package, so it must\n'
+            'be installed manually.'.format(check_name_cap)
         )
         license_header = ''
         support_type = 'contrib'
         test_dev_dep = 'datadog-checks-dev'
-        tox_base_dep = 'datadog-checks-base[deps]'
+        tox_base_dep = 'datadog-checks-base[deps]>=6.6.0'
 
     config = {
         'author': author,

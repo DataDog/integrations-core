@@ -51,7 +51,7 @@ Need help? Contact [Datadog support][8].
 [2]: http://wildfly.org/
 [3]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/datadog_checks/jboss_wildfly/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java/
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/metadata.csv
 [8]: https://docs.datadoghq.com/help/

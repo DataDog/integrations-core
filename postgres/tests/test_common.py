@@ -79,7 +79,8 @@ def test_common_metrics(aggregator, check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(HOST, PORT),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
     ]
     check_bgw_metrics(aggregator, expected_tags)
 
@@ -100,6 +101,7 @@ def test_common_metrics_without_size(aggregator, check, pg_instance):
 def test_can_connect_service_check(aggregator, check, pg_instance):
     expected_tags = pg_instance['tags'] + [
         'host:{}'.format(HOST),
+        'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'db:{}'.format(DB_NAME),
     ]
@@ -113,7 +115,8 @@ def test_schema_metrics(aggregator, check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(HOST, PORT),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
         'schema:public',
     ]
     aggregator.assert_metric('postgresql.table.count', value=1, count=1,
@@ -126,7 +129,10 @@ def test_schema_metrics(aggregator, check, pg_instance):
 def test_connections_metrics(aggregator, check, pg_instance):
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['pg_instance:{}-{}'.format(HOST, PORT)]
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+    ]
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
     expected_tags += ['db:datadog_test']
@@ -142,7 +148,8 @@ def test_locks_metrics(aggregator, check, pg_instance):
             check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(HOST, PORT),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
         'db:datadog_test',
         'lock_mode:AccessExclusiveLock', 'table:persons',
     ]
@@ -156,7 +163,8 @@ def test_activity_metrics(aggregator, check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(HOST, PORT),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
         'db:datadog_test',
     ]
     for name in ACTIVITY_METRICS:

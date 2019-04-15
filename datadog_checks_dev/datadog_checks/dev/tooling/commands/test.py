@@ -37,6 +37,7 @@ def display_envs(check_envs):
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='List available test environments')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
+@click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
 def test(
     checks,
     format_style,
@@ -52,6 +53,7 @@ def test(
     list_envs,
     changed,
     cov_keep,
+    pytest_args,
 ):
     """Run tests for Agent-based checks.
 
@@ -83,6 +85,7 @@ def test(
         coverage=coverage,
         marker=marker,
         test_filter=test_filter,
+        pytest_args=pytest_args,
     )
     coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 

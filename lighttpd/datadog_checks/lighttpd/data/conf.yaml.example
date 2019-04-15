@@ -1,33 +1,33 @@
 init_config:
 
 instances:
-  
-  ## @param lighttpd_status_url - string - required
-  ## Status url of your Lighttpd server.
-  #
+
+    ## @param lighttpd_status_url - string - required
+    ## Status url of your Lighttpd server.
+    #
   - lighttpd_status_url: http://localhost/server-status?auto
 
-  ## @param auth - string - optional
-  ## Type of authentication to use to collect data from the Lighttpd server url.
-  ## Available value are "basic", "digest".
-  # 
-  #  auth: <AUTH_TYPE>
-  
-  ## @param user - string - optional
-  ## Username for the Lighttpd status endpoint authentication.
-  #
-  #  user: <USERNAME>
+    ## @param auth - string - optional
+    ## Type of authentication to use to collect data from the Lighttpd server url.
+    ## Available value are "basic", "digest".
+    #
+    # auth: <AUTH_TYPE>
 
-  ## @param password - string - optional
-  ## Password for the Lighttpd status endpoint authentication.
-  #
-  #  password: <PASSWORD>
+    ## @param user - string - optional
+    ## Username for the Lighttpd status endpoint authentication.
+    #
+    # user: <USERNAME>
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param password - string - optional
+    ## Password for the Lighttpd status endpoint authentication.
+    #
+    # password: <PASSWORD>
+
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

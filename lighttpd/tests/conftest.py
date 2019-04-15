@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
-from six.moves.urllib.request import urlopen
-from six.moves.urllib import error
 from copy import deepcopy
 
-from datadog_checks.dev import docker_run, WaitFor
+import pytest
+from six.moves.urllib import error
+from six.moves.urllib.request import urlopen
+
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.lighttpd import Lighttpd
 
 from . import common

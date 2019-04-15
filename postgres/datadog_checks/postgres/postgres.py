@@ -843,9 +843,8 @@ GROUP BY datid, datname
     def _get_service_check_tags(cls, host, port, tags):
         service_check_tags = [
             "host:%s" % host,
-            "port:%s" % port,
         ]
-        service_check_tags.extend([t for t in tags if not t.startswith('pg_instance')])
+        service_check_tags.extend(tags)
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
 
@@ -1053,8 +1052,12 @@ GROUP BY datid, datname
         else:
             tags = list(set(tags))
 
-        # preset tags to host (if using socket) or host-port
-        tags.extend(["pg_instance:%s" % (host if host.startswith('/') else "{}-{}".format(host, port))])
+        # preset tags to host
+        tags.append('server:{}'.format(host))
+        if port:
+            tags.append('port:{}'.format(port))
+        else:
+            tags.append('port:socket')
 
         # preset tags to the database name
         tags.extend(["db:%s" % dbname])

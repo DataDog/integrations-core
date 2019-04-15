@@ -7,7 +7,7 @@ import os
 
 import requests
 import requests_kerberos
-from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems
 from six.moves.urllib.parse import urljoin
@@ -77,12 +77,8 @@ class HDFSNameNode(AgentCheck):
         tags.append("namenode_url:{}".format(jmx_address))
         tags = list(set(tags))
 
-        hdfs_system_state_beans = self._get_jmx_data(
-            instance, jmx_address, self.HDFS_NAME_SYSTEM_STATE_BEAN, tags
-        )
-        hdfs_system_beans = self._get_jmx_data(
-            instance, jmx_address, self.HDFS_NAME_SYSTEM_BEAN, tags
-        )
+        hdfs_system_state_beans = self._get_jmx_data(instance, jmx_address, self.HDFS_NAME_SYSTEM_STATE_BEAN, tags)
+        hdfs_system_beans = self._get_jmx_data(instance, jmx_address, self.HDFS_NAME_SYSTEM_BEAN, tags)
 
         # Process the JMX data and send out metrics
         if hdfs_system_state_beans:
@@ -104,9 +100,7 @@ class HDFSNameNode(AgentCheck):
         Get namenode beans data from JMX endpoint
         """
 
-        response = self._rest_request_to_json(
-            instance, jmx_address, self.JMX_PATH, {"qry": bean_name}, tags=tags
-        )
+        response = self._rest_request_to_json(instance, jmx_address, self.JMX_PATH, {"qry": bean_name}, tags=tags)
         beans = response.get("beans", [])
         return beans
 
@@ -172,7 +166,7 @@ class HDFSNameNode(AgentCheck):
                 delegate=is_affirmative(instance.get('kerberos_delegate', False)),
                 force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
                 hostname_override=instance.get('kerberos_hostname'),
-                principal=instance.get('kerberos_principal')
+                principal=instance.get('kerberos_principal'),
             )
 
         disable_ssl_validation = instance.get('disable_ssl_validation', False)

@@ -44,3 +44,4 @@ def test_check_kafka(aggregator, kafka_instance):
 
     # let's reassert for the __consumer_offsets - multiple partitions
     aggregator.assert_metric('kafka.broker_offset', at_least=1)
+    aggregator.assert_all_metrics_covered()

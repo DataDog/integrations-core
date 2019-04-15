@@ -2,14 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import pytest
+
 import mock
+import pytest
 
 from datadog_checks.nginx_ingress_controller import NginxIngressControllerCheck
 
-instance = {
-    'prometheus_url': 'http://localhost:10249/metrics',
-}
+instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 
 CHECK_NAME = 'nginx_ingress_controller'
 NAMESPACE = 'nginx_ingress'
@@ -23,10 +22,8 @@ def mock_data():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"}
-        )
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
     ):
         yield
 

@@ -5,18 +5,19 @@ init_config:
   ## but if you are using a source install, specify the location of nfsiostat
   ## with the nfsiostat_path parameter.
   #
-  #  nfsiostat_path: /usr/local/sbin/nfsiostat
+  # nfsiostat_path: /usr/local/sbin/nfsiostat
 
 ## Only one instance should be used per box
 
 instances:
-  
+
   -
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

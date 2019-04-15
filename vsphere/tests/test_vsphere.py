@@ -423,7 +423,7 @@ def test_check(vsphere, instance):
     Test the check() method
     """
     with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
-        with mock.patch('datadog_checks.vsphere.vsphere.set_external_tags') as set_external_tags:
+        with mock.patch.object(vsphere, 'set_external_tags') as set_external_tags:
             vsphere.check(instance)
             set_external_tags.assert_called_once()
             all_the_tags = set_external_tags.call_args[0][0]

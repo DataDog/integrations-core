@@ -23,7 +23,7 @@ Unix:
 Windows:
 
 ```
-"C:\Program Files\Datadog\Datadog Agent\embedded\Scrips\python.exe" -m pip install ibm_db==3.0.1
+"C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install ibm_db==3.0.1
 ```
 
 Additionally, on Linux there may be need for XML functionality. If you encounter errors during
@@ -91,7 +91,7 @@ Need help? Contact [Datadog support][8].
 [2]: https://docs.datadoghq.com/agent
 [3]: https://github.com/ibmdb/python-ibmdb/tree/master/IBM_DB/ibm_db
 [4]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/datadog_checks/ibm_db2/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
 [8]: https://docs.datadoghq.com/help

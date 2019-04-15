@@ -175,6 +175,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
         self.instance_tags = instance.get('tags', [])
+        self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
 
         # Test the kubelet health ASAP
         self._perform_kubelet_check(self.instance_tags)
@@ -193,7 +194,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                                                                      urljoin(endpoint, KUBELET_METRICS_PATH))
 
         # Kubelet credentials handling
-        self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
         self.kubelet_credentials.configure_scraper(
             self.cadvisor_scraper_config
         )
@@ -263,8 +263,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     pod_list = json.load(r.raw, object_hook=f.json_hook)
                     pod_list['expired_count'] = f.expired_count
                     if pod_list.get("items") is not None:
-                        # Wrap items in a generator to filter our None items
-                        pod_list['items'] = (p for p in pod_list['items'] if p is not None)
+                        # Filter out None items from the list
+                        pod_list['items'] = [p for p in pod_list['items'] if p is not None]
                 else:
                     pod_list = json.load(r.raw)
 

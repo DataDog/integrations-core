@@ -361,6 +361,9 @@ class SimpleApi(AbstractApi):
 
     def get_flavors_detail(self, query_params):
         url = '{}/flavors/detail'.format(self.nova_endpoint)
+        if query_params is None:
+            query_params = {}
+        query_params["is_public"] = "none"
         return self._get_paginated_list(url, 'flavors', query_params)
 
     def _get_paginated_list(self, url, obj, query_params):

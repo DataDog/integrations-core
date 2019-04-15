@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .system_swap import SystemSwap
 
-__all__ = [
-    '__version__',
-    'SystemSwap'
-]
+__all__ = ['__version__', 'SystemSwap']

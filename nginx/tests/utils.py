@@ -7,6 +7,7 @@ import os
 import mock
 
 from datadog_checks.dev.utils import read_file
+
 from .common import FIXTURES_PATH
 
 
