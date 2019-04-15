@@ -1,5 +1,14 @@
 init_config:
 
+  ## @param allowed_versions - list of strings - optional
+  ## The expected versions of TLS/SSL when connecting to `server`. Any protocol versions
+  ## negotiated by connections that are not in this list will make the service check
+  ## `tls.version` send CRITICAL.
+  #
+  #  allowed_versions:
+  #    - TLSv1.2
+  #    - TLSv1.3
+
 instances:
 
   ## @param server - string - required
@@ -43,6 +52,7 @@ instances:
   ## The expected versions of TLS/SSL when connecting to `server`. Any protocol versions
   ## negotiated by connections that are not in this list will make the service check
   ## `tls.version` send CRITICAL. By default, only TLSv1.2 and TLSv1.3 are allowed.
+  ## Overrides `allowed_versions` in init_config.
   ##
   ## The supported versions are:
   ##

@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "6.12.0",
-        "integration": "tls",
+        "integration": "TLS",
         "groups": ["name", "server_hostname", "server", "port"],
         "check": "tls.can_connect",
         "statuses": ["ok", "critical"],
@@ -10,7 +10,7 @@
     },
     {
         "agent_version": "6.12.0",
-        "integration": "tls",
+        "integration": "TLS",
         "groups": ["name", "server_hostname", "server", "port"],
         "check": "tls.version",
         "statuses": ["ok", "critical"],
@@ -19,7 +19,7 @@
     },
     {
         "agent_version": "6.12.0",
-        "integration": "tls",
+        "integration": "TLS",
         "groups": ["name", "server_hostname", "server", "port"],
         "check": "tls.cert_validation",
         "statuses": ["ok", "critical"],
@@ -28,11 +28,11 @@
     },
     {
         "agent_version": "6.12.0",
-        "integration": "tls",
+        "integration": "TLS",
         "groups": ["name", "server_hostname", "server", "port"],
         "check": "tls.cert_expiration",
         "statuses": ["ok", "warning", "critical"],
         "name": "Certificate expiration",
-        "description": "Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`, returns `WARNING` if the certificate expires in less than `days_warning`, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`/`seconds_critical`, returns `WARNING` if the certificate expires in less than `days_warning`/`seconds_warning`, otherwise returns `OK`."
     }
 ]
