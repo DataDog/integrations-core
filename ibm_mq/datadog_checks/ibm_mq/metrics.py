@@ -44,19 +44,11 @@ def queue_metrics():
 
 
 def pcf_metrics():
-    return {
-        'oldest_message_age': {
-            'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE,
-            'failure': -1,
-        },
-    }
+    return {'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1}}
 
 
 def queue_manager_metrics():
-    return {
-        'dist_lists': pymqi.CMQC.MQIA_DIST_LISTS,
-        'max_msg_list': pymqi.CMQC.MQIA_MAX_MSG_LENGTH,
-    }
+    return {'dist_lists': pymqi.CMQC.MQIA_DIST_LISTS, 'max_msg_list': pymqi.CMQC.MQIA_MAX_MSG_LENGTH}
 
 
 def channel_metrics():
@@ -81,6 +73,4 @@ def depth_percent(queue):
 
 
 def queue_metrics_functions():
-    return {
-        'depth_percent': depth_percent,
-    }
+    return {'depth_percent': depth_percent}
