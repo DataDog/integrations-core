@@ -413,20 +413,21 @@ class Network(AgentCheck):
                         nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
                     )
 
-        proc_conntrack_path = "{}/net/nf_conntrack".format(proc_location)
+        proc_conntrack_stat_path = "{}/net/stat/nf_conntrack".format(proc_location)
         try:
-            with open(proc_conntrack_path, 'r') as conntrack_file:
-                # Starting at 0 as the last line has a line return
-                conntrack_count = 0
-                while 1:
-                    # Reading the file by chucks (64k being a randomly chosen buffer size)
-                    conntrack_buffer = conntrack_file.read(65536)
-                    if not conntrack_buffer:
-                        break
-                    conntrack_count += conntrack_buffer.count('\n')
+            with open(proc_conntrack_stat_path, 'r') as conntrack_file:
+                conntrack_count, skip_line = 0, False
+                for line in conntrack_file:
+                    # Skip the first line (contains the headers for the columns).
+                    if not skip_line:
+                        skip_line = True
+                        continue
+                    # The first field is `entries'; we just set the count.
+                    # Also, convert to decimal because the values are in hex.
+                    conntrack_count = int(line.split()[0].strip(), 16)
                 self.gauge('system.net.conntrack.count', conntrack_count, tags=custom_tags)
         except IOError:
-            self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", proc_conntrack_path)
+            self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", proc_conntrack_stat_path)
 
         proc_conntrack_max_path = "{}/sys/net/nf_conntrack_max".format(proc_location)
         try:
