@@ -2,7 +2,7 @@ init_config:
 
 instances:
 
-  ## @param host - string - required
+  ## @param server - string - required
   ## The hostname or IP address with which to connect.
   #
   -  server: <SERVER>
