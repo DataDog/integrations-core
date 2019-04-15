@@ -4,6 +4,10 @@
 
 This check monitors [TLS][1] protocol versions, certificate expiration & validity, etc.
 
+Note:
+
+    Currently, only TCP is supported.
+
 ## Setup
 
 ### Installation
