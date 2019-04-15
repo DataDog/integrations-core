@@ -10,7 +10,6 @@ import time
 from collections import defaultdict
 
 import psutil
-
 from six import iteritems
 
 from datadog_checks.checks import AgentCheck
