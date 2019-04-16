@@ -2,7 +2,7 @@
 
 ## 2.0.0 / 2019-04-16
 
-* [Changed] Change host for mq_host. See [#3608](https://github.com/DataDog/integrations-core/pull/3608).
+* [Changed] Breaking change: Change host tag for mq_host. Dashboards and monitors may be affected. See [#3608](https://github.com/DataDog/integrations-core/pull/3608).
 * [Added] Adhere to code style. See [#3519](https://github.com/DataDog/integrations-core/pull/3519).
 * [Fixed] fix queue_manager variable naming of IBM MQ. See [#3592](https://github.com/DataDog/integrations-core/pull/3592).
 
