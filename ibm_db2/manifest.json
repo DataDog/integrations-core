@@ -5,7 +5,7 @@
   "name": "ibm_db2",
   "metric_prefix": "ibm_db2.",
   "metric_to_check": "ibm_db2.connection.active",
-  "creates_events": false,
+  "creates_events": true,
   "short_description": "Monitor table space, buffer pool, and other metrics from your IBM Db2 database.",
   "manifest_version": "1.0.0",
   "guid": "67378f79-e72b-4f49-8ec2-57053706523d",
