@@ -1,5 +1,11 @@
 # CHANGELOG - IBM MQ
 
+## 2.0.0 / 2019-04-16
+
+* [Changed] Change host for mq_host. See [#3608](https://github.com/DataDog/integrations-core/pull/3608).
+* [Added] Adhere to code style. See [#3519](https://github.com/DataDog/integrations-core/pull/3519).
+* [Fixed] fix queue_manager variable naming of IBM MQ. See [#3592](https://github.com/DataDog/integrations-core/pull/3592).
+
 ## 1.2.0 / 2019-03-29
 
 * [Added] Add ability to add additional tags to queues matching a regex. See [#3399](https://github.com/DataDog/integrations-core/pull/3399).
