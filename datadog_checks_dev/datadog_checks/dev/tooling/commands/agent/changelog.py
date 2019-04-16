@@ -23,7 +23,7 @@ from ....utils import write_file, read_file
 )
 @click.option('--since', help="Initial Agent version", default='6.3.0')
 @click.option('--to', help="Final Agent version")
-@click.option('--write', '-w', help="Write to the changelog file, if omitted contents will be printed to stdout")
+@click.option('--write', '-w', is_flag=True, help="Write to the changelog file, if omitted contents will be printed to stdout")
 @click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
 def changelog(since, to, write, force):
     """
@@ -70,6 +70,9 @@ def changelog(since, to, write, force):
                 # determine whether major version changed
                 breaking = old_ver.split('.')[0] < ver.split('.')[0]
                 changes_per_agent[current_tag][name] = (ver, breaking)
+            elif not old_ver:
+                # New integration
+                changes_per_agent[current_tag][name] = (ver, False)
 
     # store the changelog in memory
     changelog_contents = StringIO()
