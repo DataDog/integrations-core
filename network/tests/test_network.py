@@ -35,6 +35,18 @@ CX_STATE_GAUGES_VALUES = {
     'system.net.tcp6.time_wait': 1,
 }
 
+CONNTRACK_STATS = {
+    'system.net.conntrack.found': (27644, 21960),
+    'system.net.conntrack.invalid': (19060, 17288),
+    'system.net.conntrack.ignore': (485633411, 475938848),
+    'system.net.conntrack.insert': (0, 0),
+    'system.net.conntrack.insert_failed': (1, 1),
+    'system.net.conntrack.drop': (1, 1),
+    'system.net.conntrack.early_drop': (0, 0),
+    'system.net.conntrack.error': (0, 0),
+    'system.net.conntrack.search_restart': (39936711, 36983181),
+}
+
 if PY3:
     ESCAPE_ENCODING = 'unicode-escape'
 
@@ -89,6 +101,22 @@ def test_cx_state(aggregator, check):
         check.check(instance)
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
+
+
+def test_add_conntrack_stats_metrics(aggregator, check):
+    mocked_conntrack_stats = (
+        "cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 "
+        "drop=1 early_drop=0 error=0 search_restart=39936711\n"
+        "cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 "
+        "drop=1 early_drop=0 error=0 search_restart=36983181"
+    )
+    with mock.patch('datadog_checks.network.network.get_subprocess_output') as subprocess:
+        subprocess.return_value = mocked_conntrack_stats, None, None
+        check._add_conntrack_stats_metrics(None, ['foo:bar'])
+
+        for metric, value in iteritems(CONNTRACK_STATS):
+            aggregator.assert_metric(metric, value=value[0], tags=['foo:bar', 'cpu:0'])
+            aggregator.assert_metric(metric, value=value[1], tags=['foo:bar', 'cpu:1'])
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)

@@ -23,3 +23,8 @@ def check():
 @pytest.fixture
 def instance():
     return deepcopy(common.INSTANCE)
+
+
+@pytest.fixture
+def instance_blacklist():
+    return deepcopy(common.INSTANCE_BLACKLIST)

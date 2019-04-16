@@ -8,6 +8,8 @@ SERVICE_CHECK_NAME = "network"
 
 INSTANCE = {"collect_connection_state": True}
 
+INSTANCE_BLACKLIST = {"collect_connection_state": True, "blacklist_conntrack_metrics": ["count"]}
+
 EXPECTED_METRICS = [
     'system.net.bytes_rcvd',
     'system.net.bytes_sent',
@@ -21,22 +23,12 @@ CONNTRACK_METRICS = [
     'system.net.conntrack.acct',
     'system.net.conntrack.buckets',
     'system.net.conntrack.checksum',
-    'system.net.conntrack.count',
-    'system.net.conntrack.drop',
-    'system.net.conntrack.early_drop',
-    'system.net.conntrack.error',
     'system.net.conntrack.events',
     'system.net.conntrack.expect_max',
-    'system.net.conntrack.found',
     'system.net.conntrack.generic_timeout',
     'system.net.conntrack.helper',
-    'system.net.conntrack.ignore',
-    'system.net.conntrack.invalid',
-    'system.net.conntrack.insert',
-    'system.net.conntrack.insert_failed',
     'system.net.conntrack.log_invalid',
     'system.net.conntrack.max',
-    'system.net.conntrack.search_restart',
     'system.net.conntrack.tcp_loose',
     'system.net.conntrack.tcp_max_retrans',
     'system.net.conntrack.tcp_timeout_close',

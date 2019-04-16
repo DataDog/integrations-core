@@ -15,6 +15,7 @@ import psutil
 from six import PY3, iteritems
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.common import pattern_filter
 from datadog_checks.utils.platform import Platform
 from datadog_checks.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
@@ -280,8 +281,6 @@ class Network(AgentCheck):
         For that procfs_path can be set to something like "/host/proc"
         When a custom procfs_path is set, the collect_connection_state option is ignored
         """
-        import pyroute2
-
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
         custom_tags = instance.get('tags', [])
 
@@ -416,46 +415,68 @@ class Network(AgentCheck):
                         nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
                     )
 
-        conntrack = pyroute2.conntrack.Conntrack()
-        for cpu in conntrack.stat():
-            """
-            [
-                {
-                    'cpu': 0, 'found': 27644, 'invalid': 19060, 'ignore': 485633411, 'insert': 0,
-                    'insert_failed': 1, 'drop': 1, 'early_drop': 0, 'error': 0, 'search_restart': 39936711
-                },
-                {
-                    'cpu': 1, 'found': 21960, 'invalid': 17288, 'ignore': 475938848, 'insert': 0,
-                    'insert_failed': 1, 'drop': 1, 'early_drop': 0, 'error': 0, 'search_restart': 36983181
-                },
-            ]
-            """
-            cpu_tag = ['cpu:{}'.format(cpu['cpu'])]
-            for metric, value in iteritems(cpu):
-                if metric != 'cpu':
-                    self.monotonic_count('system.net.conntrack.{}'.format(metric), value, tags=custom_tags + cpu_tag)
+        # Get the conntrack -S information
+        conntrack_path = instance.get('conntrack_path', None)
+        if conntrack_path is not None:
+            self._add_conntrack_stats_metrics(conntrack_path, custom_tags)
 
-        self.gauge('system.net.conntrack.count', conntrack.count(), tags=custom_tags)
-
-        # Get the rest of the metric by reading the files
+        # Get the rest of the metric by reading the files. Metrics available since kernel 3.6
         conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
-        # Count has already been done by conntrack.count()
-        blacklisted_files = ['nf_conntrack_count']
+        # By default, only max and count are reported. However if the blacklist is set,
+        # the whitelist is loosing its default value
+        blacklisted_files = instance.get('blacklist_conntrack_metrics', [])
+        whitelisted_files = []
+        if not blacklisted_files:
+            whitelisted_files = ['max', 'count']
+        whitelisted_files = instance.get('whitelist_conntrack_metrics', whitelisted_files)
 
+        available_files = []
+
+        # Get the metrics to read
         for metric_file in os.listdir(conntrack_files_location):
-            metric_file_location = os.path.join(conntrack_files_location, metric_file)
-            if (
-                os.path.isfile(metric_file_location)
-                and 'nf_conntrack_' in metric_file
-                and metric_file not in blacklisted_files
-            ):
-                try:
-                    with open(metric_file_location, 'r') as conntrack_file:
-                        value = conntrack_file.read().rstrip()
-                        metric_name = metric_file[len('nf_conntrack_') :]
+            if os.path.isfile(os.path.join(conntrack_files_location, metric_file)) and 'nf_conntrack_' in metric_file:
+                available_files.append(metric_file[len('nf_conntrack_') :])
+        filtered_available_files = pattern_filter(
+            available_files, whitelist=whitelisted_files, blacklist=blacklisted_files
+        )
+
+        for metric_name in filtered_available_files:
+            metric_file_location = os.path.join(conntrack_files_location, 'nf_conntrack_{}'.format(metric_name))
+            try:
+                with open(metric_file_location, 'r') as conntrack_file:
+                    # Checking it's an integer
+                    try:
+                        value = int(conntrack_file.read().rstrip())
                         self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
-                except IOError:
-                    self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", metric_file_location)
+                    except ValueError:
+                        self.log.debug("{} is not an integer".format(metric_name))
+            except IOError as e:
+                self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", metric_file_location)
+                raise e
+
+    def _add_conntrack_stats_metrics(self, conntrack_path, tags):
+        """
+        Parse the output of conntrack -S
+        Add the parsed metrics
+        """
+        output, _, _ = get_subprocess_output(["sudo", conntrack_path, "-S"], self.log)
+        # conntrack -S sample:
+        # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
+        #       drop=1 early_drop=0 error=0 search_restart=39936711
+        # cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 \
+        #       drop=1 early_drop=0 error=0 search_restart=36983181
+
+        lines = output.splitlines()
+
+        for line in lines:
+            cols = line.split()
+            cpu_num = cols[0].split('=')[-1]
+            cpu_tag = ['cpu:{}'.format(cpu_num)]
+            cols = cols[1:]
+
+            for cell in cols:
+                metric, value = cell.split('=')
+                self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
