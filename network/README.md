@@ -34,7 +34,7 @@ The network check is included in the [Datadog Agent][2] package, so you don't ne
 Some conntrack metrics require running conntrack with privileged access to be retrieved.
 Note: the appropriate sudoers rules have to be configured for this to work
 ```
-dd-agent ALL=NOPASSWD: /usr/sbin/conntrack
+dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
 
 ### Validation
