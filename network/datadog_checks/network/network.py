@@ -416,7 +416,7 @@ class Network(AgentCheck):
                     )
 
         # Get the conntrack -S information
-        conntrack_path = instance.get('conntrack_path', None)
+        conntrack_path = instance.get('conntrack_path')
         if conntrack_path is not None:
             self._add_conntrack_stats_metrics(conntrack_path, custom_tags)
 
@@ -424,18 +424,24 @@ class Network(AgentCheck):
         conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
         # By default, only max and count are reported. However if the blacklist is set,
         # the whitelist is loosing its default value
-        blacklisted_files = instance.get('blacklist_conntrack_metrics', [])
-        whitelisted_files = []
-        if not blacklisted_files:
+        blacklisted_files = instance.get('blacklist_conntrack_metrics')
+        whitelisted_files = instance.get('whitelist_conntrack_metrics')
+        if blacklisted_files is None and whitelisted_files is None:
             whitelisted_files = ['max', 'count']
-        whitelisted_files = instance.get('whitelist_conntrack_metrics', whitelisted_files)
 
         available_files = []
 
         # Get the metrics to read
-        for metric_file in os.listdir(conntrack_files_location):
-            if os.path.isfile(os.path.join(conntrack_files_location, metric_file)) and 'nf_conntrack_' in metric_file:
-                available_files.append(metric_file[len('nf_conntrack_') :])
+        try:
+            for metric_file in os.listdir(conntrack_files_location):
+                if (
+                    os.path.isfile(os.path.join(conntrack_files_location, metric_file))
+                    and 'nf_conntrack_' in metric_file
+                ):
+                    available_files.append(metric_file[len('nf_conntrack_') :])
+        except Exception as e:
+            self.log.debug("Unable to list the files in {}. {}".format(conntrack_files_location, e))
+
         filtered_available_files = pattern_filter(
             available_files, whitelist=whitelisted_files, blacklist=blacklisted_files
         )
@@ -451,32 +457,34 @@ class Network(AgentCheck):
                     except ValueError:
                         self.log.debug("{} is not an integer".format(metric_name))
             except IOError as e:
-                self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", metric_file_location)
-                raise e
+                self.log.debug("Unable to read {}, skipping {}.".format(metric_file_location, e))
 
     def _add_conntrack_stats_metrics(self, conntrack_path, tags):
         """
         Parse the output of conntrack -S
         Add the parsed metrics
         """
-        output, _, _ = get_subprocess_output(["sudo", conntrack_path, "-S"], self.log)
-        # conntrack -S sample:
-        # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
-        #       drop=1 early_drop=0 error=0 search_restart=39936711
-        # cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 \
-        #       drop=1 early_drop=0 error=0 search_restart=36983181
+        try:
+            output, _, _ = get_subprocess_output(["sudo", conntrack_path, "-S"], self.log)
+            # conntrack -S sample:
+            # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
+            #       drop=1 early_drop=0 error=0 search_restart=39936711
+            # cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 \
+            #       drop=1 early_drop=0 error=0 search_restart=36983181
 
-        lines = output.splitlines()
+            lines = output.splitlines()
 
-        for line in lines:
-            cols = line.split()
-            cpu_num = cols[0].split('=')[-1]
-            cpu_tag = ['cpu:{}'.format(cpu_num)]
-            cols = cols[1:]
+            for line in lines:
+                cols = line.split()
+                cpu_num = cols[0].split('=')[-1]
+                cpu_tag = ['cpu:{}'.format(cpu_num)]
+                cols = cols[1:]
 
-            for cell in cols:
-                metric, value = cell.split('=')
-                self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
+                for cell in cols:
+                    metric, value = cell.split('=')
+                    self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use {} to get conntrack stats".format(conntrack_path))
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
