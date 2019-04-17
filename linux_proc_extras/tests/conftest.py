@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.linux_proc_extras import MoreUnixCheck
+
 from . import common
 
 

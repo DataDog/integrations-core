@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .kube_scheduler import KubeSchedulerCheck
 
-__all__ = [
-    '__version__',
-    'KubeSchedulerCheck'
-]
+__all__ = ['__version__', 'KubeSchedulerCheck']

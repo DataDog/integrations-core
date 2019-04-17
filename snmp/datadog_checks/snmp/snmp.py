@@ -1,45 +1,42 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from six import iteritems
-
 from collections import defaultdict
 
 import pysnmp.proto.rfc1902 as snmp_type
-from pysnmp.smi import builder, view
-from pysnmp.smi.exval import noSuchInstance, noSuchObject
-from pysnmp.error import PySnmpError
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
+from pysnmp.error import PySnmpError
+from pysnmp.smi import builder, view
+from pysnmp.smi.exval import noSuchInstance, noSuchObject
+from six import iteritems
 
 from datadog_checks.checks.network import NetworkCheck, Status
 from datadog_checks.config import _is_affirmative
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 (CounterBasedGauge64, ZeroBasedCounter64) = builder.MibBuilder().importSymbols(
-    "HCNUM-TC",
-    "CounterBasedGauge64",
-    "ZeroBasedCounter64")
+    "HCNUM-TC", "CounterBasedGauge64", "ZeroBasedCounter64"
+)
 
 # Metric type that we support
-SNMP_COUNTERS = frozenset([
-    snmp_type.Counter32.__name__,
-    snmp_type.Counter64.__name__,
-    ZeroBasedCounter64.__name__])
+SNMP_COUNTERS = frozenset([snmp_type.Counter32.__name__, snmp_type.Counter64.__name__, ZeroBasedCounter64.__name__])
 
-SNMP_GAUGES = frozenset([
-    snmp_type.Gauge32.__name__,
-    snmp_type.Unsigned32.__name__,
-    CounterBasedGauge64.__name__,
-    snmp_type.Integer.__name__,
-    snmp_type.Integer32.__name__])
+SNMP_GAUGES = frozenset(
+    [
+        snmp_type.Gauge32.__name__,
+        snmp_type.Unsigned32.__name__,
+        CounterBasedGauge64.__name__,
+        snmp_type.Integer.__name__,
+        snmp_type.Integer32.__name__,
+    ]
+)
 
 DEFAULT_OID_BATCH_SIZE = 10
 
 
 def reply_invalid(oid):
-    return noSuchInstance.isSameTypeWith(oid) or \
-        noSuchObject.isSameTypeWith(oid)
+    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
 
 
 class SnmpCheck(NetworkCheck):
@@ -63,8 +60,7 @@ class SnmpCheck(NetworkCheck):
         self.ignore_nonincreasing_oid = False
         if init_config is not None:
             self.mibs_path = init_config.get("mibs_folder")
-            self.ignore_nonincreasing_oid = _is_affirmative(
-                init_config.get("ignore_nonincreasing_oid", False))
+            self.ignore_nonincreasing_oid = _is_affirmative(init_config.get("ignore_nonincreasing_oid", False))
 
         NetworkCheck.__init__(self, name, init_config, agentConfig, instances)
 
@@ -189,8 +185,18 @@ class SnmpCheck(NetworkCheck):
             instance["service_check_error"] = message
             raise Exception(message)
 
-    def check_table(self, instance, snmp_engine, mib_view_controller, oids, lookup_names,
-                    timeout, retries, enforce_constraints=False, mibs_to_load=None):
+    def check_table(
+        self,
+        instance,
+        snmp_engine,
+        mib_view_controller,
+        oids,
+        lookup_names,
+        timeout,
+        retries,
+        enforce_constraints=False,
+        mibs_to_load=None,
+    ):
         '''
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -220,16 +226,18 @@ class SnmpCheck(NetworkCheck):
         while first_oid < len(oids):
             try:
                 # Start with snmpget command
-                oids_batch = oids[first_oid:first_oid + self.oid_batch_size]
+                oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
                 self.log.debug("Running SNMP command get on OIDS {}".format(oids_batch))
-                error_indication, error_status, error_index, var_binds = next(hlapi.getCmd(
-                    snmp_engine,
-                    auth_data,
-                    transport_target,
-                    hlapi.ContextData(context_engine_id, context_name),
-                    *(oids_batch),
-                    lookupMib=enforce_constraints
-                ))
+                error_indication, error_status, error_index, var_binds = next(
+                    hlapi.getCmd(
+                        snmp_engine,
+                        auth_data,
+                        transport_target,
+                        hlapi.ContextData(context_engine_id, context_name),
+                        *(oids_batch),
+                        lookupMib=enforce_constraints
+                    )
+                )
                 self.log.debug("Returned vars: {}".format(var_binds))
 
                 # Raise on error_indication
@@ -249,7 +257,7 @@ class SnmpCheck(NetworkCheck):
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
                     self.log.debug("Running SNMP command getNext on OIDS {}".format(missing_results))
-                    for error_indication, error_status, error_index, var_binds_table in hlapi.nextCmd(
+                    for error_indication, error_status, _, var_binds_table in hlapi.nextCmd(
                         snmp_engine,
                         auth_data,
                         transport_target,
@@ -320,7 +328,7 @@ class SnmpCheck(NetworkCheck):
         # Check the metrics completely defined
         for metric in metrics:
             if 'MIB' in metric:
-                if not("table" in metric or "symbol" in metric):
+                if not ("table" in metric or "symbol" in metric):
                     raise Exception("When specifying a MIB, you must specify either table or symbol")
                 if not enforce_constraints:
                     # We need this only if we don't enforce constraints to be able to lookup MIBs manually
@@ -348,9 +356,9 @@ class SnmpCheck(NetworkCheck):
                             if "column" in metric_tag:
                                 # In case it's a column, we need to query it as well
                                 try:
-                                    table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(
-                                        metric["MIB"], metric_tag.get("column")
-                                    )))
+                                    table_oids.append(
+                                        hlapi.ObjectType(hlapi.ObjectIdentity(metric["MIB"], metric_tag.get("column")))
+                                    )
                                 except Exception as e:
                                     self.warning(
                                         "Can't generate MIB object for variable : %s\nException: %s", metric, e
@@ -369,8 +377,16 @@ class SnmpCheck(NetworkCheck):
         and should be looked up and one for those specified by oids
         '''
 
-        (snmp_engine, mib_view_controller, ip_address,
-         tags, metrics, timeout, retries, enforce_constraints) = self._load_conf(instance)
+        (
+            snmp_engine,
+            mib_view_controller,
+            ip_address,
+            tags,
+            metrics,
+            timeout,
+            retries,
+            enforce_constraints,
+        ) = self._load_conf(instance)
 
         tags += ['snmp_device:{}'.format(ip_address)]
 
@@ -379,16 +395,29 @@ class SnmpCheck(NetworkCheck):
             if table_oids:
                 self.log.debug("Querying device %s for %s oids", ip_address, len(table_oids))
                 table_results = self.check_table(
-                    instance, snmp_engine, mib_view_controller, table_oids, True, timeout, retries,
-                    enforce_constraints=enforce_constraints, mibs_to_load=mibs_to_load
+                    instance,
+                    snmp_engine,
+                    mib_view_controller,
+                    table_oids,
+                    True,
+                    timeout,
+                    retries,
+                    enforce_constraints=enforce_constraints,
+                    mibs_to_load=mibs_to_load,
                 )
                 self.report_table_metrics(metrics, table_results, tags)
 
             if raw_oids:
                 self.log.debug("Querying device %s for %s oids", ip_address, len(raw_oids))
                 raw_results = self.check_table(
-                    instance, snmp_engine, mib_view_controller, raw_oids, False, timeout, retries,
-                    enforce_constraints=False
+                    instance,
+                    snmp_engine,
+                    mib_view_controller,
+                    raw_oids,
+                    False,
+                    timeout,
+                    retries,
+                    enforce_constraints=False,
                 )
                 self.report_raw_metrics(metrics, raw_results, tags)
         except Exception as e:
@@ -410,11 +439,7 @@ class SnmpCheck(NetworkCheck):
         custom_tags = instance.get('tags', [])
         tags = sc_tags + custom_tags
 
-        self.service_check(sc_name,
-                           NetworkCheck.STATUS_TO_SERVICE_CHECK[status],
-                           tags=tags,
-                           message=msg
-                           )
+        self.service_check(sc_name, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
 
     def report_raw_metrics(self, metrics, results, tags):
         '''
@@ -437,8 +462,7 @@ class SnmpCheck(NetworkCheck):
                             value = results[oid]
                             break
                     else:
-                        self.log.warning("No matching results found for oid %s",
-                                         queried_oid)
+                        self.log.warning("No matching results found for oid %s", queried_oid)
                         continue
                 name = metric.get('name', 'unnamed_metric')
                 metric_tags = tags
@@ -470,9 +494,7 @@ class SnmpCheck(NetworkCheck):
 
                 for value_to_collect in metric.get("symbols", []):
                     for index, val in iteritems(results[value_to_collect]):
-                        metric_tags = tags + self.get_index_tags(index, results,
-                                                                 index_based_tags,
-                                                                 column_based_tags)
+                        metric_tags = tags + self.get_index_tags(index, results, index_based_tags, column_based_tags)
                         self.submit_metric(value_to_collect, val, forced_type, metric_tags)
 
             elif 'symbol' in metric:
@@ -520,8 +542,7 @@ class SnmpCheck(NetworkCheck):
                 self.log.warning("Column %s not present in the table, skipping this tag", col_tag[1])
                 continue
             if reply_invalid(tag_value):
-                self.log.warning("Can't deduct tag from column for tag %s",
-                                 tag_group)
+                self.log.warning("Can't deduct tag from column for tag %s", tag_group)
                 continue
             tag_value = tag_value.prettyPrint()
             tags.append("{}:{}".format(tag_group, tag_value))

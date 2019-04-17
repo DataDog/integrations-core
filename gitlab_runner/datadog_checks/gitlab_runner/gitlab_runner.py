@@ -5,12 +5,11 @@
 from copy import deepcopy
 
 import requests
-
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.errors import CheckException
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.config import _is_affirmative
+from datadog_checks.errors import CheckException
 from datadog_checks.utils.headers import headers
 
 
@@ -75,13 +74,15 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         # gitlab_runner uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
         gitlab_runner_instance['prometheus_url'] = instance.get('prometheus_endpoint', None)
 
-        gitlab_runner_instance.update({
-            'namespace': 'gitlab_runner',
-            'metrics': allowed_metrics,
-            # Defaults that were set when gitlab_runner was based on PrometheusCheck
-            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
-            'health_service_check': instance.get('health_service_check', False)
-        })
+        gitlab_runner_instance.update(
+            {
+                'namespace': 'gitlab_runner',
+                'metrics': allowed_metrics,
+                # Defaults that were set when gitlab_runner was based on PrometheusCheck
+                'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+                'health_service_check': instance.get('health_service_check', False),
+            }
+        )
 
         return gitlab_runner_instance
 

@@ -36,7 +36,7 @@ Q_METRICS = [
     'rabbitmq.queue.messages_unacknowledged',
     'rabbitmq.queue.messages_unacknowledged.rate',
     'rabbitmq.queue.messages.publish.count',
-    'rabbitmq.queue.messages.publish.rate'
+    'rabbitmq.queue.messages.publish.rate',
 ]
 
 OVERVIEW_METRICS_TOTALS = [

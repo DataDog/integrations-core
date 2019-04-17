@@ -2,19 +2,18 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from collections import namedtuple
-import socket
 import os
 import platform
+import socket
+from collections import namedtuple
 
+import mock
+import pytest
 from six import PY3, iteritems
 
 from datadog_checks.network import Network
 
 from . import common
-
-import mock
-import pytest
 
 if PY3:
     long = int
@@ -41,6 +40,8 @@ if PY3:
 
     def decode_string(s):
         return s.decode(ESCAPE_ENCODING)
+
+
 else:
     ESCAPE_ENCODING = 'string-escape'
 
@@ -102,15 +103,17 @@ def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, check):
 
 
 def test_check_psutil(aggregator, check):
-    with mock.patch.object(check, '_cx_state_psutil') as _cx_state_psutil, \
-            mock.patch.object(check, '_cx_counters_psutil') as _cx_counters_psutil:
+    with mock.patch.object(check, '_cx_state_psutil') as _cx_state_psutil, mock.patch.object(
+        check, '_cx_counters_psutil'
+    ) as _cx_counters_psutil:
         check._collect_cx_state = False
         check._check_psutil({})
         _cx_state_psutil.assert_not_called()
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
-    with mock.patch.object(check, '_cx_state_psutil') as _cx_state_psutil, \
-            mock.patch.object(check, '_cx_counters_psutil') as _cx_counters_psutil:
+    with mock.patch.object(check, '_cx_state_psutil') as _cx_state_psutil, mock.patch.object(
+        check, '_cx_counters_psutil'
+    ) as _cx_counters_psutil:
         check._collect_cx_state = True
         check._check_psutil({})
         _cx_state_psutil.assert_called_once_with(tags=[])
@@ -118,47 +121,73 @@ def test_check_psutil(aggregator, check):
 
 
 def test_cx_state_psutil(aggregator, check):
-    sconn = namedtuple(
-        'sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])
+    sconn = namedtuple('sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])
     conn = [
         sconn(
-            fd=-1, family=socket.AF_INET, type=socket.SOCK_STREAM,
-            laddr=('127.0.0.1', 50482), raddr=('127.0.0.1', 2638),
-            status='ESTABLISHED', pid=1416
+            fd=-1,
+            family=socket.AF_INET,
+            type=socket.SOCK_STREAM,
+            laddr=('127.0.0.1', 50482),
+            raddr=('127.0.0.1', 2638),
+            status='ESTABLISHED',
+            pid=1416,
         ),
         sconn(
-            fd=-1, family=socket.AF_INET6, type=socket.SOCK_STREAM,
-            laddr=('::', 50482), raddr=('::', 2638),
-            status='ESTABLISHED', pid=42
+            fd=-1,
+            family=socket.AF_INET6,
+            type=socket.SOCK_STREAM,
+            laddr=('::', 50482),
+            raddr=('::', 2638),
+            status='ESTABLISHED',
+            pid=42,
         ),
         sconn(
-            fd=-1, family=socket.AF_INET6, type=socket.SOCK_STREAM,
-            laddr=('::', 49163), raddr=(),
-            status='LISTEN', pid=1416
+            fd=-1,
+            family=socket.AF_INET6,
+            type=socket.SOCK_STREAM,
+            laddr=('::', 49163),
+            raddr=(),
+            status='LISTEN',
+            pid=1416,
         ),
         sconn(
-            fd=-1, family=socket.AF_INET, type=socket.SOCK_STREAM,
-            laddr=('0.0.0.0', 445), raddr=(),
-            status='LISTEN', pid=4
+            fd=-1,
+            family=socket.AF_INET,
+            type=socket.SOCK_STREAM,
+            laddr=('0.0.0.0', 445),
+            raddr=(),
+            status='LISTEN',
+            pid=4,
         ),
         sconn(
-            fd=-1, family=socket.AF_INET6, type=socket.SOCK_STREAM,
-            laddr=('::1', 56521), raddr=('::1', 17123),
-            status='TIME_WAIT', pid=0
+            fd=-1,
+            family=socket.AF_INET6,
+            type=socket.SOCK_STREAM,
+            laddr=('::1', 56521),
+            raddr=('::1', 17123),
+            status='TIME_WAIT',
+            pid=0,
         ),
         sconn(
-            fd=-1, family=socket.AF_INET6, type=socket.SOCK_DGRAM,
-            laddr=('::', 500), raddr=(), status='NONE', pid=892
+            fd=-1, family=socket.AF_INET6, type=socket.SOCK_DGRAM, laddr=('::', 500), raddr=(), status='NONE', pid=892
         ),
         sconn(
-            fd=-1, family=socket.AF_INET6, type=socket.SOCK_STREAM,
-            laddr=('::1', 56493), raddr=('::1', 17123),
-            status='TIME_WAIT', pid=0
+            fd=-1,
+            family=socket.AF_INET6,
+            type=socket.SOCK_STREAM,
+            laddr=('::1', 56493),
+            raddr=('::1', 17123),
+            status='TIME_WAIT',
+            pid=0,
         ),
         sconn(
-            fd=-1, family=socket.AF_INET, type=socket.SOCK_STREAM,
-            laddr=('127.0.0.1', 54541), raddr=('127.0.0.1', 54542),
-            status='ESTABLISHED', pid=20500
+            fd=-1,
+            family=socket.AF_INET,
+            type=socket.SOCK_STREAM,
+            laddr=('127.0.0.1', 54541),
+            raddr=('127.0.0.1', 54542),
+            status='ESTABLISHED',
+            pid=20500,
         ),
     ]
 
@@ -188,22 +217,22 @@ def test_cx_state_psutil(aggregator, check):
 
 def test_cx_counters_psutil(aggregator, check):
     snetio = namedtuple(
-        'snetio',
-        ['bytes_sent', 'bytes_recv', 'packets_sent',
-         'packets_recv', 'errin', 'errout',
-         'dropin', 'dropout']
+        'snetio', ['bytes_sent', 'bytes_recv', 'packets_sent', 'packets_recv', 'errin', 'errout', 'dropin', 'dropout']
     )
     counters = {
-        'Ethernet':
-        snetio(
-            bytes_sent=long(3096403230), bytes_recv=long(3280598526),
-            packets_sent=6777924, packets_recv=32888147,
-            errin=0, errout=0, dropin=0, dropout=0),
-        'Loopback Pseudo-Interface 1':
-        snetio(
-            bytes_sent=0, bytes_recv=0,
-            packets_sent=0, packets_recv=0, errin=0,
-            errout=0, dropin=0, dropout=0),
+        'Ethernet': snetio(
+            bytes_sent=long(3096403230),
+            bytes_recv=long(3280598526),
+            packets_sent=6777924,
+            packets_recv=32888147,
+            errin=0,
+            errout=0,
+            dropin=0,
+            dropout=0,
+        ),
+        'Loopback Pseudo-Interface 1': snetio(
+            bytes_sent=0, bytes_recv=0, packets_sent=0, packets_recv=0, errin=0, errout=0, dropin=0, dropout=0
+        ),
     }
     with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
         mock_psutil.net_io_counters.return_value = counters
@@ -218,6 +247,7 @@ def test_cx_counters_psutil(aggregator, check):
 
 def test_parse_protocol_psutil(aggregator, check):
     import socket
+
     conn = mock.MagicMock()
 
     protocol = check._parse_protocol_psutil(conn)

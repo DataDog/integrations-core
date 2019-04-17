@@ -2,79 +2,79 @@ init_config:
 
 instances:
 
-  ## @param api_url - string - required
-  ## URL of the Vault to query
-  #
+    ## @param api_url - string - required
+    ## URL of the Vault to query
+    #
   - api_url: http://localhost:8200/v1
 
-  ## @param client_token - string - optional
-  ## Client token if needed.
-  #
-  #  client_token: <TOKEN>
+    ## @param client_token - string - optional
+    ## Client token if needed.
+    #
+    # client_token: <TOKEN>
 
-  ## @param detect_leader - boolean - optional - default: false
-  ## Whether or not this instance should report cluster leader change events.
-  #
-  #  detect_leader: false
+    ## @param detect_leader - boolean - optional - default: false
+    ## Whether or not this instance should report cluster leader change events.
+    #
+    # detect_leader: false
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-  ## @param username - string - optional
-  ## If the API endpoint is behind basic auth, enter here the required username.
-  #
-  #  username: <USERNAME>
+    ## @param username - string - optional
+    ## If the API endpoint is behind basic auth, enter here the required username.
+    #
+    # username: <USERNAME>
 
-  ## @param password - string - optional
-  ## If the API endpoint is behind basic auth, enter here the required password.
-  #
-  # password: <PASSWORD>
+    ## @param password - string - optional
+    ## If the API endpoint is behind basic auth, enter here the required password.
+    #
+    # password: <PASSWORD>
 
-  ## @param ssl_verify - boolean - optional - default: true
-  ## If Vault setup uses SSL, you might need to set the following options as well.
-  ## The ssl_verify parameter instructs the check to validate SSL certificates when
-  ## connecting to Vault. Set to false if you want to disable SSL certificate validation.
-  #
-  #  ssl_verify: true
+    ## @param ssl_verify - boolean - optional - default: true
+    ## If Vault setup uses SSL, you might need to set the following options as well.
+    ## The ssl_verify parameter instructs the check to validate SSL certificates when
+    ## connecting to Vault. Set to false if you want to disable SSL certificate validation.
+    #
+    # ssl_verify: true
 
-  ## @param ssl_cert - string - optional
-  ## You can specify a local cert to use as client side certificate
-  ## as a single file (containing the private key and the certificate concatenated)
-  #
-  #  ssl_cert: <CLIENT_CONCATENATED_FILE_PATH>
+    ## @param ssl_cert - string - optional
+    ## You can specify a local cert to use as client side certificate
+    ## as a single file (containing the private key and the certificate concatenated)
+    #
+    # ssl_cert: <CLIENT_CONCATENATED_FILE_PATH>
 
-  ## @param ssl_private_key - string - optional
-  ## If the certificate is in two separate files (for certificate and key):
-  ## Enter the path of client.cert.pem in `ssl_cert` and in ssl_private_key the path
-  ## to the corresponding private key.
-  #
-  #  ssl_private_key: <PRIVATE_KEY_PATH>
+    ## @param ssl_private_key - string - optional
+    ## If the certificate is in two separate files (for certificate and key):
+    ## Enter the path of client.cert.pem in `ssl_cert` and in ssl_private_key the path
+    ## to the corresponding private key.
+    #
+    # ssl_private_key: <PRIVATE_KEY_PATH>
 
-  ## @param ssl_ca_cert - string - optional
-  ## Alternatively, setting ssl_ca_cert to the path of a trusted ca bundle file or directory
-  ## enables both  ssl_verify and use the specified path during validation.
-  #
-  #  ssl_ca_cert: <TRUSTED_CA_BUNDLE_FILE_PATH>
+    ## @param ssl_ca_cert - string - optional
+    ## Alternatively, setting ssl_ca_cert to the path of a trusted ca bundle file or directory
+    ## enables both  ssl_verify and use the specified path during validation.
+    #
+    # ssl_ca_cert: <TRUSTED_CA_BUNDLE_FILE_PATH>
 
-  ## @param ssl_ignore_warning - boolean - optional - default: false
-  ## If you disable ssl_verify above, you will still receive security
-  ## warnings in logs. Disable those by setting ssl_ignore_warning to true.
-  #
-  #  ssl_ignore_warning: false
+    ## @param ssl_ignore_warning - boolean - optional - default: false
+    ## If you disable ssl_verify above, you will still receive security
+    ## warnings in logs. Disable those by setting ssl_ignore_warning to true.
+    #
+    # ssl_ignore_warning: false
 
-  ## @param skip_proxy - boolean - optional - default: false
-  ## If set to true, the skip_proxy parameter makes the check bypass any proxy
-  ## settings enabled and attempt to reach Vault directly.
-  #
-  #  skip_proxy: false
+    ## @param skip_proxy - boolean - optional - default: false
+    ## If set to true, the skip_proxy parameter makes the check bypass any proxy
+    ## settings enabled and attempt to reach Vault directly.
+    #
+    # skip_proxy: false
 
-  ## @param timeout - integer - optional - default: 20
-  ## Specify a custom timeout in seconds for API access.
-  #
-  #  timeout: 20
+    ## @param timeout - integer - optional - default: 20
+    ## Specify a custom timeout in seconds for API access.
+    #
+    # timeout: 20

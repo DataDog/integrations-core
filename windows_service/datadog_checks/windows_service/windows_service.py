@@ -55,9 +55,11 @@ class WindowsService(AgentCheck):
 
         service_statuses = win32service.EnumServicesStatus(scm_handle, type_filter, state_filter)
 
-        for short_name, desc, service_status in service_statuses:
+        for short_name, _, service_status in service_statuses:
             if 'ALL' not in services:
                 for service, service_pattern in iteritems(service_patterns):
+                    self.log.debug('Service: {} with Short Name: {} and Pattern: {}'
+                                   .format(service, short_name, service_pattern.pattern))
                     if service_pattern.match(short_name):
                         services_unseen.discard(service)
                         break

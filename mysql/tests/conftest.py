@@ -7,8 +7,8 @@ import pymysql
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
-from . import common, tags
 
+from . import common, tags
 
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR', 'mysql')
 COMPOSE_FILE = '{}.yaml'.format(MYSQL_FLAVOR)
@@ -24,22 +24,14 @@ def dd_environment(instance_basic):
             'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
             'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
         },
-        conditions=[
-            WaitFor(connect_master, wait=2),
-            WaitFor(connect_slave, wait=2),
-        ],
+        conditions=[WaitFor(connect_master, wait=2), WaitFor(connect_slave, wait=2)],
     ):
         yield instance_basic
 
 
 @pytest.fixture(scope='session')
 def instance_basic():
-    return {
-        'server': common.HOST,
-        'user': common.USER,
-        'pass': common.PASS,
-        'port': common.PORT,
-    }
+    return {'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}
 
 
 @pytest.fixture
@@ -62,13 +54,13 @@ def instance_complex():
                 'query': "SELECT * from testdb.users where name='Alice' limit 1;",
                 'metric': 'alice.age',
                 'type': 'gauge',
-                'field': 'age'
+                'field': 'age',
             },
             {
                 'query': "SELECT * from testdb.users where name='Bob' limit 1;",
                 'metric': 'bob.age',
                 'type': 'gauge',
-                'field': 'age'
+                'field': 'age',
             },
         ],
     }
@@ -76,11 +68,7 @@ def instance_complex():
 
 @pytest.fixture(scope='session')
 def instance_error():
-    return {
-        'server': common.HOST,
-        'user': 'unknown',
-        'pass': common.PASS,
-    }
+    return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
 
 def connect_master():

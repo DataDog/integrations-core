@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+
 from datadog_checks.mapreduce import MapReduceCheck
 
 HERE = os.path.dirname(os.path.abspath(__file__))

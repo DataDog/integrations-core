@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .supervisord import SupervisordCheck
 
-__all__ = [
-    '__version__',
-    'SupervisordCheck'
-]
+__all__ = ['__version__', 'SupervisordCheck']

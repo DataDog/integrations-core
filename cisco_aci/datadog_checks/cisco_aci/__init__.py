@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .cisco import CiscoACICheck
 from .__about__ import __version__
+from .cisco import CiscoACICheck
 
-__all__ = [
-    '__version__',
-    'CiscoACICheck'
-]
+__all__ = ['__version__', 'CiscoACICheck']

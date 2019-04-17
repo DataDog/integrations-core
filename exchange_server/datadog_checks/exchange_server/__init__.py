@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .exchange_server import ExchangeCheck
 
-__all__ = [
-    '__version__',
-    'ExchangeCheck'
-]
+__all__ = ['__version__', 'ExchangeCheck']

@@ -88,7 +88,7 @@ def test_check(aggregator, check, gauges, instance):
             expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_metadata", "_replicator", "kennel"]:
+    for db in ["_users", "_global_changes", "_replicator", "kennel"]:
         for gauge in gauges["by_db_gauges"]:
             expected_tags = ["db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -119,7 +119,7 @@ def test_db_whitelisting(aggregator, check, gauges, instance):
         check.check(config)
 
     for _ in configs:
-        for db in ['_users', '_global_changes', '_metadata', '_replicator']:
+        for db in ['_users', '_global_changes', '_replicator']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
@@ -143,7 +143,7 @@ def test_db_blacklisting(aggregator, check, gauges, instance):
         check.check(config)
 
     for _ in configs:
-        for db in ['_users', '_global_changes', '_metadata', '_replicator']:
+        for db in ['_users', '_global_changes', '_replicator']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
@@ -175,7 +175,7 @@ def test_check_without_names(aggregator, check, gauges, instance):
         for gauge in gauges["by_dd_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_metadata", "_replicator", "kennel"]:
+    for db in ["_users", "_global_changes", "_replicator", "kennel"]:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -209,7 +209,7 @@ def test_only_max_nodes_are_scanned(aggregator, check, gauges, instance):
         for gauge in gauges["cluster_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_metadata", "_replicator"]:
+    for db in ["_users", "_global_changes", "_replicator"]:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -232,7 +232,7 @@ def test_only_max_nodes_are_scanned(aggregator, check, gauges, instance):
     for gauge in gauges["cluster_gauges"]:
         aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
-    for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
+    for db in ['_users', '_global_changes', '_replicator', 'kennel']:
         expected_tags = [expected_tags[0], "db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
@@ -255,12 +255,12 @@ def test_only_max_dbs_are_scanned(aggregator, check, gauges, instance):
     for config in configs:
         check.check(config)
 
-    for db in ['_users', '_metadata']:
-        expected_tags = ["instance:{}".format(node["name"]), "db:{}".format(db)]
+    for db in ['kennel', '_replicator']:
+        expected_tags = ["db:{}".format(node["name"])]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
-    for db in ['_global_changes', 'kennel', '_replicator']:
+    for db in ['_global_changes', '_users']:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags, count=1)

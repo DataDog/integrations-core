@@ -17,119 +17,108 @@ DEFAULT_COUNTERS = [
         None,
         'Available Memory',
         'hyperv.dynamic_memory_balancer.available_memory',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Dynamic Memory Balancer',
         None,
         'Average Pressure',
         'hyperv.dynamic_memory_balancer.average_pressure',
-        'gauge'
+        'gauge',
     ],
-
     # Network
-    [
-        'Hyper-V Virtual Network Adapter',
-        None,
-        'Bytes/sec',
-        'hyperv.virtual_network_adapter.bytes_per_sec',
-        'gauge'
-    ],
-
+    ['Hyper-V Virtual Network Adapter', None, 'Bytes/sec', 'hyperv.virtual_network_adapter.bytes_per_sec', 'gauge'],
     # Processor
     [
         'Hyper-V Hypervisor Logical Processor',
         None,
         '% Guest Run Time',
         'hyperv.hypervisor_logical_processor.guest_run_time',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Hypervisor Logical Processor',
         None,
         '% Hypervisor Run Time',
         'hyperv.hypervisor_logical_processor.hypervisor_run_time',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Hypervisor Logical Processor',
         None,
         '% Idle Time',
         'hyperv.hypervisor_logical_processor.idle_time',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Hypervisor Logical Processor',
         None,
         '% Total Run Time',
         'hyperv.hypervisor_logical_processor.total_run_time',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Hypervisor Logical Processor',
         None,
         'Context Switches/sec',
         'hyperv.hypervisor_logical_processor.context_switches_per_sec',
-        'gauge'
+        'gauge',
     ],
-
     [
         'Hyper-V Hypervisor Root Virtual Processor',
         None,
         '% Guest Run Time',
         'hyperv.hypervisor_root_virtual_processor.guest_run_time',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Hypervisor Root Virtual Processor',
         None,
         '% Hypervisor Run Time',
         'hyperv.hypervisor_root_virtual_processor.hypervisor_run_time',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Hypervisor Root Virtual Processor',
         None,
         '% Total Run Time',
         'hyperv.hypervisor_root_virtual_processor.total_run_time',
-        'gauge'
+        'gauge',
     ],
-
     [
         'Hyper-V Hypervisor Virtual Processor',
         None,
         '% Guest Run Time',
         'hyperv.hypervisor_virtual_processor.guest_run_time',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Hypervisor Virtual Processor',
         None,
         '% Hypervisor Run Time',
         'hyperv.hypervisor_virtual_processor.hypervisor_run_time',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V Hypervisor Virtual Processor',
         None,
         '% Total Run Time',
         'hyperv.hypervisor_virtual_processor.total_run_time',
-        'gauge'
+        'gauge',
     ],
-
     # Storage
     [
         'Hyper-V VM Vid Partition',
         None,
         'Physical Pages Allocated',
         'hyperv.vm_vid_partition.physical_pages_allocated',
-        'gauge'
+        'gauge',
     ],
     [
         'Hyper-V VM Vid Partition',
         None,
         'Remote Physical Pages',
         'hyperv.vm_vid_partition.remote_physical_pages',
-        'gauge'
+        'gauge',
     ],
 ]

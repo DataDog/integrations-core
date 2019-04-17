@@ -76,8 +76,8 @@ class CassandraNodetoolCheck(AgentCheck):
             cmd += ['status', '--', keyspace]
 
             # Execute the command
-            out, err, _ = get_subprocess_output(cmd, self.log, False, log_debug=False)
-            if err or 'Error:' in out:
+            out, err, code = get_subprocess_output(cmd, self.log, False, log_debug=False)
+            if err or 'Error:' in out or code != 0:
                 self.log.error('Error executing nodetool status: %s', err or out)
                 continue
             nodes = self._process_nodetool_output(out)

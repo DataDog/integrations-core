@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .gunicorn import GUnicornCheck
 
-__all__ = [
-    '__version__',
-    'GUnicornCheck'
-]
+__all__ = ['__version__', 'GUnicornCheck']

@@ -2,25 +2,34 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
+from datadog_checks.dev import get_docker_hostname, get_here
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
+HOST = get_docker_hostname()
 
-DATANODE_URI = 'http://localhost:50070/'
+DATANODE_URI = 'http://{}:50070/'.format(HOST)
 
 CUSTOM_TAGS = ['optional:tag1']
 
 TEST_USERNAME = 'AzureDiamond'
 TEST_PASSWORD = 'hunter2'
 
-HDFS_DATANODE_CONFIG = {
-    'instances': [
-        {
-            'hdfs_datanode_jmx_uri': DATANODE_URI,
-            'tags': list(CUSTOM_TAGS)
-        }
-    ]
-}
+INSTANCE_INTEGRATION = {"hdfs_datanode_jmx_uri": "http://{}:50075".format(HOST)}
+
+EXPECTED_METRICS = [
+    'hdfs.datanode.dfs_remaining',
+    'hdfs.datanode.dfs_capacity',
+    'hdfs.datanode.dfs_used',
+    'hdfs.datanode.cache_capacity',
+    'hdfs.datanode.cache_used',
+    'hdfs.datanode.last_volume_failure_date',
+    'hdfs.datanode.estimated_capacity_lost_total',
+    'hdfs.datanode.num_blocks_cached',
+    'hdfs.datanode.num_failed_volumes',
+    'hdfs.datanode.num_blocks_failed_to_cache',
+]
+
+HDFS_DATANODE_CONFIG = {'instances': [{'hdfs_datanode_jmx_uri': DATANODE_URI, 'tags': list(CUSTOM_TAGS)}]}
 
 HDFS_DATANODE_AUTH_CONFIG = {
     'instances': [
@@ -47,6 +56,4 @@ HDFS_DATANODE_METRICS_VALUES = {
     'hdfs.datanode.num_blocks_failed_to_uncache': 0,
 }
 
-HDFS_DATANODE_METRIC_TAGS = [
-    'datanode_url:{}'.format(DATANODE_URI),
-]
+HDFS_DATANODE_METRIC_TAGS = ['datanode_url:{}'.format(DATANODE_URI)]

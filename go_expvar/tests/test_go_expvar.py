@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import pytest
 import logging
 
+import pytest
 from six import iteritems
 
 from . import common
@@ -19,10 +19,7 @@ CHECK_RATES_CUSTOM = {'go_expvar.num_calls': 10}
 def test_go_expvar(check, aggregator):
     check.check(common.INSTANCE)
 
-    shared_tags = [
-        'my_tag',
-        'expvar_url:{0}{1}'.format(common.INSTANCE['expvar_url'], common.GO_EXPVAR_URL_PATH)
-    ]
+    shared_tags = ['my_tag', 'expvar_url:{0}{1}'.format(common.INSTANCE['expvar_url'], common.GO_EXPVAR_URL_PATH)]
 
     for gauge in common.CHECK_GAUGES + common.CHECK_GAUGES_DEFAULT:
         aggregator.assert_metric(gauge, count=1, tags=shared_tags)

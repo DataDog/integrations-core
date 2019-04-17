@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .nginx_ingress_controller import NginxIngressControllerCheck
 
-__all__ = [
-    '__version__',
-    'NginxIngressControllerCheck'
-]
+__all__ = ['__version__', 'NginxIngressControllerCheck']

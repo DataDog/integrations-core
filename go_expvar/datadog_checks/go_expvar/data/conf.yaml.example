@@ -2,70 +2,70 @@ init_config:
 
 instances:
 
-  ## @param expvar_url - string - required
-  ## Expvar URL to gather your metrics from.
-  #
+    ## @param expvar_url - string - required
+    ## Expvar URL to gather your metrics from.
+    #
   - expvar_url: http://localhost:8080
 
-  ## @param ssl_verify - boolean - optional - default: false
-  ## Instruct the check to validate SSL certificates when connecting to expvar_url.
-  #
-  #  ssl_verify: false
+    ## @param ssl_verify - boolean - optional - default: false
+    ## Instruct the check to validate SSL certificates when connecting to expvar_url.
+    #
+    # ssl_verify: false
 
-  ## @param ssl_certfile - boolean - optional
-  ## Path to the certificate file used to identify the connection to expvar_url.
-  #
-  #  ssl_certfile: <CERT_PEM_PATH>
+    ## @param ssl_certfile - boolean - optional
+    ## Path to the certificate file used to identify the connection to expvar_url.
+    #
+    # ssl_certfile: <CERT_PEM_PATH>
 
-  ## @param ssl_key - boolean - optional
-  ## Path to the private keyfile used to identify the connection to expvar_url.
-  #
-  #  ssl_keyfile: <CERT_KEY_PATH>
+    ## @param ssl_key - boolean - optional
+    ## Path to the private keyfile used to identify the connection to expvar_url.
+    #
+    # ssl_keyfile: <CERT_KEY_PATH>
 
-  ## @param namespace - string - optional - default: go_expvar
-  ## Define your namespace that is prefixed to all metrics collected by this check.
-  #
-  #  namespace: <NAMESPACE>
+    ## @param namespace - string - optional - default: go_expvar
+    ## Define your namespace that is prefixed to all metrics collected by this check.
+    #
+    # namespace: <NAMESPACE>
 
-  ## @param tags  - list of key:value string - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging at https://docs.datadoghq.com/tagging
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-  ## @param metrics - list of objects - optionals
-  ## These metrics are just here as examples.
-  ## Most memstats metrics are collected by default without configuration needed.
-  ## See http://godoc.org/runtime#MemStats for their explanation
-  ##
-  ## For each metric you want to collect, specify its "path" and its "alias".
-  ## with no alias specified, the metric name defaults to a path based name.
-  ##
-  ## Note: You can use a regex when you want to report for all elements matching a certain pattern
-  ##
-  ## You can also specify a `type` for the metrics. One of:
-  ##  * counter
-  ##  * gauge (the default)
-  ##  * rate (note that this shows up as a gauge in Datadog that is meant to be seen as a "per second rate")
-  #
-  #  metrics:
-  #    - path: memstats/PauseTotalNs
-  #      alias: go_expvar.gc.pause_time_in_ns
-  #      type: rate
-  #      tags:
-  #        - "<TAG_KEY>:<TAG_VALUE>"
-  #    - path: memstats/Alloc
-  #    - path: memstats/Lookups
-  #      type: rate
-  #    - path: memstats/Mallocs
-  #      type: counter
-  #    - path: memstats/Frees
-  #      type: rate
-  #    - path: memstats/BySize/1/Mallocs
-  #    - path: myvariable
-  #      alias: go_expvar.my_custom_name
-  #      type: gauge
-  #    - path: routes/get_.*/count
+    ## @param metrics - list of objects - optionals
+    ## These metrics are just here as examples.
+    ## Most memstats metrics are collected by default without configuration needed.
+    ## See http://godoc.org/runtime#MemStats for their explanation
+    ##
+    ## For each metric you want to collect, specify its "path" and its "alias".
+    ## with no alias specified, the metric name defaults to a path based name.
+    ##
+    ## Note: You can use a regex when you want to report for all elements matching a certain pattern
+    ##
+    ## You can also specify a `type` for the metrics. One of:
+    ##  * counter
+    ##  * gauge (the default)
+    ##  * rate (note that this shows up as a gauge in Datadog that is meant to be seen as a "per second rate")
+    #
+    # metrics:
+    #   - path: memstats/PauseTotalNs
+    #     alias: go_expvar.gc.pause_time_in_ns
+    #     type: rate
+    #     tags:
+    #       - "<TAG_KEY>:<TAG_VALUE>"
+    #   - path: memstats/Alloc
+    #   - path: memstats/Lookups
+    #     type: rate
+    #   - path: memstats/Mallocs
+    #     type: counter
+    #   - path: memstats/Frees
+    #     type: rate
+    #   - path: memstats/BySize/1/Mallocs
+    #   - path: myvariable
+    #     alias: go_expvar.my_custom_name
+    #     type: gauge
+    #   - path: routes/get_.*/count

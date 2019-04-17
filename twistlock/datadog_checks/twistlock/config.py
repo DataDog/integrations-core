@@ -6,7 +6,6 @@ from datadog_checks.base import is_affirmative
 
 
 class Config:
-
     def __init__(self, instance):
         self.instance = instance
 

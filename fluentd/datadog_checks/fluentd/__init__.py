@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .fluentd import Fluentd
 
-__all__ = [
-    '__version__',
-    'Fluentd'
-]
+__all__ = ['__version__', 'Fluentd']

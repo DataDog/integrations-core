@@ -2,126 +2,127 @@ init_config:
 
 instances:
 
-  ## @param url - string - required
-  ## Haproxy URL to connect to gather metrics.
-  ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
-  ## or admin socket: unix:///var/run/haproxy.sock
-  #
+    ## @param url - string - required
+    ## Haproxy URL to connect to gather metrics.
+    ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
+    ## or admin socket: unix:///var/run/haproxy.sock
+    #
   - url: http://localhost/admin?stats
 
-  ## @param username - string - optional
-  ## Username to connect to the Haproxy URL.
-  #
-  #  username: <USERNAME>
+    ## @param username - string - optional
+    ## Username to connect to the Haproxy URL.
+    #
+    # username: <USERNAME>
 
-  ## @param password - string - optional
-  ## Password to use with username to connect to the Haproxy URL.
-  #
-  #  password: <PASSWORD>
+    ## @param password - string - optional
+    ## Password to use with username to connect to the Haproxy URL.
+    #
+    # password: <PASSWORD>
 
-  ## @param headers - list of key:value string - optional
-  ## The headers to use when requesting stats.
-  #
-  #  headers:
-  #    <HEADER_KEY>: <HEADER_VALUE>
+    ## @param headers - list of key:value string - optional
+    ## The headers to use when requesting stats.
+    #
+    # headers:
+    #   <HEADER_KEY>: <HEADER_VALUE>
 
-  ## @param status_check - boolean - optional - default: false
-  ## This paramater instructs the check to send events on status changes in the backend.
-  ## This is DEPRECATED in favor of the creation of a monitor on the service check status
-  ## and will be removed in a future version.
-  #
-  #  status_check: false
+    ## @param status_check - boolean - optional - default: false
+    ## This paramater instructs the check to send events on status changes in the backend.
+    ## This is DEPRECATED in favor of the creation of a monitor on the service check status
+    ## and will be removed in a future version.
+    #
+    # status_check: false
 
-  ## @param collect_aggregates_only - boolean - optional - default: true
-  ## This parameter instructs the check to collect metrics only from the aggregate frontend/backend
-  ## status lines from the stats output instead of for each backend.
-  #
-  #  collect_aggregates_only: true
+    ## @param collect_aggregates_only - boolean - optional - default: true
+    ## This parameter instructs the check to collect metrics only from the aggregate frontend/backend
+    ## status lines from the stats output instead of for each backend.
+    #
+    # collect_aggregates_only: true
 
-  ## @param collect_status_metrics - boolean - optional - default: false
-  ## This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
-  #
-  #  collect_status_metrics: false
+    ## @param collect_status_metrics - boolean - optional - default: false
+    ## This parameter instructs the check to collect metrics on status counts (e.g. haproxy.count_per_status)
+    #
+    # collect_status_metrics: false
 
-  ## @param collect_status_metrics_by_host - boolean - optional - default: false
-  ## This parameter instructs the check to collect status metrics per host instead of per service.
-  ## This only applies if `collect_status_metrics` is true.
-  #
-  #  collect_status_metrics_by_host: false
+    ## @param collect_status_metrics_by_host - boolean - optional - default: false
+    ## This parameter instructs the check to collect status metrics per host instead of per service.
+    ## This only applies if `collect_status_metrics` is true.
+    #
+    # collect_status_metrics_by_host: false
 
-  ## @param collate_status_tags_per_host - boolean - optional - default: true
-  ## This parameter collects `status` tags for `haproxy.count_per_status` up to one of
-  ## (`available`, `unavailable`) for each discovered backend.
-  #
-  #  collate_status_tags_per_host: true
+    ## @param collate_status_tags_per_host - boolean - optional - default: true
+    ## This parameter collects `status` tags for `haproxy.count_per_status` up to one of
+    ## (`available`, `unavailable`) for each discovered backend.
+    #
+    # collate_status_tags_per_host: true
 
-  ## @param count_status_by_service - boolean - optional - default: true
-  ## This parameter instructs the check to tag the status counts it collects by service in addition to by host.
-  ## This only applies if `collect_status_metrics` is True.
-  #
-  #  count_status_by_service: true
+    ## @param count_status_by_service - boolean - optional - default: true
+    ## This parameter instructs the check to tag the status counts it collects by service in addition to by host.
+    ## This only applies if `collect_status_metrics` is True.
+    #
+    # count_status_by_service: true
 
-  ## @param tag_service_check_by_host - boolean - optional - default: false
-  ## This parameter instructs the check to tag the service check status by host on top of other tags.
-  ## The default case will only tag by backend and service.
-  #
-  #  tag_service_check_by_host: false
+    ## @param tag_service_check_by_host - boolean - optional - default: false
+    ## This parameter instructs the check to tag the service check status by host on top of other tags.
+    ## The default case will only tag by backend and service.
+    #
+    # tag_service_check_by_host: false
 
-  ## @param disable_ssl_validation - boolean - optional - default: false
-  ## This parameter instructs the check to skip the validation of the SSL certificate of the URL being tested.
-  ## Set to true if you want to disable SSL certificate validation.
-  #
-  #  disable_ssl_validation: false
+    ## @param disable_ssl_validation - boolean - optional - default: false
+    ## This parameter instructs the check to skip the validation of the SSL certificate of the URL being tested.
+    ## Set to true if you want to disable SSL certificate validation.
+    #
+    # disable_ssl_validation: false
 
-  ## @param services_include - list of strings - optional
-  ## Filter metrics by services. If a tag matches an exclude rule, it won't be included
-  ## unless it also matches an include rule.
-  #
-  #  services_include:
-  #    - "<SERVICE_NAME_1>"
-  #    - "<SERVICE_NAME_2>"
+    ## @param services_include - list of strings - optional
+    ## Filter metrics by services. If a tag matches an exclude rule, it won't be included
+    ## unless it also matches an include rule.
+    #
+    # services_include:
+    #   - "<SERVICE_NAME_1>"
+    #   - "<SERVICE_NAME_2>"
 
-  ## @param services_exclude - list of strings - optional
-  ## Filter metrics by services. If a service name matches an exclude rule, it won't be included
-  ## unless it also matches an include rule.
-  #  services_exclude:
-  #    - ".*"
+    ## @param services_exclude - list of strings - optional
+    ## Filter metrics by services. If a service name matches an exclude rule, it won't be included
+    ## unless it also matches an include rule.
+    #
+    # services_exclude:
+    #   - ".*"
 
-  ## @param active_tag - boolean - optional - default: false
-  ## Includes the 'active' tag to metrics to denote whether a backend belongs to the
-  ## "active" pool of connections normally used for servicing requests.
-  #
-  #  active_tag: false
+    ## @param active_tag - boolean - optional - default: false
+    ## Includes the 'active' tag to metrics to denote whether a backend belongs to the
+    ## "active" pool of connections normally used for servicing requests.
+    #
+    # active_tag: false
 
-  ## @param enable_service_check - boolean - optional - default: false
-  ## Enable the Haproxy service check.
-  #
-  #  enable_service_check: false
+    ## @param enable_service_check - boolean - optional - default: false
+    ## Enable the Haproxy service check.
+    #
+    # enable_service_check: false
 
-  ## @param tags_regex - string - optional
-  ## This parameter instructs the check to use the defined named regex for creating
-  ## additional tags based on the name of the HAProxy service.
-  ##
-  ##  tags_regex: 'be_edge_http_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
-  ##
-  ## would match service name be_edge_http_sre-prod_elk and include additional
-  ## tags: ['team:sre','env:prod','app:elk']
-  #
-  #  tags_regex: '<TAG_REGEX>'
+    ## @param tags_regex - string - optional
+    ## This parameter instructs the check to use the defined named regex for creating
+    ## additional tags based on the name of the HAProxy service.
+    ##
+    ##  tags_regex: 'be_edge_http_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
+    ##
+    ## would match service name be_edge_http_sre-prod_elk and include additional
+    ## tags: ['team:sre','env:prod','app:elk']
+    #
+    # tags_regex: '<TAG_REGEX>'
 
-  ## @param tags  - list of key:value string - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging at https://docs.datadoghq.com/tagging
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
@@ -129,9 +130,9 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
-#logs:
-#  - type: udp
-#    port: 514
-#    service: haproxy
-#    source: haproxy
-#    sourcecategory: http_web_access
+# logs:
+#   - type: udp
+#     port: 514
+#     service: haproxy
+#     source: haproxy
+#     sourcecategory: http_web_access
