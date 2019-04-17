@@ -23,7 +23,12 @@ from ....utils import write_file, read_file
 )
 @click.option('--since', help="Initial Agent version", default='6.3.0')
 @click.option('--to', help="Final Agent version")
-@click.option('--write', '-w', is_flag=True, help="Write to the changelog file, if omitted contents will be printed to stdout")
+@click.option(
+    '--write',
+    '-w',
+    is_flag=True,
+    help="Write to the changelog file, if omitted contents will be printed to stdout"
+)
 @click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
 def changelog(since, to, write, force):
     """
