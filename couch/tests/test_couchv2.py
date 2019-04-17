@@ -256,7 +256,7 @@ def test_only_max_dbs_are_scanned(aggregator, check, gauges, instance):
         check.check(config)
 
     for db in ['kennel', '_replicator']:
-        expected_tags = ["db:{}".format(node["name"])]
+        expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
