@@ -372,7 +372,6 @@
 * datadog-gitlab-runner: 2.0.0
 * datadog-gitlab: 2.1.0
 * datadog-go-expvar: 1.1.0
-* datadog-go-metro: 1.1.0
 * datadog-gunicorn: 1.5.0
 * datadog-haproxy: 1.4.0
 * datadog-hdfs-datanode: 1.6.0
@@ -481,7 +480,6 @@
 * datadog-gitlab-runner: 2.0.0
 * datadog-gitlab: 2.0.0
 * datadog-go-expvar: 1.0.5
-* datadog-go-metro: 1.1.0
 * datadog-gunicorn: 1.4.0
 * datadog-haproxy: 1.3.2
 * datadog-hdfs-datanode: 1.5.0
@@ -514,7 +512,6 @@
 * datadog-nginx: 3.0.0
 * datadog-openldap: 1.1.0
 * datadog-openmetrics: 1.0.0
-* datadog-openstack-controller: 0.0.1
 * datadog-openstack: 1.5.0
 * datadog-oracle: 1.4.0
 * datadog-pdh-check: 1.3.0
@@ -587,7 +584,6 @@
 * datadog-gitlab-runner: 2.0.0
 * datadog-gitlab: 2.0.0
 * datadog-go-expvar: 1.0.5
-* datadog-go-metro: 1.1.0
 * datadog-gunicorn: 1.4.0
 * datadog-haproxy: 1.3.2
 * datadog-hdfs-datanode: 1.5.0
@@ -620,7 +616,6 @@
 * datadog-nginx: 3.0.0
 * datadog-openldap: 1.1.0
 * datadog-openmetrics: 1.0.0
-* datadog-openstack-controller: 0.0.1
 * datadog-openstack: 1.5.0
 * datadog-oracle: 1.4.0
 * datadog-pdh-check: 1.3.0
@@ -897,7 +892,6 @@
 * gearmand: 1.1.1
 * gitlab: 1.2.0
 * gitlab_runner: 1.2.0
-* go-metro: 1.0.0
 * go_expvar: 1.0.4
 * gunicorn: 1.2.1
 * haproxy: 1.3.1
@@ -997,7 +991,6 @@
 * gearmand: 1.1.1
 * gitlab: 1.2.0
 * gitlab_runner: 1.2.0
-* go-metro: 1.0.0
 * go_expvar: 1.0.4
 * gunicorn: 1.2.1
 * haproxy: 1.3.1

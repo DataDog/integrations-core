@@ -65,6 +65,7 @@
 * etcd [1.7.0](https://github.com/DataDog/integrations-core/blob/master/etcd/CHANGELOG.md)
 * Exchange Server [1.3.0](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
 * Gitlab Runner [2.1.0](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md)
+* go_metro [1.1.0](https://github.com/DataDog/integrations-core/blob/master/go_metro/CHANGELOG.md)
 * Gunicorn [1.6.0](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
 * HAProxy [2.0.0](https://github.com/DataDog/integrations-core/blob/master/haproxy/CHANGELOG.md) **BREAKING CHANGE**
 * HDFS Namenode [1.5.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
@@ -153,6 +154,7 @@
 * nginx-ingress-controller [1.0.0](https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/CHANGELOG.md)
 * Nginx [3.1.0](https://github.com/DataDog/integrations-core/blob/master/nginx/CHANGELOG.md)
 * OpenLDAP [1.2.0](https://github.com/DataDog/integrations-core/blob/master/openldap/CHANGELOG.md)
+* Openstack_controller [0.0.1](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
 * OpenStack [1.6.0](https://github.com/DataDog/integrations-core/blob/master/openstack/CHANGELOG.md)
 * PGBouncer [1.4.0](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/CHANGELOG.md)
 * Postgres [2.4.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
@@ -203,7 +205,6 @@
 * Elasticsearch [1.9.1](https://github.com/DataDog/integrations-core/blob/master/elastic/CHANGELOG.md)
 * etcd [1.6.0](https://github.com/DataDog/integrations-core/blob/master/etcd/CHANGELOG.md)
 * Go-Expvar [1.0.5](https://github.com/DataDog/integrations-core/blob/master/go_expvar/CHANGELOG.md)
-* go_metro [1.1.0](https://github.com/DataDog/integrations-core/blob/master/go_metro/CHANGELOG.md)
 * Gunicorn [1.4.0](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
 * HAProxy [1.3.2](https://github.com/DataDog/integrations-core/blob/master/haproxy/CHANGELOG.md)
 * HDFS Datanode [1.5.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/CHANGELOG.md)
@@ -218,7 +219,6 @@
 * Nagios [1.1.3](https://github.com/DataDog/integrations-core/blob/master/nagios/CHANGELOG.md)
 * Network [1.8.0](https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md)
 * OpenLDAP [1.1.0](https://github.com/DataDog/integrations-core/blob/master/openldap/CHANGELOG.md)
-* Openstack_controller [0.0.1](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
 * PGBouncer [1.3.1](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/CHANGELOG.md)
 * PHP-FPM [1.4.0](https://github.com/DataDog/integrations-core/blob/master/php_fpm/CHANGELOG.md)
 * Postgres [2.3.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
@@ -260,6 +260,7 @@
 * Exchange Server [1.2.0](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
 * Gitlab [2.0.0](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md) **BREAKING CHANGE**
 * Gitlab Runner [2.0.0](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md) **BREAKING CHANGE**
+* Go-Metro [1.0.0](https://github.com/DataDog/integrations-core/blob/master/go-metro/CHANGELOG.md)
 * Gunicorn [1.3.0](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
 * HTTP [3.0.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md) **BREAKING CHANGE**
 * IIS [2.2.0](https://github.com/DataDog/integrations-core/blob/master/iis/CHANGELOG.md)
@@ -325,7 +326,6 @@
 * Gearman [1.1.1](https://github.com/DataDog/integrations-core/blob/master/gearmand/CHANGELOG.md)
 * Gitlab [1.2.0](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md)
 * Gitlab Runner [1.2.0](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md)
-* Go-Metro [1.0.0](https://github.com/DataDog/integrations-core/blob/master/go-metro/CHANGELOG.md)
 * Go-Expvar [1.0.4](https://github.com/DataDog/integrations-core/blob/master/go_expvar/CHANGELOG.md)
 * Gunicorn [1.2.1](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
 * HAProxy [1.3.1](https://github.com/DataDog/integrations-core/blob/master/haproxy/CHANGELOG.md)
