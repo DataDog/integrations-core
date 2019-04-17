@@ -28,7 +28,9 @@ def dd_environment():
         cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
         env['CASSANDRA_SEEDS'] = cassandra_seed
         with docker_run(
-            compose_file, service_name=common.CASSANDRA_CONTAINER_NAME_2, log_patterns=['All sessions completed']
+            compose_file,
+            service_name=common.CASSANDRA_CONTAINER_NAME_2,
+            log_patterns=['All sessions completed', 'Starting listening for CQL clients'],
         ):
             subprocess.check_call(
                 [
