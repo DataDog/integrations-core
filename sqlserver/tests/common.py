@@ -5,8 +5,8 @@
 import os
 import sys
 
-from datadog_checks.sqlserver import SQLServer
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.sqlserver import SQLServer
 
 
 def lib_tds_path():
@@ -36,19 +36,11 @@ INSTANCE_DOCKER = {
     'tags': ['optional:tag1'],
 }
 
-INSTANCE_SQL2017 = {
-    'host': r'(local)\SQL2017',
-    'username': 'sa',
-    'password': 'Password12!',
-}
+INSTANCE_SQL2017 = {'host': r'(local)\SQL2017', 'username': 'sa', 'password': 'Password12!'}
 
 INIT_CONFIG = {
     'custom_metrics': [
-        {
-            'name': 'sqlserver.clr.execution',
-            'type': 'gauge',
-            'counter_name': 'CLR Execution',
-        },
+        {'name': 'sqlserver.clr.execution', 'type': 'gauge', 'counter_name': 'CLR Execution'},
         {
             'name': 'sqlserver.exec.in_progress',
             'type': 'gauge',
@@ -62,7 +54,7 @@ INIT_CONFIG = {
             'instance_name': 'ALL',
             'tag_by': 'db',
         },
-    ],
+    ]
 }
 
 INIT_CONFIG_OBJECT_NAME = {
@@ -72,23 +64,16 @@ INIT_CONFIG_OBJECT_NAME = {
             'counter_name': 'Cache Hit Ratio',
             'instance_name': 'SQL Plans',
             'object_name': 'SQLServer:Plan Cache',
-            'tags': [
-                'optional_tag:tag1'
-            ]
+            'tags': ['optional_tag:tag1'],
         },
         {
             'name': 'sqlserver.active_requests',
             'counter_name': 'Active requests',
             'instance_name': 'default',
             'object_name': 'SQLServer:Workload Group Stats',
-            'tags': [
-                'optional_tag:tag1'
-            ]
-        }
+            'tags': ['optional_tag:tag1'],
+        },
     ]
 }
 
-FULL_CONFIG = {
-    "init_config": INIT_CONFIG,
-    "instances": [INSTANCE_DOCKER]
-}
+FULL_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_DOCKER]}
