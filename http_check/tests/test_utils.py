@@ -4,11 +4,11 @@
 import os
 import sys
 
-import pytest
 import mock
+import pytest
 
 from datadog_checks.dev import temp_dir
-from datadog_checks.http_check.utils import get_ca_certs_path, _get_ca_certs_paths
+from datadog_checks.http_check.utils import _get_ca_certs_paths, get_ca_certs_path
 
 
 @pytest.mark.unit
