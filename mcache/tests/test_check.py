@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mcache.mcache import InvalidConfigError
+
 from .common import HOST, PORT, SERVICE_CHECK
 
 
