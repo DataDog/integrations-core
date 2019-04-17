@@ -32,29 +32,29 @@ ALLOWED_METRICS = [
     'process_open_fds',
     'process_resident_memory_bytes',
     'process_start_time_seconds',
-    'process_virtual_memory_bytes'
+    'process_virtual_memory_bytes',
 ]
 
 CONFIG = {
-    'init_config': {
-        'allowed_metrics': ALLOWED_METRICS
-    },
-    'instances': [{
-        'prometheus_endpoint': GITLAB_RUNNER_URL,
-        'gitlab_url': '{}/ci'.format(GITLAB_MASTER_URL),
-        'disable_ssl_validation': True,
-        'tags': list(CUSTOM_TAGS)
-    }]
+    'init_config': {'allowed_metrics': ALLOWED_METRICS},
+    'instances': [
+        {
+            'prometheus_endpoint': GITLAB_RUNNER_URL,
+            'gitlab_url': '{}/ci'.format(GITLAB_MASTER_URL),
+            'disable_ssl_validation': True,
+            'tags': list(CUSTOM_TAGS),
+        }
+    ],
 }
 
 BAD_CONFIG = {
-    'init_config': {
-        'allowed_metrics': ALLOWED_METRICS
-    },
-    'instances': [{
-        'prometheus_endpoint': 'http://{}:1234/metrics'.format(HOST),
-        'gitlab_url': 'http://{}:1234/ci'.format(HOST),
-        'disable_ssl_validation': True,
-        'tags': list(CUSTOM_TAGS)
-    }]
+    'init_config': {'allowed_metrics': ALLOWED_METRICS},
+    'instances': [
+        {
+            'prometheus_endpoint': 'http://{}:1234/metrics'.format(HOST),
+            'gitlab_url': 'http://{}:1234/ci'.format(HOST),
+            'disable_ssl_validation': True,
+            'tags': list(CUSTOM_TAGS),
+        }
+    ],
 }
