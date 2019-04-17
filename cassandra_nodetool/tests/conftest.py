@@ -9,7 +9,6 @@ import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.dev.utils import copy_path
 
 from . import common
 
