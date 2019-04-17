@@ -59,12 +59,14 @@ def setup_rabbitmq():
 
 def setup_vhosts(rabbitmq_admin_script):
     for vhost in ['myvhost', 'myothervhost']:
-        cmd = ['python', rabbitmq_admin_script, 'declare', 'vhost', 'name={}'.format(vhost)]
+        cmd = ['python', rabbitmq_admin_script, '-H', HOST, 'declare', 'vhost', 'name={}'.format(vhost)]
         subprocess.check_call(cmd)
 
         cmd = [
             'python',
             rabbitmq_admin_script,
+            '-H',
+            HOST,
             'declare',
             'permission',
             'vhost={}'.format(vhost),
@@ -78,15 +80,17 @@ def setup_vhosts(rabbitmq_admin_script):
 
 def setup_more(rabbitmq_admin_script):
     for name in ['test1', 'test5', 'tralala']:
-        cmd = ['python', rabbitmq_admin_script, 'declare', 'queue', 'name={}'.format(name)]
+        cmd = ['python', rabbitmq_admin_script, '-H', HOST, 'declare', 'queue', 'name={}'.format(name)]
         subprocess.check_call(cmd)
 
-        cmd = ['python', rabbitmq_admin_script, 'declare', 'exchange', 'name={}'.format(name), 'type=topic']
+        cmd = ['python', rabbitmq_admin_script, '-H', HOST, 'declare', 'exchange', 'name={}'.format(name), 'type=topic']
         subprocess.check_call(cmd)
 
         cmd = [
             'python',
             rabbitmq_admin_script,
+            '-H',
+            HOST,
             'declare',
             'binding',
             'source={}'.format(name),
@@ -99,6 +103,8 @@ def setup_more(rabbitmq_admin_script):
         cmd = [
             'python',
             rabbitmq_admin_script,
+            '-H',
+            HOST,
             'publish',
             'exchange={}'.format(name),
             'routing_key={}'.format(name),
@@ -109,6 +115,8 @@ def setup_more(rabbitmq_admin_script):
         cmd = [
             'python',
             rabbitmq_admin_script,
+            '-H',
+            HOST,
             'publish',
             'exchange={}'.format(name),
             'routing_key=bad_key',
@@ -123,6 +131,8 @@ def setup_more_with_vhosts(rabbitmq_admin_script):
             cmd = [
                 'python',
                 rabbitmq_admin_script,
+                '-H',
+                HOST,
                 '--vhost={}'.format(vhost),
                 'declare',
                 'queue',
@@ -133,6 +143,8 @@ def setup_more_with_vhosts(rabbitmq_admin_script):
             cmd = [
                 'python',
                 rabbitmq_admin_script,
+                '-H',
+                HOST,
                 '--vhost={}'.format(vhost),
                 'publish',
                 'exchange=amq.default',
