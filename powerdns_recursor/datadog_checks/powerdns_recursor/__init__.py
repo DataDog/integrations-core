@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .powerdns_recursor import PowerDNSRecursorCheck
 
-__all__ = [
-    'PowerDNSRecursorCheck',
-    '__version__'
-]
+__all__ = ['PowerDNSRecursorCheck', '__version__']

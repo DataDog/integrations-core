@@ -1,5 +1,10 @@
 # CHANGELOG - process
 
+## 1.9.0 / 2019-04-15
+
+* [Fixed] Do not return prematurely when calling `memory_info` on windows and solaris. See [#3618](https://github.com/DataDog/integrations-core/pull/3618).
+* [Added] Adhere to code style. See [#3559](https://github.com/DataDog/integrations-core/pull/3559).
+
 ## 1.8.0 / 2019-02-18
 
 * [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).

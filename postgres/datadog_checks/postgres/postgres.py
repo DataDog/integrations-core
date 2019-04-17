@@ -1,20 +1,21 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
 import socket
 import threading
-import re
 from contextlib import closing
 
 import pg8000
 from six import iteritems
 from six.moves import zip_longest
+
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+
 try:
     import psycopg2
 except ImportError:
     psycopg2 = None
-
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 
 MAX_CUSTOM_RESULTS = 100
@@ -37,6 +38,7 @@ class ShouldRestartException(Exception):
 class PostgreSql(AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics
     """
+
     SOURCE_TYPE_NAME = 'postgresql'
     RATE = AgentCheck.rate
     GAUGE = AgentCheck.gauge
@@ -59,9 +61,7 @@ class PostgreSql(AgentCheck):
         '2^31 - age(datfrozenxid) as wraparound': ('postgresql.before_xid_wraparound', GAUGE),
     }
 
-    DATABASE_SIZE_METRICS = {
-        'pg_database_size(psd.datname) as pg_database_size': ('postgresql.database_size', GAUGE),
-    }
+    DATABASE_SIZE_METRICS = {'pg_database_size(psd.datname) as pg_database_size': ('postgresql.database_size', GAUGE)}
 
     NEWER_92_METRICS = {
         'deadlocks': ('postgresql.deadlocks', RATE),
@@ -79,9 +79,7 @@ class PostgreSql(AgentCheck):
         'buffers_alloc': ('postgresql.bgwriter.buffers_alloc', MONOTONIC),
     }
 
-    NEWER_91_BGW_METRICS = {
-        'buffers_backend_fsync': ('postgresql.bgwriter.buffers_backend_fsync', MONOTONIC),
-    }
+    NEWER_91_BGW_METRICS = {'buffers_backend_fsync': ('postgresql.bgwriter.buffers_backend_fsync', MONOTONIC)}
 
     NEWER_92_BGW_METRICS = {
         'checkpoint_write_time': ('postgresql.bgwriter.write_time', MONOTONIC),
@@ -94,14 +92,8 @@ class PostgreSql(AgentCheck):
     }
 
     LOCK_METRICS = {
-        'descriptors': [
-            ('mode', 'lock_mode'),
-            ('datname', 'db'),
-            ('relname', 'table'),
-        ],
-        'metrics': {
-            'lock_count': ('postgresql.locks', GAUGE),
-        },
+        'descriptors': [('mode', 'lock_mode'), ('datname', 'db'), ('relname', 'table')],
+        'metrics': {'lock_count': ('postgresql.locks', GAUGE)},
         'query': """
 SELECT mode,
        pd.datname,
@@ -117,14 +109,9 @@ SELECT mode,
     }
 
     REL_METRICS = {
-        'descriptors': [
-            ('relname', 'table'),
-            ('schemaname', 'schema'),
-        ],
+        'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
         # This field contains old metrics that need to be deprecated. For now we keep sending them.
-        'deprecated_metrics': {
-            'idx_tup_fetch': ('postgresql.index_rows_fetched', RATE),
-        },
+        'deprecated_metrics': {'idx_tup_fetch': ('postgresql.index_rows_fetched', RATE)},
         'metrics': {
             'seq_scan': ('postgresql.seq_scans', RATE),
             'seq_tup_read': ('postgresql.seq_rows_read', RATE),
@@ -145,11 +132,7 @@ SELECT relname,schemaname,%s
     }
 
     IDX_METRICS = {
-        'descriptors': [
-            ('relname', 'table'),
-            ('schemaname', 'schema'),
-            ('indexrelname', 'index')
-        ],
+        'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
         'metrics': {
             'idx_scan': ('postgresql.index_scans', RATE),
             'idx_tup_read': ('postgresql.index_rows_read', RATE),
@@ -166,9 +149,7 @@ SELECT relname,
     }
 
     SIZE_METRICS = {
-        'descriptors': [
-            ('relname', 'table'),
-        ],
+        'descriptors': [('relname', 'table')],
         'metrics': {
             'pg_table_size(C.oid) as table_size': ('postgresql.table_size', GAUGE),
             'pg_indexes_size(C.oid) as index_size': ('postgresql.index_size', GAUGE),
@@ -184,16 +165,12 @@ LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   nspname !~ '^pg_toast' AND
   relkind IN ('r') AND
-  relname = ANY(array[%s])"""
+  relname = ANY(array[%s])""",
     }
 
     COUNT_METRICS = {
-        'descriptors': [
-            ('schemaname', 'schema')
-        ],
-        'metrics': {
-            'pg_stat_user_tables': ('postgresql.table.count', GAUGE),
-        },
+        'descriptors': [('schemaname', 'schema')],
+        'metrics': {'pg_stat_user_tables': ('postgresql.table.count', GAUGE)},
         'relation': False,
         'query': """
 SELECT schemaname, count(*) FROM
@@ -203,27 +180,35 @@ SELECT schemaname, count(*) FROM
   ORDER BY schemaname, relname
   LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
-        """.format(table_count_limit=TABLE_COUNT_LIMIT)
+        """.format(
+            table_count_limit=TABLE_COUNT_LIMIT
+        ),
     }
 
-    q1 = ('CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
-          '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END')
+    q1 = (
+        'CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
+        '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
+    )
     q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
     REPLICATION_METRICS_10 = {
         q1: ('postgresql.replication_delay', GAUGE),
         q2: ('postgresql.replication_delay_bytes', GAUGE),
     }
 
-    q = ('CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
-         '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END')
-    REPLICATION_METRICS_9_1 = {
-        q: ('postgresql.replication_delay', GAUGE),
-    }
+    q = (
+        'CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
+        '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
+    )
+    REPLICATION_METRICS_9_1 = {q: ('postgresql.replication_delay', GAUGE)}
 
-    q1 = ('abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) '
-          'AS replication_delay_bytes_dup')
-    q2 = ('abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) '
-          'AS replication_delay_bytes')
+    q1 = (
+        'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) '
+        'AS replication_delay_bytes_dup'
+    )
+    q2 = (
+        'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) '
+        'AS replication_delay_bytes'
+    )
     REPLICATION_METRICS_9_2 = {
         # postgres.replication_delay_bytes is deprecated and will be removed in a future version.
         # Please use postgresql.replication_delay_bytes instead.
@@ -237,7 +222,7 @@ SELECT schemaname, count(*) FROM
         'relation': False,
         'query': """
 SELECT %s
- WHERE (SELECT pg_is_in_recovery())"""
+ WHERE (SELECT pg_is_in_recovery())""",
     }
 
     CONNECTION_METRICS = {
@@ -251,14 +236,11 @@ SELECT %s
 WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connections')
 SELECT %s
   FROM pg_stat_database, max_con
-"""
+""",
     }
 
     STATIO_METRICS = {
-        'descriptors': [
-            ('relname', 'table'),
-            ('schemaname', 'schema')
-        ],
+        'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
         'metrics': {
             'heap_blks_read': ('postgresql.heap_blocks_read', RATE),
             'heap_blks_hit': ('postgresql.heap_blocks_hit', RATE),
@@ -279,10 +261,7 @@ SELECT relname,
     }
 
     FUNCTION_METRICS = {
-        'descriptors': [
-            ('schemaname', 'schema'),
-            ('funcname', 'function'),
-        ],
+        'descriptors': [('schemaname', 'schema'), ('funcname', 'function')],
         'metrics': {
             'calls': ('postgresql.function.calls', RATE),
             'total_time': ('postgresql.function.total_time', RATE),
@@ -306,7 +285,7 @@ SELECT s.schemaname,
   LEFT JOIN overloaded_funcs o
     ON o.funcname = s.funcname;
 """,
-        'relation': False
+        'relation': False,
     }
 
     # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
@@ -389,8 +368,10 @@ GROUP BY datid, datname
 
         # Deprecate custom_metrics in favor of custom_queries
         if instances is not None and any('custom_metrics' in instance for instance in instances):
-            self.warning("DEPRECATION NOTICE: Please use the new custom_queries option "
-                         "rather than the now deprecated custom_metrics")
+            self.warning(
+                "DEPRECATION NOTICE: Please use the new custom_queries option "
+                "rather than the now deprecated custom_metrics"
+            )
 
     @classmethod
     def _server_known(cls, host, port):
@@ -505,8 +486,10 @@ GROUP BY datid, datname
                 # explicitly set instance metrics for this key to an empty list
                 # so we don't get here more than once
                 self.instance_metrics[key] = []
-                self.log.debug("Not collecting instance metrics for key: {} as "
-                               "they are already collected by another instance".format(key))
+                self.log.debug(
+                    "Not collecting instance metrics for key: {} as "
+                    "they are already collected by another instance".format(key)
+                )
                 return None
             self._set_server_known(host, port)
 
@@ -559,8 +542,10 @@ GROUP BY datid, datname
             sub_key = key[:2]
             if sub_key in self.db_bgw_metrics:
                 self.bgw_metrics[key] = None
-                self.log.debug("Not collecting bgw metrics for key: {0} as "
-                               "they are already collected by another instance".format(key))
+                self.log.debug(
+                    "Not collecting bgw metrics for key: {0} as "
+                    "they are already collected by another instance".format(key)
+                )
                 return None
 
             self.db_bgw_metrics.append(sub_key)
@@ -576,12 +561,7 @@ GROUP BY datid, datname
         if not metrics:
             return None
 
-        return {
-            'descriptors': [],
-            'metrics': metrics,
-            'query': "select %s FROM pg_stat_bgwriter",
-            'relation': False,
-        }
+        return {'descriptors': [], 'metrics': metrics, 'query': "select %s FROM pg_stat_bgwriter", 'relation': False}
 
     def _get_archiver_metrics(self, key, db):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
@@ -597,8 +577,10 @@ GROUP BY datid, datname
             sub_key = key[:2]
             if sub_key in self.db_archiver_metrics:
                 self.archiver_metrics[key] = None
-                self.log.debug("Not collecting archiver metrics for key: {0} as "
-                               "they are already collected by another instance".format(key))
+                self.log.debug(
+                    "Not collecting archiver metrics for key: {0} as "
+                    "they are already collected by another instance".format(key)
+                )
                 return None
 
             self.db_archiver_metrics.append(sub_key)
@@ -609,12 +591,7 @@ GROUP BY datid, datname
         if not metrics:
             return None
 
-        return {
-            'descriptors': [],
-            'metrics': metrics,
-            'query': "select %s FROM pg_stat_archiver",
-            'relation': False,
-        }
+        return {'descriptors': [], 'metrics': metrics, 'query': "select %s FROM pg_stat_archiver", 'relation': False}
 
     def _get_replication_metrics(self, key, db):
         """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
@@ -657,14 +634,7 @@ GROUP BY datid, datname
         else:
             metrics, query = metrics_data
 
-        return {
-            'descriptors': [
-                ('datname', 'db'),
-            ],
-            'metrics': metrics,
-            'query': query,
-            'relation': False
-        }
+        return {'descriptors': [('datname', 'db')], 'metrics': metrics, 'query': query, 'relation': False}
 
     def _build_relations_config(self, yamlconfig):
         """Builds a dictionary from relations configuration while maintaining compatibility
@@ -685,8 +655,9 @@ GROUP BY datid, datname
                 self.log.warning('Failed to parse config element={}, check syntax'.format(element))
         return config
 
-    def _query_scope(self, cursor, scope, key, db, instance_tags, relations, is_custom_metrics, programming_error,
-                     relations_config):
+    def _query_scope(
+        self, cursor, scope, key, db, instance_tags, relations, is_custom_metrics, programming_error, relations_config
+    ):
         if scope is None:
             return None
 
@@ -722,8 +693,9 @@ GROUP BY datid, datname
 
         if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
             self.warning(
-                "Query: {0} returned more than {1} results ({2}). Truncating"
-                .format(query, MAX_CUSTOM_RESULTS, len(results))
+                "Query: {0} returned more than {1} results ({2}). Truncating".format(
+                    query, MAX_CUSTOM_RESULTS, len(results)
+                )
             )
             results = results[:MAX_CUSTOM_RESULTS]
 
@@ -738,7 +710,7 @@ GROUP BY datid, datname
             assert len(row) == len(cols) + len(desc)
 
             # build a map of descriptors and their values
-            desc_map = dict(zip([x[1] for x in desc], row[0:len(desc)]))
+            desc_map = dict(zip([x[1] for x in desc], row[0 : len(desc)]))
             if 'schema' in desc_map and relations:
                 try:
                     relname = desc_map['table']
@@ -767,14 +739,26 @@ GROUP BY datid, datname
             # v[0] == (metric_name, submit_function)
             # v[1] == the actual value
             # tags are
-            for v in zip([scope['metrics'][c] for c in cols], row[len(desc):]):
+            for v in zip([scope['metrics'][c] for c in cols], row[len(desc) :]):
                 v[0][1](self, v[0][0], v[1], tags=tags)
 
         return len(results)
 
-    def _collect_stats(self, key, db, instance_tags, relations, custom_metrics, collect_function_metrics,
-                       collect_count_metrics, collect_activity_metrics, collect_database_size_metrics,
-                       collect_default_db, interface_error, programming_error):
+    def _collect_stats(
+        self,
+        key,
+        db,
+        instance_tags,
+        relations,
+        custom_metrics,
+        collect_function_metrics,
+        collect_count_metrics,
+        collect_activity_metrics,
+        collect_database_size_metrics,
+        collect_default_db,
+        interface_error,
+        programming_error,
+    ):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
@@ -785,10 +769,7 @@ GROUP BY datid, datname
         bgw_instance_metrics = self._get_bgw_metrics(key, db)
         archiver_instance_metrics = self._get_archiver_metrics(key, db)
 
-        metric_scope = [
-            self.CONNECTION_METRICS,
-            self.LOCK_METRICS,
-        ]
+        metric_scope = [self.CONNECTION_METRICS, self.LOCK_METRICS]
 
         if collect_function_metrics:
             metric_scope.append(self.FUNCTION_METRICS)
@@ -798,12 +779,7 @@ GROUP BY datid, datname
         # Do we need relation-specific metrics?
         relations_config = {}
         if relations:
-            metric_scope += [
-                self.REL_METRICS,
-                self.IDX_METRICS,
-                self.SIZE_METRICS,
-                self.STATIO_METRICS
-            ]
+            metric_scope += [self.REL_METRICS, self.IDX_METRICS, self.SIZE_METRICS, self.STATIO_METRICS]
             relations_config = self._build_relations_config(relations)
 
         replication_metrics = self._get_replication_metrics(key, db)
@@ -814,25 +790,71 @@ GROUP BY datid, datname
 
         try:
             cursor = db.cursor()
-            results_len = self._query_scope(cursor, db_instance_metrics, key, db, instance_tags, relations,
-                                            False, programming_error, relations_config)
+            results_len = self._query_scope(
+                cursor,
+                db_instance_metrics,
+                key,
+                db,
+                instance_tags,
+                relations,
+                False,
+                programming_error,
+                relations_config,
+            )
             if results_len is not None:
-                self.gauge("postgresql.db.count", results_len,
-                           tags=[t for t in instance_tags if not t.startswith("db:")])
+                self.gauge(
+                    "postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")]
+                )
 
-            self._query_scope(cursor, bgw_instance_metrics, key, db, instance_tags, relations,
-                              False, programming_error, relations_config)
-            self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, relations,
-                              False, programming_error, relations_config)
+            self._query_scope(
+                cursor,
+                bgw_instance_metrics,
+                key,
+                db,
+                instance_tags,
+                relations,
+                False,
+                programming_error,
+                relations_config,
+            )
+            self._query_scope(
+                cursor,
+                archiver_instance_metrics,
+                key,
+                db,
+                instance_tags,
+                relations,
+                False,
+                programming_error,
+                relations_config,
+            )
 
             if collect_activity_metrics:
                 activity_metrics = self._get_activity_metrics(key, db)
-                self._query_scope(cursor, activity_metrics, key, db, instance_tags, relations,
-                                  False, programming_error, relations_config)
+                self._query_scope(
+                    cursor,
+                    activity_metrics,
+                    key,
+                    db,
+                    instance_tags,
+                    relations,
+                    False,
+                    programming_error,
+                    relations_config,
+                )
 
             for scope in list(metric_scope) + custom_metrics:
-                self._query_scope(cursor, scope, key, db, instance_tags, relations,
-                                  scope in custom_metrics, programming_error, relations_config)
+                self._query_scope(
+                    cursor,
+                    scope,
+                    key,
+                    db,
+                    instance_tags,
+                    relations,
+                    scope in custom_metrics,
+                    programming_error,
+                    relations_config,
+                )
 
             cursor.close()
         except (interface_error, socket.error) as e:
@@ -841,9 +863,7 @@ GROUP BY datid, datname
 
     @classmethod
     def _get_service_check_tags(cls, host, port, tags):
-        service_check_tags = [
-            "host:%s" % host,
-        ]
+        service_check_tags = ["host:%s" % host]
         service_check_tags.extend(tags)
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
@@ -859,23 +879,23 @@ GROUP BY datid, datname
                     # Use ident method
                     connection = connect_fct("user=%s dbname=%s" % (user, dbname))
                 elif port != '':
-                    connection = connect_fct(host=host, port=port, user=user,
-                                             password=password, database=dbname, ssl=ssl)
+                    connection = connect_fct(
+                        host=host, port=port, user=user, password=password, database=dbname, ssl=ssl
+                    )
                 elif host.startswith('/'):
                     # If the hostname starts with /, it's probably a path
                     # to a UNIX socket. This is similar behaviour to psql
-                    connection = connect_fct(unix_sock=host, user=user,
-                                             password=password, database=dbname)
+                    connection = connect_fct(unix_sock=host, user=user, password=password, database=dbname)
                 else:
-                    connection = connect_fct(host=host, user=user, password=password,
-                                             database=dbname, ssl=ssl)
+                    connection = connect_fct(host=host, user=user, password=password, database=dbname, ssl=ssl)
                 self.dbs[key] = connection
                 return connection
             except Exception as e:
                 message = u'Error establishing postgres connection: %s' % (str(e))
                 service_check_tags = self._get_service_check_tags(host, port, tags)
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                   tags=service_check_tags, message=message)
+                self.service_check(
+                    self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message
+                )
                 raise
         else:
             if not host:
@@ -896,16 +916,12 @@ GROUP BY datid, datname
 
             query = custom_query.get('query')
             if not query:
-                self.log.error(
-                    "custom query field `query` is required for metric_prefix `{}`".format(metric_prefix)
-                )
+                self.log.error("custom query field `query` is required for metric_prefix `{}`".format(metric_prefix))
                 continue
 
             columns = custom_query.get('columns')
             if not columns:
-                self.log.error(
-                    "custom query field `columns` is required for metric_prefix `{}`".format(metric_prefix)
-                )
+                self.log.error("custom query field `columns` is required for metric_prefix `{}`".format(metric_prefix))
                 continue
 
             cursor = db.cursor()
@@ -967,11 +983,7 @@ GROUP BY datid, datname
                                 )
                                 break
                             try:
-                                metric_info.append((
-                                    '{}.{}'.format(metric_prefix, name),
-                                    float(value),
-                                    column_type
-                                ))
+                                metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
                             except (ValueError, TypeError):
                                 self.log.error(
                                     "non-numeric value `{}` for metric column `{}` of "
@@ -1004,8 +1016,10 @@ GROUP BY datid, datname
                 for ref, (_, mtype) in iteritems(m['metrics']):
                     cap_mtype = mtype.upper()
                     if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
-                        raise ConfigurationError('Collector method {} is not known. '
-                                                 'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype))
+                        raise ConfigurationError(
+                            'Collector method {} is not known. '
+                            'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
+                        )
 
                     m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
                     self.log.debug("Method: %s" % (str(mtype)))
@@ -1074,22 +1088,43 @@ GROUP BY datid, datname
             self.log.debug("Running check against version %s" % version)
             if tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role(key, db))])
-            self._collect_stats(key, db, tags, relations, custom_metrics, collect_function_metrics,
-                                collect_count_metrics, collect_activity_metrics, collect_database_size_metrics,
-                                collect_default_db, interface_error, programming_error)
+            self._collect_stats(
+                key,
+                db,
+                tags,
+                relations,
+                custom_metrics,
+                collect_function_metrics,
+                collect_count_metrics,
+                collect_activity_metrics,
+                collect_database_size_metrics,
+                collect_default_db,
+                interface_error,
+                programming_error,
+            )
             self._get_custom_queries(db, tags, custom_queries, programming_error)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=False)
-            self._collect_stats(key, db, tags, relations, custom_metrics, collect_function_metrics,
-                                collect_count_metrics, collect_activity_metrics, collect_database_size_metrics,
-                                collect_default_db, interface_error, programming_error)
+            self._collect_stats(
+                key,
+                db,
+                tags,
+                relations,
+                custom_metrics,
+                collect_function_metrics,
+                collect_count_metrics,
+                collect_activity_metrics,
+                collect_database_size_metrics,
+                collect_default_db,
+                interface_error,
+                programming_error,
+            )
             self._get_custom_queries(db, tags, custom_queries, programming_error)
 
         service_check_tags = self._get_service_check_tags(host, port, tags)
         message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
-        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                           tags=service_check_tags, message=message)
+        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, message=message)
         try:
             # commit to close the current query transaction
             db.commit()

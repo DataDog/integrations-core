@@ -92,12 +92,7 @@ TABLE_SPACE_TABLE = 'SELECT {} FROM TABLE(MON_GET_TABLESPACE(NULL, -1))'.format(
 
 
 # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0059253.html
-TRANSACTION_LOG_TABLE_COLUMNS = (
-    'log_reads',
-    'log_writes',
-    'total_log_available',
-    'total_log_used',
-)
+TRANSACTION_LOG_TABLE_COLUMNS = ('log_reads', 'log_writes', 'total_log_available', 'total_log_used')
 TRANSACTION_LOG_TABLE = 'SELECT {} FROM TABLE(MON_GET_TRANSACTION_LOG(-1))'.format(
     ', '.join(TRANSACTION_LOG_TABLE_COLUMNS)
 )

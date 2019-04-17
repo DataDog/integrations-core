@@ -2,7 +2,7 @@ asn1crypto==0.24.0
 cffi==1.11.5
 cryptography==2.3.1
 enum34==1.1.6
-ipaddress==1.0.22
+ipaddress==1.0.22; python_version < '3.0'
 paramiko==2.1.5
 pyasn1==0.4.2
 pycparser==2.18

@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .prometheus import PrometheusCheck
 
-__all__ = [
-    '__version__',
-    'PrometheusCheck'
-]
+__all__ = ['__version__', 'PrometheusCheck']

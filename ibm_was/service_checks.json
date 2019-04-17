@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "6.9.0",
-        "integration":"ibm_was",
+        "integration":"IBM WAS",
         "groups": ["host", "url"],
         "check": "ibm_was.can_connect",
         "statuses": ["ok", "critical"],

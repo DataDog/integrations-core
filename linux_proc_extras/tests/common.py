@@ -10,9 +10,7 @@ CHECK_NAME = 'linux_proc_extras'
 HERE = get_here()
 FIXTURE_DIR = os.path.join(HERE, "fixtures")
 
-INSTANCE = {
-    "tags": ["foo:bar"]
-}
+INSTANCE = {"tags": ["foo:bar"]}
 
 EXPECTED_TAG = "foo:bar"
 

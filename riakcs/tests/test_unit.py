@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import mock
-import pytest
-
 from ast import literal_eval
 from socket import error as SocketError
+
+import mock
+import pytest
 
 from . import common
 
@@ -31,10 +31,7 @@ def test_service_checks(check, aggregator, instance):
         check.check(instance)
 
     aggregator.assert_service_check(
-        common.SERVICE_CHECK_NAME,
-        status=check.CRITICAL,
-        tags=common.EXPECTED_TAGS,
-        count=1,
+        common.SERVICE_CHECK_NAME, status=check.CRITICAL, tags=common.EXPECTED_TAGS, count=1
     )
 
 

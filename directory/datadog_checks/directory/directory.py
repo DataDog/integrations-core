@@ -9,6 +9,7 @@ from time import time
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.errors import ConfigurationError
+
 from .traverse import walk
 
 
@@ -55,8 +56,10 @@ class DirectoryCheck(AgentCheck):
         custom_tags = instance.get('tags', [])
 
         if not exists(abs_directory):
-            msg = "Either directory '{}' doesn't exist or the Agent doesn't "\
-                  "have permissions to access it, skipping.".format(abs_directory)
+            msg = (
+                "Either directory '{}' doesn't exist or the Agent doesn't "
+                "have permissions to access it, skipping.".format(abs_directory)
+            )
 
             if not ignore_missing:
                 raise ConfigurationError(msg)
@@ -74,7 +77,7 @@ class DirectoryCheck(AgentCheck):
             dirs_patterns_full,
             recursive,
             countonly,
-            custom_tags
+            custom_tags,
         )
 
     def _get_stats(
@@ -89,7 +92,7 @@ class DirectoryCheck(AgentCheck):
         dirs_patterns_full,
         recursive,
         countonly,
-        tags
+        tags,
     ):
         dirtags = ['{}:{}'.format(dirtagname, name)]
         dirtags.extend(tags)
@@ -97,7 +100,7 @@ class DirectoryCheck(AgentCheck):
         directory_files = 0
 
         # If we do not want to recursively search sub-directories only get the root.
-        walker = walk(directory) if recursive else (next(walk(directory)), )
+        walker = walk(directory) if recursive else (next(walk(directory)),)
 
         # Avoid repeated global lookups.
         get_length = len
@@ -118,10 +121,7 @@ class DirectoryCheck(AgentCheck):
                     # filename matches the pattern, for compatibility with previous
                     # agent versions.
                     filename = join(root, file_entry.name)
-                    if not (
-                        fnmatch(filename, pattern) or
-                        fnmatch(relpath(filename, directory), pattern)
-                    ):
+                    if not (fnmatch(filename, pattern) or fnmatch(relpath(filename, directory), pattern)):
                         directory_files -= 1
                         continue
 
@@ -133,45 +133,27 @@ class DirectoryCheck(AgentCheck):
                     file_stat = file_entry.stat()
 
                 except OSError as ose:
-                    self.warning(
-                        'DirectoryCheck: could not stat file {} - {}'.format(join(root, file_entry.name), ose)
-                    )
+                    self.warning('DirectoryCheck: could not stat file {} - {}'.format(join(root, file_entry.name), ose))
                 else:
                     # file specific metrics
                     directory_bytes += file_stat.st_size
                     if filegauges and directory_files <= 20:
                         filetags = ['{}:{}'.format(filetagname, join(root, file_entry.name))]
                         filetags.extend(dirtags)
+                        self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
                         self.gauge(
-                            'system.disk.directory.file.bytes',
-                            file_stat.st_size,
-                            tags=filetags
+                            'system.disk.directory.file.modified_sec_ago', time() - file_stat.st_mtime, tags=filetags
                         )
                         self.gauge(
-                            'system.disk.directory.file.modified_sec_ago',
-                            time() - file_stat.st_mtime,
-                            tags=filetags
-                        )
-                        self.gauge(
-                            'system.disk.directory.file.created_sec_ago',
-                            time() - file_stat.st_ctime,
-                            tags=filetags
+                            'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=filetags
                         )
                     else:
+                        self.histogram('system.disk.directory.file.bytes', file_stat.st_size, tags=dirtags)
                         self.histogram(
-                            'system.disk.directory.file.bytes',
-                            file_stat.st_size,
-                            tags=dirtags
+                            'system.disk.directory.file.modified_sec_ago', time() - file_stat.st_mtime, tags=dirtags
                         )
                         self.histogram(
-                            'system.disk.directory.file.modified_sec_ago',
-                            time() - file_stat.st_mtime,
-                            tags=dirtags
-                        )
-                        self.histogram(
-                            'system.disk.directory.file.created_sec_ago',
-                            time() - file_stat.st_ctime,
-                            tags=dirtags
+                            'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=dirtags
                         )
 
         # number of files

@@ -2,14 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import os
-import pytest
 import logging
+import os
+
+import pytest
 import simplejson as json
 from requests import Session
 
-from datadog_checks.cisco_aci.api import SessionWrapper, Api
 from datadog_checks.cisco_aci import CiscoACICheck
+from datadog_checks.cisco_aci.api import Api, SessionWrapper
 from datadog_checks.utils.containers import hash_mutable
 
 from . import common
@@ -24,6 +25,7 @@ class FakeSess(SessionWrapper):
      2. Fetch the corresponding hash from common.FIXTURE_LIST_FILE_MAP
      3. Returns the corresponding file content
      """
+
     def make_request(self, path):
         mock_path = path.replace('/', '_')
         mock_path = mock_path.replace('?', '_')
@@ -55,7 +57,7 @@ class FakeSess(SessionWrapper):
 @pytest.fixture
 def session_mock():
     session = Session()
-    setattr(session, 'send', mock_send)
+    session.send = mock_send
     fake_session_wrapper = FakeSess(common.ACI_URL, session, 'cookie')
 
     return fake_session_wrapper
@@ -63,8 +65,7 @@ def session_mock():
 
 def test_fabric_end_to_end(aggregator, session_mock):
     check = CiscoACICheck(common.CHECK_NAME, {}, {})
-    api = Api(common.ACI_URLS, common.USERNAME,
-              password=common.PASSWORD, log=check.log, sessions=[session_mock])
+    api = Api(common.ACI_URLS, common.USERNAME, password=common.PASSWORD, log=check.log, sessions=[session_mock])
     api._refresh_sessions = False
     check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
 
@@ -909,12 +910,32 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=19.134788999999998, tags=tagsspine202, hostname=hn202)
     aggregator.assert_metric(metric_name, value=17.725645999999998, tags=tagsspine202, hostname=hn202)
     aggregator.assert_metric(metric_name, value=19.067124000000007, tags=tagsspine202, hostname=hn202)
-    aggregator.assert_metric(metric_name, value=4.0, tags=['apic_role:controller', 'node_id:3', 'fabric_state:unknown',
-                                                           'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-3')
-    aggregator.assert_metric(metric_name, value=10.0, tags=['apic_role:controller', 'node_id:1', 'fabric_state:unknown',
-                                                            'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-1')
+    aggregator.assert_metric(
+        metric_name,
+        value=4.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:3',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-3',
+    )
+    aggregator.assert_metric(
+        metric_name,
+        value=10.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:1',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-1',
+    )
     aggregator.assert_metric(metric_name, value=19.234358, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=17.76097, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=19.010105999999993, tags=tagsspine201, hostname=hn201)
@@ -927,9 +948,19 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=17.827544000000003, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=19.068934999999996, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=17.649720000000002, tags=tagsspine201, hostname=hn201)
-    aggregator.assert_metric(metric_name, value=8.0, tags=['apic_role:controller', 'node_id:2', 'fabric_state:unknown',
-                                                           'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-2')
+    aggregator.assert_metric(
+        metric_name,
+        value=8.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:2',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-2',
+    )
 
     metric_name = 'cisco_aci.fabric.port.egr_bytes.multicast.cum'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)
@@ -1146,12 +1177,32 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=11.982625999999996, tags=tagsspine202, hostname=hn202)
     aggregator.assert_metric(metric_name, value=12.034676000000005, tags=tagsspine202, hostname=hn202)
     aggregator.assert_metric(metric_name, value=11.964286000000001, tags=tagsspine202, hostname=hn202)
-    aggregator.assert_metric(metric_name, value=7.0, tags=['apic_role:controller', 'node_id:3', 'fabric_state:unknown',
-                                                           'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-3')
-    aggregator.assert_metric(metric_name, value=14.0, tags=['apic_role:controller', 'node_id:1', 'fabric_state:unknown',
-                                                            'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-1')
+    aggregator.assert_metric(
+        metric_name,
+        value=7.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:3',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-3',
+    )
+    aggregator.assert_metric(
+        metric_name,
+        value=14.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:1',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-1',
+    )
     aggregator.assert_metric(metric_name, value=11.881692999999999, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=12.369293999999996, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=11.892583000000002, tags=tagsspine201, hostname=hn201)
@@ -1164,27 +1215,64 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=11.755685999999997, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=11.997952999999995, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=12.017387, tags=tagsspine201, hostname=hn201)
-    aggregator.assert_metric(metric_name, value=11.0, tags=['apic_role:controller', 'node_id:2', 'fabric_state:unknown',
-                                                            'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-2')
+    aggregator.assert_metric(
+        metric_name,
+        value=11.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:2',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-2',
+    )
 
     metric_name = 'cisco_aci.fabric.node.mem.avg'
     aggregator.assert_metric(metric_name, value=10559963.0, tags=tagsleaf101, hostname=hn101)
     aggregator.assert_metric(metric_name, value=10491187.0, tags=tagsleaf102, hostname=hn102)
     aggregator.assert_metric(metric_name, value=10747828.0, tags=tagsspine202, hostname=hn202)
-    aggregator.assert_metric(metric_name, value=37859173.0, tags=['apic_role:controller', 'node_id:3',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-3')
-    aggregator.assert_metric(metric_name, value=43008145.0, tags=['apic_role:controller', 'node_id:1',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-1')
+    aggregator.assert_metric(
+        metric_name,
+        value=37859173.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:3',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-3',
+    )
+    aggregator.assert_metric(
+        metric_name,
+        value=43008145.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:1',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-1',
+    )
     aggregator.assert_metric(metric_name, value=10814699.0, tags=tagsspine201, hostname=hn201)
-    aggregator.assert_metric(metric_name, value=34463186.0, tags=['apic_role:controller', 'node_id:2',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-2')
+    aggregator.assert_metric(
+        metric_name,
+        value=34463186.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:2',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-2',
+    )
 
     metric_name = 'cisco_aci.fabric.port.ingr_bytes.multicast.cum'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)
@@ -1970,19 +2058,46 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=10534296.0, tags=tagsleaf101, hostname=hn101)
     aggregator.assert_metric(metric_name, value=10462616.0, tags=tagsleaf102, hostname=hn102)
     aggregator.assert_metric(metric_name, value=10737028.0, tags=tagsspine202, hostname=hn202)
-    aggregator.assert_metric(metric_name, value=37835708.0, tags=['apic_role:controller', 'node_id:3',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-3')
-    aggregator.assert_metric(metric_name, value=42962460.0, tags=['apic_role:controller', 'node_id:1',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-1')
+    aggregator.assert_metric(
+        metric_name,
+        value=37835708.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:3',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-3',
+    )
+    aggregator.assert_metric(
+        metric_name,
+        value=42962460.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:1',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-1',
+    )
     aggregator.assert_metric(metric_name, value=10788240.0, tags=tagsspine201, hostname=hn201)
-    aggregator.assert_metric(metric_name, value=34432104.0, tags=['apic_role:controller', 'node_id:2',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-2')
+    aggregator.assert_metric(
+        metric_name,
+        value=34432104.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:2',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-2',
+    )
 
     metric_name = 'cisco_aci.fabric.node.mem.free.avg'
     aggregator.assert_metric(metric_name, value=13878048.0, tags=tagsleaf101, hostname=hn101)
@@ -2212,12 +2327,32 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=37.861859, tags=tagsspine202, hostname=hn202)
     aggregator.assert_metric(metric_name, value=34.662265000000005, tags=tagsspine202, hostname=hn202)
     aggregator.assert_metric(metric_name, value=37.607923, tags=tagsspine202, hostname=hn202)
-    aggregator.assert_metric(metric_name, value=3.0, tags=['apic_role:controller', 'node_id:3', 'fabric_state:unknown',
-                                                           'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-3')
-    aggregator.assert_metric(metric_name, value=10.0, tags=['apic_role:controller', 'node_id:1', 'fabric_state:unknown',
-                                                            'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-1')
+    aggregator.assert_metric(
+        metric_name,
+        value=3.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:3',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-3',
+    )
+    aggregator.assert_metric(
+        metric_name,
+        value=10.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:1',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-1',
+    )
     aggregator.assert_metric(metric_name, value=40.487681, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=31.577607999999998, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=40.411481, tags=tagsspine201, hostname=hn201)
@@ -2230,9 +2365,19 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=32.221090000000004, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=39.074027, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=31.365031000000002, tags=tagsspine201, hostname=hn201)
-    aggregator.assert_metric(metric_name, value=5.0, tags=['apic_role:controller', 'node_id:2', 'fabric_state:unknown',
-                                                           'fabric_pod_id:1', 'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-2')
+    aggregator.assert_metric(
+        metric_name,
+        value=5.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:2',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-2',
+    )
 
     metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.rate'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)
@@ -2417,19 +2562,46 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=10570520.0, tags=tagsleaf101, hostname=hn101)
     aggregator.assert_metric(metric_name, value=10509680.0, tags=tagsleaf102, hostname=hn102)
     aggregator.assert_metric(metric_name, value=10755916.0, tags=tagsspine202, hostname=hn202)
-    aggregator.assert_metric(metric_name, value=37901052.0, tags=['apic_role:controller', 'node_id:3',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-3')
-    aggregator.assert_metric(metric_name, value=43199760.0, tags=['apic_role:controller', 'node_id:1',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-1')
+    aggregator.assert_metric(
+        metric_name,
+        value=37901052.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:3',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-3',
+    )
+    aggregator.assert_metric(
+        metric_name,
+        value=43199760.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:1',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-1',
+    )
     aggregator.assert_metric(metric_name, value=10823444.0, tags=tagsspine201, hostname=hn201)
-    aggregator.assert_metric(metric_name, value=34637280.0, tags=['apic_role:controller', 'node_id:2',
-                                                                  'fabric_state:unknown', 'fabric_pod_id:1',
-                                                                  'cisco', 'project:cisco_aci'],
-                             hostname='pod-1-node-2')
+    aggregator.assert_metric(
+        metric_name,
+        value=34637280.0,
+        tags=[
+            'apic_role:controller',
+            'node_id:2',
+            'fabric_state:unknown',
+            'fabric_pod_id:1',
+            'cisco',
+            'project:cisco_aci',
+        ],
+        hostname='pod-1-node-2',
+    )
 
     metric_name = 'cisco_aci.fabric.port.egr_bytes.flood'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)

@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import cx_Oracle
 import mock
 import pytest
-import cx_Oracle
 
 
 def test_client_fallback(check, instance):
@@ -58,8 +58,9 @@ def test__get_connection_jdbc(check, instance):
                 ret = check._get_connection(server, user, password, service, jdbc_driver, tags)
                 assert ret == con
                 assert check.service_check_tags == expected_tags
-                jdb.connect.assert_called_with('oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe',
-                                               ['system', 'oracle'], None)
+                jdb.connect.assert_called_with(
+                    'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe', ['system', 'oracle'], None
+                )
                 service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.OK, tags=expected_tags)
 
 

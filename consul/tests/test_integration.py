@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from requests import HTTPError
 
 from datadog_checks.consul import ConsulCheck
+
 from . import common
 
 METRICS = [
@@ -44,10 +44,7 @@ def test_check(aggregator, instance, dd_environment):
     aggregator.assert_metric('consul.peers', value=3)
 
     aggregator.assert_service_check('consul.check')
-    aggregator.assert_service_check('consul.up', tags=[
-        'consul_datacenter:dc1',
-        'consul_url:{}'.format(common.URL)
-    ])
+    aggregator.assert_service_check('consul.up', tags=['consul_datacenter:dc1', 'consul_url:{}'.format(common.URL)])
 
 
 @pytest.mark.integration
@@ -61,10 +58,7 @@ def test_single_node_install(aggregator, instance_single_node_install, dd_enviro
     aggregator.assert_metric('consul.peers', value=3)
 
     aggregator.assert_service_check('consul.check')
-    aggregator.assert_service_check('consul.up', tags=[
-        'consul_datacenter:dc1',
-        'consul_url:{}'.format(common.URL)
-    ])
+    aggregator.assert_service_check('consul.up', tags=['consul_datacenter:dc1', 'consul_url:{}'.format(common.URL)])
 
 
 @pytest.mark.integration

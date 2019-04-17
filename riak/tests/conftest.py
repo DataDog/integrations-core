@@ -2,15 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
 import os
-import requests
-
 from copy import deepcopy
 
-from datadog_checks.riak import Riak
+import pytest
+import requests
+
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.riak import Riak
 
 from . import common
 
@@ -19,7 +19,8 @@ def populate():
     res = requests.post(
         "{}/riak/bucket/german".format(common.BASE_URL),
         headers={"Content-Type": "text/plain"},
-        data='herzlich willkommen')
+        data='herzlich willkommen',
+    )
     res.raise_for_status
 
     res = requests.get("{}/riak/bucket/german".format(common.BASE_URL))

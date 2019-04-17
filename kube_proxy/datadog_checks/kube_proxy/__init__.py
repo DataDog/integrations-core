@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .kube_proxy import KubeProxyCheck
 
-__all__ = [
-    '__version__',
-    'KubeProxyCheck'
-]
+__all__ = ['__version__', 'KubeProxyCheck']

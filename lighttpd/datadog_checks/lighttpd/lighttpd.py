@@ -5,7 +5,6 @@
 import re
 
 import requests
-
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
@@ -23,11 +22,7 @@ class Lighttpd(AgentCheck):
 
     SERVICE_CHECK_NAME = 'lighttpd.can_connect'
 
-    URL_SUFFIX_PER_VERSION = {
-        1: '?auto',
-        2: '?format=plain',
-        'Unknown': '?auto'
-    }
+    URL_SUFFIX_PER_VERSION = {1: '?auto', 2: '?format=plain', 'Unknown': '?auto'}
 
     GAUGES = {
         b'IdleServers': 'lighttpd.performance.idle_server',
@@ -63,10 +58,7 @@ class Lighttpd(AgentCheck):
         b'status_5xx': 'lighttpd.response.status_5xx',
     }
 
-    RATES = {
-        b'Total kBytes': 'lighttpd.net.bytes_per_s',
-        b'Total Accesses': 'lighttpd.net.request_per_s'
-    }
+    RATES = {b'Total kBytes': 'lighttpd.net.bytes_per_s', b'Total Accesses': 'lighttpd.net.request_per_s'}
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -104,12 +96,10 @@ class Lighttpd(AgentCheck):
             r = requests.get(url, auth=auth, headers=headers(self.agentConfig))
             r.raise_for_status()
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         headers_resp = r.headers
         server_version = self._get_server_version(headers_resp)
@@ -150,13 +140,15 @@ class Lighttpd(AgentCheck):
 
         if metric_count == 0:
             url_suffix = self.URL_SUFFIX_PER_VERSION[server_version]
-            if self.assumed_url.get(instance['lighttpd_status_url']) is None and url[-len(url_suffix):] != url_suffix:
+            if self.assumed_url.get(instance['lighttpd_status_url']) is None and url[-len(url_suffix) :] != url_suffix:
                 self.assumed_url[instance['lighttpd_status_url']] = '%s%s' % (url, url_suffix)
                 self.warning("Assuming url was not correct. Trying to add %s suffix to the url" % url_suffix)
                 self.check(instance)
             else:
-                raise Exception("No metrics were fetched for this instance. Make sure "
-                                "that %s is the proper url." % instance['lighttpd_status_url'])
+                raise Exception(
+                    "No metrics were fetched for this instance. Make sure "
+                    "that %s is the proper url." % instance['lighttpd_status_url']
+                )
 
     def _get_server_version(self, headers):
         server_version = headers.get("server", "")

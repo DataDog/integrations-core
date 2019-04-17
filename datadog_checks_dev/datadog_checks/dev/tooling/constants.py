@@ -29,6 +29,7 @@ VERSION_BUMP = OrderedDict([
 AGENT_V5_ONLY = {
     'agent_metrics',
     'docker_daemon',
+    'go-metro',
     'kubernetes',
     'ntp',
 }

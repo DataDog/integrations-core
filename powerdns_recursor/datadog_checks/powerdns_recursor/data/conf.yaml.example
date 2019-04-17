@@ -2,41 +2,41 @@ init_config:
 
 instances:
 
-  ## @param host - string - required
-  ## Host running the recursor.
-  #
+    ## @param host - string - required
+    ## Host running the recursor.
+    #
   - host: 127.0.0.1
 
-  ## @param port - integer - required
-  ## Recursor web server port.
-  #
+    ## @param port - integer - required
+    ## Recursor web server port.
+    #
     port: 8082
 
-  ## @param api_key - string - required
-  ## Recursor web server api key.
-  #
+    ## @param api_key - string - required
+    ## Recursor web server api key.
+    #
     api_key: <POWERDNS_API_KEY>
 
-  ## @param version - integer - required - default: 3
-  ## Version 3 or 4 of PowerDNS Recursor to connect to.
-  ## The PowerDNS Recursor in v4 has a production ready web server that allows for
-  ## statistics gathering. In version 3.x the server was marked as experimental.
-  ##
-  ## As the server was marked as experimental in version 3 many of the metrics have
-  ## changed names and the API structure (paths) have also changed. With these changes
-  ## there has been a need to separate the two concerns. The check now has a key value
-  ## version: which if set to version 4 queries with the correct API path on the
-  ## non-experimental web server.
-  ##
-  ## https://doc.powerdns.com/md/httpapi/api_spec/#url-apiv1serversserver95idstatistics
-  #
+    ## @param version - integer - required - default: 3
+    ## Version 3 or 4 of PowerDNS Recursor to connect to.
+    ## The PowerDNS Recursor in v4 has a production ready web server that allows for
+    ## statistics gathering. In version 3.x the server was marked as experimental.
+    ##
+    ## As the server was marked as experimental in version 3 many of the metrics have
+    ## changed names and the API structure (paths) have also changed. With these changes
+    ## there has been a need to separate the two concerns. The check now has a key value
+    ## version: which if set to version 4 queries with the correct API path on the
+    ## non-experimental web server.
+    ##
+    ## https://doc.powerdns.com/md/httpapi/api_spec/#url-apiv1serversserver95idstatistics
+    #
     version: 3
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

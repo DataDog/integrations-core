@@ -1,16 +1,12 @@
-import os
 import copy
+import os
+from collections import defaultdict
+
+from datadog_checks.haproxy import HAProxy
 
 from . import common
 
-from datadog_checks.haproxy import HAProxy
-from collections import defaultdict
-
-BASE_CONFIG = {
-    'url': 'http://localhost/admin?stats',
-    'collect_status_metrics': True,
-    'enable_service_check': True,
-}
+BASE_CONFIG = {'url': 'http://localhost/admin?stats', 'collect_status_metrics': True, 'enable_service_check': True}
 
 
 def _assert_agg_statuses(aggregator, count_status_by_service=True, collate_status_tags_per_host=False):
@@ -175,8 +171,7 @@ def test_count_hosts_statuses(aggregator, haproxy_mock):
     data = data.split('\n')
 
     # per service
-    haproxy_check._process_data(data, True, False, collect_status_metrics=True,
-                                collect_status_metrics_by_host=False)
+    haproxy_check._process_data(data, True, False, collect_status_metrics=True, collect_status_metrics_by_host=False)
 
     expected_hosts_statuses = defaultdict(int)
     expected_hosts_statuses[('b', 'FRONTEND', 'open')] = 1
@@ -188,20 +183,16 @@ def test_count_hosts_statuses(aggregator, haproxy_mock):
 
     # backend hosts
     agg_statuses = haproxy_check._process_backend_hosts_metric(expected_hosts_statuses)
-    expected_agg_statuses = {
-        'b': {'available': 3, 'unavailable': 2},
-    }
+    expected_agg_statuses = {'b': {'available': 3, 'unavailable': 2}}
 
     assert expected_agg_statuses == dict(agg_statuses)
 
     # with process_events set to True
-    haproxy_check._process_data(data, True, True, collect_status_metrics=True,
-                                collect_status_metrics_by_host=False)
+    haproxy_check._process_data(data, True, True, collect_status_metrics=True, collect_status_metrics_by_host=False)
     assert haproxy_check.hosts_statuses == expected_hosts_statuses
 
     # per host
-    haproxy_check._process_data(data, True, False, collect_status_metrics=True,
-                                collect_status_metrics_by_host=True)
+    haproxy_check._process_data(data, True, False, collect_status_metrics=True, collect_status_metrics_by_host=True)
     expected_hosts_statuses = defaultdict(int)
     expected_hosts_statuses[('b', 'FRONTEND', 'FRONTEND', 'open')] = 1
     expected_hosts_statuses[('a', 'FRONTEND', 'FRONTEND', 'open')] = 1
@@ -212,8 +203,7 @@ def test_count_hosts_statuses(aggregator, haproxy_mock):
     expected_hosts_statuses[('b', 'BACKEND', 'i-5', 'maint')] = 1
     assert haproxy_check.hosts_statuses == expected_hosts_statuses
 
-    haproxy_check._process_data(data, True, True, collect_status_metrics=True,
-                                collect_status_metrics_by_host=True)
+    haproxy_check._process_data(data, True, True, collect_status_metrics=True, collect_status_metrics_by_host=True)
     assert haproxy_check.hosts_statuses, expected_hosts_statuses
 
 
@@ -238,23 +228,26 @@ def test_regex_tags(aggregator, haproxy_mock):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
     haproxy_check.check(config)
 
-    expected_tags = ['service:be_edge_http_sre-production_elk-kibana',
-                     'type:BACKEND',
-                     'instance_url:http://localhost/admin?stats',
-                     'region:infra',
-                     'security:edge_http',
-                     'app:elk-kibana',
-                     'env:production',
-                     'team:sre',
-                     'backend:BACKEND'
-                     ]
+    expected_tags = [
+        'service:be_edge_http_sre-production_elk-kibana',
+        'type:BACKEND',
+        'instance_url:http://localhost/admin?stats',
+        'region:infra',
+        'security:edge_http',
+        'app:elk-kibana',
+        'env:production',
+        'team:sre',
+        'backend:BACKEND',
+    ]
     aggregator.assert_metric('haproxy.backend.session.current', value=1, count=1, tags=expected_tags)
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'app:elk-kibana', 1)
-    tags = ['service:be_edge_http_sre-production_elk-kibana',
-            'region:infra',
-            'security:edge_http',
-            'app:elk-kibana',
-            'env:production',
-            'team:sre',
-            'backend:i-1']
+    tags = [
+        'service:be_edge_http_sre-production_elk-kibana',
+        'region:infra',
+        'security:edge_http',
+        'app:elk-kibana',
+        'env:production',
+        'team:sre',
+        'backend:i-1',
+    ]
     aggregator.assert_service_check('haproxy.backend_up', tags=tags)

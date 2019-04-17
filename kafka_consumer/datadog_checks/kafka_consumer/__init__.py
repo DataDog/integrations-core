@@ -2,11 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .kafka_consumer import KafkaCheck
 from .__about__ import __version__
+from .kafka_consumer import KafkaCheck
 
-
-__all__ = [
-    '__version__',
-    'KafkaCheck'
-]
+__all__ = ['__version__', 'KafkaCheck']

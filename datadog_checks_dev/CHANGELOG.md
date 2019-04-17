@@ -1,5 +1,17 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.22.0 / 2019-04-15
+
+* [Added] Build releases automatically. See [#3364](https://github.com/DataDog/integrations-core/pull/3364).
+* [Fixed] Fixed language in template for integration extras readme. See [#3606](https://github.com/DataDog/integrations-core/pull/3606).
+* [Added] Add validation on integration_id. See [#3598](https://github.com/DataDog/integrations-core/pull/3598).
+* [Added] Add ability to specify extra start-up commands for e2e. See [#3594](https://github.com/DataDog/integrations-core/pull/3594).
+* [Added] Add a pytest-args option to ddev test. See [#3596](https://github.com/DataDog/integrations-core/pull/3596).
+* [Fixed] Ensure style envs support every platform. See [#3482](https://github.com/DataDog/integrations-core/pull/3482).
+* [Added] Add posargs in tox.ini. See [#3313](https://github.com/DataDog/integrations-core/pull/3313).
+* [Fixed] Fix breakpoint agent check flag. See [#3447](https://github.com/DataDog/integrations-core/pull/3447).
+* [Added] Update version of datadog-checks-base for extras. See [#3433](https://github.com/DataDog/integrations-core/pull/3433).
+
 ## 0.21.0 / 2019-03-29
 
 * [Added] Upgrade in-toto. See [#3411](https://github.com/DataDog/integrations-core/pull/3411).

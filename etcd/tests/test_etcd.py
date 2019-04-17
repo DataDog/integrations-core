@@ -10,9 +10,9 @@ from six import itervalues
 from datadog_checks.dev import run_command
 from datadog_checks.etcd import Etcd
 from datadog_checks.etcd.metrics import METRIC_MAP
-from .common import COMPOSE_FILE, HOST, URL
-from .utils import legacy, is_leader, preview
 
+from .common import COMPOSE_FILE, HOST, URL
+from .utils import is_leader, legacy, preview
 
 CHECK_NAME = 'etcd'
 
@@ -41,9 +41,7 @@ def test_check(aggregator, instance):
     check = Etcd('etcd', {}, {}, [instance])
     check.check(instance)
 
-    tags = [
-        'is_leader:{}'.format('true' if is_leader(URL) else 'false')
-    ]
+    tags = ['is_leader:{}'.format('true' if is_leader(URL) else 'false')]
 
     for metric in itervalues(METRIC_MAP):
         try:
@@ -76,9 +74,7 @@ def test_service_check(aggregator, instance):
     check = Etcd(CHECK_NAME, None, {}, [instance])
     check.check(instance)
 
-    tags = [
-        'endpoint:{}'.format(instance['prometheus_url']),
-    ]
+    tags = ['endpoint:{}'.format(instance['prometheus_url'])]
 
     aggregator.assert_service_check('etcd.prometheus.health', Etcd.OK, tags=tags, count=1)
 
@@ -92,9 +88,7 @@ def test_bad_config(aggregator):
     with pytest.raises(Exception):
         check.check(instance)
 
-    aggregator.assert_service_check(
-        check.SERVICE_CHECK_NAME, tags=['url:{}'.format(bad_url)], count=1
-    )
+    aggregator.assert_service_check(check.SERVICE_CHECK_NAME, tags=['url:{}'.format(bad_url)], count=1)
     aggregator.assert_service_check(check.HEALTH_SERVICE_CHECK_NAME)
 
 

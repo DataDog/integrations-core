@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .nfsstat import NfsStatCheck
 
-__all__ = [
-    '__version__',
-    'NfsStatCheck'
-]
+__all__ = ['__version__', 'NfsStatCheck']

@@ -61,6 +61,9 @@ class LocalAgentInterface(object):
     def agent_command(self):
         return get_agent_exe(self.agent_version, platform=self.platform)
 
+    def exec_command(self, command, **kwargs):
+        return run_command(command, **kwargs)
+
     def write_config(self):
         write_env_data(self.check, self.env, self.config, self.metadata)
         self.copy_config_to_local_agent()

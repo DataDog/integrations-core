@@ -10,7 +10,6 @@ from datadog_checks.checks import AgentCheck
 
 
 class SystemSwap(AgentCheck):
-
     def check(self, instance):
         swap_mem = psutil.swap_memory()
         tags = instance.get('tags', [])

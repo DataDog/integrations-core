@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.dns_check import DNSCheck
+
 from . import common
 
 

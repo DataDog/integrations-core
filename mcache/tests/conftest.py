@@ -8,8 +8,16 @@ import pytest
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.mcache import Memcache
+
 from .common import (
-    HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH, platform_supports_sockets
+    DOCKER_SOCKET_DIR,
+    DOCKER_SOCKET_PATH,
+    HERE,
+    HOST,
+    PASSWORD,
+    PORT,
+    USERNAME,
+    platform_supports_sockets,
 )
 from .utils import get_host_socket_path
 
@@ -30,7 +38,7 @@ def dd_environment(e2e_instance):
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         service_name='memcached',
         env_vars={'PWD': HERE},
-        conditions=[WaitFor(connect_to_mcache, args=(['{}:{}'.format(HOST, PORT)], USERNAME, PASSWORD))]
+        conditions=[WaitFor(connect_to_mcache, args=(['{}:{}'.format(HOST, PORT)], USERNAME, PASSWORD))],
     ):
         if platform_supports_sockets:
             with TempDir() as temp_dir:
@@ -50,7 +58,7 @@ def dd_environment(e2e_instance):
                     },
                     conditions=[WaitFor(connect_to_mcache, args=(host_socket_path, USERNAME, PASSWORD))],
                     # Don't worry about spinning down since the outermost runner will already do that
-                    down=lambda: None
+                    down=lambda: None,
                 ):
                     yield e2e_instance
         else:
@@ -74,31 +82,14 @@ def check():
 
 @pytest.fixture
 def instance():
-    return {
-        'url': HOST,
-        'port': PORT,
-        'tags': ['foo:bar'],
-        'username': USERNAME,
-        'password': PASSWORD,
-    }
+    return {'url': HOST, 'port': PORT, 'tags': ['foo:bar'], 'username': USERNAME, 'password': PASSWORD}
 
 
 @pytest.fixture(scope='session')
 def e2e_instance():
-    return {
-        'url': HOST,
-        'port': PORT,
-        'tags': ['foo:bar'],
-        'username': USERNAME,
-        'password': PASSWORD,
-    }
+    return {'url': HOST, 'port': PORT, 'tags': ['foo:bar'], 'username': USERNAME, 'password': PASSWORD}
 
 
 @pytest.fixture
 def instance_socket():
-    return {
-        'socket': get_host_socket_path(),
-        'tags': ['foo:bar'],
-        'username': USERNAME,
-        'password': PASSWORD,
-    }
+    return {'socket': get_host_socket_path(), 'tags': ['foo:bar'], 'username': USERNAME, 'password': PASSWORD}

@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .ssh_check import CheckSSH
 
-__all__ = [
-    '__version__',
-    'CheckSSH'
-]
+__all__ = ['__version__', 'CheckSSH']

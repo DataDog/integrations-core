@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from setuptools import setup
 from codecs import open
 from os import path
+
+from setuptools import setup
 
 HERE = path.abspath(path.dirname(__file__))
 
@@ -48,10 +49,8 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
     packages=['datadog_checks.openldap'],
-
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-
     # Extra files to ship with the wheel package
     package_data={'datadog_checks.openldap': ['conf.yaml.example']},
     include_package_data=True,

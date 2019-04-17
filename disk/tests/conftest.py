@@ -5,6 +5,7 @@ import mock
 import pytest
 
 from datadog_checks.dev.utils import ON_WINDOWS, mock_context_manager
+
 from .metrics import CORE_GAUGES, CORE_RATES, UNIX_GAUGES
 from .mocks import MockDiskIOMetrics, MockDiskMetrics, MockInodesMetrics, MockPart
 
@@ -16,11 +17,9 @@ def psutil_mocks():
     else:
         mock_statvfs = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__='statvfs')
 
-    with \
-            mock.patch('psutil.disk_partitions', return_value=[MockPart()], __name__='disk_partitions'), \
-            mock.patch('psutil.disk_usage', return_value=MockDiskMetrics(), __name__='disk_usage'), \
-            mock.patch('psutil.disk_io_counters', return_value=MockDiskIOMetrics()), \
-            mock_statvfs:
+    with mock.patch('psutil.disk_partitions', return_value=[MockPart()], __name__='disk_partitions'), mock.patch(
+        'psutil.disk_usage', return_value=MockDiskMetrics(), __name__='disk_usage'
+    ), mock.patch('psutil.disk_io_counters', return_value=MockDiskIOMetrics()), mock_statvfs:
         yield
 
 
@@ -31,16 +30,12 @@ def dd_environment(instance_basic_volume):
 
 @pytest.fixture(scope='session')
 def instance_basic_volume():
-    return {
-        'use_mount': 'false',
-    }
+    return {'use_mount': 'false'}
 
 
 @pytest.fixture(scope='session')
 def instance_basic_mount():
-    return {
-        'use_mount': 'true',
-    }
+    return {'use_mount': 'true'}
 
 
 @pytest.fixture(scope='session')

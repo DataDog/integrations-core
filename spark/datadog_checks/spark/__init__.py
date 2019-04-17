@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .spark import SparkCheck
 
-__all__ = [
-    '__version__',
-    'SparkCheck'
-]
+__all__ = ['__version__', 'SparkCheck']
