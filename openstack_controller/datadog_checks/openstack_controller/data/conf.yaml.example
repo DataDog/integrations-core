@@ -33,7 +33,7 @@ instances:
     ## @param whitelist_project_names - list of strings - optional - default: []
     ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
     ## Regex expressions for the project names are supported.
-    ## Whitelist takes precedence over blacklist in case of overlap.
+    ## Blacklist takes precedence over whitelist in case of overlap.
     #
     # whitelist_project_names:
     #   - <PROJECT_NAME>
@@ -42,7 +42,7 @@ instances:
     ## @param blacklist_project_names - list of strings - optional - default: []
     ## IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
     ## Regex expressions for the project names are supported.
-    ## Whitelist takes precedence over blacklist in case of overlap.
+    ## Blacklist takes precedence over whitelist in case of overlap.
     #
     # blacklist_project_names:
     #   - <PROJECT_NAME>
