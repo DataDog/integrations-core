@@ -4,6 +4,7 @@
 
 import os
 import subprocess
+import time
 
 import pytest
 import requests
@@ -32,6 +33,7 @@ def dd_environment():
 
     with docker_run(compose_file, log_patterns='Server startup complete', env_vars=env):
         setup_rabbitmq()
+        time.sleep(5)
         yield CONFIG
 
 
