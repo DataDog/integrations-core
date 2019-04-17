@@ -401,7 +401,7 @@ Descriptions of each column of the `metadata.csv` file:
 
 ##### Example metadata config
 
-Our example integration doesn't send any metrics, so in this case the generated `awesome/metadata.csv` remains empty.
+Our example integration doesn't send any metrics, so in this case the generated `awesome/metadata.csv` contains only the row containing CSV column names.
 
 #### Service check file
 
@@ -421,7 +421,7 @@ The `service_checks.json` file contains the following mandatory attributes:
 
 ##### Example service check config
 
-Our example integration contains a service check, so we need to add it to the `awesome/service_checks.json` file:
+Our example integration contains a service check, so we need to create a JSON file at `awesome/service_checks.json` with the following contents:
 
 ```json
 [
