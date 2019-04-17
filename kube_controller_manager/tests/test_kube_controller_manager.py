@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import pytest
+
 import mock
+import pytest
 
 from datadog_checks.base.checks.kube_leader import ElectionRecord
 from datadog_checks.kube_controller_manager import KubeControllerManagerCheck
@@ -12,7 +13,7 @@ from datadog_checks.kube_controller_manager import KubeControllerManagerCheck
 instance = {
     'prometheus_url': 'http://localhost:10252/metrics',
     'extra_queues': ['extra'],
-    'extra_limiters': ['extra_controller']
+    'extra_limiters': ['extra_controller'],
 }
 
 # Constants
@@ -28,9 +29,7 @@ def mock_metrics():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"}
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),
     ):
         yield
@@ -42,8 +41,8 @@ def mock_leader():
     with mock.patch(
         'datadog_checks.kube_controller_manager.KubeControllerManagerCheck._get_record',
         return_value=ElectionRecord(
-            '{"holderIdentity":"pod1","leaseDurationSeconds":15,"leaderTransitions":3,' +
-            '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}'
+            '{"holderIdentity":"pod1","leaseDurationSeconds":15,"leaderTransitions":3,'
+            + '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}'
         ),
     ):
         yield
@@ -95,11 +94,7 @@ def test_check_metrics(aggregator, mock_metrics, mock_leader):
     assert_metric('.queue.latency.quantile', value=10, tags=["queue:extra", "quantile:0.9"])
 
     # Leader election mixin
-    expected_le_tags = [
-        "record_kind:endpoints",
-        "record_name:kube-controller-manager",
-        "record_namespace:kube-system"
-    ]
+    expected_le_tags = ["record_kind:endpoints", "record_name:kube-controller-manager", "record_namespace:kube-system"]
     assert_metric('.leader_election.transitions', value=3, tags=expected_le_tags)
     assert_metric('.leader_election.lease_duration', value=15, tags=expected_le_tags)
     aggregator.assert_service_check(NAMESPACE + ".leader_election.status", tags=expected_le_tags)
