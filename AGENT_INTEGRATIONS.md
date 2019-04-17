@@ -127,7 +127,7 @@
 * datadog-cassandra-nodetool: 1.3.0
 * datadog-cassandra: 1.3.0
 * datadog-ceph: 1.4.0
-* datadog-checks-base: 6.0.0
+* datadog-checks-base: 6.0.1
 * datadog-checks-downloader: 0.3.0
 * datadog-cisco-aci: 1.4.0
 * datadog-cockroachdb: 1.0.0
@@ -150,7 +150,6 @@
 * datadog-gitlab-runner: 2.1.0
 * datadog-gitlab: 2.1.0
 * datadog-go-expvar: 1.1.0
-* datadog-go-metro: 1.1.0
 * datadog-gunicorn: 1.6.0
 * datadog-haproxy: 2.0.0
 * datadog-hdfs-datanode: 1.6.0
@@ -239,7 +238,7 @@
 * datadog-cassandra-nodetool: 1.3.0
 * datadog-cassandra: 1.3.0
 * datadog-ceph: 1.4.0
-* datadog-checks-base: 6.0.0
+* datadog-checks-base: 6.0.1
 * datadog-checks-downloader: 0.3.0
 * datadog-cisco-aci: 1.4.0
 * datadog-cockroachdb: 1.0.0
@@ -262,7 +261,6 @@
 * datadog-gitlab-runner: 2.1.0
 * datadog-gitlab: 2.1.0
 * datadog-go-expvar: 1.1.0
-* datadog-go-metro: 1.1.0
 * datadog-gunicorn: 1.6.0
 * datadog-haproxy: 2.0.0
 * datadog-hdfs-datanode: 1.6.0
@@ -687,7 +685,6 @@
 * gearmand: 1.1.1
 * gitlab: 2.0.0
 * gitlab_runner: 2.0.0
-* go-metro: 1.0.0
 * go_expvar: 1.0.4
 * gunicorn: 1.3.0
 * haproxy: 1.3.1
@@ -791,7 +788,6 @@
 * gearmand: 1.1.1
 * gitlab: 2.0.0
 * gitlab_runner: 2.0.0
-* go-metro: 1.0.0
 * go_expvar: 1.0.4
 * gunicorn: 1.3.0
 * haproxy: 1.3.1

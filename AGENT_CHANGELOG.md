@@ -53,7 +53,7 @@
 * Cacti [1.3.0](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
 * Cassandra Nodetool [1.3.0](https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/CHANGELOG.md)
 * Ceph [1.4.0](https://github.com/DataDog/integrations-core/blob/master/ceph/CHANGELOG.md)
-* datadog_checks_base [6.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
+* datadog_checks_base [6.0.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
 * datadog_checks_downloader [0.3.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
 * Cisco ACI [1.4.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
 * Consul [1.7.0](https://github.com/DataDog/integrations-core/blob/master/consul/CHANGELOG.md)
@@ -65,7 +65,6 @@
 * etcd [1.7.0](https://github.com/DataDog/integrations-core/blob/master/etcd/CHANGELOG.md)
 * Exchange Server [1.3.0](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
 * Gitlab Runner [2.1.0](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md)
-* go_metro [1.1.0](https://github.com/DataDog/integrations-core/blob/master/go_metro/CHANGELOG.md)
 * Gunicorn [1.6.0](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
 * HAProxy [2.0.0](https://github.com/DataDog/integrations-core/blob/master/haproxy/CHANGELOG.md) **BREAKING CHANGE**
 * HDFS Namenode [1.5.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
@@ -260,7 +259,6 @@
 * Exchange Server [1.2.0](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
 * Gitlab [2.0.0](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md) **BREAKING CHANGE**
 * Gitlab Runner [2.0.0](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md) **BREAKING CHANGE**
-* Go-Metro [1.0.0](https://github.com/DataDog/integrations-core/blob/master/go-metro/CHANGELOG.md)
 * Gunicorn [1.3.0](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
 * HTTP [3.0.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md) **BREAKING CHANGE**
 * IIS [2.2.0](https://github.com/DataDog/integrations-core/blob/master/iis/CHANGELOG.md)
