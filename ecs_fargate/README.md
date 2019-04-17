@@ -38,7 +38,7 @@ The instructions below show you how to configure the task using the [AWS CLI too
 2. Click on **Task Definitions** in the left menu, then click the **Create new Task Definition** button.
 3. Select **Fargate** as the launch type, then click the **Next step** button.
 4. Enter a **Task Definition Name**, such as `my-app-and-datadog`.
-5. Select a Task execution IAM role. See permission requirements in the [Create or Modify your IAM Policy](##create-or-modify-your-iam-policy) section below.
+5. Select a Task execution IAM role. See permission requirements in the [Create or Modify your IAM Policy](#create-or-modify-your-iam-policy) section below.
 6. Choose **Task memory** and **Task CPU** based on your needs.
 7. Click the **Add container** button.
 8. For **Container name** enter `datadog-agent`.
