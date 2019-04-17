@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import os
+
 from datadog_checks.utils.common import get_docker_hostname
 
 CHECK_NAME = "go_expvar"
@@ -16,16 +17,7 @@ GO_EXPVAR_URL_PATH = "/debug/vars"
 
 URL_WITH_PATH = "{}{}".format(URL, GO_EXPVAR_URL_PATH)
 
-INSTANCE = {
-    "expvar_url": URL,
-    'tags': ['my_tag'],
-    'metrics': [
-        {
-            'path': 'num_calls',
-            "type": "rate"
-        },
-    ]
-}
+INSTANCE = {"expvar_url": URL, 'tags': ['my_tag'], 'metrics': [{'path': 'num_calls', "type": "rate"}]}
 
 CHECK_GAUGES = [
     'go_expvar.memstats.alloc',
@@ -39,9 +31,7 @@ CHECK_GAUGES = [
 ]
 
 # this is a histogram
-CHECK_GAUGES_DEFAULT = [
-    'go_expvar.memstats.pause_ns',
-]
+CHECK_GAUGES_DEFAULT = ['go_expvar.memstats.pause_ns']
 
 CHECK_RATES = [
     'go_expvar.memstats.frees',
