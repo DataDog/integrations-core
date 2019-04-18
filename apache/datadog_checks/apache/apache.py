@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import warnings
+
 import requests
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
@@ -58,9 +60,6 @@ class Apache(AgentCheck):
 
         disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', False))
 
-        if disable_ssl_validation:
-            requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
-
         auth = None
         if 'apache_user' in instance and 'apache_password' in instance:
             auth = (instance['apache_user'], instance['apache_password'])
@@ -75,13 +74,17 @@ class Apache(AgentCheck):
             self.log.debug(
                 'apache check initiating request, connect timeout %d receive %d' % (connect_timeout, receive_timeout)
             )
-            r = requests.get(
-                url,
-                auth=auth,
-                headers=headers(self.agentConfig),
-                verify=not disable_ssl_validation,
-                timeout=(connect_timeout, receive_timeout),
-            )
+            with warnings.catch_warnings():
+                if config['tls_ignore_warning']:
+                    warnings.simplefilter('ignore', InsecureRequestWarning)
+
+                r = requests.get(
+                    url,
+                    auth=auth,
+                    headers=headers(self.agentConfig),
+                    verify=not disable_ssl_validation,
+                    timeout=(connect_timeout, receive_timeout),
+                )
             r.raise_for_status()
 
         except Exception as e:
