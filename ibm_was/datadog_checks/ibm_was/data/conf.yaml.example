@@ -8,11 +8,69 @@ instances:
     #
   - servlet_url: http://localhost:<PORT>/wasPerfTool/servlet/perfservlet
 
+    ## @param username - string - optional
+    ## The username to use for authentication againse the servlet
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The username to use for authentication againse the servlet
+    #
+    # password: <password>
+
+    ## @param timeout - int - optional - default: 10
+    ## The timeout for connecting to the perf servlet
+    #
+    # timeout: 10
+
+    ## @param headers - map - optional
+    ## Map of headers to send on every request
+    #
+    # headers:
+    #  - <header1>
+    #  - <header2>
+
+    ## @param proxy - boolean - optional - default: False
+    ## Wheter or not to skip the proxy configured in the Agent's config file when
+    ## making the request to the PerfServlet
+    #
+    # skip_proxy: False
+
+    ## @param ssl_veify - boolean - optional - default: True
+    ## Whether or not to verify SSL certificates (default true)
+    #
+    # ssl_verify: False
+
+    ## @param ssl_ca_cert - string - optional
+    ## The path to a CA_BUNDLE file or directory with certificates of trusted CAs. Implicitly sets ssl_verify to true
+    #
+    # ssl_ca_cert: <PATH_TO_CERT>
+
+    ## @param ssl_cert - string - optional
+    ## The client side certificate to use
+    #
+    # ssl_cert: <PATH_TO_CERT>
+
+    ## @param ssl_private_key - string - optional
+    ## The private key to use if it's not included in the ssl_cert file
+    #
+    # ssl_private_key: <private_key>
+
+    ## @param ssl_ignore_warning - boolean - optional - default:
+    ## The private key to use if it's not included in the ssl_cert file
+    #
+    # ssl_ignore_warning: False
+
     ## @param skip_proxy - boolean - optional - default: False
     ## Wheter or not to skip the proxy configured in the Agent's config file when
     ## making the request to the PerfServlet
     #
     # skip_proxy: False
+
+    ## @param persist_connections - boolean - optional - default: True
+    ## Whether or not to persist cookies and use connection pooling
+    #
+    # persist_connections: True
 
     ## @param collect_jdbc_stats - boolean - optional - default: True
     ## Whether or not to collect JDBC Connection Pool stats

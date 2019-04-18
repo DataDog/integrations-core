@@ -100,7 +100,7 @@ class IbmWasCheck(AgentCheck):
 
     def make_request(self, instance, url, tags):
         try:
-            resp = requests.get(url, proxies=self.get_instance_proxy(instance, url))
+            resp = self.http.get(url)
             resp.raise_for_status()
             self.submit_service_checks(tags, AgentCheck.OK)
         except (requests.HTTPError, requests.ConnectionError) as e:
