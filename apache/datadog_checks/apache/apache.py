@@ -75,7 +75,7 @@ class Apache(AgentCheck):
                 'apache check initiating request, connect timeout %d receive %d' % (connect_timeout, receive_timeout)
             )
             with warnings.catch_warnings():
-                if config['tls_ignore_warning']:
+                if _is_affirmative(instance.get('tls_ignore_warning', False)):
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
                 r = requests.get(
