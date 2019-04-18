@@ -45,6 +45,12 @@ instances:
     #
     # receive_timeout: <VALUE_IN_SECOND>
 
+  ## @param tls_ignore_warning - boolean - optional - default: false
+  ## Instructs the check to disable the TLS/SSL warnings when the apache_status_url uses https
+  ## and SSL certificate verification is disabled.
+  #
+  # tls_ignore_warning: false
+
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
