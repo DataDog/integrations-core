@@ -227,12 +227,12 @@ instances:
     #
     # stream: false
 
-    ## @param include_default_headers - boolean - optional - default: true
+    ## @param include_default_headers - boolean - optional - default: false
     ## The (optional) include_default_headers parameter instructs the check to include the default headers.
     ## Default headers can be found at:
     ## https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/utils/headers.py
     #
-    # include_default_headers: true
+    # include_default_headers: false
 
     ## @param tags  - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
