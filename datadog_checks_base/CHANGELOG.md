@@ -2,7 +2,7 @@
 
 ## 7.0.0 / 2019-04-18
 
-* [Added] Add TLS integration. See [#3256](https://github.com/DataDog/integrations-core/pull/3256).
+* [Added] Add service_identity dependency. See [#3256](https://github.com/DataDog/integrations-core/pull/3256).
 * [Changed] Standardize TLS/SSL protocol naming. See [#3620](https://github.com/DataDog/integrations-core/pull/3620).
 * [Fixed] Parse timeouts as floats in RequestsWrapper. See [#3448](https://github.com/DataDog/integrations-core/pull/3448).
 * [Added] Support Python 3. See [#3605](https://github.com/DataDog/integrations-core/pull/3605).
