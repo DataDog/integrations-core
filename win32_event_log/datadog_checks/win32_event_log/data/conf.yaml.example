@@ -1,5 +1,12 @@
 init_config:
 
+  ## @param submit_all_events - boolean - optional - default: false
+  ## By default, all events will not be submitted but rather specified by filters.
+  ##
+  ## WARNING: Enabling this will severely impact performance and clutter your event stream.
+  #
+  submit_all_events: false
+
   ## @param tag_event_id - boolean - optional - default: false
   ## The `tag_event_id` setting adds an event id tag to each
   ## event sent from this check.
@@ -14,7 +21,13 @@ init_config:
 
 instances:
 
-  -
+    ## @param submit_all_events - boolean - optional - default: false
+    ## By default, all events will not be submitted but rather specified by filters.
+    ## Overrides `submit_all_events` in `init_config`.
+    ##
+    ## WARNING: Enabling this will severely impact performance and clutter your event stream.
+    #
+  - submit_all_events: false
 
     ## @param host - string - optional - default: localhost
     ## By default, the local machine's event logs are captured. To capture a remote

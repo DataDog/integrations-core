@@ -6,6 +6,7 @@ import logging
 import pytest
 from mock import patch
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.win32_event_log import Win32EventLogWMI
 
 log = logging.getLogger(__file__)
@@ -101,3 +102,10 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
         alert_type='error',
         source_type_name='event viewer',
     )
+
+
+def test_new_default_config(check):
+    instance = {'submit_all_events': False}
+
+    with pytest.raises(ConfigurationError):
+        check.check(instance)
