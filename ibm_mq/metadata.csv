@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+ibm_mq.channel.channels,gauge,,resource,,The number of active channels,0,ibm_mq,Number of channels
 ibm_mq.queue.service_interval,gauge,,millisecond,,the time since last serviced,0,ibm_mq,service interval
 ibm_mq.queue.inhibit_put,gauge,,occurrence,,puts are inhibited,0,ibm_mq,puts inhibited
 ibm_mq.queue.depth_low_limit,gauge,,item,,the low limit on the depth to create an alert,0,ibm_mq,depth low limit
