@@ -14,7 +14,7 @@
         "groups": ["queue_manager", "mq_host", "port", "channel"],
         "check": "ibm_mq.queue_manager",
         "statuses": ["ok", "critical"],
-        "name": "Can Connect",
+        "name": "Queue Manager Can Connect",
         "description": "Returns `CRITICAL` if the Agent cannot retrieve stats from the queue manager. Returns `OK` otherwise."
     },
     {
@@ -23,7 +23,7 @@
         "groups": ["queue_manager", "mq_host", "port", "queue"],
         "check": "ibm_mq.queue",
         "statuses": ["ok", "critical"],
-        "name": "Can Connect",
+        "name": "Queue Can Connect",
         "description": "Returns `CRITICAL` if the Agent cannot retrieve queue stats. Returns `OK` otherwise."
     },
     {
@@ -32,7 +32,7 @@
         "groups": ["queue_manager", "mq_host", "port", "channel"],
         "check": "ibm_mq.channel",
         "statuses": ["ok", "critical"],
-        "name": "Can Connect",
+        "name": "Channel Can Connect",
         "description": "Returns `CRITICAL` if the Agent cannot retrieve channel stats. Returns `OK` otherwise."
     }
 ]
