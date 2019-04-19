@@ -67,10 +67,10 @@ instances:
     #
     # skip_proxy: False
 
-    ## @param persist_connections - boolean - optional - default: True
+    ## @param persist_connections - boolean - optional - default: False
     ## Whether or not to persist cookies and use connection pooling
     #
-    # persist_connections: True
+    # persist_connections: False
 
     ## @param collect_jdbc_stats - boolean - optional - default: True
     ## Whether or not to collect JDBC Connection Pool stats
