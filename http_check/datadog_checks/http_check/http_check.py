@@ -144,6 +144,12 @@ class HTTPCheck(NetworkCheck):
                 if suppress_warning:
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
+                # GET requests do not need headers that include Content-Type, as some firewalls may block them
+                # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type
+                if method == 'get' and headers['Content-Type'] == 'application/x-www-form-urlencoded':
+                    headers.pop('Content-Type')
+                    self.log.debug("Stripping headers from Content-Type")
+
                 r = sess.request(
                     method.upper(),
                     addr,

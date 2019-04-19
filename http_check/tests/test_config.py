@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.http_check.config import DEFAULT_EXPECTED_CODE, from_instance
+from datadog_checks.utils.headers import headers as agent_headers
 
 
 @pytest.mark.unit
@@ -49,7 +50,7 @@ def test_from_instance():
     # default `include_content` is False
     assert params[10] is False
     # default headers
-    assert params[11] == {}
+    assert params[11] == agent_headers({})
     # default `collect_response_time` is True
     assert params[12] is True
     # default `content_match` is None
@@ -83,7 +84,9 @@ def test_from_instance():
     )
 
     headers = params[11]
+    expected_headers = agent_headers({}).get('User-Agent')
     assert headers["X-Auth-Token"] == "SOME-AUTH-TOKEN", headers
+    assert expected_headers == headers.get('User-Agent'), headers
 
     # proxy
     params = from_instance({'url': 'https://example.com', 'name': 'UpService', 'no_proxy': True})

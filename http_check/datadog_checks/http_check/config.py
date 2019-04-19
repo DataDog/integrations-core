@@ -36,7 +36,7 @@ def from_instance(instance, default_ca_certs=None):
     http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
     timeout = int(instance.get('timeout', 10))
     config_headers = instance.get('headers', {})
-    default_headers = is_affirmative(instance.get("include_default_headers", False))
+    default_headers = is_affirmative(instance.get("include_default_headers", True))
     if default_headers:
         headers = agent_headers({})
     else:
