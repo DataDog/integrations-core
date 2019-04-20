@@ -2,12 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+
 import mock
 
-
-from datadog_checks.dev.utils import (
-    running_on_appveyor, running_on_travis, running_on_ci
-)
+from datadog_checks.dev.utils import running_on_appveyor, running_on_ci, running_on_travis
 
 
 def test_running_on_appveyor():

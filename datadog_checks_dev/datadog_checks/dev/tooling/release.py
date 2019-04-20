@@ -3,18 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from .utils import get_version_file, load_manifest
-from ..utils import read_file, read_file_lines, write_file, write_file_lines, chdir
 from ..errors import ManifestError
 from ..subprocess import run_command
-
+from ..utils import chdir, read_file, read_file_lines, write_file, write_file_lines
+from .utils import get_version_file, load_manifest
 
 # Maps the Python platform strings to the ones we have in the manifest
-PLATFORMS_TO_PY = {
-    'windows': 'win32',
-    'mac_os': 'darwin',
-    'linux': 'linux2',
-}
+PLATFORMS_TO_PY = {'windows': 'win32', 'mac_os': 'darwin', 'linux': 'linux2'}
 ALL_PLATFORMS = sorted(PLATFORMS_TO_PY)
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 DATADOG_PACKAGE_PREFIX = 'datadog-'
@@ -62,7 +57,7 @@ def get_folder_name(package_name):
     elif package_name == 'datadog-checks-downloader':
         return 'datadog_checks_downloader'
 
-    return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX):]
+    return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX) :]
 
 
 def get_agent_requirement_line(check, version):
@@ -84,9 +79,7 @@ def get_agent_requirement_line(check, version):
         return '{}=={}'.format(package_name, version)
     # one specific platform
     elif len(platforms) == 1:
-        return "{}=={}; sys_platform == '{}'".format(
-            package_name, version, PLATFORMS_TO_PY.get(platforms[0])
-        )
+        return "{}=={}; sys_platform == '{}'".format(package_name, version, PLATFORMS_TO_PY.get(platforms[0]))
     elif platforms:
         if 'windows' not in platforms:
             return "{}=={}; sys_platform != 'win32'".format(package_name, version)
