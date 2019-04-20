@@ -16,10 +16,7 @@ def test_objects_queue_init(q):
 
 
 def test_objects_queue_fill(q):
-    q.fill('foo', {
-        'type_foo': [],
-        'type_bar': [-99],
-    })
+    q.fill('foo', {'type_foo': [], 'type_bar': [-99]})
     assert len(q._objects_queue) == 1
     assert len(q._objects_queue['foo']) == 2
 
@@ -31,10 +28,7 @@ def test_objects_queue_contains(q):
 
 
 def test_objects_queue_size(q):
-    q.fill('foo', {
-        'type_foo': [],
-        'type_bar': [-99],
-    })
+    q.fill('foo', {'type_foo': [], 'type_bar': [-99]})
     assert q.size('foo', 'type_foo') == 0
     assert q.size('foo', 'type_bar') == 1
     with pytest.raises(KeyError):
@@ -42,10 +36,7 @@ def test_objects_queue_size(q):
 
 
 def test_objects_queue_pop(q):
-    q.fill('foo', {
-        'type_foo': [],
-        'type_bar': [-99],
-    })
+    q.fill('foo', {'type_foo': [], 'type_bar': [-99]})
     assert q.pop('foo', 'type_foo') is None
     assert q.pop('foo', 'type_bar') == -99
     with pytest.raises(KeyError):

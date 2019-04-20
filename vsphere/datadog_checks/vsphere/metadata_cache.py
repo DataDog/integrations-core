@@ -13,6 +13,7 @@ class MetadataCache:
     Implements a thread safe storage for metrics metadata.
     For each instance key the cache maps: counter ID --> metric name, unit
     """
+
     def __init__(self):
         self._metadata = {}
         self._metric_ids = {}

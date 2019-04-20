@@ -11,6 +11,7 @@ class CacheConfig:
     CacheConfig is threadsafe and can be used from different workers in the
     threading pool.
     """
+
     Morlist = 0
     Metadata = 1
 
@@ -31,14 +32,8 @@ class CacheConfig:
         """
         with self._lock:
             self._config = {
-                CacheConfig.Morlist: {
-                    'last': defaultdict(float),
-                    'intl': {},
-                },
-                CacheConfig.Metadata: {
-                    'last': defaultdict(float),
-                    'intl': {},
-                }
+                CacheConfig.Morlist: {'last': defaultdict(float), 'intl': {}},
+                CacheConfig.Metadata: {'last': defaultdict(float), 'intl': {}},
             }
 
     def set_last(self, type_, key, ts):
