@@ -104,8 +104,44 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
     )
 
 
-def test_new_default_config(check):
-    instance = {'submit_all_events': False}
+def test_no_filters(check):
+    instance = {}
 
     with pytest.raises(ConfigurationError):
         check.check(instance)
+
+
+def test_filter_source_name(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'source_name': ['MSSQLSERVER']}
+
+    check.check(instance)
+
+
+def test_filter_event_id(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'event_id': ['789']}
+
+    check.check(instance)
+
+
+def test_filter_message_filters(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'message_filters': ['ok']}
+
+    check.check(instance)
+
+
+def test_filter_log_file(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'log_file': ['log']}
+
+    check.check(instance)
+
+
+def test_filter_user(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'user': 'user'}
+
+    check.check(instance)
+
+
+def test_filter_type(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'type': ['type']}
+
+    check.check(instance)

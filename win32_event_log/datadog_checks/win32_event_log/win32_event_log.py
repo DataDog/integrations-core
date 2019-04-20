@@ -29,7 +29,6 @@ class Win32EventLogWMI(WinWMICheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         WinWMICheck.__init__(self, name, init_config, agentConfig, instances=instances)
         # Settings
-        self._submit_all_events = is_affirmative(init_config.get('submit_all_events', True))
         self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
         self._verbose = init_config.get('verbose', True)
         self._default_event_priority = init_config.get('default_event_priority', 'normal')
@@ -55,9 +54,8 @@ class Win32EventLogWMI(WinWMICheck):
         event_ids = instance.get('event_id', [])
         event_format = instance.get('event_format')
         message_filters = instance.get('message_filters', [])
-        submit_all_events = is_affirmative(instance.get('submit_all_events', self._submit_all_events))
 
-        if not submit_all_events and not (source_names or event_ids or message_filters or log_files or user or ltypes):
+        if not (source_names or event_ids or message_filters or log_files or user or ltypes):
             raise ConfigurationError(
                 'At least one of the following filters must be selected: '
                 'source_name, event_id, message_filters, log_file, user, type'
