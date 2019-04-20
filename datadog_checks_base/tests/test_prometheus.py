@@ -11,8 +11,7 @@ from six import iteritems, iterkeys
 from six.moves import range
 
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
-from datadog_checks.utils.prometheus import parse_metric_family, metrics_pb2
-
+from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
 
@@ -1232,7 +1231,7 @@ def test_parse_one_summary_with_none_values(p_check):
 
     # Root summary sample
     summary_metric.summary.sample_count = 0
-    summary_metric.summary.sample_sum = 0.
+    summary_metric.summary.sample_sum = 0.0
 
     # Create quantiles 0.5, 0.9, 0.99
     quantile_05 = summary_metric.summary.quantile.add()

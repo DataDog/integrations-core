@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+from .utils.common import to_string
+
 try:
     import datadog_agent
 except ImportError:
     from .stubs import datadog_agent
 
-from .utils.common import to_string
 
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
@@ -25,11 +26,12 @@ class AgentLogHandler(logging.Handler):
     This handler forwards every log to the Go backend allowing python checks to
     log message within the main agent logging system.
     """
+
     def emit(self, record):
         msg = "({}:{}) | {}".format(
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
-            to_string(self.format(record))
+            to_string(self.format(record)),
         )
         datadog_agent.log(msg, record.levelno)
 

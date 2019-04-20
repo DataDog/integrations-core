@@ -4,8 +4,10 @@
 
 try:
     import datadog_agent
+
     if datadog_agent.get_config('integration_tracing'):
         from ddtrace import patch
+
         patch(requests=True)
 except ImportError:
     # Tracing Integrations is only available with Agent 6

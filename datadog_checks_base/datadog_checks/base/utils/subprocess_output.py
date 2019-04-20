@@ -5,6 +5,8 @@ import logging
 
 from six import string_types
 
+from .. import ensure_unicode
+
 try:
     # Agent6
     from _util import get_subprocess_output as subprocess_output
@@ -19,7 +21,6 @@ except ImportError:
         from ..stubs._util import subprocess_output
         from ..stubs._util import SubprocessOutputEmptyError  # noqa
 
-from .. import ensure_unicode
 
 log = logging.getLogger(__name__)
 
@@ -59,9 +60,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
 
     log.debug(
         'get_subprocess_output returned '
-        '(len(out): {} ; len(err): {} ; returncode: {})'.format(
-            len(out), len(err), returncode
-        )
+        '(len(out): {} ; len(err): {} ; returncode: {})'.format(len(out), len(err), returncode)
     )
 
     out = ensure_unicode(out) if out is not None else None

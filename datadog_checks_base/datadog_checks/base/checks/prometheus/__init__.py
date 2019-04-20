@@ -4,11 +4,7 @@
 
 try:
     # Agent5 compatibility layer
-    from checks import (
-        UnknownFormatError,
-        PrometheusFormat,
-        PrometheusCheck
-    )
+    from checks import UnknownFormatError, PrometheusFormat, PrometheusCheck
 except ImportError:
     from .mixins import PrometheusFormat, UnknownFormatError
     from .prometheus_base import PrometheusCheck
@@ -16,10 +12,4 @@ except ImportError:
 
 from .base_check import PrometheusScraper
 
-__all__ = [
-    'PrometheusFormat',
-    'UnknownFormatError',
-    'PrometheusCheck',
-    'GenericPrometheusCheck',
-    'PrometheusScraper',
-]
+__all__ = ['PrometheusFormat', 'UnknownFormatError', 'PrometheusCheck', 'GenericPrometheusCheck', 'PrometheusScraper']
