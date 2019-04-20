@@ -4,7 +4,7 @@
 
 ## Overview
 
-This check monitors [RabbitMQ][16] through the Datadog Agent. It allows you to:
+This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 
 * Track queue-based stats: queue size, consumer count, unacknowledged messages, redelivered messages, etc
 * Track node-based stats: waiting processes, used sockets, used file descriptors, etc
@@ -15,15 +15,15 @@ And more.
 ## Setup
 ### Installation
 
-The RabbitMQ check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+The RabbitMQ check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
 ### Configuration
 
-Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your RabbitMQ [metrics](#metric-collection) and [logs](#log-collection). See the [sample rabbitmq.yaml][4] for all available configuration options.
+Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your RabbitMQ [metrics](#metric-collection) and [logs](#log-collection). See the [sample rabbitmq.yaml][5] for all available configuration options.
 
 #### Prepare RabbitMQ
 
-Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][5] to enable it.
+Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][6] to enable it.
 
 The Agent user then needs at least the `monitoring` tag and these required permissions:
 
@@ -41,7 +41,7 @@ rabbitmqctl set_permissions  -p / datadog "^aliveness-test$" "^amq\.default$" ".
 rabbitmqctl set_user_tags datadog monitoring
 ```
 
-Here, `/` refers to the default host. Set this to your specified virtual host name. See the [RabbitMQ documentation][6] for more information.
+Here, `/` refers to the default host. Set this to your specified virtual host name. See the [RabbitMQ documentation][7] for more information.
 
 #### Metric Collection
 
@@ -66,13 +66,13 @@ If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 
 If you do set `vhosts`, the Agent sends this check and metric only for the vhosts you list.
 
-There are options for `queues` and `nodes` that work similarly. The Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration][4] for details.
+There are options for `queues` and `nodes` that work similarly. The Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration][5] for details.
 
 Configuration Options:
 
 | Option                           | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                 |
 |----------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `rabbitmq_api_url`               | Yes      | Points to the API url of the [RabbitMQ Managment Plugin][7].                                                                                                                                                                                                                                                                                                                                                |
+| `rabbitmq_api_url`               | Yes      | Points to the API url of the [RabbitMQ Managment Plugin][8].                                                                                                                                                                                                                                                                                                                                                |
 | `rabbitmq_user`                  | No       | User name, defaults to 'guest'                                                                                                                                                                                                                                                                                                                                                                              |
 | `rabbitmq_pass`                  | No       | Password, defaults to 'guest'                                                                                                                                                                                                                                                                                                                                                                               |
 | `tag_families`                   | No       | Tag queue "families" based off of regex matching, defaults to false                                                                                                                                                                                                                                                                                                                                         |
@@ -81,7 +81,7 @@ Configuration Options:
 | `exchanges` or `exchanges_regex` | No       | Use these parameters to specify the exchanges you want to collect metrics on (up to 50). If you have less than 50 exchanges, you don't have to set this parameter. The metrics are collected for all exchanges by default.                                                                                                                                                                                  |
 | `vhosts`                         | No       | By default a list of all vhosts is fetched and each one is checked using the aliveness API. If you prefer only certain vhosts to be monitored, list the vhosts you care about.                                                                                                                                                                                                                              |
 
-[Restart the Agent][8] to begin sending RabbitMQ metrics, events, and service checks to Datadog.
+[Restart the Agent][9] to begin sending RabbitMQ metrics, events, and service checks to Datadog.
 
 #### Log Collection
 
@@ -114,16 +114,16 @@ Configuration Options:
               pattern: "="
     ```
 
-4. [Restart the Agent][8].
+4. [Restart the Agent][9].
 
 ### Validation
 
-[Run the Agent's status subcommand][9] and look for `rabbitmq` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `rabbitmq` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][11] for a list of metrics provided by this integration.
 
 The Agent tags `rabbitmq.queue.*` metrics by queue name and `rabbitmq.node.*` metrics by node name.
 
@@ -131,7 +131,7 @@ The Agent tags `rabbitmq.queue.*` metrics by queue name and `rabbitmq.node.*` me
 
 For performance reasons, the RabbitMQ check limits the number of exchanges, queues, and nodes it collects metrics for. If the check nears this limit, it emits a warning-level event to your event stream.
 
-If you require an increase in the number of exchanges, queues, or nodes, contact [Datadog support][15].
+If you require an increase in the number of exchanges, queues, or nodes, contact [Datadog support][12].
 
 ### Service Checks
 
@@ -143,31 +143,31 @@ Returns CRITICAL if the Agent cannot connect to RabbitMQ to collect metrics, oth
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][15].
+Need help? Contact [Datadog support][12].
 
 ## Further Reading
 ### Datadog Blog
-* [Key metrics for RabbitMQ monitoring][12]
-* [Collecting metrics with RabbitMQ monitoring tools][13]
-* [Monitoring RabbitMQ performance with Datadog][14]
+* [Key metrics for RabbitMQ monitoring][13]
+* [Collecting metrics with RabbitMQ monitoring tools][14]
+* [Monitoring RabbitMQ performance with Datadog][15]
 
 ### FAQ
-* [Tagging RabbitMQ queues by tag family][11]
+* [Tagging RabbitMQ queues by tag family][16]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/datadog_checks/rabbitmq/data/conf.yaml.example
-[5]: https://www.rabbitmq.com/management.html
-[6]: https://www.rabbitmq.com/rabbitmqctl.8.html#set_permissions
-[7]: https://www.rabbitmq.com/management.html
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
-[11]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family
-[12]: https://www.datadoghq.com/blog/rabbitmq-monitoring
-[13]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
-[14]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
-[15]: https://docs.datadoghq.com/help/
-[16]: https://www.rabbitmq.com/
+[2]: https://www.rabbitmq.com
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/datadog_checks/rabbitmq/data/conf.yaml.example
+[6]: https://www.rabbitmq.com/management.html
+[7]: https://www.rabbitmq.com/rabbitmqctl.8.html#set_permissions
+[8]: https://www.rabbitmq.com/management.html
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
+[12]: https://docs.datadoghq.com/help
+[13]: https://www.datadoghq.com/blog/rabbitmq-monitoring
+[14]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
+[15]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
+[16]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family

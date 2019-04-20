@@ -53,19 +53,19 @@ The following scenarios are possible when using the vSphere integration:
 | `ssl_capath`              | No       | Set to the absolute file path of a directory containing CA certificates in PEM format.                                                                                                                                                                                                    |
 | `host_include_only_regex` | No       | Use a regex like this if you want the check to only fetch metrics for these ESXi hosts and the VMs running on it.                                                                                                                                                                         |
 | `vm_include_only_regex`   | No       | Use a regex to include only the VMs that are matching this pattern.                                                                                                                                                                                                                       |
-| `include_only_marked`     | No       | Set to true if you'd like to only collect metrics on vSphere VMs which are marked by a custom field with the value 'DatadogMonitored'. To set this custom field, you can use the UI to apply a tag or through the CLI with [PowerCLI][10] An example working on VSphere 5.1 is: `Get-VM VM | Set-CustomField -Name "DatadogMonitored" -Value "DatadogMonitored"`.|
+| `include_only_marked`     | No       | Set to true if you'd like to only collect metrics on vSphere VMs which are marked by a custom field with the value 'DatadogMonitored'. To set this custom field, you can use the UI to apply a tag or through the CLI with [PowerCLI][6] An example working on VSphere 5.1 is: `Get-VM VM | Set-CustomField -Name "DatadogMonitored" -Value "DatadogMonitored"`.|
 | `collection_level`        | No       | A number between 1 and 4 to specify how many metrics are sent, 1 meaning only important monitoring metrics and 4 meaning every metric available.                                                                                                                                          |
 | `all_metrics`             | No       | (Deprecated) When set to true, this collects EVERY metric from vCenter, which means a LOT of metrics. When set to false, this collects a subset of metrics we selected that are interesting to monitor                                                                                    |
 | `event_config`            | No       | Event config is a dictionary. For now the only switch you can flip is `collect_vcenter_alarms` which sends the alarms set in vCenter as events.                                                                                                                                           |
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `vsphere` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `vsphere` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 
@@ -95,10 +95,10 @@ Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, othe
 
 ## Troubleshooting
 
-* [Can I limit the number of VMs that are pulled in via the VMWare integration?][8]
+* [Can I limit the number of VMs that are pulled in via the VMWare integration?][9]
 
 ## Further Reading
-See our [blog post][9] on monitoring vSphere environments with Datadog.
+See our [blog post][10] on monitoring vSphere environments with Datadog.
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
@@ -106,8 +106,8 @@ See our [blog post][9] on monitoring vSphere environments with Datadog.
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
-[8]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
-[9]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
-[10]: https://pubs.vmware.com/vsphere-51/index.jsp?topic=%2Fcom.vmware.powercli.cmdletref.doc%2FSet-CustomField.html
+[6]: https://pubs.vmware.com/vsphere-51/index.jsp?topic=%2Fcom.vmware.powercli.cmdletref.doc%2FSet-CustomField.html
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
+[9]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
+[10]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers

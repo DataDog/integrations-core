@@ -1,6 +1,6 @@
 # Agent Check: Kafka Consumer
 
-![Kafka Dashboard][111]
+![Kafka Dashboard][11]
 
 ## Overview
 
@@ -11,19 +11,19 @@ This check fetches the highwater offsets from the Kafka brokers, consumer offset
 ## Setup
 ### Installation
 
-The Agent's Kafka consumer check is included in the [Datadog Agent][112] package, so you don't need to install anything else on your Kafka nodes.
+The Agent's Kafka consumer check is included in the [Datadog Agent][12] package, so you don't need to install anything else on your Kafka nodes.
 
 ### Configuration
 
-Create a `kafka_consumer.yaml` file using [this sample configuration file][113] as an example. Then [restart the Datadog Agent][114] to start sending metrics to Datadog.
+Create a `kafka_consumer.yaml` file using [this sample configuration file][13] as an example. Then [restart the Datadog Agent][14] to start sending metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][115] and look for `kafka_consumer` under the Checks section.
+[Run the Agent's `status` subcommand][15] and look for `kafka_consumer` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][116] for a list of metrics provided by this check.
+See [metadata.csv][16] for a list of metrics provided by this check.
 
 ### Events
 
@@ -37,26 +37,26 @@ The Kafka-consumer check does not include any service checks.
 
 ## Troubleshooting
 
-* [Troubleshooting and Deep Dive for Kafka][117]
-* [Agent failed to retrieve RMIServer stub][118]
-* [Producer and Consumer metrics don't appear in my Datadog application][119]
+* [Troubleshooting and Deep Dive for Kafka][17]
+* [Agent failed to retrieve RMIServer stub][18]
+* [Producer and Consumer metrics don't appear in my Datadog application][19]
 
 ## Further Reading
 
-* [Monitoring Kafka performance metrics][120]
-* [Collecting Kafka performance metrics][121]
-* [Monitoring Kafka with Datadog][122]
+* [Monitoring Kafka performance metrics][110]
+* [Collecting Kafka performance metrics][111]
+* [Monitoring Kafka with Datadog][112]
 
 
-[111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
-[112]: https://app.datadoghq.com/account/settings#agent
-[113]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
-[114]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[115]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv
-[117]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
-[118]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
-[119]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
-[120]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
-[121]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
-[122]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
+[12]: https://app.datadoghq.com/account/settings#agent
+[13]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
+[14]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[15]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[16]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv
+[17]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka
+[18]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub
+[19]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application
+[110]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
+[111]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
+[112]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
