@@ -1,13 +1,18 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-
-# 1st party.
+"""
+A module with a function that substitutes parameters for
+in-toto inspections. The function is expected to be called
+'substitute', and takes one parameter, target_relpath, that specifies
+the relative target path of the given Python package. The function is
+expected to return a dictionary which maps parameter names to
+parameter values, so that in-toto can substitute these parameters in
+order to perform a successful inspection.
+The module is expected to live here.
+"""
 import os.path
 
-# 3rd party.
-# NOTE: We assume that setuptools is installed by default.
 from pkg_resources import safe_name
 
 EXCEPTIONS = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'}
