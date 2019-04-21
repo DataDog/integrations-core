@@ -8,22 +8,12 @@ from datadog_checks.dev.utils import running_on_appveyor
 
 @pytest.fixture(scope='session')
 def mock_e2e_config():
-    return {
-        'prometheus_url': 'http://localhost:2379/metrics',
-        'tags': [
-            'tag1:value1',
-            'tag2:value2',
-        ],
-    }
+    return {'prometheus_url': 'http://localhost:2379/metrics', 'tags': ['tag1:value1', 'tag2:value2']}
 
 
 @pytest.fixture(scope='session')
 def mock_e2e_metadata():
-    return {
-        'env_type': 'vagrant',
-        'future': 'now',
-        'env_vars': {},
-    }
+    return {'env_type': 'vagrant', 'future': 'now', 'env_vars': {}}
 
 
 @pytest.fixture(scope='session')

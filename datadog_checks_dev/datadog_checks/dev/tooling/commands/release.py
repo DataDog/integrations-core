@@ -10,35 +10,47 @@ import click
 from semver import finalize_version, parse_version_info
 from six import StringIO, iteritems
 
-from .console import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting,
-    echo_warning
-)
-from ..constants import (
-    BETA_PACKAGES, CHANGELOG_TYPE_NONE, NOT_CHECKS, VERSION_BUMP,
-    get_root, get_agent_release_requirements
-)
-from ..git import (
-    get_current_branch, get_commits_since, git_tag, git_commit
-)
-from ..github import (
-    from_contributor, get_changelog_types, get_pr, get_pr_from_hash, get_pr_labels,
-    get_pr_milestone, parse_pr_numbers, parse_pr_number
-)
-from ..release import (
-    get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
-    update_version_module, build_package
-)
-from ..trello import TrelloClient
-from ..utils import (
-    get_bump_function, get_current_agent_version, get_valid_checks,
-    get_version_string, format_commit_id
-)
 from ...subprocess import run_command
 from ...utils import (
-    basepath, chdir, dir_exists, ensure_unicode, get_next, remove_path, resolve_path, stream_file_lines,
-    write_file
+    basepath,
+    chdir,
+    dir_exists,
+    ensure_unicode,
+    get_next,
+    remove_path,
+    resolve_path,
+    stream_file_lines,
+    write_file,
 )
+from ..constants import (
+    BETA_PACKAGES,
+    CHANGELOG_TYPE_NONE,
+    NOT_CHECKS,
+    VERSION_BUMP,
+    get_agent_release_requirements,
+    get_root,
+)
+from ..git import get_commits_since, get_current_branch, git_commit, git_tag
+from ..github import (
+    from_contributor,
+    get_changelog_types,
+    get_pr,
+    get_pr_from_hash,
+    get_pr_labels,
+    get_pr_milestone,
+    parse_pr_number,
+    parse_pr_numbers,
+)
+from ..release import (
+    build_package,
+    get_agent_requirement_line,
+    get_release_tag_string,
+    update_agent_requirements,
+    update_version_module,
+)
+from ..trello import TrelloClient
+from ..utils import format_commit_id, get_bump_function, get_current_agent_version, get_valid_checks, get_version_string
+from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
@@ -88,18 +100,12 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body):
                 break
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Manage the release of checks'
-)
+@click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the release of checks')
 def release():
     pass
 
 
-@release.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Show release information'
-)
+@release.group(context_settings=CONTEXT_SETTINGS, short_help='Show release information')
 def show():
     """To avoid GitHub's public API rate limits, you need to set
     `github.user`/`github.token` in your config file or use the
@@ -108,10 +114,7 @@ def show():
     pass
 
 
-@show.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Show all the checks that can be released'
-)
+@show.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the checks that can be released')
 @click.option('--quiet', '-q', is_flag=True)
 @click.pass_context
 def ready(ctx, quiet):
@@ -166,17 +169,13 @@ def ready(ctx, quiet):
             if quiet:
                 msg = target
             else:
-                msg = (
-                    'Check {} has {} out of {} merged PRs that could be released'
-                    ''.format(target, shippable_prs, len(pr_numbers))
+                msg = 'Check {} has {} out of {} merged PRs that could be released' ''.format(
+                    target, shippable_prs, len(pr_numbers)
                 )
             echo_info(msg)
 
 
-@show.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Show all the pending PRs for a given check'
-)
+@show.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check')
 @click.argument('check')
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
@@ -242,8 +241,7 @@ def changes(ctx, check, dry_run):
 
 
 @release.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Create a Trello card for each change that needs to be tested'
+    context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
 )
 @click.option('--start', 'start_id', help='The PR number or commit hash to start at')
 @click.option('--since', 'agent_version', callback=validate_version, help='The version of the Agent to compare')
@@ -281,9 +279,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         echo_success(current_agent_version)
 
     current_release_branch = '{}.x'.format(current_agent_version)
-    echo_info(
-        'Branch `{}` will be compared to `master`.'.format(current_release_branch)
-    )
+    echo_info('Branch `{}` will be compared to `master`.'.format(current_release_branch))
 
     echo_waiting('Getting diff... ', nl=False)
     diif_command = 'git --no-pager log "--pretty=format:%H %s" {}..master'
@@ -297,7 +293,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 'Local branch `{}` might not exist, trying `{}`... '.format(
                     current_release_branch, origin_release_branch
                 ),
-                nl=False
+                nl=False,
             )
 
             result = run_command(diif_command.format(origin_release_branch), capture=True)
@@ -309,9 +305,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             echo_success('success!')
 
     # [(commit_hash, commit_subject), ...]
-    diff_data = [
-        tuple(line.split(None, 1)) for line in reversed(result.stdout.splitlines())
-    ]
+    diff_data = [tuple(line.split(None, 1)) for line in reversed(result.stdout.splitlines())]
     num_changes = len(diff_data)
 
     if dry_run:
@@ -320,29 +314,25 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         return
 
     if repo == 'integrations-core':
-        options = OrderedDict((
-            ('1', 'Integrations'),
-            ('2', 'Containers'),
-            ('3', 'Agent'),
-            ('s', 'Skip'),
-            ('q', 'Quit'),
-        ))
+        options = OrderedDict(
+            (('1', 'Integrations'), ('2', 'Containers'), ('3', 'Agent'), ('s', 'Skip'), ('q', 'Quit'))
+        )
     else:
-        options = OrderedDict((
-            ('1', 'Agent'),
-            ('2', 'Containers'),
-            ('3', 'Logs'),
-            ('4', 'Process'),
-            ('5', 'Trace'),
-            ('6', 'Integrations'),
-            ('s', 'Skip'),
-            ('q', 'Quit'),
-        ))
+        options = OrderedDict(
+            (
+                ('1', 'Agent'),
+                ('2', 'Containers'),
+                ('3', 'Logs'),
+                ('4', 'Process'),
+                ('5', 'Trace'),
+                ('6', 'Integrations'),
+                ('s', 'Skip'),
+                ('q', 'Quit'),
+            )
+        )
     default_option = get_next(options)
     options_prompt = 'Choose an option (default {}): '.format(options[default_option])
-    options_text = '\n' + '\n'.join(
-        '{} - {}'.format(key, value) for key, value in iteritems(options)
-    )
+    options_text = '\n' + '\n'.join('{} - {}'.format(key, value) for key, value in iteritems(options))
 
     commit_ids = set()
     user_config = ctx.obj
@@ -400,9 +390,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 found_start_id = True
             else:
                 echo_info(
-                    'Looking for {}, skipping {}.'.format(
-                        format_commit_id(start_id), format_commit_id(commit_id)
-                    )
+                    'Looking for {}, skipping {}.'.format(format_commit_id(start_id), format_commit_id(commit_id))
                 )
                 continue
 
@@ -491,10 +479,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             finished = True
 
 
-@release.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Tag the git repo with the current release of a check'
-)
+@release.command(context_settings=CONTEXT_SETTINGS, short_help='Tag the git repo with the current release of a check')
 @click.argument('check')
 @click.argument('version', required=False)
 @click.option('--push/--no-push', default=True)
@@ -558,10 +543,7 @@ def tag(check, version, push, dry_run):
         abort(code=2)
 
 
-@release.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Release a single check'
-)
+@release.command(context_settings=CONTEXT_SETTINGS, short_help='Release a single check')
 @click.argument('check')
 @click.argument('version', required=False)
 @click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')
@@ -670,7 +652,7 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
             old_version=cur_version,
             initial=initial_release,
             quiet=True,
-            dry_run=False
+            dry_run=False,
         )
         echo_success('success!')
 
@@ -708,10 +690,7 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
 
 
-@release.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Update the changelog for a check'
-)
+@release.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
 @click.argument('check')
 @click.argument('version')
 @click.argument('old_version', required=False)
@@ -777,9 +756,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
         author_url = payload.get('user', {}).get('html_url')
         title = '[{}] {}'.format(changelog_type, payload.get('title'))
 
-        entry = ChangelogEntry(
-            pr_num, title, payload.get('html_url'), author, author_url, from_contributor(payload)
-        )
+        entry = ChangelogEntry(pr_num, title, payload.get('html_url'), author, author_url, from_contributor(payload))
 
         entries.append(entry)
 
@@ -825,10 +802,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
         write_file(changelog_path, changelog_buffer.getvalue())
 
 
-@release.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Build a wheel for a check'
-)
+@release.command(context_settings=CONTEXT_SETTINGS, short_help='Build a wheel for a check')
 @click.argument('check')
 @click.option('--sdist', '-s', is_flag=True)
 def build(check, sdist):
@@ -855,10 +829,7 @@ def build(check, sdist):
     echo_success('Success!')
 
 
-@release.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Build and upload a check to PyPI'
-)
+@release.command(context_settings=CONTEXT_SETTINGS, short_help='Build and upload a check to PyPI')
 @click.argument('check')
 @click.option('--sdist', '-s', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
