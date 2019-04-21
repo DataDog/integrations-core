@@ -57,7 +57,7 @@ class Win32EventLogWMI(WinWMICheck):
 
         if not (source_names or event_ids or message_filters or log_files or user or ltypes):
             raise ConfigurationError(
-                'At least one of the following filters must be selected: '
+                'At least one of the following filters must be set: '
                 'source_name, event_id, message_filters, log_file, user, type'
             )
 
