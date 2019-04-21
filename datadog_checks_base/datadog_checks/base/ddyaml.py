@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2011-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import logging
 
-# 3p
-import yaml  # noqa, let's guess, probably imported somewhere
+import yaml
 
 try:
     from yaml import CSafeLoader as yLoader
