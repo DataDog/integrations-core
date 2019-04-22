@@ -421,7 +421,7 @@ The `service_checks.json` file contains the following mandatory attributes:
 
 ##### Example service check config
 
-Our example integration contains a service check, so we need to create a JSON file at `awesome/service_checks.json` with the following contents:
+Our example integration contains a service check, so we need to create a JSON file at `awesome/service_checks.json` with this content:
 
 ```json
 [
