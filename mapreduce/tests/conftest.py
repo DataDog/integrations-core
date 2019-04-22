@@ -1,26 +1,21 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
-import os
 import json
+import os
+
+import pytest
 from mock import patch
 
-# 3rd party
-import pytest
-
 from .common import (
-    HERE, YARN_APPS_URL_BASE, MR_JOBS_URL, MR_JOB_COUNTERS_URL, MR_TASKS_URL, TEST_USERNAME, TEST_PASSWORD
+    HERE,
+    MR_JOB_COUNTERS_URL,
+    MR_JOBS_URL,
+    MR_TASKS_URL,
+    TEST_PASSWORD,
+    TEST_USERNAME,
+    YARN_APPS_URL_BASE,
 )
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
 
 
 @pytest.fixture
@@ -52,8 +47,8 @@ def requests_get_mock(*args, **kwargs):
     # The parameter that creates the query params (kwargs) is an unordered dict,
     #   so the query params can be in any order
     if url.startswith(YARN_APPS_URL_BASE):
-        query = url[len(YARN_APPS_URL_BASE):]
-        if (query in ["?states=RUNNING&applicationTypes=MAPREDUCE", "?applicationTypes=MAPREDUCE&states=RUNNING"]):
+        query = url[len(YARN_APPS_URL_BASE) :]
+        if query in ["?states=RUNNING&applicationTypes=MAPREDUCE", "?applicationTypes=MAPREDUCE&states=RUNNING"]:
             apps_metrics_file = os.path.join(HERE, "fixtures", "apps_metrics")
             with open(apps_metrics_file, "r") as f:
                 body = f.read()

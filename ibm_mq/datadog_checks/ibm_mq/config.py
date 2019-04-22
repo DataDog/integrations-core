@@ -58,8 +58,7 @@ class IBMMQConfig:
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')
 
         self.ssl_key_repository_location = instance.get(
-            'ssl_key_repository_location',
-            '/var/mqm/ssl-db/client/KeyringClient'
+            'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
@@ -83,10 +82,7 @@ class IBMMQConfig:
         queue_tag_list = []
         for regex_str, tags in iteritems(self._queue_tag_re):
             try:
-                queue_tag_list.append([
-                    re.compile(regex_str),
-                    [t.strip() for t in tags.split(',')]
-                ])
+                queue_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(',')]])
             except TypeError:
                 log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         return queue_tag_list
@@ -95,15 +91,15 @@ class IBMMQConfig:
     def tags(self):
         return [
             "queue_manager:{}".format(self.queue_manager_name),
-            "host:{}".format(self.host),
+            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
             "port:{}".format(self.port),
-            "channel:{}".format(self.channel)
+            "channel:{}".format(self.channel),
         ] + self.custom_tags
 
     @property
     def tags_no_channel(self):
         return [
             "queue_manager:{}".format(self.queue_manager_name),
-            "host:{}".format(self.host),
+            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
             "port:{}".format(self.port),
         ] + self.custom_tags

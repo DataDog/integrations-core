@@ -6,6 +6,7 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run
+
 from .common import HERE, HOST
 
 
@@ -25,5 +26,5 @@ def instance_standalone():
     return {
         'spark_url': 'http://{}:8080'.format(HOST),
         'cluster_name': 'SparkCluster',
-        'spark_cluster_mode': 'spark_standalone_mode'
+        'spark_cluster_mode': 'spark_standalone_mode',
     }

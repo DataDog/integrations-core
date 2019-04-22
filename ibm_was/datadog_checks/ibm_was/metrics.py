@@ -10,7 +10,7 @@ METRIC_VALUE_FIELDS = {
     'CountStatistic': 'count',
     'DoubleStatistic': 'double',
     'RangeStatistic': 'value',
-    'TimeStatistic': 'totalTime'
+    'TimeStatistic': 'totalTime',
 }
 
 # Mapping the Name of the Stat object to the metric prefix
@@ -22,23 +22,14 @@ METRIC_CATEGORIES = {
     'Thread Pools': 'thread_pools',
 }
 
-CATEGORY_FIELDS = {
-    'Stat'
-}
+CATEGORY_FIELDS = {'Stat'}
 
 # Each Stat Node will have a predictable set up sub Nodes that containing
 # more Stat Nodes and eventually metrics. This maps each Stat Node to what the tag key needs
 # to be for that Stat. For Ex, the JDBC stat will have one sub Stat node representing a Provider
 # which has a sub node representing a DataSource, so we need to know what to tag by.
 NESTED_TAGS = {
-    'jdbc': [
-        'provider',
-        'dataSource'
-    ],
-    'servlet_session': [
-        'web_application'
-    ],
-    'thread_pools': [
-        'thread_pool'
-    ]
+    'jdbc': ['provider', 'dataSource'],
+    'servlet_session': ['web_application'],
+    'thread_pools': ['thread_pool'],
 }

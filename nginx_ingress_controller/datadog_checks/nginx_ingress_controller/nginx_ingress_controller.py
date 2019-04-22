@@ -8,6 +8,7 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
     """
     Collect Nginx Ingress Controller metrics in OpenMetrics format
     """
+
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -42,5 +43,5 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
                     ],
                 }
             },
-            default_namespace="nginx_ingress"
+            default_namespace="nginx_ingress",
         )

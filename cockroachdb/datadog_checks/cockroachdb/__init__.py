@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .cockroachdb import CockroachdbCheck
 
-__all__ = [
-    '__version__',
-    'CockroachdbCheck'
-]
+__all__ = ['__version__', 'CockroachdbCheck']

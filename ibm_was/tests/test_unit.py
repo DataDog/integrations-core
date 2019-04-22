@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import os
+
+import mock
 import pytest
 import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+
 from . import common
 
 pytestmark = pytest.mark.unit
@@ -33,7 +35,7 @@ def test_custom_query(aggregator, instance, check):
 
     aggregator.assert_metric_has_tag(
         'ibm_was.object_pool.objects_created_count',
-        'implementations:ObjectPool_ibm.system.objectpool_com.ibm.ws.webcontainer.srt.SRTConnectionContextImpl'
+        'implementations:ObjectPool_ibm.system.objectpool_com.ibm.ws.webcontainer.srt.SRTConnectionContextImpl',
     )
 
 

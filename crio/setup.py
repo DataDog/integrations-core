@@ -25,17 +25,13 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent crio check container runtime kubernetes',
-
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
-
     # Author details
     author='Datadog',
     author_email='packages@datadoghq.com',
-
     # License
     license='BSD-3-Clause',
-
     # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -47,13 +43,10 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-
     # The package we're going to ship
     packages=['datadog_checks.crio'],
-
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

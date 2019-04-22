@@ -3,22 +3,24 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-
 from shutil import copyfile, move
 
-from .agent import (
-    DEFAULT_AGENT_VERSION, FAKE_API_KEY, MANIFEST_VERSION_PATTERN,
-    get_agent_conf_dir, get_agent_exe, get_agent_pip_install,
-    get_agent_service_cmd, get_agent_version_manifest,
-    get_rate_flag
-)
-from .config import (
-    config_file_name, locate_config_dir, locate_config_file, write_env_data, remove_env_data
-)
-from .platform import LINUX, MAC, WINDOWS
-from ..constants import get_root
-from ...utils import ON_MACOS, ON_WINDOWS, ON_LINUX, path_join, file_exists
 from ...subprocess import run_command
+from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS, file_exists, path_join
+from ..constants import get_root
+from .agent import (
+    DEFAULT_AGENT_VERSION,
+    FAKE_API_KEY,
+    MANIFEST_VERSION_PATTERN,
+    get_agent_conf_dir,
+    get_agent_exe,
+    get_agent_pip_install,
+    get_agent_service_cmd,
+    get_agent_version_manifest,
+    get_rate_flag,
+)
+from .config import config_file_name, locate_config_dir, locate_config_file, remove_env_data, write_env_data
+from .platform import LINUX, MAC, WINDOWS
 
 
 class LocalAgentInterface(object):
@@ -61,6 +63,9 @@ class LocalAgentInterface(object):
     def agent_command(self):
         return get_agent_exe(self.agent_version, platform=self.platform)
 
+    def exec_command(self, command, **kwargs):
+        return run_command(command, **kwargs)
+
     def write_config(self):
         write_env_data(self.check, self.env, self.config, self.metadata)
         self.copy_config_to_local_agent()
@@ -82,8 +87,7 @@ class LocalAgentInterface(object):
 
     def remove_config_from_local_agent(self):
         check_conf_file = os.path.join(
-            get_agent_conf_dir(self.check, self.agent_version, self.platform),
-            '{}.yaml'.format(self.check)
+            get_agent_conf_dir(self.check, self.agent_version, self.platform), '{}.yaml'.format(self.check)
         )
         backup_conf_file = '{}.bak'.format(check_conf_file)
         os.remove(check_conf_file)
@@ -128,13 +132,14 @@ class LocalAgentInterface(object):
         return run_command(command, capture=capture)
 
     def update_check(self):
-        install_cmd = get_agent_pip_install(self.agent_version, self.platform) + \
-                      ['-e',  path_join(get_root(), self.check)]
+        install_cmd = get_agent_pip_install(self.agent_version, self.platform) + [
+            '-e',
+            path_join(get_root(), self.check),
+        ]
         return run_command(install_cmd, capture=True, check=True)
 
     def update_base_package(self):
-        install_cmd = get_agent_pip_install(self.agent_version, self.platform) + \
-                      ['-e', self.base_package]
+        install_cmd = get_agent_pip_install(self.agent_version, self.platform) + ['-e', self.base_package]
         return run_command(install_cmd, capture=True, check=True)
 
     def update_agent(self):

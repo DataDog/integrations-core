@@ -3,20 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..console import (
-    CONTEXT_SETTINGS, echo_failure, echo_info, echo_success
-)
+from ....utils import write_file_lines
 from ...constants import AGENT_V5_ONLY, get_agent_release_requirements
 from ...release import get_agent_requirement_line
 from ...utils import get_valid_checks, get_version_string
-from ....utils import write_file_lines
+from ..console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_success
 
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
     short_help="Generate the list of integrations to ship with the Agent and save it to '{}'".format(
         get_agent_release_requirements()
-    )
+    ),
 )
 @click.pass_context
 def requirements(ctx):

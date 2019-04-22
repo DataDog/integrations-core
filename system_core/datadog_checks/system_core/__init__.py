@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .system_core import SystemCore
 
-__all__ = [
-    '__version__',
-    'SystemCore'
-]
+__all__ = ['__version__', 'SystemCore']

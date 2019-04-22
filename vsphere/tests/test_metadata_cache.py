@@ -36,9 +36,7 @@ def test_get_metadata(cache):
     with pytest.raises(KeyError):
         cache.get_metadata("instance", "id")
 
-    cache._metadata["foo_instance"] = {
-        "foo_id": {"name": "metric_name"}
-    }
+    cache._metadata["foo_instance"] = {"foo_id": {"name": "metric_name"}}
 
     assert cache.get_metadata("foo_instance", "foo_id")["name"] == "metric_name"
 

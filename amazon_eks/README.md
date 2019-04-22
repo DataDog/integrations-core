@@ -37,6 +37,7 @@ Need help? Contact [Datadog support][9].
 ## Further Reading
 
 * [Monitor Amazon EKS with Datadog][10]
+* [Key metrics for Amazon EKS monitoring][11]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/amazon_eks/images/amazon_eks_dashboard.png
@@ -49,3 +50,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/announcing-eks
+[11]: https://www.datadoghq.com/blog/eks-cluster-metrics/

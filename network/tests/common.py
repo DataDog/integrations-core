@@ -6,9 +6,7 @@ from datadog_checks.dev import get_here
 HERE = get_here()
 SERVICE_CHECK_NAME = "network"
 
-INSTANCE = {
-    "collect_connection_state": True,
-}
+INSTANCE = {"collect_connection_state": True}
 
 EXPECTED_METRICS = [
     'system.net.bytes_rcvd',

@@ -8,4 +8,4 @@ services:
       - "9080:9080"
     volumes:
       - ./PASSWORD:/tmp/PASSWORD
-      - ./init.jython:/home/scripts/init.jython
+      - ./scripts/${IBM_WAS_VERSION}/init.jython:/home/scripts/init.jython

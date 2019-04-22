@@ -17,61 +17,55 @@ class ShouldRestartException(Exception):
 class PgBouncer(AgentCheck):
     """Collects metrics from pgbouncer
     """
+
     RATE = AgentCheck.rate
     GAUGE = AgentCheck.gauge
     DB_NAME = 'pgbouncer'
     SERVICE_CHECK_NAME = 'pgbouncer.can_connect'
 
     STATS_METRICS = {
-        'descriptors': [
-            ('database', 'db'),
-        ],
+        'descriptors': [('database', 'db')],
         'metrics': [
-            ('total_requests',       ('pgbouncer.stats.requests_per_second', RATE)),  # < 1.8
-            ('total_xact_count',     ('pgbouncer.stats.transactions_per_second', RATE)),  # >= 1.8
-            ('total_query_count',    ('pgbouncer.stats.queries_per_second', RATE)),  # >= 1.8
-            ('total_received',       ('pgbouncer.stats.bytes_received_per_second', RATE)),
-            ('total_sent',           ('pgbouncer.stats.bytes_sent_per_second', RATE)),
-            ('total_query_time',     ('pgbouncer.stats.total_query_time', RATE)),
-            ('total_xact_time',      ('pgbouncer.stats.total_transaction_time', RATE)),  # >= 1.8
-            ('avg_req',              ('pgbouncer.stats.avg_req', GAUGE)),  # < 1.8
-            ('avg_xact_count',       ('pgbouncer.stats.avg_transaction_count', GAUGE)),  # >= 1.8
-            ('avg_query_count',      ('pgbouncer.stats.avg_query_count', GAUGE)),  # >= 1.8
-            ('avg_recv',             ('pgbouncer.stats.avg_recv', GAUGE)),
-            ('avg_sent',             ('pgbouncer.stats.avg_sent', GAUGE)),
-            ('avg_query',            ('pgbouncer.stats.avg_query', GAUGE)),  # < 1.8
-            ('avg_xact_time',        ('pgbouncer.stats.avg_transaction_time', GAUGE)),  # >= 1.8
-            ('avg_query_time',       ('pgbouncer.stats.avg_query_time', GAUGE)),  # >= 1.8
+            ('total_requests', ('pgbouncer.stats.requests_per_second', RATE)),  # < 1.8
+            ('total_xact_count', ('pgbouncer.stats.transactions_per_second', RATE)),  # >= 1.8
+            ('total_query_count', ('pgbouncer.stats.queries_per_second', RATE)),  # >= 1.8
+            ('total_received', ('pgbouncer.stats.bytes_received_per_second', RATE)),
+            ('total_sent', ('pgbouncer.stats.bytes_sent_per_second', RATE)),
+            ('total_query_time', ('pgbouncer.stats.total_query_time', RATE)),
+            ('total_xact_time', ('pgbouncer.stats.total_transaction_time', RATE)),  # >= 1.8
+            ('avg_req', ('pgbouncer.stats.avg_req', GAUGE)),  # < 1.8
+            ('avg_xact_count', ('pgbouncer.stats.avg_transaction_count', GAUGE)),  # >= 1.8
+            ('avg_query_count', ('pgbouncer.stats.avg_query_count', GAUGE)),  # >= 1.8
+            ('avg_recv', ('pgbouncer.stats.avg_recv', GAUGE)),
+            ('avg_sent', ('pgbouncer.stats.avg_sent', GAUGE)),
+            ('avg_query', ('pgbouncer.stats.avg_query', GAUGE)),  # < 1.8
+            ('avg_xact_time', ('pgbouncer.stats.avg_transaction_time', GAUGE)),  # >= 1.8
+            ('avg_query_time', ('pgbouncer.stats.avg_query_time', GAUGE)),  # >= 1.8
         ],
         'query': """SHOW STATS""",
     }
 
     POOLS_METRICS = {
-        'descriptors': [
-            ('database', 'db'),
-            ('user', 'user'),
-        ],
+        'descriptors': [('database', 'db'), ('user', 'user')],
         'metrics': [
-            ('cl_active',            ('pgbouncer.pools.cl_active', GAUGE)),
-            ('cl_waiting',           ('pgbouncer.pools.cl_waiting', GAUGE)),
-            ('sv_active',            ('pgbouncer.pools.sv_active', GAUGE)),
-            ('sv_idle',              ('pgbouncer.pools.sv_idle', GAUGE)),
-            ('sv_used',              ('pgbouncer.pools.sv_used', GAUGE)),
-            ('sv_tested',            ('pgbouncer.pools.sv_tested', GAUGE)),
-            ('sv_login',             ('pgbouncer.pools.sv_login', GAUGE)),
-            ('maxwait',              ('pgbouncer.pools.maxwait', GAUGE)),
+            ('cl_active', ('pgbouncer.pools.cl_active', GAUGE)),
+            ('cl_waiting', ('pgbouncer.pools.cl_waiting', GAUGE)),
+            ('sv_active', ('pgbouncer.pools.sv_active', GAUGE)),
+            ('sv_idle', ('pgbouncer.pools.sv_idle', GAUGE)),
+            ('sv_used', ('pgbouncer.pools.sv_used', GAUGE)),
+            ('sv_tested', ('pgbouncer.pools.sv_tested', GAUGE)),
+            ('sv_login', ('pgbouncer.pools.sv_login', GAUGE)),
+            ('maxwait', ('pgbouncer.pools.maxwait', GAUGE)),
         ],
         'query': """SHOW POOLS""",
     }
 
     DATABASES_METRICS = {
-        'descriptors': [
-            ('name', 'name'),
-        ],
+        'descriptors': [('name', 'name')],
         'metrics': [
-            ('pool_size',            ('pgbouncer.databases.pool_size', GAUGE)),
-            ('max_connections',      ('pgbouncer.databases.max_connections', GAUGE)),
-            ('current_connections',  ('pgbouncer.databases.current_connections', GAUGE)),
+            ('pool_size', ('pgbouncer.databases.pool_size', GAUGE)),
+            ('max_connections', ('pgbouncer.databases.max_connections', GAUGE)),
+            ('current_connections', ('pgbouncer.databases.current_connections', GAUGE)),
         ],
         'query': """SHOW DATABASES""",
     }
@@ -89,11 +83,7 @@ class PgBouncer(AgentCheck):
             host = parsed_url.hostname
             port = parsed_url.port
 
-        service_checks_tags = [
-            "host:%s" % host,
-            "port:%s" % port,
-            "db:%s" % self.DB_NAME
-        ]
+        service_checks_tags = ["host:%s" % host, "port:%s" % port, "db:%s" % self.DB_NAME]
         service_checks_tags.extend(tags)
         service_checks_tags = list(set(service_checks_tags))
 
@@ -152,39 +142,31 @@ class PgBouncer(AgentCheck):
             return {'dsn': database_url}
 
         if not host:
-            raise CheckException(
-                "Please specify a PgBouncer host to connect to.")
+            raise CheckException("Please specify a PgBouncer host to connect to.")
 
         if not user:
-            raise CheckException(
-                "Please specify a user to connect to PgBouncer as.")
+            raise CheckException("Please specify a user to connect to PgBouncer as.")
 
         if host in ('localhost', '127.0.0.1') and password == '':
-            return {  # Use ident method
-                'dsn': "user={} dbname={}".format(user, self.DB_NAME)
-            }
+            # Use ident method
+            return {'dsn': "user={} dbname={}".format(user, self.DB_NAME)}
 
         if port:
-            return {'host': host, 'user': user, 'password': password,
-                    'database': self.DB_NAME, 'port': port}
+            return {'host': host, 'user': user, 'password': password, 'database': self.DB_NAME, 'port': port}
 
-        return {'host': host, 'user': user, 'password': password,
-                'database': self.DB_NAME}
+        return {'host': host, 'user': user, 'password': password, 'database': self.DB_NAME}
 
-    def _get_connection(self, key, host='', port='', user='',
-                        password='', database_url='', tags=None, use_cached=True):
+    def _get_connection(self, key, host='', port='', user='', password='', database_url='', tags=None, use_cached=True):
         "Get and memoize connections to instances"
         if key in self.dbs and use_cached:
             return self.dbs[key]
         try:
             connect_kwargs = self._get_connect_kwargs(
-                host=host, port=port, user=user,
-                password=password, database_url=database_url
+                host=host, port=port, user=user, password=password, database_url=database_url
             )
 
             connection = pg.connect(**connect_kwargs)
-            connection.set_isolation_level(
-                pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
         # re-raise the CheckExceptions raised by _get_connect_kwargs()
         except CheckException:
@@ -194,9 +176,12 @@ class PgBouncer(AgentCheck):
             redacted_url = self._get_redacted_dsn(host, port, user, database_url)
             message = u'Cannot establish connection to {}'.format(redacted_url)
 
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=self._get_service_checks_tags(host, port, database_url, tags),
-                               message=message)
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                tags=self._get_service_checks_tags(host, port, database_url, tags),
+                message=message,
+            )
             raise
 
         self.dbs[key] = connection
@@ -231,17 +216,22 @@ class PgBouncer(AgentCheck):
             tags = list(set(tags))
 
         try:
-            db = self._get_connection(key, host, port, user, password, tags=tags,
-                                      database_url=database_url, use_cached=use_cached)
+            db = self._get_connection(
+                key, host, port, user, password, tags=tags, database_url=database_url, use_cached=use_cached
+            )
             self._collect_stats(db, tags)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
-            db = self._get_connection(key, host, port, user, password, tags=tags,
-                                      database_url=database_url, use_cached=False)
+            db = self._get_connection(
+                key, host, port, user, password, tags=tags, database_url=database_url, use_cached=False
+            )
             self._collect_stats(db, tags)
 
         redacted_dsn = self._get_redacted_dsn(host, port, user, database_url)
         message = u'Established connection to {}'.format(redacted_dsn)
-        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                           tags=self._get_service_checks_tags(host, port, database_url, tags),
-                           message=message)
+        self.service_check(
+            self.SERVICE_CHECK_NAME,
+            AgentCheck.OK,
+            tags=self._get_service_checks_tags(host, port, database_url, tags),
+            message=message,
+        )

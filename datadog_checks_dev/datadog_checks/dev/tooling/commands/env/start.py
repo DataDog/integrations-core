@@ -7,37 +7,36 @@ import click
 import pyperclip
 from six import string_types
 
-from ..console import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-)
+from ....utils import dir_exists, file_exists, path_join
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...testing import get_available_tox_envs
 from ...utils import get_tox_file
-from ....utils import dir_exists, file_exists, path_join
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Start an environment'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Start an environment')
 @click.argument('check')
 @click.argument('env')
 @click.option(
-    '--agent', '-a', default='6',
+    '--agent',
+    '-a',
+    default='6',
     help=(
         'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
         'Docker environments you can use an integer corresponding to fields in the '
         'config (agent5, agent6, etc.)'
-    )
+    ),
 )
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
 @click.option(
-    '--env-vars', '-e', multiple=True,
+    '--env-vars',
+    '-e',
+    multiple=True,
     help=(
         'ENV Variable that should be passed to the Agent container. '
         'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
-    )
+    ),
 )
 @click.pass_context
 def start(ctx, check, env, agent, dev, base, env_vars):
@@ -139,6 +138,25 @@ def start(ctx, check, env, agent, dev, base, env_vars):
         environment.remove_config()
         abort()
     echo_success('success!')
+
+    start_commands = metadata.get('start_commands', [])
+    if start_commands:
+        echo_waiting('Running extra start-up commands... ', nl=False)
+
+        for command in start_commands:
+            result = environment.exec_command(command, capture=True)
+            if result.code:
+                click.echo()
+                echo_info(result.stdout + result.stderr)
+                echo_failure('An error occurred.')
+                echo_waiting('Stopping the environment...')
+                stop_environment(check, env, metadata=metadata)
+                echo_waiting('Stopping the Agent...')
+                environment.stop_agent()
+                environment.remove_config()
+                abort()
+
+        echo_success('success!')
 
     if base and not dev:
         dev = True

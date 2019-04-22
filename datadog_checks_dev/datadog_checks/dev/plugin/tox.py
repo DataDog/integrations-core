@@ -41,6 +41,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
     sections[section] = {
+        'platform': 'linux|darwin|win32',
         # These tools only support Python 3+
         'basepython': 'python3',
         'skip_install': 'true',
@@ -62,6 +63,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
     # testenv:format_style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
     sections[section] = {
+        'platform': 'linux|darwin|win32',
         # These tools only support Python 3+
         'basepython': 'python3',
         'skip_install': 'true',

@@ -11,21 +11,10 @@ from .reload import reload_env
 from .start import start
 from .stop import stop
 
-
-ALL_COMMANDS = (
-    check_run,
-    ls,
-    prune,
-    reload_env,
-    start,
-    stop,
-)
+ALL_COMMANDS = (check_run, ls, prune, reload_env, start, stop)
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Manage environments'
-)
+@click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage environments')
 def env():
     pass
 

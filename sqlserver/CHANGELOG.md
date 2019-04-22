@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.10.1 / 2019-04-04
+
+* [Fixed] Don't ship `pyodbc` on macOS as SQLServer integration is not shipped on macOS. See [#3461](https://github.com/DataDog/integrations-core/pull/3461).
+
 ## 1.10.0 / 2019-03-29
 
 * [Added] Add custom instance tags to storedproc metrics. See [#3237](https://github.com/DataDog/integrations-core/pull/3237).

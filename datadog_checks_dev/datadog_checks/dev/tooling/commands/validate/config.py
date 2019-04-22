@@ -4,27 +4,16 @@
 import click
 import yaml
 
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-from ...utils import get_config_files, get_valid_checks
 from ....utils import basepath, read_file
+from ...utils import get_config_files, get_valid_checks
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 FILE_INDENT = ' ' * 8
 
-IGNORE_DEFAULT_INSTANCE = {
-    'ceph',
-    'dotnetclr',
-    'gunicorn',
-    'marathon',
-    'pgbouncer',
-    'process',
-    'supervisord',
-}
+IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate default configuration files'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
 @click.argument('check', required=False)
 def config(check):
     """Validate default configuration files."""
