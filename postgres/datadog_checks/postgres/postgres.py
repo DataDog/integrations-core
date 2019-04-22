@@ -642,10 +642,7 @@ GROUP BY datid, datname
         config = {}
         for element in yamlconfig:
             if isinstance(element, str):
-                config[element] = {
-                    'relation_name': element,
-                    'schemas': []
-                }
+                config[element] = {'relation_name': element, 'schemas': []}
             elif isinstance(element, dict):
                 if 'relation_name' not in element or 'schemas' not in element:
                     self.log.warning("Unknown element format for relation element %s", element)
@@ -654,10 +651,7 @@ GROUP BY datid, datname
                     self.log.warning("Expected a list of schemas for %s", element)
                     continue
                 name = element['relation_name']
-                config[name] = {
-                    'relation_name': name,
-                    'schemas': element['schemas'],
-                }
+                config[name] = {'relation_name': name, 'schemas': element['schemas']}
             else:
                 self.log.warning('Unhandled relations config type: {}'.format(element))
         return config
@@ -809,14 +803,7 @@ GROUP BY datid, datname
         try:
             cursor = db.cursor()
             results_len = self._query_scope(
-                cursor,
-                db_instance_metrics,
-                key,
-                db,
-                instance_tags,
-                False,
-                programming_error,
-                relations_config,
+                cursor, db_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
             )
             if results_len is not None:
                 self.gauge(
@@ -824,49 +811,21 @@ GROUP BY datid, datname
                 )
 
             self._query_scope(
-                cursor,
-                bgw_instance_metrics,
-                key,
-                db,
-                instance_tags,
-                False,
-                programming_error,
-                relations_config,
+                cursor, bgw_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
             )
             self._query_scope(
-                cursor,
-                archiver_instance_metrics,
-                key,
-                db,
-                instance_tags,
-                False,
-                programming_error,
-                relations_config,
+                cursor, archiver_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
             )
 
             if collect_activity_metrics:
                 activity_metrics = self._get_activity_metrics(key, db)
                 self._query_scope(
-                    cursor,
-                    activity_metrics,
-                    key,
-                    db,
-                    instance_tags,
-                    False,
-                    programming_error,
-                    relations_config,
+                    cursor, activity_metrics, key, db, instance_tags, False, programming_error, relations_config
                 )
 
             for scope in list(metric_scope) + custom_metrics:
                 self._query_scope(
-                    cursor,
-                    scope,
-                    key,
-                    db,
-                    instance_tags,
-                    scope in custom_metrics,
-                    programming_error,
-                    relations_config,
+                    cursor, scope, key, db, instance_tags, scope in custom_metrics, programming_error, relations_config
                 )
 
             cursor.close()
