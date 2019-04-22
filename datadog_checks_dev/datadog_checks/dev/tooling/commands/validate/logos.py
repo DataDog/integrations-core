@@ -6,22 +6,15 @@ import os
 import click
 from PIL import Image
 
-
 from ...constants import NOT_TILES, get_root
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_failure, echo_success, echo_waiting
 from ...utils import get_valid_integrations, load_manifest
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting
 
-
-REQUIRED_IMAGES = {
-    'avatars-bot.png': (128, 128),
-    'saas_logos-bot.png': (200, 128),
-    'saas_logos-small.png': (120, 60)
-}
+REQUIRED_IMAGES = {'avatars-bot.png': (128, 128), 'saas_logos-bot.png': (200, 128), 'saas_logos-small.png': (120, 60)}
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate logos files, specifying no check will validate all logos'
+    context_settings=CONTEXT_SETTINGS, short_help='Validate logos files, specifying no check will validate all logos'
 )
 @click.argument('check', required=False)
 def logos(check):
@@ -58,9 +51,7 @@ def logos(check):
             else:
                 size = get_resolution(logo_file_name)
                 if size != required_size:
-                    errors[logo] = '    {} has improper resolution: {}. Should be {}'.format(
-                        logo, size, required_size
-                    )
+                    errors[logo] = '    {} has improper resolution: {}. Should be {}'.format(logo, size, required_size)
 
         if errors:
             echo_waiting('{}:'.format(display_name))

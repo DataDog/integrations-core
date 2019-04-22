@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 2.7.0 / 2019-04-05
+
+* [Added] Adds an option to tag metrics with `replication_role`. See [#2929](https://github.com/DataDog/integrations-core/pull/2929).
+* [Added] Add `server` tag to metrics and service_check. See [#2928](https://github.com/DataDog/integrations-core/pull/2928).
+
 ## 2.6.0 / 2019-03-11
 
 * [Added] Support multiple rows for custom queries. See [#3242](https://github.com/DataDog/integrations-core/pull/3242).

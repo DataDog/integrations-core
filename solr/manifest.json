@@ -1,7 +1,6 @@
 {
   "categories": [
-    "data store",
-    "search"
+    "data store"
   ],
   "creates_events": false,
   "display_name": "Solr",

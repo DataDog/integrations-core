@@ -5,11 +5,9 @@ import os
 import re
 from collections import defaultdict
 
-from .constants import get_root
 from ..subprocess import run_command
-from ..utils import (
-    chdir, resolve_path, stream_file_lines, write_file_lines
-)
+from ..utils import chdir, resolve_path, stream_file_lines, write_file_lines
+from .constants import get_root
 
 DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
 
@@ -27,7 +25,7 @@ class Package:
         return '{}{}{}'.format(
             self.name,
             '=={}'.format(self.version) if self.version else '',
-            '; {}'.format(self.marker) if self.marker else ''
+            '; {}'.format(self.marker) if self.marker else '',
         )
 
     def __lt__(self, other):
@@ -52,11 +50,7 @@ class Package:
 
     def __eq__(self, other):
         try:
-            return (
-                self.name == other.name and
-                self.version == other.version and
-                self.marker == other.marker
-            )
+            return self.name == other.name and self.version == other.version and self.marker == other.marker
         except (AttributeError, TypeError):
             return NotImplemented
 

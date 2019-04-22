@@ -16,41 +16,22 @@ from ..utils import ensure_parent_dir_exists, file_exists, read_file
 APP_DIR = user_data_dir('dd-checks-dev', '')
 CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')
 
-SECRET_KEYS = {
-    'dd_api_key',
-    'github.token',
-    'pypi.pass',
-    'trello.key',
-    'trello.token',
-}
+SECRET_KEYS = {'dd_api_key', 'github.token', 'pypi.pass', 'trello.key', 'trello.token'}
 
-DEFAULT_CONFIG = OrderedDict([
-    ('core', os.path.join('~', 'dd', 'integrations-core')),
-    ('extras', os.path.join('~', 'dd', 'integrations-extras')),
-    ('agent', os.path.join('~', 'dd', 'datadog-agent')),
-    ('repo', 'core'),
-    ('agent6', OrderedDict((
-        ('docker', 'datadog/agent-dev:master'),
-        ('local', 'latest'),
-    ))),
-    ('agent5', OrderedDict((
-        ('docker', 'datadog/dev-dd-agent:master'),
-        ('local', 'latest'),
-    ))),
-    ('dd_api_key', os.getenv('DD_API_KEY')),
-    ('github', OrderedDict((
-        ('user', ''),
-        ('token', ''),
-    ))),
-    ('pypi', OrderedDict((
-        ('user', ''),
-        ('pass', ''),
-    ))),
-    ('trello', OrderedDict((
-        ('key', ''),
-        ('token', ''),
-    ))),
-])
+DEFAULT_CONFIG = OrderedDict(
+    [
+        ('core', os.path.join('~', 'dd', 'integrations-core')),
+        ('extras', os.path.join('~', 'dd', 'integrations-extras')),
+        ('agent', os.path.join('~', 'dd', 'datadog-agent')),
+        ('repo', 'core'),
+        ('agent6', OrderedDict((('docker', 'datadog/agent-dev:master'), ('local', 'latest')))),
+        ('agent5', OrderedDict((('docker', 'datadog/dev-dd-agent:master'), ('local', 'latest')))),
+        ('dd_api_key', os.getenv('DD_API_KEY')),
+        ('github', OrderedDict((('user', ''), ('token', '')))),
+        ('pypi', OrderedDict((('user', ''), ('pass', '')))),
+        ('trello', OrderedDict((('key', ''), ('token', '')))),
+    ]
+)
 
 
 def config_file_exists():
@@ -98,15 +79,9 @@ def update_config():
 
     # Support legacy config where agent5 and agent6 were strings
     if isinstance(config['agent6'], string_types):
-        config['agent6'] = OrderedDict((
-            ('docker', config['agent6']),
-            ('local', 'latest'),
-        ))
+        config['agent6'] = OrderedDict((('docker', config['agent6']), ('local', 'latest')))
     if isinstance(config['agent5'], string_types):
-        config['agent5'] = OrderedDict((
-            ('docker', config['agent5']),
-            ('local', 'latest'),
-        ))
+        config['agent5'] = OrderedDict((('docker', config['agent5']), ('local', 'latest')))
 
     save_config(config)
     return config

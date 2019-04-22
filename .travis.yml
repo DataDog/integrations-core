@@ -182,7 +182,7 @@ jobs:
     - stage: test
       env: CHECK=lighttpd PYTHON3=true
     - stage: test
-      env: CHECK=linkerd
+      env: CHECK=linkerd PYTHON3=true
     - stage: test
       env: CHECK=linux_proc_extras PYTHON3=true
     - stage: test
@@ -210,6 +210,7 @@ jobs:
     - stage: test
       env: CHECK=nginx_ingress_controller PYTHON3=true
     - stage: test
+    # Agent <=5.x.x integration - only supporting py2 is needed
       env: CHECK=ntp
     - stage: test
       env: CHECK=openldap PYTHON3=true
@@ -256,8 +257,7 @@ jobs:
     - stage: test
       env: CHECK=statsd PYTHON3=true
     - stage: test
-    # python 2 support only
-      env: CHECK=supervisord
+      env: CHECK=supervisord PYTHON3=true
     - stage: test
       env: CHECK=squid PYTHON3=true
     - stage: test
@@ -278,7 +278,7 @@ jobs:
     - stage: test
       env: CHECK=vault PYTHON3=true
     - stage: test
-      env: CHECK=vsphere
+      env: CHECK=vsphere PYTHON3=true
     - stage: test
       env: CHECK=yarn PYTHON3=true
     - stage: test

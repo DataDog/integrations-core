@@ -14,7 +14,7 @@ flup-py3==1.0.3; python_version > '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 httplib2==0.10.3
 in-toto==0.3.0
-ipaddress==1.0.22
+ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.1.1
 jpype1==0.6.3
 kafka-python==1.4.4; sys_platform != 'win32'
@@ -31,14 +31,14 @@ ply==3.10
 prometheus-client==0.3.0
 protobuf==3.7.0
 psutil==5.5.0
-psycopg2-binary==2.7.5
+psycopg2-binary==2.8.2
 pyasn1==0.4.2
 pycparser==2.18
 pycryptodomex==3.4.7
 pymongo==3.5.1
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
-pymysql==0.8.0
-pyodbc==4.0.22
+pymysql==0.9.3
+pyodbc==4.0.22; sys_platform != 'darwin'
 pyro4==4.73; sys_platform == 'win32'
 pysmi==0.2.2
 pysnmp==4.4.3
@@ -56,8 +56,9 @@ scandir==1.8
 securesystemslib[crypto,pynacl]==0.11.3
 selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 serpent==1.27; sys_platform == 'win32'
+service_identity[idna]==18.1.0
 simplejson==3.6.5
 six==1.12.0
-supervisor==3.3.3; python_version < '3.0'
+supervisor==4.0.1
 tuf==0.11.2.dev3
 uptime==3.0.1

@@ -3,12 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from six import iteritems
-from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
-
 import requests
 import requests_kerberos
-from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError, SSLError
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
+from six import iteritems
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
@@ -351,7 +350,7 @@ class YarnCheck(AgentCheck):
                 delegate=is_affirmative(instance.get('kerberos_delegate', False)),
                 force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
                 hostname_override=instance.get('kerberos_hostname'),
-                principal=instance.get('kerberos_principal')
+                principal=instance.get('kerberos_principal'),
             )
 
         ssl_verify = is_affirmative(instance.get('ssl_verify', True))

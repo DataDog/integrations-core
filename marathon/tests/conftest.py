@@ -1,14 +1,15 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
 import json
+import os
+from copy import deepcopy
 
 import pytest
-from copy import deepcopy
 
 from datadog_checks.dev import docker_run
 from datadog_checks.marathon import Marathon
+
 from .common import HERE, INSTANCE_INTEGRATION
 
 
@@ -20,8 +21,7 @@ def read_fixture_file(fname):
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
-        log_patterns='All services up and running.'
+        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'), log_patterns='All services up and running.'
     ):
         yield INSTANCE_INTEGRATION
 

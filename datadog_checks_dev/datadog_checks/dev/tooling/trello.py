@@ -9,10 +9,7 @@ class TrelloClient:
     CREATE_ENDPOINT = API_URL + '/1/cards'
 
     def __init__(self, config):
-        self.auth = {
-            'key': config['trello']['key'] or None,
-            'token': config['trello']['token'] or None,
-        }
+        self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
         self.team_list_map = {
             'Agent': '5ae1e3d62a5167779e65e87d',
             'Containers': '5ae1cab495edd80852396c71',

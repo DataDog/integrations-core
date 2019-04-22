@@ -25,10 +25,7 @@ ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
-CI_IDENTIFIERS = {
-    'appveyor': 'APPVEYOR',
-    'travis': 'TRAVIS',
-}
+CI_IDENTIFIERS = {'appveyor': 'APPVEYOR', 'travis': 'TRAVIS'}
 
 
 def running_on_appveyor():
@@ -44,6 +41,7 @@ def running_on_ci():
 
 
 if PY3:
+
     def write_file(file, contents, encoding='utf-8'):
         with open(file, 'w', encoding=encoding) as f:
             f.write(contents)
@@ -51,7 +49,10 @@ if PY3:
     def write_file_lines(file, lines, encoding='utf-8'):
         with open(file, 'w', encoding=encoding) as f:
             f.writelines(lines)
+
+
 else:
+
     def write_file(file, contents, encoding='utf-8'):
         with open(file, 'w', encoding=encoding) as f:
             f.write(text_type(contents))

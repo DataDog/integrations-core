@@ -161,7 +161,7 @@ class TestElectionRecord:
 
     def test_seconds_until_renew(self):
         raw = make_record(
-            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.now() + timedelta(seconds=20)
+            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() + timedelta(seconds=20)
         )
 
         record = ElectionRecord(raw)
@@ -169,7 +169,7 @@ class TestElectionRecord:
         assert record.seconds_until_renew < 21
 
         raw = make_record(
-            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.now() - timedelta(seconds=5)
+            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() - timedelta(seconds=5)
         )
 
         record = ElectionRecord(raw)

@@ -3,13 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from six import iteritems
-
+from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.config import is_affirmative
-
-from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
-
 
 DEFAULT_COUNTERS = {
     # Number of HTTP requests, partitioned by status code, method, and host.
@@ -66,12 +62,12 @@ TRANSFORM_VALUE_SUMMARIES = {}
 
 DEPRECARED_SUMMARIES = {
     # (deprecated 1.14) Scheduling latency in seconds split by sub-parts of the scheduling operation
-    'scheduler_scheduling_latency_seconds': 'scheduling.scheduling_duration',
+    'scheduler_scheduling_latency_seconds': 'scheduling.scheduling_duration'
 }
 
 DEFAULT_GAUGES = {
     # Number of selected preemption victims
-    'scheduler_pod_preemption_victims': 'pod_preemption.victims',
+    'scheduler_pod_preemption_victims': 'pod_preemption.victims'
 }
 
 DEFAULT_GO_METRICS = {
@@ -117,12 +113,18 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                 "kube_scheduler": {
                     'prometheus_url': 'http://localhost:10251/metrics',
                     'namespace': self.KUBE_SCHEDULER_NAMESPACE,
-                    'metrics': [DEFAULT_COUNTERS, DEFAULT_HISTOGRAMS, NEW_1_14_HISTOGRAMS,
-                                DEFAULT_GAUGES, DEFAULT_GO_METRICS, DEPRECARED_SUMMARIES],
+                    'metrics': [
+                        DEFAULT_COUNTERS,
+                        DEFAULT_HISTOGRAMS,
+                        NEW_1_14_HISTOGRAMS,
+                        DEFAULT_GAUGES,
+                        DEFAULT_GO_METRICS,
+                        DEPRECARED_SUMMARIES,
+                    ],
                     'ignore_metrics': IGNORE_METRICS,
                 }
             },
-            default_namespace="kube_scheduler"
+            default_namespace="kube_scheduler",
         )
 
     def check(self, instance):
@@ -130,9 +132,9 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         scraper_config = self.get_scraper_config(instance)
         # Set up metric_transformers
         transformers = {}
-        for metric, mapping in iteritems(TRANSFORM_VALUE_HISTOGRAMS):
+        for metric in TRANSFORM_VALUE_HISTOGRAMS:
             transformers[metric] = self._histogram_from_microseconds_to_second
-        for metric, mapping in iteritems(TRANSFORM_VALUE_SUMMARIES):
+        for metric in TRANSFORM_VALUE_SUMMARIES:
             transformers[metric] = self._summary_from_microseconds_to_second
 
         self.process(scraper_config, metric_transformers=transformers)

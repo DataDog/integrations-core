@@ -2,23 +2,36 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
-import os
 import json
+import os
+from copy import deepcopy
+
+import pytest
 from mock import patch
 
-# 3rd party
-import pytest
+from datadog_checks.dev import docker_run
+from datadog_checks.hdfs_datanode import HDFSDataNode
 
-from .common import HERE, TEST_USERNAME, TEST_PASSWORD
+from .common import HERE, INSTANCE_INTEGRATION, TEST_PASSWORD, TEST_USERNAME
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    with docker_run(
+        compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
+        log_patterns='Got finalize command for block pool',
+    ):
+        yield
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
+def check():
+    return HDFSDataNode('hdfs_datanode')
 
-    aggregator.reset()
-    return aggregator
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE_INTEGRATION)
 
 
 @pytest.fixture

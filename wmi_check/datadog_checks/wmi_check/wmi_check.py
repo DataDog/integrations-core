@@ -14,6 +14,7 @@ class WMICheck(WinWMICheck):
 
     Windows only.
     """
+
     def __init__(self, name, init_config, agentConfig, instances):
         WinWMICheck.__init__(self, name, init_config, agentConfig, instances)
         self.wmi_samplers = {}
@@ -49,15 +50,19 @@ class WMICheck(WinWMICheck):
         instance_hash = hash_mutable(instance)
         instance_key = self._get_instance_key(host, namespace, wmi_class, instance_hash)
 
-        metric_name_and_type_by_property, properties = \
-            self._get_wmi_properties(instance_key, metrics, tag_queries)
+        metric_name_and_type_by_property, properties = self._get_wmi_properties(instance_key, metrics, tag_queries)
 
         wmi_sampler = self._get_wmi_sampler(
             instance_key,
-            wmi_class, properties,
-            tag_by=tag_by, filters=filters,
-            host=host, namespace=namespace, provider=provider,
-            username=username, password=password,
+            wmi_class,
+            properties,
+            tag_by=tag_by,
+            filters=filters,
+            host=host,
+            namespace=namespace,
+            provider=provider,
+            username=username,
+            password=password,
         )
 
         # Sample, extract & submit metrics
@@ -69,8 +74,7 @@ class WMICheck(WinWMICheck):
                 u"WMI query timed out."
                 u" class={wmi_class} - properties={wmi_properties} -"
                 u" filters={filters} - tag_queries={tag_queries}".format(
-                    wmi_class=wmi_class, wmi_properties=properties,
-                    filters=filters, tag_queries=tag_queries
+                    wmi_class=wmi_class, wmi_properties=properties, filters=filters, tag_queries=tag_queries
                 )
             )
         else:

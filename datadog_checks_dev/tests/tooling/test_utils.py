@@ -3,9 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 
-from datadog_checks.dev.tooling.utils import (
-    parse_agent_req_file, get_version_string
-)
+from datadog_checks.dev.tooling.utils import get_version_string, parse_agent_req_file
 
 
 def test_parse_agent_req_file():

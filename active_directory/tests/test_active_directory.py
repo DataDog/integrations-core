@@ -2,15 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
+from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
-from .common import (
-    CHECK_NAME,
-    MINIMAL_INSTANCE,
-)
 from datadog_checks.active_directory import ActiveDirectoryCheck
 from datadog_checks.active_directory.active_directory import DEFAULT_COUNTERS
 
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
+from .common import CHECK_NAME, MINIMAL_INSTANCE
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')

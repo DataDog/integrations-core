@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .mcache import Memcache
 
-__all__ = [
-    '__version__',
-    'Memcache'
-]
+__all__ = ['__version__', 'Memcache']

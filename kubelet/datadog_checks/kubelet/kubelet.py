@@ -3,33 +3,35 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import json
 import logging
 import re
 from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime, timedelta
-import json
 
 import requests
-
-from datadog_checks.base.utils.date import parse_rfc3339, UTC
-from datadog_checks.base.utils.tagging import tagger
-from datadog_checks.checks import AgentCheck
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
 from kubeutil import get_connection_info
 from six import iteritems
 from six.moves.urllib.parse import urljoin
 
-from .common import CADVISOR_DEFAULT_PORT, PodListUtils, KubeletCredentials
+from datadog_checks.base.utils.date import UTC, parse_rfc3339
+from datadog_checks.base.utils.tagging import tagger
+from datadog_checks.checks import AgentCheck
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.errors import CheckException
+
 from .cadvisor import CadvisorScraper
+from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils
 from .prometheus import CadvisorPrometheusScraperMixin
 
 try:
     from datadog_agent import get_config
 except ImportError:
+
     def get_config(key):
         return ""
+
 
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
@@ -60,7 +62,7 @@ FACTORS = {
 
 WHITELISTED_CONTAINER_STATE_REASONS = {
     'waiting': ['errimagepull', 'imagepullbackoff', 'crashloopbackoff', 'containercreating'],
-    'terminated': ['oomkilled', 'containercannotrun', 'error']
+    'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
 
 
@@ -71,6 +73,7 @@ class ExpiredPodFilter(object):
     """
     Allows to filter old pods out of the podlist by providing a decoding hook
     """
+
     def __init__(self, cutoff_date):
         self.expired_count = 0
         self.cutoff_date = cutoff_date
@@ -110,6 +113,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
     """
     Collect metrics from Kubelet.
     """
+
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -138,31 +142,34 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         This is so the base class can create a scraper_config with the proper values.
         """
         kubelet_instance = deepcopy(instance)
-        kubelet_instance.update({
-            'namespace': self.NAMESPACE,
-
-            # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
-            # we specify a dummy url that will be replaced in the `check()` function. We append it with "kubelet"
-            # so the key is different than the cadvisor scraper.
-            'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
-            'metrics': [{
-                'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
-                'rest_client_requests_total': 'rest.client.requests',
-                'rest_client_request_latency_seconds': 'rest.client.latency',
-                'kubelet_runtime_operations': 'kubelet.runtime.operations',
-                'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
-                'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
-                'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
-                'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
-                'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
-                'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
-                'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
-                'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
-            }],
-            # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
-            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
-            'health_service_check': instance.get('health_service_check', False)
-        })
+        kubelet_instance.update(
+            {
+                'namespace': self.NAMESPACE,
+                # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
+                # we specify a dummy url that will be replaced in the `check()` function. We append it with "kubelet"
+                # so the key is different than the cadvisor scraper.
+                'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
+                'metrics': [
+                    {
+                        'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
+                        'rest_client_requests_total': 'rest.client.requests',
+                        'rest_client_request_latency_seconds': 'rest.client.latency',
+                        'kubelet_runtime_operations': 'kubelet.runtime.operations',
+                        'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+                        'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+                        'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
+                        'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
+                        'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
+                        'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
+                        'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
+                        'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
+                    }
+                ],
+                # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
+                'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+                'health_service_check': instance.get('health_service_check', False),
+            }
+        )
         return kubelet_instance
 
     def check(self, instance):
@@ -175,31 +182,30 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
         self.instance_tags = instance.get('tags', [])
+        self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
 
         # Test the kubelet health ASAP
         self._perform_kubelet_check(self.instance_tags)
 
         if 'cadvisor_metrics_endpoint' in instance:
-            self.cadvisor_scraper_config['prometheus_url'] = \
-                instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+            self.cadvisor_scraper_config['prometheus_url'] = instance.get(
+                'cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)
+            )
         else:
-            self.cadvisor_scraper_config['prometheus_url'] = instance.get('metrics_endpoint',
-                                                                          urljoin(endpoint, CADVISOR_METRICS_PATH))
+            self.cadvisor_scraper_config['prometheus_url'] = instance.get(
+                'metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)
+            )
 
         if 'metrics_endpoint' in instance:
             self.log.warning('metrics_endpoint is deprecated, please specify cadvisor_metrics_endpoint instead.')
 
-        self.kubelet_scraper_config['prometheus_url'] = instance.get('kubelet_metrics_endpoint',
-                                                                     urljoin(endpoint, KUBELET_METRICS_PATH))
+        self.kubelet_scraper_config['prometheus_url'] = instance.get(
+            'kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH)
+        )
 
         # Kubelet credentials handling
-        self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
-        self.kubelet_credentials.configure_scraper(
-            self.cadvisor_scraper_config
-        )
-        self.kubelet_credentials.configure_scraper(
-            self.kubelet_scraper_config
-        )
+        self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
+        self.kubelet_credentials.configure_scraper(self.kubelet_scraper_config)
 
         # Legacy cadvisor support
         try:
@@ -217,24 +223,14 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
             self.log.debug('processing legacy cadvisor metrics')
-            self.process_cadvisor(
-                instance,
-                self.cadvisor_legacy_url,
-                self.pod_list,
-                self.pod_list_utils
-            )
+            self.process_cadvisor(instance, self.cadvisor_legacy_url, self.pod_list, self.pod_list_utils)
         elif self.cadvisor_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing cadvisor metrics')
-            self.process(
-                self.cadvisor_scraper_config,
-                metric_transformers=self.CADVISOR_METRIC_TRANSFORMERS
-            )
+            self.process(self.cadvisor_scraper_config, metric_transformers=self.CADVISOR_METRIC_TRANSFORMERS)
 
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            self.process(
-                self.kubelet_scraper_config
-            )
+            self.process(self.kubelet_scraper_config)
 
         # Free up memory
         self.pod_list = None
@@ -251,7 +247,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             cert=self.kubelet_credentials.cert_pair(),
             headers=self.kubelet_credentials.headers(url),
             params={'verbose': verbose},
-            stream=stream
+            stream=stream,
         )
 
     def retrieve_pod_list(self):
@@ -263,8 +259,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     pod_list = json.load(r.raw, object_hook=f.json_hook)
                     pod_list['expired_count'] = f.expired_count
                     if pod_list.get("items") is not None:
-                        # Wrap items in a generator to filter our None items
-                        pod_list['items'] = (p for p in pod_list['items'] if p is not None)
+                        # Filter out None items from the list
+                        pod_list['items'] = [p for p in pod_list['items'] if p is not None]
                 else:
                     pod_list = json.load(r.raw)
 
@@ -273,8 +269,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 pod_list['items'] = []
             return pod_list
         except Exception as e:
-            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s'
-                             % (self.pod_list_url, str(e)))
+            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s' % (self.pod_list_url, str(e)))
             return None
 
     @staticmethod
@@ -337,8 +332,12 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         except Exception as e:
             self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
-            self.service_check(service_check_base, AgentCheck.CRITICAL,
-                               message='Kubelet check %s failed: %s' % (url, str(e)), tags=instance_tags)
+            self.service_check(
+                service_check_base,
+                AgentCheck.CRITICAL,
+                message='Kubelet check %s failed: %s' % (url, str(e)),
+                tags=instance_tags,
+            )
         else:
             if is_ok:
                 self.service_check(service_check_base, AgentCheck.OK, tags=instance_tags)

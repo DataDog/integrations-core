@@ -1,0 +1,3 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+tls.days_left,gauge,,day,,Days until X.509 certificate expiration,1,tls,Days until expiration
+tls.seconds_left,gauge,,second,,Seconds until X.509 certificate expiration,1,tls,Seconds until expiration

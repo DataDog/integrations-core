@@ -3,16 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import pytest
+
 import mock
+import pytest
 
 from datadog_checks.base.checks.kube_leader import ElectionRecord
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
-instance = {
-    'prometheus_url': 'http://localhost:10251/metrics',
-    'send_histograms_buckets': True,
-}
+instance = {'prometheus_url': 'http://localhost:10251/metrics', 'send_histograms_buckets': True}
 
 # Constants
 CHECK_NAME = 'kube_scheduler'
@@ -27,9 +25,7 @@ def mock_metrics():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"}
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),
     ):
         yield
@@ -42,8 +38,8 @@ def mock_leader():
     with mock.patch(
         'datadog_checks.kube_scheduler.KubeSchedulerCheck._get_record',
         return_value=ElectionRecord(
-            '{"holderIdentity":"pod1","leaseDurationSeconds":15,"leaderTransitions":3,' +
-            '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}'
+            '{"holderIdentity":"pod1","leaseDurationSeconds":15,"leaderTransitions":3,'
+            + '"acquireTime":"2018-12-19T18:23:24Z","renewTime":"2019-01-02T16:30:07Z"}'
         ),
     ):
         yield
@@ -67,8 +63,9 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     assert_metric('.scheduling.e2e_scheduling_duration.count', value=0.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm_duration.count', value=14.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.e2e_scheduling_duration.sum', value=0.166793941, tags=[])
-    assert_metric('.scheduling.scheduling_duration.quantile', value=0.01050672,
-                  tags=['operation:binding', 'quantile:0.5'])
+    assert_metric(
+        '.scheduling.scheduling_duration.quantile', value=0.01050672, tags=['operation:binding', 'quantile:0.5']
+    )
     assert_metric('.scheduling.algorithm.priority_duration.sum', value=0.0, tags=[])
     assert_metric('.scheduling.algorithm.priority_duration.count', value=14.0, tags=['upper_bound:0.004'])
     assert_metric('.scheduling.algorithm.preemption_duration.sum', value=0.5524, tags=[])
@@ -76,12 +73,16 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     assert_metric('.scheduling.algorithm.preemption_duration.count', value=0.0, tags=['upper_bound:0.001'])
     assert_metric('.schedule_attempts', value=14.0, tags=['result:scheduled'])
     assert_metric('.volume_scheduling_duration.sum', value=3.3576e-05, tags=['operation:assume'])
-    assert_metric('.volume_scheduling_duration.count',
-                  value=14.0, tags=['upper_bound:1000.0', 'operation:assume'])
-    assert_metric('.client.http.requests_duration.count',
-                  tags=['url:https://172.17.0.2:6443/%7Bprefix%7D', 'upper_bound:0.001', 'verb:GET'])
-    assert_metric('.client.http.requests_duration.sum', value=24.374537649,
-                  tags=['url:https://172.17.0.2:6443/%7Bprefix%7D', 'verb:GET'])
+    assert_metric('.volume_scheduling_duration.count', value=14.0, tags=['upper_bound:1000.0', 'operation:assume'])
+    assert_metric(
+        '.client.http.requests_duration.count',
+        tags=['url:https://172.17.0.2:6443/%7Bprefix%7D', 'upper_bound:0.001', 'verb:GET'],
+    )
+    assert_metric(
+        '.client.http.requests_duration.sum',
+        value=24.374537649,
+        tags=['url:https://172.17.0.2:6443/%7Bprefix%7D', 'verb:GET'],
+    )
     assert_metric('.goroutines')
     assert_metric('.gc_duration_seconds.sum')
     assert_metric('.gc_duration_seconds.count')
@@ -93,11 +94,7 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     # check historgram transformation from microsecond to second
     assert_metric('.scheduling.algorithm_duration.sum', value=0.0018508010000000002, tags=[])
     # Leader election mixin
-    expected_le_tags = [
-      "record_kind:endpoints",
-      "record_name:kube-scheduler",
-      "record_namespace:kube-system"
-    ]
+    expected_le_tags = ["record_kind:endpoints", "record_name:kube-scheduler", "record_namespace:kube-system"]
     assert_metric('.leader_election.transitions', value=3, tags=expected_le_tags)
     assert_metric('.leader_election.lease_duration', value=15, tags=expected_le_tags)
     aggregator.assert_service_check(NAMESPACE + ".leader_election.status", tags=expected_le_tags)

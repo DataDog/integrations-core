@@ -23,7 +23,7 @@ Unix:
 Windows:
 
 ```
-"C:\Program Files\Datadog\Datadog Agent\embedded\Scrips\python.exe" -m pip install ibm_db==3.0.1
+"C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install ibm_db==3.0.1
 ```
 
 Additionally, on Linux there may be need for XML functionality. If you encounter errors during

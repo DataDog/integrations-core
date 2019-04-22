@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .rabbitmq import RabbitMQ
 
-__all__ = [
-    '__version__',
-    'RabbitMQ'
-]
+__all__ = ['__version__', 'RabbitMQ']

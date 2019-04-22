@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .gitlab_runner import GitlabRunnerCheck
 
-__all__ = [
-    '__version__',
-    'GitlabRunnerCheck'
-]
+__all__ = ['__version__', 'GitlabRunnerCheck']

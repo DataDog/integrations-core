@@ -99,7 +99,7 @@ ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "tw
 
 ### Metrics
 
-Twistlock collects metrics on compliance and vulnerabilities. Look in the [metadata.csv][6] to see more
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 

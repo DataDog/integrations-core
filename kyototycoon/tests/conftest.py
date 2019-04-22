@@ -9,9 +9,7 @@ import requests
 
 from datadog_checks.dev import docker_run
 
-from .common import (
-    HERE, URL, DEFAULT_INSTANCE
-)
+from .common import DEFAULT_INSTANCE, HERE, URL
 
 
 @pytest.fixture(scope="session")
@@ -21,19 +19,14 @@ def dd_environment():
     """
 
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'compose_kyototycoon.yaml'),
-        endpoints='{}/rpc/report'.format(URL),
+        compose_file=os.path.join(HERE, 'compose', 'compose_kyototycoon.yaml'), endpoints='{}/rpc/report'.format(URL)
     ):
 
         # Generate a test database
-        data = {
-            'dddd': 'dddd'
-        }
-        headers = {
-            'X-Kt-Mode': 'set'
-        }
+        data = {'dddd': 'dddd'}
+        headers = {'X-Kt-Mode': 'set'}
 
-        for i in range(100):
+        for _ in range(100):
             requests.put(URL, data=data, headers=headers)
             requests.get(URL)
 

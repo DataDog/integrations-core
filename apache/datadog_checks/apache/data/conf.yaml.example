@@ -2,53 +2,59 @@ init_config:
 
 instances:
 
-  ## @param apache_status_url - string - required
-  ## Status url of your Apache server.
-  #
+    ## @param apache_status_url - string - required
+    ## Status url of your Apache server.
+    #
   - apache_status_url: http://localhost/server-status?auto
 
-  ## @param apache_user - string - optional
-  ## Username for the Apache status endpoint authentication.
-  #
-  #  apache_user: <USERNAME>
+    ## @param apache_user - string - optional
+    ## Username for the Apache status endpoint authentication.
+    #
+    # apache_user: <USERNAME>
 
-  ## @param apache_password - string - optional
-  ## Password for the Apache status endpoint authentication.
-  #
-  #  apache_password: <PASSWORD>
+    ## @param apache_password - string - optional
+    ## Password for the Apache status endpoint authentication.
+    #
+    # apache_password: <PASSWORD>
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-  ## @param disable_ssl_validation - boolean - optional - default: false
-  ## Instructs the check to skip the validation of the SSL certificate of the URL being tested.
-  ## Defaults to false, set to true if you want to disable SSL certificate validation.
-  #
-  #  disable_ssl_validation: false
+    ## @param disable_ssl_validation - boolean - optional - default: false
+    ## Instructs the check to skip the validation of the SSL certificate of the URL being tested.
+    ## Defaults to false, set to true if you want to disable SSL certificate validation.
+    #
+    # disable_ssl_validation: false
 
-  ## @param connect_timeout - integer - optional
-  ## Overrides the default connection timeout value,
-  ## and fails the check if the time to establish the (TCP) connection
-  ## exceeds the connect_timeout value (in seconds)
-  #
-  #  connect_timeout: <VALUE_IN_SECOND>
+    ## @param connect_timeout - integer - optional
+    ## Overrides the default connection timeout value,
+    ## and fails the check if the time to establish the (TCP) connection
+    ## exceeds the connect_timeout value (in seconds)
+    #
+    # connect_timeout: <VALUE_IN_SECOND>
 
-  ## @param receive_timeout - integer - optional
-  ## Overrides the default received timeout value, and fails the check if the time to receive
-  ## the server status from the Apache server exceeds the receive_timeout value (in seconds)
+    ## @param receive_timeout - integer - optional
+    ## Overrides the default received timeout value, and fails the check if the time to receive
+    ## the server status from the Apache server exceeds the receive_timeout value (in seconds)
+    #
+    # receive_timeout: <VALUE_IN_SECOND>
+
+  ## @param tls_ignore_warning - boolean - optional - default: false
+  ## Instructs the check to disable the TLS/SSL warnings when the apache_status_url uses https
+  ## and SSL certificate verification is disabled.
   #
-  #  receive_timeout: <VALUE_IN_SECOND>
+  # tls_ignore_warning: false
 
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
@@ -56,14 +62,14 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
-#logs:
-#  - type: file
-#    path: /var/log/apache2/access.log
-#    source: apache
-#    sourcecategory: http_web_access
-#    service: apache
-#  - type: file
-#    path: /var/log/apache2/error.log
-#    source: apache
-#    sourcecategory: http_web_access
-#    service: apache
+# logs:
+#   - type: file
+#     path: /var/log/apache2/access.log
+#     source: apache
+#     sourcecategory: http_web_access
+#     service: apache
+#   - type: file
+#     path: /var/log/apache2/error.log
+#     source: apache
+#     sourcecategory: http_web_access
+#     service: apache

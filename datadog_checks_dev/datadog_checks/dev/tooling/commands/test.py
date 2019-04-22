@@ -5,11 +5,11 @@ import os
 
 import click
 
-from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
-from ..constants import get_root
-from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from ...subprocess import run_command
 from ...utils import chdir, file_exists, remove_path, running_on_ci
+from ..constants import get_root
+from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
+from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 
 def display_envs(check_envs):
@@ -19,10 +19,7 @@ def display_envs(check_envs):
             echo_info('    {}'.format(e))
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Run tests'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Run tests')
 @click.argument('checks', nargs=-1)
 @click.option('--format-style', '-fs', is_flag=True, help='Run only the code style formatter')
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
@@ -37,6 +34,7 @@ def display_envs(check_envs):
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='List available test environments')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
+@click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
 def test(
     checks,
     format_style,
@@ -52,6 +50,7 @@ def test(
     list_envs,
     changed,
     cov_keep,
+    pytest_args,
 ):
     """Run tests for Agent-based checks.
 
@@ -83,6 +82,7 @@ def test(
         coverage=coverage,
         marker=marker,
         test_filter=test_filter,
+        pytest_args=pytest_args,
     )
     coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 
@@ -162,13 +162,7 @@ def test(
                         abort('\nFailed!', code=result.code)
 
                     fix_coverage_report(check, 'coverage.xml')
-                    run_command([
-                        'codecov',
-                        '-X', 'gcov',
-                        '--root', root,
-                        '-F', check,
-                        '-f', 'coverage.xml'
-                    ])
+                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')

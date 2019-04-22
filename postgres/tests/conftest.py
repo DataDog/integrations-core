@@ -9,8 +9,8 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
-from .common import HOST, PORT, USER, PASSWORD, DB_NAME
 
+from .common import DB_NAME, HOST, PASSWORD, PORT, USER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,10 +24,7 @@ def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
     """
-    with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-        conditions=[WaitFor(connect_to_pg)],
-    ):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yaml'), conditions=[WaitFor(connect_to_pg)]):
         yield e2e_instance
 
 
@@ -48,7 +45,7 @@ def pg_instance():
         'password': PASSWORD,
         'dbname': DB_NAME,
         'use_psycopg2': os.environ.get('USE_PSYCOPG2', 'false'),
-        'tags': ['foo:bar']
+        'tags': ['foo:bar'],
     }
 
 
@@ -61,5 +58,5 @@ def e2e_instance():
         'password': PASSWORD,
         'dbname': DB_NAME,
         'use_psycopg2': os.environ.get('USE_PSYCOPG2', 'true'),
-        'tags': ['foo:bar']
+        'tags': ['foo:bar'],
     }

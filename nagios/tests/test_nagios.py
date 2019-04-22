@@ -4,13 +4,22 @@
 import json
 import tempfile
 import time
+
 import pytest
 
-from datadog_checks.nagios import Nagios
 from datadog_checks.base import ensure_bytes
+from datadog_checks.nagios import Nagios
+
 from .common import (
-    CHECK_NAME, CUSTOM_TAGS, NAGIOS_TEST_LOG, NAGIOS_TEST_HOST, NAGIOS_TEST_ALT_HOST_TEMPLATE,
-    NAGIOS_TEST_HOST_TEMPLATE, NAGIOS_TEST_SVC, NAGIOS_TEST_SVC_TEMPLATE, NAGIOS_TEST_ALT_SVC_TEMPLATE,
+    CHECK_NAME,
+    CUSTOM_TAGS,
+    NAGIOS_TEST_ALT_HOST_TEMPLATE,
+    NAGIOS_TEST_ALT_SVC_TEMPLATE,
+    NAGIOS_TEST_HOST,
+    NAGIOS_TEST_HOST_TEMPLATE,
+    NAGIOS_TEST_LOG,
+    NAGIOS_TEST_SVC,
+    NAGIOS_TEST_SVC_TEMPLATE,
 )
 
 
@@ -23,8 +32,7 @@ class TestEventLogTailer:
 
         # Get the config
         config, nagios_cfg = get_config(
-            ensure_bytes("log_file={}\n".format(NAGIOS_TEST_LOG)),
-            events=True, tags=CUSTOM_TAGS
+            ensure_bytes("log_file={}\n".format(NAGIOS_TEST_LOG)), events=True, tags=CUSTOM_TAGS
         )
 
         # Set up the check
@@ -101,7 +109,7 @@ class TestEventLogTailer:
         # Set up the check
         nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
 
-        for i in range(ITERATIONS):
+        for _ in range(ITERATIONS):
             log_file.write(test_data)
             log_file.flush()
             nagios.check(config['instances'][0])
@@ -119,7 +127,7 @@ class TestPerfDataTailer:
         "db0=33;180;190;0;200",
         "db1=1;150;190;0;200",
         "db2=0;120;290;1;200",
-        "db3=0;110;195;5;100"
+        "db3=0;110;195;5;100",
     ]
 
     DB_LOG_DATA = [
