@@ -722,13 +722,13 @@ GROUP BY datid, datname
 
                 config_table_obj = relations_config.get(row_table)
                 if not config_table_obj:
-                    self.log.info("weird, got row %s.%s, but not relation", row_schema, row_table)
+                    self.log.info("Got row %s.%s, but not relation", row_schema, row_table)
                 else:
                     config_schemas = config_table_obj.get('schemas')
                     if not config_schemas:
-                        self.log.debug("all schemas are allowed for table %s.%s", row_schema, row_table)
+                        self.log.debug("All schemas are allowed for table %s.%s", row_schema, row_table)
                     elif row_schema not in config_schemas:
-                        self.log.debug("Skipping non match schema %s for table %s", desc_map['schema'], row_table)
+                        self.log.debug("Skipping non matched schema %s for table %s", desc_map['schema'], row_table)
                         continue
 
             # Build tags
