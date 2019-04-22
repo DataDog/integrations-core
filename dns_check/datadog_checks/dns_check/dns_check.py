@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 
 import time
+
 import dns.resolver
 
-from datadog_checks.utils.platform import Platform
 from datadog_checks.checks import NetworkCheck, Status
+from datadog_checks.utils.platform import Platform
 
 # These imports are necessary because otherwise dynamic type
 # resolution will fail on windows without it.
@@ -16,6 +17,7 @@ from datadog_checks.checks import NetworkCheck, Status
 if Platform.is_win32():
     from dns.rdtypes.ANY import *  # noqa
     from dns.rdtypes.IN import *  # noqa
+
     # for tiny time deltas, time.time on Windows reports the same value
     # of the clock more than once, causing the computation of response_time
     # to be often 0; let's use time.clock that is more precise.
@@ -79,7 +81,7 @@ class DNSCheck(NetworkCheck):
         t0 = time_func()
 
         try:
-            self.log.debug('Querying "{0}" record for hostname "{1}"...'.format(record_type, hostname))
+            self.log.debug('Querying "{}" record for hostname "{}"...'.format(record_type, hostname))
             if record_type == "NXDOMAIN":
                 try:
                     resolver.query(hostname)
@@ -89,32 +91,32 @@ class DNSCheck(NetworkCheck):
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
                 answer = resolver.query(hostname, rdtype=record_type)
-                assert(answer.rrset.items[0].to_text())
+                assert answer.rrset.items[0].to_text()
                 if resolves_as:
                     self._check_answer(answer, resolves_as)
 
             response_time = time_func() - t0
 
         except dns.exception.Timeout:
-            self.log.error('DNS resolution of {0} timed out'.format(hostname))
-            return Status.CRITICAL, 'DNS resolution of {0} timed out'.format(hostname)
+            self.log.error('DNS resolution of {} timed out'.format(hostname))
+            return Status.CRITICAL, 'DNS resolution of {} timed out'.format(hostname)
 
         except Exception:
-            self.log.exception('DNS resolution of {0} has failed.'.format(hostname))
-            return Status.CRITICAL, 'DNS resolution of {0} has failed'.format(hostname)
+            self.log.exception('DNS resolution of {} has failed.'.format(hostname))
+            return Status.CRITICAL, 'DNS resolution of {} has failed'.format(hostname)
 
         else:
             tags = self._get_tags(instance)
             if response_time > 0:
                 self.gauge('dns.response_time', response_time, tags=tags)
-            self.log.debug('Resolved hostname: {0}'.format(hostname))
+            self.log.debug('Resolved hostname: {}'.format(hostname))
             return Status.UP, 'UP'
 
     def _check_answer(self, answer, resolves_as):
         ips = [x.strip().lower() for x in resolves_as.split(',')]
         number_of_results = len(answer.rrset.items)
 
-        assert(len(ips) == number_of_results)
+        assert len(ips) == number_of_results
         result_ips = []
         for rip in answer.rrset.items:
             result = rip.to_text().lower()
@@ -123,7 +125,7 @@ class DNSCheck(NetworkCheck):
             result_ips.append(result)
 
         for ip in ips:
-            assert(ip in result_ips)
+            assert ip in result_ips
 
     def _get_tags(self, instance):
         hostname = instance.get('hostname')
@@ -138,12 +140,14 @@ class DNSCheck(NetworkCheck):
         except IndexError:
             self.log.error('No DNS server was found on this host.')
 
-        tags = custom_tags + ['nameserver:{0}'.format(nameserver),
-                              'resolved_hostname:{0}'.format(hostname),
-                              'instance:{0}'.format(instance_name),
-                              'record_type:{0}'.format(record_type)]
+        tags = custom_tags + [
+            'nameserver:{}'.format(nameserver),
+            'resolved_hostname:{}'.format(hostname),
+            'instance:{}'.format(instance_name),
+            'record_type:{}'.format(record_type),
+        ]
         if resolved_as:
-            tags.append('resolved_as:{0}'.format(resolved_as))
+            tags.append('resolved_as:{}'.format(resolved_as))
 
         return tags
 
@@ -153,8 +157,6 @@ class DNSCheck(NetworkCheck):
         if status == Status.UP:
             msg = None
 
-        self.service_check(self.SERVICE_CHECK_NAME,
-                           NetworkCheck.STATUS_TO_SERVICE_CHECK[status],
-                           tags=tags,
-                           message=msg
-                           )
+        self.service_check(
+            self.SERVICE_CHECK_NAME, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg
+        )

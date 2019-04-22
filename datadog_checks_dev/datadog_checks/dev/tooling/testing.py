@@ -146,7 +146,7 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
-    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter=''
+    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter='', pytest_args=''
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
@@ -180,6 +180,9 @@ def construct_pytest_options(
 
     if test_filter:
         pytest_options += ' -k {}'.format(test_filter)
+
+    if pytest_args:
+        pytest_options += ' {}'.format(pytest_args)
 
     return pytest_options
 

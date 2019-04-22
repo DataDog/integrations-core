@@ -1,46 +1,86 @@
 init_config:
 
 instances:
-  # The `db_whitelist` should contain the names of the databases meant to be checked.
-  # If no whitelist is specified, all databases will be checked.
-  #
-  # The `db_blacklist` should contain the names of any databases meant to be excluded
-  # from being checked. If a database is listed in both the blacklist and whitelist,
-  # the blacklist will take precedence.
-  #
-  # You should also notice that no more than 50 databases will be checked, if you have
-  # whitelisted more than 50 or if you have more than 50 databases and no whitelist,
-  # only the first 50 databases will be checked.
-  #
+
+    ## @param server - string - required
+    ## The Couch server's url.
+    #
   - server: http://localhost:5984
-    # name: <Erlang name>         # CouchDB 2.x only. If not provided, the check will scan up to max_nodes_per_check nodes of the cluster
-    # user: username              # optional
-    # password: password          # optional
-    # timeout: 5                  # optional. in seconds. Defaults to 5
-    # db_whitelist:               # optional. A list of dbs to scan. All by default.
-    #  - db1
-    #  - db2
-    #  - db3
-    # db_blacklist:               # optional. A list of dbs to skip. None by default.
-    #  - db1
-    #  - db2
-    #  - db3
-    # max_nodes_per_check: 10     # CouchDB 2.x only. How many nodes each check will report if no name is provided. Defaults to 20.
-    # max_dbs_per_check: 20       # Optional. How many databases to scan. Default to 50.
+
+    ## @param username - string - optional
+    ## The username to use if `server` is behind basic auth.
+    #
+    # user: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to use if `server` is behind basic auth.
+    #
+    # password: <PASSWORD>
+
+    ## @param timeout - integer - optional - default: 5
+    ## The timeout for connecting to the `server`
+    #
+    # timeout: 5
+
+    ## @param db_whitelist - list of strings - optional - default: all
+    ## The `db_whitelist` should contain the names of the databases meant to be checked.
+    ## If no whitelist is specified, all databases will be checked.
+    ##
+    ## Note that no more than 50 databases can be checked at the same time, if you have
+    ## whitelisted more than 50 or if you have more than 50 databases update the `max_dbs_per_check`
+    ## parameter accordingly.
+    #
+    # db_whitelist:
+    #   - <DATABASE_1>
+    #   - <DATABASE_2>
+
+    ## @param db_blacklist - list of strings - optional - default: none
+    ## The `db_blacklist` should contain the names of any databases meant to be excluded
+    ## from being checked. If a database is listed in both the blacklist and whitelist,
+    ## the blacklist takes precedence.
+    #
+    # db_blacklist:
+    #   - <DATABASE_1>
+    #   - <DATABASE_2>
+
+    ## @param max_dbs_per_check - integer - optional - default: 50
+    ## Number of databases to scan per check.
+    #
+    # max_dbs_per_check: 50
+
+    ## @param name - string - optional
+    ## CouchDB 2.x only. If not provided, the check scans up to max_nodes_per_check nodes of the cluster.
+    #
+    # name: <ERLANG_NAME>
+
+    ## @param max_nodes_per_check - integer - optional - default: 20
+    ## CouchDB 2.x only. How many nodes each check reports if no name is provided.
+    #
+    # max_nodes_per_check: 10
+
+    ## @param tags - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
-
-#logs:
-
-    # - type : (mandatory) type of log input source (tcp / udp / file)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
-    #   tags: (optional) add tags to each logs collected
-    
-    # - type: file
-    #   path: /var/log/couchdb/couch.log
-    #   source: couchdb
-    #   sourcecategory: database
-    #   service: couch
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     path: /var/log/couchdb/couch.log
+#     source: couchdb
+#     sourcecategory: database
+#     service: couch

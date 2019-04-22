@@ -5,6 +5,7 @@ import mock
 
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
+
 from .common import INSTANCES, response
 
 

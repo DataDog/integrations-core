@@ -8,9 +8,11 @@ import pytest
 
 from datadog_checks.ibm_mq import IbmMqCheck
 
+from . import common
+
 log = logging.getLogger(__file__)
 
-METRICS = [
+QUEUE_METRICS = [
     'ibm_mq.queue.service_interval',
     'ibm_mq.queue.inhibit_put',
     'ibm_mq.queue.depth_low_limit',
@@ -40,9 +42,13 @@ METRICS = [
     'ibm_mq.queue.open_output_count',
     'ibm_mq.queue.trigger_type',
     'ibm_mq.queue.depth_percent',
+]
+
+METRICS = [
     'ibm_mq.queue_manager.dist_lists',
     'ibm_mq.queue_manager.max_msg_list',
-]
+    'ibm_mq.channel.channels',
+] + QUEUE_METRICS
 
 OPTIONAL_METRICS = [
     'ibm_mq.queue.max_channels',
@@ -67,6 +73,17 @@ def test_check(aggregator, instance, seed_data):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+    tags = [
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+    ]
+
+    channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags)
+    bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
+    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -95,3 +112,20 @@ def test_check_all(aggregator, instance_collect_all, seed_data):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_check_regex(aggregator, instance_queue_regex_tag, seed_data):
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check.check(instance_queue_regex_tag)
+
+    tags = [
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'channel:{}'.format(common.CHANNEL),
+        'queue:{}'.format(common.QUEUE),
+        'foo:bar',
+    ]
+
+    for metric in QUEUE_METRICS:
+        aggregator.assert_metric(metric, tags=tags)

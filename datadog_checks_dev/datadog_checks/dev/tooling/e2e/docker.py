@@ -51,18 +51,55 @@ class DockerInterface(object):
 
     @property
     def agent_command(self):
-        return 'docker exec {} {}'.format(
-            self.container_name,
-            get_agent_exe(self.agent_version)
-        )
+        return get_agent_exe(self.agent_version)
 
-    def run_check(self, capture=False, rate=False):
-        command = '{} check {}{}'.format(
-            self.agent_command,
-            self.check,
-            ' {}'.format(get_rate_flag(self.agent_version)) if rate else ''
-        )
-        return run_command(command, capture=capture)
+    def exec_command(self, command, **kwargs):
+        cmd = 'docker exec'
+
+        if kwargs.pop('interactive', False):
+            cmd += ' -it'
+
+        cmd += ' {}'.format(self.container_name)
+        cmd += ' {}'.format(command)
+
+        return run_command(cmd, **kwargs)
+
+    def run_check(
+        self,
+        capture=False,
+        rate=False,
+        times=None,
+        pause=None,
+        delay=None,
+        log_level=None,
+        as_json=False,
+        break_point=None,
+    ):
+        command = '{} check {}'.format(self.agent_command, self.check)
+
+        if rate:
+            command += ' {}'.format(get_rate_flag(self.agent_version))
+
+        # These are only available for Agent 6+
+        if times is not None:
+            command += ' --check-times {}'.format(times)
+
+        if pause is not None:
+            command += ' --pause {}'.format(pause)
+
+        if delay is not None:
+            command += ' --delay {}'.format(delay)
+
+        if log_level is not None:
+            command += ' --log-level {}'.format(log_level)
+
+        if as_json:
+            command += ' --json {}'.format(as_json)
+
+        if break_point is not None:
+            command += ' --breakpoint {}'.format(break_point)
+
+        return self.exec_command(command, capture=capture, interactive=break_point is not None)
 
     def exists(self):
         return env_exists(self.check, self.env)
@@ -119,6 +156,8 @@ class DockerInterface(object):
                 '-v', '{}:{}'.format(self.config_dir, get_agent_conf_dir(self.check, self.agent_version)),
                 # Mount the check directory
                 '-v', '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
+                # Mount the /proc directory
+                '-v', '/proc:/host/proc',
             ]
 
             # Any environment variables passed to the start command

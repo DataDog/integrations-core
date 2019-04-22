@@ -1,5 +1,9 @@
 # CHANGELOG - btrfs
 
+## 1.6.0 / 2019-03-29
+
+* [Added] Adhere to code style. See [#3324](https://github.com/DataDog/integrations-core/pull/3324).
+
 ## 1.5.0 / 2019-02-18
 
 * [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).

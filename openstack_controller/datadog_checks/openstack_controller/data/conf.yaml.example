@@ -1,151 +1,151 @@
 init_config:
 
-## @param os_host - string - optional
-## The hostname of this machine registered with Nova.
-## Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
-#
-#  os_host: <HOSTNAME>
+  ## @param os_host - string - optional
+  ## The hostname of this machine registered with Nova.
+  ## Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
+  #
+  # os_host: <HOSTNAME>
 
 instances:
 
-  ## @param name - string - required
-  ## Unique identifier for this instance.
-  #
+    ## @param name - string - required
+    ## Unique identifier for this instance.
+    #
   - name: <INSTANCE_NAME>
 
-  ## @param keystone_server_url - string - required
-  ## URL of your identity server. Note that the server must support Identity API v3
-  #
+    ## @param keystone_server_url - string - required
+    ## URL of your identity server. Note that the server must support Identity API v3
+    #
     keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
 
-  ## @param user - object - required
-  ## Password authentication is the only auth method supported
-  ## User expects username, password, and user domain id
-  ## `user` should resolve to a structure like {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-  ## The check uses the Unscoped token method to collect information about all available projects to the user.
-  #
+    ## @param user - object - required
+    ## Password authentication is the only auth method supported
+    ## User expects username, password, and user domain id
+    ## `user` should resolve to a structure like {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
+    ## The check uses the Unscoped token method to collect information about all available projects to the user.
+    #
     user:
         password: <PASSWORD>
         name: <USER_NAME>
         domain:
             id: <DOMAIN_ID>
-            
-  ## @param whitelist_project_names - list of strings - optional - default: []
-  ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
-  ## Regex expressions for the project names are supported.
-  ## Whitelist takes precedence over blacklist in case of overlap.
-  #
-  #  whitelist_project_names:
-  #    - <PROJECT_NAME>
-  #    - <PROJECT_PREFIX>*
 
-  ## @param blacklist_project_names - list of strings - optional - default: []
-  ## IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
-  ## Regex expressions for the project names are supported.
-  ## Whitelist takes precedence over blacklist in case of overlap.
-  #
-  #  blacklist_project_names:
-  #    - <PROJECT_NAME>
-  #    - <PROJECT_PREFIX>*
+    ## @param whitelist_project_names - list of strings - optional - default: []
+    ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
+    ## Regex expressions for the project names are supported.
+    ## Blacklist takes precedence over whitelist in case of overlap.
+    #
+    # whitelist_project_names:
+    #   - <PROJECT_NAME>
+    #   - <PROJECT_PREFIX>*
 
-  ## @param exclude_server_ids - list of strings - optional - default: []
-  ## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
-  ## Regex expressions for the server IDs are supported.
-  #
-  #  exclude_server_ids:
-  #    - <SERVER_ID>
-  #    - <SERVER_ID_PREFIX>*
+    ## @param blacklist_project_names - list of strings - optional - default: []
+    ## IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
+    ## Regex expressions for the project names are supported.
+    ## Blacklist takes precedence over whitelist in case of overlap.
+    #
+    # blacklist_project_names:
+    #   - <PROJECT_NAME>
+    #   - <PROJECT_PREFIX>*
 
-  ## @param exclude_network_ids - list of strings - optional - default: []
-  ## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the neutron:get_networks operation)
-  ## Regex expressions for the network IDs to exclude are supported.
-  #
-  #  exclude_network_ids:
-  #    - <NETWORK_ID>
-  #    - <NETWORK_ID_PREFIX>*
+    ## @param exclude_server_ids - list of strings - optional - default: []
+    ## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
+    ## Regex expressions for the server IDs are supported.
+    #
+    # exclude_server_ids:
+    #   - <SERVER_ID>
+    #   - <SERVER_ID_PREFIX>*
 
-  ## @param ssl_verify - boolean - optional - default: true
-  ## Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
-  ## need to set to false when using self-signed certs.
-  #
-  #  ssl_verify: true
+    ## @param exclude_network_ids - list of strings - optional - default: []
+    ## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the neutron:get_networks operation)
+    ## Regex expressions for the network IDs to exclude are supported.
+    #
+    # exclude_network_ids:
+    #   - <NETWORK_ID>
+    #   - <NETWORK_ID_PREFIX>*
 
-  ## @param use_agent_proxy - boolean - optional - default: true
-  ## Whether the dd-agent proxy should also be used for openstack API requests (if set).
-  #
-  #  use_agent_proxy: true
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
+    ## need to set to false when using self-signed certs.
+    #
+    # ssl_verify: true
 
-  ## @param paginated_limit - integer - optional - default: 1000
-  ## paginated_limit sets the number of items some api calls should return.
-  #
-  #  paginated_limit: 1000
+    ## @param use_agent_proxy - boolean - optional - default: true
+    ## Whether the dd-agent proxy should also be used for openstack API requests (if set).
+    #
+    # use_agent_proxy: true
 
-  ## @param request_timeout - integer - optional - default: 10
-  ## request_timeout sets the timeout in second used when making api calls.
-  #
-  #  request_timeout: 10
+    ## @param paginated_limit - integer - optional - default: 1000
+    ## paginated_limit sets the number of items some api calls should return.
+    #
+    # paginated_limit: 1000
 
-  ## @param openstack_config_file_path - string - optional
-  ## Absolute path of the configuration file for the connection to openstack with openstacksdk.
-  #
-  #  openstack_config_file_path: <PATH_TO_YAML_FILE>
+    ## @param request_timeout - integer - optional - default: 10
+    ## request_timeout sets the timeout in second used when making api calls.
+    #
+    # request_timeout: 10
 
-  ## @param openstack_cloud_name - string - optional
-  ## Name of the cloud configuration to use.
-  ## If this parameter is specified, the connection to Openstack will be using only the configuration file specified in
-  ## openstack_config_file_path, or at the default location:
-  ## ~/.config/openstack or /etc/openstack
-  #
-  #  openstack_cloud_name: <CLOUD_NAME>
+    ## @param openstack_config_file_path - string - optional
+    ## Absolute path of the configuration file for the connection to openstack with openstacksdk.
+    #
+    # openstack_config_file_path: <PATH_TO_YAML_FILE>
 
-  ## @param collect_hypervisor_load - boolean - optional - default: true
-  ## Collects hypervisor_load.1/5/15 for each hypervisor
-  ## Disabled by default to increase performance of the check.
-  ## With this enabled there is an extra N requests per check run (N = # of hypervisors)
-  ## If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
-  #
-  #  collect_hypervisor_load: true
+    ## @param openstack_cloud_name - string - optional
+    ## Name of the cloud configuration to use.
+    ## If this parameter is specified, the connection to Openstack will be using only the configuration file specified in
+    ## openstack_config_file_path, or at the default location:
+    ## ~/.config/openstack or /etc/openstack
+    #
+    # openstack_cloud_name: <CLOUD_NAME>
 
-  ## @param collect_hypervisor_metrics - boolean - optional - default: true
-  ## Collects hypervisor metrics (including hypervisor_load).
-  #
-  #  collect_hypervisor_metrics: true
+    ## @param collect_hypervisor_load - boolean - optional - default: true
+    ## Collects hypervisor_load.1/5/15 for each hypervisor
+    ## Disabled by default to increase performance of the check.
+    ## With this enabled there is an extra N requests per check run (N = # of hypervisors)
+    ## If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
+    #
+    # collect_hypervisor_load: true
 
-  ## @param collect_project_metrics - boolean - optional - default: true
-  ## The admin user defined for Datadog starts with a "default" project.
-  ## If this option is disabled, project limits metrics are only collected from projects the
-  ## datadog defined user has access to view.
-  #
-  #  collect_project_metrics: true
+    ## @param collect_hypervisor_metrics - boolean - optional - default: true
+    ## Collects hypervisor metrics (including hypervisor_load).
+    #
+    # collect_hypervisor_metrics: true
 
-  ## @param collect_network_metrics - boolean - optional - default: true
-  ## Collects network metrics.
-  #
-  #  collect_network_metrics: true
+    ## @param collect_project_metrics - boolean - optional - default: true
+    ## The admin user defined for Datadog starts with a "default" project.
+    ## If this option is disabled, project limits metrics are only collected from projects the
+    ## datadog defined user has access to view.
+    #
+    # collect_project_metrics: true
 
-  ## @param collect_server_flavor_metrics - boolean - optional - default: true
-  ## Collect server flavor metrics.
-  #
-  #  collect_server_flavor_metrics: true
+    ## @param collect_network_metrics - boolean - optional - default: true
+    ## Collects network metrics.
+    #
+    # collect_network_metrics: true
 
-  ## @param collect_diagnostic_flavor_metrics - boolean - optional - default: true
-  ## Collect server diagnostic metrics. Enabling this may result in performance decrease.
-  ## This is fine for small deployments. For large deployment, turn it off and install the agent on VMs directly.
-  #
-  #  collect_server_diagnostic_metrics: true
+    ## @param collect_server_flavor_metrics - boolean - optional - default: true
+    ## Collect server flavor metrics.
+    #
+    # collect_server_flavor_metrics: true
 
-  ## @param use_shortname - boolean - optional - default: false
-  ## In some OpenStack environments, the hostname registered to Nova is the shortname. 
-  ## Enabling this enforces the check to split the hostname up to the first period when
-  ## comparing against nova responses. Only affects aggregate tagging. 
-  #
-  #  use_shortname: false
+    ## @param collect_diagnostic_flavor_metrics - boolean - optional - default: true
+    ## Collect server diagnostic metrics. Enabling this may result in performance decrease.
+    ## This is fine for small deployments. For large deployment, turn it off and install the agent on VMs directly.
+    #
+    # collect_server_diagnostic_metrics: true
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ## Note: server metrics override the host tag and thus do not get the host-level tags specified in datadog.(conf/yaml)
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param use_shortname - boolean - optional - default: false
+    ## In some OpenStack environments, the hostname registered to Nova is the shortname.
+    ## Enabling this enforces the check to split the hostname up to the first period when
+    ## comparing against nova responses. Only affects aggregate tagging.
+    #
+    # use_shortname: false
+
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## Note: server metrics override the host tag and thus do not get the host-level tags specified in datadog.(conf/yaml)
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

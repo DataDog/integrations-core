@@ -1,69 +1,69 @@
 instances:
 
-  ## @param host - string - required
-  ## Aerospike host to connect to.
-  #
+    ## @param host - string - required
+    ## Aerospike host to connect to.
+    #
   - host: localhost
 
-  ## @param port - integer - required
-  ## Aerospike port to connect to.
-  #
+    ## @param port - integer - required
+    ## Aerospike port to connect to.
+    #
     port: 3000
 
-  ## @param username - string - optional
-  ## The database user to authenticate as.
-  #
-  #  username: <USERNAME>
+    ## @param username - string - optional
+    ## The database user to authenticate as.
+    #
+    # username: <USERNAME>
 
-  ## @param password - string - optional
-  ## The password of `username`.
-  #
-  #  password: <PASSWORD>
+    ## @param password - string - optional
+    ## The password of `username`.
+    #
+    # password: <PASSWORD>
 
-  ## @param tls_name - string - optional
-  ## This must match the tls-name specified in the node’s server
-  ## configuration file and match the server’s CA certificate.
-  #
-  #  tls_name: <TLS_NAME>
+    ## @param tls_name - string - optional
+    ## This must match the tls-name specified in the node’s server
+    ## configuration file and match the server’s CA certificate.
+    #
+    # tls_name: <TLS_NAME>
 
-  ## @param timeout - integer - optional - default: 10
-  ## The read timeout in seconds.
-  #
-  #  timeout: 10
+    ## @param timeout - integer - optional - default: 10
+    ## The read timeout in seconds.
+    #
+    # timeout: 10
 
-  ## @param tags  - list of key:value strings - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value strings - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-  ## @param metrics - list of strings - optional
-  ## All metrics collected by default. You probably don't want to do this,
-  ## so list the ones you do want here. Check with:
-  ##  asinfo -v statistics -l
-  #
-  #  metrics:
-  #    - migrate_rx_objs
-  #    - migrate_tx_objs
+    ## @param metrics - list of strings - optional
+    ## All metrics collected by default. You probably don't want to do this,
+    ## so list the ones you do want here. Check with:
+    ##  asinfo -v statistics -l
+    #
+    # metrics:
+    #   - migrate_rx_objs
+    #   - migrate_tx_objs
 
-  ## @param namespace_metrics - list of strings - optional
-  ## All Namespace metrics collected by default. You probably don't want to do this,
-  ## so list the ones you do want here. Check with:
-  ##  asinfo -v namespace/<NAME_SPACE> -l.
-  #
-  #  namespace_metrics:
-  #    - free-pct-disk
-  #    - free-pct-memory
-  #    - evicted-objects
-  #    - expired-objects
-  #    - master-objects
-  #    - migrate-rx-partitions-initial
-  #    - migrate-rx-partitions-remaining
-  #    - migrate-tx-partitions-initial
-  #    - migrate-tx-partitions-remaining
+    ## @param namespace_metrics - list of strings - optional
+    ## All Namespace metrics collected by default. You probably don't want to do this,
+    ## so list the ones you do want here. Check with:
+    ##  asinfo -v namespace/<NAME_SPACE> -l.
+    #
+    # namespace_metrics:
+    #   - free-pct-disk
+    #   - free-pct-memory
+    #   - evicted-objects
+    #   - expired-objects
+    #   - master-objects
+    #   - migrate-rx-partitions-initial
+    #   - migrate-rx-partitions-remaining
+    #   - migrate-tx-partitions-initial
+    #   - migrate-tx-partitions-remaining
 
 init_config:
 
@@ -290,11 +290,11 @@ init_config:
     - xdr_unknown_namespace_error
     - xdr_uptime
 
-    # ==============================================================================
-    # Namespace specific metrics recorded per namespace
-    # ------------------------------------------------------------------------------
+    ## ==============================================================================
+    ## Namespace specific metrics recorded per namespace
+    ## ------------------------------------------------------------------------------
 
-    # inline comments indicate moved/renamed metrics starting with ASD 3.9+
+    ## inline comments indicate moved/renamed metrics starting with ASD 3.9+
     - batch_sub_proxy_complete
     - batch_sub_proxy_error
     - batch_sub_proxy_timeout
@@ -404,11 +404,11 @@ init_config:
     - xdr_write_success
     - xdr_write_timeout
 
-    # ==============================================================================
-    # Datacenter (XDR) specific metrics recorded per datacenter
-    # ------------------------------------------------------------------------------
+    ## ==============================================================================
+    ## Datacenter (XDR) specific metrics recorded per datacenter
+    ## ------------------------------------------------------------------------------
 
-    # inline comments indicate moved/renamed metrics starting with ASD 3.9+
+    ## inline comments indicate moved/renamed metrics starting with ASD 3.9+
     - dc_remote_ship_ok
     - dc_rec_ship_attempts        # renamed dc_ship_attempt
     - dc_delete_ship_attempts    # renamed dc_ship_delete_success

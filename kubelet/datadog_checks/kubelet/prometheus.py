@@ -7,10 +7,10 @@ from copy import deepcopy
 
 from six import iteritems
 
+from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from tagger import get_tags
 
-from .common import is_static_pending_pod, get_pod_by_uid
+from .common import get_pod_by_uid, is_static_pending_pod
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
@@ -61,37 +61,38 @@ class CadvisorPrometheusScraperMixin(object):
         This is so the base class can create a scraper_config with the proper values.
         """
         cadvisor_instance = deepcopy(instance)
-        cadvisor_instance.update({
-            'namespace': self.NAMESPACE,
-
-            # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
-            # we specify a dummy url that will be replaced in the `check()` function. We append it with "cadvisor"
-            # so the key is different than the kubelet scraper.
-            'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
-            'ignore_metrics': [
-                'container_cpu_cfs_periods_total',
-                'container_fs_inodes_free',
-                'container_fs_inodes_total',
-                'container_fs_io_current',
-                'container_fs_io_time_seconds_total',
-                'container_fs_io_time_weighted_seconds_total',
-                'container_fs_read_seconds_total',
-                'container_fs_reads_merged_total',
-                'container_fs_reads_total',
-                'container_fs_sector_reads_total',
-                'container_fs_sector_writes_total',
-                'container_fs_write_seconds_total',
-                'container_fs_writes_merged_total',
-                'container_fs_writes_total',
-                'container_last_seen',
-                'container_start_time_seconds',
-                'container_spec_memory_swap_limit_bytes',
-                'container_scrape_error'
-            ],
-            # Defaults that were set when CadvisorPrometheusScraper was based on PrometheusScraper
-            'send_monotonic_counter': instance.get('send_monotonic_counter', False),
-            'health_service_check': instance.get('health_service_check', False)
-        })
+        cadvisor_instance.update(
+            {
+                'namespace': self.NAMESPACE,
+                # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
+                # we specify a dummy url that will be replaced in the `check()` function. We append it with "cadvisor"
+                # so the key is different than the kubelet scraper.
+                'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
+                'ignore_metrics': [
+                    'container_cpu_cfs_periods_total',
+                    'container_fs_inodes_free',
+                    'container_fs_inodes_total',
+                    'container_fs_io_current',
+                    'container_fs_io_time_seconds_total',
+                    'container_fs_io_time_weighted_seconds_total',
+                    'container_fs_read_seconds_total',
+                    'container_fs_reads_merged_total',
+                    'container_fs_reads_total',
+                    'container_fs_sector_reads_total',
+                    'container_fs_sector_writes_total',
+                    'container_fs_write_seconds_total',
+                    'container_fs_writes_merged_total',
+                    'container_fs_writes_total',
+                    'container_last_seen',
+                    'container_start_time_seconds',
+                    'container_spec_memory_swap_limit_bytes',
+                    'container_scrape_error',
+                ],
+                # Defaults that were set when CadvisorPrometheusScraper was based on PrometheusScraper
+                'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+                'health_service_check': instance.get('health_service_check', False),
+            }
+        )
         return cadvisor_instance
 
     @staticmethod
@@ -257,7 +258,7 @@ class CadvisorPrometheusScraperMixin(object):
                 seen[uid] = (
                     seen[uid][OpenMetricsBaseCheck.SAMPLE_NAME],
                     seen[uid][OpenMetricsBaseCheck.SAMPLE_LABELS],
-                    seen[uid][OpenMetricsBaseCheck.SAMPLE_VALUE] + sample[OpenMetricsBaseCheck.SAMPLE_VALUE]
+                    seen[uid][OpenMetricsBaseCheck.SAMPLE_VALUE] + sample[OpenMetricsBaseCheck.SAMPLE_VALUE],
                 )
                 # TODO
                 # metric.Clear()  # Ignore this metric message
@@ -278,14 +279,14 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = get_tags(c_id, True)
+            tags = tagger.tag(c_id, tagger.HIGH)
             tags += scraper_config['custom_tags']
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             pod = self._get_pod_by_metric_label(sample[self.SAMPLE_LABELS])
             if pod is not None and is_static_pending_pod(pod):
-                tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
+                tags += tagger.tag('kubernetes_pod://%s' % pod["metadata"]["uid"], tagger.HIGH)
                 tags += self._get_kube_container_name(sample[self.SAMPLE_LABELS])
                 tags = list(set(tags))
 
@@ -309,7 +310,7 @@ class CadvisorPrometheusScraperMixin(object):
         for pod_uid, sample in iteritems(samples):
             if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                 continue
-            tags = get_tags('kubernetes_pod://%s' % pod_uid, True)
+            tags = tagger.tag('kubernetes_pod://%s' % pod_uid, tagger.HIGH)
             tags += scraper_config['custom_tags']
             val = sample[self.SAMPLE_VALUE]
             self.rate(metric_name, val, tags)
@@ -332,14 +333,14 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = get_tags(c_id, True)
+            tags = tagger.tag(c_id, tagger.HIGH)
             tags += scraper_config['custom_tags']
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             pod = self._get_pod_by_metric_label(sample[self.SAMPLE_LABELS])
             if pod is not None and is_static_pending_pod(pod):
-                tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
+                tags += tagger.tag('kubernetes_pod://%s' % pod["metadata"]["uid"], tagger.HIGH)
                 tags += self._get_kube_container_name(sample[self.SAMPLE_LABELS])
                 tags = list(set(tags))
 
@@ -366,7 +367,7 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = get_tags(c_id, True)
+            tags = tagger.tag(c_id, tagger.HIGH)
             tags += scraper_config['custom_tags']
 
             if m_name:
@@ -380,16 +381,21 @@ class CadvisorPrometheusScraperMixin(object):
                 if usage:
                     self.gauge(pct_m_name, float(usage / float(limit)), tags)
                 else:
-                    self.log.debug("No corresponding usage found for metric %s and "
-                                   "container %s, skipping usage_pct for now." % (pct_m_name, c_name))
+                    self.log.debug(
+                        "No corresponding usage found for metric %s and "
+                        "container %s, skipping usage_pct for now." % (pct_m_name, c_name)
+                    )
 
     def container_cpu_usage_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.usage.total'
 
         for i, sample in enumerate(metric.samples):
             # Replacing the sample tuple to convert cores in nano cores
-            metric.samples[i] = (sample[self.SAMPLE_NAME], sample[self.SAMPLE_LABELS],
-                                 sample[self.SAMPLE_VALUE] * 10. ** 9)
+            metric.samples[i] = (
+                sample[self.SAMPLE_NAME],
+                sample[self.SAMPLE_LABELS],
+                sample[self.SAMPLE_VALUE] * 10.0 ** 9,
+            )
         self._process_container_metric('rate', metric_name, metric, scraper_config)
 
     def container_cpu_load_average_10s(self, metric, scraper_config):

@@ -1,41 +1,76 @@
 init_config:
 
 instances:
-  - # Get metrics from your FPM pool with this URL
-    status_url: http://localhost/status
-    # Get a reliable service check of your FPM pool with that one
+
+    ## @param status_url - string - required
+    ## Get metrics from your FPM pool with this URL
+    ## The status URLs should follow the options from your FPM pool
+    ## See http://php.net/manual/en/install.fpm.configuration.php
+    ##   * pm.status_path
+    ## You should configure your fastcgi passthru (nginx/apache) to
+    ## catch these URLs and redirect them through the FPM pool target
+    ## you want to monitor (FPM `listen` directive in the config, usually
+    ## a UNIX socket or TCP socket.
+    #
+  - status_url: http://localhost/status
+
+    ## @param ping_url - string - required
+    ## Get a reliable service check of your FPM pool with `ping_url` parameter
+    ## The ping URLs should follow the options from your FPM pool
+    ## See http://php.net/manual/en/install.fpm.configuration.php
+    ##   * ping.path
+    ## You should configure your fastcgi passthru (nginx/apache) to
+    ## catch these URLs and redirect them through the FPM pool target
+    ## you want to monitor (FPM `listen` directive in the config, usually
+    ## a UNIX socket or TCP socket.
+    #
     ping_url: http://localhost/ping
-    # Communicate directly with PHP-FPM using FastCGI
+
+    ## @param use_fastcgi - boolean - required - default: false
+    ## Communicate directly with PHP-FPM using FastCGI
+    #
     use_fastcgi: false
-    # Set the expected reply to the ping.
+
+    ## @param ping_reply - string - required
+    ## Set the expected reply to the ping.
+    #
     ping_reply: pong
-    # These 2 URLs should follow the options from your FPM pool
-    # See http://php.net/manual/en/install.fpm.configuration.php
-    #   * pm.status_path
-    #   * ping.path
-    # You should configure your fastcgi passthru (nginx/apache) to
-    # catch these URLs and redirect them through the FPM pool target
-    # you want to monitor (FPM `listen` directive in the config, usually
-    # a UNIX socket or TCP socket.
+
+    ## @param user - string - optional
+    ## Use the `user` parameter to set your username
+    ## if you have basic authentication on your ping and status pages.
     #
-    # Use this if you have basic authentication on these pages
-    # user: bits
-    # password: D4T4D0G
+    # user: <USERNAME>
+
+    ## @param password - string - optional
+    ## Use the `password` parameter to set your password
+    ## if you have basic authentication on your ping and status pages.
     #
-    # If your FPM pool is only accessible via a specific HTTP vhost, you can
-    # pass in a custom Host header like so
-    # http_host: such.production.host
+    # password: <PASSWORD>
+
+    ## @param http_host - string - optional
+    ## If your FPM pool is only accessible via a specific HTTP vhost, you can
+    ## pass in a custom Host header like so
     #
-    # If you need to specify a custom timeout in seconds (default is 20):
+    # http_host: <HOST_ENDPOINT>
+
+    ## @param timeout - integer - optional - default: 20
+    ## If you need to specify a custom timeout in seconds.
+    #
     # timeout: 20
-    #
-    # The (optional) disable_ssl_validation will instruct the check
-    # to skip the validation of the SSL certificate of the URL being tested.
-    # Defaults to false, set to true if you want to disable SSL certificate validation.
+
+    ## @param disable_ssl_validation - boolean - optional - default: false
+    ## The disable_ssl_validation instructs the check to skip the validation
+    ## of the SSL certificate of the URL being tested.
+    ## Set to true if you want to disable SSL certificate validation.
     #
     # disable_ssl_validation: false
+
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
-    # Array of custom tags
-    # By default metrics and service check will be tagged by pool and host
     # tags:
-    #   - instance:foo
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

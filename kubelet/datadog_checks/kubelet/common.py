@@ -2,18 +2,20 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from tagger import get_tags
+from datadog_checks.base.utils.tagging import tagger
 
 try:
     from containers import is_excluded
 except ImportError:
     # Don't fail on < 6.2
     import logging
+
     log = logging.getLogger(__name__)
     log.info('Agent does not provide filtering logic, disabling container filtering')
 
     def is_excluded(name, image):
         return False
+
 
 SOURCE_TYPE = 'kubelet'
 
@@ -25,7 +27,7 @@ def tags_for_pod(pod_id, cardinality):
     Queries the tagger for a given pod uid
     :return: string array, empty if pod not found
     """
-    return get_tags('kubernetes_pod://%s' % pod_id, cardinality)
+    return tagger.tag('kubernetes_pod://%s' % pod_id, cardinality)
 
 
 def tags_for_docker(cid, cardinality):
@@ -33,7 +35,7 @@ def tags_for_docker(cid, cardinality):
     Queries the tagger for a given container id
     :return: string array, empty if container not found
     """
-    return get_tags('docker://%s' % cid, cardinality)
+    return tagger.tag('docker://%s' % cid, cardinality)
 
 
 def get_pod_by_uid(uid, podlist):
@@ -83,6 +85,7 @@ class PodListUtils(object):
     Containers that are part of a static pod are not filtered, as we cannot curently
     reliably determine their image name to pass to the filtering logic.
     """
+
     def __init__(self, podlist):
         self.containers = {}
         self.static_pod_uids = set()
@@ -173,6 +176,7 @@ class KubeletCredentials(object):
     """
     Holds the configured credentials to connect to the Kubelet.
     """
+
     def __init__(self, kubelet_conn_info):
         """
         Parses the kubelet_conn_info dict and computes credentials
@@ -233,9 +237,11 @@ class KubeletCredentials(object):
         :param endpoint: url that will be scraped
         """
         endpoint = scraper_config['prometheus_url']
-        scraper_config.update({
-            'ssl_ca_cert': self._ssl_verify,
-            'ssl_cert': self._ssl_cert,
-            'ssl_private_key': self._ssl_private_key,
-            'extra_headers': self.headers(endpoint) or {}
-        })
+        scraper_config.update(
+            {
+                'ssl_ca_cert': self._ssl_verify,
+                'ssl_cert': self._ssl_cert,
+                'ssl_private_key': self._ssl_private_key,
+                'extra_headers': self.headers(endpoint) or {},
+            }
+        )

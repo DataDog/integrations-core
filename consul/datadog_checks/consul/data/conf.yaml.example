@@ -1,86 +1,115 @@
-# This check takes no init_config
 init_config:
 
 instances:
-    # Where your Consul HTTP Server Lives
-    # Point the URL at the leader to get metrics about your Consul Cluster.
-    # Remind to use https instead of http if your Consul setup is configured to do so.
-    - url: http://localhost:8500
 
-      # If Consul setup uses SSL, you might need to set the following options as well.
+    ## @param url - string - required
+    ## Where your Consul HTTP Server Lives
+    ## Point the URL at the leader to get metrics about your Consul Cluster.
+    ## Remind to use https instead of http if your Consul setup is configured to do so.
+    #
+  - url: http://localhost:8500
 
-      # You can specify a local cert to use as client side certificate
-      # as a single file (containing the private key and the certificate concatenated)
-      # client_cert_file: '/path/to/client.concatenated.pem'
+    ## @param catalog_checks - boolean - optional - default: false
+    ## Set to true to perform checks against the Consul service Catalog.
+    #
+    # catalog_checks: false
 
-      # Or as two separate files (for certificate and key):
-      # client_cert_file: '/path/to/client.cert.pem'
-      # private_key_file: '/path/to/private.key.pem'
+    ## @param network_latency_checks - boolean - optional - default: false
+    ## Whether to enable network latency metrics collection. When enabled
+    ## consul network coordinates is retrieved and latency calculated for
+    ## each node and between data centers.
+    ## See https://www.consul.io/docs/internals/coordinates.html
+    #
+    # network_latency_checks: false
 
-      # Whether to verifiy SSL certificates for HTTPS requests.
-      # Possible values: True, False or '/path/to/your/trusted_ca_bundle_file'
-      # ca_bundle_file: '/path/to/trusted_ca_bundle_file'
+    ## @param self_leader_check - boolean - optional - default: false
+    ## Whether to enable self leader checks. Each instance with this enabled
+    ## watches for itself to become the leader and emits an event when that
+    ## happens. It is safe/expected to enable this on all nodes in a consul
+    ## cluster since only the new leader emits the (single) event. This
+    ## flag takes precedence over new_leader_checks.
+    #
+    # self_leader_check: false
 
-      # ACL token to use for authentication
-      # acl_token: 'token'
+    ## @param client_cert_file - string - optional
+    ## Specify a local cert to use as client side certificate
+    ## as a single file (containing the private key and the certificate concatenated)
+    #
+    # client_cert_file: '<CLIENT_CONCATENATED_FILE_PATH>'
 
-      # Whether or not to perform the full check even when not the leader. Useful
-      # if you don't want to install the Agent on every node in a data center.
-      # single_node_install: false
+    ## @param client_cert_file - string - optional
+    ## If your certificate is composed of two separate files (for certificate and key):
+    ## Enter here the certificate file path.
+    #
+    # client_cert_file: '<CERTIFICATE_FILE_PATH>'
 
-      # Whether to perform checks against the Consul service Catalog
-      catalog_checks: true
+    ## @param private_key_file - string - optional
+    ## If your certificate is composed of two separate files (for certificate and key):
+    ## Enter here the key file path.
+    #
+    # private_key_file: '<KEY_FILE_PATH>'
 
-      # Whether to enable self leader checks. Each instance with this enabled will
-      # watch for itself to become the leader and will emit an event when that
-      # happens. It is safe/expected to enable this on all nodes in a consul
-      # cluster since only the new leader will emit the (single) event. This
-      # flag takes precedence over new_leader_checks.
-      self_leader_check: true
+    ## @param ca_bundle_file - string - optional - default: true
+    ## Whether to verifiy SSL certificates for HTTPS requests.
+    ## Possible values: True, False or '<TRUSTED_CA_BUNDLE_FILE_PATH>'
+    #
+    # ca_bundle_file: true
 
-      # Whether to enable new leader checks from this instance
-      # Note: if this is set on multiple instances/agents in the same cluster
-      # you will receive one event per leader change per instance. See
-      # self_leader_check for a more robust option.
-      new_leader_checks: true
+    ## @param acl_token - string - optional
+    ## ACL token to use for authentication.
+    #
+    # acl_token: '<TOKEN>'
 
-      # Whether to enable network latency metrics collection. When enabled
-      # consul network coordinates will be retrieved and latency calculated for
-      # each node and between data centers.
-      # See https://www.consul.io/docs/internals/coordinates.html
-      network_latency_checks: true
+    ## @param single_node_install - boolean - optional - default: false
+    ## Whether or not to perform the full check even when not the leader. Useful
+    ## if you don't want to install the Agent on every node in a data center.
+    #
+    # single_node_install: false
 
-      # Services to restrict catalog querying to
-      # The default settings query up to 50 services. So if you have more than
-      # this many in your Consul service catalog, you will want to fill in the
-      # whitelist
-      # service_whitelist:
-      #   - zookeeper
-      #   - gunicorn
-      #   - redis
+    ## @param new_leader_checks - boolean - optional - default: false
+    ## Whether to enable new leader checks from this instance
+    ## Note: if this is set on multiple instances/agents in the same cluster
+    ## you will receive one event per leader change per instance. See
+    ## self_leader_check for a more robust option.
+    #
+    # new_leader_checks: false
 
-      # If you'd rather not maintain a whitelist, you can increase the maximum
-      # number of queried services
-      # max_services: 50
+    ## @param service_whitelist - list of strings - optional
+    ## Services to restrict catalog querying to
+    ## The default settings query up to 50 services. So if you have more than
+    ## this many in your Consul service catalog, fill this whitelist.
+    #
+    # service_whitelist:
+    #   - <SERVICE_1>
+    #   - <SERVICE_2>
 
-      # Additional tags to apply to the metrics, events and service checks
-      # You should always specify tags when multiple instances of the check run
-      # on the same agent.
-      # tags:
-      #   - 'consul_server:server1'
+    ## @param max_services - integer - optional - default: 50
+    ## Increase the maximum number of queried services.
+    #
+    # max_services: 50
+
+    ## @param tags  - list of key:value element - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
-
-#logs:
-
-    # - type : (mandatory) type of log input source (tcp / udp / file)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
-    #   tags: (optional) add tags to each logs collected
-
-    # - type: file
-    #   path: /var/log/consul_server.log
-    #   source: consul
-    #   service: myservice
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     path: /var/log/consul_server.log
+#     source: consul
+#     service: <SERVICE_NAME>

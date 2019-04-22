@@ -57,7 +57,7 @@ VARIABLES_VARS = [
     'mysql.net.max_connections_available',
     'mysql.performance.qcache_size',
     'mysql.performance.table_open_cache',
-    'mysql.performance.thread_cache_size'
+    'mysql.performance.thread_cache_size',
 ]
 
 INNODB_VARS = [
@@ -86,11 +86,7 @@ BINLOG_VARS = [
     # 'mysql.binlog.disk_use', Only collected if log_bin is true
 ]
 
-SYSTEM_METRICS = [
-    'mysql.performance.user_time',
-    'mysql.performance.kernel_time',
-    'mysql.performance.cpu_time',
-]
+SYSTEM_METRICS = ['mysql.performance.user_time', 'mysql.performance.kernel_time', 'mysql.performance.cpu_time']
 
 OPTIONAL_REPLICATION_METRICS = [
     'mysql.replication.slave_running',
@@ -134,14 +130,10 @@ OPTIONAL_STATUS_VARS = [
     'mysql.performance.table_locks_immediate',
     'mysql.performance.table_locks_immediate.rate',
     'mysql.performance.threads_cached',
-    'mysql.performance.threads_created'
+    'mysql.performance.threads_created',
 ]
 
-OPTIONAL_STATUS_VARS_5_6_6 = [
-    'mysql.performance.table_cache_hits',
-    'mysql.performance.table_cache_misses',
-
-]
+OPTIONAL_STATUS_VARS_5_6_6 = ['mysql.performance.table_cache_hits', 'mysql.performance.table_cache_misses']
 
 # Will collect if [FLAG NAME] is True
 OPTIONAL_INNODB_VARS = [
@@ -232,16 +224,8 @@ OPTIONAL_INNODB_VARS = [
     'mysql.innodb.x_lock_spin_waits',
 ]
 
-PERFORMANCE_VARS = [
-    'mysql.performance.query_run_time.avg',
-    'mysql.performance.digest_95th_percentile.avg_us',
-]
+PERFORMANCE_VARS = ['mysql.performance.query_run_time.avg', 'mysql.performance.digest_95th_percentile.avg_us']
 
-SCHEMA_VARS = [
-    'mysql.info.schema.size'
-]
+SCHEMA_VARS = ['mysql.info.schema.size']
 
-SYNTHETIC_VARS = [
-    'mysql.performance.qcache.utilization',
-    'mysql.performance.qcache.utilization.instant',
-]
+SYNTHETIC_VARS = ['mysql.performance.qcache.utilization', 'mysql.performance.qcache.utilization.instant']

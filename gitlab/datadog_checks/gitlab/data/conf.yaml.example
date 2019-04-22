@@ -1,57 +1,57 @@
 instances:
 
-  ## @param gitlab_url - string - required
-  ## Master URL to probe for service health status
-  ## If you are using gitlab CE and not EE, use this url with
-  ## the authorization token: http://localhost/?token=<TOKEN>
-  #
+    ## @param gitlab_url - string - required
+    ## Master URL to probe for service health status
+    ## If you are using gitlab CE and not EE, use this url with
+    ## the authorization token: http://localhost/?token=<TOKEN>
+    #
   - gitlab_url: <GITLAB_URL>
 
-  ## @param prometheus_endpoint - string - required
-  ## URL of the metrics endpoint of prometheus
-  #
+    ## @param prometheus_endpoint - string - required
+    ## URL of the metrics endpoint of prometheus
+    #
     prometheus_endpoint: http://<PROMETHEUS_ENDPOINT>:<PROMETHEUS_PORT>/metrics
-    
-  ## @param send_histograms_buckets - boolean - optional - default: true
-  ## The histogram buckets can be noisy and generate a lot of tags.
-  ## send_histograms_buckets controls whether or not you want to pull them.
-  #
-  #  send_histograms_buckets: true
 
-  ## @param connect_timeout - integer - optional - default: 5
-  ## This parameter overrides the default value, and fails the check if the time
-  ## to establish the (TCP) connection exceeds the connect_timeout value (in seconds).
-  #
-  #  connect_timeout: 5
+    ## @param send_histograms_buckets - boolean - optional - default: true
+    ## The histogram buckets can be noisy and generate a lot of tags.
+    ## send_histograms_buckets controls whether or not you want to pull them.
+    #
+    # send_histograms_buckets: true
 
-  ## @param receive_timeout - integer - optional - default: 15
-  ## This parameter overrides the default value, and fails the check if the time 
-  ## to receive the server status from the Apache server exceeds the receive_timeout value (in seconds).
-  #
-  #  receive_timeout: 15
+    ## @param connect_timeout - integer - optional - default: 5
+    ## This parameter overrides the default value, and fails the check if the time
+    ## to establish the (TCP) connection exceeds the connect_timeout value (in seconds).
+    #
+    # connect_timeout: 5
 
-  ## @param ssl_cert_validation - boolean - optional - default: true
-  ## Set to `false` to disable the validation of Gitlab's SSL certificates.
-  #
-  #  ssl_cert_validation: true
+    ## @param receive_timeout - integer - optional - default: 15
+    ## This parameter overrides the default value, and fails the check if the time
+    ## to receive the server status from the Apache server exceeds the receive_timeout value (in seconds).
+    #
+    # receive_timeout: 15
 
-  ## @param ssl_ca_certs - string - optional
-  ## If ssl_cert_validation is enabled, provide with this parameter a file path
-  ## that lists trusted CA certificates.
-  # 
-  #  ssl_ca_certs: <CERT_PATH>
+    ## @param ssl_cert_validation - boolean - optional - default: true
+    ## Set to `false` to disable the validation of Gitlab's SSL certificates.
+    #
+    # ssl_cert_validation: true
 
-  ## @param tags  - list of key:value string - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging at https://docs.datadoghq.com/tagging
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param ssl_ca_certs - string - optional
+    ## If ssl_cert_validation is enabled, provide with this parameter a file path
+    ## that lists trusted CA certificates.
+    #
+    # ssl_ca_certs: <CERT_PATH>
+
+    ## @param tags  - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 init_config:
-  
+
   ## @param allowed_metrics - list of strings - required
   ## List of metrics to extract from Prometheus
   #

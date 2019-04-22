@@ -7,78 +7,40 @@ import pytest
 
 from datadog_checks.ssh_check import CheckSSH
 
+from . import common
 
-class TestSshCheck:
-    THREAD_TIMEOUT = 10
 
-    INSTANCES = {
-        'main': {
-            'host': 'io.netgarage.org',
-            'port': 22,
-            'username': 'level1',
-            'password': 'level1',
-            'sftp_check': False,
-            'private_key_file': '',
-            'add_missing_keys': True,
-            'tags': ['optional:tag1']
-        },
-        'bad_auth': {
-            'host': 'localhost',
-            'port': 22,
-            'username': 'test',
-            'password': 'yodawg',
-            'sftp_check': False,
-            'private_key_file': '',
-            'add_missing_keys': True
-        },
-        'bad_hostname': {
-            'host': 'wronghost',
-            'port': 22,
-            'username': 'datadog01',
-            'password': 'abcd',
-            'sftp_check': False,
-            'private_key_file': '',
-            'add_missing_keys': True
-        },
-    }
+def test_ssh(aggregator):
+    c = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
 
-    def test_ssh(self, aggregator):
-        c = CheckSSH('ssh_check', {}, {}, list(self.INSTANCES.values()))
+    nb_threads = threading.active_count()
 
-        nb_threads = threading.active_count()
+    c.check(common.INSTANCES['main'])
 
-        c.check(self.INSTANCES['main'])
+    for sc in aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
+        assert sc.status == CheckSSH.OK
+        for tag in sc.tags:
+            assert tag in ('instance:io.netgarage.org-22', 'optional:tag1')
 
-        for sc in aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
-            assert sc.status == CheckSSH.OK
-            for tag in sc.tags:
-                assert tag in ('instance:io.netgarage.org-22', 'optional:tag1')
+    # Check that we've closed all connections, if not we're leaking threads
+    common.wait_for_threads()
+    assert nb_threads == threading.active_count()
 
-        # Check that we've closed all connections, if not we're leaking threads
-        self.wait_for_threads()
-        assert nb_threads == threading.active_count()
 
-    def test_ssh_bad_config(self, aggregator):
-        c = CheckSSH('ssh_check', {}, {}, list(self.INSTANCES.values()))
+def test_ssh_bad_config(aggregator):
+    c = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
 
-        nb_threads = threading.active_count()
+    nb_threads = threading.active_count()
 
-        with pytest.raises(Exception):
-            c.check(self.INSTANCES['bad_auth'])
+    with pytest.raises(Exception):
+        c.check(common.INSTANCES['bad_auth'])
 
-        with pytest.raises(Exception):
-            c.check(self.INSTANCES['bad_hostname'])
+    with pytest.raises(Exception):
+        c.check(common.INSTANCES['bad_hostname'])
 
-        for sc in aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
-            assert sc.status == CheckSSH.CRITICAL
+    for sc in aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
+        assert sc.status == CheckSSH.CRITICAL
 
-        # Check that we've closed all connections, if not we're leaking threads
-        self.wait_for_threads()
-        assert nb_threads == threading.active_count()
-
-    def wait_for_threads(self):
-        for thread in threading.enumerate():
-            try:
-                thread.join(self.THREAD_TIMEOUT)
-            except RuntimeError:
-                pass
+    # Check that we've closed all connections, if not we're leaking threads
+    common.wait_for_threads()
+    assert nb_threads == threading.active_count()

@@ -6,7 +6,6 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, PDHBaseCheck
 from datadog_checks.utils.containers import hash_mutable
 
-
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
     # Network
@@ -18,7 +17,6 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Files Received/sec", "iis.net.files_rcvd", "gauge"],
     ["Web Service", None, "Total Connection Attempts (all instances)", "iis.net.connection_attempts", "gauge"],
     ["Web Service", None, "Connection Attempts/sec", "iis.net.connection_attempts_sec", "gauge"],
-
     # HTTP Methods
     ["Web Service", None, "Get Requests/sec", "iis.httpd_request_method.get", "gauge"],
     ["Web Service", None, "Post Requests/sec", "iis.httpd_request_method.post", "gauge"],
@@ -27,15 +25,12 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Delete Requests/sec", "iis.httpd_request_method.delete", "gauge"],
     ["Web Service", None, "Options Requests/sec", "iis.httpd_request_method.options", "gauge"],
     ["Web Service", None, "Trace Requests/sec", "iis.httpd_request_method.trace", "gauge"],
-
     # Errors
     ["Web Service", None, "Not Found Errors/sec", "iis.errors.not_found", "gauge"],
     ["Web Service", None, "Locked Errors/sec", "iis.errors.locked", "gauge"],
-
     # Users
     ["Web Service", None, "Anonymous Users/sec", "iis.users.anon", "gauge"],
     ["Web Service", None, "NonAnonymous Users/sec", "iis.users.nonanon", "gauge"],
-
     # Requests
     ["Web Service", None, "CGI Requests/sec", "iis.requests.cgi", "gauge"],
     ["Web Service", None, "ISAPI Extension Requests/sec", "iis.requests.isapi", "gauge"],
@@ -47,6 +42,15 @@ class IIS(PDHBaseCheck):
 
     def __init__(self, name, init_config, agentConfig, instances):
         PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
+
+    def get_iishost(self, instance):
+        inst_host = instance.get("host")
+        if inst_host in [".", "localhost", "127.0.0.1", None]:
+            # Use agent's hostname if connecting to local machine.
+            iis_host = self.hostname
+        else:
+            iis_host = inst_host
+        return "iis_host:{}".format(self.normalize(iis_host))
 
     def check(self, instance):
         sites = instance.get('sites')
@@ -73,6 +77,7 @@ class IIS(PDHBaseCheck):
                     tags = []
                     if key in self._tags:
                         tags = list(self._tags[key])
+                    tags.append(self.get_iishost(instance))
 
                     try:
                         if not counter.is_single_instance():
@@ -107,12 +112,13 @@ class IIS(PDHBaseCheck):
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error("IIS Failed to get metric data for {} {}: {}" .format(inst_name, dd_name, str(e)))
+                self.log.error("IIS Failed to get metric data for {} {}: {}".format(inst_name, dd_name, str(e)))
                 pass
 
         for site in expected_sites:
             tags = []
             if key in self._tags:
                 tags = list(self._tags[key])
+            tags.append(self.get_iishost(instance))
             tags.append("site:{}".format(self.normalize(site)))
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)

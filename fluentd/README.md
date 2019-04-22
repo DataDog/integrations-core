@@ -53,7 +53,7 @@ In your fluentd configuration file, add a `monitor_agent` source:
 
 #### Log Collection
 
-As long as you can forward your FluentD logs over tcp/udp to a specific port, you can use that approach to forward your FluentD logs to your Datadog agent. But another option is to use the [Datadog FluentD plugin][6] to forward the logs directly from FluentD to your Datadog account. 
+As long as you can forward your FluentD logs over tcp/udp to a specific port, you can use that approach to forward your FluentD logs to your Datadog agent. But another option is to use the [Datadog FluentD plugin][6] to forward the logs directly from FluentD to your Datadog account.
 
 ##### Add metadata to your logs
 
@@ -81,7 +81,7 @@ Setup Example:
   tag_key 'tag'
 
   # Optional tags
-  dd_source '<INTEGRATION_NAME>' 
+  dd_source '<INTEGRATION_NAME>'
   dd_tags '<KEY1:VALUE1>,<KEY2:VALUE2>'
   dd_sourcecategory '<SOURCE_CATEGORY>'
 
@@ -158,9 +158,9 @@ Need help? Contact [Datadog support][15].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: http://www.rubydoc.info/gems/fluent-plugin-datadog
 [7]: https://docs.datadoghq.com/logs/processing/#edit-reserved-attributes
 [8]: https://docs.datadoghq.com/integrations/#cat-log-collection
@@ -168,7 +168,7 @@ Need help? Contact [Datadog support][15].
 [10]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags
 [11]: https://app.datadoghq.com/infrastructure
 [12]: https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter
-[13]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[13]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
 [15]: https://docs.datadoghq.com/help
 [16]: https://www.datadoghq.com/blog/monitor-fluentd-datadog

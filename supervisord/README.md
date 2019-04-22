@@ -108,16 +108,16 @@ The Agent submits this service check for all child processes of supervisord (if 
 
 This table shows the `supervisord.process.status` that results from each supervisord status:
 
-|supervisord status|supervisord.process.status|
-|---|---|
-|STOPPED|CRITICAL|
-|STARTING|UNKNOWN|
-|RUNNING|OK|
-|BACKOFF|CRITICAL|
-|STOPPING|CRITICAL|
-|EXITED|CRITICAL|
-|FATAL|CRITICAL|
-|UNKNOWN|UNKNOWN|
+| supervisord status | supervisord.process.status |
+| ---                | ---                        |
+| STOPPED            | CRITICAL                   |
+| STARTING           | UNKNOWN                    |
+| RUNNING            | OK                         |
+| BACKOFF            | CRITICAL                   |
+| STOPPING           | CRITICAL                   |
+| EXITED             | CRITICAL                   |
+| FATAL              | CRITICAL                   |
+| UNKNOWN            | UNKNOWN                    |
 
 ## Troubleshooting
 Need help? Contact [Datadog support][8].
@@ -129,10 +129,10 @@ Need help? Contact [Datadog support][8].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/supervisord/datadog_checks/supervisord/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor

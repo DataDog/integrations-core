@@ -1,106 +1,153 @@
 init_config:
 
 instances:
-  # for every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-  # url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html)
-  # optional: 'rabbitmq_user' (default: guest), 'rabbitmq_pass' (default: guest),
-  # and 'tag_families' (default: false) to tag queue "families" based off of regex
-  # matching.
+
+    ## @param rabbit_api_url - string - required
+    ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
+    ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
+    #
   - rabbitmq_api_url: http://localhost:15672/api/
-    rabbitmq_user: guest
-    rabbitmq_pass: guest
-    # The (optional) ssl_verify can be used to tell the check
-    # to skip the verification of the SSL certificate of the
-    # RabbitMQ management web endpoint.
-    # This is mostly useful when checking SSL connections signed with
-    # certificates that are not themselves signed by a public authority.
-    # When false, the check logs a warning in collector.log
-    # Defaults to true; set to false if you want to disable
-    # SSL certificate verification.
-    #
-    # ssl_verify: false
 
-    # If ssl_verify is turned on and the SSL cert is invalid, it can be very noisy. This will reduce the noise in the logs.
+    ## @param rabbitmq_user - string - optional - default: guest
+    ## RabbitMQ username to use when connecting to the API URL.
     #
-    #  ignore_ssl_warning: false
+    # rabbitmq_user: guest
 
-    # The (optional) skip_proxy parameter would bypass any proxy settings enabled
-    # and attempt to reach the the URL directly.
-    # If no proxy is defined at any level, this flag bears no effect.
-    # Defaults to False.
+    ## @param rabbitmq_pass - string - optional - default: guest
+    ## RabbitMQ password associated to the above username
+    ## to use when connecting to the API URL.
+    #
+    # rabbitmq_pass: guest
+
+    ## @param tag_families - boolean - optional - default: false
+    ## to tag queue "families" based off of regex matching.
+    #
+    # tag_families: false
+
+    ## @param ssl_verify - boolean - optional - default: true
+    ## The ssl_verify parameter can be used to tell the check
+    ## to skip the verification of the SSL certificate of the
+    ## RabbitMQ management web endpoint. Set to false if you want to disable
+    ## SSL certificate verification.
+    ##
+    ## This is mostly useful when checking SSL connections signed with
+    ## certificates that are not themselves signed by a public authority.
+    ## When false, the check logs a warning in collector.log
+    #
+    # ssl_verify: true
+
+    ## @param ignore_ssl_warning - boolean - optional - default: false
+    ## If `ssl_verify` is turned on and the SSL cert is invalid,
+    ## it can be very noisy. This reduces the noise in the logs.
+    #
+    # ignore_ssl_warning: false
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## The `skip_proxy` parameter bypasses any proxy settings enabled
+    ## and attempt to reach the the URL directly.
+    ## If no proxy is defined at any level, this flag bears no effect.
     #
     # skip_proxy: false
 
-    # tag_families: true
-    # Use the `nodes` or `nodes_regexes` parameters to specify the nodes you'd like to
-    # collect metrics on (up to 100 nodes).
-    # If you have less than 100 nodes, you don't have to set this parameter,
-    # the metrics will be collected on all the nodes by default.
+    ## @param nodes - list of strings - optional
+    ## Use the `nodes` parameters to specify the nodes you'd like to
+    ## collect metrics on (up to 100 nodes).
+    ## If you have less than 100 nodes, you don't have to set this parameter,
+    ## the metrics are collected on all the nodes by default.
     #
     # nodes:
-    #   - rabbit@localhost
-    #   - rabbit2@domain
-    # nodes_regexes:
-    #   - bla.*
+    #   - <NODE_NAME_1>
+    #   - <NODE_NAME_2>
 
-    # Use the `queues` or `queues_regexes` parameters to specify the queues you'd like to
-    # collect metrics on (up to 200 queues).
-    # If you have less than 200 queues, you don't have to set this parameter,
-    # the metrics will be collected on all the queues by default.
-    # If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
-    # If you have `tag_families` enabled, the first captured group in the regex
-    # will be used as the queue_family tag
+    ## @param nodes_regexes - list of strings - optional
+    ## Use the `nodes_regexes` parameters to specify one or multiple regex to
+    ## match the nodes you'd like to collect metrics on (up to 100 nodes).
+    ## If you have less than 100 nodes, you don't have to set this parameter,
+    ## the metrics are collected on all the nodes by default.
+    #
+    # nodes_regexes:
+    #   - <REGEX>
+
+    ## @param queues - list of strings - optional
+    ## Use the `queues` parameters to specify the queues you'd like to
+    ## collect metrics on (up to 200 queues).
+    ## If you have less than 200 queues, you don't have to set this parameter,
+    ## the metrics are collected on all the queues by default.
+    ## If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
+    ## If you have `tag_families` enabled, the first captured group in the regex
+    ## is used as the queue_family tag.
     #
     # queues:
-    #   - queue1
-    #   - queue2
+    #   - <QUEUE_NAME_1>
+    #   - <QUEUE_NAME_2>
+
+    ## @param queues_regexes - list of strings - optional
+    ## Use the `queues_regexes` parameters to specify one or multiple regex to to match
+    ## the queues you'd like to collect metrics on (up to 200 queues).
+    ## If you have less than 200 queues, you don't have to set this parameter,
+    ## the metrics are collected on all the queues by default.
+    ## If you have `tag_families` enabled, the first captured group in the regex
+    ## is used as the queue_family tag.
+    #
     # queues_regexes:
-    #   - thisqueue-.*
-    #   - another_\d+queue
-    #   - (lepidorae)-\d+   # to tag queues in the lepidorae queue_family
-    #   - ^((?!errors|aliveness).)*$   # exclude queues with 'errors' or 'aliveness'
-    
-    # Use the `exchanges` or `exchanges_regexes` parameters to specify the exchanges you'd like to
-    # collect metrics on (up to 50 exchanges).
-    # If you have less than 50 exchanges, you don't have to set this parameter,
-    # the metrics will be collected on all the exchanges by default.
+    #   - <REGEX>
+
+    ## @param exchanges - list of strings - optional
+    ## Use the `exchanges` parameters to specify the exchanges you'd like to
+    ## collect metrics on (up to 50 exchanges).
+    ## If you have less than 50 exchanges, you don't have to set this parameter,
+    ## the metrics is collected on all the exchanges by default.
     #
     # exchanges:
-    #   - exchange1
-    #   - exchange2
-    # exchanges_regexes:
-    #   - thisexchange-.*
+    #   - <EXCHANGE_1>
+    #   - <EXCHANGE_2>
 
-    # Service checks and `rabbitmq.connections` metric:
-    # By default a list of all vhosts is fetched and each one will be checked
-    # using the aliveness API and the metric `rabbitmq.connections` will be collected.
-    # If you prefer only certain vhosts to be monitored with service checks
-    # and the number of `connections` then you can list the vhosts you care about.
+    ## @param exchanges_regexes - list of strings - optional
+    ## Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
+    ## the exchanges you'd like to collect metrics on (up to 50 exchanges).
+    ## If you have less than 50 exchanges, you don't have to set this parameter,
+    ## the metrics is collected on all the exchanges by default.
+    #
+    # exchanges_regexes:
+    #   - <REGEX>
+
+    ## @param vhosts - list of strings - optional
+    ## Service checks and `rabbitmq.connections` metric:
+    ## By default a list of all vhosts is fetched and each one is checked using the aliveness
+    ## API and the metric `rabbitmq.connections` is collected.
+    ## If you prefer only certain vhosts to be monitored with service checks
+    ## and the number of `connections` then you can list the vhosts you care about in this parameter.
     #
     # vhosts:
-    #   - vhost1
-    #   - vhost2
+    #   - <VHOST_NAME_1>
+    #   - <VHOST_NAME_2>
 
-    # Optional tags to be applied to every emitted metric, service checks and events.
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
     # tags:
-    #   - "key:value"
-    #   - "instance:production"
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
-#logs:
-
-    # - type : (mandatory) type of log input source (tcp / udp / file / docker)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
-    #   tags: (optional) add tags to each logs collected
-
-   # - type: file
-   #   path: /var/log/rabbit/*.log
-   #   source: rabbitmq
-   #   service: myservice
-   #   log_processing_rules:
-   #     - type: multi_line
-   #       name: logs_starts_with_equal_sign
-   #       pattern: "="
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#  - type: file
+#    path: /var/log/rabbit/*.log
+#    source: rabbitmq
+#    service: myservice
+#    log_processing_rules:
+#      - type: multi_line
+#        name: logs_starts_with_equal_sign
+#        pattern: "="

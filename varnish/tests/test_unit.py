@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import mock
 import os
-
 from distutils.version import LooseVersion
+
+import mock
 
 from datadog_checks.base import ensure_unicode
 
@@ -77,10 +77,7 @@ def test_command_line_manually_unhealthy(mock_subprocess, mock_version, mock_get
     args, _ = mock_subprocess.call_args
     assert args[0] == [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health']
     aggregator.assert_service_check(
-        "varnish.backend_healthy",
-        status=check.CRITICAL,
-        tags=['backend:default', 'cluster:webs'],
-        count=1
+        "varnish.backend_healthy", status=check.CRITICAL, tags=['backend:default', 'cluster:webs'], count=1
     )
 
     mock_version.return_value = LooseVersion('4.1.0'), 'xml'
@@ -89,10 +86,14 @@ def test_command_line_manually_unhealthy(mock_subprocess, mock_version, mock_get
     check.check(instance)
     args, _ = mock_subprocess.call_args
     assert args[0] == [
-        'sudo', common.VARNISHADM_PATH,
-        '-T', common.DAEMON_ADDRESS,
-        '-S', common.SECRETFILE_PATH,
-        'backend.list', '-p'
+        'sudo',
+        common.VARNISHADM_PATH,
+        '-T',
+        common.DAEMON_ADDRESS,
+        '-S',
+        common.SECRETFILE_PATH,
+        'backend.list',
+        '-p',
     ]
 
 
@@ -113,10 +114,7 @@ def test_command_line_post_varnish4(mock_subprocess, mock_version, mock_geteuid,
     args, _ = mock_subprocess.call_args
     assert args[0] == [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health']
     aggregator.assert_service_check(
-        "varnish.backend_healthy",
-        status=check.OK,
-        tags=['backend:backend2', 'cluster:webs'],
-        count=1
+        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'cluster:webs'], count=1
     )
 
     mock_version.return_value = LooseVersion('4.1.0'), 'xml'
@@ -125,10 +123,14 @@ def test_command_line_post_varnish4(mock_subprocess, mock_version, mock_geteuid,
     check.check(instance)
     args, _ = mock_subprocess.call_args
     assert args[0] == [
-        'sudo', common.VARNISHADM_PATH,
-        '-T', common.DAEMON_ADDRESS,
-        '-S', common.SECRETFILE_PATH,
-        'backend.list', '-p'
+        'sudo',
+        common.VARNISHADM_PATH,
+        '-T',
+        common.DAEMON_ADDRESS,
+        '-S',
+        common.SECRETFILE_PATH,
+        'backend.list',
+        '-p',
     ]
 
 
@@ -149,15 +151,15 @@ def test_command_line_post_varnish5(mock_subprocess, mock_version, mock_geteuid,
     args, _ = mock_subprocess.call_args
     assert args[0] == [
         common.VARNISHADM_PATH,
-        '-T', common.DAEMON_ADDRESS,
-        '-S', common.SECRETFILE_PATH,
-        'backend.list', '-p'
+        '-T',
+        common.DAEMON_ADDRESS,
+        '-S',
+        common.SECRETFILE_PATH,
+        'backend.list',
+        '-p',
     ]
     aggregator.assert_service_check(
-        "varnish.backend_healthy",
-        status=check.OK,
-        tags=['backend:backend2', 'cluster:webs'],
-        count=1
+        "varnish.backend_healthy", status=check.OK, tags=['backend:backend2', 'cluster:webs'], count=1
     )
 
     mock_version.return_value = LooseVersion('5.0.0'), 'json'
@@ -166,10 +168,14 @@ def test_command_line_post_varnish5(mock_subprocess, mock_version, mock_geteuid,
     check.check(instance)
     args, _ = mock_subprocess.call_args
     assert args[0] == [
-        'sudo', common.VARNISHADM_PATH,
-        '-T', common.DAEMON_ADDRESS,
-        '-S', common.SECRETFILE_PATH,
-        'backend.list', '-p'
+        'sudo',
+        common.VARNISHADM_PATH,
+        '-T',
+        common.DAEMON_ADDRESS,
+        '-S',
+        common.SECRETFILE_PATH,
+        'backend.list',
+        '-p',
     ]
 
 
@@ -190,8 +196,5 @@ def test_command_line(mock_subprocess, mock_version, mock_geteuid, aggregator, c
     args, _ = mock_subprocess.call_args
     assert args[0] == [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health']
     aggregator.assert_service_check(
-        "varnish.backend_healthy",
-        status=check.OK,
-        tags=['backend:default', 'cluster:webs'],
-        count=1
+        "varnish.backend_healthy", status=check.OK, tags=['backend:default', 'cluster:webs'], count=1
     )

@@ -2,6 +2,7 @@ from datadog_checks.envoy.utils import make_metric_tree
 
 
 def test_make_metric_tree():
+    # fmt: off
     metrics = {
         'http.dynamodb.error': {
             'tags': (
@@ -45,3 +46,4 @@ def test_make_metric_tree():
             ],
         },
     }
+    # fmt: on

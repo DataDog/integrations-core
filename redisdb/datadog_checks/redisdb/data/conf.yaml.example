@@ -1,84 +1,129 @@
 init_config:
 
 instances:
+
+    ## @param host - string - required
+    ## Enter the host to connect to.
+    #
   - host: localhost
+
+    ## @param port - integer - required
+    ## Enter the port of the host to connect to.
+    #
     port: 6379
 
-    # Can be used in lieu of host/port
+    ## @param unix_socket_path - string - optional
+    ## Connect through a unix socket instead of
+    ## using a `host` and a `port`.
     #
-    # unix_socket_path: /var/run/redis/redis.sock # optional, can be used in lieu of host/port
+    # unix_socket_path: /var/run/redis/redis.sock
 
-    # Addional connection options
+    ## @param db - integer - optional - default: 0
+    ## Index of the database (keyspace) to use.
+    ## The index 0 is the default and any other index will result in a SELECT command to be sent upon connection
+    ## to select the desired database. For redis.clone this can also be NA in which case the same database is
+    ## used as in rc.
     #
     # db: 0
-    # password: mypassword
+
+    ## @param password - string - optional
+    ## Additional password to use for the connection.
+    #
+    # password: <PASSWORD>
+
+    ## @param socket_timeout - integer - optional - default: 5
+    ## Custom timeout for the check request.
+    #
     # socket_timeout: 5
 
-    # Optional SSL/TLS parameters
-    # ssl: False     # Optional (default to False)
-    # ssl_keyfile:   # Path to the client-side private keyfile
-    # ssl_certfile:  # Path to the client-side certificate file
-    # ssl_ca_certs:  #  Path to the ca_certs file
-    # ssl_cert_reqs: # Specifies whether a certificate is required from the
-    #                # other side of the connection, and whether it will be validated if
-    #                # provided.
-    #   * 0 for ssl.CERT_NONE (certificates ignored)
-    #   * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
-    #   * 2 for ssl.CERT_REQUIRED (required and validated)
-
-    # Optional extra tags added to all redis metrics
-    # tags:
-    #   - optional_tag1
-    #   - optional_tag2
+    ## @param ssl - boolean - optional - default: false
+    ## Enable SSL/TLS encryption for the check.
     #
+    # ssl: false
 
-    # Collect the lengths of the following keys.
-    # Length is 1 for strings
-    # Length is zero for keys that have a type other than list, set, hash, or sorted set.
-    # Keys can be expressed as patterns, see https://redis.io/commands/keys
+    ## @param ssl_keyfile - string - optional
+    ## Path to the client-side private keyfile.
+    #
+    # ssl_keyfile: <CERT_KEY_PATH>
+
+    ## @param ssl_certfile - string - optional
+    ## Path to the client-side certificate file.
+    #
+    # ssl_certfile: <CERT_PEM_PATH>
+
+    ## @param ssl_ca_certs - string - optional
+    ## Path to the ca_certs file
+    #
+    # ssl_ca_certs: <CERT_PATH>
+
+    ## @param ssl_cert_reqs - integer - optional
+    ## Specifies whether a certificate is required from the
+    ## other side of the connection, and whether it's validated if provided.
+    ##   * 0 for ssl.CERT_NONE (certificates ignored)
+    ##   * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
+    ##   * 2 for ssl.CERT_REQUIRED (required and validated)
+    #
+    # ssl_cert_reqs: 0
+
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param keys - list of strings - optional
+    ## Enter the list of keys to collect the lengths from.
+    ## Length is 1 for strings
+    ## Length is zero for keys that have a type other than list, set, hash, or sorted set.
+    ## Note: Keys can be expressed as patterns, see https://redis.io/commands/keys
     #
     # keys:
-    #   - key1
-    #   - key2
-    #   - key* (matches key, key1 and key2)
+    #   - <KEY_1>
+    #   - <KEY_REGEX>
 
-    # If you provide a list of 'keys', have the Agent log a warning when keys are missing.
-    # (default: True)
+    ## @param warn_on_missing_keys - boolean - optional - default: true
+    ## If you provide a list of 'keys', set this to true to have the Agent log a warning
+    ## when keys are missing.
     #
-    # warn_on_missing_keys: True
+    # warn_on_missing_keys: true
 
-    # Max number of entries to fetch from the slow query log
-    # By default, the check will read this value from the redis config
-    # If it's above 128, it will default to 128 due to potential increased latency
-    # to retrieve more than 128 slowlog entries every 15 seconds
-    # If you need to get more entries from the slow query logs
-    # set the value here.
-    # Warning: It may impact the performance of your redis instance
+    ## @param slowlog-max-len - integer - optional - default: 128
+    ## Set the maximum number of entries to fetch from the slow query log
+    ## By default, the check reads this value from the redis config, but is limited to 128.
+    ##
+    ## Set a custom value here if you need to get more than 128 slowlog entries every 15 seconds.
+    ## Warning: It may impact the performance of your redis instance
+    #
     # slowlog-max-len: 128
 
-    # Collect INFO COMMANDSTATS output as metrics.
-    # command_stats: False
+    ## @param command_stats - boolean - optional - default: false
+    ## Collect INFO COMMANDSTATS output as metrics.
+    #
+    # command_stats: false
 
-    # Disable connections cache.
-    # The check attempts to reuse the same Redis connections at every collection
-    # cycle, this behaviour can be disabled to prevent stale connections.
-    # disable_connection_cache: False
+    ## @param disable_connection_cache - boolean - optional - default: false
+    ## Set to true to enable connections cache to make The check attempts to reuse the same Redis connections
+    ## at every collection cycle. If disabled, this would prevent stale connections.
+    #
+    # disable_connection_cache: false
 
 ## Log Section (Available for Agent >=6.0)
-
-#logs:
-
-    # - type : (mandatory) type of log input source (tcp / udp / file)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
-    #   tags: (optional) add tags to each logs collected
-
-    # - type: file
-    #   path: /var/log/redis_6379.log
-    #   source: redis
-    #   sourcecategory: database
-    #   service: myapplication
-
-
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#  - type: file
+#    path: /var/log/redis_6379.log
+#    source: redis
+#    sourcecategory: database
+#    service: myapplication

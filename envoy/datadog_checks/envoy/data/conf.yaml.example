@@ -2,86 +2,85 @@ init_config:
 
 instances:
 
-  ## @param stats_url - string - required
-  ## The admin endpoint to connect to. It must be accessible: 
-  ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
-  ## Add a `?usedonly` on the end if you wish to ignore
-  ## unused metrics instead of reporting them as `0`.
-  #
+    ## @param stats_url - string - required
+    ## The admin endpoint to connect to. It must be accessible:
+    ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
+    ## Add a `?usedonly` on the end if you wish to ignore
+    ## unused metrics instead of reporting them as `0`.
+    #
   - stats_url: http://localhost:80/stats
 
-  ## @param metric_whitelist - optional - list of strings
-  ## Whitelist metrics using regular expressions.
-  ## The filtering occurs before tag extraction, so you have the option
-  ## to have certain tags decide whether or not to keep or ignore metrics.
-  ## For an exhaustive list of all metrics and tags, see:
-  ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
-  ##
-  ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
-  #
-  #  metric_whitelist:
-  #    - cluster\.(in|out)\..*
+    ## @param metric_whitelist - optional - list of strings
+    ## Whitelist metrics using regular expressions.
+    ## The filtering occurs before tag extraction, so you have the option
+    ## to have certain tags decide whether or not to keep or ignore metrics.
+    ## For an exhaustive list of all metrics and tags, see:
+    ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
+    ##
+    ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
+    #
+    # metric_whitelist:
+    #   - cluster\.(in|out)\..*
 
+    ## @param metric_whitelist - optional - list of strings
+    ## Blacklist metrics using regular expressions.
+    ## The filtering occurs before tag extraction, so you have the option
+    ## to have certain tags decide whether or not to keep or ignore metrics.
+    ## For an exhaustive list of all metrics and tags, see:
+    ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
+    ##
+    ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
+    #
+    # metric_blacklist:
+    #   - ^http\..*
 
-  ## @param metric_whitelist - optional - list of strings
-  ## Blacklist metrics using regular expressions.
-  ## The filtering occurs before tag extraction, so you have the option
-  ## to have certain tags decide whether or not to keep or ignore metrics.
-  ## For an exhaustive list of all metrics and tags, see:
-  ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
-  ##
-  ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
-  # 
-  #  metric_blacklist:
-  #    - ^http\..*
+    ## @param cache_metrics - boolean - optional - default: true
+    ## Results are cached by default to decrease CPU utilization, at
+    ## the expense of some memory. Disable by setting this to false.
+    #
+    # cache_metrics: true
 
-  ## @param cache_metrics - boolean - optional - default: true
-  ## Results are cached by default to decrease CPU utilization, at
-  ## the expense of some memory. Disable by setting this to false.
-  #
-  #  cache_metrics: true
+    ## @param username - string - optional
+    ## Enter your username if the stats page is behind basic auth.
+    ## Note: The Envoy admin endpoint does not support auth until:
+    ## https://github.com/envoyproxy/envoy/issues/2763
+    ## For an alternative, see:
+    ## https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+    #
+    # username: <USERNAME>
 
-  ## @param username - string - optional 
-  ## Enter your username if the stats page is behind basic auth.
-  ## Note: The Envoy admin endpoint does not support auth until:
-  ## https://github.com/envoyproxy/envoy/issues/2763
-  ## For an alternative, see:
-  ## https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
-  #
-  #  username: <USERNAME>
+    ## @param password - string - optional
+    ## Enter your password if the stats page is behind basic auth.
+    ## Note: The Envoy admin endpoint does not support auth until:
+    ## https://github.com/envoyproxy/envoy/issues/2763
+    ## For an alternative, see:
+    ## https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+    #
+    # password: <PASSWORD>
 
-  ## @param password - string - optional 
-  ## Enter your password if the stats page is behind basic auth.
-  ## Note: The Envoy admin endpoint does not support auth until:
-  ## https://github.com/envoyproxy/envoy/issues/2763
-  ## For an alternative, see:
-  ## https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
-  #
-  #  password: <PASSWORD>
+    ## @param verify_ssl - boolean - optional - default: true
+    ## The verify_ssl parameter instructs the check to validate SSL
+    ## certificates when connecting to Envoy. Set to false if
+    ## you want to disable SSL certificate validation.
+    #
+    # verify_ssl: true
 
-  ## @param verify_ssl - boolean - optional - default: true
-  ## The verify_ssl parameter instructs the check to validate SSL
-  ## certificates when connecting to Envoy. Set to false if
-  ## you want to disable SSL certificate validation.
-  #
-  #  verify_ssl: true
+    ## @param skip_proxy - boolean - optional - default: false
+    ## The (optional) skip_proxy parameter bypasses any proxy
+    ## settings enabled and attempt to reach Envoy directly.
+    #
+    # skip_proxy: false
 
-  ## @param skip_proxy - boolean - optional - default: false
-  ## The (optional) skip_proxy parameter bypasses any proxy
-  ## settings enabled and attempt to reach Envoy directly.
-  #
-  #  skip_proxy: false
+    ## @param timeout - integer - optional - default: 20
+    ## Specify a custom timeout in seconds for the check connection.
+    #
+    # timeout: 20
 
-  ## @param timeout - integer - optional - default: 20
-  ## Specify a custom timeout in seconds for the check connection.
-  #
-  #  timeout: 20
-
-  ## @param tags  - list of key:value string - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging at https://docs.datadoghq.com/tagging
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

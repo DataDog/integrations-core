@@ -1,79 +1,140 @@
-##########
-# WARNING
-##########
-# This sample works only for Kafka >= 0.8.2.
-# If you are running a version older than that, you can refer to agent 5.2.x released
-# sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
+## WARNING
+##
+## This sample works only for Kafka >= 0.8.2.
+## If you are running a version older than that, you can refer to agent 5.2.x released
+## sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
 
 instances:
+
+    ## @param host - string - required
+    ## Kafka host to connect to.
+    #
   - host: localhost
-    port: 9999 # This is the JMX port on which Kafka exposes its metrics (usually 9999)
-    tags:
-      kafka: broker
-      # env: stage
-      # newTag: test
-    # user: username
-    # password: password
-    # process_name_regex: .*process_name.*  # Instead of specifying a host, and port. The agent can connect using the attach api.
-    # This requires the JDK to be installed and the path to tools.jar to be set below.
-    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar  # To be set when process_name_regex is set
+
+    ## @param port - integer - required
+    ## Kafka port to connect to.
+    ## This is the JMX port on which Kafka exposes its metrics.
+    #
+    port: 9999
+
+    ## @param user - string - optional
+    ## Username from the credentials needed to connect to the host.
+    #
+    # user: <USERNAME>
+
+    ## @param password - string - optional
+    ## Password from the credentials needed to connect to the host.
+    #
+    # password: <PASSWORD>
+
+    ## @param process_name_regex - string - optional
+    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below in tools_jar_path parameter.
+    #
+    # process_name_regex: .*process_name.*
+
+    ## @param tools_jar_path - string - optional
+    ## Needs to be set when process_name_regex parameter is set.
+    #
+    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+
+    ## @param name - string - optional
+    ## Set your instance name.
+    #
     # name: kafka_instance
-    # java_bin_path: /path/to/java  # Optional, should be set if the agent cannot find your java executable
-    #
-    # trust_store_path: /path/to/trustStore.jks # Optional, should be set if "com.sun.management.jmxremote.ssl" is set to true on the target JVM.
-    # trust_store_password: password
-    # key_store_path: /path/to/keyStore.jks # Optional, should be set if "com.sun.management.jmxremote.ssl.need.client.auth" is set to true on the target JVM.
-    # key_store_password: password
-    # rmi_registry_ssl: false # Optional, should be set to true if "com.sun.management.jmxremote.registry.ssl" is set to true on the target JVM.
-    #
-  # - host: remotehost
-  #   port: 9998 # Producer
-  #   tags:
-  #     kafka: producer0
-  #     env: stage
-  #     newTag: test
-  # - host: remotehost
-  #   port: 9997 # Consumer
-  #   tags:
-  #     kafka: consumer0
-  #     env: stage
-  #     newTag: test
 
+    ## @param java_bin_path - string - optional
+    ## java_bin_path should be set if the agent cannot find your java executable
+    #
+    # java_bin_path: <JAVA_PATH>
 
+    ## @param java_options - string - optional
+    ## List of Java JVM options.
+    #
+    # java_options: "-Xmx200m -Xms50m"
+
+    ## @param trust_store_path - string - optional
+    ## trust_store_path should be set if ssl is enabled.
+    ## path to your trusted store
+    #
+    # trust_store_path: <TRUSTSTORE.JKS_PATH>
+
+    ## @param trust_store_password - string - optional
+    ## trust_store_password should be set if ssl is enabled
+    ## password for your TrustStore.jks file
+    #
+    # trust_store_password: <PASSWORD>
+
+    ## @param key_store_path - string - optional
+    ## key_store_path should be set if client authentication is enabled on the target JVM.
+    ## path to your key store
+    #
+    # key_store_path: <KEYSTORE.JKS_PATH>
+
+    ## @param key_store_password - string - optional
+    ## key_store_password should be set if client authentication is enabled on the target JVM.
+    ## password for your KeyStore.jks file
+    #
+    # key_store_password: <PASSWORD>
+
+    ## @param rmi_registry_ssl - boolean - optional
+    ## Whether or not the agent should connect to the rmi registry using ssl.
+    #
+    # rmi_registry_ssl: false
+
+    ## @param tags  - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
-#logs:
-
-    # - type : (mandatory) type of log input source (tcp / udp / file / docker)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribute
-    #   tags: (optional) add tags to each logs collected
-
-   # - type: file
-   #   path: /var/log/kafka/server.log
-   #   source: kafka
-   #   service: myservice
-      #To handle multi line that starts with yyyy-mm-dd use the following pattern
-      #log_processing_rules:
-      # - type: multi_line
-      #   name: start_with_date
-      #   pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#
+#   - type: file
+#     path: /var/log/kafka/server.log
+#     source: kafka
+#     service: myservice
+## To handle multi line that starts with yyyy-mm-dd use the following pattern
+#     log_processing_rules:
+#        - type: multi_line
+#          name: start_with_date
+#          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
 
 init_config:
+
+  ## @param is_jmx - boolean - required
+  ## Whether or not this file is a configuration for a JMX integration
+  #
   is_jmx: true
+
+  ## @param collect_default_metrics - boolean - required
+  ## Whether or not the check should collect all default metrics for this integration.
+  #
   collect_default_metrics: true
 
-  # List of metrics to be collected by the integration
-  # Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-  # Agent 5: Customize all your metrics below
-  # Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+  ## List of metrics to be collected by the integration
+  ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+  ## Agent 5: Customize all your metrics below
+  ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+
   conf:
-    #
-    # Producers (only v0.8.2.x)
-    #
+    ##
+    ## Producers (only v0.8.2.x)
+    ##
     - include:
         domain: 'kafka.producer'
         bean_regex: 'kafka\.producer:type=ProducerRequestMetrics,name=ProducerRequestRateAndTimeMs,clientId=.*'
@@ -103,9 +164,9 @@ init_config:
             metric_type: rate
             alias: kafka.producer.message_rate
 
-    #
-    # Producers (v0.9.0.x to v0.10.2.x)
-    #
+
+    ## Producers (v0.9.0.x to v0.10.2.x)
+
     - include:
         domain: 'kafka.producer'
         bean_regex: 'kafka\.producer:type=producer-metrics,client-id=.*'
@@ -142,9 +203,9 @@ init_config:
             metric_type: gauge
             alias: kafka.producer.io_wait
 
-    #
-    # Producers (v0.11.x)
-    #
+
+    ## Producers (v0.11.x)
+
     - include:
         domain: 'kafka.producer'
         bean_regex: 'kafka.producer:type=producer-metrics,client-id=([-.\w]+)'
@@ -213,9 +274,8 @@ init_config:
               metric_type: gauge
               alias: kafka.producer.throttle_time_avg
 
-    #
-    # Producers: Per Topic Metrics
-    #
+    ## Producers: Per Topic Metrics
+
     - include:
         domain: 'kafka.producer'
         bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
@@ -267,9 +327,7 @@ init_config:
           client: $1
           topic: $2
 
-    #
-    # Consumers (only v0.8.2.x)
-    #
+    ## Consumers (only v0.8.2.x)
     - include:
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=ConsumerFetcherManager,name=MaxLag,clientId=.*'
@@ -315,9 +373,8 @@ init_config:
             metric_type: rate
             alias: kafka.consumer.kafka_commits
 
-    #
-    # Consumers (v0.9.0.x to v0.10.2.x)
-    #
+    ## Consumers (v0.9.0.x to v0.10.2.x)
+
     - include:
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=.*'
@@ -333,9 +390,7 @@ init_config:
             metric_type: gauge
             alias: kafka.consumer.messages_in
 
-    #
-    # Consumers: Per Topic Metrics
-    #
+    ## Consumers: Per Topic Metrics
 
     - include:
         domain: 'kafka.consumer'
@@ -388,9 +443,8 @@ init_config:
           client: $1
           topic: $2
 
-    #
-    # Aggregate cluster stats
-    #
+    ## Aggregate cluster stats
+
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=BrokerTopicMetrics,name=BytesOutPerSec'
@@ -420,9 +474,8 @@ init_config:
             metric_type: rate
             alias: kafka.net.bytes_rejected.rate
 
-    #
-    # Brokers: Per Topic Metrics
-    #
+    ## Brokers: Per Topic Metrics
+
     - include:
         domain: 'kafka.server'
         bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesOutPerSec,topic=.*'
@@ -452,9 +505,8 @@ init_config:
             metric_type: rate
             alias: kafka.topics.net.bytes_rejected.rate
 
-    #
-    # Request timings
-    #
+    ## Request timings
+
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=BrokerTopicMetrics,name=FailedFetchRequestsPerSec'
@@ -572,9 +624,8 @@ init_config:
             metric_type: gauge
             alias: kafka.request.handler.avg.idle.pct.rate
 
-    #
-    # Request Purgatory (only v0.8.2.x)
-    #
+    ## Request Purgatory (only v0.8.2.x)
+
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ProducerRequestPurgatory,name=PurgatorySize'
@@ -590,9 +641,8 @@ init_config:
             metric_type: gauge
             alias: kafka.request.fetch_request_purgatory.size
 
-    #
-    # Request Purgatory (v0.9.0.x onwards)
-    #
+    ## Request Purgatory (v0.9.0.x onwards)
+
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Produce'
@@ -608,9 +658,8 @@ init_config:
             metric_type: gauge
             alias: kafka.request.fetch_request_purgatory.size
 
-    #
-    # Replication stats
-    #
+    ## Replication stats
+
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions'
@@ -682,9 +731,8 @@ init_config:
             metric_type: gauge
             alias: kafka.replication.max_lag
 
-    #
-    # Log flush stats
-    #
+    ## Log flush stats
+
     - include:
         domain: 'kafka.log'
         bean: 'kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs'

@@ -29,19 +29,11 @@ def get_normal_connection(config):
     if config.username and config.password:
         log.debug("connecting with username and password")
         queue_manager = pymqi.connect(
-            config.queue_manager_name,
-            config.channel,
-            config.host_and_port,
-            config.username,
-            config.password
+            config.queue_manager_name, config.channel, config.host_and_port, config.username, config.password
         )
     else:
         log.debug("connecting without a username and password")
-        queue_manager = pymqi.connect(
-            config.queue_manager_name,
-            config.channel,
-            config.host_and_port,
-        )
+        queue_manager = pymqi.connect(config.queue_manager_name, config.channel, config.host_and_port)
 
     return queue_manager
 
@@ -58,9 +50,9 @@ def get_ssl_connection(config):
     cd.SSLCipherSpec = config.ssl_cipher_spec
 
     sco = pymqi.SCO()
-    sco.KeyRepository = config.key_repo_location
+    sco.KeyRepository = config.ssl_key_repository_location
 
     queue_manager = pymqi.QueueManager(None)
-    queue_manager.connect_with_options(config.queue_manager, cd, sco)
+    queue_manager.connect_with_options(config.queue_manager_name, cd, sco)
 
     return queue_manager

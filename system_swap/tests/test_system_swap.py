@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import pytest
-import mock
 import logging
+from copy import deepcopy
 
-from datadog_checks.system_swap import SystemSwap
+import mock
+import pytest
+
+from . import common
 
 log = logging.getLogger(__file__)
 
@@ -30,23 +32,13 @@ MOCK_PSUTIL_SWAP_STATS = [
 
 
 @pytest.fixture
-def check():
-    return SystemSwap('system_swap', {}, {})
-
-
-@pytest.fixture
 def mock_psutil():
     with mock.patch('psutil.swap_memory', side_effect=MOCK_PSUTIL_SWAP_STATS):
         yield
 
 
 def test_system_swap(check, mock_psutil, aggregator):
+    check.check(deepcopy(common.INSTANCE))
 
-    tags = ["optional:tags"]
-
-    check.check({
-        "tags": tags
-    })
-
-    aggregator.assert_metric('system.swap.swapped_in', value=ORIG_SWAP_IN, count=1, tags=tags)
-    aggregator.assert_metric('system.swap.swapped_out', value=ORIG_SWAP_OUT, count=1, tags=tags)
+    aggregator.assert_metric('system.swap.swapped_in', value=ORIG_SWAP_IN, count=1, tags=common.INSTANCE.get("tags"))
+    aggregator.assert_metric('system.swap.swapped_out', value=ORIG_SWAP_OUT, count=1, tags=common.INSTANCE.get("tags"))

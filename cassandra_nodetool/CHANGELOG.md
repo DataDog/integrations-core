@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 1.4.0 / 2019-03-29
+
+* [Added] Support old nodetool output format. See [#3253](https://github.com/DataDog/integrations-core/pull/3253). Thanks [hitsumabushi](https://github.com/hitsumabushi).
+
 ## 1.3.0 / 2019-02-18
 
 * [Added] Finish Python3 Support. See [#2905](https://github.com/DataDog/integrations-core/pull/2905).

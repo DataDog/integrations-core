@@ -1,20 +1,19 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 import json
+import os
 import time
+from collections import defaultdict
+from copy import deepcopy
+from time import sleep
 
 import pytest
 import requests
 
-from time import sleep
-from collections import defaultdict
-from copy import deepcopy
-
+from datadog_checks.couch import CouchDb
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
-from datadog_checks.couch import CouchDb
 
 from . import common
 
@@ -56,7 +55,10 @@ def dd_environment():
         env_vars=env,
         conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version), lambda: time.sleep(20)],
     ):
-        yield common.BASIC_CONFIG
+        if couch_version == '1':
+            yield common.BASIC_CONFIG
+        elif couch_version == '2':
+            yield common.BASIC_CONFIG_V2
 
 
 def generate_data(couch_version):
@@ -74,24 +76,20 @@ def generate_data(couch_version):
     data = {
         "language": "javascript",
         "views": {
-            "all": {
-                "map": "function(doc) { emit(doc._id); }"
-            },
-            "by_data": {
-                "map": "function(doc) { emit(doc.data, doc); }"
-            }
-        }
+            "all": {"map": "function(doc) { emit(doc._id); }"},
+            "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
+        },
     }
     requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
 
     urls = [
         "{}/_node/node1@127.0.0.1/_stats".format(common.URL),
         "{}/_node/node2@127.0.0.1/_stats".format(common.URL),
-        "{}/_node/node3@127.0.0.1/_stats".format(common.URL)
+        "{}/_node/node3@127.0.0.1/_stats".format(common.URL),
     ]
 
     ready = defaultdict(bool)
-    for i in range(120):
+    for _ in range(120):
         print("Waiting for stats to be generated on the nodes...")
         try:
             for url in urls:

@@ -101,15 +101,15 @@ Duplicate information is being reported by both `mntr` and `stat`: the duplicate
 
 **Important:** if available, make use of the data reported by `mntr`, not `stat`.
 
-| Metric reported by `mntr` | Duplicate reported by `stat` |
-| ------------------------- | ---------------------------- |
-| `zookeeper.avg_latency` | `zookeeper.latency.avg` |
-| `zookeeper.max_latency` | `zookeeper.latency.max` |
-| `zookeeper.min_latency` | `zookeeper.latency.min` |
-| `zookeeper.packets_received` | `zookeeper.packets.received` |
-| `zookeeper.packets_sent` | `zookeeper.packets.sent` |
-| `zookeeper.num_alive_connections` | `zookeeper.connections` |
-| `zookeeper.znode_count` | `zookeeper.nodes` |
+| Metric reported by `mntr`         | Duplicate reported by `stat` |
+| -------------------------         | ---------------------------- |
+| `zookeeper.avg_latency`           | `zookeeper.latency.avg`      |
+| `zookeeper.max_latency`           | `zookeeper.latency.max`      |
+| `zookeeper.min_latency`           | `zookeeper.latency.min`      |
+| `zookeeper.packets_received`      | `zookeeper.packets.received` |
+| `zookeeper.packets_sent`          | `zookeeper.packets.sent`     |
+| `zookeeper.num_alive_connections` | `zookeeper.connections`      |
+| `zookeeper.znode_count`           | `zookeeper.nodes`            |
 
 See [metadata.csv][9]
 for a list of metrics provided by this check.
@@ -138,11 +138,11 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
 [7]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [10]: https://docs.datadoghq.com/help

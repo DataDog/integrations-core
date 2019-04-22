@@ -14,7 +14,6 @@ RELATION_METRICS = [
     'postgresql.rows_hot_updated',
     'postgresql.live_rows',
     'postgresql.dead_rows',
-
     'postgresql.heap_blocks_read',
     'postgresql.heap_blocks_hit',
     'postgresql.toast_blocks_read',
@@ -23,11 +22,7 @@ RELATION_METRICS = [
     'postgresql.toast_index_blocks_hit',
 ]
 
-RELATION_SIZE_METRICS = [
-    'postgresql.table_size',
-    'postgresql.total_size',
-    'postgresql.index_size',
-]
+RELATION_SIZE_METRICS = ['postgresql.table_size', 'postgresql.total_size', 'postgresql.index_size']
 
 RELATION_INDEX_METRICS = [
     'postgresql.index_scans',
@@ -37,11 +32,7 @@ RELATION_INDEX_METRICS = [
     'postgresql.index_blocks_hit',
 ]
 
-IDX_METRICS = [
-    'postgresql.index_scans',
-    'postgresql.index_rows_read',
-    'postgresql.index_rows_fetched',
-]
+IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgresql.index_rows_fetched']
 
 
 @pytest.mark.integration
@@ -52,8 +43,21 @@ def test_relations_metrics(aggregator, pg_instance):
     posgres_check = PostgreSql('postgres', {}, {})
     posgres_check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['db:%s' % pg_instance['dbname'], 'table:persons', 'schema:public']
-    expected_size_tags = pg_instance['tags'] + ['db:%s' % pg_instance['dbname'], 'table:persons']
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
+        'db:%s' % pg_instance['dbname'],
+        'table:persons',
+        'schema:public',
+    ]
+
+    expected_size_tags = pg_instance['tags'] + [
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
+        'db:%s' % pg_instance['dbname'],
+        'table:persons',
+    ]
+
     for name in RELATION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
@@ -74,7 +78,14 @@ def test_index_metrics(aggregator, pg_instance):
     posgres_check = PostgreSql('postgres', {}, {})
     posgres_check.check(pg_instance)
 
-    expected_tags = ['db:dogs', 'table:breed', 'index:breed_names', 'schema:public']
-    expected_tags += pg_instance['tags']
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
+        'db:dogs',
+        'table:breed',
+        'index:breed_names',
+        'schema:public',
+    ]
+
     for name in IDX_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)

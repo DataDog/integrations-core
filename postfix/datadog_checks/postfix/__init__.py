@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .postfix import PostfixCheck
 
-__all__ = [
-    '__version__',
-    'PostfixCheck'
-]
+__all__ = ['__version__', 'PostfixCheck']

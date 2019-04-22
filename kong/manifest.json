@@ -1,7 +1,6 @@
 {
   "categories": [
     "web",
-    "api",
     "log collection"
   ],
   "creates_events": false,

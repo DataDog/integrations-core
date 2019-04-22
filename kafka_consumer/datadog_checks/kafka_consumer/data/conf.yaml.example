@@ -8,17 +8,17 @@ init_config:
   ## @param zk_timeout - integer - optional - default: 5
   ## Customizes the ZooKeeper connection timeout.
   #
-  #  zk_timeout: 5
+  # zk_timeout: 5
 
   ## @param kafka_timeout - integer - optional - default: 5
   ## Customizes the Kafka connection timeout.
   #
-  #  kafka_timeout: 5
+  # kafka_timeout: 5
 
   ## @param kafka_retries - integer - optional - default: 3
   ## Customizes the max number of retries per failed query to Kafka.
   #
-  #  kafka_retries: 3
+  # kafka_retries: 3
 
   ## @param min_collection_interval - integer - optional - default: 600
   ## Customize the number of seconds that must elapse between running this check.
@@ -26,161 +26,161 @@ init_config:
   ## must stat zookeeper more than the number of consumers * topic_partitions
   ## that you're monitoring. If that number is greater than 100, it's recommended
   ## to increase this value to avoid hitting zookeeper too hard.
-  ## https://docs.datadoghq.com/agent/faq/how-do-i-change-the-frequency-of-an-agent-check/
+  ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
   #
-  #  min_collection_interval: 600
+  # min_collection_interval: 600
 
 instances:
 
-  ## @param kafka_connect_str - list of strings - required
-  ## Kafka endpoints and port to connect to.
-  ## 
-  ## In a production environment, it's often useful to specify multiple
-  ## Kafka nodes for a single check instance. This way you
-  ## only generate a single check process, but if one host goes down,
-  ## KafkaClient / KazooClient tries contacting the next host.
-  ## Details: https://github.com/DataDog/dd-agent/issues/2943
-  #
+    ## @param kafka_connect_str - list of strings - required
+    ## Kafka endpoints and port to connect to.
+    ##
+    ## In a production environment, it's often useful to specify multiple
+    ## Kafka nodes for a single check instance. This way you
+    ## only generate a single check process, but if one host goes down,
+    ## KafkaClient / KazooClient tries contacting the next host.
+    ## Details: https://github.com/DataDog/dd-agent/issues/2943
+    #
   - kafka_connect_str:
     - localhost:9092
-    - <KAFKA_BROKER_ENDPOINT>:9092
+    # - <KAFKA_BROKER_ENDPOINT>:9092
 
-  ## @param zk_connect_str - list of objects - required
-  ## Zookeeper endpoints and port to connect to.
-  ## In a production environment, it's often useful to specify multiple
-  ## Zookeeper nodes for a single check instance. This way you
-  ## only generate a single check process, but if one host goes down,
-  ## KafkaClient / KazooClient tries contacting the next host.
-  ## Details: https://github.com/DataDog/dd-agent/issues/2943
-  ##
-  ## If you wish to only collect consumer offsets from kafka, because
-  ## you're using the new style consumers, you can comment out all
-  ## zk_* configuration elements below.
-  ## Please note that unlisted consumer groups are not supported at
-  ## the moment when zookeeper consumer offset collection is disabled.
-  #
+    ## @param zk_connect_str - list of objects - required
+    ## Zookeeper endpoints and port to connect to.
+    ## In a production environment, it's often useful to specify multiple
+    ## Zookeeper nodes for a single check instance. This way you
+    ## only generate a single check process, but if one host goes down,
+    ## KafkaClient / KazooClient tries contacting the next host.
+    ## Details: https://github.com/DataDog/dd-agent/issues/2943
+    ##
+    ## If you wish to only collect consumer offsets from kafka, because
+    ## you're using the new style consumers, you can comment out all
+    ## zk_* configuration elements below.
+    ## Please note that unlisted consumer groups are not supported at
+    ## the moment when zookeeper consumer offset collection is disabled.
+    #
   - zk_connect_str:
     - localhost:2181
-    - <ZOOKEEPER_ENDPOINT>:2181
-  
-  ## @param zk_iteration_ival - integer - optional
-  ## Set how many seconds the check should wait between two ZK consumer offset
-  ## collections. If kafka consumer offsets is disabled, this has no effect.
-  #
-  #  zk_iteration_ival: 1
+    # - <ZOOKEEPER_ENDPOINT>:2181
 
-  ## @param zk_prefix - string - optional
-  ## Zookeeper chroot prefix under which kafka data is living in zookeeper. 
-  ## If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
-  #
-  #  zk_prefix: <ZK_PREFIX>
+    ## @param zk_iteration_ival - integer - optional
+    ## Set how many seconds the check should wait between two ZK consumer offset
+    ## collections. If kafka consumer offsets is disabled, this has no effect.
+    #
+    # zk_iteration_ival: 1
 
-  ## @param consumer_groups - object - optional
-  ## Note that each level of values is optional (this is currently only available
-  ## when using zookeeper to store consumer groups). Any omitted values are
-  ## fetched from Zookeeper. You can omit partitions (example: <CONSUMER_NAME_2>),
-  ## topics (example: <CONSUMER_NAME_3>), and even consumer_groups. If you omit
-  ## consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
-  ## If a value is omitted, the parent value must still be it's expected type,
-  ## which is typically a dict.
-  #
-  #  consumer_groups:
-  #    <CONSUMER_NAME_1>:
-  #      <TOPIC_NAME_1>: [0, 1, 4, 12]
-  #    <CONSUMER_NAME_2>:
-  #      <TOPIC_NAME_2>:
-  #    <CONSUMER_NAME_3>
-  
-  ## @param monitor_unlisted_consumer_groups - boolean - required
-  ## Setting monitor_unlisted_consumer_groups to True tells the check to
-  ## discover and fetch all offsets for all consumer groups stored in zookeeper.
-  ## While this is convenient, it can also put a lot of load on zookeeper.
-  #
+    ## @param zk_prefix - string - optional
+    ## Zookeeper chroot prefix under which kafka data is living in zookeeper.
+    ## If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
+    #
+    # zk_prefix: <ZK_PREFIX>
+
+    ## @param consumer_groups - object - optional
+    ## Note that each level of values is optional (this is currently only available
+    ## when using zookeeper to store consumer groups). Any omitted values are
+    ## fetched from Zookeeper. You can omit partitions (example: <CONSUMER_NAME_2>),
+    ## topics (example: <CONSUMER_NAME_3>), and even consumer_groups. If you omit
+    ## consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
+    ## If a value is omitted, the parent value must still be it's expected type,
+    ## which is typically a dict.
+    #
+    # consumer_groups:
+    #   <CONSUMER_NAME_1>:
+    #     <TOPIC_NAME_1>: [0, 1, 4, 12]
+    #   <CONSUMER_NAME_2>:
+    #     <TOPIC_NAME_2>:
+    #   <CONSUMER_NAME_3>
+
+    ## @param monitor_unlisted_consumer_groups - boolean - required
+    ## Setting monitor_unlisted_consumer_groups to True tells the check to
+    ## discover and fetch all offsets for all consumer groups stored in zookeeper.
+    ## While this is convenient, it can also put a lot of load on zookeeper.
+    #
     monitor_unlisted_consumer_groups: false
 
-  ## @param kafka_consumer_offsets - boolean - optional - default: false
-  ## Set to true if consumer offsets data are stored within Kafka.
-  ## Set to false if consumer offsets data are stored within Zookeeper.
-  #
-  #  kafka_consumer_offsets: false
+    ## @param kafka_consumer_offsets - boolean - optional - default: false
+    ## Set to true if consumer offsets data are stored within Kafka.
+    ## Set to false if consumer offsets data are stored within Zookeeper.
+    #
+    # kafka_consumer_offsets: false
 
-  ## @param tags  - list of key:value string - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging at https://docs.datadoghq.com/tagging
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
-  
-  ## @param security_protocol - string - required
-  ## Protocol used to communicate with brokers. 
-  ## Valid values are: PLAINTEXT, SSL. Default: PLAINTEXT.
-  #
+    ## @param tags  - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param security_protocol - string - required
+    ## Protocol used to communicate with brokers.
+    ## Valid values are: PLAINTEXT, SSL. Default: PLAINTEXT.
+    #
     security_protocol: PLAINTEXT
-  
-  ## @param sasl_mechanism - string - optional
-  ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL. 
-  ## Currently only PLAIN is supported.
-  #
-  #  sasl_mechanism: PLAIN
 
-  ## @param sasl_plain_username - string - optional
-  ## Username for sasl PLAIN authentication.
-  #
-  #  sasl_plain_username: <USERNAME>
+    ## @param sasl_mechanism - string - optional
+    ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
+    ## Currently only PLAIN is supported.
+    #
+    # sasl_mechanism: PLAIN
 
-  ## @param sasl_plain_password - string - optional
-  ## Password for sasl PLAIN authentication.
-  #
-  #  sasl_plain_password: <PASSWORD>
+    ## @param sasl_plain_username - string - optional
+    ## Username for sasl PLAIN authentication.
+    #
+    # sasl_plain_username: <USERNAME>
 
-  ## @param sasl_kerberos_service_name - string - optional - default: kafka
-  ## Service name to include in GSSAPI sasl mechanism handshake.
-  #
-  #  sasl_kerberos_service_name: kafka 
+    ## @param sasl_plain_password - string - optional
+    ## Password for sasl PLAIN authentication.
+    #
+    # sasl_plain_password: <PASSWORD>
 
-  ## @param sasl_kerberos_domain_name - string - optional - default: one of the bootstrap servers
-  ## Kerberos domain name to use in GSSAPI sasl mechanism handshake. 
-  #
-  #  sasl_kerberos_domain_name: localhost
+    ## @param sasl_kerberos_service_name - string - optional - default: kafka
+    ## Service name to include in GSSAPI sasl mechanism handshake.
+    #
+    # sasl_kerberos_service_name: kafka
 
-  ## @param ssl_context - string - optional
-  ## Pre-configured SSLContext for wrapping socket connections. 
-  ## If provided, all other ssl_* configurations are ignored. 
-  #
-  #  ssl_context: <SSL_CONTEXT>
+    ## @param sasl_kerberos_domain_name - string - optional - default: one of the bootstrap servers
+    ## Kerberos domain name to use in GSSAPI sasl mechanism handshake.
+    #
+    # sasl_kerberos_domain_name: localhost
 
-  ## @param ssl_check_hostname - string - optional - default: true
-  ## Flag to configure whether SSL handshake should verify that the 
-  ## certificate matches the broker’s hostname.
-  #
-  #  ssl_check_hostname: true
+    ## @param ssl_context - string - optional
+    ## Pre-configured SSLContext for wrapping socket connections.
+    ## If provided, all other ssl_* configurations are ignored.
+    #
+    # ssl_context: <SSL_CONTEXT>
 
-  ## @param ssl_cafile - string - optional
-  ## Filename of CA file path to use in certificate verification.
-  #
-  #  ssl_cafile: <CA_FILE_PATH>
+    ## @param ssl_check_hostname - string - optional - default: true
+    ## Flag to configure whether SSL handshake should verify that the
+    ## certificate matches the broker’s hostname.
+    #
+    # ssl_check_hostname: true
 
-  ## @param ssl_certfile - string - optional
-  ## Filename path of file in PEM format containing the client certificate, 
-  ## as well as any CA certificates needed to establish the certificate’s authenticity.
-  #
-  #  ssl_certfile: <CERT_FILE_PATH>
+    ## @param ssl_cafile - string - optional
+    ## Filename of CA file path to use in certificate verification.
+    #
+    # ssl_cafile: <CA_FILE_PATH>
 
-  ## @param ssl_keyfile - string - optional
-  ## Optional filename containing the client private key.
-  #
-  #  ssl_keyfile: <KEY_FILE_PATH>
+    ## @param ssl_certfile - string - optional
+    ## Filename path of file in PEM format containing the client certificate,
+    ## as well as any CA certificates needed to establish the certificate’s authenticity.
+    #
+    # ssl_certfile: <CERT_FILE_PATH>
 
-  ## @param ssl_password - string - optional
-  ## Password to be used when loading the certificate chain. 
-  #
-  #  ssl_password: <PASSWORD>
+    ## @param ssl_keyfile - string - optional
+    ## Optional filename containing the client private key.
+    #
+    # ssl_keyfile: <KEY_FILE_PATH>
 
-  ## @param ssl_crlfile - string - optional
-  ## Filename path containing the CRL to check for certificate expiration.
-  ## By default, no CRL check is done. When providing a file, only the leaf certificate
-  ## will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+. 
-  #
-  #  ssl_crlfile: <SSL_FILE_PATH>
+    ## @param ssl_password - string - optional
+    ## Password to be used when loading the certificate chain.
+    #
+    # ssl_password: <PASSWORD>
+
+    ## @param ssl_crlfile - string - optional
+    ## Filename path containing the CRL to check for certificate expiration.
+    ## By default, no CRL check is done. When providing a file, only the leaf certificate
+    ## will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+.
+    #
+    # ssl_crlfile: <SSL_FILE_PATH>

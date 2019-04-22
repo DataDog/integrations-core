@@ -18,6 +18,7 @@ Many operating systems come with Python pre-installed. If your system Python is 
 Any recent version of macOS comes with Python pre-installed, however, it may be older than the version used in the Agent, and might also lack required tools and dependencies. You must install a fresh, dedicated Python interpreter that you can manage *without* the App Store.
 
 Some options include:
+
 * [Homebrew][2]: Follow the "[Doing it Right][3]" instructions.
 * [Miniconda][4]: Follow the "[Conda installation][5]" instructions.
 
@@ -37,7 +38,7 @@ Each integration has its own set of dependencies that must be added to Python in
 
 ### Virtualenv and Virtualenvwrapper
 
-We recommend using [Virtualenv][8] to manage Python virtual environments, and [virtualenvwrapper][9] to make the process smoother. There's a [comprehensive guide][10] in the Hitchhiker's Guide to Python describing how to set up these two tools.
+Datadog recommends using [Virtualenv][8] to manage Python virtual environments, and [virtualenvwrapper][9] to make the process smoother. There's a [comprehensive guide][10] in the Hitchhiker's Guide to Python describing how to set up these two tools.
 
 ### Miniconda
 

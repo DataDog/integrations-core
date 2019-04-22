@@ -21,7 +21,6 @@ VERSION_BUMP = OrderedDict([
     ('patch', semver.bump_patch),
     ('fix', semver.bump_patch),
     ('rc', lambda v: semver.bump_prerelease(v, 'rc')),
-    ('pre', lambda v: semver.bump_prerelease(v, 'pre')),
     ('alpha', lambda v: semver.bump_prerelease(v, 'alpha')),
     ('beta', lambda v: semver.bump_prerelease(v, 'beta')),
 ])
@@ -29,6 +28,7 @@ VERSION_BUMP = OrderedDict([
 AGENT_V5_ONLY = {
     'agent_metrics',
     'docker_daemon',
+    'go-metro',
     'kubernetes',
     'ntp',
 }

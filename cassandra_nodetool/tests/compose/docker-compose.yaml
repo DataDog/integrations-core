@@ -2,7 +2,10 @@ version: '3.5'
 
 services:
   dd-test-cassandra:
-    image: cassandra:${CASSANDRA_VERSION}
+    build:
+      context: ./config
+      args:
+        CASSANDRA_VERSION: ${CASSANDRA_VERSION}
     container_name: dd-test-cassandra
     ports:
       - ${CONTAINER_PORT}:${CONTAINER_PORT}
@@ -18,8 +21,6 @@ services:
         -Djava.rmi.server.hostname=localhost
     expose:
       - ${CONTAINER_PORT}
-    volumes:
-      - ${JMX_PASS_FILE}:/etc/cassandra/jmxremote.password
 
   dd-test-cassandra2:
     image: cassandra:${CASSANDRA_VERSION}

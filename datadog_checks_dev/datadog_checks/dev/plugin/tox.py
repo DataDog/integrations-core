@@ -41,6 +41,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
     sections[section] = {
+        'platform': 'linux|darwin|win32',
         # These tools only support Python 3+
         'basepython': 'python3',
         'skip_install': 'true',
@@ -54,7 +55,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
     )
 
     # Intentionally add to envlist when seeing what is available
-    if any('--listenvs' in arg for arg in config.args):
+    if config.option.env is None or config.option.env == STYLE_CHECK_ENV_NAME:
         config.envlist.append(STYLE_CHECK_ENV_NAME)
 
 
@@ -62,6 +63,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
     # testenv:format_style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
     sections[section] = {
+        'platform': 'linux|darwin|win32',
         # These tools only support Python 3+
         'basepython': 'python3',
         'skip_install': 'true',
@@ -76,7 +78,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
     )
 
     # Intentionally add to envlist when seeing what is available
-    if any('--listenvs' in arg for arg in config.args):
+    if config.option.env is None or config.option.env == STYLE_FORMATTER_ENV_NAME:
         config.envlist.append(STYLE_FORMATTER_ENV_NAME)
 
 

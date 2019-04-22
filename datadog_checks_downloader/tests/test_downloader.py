@@ -17,7 +17,7 @@ def test_downloader():
     r.raise_for_status()
 
     for line in r.text.split('\n'):
-        pattern = "<a href='(datadog-\\w+?)/'>\\w+?</a><br />"
+        pattern = r"<a href='(datadog-[\w-]+?)/'>\w+?</a><br />"
         match = re.match(pattern, line)
 
         if match:

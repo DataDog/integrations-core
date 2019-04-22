@@ -1,5 +1,10 @@
 # CHANGELOG - http_check
 
+## 3.2.1 / 2019-03-29
+
+* [Fixed] Fix Python 3.7 support. See [#3293](https://github.com/DataDog/integrations-core/pull/3293).
+* [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
+
 ## 3.2.0 / 2019-02-18
 
 * [Added] Add url as tag. See [#3080](https://github.com/DataDog/integrations-core/pull/3080).
