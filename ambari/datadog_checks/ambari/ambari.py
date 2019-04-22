@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import iteritems
+import requests
+
+
 from datadog_checks.base import AgentCheck
 from . import common
 
@@ -14,73 +17,159 @@ class AmbariCheck(AgentCheck):
         self.services = []
 
     def check(self, instance):
-        server = instance.get("url")
-        port = instance.get("port")
-        tags = []
+        server = instance.get("url", "")
+        port = str(instance.get("port", ""))
+        tags = instance.get("tags", [])
+        services = instance.get("services", [])
+        headers = instance.get("metric_headers", [])
+        headers = [str(h) for h in headers]
         clusters_endpoint = common.CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
-        clusters = self.get_clusters(clusters_endpoint)
-        self.get_hosts_metrics(clusters, server, port, tags)
+        cluster_list = self.get_clusters(clusters_endpoint, server)
+        self.get_host_metrics(cluster_list, server, port, tags)
+        self.get_service_metrics(cluster_list, server, port, services, headers, tags)
 
-    def get_clusters(self, url):
+    def get_clusters(self, cluster_url, base_url):
         cluster_list = []
-        r = self.http.get(url)
-        r.raise_for_status()
 
-        clusters = r.json().get('items')
-        for cluster in clusters:
+        resp = self.make_request(cluster_url)
+
+        if resp is None:
+            self.error(
+                "Couldn't connect to URL: {}. Please verify the address is reachable"
+                .format(cluster_url))
+            self.submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
+            raise
+
+        self.submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
+        for cluster in resp.get('items'):
             cluster_list.append(cluster.get('Clusters').get('cluster_name'))
         return cluster_list
 
-    def get_hosts_metrics(self, clusters, server, port, tags):
+    def get_host_metrics(self, clusters, server, port, tags):
         for cluster in clusters:
-            hosts_endpoint = common.HOSTS_URL.format(ambari_server=server, ambari_port=port, cluster_name=cluster)
-            resp = self.http.get(hosts_endpoint)
-            resp.raise_for_status()
-            hosts_list = resp.json().get('items')
+            hosts_endpoint = common.HOST_METRICS_URL.format(
+                ambari_server=server,
+                ambari_port=port,
+                cluster_name=cluster
+            )
+            # resp = self.make_request("http://bad_endpoint.com") #for testing
+            resp = self.make_request(hosts_endpoint)
+
+            hosts_list = resp.get('items')
             cluster_tag = "ambari_cluster:{}".format(cluster)
 
             for host in hosts_list:
-                metrics = self.host_iterate(host.get('metrics'), "")
+                if host.get('metrics') is None:
+                    self.log.warning("No metrics received for host {}".format(host.get('Hosts').get('host_name')))
+                    continue
+
+                metrics = self.host_metrics_iterate(host.get('metrics'), "")
                 for metric_name, value in iteritems(metrics):
-                    host_tags = [cluster_tag, "ambari_host:" + host.get('Hosts').get('host_name')]
-                    self.submit_metrics(metric_name, value, host_tags)
+                    host_tag = "ambari_host:" + host.get('Hosts').get('host_name')
+                    metric_tags = []
+                    metric_tags += tags
+                    metric_tags.extend((cluster_tag, host_tag))
+                    if isinstance(value, float):
+                        self.submit_metrics(metric_name, value, metric_tags)
 
-    # def get_service_metrics(self, clusters, server, port):
-    #     for cluster in clusters:
-    #         services_endpoint = common.SERVICES_URL.format(
-    #                                                        ambari_server=server,
-    #                                                        ambari_port=port,
-    #                                                        cluster_name=cluster
-    #         )
-    #         resp = self.http.get(services_endpoint)
-    #         resp.raise_for_status()
-    #         services_list = resp.json().get('items')
-    #         cluster_tag = "ambari_cluster:{}".format(cluster)
+    def get_service_metrics(self, clusters, server, port, services, headers, tags):
+        for cluster in clusters:
+            cluster_tag = "ambari_cluster:{}".format(cluster)
+            for service, components in iteritems(services):
+                components = [c.upper() for c in components]
+                metrics_endpoint = self.create_endpoint(server, port, cluster, service, "/components?fields=metrics")
+                service_check_endpoint = self.create_endpoint(server, port, cluster, service, "?fields=ServiceInfo")
 
-    #         for service in services_list:
-    #             service_tags = [
-    #                             cluster_tag,
-    #                             "ambari_host:" + service.get('Hosts').get('host_name'),
-    #                             "ambari_server:" + service.get('Services').get('service_name')
-    #             ]
-    #             self.submit_metrics("test.value", service.get('metrics').get('cpu').get('cpu_idle'), service_tags)
+                resp = self.make_request(metrics_endpoint)
+                # resp = self.make_request("http://bad_endpoint.com") #for testing
+                service_tag = "ambari_service:" + service.lower()
 
-    def host_iterate(self, metric_dict, prev_heading, prev_metrics={}):
+                if resp is None:
+                    self.log.warning("No components found for service {}.".format(service))
+                    continue
+
+                for component in resp.get('items'):
+                    component_name = component.get('ServiceComponentInfo').get('component_name')
+                    component_tag = "ambari_component:" + component_name.lower()
+
+                    if component_name not in components:
+                        continue
+                    if component.get('metrics') is None:
+                        self.log.warning(
+                            "No metrics found for component {} for service {}"
+                            .format(component_name, service)
+                        )
+                        continue
+
+                    for header in headers:
+                        if header not in component.get('metrics'):
+                            self.log.warning(
+                                "No {} metrics found for component {} for service {}"
+                                .format(header, component_name, service)
+                            )
+                            continue
+
+                        metrics = self.service_metrics_iterate(component.get('metrics')[header], header)
+                        for metric_name, value in iteritems(metrics):
+                            metric_tags = []
+                            metric_tags += tags
+                            metric_tags.extend((service_tag, component_tag, cluster_tag))
+
+                            if isinstance(value, float):
+                                self.submit_metrics(metric_name, value, metric_tags)
+
+                # service health check
+                service_resp = self.make_request(service_check_endpoint)
+                service_check_tags = []
+                service_check_tags += tags
+                service_check_tags.extend((service_tag, cluster_tag))
+                if service_resp is None:
+                    self.submit_service_checks("state", self.CRITICAL, service_check_tags)
+                    self.log.warning("No response received for service {}{}".format(component_name, service))
+                else:
+                    state = service_resp.get('ServiceInfo').get('state')
+                    self.submit_service_checks("state", common.STATUS[state], service_check_tags)
+
+    def create_endpoint(self, server, port, cluster, service, ending):
+        return common.SERVICE_URL.format(
+                    ambari_server=server,
+                    ambari_port=port,
+                    cluster_name=cluster,
+                    service_name=service.upper(),
+                    ending=ending
+        )
+
+    def service_metrics_iterate(self, metric_dict, header, prev_metrics={}):
+        for key, value in iteritems(metric_dict):
+            if isinstance(value, dict):
+                self.service_metrics_iterate(value, header, prev_metrics)
+            else:
+                prev_metrics['{}.{}'.format(header, key)] = value
+        return prev_metrics
+
+    def host_metrics_iterate(self, metric_dict, prev_heading, prev_metrics={}):
         for key, value in iteritems(metric_dict):
             if key == "boottime":
                 prev_metrics["boottime"] = value
             elif isinstance(value, dict):
-                self.host_iterate(value, key, prev_metrics)
+                self.host_metrics_iterate(value, key, prev_metrics)
             else:
                 prev_metrics['{}.{}'.format(prev_heading, key)] = value
         return prev_metrics
 
+    def make_request(self, url):
+        try:
+            resp = self.http.get(url)
+            return resp.json()
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+            self.warning(
+                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
+                .format(url, e))
+        except (requests.exceptions.Timeout):
+            self.warning("Connection timeout when connecting to {}".format(url))
+
     def submit_metrics(self, name, value, tags):
-        # value = child.get(metrics.METRIC_VALUE_FIELDS[child.tag])
-        # metric_name = self.normalize(
-        #     ensure_unicode(child.get('name')),
-        #     prefix='{}.{}'.format(self.METRIC_PREFIX, prefix),
-        #     fix_case=True
-        # )
-        # self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
-        self.gauge(name, value, tags)
+        self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
+
+    def submit_service_checks(self, name, value, tags):
+        self.service_check('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
