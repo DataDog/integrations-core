@@ -314,36 +314,16 @@ def manifest(fix, include_extras):
                     display_queue.append((echo_failure, '  required non-null sequence: categories'))
 
                 # type
-                correct_integration_type = 'check'
+                correct_integration_types = ['check', 'crawler']
                 integration_type = decoded.get('type')
                 if not integration_type or not isinstance(integration_type, string_types):
                     file_failures += 1
                     output = '  required non-null string: type'
-
-                    if fix:
-                        decoded['type'] = correct_integration_type
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `type`: {}'.format(correct_integration_type)))
-
-                        file_failures -= 1
-                        file_fixed = True
-                    else:
-                        display_queue.append((echo_failure, output))
-                elif integration_type != correct_integration_type:
+                    display_queue.append((echo_failure, output))
+                elif integration_type not in correct_integration_types:
                     file_failures += 1
                     output = '  invalid `type`: {}'.format(integration_type)
-
-                    if fix:
-                        decoded['type'] = correct_integration_type
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `type`: {}'.format(correct_integration_type)))
-
-                        file_failures -= 1
-                        file_fixed = True
-                    else:
-                        display_queue.append((echo_failure, output))
+                    display_queue.append((echo_failure, output))
 
                 # is_public
                 correct_is_public = True
