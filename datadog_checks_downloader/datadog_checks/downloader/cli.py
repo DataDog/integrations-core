@@ -7,6 +7,14 @@
 import argparse
 import re
 
+# 2nd party.
+from .download import REPOSITORY_URL_PREFIX, TUFDownloader
+from .exceptions import (
+    NonCanonicalVersion,
+    NonDatadogPackage,
+    NoSuchDatadogPackageOrVersion,
+)
+
 # 3rd party.
 from tuf.exceptions import UnknownTargetError
 
@@ -41,13 +49,18 @@ def download():
         'standard_distribution_name', type=str, help='Standard distribution name of the desired Datadog check.'
     )
 
-    parser.add_argument('--version', type=str, default=None, help='The version number of the desired Datadog check.')
+    parser.add_argument('--repository', type=str, default=REPOSITORY_URL_PREFIX,
+                        help='The complete URL prefix for the TUF repository.')
+
+    parser.add_argument('--version', type=str, default=None,
+                        help='The version number of the desired Datadog check.')
 
     parser.add_argument(
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
     )
 
     args = parser.parse_args()
+    repository_url_prefix = args.repository
     standard_distribution_name = args.standard_distribution_name
     version = args.version
     verbose = args.verbose
@@ -56,7 +69,7 @@ def download():
         raise NonDatadogPackage(standard_distribution_name)
     else:
         wheel_distribution_name = __get_wheel_distribution_name(standard_distribution_name)
-        tuf_downloader = TUFDownloader(verbose=verbose)
+        tuf_downloader = TUFDownloader(repository_url_prefix=repository_url_prefix, verbose=verbose)
 
         if not version:
             version = tuf_downloader.get_latest_version(standard_distribution_name, wheel_distribution_name)

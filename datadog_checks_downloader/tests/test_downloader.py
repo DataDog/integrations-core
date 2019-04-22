@@ -8,12 +8,16 @@ import re
 import subprocess
 
 import requests
+import six
+
+from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
 
 log = logging.getLogger('test_downloader')
 
 
 def test_downloader():
-    r = requests.get('https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/index.html')
+    index = six.moves.urllib_parse.urljoin(REPOSITORY_URL_PREFIX, 'targets/simple/index.html')
+    r = requests.get(index)
     r.raise_for_status()
 
     for line in r.text.split('\n'):

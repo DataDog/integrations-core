@@ -46,6 +46,7 @@ REPOSITORY_MIRRORS = {
         'confined_target_dirs': [''],
     }
 }
+REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
 
 
 # Global variables.
@@ -53,7 +54,9 @@ logger = logging.getLogger(__name__)
 
 
 class TUFDownloader:
-    def __init__(self, verbose=0):
+
+
+    def __init__(self, repository_url_prefix=REPOSITORY_URL_PREFIX, verbose=0):
         # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
         # 2 => 40 (ERROR)
@@ -79,7 +82,14 @@ class TUFDownloader:
         # https://github.com/theupdateframework/tuf/blob/aa2ab218f22d8682e03c992ea98f88efd155cffd/tuf/client/updater.py#L628-L683
         # NOTE: This updater will store files under:
         # os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
-        self.__updater = Updater(REPOSITORY_DIR, REPOSITORY_MIRRORS)
+        self.__updater = Updater(REPOSITORY_DIR, {
+            'repo': {
+                'url_prefix': repository_url_prefix,
+                'metadata_path': 'metadata.staged',
+                'targets_path': 'targets',
+                'confined_target_dirs': [''],
+            }
+        })
 
         # NOTE: Update to the latest top-level role metadata only ONCE, so that
         # we use the same consistent snapshot to download targets.
