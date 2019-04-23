@@ -19,10 +19,7 @@ def headers(agentConfig, **kwargs):
             'Accept': 'text/html, */*',
         }
     else:
-        res = {
-            'User-Agent': 'Datadog Agent/{}'.format(version),
-            'Accept': 'text/html, */*',
-        }
+        res = {'User-Agent': 'Datadog Agent/{}'.format(version), 'Accept': 'text/html, */*'}
 
         if kwargs.get('http_method'):
             if kwargs.get('http_method').lower() in ('post', 'put', 'patch'):
