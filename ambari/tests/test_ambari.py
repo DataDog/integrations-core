@@ -4,7 +4,10 @@
 from datadog_checks.ambari import AmbariCheck
 
 
-def test_check(aggregator):
+
+
+
+def manual_test_check(aggregator):
     instance = [{
         "url": "c6801.ambari.apache.org",
         "port": "8080",
@@ -24,3 +27,4 @@ def test_check(aggregator):
     check.check(instance[0])
     # import pdb; pdb.set_trace()
     aggregator.assert_all_metrics_covered()
+
