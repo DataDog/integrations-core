@@ -159,6 +159,14 @@ Datadog's default CloudWatch crawler polls metrics once every 10 minutes. If you
 
 3. Finally, use a [Lambda function][14] to collect logs from CloudWatch and send them to Datadog.
 
+### Trace Collection
+
+1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true`.
+
+2. [Instrument your application][24] based on your setup.
+
+3. Ensure your application is running in the same task definition as the Datadog Agent container.
+
 ## Data Collected
 
 ### Metrics
@@ -207,3 +215,4 @@ Need help? Contact [Datadog support][16].
 [21]: https://docs.datadoghq.com/integrations/amazon_ecs/#data-collected
 [22]: https://docs.datadoghq.com/graphing/infrastructure/process/?tab=docker#installation
 [23]: https://docs.datadoghq.com/agent/docker/#environment-variables
+[24]: https://docs.datadoghq.com/tracing/setup/
