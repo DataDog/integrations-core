@@ -8,4 +8,4 @@ def test_get_py_loglevel():
     """
     Ensure function _get_py_loglevel is exposed
     """
-    assert getattr(log, "_get_py_loglevel")
+    assert getattr(log, "_get_py_loglevel", None) is not None

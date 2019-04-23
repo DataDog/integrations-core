@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .mixins import PrometheusScraperMixin
-from .. import AgentCheck
-from ...errors import CheckException
-
 from six import string_types
+
+from ...errors import CheckException
+from .. import AgentCheck
+from .mixins import PrometheusScraperMixin
 
 
 class PrometheusScraper(PrometheusScraperMixin):
@@ -84,6 +84,7 @@ class GenericPrometheusCheck(AgentCheck):
             - bar
             - foo
     """
+
     DEFAULT_METRIC_LIMIT = 2000
 
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=""):
@@ -105,7 +106,7 @@ class GenericPrometheusCheck(AgentCheck):
             send_histograms_buckets=instance.get('send_histograms_buckets', True),
             send_monotonic_counter=instance.get('send_monotonic_counter', True),
             instance=instance,
-            ignore_unmapped=True
+            ignore_unmapped=True,
         )
 
     def _extract_rate_metrics(self, type_overrides):
@@ -162,11 +163,13 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.extra_headers = default_instance.get("extra_headers", {})
         scraper.extra_headers.update(instance.get("extra_headers", {}))
         # For simple values instance settings overrides optional defaults
-        scraper.prometheus_metrics_prefix = instance.get("prometheus_metrics_prefix",
-                                                         default_instance.get("prometheus_metrics_prefix", ''))
+        scraper.prometheus_metrics_prefix = instance.get(
+            "prometheus_metrics_prefix", default_instance.get("prometheus_metrics_prefix", '')
+        )
         scraper.label_to_hostname = instance.get("label_to_hostname", default_instance.get("label_to_hostname", None))
-        scraper.health_service_check = instance.get("health_service_check",
-                                                    default_instance.get("health_service_check", True))
+        scraper.health_service_check = instance.get(
+            "health_service_check", default_instance.get("health_service_check", True)
+        )
         scraper.ssl_cert = instance.get("ssl_cert", default_instance.get("ssl_cert", None))
         scraper.ssl_private_key = instance.get("ssl_private_key", default_instance.get("ssl_private_key", None))
         scraper.ssl_ca_cert = instance.get("ssl_ca_cert", default_instance.get("ssl_ca_cert", None))

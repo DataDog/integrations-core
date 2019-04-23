@@ -6,7 +6,7 @@ def test_rate_override():
     instance = {
         'prometheus_url': endpoint,
         'metrics': [{"test_rate": "test.rate"}],
-        'type_overrides': {"test_rate": "rate"}
+        'type_overrides': {"test_rate": "rate"},
     }
     expected_type_overrides = {"test_rate": "rate"}
 

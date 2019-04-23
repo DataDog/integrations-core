@@ -34,6 +34,7 @@ class UndefinedCalculator(Exception):
     """
     No calculator is defined for the given CounterType.
     """
+
     pass
 
 
@@ -41,9 +42,11 @@ def calculator(counter_type):
     """
     A decorator that assign a counter_type to its calculator.
     """
+
     def set_calculator(func):
         _counter_type_calculators[counter_type] = func
         return func
+
     return set_calculator
 
 

@@ -12,7 +12,7 @@ def get_datadog_wheels():
     dist = list(pkg_resources.working_set)
     for package in dist:
         if package.project_name.startswith(DATADOG_CHECK_PREFIX):
-            name = package.project_name[len(DATADOG_CHECK_PREFIX):].replace('-', '_')
+            name = package.project_name[len(DATADOG_CHECK_PREFIX) :].replace('-', '_')
             packages.append(name)
 
     return packages
