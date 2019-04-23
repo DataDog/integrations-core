@@ -38,7 +38,7 @@ def from_instance(instance, default_ca_certs=None):
     config_headers = instance.get('headers', {})
     default_headers = is_affirmative(instance.get("include_default_headers", True))
     if default_headers:
-        headers = agent_headers({})
+        headers = agent_headers({}, http_method=method)
     else:
         headers = {}
     headers.update(config_headers)
