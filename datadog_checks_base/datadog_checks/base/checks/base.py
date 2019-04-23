@@ -789,6 +789,8 @@ class __AgentCheckPy2(object):
 
         if tags is not None:
             for tag in tags:
+                if tag is None:
+                    continue
                 encoded_tag = self._to_bytes(tag)
                 if encoded_tag is None:
                     self.log.warning(
@@ -811,7 +813,7 @@ class __AgentCheckPy2(object):
         if not isinstance(data, bytes):
             try:
                 return data.encode('utf-8')
-            except Exception:
+            except UnicodeError:
                 return None
 
         return data
