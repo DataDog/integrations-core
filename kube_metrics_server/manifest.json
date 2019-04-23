@@ -1,0 +1,25 @@
+{
+  "display_name": "Kube_metrics_server",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "kube_metrics_server",
+  "metric_prefix": "kube_metrics_server.",
+  "metric_to_check": "kube_metrics_server.threads",
+  "creates_events": false,
+  "short_description": "Monitors the Kubernetes Metrics Server",
+  "guid": "TODO",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Kube_metrics_server Integration",
+  "categories": [
+    "orchestration",
+    "containers"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "kube-metrics-server"
+}
