@@ -29,16 +29,15 @@ def get_valid_templates():
 
 def construct_template_fields(integration_name, repo_choice, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
-    check_name_cap = integration_name.capitalize() if re.match(SIMPLE_NAME, integration_name) else integration_name
-    check_name_kebab = re.sub('_| ', '-', integration_name)
+    check_name_kebab = re.sub('_| ', '-', integration_name.lower())
 
     if repo_choice == 'core':
         author = 'Datadog'
         email = 'help@datadoghq.com'
         email_packages = 'packages@datadoghq.com'
         install_info = (
-            'The {check_name_cap} check is included in the [Datadog Agent][2] package.\n'
-            'No additional installation is needed on your server.'.format(check_name_cap=check_name_cap)
+            'The {integration_name} check is included in the [Datadog Agent][2] package.\n'
+            'No additional installation is needed on your server.'.format(integration_name=integration_name)
         )
         license_header = (
             '# (C) Datadog, Inc. {year}\n'
@@ -53,7 +52,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         email = email_packages = 'friend@datadog.community'
         install_info = (
             'The {} check is not included in the [Datadog Agent][2] package, so it must\n'
-            'be installed manually.'.format(check_name_cap)
+            'be installed manually.'.format(integration_name)
         )
         license_header = ''
         support_type = 'contrib'
@@ -64,7 +63,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         'author': author,
         'check_class': '{}Check'.format(''.join(part.capitalize() for part in normalized_integration_name.split('_'))),
         'check_name': normalized_integration_name,
-        'check_name_cap': check_name_cap,
+        'integration_name': integration_name,
         'check_name_kebab': check_name_kebab,
         'email': email,
         'email_packages': email_packages,

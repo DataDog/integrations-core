@@ -1,8 +1,8 @@
-# Agent Check: {check_name_cap}
+# Agent Check: {integration_name}
 
 ## Overview
 
-This check monitors [{check_name_cap}][1].
+This check monitors [{integration_name}][1].
 
 ## Setup
 
@@ -22,15 +22,15 @@ This check monitors [{check_name_cap}][1].
 
 ### Metrics
 
-{check_name_cap} does not include any metrics.
+{integration_name} does not include any metrics.
 
 ### Service Checks
 
-{check_name_cap} does not include any service checks.
+{integration_name} does not include any service checks.
 
 ### Events
 
-{check_name_cap} does not include any events.
+{integration_name} does not include any events.
 
 ## Troubleshooting
 
