@@ -5,7 +5,8 @@ from six import iteritems
 import requests
 
 
-from datadog_checks.base import AgentCheck, CheckException
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
 from . import common
 
 # Tag templates
@@ -36,27 +37,21 @@ class AmbariCheck(AgentCheck):
         services = instance.get("services", [])
         headers = instance.get("metric_headers", [])
         headers = [str(h) for h in headers]
-        clusters_endpoint = common.CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
-        cluster_list = self.get_clusters(clusters_endpoint, server)
+
+        cluster_list = self.get_clusters(server, port)
         self.get_host_metrics(cluster_list, server, port, tags)
         self.get_service_metrics(cluster_list, server, port, services, headers, tags)
 
-    def get_clusters(self, cluster_url, base_url):
-        cluster_list = []
+    def get_clusters(self, server, port):
+        clusters_endpoint = common.CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
 
-        resp = self.make_request(cluster_url)
-
+        resp = self.make_request(clusters_endpoint)
         if resp is None:
-            self.error(
-                "Couldn't connect to URL: {}. Please verify the address is reachable"
-                .format(cluster_url))
-            self.submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
-            raise CheckException
+            self.submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(server)])
+            raise CheckException("Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint))
+        self.submit_service_checks("can_connect", self.OK, ["url:{}".format(server)])
 
-        self.submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
-        for cluster in resp.get('items'):
-            cluster_list.append(cluster.get('Clusters').get('cluster_name'))
-        return cluster_list
+        return [cluster.get('Clusters').get('cluster_name') for cluster in resp.get('items')]
 
     def get_host_metrics(self, clusters, server, port, tags):
         for cluster in clusters:
