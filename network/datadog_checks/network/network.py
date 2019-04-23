@@ -6,6 +6,7 @@
 Collects network metrics.
 """
 
+import os
 import re
 import socket
 from collections import defaultdict
@@ -14,6 +15,7 @@ import psutil
 from six import PY3, iteritems
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.common import pattern_filter
 from datadog_checks.utils.platform import Platform
 from datadog_checks.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
@@ -413,29 +415,76 @@ class Network(AgentCheck):
                         nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
                     )
 
-        proc_conntrack_path = "{}/net/nf_conntrack".format(proc_location)
-        try:
-            with open(proc_conntrack_path, 'r') as conntrack_file:
-                # Starting at 0 as the last line has a line return
-                conntrack_count = 0
-                while 1:
-                    # Reading the file by chucks (64k being a randomly chosen buffer size)
-                    conntrack_buffer = conntrack_file.read(65536)
-                    if not conntrack_buffer:
-                        break
-                    conntrack_count += conntrack_buffer.count('\n')
-                self.gauge('system.net.conntrack.count', conntrack_count, tags=custom_tags)
-        except IOError:
-            self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", proc_conntrack_path)
+        # Get the conntrack -S information
+        conntrack_path = instance.get('conntrack_path')
+        if conntrack_path is not None:
+            self._add_conntrack_stats_metrics(conntrack_path, custom_tags)
 
-        proc_conntrack_max_path = "{}/sys/net/nf_conntrack_max".format(proc_location)
+        # Get the rest of the metric by reading the files. Metrics available since kernel 3.6
+        conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
+        # By default, only max and count are reported. However if the blacklist is set,
+        # the whitelist is loosing its default value
+        blacklisted_files = instance.get('blacklist_conntrack_metrics')
+        whitelisted_files = instance.get('whitelist_conntrack_metrics')
+        if blacklisted_files is None and whitelisted_files is None:
+            whitelisted_files = ['max', 'count']
+
+        available_files = []
+
+        # Get the metrics to read
         try:
-            with open(proc_conntrack_max_path, 'r') as conntrack_max_file:
-                # Starting at 0 as the last line has a line return
-                conntrack_max = conntrack_max_file.read().rstrip()
-                self.gauge('system.net.conntrack.max', conntrack_max, tags=custom_tags)
-        except IOError:
-            self.log.debug("Unable to read %s. Skipping nf_conntrack_max metrics pull.", proc_conntrack_max_path)
+            for metric_file in os.listdir(conntrack_files_location):
+                if (
+                    os.path.isfile(os.path.join(conntrack_files_location, metric_file))
+                    and 'nf_conntrack_' in metric_file
+                ):
+                    available_files.append(metric_file[len('nf_conntrack_') :])
+        except Exception as e:
+            self.log.debug("Unable to list the files in {}. {}".format(conntrack_files_location, e))
+
+        filtered_available_files = pattern_filter(
+            available_files, whitelist=whitelisted_files, blacklist=blacklisted_files
+        )
+
+        for metric_name in filtered_available_files:
+            metric_file_location = os.path.join(conntrack_files_location, 'nf_conntrack_{}'.format(metric_name))
+            try:
+                with open(metric_file_location, 'r') as conntrack_file:
+                    # Checking it's an integer
+                    try:
+                        value = int(conntrack_file.read().rstrip())
+                        self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
+                    except ValueError:
+                        self.log.debug("{} is not an integer".format(metric_name))
+            except IOError as e:
+                self.log.debug("Unable to read {}, skipping {}.".format(metric_file_location, e))
+
+    def _add_conntrack_stats_metrics(self, conntrack_path, tags):
+        """
+        Parse the output of conntrack -S
+        Add the parsed metrics
+        """
+        try:
+            output, _, _ = get_subprocess_output(["sudo", conntrack_path, "-S"], self.log)
+            # conntrack -S sample:
+            # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
+            #       drop=1 early_drop=0 error=0 search_restart=39936711
+            # cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 \
+            #       drop=1 early_drop=0 error=0 search_restart=36983181
+
+            lines = output.splitlines()
+
+            for line in lines:
+                cols = line.split()
+                cpu_num = cols[0].split('=')[-1]
+                cpu_tag = ['cpu:{}'.format(cpu_num)]
+                cols = cols[1:]
+
+                for cell in cols:
+                    metric, value = cell.split('=')
+                    self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use {} to get conntrack stats".format(conntrack_path))
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
