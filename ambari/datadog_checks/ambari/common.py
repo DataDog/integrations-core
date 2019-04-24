@@ -7,7 +7,7 @@ from datadog_checks.base.constants import ServiceCheck
 CLUSTERS_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters"
 HOSTS_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/hosts/{host_name}"
 HOST_METRICS_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/hosts?fields=metrics"
-SERVICE_URL = "http://{ambari_server}:{ambari_port}/api/v1/clusters/{cluster_name}/services/{service_name}{ending}"
+SERVICE_URL = "http://{ambari_server}:{ambari_port}{ambari_path}/api/v1/clusters/{cluster_name}/services/{service_name}{ending}"
 METRIC_PREFIX = 'ambari'
 
 # https://github.com/apache/ambari/blob/trunk/ambari-server/docs/api/v1/service-resources.md
@@ -28,10 +28,12 @@ STATUS = {
 }
 
 
-def create_endpoint(server, port, cluster, service, ending):
+def create_endpoint(server, port, path, cluster, service, ending):
+    path = '/' + path if path else ''
     return SERVICE_URL.format(
                 ambari_server=server,
                 ambari_port=port,
+                ambari_path=path,
                 cluster_name=cluster,
                 service_name=service.upper(),
                 ending=ending
