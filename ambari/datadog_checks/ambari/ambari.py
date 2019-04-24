@@ -69,7 +69,7 @@ class AmbariCheck(AgentCheck):
                     self.log.warning("No metrics received for host {}".format(host.get('Hosts').get('host_name')))
                     continue
 
-                metrics = self.host_metrics_iterate(host.get(METRICS_FIELD), "")
+                metrics = self.flatten_host_metrics(host.get(METRICS_FIELD), "")
                 for metric_name, value in iteritems(metrics):
                     host_tag = HOST_TAG + host.get('Hosts').get('host_name')
                     metric_tags = base_tags + [cluster_tag, host_tag]
@@ -127,7 +127,7 @@ class AmbariCheck(AgentCheck):
                     )
                     continue
 
-                metrics = self.service_metrics_iterate(component.get(METRICS_FIELD)[header], header)
+                metrics = self.flatten_service_metrics(component.get(METRICS_FIELD)[header], header)
                 for metric_name, value in iteritems(metrics):
                     metric_tags = base_tags + [component_tag]
                     if isinstance(value, float):
@@ -136,22 +136,23 @@ class AmbariCheck(AgentCheck):
                         self.log.warning("Expected a float for {}, received {}".format(metric_name, value))
 
     @staticmethod
-    def service_metrics_iterate(metric_dict, header, prev_metrics={}):
+    def flatten_service_metrics(metric_dict, prefix, flat_metrics=None):
+        flat_metrics = flat_metrics or {}
         for key, value in iteritems(metric_dict):
             if isinstance(value, dict):
-                AmbariCheck.service_metrics_iterate(value, header, prev_metrics)
+                AmbariCheck.flatten_service_metrics(value, prefix, flat_metrics)
             else:
-                prev_metrics['{}.{}'.format(header, key)] = value
-        return prev_metrics
+                flat_metrics['{}.{}'.format(prefix, key)] = value
+        return flat_metrics
 
     @staticmethod
-    def host_metrics_iterate(metric_dict, prev_heading, prev_metrics=None):
+    def flatten_host_metrics(metric_dict, prev_heading, prev_metrics=None):
         prev_metrics = prev_metrics or {}
         for key, value in iteritems(metric_dict):
             if key == "boottime":
                 prev_metrics["boottime"] = value
             elif isinstance(value, dict):
-                AmbariCheck.host_metrics_iterate(value, key, prev_metrics)
+                AmbariCheck.flatten_host_metrics(value, key, prev_metrics)
             else:
                 prev_metrics['{}.{}'.format(prev_heading, key)] = value
         return prev_metrics
