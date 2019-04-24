@@ -391,7 +391,7 @@ class __AgentCheckPy3(object):
                 if not isinstance(tag, str):
                     try:
                         tag = tag.decode('utf-8')
-                    except UnicodeError:
+                    except Exception:
                         self.log.warning(
                             'Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
                         )
