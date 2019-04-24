@@ -12,6 +12,11 @@ instances:
   ## Note: The default port is usually 8080.
     port: 8080
 
+  ## @param path - string - required
+  ## The path of the Ambari Server
+  ## Note: By default this is an empty string
+  #  path: cloudbreak-install/dp-proxy/ambari
+
   ## @param user - string - required
   ## Username created to connect to the Ambari server.
   #

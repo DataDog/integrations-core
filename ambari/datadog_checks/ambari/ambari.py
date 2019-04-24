@@ -33,6 +33,7 @@ class AmbariCheck(AgentCheck):
     def check(self, instance):
         server = instance.get("url", "")
         port = str(instance.get("port", ""))
+        path = str(instance.get("path", ""))
         base_tags = instance.get("tags", [])
         services = instance.get("services", [])
         metric_headers = [str(h) for h in instance.get("metric_headers", [])]
