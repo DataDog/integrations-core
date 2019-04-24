@@ -4,6 +4,7 @@
 [![Build status][3]][4]
 [![Coverage status][17]][18]
 [![Documentation Status][19]][20]
+[![Code style - black][21]][22]
 
 This repository contains the Agent Integrations (also known as checks) that Datadog
 officially develops and supports. To add a new integration, please see the [Integrations Extras][5]
@@ -95,3 +96,5 @@ fingerprints known to correspond to developers who, at the time of writing (Nov
 [18]: https://codecov.io/github/DataDog/integrations-core?branch=master
 [19]: https://readthedocs.org/projects/datadog-checks-base/badge/?version=latest
 [20]: https://datadog-checks-base.readthedocs.io/en/latest/?badge=latest
+[21]: https://img.shields.io/badge/code%20style-black-000000.svg
+[22]: https://github.com/ambv/black
