@@ -17,7 +17,8 @@
   "public_title": "Datadog-Kube_scheduler Integration",
   "categories": [
     "orchestration",
-    "containers"
+    "containers",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,
