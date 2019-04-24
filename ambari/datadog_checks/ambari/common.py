@@ -26,3 +26,13 @@ STATUS = {
     'WIPING_OUT': ServiceCheck.CRITICAL,
     'UNKNOWN': ServiceCheck.UNKNOWN
 }
+
+
+def create_endpoint(server, port, cluster, service, ending):
+    return SERVICE_URL.format(
+                ambari_server=server,
+                ambari_port=port,
+                cluster_name=cluster,
+                service_name=service.upper(),
+                ending=ending
+    )

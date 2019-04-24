@@ -4,7 +4,8 @@
 from datadog_checks.ambari import AmbariCheck
 
 
-
+def test_answer():
+    assert (2+3) == 5
 
 
 def manual_test_check(aggregator):
