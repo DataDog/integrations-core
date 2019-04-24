@@ -4,29 +4,6 @@ kube_metrics_server.go.gc_duration_seconds.quantile,gauge,,,,"GC invocation dura
 kube_metrics_server.go.gc_duration_seconds.sum,gauge,,,,"GC invocation durations sum",0,kube_metrics_server,go.gc_duration_seconds.sum
 kube_metrics_server.go.gc_duration_seconds.count,gauge,,,,"Number of the GC invocation",0,kube_metrics_server,go.gc_duration_seconds.count
 kube_metrics_server.go.goroutines,gauge,,,,"Number of goroutines that currently exist",0,kube_metrics_server,go.goroutines
-kube_metrics_server.go.memstats.alloc_bytes,gauge,,,,"Number of bytes allocated and still in use",0,kube_metrics_server,go.memstats.alloc_bytes
-kube_metrics_server.go.memstats.alloc_bytes_total,counter,,,,"Total number of bytes allocated, even if freed",0,kube_metrics_server,go.memstats.alloc_bytes_total
-kube_metrics_server.go.memstats.buck_hash_sys_bytes,gauge,,,,"Number of bytes used by the profiling bucket hash table",0,kube_metrics_server,go.memstats.buck_hash_sys_bytes
-kube_metrics_server.go.memstats.frees_total,counter,,,,"Total number of frees",0,kube_metrics_server,go.memstats.frees_total
-kube_metrics_server.go.memstats.gc_sys_bytes,gauge,,,,"Number of bytes used for garbage collection system metadata",0,kube_metrics_server,go.memstats.gc_sys_bytes
-kube_metrics_server.go.memstats.heap_alloc_bytes,gauge,,,,"Number of heap bytes allocated and still in use",0,kube_metrics_server,go.memstats.heap_alloc_bytes
-kube_metrics_server.go.memstats.heap_idle_bytes,gauge,,,,"Number of heap bytes waiting to be used",0,kube_metrics_server,go.memstats.heap_idle_bytes
-kube_metrics_server.go.memstats.heap_inuse_bytes,gauge,,,,"Number of heap bytes that are in use",0,kube_metrics_server,go.memstats.heap_inuse_bytes
-kube_metrics_server.go.memstats.heap_objects,gauge,,,,"Number of allocated objects",0,kube_metrics_server,go.memstats.heap_objects
-kube_metrics_server.go.memstats.heap_released_bytes_total,counter,,,,"Total number of heap bytes released to OS",0,kube_metrics_server,go.memstats.heap_released_bytes_total
-kube_metrics_server.go.memstats.heap_sys_bytes,gauge,,,,"Number of heap bytes obtained from system",0,kube_metrics_server,go.memstats.heap_sys_bytes
-kube_metrics_server.go.memstats.last_gc_time_seconds,gauge,,,,"Number of seconds since 1970 of last garbage collection",0,kube_metrics_server,go.memstats.last_gc_time_seconds
-kube_metrics_server.go.memstats.lookups_total,counter,,,,"Total number of pointer lookups",0,kube_metrics_server,go.memstats.lookups_total
-kube_metrics_server.go.memstats.mallocs_total,counter,,,,"Total number of mallocs",0,kube_metrics_server,go.memstats.mallocs_total
-kube_metrics_server.go.memstats.mcache_inuse_bytes,gauge,,,,"Number of bytes in use by mcache structures",0,kube_metrics_server,go.memstats.mcache_inuse_bytes
-kube_metrics_server.go.memstats.mcache_sys_bytes,gauge,,,,"Number of bytes used for mcache structures obtained from system",0,kube_metrics_server,go.memstats.mcache_sys_bytes
-kube_metrics_server.go.memstats.mspan_inuse_bytes,gauge,,,,"Number of bytes in use by mspan structures",0,kube_metrics_server,go.memstats.mspan_inuse_bytes
-kube_metrics_server.go.memstats.mspan_sys_bytes,gauge,,,,"Number of bytes used for mspan structures obtained from system",0,kube_metrics_server,go.memstats.mspan_sys_bytes
-kube_metrics_server.go.memstats.next_gc_bytes,gauge,,,,"Number of heap bytes when next garbage collection will take place",0,kube_metrics_server,go.memstats.next_gc_bytes
-kube_metrics_server.go.memstats.other_sys_bytes,gauge,,,,"Number of bytes used for other system allocations",0,kube_metrics_server,go.memstats.other_sys_bytes
-kube_metrics_server.go.memstats.stack_inuse_bytes,gauge,,,,"Number of bytes in use by the stack allocator",0,kube_metrics_server,go.memstats.stack_inuse_bytes
-kube_metrics_server.go.memstats.stack_sys_bytes,gauge,,,,"Number of bytes obtained from system for stack allocator",0,kube_metrics_server,go.memstats.stack_sys_bytes
-kube_metrics_server.go.memstats.sys_bytes,gauge,,,,"Number of bytes obtained by system. Sum of all system allocations",0,kube_metrics_server,go.memstats.sys_bytes
 kube_metrics_server.kubelet_summary_request_duration.count,gauge,,,,"Number of Kubelet summary request",0,kube_metrics_server,kubelet_summary_request_duration.count
 kube_metrics_server.kubelet_summary_request_duration.sum,gauge,,,second,"The Kubelet summary request latencies sum",0,kube_metrics_server,kubelet_summary_request_duration.sum
 kube_metrics_server.kubelet_summary_scrapes_total,counter,,,,"Total number of attempted Summary API scrapes done by Metrics Server",0,kube_metrics_server,kubelet_summary_scrapes_total
