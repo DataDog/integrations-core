@@ -15,6 +15,3 @@ kube_metrics_server.scraper_last_time,gauge,,,second,"Last time metrics-server p
 kube_metrics_server.process.cpu_seconds_total,counter,,,second,"Total user and system CPU time spent",0,kube_metrics_server,process.cpu_seconds_total
 kube_metrics_server.process.max_fds,gauge,,,,"Maximum number of open file descriptors",0,kube_metrics_server,process.max_fds
 kube_metrics_server.process.open_fds,gauge,,,,"Number of open file descriptors",0,kube_metrics_server,process.open_fds
-kube_metrics_server.process.resident_memory_bytes,gauge,,,,"Resident memory size in bytes",0,kube_metrics_server,process.resident_memory_bytes
-kube_metrics_server.process.start_time_seconds,gauge,,,second,"Start time of the process since unix epoch",0,kube_metrics_server,process.start_time_seconds
-kube_metrics_server.process.virtual_memory_bytes,gauge,,,,"Virtual memory size in bytes",0,kube_metrics_server,process.virtual_memory_bytes

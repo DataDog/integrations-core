@@ -7,7 +7,6 @@ from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 COUNTERS = {
     'authenticated_user_requests': 'authenticated_user.requests',
     'metrics_server_kubelet_summary_scrapes_total': 'kubelet_summary_scrapes_total',
-    'process_cpu_seconds_total': 'process.cpu_seconds_total',
 }
 
 HISTOGRAMS = {
@@ -21,9 +20,6 @@ GAUGES = {
     'metrics_server_scraper_last_time_seconds': 'scraper_last_time',
     'process_max_fds': 'process.max_fds',
     'process_open_fds': 'process.open_fds',
-    'process_resident_memory_bytes': 'process.resident_memory_bytes',
-    'process_start_time_seconds': 'process.start_time_seconds',
-    'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
 }
 
 GO_METRICS = {'go_gc_duration_seconds': 'go.gc_duration_seconds', 'go_goroutines': 'go.goroutines'}
@@ -70,6 +66,10 @@ IGNORED_METRICS = [
     'go_memstats_stack_inuse_bytes',
     'go_memstats_stack_sys_bytes',
     'go_memstats_sys_bytes',
+    'process_cpu_seconds_total',
+    'process_resident_memory_bytes',
+    'process_start_time_seconds',
+    'process_virtual_memory_bytes',
 ]
 
 
