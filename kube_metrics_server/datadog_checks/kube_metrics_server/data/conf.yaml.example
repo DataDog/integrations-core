@@ -4,6 +4,13 @@ instances:
 
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
+    ## It could be either the address of the metrics server service or
+    ## the address of the pod itself.
+    ## Please note that monitoring an exposed service of the metrics server
+    ## that is backed by more than one pod could lead to inaccurate metrics
+    ## because of to the load balancing. In this case, it is recommended to
+    ## enable endpoint checks alongside the service check and use autodiscovery
+    ## to get pod IP by setting up `prometheus_url` to https://%%host%%/metrics
     #
   - prometheus_url: http://localhost:443/metrics
 

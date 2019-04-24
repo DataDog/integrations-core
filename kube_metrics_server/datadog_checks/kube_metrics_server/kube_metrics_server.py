@@ -90,7 +90,6 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
             instances,
             default_instances={
                 "kube_metrics_server": {
-                    'prometheus_url': 'http://localhost:443/metrics',
                     'namespace': self.KUBE_METRICS_SERVER_NAMESPACE,
                     'metrics': [COUNTERS, HISTOGRAMS, SUMMARIES, GAUGES, GO_METRICS],
                     'ignore_metrics': IGNORED_METRICS,
