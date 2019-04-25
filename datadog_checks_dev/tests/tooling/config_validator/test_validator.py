@@ -71,5 +71,3 @@ def tests_config_block_validate_description():
         else:
             assert len(errs) == 1
             assert c[2] in str(errs[0])
-
-
