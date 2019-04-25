@@ -36,7 +36,7 @@ instances:
     #
   - directory: /var/spool/postfix
 
-    ## @param queues - list of string - requied
+    ## @param queues - list of string - required
     ## List of queues to monitor.
     #
     queues:
@@ -53,7 +53,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## config_directory - string - optional
+    ## @param config_directory - string - optional
     ## The config_directory option only applies when `postqueue: true`.
     ## The config_directory is the location of the Postfix configuration directory
     ## where main.cf lives.

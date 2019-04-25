@@ -13,7 +13,7 @@ instances:
     #
     min_collection_interval: 60
 
-    ## @paral cacert - string - optional
+    ## @param cacert - string - optional
     ## Path to the TLS CA certificate file (ca.pem).
     #
     # cacert: <TLS_CA_CERT_PATH>

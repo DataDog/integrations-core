@@ -33,17 +33,19 @@ instances:
 
     ## @param username - string - optional
     ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
-    ## For the check to work, this user must have a read/write access so that the Datadog Cassandra nodetool check can execute the `status` command
+    ## For the check to work, this user must have a read/write access so that the Datadog Cassandra nodetool
+    ## check can execute the `status` command
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
     ## Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
-    ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool check can execute the `status` command
+    ## For the check to work, this user must have a read/write access so that the Datadog Cassandra Nodetool
+    ## check can execute the `status` command
     #
     # password: <PASSWORD>
 
-    ## @param ssl - boolean - optional - default:false
+    ## @param ssl - boolean - optional - default: false
     ## Whether or not to use the --ssl parameter to nodetool to initiate a connection over SSL to the JMX server.
     #
     # ssl: false

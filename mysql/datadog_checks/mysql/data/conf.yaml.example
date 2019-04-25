@@ -64,7 +64,7 @@ instances:
     #
     # max_custom_queries: 20
 
-    ## @param queries - custom object - optional
+    ## @param queries - object - optional
     ## Define custom queries to collect custom metrics on your MySQL
     ## See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
     #
@@ -76,7 +76,7 @@ instances:
     #     type: <METRIC_TYPE>
     #     field: <FIELD_NAME>
 
-    ## @param options - custom object - optional
+    ## @param options - object - optional
     ## Enable options to collect extra metrics from your MySQL integration.
     #
     # options:

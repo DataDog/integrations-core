@@ -3,6 +3,10 @@
 ## to `agent_metrics.yaml` and make your changes on that file.
 
 init_config:
+
+    ## @param process_metrics - list of metrics - required
+    ##
+    #
     process_metrics:
         - name: memory_info
           type: gauge

@@ -26,7 +26,8 @@ init_config:
   # refresh_morlist_interval: 180
 
   ## @param clean_morlist_interval - integer - optional - default: 2*refresh_morlist_interval
-  ## Number of seconds to wait before an object is considered deleted from your vSphere environment and removed from the cache
+  ## Number of seconds to wait before an object is considered deleted from your vSphere
+  ## environment and removed from the cache
   ## This value should be higher than refresh_morlist_interval.
   #
   # clean_morlist_interval: 360

@@ -2,10 +2,7 @@ init_config:
 
 instances:
 
-    ## WARNING: This check has no required parameter, if you intend to use any of the parameter
-    ## below, remove '{}' from the instance definition and use any parameter instead.
-  - {}
-
+  -
     ## @param tags  - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##

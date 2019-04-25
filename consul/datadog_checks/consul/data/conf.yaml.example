@@ -32,14 +32,8 @@ instances:
     # self_leader_check: false
 
     ## @param client_cert_file - string - optional
-    ## Specify a local cert to use as client side certificate
-    ## as a single file (containing the private key and the certificate concatenated)
-    #
-    # client_cert_file: '<CLIENT_CONCATENATED_FILE_PATH>'
-
-    ## @param client_cert_file - string - optional
-    ## If your certificate is composed of two separate files (for certificate and key):
-    ## Enter here the certificate file path.
+    ## Specify a local cert to use as client side certificate. If your certificate is composed of two separate files
+    ## (for certificate and key) enter here the certificate file path.
     #
     # client_cert_file: '<CERTIFICATE_FILE_PATH>'
 

@@ -10,7 +10,7 @@ instances:
     #
   - stats_url: http://localhost:80/stats
 
-    ## @param metric_whitelist - optional - list of strings
+    ## @param metric_whitelist - list of strings - optional
     ## Whitelist metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
@@ -22,7 +22,7 @@ instances:
     # metric_whitelist:
     #   - cluster\.(in|out)\..*
 
-    ## @param metric_whitelist - optional - list of strings
+    ## @param metric_blacklist - list of strings - optional
     ## Blacklist metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.

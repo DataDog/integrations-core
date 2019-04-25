@@ -1,6 +1,6 @@
 init_config:
 
-  ## @param keystone_server_url - string -required
+  ## @param keystone_server_url - string - required
   ## Where your identity server lives. Note that the server must support Identity API v3
   #
   keystone_server_url: "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/"
@@ -63,7 +63,7 @@ instances:
     #
   - name: <INSTANCE_NAME>
 
-    ## @param user - custom object - required
+    ## @param user - object - required
     ## User credentials
     ## Password authentication is the only auth method supported.
     ## `user` object expects the parameter `username`, `password`, and `user.domain.id`.
@@ -78,7 +78,7 @@ instances:
       domain:
         id: <DOMAINE_ID>
 
-    ## @param auth_scope - custom object - optional
+    ## @param auth_scope - object - optional
     ## The authorization scope that is used to request a token from Identity API v3
     ## The auth scope must resolve to 1 of the following structures:
     ##

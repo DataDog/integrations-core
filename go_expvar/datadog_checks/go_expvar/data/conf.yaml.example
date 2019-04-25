@@ -36,7 +36,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param metrics - list of objects - optionals
+    ## @param metrics - list of objects - optional
     ## These metrics are just here as examples.
     ## Most memstats metrics are collected by default without configuration needed.
     ## See http://godoc.org/runtime#MemStats for their explanation

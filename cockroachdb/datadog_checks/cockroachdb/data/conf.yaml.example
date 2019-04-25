@@ -7,7 +7,8 @@ instances:
   - prometheus_url: http://localhost:8080/_status/vars
 
     ## @param ssl_cert - string - optional
-    ## If the certificate contains the ssl_private_key you can use this optional param instead of ssl_private_key and ssl_ca_cert
+    ## If the certificate contains the ssl_private_key you can use this optional param instead of ssl_private_key and
+    ## ssl_ca_cert
     #
     # ssl_cert: <PATH_TO_CERT_PEM>
 

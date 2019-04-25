@@ -16,7 +16,8 @@ init_config:
   ##                          this particular query.
   ## 4. tags (optional) - A list of tags to apply to each metric.
   ##
-  ## global_custom_queries are applied to all instances where use_global_custom_queries is set to true at the instance level.
+  ## global_custom_queries are applied to all instances where use_global_custom_queries is set to true at the
+  ## instance level.
   ##
   ## This:
   ##
@@ -102,7 +103,8 @@ instances:
     ##                          this particular query.
     ## 4. tags (optional) - A list of tags to apply to each metric.
     ##
-    ## custom_queries set here will override global_custom_queries set in the init_config section if use_global_custom_queries is set to false.
+    ## custom_queries set here will override global_custom_queries set in the init_config section if
+    ## use_global_custom_queries is set to false.
     ## Otherwise, they will be used in addition of global_custom_queries.
     ##
     ## This:

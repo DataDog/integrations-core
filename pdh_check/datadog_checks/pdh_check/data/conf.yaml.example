@@ -2,7 +2,7 @@ init_config:
 
 instances:
 
-    ## @param countersetname - custom object - required
+    ## @param countersetname - string - required
     ## Each PDH query has 3 required options:
     ##   * `countersetname` is the name of the performance counter
     ##   * `metrics` is a list of metrics you want to capture, with each item in the
@@ -25,5 +25,9 @@ instances:
     ##
     #
   - countersetname: <PERFORMANCE_COUNTER_NAME>
+
+    ## @param metrics - list of metrics - required
+    ##
+    #
     metrics:
       - ['<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]

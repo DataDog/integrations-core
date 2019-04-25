@@ -23,7 +23,7 @@ instances:
     #
     # host: <REMOTE_HOSNAME>
 
-    ## @param password - string - optional
+    ## @param username - string - optional
     ## If authentication is needed, specify a `username` here.
     #
     # username: <USERNAME>

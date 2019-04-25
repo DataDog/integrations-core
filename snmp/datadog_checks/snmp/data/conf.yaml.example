@@ -140,7 +140,7 @@ instances:
     #
     # user: <USERNAME>
 
-    ## @param authProtocol - string -required
+    ## @param authProtocol - string - required
     ## Authentication type to use when connecting to your SNMP devices.
     #
     # authProtocol: <AUTHENTICATION_PROTOCOL>

@@ -77,7 +77,8 @@ instances:
 
     ## @param filtered_event_types - list of strings - optional - default: ['top', 'exec_start', 'exec_create', 'exec_die']
     ## List of excluded (filtered out) event types. Docker events of this type will not be collected
-    ## A list of available statuses can be found here https://docs.docker.com/engine/reference/commandline/events/#object-types
+    ## A list of available statuses can be found here
+    ## https://docs.docker.com/engine/reference/commandline/events/#object-types
     #
     # filtered_event_types:
     #   - 'top'

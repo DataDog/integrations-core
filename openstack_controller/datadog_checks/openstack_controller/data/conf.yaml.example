@@ -2,7 +2,8 @@ init_config:
 
   ## @param os_host - string - optional
   ## The hostname of this machine registered with Nova.
-  ## Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
+  ## Defaults to the Hostname detected by the Agent -
+  ## https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
   #
   # os_host: <HOSTNAME>
 
@@ -21,7 +22,8 @@ instances:
     ## @param user - object - required
     ## Password authentication is the only auth method supported
     ## User expects username, password, and user domain id
-    ## `user` should resolve to a structure like {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
+    ## `user` should resolve to a structure like
+    ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
     ## The check uses the Unscoped token method to collect information about all available projects to the user.
     #
     user:
@@ -57,7 +59,8 @@ instances:
     #   - <SERVER_ID_PREFIX>*
 
     ## @param exclude_network_ids - list of strings - optional - default: []
-    ## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the neutron:get_networks operation)
+    ## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
+    ## neutron:get_networks operation)
     ## Regex expressions for the network IDs to exclude are supported.
     #
     # exclude_network_ids:

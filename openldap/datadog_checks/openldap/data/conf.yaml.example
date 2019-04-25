@@ -51,7 +51,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param custom_queries - custom object - optional
+    ## @param custom_queries - object - optional
     ## Specifies custom search queries that are run by the check, which then sends the duration of
     ## the query, and the number of results to Datadog.
     ## Each custom queries have the following parameters:

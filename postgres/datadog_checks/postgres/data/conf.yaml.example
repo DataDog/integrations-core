@@ -51,22 +51,20 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param relations - list of strings - optional
+    ## @param relations - list of strings (or objects) - optional
     ## The list of relations/tables must be specified here to track per-relation (table) metrics.
     ## Each relation generates many metrics (10 + 10 per index)
-    #
-    # relations:
-    #   - <TABLE_NAME_1>
-    #   - <TABLE_NAME_1>
-
-    ## @param relations - custom objects - optional
     ## By default all schemas are included. To track relations from specific schemas only,
     ## use the following syntax:
+    ##
+    ## relations:
+    ##   - relation_name: <TABLE_NAME>
+    ##     schemas:
+    ##         - <SCHEMA_NAME>
     #
     # relations:
-    #   - relation_name: <TABLE_NAME>
-    #     schemas:
-    #         - <SCHEMA_NAME>
+    #   - <TABLE_NAME_1>
+    #   - <TABLE_NAME_1>
 
     ## @param collect_function_metrics - boolean - optional - default: false
     ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions
@@ -80,7 +78,7 @@ instances:
 
     ## @param collect_activity_metrics - boolean - optional - default: false
     ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
-    #  has sufficient privileges to read from pg_stat_activity before enabling this option.
+    ## has sufficient privileges to read from pg_stat_activity before enabling this option.
     #
     # collect_activity_metrics: false
 
@@ -99,7 +97,7 @@ instances:
     #
     # tag_replication_role: False
 
-    ## @param custom_queries - custom object - optional
+    ## @param custom_queries - object - optional
     ## Define custom queries to collect custom metrics from your PostgreSQL
     ## See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
     ## https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/

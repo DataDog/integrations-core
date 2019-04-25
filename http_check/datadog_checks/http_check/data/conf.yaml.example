@@ -166,7 +166,7 @@ instances:
     #
     # days_warning: <THRESHOLD_DAYS>
 
-    ## @param days_warning - integer - optional
+    ## @param days_critical - integer - optional
     ## Express critical threshold for the HTTP check in days
     #
     # days_critical: <THRESHOLD_DAYS>
@@ -194,7 +194,7 @@ instances:
     #
     # ssl_server_name: <HOSTNAME>
 
-    ## @param headers: list of key:value elements - optional
+    ## @param headers - list of key:value elements - optional
     ## The headers parameter allows you to send extra headers
     ## with the check request. This is useful for explicitly specifying the host
     ## header or perhaps adding headers for authorisation purposes. Note

@@ -99,7 +99,7 @@ instances:
     #
     # apiserver_ca_cert: <CA_CERT_PATH>.crt
 
-    ## @param kubelet_cert - string - optioanl
+    ## @param kubelet_cert - string - optional
     ## Server Authentication for kubelet. Similarly we use the default CA cert of the agent's service account to verify the
     ## apiserver's identity, but custom ones can be specified here.
     #

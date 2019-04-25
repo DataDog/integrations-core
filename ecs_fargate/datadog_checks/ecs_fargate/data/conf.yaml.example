@@ -2,9 +2,7 @@ init_config:
 
 instances:
 
-    ## WARNING: This check has no required parameter, if you intend to use any of the parameter
-    ## below, remove '{}' from the instance definition and use any parameter instead.
-  - {}
+  -
 
     ## @param timeout - integer - optional - default: 5
     ## Time to wait on the Fargate metadata API before timeout in second

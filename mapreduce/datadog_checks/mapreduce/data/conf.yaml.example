@@ -19,7 +19,7 @@ instances:
     #
     cluster_name: <MAPREDUCE_CLUSTER_NAME>
 
-    ## @param collect_task_metrics - boolean - default: false
+    ## @param collect_task_metrics - boolean - optional - default: false
     ## Set to true to collect histograms on the elapsed time of map and reduce tasks.
     #
     # collect_task_metrics: false
@@ -63,7 +63,7 @@ init_config:
   ##     - counter_name: 'REDUCE_OUTPUT_RECORDS'
   ##
   ## For more information on counters visit the MapReduce documentation page:
-  ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API
+  ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API #noqa
   #
   # general_counters:
   #   - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
@@ -81,7 +81,7 @@ init_config:
   ##         - counter_name: <COUNTER_NAME>
   ##
   ## For more information on counters visit the MapReduce documentation page:
-  ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API
+  ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API #noqa
   #
   # job_specific_counters:
   #   - job_name: '<JOB_NAME>'

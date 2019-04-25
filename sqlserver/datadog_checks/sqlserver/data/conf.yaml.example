@@ -1,6 +1,6 @@
 init_config:
 
-  ## @param custom_metrics - custom object - optional
+  ## @param custom_metrics - object - optional
   ## Collect custom metrics and send them to Datadog based on
   ## your SQL server counters.
   ##
@@ -12,7 +12,7 @@ init_config:
 
 instances:
 
-## Note: All '%' characters must be escaped as '%%'.
+    ## Note: All '%' characters must be escaped as '%%'.
 
     ## @param host - string - required
     ## Host and port of your SQL server.
@@ -50,7 +50,7 @@ instances:
     #
     # connector: adodbapi
 
-    ## @param adoprovider - string - optional - default: SQL Server
+    ## @param driver - string - optional - default: SQL Server
     ## If using odbc, use the named driver.
     #
     # driver: SQL Server
