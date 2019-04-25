@@ -31,7 +31,7 @@ instances:
     #
     # timeout: 10
 
-    ## @param tags  - list of key:value strings - optional
+    ## @param tags - list of key:value strings - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

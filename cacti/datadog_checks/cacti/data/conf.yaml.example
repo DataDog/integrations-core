@@ -57,7 +57,7 @@ instances:
     #
     rrd_whitelist: /path/to/rrd_whitelist.txt
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
