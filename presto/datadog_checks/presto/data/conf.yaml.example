@@ -237,10 +237,10 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /data/var/log/*.log
+#     path: /var/log/presto/*.log
 #     source: presto
 #     sourcecategory: database
-#     service: myapplication
+#     service: <SERVICE_NAME>
 #     log_processing_rules:
 #       - type: multi_line
 #         name: log_start_with_date
