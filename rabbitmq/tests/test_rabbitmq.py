@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import time
 from contextlib import closing
 
 import pika
@@ -185,6 +186,8 @@ def test_connections(aggregator, check):
 
     params = pika.ConnectionParameters(common.HOST)
     with closing(pika.BlockingConnection(params)), closing(pika.BlockingConnection(params)):
+        time.sleep(5)
+
         aggregator.reset()
         check.check(common.CONFIG)
         aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=2, count=1)
