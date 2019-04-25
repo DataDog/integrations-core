@@ -1,0 +1,24 @@
+var_1: 1
+
+list_var:
+  - 1
+  - 2
+  - 3
+
+object_var:
+  sub_var_list:
+    - 1
+    - 2
+    - 3
+  sub_var_object:
+    key: value
+    key2: value2
+
+# object_var:
+#   sub_var_list:
+#      - 1
+#      - 2
+#      - 3
+#    sub_var_object:
+#      key: value
+#      key2: value2

@@ -7,7 +7,8 @@ import yaml
 from ....utils import basepath, read_file
 from ...utils import get_config_files, get_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-
+from ....config_validator.validator import validate_config
+from ....config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
@@ -35,9 +36,9 @@ def config(check):
             num_files += 1
             file_display_queue = []
             file_name = basepath(config_file)
-
+            file_data = read_file(config_file)
             try:
-                config_data = yaml.safe_load(read_file(config_file))
+                config_data = yaml.safe_load(file_data)
             except Exception as e:
                 files_failed[config_file] = True
 
@@ -48,6 +49,18 @@ def config(check):
                 check_display_queue.append(lambda: echo_failure('Invalid YAML -', indent=FILE_INDENT))
                 check_display_queue.append(lambda: echo_info(error, indent=FILE_INDENT * 2))
                 continue
+
+            errors = validate_config(file_data)
+            for err in errors:
+                err_msg = str(err)
+                if err.severity == SEVERITY_ERROR:
+                    file_display_queue.append(lambda x=err_msg: echo_failure(x, indent=FILE_INDENT))
+                    files_failed[config_file] = True
+                elif err.severity == SEVERITY_WARNING:
+                    file_display_queue.append(lambda x=err_msg: echo_warning(x, indent=FILE_INDENT))
+                    files_warned[config_file] = True
+                else:
+                    file_display_queue.append(lambda x=err_msg: echo_info(x, indent=FILE_INDENT))
 
             # Verify there is an `instances` section
             if 'instances' not in config_data:
@@ -62,7 +75,7 @@ def config(check):
                     file_display_queue.append(lambda: echo_failure('No default instance', indent=FILE_INDENT))
 
             if file_display_queue:
-                check_display_queue.append(lambda: echo_info('{}:'.format(file_name), indent=True))
+                check_display_queue.append(lambda x=file_name: echo_info('{}:'.format(x), indent=True))
                 check_display_queue.extend(file_display_queue)
 
         if check_display_queue:

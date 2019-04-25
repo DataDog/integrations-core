@@ -1,0 +1,36 @@
+## @param small_indent_list - list - optional
+# small_indent_list:
+# - item1
+# - item2
+
+big_indent_list:
+  - item1 # A simple comment
+  - item2
+  - item3
+
+complex_object:
+  list:
+    - 1
+    - 2
+    - 3
+  key: value
+  key2: value2
+
+  list_of_objects: # This is a big object
+    - key1: value1
+      key2: value2
+      key3: value3
+
+      sub_object:
+        key1: value1
+        key2: value2
+
+    - key1: value1
+      key2: value2
+      key3: value3
+
+      sub_object:
+        key1: value1
+        key2: value2
+
+last_key: false

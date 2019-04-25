@@ -1,0 +1,34 @@
+## @param var - string - required
+## Description
+#
+var: "value"
+
+## @param var2 - list - required
+## Description
+#
+var2:
+  - 1
+  - 2
+  - 3
+
+## @param var3 - object - required
+## Description
+#
+var3:
+  a: 1
+  b: 2
+  c:
+    ## @param c_1 - number - required
+    ## Description
+    #
+    c_1: 1
+
+    ## @param c_2 - number - required
+    ## Description
+    #
+    c_2: 2
+
+## @param var4 - string - required
+## Description
+#
+var4: value
