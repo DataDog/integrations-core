@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2019
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
 from datadog_checks.dev.config_validator.config_block import ParamProperties, ConfigBlock, _get_end_of_param_declaration_block, _parse_description, _is_object, _should_recurse, _is_comment, _parse_comment

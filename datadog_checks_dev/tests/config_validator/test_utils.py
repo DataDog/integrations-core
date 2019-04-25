@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2019
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from datadog_checks.dev.config_validator.utils import is_blank, is_at_least_indented, is_exactly_indented, get_indent, get_end_of_part
 
