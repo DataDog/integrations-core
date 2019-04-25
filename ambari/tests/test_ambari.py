@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.ambari import AmbariCheck
+from unittest.mock import MagicMock
 
 
 def test_flatten_service_metrics():
@@ -30,6 +31,21 @@ def test_flatten_host_metrics():
                        'metric_c.submetric_c': 'hello',
                        'metric_d.submetric_d.subsub_d': 25
                        }
+
+
+def test_get_clusters(instance, authentication):
+    ambari = AmbariCheck(instance=instance)
+    ambari.make_request = MagicMock(return_value={
+        'href': 'localhost/api/v1/clusters',
+        'items': [{'href': 'localhost/api/v1/clusters/LabCluster',
+                   'Clusters': {'cluster_name': 'LabCluster'}}
+                  ]
+    })
+    clusters = ambari.get_clusters('localhost', authentication)
+    ambari.make_request.assert_called_with('localhost/api/v1/clusters', authentication)
+    assert clusters == ['LabCluster']
+
+
 
 
 

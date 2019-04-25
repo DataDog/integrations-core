@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import iteritems
+from requests.auth import HTTPBasicAuth
 import requests
 
 
@@ -24,8 +25,8 @@ METRICS_FIELD = "metrics"
 
 
 class AmbariCheck(AgentCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        super(AmbariCheck, self).__init__(name, init_config, agentConfig, instances)
+    def __init__(self, *args, **kwargs):
+        super(AmbariCheck, self).__init__(args, kwargs)
         self.hosts = []
         self.clusters = []
         self.services = []
@@ -36,31 +37,34 @@ class AmbariCheck(AgentCheck):
         path = str(instance.get("path", ""))
         base_tags = instance.get("tags", [])
         services = instance.get("services", [])
+        authentication = {'username': instance.get("username", ""),
+                          'password': instance.get("password", "")
+                          }
         metric_headers = [str(h) for h in instance.get("metric_headers", [])]
 
         base_url = "{}:{}{}".format(server, port, path)
-        clusters = self.get_clusters(base_url)
-        self.get_host_metrics(base_url, clusters, base_tags)
-        self.get_service_metrics(base_url, clusters, services, metric_headers, base_tags)
+        clusters = self.get_clusters(base_url, authentication)
+        self.get_host_metrics(base_url, authentication, clusters, base_tags)
+        self.get_service_metrics(base_url, authentication, clusters, services, metric_headers, base_tags)
 
-    def get_clusters(self, base_url):
+    def get_clusters(self, base_url, authentication):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
 
-        resp = self.make_request(clusters_endpoint)
+        resp = self.make_request(clusters_endpoint, authentication)
         if resp is None:
             self.submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
             raise CheckException("Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint))
-        self.submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
 
+        self.submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
         return [cluster.get('Clusters').get('cluster_name') for cluster in resp.get('items')]
 
-    def get_host_metrics(self, base_url, clusters, base_tags):
+    def get_host_metrics(self, base_url, authentication, clusters, base_tags):
         for cluster in clusters:
             hosts_endpoint = common.HOST_METRICS_URL.format(
                 base_url=base_url,
                 cluster_name=cluster
             )
-            resp = self.make_request(hosts_endpoint)
+            resp = self.make_request(hosts_endpoint, authentication)
 
             hosts_list = resp.get('items')
             cluster_tag = CLUSTER_TAG_TEMPLATE.format(cluster)
@@ -77,21 +81,20 @@ class AmbariCheck(AgentCheck):
                     if isinstance(value, float):
                         self.submit_gauge(metric_name, value, metric_tags)
 
-    def get_service_metrics(self, base_url, clusters, services, metric_headers, base_tags):
+    def get_service_metrics(self, base_url, authentication, clusters, services, metric_headers, base_tags):
         for cluster in clusters:
             tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
             for service, components in iteritems(services):
                 service_tag = SERVICE_TAG + service.lower()
-                self.get_component_metrics(base_url, cluster, service, metric_headers,
-                                           tags + [service_tag],
-                                           [c.upper() for c in components])
-                self.get_service_health(base_url, cluster, service, tags, service_tag)
+                self.get_component_metrics(base_url, authentication, cluster, service, metric_headers,
+                                           tags + [service_tag], [c.upper() for c in components])
+                self.get_service_health(base_url, authentication, cluster, service, tags, service_tag)
 
-    def get_service_health(self, base_url, cluster, service, base_tags, service_tag):
+    def get_service_health(self, base_url, authentication, cluster, service, base_tags, service_tag):
         service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
         service_check_tags = base_tags + [service_tag]
 
-        service_resp = self.make_request(service_check_endpoint)
+        service_resp = self.make_request(service_check_endpoint, authentication)
         if service_resp is None:
             self.submit_service_checks("state", self.CRITICAL, service_check_tags)
             self.log.warning("No response received for service {}".format(service))
@@ -99,9 +102,9 @@ class AmbariCheck(AgentCheck):
             state = service_resp.get('ServiceInfo').get('state')
             self.submit_service_checks("state", common.STATUS[state], service_check_tags)
 
-    def get_component_metrics(self, base_url, cluster, service, metric_headers, base_tags, components):
+    def get_component_metrics(self, base_url, authentication, cluster, service, metric_headers, base_tags, components):
         component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
-        resp = self.make_request(component_metrics_endpoint)
+        resp = self.make_request(component_metrics_endpoint, authentication)
 
         if resp is None:
             self.log.warning("No components found for service {}.".format(service))
@@ -160,9 +163,11 @@ class AmbariCheck(AgentCheck):
                 flat_metrics[metric_name] = metric_value
         return flat_metrics
 
-    def make_request(self, url):
+    def make_request(self, url, auth):
         try:
-            resp = self.http.get(url)
+            resp = self.http.get(url,
+                                 auth=HTTPBasicAuth(auth.get('username'), auth.get('password')),
+                                 verify=False)  # In case Ambari is under uncertified https
             return resp.json()
         except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
             self.warning(
