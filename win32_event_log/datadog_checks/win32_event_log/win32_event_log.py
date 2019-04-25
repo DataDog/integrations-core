@@ -5,16 +5,15 @@
 '''
 Monitor the Windows Event Log
 '''
-# stdlib
 import calendar
 from datetime import datetime, timedelta
 
 from uptime import uptime
 
-# project
-from datadog_checks.checks.win.wmi import WinWMICheck, from_time, to_time
-from datadog_checks.utils.containers import hash_mutable
-from datadog_checks.utils.timeout import TimeoutException
+from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
+from datadog_checks.base.utils.containers import hash_mutable
+from datadog_checks.base.utils.timeout import TimeoutException
 
 SOURCE_TYPE_NAME = 'event viewer'
 EVENT_TYPE = 'win32_log_event'
@@ -30,7 +29,7 @@ class Win32EventLogWMI(WinWMICheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         WinWMICheck.__init__(self, name, init_config, agentConfig, instances=instances)
         # Settings
-        self._tag_event_id = init_config.get('tag_event_id', False)
+        self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
         self._verbose = init_config.get('verbose', True)
         self._default_event_priority = init_config.get('default_event_priority', 'normal')
 
@@ -53,8 +52,14 @@ class Win32EventLogWMI(WinWMICheck):
         source_names = instance.get('source_name', [])
         log_files = instance.get('log_file', [])
         event_ids = instance.get('event_id', [])
-        message_filters = instance.get('message_filters', [])
         event_format = instance.get('event_format')
+        message_filters = instance.get('message_filters', [])
+
+        if not (source_names or event_ids or message_filters or log_files or user or ltypes):
+            raise ConfigurationError(
+                'At least one of the following filters must be set: '
+                'source_name, event_id, message_filters, log_file, user, type'
+            )
 
         instance_hash = hash_mutable(instance)
         instance_key = self._get_instance_key(host, self.NAMESPACE, self.EVENT_CLASS, instance_hash)
