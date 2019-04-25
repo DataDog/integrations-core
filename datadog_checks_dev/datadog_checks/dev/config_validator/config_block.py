@@ -120,7 +120,7 @@ class ConfigBlock:
             errors.append(ValidatorError("Empty description for %s" % param_name, self.line, SEVERITY_WARNING))
 
         for i, line in enumerate(self.description.split('\n')):
-            if len(line) > MAX_COMMENT_LENGTH:
+            if len(line) > MAX_COMMENT_LENGTH and line[-5:] != "#noqa":
                 err_string = "Description too long [%s...] (%d/%d)" % (line[:30], len(line), MAX_COMMENT_LENGTH)
                 errors.append(ValidatorError(err_string, self.line + i + 1))
 
@@ -167,6 +167,14 @@ class ConfigBlock:
         if param_prop is None:
             return ConfigBlock(None, None, start, block_len, errors)
 
+        # If var is indicated as list, recompute end of block knowing it is a list
+        if param_prop.type_name.startswith('list'):
+            end = _get_end_of_param_declaration_block(start, len(config_lines), config_lines, indent, errors, is_list=True)
+            if end is None:
+                default_end = _get_next_block_in_case_of_failure(start, config_lines)
+                return ConfigBlock(None, None, start, default_end - start, errors)
+            block_len = end - start
+
         # Parsing the description
         idx += 1
         description, idx = _parse_description(idx, end, config_lines, indent, errors)
@@ -189,7 +197,7 @@ class ConfigBlock:
         return ConfigBlock(param_prop, description, start, block_len, errors, should_recurse=False)
             
 
-def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors=None):
+def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors=None, is_list=False):
     """Here we suppose the config block is correctly formatted (@param, description, empty comment then the actual content)
     and try to return the line of any data coming after. In case of a object we point to its first member. In case
     of a list or a simple variable we point to the next element.
@@ -231,8 +239,6 @@ def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors
 
     # Now analyze the actual content
     idx += 1
-    # Whether or not the corresponding yaml variable is a list
-    is_list = False
     while idx < end:
         if is_blank(config_lines[idx]):
             idx += 1
