@@ -4,11 +4,12 @@
 import click
 import yaml
 
+from ....config_validator.validator import validate_config
+from ....config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 from ....utils import basepath, read_file
 from ...utils import get_config_files, get_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-from ....config_validator.validator import validate_config
-from ....config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
+
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}

@@ -3,7 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev.config_validator.config_block import ParamProperties, ConfigBlock, _get_end_of_param_declaration_block, _parse_description, _is_object, _should_recurse, _is_comment, _parse_comment
+from datadog_checks.dev.config_validator.config_block import (
+    ConfigBlock,
+    ParamProperties,
+    _get_end_of_param_declaration_block,
+    _is_comment,
+    _is_object,
+    _parse_comment,
+    _parse_description,
+    _should_recurse,
+)
 
 
 def test_param_properties():
@@ -13,8 +22,14 @@ def test_param_properties():
 
     test_cases = [
         ("## @param var - string - required", "var", "string", True, None),
-        ("## @param varname_with_underscores - custom object type with spaces - optional", "varname_with_underscores", "custom object type with spaces", False, None),
-        ("## @param var - int - optional - default: 3306", "var", "int", False, "3306")
+        (
+            "## @param varname_with_underscores - custom object type with spaces - optional",
+            "varname_with_underscores",
+            "custom object type with spaces",
+            False,
+            None,
+        ),
+        ("## @param var - int - optional - default: 3306", "var", "int", False, "3306"),
     ]
 
     for c in test_cases:
@@ -30,15 +45,13 @@ def test_config_block():
         "## @param var - string - required",
         "## Documentation line 1",
         "## Documentation line 2",
-        "#"
-        "param: value"
+        "#" "param: value",
     ]
     test_case_2 = [
         "  ## @param var - string - required",
         "  ## Documentation line 1",
         "  ## Documentation line 2",
-        "  #"
-        "  param: value"
+        "  #" "  param: value",
     ]
 
     cfg_block_1 = ConfigBlock.parse_from_strings(0, test_case_1, 0)
@@ -66,8 +79,7 @@ def test_get_end_of_param_declaration_block():
         (5, 27, 0, 13),
         (13, 27, 0, 17),
         (19, 27, 2, None),
-        (20, 27, 4, 25)
-
+        (20, 27, 4, 25),
     ]
 
     for c in test_cases:
@@ -81,13 +93,16 @@ def test_parse_description():
     config_lines = test_file.read().split('\n')
     test_file.close()
 
-    expected = " Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n Suspendisse erat enim, tincidunt ac libero sit amet"
+    expected = (
+        " Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n"
+        " Suspendisse erat enim, tincidunt ac libero sit amet"
+    )
 
     test_cases = [
         # start, end, indent, expected_description, expected_new_idx
         (0, 10, 0, expected, 3),
         (4, 10, 0, None, None),
-        (7, 10, 2, expected, 10)
+        (7, 10, 2, expected, 10),
     ]
 
     for c in test_cases:
@@ -135,7 +150,7 @@ def test_should_recurse():
         (0, 0, False, 4),
         (7, 0, True, None),
         (21, 0, False, 25),
-        (29, 0, True, None)
+        (29, 0, True, None),
     ]
 
     for c in test_cases:
@@ -157,7 +172,7 @@ def test_is_comment():
         (6, 0, True),
         (6, 2, True),
         (12, 0, True),
-        (12, 2, True)
+        (12, 2, True),
     ]
 
     for c in test_cases:
@@ -171,12 +186,10 @@ def test_parse_comment():
     config_lines = test_file.read().split('\n')
     test_file.close()
 
-    #def _parse_comment(start, config_lines):
-
     test_cases = [
         # idx, expected
         (6, " Multi-line comment\n starting here\n key: value\n - 1\n - 2", 12),
-        (12, " Comment with\n a mistake in indentation\n must still be read as a comment", 16)
+        (12, " Comment with\n a mistake in indentation\n must still be read as a comment", 16),
     ]
 
     for c in test_cases:

@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.dev.config_validator.config_block import MAX_COMMENT_LENGTH, ConfigBlock, ParamProperties
 from datadog_checks.dev.config_validator.validator import _check_no_duplicate_names
-from datadog_checks.dev.config_validator.config_block import ConfigBlock, ParamProperties, MAX_COMMENT_LENGTH
 
 
 def create(name, type_name="string", description="Non-empty description"):
@@ -15,21 +15,10 @@ def test_check_no_duplicate_names():
         [
             create("1"),
             create("2"),
-            [
-                create("1"),
-                create("2"),
-                [
-                    create("1"),
-                    create("2")
-                ],
-                [
-                    create("1"),
-                    create("2")
-                ]
-            ],
-            create("3")
+            [create("1"), create("2"), [create("1"), create("2")], [create("1"), create("2")]],
+            create("3"),
         ],
-        create("1")
+        create("1"),
     ]
     assert len(_check_no_duplicate_names(blocks_no_duplicate)) == 0
 
@@ -42,20 +31,14 @@ def test_check_duplicate_names():
             [
                 create("1"),
                 create("2"),  # Duplicate #2
-                [
-                    create("1"),
-                    create("2")
-                ],
-                [
-                    create("1"),
-                    create("2")
-                ],
-                create("2")  # Duplicate #2
+                [create("1"), create("2")],
+                [create("1"), create("2")],
+                create("2"),  # Duplicate #2
             ],
             create("3"),
-            create("1")  # Duplicate #1
+            create("1"),  # Duplicate #1
         ],
-        create("1")
+        create("1"),
     ]
     assert len(_check_no_duplicate_names(blocks_two_duplicates)) == 2
 

@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .config_block import ConfigBlock
-from .validator_errors import ValidatorError, SEVERITY_WARNING
-from .utils import is_blank, get_end_of_part, get_indent, is_at_least_indented
+from .utils import get_end_of_part, get_indent, is_at_least_indented, is_blank
+from .validator_errors import SEVERITY_WARNING, ValidatorError
 
 
 def validate_config(config):
@@ -13,7 +13,7 @@ def validate_config(config):
     errors = []
     blocks = []  # This will store ConfigBlocks as a tree
     config_lines = config.split('\n')
-    
+
     init_config_line = -1
     instances_line = -1
     for i, line in enumerate(config_lines):
@@ -29,7 +29,7 @@ def validate_config(config):
     if init_config_line == -1:
         errors.append(ValidatorError("Missing `init_config` section", None))
         return errors
-    
+
     if instances_line == -1:
         errors.append(ValidatorError("Missing `instances` section", None))
         return errors
@@ -123,7 +123,8 @@ def _parse_for_config_blocks(config_lines, start, end, errors=None):
             new_end = get_end_of_part(config_lines, idx, indent=indent)
             if new_end is None:
                 block_name = cfg_block.param_prop.var_name if cfg_block.param_prop else "?"
-                errors.append(ValidatorError("The object %s cannot be parsed correctly, check indentation" % block_name, idx))
+                err_string = "The object %s cannot be parsed correctly, check indentation" % block_name
+                errors.append(ValidatorError(err_string, idx))
                 return blocks
             if new_end > end:
                 new_end = end

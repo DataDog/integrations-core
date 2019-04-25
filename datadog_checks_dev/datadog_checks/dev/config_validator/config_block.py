@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from .validator_errors import ValidatorError, SEVERITY_WARNING
-from .utils import is_blank, is_exactly_indented, is_at_least_indented, get_indent
+from .utils import get_indent, is_at_least_indented, is_blank, is_exactly_indented
+from .validator_errors import SEVERITY_WARNING, ValidatorError
 
 # The maximum length authorized for comments. It accounts for text after '##' and does not apply to the @param
 # declaration
@@ -20,7 +20,7 @@ ACCEPTED_VAR_TYPE_REGEX = [
     "^string$",
     "^object$",
     "^list.*$",
-    "^dictionary$"
+    "^dictionary$",
 ]
 
 # Regex used to parse the fields of the '## @param' declaration
@@ -74,9 +74,9 @@ class ParamProperties:
             def_val = None
             if m.group(4):  # If there is a default value
                 def_val = m.group(4)[12:]
-            
+
             return ParamProperties(m.group(1), m.group(2), False, def_val)
-        
+
         return ParamProperties(m.group(1), m.group(2), True)
 
 
@@ -169,7 +169,9 @@ class ConfigBlock:
 
         # If var is indicated as list, recompute end of block knowing it is a list
         if param_prop.type_name.startswith('list'):
-            end = _get_end_of_param_declaration_block(start, len(config_lines), config_lines, indent, errors, is_list=True)
+            end = _get_end_of_param_declaration_block(
+                start, len(config_lines), config_lines, indent, errors, is_list=True
+            )
             if end is None:
                 default_end = _get_next_block_in_case_of_failure(start, config_lines)
                 return ConfigBlock(None, None, start, default_end - start, errors)
@@ -180,7 +182,7 @@ class ConfigBlock:
         description, idx = _parse_description(idx, end, config_lines, indent, errors)
         if idx is None:
             return ConfigBlock(param_prop, None, start, block_len, errors)
-        
+
         # We recurse if the variable is an object and contains at least one member with description
         is_object = _is_object(idx, config_lines, indent, param_prop, errors)
         if not is_object:
@@ -195,7 +197,7 @@ class ConfigBlock:
         # indentation and thus ignore sub-blocks.
         block_len = next_block - start
         return ConfigBlock(param_prop, description, start, block_len, errors, should_recurse=False)
-            
+
 
 def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors=None, is_list=False):
     """Here we suppose the config block is correctly formatted (@param, description, empty comment then the actual content)
@@ -246,7 +248,7 @@ def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors
         if not is_at_least_indented(config_lines[idx], indent):
             # We reached a surrounding block, thus this block has ended.
             break
-        
+
         current_line = config_lines[idx][indent:]
 
         if current_line[0:2] == '# ':
@@ -294,7 +296,7 @@ def _parse_description(idx, end, config_lines, indent, errors=None):
         # EOF reached without end of description
         errors.append(ValidatorError("Reached EOF while reading description", idx))
         return None, None
-    
+
     return description, idx
 
 
@@ -308,16 +310,17 @@ def _is_object(idx, config_lines, indent, param_prop, errors=None):
     if not is_exactly_indented(config_lines[idx], indent):
         errors.append(ValidatorError("Content is not correctly indented", idx))
         return False
-    
+
     current_line = config_lines[idx][indent:]
-    
+
     if param_prop.type_name == 'object':
         # The variable to be parsed is an object and thus requires to go recursively
         if re.match(OBJECT_REGEX, current_line) is None:
-            errors.append(ValidatorError("Parameter %s is declared as object but isn't one." % param_prop.var_name, idx))
+            err_string = "Parameter %s is declared as object but isn't one." % param_prop.var_name
+            errors.append(ValidatorError(err_string, idx))
             return False
         return True
-    
+
     return False
 
 

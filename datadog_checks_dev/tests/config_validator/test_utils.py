@@ -2,18 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from datadog_checks.dev.config_validator.utils import is_blank, is_at_least_indented, is_exactly_indented, get_indent, get_end_of_part
+
+from datadog_checks.dev.config_validator.utils import (
+    get_end_of_part,
+    get_indent,
+    is_at_least_indented,
+    is_blank,
+    is_exactly_indented,
+)
 
 
 def test_is_blank():
     blank_lines = ["", " ", "       ", "   - "]
-    non_blank_lines = [
-        "simple_text",
-        "#simple_text",
-        "# ",
-        "   - {}",
-        "  - hey"
-    ]
+    non_blank_lines = ["simple_text", "#simple_text", "# ", "   - {}", "  - hey"]
     for l in blank_lines:
         assert is_blank(l)
 
@@ -34,7 +35,7 @@ def test_is_at_least_indented():
         (2, "  key: value"),
         (2, "  # Simple comment"),
         (2, "- list_item_1"),
-        (4, "  - list item 2")
+        (4, "  - list item 2"),
     ]
 
     test_wrong_cases = [
@@ -44,7 +45,7 @@ def test_is_at_least_indented():
         (2, "  "),
         (2, "   "),
         (0, "  "),
-        (5, "- k")
+        (5, "- k"),
     ]
 
     for c in test_correct_cases:
@@ -65,7 +66,7 @@ def test_is_exactly_indented():
         (2, "  key: value"),
         (2, "  # Simple comment"),
         (2, "- list_item_1"),
-        (4, "  - list item 2")
+        (4, "  - list item 2"),
     ]
 
     test_wrong_cases = [
@@ -77,7 +78,7 @@ def test_is_exactly_indented():
         (2, "  "),
         (2, "   "),
         (0, "  "),
-        (5, "- k")
+        (5, "- k"),
     ]
 
     for c in test_correct_cases:
@@ -88,13 +89,7 @@ def test_is_exactly_indented():
 
 
 def test_get_indent():
-    test_cases = [
-        (0, "key: value"),
-        (1, " key: value"),
-        (2, "  key: value"),
-        (2, "- item"),
-        (6, "  -   item")
-    ]
+    test_cases = [(0, "key: value"), (1, " key: value"), (2, "  key: value"), (2, "- item"), (6, "  -   item")]
 
     for c in test_cases:
         assert get_indent(c[1]) == c[0]
@@ -128,7 +123,7 @@ def test_get_end_of_part():
         (13, 2, 15),
         (19, 2, 35),
         (19, 6, None),
-        (24, 6, 27)
+        (24, 6, 27),
     ]
 
     for c in test_cases:
