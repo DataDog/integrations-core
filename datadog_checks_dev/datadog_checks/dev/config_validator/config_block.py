@@ -70,14 +70,14 @@ class ParamProperties:
             errors.append(ValidatorError("Invalid @param declaration", idx))
             return None
 
-        if m[3] == "optional":
+        if m.group(3) == "optional":
             def_val = None
-            if m[4]:  # If there is a default value
-                def_val = m[4][12:]
+            if m.group(4):  # If there is a default value
+                def_val = m.group(4)[12:]
             
-            return ParamProperties(m[1], m[2], False, def_val)
+            return ParamProperties(m.group(1), m.group(2), False, def_val)
         
-        return ParamProperties(m[1], m[2], True)
+        return ParamProperties(m.group(1), m.group(2), True)
 
 
 class ConfigBlock:

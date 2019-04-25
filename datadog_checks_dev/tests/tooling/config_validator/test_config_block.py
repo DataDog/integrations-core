@@ -104,7 +104,7 @@ def test_is_object():
 
     test_cases = [
         # idx, indent, param_prop, expected
-        (0, 0, obj_param_prop, None),
+        (0, 0, obj_param_prop, False),
         (0, 0, non_obj_param_prop, False),
         (2, 0, obj_param_prop, True),
         (2, 0, non_obj_param_prop, False),
@@ -180,6 +180,3 @@ def test_parse_comment():
         comment, next_idx = _parse_comment(c[0], config_lines)
         assert comment == c[1]
         assert next_idx == c[2]
-
-
-
