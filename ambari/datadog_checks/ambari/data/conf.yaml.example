@@ -3,7 +3,7 @@ init_config:
 instances:
 
 ## @param url - string - required
-## The URL of the Ambari Server
+## The URL of the Ambari Server, include http:// or https://
 #
   - url: <ambari url>
 
@@ -12,18 +12,19 @@ instances:
   ## Note: The default port is usually 8080.
     port: 8080
 
-  ## @param path - string - required
+  ## @param path - string - optional
   ## The path of the Ambari Server
   ## Note: By default this is an empty string
-  #  path: cloudbreak-install/dp-proxy/ambari
+  #  path: /cloudbreak-install/dp-proxy/ambari
+
 
   ## @param user - string - required
-  ## Username created to connect to the Ambari server.
+  ## Username created to connect to the Ambari server if using basic authentication
   #
     username: admin
 
   ## @param password - string - required
-  ## Password associated with the Ambari server user.
+  ## Password associated with the Ambari server user if using basic authentication
   #
     password: <UNIQUEPASSWORD>
   

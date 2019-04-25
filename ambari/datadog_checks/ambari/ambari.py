@@ -38,26 +38,26 @@ class AmbariCheck(AgentCheck):
         services = instance.get("services", [])
         metric_headers = [str(h) for h in instance.get("metric_headers", [])]
 
-        clusters = self.get_clusters(server, port)
-        self.get_host_metrics(clusters, server, port, base_tags)
-        self.get_service_metrics(clusters, server, port, services, metric_headers, base_tags)
+        base_url = "{}:{}{}".format(server, port, path)
+        clusters = self.get_clusters(base_url)
+        self.get_host_metrics(base_url, clusters, base_tags)
+        self.get_service_metrics(base_url, clusters, services, metric_headers, base_tags)
 
-    def get_clusters(self, server, port):
-        clusters_endpoint = common.CLUSTERS_URL.format(ambari_server=server, ambari_port=port)
+    def get_clusters(self, base_url):
+        clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
 
         resp = self.make_request(clusters_endpoint)
         if resp is None:
-            self.submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(server)])
+            self.submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
             raise CheckException("Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint))
-        self.submit_service_checks("can_connect", self.OK, ["url:{}".format(server)])
+        self.submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
 
         return [cluster.get('Clusters').get('cluster_name') for cluster in resp.get('items')]
 
-    def get_host_metrics(self, clusters, server, port, base_tags):
+    def get_host_metrics(self, base_url, clusters, base_tags):
         for cluster in clusters:
             hosts_endpoint = common.HOST_METRICS_URL.format(
-                ambari_server=server,
-                ambari_port=port,
+                base_url=base_url,
                 cluster_name=cluster
             )
             resp = self.make_request(hosts_endpoint)
@@ -70,25 +70,25 @@ class AmbariCheck(AgentCheck):
                     self.log.warning("No metrics received for host {}".format(host.get('Hosts').get('host_name')))
                     continue
 
-                metrics = self.flatten_host_metrics(host.get(METRICS_FIELD), "")
+                metrics = self.flatten_host_metrics(host.get(METRICS_FIELD))
                 for metric_name, value in iteritems(metrics):
                     host_tag = HOST_TAG + host.get('Hosts').get('host_name')
                     metric_tags = base_tags + [cluster_tag, host_tag]
                     if isinstance(value, float):
                         self.submit_gauge(metric_name, value, metric_tags)
 
-    def get_service_metrics(self, clusters, server, port, services, metric_headers, base_tags):
+    def get_service_metrics(self, base_url, clusters, services, metric_headers, base_tags):
         for cluster in clusters:
             tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
             for service, components in iteritems(services):
                 service_tag = SERVICE_TAG + service.lower()
-                self.get_component_metrics(server, port, cluster, service, metric_headers,
+                self.get_component_metrics(base_url, cluster, service, metric_headers,
                                            tags + [service_tag],
                                            [c.upper() for c in components])
-                self.get_service_health(cluster, server, port, service, tags, service_tag)
+                self.get_service_health(base_url, cluster, service, tags, service_tag)
 
-    def get_service_health(self, cluster, server, port, service, base_tags, service_tag):
-        service_check_endpoint = common.create_endpoint(server, port, cluster, service, SERVICE_INFO_QUERY)
+    def get_service_health(self, base_url, cluster, service, base_tags, service_tag):
+        service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
         service_check_tags = base_tags + [service_tag]
 
         service_resp = self.make_request(service_check_endpoint)
@@ -99,8 +99,8 @@ class AmbariCheck(AgentCheck):
             state = service_resp.get('ServiceInfo').get('state')
             self.submit_service_checks("state", common.STATUS[state], service_check_tags)
 
-    def get_component_metrics(self, server, port, cluster, service, metric_headers, base_tags, components):
-        component_metrics_endpoint = common.create_endpoint(server, port, cluster, service, COMPONENT_METRICS_QUERY)
+    def get_component_metrics(self, base_url, cluster, service, metric_headers, base_tags, components):
+        component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
         resp = self.make_request(component_metrics_endpoint)
 
         if resp is None:
@@ -137,26 +137,28 @@ class AmbariCheck(AgentCheck):
                         self.log.warning("Expected a float for {}, received {}".format(metric_name, value))
 
     @staticmethod
-    def flatten_service_metrics(metric_dict, prefix, flat_metrics=None):
-        flat_metrics = flat_metrics or {}
-        for key, value in iteritems(metric_dict):
-            if isinstance(value, dict):
-                AmbariCheck.flatten_service_metrics(value, prefix, flat_metrics)
+    def flatten_service_metrics(metric_dict, prefix):
+        flat_metrics = {}
+        for raw_metric_name, metric_value in iteritems(metric_dict):
+            if isinstance(metric_value, dict):
+                flat_metrics.update(AmbariCheck.flatten_service_metrics(metric_value, prefix))
             else:
-                flat_metrics['{}.{}'.format(prefix, key)] = value
+                metric_name = '{}.{}'.format(prefix, raw_metric_name) if prefix else raw_metric_name
+                flat_metrics[metric_name] = metric_value
         return flat_metrics
 
     @staticmethod
-    def flatten_host_metrics(metric_dict, prev_heading, prev_metrics=None):
-        prev_metrics = prev_metrics or {}
-        for key, value in iteritems(metric_dict):
-            if key == "boottime":
-                prev_metrics["boottime"] = value
-            elif isinstance(value, dict):
-                AmbariCheck.flatten_host_metrics(value, key, prev_metrics)
+    def flatten_host_metrics(metric_dict, prefix=""):
+        flat_metrics = {}
+        for raw_metric_name, metric_value in iteritems(metric_dict):
+            metric_name = '{}.{}'.format(prefix, raw_metric_name) if prefix else raw_metric_name
+            if raw_metric_name == "boottime":
+                flat_metrics["boottime"] = metric_value
+            elif isinstance(metric_value, dict):
+                flat_metrics.update(AmbariCheck.flatten_host_metrics(metric_value, metric_name))
             else:
-                prev_metrics['{}.{}'.format(prev_heading, key)] = value
-        return prev_metrics
+                flat_metrics[metric_name] = metric_value
+        return flat_metrics
 
     def make_request(self, url):
         try:
