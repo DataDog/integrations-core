@@ -34,18 +34,20 @@ def validate_config(config):
         errors.append(ValidatorError("Missing `instances` section", None))
         return errors
 
-    errors += _validate_no_inline_comment(config_lines)
+    _validate_no_inline_comment(config_lines, errors)
+
     # parse init_config data
     blocks.append(_parse_init_config(config_lines, init_config_line, errors))
 
+    # parse instances data
     instances_end = get_end_of_part(config_lines, instances_line)
     if instances_end is None:
         errors.append(ValidatorError("Malformed file, cannot find end of part 'instances'", instances_line))
         return errors
     blocks.append(_parse_for_config_blocks(config_lines, instances_line + 1, instances_end, errors))
 
-    errors += _check_no_duplicate_names(blocks)
-    errors += _validate_blocks(blocks)
+    _check_no_duplicate_names(blocks, errors)
+    _validate_blocks(blocks, errors)
     return errors
 
 
@@ -78,15 +80,13 @@ def _parse_init_config(config_lines, init_config_start_line, errors):
     return _parse_for_config_blocks(config_lines, init_config_start_line + 1, end, errors)
 
 
-def _parse_for_config_blocks(config_lines, start, end, errors=None):
+def _parse_for_config_blocks(config_lines, start, end, errors):
     """The function basically do all the work. It reads the config from start, removes blank lines first then when it first
     sees data, it sets the 'indent' variable once for all. All blocks read in a given function call must have the same
     indentation. Sub-blocks are parsed recursively and thus the 'indent' variable is given a new value.
     Once a block is parsed the function will either recurse if the block requires it (see ConfigBlock), or it will go
     to the next block and iterate.
     """
-    if errors is None:
-        errors = []
     idx = start
     blocks = []
 
@@ -134,23 +134,19 @@ def _parse_for_config_blocks(config_lines, start, end, errors=None):
     return blocks
 
 
-def _validate_no_inline_comment(config_lines):
-    """Returns errors for each inline comment found"""
-    errors = []
+def _validate_no_inline_comment(config_lines, errors):
+    """Append errors for each inline comment found"""
     for i, line in enumerate(config_lines):
         if line.lstrip(' ')[:1] != '#' and '#' in line:
             # Now checks if those chars are inside double quotes or not.
             errors.append(ValidatorError("Inline comment should be removed", i, SEVERITY_WARNING))
-    return errors
 
 
-def _check_no_duplicate_names(blocks):
+def _check_no_duplicate_names(blocks, errors):
     """blocks contains ConfigBlocks as a tree. This function makes sure that each yaml object has no duplicates
     variables and return a list of errors to be displayed if duplicates are found. The @param declaration needs to
     be there for this to correctly identify a variable.
     """
-    errors = []
-
     same_level_blocks = [b for b in blocks if isinstance(b, ConfigBlock)]
     names_list = [b.param_prop.var_name for b in same_level_blocks if b.param_prop]
     duplicates = set([x for x in names_list if names_list.count(x) > 1])
@@ -159,22 +155,16 @@ def _check_no_duplicate_names(blocks):
 
     sub_lists_of_other_blocks = [b for b in blocks if isinstance(b, list)]
     for l in sub_lists_of_other_blocks:
-        errors += _check_no_duplicate_names(l)
-
-    return errors
+        _check_no_duplicate_names(l, errors)
 
 
-def _validate_blocks(blocks):
+def _validate_blocks(blocks, errors):
     """blocks contains ConfigBlocks as a tree. This function iterate over it to run the validate method on each
-    ConfigBlock and return an array of the errors.
+    ConfigBlock and append errors to the provided array if needed.
     """
-    errors = []
-
     leaves = [b for b in blocks if isinstance(b, ConfigBlock)]
     for b in leaves:
-        errors += b.validate()
+        b.validate(errors)
     nodes = [b for b in blocks if isinstance(b, list)]
     for n in nodes:
-        errors += _validate_blocks(n)
-
-    return errors
+        _validate_blocks(n, errors)

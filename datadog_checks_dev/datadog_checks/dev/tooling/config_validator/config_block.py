@@ -51,10 +51,7 @@ class ParamProperties:
         self.default_value = default_value
 
     @classmethod
-    def parse_from_string(cls, idx, config_lines, indent, errors=None):
-        if errors is None:
-            errors = []
-
+    def parse_from_string(cls, idx, config_lines, indent, errors):
         if not is_exactly_indented(config_lines[idx], indent):
             errors.append(ValidatorError("Content is not correctly indented", idx))
             return None
@@ -85,33 +82,27 @@ class ConfigBlock:
     its description and its content.
     """
 
-    def __init__(self, param_prop, description, line, length, errors=None, should_recurse=False):
+    def __init__(self, param_prop, description, line, length, should_recurse=False):
         """
         :param param_prop: ParamProperties instance
         :param description: The description preceding the variable declaration
         :param line: The first line of this block
         :param length: The number of lines this block takes. (see should_recurse)
-        :param errors: An array of ValidatorError instances
         :param should_recurse: Whether or not the content of the block must be analyzed. See _should_recurse function
         """
         self.param_prop = param_prop
         self.description = description
         self.line = line
         self.length = length
-        if errors is None:
-            self.errors = []
         self.should_recurse = should_recurse
 
-    def validate(self):
+    def validate(self, errors):
         """Method to return a list of errors and warnings about an already parsed block"""
-        errors = []
-        errors += self._validate_description()
-        errors += self._validate_type()
-        return errors
+        self._validate_description(errors)
+        self._validate_type(errors)
 
-    def _validate_description(self):
+    def _validate_description(self, errors):
         """Check if the block has a description and lines are not too long."""
-        errors = []
         if self.description is None:
             # There was a error reading description, which has already been recorded.
             return errors
@@ -121,15 +112,12 @@ class ConfigBlock:
             errors.append(ValidatorError("Empty description for {}".format(param_name), self.line, SEVERITY_WARNING))
 
         for i, line in enumerate(self.description.splitlines()):
-            if len(line) > MAX_COMMENT_LENGTH and line.endswith("#noqa"):
+            if len(line) > MAX_COMMENT_LENGTH and not line.endswith("#noqa"):
                 err_string = "Description too long [{}...] ({}/{})".format(line[:30], len(line), MAX_COMMENT_LENGTH)
                 errors.append(ValidatorError(err_string, self.line + i + 1))
 
-        return errors
-
-    def _validate_type(self):
+    def _validate_type(self, errors):
         """Check if the block has a valid type"""
-        errors = []
         if self.param_prop is None:
             return errors
 
@@ -141,17 +129,15 @@ class ConfigBlock:
         return errors
 
     @classmethod
-    def parse_from_strings(cls, start, config_lines, indent, errors=None):
+    def parse_from_strings(cls, start, config_lines, indent, errors):
         """Main method used to parse a block starting at line 'start' with a given indentation.
         """
-        if errors is None:
-            errors = []
         idx = start
 
         # Let's first check if the block is a simple comment. If so, let's return and go to the next block
         if _is_comment(start, config_lines, indent, errors):
             comment, end = _parse_comment(start, config_lines)
-            return ConfigBlock(None, comment, start, end - start, errors)
+            return ConfigBlock(None, comment, start, end - start)
 
         # Let's get to the end of the block supposing it is formatted correctly (@param line, description, empty
         # comment, then the actual content). If it fails, let's ignore the whole block and its potential
@@ -159,14 +145,14 @@ class ConfigBlock:
         end = _get_end_of_param_declaration_block(start, len(config_lines), config_lines, indent, errors)
         if end is None:
             default_end = _get_next_block_in_case_of_failure(start, config_lines)
-            return ConfigBlock(None, None, start, default_end - start, errors)
+            return ConfigBlock(None, None, start, default_end - start)
 
         block_len = end - start
 
         # Parsing the @param line
         param_prop = ParamProperties.parse_from_string(idx, config_lines, indent, errors)
         if param_prop is None:
-            return ConfigBlock(None, None, start, block_len, errors)
+            return ConfigBlock(None, None, start, block_len)
 
         # If var is indicated as list, recompute end of block knowing it is a list
         if param_prop.type_name.startswith('list'):
@@ -175,38 +161,36 @@ class ConfigBlock:
             )
             if end is None:
                 default_end = _get_next_block_in_case_of_failure(start, config_lines)
-                return ConfigBlock(None, None, start, default_end - start, errors)
+                return ConfigBlock(None, None, start, default_end - start)
             block_len = end - start
 
         # Parsing the description
         idx += 1
         description, idx = _parse_description(idx, end, config_lines, indent, errors)
         if idx is None:
-            return ConfigBlock(param_prop, None, start, block_len, errors)
+            return ConfigBlock(param_prop, None, start, block_len)
 
         # We recurse if the variable is an object and contains at least one member with description
         is_object = _is_object(idx, config_lines, indent, param_prop, errors)
         if not is_object:
-            return ConfigBlock(param_prop, description, start, block_len, errors, should_recurse=False)
+            return ConfigBlock(param_prop, description, start, block_len, should_recurse=False)
 
         should_recurse, next_block = _should_recurse(idx, config_lines, indent)
         if should_recurse:
             # If we recurse we use block_len, pointing to the next sub-block
-            return ConfigBlock(param_prop, description, start, block_len, errors, should_recurse=True)
+            return ConfigBlock(param_prop, description, start, block_len, should_recurse=True)
 
         # If we don't recurse we use the next_object variable to point to the next block with the same or less
         # indentation and thus ignore sub-blocks.
         block_len = next_block - start
-        return ConfigBlock(param_prop, description, start, block_len, errors, should_recurse=False)
+        return ConfigBlock(param_prop, description, start, block_len, should_recurse=False)
 
 
-def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors=None, is_list=False):
+def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors, is_list=False):
     """Here we suppose the config block is correctly formatted (@param, description, empty comment then the actual content)
     and try to return the line of any data coming after. In case of a object we point to its first member. In case
     of a list or a simple variable we point to the next element.
     """
-    if errors is None:
-        errors = []
 
     if not is_exactly_indented(config_lines[start], indent):
         other_indent = get_indent(config_lines[start])
@@ -267,12 +251,10 @@ def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors
     return idx
 
 
-def _parse_description(idx, end, config_lines, indent, errors=None):
+def _parse_description(idx, end, config_lines, indent, errors):
     """With idx pointing to the beginning of a description, it reads line by line and build the string. It returns
     the string and a pointer to the end of the description.
     """
-    if errors is None:
-        errors = []
 
     description = []
     while idx < end:
@@ -301,12 +283,10 @@ def _parse_description(idx, end, config_lines, indent, errors=None):
     return description, idx
 
 
-def _is_object(idx, config_lines, indent, param_prop, errors=None):
+def _is_object(idx, config_lines, indent, param_prop, errors):
     """With idx pointing to the beginning of a 'key: value' variable declaration, this function returns true
     if the variable is declared as an object in the @param declaration and if value is not on the same line.
     """
-    if errors is None:
-        errors = []
 
     if not is_exactly_indented(config_lines[idx], indent):
         errors.append(ValidatorError("Content is not correctly indented", idx))
@@ -368,12 +348,10 @@ def _should_recurse(start, config_lines, initial_indent):
     return False, idx
 
 
-def _is_comment(start, config_lines, indent, errors=None):
+def _is_comment(start, config_lines, indent, errors):
     """Returns true if the block starting at line 'start' only contains comments and no @param declaration nor
     setting any variable.
     """
-    if errors is None:
-        errors = []
 
     regex = COMMENT_REGEX.replace('INDENT', str(indent))
     idx = start
