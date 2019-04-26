@@ -38,8 +38,8 @@ def config(check):
             num_files += 1
             file_display_queue = []
             file_name = basepath(config_file)
-            file_data = read_file(config_file)
             try:
+                file_data = read_file(config_file)
                 config_data = yaml.safe_load(file_data)
             except Exception as e:
                 files_failed[config_file] = True
