@@ -32,3 +32,17 @@ var3:
 ## Description
 #
 var4: value
+
+## @param var5 - boolean - optional
+## Description
+
+var5: Hey
+
+## @param var6 - boolean - optional
+## Description
+ ## Line 2 incorrectly indented
+var6: Hey
+
+## @param var7 - boolean - optional
+## Description
+var7: Hey

@@ -17,7 +17,6 @@ ACCEPTED_VAR_TYPE_REGEX = [
     "^integer$",
     "^double$",
     "^float$",
-    "^string$",
     "^object$",
     "^list.*$",
     "^dictionary$",
@@ -105,7 +104,7 @@ class ConfigBlock:
         """Check if the block has a description and lines are not too long."""
         if self.description is None:
             # There was a error reading description, which has already been recorded.
-            return errors
+            return
 
         if self.description.strip() == '':
             param_name = self.param_prop.var_name
@@ -119,14 +118,13 @@ class ConfigBlock:
     def _validate_type(self, errors):
         """Check if the block has a valid type"""
         if self.param_prop is None:
-            return errors
+            return
 
         for regex in ACCEPTED_VAR_TYPE_REGEX:
             if re.match(regex, self.param_prop.type_name):
                 break
         else:
-            errors.append(ValidatorError("Type {} is not accepted.".format(self.param_prop.type_name), self.line))
-        return errors
+            errors.append(ValidatorError("Type {} is not accepted".format(self.param_prop.type_name), self.line))
 
     @classmethod
     def parse_from_strings(cls, start, config_lines, indent, errors):
@@ -209,7 +207,8 @@ def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors
             return None
         if not is_exactly_indented(config_lines[idx], indent):
             other_indent = get_indent(config_lines[idx])
-            errors.append(ValidatorError("Unexpected indentation, expecting {} not {}".format(indent, other_indent), idx))
+            err_string = "Unexpected indentation, expecting {} not {}".format(indent, other_indent)
+            errors.append(ValidatorError(err_string, idx))
             return None
 
         current_line = config_lines[idx][indent:]
@@ -259,7 +258,10 @@ def _parse_description(idx, end, config_lines, indent, errors):
     description = []
     while idx < end:
         if not is_exactly_indented(config_lines[idx], indent):
-            errors.append(ValidatorError("Description is not correctly indented", idx))
+            if is_blank(config_lines[idx]):
+                errors.append(ValidatorError("Reached end of description without marker", idx))
+            else:
+                errors.append(ValidatorError("Description is not correctly indented", idx))
             return None, None
         current_line = config_lines[idx][indent:]
 
@@ -297,7 +299,7 @@ def _is_object(idx, config_lines, indent, param_prop, errors):
     if param_prop.type_name == 'object':
         # The variable to be parsed is an object and thus requires to go recursively
         if re.match(OBJECT_REGEX, current_line) is None:
-            err_string = "Parameter {} is declared as object but isn't one.".format(param_prop.var_name)
+            err_string = "Parameter {} is declared as object but isn't one".format(param_prop.var_name)
             errors.append(ValidatorError(err_string, idx))
             return False
         return True
