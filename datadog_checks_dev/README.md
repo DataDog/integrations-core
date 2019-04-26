@@ -10,10 +10,17 @@
 This is the developer toolkit designed for use by any [Agent-based][5] check or
 integration repository.
 
+## Prerequisites
+
+* Python 2.7 and Python 3.7+ need to be available on your system
+* Docker to run the full test suite.
+
+Using virtualenv is recommended.
+
 ## Installation
 
 `datadog-checks-dev` is distributed on [PyPI][6] as a universal wheel
-and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and PyPy.
+and is available on Linux, macOS, and Windows, and supports Python 2.7/3.7+ and PyPy.
 
 ```console
 $ pip install "datadog-checks-dev[cli]"
