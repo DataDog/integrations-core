@@ -1,10 +1,11 @@
-## This file is overwritten upon Agent upgrade.
-## To make modifications to the check configuration, please copy this file
-## to `agent_metrics.yaml` and make your changes on that file.
-
 init_config:
 
     ## @param process_metrics - list of metrics - required
+    ## List or process metrics to collect.
+    ## Each metrics has the following required parameter:
+    ##   * name - string - name of the metric
+    ##   * type - string - type of the metric
+    ##   * active - boolean - if the metric is active or not.
     ##
     #
     process_metrics:

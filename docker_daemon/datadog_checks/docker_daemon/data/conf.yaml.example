@@ -41,7 +41,7 @@ init_config:
   # tls_cacert: <TLS_CA_CERT_PATH>
 
   ## @param tls_verify - boolean - optional - default: true
-  ##
+  ## Set this variable to false to disable TLS verification.
   #
   # tls_verify: true
 
