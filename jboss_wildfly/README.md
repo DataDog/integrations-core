@@ -46,7 +46,6 @@ The JBoss/WildFly integration does not include any events.
 
 Need help? Contact [Datadog support][5].
 
-
 [1]: https://developers.redhat.com/products/eap/overview
 [2]: http://wildfly.org
 [3]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/datadog_checks/jboss_wildfly/data/conf.yaml.example
