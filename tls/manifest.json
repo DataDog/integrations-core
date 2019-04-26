@@ -1,0 +1,25 @@
+{
+  "display_name": "TLS",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "tls",
+  "metric_prefix": "tls.",
+  "metric_to_check": "tls.seconds_left",
+  "creates_events": false,
+  "short_description": "Monitor TLS for protocol version, certificate expiration & validity, etc.",
+  "guid": "4e27a211-a034-42dd-9939-9ef967b1da50",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-TLS Integration",
+  "categories": [
+    "network",
+    "web"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "tls"
+}

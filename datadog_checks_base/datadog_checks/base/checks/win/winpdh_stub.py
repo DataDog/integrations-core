@@ -6,7 +6,6 @@ DATA_TYPE_DOUBLE = 1
 
 
 class WinPDHCounter(object):
-
     def is_single_instance(self):
         return False
 

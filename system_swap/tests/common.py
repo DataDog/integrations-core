@@ -2,6 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-INSTANCE = {
-    "tags": ["tag1:value1"]
-}
+INSTANCE = {"tags": ["tag1:value1"]}

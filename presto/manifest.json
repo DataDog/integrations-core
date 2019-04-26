@@ -16,9 +16,10 @@
   ],
   "public_title": "Datadog-Presto Integration",
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "presto"
 }

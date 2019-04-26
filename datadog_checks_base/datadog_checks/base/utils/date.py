@@ -43,11 +43,13 @@ class TimezoneInfo(datetime.tzinfo):
 UTC = TimezoneInfo(0, 0)
 
 # ref https://www.ietf.org/rfc/rfc3339.txt
-_re_rfc3339 = re.compile(r"(\d\d\d\d)-(\d\d)-(\d\d)"        # full-date
-                         r"[ Tt]"                           # Separator
-                         r"(\d\d):(\d\d):(\d\d)([.,]\d+)?"  # partial-time
-                         r"([zZ ]|[-+]\d\d?:\d\d)?",        # time-offset
-                         re.VERBOSE + re.IGNORECASE)
+_re_rfc3339 = re.compile(
+    r"(\d\d\d\d)-(\d\d)-(\d\d)"  # full-date
+    r"[ Tt]"  # Separator
+    r"(\d\d):(\d\d):(\d\d)([.,]\d+)?"  # partial-time
+    r"([zZ ]|[-+]\d\d?:\d\d)?",  # time-offset
+    re.VERBOSE + re.IGNORECASE,
+)
 _re_timezone = re.compile(r"([-+])(\d\d?):?(\d\d)?")
 
 
@@ -74,9 +76,8 @@ def parse_rfc3339(s):
             minute = int(tz_groups[2])
         tz = TimezoneInfo(hour, minute)
     return datetime.datetime(
-        year=dt[0], month=dt[1], day=dt[2],
-        hour=dt[3], minute=dt[4], second=dt[5],
-        microsecond=dt[6], tzinfo=tz)
+        year=dt[0], month=dt[1], day=dt[2], hour=dt[3], minute=dt[4], second=dt[5], microsecond=dt[6], tzinfo=tz
+    )
 
 
 def format_rfc3339(date_time):

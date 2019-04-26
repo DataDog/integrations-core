@@ -12,6 +12,7 @@ from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
+
 try:
     import datadog_agent
 except ImportError:
@@ -23,30 +24,31 @@ STANDARD_FIELDS = {
     'persist_connections': False,
     'proxy': None,
     'skip_proxy': False,
-    'ssl_ca_cert': None,
-    'ssl_cert': None,
-    'ssl_ignore_warning': False,
-    'ssl_private_key': None,
-    'ssl_verify': True,
+    'tls_ca_cert': None,
+    'tls_cert': None,
+    'tls_ignore_warning': False,
+    'tls_private_key': None,
+    'tls_verify': True,
     'timeout': 10,
     'username': None,
 }
 # For any known legacy fields that may be widespread
 DEFAULT_REMAPPED_FIELDS = {
     # TODO: Remove in 6.13
-    'no_proxy': {'name': 'skip_proxy'},
+    'no_proxy': {'name': 'skip_proxy'}
 }
 PROXY_SETTINGS_DISABLED = {
     # This will instruct `requests` to ignore the `HTTP_PROXY`/`HTTPS_PROXY`
     # environment variables. If the proxy options `http`/`https` are missing
     # or are `None` then `requests` will use the aforementioned environment
     # variables, hence the need to set each to an empty string.
-    'http': '', 'https': ''
+    'http': '',
+    'https': '',
 }
 
 
 class RequestsWrapper(object):
-    __slots__ = ('ignore_ssl_warning', 'persist_connections', 'no_proxy_uris', 'options', '_session')
+    __slots__ = ('ignore_tls_warning', 'persist_connections', 'no_proxy_uris', 'options', '_session')
 
     # For modifying the warnings filter since the context
     # manager that is provided changes module constants
@@ -64,7 +66,7 @@ class RequestsWrapper(object):
         # Support non-standard (usually legacy) configurations, for example:
         # {
         #     'disable_ssl_validation': {
-        #         'name': 'ssl_verify',
+        #         'name': 'tls_verify',
         #         'default': False,
         #         'invert': True,
         #     },
@@ -96,7 +98,7 @@ class RequestsWrapper(object):
             config[field] = value
 
         # http://docs.python-requests.org/en/master/user/advanced/#timeouts
-        timeout = int(config['timeout'])
+        timeout = float(config['timeout'])
 
         # http://docs.python-requests.org/en/master/user/quickstart/#custom-headers
         # http://docs.python-requests.org/en/master/user/advanced/#header-ordering
@@ -111,18 +113,18 @@ class RequestsWrapper(object):
 
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
-        if isinstance(config['ssl_ca_cert'], string_types):
-            verify = config['ssl_ca_cert']
-        elif not is_affirmative(config['ssl_verify']):
+        if isinstance(config['tls_ca_cert'], string_types):
+            verify = config['tls_ca_cert']
+        elif not is_affirmative(config['tls_verify']):
             verify = False
 
         # http://docs.python-requests.org/en/master/user/advanced/#client-side-certificates
         cert = None
-        if isinstance(config['ssl_cert'], string_types):
-            if isinstance(config['ssl_private_key'], string_types):
-                cert = (config['ssl_cert'], config['ssl_private_key'])
+        if isinstance(config['tls_cert'], string_types):
+            if isinstance(config['tls_private_key'], string_types):
+                cert = (config['tls_cert'], config['tls_private_key'])
             else:
-                cert = config['ssl_cert']
+                cert = config['tls_cert']
 
         # http://docs.python-requests.org/en/master/user/advanced/#proxies
         no_proxy_uris = None
@@ -166,7 +168,7 @@ class RequestsWrapper(object):
         self.no_proxy_uris = no_proxy_uris
 
         # Ignore warnings for lack of SSL validation
-        self.ignore_ssl_warning = is_affirmative(config['ssl_ignore_warning'])
+        self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
         # For connection and cookie persistence, if desired. See:
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
@@ -206,7 +208,7 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
-        with self.handle_ssl_warning():
+        with self.handle_tls_warning():
             if persist:
                 return getattr(self.session, method)(url, **options)
             else:
@@ -224,11 +226,11 @@ class RequestsWrapper(object):
         return options
 
     @contextmanager
-    def handle_ssl_warning(self):
+    def handle_tls_warning(self):
         with self.warning_lock:
 
             with warnings.catch_warnings():
-                if self.ignore_ssl_warning:
+                if self.ignore_tls_warning:
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
                 yield

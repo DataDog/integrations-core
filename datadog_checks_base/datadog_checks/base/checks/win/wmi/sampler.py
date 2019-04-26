@@ -31,8 +31,8 @@ from six import iteritems, string_types, with_metaclass
 from six.moves import zip
 from win32com.client import Dispatch
 
-from .counter_type import UndefinedCalculator, get_calculator, get_raw
 from ....utils.timeout import TimeoutException, timeout
+from .counter_type import UndefinedCalculator, get_calculator, get_raw
 
 
 class CaseInsensitiveDict(dict):
@@ -53,6 +53,7 @@ class ProviderArchitectureMeta(type):
     """
     Metaclass for ProviderArchitecture.
     """
+
     def __contains__(cls, provider):
         """
         Support `Enum` style `contains`.
@@ -64,6 +65,7 @@ class ProviderArchitecture(with_metaclass(ProviderArchitectureMeta, object)):
     """
     Enumerate WMI Provider Architectures.
     """
+
     # Available Provider Architecture(s)
     DEFAULT = 0
     _32BIT = 32
@@ -75,6 +77,7 @@ class WMISampler(object):
     """
     WMI Sampler.
     """
+
     # Properties
     _provider = None
     _formatted_filters = None
@@ -89,9 +92,20 @@ class WMISampler(object):
     # Sampling state
     _sampling = False
 
-    def __init__(self, logger, class_name, property_names, filters="", host="localhost",
-                 namespace="root\\cimv2", provider=None,
-                 username="", password="", and_props=None, timeout_duration=10):
+    def __init__(
+        self,
+        logger,
+        class_name,
+        property_names,
+        filters="",
+        host="localhost",
+        namespace="root\\cimv2",
+        provider=None,
+        username="",
+        password="",
+        and_props=None,
+        timeout_duration=10,
+    ):
         self.logger = logger
 
         # Connection information
@@ -109,17 +123,19 @@ class WMISampler(object):
         #   performance counters:
         #   https://msdn.microsoft.com/en-us/library/aa394299(v=vs.85).aspx
         if self.is_raw_perf_class:
-            property_names.extend([
-                "Timestamp_Sys100NS",
-                "Frequency_Sys100NS",
-                # IMPORTANT: To improve performance and since they're currently
-                # not needed, do not include the other Timestamp/Frequency
-                # properties:
-                #   - Timestamp_PerfTime
-                #   - Timestamp_Object
-                #   - Frequency_PerfTime
-                #   - Frequency_Object"
-            ])
+            property_names.extend(
+                [
+                    "Timestamp_Sys100NS",
+                    "Frequency_Sys100NS",
+                    # IMPORTANT: To improve performance and since they're currently
+                    # not needed, do not include the other Timestamp/Frequency
+                    # properties:
+                    #   - Timestamp_PerfTime
+                    #   - Timestamp_Object
+                    #   - Frequency_PerfTime
+                    #   - Frequency_Object"
+                ]
+            )
 
         self.class_name = class_name
         self.property_names = property_names
@@ -154,9 +170,7 @@ class WMISampler(object):
                 result = parsed_value
 
         if result is None:
-            self.logger.error(
-                u"Invalid '%s' WMI Provider Architecture. The parameter is ignored.", value
-            )
+            self.logger.error(u"Invalid '%s' WMI Provider Architecture. The parameter is ignored.", value)
 
         self._provider = result or ProviderArchitecture.DEFAULT
 
@@ -165,23 +179,14 @@ class WMISampler(object):
         """
         A property to retrieve the sampler connection information.
         """
-        return {
-            'host': self.host,
-            'namespace': self.namespace,
-            'username': self.username,
-            'password': self.password,
-        }
+        return {'host': self.host, 'namespace': self.namespace, 'username': self.username, 'password': self.password}
 
     @property
     def connection_key(self):
         """
         Return an index key used to cache the sampler connection.
         """
-        return "{host}:{namespace}:{username}".format(
-            host=self.host,
-            namespace=self.namespace,
-            username=self.username
-        )
+        return "{host}:{namespace}:{username}".format(host=self.host, namespace=self.namespace, username=self.username)
 
     @property
     def formatted_filters(self):
@@ -211,11 +216,7 @@ class WMISampler(object):
             self._previous_sample = self._current_sample
             self._current_sample = self._query()
         except TimeoutException:
-            self.logger.debug(
-                u"Query timeout after {timeout}s".format(
-                    timeout=self._timeout_duration
-                )
-            )
+            self.logger.debug(u"Query timeout after {timeout}s".format(timeout=self._timeout_duration))
             raise
         else:
             self._sampling = False
@@ -226,9 +227,7 @@ class WMISampler(object):
         """
         # No data is returned while sampling
         if self._sampling:
-            raise TypeError(
-                u"Sampling `WMISampler` object has no len()"
-            )
+            raise TypeError(u"Sampling `WMISampler` object has no len()")
 
         return len(self._current_sample)
 
@@ -238,17 +237,12 @@ class WMISampler(object):
         """
         # No data is returned while sampling
         if self._sampling:
-            raise TypeError(
-                u"Sampling `WMISampler` object is not iterable"
-            )
+            raise TypeError(u"Sampling `WMISampler` object is not iterable")
 
         if self.is_raw_perf_class:
             # Format required
             for previous_wmi_object, current_wmi_object in zip(self._previous_sample, self._current_sample):
-                formatted_wmi_object = self._format_property_values(
-                    previous_wmi_object,
-                    current_wmi_object
-                )
+                formatted_wmi_object = self._format_property_values(previous_wmi_object, current_wmi_object)
                 yield formatted_wmi_object
         else:
             #  No format required
@@ -262,10 +256,7 @@ class WMISampler(object):
         if self.is_raw_perf_class:
             previous_wmi_object = self._previous_sample[index]
             current_wmi_object = self._current_sample[index]
-            formatted_wmi_object = self._format_property_values(
-                previous_wmi_object,
-                current_wmi_object
-            )
+            formatted_wmi_object = self._format_property_values(previous_wmi_object, current_wmi_object)
             return formatted_wmi_object
         else:
             return self._current_sample[index]
@@ -293,9 +284,7 @@ class WMISampler(object):
         except UndefinedCalculator:
             self.logger.warning(
                 u"Undefined WMI calculator for counter_type {counter_type}."
-                " Values are reported as RAW.".format(
-                    counter_type=counter_type
-                )
+                " Values are reported as RAW.".format(counter_type=counter_type)
             )
 
         return calculator
@@ -326,10 +315,8 @@ class WMISampler(object):
         """
         self.logger.debug(
             u"Connecting to WMI server "
-            u"(host={host}, namespace={namespace}, provider={provider}, username={username})."
-            .format(
-                host=self.host, namespace=self.namespace,
-                provider=self.provider, username=self.username
+            u"(host={host}, namespace={namespace}, provider={provider}, username={username}).".format(
+                host=self.host, namespace=self.namespace, provider=self.provider, username=self.username
             )
         )
 
@@ -347,9 +334,7 @@ class WMISampler(object):
             additional_args = [None, "", 128, context]
 
         locator = Dispatch("WbemScripting.SWbemLocator")
-        connection = locator.ConnectServer(
-            self.host, self.namespace, self.username, self.password, *additional_args
-        )
+        connection = locator.ConnectServer(self.host, self.namespace, self.username, self.password, *additional_args)
 
         return connection
 
@@ -368,6 +353,7 @@ class WMISampler(object):
                 If we detect a wildcard character ('%') we will override the operator
                 to use LIKE
         """
+
         def build_where_clause(fltr):
             f = fltr.pop()
             wql = ""
@@ -386,10 +372,14 @@ class WMISampler(object):
                     if not len(value):
                         continue
 
-                    internal_filter = map(lambda x:
-                                          (prop, x) if isinstance(x, tuple)
-                                          else (prop, ('LIKE', x)) if '%' in x
-                                          else (prop, (oper, x)), value)
+                    internal_filter = map(
+                        lambda x: (prop, x)
+                        if isinstance(x, tuple)
+                        else (prop, ('LIKE', x))
+                        if '%' in x
+                        else (prop, (oper, x)),
+                        value,
+                    )
 
                     bool_op = ' OR '
                     for p in and_props:
@@ -397,22 +387,22 @@ class WMISampler(object):
                             bool_op = ' AND '
                             break
 
-                    clause = bool_op.join(['{0} {1} \'{2}\''.format(k, v[0], v[1]) if isinstance(v, tuple)
-                                          else '{0} = \'{1}\''.format(k, v)
-                                          for k, v in internal_filter])
+                    clause = bool_op.join(
+                        [
+                            '{0} {1} \'{2}\''.format(k, v[0], v[1])
+                            if isinstance(v, tuple)
+                            else '{0} = \'{1}\''.format(k, v)
+                            for k, v in internal_filter
+                        ]
+                    )
 
                     if bool_op.strip() == 'OR':
-                        wql += "( {clause} )".format(
-                            clause=clause)
+                        wql += "( {clause} )".format(clause=clause)
                     else:
-                        wql += "{clause}".format(
-                            clause=clause)
+                        wql += "{clause}".format(clause=clause)
 
                 else:
-                    wql += "{property} {cmp} '{constant}'".format(
-                        property=prop,
-                        cmp=oper,
-                        constant=value)
+                    wql += "{property} {cmp} '{constant}'".format(property=prop, cmp=oper, constant=value)
                 if f:
                     wql += " AND "
 
@@ -423,10 +413,7 @@ class WMISampler(object):
             if len(fltr) == 0:
                 return "( {clause} )".format(clause=wql)
 
-            return "( {clause} ) OR {more}".format(
-                clause=wql,
-                more=build_where_clause(fltr)
-            )
+            return "( {clause} ) OR {more}".format(clause=wql, more=build_where_clause(fltr))
 
         if not filters:
             return ""
@@ -441,9 +428,7 @@ class WMISampler(object):
         """
         formated_property_names = ",".join(self.property_names)
         wql = "Select {property_names} from {class_name}{filters}".format(
-            property_names=formated_property_names,
-            class_name=self.class_name,
-            filters=self.formatted_filters,
+            property_names=formated_property_names, class_name=self.class_name, filters=self.formatted_filters
         )
         self.logger.debug(u"Querying WMI: {0}".format(wql))
 
@@ -503,8 +488,7 @@ class WMISampler(object):
                 # IMPORTANT: To improve performance, only access the Qualifiers
                 # if the "CounterType" hasn't already been cached.
                 should_get_qualifier_type = (
-                    includes_qualifiers and
-                    wmi_property.Name not in self._property_counter_types
+                    includes_qualifiers and wmi_property.Name not in self._property_counter_types
                 )
 
                 if should_get_qualifier_type:
@@ -522,19 +506,14 @@ class WMISampler(object):
 
                         self.logger.debug(
                             u"Caching property qualifier CounterType: "
-                            "{class_name}.{property_names} = {counter_type}"
-                            .format(
-                                class_name=self.class_name,
-                                property_names=wmi_property.Name,
-                                counter_type=counter_type,
+                            "{class_name}.{property_names} = {counter_type}".format(
+                                class_name=self.class_name, property_names=wmi_property.Name, counter_type=counter_type
                             )
                         )
                     else:
                         self.logger.debug(
-                            u"CounterType qualifier not found for {class_name}.{property_names}"
-                            .format(
-                                class_name=self.class_name,
-                                property_names=wmi_property.Name,
+                            u"CounterType qualifier not found for {class_name}.{property_names}".format(
+                                class_name=self.class_name, property_names=wmi_property.Name
                             )
                         )
 

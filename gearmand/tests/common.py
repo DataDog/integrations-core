@@ -16,22 +16,10 @@ BAD_PORT = 4731
 TAGS = ['first_tag', 'second_tag']
 TAGS2 = ['foo:bar']
 
-INSTANCE = {
-    'server': HOST,
-    'port': PORT,
-    'tags': TAGS
-}
+INSTANCE = {'server': HOST, 'port': PORT, 'tags': TAGS}
 
-INSTANCE2 = {
-    'server': HOST,
-    'port': PORT,
-    'tags': TAGS2
-}
+INSTANCE2 = {'server': HOST, 'port': PORT, 'tags': TAGS2}
 
-BAD_INSTANCE = {
-    'server': HOST,
-    'port': BAD_PORT,
-    'tags': TAGS2
-}
+BAD_INSTANCE = {'server': HOST, 'port': BAD_PORT, 'tags': TAGS2}
 
 CHECK_NAME = 'gearmand'

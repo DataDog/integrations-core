@@ -4,8 +4,7 @@ services:
   mysql-master:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=1
-      - MARIADB_ROOT_PASSWORD=master_root_password
+      - ALLOW_EMPTY_PASSWORD=yes
       - MARIADB_REPLICATION_MODE=master
       - MARIADB_REPLICATION_USER=my_repl_user
       - MARIADB_REPLICATION_PASSWORD=my_repl_password
@@ -18,15 +17,14 @@ services:
   mysql-slave:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - ALLOW_EMPTY_PASSWORD=yes
       - MASTER_HOST=mysql-master
       - MASTER_PORT=3306
       - MARIADB_REPLICATION_MODE=slave
       - MARIADB_REPLICATION_USER=my_repl_user
       - MARIADB_REPLICATION_PASSWORD=my_repl_password
       - MARIADB_MASTER_HOST=mysql-master
-      - MARIADB_MASTER_PORT=3306
-      - MARIADB_MASTER_ROOT_PASSWORD=master_root_password
+      - MARIADB_MASTER_PORT_NUMBER=3306
     ports:
       - "${MYSQL_SLAVE_PORT}:3306"
     depends_on:

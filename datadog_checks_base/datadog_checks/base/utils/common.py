@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from decimal import ROUND_HALF_UP, Decimal
 import os
 import re
+from decimal import ROUND_HALF_UP, Decimal
 
 from six import PY3
 from six.moves.urllib.parse import urlparse
@@ -58,11 +58,7 @@ def pattern_filter(items, whitelist=None, blacklist=None, key=None):
 
 
 def _filter(items, pattern_list, key):
-    return {
-        key(item) for pattern in pattern_list
-        for item in items
-        if re.search(pattern, key(item))
-    }
+    return {key(item) for pattern in pattern_list for item in items if re.search(pattern, key(item))}
 
 
 def __return_self(obj):

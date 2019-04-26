@@ -1,5 +1,9 @@
 # CHANGELOG - Openstack_controller
 
+## 1.1.2 / 2019-04-15
+
+* [Fixed] Get details for both private and public flavors. See [#3621](https://github.com/DataDog/integrations-core/pull/3621).
+
 ## 1.1.1 / 2019-03-21
 
 * [Fixed] Fix issue with exception handling preventing re-authentication in case of token expiration. See [#3321](https://github.com/DataDog/integrations-core/pull/3321).

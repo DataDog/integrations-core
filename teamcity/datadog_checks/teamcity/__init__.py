@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .teamcity import TeamCityCheck
 
-__all__ = [
-    '__version__',
-    'TeamCityCheck'
-]
+__all__ = ['__version__', 'TeamCityCheck']

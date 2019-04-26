@@ -4,7 +4,7 @@
         "integration":"postgres",
         "check": "postgres.can_connect",
         "statuses": ["ok", "critical"],
-        "groups": ["host", "port", "db"],
+        "groups": ["host", "server", "port", "db"],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance. Returns `OK` otherwise."
     }

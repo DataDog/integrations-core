@@ -6,95 +6,95 @@
 
 instances:
 
-  ## @param host - string - required
-  ## Kafka host to connect to.
-  #
+    ## @param host - string - required
+    ## Kafka host to connect to.
+    #
   - host: localhost
 
-  ## @param port - integer - required
-  ## Kafka port to connect to.
-  ## This is the JMX port on which Kafka exposes its metrics.
-  #
+    ## @param port - integer - required
+    ## Kafka port to connect to.
+    ## This is the JMX port on which Kafka exposes its metrics.
+    #
     port: 9999
 
-  ## @param user - string - optional
-  ## Username from the credentials needed to connect to the host.
-  #
-  #  user: <USERNAME>
+    ## @param user - string - optional
+    ## Username from the credentials needed to connect to the host.
+    #
+    # user: <USERNAME>
 
-  ## @param password - string - optional
-  ## Password from the credentials needed to connect to the host.
-  #
-  #  password: <PASSWORD>
+    ## @param password - string - optional
+    ## Password from the credentials needed to connect to the host.
+    #
+    # password: <PASSWORD>
 
-  ## @param process_name_regex - string - optional
-  ## Instead of specifying a host, and port. The agent can connect using the attach api.
-  ## This requires the JDK to be installed and the path to tools.jar to be set below in tools_jar_path parameter.
-  #
-  #  process_name_regex: .*process_name.*
+    ## @param process_name_regex - string - optional
+    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below in tools_jar_path parameter.
+    #
+    # process_name_regex: .*process_name.*
 
-  ## @param tools_jar_path - string - optional
-  ## Needs to be set when process_name_regex parameter is set.
-  #
-  #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## @param tools_jar_path - string - optional
+    ## Needs to be set when process_name_regex parameter is set.
+    #
+    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
-  ## @param name - string - optional
-  ## Set your instance name.
-  #
-  #  name: kafka_instance
+    ## @param name - string - optional
+    ## Set your instance name.
+    #
+    # name: kafka_instance
 
-  ## @param java_bin_path - string - optional
-  ## java_bin_path should be set if the agent cannot find your java executable
-  #
-  #  java_bin_path: <JAVA_PATH>
+    ## @param java_bin_path - string - optional
+    ## java_bin_path should be set if the agent cannot find your java executable
+    #
+    # java_bin_path: <JAVA_PATH>
 
-  ## @param java_options - string - optional
-  ## List of Java JVM options.
-  #
-  #  java_options: "-Xmx200m -Xms50m"
+    ## @param java_options - string - optional
+    ## List of Java JVM options.
+    #
+    # java_options: "-Xmx200m -Xms50m"
 
-  ## @param trust_store_path - string - optional
-  ## trust_store_path should be set if ssl is enabled.
-  ## path to your trusted store
-  #
-  #  trust_store_path: <TRUSTSTORE.JKS_PATH>
+    ## @param trust_store_path - string - optional
+    ## trust_store_path should be set if ssl is enabled.
+    ## path to your trusted store
+    #
+    # trust_store_path: <TRUSTSTORE.JKS_PATH>
 
-  ## @param trust_store_password - string - optional
-  ## trust_store_password should be set if ssl is enabled
-  ## password for your TrustStore.jks file
-  #
-  #  trust_store_password: <PASSWORD>
+    ## @param trust_store_password - string - optional
+    ## trust_store_password should be set if ssl is enabled
+    ## password for your TrustStore.jks file
+    #
+    # trust_store_password: <PASSWORD>
 
-  ## @param key_store_path - string - optional
-  ## key_store_path should be set if client authentication is enabled on the target JVM.
-  ## path to your key store
-  #
-  #  key_store_path: <KEYSTORE.JKS_PATH>
+    ## @param key_store_path - string - optional
+    ## key_store_path should be set if client authentication is enabled on the target JVM.
+    ## path to your key store
+    #
+    # key_store_path: <KEYSTORE.JKS_PATH>
 
-  ## @param key_store_password - string - optional
-  ## key_store_password should be set if client authentication is enabled on the target JVM.
-  ## password for your KeyStore.jks file
-  #
-  #  key_store_password: <PASSWORD>
+    ## @param key_store_password - string - optional
+    ## key_store_password should be set if client authentication is enabled on the target JVM.
+    ## password for your KeyStore.jks file
+    #
+    # key_store_password: <PASSWORD>
 
-  ## @param rmi_registry_ssl - boolean - optional
-  ## Whether or not the agent should connect to the rmi registry using ssl.
-  #
-  #  rmi_registry_ssl: false
+    ## @param rmi_registry_ssl - boolean - optional
+    ## Whether or not the agent should connect to the rmi registry using ssl.
+    #
+    # rmi_registry_ssl: false
 
-  ## @param tags  - list of key:value element - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
@@ -102,18 +102,17 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
-#logs:
+# logs:
 #
-#  - type: file
-#    path: /var/log/kafka/server.log
-#    source: kafka
-#    service: myservice
-
+#   - type: file
+#     path: /var/log/kafka/server.log
+#     source: kafka
+#     service: myservice
 ## To handle multi line that starts with yyyy-mm-dd use the following pattern
-#    log_processing_rules:
-#       - type: multi_line
-#         name: start_with_date
-#         pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#     log_processing_rules:
+#        - type: multi_line
+#          name: start_with_date
+#          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
 
 init_config:
 
@@ -133,9 +132,9 @@ init_config:
   ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
 
   conf:
-    #
-    # Producers (only v0.8.2.x)
-    #
+    ##
+    ## Producers (only v0.8.2.x)
+    ##
     - include:
         domain: 'kafka.producer'
         bean_regex: 'kafka\.producer:type=ProducerRequestMetrics,name=ProducerRequestRateAndTimeMs,clientId=.*'

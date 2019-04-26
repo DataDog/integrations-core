@@ -50,9 +50,7 @@ def changes(since, out_file, eager):
                 continue
 
             result = run_command(
-                'git show "--pretty=format:%an%n" -U0 {} */CHANGELOG.md'.format(commit_hash),
-                capture=True,
-                check=True,
+                'git show "--pretty=format:%an%n" -U0 {} */CHANGELOG.md'.format(commit_hash), capture=True, check=True
             )
 
             # Example:

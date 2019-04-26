@@ -35,13 +35,8 @@ INSTANCE = {
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queues': [
-        QUEUE
-    ],
-    'channels': [
-        CHANNEL,
-        BAD_CHANNEL,
-    ]
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
 INSTANCE_PATTERN = {
@@ -51,14 +46,8 @@ INSTANCE_PATTERN = {
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queue_patterns': [
-        'DEV.*',
-        'SYSTEM.*'
-    ],
-    'channels': [
-        CHANNEL,
-        BAD_CHANNEL,
-    ]
+    'queue_patterns': ['DEV.*', 'SYSTEM.*'],
+    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
 INSTANCE_COLLECT_ALL = {
@@ -69,10 +58,7 @@ INSTANCE_COLLECT_ALL = {
     'username': USERNAME,
     'password': PASSWORD,
     'auto_discover_queues': True,
-    'channels': [
-        CHANNEL,
-        BAD_CHANNEL,
-    ]
+    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
 INSTANCE_QUEUE_REGEX_TAG = {
@@ -82,10 +68,6 @@ INSTANCE_QUEUE_REGEX_TAG = {
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queues': [
-        QUEUE
-    ],
-    'queue_tag_re': {
-        'DEV.QUEUE.*': "foo:bar"
-    }
+    'queues': [QUEUE],
+    'queue_tag_re': {'DEV.QUEUE.*': "foo:bar"},
 }

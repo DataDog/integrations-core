@@ -1,35 +1,23 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 import json
+import os
 from collections import OrderedDict
 
 import click
 from six import string_types
 
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
-from ...constants import get_root
-from ...utils import parse_version_parts
 from ....compat import JSONDecodeError
 from ....utils import file_exists, read_file
+from ...constants import get_root
+from ...utils import parse_version_parts
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
-REQUIRED_ATTRIBUTES = {
-    'agent_version',
-    'check',
-    'description',
-    'groups',
-    'integration',
-    'name',
-    'statuses',
-}
+REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
 
 
-@click.command(
-    'service-checks',
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate `service_checks.json` files'
-)
+@click.command('service-checks', context_settings=CONTEXT_SETTINGS, short_help='Validate `service_checks.json` files')
 def service_checks():
     """Validate all `service_checks.json` files."""
     root = get_root()

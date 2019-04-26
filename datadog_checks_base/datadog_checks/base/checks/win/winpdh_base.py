@@ -4,24 +4,18 @@
 import win32wnet
 from six import iteritems
 
+from ... import AgentCheck, is_affirmative
+from ...utils.containers import hash_mutable
+
 try:
     from .winpdh import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 except ImportError:
     from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 
-from ... import AgentCheck, is_affirmative
-from ...utils.containers import hash_mutable
 
-int_types = [
-    "int",
-    "long",
-    "uint",
-]
+int_types = ["int", "long", "uint"]
 
-double_types = [
-    "double",
-    "float",
-]
+double_types = ["double", "float"]
 
 
 class PDHBaseCheck(AgentCheck):
@@ -30,6 +24,7 @@ class PDHBaseCheck(AgentCheck):
 
     Windows only.
     """
+
     def __init__(self, name, init_config, agentConfig, instances, counter_list):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._countersettypes = {}
@@ -154,12 +149,7 @@ class PDHBaseCheck(AgentCheck):
 
             try:
                 obj = WinPDHCounter(
-                    counterset,
-                    counter_name,
-                    self.log,
-                    inst_name,
-                    machine_name=remote_machine,
-                    precision=precision
+                    counterset, counter_name, self.log, inst_name, machine_name=remote_machine, precision=precision
                 )
             except Exception as e:
                 self.log.debug(
@@ -168,7 +158,10 @@ class PDHBaseCheck(AgentCheck):
                     )
                 )
                 self._missing_counters[(counterset, inst_name, counter_name, dd_name, mtype)] = (
-                    datatypes, remote_machine, check_instance, message
+                    datatypes,
+                    remote_machine,
+                    check_instance,
+                    message,
                 )
                 continue
             else:
@@ -180,9 +173,4 @@ class PDHBaseCheck(AgentCheck):
 
     @classmethod
     def _no_instance(cls, inst_name):
-        return (
-            inst_name.lower() == 'none' or
-            len(inst_name) == 0 or
-            inst_name == '*' or
-            inst_name.lower() == 'all'
-        )
+        return inst_name.lower() == 'none' or len(inst_name) == 0 or inst_name == '*' or inst_name.lower() == 'all'

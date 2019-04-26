@@ -44,13 +44,7 @@ class WaitFor(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError(
-                'Result: {}\n'
-                'Error: {}'.format(
-                    repr(last_result),
-                    last_error,
-                )
-            )
+            raise RetryError('Result: {}\n' 'Error: {}'.format(repr(last_result), last_error))
 
 
 class CheckEndpoints(LazyFunction):
@@ -82,13 +76,7 @@ class CheckEndpoints(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError(
-                'Endpoint: {}\n'
-                'Error: {}'.format(
-                    last_endpoint,
-                    last_error
-                )
-            )
+            raise RetryError('Endpoint: {}\n' 'Error: {}'.format(last_endpoint, last_error))
 
 
 class CheckCommandOutput(LazyFunction):
@@ -106,8 +94,7 @@ class CheckCommandOutput(LazyFunction):
             patterns = [patterns]
 
         self.patterns = [
-            re.compile(pattern, re.M) if isinstance(pattern, string_types) else pattern
-            for pattern in patterns
+            re.compile(pattern, re.M) if isinstance(pattern, string_types) else pattern for pattern in patterns
         ]
 
         if matches == 'all':
@@ -141,13 +128,7 @@ class CheckCommandOutput(LazyFunction):
             time.sleep(self.wait)
         else:
             raise RetryError(
-                u'Command: {}\n'
-                u'Exit code: {}\n'
-                u'Captured Output: {}'.format(
-                    self.command,
-                    exit_code,
-                    log_output
-                )
+                u'Command: {}\n' u'Exit code: {}\n' u'Captured Output: {}'.format(self.command, exit_code, log_output)
             )
 
 

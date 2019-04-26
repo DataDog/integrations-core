@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .openstack_controller import OpenStackControllerCheck
 
-__all__ = [
-    '__version__',
-    'OpenStackControllerCheck'
-]
+__all__ = ['__version__', 'OpenStackControllerCheck']

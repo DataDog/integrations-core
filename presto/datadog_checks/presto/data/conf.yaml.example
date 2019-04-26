@@ -12,96 +12,96 @@ init_config:
 
 instances:
 
-  ## @param host - string - required
-  ## Presto host to connect to.
-  #
+    ## @param host - string - required
+    ## Presto host to connect to.
+    #
   - host: localhost
 
-  ## @param port - integer - required
-  ## Presto port to connect to.
-  #
+    ## @param port - integer - required
+    ## Presto port to connect to.
+    #
     port: 9999
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
-  ## @param user - string - optional
-  ## Username to use when connecting to presto.
-  #
-  #  user: <USERNAME>
+    ## @param user - string - optional
+    ## Username to use when connecting to presto.
+    #
+    # user: <USERNAME>
 
-  ## @param password - string - optional
-  ## Password to use when connecting to presto.
-  #
-  #  password: <PASSWORD>
+    ## @param password - string - optional
+    ## Password to use when connecting to presto.
+    #
+    # password: <PASSWORD>
 
-  ## @param process_name_regex - string - optional
-  ## Instead of specifying a host, and port. The agent can connect using the attach api.
-  ## This requires the JDK to be installed and the path to tools.jar to be set below.
-  ## Note: It needs to be set when process_name_regex parameter is set
-  ##
-  #
-  #  process_name_regex: .*process_name.*
+    ## @param process_name_regex - string - optional
+    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below.
+    ## Note: It needs to be set when process_name_regex parameter is set
+    ##
+    #
+    # process_name_regex: .*process_name.*
 
-  ## @param tools_jar_path - string - optional
-  ## Path to the tool.jar file to use with `process_name_regex` parameter.
-  #
-  #  tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## @param tools_jar_path - string - optional
+    ## Path to the tool.jar file to use with `process_name_regex` parameter.
+    #
+    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
-  ## @param name - string - optional
-  ## Set your instance name.
-  #
-  #  name: presto_instance
+    ## @param name - string - optional
+    ## Set your instance name.
+    #
+    # name: presto_instance
 
-  ## @param java_bin_path - string - optional
-  ## java_bin_path should be set if the agent cannot find your java executable
-  #
-  #  java_bin_path: <JAVA_PATH>
+    ## @param java_bin_path - string - optional
+    ## java_bin_path should be set if the agent cannot find your java executable
+    #
+    # java_bin_path: <JAVA_PATH>
 
-  ## @param java_options - string - optional
-  ## List of Java JVM options.
-  #
-  #  java_options: "-Xmx200m -Xms50m"
+    ## @param java_options - string - optional
+    ## List of Java JVM options.
+    #
+    # java_options: "-Xmx200m -Xms50m"
 
-  ## @param trust_store_path - string - optional
-  ## trust_store_path should be set if ssl is enabled.
-  ## path to your trusted store
-  #
-  #  trust_store_path: <TRUSTSTORE.JKS_PATH>
+    ## @param trust_store_path - string - optional
+    ## trust_store_path should be set if ssl is enabled.
+    ## path to your trusted store
+    #
+    # trust_store_path: <TRUSTSTORE.JKS_PATH>
 
-  ## @param trust_store_password - string - optional
-  ## trust_store_password should be set if ssl is enabled
-  ## password for your TrustStore.jks file
-  #
-  #  trust_store_password: password
+    ## @param trust_store_password - string - optional
+    ## trust_store_password should be set if ssl is enabled
+    ## password for your TrustStore.jks file
+    #
+    # trust_store_password: password
 
-  ## @param key_store_path - string - optional
-  ## key_store_path should be set if client authentication is enabled on the target JVM.
-  ## path to your key store
-  #
-  #  key_store_path: <KEYSTORE.JKS_PATH>
+    ## @param key_store_path - string - optional
+    ## key_store_path should be set if client authentication is enabled on the target JVM.
+    ## path to your key store
+    #
+    # key_store_path: <KEYSTORE.JKS_PATH>
 
-  ## @param key_store_password - string - optional
-  ## key_store_password should be set if client authentication is enabled on the target JVM.
-  ## password for your KeyStore.jks file
-  #
-  #  key_store_password: <PASSWORD>
+    ## @param key_store_password - string - optional
+    ## key_store_password should be set if client authentication is enabled on the target JVM.
+    ## password for your KeyStore.jks file
+    #
+    # key_store_password: <PASSWORD>
 
-  ## @param rmi_registry_ssl - boolean - optional - default: false
-  ## Whether or not the agent should connect to the rmi registry using ssl.
-  #
-  #  rmi_registry_ssl: false
+    ## @param rmi_registry_ssl - boolean - optional - default: false
+    ## Whether or not the agent should connect to the rmi registry using ssl.
+    #
+    # rmi_registry_ssl: false
 
-  ## List of metrics to be collected by the integration
-  ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-  ## Agent 5: Customize all your metrics below
-  ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+    ## List of metrics to be collected by the integration
+    ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+    ## Agent 5: Customize all your metrics below
+    ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
 
     conf:
       - include:
@@ -225,7 +225,7 @@ instances:
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel if type is windows_event
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
@@ -237,10 +237,10 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /data/var/log/*.log
+#     path: /var/log/presto/*.log
 #     source: presto
 #     sourcecategory: database
-#     service: myapplication
+#     service: <SERVICE_NAME>
 #     log_processing_rules:
 #       - type: multi_line
 #         name: log_start_with_date

@@ -15,14 +15,10 @@ COMMON_METRICS = [
 ]
 
 E_METRICS = [
-    'rabbitmq.exchange.messages.confirm.count',
-    'rabbitmq.exchange.messages.confirm.rate',
     'rabbitmq.exchange.messages.publish_in.count',
     'rabbitmq.exchange.messages.publish_in.rate',
     'rabbitmq.exchange.messages.publish_out.count',
     'rabbitmq.exchange.messages.publish_out.rate',
-    'rabbitmq.exchange.messages.return_unroutable.count',
-    'rabbitmq.exchange.messages.return_unroutable.rate',
 ]
 
 Q_METRICS = [
@@ -36,7 +32,7 @@ Q_METRICS = [
     'rabbitmq.queue.messages_unacknowledged',
     'rabbitmq.queue.messages_unacknowledged.rate',
     'rabbitmq.queue.messages.publish.count',
-    'rabbitmq.queue.messages.publish.rate'
+    'rabbitmq.queue.messages.publish.rate',
 ]
 
 OVERVIEW_METRICS_TOTALS = [

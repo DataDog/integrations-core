@@ -5,15 +5,15 @@
 '''
 Monitor the Windows Event Log
 '''
-# stdlib
 import calendar
 from datetime import datetime, timedelta
+
 from uptime import uptime
 
-# project
-from datadog_checks.checks.win.wmi import WinWMICheck, to_time, from_time
-from datadog_checks.utils.containers import hash_mutable
-from datadog_checks.utils.timeout import TimeoutException
+from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
+from datadog_checks.base.utils.containers import hash_mutable
+from datadog_checks.base.utils.timeout import TimeoutException
 
 SOURCE_TYPE_NAME = 'event viewer'
 EVENT_TYPE = 'win32_log_event'
@@ -21,26 +21,15 @@ EVENT_TYPE = 'win32_log_event'
 
 class Win32EventLogWMI(WinWMICheck):
     # WMI information
-    EVENT_PROPERTIES = [
-        "EventCode",
-        "SourceName",
-        "TimeGenerated",
-        "Type",
-    ]
-    EXTRA_EVENT_PROPERTIES = [
-        "InsertionStrings",
-        "Message",
-        "Logfile",
-    ]
+    EVENT_PROPERTIES = ["EventCode", "SourceName", "TimeGenerated", "Type"]
+    EXTRA_EVENT_PROPERTIES = ["InsertionStrings", "Message", "Logfile"]
     NAMESPACE = "root\\CIMV2"
     EVENT_CLASS = "Win32_NTLogEvent"
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        WinWMICheck.__init__(
-            self, name, init_config, agentConfig, instances=instances
-        )
+        WinWMICheck.__init__(self, name, init_config, agentConfig, instances=instances)
         # Settings
-        self._tag_event_id = init_config.get('tag_event_id', False)
+        self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
         self._verbose = init_config.get('verbose', True)
         self._default_event_priority = init_config.get('default_event_priority', 'normal')
 
@@ -63,8 +52,14 @@ class Win32EventLogWMI(WinWMICheck):
         source_names = instance.get('source_name', [])
         log_files = instance.get('log_file', [])
         event_ids = instance.get('event_id', [])
-        message_filters = instance.get('message_filters', [])
         event_format = instance.get('event_format')
+        message_filters = instance.get('message_filters', [])
+
+        if not (source_names or event_ids or message_filters or log_files or user or ltypes):
+            raise ConfigurationError(
+                'At least one of the following filters must be set: '
+                'source_name, event_id, message_filters, log_file, user, type'
+            )
 
         instance_hash = hash_mutable(instance)
         instance_key = self._get_instance_key(host, self.NAMESPACE, self.EVENT_CLASS, instance_hash)
@@ -122,11 +117,14 @@ class Win32EventLogWMI(WinWMICheck):
 
         wmi_sampler = self._get_wmi_sampler(
             instance_key,
-            self.EVENT_CLASS, event_properties,
+            self.EVENT_CLASS,
+            event_properties,
             filters=filters,
-            host=host, namespace=self.NAMESPACE,
-            username=username, password=password,
-            and_props=['Message']
+            host=host,
+            namespace=self.NAMESPACE,
+            username=username,
+            password=password,
+            and_props=['Message'],
         )
 
         wmi_sampler.reset_filter(new_filters=filters)
@@ -137,8 +135,7 @@ class Win32EventLogWMI(WinWMICheck):
                 u"[Win32EventLog] WMI query timed out."
                 u" class={wmi_class} - properties={wmi_properties} -"
                 u" filters={filters} - tags={tags}".format(
-                    wmi_class=self.EVENT_CLASS, wmi_properties=event_properties,
-                    filters=filters, tags=instance_tags
+                    wmi_class=self.EVENT_CLASS, wmi_properties=event_properties, filters=filters, tags=instance_tags
                 )
             )
         else:
@@ -146,8 +143,7 @@ class Win32EventLogWMI(WinWMICheck):
                 # for local events we dont need to specify a hostname
                 hostname = None if (host == "localhost" or host == ".") else host
                 log_ev = LogEvent(
-                    ev, self.log, hostname, instance_tags, notify,
-                    self._tag_event_id, event_format, event_priority
+                    ev, self.log, hostname, instance_tags, notify, self._tag_event_id, event_format, event_priority
                 )
 
                 # Since WQL only compares on the date and NOT the time, we have to
@@ -165,9 +161,16 @@ class Win32EventLogWMI(WinWMICheck):
         ''' A wrapper around wmi.from_time to get a WMI-formatted time from a
             time struct.
         '''
-        return from_time(year=dt.year, month=dt.month, day=dt.day,
-                         hours=dt.hour, minutes=dt.minute,
-                         seconds=dt.second, microseconds=0, timezone=0)
+        return from_time(
+            year=dt.year,
+            month=dt.month,
+            day=dt.day,
+            hours=dt.hour,
+            minutes=dt.minute,
+            seconds=dt.second,
+            microseconds=0,
+            timezone=0,
+        )
 
 
 class LogEvent(object):
@@ -183,9 +186,7 @@ class LogEvent(object):
 
     @property
     def _msg_title(self):
-        return '{logfile}/{source}'.format(
-            logfile=self.event['Logfile'],
-            source=self.event['SourceName'])
+        return '{logfile}/{source}'.format(logfile=self.event['Logfile'], source=self.event['SourceName'])
 
     @property
     def _msg_text(self):
@@ -220,12 +221,10 @@ class LogEvent(object):
             if self.event.get('Message'):
                 msg_text = u"{message}\n".format(message=self.event['Message'])
             elif self.event.get('InsertionStrings'):
-                msg_text = u"\n".join([i_str for i_str in self.event['InsertionStrings']
-                                      if i_str.strip()])
+                msg_text = u"\n".join([i_str for i_str in self.event['InsertionStrings'] if i_str.strip()])
 
         if self.notify_list:
-            msg_text += u"\n{notify_list}".format(
-                notify_list=' '.join([" @" + n for n in self.notify_list]))
+            msg_text += u"\n{notify_list}".format(notify_list=' '.join([" @" + n for n in self.notify_list]))
 
         return msg_text
 
@@ -253,7 +252,7 @@ class LogEvent(object):
             'aggregation_key': self._aggregation_key,
             'alert_type': self._alert_type,
             'source_type_name': SOURCE_TYPE_NAME,
-            'tags': self.tags
+            'tags': self.tags,
         }
         if self.hostname:
             event_dict['host'] = self.hostname
@@ -272,10 +271,12 @@ class LogEvent(object):
         year, month, day, hour, minute, second, microsecond, tz = to_time(wmi_ts)
         tz_delta = timedelta(minutes=int(tz))
         if '+' in wmi_ts:
-            tz_delta = - tz_delta
+            tz_delta = -tz_delta
 
-        dt = datetime(year=year, month=month, day=day, hour=hour, minute=minute,
-                      second=second, microsecond=microsecond) + tz_delta
+        dt = (
+            datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=second, microsecond=microsecond)
+            + tz_delta
+        )
         return int(calendar.timegm(dt.timetuple()))
 
     def _tags(self, tags, event_code):

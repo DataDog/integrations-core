@@ -14,7 +14,6 @@ RELATION_METRICS = [
     'postgresql.rows_hot_updated',
     'postgresql.live_rows',
     'postgresql.dead_rows',
-
     'postgresql.heap_blocks_read',
     'postgresql.heap_blocks_hit',
     'postgresql.toast_blocks_read',
@@ -23,11 +22,7 @@ RELATION_METRICS = [
     'postgresql.toast_index_blocks_hit',
 ]
 
-RELATION_SIZE_METRICS = [
-    'postgresql.table_size',
-    'postgresql.total_size',
-    'postgresql.index_size',
-]
+RELATION_SIZE_METRICS = ['postgresql.table_size', 'postgresql.total_size', 'postgresql.index_size']
 
 RELATION_INDEX_METRICS = [
     'postgresql.index_scans',
@@ -37,11 +32,7 @@ RELATION_INDEX_METRICS = [
     'postgresql.index_blocks_hit',
 ]
 
-IDX_METRICS = [
-    'postgresql.index_scans',
-    'postgresql.index_rows_read',
-    'postgresql.index_rows_fetched',
-]
+IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgresql.index_rows_fetched']
 
 
 @pytest.mark.integration
@@ -53,13 +44,16 @@ def test_relations_metrics(aggregator, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
-        'table:persons', 'schema:public',
+        'table:persons',
+        'schema:public',
     ]
 
     expected_size_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:persons',
     ]
@@ -85,8 +79,12 @@ def test_index_metrics(aggregator, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
-        'pg_instance:{}-{}'.format(pg_instance['host'], pg_instance['port']),
-        'db:dogs', 'table:breed', 'index:breed_names', 'schema:public',
+        'server:{}'.format(pg_instance['host']),
+        'port:{}'.format(pg_instance['port']),
+        'db:dogs',
+        'table:breed',
+        'index:breed_names',
+        'schema:public',
     ]
 
     for name in IDX_METRICS:

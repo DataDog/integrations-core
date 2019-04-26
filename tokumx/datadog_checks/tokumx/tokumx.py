@@ -5,18 +5,13 @@
 from __future__ import division
 
 import time
-from six import iteritems, PY3
 
-from datadog_checks.tokumx.vendor.pymongo import (
-    MongoClient,
-    ReadPreference,
-    errors,
-    uri_parser,
-    version as py_version,
-)
-from datadog_checks.tokumx.vendor import bson
+from six import PY3, iteritems
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.tokumx.vendor import bson
+from datadog_checks.tokumx.vendor.pymongo import MongoClient, ReadPreference, errors, uri_parser
+from datadog_checks.tokumx.vendor.pymongo import version as py_version
 
 if PY3:
     long = int
@@ -37,7 +32,7 @@ class LocalRate:
         self.cur_ts = None
 
     def submit_histogram(self):
-        value = float(self.cur_val - self.prev_val)/float(self.cur_ts - self.prev_ts)
+        value = float(self.cur_val - self.prev_val) / float(self.cur_ts - self.prev_ts)
         self.agent_check.histogram(self.metric_name, value=value, tags=self.tags)
 
     def submit(self, val):
@@ -70,20 +65,17 @@ class TokuMX(AgentCheck):
         "cursors.totalOpen",
         "cursors.timedOut",
         "uptime",
-
         "stats.indexes",
         "stats.indexSize",
         "stats.objects",
         "stats.dataSize",
         "stats.storageSize",
-
         "replSet.health",
         "replSet.state",
         "replSet.replicationLag",
         "metrics.repl.buffer.count",
         "metrics.repl.buffer.maxSizeBytes",
         "metrics.repl.buffer.sizeBytes",
-
         "ft.cachetable.size.current",
         "ft.cachetable.size.writing",
         "ft.cachetable.size.limit",
@@ -93,7 +85,6 @@ class TokuMX(AgentCheck):
         "ft.compressionRatio.nonleaf",
         "ft.compressionRatio.overall",
         "ft.checkpoint.lastComplete.time",
-
         "ft.alerts.locktreeRequestsPending",
         "ft.alerts.checkpointFailures",
     ]
@@ -144,7 +135,6 @@ class TokuMX(AgentCheck):
         "metrics.repl.oplog.insertBytes",
         "metrics.ttl.deletedDocuments",
         "metrics.ttl.passes",
-
         "ft.fsync.count",
         "ft.fsync.time",
         "ft.log.count",
@@ -189,7 +179,6 @@ class TokuMX(AgentCheck):
         "ft.serializeTime.leaf.compress",
         "ft.serializeTime.leaf.decompress",
         "ft.serializeTime.leaf.deserialize",
-
         "ft.alerts.longWaitEvents.logBufferWait",
         "ft.alerts.longWaitEvents.fsync.count",
         "ft.alerts.longWaitEvents.fsync.time",
@@ -248,13 +237,15 @@ class TokuMX(AgentCheck):
         msg_title = "%s is %s" % (server, status)
         msg = "TokuMX %s just reported as %s" % (server, status)
 
-        self.event({
-            'timestamp': int(time.time()),
-            'event_type': 'tokumx',
-            'msg_title': msg_title,
-            'msg_text': msg,
-            'host': self.hostname
-        })
+        self.event(
+            {
+                'timestamp': int(time.time()),
+                'event_type': 'tokumx',
+                'msg_title': msg_title,
+                'msg_text': msg,
+                'host': self.hostname,
+            }
+        )
 
     def _get_ssl_params(self, instance):
         ssl_params = {
@@ -262,7 +253,7 @@ class TokuMX(AgentCheck):
             'ssl_keyfile': instance.get('ssl_keyfile', None),
             'ssl_certfile': instance.get('ssl_certfile', None),
             'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-            'ssl_ca_certs': instance.get('ssl_ca_certs', None)
+            'ssl_ca_certs': instance.get('ssl_ca_certs', None),
         }
 
         for key, param in list(iteritems(ssl_params)):
@@ -296,18 +287,13 @@ class TokuMX(AgentCheck):
             self.log.info('No TokuMX database found in URI. Defaulting to admin.')
             db_name = 'admin'
 
-        service_check_tags = [
-            "db:%s" % db_name
-        ] + custom_tags
+        service_check_tags = ["db:%s" % db_name] + custom_tags
 
         nodelist = parsed.get('nodelist')
         if nodelist:
             host = nodelist[0][0]
             port = nodelist[0][1]
-            service_check_tags = service_check_tags + [
-                "host:%s" % host,
-                "port:%s" % port
-            ]
+            service_check_tags = service_check_tags + ["host:%s" % host, "port:%s" % port]
 
         do_auth = True
         if username is None or password is None:
@@ -315,12 +301,14 @@ class TokuMX(AgentCheck):
             do_auth = False
         try:
             if read_preference:
-                conn = MongoClient(server,
-                                   socketTimeoutMS=DEFAULT_TIMEOUT*1000,
-                                   read_preference=ReadPreference.SECONDARY,
-                                   **ssl_params)
+                conn = MongoClient(
+                    server,
+                    socketTimeoutMS=DEFAULT_TIMEOUT * 1000,
+                    read_preference=ReadPreference.SECONDARY,
+                    **ssl_params
+                )
             else:
-                conn = MongoClient(server, socketTimeoutMS=DEFAULT_TIMEOUT*1000, **ssl_params)
+                conn = MongoClient(server, socketTimeoutMS=DEFAULT_TIMEOUT * 1000, **ssl_params)
             db = conn[db_name]
         except Exception:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
@@ -329,10 +317,9 @@ class TokuMX(AgentCheck):
         if do_auth:
             if not db.authenticate(username, password):
                 message = "TokuMX: cannot connect with config %s" % server
-                self.service_check(self.SERVICE_CHECK_NAME,
-                                   AgentCheck.CRITICAL,
-                                   tags=service_check_tags,
-                                   message=message)
+                self.service_check(
+                    self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message
+                )
                 raise Exception(message)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
@@ -363,9 +350,8 @@ class TokuMX(AgentCheck):
                         data['replicationLag'] = lag.total_seconds()
                     else:
                         data['replicationLag'] = (
-                            lag.microseconds +
-                            (lag.seconds + lag.days * 24 * 3600) * 10**6
-                        ) / 10.0**6
+                            lag.microseconds + (lag.seconds + lag.days * 24 * 3600) * 10 ** 6
+                        ) / 10.0 ** 6
 
                 if current is not None:
                     data['health'] = current['health']
@@ -376,8 +362,10 @@ class TokuMX(AgentCheck):
                     tags.append('role:primary')
                 else:
                     tags.append('role:secondary')
-                    self.log.debug("Current replSet member is secondary. "
-                                   "Creating new connection to set read_preference to secondary.")
+                    self.log.debug(
+                        "Current replSet member is secondary. "
+                        "Creating new connection to set read_preference to secondary."
+                    )
                     # need a new connection to deal with replica sets
                     server, conn, db, _ = self._get_connection(instance, read_preference=ReadPreference.SECONDARY)
 
@@ -385,8 +373,9 @@ class TokuMX(AgentCheck):
                 self.check_last_state(data['state'], server, self.agentConfig)
                 status['replSet'] = data
         except Exception as e:
-            if "OperationFailure" in repr(e) and \
-                    ("replSetGetStatus" in str(e) or "not running with --replSet" in str(e)):
+            if "OperationFailure" in repr(e) and (
+                "replSetGetStatus" in str(e) or "not running with --replSet" in str(e)
+            ):
                 pass
             else:
                 raise e

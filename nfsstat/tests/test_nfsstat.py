@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 import logging
+import os
 
 import mock
 
@@ -35,21 +35,17 @@ log = logging.getLogger(__name__)
 
 class TestNfsstat:
     CHECK_NAME = 'nfsstat'
-    INSTANCES = {
-        'main': {
-            'tags': ['optional:tag1'],
-        },
-    }
+    INSTANCES = {'main': {'tags': ['optional:tag1']}}
 
-    INIT_CONFIG = {
-        'nfsiostat_path': '/opt/datadog-agent/embedded/sbin/nfsiostat',
-    }
+    INIT_CONFIG = {'nfsiostat_path': '/opt/datadog-agent/embedded/sbin/nfsiostat'}
 
     def test_no_devices(self, aggregator):
         instance = self.INSTANCES['main']
         c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
-        with mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output',
-                        return_value=('No NFS mount points were found', '', 0)):
+        with mock.patch(
+            'datadog_checks.nfsstat.nfsstat.get_subprocess_output',
+            return_value=('No NFS mount points were found', '', 0),
+        ):
             c.check(instance)
 
     def test_check(self, aggregator):
@@ -59,16 +55,11 @@ class TestNfsstat:
         with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
             mock_output = ensure_unicode(f.read())
 
-        with mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output',
-                        return_value=(mock_output, '', 0)):
+        with mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output', return_value=(mock_output, '', 0)):
             c.check(instance)
 
         tags = list(instance['tags'])
-        tags.extend([
-            'nfs_server:192.168.34.1',
-            'nfs_export:/exports/nfs/datadog/two',
-            'nfs_mount:/mnt/datadog/two'
-        ])
+        tags.extend(['nfs_server:192.168.34.1', 'nfs_export:/exports/nfs/datadog/two', 'nfs_mount:/mnt/datadog/two'])
 
         for metric in metrics:
             aggregator.assert_metric(metric, tags=tags)

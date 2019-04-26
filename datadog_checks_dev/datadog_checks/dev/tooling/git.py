@@ -4,9 +4,9 @@
 import os
 import re
 
-from .constants import get_root
 from ..subprocess import run_command
 from ..utils import chdir
+from .constants import get_root
 
 
 def get_current_branch():
@@ -37,10 +37,7 @@ def get_commits_since(check_name, target_tag=None):
     """
     root = get_root()
     target_path = os.path.join(root, check_name)
-    command = 'git log --pretty=%s {}{}'.format(
-        '' if target_tag is None else '{}... '.format(target_tag),
-        target_path
-    )
+    command = 'git log --pretty=%s {}{}'.format('' if target_tag is None else '{}... '.format(target_tag), target_path)
 
     with chdir(root):
         return run_command(command, capture=True).stdout.splitlines()
@@ -67,21 +64,11 @@ def git_commit(targets, message, force=False, sign=False):
         target_paths.append(os.path.join(root, t))
 
     with chdir(root):
-        result = run_command(
-            'git add{} {}'.format(
-                ' -f' if force else '',
-                ' '.join(target_paths)
-            )
-        )
+        result = run_command('git add{} {}'.format(' -f' if force else '', ' '.join(target_paths)))
         if result.code != 0:
             return result
 
-        return run_command(
-            'git commit{} -m "{}"'.format(
-                ' -S' if sign else '',
-                message
-            )
-        )
+        return run_command('git commit{} -m "{}"'.format(' -S' if sign else '', message))
 
 
 def git_tag(tag_name, push=False):
@@ -94,7 +81,7 @@ def git_tag(tag_name, push=False):
         if push:
             if result.code != 0:
                 return result
-            return run_command('git push origin {}'.format(tag_name))
+            return run_command('git push origin {}'.format(tag_name), capture=True)
 
         return result
 

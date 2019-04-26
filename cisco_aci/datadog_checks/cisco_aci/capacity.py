@@ -4,7 +4,7 @@
 
 from six import iteritems
 
-from . import aci_metrics, helpers, exceptions
+from . import aci_metrics, exceptions, helpers
 
 
 class Capacity:

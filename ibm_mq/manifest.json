@@ -14,7 +14,8 @@
   ],
   "public_title": "Datadog-IBM MQ Integration",
   "categories": [
-    "Message Queue",
+    "processing",
+    "messaging",
     "log collection"
   ],
   "type": "check",

@@ -1,8 +1,8 @@
-# Agent Check: {check_name_cap}
+# Agent Check: {integration_name}
 
 ## Overview
 
-This check monitors [{check_name_cap}][1] through the Datadog Agent.
+This check monitors [{integration_name}][1] through the Datadog Agent.
 
 ## Setup
 
@@ -24,21 +24,21 @@ This check monitors [{check_name_cap}][1] through the Datadog Agent.
 
 ### Metrics
 
-{check_name_cap} does not include any metrics.
+{integration_name} does not include any metrics.
 
 ### Service Checks
 
-{check_name_cap} does not include any service checks.
+{integration_name} does not include any service checks.
 
 ### Events
 
-{check_name_cap} does not include any events.
+{integration_name} does not include any events.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://github.com/DataDog/integrations-core/blob/master/{check_name}/datadog_checks/{check_name}/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information

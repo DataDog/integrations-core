@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .tokumx import TokuMX
 
-__all__ = [
-    '__version__',
-    'TokuMX'
-]
+__all__ = ['__version__', 'TokuMX']

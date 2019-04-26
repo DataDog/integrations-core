@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .mongo import MongoDb
 
-__all__ = [
-    '__version__',
-    'MongoDb'
-]
+__all__ = ['__version__', 'MongoDb']

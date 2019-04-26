@@ -8,6 +8,7 @@ class TaggerStub(object):
     Used for unit testing checks, this stub makes possible to execute
     a check without a running Agent.
     """
+
     LOW, ORCHESTRATOR, HIGH = range(3)
 
     def __init__(self):

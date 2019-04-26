@@ -116,7 +116,7 @@ class TestEvents:
             "msg_title": "new test event",
             "aggregation_key": "test.event",
             "msg_text": "test event test event",
-            "tags": None
+            "tags": None,
         }
         check.event(event)
         aggregator.assert_event('test event test event')
@@ -129,13 +129,23 @@ class TestServiceChecks:
         check.service_check("testservicecheck", AgentCheck.OK, tags=None, message="")
         aggregator.assert_service_check("testservicecheck", status=AgentCheck.OK)
 
-        check.service_check("testservicecheckwithhostname", AgentCheck.OK, tags=["foo", "bar"], hostname="testhostname",
-                            message="a message")
-        aggregator.assert_service_check("testservicecheckwithhostname", status=AgentCheck.OK, tags=["foo", "bar"],
-                                        hostname="testhostname", message="a message")
+        check.service_check(
+            "testservicecheckwithhostname",
+            AgentCheck.OK,
+            tags=["foo", "bar"],
+            hostname="testhostname",
+            message="a message",
+        )
+        aggregator.assert_service_check(
+            "testservicecheckwithhostname",
+            status=AgentCheck.OK,
+            tags=["foo", "bar"],
+            hostname="testhostname",
+            message="a message",
+        )
 
         check.service_check("testservicecheckwithnonemessage", AgentCheck.OK, message=None)
-        aggregator.assert_service_check("testservicecheckwithnonemessage", status=AgentCheck.OK, )
+        aggregator.assert_service_check("testservicecheckwithnonemessage", status=AgentCheck.OK)
 
 
 class TestTags:
@@ -233,7 +243,7 @@ class LimitedCheck(AgentCheck):
     DEFAULT_METRIC_LIMIT = 10
 
 
-class TestLimits():
+class TestLimits:
     def test_context_uid(self, aggregator):
         check = LimitedCheck()
 
@@ -252,12 +262,12 @@ class TestLimits():
         check = LimitedCheck()
         assert check.get_warnings() == []
 
-        for i in range(0, 10):
+        for _ in range(0, 10):
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 0
         assert len(aggregator.metrics("metric")) == 10
 
-        for i in range(0, 10):
+        for _ in range(0, 10):
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 10
@@ -267,7 +277,7 @@ class TestLimits():
         assert check.get_warnings() == []
 
         # Multiple calls for a single set of (metric_name, tags) should not trigger
-        for i in range(0, 20):
+        for _ in range(0, 20):
             check.count("metric", 0, hostname="host-single")
         assert len(check.get_warnings()) == 0
         assert len(aggregator.metrics("metric")) == 20
@@ -280,15 +290,11 @@ class TestLimits():
         assert len(aggregator.metrics("metric")) == 29
 
     def test_metric_limit_instance_config(self, aggregator):
-        instances = [
-            {
-                "max_returned_metrics": 42,
-            }
-        ]
+        instances = [{"max_returned_metrics": 42}]
         check = AgentCheck("test", {}, instances)
         assert check.get_warnings() == []
 
-        for i in range(0, 42):
+        for _ in range(0, 42):
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 0
         assert len(aggregator.metrics("metric")) == 42
@@ -298,15 +304,11 @@ class TestLimits():
         assert len(aggregator.metrics("metric")) == 42
 
     def test_metric_limit_instance_config_zero(self, aggregator):
-        instances = [
-            {
-                "max_returned_metrics": 0,
-            }
-        ]
+        instances = [{"max_returned_metrics": 0}]
         check = LimitedCheck("test", {}, instances)
         assert len(check.get_warnings()) == 1
 
-        for i in range(0, 42):
+        for _ in range(0, 42):
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10

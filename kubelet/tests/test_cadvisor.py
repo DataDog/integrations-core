@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import sys
 import json
+import sys
+
 import mock
 import pytest
 import requests_mock
@@ -10,15 +11,12 @@ from requests.exceptions import HTTPError
 
 from datadog_checks.kubelet import KubeletCheck
 
-from .test_kubelet import mock_from_file, EXPECTED_METRICS_COMMON, NODE_SPEC
+from .test_kubelet import EXPECTED_METRICS_COMMON, NODE_SPEC, mock_from_file
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
 
-EXPECTED_METRICS_CADVISOR = [
-    'kubernetes.network_errors',
-    'kubernetes.diskio.io_service_bytes.stats.total',
-]
+EXPECTED_METRICS_CADVISOR = ['kubernetes.network_errors', 'kubernetes.diskio.io_service_bytes.stats.total']
 
 
 @pytest.fixture()
@@ -30,6 +28,7 @@ def mock_request():
 @pytest.fixture
 def tagger():
     from datadog_checks.base.stubs import tagger
+
     tagger.reset()
     # We filter out slices unknown by the tagger, mock a non-empty taglist
     tagger.set_default_tags(["foo:bar"])
@@ -59,12 +58,14 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
     instance_with_tag = {"tags": ["instance:tag"], "cadvisor_port": 4194}
     cadvisor_url = "http://valid:port/url"
     check = KubeletCheck('kubelet', None, {}, [instance_with_tag])
-    monkeypatch.setattr(check, 'retrieve_pod_list',
-                        mock.Mock(return_value=json.loads(mock_from_file('pods_list_1.2.json'))))
+    monkeypatch.setattr(
+        check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_list_1.2.json')))
+    )
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
-    monkeypatch.setattr(check, '_retrieve_cadvisor_metrics',
-                        mock.Mock(return_value=json.loads(mock_from_file('cadvisor_1.2.json'))))
+    monkeypatch.setattr(
+        check, '_retrieve_cadvisor_metrics', mock.Mock(return_value=json.loads(mock_from_file('cadvisor_1.2.json')))
+    )
     monkeypatch.setattr(check, 'detect_cadvisor', mock.Mock(return_value=cadvisor_url))
     monkeypatch.setattr(check, 'process', mock.Mock(return_value=None))
 
