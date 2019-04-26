@@ -56,7 +56,7 @@ instances:
     #
     # namespace_metrics:
     #   - free-pct-disk
-    #   - free-pct-memoryte
+    #   - free-pct-memory
     #   - evicted-objectst
     #   - expired-objects
     #   - master-objects
