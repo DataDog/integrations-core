@@ -64,7 +64,7 @@ def is_blank(line):
     """Returns true if the line is empty.
     A single hyphen in a line is considered as blank
     """
-    return line.isspace() or not line or line.lstrip(' ').rstrip(' ') == '-'
+    return line.isspace() or not line or line.strip() == '-'
 
 
 def is_exactly_indented(line, indent):

@@ -50,8 +50,8 @@ class ParamProperties:
         self.required = required
         self.default_value = default_value
 
-    @staticmethod
-    def parse_from_string(idx, config_lines, indent, errors=None):
+    @classmethod
+    def parse_from_string(cls, idx, config_lines, indent, errors=None):
         if errors is None:
             errors = []
 
@@ -113,15 +113,16 @@ class ConfigBlock:
         """Check if the block has a description and lines are not too long."""
         errors = []
         if self.description is None:
+            # There was a error reading description, which has already been recorded.
             return errors
 
-        if self.description.replace(' ', '').replace('\n', '') == '':
+        if self.description.strip() == '':
             param_name = self.param_prop.var_name
-            errors.append(ValidatorError("Empty description for %s" % param_name, self.line, SEVERITY_WARNING))
+            errors.append(ValidatorError("Empty description for {}".format(param_name), self.line, SEVERITY_WARNING))
 
-        for i, line in enumerate(self.description.split('\n')):
-            if len(line) > MAX_COMMENT_LENGTH and line[-5:] != "#noqa":
-                err_string = "Description too long [%s...] (%d/%d)" % (line[:30], len(line), MAX_COMMENT_LENGTH)
+        for i, line in enumerate(self.description.splitlines()):
+            if len(line) > MAX_COMMENT_LENGTH and line.endswith("#noqa"):
+                err_string = "Description too long [{}...] ({}/{})".format(line[:30], len(line), MAX_COMMENT_LENGTH)
                 errors.append(ValidatorError(err_string, self.line + i + 1))
 
         return errors
@@ -136,11 +137,11 @@ class ConfigBlock:
             if re.match(regex, self.param_prop.type_name):
                 break
         else:
-            errors.append(ValidatorError("Type %s is not accepted." % self.param_prop.type_name, self.line))
+            errors.append(ValidatorError("Type {} is not accepted.".format(self.param_prop.type_name), self.line))
         return errors
 
-    @staticmethod
-    def parse_from_strings(start, config_lines, indent, errors=None):
+    @classmethod
+    def parse_from_strings(cls, start, config_lines, indent, errors=None):
         """Main method used to parse a block starting at line 'start' with a given indentation.
         """
         if errors is None:
@@ -209,22 +210,22 @@ def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors
 
     if not is_exactly_indented(config_lines[start], indent):
         other_indent = get_indent(config_lines[start])
-        errors.append(ValidatorError("Unexpected indentation, expecting %d not %d" % (indent, other_indent), start))
-        return
+        errors.append(ValidatorError("Unexpected indentation, expecting {} not {}".format(indent, other_indent), start))
+        return None
 
     if not config_lines[start].startswith(' ' * indent + "## @param"):
         errors.append(ValidatorError("Expecting @param declaration", start))
-        return
+        return None
 
     # Going through the description
     idx = start + 1
     while idx < end:
         if is_blank(config_lines[idx]):
             errors.append(ValidatorError("Blank line when reading description", idx))
-            return
+            return None
         if not is_exactly_indented(config_lines[idx], indent):
             other_indent = get_indent(config_lines[idx])
-            errors.append(ValidatorError("Unexpected indentation, expecting %d not %d" % (indent, other_indent), idx))
+            errors.append(ValidatorError("Unexpected indentation, expecting {} not {}".format(indent, other_indent), idx))
             return None
 
         current_line = config_lines[idx][indent:]
@@ -236,7 +237,7 @@ def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors
             idx += 1
             break
         else:
-            errors.append(ValidatorError("Cannot find end of block starting at line %d" % start, idx))
+            errors.append(ValidatorError("Cannot find end of block starting at line {}".format(start), idx))
             return None
 
     # Now analyze the actual content
@@ -316,7 +317,7 @@ def _is_object(idx, config_lines, indent, param_prop, errors=None):
     if param_prop.type_name == 'object':
         # The variable to be parsed is an object and thus requires to go recursively
         if re.match(OBJECT_REGEX, current_line) is None:
-            err_string = "Parameter %s is declared as object but isn't one." % param_prop.var_name
+            err_string = "Parameter {} is declared as object but isn't one.".format(param_prop.var_name)
             errors.append(ValidatorError(err_string, idx))
             return False
         return True
@@ -396,8 +397,8 @@ def _is_comment(start, config_lines, indent, errors=None):
             continue
         else:
             return False
-    else:
-        return True
+
+    return True
 
 
 def _parse_comment(start, config_lines):
