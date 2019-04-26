@@ -4,8 +4,9 @@
 import click
 import yaml
 
-from ....config_validator.validator import validate_config
-from ....config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
+from datadog_checks.dev.tooling.config_validator.validator import validate_config
+from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
+
 from ....utils import basepath, read_file
 from ...utils import get_config_files, get_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning

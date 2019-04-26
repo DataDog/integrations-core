@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev.config_validator.config_block import (
+from datadog_checks.dev.tooling.config_validator.config_block import (
     ConfigBlock,
     ParamProperties,
     _get_end_of_param_declaration_block,

@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.config_validator.config_block import MAX_COMMENT_LENGTH, ConfigBlock, ParamProperties
-from datadog_checks.dev.config_validator.validator import _check_no_duplicate_names
+from datadog_checks.dev.tooling.config_validator.config_block import MAX_COMMENT_LENGTH, ConfigBlock, ParamProperties
+from datadog_checks.dev.tooling.config_validator.validator import _check_no_duplicate_names
 
 
 def create(name, type_name="string", description="Non-empty description"):
