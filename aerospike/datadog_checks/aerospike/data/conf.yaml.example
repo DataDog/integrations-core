@@ -57,7 +57,7 @@ instances:
     # namespace_metrics:
     #   - free-pct-disk
     #   - free-pct-memoryte
-    #   - evicted-objects
+    #   - evicted-objectst
     #   - expired-objects
     #   - master-objects
     #   - migrate-rx-partitions-initial
