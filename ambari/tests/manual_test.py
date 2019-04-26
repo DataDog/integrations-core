@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 from datadog_checks.ambari import AmbariCheck
 
 
+@pytest.mark.integration
 def test_check(aggregator):
     instance = [{
         "url": "https://146.148.123.63",

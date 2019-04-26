@@ -3,44 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.ambari import AmbariCheck
 from unittest.mock import MagicMock
-
-HOST_METRICS = {
-    'boottime': 1555934503.0,
-    'cpu': {
-        'cpu_idle': 62.8,
-        'cpu_nice': 0.0,
-        'cpu_num': 4.0,
-        'cpu_system': 5.1,
-        'cpu_user': 32.0,
-        'cpu_wio': 0.0
-    },
-    'disk': {
-        'disk_free': 124.35,
-        'disk_total': 148.29,
-        'read_bytes': 1594053632.0,
-        'read_count': 42717.0,
-        'read_time': 240986.0,
-        'write_bytes': 117000843264.0,
-        'write_count': 499318.0,
-        'write_time': 5946304.0
-    },
-    'load': {'load_fifteen': 0.99, 'load_five': 1.35, 'load_one': 0.57},
-    'memory': {
-        'mem_cached': 3554248.0,
-        'mem_free': 11327848.0,
-        'mem_shared': 0.0,
-        'mem_total': 15399208.0,
-        'swap_free': 0.0,
-        'swap_total': 0.0
-    },
-    'network': {
-        'bytes_in': 683.2346950556641,
-        'bytes_out': 12517.203580542699,
-        'pkts_in': 8.499187630576825,
-        'pkts_out': 10.498996484830196
-    },
-    'process': {'proc_run': 0.0, 'proc_total': 128.0}
-}
+from . import responses
 
 
 def test_flatten_service_metrics():
@@ -57,7 +20,7 @@ def test_flatten_service_metrics():
 
 
 def test_flatten_host_metrics():
-    metrics = AmbariCheck.flatten_host_metrics(HOST_METRICS)
+    metrics = AmbariCheck.flatten_host_metrics(responses.HOST_METRICS)
     assert metrics == {
         'boottime': 1555934503.0,
         'cpu.cpu_idle': 62.8,
@@ -123,7 +86,7 @@ def test_get_hosts(instance, authentication):
                     'cluster_name': 'myCluster',
                     'host_name': 'my_host_2'
                 },
-                'metrics': HOST_METRICS
+                'metrics': responses.HOST_METRICS
             }
         ]
     })
@@ -135,6 +98,33 @@ def test_get_hosts(instance, authentication):
     assert hosts[1]['metrics'] is not None
 
 
+def test_get_component_metrics(instance, authentication):
+    ambari = AmbariCheck(instance=instance)
+    ambari.make_request = MagicMock(return_value=responses.COMPONENT_METRICS)
+    components = ambari.get_component_metrics('localhost', authentication, 'LabCluster', 'HDFS',
+                                              base_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs'],
+                                              component_whitelist=['NAMENODE', 'DATANODE'],
+                                              metric_whitelist=['cpu', 'jvm'])
+
+    ambari.make_request.assert_called_with(
+        'localhost/api/v1/clusters/LabCluster/services/HDFS/components?fields=metrics', authentication)
+
+    assert components == ['LabCluster']
 
 
+def test_get_service_health(instance, authentication):
+    ambari = AmbariCheck(instance=instance)
+    ambari.make_request = MagicMock(return_value=responses.SERVICE_HEALTH_METRICS)
+    service_info = ambari.get_service_checks_info('localhost', authentication, 'LabCluster', 'HDFS',
+                                                  service_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs'])
+
+    ambari.make_request.assert_called_with(
+        'localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo', authentication)
+
+    assert service_info == [
+        {
+            'state': 0,
+            'tags': ['ambari_cluster:LabCluster', 'ambari_service:hdfs']
+         }
+    ]
 

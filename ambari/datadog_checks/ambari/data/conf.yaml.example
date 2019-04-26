@@ -50,6 +50,10 @@ instances:
     metric_headers:
       - cpu
       - disk
+      - load
+      - memory
+      - network
+      - process
 
   ## @param timeout - integer - optional - default: 10
   ## Customizes the Ambari connection timeout (in seconds).
