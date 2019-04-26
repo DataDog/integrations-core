@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "6.11.0",
+        "integration":"jboss_wildfly",
+        "groups": ["host", "instance"],
+        "check": "jboss_wildfly.can_connect",
+        "statuses": ["ok", "critical"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored JBoss/WildFly instance. Returns `OK` otherwise."
+    }
+]

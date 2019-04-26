@@ -286,10 +286,10 @@ class TestProxies:
         # iterable will never occur when gated by `if iterable:`.
         http.no_proxy_uris = mock.MagicMock()
 
-        setattr(http.no_proxy_uris, '__iter__', lambda self, *args, **kwargs: iter([]))
-        setattr(http.no_proxy_uris, '__bool__', lambda self, *args, **kwargs: True)
+        http.no_proxy_uris.__iter__ = lambda self, *args, **kwargs: iter([])
+        http.no_proxy_uris.__bool__ = lambda self, *args, **kwargs: True
         # TODO: Remove with Python 2
-        setattr(http.no_proxy_uris, '__nonzero__', lambda self, *args, **kwargs: True)
+        http.no_proxy_uris.__nonzero__ = lambda self, *args, **kwargs: True
 
         http.get('https://www.google.com')
 

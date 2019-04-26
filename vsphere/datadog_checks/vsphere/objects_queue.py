@@ -10,6 +10,7 @@ class ObjectsQueue:
     Objects are fill once in batch and then extracted one by one.
     The queue is thread safe.
     """
+
     def __init__(self):
         self._objects_queue = {}
         self._objects_queue_lock = threading.RLock()

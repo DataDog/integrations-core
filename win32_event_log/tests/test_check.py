@@ -6,6 +6,7 @@ import logging
 import pytest
 from mock import patch
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.win32_event_log import Win32EventLogWMI
 
 log = logging.getLogger(__file__)
@@ -101,3 +102,46 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
         alert_type='error',
         source_type_name='event viewer',
     )
+
+
+def test_no_filters(check):
+    instance = {}
+
+    with pytest.raises(ConfigurationError):
+        check.check(instance)
+
+
+def test_filter_source_name(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'source_name': ['MSSQLSERVER']}
+
+    check.check(instance)
+
+
+def test_filter_event_id(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'event_id': ['789']}
+
+    check.check(instance)
+
+
+def test_filter_message_filters(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'message_filters': ['ok']}
+
+    check.check(instance)
+
+
+def test_filter_log_file(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'log_file': ['log']}
+
+    check.check(instance)
+
+
+def test_filter_user(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'user': 'user'}
+
+    check.check(instance)
+
+
+def test_filter_type(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
+    instance = {'type': ['type']}
+
+    check.check(instance)

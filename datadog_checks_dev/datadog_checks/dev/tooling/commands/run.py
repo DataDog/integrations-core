@@ -3,16 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from .console import UNKNOWN_OPTIONS
-from ..constants import get_root
 from ...subprocess import run_command
 from ...utils import chdir
+from ..constants import get_root
+from .console import UNKNOWN_OPTIONS
 
 
-@click.command(
-    context_settings=UNKNOWN_OPTIONS,
-    short_help='Run commands in the proper repo'
-)
+@click.command(context_settings=UNKNOWN_OPTIONS, short_help='Run commands in the proper repo')
 @click.argument('args', nargs=-1)
 @click.pass_context
 def run(ctx, args):

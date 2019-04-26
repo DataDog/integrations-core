@@ -12,6 +12,7 @@ from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
+
 try:
     import datadog_agent
 except ImportError:
@@ -34,14 +35,15 @@ STANDARD_FIELDS = {
 # For any known legacy fields that may be widespread
 DEFAULT_REMAPPED_FIELDS = {
     # TODO: Remove in 6.13
-    'no_proxy': {'name': 'skip_proxy'},
+    'no_proxy': {'name': 'skip_proxy'}
 }
 PROXY_SETTINGS_DISABLED = {
     # This will instruct `requests` to ignore the `HTTP_PROXY`/`HTTPS_PROXY`
     # environment variables. If the proxy options `http`/`https` are missing
     # or are `None` then `requests` will use the aforementioned environment
     # variables, hence the need to set each to an empty string.
-    'http': '', 'https': ''
+    'http': '',
+    'https': '',
 }
 
 

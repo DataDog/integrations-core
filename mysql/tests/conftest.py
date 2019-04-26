@@ -10,8 +10,9 @@ from datadog_checks.dev import WaitFor, docker_run
 
 from . import common, tags
 
-MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR', 'mysql')
-COMPOSE_FILE = '{}.yaml'.format(MYSQL_FLAVOR)
+MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
+MYSQL_VERSION = os.getenv('MYSQL_VERSION')
+COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
 @pytest.fixture(scope='session')
@@ -24,8 +25,10 @@ def dd_environment(instance_basic):
             'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
             'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
         },
-        conditions=[WaitFor(connect_master, wait=2), WaitFor(connect_slave, wait=2)],
+        conditions=[WaitFor(init_master, wait=2), WaitFor(init_slave, wait=2)],
     ):
+        master_conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
+        _populate_database(master_conn)
         yield instance_basic
 
 
@@ -71,27 +74,36 @@ def instance_error():
     return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
 
-def connect_master():
-    passw = common.MARIA_ROOT_PASS if MYSQL_FLAVOR == 'mariadb' else ''
-    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root', password=passw)
-    _setup_master(conn)
+def init_master():
+    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
+    _add_dog_user(conn)
 
 
-def connect_slave():
+def init_slave():
     pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
 
 
-def _setup_master(conn):
+def _add_dog_user(conn):
     cur = conn.cursor()
     cur.execute("CREATE USER 'dog'@'%' IDENTIFIED BY 'dog';")
-    cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%' WITH MAX_USER_CONNECTIONS 5;")
+    if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
+        cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%';")
+        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 5;")
+    else:
+        cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%' WITH MAX_USER_CONNECTIONS 5;")
     cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%';")
+    cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
+
+
+def _populate_database(conn):
+    cur = conn.cursor()
+    cur.execute("USE mysql;")
     cur.execute("CREATE DATABASE testdb;")
+    cur.execute("USE testdb;")
     cur.execute("CREATE TABLE testdb.users (name VARCHAR(20), age INT);")
-    cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%'")
     cur.execute("INSERT INTO testdb.users (name,age) VALUES('Alice',25);")
     cur.execute("INSERT INTO testdb.users (name,age) VALUES('Bob',20);")
-    cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
+    cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
     cur.close()
 
 
@@ -106,9 +118,11 @@ def _wait_for_it_script():
 
 def _mysql_docker_repo():
     if MYSQL_FLAVOR == 'mysql':
-        if os.getenv('MYSQL_VERSION') == '5.5':
+        if MYSQL_VERSION == '5.5':
             return 'jfullaondo/mysql-replication'
-        else:
+        elif MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
+        elif MYSQL_VERSION == '8.0':
+            return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'

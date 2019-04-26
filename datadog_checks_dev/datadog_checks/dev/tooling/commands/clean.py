@@ -5,42 +5,36 @@ import os
 
 import click
 
-from .console import (
-    CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
-)
+from ...utils import basepath, dir_exists, resolve_path
 from ..clean import clean_package, remove_compiled_scripts
 from ..constants import get_root
-from ...utils import dir_exists, resolve_path, basepath
+from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help="Remove a project's build artifacts"
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help="Remove a project's build artifacts")
 @click.argument('check', required=False)
+@click.option('--compiled-only', '-c', is_flag=True, help='Removes only .pyc files.')
 @click.option(
-    '--compiled-only', '-c',
-    is_flag=True,
-    help='Removes only .pyc files.'
-)
-@click.option(
-    '--all', '-a', 'all_matches',
+    '--all',
+    '-a',
+    'all_matches',
     is_flag=True,
     help=(
         "Disable the detection of a project's dedicated virtual "
         'env and/or editable installation. By default, these will '
         'not be considered.'
-    )
+    ),
 )
 @click.option(
-    '--force', '-f',
+    '--force',
+    '-f',
     is_flag=True,
     help=(
         'When run at the root of the project, '
         'it will ignore most build and testing artifacts, '
         'like .tox and build directories. '
         'Force it to remove these.'
-    )
+    ),
 )
 @click.option('--verbose', '-v', is_flag=True, help='Shows removed paths.')
 @click.pass_context

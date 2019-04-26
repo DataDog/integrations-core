@@ -21,7 +21,7 @@ CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 setup(
     name='datadog-{check_name}',
     version=ABOUT['__version__'],
-    description='The {check_name_cap} check',
+    description='The {integration_name} check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent {check_name} check',

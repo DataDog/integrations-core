@@ -3,16 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..console import CONTEXT_SETTINGS, echo_info, echo_success
 from ...e2e import get_configured_checks, get_configured_envs
 from ...testing import get_available_tox_envs
 from ...utils import get_testable_checks
+from ..console import CONTEXT_SETTINGS, echo_info, echo_success
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='List active or available environments'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='List active or available environments')
 @click.argument('checks', nargs=-1)
 def ls(checks):
     """List active or available environments."""

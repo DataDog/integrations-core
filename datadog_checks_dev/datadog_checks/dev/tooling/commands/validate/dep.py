@@ -6,9 +6,9 @@ import os
 import click
 from six import iteritems
 
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
-from ...constants import get_root, get_agent_requirements
+from ...constants import get_agent_requirements, get_root
 from ...requirements import make_catalog, read_packages
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 
 def display_multiple_attributes(attributes, message):
@@ -20,19 +20,14 @@ def display_multiple_attributes(attributes, message):
             echo_info('    {}: {} and {}'.format(attribute, checks[0], checks[1]))
         else:
             remaining = len(checks) - 2
-            echo_info('    {}: {}, {}, and {} other{}'.format(
-                attribute,
-                checks[0],
-                checks[1],
-                remaining,
-                's' if remaining > 1 else ''
-            ))
+            echo_info(
+                '    {}: {}, {}, and {} other{}'.format(
+                    attribute, checks[0], checks[1], remaining, 's' if remaining > 1 else ''
+                )
+            )
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Verify dependencies across all checks'
-)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Verify dependencies across all checks')
 def dep():
     """
     This command will:
@@ -82,14 +77,18 @@ def dep():
         for package in catalog.get_check_packages(check_name):
             if package.name not in embedded_deps:
                 failed = True
-                echo_failure('Dependency `{}` for check `{}` missing from the embedded environment'.format(
-                    package.name, check_name
-                ))
+                echo_failure(
+                    'Dependency `{}` for check `{}` missing from the embedded environment'.format(
+                        package.name, check_name
+                    )
+                )
             elif embedded_deps[package.name] != package:
                 failed = True
-                echo_failure('Dependency `{}` mismatch for check `{}` in the embedded environment'.format(
-                    package.name, check_name
-                ))
+                echo_failure(
+                    'Dependency `{}` mismatch for check `{}` in the embedded environment'.format(
+                        package.name, check_name
+                    )
+                )
                 echo_info('    have: {}'.format(embedded_deps[package.name]))
                 echo_info('    want: {}'.format(package))
 

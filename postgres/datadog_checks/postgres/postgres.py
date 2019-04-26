@@ -641,22 +641,23 @@ GROUP BY datid, datname
         """
         config = {}
         for element in yamlconfig:
-            try:
-                if isinstance(element, str):
-                    config[element] = {'relation_name': element, 'schemas': []}
-                elif isinstance(element, dict):
-                    name = element['relation_name']
-                    config[name] = {}
-                    config[name]['schemas'] = element['schemas']
-                    config[name]['relation_name'] = name
-                else:
-                    self.log.warning('Unhandled relations config type: {}'.format(element))
-            except KeyError:
-                self.log.warning('Failed to parse config element={}, check syntax'.format(element))
+            if isinstance(element, str):
+                config[element] = {'relation_name': element, 'schemas': []}
+            elif isinstance(element, dict):
+                if 'relation_name' not in element or 'schemas' not in element:
+                    self.log.warning("Unknown element format for relation element %s", element)
+                    continue
+                if not isinstance(element['schemas'], list):
+                    self.log.warning("Expected a list of schemas for %s", element)
+                    continue
+                name = element['relation_name']
+                config[name] = {'relation_name': name, 'schemas': element['schemas']}
+            else:
+                self.log.warning('Unhandled relations config type: {}'.format(element))
         return config
 
     def _query_scope(
-        self, cursor, scope, key, db, instance_tags, relations, is_custom_metrics, programming_error, relations_config
+        self, cursor, scope, key, db, instance_tags, is_custom_metrics, programming_error, relations_config
     ):
         if scope is None:
             return None
@@ -672,7 +673,7 @@ GROUP BY datid, datname
 
         try:
             # if this is a relation-specific query, we need to list all relations last
-            if scope['relation'] and len(relations) > 0:
+            if scope['relation'] and len(relations_config) > 0:
                 relnames = ', '.join("'{0}'".format(w) for w in relations_config)
                 query = scope['query'] % (", ".join(cols), "%s")  # Keep the last %s intact
                 self.log.debug("Running query: %s with relations: %s" % (query, relnames))
@@ -705,20 +706,30 @@ GROUP BY datid, datname
         # A row should look like this
         # (descriptor, descriptor, ..., value, value, value, value, ...)
         # with descriptor a PG relation or index name, which we use to create the tags
+        valid_results_size = 0
         for row in results:
             # Check that all columns will be processed
             assert len(row) == len(cols) + len(desc)
 
             # build a map of descriptors and their values
             desc_map = dict(zip([x[1] for x in desc], row[0 : len(desc)]))
-            if 'schema' in desc_map and relations:
-                try:
-                    relname = desc_map['table']
-                    config_schemas = relations_config[relname]['schemas']
-                    if config_schemas and desc_map['schema'] not in config_schemas:
-                        return len(results)
-                except KeyError:
-                    pass
+
+            # if relations *and* schemas are set, filter out table not
+            # matching the schema in the configuration
+            if scope['relation'] and len(relations_config) > 0 and 'schema' in desc_map and 'table' in desc_map:
+                row_table = desc_map['table']
+                row_schema = desc_map['schema']
+
+                config_table_obj = relations_config.get(row_table)
+                if not config_table_obj:
+                    self.log.info("Got row %s.%s, but not relation", row_schema, row_table)
+                else:
+                    config_schemas = config_table_obj.get('schemas')
+                    if not config_schemas:
+                        self.log.debug("All schemas are allowed for table %s.%s", row_schema, row_table)
+                    elif row_schema not in config_schemas:
+                        self.log.debug("Skipping non matched schema %s for table %s", desc_map['schema'], row_table)
+                        continue
 
             # Build tags
             # descriptors are: (pg_name, dd_tag_name): value
@@ -741,8 +752,9 @@ GROUP BY datid, datname
             # tags are
             for v in zip([scope['metrics'][c] for c in cols], row[len(desc) :]):
                 v[0][1](self, v[0][0], v[1], tags=tags)
+            valid_results_size += 1
 
-        return len(results)
+        return valid_results_size
 
     def _collect_stats(
         self,
@@ -791,15 +803,7 @@ GROUP BY datid, datname
         try:
             cursor = db.cursor()
             results_len = self._query_scope(
-                cursor,
-                db_instance_metrics,
-                key,
-                db,
-                instance_tags,
-                relations,
-                False,
-                programming_error,
-                relations_config,
+                cursor, db_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
             )
             if results_len is not None:
                 self.gauge(
@@ -807,53 +811,21 @@ GROUP BY datid, datname
                 )
 
             self._query_scope(
-                cursor,
-                bgw_instance_metrics,
-                key,
-                db,
-                instance_tags,
-                relations,
-                False,
-                programming_error,
-                relations_config,
+                cursor, bgw_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
             )
             self._query_scope(
-                cursor,
-                archiver_instance_metrics,
-                key,
-                db,
-                instance_tags,
-                relations,
-                False,
-                programming_error,
-                relations_config,
+                cursor, archiver_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
             )
 
             if collect_activity_metrics:
                 activity_metrics = self._get_activity_metrics(key, db)
                 self._query_scope(
-                    cursor,
-                    activity_metrics,
-                    key,
-                    db,
-                    instance_tags,
-                    relations,
-                    False,
-                    programming_error,
-                    relations_config,
+                    cursor, activity_metrics, key, db, instance_tags, False, programming_error, relations_config
                 )
 
             for scope in list(metric_scope) + custom_metrics:
                 self._query_scope(
-                    cursor,
-                    scope,
-                    key,
-                    db,
-                    instance_tags,
-                    relations,
-                    scope in custom_metrics,
-                    programming_error,
-                    relations_config,
+                    cursor, scope, key, db, instance_tags, scope in custom_metrics, programming_error, relations_config
                 )
 
             cursor.close()
