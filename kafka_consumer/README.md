@@ -47,7 +47,6 @@ The Kafka-consumer check does not include any service checks.
 * [Collecting Kafka performance metrics][1111]
 * [Monitoring Kafka with Datadog][1112]
 
-
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
 [112]: https://app.datadoghq.com/account/settings#agent
 [113]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
