@@ -26,7 +26,7 @@ No additional installation is needed on your server.
 
 #### Log Collection
 
-Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
 ```
     logs_enabled: true
 ```
