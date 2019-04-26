@@ -50,18 +50,18 @@ class AmbariCheck(AgentCheck):
     def get_clusters(self, base_url, authentication):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
 
-        resp = self.make_request(clusters_endpoint, authentication)
+        resp = self._make_request(clusters_endpoint, authentication)
         if resp is None:
-            self.submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
+            self._submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
             raise CheckException("Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint))
 
-        self.submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
+        self._submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
         return [cluster.get('Clusters').get('cluster_name') for cluster in resp.get('items')]
 
     def get_host_metrics(self, base_url, authentication, clusters, base_tags):
         for cluster in clusters:
             cluster_tag = CLUSTER_TAG_TEMPLATE.format(cluster)
-            hosts_list = self.get_hosts(base_url, authentication, cluster)
+            hosts_list = self._get_hosts_info(base_url, authentication, cluster)
 
             for host in hosts_list:
                 if host.get(METRICS_FIELD) is None:
@@ -73,18 +73,9 @@ class AmbariCheck(AgentCheck):
                     host_tag = HOST_TAG + host.get('Hosts').get('host_name')
                     metric_tags = base_tags + [cluster_tag, host_tag]
                     if isinstance(value, float):
-                        self.submit_gauge(metric_name, value, metric_tags)
+                        self._submit_gauge(metric_name, value, metric_tags)
                     else:
                         self.log.warning("Encountered non float metric {}:{}".format(metric_name, value))
-
-    def get_hosts(self, base_url, authentication, cluster):
-        hosts_endpoint = common.HOST_METRICS_URL.format(
-            base_url=base_url,
-            cluster_name=cluster
-        )
-        resp = self.make_request(hosts_endpoint, authentication)
-
-        return resp.get('items')
 
     def get_service_metrics(self, base_url, authentication, clusters, whitelisted_services,
                             whitelisted_metrics, base_tags):
@@ -96,33 +87,21 @@ class AmbariCheck(AgentCheck):
                                            service_tags, [c.upper() for c in components], whitelisted_metrics)
                 self.get_service_checks(base_url, authentication, cluster, service, service_tags)
 
-    def get_service_checks_info(self, base_url, authentication, cluster, service, service_tags):
-        service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
-        service_info = []
-        service_resp = self.make_request(service_check_endpoint, authentication)
-        if service_resp is None:
-            service_info.append({'state': self.CRITICAL, 'tags': service_tags})
-            self.log.warning("No response received for service {}".format(service))
-        else:
-            state = service_resp.get('ServiceInfo').get('state')
-            service_info.append({'state': common.STATUS[state], 'tags': service_tags})
-        return service_info
-
     def get_service_checks(self, base_url, authentication, cluster, service, service_tags):
-        service_info = self.get_service_checks_info(base_url, authentication, cluster, service, service_tags)
+        service_info = self._get_service_checks_info(base_url, authentication, cluster, service, service_tags)
         for info in service_info:
-            self.submit_service_checks("state", info['state'], info['tags'])
+            self._submit_service_checks("state", info['state'], info['tags'])
 
     def get_component_metrics(self, base_url, authentication, cluster, service,
                               base_tags, component_whitelist, metric_whitelist):
         component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
-        resp = self.make_request(component_metrics_endpoint, authentication)
+        components_response = self._make_request(component_metrics_endpoint, authentication)
 
-        if resp is None:
+        if components_response is None:
             self.log.warning("No components found for service {}.".format(service))
             return
 
-        for component in resp.get('items'):
+        for component in components_response.get('items'):
             component_name = component.get('ServiceComponentInfo').get('component_name')
 
             if component_name not in component_whitelist:
@@ -148,9 +127,49 @@ class AmbariCheck(AgentCheck):
                 for metric_name, value in iteritems(metrics):
                     metric_tags = base_tags + [component_tag]
                     if isinstance(value, float):
-                        self.submit_gauge(metric_name, value, metric_tags)
+                        self._submit_gauge(metric_name, value, metric_tags)
                     else:
                         self.log.warning("Expected a float for {}, received {}".format(metric_name, value))
+
+    def _get_hosts_info(self, base_url, authentication, cluster):
+        hosts_endpoint = common.HOST_METRICS_URL.format(
+            base_url=base_url,
+            cluster_name=cluster
+        )
+        resp = self._make_request(hosts_endpoint, authentication)
+
+        return resp.get('items')
+
+    def _get_service_checks_info(self, base_url, authentication, cluster, service, service_tags):
+        service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
+        service_info = []
+        service_resp = self._make_request(service_check_endpoint, authentication)
+        if service_resp is None:
+            service_info.append({'state': self.CRITICAL, 'tags': service_tags})
+            self.log.warning("No response received for service {}".format(service))
+        else:
+            state = service_resp.get('ServiceInfo').get('state')
+            service_info.append({'state': common.STATUS[state], 'tags': service_tags})
+        return service_info
+
+    def _make_request(self, url, auth):
+        try:
+            resp = self.http.get(url,
+                                 auth=HTTPBasicAuth(auth.get('username'), auth.get('password')),
+                                 verify=False)  # In case Ambari is under uncertified https
+            return resp.json()
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+            self.warning(
+                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
+                .format(url, e))
+        except requests.exceptions.Timeout:
+            self.warning("Connection timeout when connecting to {}".format(url))
+
+    def _submit_gauge(self, name, value, tags):
+        self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
+
+    def _submit_service_checks(self, name, value, tags):
+        self.service_check('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
 
     @staticmethod
     def flatten_service_metrics(metric_dict, prefix):
@@ -176,21 +195,3 @@ class AmbariCheck(AgentCheck):
                 flat_metrics[metric_name] = metric_value
         return flat_metrics
 
-    def make_request(self, url, auth):
-        try:
-            resp = self.http.get(url,
-                                 auth=HTTPBasicAuth(auth.get('username'), auth.get('password')),
-                                 verify=False)  # In case Ambari is under uncertified https
-            return resp.json()
-        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
-            self.warning(
-                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
-                .format(url, e))
-        except requests.exceptions.Timeout:
-            self.warning("Connection timeout when connecting to {}".format(url))
-
-    def submit_gauge(self, name, value, tags):
-        self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
-
-    def submit_service_checks(self, name, value, tags):
-        self.service_check('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)

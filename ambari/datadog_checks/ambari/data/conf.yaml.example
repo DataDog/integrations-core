@@ -43,7 +43,7 @@ instances:
         - <COMPONENT_NAME_2>
 
   ## @param metric_headers - list - required
-  ## Metric headings from which metrics will be sourced.  To query all metrics 
+  ## Metric headings from which component metrics will be sourced.  To query all metrics
   ## from a component to see what headings it has, see here:
   ## https://github.com/apache/ambari/blob/trunk/ambari-server/docs/api/v1/components-component.md
   #
