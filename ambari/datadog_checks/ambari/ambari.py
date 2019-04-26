@@ -53,7 +53,8 @@ class AmbariCheck(AgentCheck):
         resp = self._make_request(clusters_endpoint, authentication)
         if resp is None:
             self._submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
-            raise CheckException("Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint))
+            raise CheckException(
+                "Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint))
 
         self._submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
         return [cluster.get('Clusters').get('cluster_name') for cluster in resp.get('items')]

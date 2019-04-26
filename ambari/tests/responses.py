@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2019
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 HOST_METRICS = {
     'boottime': 1555934503.0,
     'cpu': {
