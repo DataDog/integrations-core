@@ -34,8 +34,6 @@ def validate_config(config):
         errors.append(ValidatorError("Missing `instances` section", None))
         return errors
 
-    _validate_no_inline_comment(config_lines, errors)
-
     # parse init_config data
     blocks.append(_parse_init_config(config_lines, init_config_line, errors))
 
@@ -132,14 +130,6 @@ def _parse_for_config_blocks(config_lines, start, end, errors):
             idx = new_end
 
     return blocks
-
-
-def _validate_no_inline_comment(config_lines, errors):
-    """Append errors for each inline comment found"""
-    for i, line in enumerate(config_lines):
-        if line.lstrip(' ')[:1] != '#' and '#' in line:
-            # Now checks if those chars are inside double quotes or not.
-            errors.append(ValidatorError("Inline comment should be removed", i, SEVERITY_WARNING))
 
 
 def _check_no_duplicate_names(blocks, errors):
