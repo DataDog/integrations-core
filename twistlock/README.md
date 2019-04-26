@@ -54,7 +54,7 @@ spec:
 
 ##### Kubernetes
 
-* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration](https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection):
+* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][5]:
 
 ```
 (...)
@@ -67,7 +67,7 @@ spec:
 (...)
 ```
 
-* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest](https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest).
+* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][6].
 
 * Make sure the log section is included in the Pod annotation for the defender, where the container name can be found just below in the pod spec:
 
@@ -91,7 +91,7 @@ DD_LOGS_ENABLED=true
 ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
 ```
 
-* Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation](https://docs.datadoghq.com/logs/log_collection/docker/?tab=containerinstallation)
+* Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][7]
 
 * [Restart the Agent][3] to begin sending Twistlock logs to Datadog.
 
@@ -99,7 +99,7 @@ ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "tw
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
@@ -111,12 +111,14 @@ Twistlock sends an event when a new CVE is found.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][9].
 
-[1]: https://www.twistlock.com/
+[1]: https://www.twistlock.com
 [2]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[5]: https://docs.datadoghq.com/help/
-[6]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
-[7]: https://docs.datadoghq.com/logs
+[5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
+[6]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
+[7]: https://docs.datadoghq.com/logs/log_collection/docker/?tab=containerinstallation
+[8]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
+[9]: https://docs.datadoghq.com/help

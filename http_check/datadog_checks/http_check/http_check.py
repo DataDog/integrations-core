@@ -144,6 +144,10 @@ class HTTPCheck(NetworkCheck):
                 if suppress_warning:
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
+                # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
+                if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
                 r = sess.request(
                     method.upper(),
                     addr,

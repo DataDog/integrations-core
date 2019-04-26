@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "6.11.0",
-        "integration":"jboss_wildfly",
+        "integration":"JBoss/WildFly",
         "groups": ["host", "instance"],
         "check": "jboss_wildfly.can_connect",
         "statuses": ["ok", "critical"],
