@@ -11,7 +11,7 @@ def test_check(aggregator):
         "path": "/ambari-lab-2/dp-proxy/ambari",
         "username": "admin",
         "password": "admin",
-        "tags": ["test:abc", "test1:xyz"],
+        "tags": ["test:manual"],
         "services": {
             "HDFS": ["NAMENODE", "DATANODE"],
             "YARN": ["NODEMANANGER", "YARNCLIENT"]
@@ -21,7 +21,7 @@ def test_check(aggregator):
         "collect_service_metrics": True,
         "timeout": 30
     }]
-    check = AmbariCheck('ambari', {}, {}, instance)
+    check = AmbariCheck(instance=instance)
     check.check(instance[0])
     # import pdb; pdb.set_trace()
     aggregator.assert_all_metrics_covered()

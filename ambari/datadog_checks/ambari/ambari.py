@@ -60,14 +60,8 @@ class AmbariCheck(AgentCheck):
 
     def get_host_metrics(self, base_url, authentication, clusters, base_tags):
         for cluster in clusters:
-            hosts_endpoint = common.HOST_METRICS_URL.format(
-                base_url=base_url,
-                cluster_name=cluster
-            )
-            resp = self.make_request(hosts_endpoint, authentication)
-
-            hosts_list = resp.get('items')
             cluster_tag = CLUSTER_TAG_TEMPLATE.format(cluster)
+            hosts_list = self.get_hosts(base_url, authentication, cluster)
 
             for host in hosts_list:
                 if host.get(METRICS_FIELD) is None:
@@ -80,6 +74,17 @@ class AmbariCheck(AgentCheck):
                     metric_tags = base_tags + [cluster_tag, host_tag]
                     if isinstance(value, float):
                         self.submit_gauge(metric_name, value, metric_tags)
+                    else:
+                        self.log.warning("Encountered non float metric {}:{}".format(metric_name, value))
+
+    def get_hosts(self, base_url, authentication, cluster):
+        hosts_endpoint = common.HOST_METRICS_URL.format(
+            base_url=base_url,
+            cluster_name=cluster
+        )
+        resp = self.make_request(hosts_endpoint, authentication)
+
+        return resp.get('items')
 
     def get_service_metrics(self, base_url, authentication, clusters, services, metric_headers, base_tags):
         for cluster in clusters:
