@@ -57,4 +57,4 @@ Additional helpful documentation, links, and articles:
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/vault/metadata.csv
 [8]: https://docs.datadoghq.com/help
-[9]: https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog/
+[9]: https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog

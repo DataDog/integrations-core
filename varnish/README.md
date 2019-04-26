@@ -61,8 +61,8 @@ sudo usermod -G varnish -a dd-agent
 
 Configuration of the Varnish check using Autodiscovery in containerized environments is not supported. Collecting metrics in this type of environment may be possible by pushing metrics to DogStatsD using a StatsD plugin. The following 3rd party plugins are available:
 
-* [libvmod-statsd][13]
-* [prometheus_varnish_exporter][14]
+* [libvmod-statsd][6]
+* [prometheus_varnish_exporter][7]
 
 #### Log Collection
 
@@ -106,15 +106,15 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
 
 * [Restart the Agent][5].
 
-**Learn more about log collection [in the log documentation][6]**
+**Learn more about log collection [in the log documentation][8]**
 
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `varnish` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `varnish` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][8] for a list of metrics provided by this check.
+See [metadata.csv][10] for a list of metrics provided by this check.
 
 ### Events
 The Varnish check does not include any events.
@@ -124,14 +124,14 @@ The Varnish check does not include any events.
 The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<backend_name>`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][11].
 
 ## Further Reading
 Additional helpful documentation, links, and articles:
 
-* [Top Varnish performance metrics][10]
-* [How to collect Varnish metrics][11]
-* [Monitor Varnish using Datadog][12]
+* [Top Varnish performance metrics][12]
+* [How to collect Varnish metrics][13]
+* [Monitor Varnish using Datadog][14]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png
@@ -139,12 +139,12 @@ Additional helpful documentation, links, and articles:
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/varnish/datadog_checks/varnish/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/logs
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
-[9]: https://docs.datadoghq.com/help
-[10]: https://www.datadoghq.com/blog/top-varnish-performance-metrics
-[11]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics
-[12]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog
-[13]: https://github.com/jib/libvmod-statsd
-[14]: https://github.com/jonnenauha/prometheus_varnish_exporter
+[6]: https://github.com/jib/libvmod-statsd
+[7]: https://github.com/jonnenauha/prometheus_varnish_exporter
+[8]: https://docs.datadoghq.com/logs
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[10]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
+[11]: https://docs.datadoghq.com/help
+[12]: https://www.datadoghq.com/blog/top-varnish-performance-metrics
+[13]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics
+[14]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog

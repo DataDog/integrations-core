@@ -50,4 +50,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/announcing-eks
-[11]: https://www.datadoghq.com/blog/eks-cluster-metrics/
+[11]: https://www.datadoghq.com/blog/eks-cluster-metrics
