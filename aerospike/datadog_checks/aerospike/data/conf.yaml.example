@@ -73,8 +73,8 @@ init_config:
   ## for the definitive list
   #
   mappings:
-    - basic_scans_failed    # moved to NS scan_basic_error
-    - basic_scans_succeeded    # moved to NS scan_basic_complete
+    - basic_scans_failed
+    - basic_scans_succeeded
     - batch_error
     - batch_index_initiate
     - batch_index_complete
@@ -98,22 +98,22 @@ init_config:
     - early_tsvc_udf_sub_error
     - err_duplicate_proxy_request
     - err_out_of_space
-    - err_recs_dropped            # renamed xdr_queue_overflow_error
+    - err_recs_dropped
     - err_replica_non_null_node
     - err_replica_null_node
     - err_rw_cant_put_unique
-    - err_rw_pending_limit     # moved to NS fail_key_busy
+    - err_rw_pending_limit
     - err_rw_request_not_found
     - err_storage_queue_full
     - err_sync_copy_null_master
     - err_sync_copy_null_node
     - err_tsvc_requests
-    - err_tsvc_requests_timeout       # moved to NS tsvc_client_timeout
+    - err_tsvc_requests_timeout
     - err_write_fail_bin_exists
     - err_write_fail_bin_name
     - err_write_fail_bin_not_found
-    - err_write_fail_forbidden      # moved to NS fail_xdr_forbidden
-    - err_write_fail_generation     # moved to NS fail_generation
+    - err_write_fail_forbidden
+    - err_write_fail_generation
     - err_write_fail_generation_xdr
     - err_write_fail_incompatible_type
     - err_write_fail_key_exists
@@ -124,27 +124,27 @@ init_config:
     - err_write_fail_prole_delete
     - err_write_fail_prole_generation
     - err_write_fail_prole_unknown
-    - err_write_fail_record_too_big    # moved to NS fail_record_too_big
+    - err_write_fail_record_too_big
     - err_write_fail_unknown
     - fabric_msgs_rcvd
     - fabric_msgs_sent
     - heartbeat_received_foreign
     - heartbeat_received_self
-    - hotkeys_fetched        # renamed xdr_hotkey_fetch
+    - hotkeys_fetched
     - info_complete
-    - local_recs_error        # renamed xdr_read_error
-    - local_recs_fetch_avg_latency        # renamed xdr_read_latency_avg
-    - local_recs_fetched        # renamed xdr_read_success
-    - local_recs_notfound        # renamed xdr_read_not_found
+    - local_recs_error
+    - local_recs_fetch_avg_latency
+    - local_recs_fetched
+    - local_recs_notfound
     - migrate_msgs_recv
     - migrate_msgs_sent
     - migrate_num_incoming_accepted
     - migrate_num_incoming_refused
     - noship_recs_expired
-    - noship_recs_hotkey    # renamed xdr_hotkey_skip
+    - noship_recs_hotkey
     - noship_recs_notmaster
-    - noship_recs_uninitialized_destination        # renamed xdr_uninitialized_destination_error
-    - noship_recs_unknown_namespace            # renamed xdr_unknown_namespace_error
+    - noship_recs_uninitialized_destination
+    - noship_recs_unknown_namespace
     - proxy_action
     - proxy_initiate
     - proxy_retry
@@ -152,27 +152,27 @@ init_config:
     - proxy_retry_q_full
     - proxy_retry_same_dest
     - proxy_unproxy
-    - query_abort        # moved to NS
-    - query_agg        # moved to NS
-    - query_agg_abort     # moved to NS
-    - query_agg_avg_rec_count    # moved to NS
-    - query_agg_err     # moved to NS query_agg_error
-    - query_agg_success    # moved to NS
-    - query_avg_rec_count     # moved to NS
-    - query_fail        # moved to NS
-    - query_long_queue_full    # moved to NS
-    - query_long_reqs    # moved to NS
+    - query_abort
+    - query_agg
+    - query_agg_abort
+    - query_agg_avg_rec_count
+    - query_agg_err
+    - query_agg_success
+    - query_avg_rec_count
+    - query_fail
+    - query_long_queue_full
+    - query_long_reqs
     - query_long_running
-    - query_lookup_abort    # moved to NS
-    - query_lookup_avg_rec_count    # moved to NS
-    - query_lookup_err        # moved to NS query_lookup_error
-    - query_lookups    # moved to NS
-    - query_lookup_success        # moved to NS
-    - query_reqs                # moved to NS
-    - query_short_queue_full    # moved to NS
-    - query_short_reqs        # moved to NS
+    - query_lookup_abort
+    - query_lookup_avg_rec_count
+    - query_lookup_err
+    - query_lookups
+    - query_lookup_success
+    - query_reqs
+    - query_short_queue_full
+    - query_short_reqs
     - query_short_running
-    - query_success        # moved to NS
+    - query_success
     - query_tracked
     - read_dup_prole
     - reaped_fds
@@ -203,44 +203,44 @@ init_config:
     - stat_cluster_key_transaction_reenqueue
     - stat_cluster_key_trans_to_proxy_retry
     - stat_deleted_set_objects
-    - stat_delete_success        # moved to NS client_delete_success
+    - stat_delete_success
     - stat_duplicate_operation
-    - stat_evicted_objects        # moved to NS evicted_objects
-    - stat_expired_objects        # moved to NS expired_objects
+    - stat_evicted_objects
+    - stat_expired_objects
     - stat_ldt_proxy
     - stat_nsup_deletes_not_shipped
     - stat_evicted_set_objects
-    - stat_proxy_errs        # moved to NS client_proxy_error
+    - stat_proxy_errs
     - stat_proxy_reqs
     - stat_proxy_reqs_xdr
-    - stat_proxy_success    # moved to NS client_proxy_complete
-    - stat_read_errs_notfound    # moved to NS client_read_not_found
-    - stat_read_errs_other        # moved to NS client_read_error
+    - stat_proxy_success
+    - stat_read_errs_notfound
+    - stat_read_errs_other
     - stat_read_reqs
     - stat_read_reqs_xdr
-    - stat_read_success    # moved to NS client_read_success
-    - stat_recs_inflight    # renamed xdr_ship_inflight_objects
-    - stat_recs_linkdown_processed    # renamed dlog_processed_link_down
-    - stat_recs_logged        # renamed dlog_logged
+    - stat_read_success
+    - stat_recs_inflight
+    - stat_recs_linkdown_processed
+    - stat_recs_logged
     - stat_recs_logged_master
-    - stat_recs_outstanding    # renamed xdr_ship_outstanding_objects
-    - stat_recs_relogged        # renamed dlog_relogged
-    - stat_recs_relogged_incoming    # renamed xdr_relogged_incoming
-    - stat_recs_relogged_outgoing    # renamed xdr_relogged_outgoing
-    - stat_recs_replprocessed        # renamed dlog_processed_replica
+    - stat_recs_outstanding
+    - stat_recs_relogged
+    - stat_recs_relogged_incoming
+    - stat_recs_relogged_outgoing
+    - stat_recs_replprocessed
     - stat_recs_shipped
     - stat_recs_shipped_binlevel
-    - stat_recs_shipped_ok        # renamed xdr_ship_success
-    - stat_rw_timeout        # moved to NS client_read_timeout, client_write_timeout
+    - stat_recs_shipped_ok
+    - stat_rw_timeout
     - stat_slow_trans_queue_batch_pop
     - stat_slow_trans_queue_pop
     - stat_slow_trans_queue_push
-    - stat_write_errs        # moved to NS client_write_error
+    - stat_write_errs
     - stat_write_errs_notfound
-    - stat_write_errs_other    # moved to NS client_write_error
+    - stat_write_errs_other
     - stat_write_reqs
-    - stat_write_reqs_xdr    # moved to NS  to xdr_write_success
-    - stat_write_success        # moved to NS client_write_success
+    - stat_write_reqs_xdr
+    - stat_write_success
     - stat_xdr_pipe_miss
     - stat_xdr_pipe_writes
     - stat_zero_bin_records
@@ -250,25 +250,25 @@ init_config:
     - tscan_initiate
     - tscan_pending
     - tscan_succeeded
-    - udf_bg_scans_succeeded    # moved to NS udf_bg_scan_failure
-    - udf_bg_scans_failed        # moved to NS udf_bg_scan_success
+    - udf_bg_scans_succeeded
+    - udf_bg_scans_failed
     - udf_delete_err_others
     - udf_delete_reqs
-    - udf_delete_success    # moved to NS client_lang_delete_success
-    - udf_lua_errs        # moved to NS client_lang_error, udf_sub_udf_error
+    - udf_delete_success
+    - udf_lua_errs
     - udf_query_rec_reqs
     - udf_read_errs_other
     - udf_read_reqs
-    - udf_read_success        # moved to NS client_lang_read_success
+    - udf_read_success
     - udf_replica_writes
     - udf_scan_rec_reqs
     - udf_write_err_others
     - udf_write_reqs
-    - udf_write_success    # moved to NS client_lang_write_success
+    - udf_write_success
     - write_master
     - write_prole
     - xdr_deletes_canceled
-    - xdr_deletes_shipped    # renamed xdr_ship_delete_success
+    - xdr_deletes_shipped
     - xdr_hotkey_fetch
     - xdr_hotkey_skip
     - xdr_queue_overflow_error
@@ -295,7 +295,6 @@ init_config:
     ## Namespace specific metrics recorded per namespace
     ## ------------------------------------------------------------------------------
 
-    ## inline comments indicate moved/renamed metrics starting with ASD 3.9+
     - batch_sub_proxy_complete
     - batch_sub_proxy_error
     - batch_sub_proxy_timeout
@@ -409,10 +408,9 @@ init_config:
     ## Datacenter (XDR) specific metrics recorded per datacenter
     ## ------------------------------------------------------------------------------
 
-    ## inline comments indicate moved/renamed metrics starting with ASD 3.9+
     - dc_remote_ship_ok
-    - dc_rec_ship_attempts        # renamed dc_ship_attempt
-    - dc_delete_ship_attempts    # renamed dc_ship_delete_success
+    - dc_rec_ship_attempts
+    - dc_delete_ship_attempts
     - dc_ship_attempt
     - dc_ship_delete_success
     - dc_ship_destination_error
