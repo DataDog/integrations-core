@@ -25,7 +25,7 @@ def service_checks():
     failed_checks = 0
     ok_checks = 0
 
-    for check_name in get_valid_integrations():
+    for check_name in sorted(get_valid_integrations()):
         display_queue = []
         file_failed = False
         service_checks_file = os.path.join(root, check_name, 'service_checks.json')
