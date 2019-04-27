@@ -11,7 +11,7 @@ from six import string_types
 from ....compat import JSONDecodeError
 from ....utils import file_exists, read_file
 from ...constants import get_root
-from ...utils import parse_version_parts
+from ...utils import get_valid_integrations, parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
@@ -24,21 +24,21 @@ def service_checks():
     echo_info("Validating all service_checks.json files...")
     failed_checks = 0
     ok_checks = 0
-    for check_name in sorted(os.listdir(root)):
+
+    for check_name in get_valid_integrations():
+        display_queue = []
+        file_failed = False
         service_checks_file = os.path.join(root, check_name, 'service_checks.json')
 
-        if file_exists(service_checks_file):
-            file_failed = False
-            display_queue = []
-
+        if not file_exists(service_checks_file):
+            display_queue.append((echo_failure, '  service_checks.json file doesn\'t exist'))
+            file_failed = True
+        else:
             try:
                 decoded = json.loads(read_file(service_checks_file).strip(), object_pairs_hook=OrderedDict)
             except JSONDecodeError as e:
                 failed_checks += 1
-                echo_info("{}/service_checks.json... ".format(check_name), nl=False)
-                echo_failure("FAILED")
-                echo_failure('  invalid json: {}'.format(e))
-                continue
+                display_queue.append((echo_failure, '  Invalid JSON {}'.format(e)))
 
             unique_names = set()
             unique_checks = set()
@@ -113,15 +113,16 @@ def service_checks():
                     file_failed = True
                     display_queue.append((echo_failure, '  required non empty list: statuses'))
 
-            if file_failed:
-                failed_checks += 1
-                # Display detailed info if file invalid
-                echo_info("{}/service_checks.json... ".format(check_name), nl=False)
-                echo_failure("FAILED")
-                for display_func, message in display_queue:
-                    display_func(message)
-            else:
-                ok_checks += 1
+        if file_failed:
+            failed_checks += 1
+            # Display detailed info if file invalid
+            echo_info("{}/service_checks.json... ".format(check_name), nl=False)
+            echo_failure("FAILED")
+            for display_func, message in display_queue:
+                display_func(message)
+        else:
+            ok_checks += 1
+
 
     if ok_checks:
         echo_success("{} valid files".format(ok_checks))
