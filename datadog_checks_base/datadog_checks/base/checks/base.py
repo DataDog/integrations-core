@@ -813,7 +813,7 @@ class __AgentCheckPy2(object):
         if not isinstance(data, bytes):
             try:
                 return data.encode('utf-8')
-            except UnicodeError:
+            except Exception:
                 return None
 
         return data

@@ -217,8 +217,8 @@ class TestTags:
         check = AgentCheck()
         assert isinstance(check._to_bytes(b"tag:foo"), bytes)
         assert isinstance(check._to_bytes(u"tag:☣"), bytes)
-        in_str = mock.MagicMock(side_effect=UnicodeError)
-        in_str.encode.side_effect = UnicodeError
+        in_str = mock.MagicMock(side_effect=Exception)
+        in_str.encode.side_effect = Exception
         assert check._to_bytes(in_str) is None
 
     def test_none_value(self):
