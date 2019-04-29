@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 istio.mesh.request.count,gauge,,request,,The number of requests,0,istio,request count
-istio.mesh.request.duration.count,gauge,,millisecond,,count of request durations,0,istio,request durations count
+istio.mesh.request.duration.count,gauge,,request,,count of request durations,0,istio,request durations count
 istio.mesh.request.duration.sum,gauge,,millisecond,,sum of request durations,0,istio,request durations sum
 istio.mesh.request.size.count,gauge,,request,,count of request sizes,0,istio,request sizes count
 istio.mesh.request.size.sum,gauge,,request,,sum of request sizes,0,istio,request sizes sum
