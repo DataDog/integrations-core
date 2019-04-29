@@ -32,20 +32,32 @@ class AmbariCheck(AgentCheck):
         self.services = []
 
     def check(self, instance):
-        server = instance.get("url", "")
-        port = str(instance.get("port", ""))
-        path = str(instance.get("path", ""))
+        base_url = instance.get("url", "")
         base_tags = instance.get("tags", [])
         whitelisted_services = instance.get("services", [])
-        authentication = {'username': instance.get("username", ""),
-                          'password': instance.get("password", "")
-                          }
+        basic_auth, credentials = self._get_authentication_method(instance)
+
         whitelisted_metrics = [str(h) for h in instance.get("metric_headers", [])]
 
-        base_url = "{}:{}{}".format(server, port, path)
-        clusters = self.get_clusters(base_url, authentication)
-        self.get_host_metrics(base_url, authentication, clusters, base_tags)
-        self.get_service_metrics(base_url, authentication, clusters, whitelisted_services, whitelisted_metrics, base_tags)
+        clusters = self.get_clusters(base_url, credentials)
+        if instance.get("collect_host_metrics", True):
+            self.get_host_metrics(base_url, credentials, clusters, base_tags)
+        if instance.get("collect_service_metrics", True):
+            self.get_service_metrics(base_url, credentials, clusters, whitelisted_services,
+                                     whitelisted_metrics, base_tags,
+                                     instance.get("collect_service_status", True))
+
+    @staticmethod
+    def _get_authentication_method(instance):
+        authentication = instance.get("cert", "")
+        if authentication:
+            basic_auth = False
+        else:
+            basic_auth = True
+            authentication = {'username': instance.get("username", ""),
+                              'password': instance.get("password", "")
+                              }
+        return basic_auth, authentication
 
     def get_clusters(self, base_url, authentication):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
@@ -65,28 +77,30 @@ class AmbariCheck(AgentCheck):
             hosts_list = self._get_hosts_info(base_url, authentication, cluster)
 
             for host in hosts_list:
-                if host.get(METRICS_FIELD) is None:
-                    self.log.warning("No metrics received for host {}".format(host.get('Hosts').get('host_name')))
+                host_metrics = host.get(METRICS_FIELD)
+                if host_metrics is None:
+                    self.warning("No metrics received for host {}".format(host.get('Hosts').get('host_name')))
                     continue
 
-                metrics = self.flatten_host_metrics(host.get(METRICS_FIELD))
+                metrics = self.flatten_host_metrics(host_metrics)
                 for metric_name, value in iteritems(metrics):
                     host_tag = HOST_TAG + host.get('Hosts').get('host_name')
                     metric_tags = base_tags + [cluster_tag, host_tag]
                     if isinstance(value, float):
                         self._submit_gauge(metric_name, value, metric_tags)
                     else:
-                        self.log.warning("Encountered non float metric {}:{}".format(metric_name, value))
+                        self.warning("Expected a float for {}, received {}".format(metric_name, value))
 
     def get_service_metrics(self, base_url, authentication, clusters, whitelisted_services,
-                            whitelisted_metrics, base_tags):
+                            whitelisted_metrics, base_tags, collect_service_status):
         for cluster in clusters:
             tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
             for service, components in iteritems(whitelisted_services):
                 service_tags = tags + [SERVICE_TAG + service.lower()]
                 self.get_component_metrics(base_url, authentication, cluster, service,
                                            service_tags, [c.upper() for c in components], whitelisted_metrics)
-                self.get_service_checks(base_url, authentication, cluster, service, service_tags)
+                if collect_service_status:
+                    self.get_service_checks(base_url, authentication, cluster, service, service_tags)
 
     def get_service_checks(self, base_url, authentication, cluster, service, service_tags):
         service_info = self._get_service_checks_info(base_url, authentication, cluster, service, service_tags)
@@ -98,12 +112,12 @@ class AmbariCheck(AgentCheck):
         component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
         components_response = self._make_request(component_metrics_endpoint, authentication)
 
-        if components_response is None:
+        if components_response is None or 'items' not in components_response:
             self.log.warning("No components found for service {}.".format(service))
             return
 
-        for component in components_response.get('items'):
-            component_name = component.get('ServiceComponentInfo').get('component_name')
+        for component in components_response['items']:
+            component_name = component['ServiceComponentInfo']['component_name']
 
             if component_name not in component_whitelist:
                 self.log.warning('{} not found in {}:{}'.format(component_name, cluster, service))
@@ -130,7 +144,7 @@ class AmbariCheck(AgentCheck):
                     if isinstance(value, float):
                         self._submit_gauge(metric_name, value, metric_tags)
                     else:
-                        self.log.warning("Expected a float for {}, received {}".format(metric_name, value))
+                        self.warning("Expected a float for {}, received {}".format(metric_name, value))
 
     def _get_hosts_info(self, base_url, authentication, cluster):
         hosts_endpoint = common.HOST_METRICS_URL.format(
@@ -147,7 +161,7 @@ class AmbariCheck(AgentCheck):
         service_resp = self._make_request(service_check_endpoint, authentication)
         if service_resp is None:
             service_info.append({'state': self.CRITICAL, 'tags': service_tags})
-            self.log.warning("No response received for service {}".format(service))
+            self.warning("No response received for service {}".format(service))
         else:
             state = service_resp.get('ServiceInfo').get('state')
             service_info.append({'state': common.STATUS[state], 'tags': service_tags})

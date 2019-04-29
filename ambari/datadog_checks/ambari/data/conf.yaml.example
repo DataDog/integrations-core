@@ -7,27 +7,23 @@ instances:
 #
   - url: <ambari url>
 
-  ## @param port - string - required
-  ## The port of the Ambari Server
-  ## Note: The default port is usually 8080.
-    port: 8080
-
-  ## @param path - string - optional
-  ## The path of the Ambari Server
-  ## Note: By default this is an empty string
-  #  path: /cloudbreak-install/dp-proxy/ambari
-
-
-  ## @param user - string - required
+  ## @param user - string - optional
   ## Username created to connect to the Ambari server if using basic authentication
   #
-    username: admin
+  #  username: admin
 
-  ## @param password - string - required
+  ## @param password - string - optional
   ## Password associated with the Ambari server user if using basic authentication
   #
-    password: <UNIQUEPASSWORD>
-  
+  #  password: <UNIQUEPASSWORD>
+
+
+  ## @param cert - string - optional
+  ## Path to certificate to connect to the Ambari server if using SSL authentication
+  #
+  # cert: <PATH_TO_CERTIFICATE>
+
+
   ## @param services - object - required
   ## Note that each level of values is required.  This is essentially whitelisting
   ## where we will only pull metrics from the components listed under their
@@ -69,6 +65,11 @@ instances:
   ## Change to False to omit collecting service level metrics
   #
   # collect_service_metrics: True
+
+  ## @param collect_service_status - boolean - optional - default: True
+  ## Change to False to omit collecting services status
+  #
+  # collect_service_status: True
 
   ## @param skip_proxy - boolean - optional - default: False
   ## Whether or not to skip the proxy configured in the Agent's config file when
