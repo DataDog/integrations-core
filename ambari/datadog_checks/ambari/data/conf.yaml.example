@@ -30,6 +30,18 @@ instances:
   # tls_private_key: <PATH_TO_PRIVATE_KEY>
 
 
+  ## @param tls_verify - boolean - optional
+  ## If server certificate should be verified. Set to False if using a self signed certificate
+  #
+  # tls_verify: True
+
+
+  ## @param ignore_tls_warning - boolean - optional
+  ## Ignore warnings for lack of SSL validation
+  #
+  # ignore_tls_warning = False
+
+
   ## @param services - object - required
   ## Note that each level of values is required.  This is essentially whitelisting
   ## where we will only pull metrics from the components listed under their

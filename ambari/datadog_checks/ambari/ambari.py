@@ -109,7 +109,8 @@ class AmbariCheck(AgentCheck):
             if component_name not in component_whitelist:
                 self.log.warning('{} not found in {}:{}'.format(component_name, cluster, service))
                 continue
-            if component.get(METRICS_FIELD) is None:
+            component_metrics = component.get(METRICS_FIELD)
+            if component_metrics is None:
                 self.log.warning(
                     "No metrics found for component {} for service {}"
                         .format(component_name, service)
@@ -117,14 +118,14 @@ class AmbariCheck(AgentCheck):
                 continue
 
             for header in metric_whitelist:
-                if header not in component.get(METRICS_FIELD):
+                if header not in component_metrics:
                     self.log.warning(
                         "No {} metrics found for component {} for service {}"
                             .format(header, component_name, service)
                     )
                     continue
 
-                metrics = self.flatten_service_metrics(component.get(METRICS_FIELD)[header], header)
+                metrics = self.flatten_service_metrics(component_metrics[header], header)
                 component_tag = COMPONENT_TAG + component_name.lower()
                 for metric_name, value in iteritems(metrics):
                     metric_tags = base_tags + [component_tag]
@@ -156,8 +157,7 @@ class AmbariCheck(AgentCheck):
 
     def _make_request(self, url):
         try:
-            resp = self.http.get(url,
-                                 verify=False)  # In case Ambari is under uncertified https
+            resp = self.http.get(url)
             return resp.json()
         except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
             self.warning(
@@ -172,8 +172,8 @@ class AmbariCheck(AgentCheck):
     def _submit_service_checks(self, name, value, tags):
         self.service_check('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
 
-    @staticmethod
-    def flatten_service_metrics(metric_dict, prefix):
+    @classmethod
+    def flatten_service_metrics(cls, metric_dict, prefix):
         flat_metrics = {}
         for raw_metric_name, metric_value in iteritems(metric_dict):
             if isinstance(metric_value, dict):
@@ -183,8 +183,8 @@ class AmbariCheck(AgentCheck):
                 flat_metrics[metric_name] = metric_value
         return flat_metrics
 
-    @staticmethod
-    def flatten_host_metrics(metric_dict, prefix=""):
+    @classmethod
+    def flatten_host_metrics(cls, metric_dict, prefix=""):
         flat_metrics = {}
         for raw_metric_name, metric_value in iteritems(metric_dict):
             metric_name = '{}.{}'.format(prefix, raw_metric_name) if prefix else raw_metric_name

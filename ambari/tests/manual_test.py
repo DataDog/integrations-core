@@ -19,7 +19,8 @@ def test_check(aggregator):
         "metric_headers": ["cpu", "jvm"],
         "collect_host_metrics": True,
         "collect_service_metrics": True,
-        "timeout": 30
+        "timeout": 30,
+        "tls_verify": False,
     }]
     check = AmbariCheck(instance=instance)
     check.check(instance[0])
