@@ -35,34 +35,21 @@ class AmbariCheck(AgentCheck):
         base_url = instance.get("url", "")
         base_tags = instance.get("tags", [])
         whitelisted_services = instance.get("services", [])
-        basic_auth, credentials = self._get_authentication_method(instance)
 
         whitelisted_metrics = [str(h) for h in instance.get("metric_headers", [])]
 
-        clusters = self.get_clusters(base_url, credentials)
+        clusters = self.get_clusters(base_url)
         if instance.get("collect_host_metrics", True):
-            self.get_host_metrics(base_url, credentials, clusters, base_tags)
+            self.get_host_metrics(base_url, clusters, base_tags)
         if instance.get("collect_service_metrics", True):
-            self.get_service_metrics(base_url, credentials, clusters, whitelisted_services,
+            self.get_service_metrics(base_url, clusters, whitelisted_services,
                                      whitelisted_metrics, base_tags,
                                      instance.get("collect_service_status", True))
 
-    @staticmethod
-    def _get_authentication_method(instance):
-        authentication = instance.get("cert", "")
-        if authentication:
-            basic_auth = False
-        else:
-            basic_auth = True
-            authentication = {'username': instance.get("username", ""),
-                              'password': instance.get("password", "")
-                              }
-        return basic_auth, authentication
-
-    def get_clusters(self, base_url, authentication):
+    def get_clusters(self, base_url):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
 
-        resp = self._make_request(clusters_endpoint, authentication)
+        resp = self._make_request(clusters_endpoint)
         if resp is None:
             self._submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
             raise CheckException(
@@ -91,26 +78,26 @@ class AmbariCheck(AgentCheck):
                     else:
                         self.warning("Expected a float for {}, received {}".format(metric_name, value))
 
-    def get_service_metrics(self, base_url, authentication, clusters, whitelisted_services,
+    def get_service_metrics(self, base_url, clusters, whitelisted_services,
                             whitelisted_metrics, base_tags, collect_service_status):
         for cluster in clusters:
             tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
             for service, components in iteritems(whitelisted_services):
                 service_tags = tags + [SERVICE_TAG + service.lower()]
-                self.get_component_metrics(base_url, authentication, cluster, service,
+                self.get_component_metrics(base_url, cluster, service,
                                            service_tags, [c.upper() for c in components], whitelisted_metrics)
                 if collect_service_status:
-                    self.get_service_checks(base_url, authentication, cluster, service, service_tags)
+                    self.get_service_checks(base_url, cluster, service, service_tags)
 
-    def get_service_checks(self, base_url, authentication, cluster, service, service_tags):
-        service_info = self._get_service_checks_info(base_url, authentication, cluster, service, service_tags)
+    def get_service_checks(self, base_url, cluster, service, service_tags):
+        service_info = self._get_service_checks_info(base_url, cluster, service, service_tags)
         for info in service_info:
             self._submit_service_checks("state", info['state'], info['tags'])
 
-    def get_component_metrics(self, base_url, authentication, cluster, service,
+    def get_component_metrics(self, base_url, cluster, service,
                               base_tags, component_whitelist, metric_whitelist):
         component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
-        components_response = self._make_request(component_metrics_endpoint, authentication)
+        components_response = self._make_request(component_metrics_endpoint)
 
         if components_response is None or 'items' not in components_response:
             self.log.warning("No components found for service {}.".format(service))
@@ -146,19 +133,19 @@ class AmbariCheck(AgentCheck):
                     else:
                         self.warning("Expected a float for {}, received {}".format(metric_name, value))
 
-    def _get_hosts_info(self, base_url, authentication, cluster):
+    def _get_hosts_info(self, base_url, cluster):
         hosts_endpoint = common.HOST_METRICS_URL.format(
             base_url=base_url,
             cluster_name=cluster
         )
-        resp = self._make_request(hosts_endpoint, authentication)
+        resp = self._make_request(hosts_endpoint)
 
         return resp.get('items')
 
-    def _get_service_checks_info(self, base_url, authentication, cluster, service, service_tags):
+    def _get_service_checks_info(self, base_url, cluster, service, service_tags):
         service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
         service_info = []
-        service_resp = self._make_request(service_check_endpoint, authentication)
+        service_resp = self._make_request(service_check_endpoint)
         if service_resp is None:
             service_info.append({'state': self.CRITICAL, 'tags': service_tags})
             self.warning("No response received for service {}".format(service))
@@ -167,10 +154,9 @@ class AmbariCheck(AgentCheck):
             service_info.append({'state': common.STATUS[state], 'tags': service_tags})
         return service_info
 
-    def _make_request(self, url, auth):
+    def _make_request(self, url):
         try:
             resp = self.http.get(url,
-                                 auth=HTTPBasicAuth(auth.get('username'), auth.get('password')),
                                  verify=False)  # In case Ambari is under uncertified https
             return resp.json()
         except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:

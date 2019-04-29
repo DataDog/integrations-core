@@ -19,9 +19,15 @@ instances:
 
 
   ## @param cert - string - optional
-  ## Path to certificate to connect to the Ambari server if using SSL authentication
+  ## Path to certificate to connect to the Ambari server if using TSL authentication
   #
-  # cert: <PATH_TO_CERTIFICATE>
+  # tsl_cert: <PATH_TO_CERTIFICATE>
+
+
+  ## @param cert - string - optional
+  ## Path to certificate private key to connect to the Ambari server if using TSL authentication
+  #
+  # tls_private_key: <PATH_TO_PRIVATE_KEY>
 
 
   ## @param services - object - required
