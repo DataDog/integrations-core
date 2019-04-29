@@ -4,6 +4,7 @@ kind: documentation
 aliases:
     - /developers/integrations/integration_sdk/
     - /developers/integrations/testing/
+    - /integrations/datadog_checks_dev/
 ---
 
 To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, a number of prerequisites must be met:
