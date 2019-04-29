@@ -71,9 +71,9 @@ class ParamProperties:
             if m.group(4):  # If there is a default value
                 def_val = m.group(4)[12:]
 
-            return ParamProperties(m.group(1), m.group(2), False, def_val)
+            return cls(m.group(1), m.group(2), False, def_val)
 
-        return ParamProperties(m.group(1), m.group(2), True)
+        return cls(m.group(1), m.group(2), True)
 
 
 class ConfigBlock:
@@ -135,7 +135,7 @@ class ConfigBlock:
         # Let's first check if the block is a simple comment. If so, let's return and go to the next block
         if _is_comment(start, config_lines, indent, errors):
             comment, end = _parse_comment(start, config_lines)
-            return ConfigBlock(None, comment, start, end - start)
+            return cls(None, comment, start, end - start)
 
         # Let's get to the end of the block supposing it is formatted correctly (@param line, description, empty
         # comment, then the actual content). If it fails, let's ignore the whole block and its potential
@@ -143,14 +143,14 @@ class ConfigBlock:
         end = _get_end_of_param_declaration_block(start, len(config_lines), config_lines, indent, errors)
         if end is None:
             default_end = _get_next_block_in_case_of_failure(start, config_lines)
-            return ConfigBlock(None, None, start, default_end - start)
+            return cls(None, None, start, default_end - start)
 
         block_len = end - start
 
         # Parsing the @param line
         param_prop = ParamProperties.parse_from_string(idx, config_lines, indent, errors)
         if param_prop is None:
-            return ConfigBlock(None, None, start, block_len)
+            return cls(None, None, start, block_len)
 
         # If var is indicated as list, recompute end of block knowing it is a list
         if param_prop.type_name.startswith('list'):
@@ -159,29 +159,29 @@ class ConfigBlock:
             )
             if end is None:
                 default_end = _get_next_block_in_case_of_failure(start, config_lines)
-                return ConfigBlock(None, None, start, default_end - start)
+                return cls(None, None, start, default_end - start)
             block_len = end - start
 
         # Parsing the description
         idx += 1
         description, idx = _parse_description(idx, end, config_lines, indent, errors)
         if idx is None:
-            return ConfigBlock(param_prop, None, start, block_len)
+            return cls(param_prop, None, start, block_len)
 
         # We recurse if the variable is an object and contains at least one member with description
         is_object = _is_object(idx, config_lines, indent, param_prop, errors)
         if not is_object:
-            return ConfigBlock(param_prop, description, start, block_len, should_recurse=False)
+            return cls(param_prop, description, start, block_len)
 
         should_recurse, next_block = _should_recurse(idx, config_lines, indent)
         if should_recurse:
             # If we recurse we use block_len, pointing to the next sub-block
-            return ConfigBlock(param_prop, description, start, block_len, should_recurse=True)
+            return cls(param_prop, description, start, block_len, should_recurse=True)
 
         # If we don't recurse we use the next_object variable to point to the next block with the same or less
         # indentation and thus ignore sub-blocks.
         block_len = next_block - start
-        return ConfigBlock(param_prop, description, start, block_len, should_recurse=False)
+        return cls(param_prop, description, start, block_len)
 
 
 def _get_end_of_param_declaration_block(start, end, config_lines, indent, errors, is_list=False):
