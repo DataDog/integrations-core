@@ -123,7 +123,6 @@ def service_checks():
         else:
             ok_checks += 1
 
-
     if ok_checks:
         echo_success("{} valid files".format(ok_checks))
     if failed_checks:
