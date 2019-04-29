@@ -274,7 +274,7 @@ Configuration blocks in either section take the following form:
 
 Configuration blocks follow a few guidelines:
 
-* Description should not be empty
+* Description must not be empty
 * Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`, as per the documentation [contributing guidelines][9]:
 * All required parameters are **not** commented by default.
 * All optional parameters are commented by default.
@@ -286,6 +286,7 @@ Practically speaking, the only command is `@param`, which is used to describe co
 
 ```
 @param <name> - <type> - required
+@param <name> - <type> - optional
 @param <name> - <type> - optional - default: <defval>
 ```
 
@@ -303,14 +304,14 @@ Arguments:
   * *object*
 * `defval`: default value for the parameter; can be empty (optional).
 
-`list` and `object` variables will span over multiple lines and have special rules.
+`list` and `object` variables span over multiple lines and have special rules.
 
-* In a `list`, individual elements are not documented with the @param specification
-* In an `object` individual elements are documented. You can though ignore documentation of individual elements if you consider the object is "simple enough", in that case do not document any individual element.
+* In a `list`, individual elements are not documented with the `@param` specification
+* In an `object` you can choose to either document elements individually with the `@param` specification or to have a common top-level description following the specification of the object itself.
 
 #### Optional parameters
 
-An optional parameter must be commented by default. Before every line the parameter spans on, simply add `# ` (note the space) with the same indentation as the @param specification.
+An optional parameter must be commented by default. Before every line the parameter spans on, add `# ` (note the space) with the same indentation as the `@param` specification.
 
 #### Block comments
 
@@ -326,8 +327,8 @@ The `awesome/datadog_checks/awesome/data/conf.yaml.example` for the Awesome serv
 
 ```yaml
 init_config:
-    ## Block comment in the init_config
-    ## part.
+  ## Block comment in the init_config
+  ## part.
 
 ## Block comment outside
 ## of the init_config part.
