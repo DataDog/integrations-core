@@ -380,8 +380,10 @@ class OpenMetricsScraperMixin(object):
                 except Exception as err:
                     self.log.warning("Error handling metric: {} - error: {}".format(metric.name, err))
             else:
-                self.log.debug("Unable to handle metric: {0} - error: "
-                               "No handler function named '{0}' defined".format(metric.name))
+                self.log.debug(
+                    "Unable to handle metric: {0} - error: "
+                    "No handler function named '{0}' defined".format(metric.name)
+                )
         else:
             # build the wildcard list if first pass
             if scraper_config['_metrics_wildcards'] is None:
