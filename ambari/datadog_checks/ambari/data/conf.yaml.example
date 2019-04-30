@@ -30,13 +30,13 @@ instances:
   # tls_private_key: <PATH_TO_PRIVATE_KEY>
 
 
-  ## @param tls_verify - boolean - optional
+  ## @param tls_verify - boolean - optional - default: True
   ## If server certificate should be verified. Set to False if using a self signed certificate
   #
   # tls_verify: True
 
 
-  ## @param ignore_tls_warning - boolean - optional
+  ## @param ignore_tls_warning - boolean - optional - default: False
   ## Ignore warnings for lack of SSL validation
   #
   # ignore_tls_warning = False

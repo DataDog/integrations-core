@@ -17,8 +17,3 @@ def instance():
         'username': 'admin',
         'password': 'admin',
     }
-
-
-@pytest.fixture
-def authentication():
-    return {'username': 'admin', 'password': 'admin'}

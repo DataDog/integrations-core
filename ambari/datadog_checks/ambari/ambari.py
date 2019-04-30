@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import iteritems
-from requests.auth import HTTPBasicAuth
 import requests
 
 
@@ -26,7 +25,7 @@ METRICS_FIELD = "metrics"
 
 class AmbariCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
-        super(AmbariCheck, self).__init__(args, kwargs)
+        super(AmbariCheck, self).__init__(*args, **kwargs)
         self.hosts = []
         self.clusters = []
         self.services = []
@@ -58,10 +57,10 @@ class AmbariCheck(AgentCheck):
         self._submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
         return [cluster.get('Clusters').get('cluster_name') for cluster in resp.get('items')]
 
-    def get_host_metrics(self, base_url, authentication, clusters, base_tags):
+    def get_host_metrics(self, base_url, clusters, base_tags):
         for cluster in clusters:
             cluster_tag = CLUSTER_TAG_TEMPLATE.format(cluster)
-            hosts_list = self._get_hosts_info(base_url, authentication, cluster)
+            hosts_list = self._get_hosts_info(base_url, cluster)
 
             for host in hosts_list:
                 host_metrics = host.get(METRICS_FIELD)

@@ -22,7 +22,7 @@ def test_check(aggregator):
         "timeout": 30,
         "tls_verify": False,
     }]
-    check = AmbariCheck(instance=instance)
+    check = AmbariCheck(instances=instance)
     check.check(instance[0])
     # import pdb; pdb.set_trace()
     aggregator.assert_all_metrics_covered()
