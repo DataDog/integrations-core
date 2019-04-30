@@ -119,6 +119,7 @@ class File(object):
         if self.binary:
             self.contents = contents
         else:
+            print(self.file_path)
             self.contents = contents.format(**self.config)
 
     def write(self):
