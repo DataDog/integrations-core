@@ -147,11 +147,12 @@ class AggregatorStub(object):
         """
         Assert a metric was processed by this stub
         """
-        self._asserted.add(name)
+        mapped_name, at_least = self._match_metric_name_in_mapping(name, at_least) or [name, at_least]
+        self._asserted.add(mapped_name)
         tags = normalize_tags(tags, sort=True)
 
         candidates = []
-        for metric in self.metrics(name):
+        for metric in self.metrics(mapped_name):
             if value is not None and not self.is_aggregate(metric.type) and value != metric.value:
                 continue
 
@@ -243,6 +244,26 @@ class AggregatorStub(object):
             assert len(candidates) == count
         else:
             assert len(candidates) >= at_least
+
+    def _match_metric_name_in_mapping(self, name, at_least):
+        """
+        Treat the edge cases where trimmed counter metric names
+        are overwritten in `self._metrics` mapping and get appended
+        to other metrics with the same name in the mapping
+        """
+        if name in self._metrics:
+            # nominal case
+            return [name, at_least]
+        trimmed_name = name.replace("_total", "")
+        if trimmed_name in self._metrics:
+            # trimmed counter metric name corresponds to another metric name
+            # should incremente the `at_least` parameter to make sure we received
+            # the counter metric
+            return [trimmed_name, at_least + 1]
+        trimmed_name = name.replace("total", "current")
+        if trimmed_name in self._metrics:
+            # very edge case hit by the nginx_ingress_controller check
+            return [trimmed_name, at_least + 1]
 
     @property
     def metrics_asserted_pct(self):
