@@ -164,7 +164,8 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
     assert len(messages) == 41
     # Tests correct parsing of counters
     _counter = metrics_pb2.MetricFamily()
-    _counter.name = 'skydns_skydns_dns_cachemiss_count_total'
+    # we expect the parsing function to trim `_total` from the counter metric name
+    _counter.name = 'skydns_skydns_dns_cachemiss_count'
     _counter.help = 'Counter of DNS requests that result in a cache miss.'
     _counter.type = 0  # COUNTER
     _c = _counter.metric.add()
@@ -681,7 +682,8 @@ def test_parse_one_counter(p_check):
 
     expected_etcd_metric = metrics_pb2.MetricFamily()
     expected_etcd_metric.help = "Total number of mallocs."
-    expected_etcd_metric.name = "go_memstats_mallocs_total"
+    # we expect the parsing function to trim `_total` from the counter metric name
+    expected_etcd_metric.name = "go_memstats_mallocs"
     expected_etcd_metric.type = 0
     expected_etcd_metric.metric.add().counter.value = 18713
 

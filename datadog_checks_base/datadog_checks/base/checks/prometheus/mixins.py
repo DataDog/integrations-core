@@ -214,8 +214,17 @@ class PrometheusScraperMixin(object):
                 metric.name = self.remove_metric_prefix(metric.name)
                 metric_name = "%s_bucket" % metric.name if metric.type == "histogram" else metric.name
                 metric_type = self.type_overrides.get(metric_name, metric.type)
+                metric_type = self._match_metric_in_mapping(metric, self.type_overrides) or metric.type
                 if metric_type == "untyped" or metric_type not in self.METRIC_TYPES:
                     continue
+
+                if metric.name in obj_map and metric.type == "counter":
+                    # we already received a metric with this name
+                    # it means "_total" was trimmed when parsing
+                    # the counter metric, we readd the "_total" to avoid
+                    # overwriting the metric in `obj_map` and `obj_help` and `messages`
+                    metric.name += "_total"
+                    metric_name += "_total"
 
                 for sample in metric.samples:
                     if (sample[0].endswith("_sum") or sample[0].endswith("_count")) and \
@@ -396,7 +405,8 @@ class PrometheusScraperMixin(object):
 
     def store_labels(self, message):
         # If targeted metric, store labels
-        if message.name in self.label_joins:
+        join_config = self._match_metric_in_mapping(message, self.label_joins)
+        if join_config:
             matching_label = self.label_joins[message.name]['label_to_match']
             for metric in message.metric:
                 labels_list = []
@@ -404,7 +414,7 @@ class PrometheusScraperMixin(object):
                 for label in metric.label:
                     if label.name == matching_label:
                         matching_value = label.value
-                    elif label.name in self.label_joins[message.name]['labels_to_get']:
+                    elif label.name in join_config['labels_to_get']:
                         labels_list.append((label.name, label.value))
                 try:
                     self._label_mapping[matching_label][matching_value] = labels_list
@@ -444,7 +454,7 @@ class PrometheusScraperMixin(object):
         # If targeted metric, store labels
         self.store_labels(message)
 
-        if message.name in self.ignore_metrics:
+        if self._is_metric_in_list(message, self.ignore_metrics):
             return  # Ignore the metric
 
         # Filter metric to see if we can enrich with joined labels
@@ -457,10 +467,12 @@ class PrometheusScraperMixin(object):
 
         try:
             if not self._dry_run:
-                try:
-                    self._submit(self.metrics_mapper[message.name], message, send_histograms_buckets,
+                mapped_name = self._match_metric_in_mapping(message, self.metrics_mapper)
+                if mapped_name:
+                    self._submit(mapped_name, message, send_histograms_buckets,
                                  send_monotonic_counter, custom_tags)
-                except KeyError:
+                    return
+                else:
                     if not ignore_unmapped:
                         # call magic method (non-generic check)
                         handler = getattr(self, message.name)  # Lookup will throw AttributeError if not found
@@ -673,3 +685,26 @@ class PrometheusScraperMixin(object):
     def set_prometheus_timeout(self, instance, default_value=10):
         """ extract `prometheus_timeout` directly from the instance configuration """
         self.prometheus_timeout = instance.get('prometheus_timeout', default_value)
+
+    @staticmethod
+    def _match_metric_in_mapping(metric, mapping):
+        """
+        Lookup a metric name in a mapping
+        If the lookup fails for a counter metric, add `_total`suffix
+        to the metric name and perform a second lookup
+        """
+        if metric.name in mapping:
+            return mapping.get(metric.name)
+        elif metric.type == "counter":
+            return mapping.get(metric.name + "_total")
+
+    @staticmethod
+    def _is_metric_in_list(metric, name_list):
+        """
+        Lookup a metric name in a list
+        If the lookup fails for a counter metric, add `_total`suffix
+        to the metric name and perform a second lookup
+        """
+        if metric.name in name_list:
+            return True
+        return metric.type == "counter" and metric.name + "_total" in name_list
