@@ -11,6 +11,7 @@ from mock import patch
 from requests.exceptions import SSLError
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.yarn import YarnCheck
 
 from .common import (
@@ -29,7 +30,7 @@ from .common import (
 def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-        endpoints=[INSTANCE_INTEGRATION['resourcemanager_uri']],
+        conditions=[CheckEndpoints(INSTANCE_INTEGRATION['resourcemanager_uri'], attempts=120)],
     ):
         yield INSTANCE_INTEGRATION
 
