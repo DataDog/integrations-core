@@ -29,7 +29,7 @@ from .common import (
 def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-        log_patterns=['Registered webapp guice modules'],
+        endpoints=[INSTANCE_INTEGRATION['resourcemanager_uri']],
     ):
         yield INSTANCE_INTEGRATION
 
