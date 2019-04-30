@@ -1,0 +1,38 @@
+version: "3"
+# Inspired from
+# https://github.com/big-data-europe/docker-hadoop
+services:
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:1.1.0-hadoop2.7.1-java8
+    container_name: resourcemanager
+    depends_on:
+      - namenode
+      - datanode
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "8088:8088"
+  
+  namenode:
+    image: bde2020/hadoop-namenode:1.1.0-hadoop2.7.1-java8
+    container_name: namenode
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=SparkCluster
+    env_file:
+      - ./hadoop.env
+  
+  datanode:
+    image: bde2020/hadoop-datanode:1.1.0-hadoop2.7.1-java8
+    container_name: datanode
+    depends_on:
+      - namenode
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:

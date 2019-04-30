@@ -31,6 +31,63 @@ CUSTOM_TAGS = ['optional:tag1']
 TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
 
+INSTANCE_INTEGRATION = {"resourcemanager_uri": RM_ADDRESS, "cluster_name": CLUSTER_NAME}
+
+CLUSTER_TAG = "cluster_name:{}".format(CLUSTER_NAME)
+
+EXPECTED_METRICS = [
+    "yarn.metrics.apps_submitted",
+    "yarn.metrics.apps_completed",
+    "yarn.metrics.apps_pending",
+    "yarn.metrics.apps_running",
+    "yarn.metrics.apps_failed",
+    "yarn.metrics.apps_killed",
+    "yarn.metrics.reserved_mb",
+    "yarn.metrics.available_mb",
+    "yarn.metrics.allocated_mb",
+    "yarn.metrics.total_mb",
+    "yarn.metrics.reserved_virtual_cores",
+    "yarn.metrics.available_virtual_cores",
+    "yarn.metrics.allocated_virtual_cores",
+    "yarn.metrics.total_virtual_cores",
+    "yarn.metrics.containers_allocated",
+    "yarn.metrics.containers_reserved",
+    "yarn.metrics.containers_pending",
+    "yarn.metrics.total_nodes",
+    "yarn.metrics.active_nodes",
+    "yarn.metrics.lost_nodes",
+    "yarn.metrics.unhealthy_nodes",
+    "yarn.metrics.decommissioned_nodes",
+    "yarn.metrics.rebooted_nodes",
+    "yarn.queue.root.max_capacity",
+    "yarn.queue.root.used_capacity",
+    "yarn.queue.root.capacity",
+    "yarn.queue.num_pending_applications",
+    "yarn.queue.user_am_resource_limit.memory",
+    "yarn.queue.user_am_resource_limit.vcores",
+    "yarn.queue.absolute_capacity",
+    "yarn.queue.user_limit_factor",
+    "yarn.queue.user_limit",
+    "yarn.queue.num_applications",
+    "yarn.queue.used_am_resource.memory",
+    "yarn.queue.used_am_resource.vcores",
+    "yarn.queue.absolute_used_capacity",
+    "yarn.queue.resources_used.memory",
+    "yarn.queue.resources_used.vcores",
+    "yarn.queue.am_resource_limit.vcores",
+    "yarn.queue.am_resource_limit.memory",
+    "yarn.queue.capacity",
+    "yarn.queue.num_active_applications",
+    "yarn.queue.absolute_max_capacity",
+    "yarn.queue.used_capacity",
+    "yarn.queue.num_containers",
+    "yarn.queue.max_capacity",
+    "yarn.queue.max_applications",
+    "yarn.queue.max_applications_per_user",
+]
+
+EXPECTED_TAGS = ['cluster_name:test']
+
 YARN_CONFIG = {
     'instances': [
         {

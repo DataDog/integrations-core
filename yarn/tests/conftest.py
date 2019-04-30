@@ -4,13 +4,18 @@
 
 import json
 import os
+from copy import deepcopy
 
 import pytest
 from mock import patch
 from requests.exceptions import SSLError
 
+from datadog_checks.dev import docker_run
+from datadog_checks.yarn import YarnCheck
+
 from .common import (
     HERE,
+    INSTANCE_INTEGRATION,
     TEST_PASSWORD,
     TEST_USERNAME,
     YARN_APPS_URL,
@@ -18,6 +23,25 @@ from .common import (
     YARN_NODES_URL,
     YARN_SCHEDULER_URL,
 )
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    with docker_run(
+        compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
+        log_patterns=['Registered webapp guice modules'],
+    ):
+        yield INSTANCE_INTEGRATION
+
+
+@pytest.fixture
+def check():
+    return YarnCheck('yarn', {}, {})
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE_INTEGRATION)
 
 
 @pytest.fixture
