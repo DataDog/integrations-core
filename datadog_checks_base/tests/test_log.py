@@ -11,7 +11,7 @@ from datadog_checks import log
 def test_get_py_loglevel():
     # default value for invalid input
     assert log._get_py_loglevel(None) == logging.INFO
-    # default value for invalid unicode input
+    # default value for valid unicode input encoding into an invalid key
     assert log._get_py_loglevel(u'dèbùg') == logging.INFO
     # check unicode works
     assert log._get_py_loglevel(u'crit') == logging.CRITICAL
