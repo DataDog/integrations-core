@@ -15,7 +15,7 @@ integration repository.
 * Python 2.7 and Python 3.7+ need to be available on your system.
 * Docker to run the full test suite.
 
-Using virtualenv is recommended.
+Using a virtual environment is recommended.
 
 ## Installation
 
