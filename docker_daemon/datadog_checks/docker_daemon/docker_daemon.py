@@ -76,6 +76,13 @@ CGROUP_METRICS = [
         },
     },
     {
+        "cgroup": "memory",
+        "file": "memory.kmem.usage_in_bytes",
+        "metrics": {
+            "kmemusage": ("docker.kmem.usage", GAUGE),
+        },
+    },
+    {
         "cgroup": "cpuacct",
         "file": "cpuacct.stat",
         "metrics": {
@@ -1033,6 +1040,10 @@ class DockerDaemon(AgentCheck):
                     # 2 ** 60 is kept for consistency of other cgroups metrics
                     if value < 2 ** 60:
                         return dict({'softlimit': value})
+                elif 'memory.kmem.usage_in_bytes' in stat_file:
+                    value = int(fp.read())
+                    if value < 2 ** 60:
+                        return dict({'kmemusage': value})
                 elif 'cpu.shares' in stat_file:
                     value = int(fp.read())
                     return {'shares': value}
