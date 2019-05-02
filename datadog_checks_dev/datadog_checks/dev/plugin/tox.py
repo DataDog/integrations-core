@@ -65,7 +65,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
     sections[section] = {
         'platform': 'linux|darwin|win32',
-        # These tools only support Python 3.6+
+        # These tools require Python 3.6+
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
