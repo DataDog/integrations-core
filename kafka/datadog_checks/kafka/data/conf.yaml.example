@@ -82,7 +82,7 @@ instances:
     #
     # rmi_registry_ssl: false
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
@@ -126,11 +126,12 @@ init_config:
   #
   collect_default_metrics: true
 
+  ## @param conf - list of objects - required
   ## List of metrics to be collected by the integration
   ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
   ## Agent 5: Customize all your metrics below
   ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
-
+  #
   conf:
     ##
     ## Producers (only v0.8.2.x)

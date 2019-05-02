@@ -8,31 +8,31 @@ init_config:
 
 instances:
 
-    ## collect_connection_state - boolean - required
+    ## @param collect_connection_state - boolean - required
     ## Set to true to collect connection states for your interfaces
     #
   - collect_connection_state: false
 
-    ## excluded_interfaces - list of strings - optional
+    ## @param excluded_interfaces - list of strings - optional
     ## List of interface to exclude from the check.
     #
     # excluded_interfaces:
     #   - lo
     #   - lo0
 
-    ## excluded_interface_re - string - optional
+    ## @param excluded_interface_re - string - optional
     ## Completely ignore any network interface matching the given regex.
     #
     # excluded_interface_re: <NETWORK_INTERFACE_NAME>.*
 
-    ## combine_connection_states - boolean - optional - default: true
+    ## @param combine_connection_states - boolean - optional - default: true
     ## Set to false to not combine connection states.
     ## By default we combine states like fin_wait_1 and fin_wait_2
     ## together into one state: 'closing' disable this option to get more granular data.
     #
     # combine_connection_states: true
 
-    ## collect_rate_metrics - boolean - optional - default: true
+    ## @param collect_rate_metrics - boolean - optional - default: true
     ## By default, most metrics are submitted as rates.
     ## However, some metrics like tcp/udp retransmissions and errors are
     ## better handled as counts.
@@ -40,7 +40,7 @@ instances:
     #
     # collect_rate_metrics: true
 
-    ## collect_count_metrics - boolean - optional - default: false
+    ## @param collect_count_metrics - boolean - optional - default: false
     ## By default, most metrics are submitted as rates.
     ## However, some metrics like tcp/udp retransmissions and errors are
     ## better handled as counts.
@@ -81,7 +81,7 @@ instances:
     #   - <METRIC_NAME>
     #   - <METRIC_PREFIX>*
 
-    ## @param tags  - list of key:value elements - optional
+    ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

@@ -1,7 +1,8 @@
 init_config:
 
 instances:
-    ## @param prometheus_url - string -required
+
+    ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
   - prometheus_url: http://service/prometheus
@@ -36,7 +37,7 @@ instances:
     #
     # label_to_hostname: <LABEL>
 
-    ## @param label_joins - custom - optional
+    ## @param label_joins - object - optional
     ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping
     #
     # label_joins:
@@ -61,7 +62,7 @@ instances:
     # type_overrides:
     #   <METRIC_NAME>: <METRIC_TYPE>
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

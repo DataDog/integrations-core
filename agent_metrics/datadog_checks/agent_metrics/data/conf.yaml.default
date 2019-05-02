@@ -1,8 +1,13 @@
-## This file is overwritten upon Agent upgrade.
-## To make modifications to the check configuration, please copy this file
-## to `agent_metrics.yaml` and make your changes on that file.
-
 init_config:
+
+    ## @param process_metrics - list of metrics - required
+    ## List or process metrics to collect.
+    ## Each metrics has the following required parameter:
+    ##   * name - string - name of the metric
+    ##   * type - string - type of the metric
+    ##   * active - boolean - if the metric is active or not.
+    ##
+    #
     process_metrics:
         - name: memory_info
           type: gauge
@@ -20,7 +25,7 @@ init_config:
 instances:
 
   -
-    ## @param tags  - list of key:value strings - optional
+    ## @param tags - list of key:value strings - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

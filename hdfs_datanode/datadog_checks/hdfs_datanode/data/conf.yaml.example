@@ -22,7 +22,7 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event, and service check emitted by this integration.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
@@ -49,7 +49,8 @@ instances:
     # kerberos_delegate: false
 
     ## @param kerberos_force_initiate - boolean - optional - default: false
-    ## Set to true to preemptively initiate the Kerberos GSS exchange and present a Kerberos ticket on the initial request (and all subsequent).
+    ## Set to true to preemptively initiate the Kerberos GSS exchange and present a Kerberos ticket on the initial
+    ## request (and all subsequent).
     ## See https://github.com/requests/requests-kerberos#preemptive-authentication
     #
     # kerberos_force_initiate: false

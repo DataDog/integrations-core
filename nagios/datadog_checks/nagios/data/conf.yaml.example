@@ -10,7 +10,8 @@ instances:
     ## @param nagios_conf - string - required
     ## Define the path to your Nagios configuration file.
     ## The Agent reads the main Nagios configuration file to get the locations of the Nagios log files it should watch.
-    ## The integration also works with Icinga. If you use Icinga, set `nagios_conf` to the location of your Icinga configuration file.
+    ## The integration also works with Icinga. If you use Icinga, set `nagios_conf` to the location of your Icinga
+    ## configuration file.
     #
   - nagios_conf: /etc/nagios3/nagios.cfg
 
@@ -36,7 +37,7 @@ instances:
     #
     # collect_service_performance_data: false
 
-    ## @param tags  - list of key:value elements - optional
+    ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

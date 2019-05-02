@@ -14,7 +14,8 @@ instances:
     ## @param mixer_endpoint - string - required
     ## Define the mixer endpoint in order to collect all Prometheus metrics on the Mixer process as well
     ## as gRPC metrics related to API calls and metrics on adapter dispatch.
-    ## If using Istio < v1.1, replace port 15014 with port 9093. See the changes here: https://istio.io/about/notes/1.1/#configuration-management
+    ## If using Istio < v1.1, replace port 15014 with port 9093. See the changes here:
+    ## https://istio.io/about/notes/1.1/#configuration-management
     #
     mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
 
@@ -23,7 +24,7 @@ instances:
     #
     send_histograms_buckets: true
 
-    ## @param tags  - list of key:value elements - optional
+    ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

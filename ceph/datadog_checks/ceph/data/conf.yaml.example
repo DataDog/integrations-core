@@ -3,13 +3,13 @@ init_config:
 instances:
 
   -
-    ## @param ceph_cmd - string - optional
-    ##
+    ## @param ceph_cmd - string - optional - default: /usr/bin/ceph
+    ## Ceph command to use.
     #
     # ceph_cmd: /usr/bin/ceph
 
-    ## @param ceph_cluster - string - optional
-    ##
+    ## @param ceph_cluster - string - optional - default: ceph
+    ## Cluster ceph to query.
     #
     # ceph_cluster: ceph
 
@@ -48,7 +48,7 @@ instances:
     #   - REQUEST_SLOW
     #   - REQUEST_STUCK
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

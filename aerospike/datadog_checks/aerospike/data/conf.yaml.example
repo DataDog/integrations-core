@@ -31,7 +31,7 @@ instances:
     #
     # timeout: 10
 
-    ## @param tags  - list of key:value strings - optional
+    ## @param tags - list of key:value strings - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
@@ -67,10 +67,11 @@ instances:
 
 init_config:
 
+  ## @param mappings - list of strings - required
   ## Rate mappings. DO NOT EDIT unless you know what you're doing.
   ## See https://github.com/aerospike/aerospike-collectd/blob/develop/aerospike_schema.yaml
   ## for the definitive list
-
+  #
   mappings:
     - basic_scans_failed    # moved to NS scan_basic_error
     - basic_scans_succeeded    # moved to NS scan_basic_complete

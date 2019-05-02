@@ -86,11 +86,11 @@ instances:
     ## @param admin_forwarder - boolean - optional - default: false
     ## It is used to signify a URL that includes a context root
     ## needed for a forwarder application to access Elasticsearch REST services
-    ## for example: https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
+    ## for example https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
     #
     # admin_forwarder: false
 
-    ## @param tags  - list of key:value string - optional
+    ## @param tags - list of key:value string - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging

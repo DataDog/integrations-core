@@ -4,4 +4,9 @@ ad_identifiers:
 init_config:
 
 instances:
+
+    ## @param url - string - optional
+    ## Note: the following configuration param is only available when the `use_preview` param is set to 'false'.
+    ## API endpoint of your etcd instance.
+    #
   - url: "http://%%host%%:2379"

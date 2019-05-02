@@ -5,7 +5,7 @@ instances:
     #
   - jmx_url: "service:jmx:remote+http://localhost:9990"
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
@@ -99,16 +99,16 @@ init_config:
   # custom_jar_paths:
   #   - /path/to/jboss-cli-client.jar
 
+  ## @param conf - list of objects - required
   ## List of metrics to be collected by the integration
   ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
   ## Agent 5: Customize all your metrics below
   ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
-
-  conf:
-
   ## inspired from:
-  ## https://github.com/nlighten/wildfly_exporter/blob/master/client/src/main/java/nl/nlighten/prometheus/wildfly/JbossJdbcPoolExports.java
+  ## https://github.com/nlighten/wildfly_exporter/blob/master/client/src/main/java/nl/nlighten/prometheus/wildfly/JbossJdbcPoolExports.java #noqa
   ## https://github.com/prometheus/jmx_exporter/blob/master/example_configs/wildfly-10.yaml
+  #
+  conf:
   - include:
       bean_regex:
         - jboss\.as:subsystem=datasources,(?:xa-)*data-source=(.*),statistics=(.*)
@@ -184,9 +184,9 @@ init_config:
 
 
 
-  ## Undertow
-  ## inspired from:
-  ## https://github.com/nlighten/wildfly_exporter/blob/master/client/src/main/java/nl/nlighten/prometheus/wildfly/UndertowExports.java
+    ## Undertow
+    ## inspired from:
+    ## https://github.com/nlighten/wildfly_exporter/blob/master/client/src/main/java/nl/nlighten/prometheus/wildfly/UndertowExports.java
 
   - include:
       bean_regex:

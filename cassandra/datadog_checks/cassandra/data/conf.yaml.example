@@ -15,7 +15,7 @@ instances:
     #
     cassandra_aliasing: true
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ## The 'environment' tag depends on the <cluster_name> in Cassandra configuration:
     ##   - if the environment information (eg 'prod' or 'test') is included in the <cluster_name>, just use <cluster_name>.
@@ -126,11 +126,12 @@ init_config:
   #
   collect_default_metrics: true
 
+  ## @param conf - list of objects - required
   ## List of metrics to be collected by the integration
   ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
   ## Agent 5: Customize all your metrics below
   ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
-
+  #
   conf:
     - include:
         domain: org.apache.cassandra.metrics

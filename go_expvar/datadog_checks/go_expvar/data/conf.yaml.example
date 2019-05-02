@@ -27,7 +27,7 @@ instances:
     #
     # namespace: <NAMESPACE>
 
-    ## @param tags  - list of key:value string - optional
+    ## @param tags - list of key:value string - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
@@ -36,7 +36,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param metrics - list of objects - optionals
+    ## @param metrics - list of objects - optional
     ## These metrics are just here as examples.
     ## Most memstats metrics are collected by default without configuration needed.
     ## See http://godoc.org/runtime#MemStats for their explanation

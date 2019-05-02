@@ -33,7 +33,8 @@ instances:
     # s3_root: s3.amazonaws.com
 
     ## @param metrics - list of strings - optional
-    ## For RiackCS v2.1+, the default metrics collected by this integrations includes most S3 API metrics as well as memory stats.
+    ## For RiackCS v2.1+, the default metrics collected by this integrations includes most S3 API metrics as
+    ## well as memory stats.
     ## Some have been excluded though:
     ##
     ##   * bucket_acl_(get|put)
