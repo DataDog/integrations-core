@@ -55,7 +55,7 @@ def _get_py_loglevel(lvl):
     """
     Map log levels to strings
     """
-    # In Python2, transform the unicode object into plain string with utf-8 encoding
+    # In Python2, transform the unicode object into plain string
     if PY2 and isinstance(lvl, text_type):
         lvl = lvl.encode('ascii', 'ignore')
 
