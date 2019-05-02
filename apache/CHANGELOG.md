@@ -1,5 +1,9 @@
 # CHANGELOG - apache
 
+## 1.6.0 / 2019-05-02
+
+* [Added] Add option to Suppress `InsecureRequestWarning` when disable_ssl_validation is set. See [#2475](https://github.com/DataDog/integrations-core/pull/2475).
+
 ## 1.5.0 / 2019-03-29
 
 * [Added] Adhere to code style. See [#3322](https://github.com/DataDog/integrations-core/pull/3322).
