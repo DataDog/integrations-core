@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from six import text_type, string_types, PY2
 
 from .utils.common import to_string
 
@@ -53,10 +54,21 @@ def _get_py_loglevel(lvl):
     """
     Map log levels to strings
     """
-    if not lvl:
-        lvl = 'INFO'
+    # In Python2, transform the unicode object into plain string with utf-8 encoding
+    if PY2 and isinstance(lvl, text_type):
+        try:
+            lvl = lvl.encode('utf-8')
+        except UnicodeError:
+            lvl = ''
 
-    return LOG_LEVEL_MAP.get(lvl.upper(), logging.DEBUG)
+    # Be resilient to bad input since `lvl` comes from a configuration file
+    try:
+        lvl = lvl.upper()
+    except AttributeError:
+        lvl = ''
+
+    # if `lvl` is not a valid level string, let it fall back to default logging value
+    return LOG_LEVEL_MAP.get(lvl, logging.INFO)
 
 
 def init_logging():
