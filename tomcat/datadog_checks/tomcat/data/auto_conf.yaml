@@ -14,7 +14,7 @@ init_config:
   collect_default_metrics: true
 
 instances:
-  -
+
     ## @param host - string - required
     ## Tomcat host to connect to.
     #
