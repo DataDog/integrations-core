@@ -2,7 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from six import text_type, PY2
+
+from six import PY2, text_type
 
 from .utils.common import to_string
 
@@ -56,10 +57,7 @@ def _get_py_loglevel(lvl):
     """
     # In Python2, transform the unicode object into plain string with utf-8 encoding
     if PY2 and isinstance(lvl, text_type):
-        try:
-            lvl = lvl.encode('utf-8')
-        except UnicodeError:
-            lvl = ''
+        lvl = lvl.encode('ascii', 'ignore')
 
     # Be resilient to bad input since `lvl` comes from a configuration file
     try:
