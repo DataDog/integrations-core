@@ -1,0 +1,24 @@
+{
+  "display_name": "hive",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "hive",
+  "metric_prefix": "hive.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "3faee302-f293-45de-9eb8-ba6b7fa052a3",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-hive Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "hive"
+}
