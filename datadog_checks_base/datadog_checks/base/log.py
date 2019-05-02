@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from six import text_type, string_types, PY2
+from six import text_type, PY2
 
 from .utils.common import to_string
 
