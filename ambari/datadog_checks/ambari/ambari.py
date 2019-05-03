@@ -11,7 +11,6 @@ from . import common
 
 # Tag templates
 CLUSTER_TAG_TEMPLATE = "ambari_cluster:{}"
-HOST_TAG = "ambari_host:"
 SERVICE_TAG = "ambari_service:"
 COMPONENT_TAG = "ambari_component:"
 
@@ -74,8 +73,7 @@ class AmbariCheck(AgentCheck):
 
                 metrics = self.flatten_host_metrics(host_metrics)
                 for metric_name, value in iteritems(metrics):
-                    host_tag = HOST_TAG + host.get('Hosts').get('host_name')
-                    metric_tags = base_tags + [cluster_tag, host_tag]
+                    metric_tags = base_tags + [cluster_tag]
                     if isinstance(value, float):
                         self._submit_gauge(metric_name, value, metric_tags, hostname)
                     else:
