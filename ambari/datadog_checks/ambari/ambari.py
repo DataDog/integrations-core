@@ -59,14 +59,17 @@ class AmbariCheck(AgentCheck):
         return [cluster.get('Clusters').get('cluster_name') for cluster in resp.get('items')]
 
     def get_host_metrics(self, base_url, clusters, base_tags):
+        external_tags = []
         for cluster in clusters:
             cluster_tag = CLUSTER_TAG_TEMPLATE.format(cluster)
             hosts_list = self._get_hosts_info(base_url, cluster)
 
             for host in hosts_list:
+                hostname = host.get('Hosts').get('host_name')
+                external_tags.append((hostname, {'ambari': [cluster_tag]}))
                 host_metrics = host.get(METRICS_FIELD)
                 if host_metrics is None:
-                    self.warning("No metrics received for host {}".format(host.get('Hosts').get('host_name')))
+                    self.warning("No metrics received for host {}".format(hostname))
                     continue
 
                 metrics = self.flatten_host_metrics(host_metrics)
@@ -77,6 +80,7 @@ class AmbariCheck(AgentCheck):
                         self._submit_gauge(metric_name, value, metric_tags)
                     else:
                         self.warning("Expected a float for {}, received {}".format(metric_name, value))
+        self.set_external_tags(external_tags)
 
     def get_service_metrics(self, base_url, clusters, whitelisted_services,
                             whitelisted_metrics, base_tags, collect_service_metrics, collect_service_status):
