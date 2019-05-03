@@ -26,9 +26,6 @@ from .exceptions import (
 )
 from .parameters import substitute
 
-# Turn off TUF file logging.
-tuf_settings.ENABLE_FILE_LOGGING = False
-
 # Increase requests timeout.
 tuf_settings.SOCKET_TIMEOUT = 60
 
