@@ -6,7 +6,7 @@
   "metric_prefix": "ambari.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Get metrics by host or service for all your ambari managed clusters",
   "guid": "4f518f2c-cfa7-4763-ac33-b1c8846eb738",
   "support": "core",
   "supported_os": [

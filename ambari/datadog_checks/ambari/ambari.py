@@ -26,9 +26,6 @@ METRICS_FIELD = "metrics"
 class AmbariCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         super(AmbariCheck, self).__init__(*args, **kwargs)
-        self.hosts = []
-        self.clusters = []
-        self.services = []
 
     def check(self, instance):
         base_url = instance.get("url", "")
@@ -40,10 +37,14 @@ class AmbariCheck(AgentCheck):
         clusters = self.get_clusters(base_url)
         if instance.get("collect_host_metrics", True):
             self.get_host_metrics(base_url, clusters, base_tags)
-        if instance.get("collect_service_metrics", True):
+
+        collect_service_metrics = instance.get("collect_service_metrics", True)
+        collect_service_status = instance.get("collect_service_status", False)
+        if collect_service_metrics or collect_service_status:
             self.get_service_metrics(base_url, clusters, whitelisted_services,
                                      whitelisted_metrics, base_tags,
-                                     instance.get("collect_service_status", True))
+                                     collect_service_metrics,
+                                     collect_service_status)
 
     def get_clusters(self, base_url):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
@@ -78,13 +79,15 @@ class AmbariCheck(AgentCheck):
                         self.warning("Expected a float for {}, received {}".format(metric_name, value))
 
     def get_service_metrics(self, base_url, clusters, whitelisted_services,
-                            whitelisted_metrics, base_tags, collect_service_status):
+                            whitelisted_metrics, base_tags, collect_service_metrics, collect_service_status):
         for cluster in clusters:
             tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
             for service, components in iteritems(whitelisted_services):
                 service_tags = tags + [SERVICE_TAG + service.lower()]
-                self.get_component_metrics(base_url, cluster, service,
-                                           service_tags, [c.upper() for c in components], whitelisted_metrics)
+
+                if collect_service_metrics:
+                    self.get_component_metrics(base_url, cluster, service,
+                                               service_tags, [c.upper() for c in components], whitelisted_metrics)
                 if collect_service_status:
                     self.get_service_checks(base_url, cluster, service, service_tags)
 
@@ -95,6 +98,8 @@ class AmbariCheck(AgentCheck):
 
     def get_component_metrics(self, base_url, cluster, service,
                               base_tags, component_whitelist, metric_whitelist):
+        if not component_whitelist:
+            return
         component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
         components_response = self._make_request(component_metrics_endpoint)
 

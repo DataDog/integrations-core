@@ -14,11 +14,13 @@ def test_check(aggregator):
         "tags": ["test:manual"],
         "services": {
             "HDFS": ["NAMENODE", "DATANODE"],
-            "YARN": ["NODEMANANGER", "YARNCLIENT"]
+            "YARN": ["NODEMANANGER", "YARNCLIENT"],
+            "SPARK": []
         },
         "metric_headers": ["cpu", "jvm"],
         "collect_host_metrics": True,
         "collect_service_metrics": True,
+        "collect_service_status": True,
         "timeout": 30,
         "tls_verify": False,
     }]

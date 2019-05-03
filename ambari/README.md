@@ -42,21 +42,7 @@ whitelisted service component the metrics with headers in the white list.
 ### Service Checks
 
 If service status collection is enabled with `collect_service_status` this integration will collect
-the status of each installed service with the following mapping:
-
-    * INIT: OK
-    * INSTALLING: OK
-    * INSTALLED: OK
-    * STARTING: OK
-    * STARTED: OK
-    * STOPPING:	WARNING
-    * UNINSTALLING: WARNING
-    * UPGRADING: WARNING
-    * MAINTENANCE: WARNING
-    * INSTALL_FAILED: WARNING
-    * UNINSTALLED: CRITICAL
-    * WIPING_OUT: CRITICAL
-    * UNKNOWN: CRITICAL
+the status of each installed service with the following mapping found in `common.py`
 
 ### Events
 
