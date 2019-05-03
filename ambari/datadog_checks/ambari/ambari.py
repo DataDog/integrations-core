@@ -77,7 +77,7 @@ class AmbariCheck(AgentCheck):
                     host_tag = HOST_TAG + host.get('Hosts').get('host_name')
                     metric_tags = base_tags + [cluster_tag, host_tag]
                     if isinstance(value, float):
-                        self._submit_gauge(metric_name, value, metric_tags)
+                        self._submit_gauge(metric_name, value, metric_tags, hostname)
                     else:
                         self.warning("Expected a float for {}, received {}".format(metric_name, value))
         self.set_external_tags(external_tags)
@@ -174,8 +174,8 @@ class AmbariCheck(AgentCheck):
         except requests.exceptions.Timeout:
             self.warning("Connection timeout when connecting to {}".format(url))
 
-    def _submit_gauge(self, name, value, tags):
-        self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
+    def _submit_gauge(self, name, value, tags, hostname=None):
+        self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags, hostname=hostname)
 
     def _submit_service_checks(self, name, value, tags):
         self.service_check('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
