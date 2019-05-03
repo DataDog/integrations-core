@@ -25,11 +25,38 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-Ambari does not include any metrics.
+If host metrics collection is enabled with `collect_host_metrics` this integration will collect
+for every host in every cluster the following system metrics:
+* boottime
+* cpu
+* disk
+* memory
+* load
+* network
+* process
+
+If service metrics collection is enabled with `collect_service_metrics` this integration will collect for each
+whitelisted service component the metrics with headers in the white list.
+
 
 ### Service Checks
 
-Ambari does not include any service checks.
+If service status collection is enabled with `collect_service_status` this integration will collect
+the status of each installed service with the following mapping:
+
+    * INIT: OK
+    * INSTALLING: OK
+    * INSTALLED: OK
+    * STARTING: OK
+    * STARTED: OK
+    * STOPPING:	WARNING
+    * UNINSTALLING: WARNING
+    * UPGRADING: WARNING
+    * MAINTENANCE: WARNING
+    * INSTALL_FAILED: WARNING
+    * UNINSTALLED: CRITICAL
+    * WIPING_OUT: CRITICAL
+    * UNKNOWN: CRITICAL
 
 ### Events
 

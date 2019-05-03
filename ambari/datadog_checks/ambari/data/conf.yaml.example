@@ -56,6 +56,7 @@ instances:
         - <COMPONENT_NAME_1>
         - <COMPONENT_NAME_2>
 
+
   ## @param metric_headers - list - required
   ## Metric headings from which component metrics will be sourced.  To query all metrics
   ## from a component to see what headings it has, see here:
@@ -69,31 +70,37 @@ instances:
       - network
       - process
 
+
   ## @param timeout - integer - optional - default: 10
   ## Customizes the Ambari connection timeout (in seconds).
   #
   #  timeout: 10
+
 
   ## @param collect_host_metrics - boolean - optional - default: True
   ## Change to False to omit collecting host level metrics
   #
   # collect_host_metrics: True
 
+
   ## @param collect_service_metrics - boolean - optional - default: True
   ## Change to False to omit collecting service level metrics
   #
   # collect_service_metrics: True
 
-  ## @param collect_service_status - boolean - optional - default: True
+
+  ## @param collect_service_status - boolean - optional - default: False
   ## Change to False to omit collecting services status
   #
-  # collect_service_status: True
+  # collect_service_status: False
+
 
   ## @param skip_proxy - boolean - optional - default: False
   ## Whether or not to skip the proxy configured in the Agent's config file when
   ## making the request to the PerfServlet
   #
   #  skip_proxy: False
+
 
   ## @param tags  - list of key:value elements - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
@@ -103,6 +110,7 @@ instances:
   #  tags:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
+
 
 ## Log Section (Available for Agent >=6.0)
 ##

@@ -5,7 +5,7 @@ import pytest
 from datadog_checks.ambari import AmbariCheck
 
 
-@pytest.mark.integration
+@pytest.disable()
 def test_check(aggregator):
     instance = [{
         "url": "https://146.148.123.63:8443/ambari-lab-2/dp-proxy/ambari",
