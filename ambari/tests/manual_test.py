@@ -5,7 +5,7 @@ import pytest
 from datadog_checks.ambari import AmbariCheck
 
 
-@pytest.disable()
+@pytest.mark.skip(reason="Cannot be automated due to network restrictions")
 def test_check(aggregator):
     instance = [{
         "url": "https://146.148.123.63:8443/ambari-lab-2/dp-proxy/ambari",
