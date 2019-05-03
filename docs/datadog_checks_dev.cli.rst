@@ -3,6 +3,14 @@
 The Developer Toolkit
 ---------------------
 
+Prerequisites
+^^^^^^^^^^^^^
+
+* Python 3.7+ needs to be available on your system. Python 2.7 is optional.
+* Docker to run the full test suite.
+
+Using a virtual environment is recommended.
+
 Installation
 ^^^^^^^^^^^^
 .. code-block:: bash
