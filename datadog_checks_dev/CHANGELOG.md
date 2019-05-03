@@ -1,5 +1,14 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.23.2 / 2019-04-30
+
+* [Fixed] Remove spurious debug line. See [#3703](https://github.com/DataDog/integrations-core/pull/3703).
+
+## 0.23.1 / 2019-04-30
+
+* [Fixed] Fix creation of jmx & tile integrations. See [#3701](https://github.com/DataDog/integrations-core/pull/3701).
+* [Fixed] Fix template for new integration to use argument as display name. See [#3664](https://github.com/DataDog/integrations-core/pull/3664).
+
 ## 0.23.0 / 2019-04-22
 
 * [Added] Add extra type for manifest validation. See [#3662](https://github.com/DataDog/integrations-core/pull/3662).

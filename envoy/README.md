@@ -114,8 +114,8 @@ The filtering occurs before tag extraction, so you have the option to have certa
 ...
 'cluster.grpc.success': {
     'tags': (
-        ('cluster_name', ),
-        ('grpc_service', 'grpc_method', ),
+        ('<CLUSTER_NAME>', ),
+        ('<GRPC_SERVICE>', '<GRPC_METHOD>', ),
         (),
     ),
     ...
@@ -123,13 +123,13 @@ The filtering occurs before tag extraction, so you have the option to have certa
 ...
 ```
 
-Here there are `3` tag sequences: `('cluster_name')`, `('grpc_service', 'grpc_method')`, and empty `()`. The number of sequences corresponds exactly to how many metric parts there are. For this metric, there are `3` parts: `cluster`, `grpc`, and `success`. Envoy separates everything with a `.`, hence the final metric name would be:
+Here there are `3` tag sequences: `('<CLUSTER_NAME>')`, `('<GRPC_SERVICE>', '<GRPC_METHOD>')`, and empty `()`. The number of sequences corresponds exactly to how many metric parts there are. For this metric, there are `3` parts: `cluster`, `grpc`, and `success`. Envoy separates everything with a `.`, hence the final metric name would be:
 
-`cluster.<cluster_name>.grpc.<grpc_service>.<grpc_method>.success`
+`cluster.<CLUSTER_NAME>.grpc.<GRPC_SERVICE>.<GRPC_METHOD>.success`
 
 If you care only about the cluster name and grpc service, you would add this to your whitelist:
 
-`^cluster\.(cluster5|cluster7)\.grpc\.serviceXYZ\.`
+`^cluster\.<CLUSTER_NAME>\.grpc\.<GRPC_SERVICE>\.`
 
 ### Validation
 

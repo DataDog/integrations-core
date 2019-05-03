@@ -10,7 +10,7 @@ instances:
     #
   - stats_url: http://localhost:80/stats
 
-    ## @param metric_whitelist - optional - list of strings
+    ## @param metric_whitelist - list of strings - optional
     ## Whitelist metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
@@ -22,7 +22,7 @@ instances:
     # metric_whitelist:
     #   - cluster\.(in|out)\..*
 
-    ## @param metric_whitelist - optional - list of strings
+    ## @param metric_blacklist - list of strings - optional
     ## Blacklist metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
@@ -76,7 +76,7 @@ instances:
     #
     # timeout: 20
 
-    ## @param tags  - list of key:value string - optional
+    ## @param tags - list of key:value string - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging

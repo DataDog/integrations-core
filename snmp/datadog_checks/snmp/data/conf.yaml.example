@@ -121,7 +121,7 @@ instances:
     #
     # enforce_mib_constraints: true
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
@@ -140,7 +140,7 @@ instances:
     #
     # user: <USERNAME>
 
-    ## @param authProtocol - string -required
+    ## @param authProtocol - string - required
     ## Authentication type to use when connecting to your SNMP devices.
     #
     # authProtocol: <AUTHENTICATION_PROTOCOL>

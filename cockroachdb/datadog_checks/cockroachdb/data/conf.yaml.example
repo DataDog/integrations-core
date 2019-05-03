@@ -7,7 +7,8 @@ instances:
   - prometheus_url: http://localhost:8080/_status/vars
 
     ## @param ssl_cert - string - optional
-    ## If the certificate contains the ssl_private_key you can use this optional param instead of ssl_private_key and ssl_ca_cert
+    ## If the certificate contains the ssl_private_key you can use this optional param instead of ssl_private_key and
+    ## ssl_ca_cert
     #
     # ssl_cert: <PATH_TO_CERT_PEM>
 
@@ -32,7 +33,7 @@ instances:
     #
     # send_histograms_buckets: true
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event, and service check emitted by this integration.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging

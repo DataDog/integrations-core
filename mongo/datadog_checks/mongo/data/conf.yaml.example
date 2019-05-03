@@ -20,7 +20,7 @@ instances:
     #
     # timeout: 30
 
-    ## @param tags  - list of key:value elements - optional
+    ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
@@ -30,7 +30,8 @@ instances:
     #   - <KEY_2>:<VALUE_2>
 
     ## @param ssl - boolean - optional - default: false
-    ## Optional SSL parameters, see https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
+    ## Optional SSL parameters, see
+    ## https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
     ## for more details
     #
     # ssl: false
@@ -46,7 +47,8 @@ instances:
     # ssl_certfile: <CERT_FILE_PATH>
 
     ## @param ssl_cert_reqs - integer - optional
-    ## Specifies whether a certificate is required from the other side of the connection, and whether it will be validated if provided.
+    ## Specifies whether a certificate is required from the other side of the connection, and whether it will be
+    ## validated if provided.
     ## Possible values:
     ##   * 0 for ssl.CERT_NONE (certificates ignored)
     ##   * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)

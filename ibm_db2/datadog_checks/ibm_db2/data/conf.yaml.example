@@ -46,7 +46,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param use_global_custom_queries - (boolean|string) - optional - default: true
+    ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
     ##
     ## 1. true - `global_custom_queries` will override `custom_queries`

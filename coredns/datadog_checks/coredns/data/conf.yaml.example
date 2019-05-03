@@ -8,15 +8,21 @@ instances:
     ## See: https://coredns.io/plugins/metrics/
     #
   - prometheus_url: "http://%%host%%:9153/metrics"
+
+    ## @param tags - list of strings - required
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
     tags:
       - "dns-pod:%%host%%"
 
-    ## @param send_histogram_buckets - boolean - optional - default:True
+    ## @param send_histogram_buckets - boolean - optional - default: True
     ## Set send_histograms_buckets to true to send the histograms buckets.
     #
     # send_histograms_buckets: True
 
-    ## @param send_monotonic_counter - boolean - optional - default:True
+    ## @param send_monotonic_counter - boolean - optional - default: True
     ## To send counters as monotonic counter.
     ## see: https://github.com/DataDog/integrations-core/issues/1303
     #

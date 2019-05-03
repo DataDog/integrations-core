@@ -8,7 +8,8 @@ instances:
     ## Data Helper) performance counters for IIS on that machine.
     ##
     ## "." means the current host, any other value makes the Agent attempt to connect to a remote host.
-    ## Note: Remote access requires additional permissions - https://support.microsoft.com/en-us/help/922775/how-to-troubleshoot-monitoring-and-logging-issues-for-performance-coun
+    ## Note: Remote access requires additional permissions -
+    ## https://support.microsoft.com/en-us/help/922775/how-to-troubleshoot-monitoring-and-logging-issues-for-performance-coun
     #
   - host: .
 
@@ -32,7 +33,7 @@ instances:
     #   - <WEB_SITE_1>
     #   - <WEB_SITE_2>
 
-    ## @param tags  - list of key:value elements - optional
+    ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
@@ -41,7 +42,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param additional_metrics - array of strings - optional
+    ## @param additional_metrics - list of strings - optional
     ## PDH provides hundreds of metrics for each service.  Additional metrics
     ## can be specified using the `additional_metrics` configuration.
     ## The additional metrics is a list of additional counters to collect.  The

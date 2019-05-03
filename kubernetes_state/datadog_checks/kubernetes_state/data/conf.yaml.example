@@ -14,10 +14,12 @@ instances:
     # labels_mapper:
     #   namespace: kube_namespace
 
-    ## @param label_joins - custom - optional
+    ## @param label_joins - object - optional
     ## Add the tags to join from other KSM metrics.
-    ## Example: Joining for deployment metrics. Based on: kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile"}
-    ## Use the following config to add the value of label_addonmanager_kubernetes_io_mode as a tag to your KSM deployment metrics.
+    ## Example: Joining for deployment metrics. Based on:
+    ## kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile"}
+    ## Use the following config to add the value of label_addonmanager_kubernetes_io_mode as a tag to your KSM
+    ## deployment metrics.
     #
     # label_joins:
     #   kube_deployment_labels:
@@ -32,7 +34,7 @@ instances:
     #
     # hostname_override: false
 
-    ## @param tags  - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

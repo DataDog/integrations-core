@@ -23,7 +23,7 @@ instances:
     #
     # host: <REMOTE_HOSNAME>
 
-    ## @param password - string - optional
+    ## @param username - string - optional
     ## If authentication is needed, specify a `username` here.
     #
     # username: <USERNAME>
@@ -92,7 +92,7 @@ instances:
     # event_format:
     #   - Message
 
-    ## @param tags  - list of key:value elements - optional
+    ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event, and service check emitted by this Integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
