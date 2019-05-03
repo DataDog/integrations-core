@@ -36,6 +36,8 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "ISAPI Extension Requests/sec", "iis.requests.isapi", "gauge"],
 ]
 
+TOTAL_SITE = "_Total"
+
 
 class IIS(PDHBaseCheck):
     SERVICE_CHECK = "iis.site_up"
@@ -60,10 +62,9 @@ class IIS(PDHBaseCheck):
             expected_sites = set(sites)
         # _Total should always be in the list of expected sites; we always
         # report _Total
-        if "_Total" not in expected_sites:
-            expected_sites.add("_Total")
+        expected_sites.add(TOTAL_SITE)
 
-        self.log.debug("expected sites is {}".format(str(expected_sites)))
+        self.log.debug("Expected sites is {}".format(expected_sites))
         key = hash_mutable(instance)
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             try:
@@ -81,39 +82,30 @@ class IIS(PDHBaseCheck):
 
                     try:
                         if not counter.is_single_instance():
-                            # Skip any sites we don't specifically want.
-                            if not sites:
-                                tags.append("site:{0}".format(self.normalize(sitename)))
-                            # always report total
-                            elif sitename == "_Total":
-                                tags.append("site:{0}".format(self.normalize(sitename)))
-                            elif sitename not in sites:
+                            if sites and sitename != TOTAL_SITE and sitename not in sites:
                                 continue
-                            else:
-                                tags.append("site:{0}".format(self.normalize(sitename)))
+                            tags.append("site:{}".format(self.normalize(sitename)))
                     except Exception as e:
-                        self.log.error("Caught exception {} setting tags".format(str(e)))
+                        self.log.error("Caught exception {} setting tags".format(e))
 
                     try:
                         metric_func(dd_name, val, tags)
                     except Exception as e:
-                        self.log.error("metric_func: {} {} {}".format(dd_name, str(val), str(e)))
-                        pass
+                        self.log.error("Error in metric_func: {} {} {}".format(dd_name, val, e))
 
                     if dd_name == "iis.uptime":
                         uptime = int(val)
                         status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
                         self.service_check(self.SERVICE_CHECK, status, tags)
                         if sitename in expected_sites:
-                            self.log.debug("Removing {} from expected sites".format(sitename))
+                            self.log.debug("Removing {!r} from expected sites".format(sitename))
                             expected_sites.remove(sitename)
                         else:
-                            self.log.warning("site not in expected_sites {}".format(sitename))
+                            self.log.warning("Site {!r} not in expected_sites".format(sitename))
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error("IIS Failed to get metric data for {} {}: {}".format(inst_name, dd_name, str(e)))
-                pass
+                self.log.error("IIS Failed to get metric data for {} {}: {}".format(inst_name, dd_name, e))
 
         for site in expected_sites:
             tags = []
