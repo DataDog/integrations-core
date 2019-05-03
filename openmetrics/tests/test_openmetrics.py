@@ -1,9 +1,8 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
+
 import pytest
-from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 from datadog_checks.openmetrics import OpenMetricsCheck
 
@@ -19,29 +18,7 @@ instance = {
 }
 
 
-@pytest.fixture(scope='module', autouse=True)
-def poll_mock():
-    registry = CollectorRegistry()
-    g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
-    g1.labels(matched_label='foobar', node='host1', flavor='test').set(99.9)
-    g2 = Gauge('metric2', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g2.labels(matched_label='foobar', node='host2', timestamp='123').set(12.2)
-    c1 = Counter('counter1', 'hits', ['node'], registry=registry)
-    c1.labels(node='host2').inc(42)
-    g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g3.labels(matched_label='foobar', node='host2', timestamp='456').set(float('inf'))
-
-    with mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: generate_latest(registry).decode().split('\n'),
-            headers={'Content-Type': 'text/plain'},
-        ),
-    ):
-        yield
-
-
+@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_check(aggregator):
     c = OpenMetricsCheck('openmetrics', None, {}, [instance])
     c.check(instance)
@@ -59,6 +36,7 @@ def test_openmetrics_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_check_counter_gauge(aggregator):
     instance['send_monotonic_counter'] = False
     c = OpenMetricsCheck('openmetrics', None, {}, [instance])
@@ -77,6 +55,7 @@ def test_openmetrics_check_counter_gauge(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("poll_mock")
 def test_invalid_metric(aggregator):
     """
     Testing that invalid values of metrics are discarded
@@ -92,6 +71,7 @@ def test_invalid_metric(aggregator):
     assert aggregator.metrics('metric3') == []
 
 
+@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_wildcard(aggregator):
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
@@ -114,6 +94,7 @@ def test_openmetrics_wildcard(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_default_instance(aggregator):
     """
     Testing openmetrics with default instance
@@ -147,6 +128,7 @@ def test_openmetrics_default_instance(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_mixed_instance(aggregator):
     c = OpenMetricsCheck(
         CHECK_NAME,
@@ -194,4 +176,15 @@ def test_openmetrics_mixed_instance(aggregator):
         tags=['extra:foo', 'matched_label:foobar', 'timestamp:123', 'node:host2'],
         metric_type=aggregator.GAUGE,
     )
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+def test_integration(aggregator, dd_environment):
+    c = OpenMetricsCheck('openmetrics', None, {}, [dd_environment])
+    c.check(dd_environment)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.quantile', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.go_memstats_mallocs_total', metric_type=aggregator.MONOTONIC_COUNT)
     aggregator.assert_all_metrics_covered()

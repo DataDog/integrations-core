@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  openmetrics:
+    image: prom/prometheus
+    volumes:
+     - ./config:/etc/prometheus
+    ports:
+     - 9090:9090
