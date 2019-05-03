@@ -8,7 +8,7 @@ This check monitors [Ambari][1] through the Datadog Agent.
 
 ### Installation
 
-The Ambari check is included in the [Datadog Agent][2] package.
+The Ambari check is included in the [Datadog Agent][7] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -57,3 +57,5 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/agent/
+

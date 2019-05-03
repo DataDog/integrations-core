@@ -23,9 +23,6 @@ METRICS_FIELD = "metrics"
 
 
 class AmbariCheck(AgentCheck):
-    def __init__(self, *args, **kwargs):
-        super(AmbariCheck, self).__init__(*args, **kwargs)
-
     def check(self, instance):
         base_url = instance.get("url", "")
         base_tags = instance.get("tags", [])
@@ -55,7 +52,19 @@ class AmbariCheck(AgentCheck):
                 "Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint))
 
         self._submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
-        return [cluster.get('Clusters').get('cluster_name') for cluster in resp.get('items')]
+        return self._get_response_clusters(resp)
+
+    def _get_response_clusters(self, resp):
+        items = resp.get('items')
+        self.log.warning("No clusters found")
+        if not items:
+            return []
+        clusters = []
+        for cluster in items:
+            c = cluster.get('Clusters')
+            if c:
+                clusters.append(c.get('cluster_name'))
+        return clusters
 
     def get_host_metrics(self, base_url, clusters, base_tags):
         external_tags = []
@@ -64,7 +73,15 @@ class AmbariCheck(AgentCheck):
             hosts_list = self._get_hosts_info(base_url, cluster)
 
             for host in hosts_list:
-                hostname = host.get('Hosts').get('host_name')
+                h = host.get('Hosts')
+                if not h:
+                    self.log.warning("Unexpected response format for host list")
+                    continue
+                hostname = h.get('host_name')
+                if not hostname:
+                    self.log.warning("Unexpected response format for host list")
+                    continue
+
                 external_tags.append((hostname, {'ambari': [cluster_tag]}))
                 host_metrics = host.get(METRICS_FIELD)
                 if host_metrics is None:
@@ -183,7 +200,7 @@ class AmbariCheck(AgentCheck):
         flat_metrics = {}
         for raw_metric_name, metric_value in iteritems(metric_dict):
             if isinstance(metric_value, dict):
-                flat_metrics.update(AmbariCheck.flatten_service_metrics(metric_value, prefix))
+                flat_metrics.update(cls.flatten_service_metrics(metric_value, prefix))
             else:
                 metric_name = '{}.{}'.format(prefix, raw_metric_name) if prefix else raw_metric_name
                 flat_metrics[metric_name] = metric_value
@@ -197,7 +214,7 @@ class AmbariCheck(AgentCheck):
             if raw_metric_name == "boottime":
                 flat_metrics["boottime"] = metric_value
             elif isinstance(metric_value, dict):
-                flat_metrics.update(AmbariCheck.flatten_host_metrics(metric_value, metric_name))
+                flat_metrics.update(cls.flatten_host_metrics(metric_value, metric_name))
             else:
                 flat_metrics[metric_name] = metric_value
         return flat_metrics
