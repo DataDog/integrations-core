@@ -13,7 +13,8 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][2] for all available configuration options.
+1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to 
+start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3].
 
@@ -23,7 +24,8 @@ No additional installation is needed on your server.
 
 ## Data Collected
 
-If host metrics collection is enabled with `collect_host_metrics` this integration collects for every host in every cluster the following system metrics:
+If host metrics collection is enabled with `collect_host_metrics` this integration collects for every host in every 
+cluster the following system metrics:
 
 * boottime
 * cpu
@@ -33,7 +35,8 @@ If host metrics collection is enabled with `collect_host_metrics` this integrati
 * network
 * process
 
-If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted service component the metrics with headers in the white list.
+If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted 
+service component the metrics with headers in the white list.
 ### Metrics
 
 If host metrics collection is enabled with `collect_host_metrics` this integration will collect
@@ -48,12 +51,14 @@ for every host in every cluster the following system metrics:
 
 If service metrics collection is enabled with `collect_service_metrics` this integration will collect for each
 whitelisted service component the metrics with headers in the white list.
+See [metadata.csv][8] for a list of host metrics provided by this integration.
 
 
 ### Service Checks
 
 If service status collection is enabled with `collect_service_status` this integration collects
-the status of each installed service with the following mapping found in `common.py`
+the status of each installed service with the following mapping found in `common.py`[9].
+
 
 ### Events
 
@@ -69,4 +74,6 @@ Need help? Contact [Datadog support][5].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://docs.datadoghq.com/help
 [7]: https://docs.datadoghq.com/agent/
+[8]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
+[9]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/common.py
 
