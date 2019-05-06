@@ -13,7 +13,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ambari performance data. See the [sample ambari.d/conf.yaml][2] for all available configuration options.
+1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3].
 
@@ -23,6 +23,17 @@ No additional installation is needed on your server.
 
 ## Data Collected
 
+If host metrics collection is enabled with `collect_host_metrics` this integration collects for every host in every cluster the following system metrics:
+
+* boottime
+* cpu
+* disk
+* memory
+* load
+* network
+* process
+
+If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted service component the metrics with headers in the white list.
 ### Metrics
 
 If host metrics collection is enabled with `collect_host_metrics` this integration will collect
@@ -41,7 +52,7 @@ whitelisted service component the metrics with headers in the white list.
 
 ### Service Checks
 
-If service status collection is enabled with `collect_service_status` this integration will collect
+If service status collection is enabled with `collect_service_status` this integration collects
 the status of each installed service with the following mapping found in `common.py`
 
 ### Events
