@@ -290,7 +290,9 @@ class __AgentCheckPy3(object):
         else:
             message = ensure_unicode(message)
 
-        aggregator.submit_service_check(self, self.check_id, self._format_namespace(name), status, tags, hostname, message)
+        aggregator.submit_service_check(
+            self, self.check_id, self._format_namespace(name), status, tags, hostname, message
+        )
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
@@ -698,7 +700,9 @@ class __AgentCheckPy2(object):
         else:
             message = ensure_bytes(message)
 
-        aggregator.submit_service_check(self, self.check_id, self._format_namespace(name), status, tags, hostname, message)
+        aggregator.submit_service_check(
+            self, self.check_id, self._format_namespace(name), status, tags, hostname, message
+        )
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
