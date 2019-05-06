@@ -88,7 +88,7 @@ instances:
 
 
   ## @param tls_verify - boolean - optional - default: True
-  ## If server certificate should be verified. Set to False if using a self signed certificate
+  ## Whether or not to verify TSL certificates (default true)
   #
   # tls_verify: True
 
@@ -105,19 +105,21 @@ instances:
   #  timeout: 10
 
 
-  ## @param headers - dict - optional
-  ## Custom headers
+  ## @param headers - map - optional
+  ## Map of headers to send on every request
   #
-  # headers: {}
+  # headers:
+  #  - <header1>
+  #  - <header2>
 
 
   ## @param persist_connections - boolean - optional - default: False
-  ## If true any requests that you make within a session will automatically reuse the appropriate connection!
+  ## Whether or not to persist cookies and use connection pooling
   #
   # persist_connections: False
 
 
-  ## @param proxy - dict - optional
+  ## @param proxy - map - optional
   ## Proxy configuration
   #
   # proxy:
