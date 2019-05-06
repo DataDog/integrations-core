@@ -58,6 +58,9 @@ class __AgentCheckPy3(object):
     The base class for any Agent based integrations
     """
 
+    # If defined, this will be the prefix of every metric/service check and the source type of events
+    __NAMESPACE__ = ''
+
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
     # Used by `self.http` RequestsWrapper
@@ -203,6 +206,12 @@ class __AgentCheckPy3(object):
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
+    def _format_namespace(self, s):
+        if self.__NAMESPACE__:
+            return '{}.{}'.format(self.__NAMESPACE__, ensure_unicode(s))
+
+        return ensure_unicode(s)
+
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
             # ignore metric sample
@@ -234,7 +243,7 @@ class __AgentCheckPy3(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, ensure_unicode(name), value, tags, hostname)
+        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -281,7 +290,7 @@ class __AgentCheckPy3(object):
         else:
             message = ensure_unicode(message)
 
-        aggregator.submit_service_check(self, self.check_id, ensure_unicode(name), status, tags, hostname, message)
+        aggregator.submit_service_check(self, self.check_id, self._format_namespace(name), status, tags, hostname, message)
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
@@ -295,12 +304,17 @@ class __AgentCheckPy3(object):
                         'Error decoding unicode field `{}` to utf-8 encoded string, cannot submit event'.format(key)
                     )
                     return
+
         if event.get('tags'):
             event['tags'] = self._normalize_tags_type(event['tags'])
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
             event['aggregation_key'] = ensure_unicode(event['aggregation_key'])
+
+        if self.__NAMESPACE__:
+            event.setdefault('source_type_name', self.__NAMESPACE__)
+
         aggregator.submit_event(self, self.check_id, event)
 
     # TODO(olivier): implement service_metadata if it's worth it
@@ -459,6 +473,9 @@ class __AgentCheckPy2(object):
     The base class for any Agent based integrations
     """
 
+    # If defined, this will be the prefix of every metric/service check and the source type of events
+    __NAMESPACE__ = ''
+
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
     """
@@ -597,6 +614,12 @@ class __AgentCheckPy2(object):
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
+    def _format_namespace(self, s):
+        if self.__NAMESPACE__:
+            return '{}.{}'.format(self.__NAMESPACE__, ensure_bytes(s))
+
+        return ensure_bytes(s)
+
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
             # ignore metric sample
@@ -628,7 +651,7 @@ class __AgentCheckPy2(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), value, tags, hostname)
+        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -675,7 +698,7 @@ class __AgentCheckPy2(object):
         else:
             message = ensure_bytes(message)
 
-        aggregator.submit_service_check(self, self.check_id, ensure_bytes(name), status, tags, hostname, message)
+        aggregator.submit_service_check(self, self.check_id, self._format_namespace(name), status, tags, hostname, message)
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
@@ -689,12 +712,17 @@ class __AgentCheckPy2(object):
                         "Error encoding unicode field '%s' to utf-8 encoded string, can't submit event", key
                     )
                     return
+
         if event.get('tags'):
             event['tags'] = self._normalize_tags_type(event['tags'])
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
             event['aggregation_key'] = ensure_bytes(event['aggregation_key'])
+
+        if self.__NAMESPACE__:
+            event.setdefault('source_type_name', self.__NAMESPACE__)
+
         aggregator.submit_event(self, self.check_id, event)
 
     # TODO(olivier): implement service_metadata if it's worth it
