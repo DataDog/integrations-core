@@ -1,0 +1,20 @@
+[
+    {
+        "agent_version": "6.13.0",
+        "integration": "Vertica",
+        "groups": ["host", "db"],
+        "check": "vertica.can_connect",
+        "statuses": ["ok", "critical"],
+        "name": "Can Connect",
+        "description": "Returns `OK` if the Agent is able to connect to the monitored Vertica database, or `CRITICAL` otherwise."
+    },
+    {
+        "agent_version": "6.13.0",
+        "integration": "Vertica",
+        "groups": ["host", "db", "node_name"],
+        "check": "vertica.node_state",
+        "statuses": ["ok", "warning", "critical", "unknown"],
+        "name": "Node State",
+        "description": "Returns `OK` if the monitored Vertica database is UP, `WARNING` for states that are on a possible path to UP, or `CRITICAL` otherwise."
+    }
+]
