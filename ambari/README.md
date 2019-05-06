@@ -52,7 +52,7 @@ whitelisted service component the metrics with headers in the white list.
 
 ### Service Checks
 
-If service status collection is enabled with `collect_service_status` this integration will collect
+If service status collection is enabled with `collect_service_status` this integration collects
 the status of each installed service with the following mapping found in `common.py`
 
 ### Events
