@@ -13,7 +13,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ambari performance data. See the [sample ambari.d/conf.yaml][2] for all available configuration options.
+1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3].
 
