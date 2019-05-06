@@ -54,9 +54,9 @@ instances:
     #   flavor: origin
 
     ## @param type_overrides - list of key:value elements - optional
-    ## Type override allows you to override a type in the prometheus the payload
+    ## Type override allows you to override a type in the prometheus payload
     ## or type an untyped metrics (they're ignored by default)
-    ## Supported <METRIC_TYPE> are `gauge`, `count`, `rate`
+    ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
     #
     # type_overrides:
     #   <METRIC_NAME>: <METRIC_TYPE>
