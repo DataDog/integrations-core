@@ -6,8 +6,9 @@ import pytest
 
 from datadog_checks.openmetrics import OpenMetricsCheck
 
-CHECK_NAME = 'openmetrics'
-NAMESPACE = 'openmetrics'
+from .common import CHECK_NAME
+
+pytestmark = pytest.mark.usefixtures("poll_mock")
 
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
@@ -18,7 +19,6 @@ instance = {
 }
 
 
-@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_check(aggregator):
     c = OpenMetricsCheck('openmetrics', None, {}, [instance])
     c.check(instance)
@@ -36,7 +36,6 @@ def test_openmetrics_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_check_counter_gauge(aggregator):
     instance['send_monotonic_counter'] = False
     c = OpenMetricsCheck('openmetrics', None, {}, [instance])
@@ -55,7 +54,6 @@ def test_openmetrics_check_counter_gauge(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("poll_mock")
 def test_invalid_metric(aggregator):
     """
     Testing that invalid values of metrics are discarded
@@ -71,7 +69,6 @@ def test_invalid_metric(aggregator):
     assert aggregator.metrics('metric3') == []
 
 
-@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_wildcard(aggregator):
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
@@ -94,7 +91,6 @@ def test_openmetrics_wildcard(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_default_instance(aggregator):
     """
     Testing openmetrics with default instance
@@ -128,7 +124,6 @@ def test_openmetrics_default_instance(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("poll_mock")
 def test_openmetrics_mixed_instance(aggregator):
     c = OpenMetricsCheck(
         CHECK_NAME,
@@ -176,18 +171,4 @@ def test_openmetrics_mixed_instance(aggregator):
         tags=['extra:foo', 'matched_label:foobar', 'timestamp:123', 'node:host2'],
         metric_type=aggregator.GAUGE,
     )
-    aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.integration
-def test_integration(aggregator, dd_environment):
-    c = OpenMetricsCheck('openmetrics', None, {}, [dd_environment])
-    c.check(dd_environment)
-    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.sum', metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.count', metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.quantile', metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.go_memstats_mallocs_total', metric_type=aggregator.MONOTONIC_COUNT)
-    aggregator.assert_metric(CHECK_NAME + '.go_memstats_alloc_bytes', metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.http_req_duration_seconds.count', metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.http_req_duration_seconds.sum', metric_type=aggregator.GAUGE)
     aggregator.assert_all_metrics_covered()
