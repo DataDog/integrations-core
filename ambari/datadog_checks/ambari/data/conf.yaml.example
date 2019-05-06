@@ -18,30 +18,6 @@ instances:
   #  password: <UNIQUEPASSWORD>
 
 
-  ## @param cert - string - optional
-  ## Path to certificate to connect to the Ambari server if using TSL authentication
-  #
-  # tsl_cert: <PATH_TO_CERTIFICATE>
-
-
-  ## @param cert - string - optional
-  ## Path to certificate private key to connect to the Ambari server if using TSL authentication
-  #
-  # tls_private_key: <PATH_TO_PRIVATE_KEY>
-
-
-  ## @param tls_verify - boolean - optional - default: True
-  ## If server certificate should be verified. Set to False if using a self signed certificate
-  #
-  # tls_verify: True
-
-
-  ## @param ignore_tls_warning - boolean - optional - default: False
-  ## Ignore warnings for lack of SSL validation
-  #
-  # ignore_tls_warning = False
-
-
   ## @param services - object - required
   ## Note that each level of values is required.  This is essentially whitelisting
   ## where we will only pull metrics from the components listed under their
@@ -71,12 +47,6 @@ instances:
       - process
 
 
-  ## @param timeout - integer - optional - default: 10
-  ## Customizes the Ambari connection timeout (in seconds).
-  #
-  #  timeout: 10
-
-
   ## @param collect_host_metrics - boolean - optional - default: True
   ## Change to False to omit collecting host level metrics
   #
@@ -95,13 +65,6 @@ instances:
   # collect_service_status: False
 
 
-  ## @param skip_proxy - boolean - optional - default: False
-  ## Whether or not to skip the proxy configured in the Agent's config file when
-  ## making the request to the PerfServlet
-  #
-  #  skip_proxy: False
-
-
   ## @param tags  - list of key:value elements - optional
   ## List of tags to attach to every metric, event and service check emitted by this integration.
   ##
@@ -110,6 +73,61 @@ instances:
   #  tags:
   #    - <KEY_1>:<VALUE_1>
   #    - <KEY_2>:<VALUE_2>
+
+
+  ## @param cert - string - optional
+  ## Path to certificate to connect to the Ambari server if using TSL authentication
+  #
+  # tsl_cert: <PATH_TO_CERTIFICATE>
+
+
+  ## @param cert - string - optional
+  ## Path to certificate private key to connect to the Ambari server if using TSL authentication
+  #
+  # tls_private_key: <PATH_TO_PRIVATE_KEY>
+
+
+  ## @param tls_verify - boolean - optional - default: True
+  ## If server certificate should be verified. Set to False if using a self signed certificate
+  #
+  # tls_verify: True
+
+
+  ## @param ignore_tls_warning - boolean - optional - default: False
+  ## Ignore warnings for lack of SSL validation
+  #
+  # ignore_tls_warning = False
+
+
+  ## @param timeout - integer - optional - default: 10
+  ## Customizes the Ambari connection timeout (in seconds).
+  #
+  #  timeout: 10
+
+
+  ## @param headers - dict - optional
+  ## Custom headers
+  #
+  # headers: {}
+
+
+  ## @param persist_connections - boolean - optional - default: False
+  ## If true any requests that you make within a session will automatically reuse the appropriate connection!
+  #
+  # persist_connections: False
+
+
+  ## @param proxy - dict - optional
+  ## Proxy configuration
+  #
+  # proxy:
+
+
+  ## @param skip_proxy - boolean - optional - default: False
+  ## Whether or not to skip the proxy configured in the Agent's config file when
+  ## making the request to the PerfServlet
+  #
+  #  skip_proxy: False
 
 
 ## Log Section (Available for Agent >=6.0)
