@@ -23,6 +23,17 @@ No additional installation is needed on your server.
 
 ## Data Collected
 
+If host metrics collection is enabled with `collect_host_metrics` this integration collects for every host in every cluster the following system metrics:
+
+* boottime
+* cpu
+* disk
+* memory
+* load
+* network
+* process
+
+If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted service component the metrics with headers in the white list.
 ### Metrics
 
 If host metrics collection is enabled with `collect_host_metrics` this integration will collect
