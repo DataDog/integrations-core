@@ -8,7 +8,7 @@ from datadog_checks.ambari import AmbariCheck
 @pytest.mark.skip(reason="Cannot be automated due to network restrictions")
 def test_check(aggregator):
     instance = [{
-        "url": "https://146.148.123.63:8443/ambari-lab-2/dp-proxy/ambari",
+        "url": "https://${ambari_ip}:8443/ambari-lab-2/dp-proxy/ambari",
         "username": "admin",
         "password": "admin",
         "tags": ["test:manual"],
