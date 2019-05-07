@@ -7,19 +7,12 @@
 import argparse
 import re
 
-# 2nd party.
-from .download import REPOSITORY_URL_PREFIX, TUFDownloader
-from .exceptions import (
-    NonCanonicalVersion,
-    NonDatadogPackage,
-    NoSuchDatadogPackageOrVersion,
-)
-
 # 3rd party.
 from tuf.exceptions import UnknownTargetError
 
 # 2nd party.
-from .download import TUFDownloader
+# 2nd party.
+from .download import REPOSITORY_URL_PREFIX, TUFDownloader
 from .exceptions import NonCanonicalVersion, NonDatadogPackage, NoSuchDatadogPackageOrVersion
 
 # Private module functions.
@@ -49,11 +42,11 @@ def download():
         'standard_distribution_name', type=str, help='Standard distribution name of the desired Datadog check.'
     )
 
-    parser.add_argument('--repository', type=str, default=REPOSITORY_URL_PREFIX,
-                        help='The complete URL prefix for the TUF repository.')
+    parser.add_argument(
+        '--repository', type=str, default=REPOSITORY_URL_PREFIX, help='The complete URL prefix for the TUF repository.'
+    )
 
-    parser.add_argument('--version', type=str, default=None,
-                        help='The version number of the desired Datadog check.')
+    parser.add_argument('--version', type=str, default=None, help='The version number of the desired Datadog check.')
 
     parser.add_argument(
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
