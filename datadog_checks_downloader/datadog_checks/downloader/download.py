@@ -55,7 +55,6 @@ logger = logging.getLogger(__name__)
 
 class TUFDownloader:
 
-
     def __init__(self, repository_url_prefix=REPOSITORY_URL_PREFIX, verbose=0):
         # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
