@@ -1,3 +1,423 @@
 # Default metrics collected by this check. You should not have to modify this.
-# See Cassandra metrics.yaml as an example
-# https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/metrics.yaml
+jmx_metrics:
+  # Metrics Hive Metastore related
+  - include:
+      bean: metrics:name=open_connections
+      attribute:
+        Count:
+          alias: hive.metastore.open_connections
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=open_operations
+      attribute:
+        Count:
+          alias: hive.metastore.open_operations
+          metric_type: gauge
+
+  # Metrics HiveServer2 related
+  # Session
+  - include:
+      bean: metrics:name=hs2_active_sessions
+      attribute:
+        Value:
+          alias: hive.server.session.active
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=hs2_avg_active_session_time
+      attribute:
+        Value:
+          alias: hive.server.session.active.time_mean
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=hs2_open_sessions
+      attribute:
+        Value:
+          alias: hive.server.session.open
+          metric_type: gauge
+  
+  - include:
+      bean: metrics:name=hs2_avg_open_session_time
+      attribute:
+        Value:
+          alias: hive.server.session.open.time_mean
+          metric_type: gauge
+
+  # Queries
+  ## TODO: type
+  - include:
+      bean: metrics:name=active_calls_hs2_submitted_queries
+      attribute:
+        Count:
+          alias: hive.server.queries.submitted.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=hs2_submitted_queries
+      attribute:
+        Max:
+          alias: hive.server.queries.submitted.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.queries.submitted.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.queries.submitted.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.queries.submitted.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.queries.submitted.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.queries.submitted.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.queries.submitted.meanrate
+          metric_type: rate
+
+  - include:
+      bean: metrics:name=active_calls_hs2_compiling_queries
+      attribute:
+        Count:
+          alias: hive.server.queries.compiling.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=hs2_compiling_queries
+      attribute:
+        Max:
+          alias: hive.server.queries.compiling.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.queries.compiling.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.queries.compiling.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.queries.compiling.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.queries.compiling.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.queries.compiling.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.queries.compiling.meanrate
+          metric_type: rate
+
+  - include:
+      bean: metrics:name=active_calls_hs2_executing_queries
+      attribute:
+        Count:
+          alias: hive.server.api.queries.executing.active_call
+          metric_type: gauge
+  
+  - include:
+      bean: metrics:name=hs2_executing_queries
+      attribute:
+        Max:
+          alias: hive.server.queries.executing.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.queries.executing.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.queries.executing.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.queries.executing.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.queries.executing.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.queries.executing.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.queries.executing.meanrate
+          metric_type: rate
+
+  - include:
+      bean: metrics:name=hs2_succeeded_queries
+      attribute:
+        Count:
+          alias: hive.server.queries.succeeded
+          type: gauge
+        MeanRate:
+          alias: hive.server.queries.meanrate
+          type: rate
+
+  # SQL operation
+  # Pending
+  - include:
+      bean: metrics:name=active_calls_api_hs2_sql_operation_PENDING
+      attribute:
+        Count:
+          alias: hive.server.api.sql_operation.pending.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=api_hs2_sql_operation_PENDING
+      attribute:
+        Max:
+          alias: hive.server.api.sql_operation.pending.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.api.sql_operation.pending.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.api.sql_operation.pending.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.api.sql_operation.pending.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.api.sql_operation.pending.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.api.sql_operation.pending.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.api.sql_operation.pending.meanrate
+          metric_type: rate
+
+  - include:
+      bean: metrics:name=active_calls_api_hs2_sql_operation_PENDING
+      attribute:
+        Count:
+          alias: hive.server.api.sql_operation.pending.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=api_hs2_sql_operation_PENDING
+      attribute:
+        Max:
+          alias: hive.server.api.sql_operation.pending.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.api.sql_operation.pending.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.api.sql_operation.pending.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.api.sql_operation.pending.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.api.sql_operation.pending.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.api.sql_operation.pending.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.api.sql_operation.pending.meanrate
+          metric_type: rate
+
+  # Running
+  - include:
+      bean: metrics:name=active_calls_api_hs2_sql_operation_RUNNING
+      attribute:
+        Count:
+          alias: hive.server.api.sql_operation.running.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=api_hs2_sql_operation_RUNNING
+      attribute:
+        Max:
+          alias: hive.server.api.sql_operation.running.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.api.sql_operation.running.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.api.sql_operation.running.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.api.sql_operation.running.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.api.sql_operation.running.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.api.sql_operation.running.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.api.sql_operation.running.meanrate
+          metric_type: rate
+  
+  - include:
+      bean: metrics:name=active_calls_api_hs2_sql_operation_RUNNING
+      attribute:
+        Count:
+          alias: hive.server.api.sql_operation.running.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=api_hs2_sql_operation_RUNNING
+      attribute:
+        Max:
+          alias: hive.server.api.sql_operation.running.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.api.sql_operation.running.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.api.sql_operation.running.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.api.sql_operation.running.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.api.sql_operation.running.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.api.sql_operation.running.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.api.sql_operation.running.meanrate
+          metric_type: rate
+  
+  # Completed
+  - include:
+      bean: metrics:name=hs2_completed_sql_operation_CLOSED
+      attribute:
+        Count:
+          alias: hive.server.sql_operation.completed.closed
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=hs2_completed_sql_operation_FINISHED
+      attribute:
+        Count:
+          alias: hive.server.sql_operation.completed.finished
+          metric_type: gauge
+
+  # User
+  - include:
+      bean: metrics:name=hs2_sql_operation_active_user
+      attribute:
+        Count:
+          alias: hive.server.sql_operation.user.active
+          metric_type: gauge
+
+  # Operation
+  # Initialized
+  - include:
+      bean: metrics:name=active_calls_api_hs2_operation_INITIALIZED
+      attribute:
+        Count:
+          alias: hive.server.api.operation.initialized.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=api_hs2_operation_INITIALIZED
+      attribute:
+        Max:
+          alias: hive.server.api.operation.initialized.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.api.operation.initialized.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.api.operation.initialized.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.api.operation.initialized.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.api.operation.initialized.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.api.operation.initialized.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.api.operation.initialized.meanrate
+          metric_type: rate
+
+  # Pending
+  - include:
+      bean: metrics:name=active_calls_api_hs2_operation_PENDING
+      attribute:
+        Count:
+          alias: hive.server.api.operation.pending.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=api_hs2_operation_PENDING
+      attribute:
+        Max:
+          alias: hive.server.api.operation.pending.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.api.operation.pending.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.api.operation.pending.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.api.operation.pending.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.api.operation.pending.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.api.operation.pending.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.api.operation.pending.meanrate
+          metric_type: rate
+
+  # Running
+  - include:
+      bean: metrics:name=active_calls_api_hs2_operation_RUNNING
+      attribute:
+        Count:
+          alias: hive.server.api.operation.running.active_call
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=api_hs2_operation_RUNNING
+      attribute:
+        Max:
+          alias: hive.server.api.operation.running.max
+          metric_type: gauge
+        Mean:
+          alias: hive.server.api.operation.running.mean
+          metric_type: gauge
+        Min:
+          alias: hive.server.api.operation.running.min
+          metric_type: gauge
+        75thPercentile:
+          alias: hive.server.api.operation.running.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hive.server.api.operation.running.95percentile
+          metric_type: gauge
+        Count:
+          alias: hive.server.api.operation.running.count
+          metric_type: gauge
+        MeanRate:
+          alias: hive.server.api.operation.running.meanrate
+          metric_type: rate
+
+  # Completed
+  - include:
+      bean: metrics:name=hs2_completed_operation_FINISHED
+      attribute:
+        Count:
+          alias: hive.server.operation.completed.finished
+          metric_type: gauge
+
+  - include:
+      bean: metrics:name=hs2_completed_operation_CLOSED
+      attribute:
+        Count:
+          alias: hive.server.operation.completed.closed.count
+          metric_type: gauge
