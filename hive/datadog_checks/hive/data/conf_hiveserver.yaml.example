@@ -155,7 +155,7 @@ init_config:
         bean: metrics:name=active_calls_hs2_submitted_queries
         attribute:
           Count:
-            alias: hive.server.active_call.queries.submitted
+            alias: hive.server.queries.submitted.active_call
             metric_type: gauge
 
     - include:
@@ -187,7 +187,7 @@ init_config:
         bean: metrics:name=active_calls_hs2_compiling_queries
         attribute:
           Count:
-            alias: hive.server.active_call.queries.compiling
+            alias: hive.server.queries.compiling.active_call
             metric_type: gauge
 
     - include:
@@ -219,7 +219,7 @@ init_config:
         bean: metrics:name=active_calls_hs2_executing_queries
         attribute:
           Count:
-            alias: hive.server.api.active_call.queries.executing
+            alias: hive.server.api.queries.executing.active_call
             metric_type: gauge
     
     - include:
@@ -263,7 +263,7 @@ init_config:
         bean: metrics:name=active_calls_api_hs2_sql_operation_PENDING
         attribute:
           Count:
-            alias: hive.server.api.active_call.sql_operation.pending
+            alias: hive.server.api.sql_operation.pending.active_call
             metric_type: gauge
 
     - include:
@@ -295,7 +295,7 @@ init_config:
         bean: metrics:name=active_calls_api_hs2_sql_operation_PENDING
         attribute:
           Count:
-            alias: hive.server.api.active_call.sql_operation.pending
+            alias: hive.server.api.sql_operation.pending.active_call
             metric_type: gauge
 
     - include:
@@ -328,7 +328,7 @@ init_config:
         bean: metrics:name=active_calls_api_hs2_sql_operation_RUNNING
         attribute:
           Count:
-            alias: hive.server.api.active_call.sql_operation.running
+            alias: hive.server.api.sql_operation.running.active_call
             metric_type: gauge
 
     - include:
@@ -360,7 +360,7 @@ init_config:
         bean: metrics:name=active_calls_api_hs2_sql_operation_RUNNING
         attribute:
           Count:
-            alias: hive.server.api.active_call.sql_operation.running
+            alias: hive.server.api.sql_operation.running.active_call
             metric_type: gauge
 
     - include:
@@ -417,7 +417,7 @@ init_config:
         bean: metrics:name=active_calls_api_hs2_operation_INITIALIZED
         attribute:
           Count:
-            alias: hive.server.api.active_call.operation.initialized
+            alias: hive.server.api.operation.initialized.active_call
             metric_type: gauge
 
     - include:
@@ -450,7 +450,7 @@ init_config:
         bean: metrics:name=active_calls_api_hs2_operation_PENDING
         attribute:
           Count:
-            alias: hive.server.api.active_call.operation.pending
+            alias: hive.server.api.operation.pending.active_call
             metric_type: gauge
 
     - include:
@@ -483,7 +483,7 @@ init_config:
         bean: metrics:name=active_calls_api_hs2_operation_RUNNING
         attribute:
           Count:
-            alias: hive.server.api.active_call.operation.running
+            alias: hive.server.api.operation.running.active_call
             metric_type: gauge
 
     - include:
