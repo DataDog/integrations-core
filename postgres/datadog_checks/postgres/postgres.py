@@ -92,19 +92,21 @@ class PostgreSql(AgentCheck):
     }
 
     LOCK_METRICS = {
-        'descriptors': [('mode', 'lock_mode'), ('datname', 'db'), ('relname', 'table')],
+        'descriptors': [('mode', 'lock_mode'), ('nspname', 'schema'), ('datname', 'db'), ('relname', 'table')],
         'metrics': {'lock_count': ('postgresql.locks', GAUGE)},
         'query': """
 SELECT mode,
        pd.datname,
+       pn.nspname,
        pc.relname,
        count(*) AS %s
   FROM pg_locks l
   JOIN pg_database pd ON (l.database = pd.oid)
   JOIN pg_class pc ON (l.relation = pc.oid)
+  LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
  WHERE l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg_%%'
- GROUP BY pd.datname, pc.relname, mode""",
+ GROUP BY pd.datname, pn.nspname, pc.relname, mode""",
         'relation': False,
     }
 
@@ -149,7 +151,7 @@ SELECT relname,
     }
 
     SIZE_METRICS = {
-        'descriptors': [('relname', 'table')],
+        'descriptors': [('nspname', 'schema'), ('relname', 'table')],
         'metrics': {
             'pg_table_size(C.oid) as table_size': ('postgresql.table_size', GAUGE),
             'pg_indexes_size(C.oid) as index_size': ('postgresql.index_size', GAUGE),
@@ -158,6 +160,7 @@ SELECT relname,
         'relation': True,
         'query': """
 SELECT
+  N.nspname,
   relname,
   %s
 FROM pg_class C
