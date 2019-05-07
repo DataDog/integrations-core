@@ -11,9 +11,4 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {
-        'url': 'localhost',
-        'port': 80,
-        'username': 'admin',
-        'password': 'admin',
-    }
+    return {'url': 'localhost', 'port': 80, 'username': 'admin', 'password': 'admin'}

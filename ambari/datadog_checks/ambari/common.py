@@ -17,21 +17,16 @@ STATUS = {
     'INSTALLED': ServiceCheck.OK,
     'STARTING': ServiceCheck.OK,
     'STARTED': ServiceCheck.OK,
-    'STOPPING':	ServiceCheck.WARNING,
+    'STOPPING': ServiceCheck.WARNING,
     'UNINSTALLING': ServiceCheck.WARNING,
     'UPGRADING': ServiceCheck.WARNING,
     'MAINTENANCE': ServiceCheck.WARNING,
     'INSTALL_FAILED': ServiceCheck.CRITICAL,
     'UNINSTALLED': ServiceCheck.CRITICAL,
     'WIPING_OUT': ServiceCheck.CRITICAL,
-    'UNKNOWN': ServiceCheck.UNKNOWN
+    'UNKNOWN': ServiceCheck.UNKNOWN,
 }
 
 
 def create_endpoint(base_url, cluster, service, ending):
-    return SERVICE_URL.format(
-                base_url=base_url,
-                cluster_name=cluster,
-                service_name=service.upper(),
-                ending=ending
-    )
+    return SERVICE_URL.format(base_url=base_url, cluster_name=cluster, service_name=service.upper(), ending=ending)

@@ -13,4 +13,3 @@ def test_create_endpoint():
 def test_create_endpoint_no_path():
     endpoint = create_endpoint("http://myserver:5678", "mycluster", "hive", "/metrics")
     assert endpoint == "http://myserver:5678/api/v1/clusters/mycluster/services/HIVE/metrics"
-

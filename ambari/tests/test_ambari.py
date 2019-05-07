@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from mock import MagicMock, call
+
 from datadog_checks.ambari import AmbariCheck
-from unittest.mock import MagicMock, call
+
 from . import responses
 
 
@@ -12,16 +14,11 @@ def test_flatten_service_metrics():
             "metric_a": 10,
             "metric_b": 15,
             "metric_c": {"submetric_c": "hello"},
-            "metric_d": {"submetric_d": {'subsub_d': 25}}
+            "metric_d": {"submetric_d": {'subsub_d': 25}},
         },
-        "pfx"
+        "pfx",
     )
-    assert metrics == {
-        'pfx.metric_a': 10,
-        'pfx.metric_b': 15,
-        'pfx.submetric_c': 'hello',
-        'pfx.subsub_d': 25
-    }
+    assert metrics == {'pfx.metric_a': 10, 'pfx.metric_b': 15, 'pfx.submetric_c': 'hello', 'pfx.subsub_d': 25}
 
 
 def test_flatten_host_metrics():
@@ -56,18 +53,18 @@ def test_flatten_host_metrics():
         'network.pkts_in': 8.499187630576825,
         'network.pkts_out': 10.498996484830196,
         'process.proc_run': 0.0,
-        'process.proc_total': 128.0
+        'process.proc_total': 128.0,
     }
 
 
 def test_get_clusters(instance):
     ambari = AmbariCheck(instances=[instance])
-    ambari._make_request = MagicMock(return_value={
-        'href': 'localhost/api/v1/clusters',
-        'items': [{'href': 'localhost/api/v1/clusters/LabCluster',
-                   'Clusters': {'cluster_name': 'LabCluster'}}
-                  ]
-    })
+    ambari._make_request = MagicMock(
+        return_value={
+            'href': 'localhost/api/v1/clusters',
+            'items': [{'href': 'localhost/api/v1/clusters/LabCluster', 'Clusters': {'cluster_name': 'LabCluster'}}],
+        }
+    )
 
     clusters = ambari.get_clusters('localhost')
 
@@ -77,26 +74,22 @@ def test_get_clusters(instance):
 
 def test_get_hosts(instance):
     ambari = AmbariCheck(instances=[instance])
-    ambari._make_request = MagicMock(return_value={
-        'href': 'localhost/api/v1/clusters/myCluster/hosts?fields=metrics',
-        'items': [
-            {
-                'href': 'localhost/api/v1/clusters/myCluster/hosts/my_host_1',
-                'Hosts': {
-                    'cluster_name': 'myCluster',
-                    'host_name': 'my_host_1'
-                }
-            },
-            {
-                'href': 'localhost/api/v1/clusters/myCluster/hosts/my_host_2',
-                'Hosts': {
-                    'cluster_name': 'myCluster',
-                    'host_name': 'my_host_2'
+    ambari._make_request = MagicMock(
+        return_value={
+            'href': 'localhost/api/v1/clusters/myCluster/hosts?fields=metrics',
+            'items': [
+                {
+                    'href': 'localhost/api/v1/clusters/myCluster/hosts/my_host_1',
+                    'Hosts': {'cluster_name': 'myCluster', 'host_name': 'my_host_1'},
                 },
-                'metrics': responses.HOST_METRICS
-            }
-        ]
-    })
+                {
+                    'href': 'localhost/api/v1/clusters/myCluster/hosts/my_host_2',
+                    'Hosts': {'cluster_name': 'myCluster', 'host_name': 'my_host_2'},
+                    'metrics': responses.HOST_METRICS,
+                },
+            ],
+        }
+    )
     hosts = ambari._get_hosts_info('localhost', 'myCluster')
     ambari._make_request.assert_called_with('localhost/api/v1/clusters/myCluster/hosts?fields=metrics')
     assert len(hosts) == 2
@@ -111,54 +104,57 @@ def test_get_component_metrics(instance):
     ambari._submit_gauge = MagicMock()
     namenode_tags = ['ambari_cluster:LabCluster', 'ambari_service:hdfs', 'ambari_component:namenode']
 
-    ambari.get_component_metrics('localhost', 'LabCluster', 'HDFS',
-                                 base_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs'],
-                                 component_whitelist=['NAMENODE'],
-                                 metric_whitelist=['cpu'])
+    ambari.get_component_metrics(
+        'localhost',
+        'LabCluster',
+        'HDFS',
+        base_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs'],
+        component_whitelist=['NAMENODE'],
+        metric_whitelist=['cpu'],
+    )
 
     ambari._make_request.assert_called_with(
-        'localhost/api/v1/clusters/LabCluster/services/HDFS/components?fields=metrics')
-    ambari._submit_gauge.assert_has_calls([
-        call('cpu.cpu_idle', 90.3, namenode_tags),
-        call('cpu.cpu_idle._avg', 90.3, namenode_tags),
-        call('cpu.cpu_idle._max', 90.3, namenode_tags),
-        call('cpu.cpu_idle._min', 90.3, namenode_tags),
-        call('cpu.cpu_idle._sum', 90.3, namenode_tags),
-        call('cpu.cpu_nice', 0.0, namenode_tags),
-        call('cpu.cpu_nice._avg', 0.0, namenode_tags),
-        call('cpu.cpu_nice._max', 0.0, namenode_tags),
-        call('cpu.cpu_nice._min', 0.0, namenode_tags),
-        call('cpu.cpu_nice._sum', 0.0, namenode_tags),
-        call('cpu.cpu_system', 1.6333333333333335, namenode_tags),
-        call('cpu.cpu_system._avg', 1.6333333333333335, namenode_tags),
-        call('cpu.cpu_system._max', 1.6333333333333335, namenode_tags),
-        call('cpu.cpu_system._min', 1.6333333333333335, namenode_tags),
-        call('cpu.cpu_system._sum', 1.6333333333333335, namenode_tags),
-        call('cpu.cpu_user', 8.033333333333333, namenode_tags),
-        call('cpu.cpu_user._avg', 8.033333333333333, namenode_tags),
-        call('cpu.cpu_user._max', 8.033333333333333, namenode_tags),
-        call('cpu.cpu_user._min', 8.033333333333333, namenode_tags),
-        call('cpu.cpu_user._sum', 8.033333333333333, namenode_tags),
-        call('cpu.cpu_wio', 0.0, namenode_tags),
-        call('cpu.cpu_wio._avg', 0.0, namenode_tags),
-        call('cpu.cpu_wio._max', 0.0, namenode_tags),
-        call('cpu.cpu_wio._min', 0.0, namenode_tags),
-        call('cpu.cpu_wio._sum', 0.0, namenode_tags)]
+        'localhost/api/v1/clusters/LabCluster/services/HDFS/components?fields=metrics'
+    )
+    ambari._submit_gauge.assert_has_calls(
+        [
+            call('cpu.cpu_idle', 90.3, namenode_tags),
+            call('cpu.cpu_idle._avg', 90.3, namenode_tags),
+            call('cpu.cpu_idle._max', 90.3, namenode_tags),
+            call('cpu.cpu_idle._min', 90.3, namenode_tags),
+            call('cpu.cpu_idle._sum', 90.3, namenode_tags),
+            call('cpu.cpu_nice', 0.0, namenode_tags),
+            call('cpu.cpu_nice._avg', 0.0, namenode_tags),
+            call('cpu.cpu_nice._max', 0.0, namenode_tags),
+            call('cpu.cpu_nice._min', 0.0, namenode_tags),
+            call('cpu.cpu_nice._sum', 0.0, namenode_tags),
+            call('cpu.cpu_system', 1.6333333333333335, namenode_tags),
+            call('cpu.cpu_system._avg', 1.6333333333333335, namenode_tags),
+            call('cpu.cpu_system._max', 1.6333333333333335, namenode_tags),
+            call('cpu.cpu_system._min', 1.6333333333333335, namenode_tags),
+            call('cpu.cpu_system._sum', 1.6333333333333335, namenode_tags),
+            call('cpu.cpu_user', 8.033333333333333, namenode_tags),
+            call('cpu.cpu_user._avg', 8.033333333333333, namenode_tags),
+            call('cpu.cpu_user._max', 8.033333333333333, namenode_tags),
+            call('cpu.cpu_user._min', 8.033333333333333, namenode_tags),
+            call('cpu.cpu_user._sum', 8.033333333333333, namenode_tags),
+            call('cpu.cpu_wio', 0.0, namenode_tags),
+            call('cpu.cpu_wio._avg', 0.0, namenode_tags),
+            call('cpu.cpu_wio._max', 0.0, namenode_tags),
+            call('cpu.cpu_wio._min', 0.0, namenode_tags),
+            call('cpu.cpu_wio._sum', 0.0, namenode_tags),
+        ],
+        any_order=True,
     )
 
 
 def test_get_service_health(instance):
     ambari = AmbariCheck(instances=[instance])
     ambari._make_request = MagicMock(return_value=responses.SERVICE_HEALTH_METRICS)
-    service_info = ambari._get_service_checks_info('localhost', 'LabCluster', 'HDFS',
-                                                   service_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs'])
+    service_info = ambari._get_service_checks_info(
+        'localhost', 'LabCluster', 'HDFS', service_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs']
+    )
 
-    ambari._make_request.assert_called_with(
-        'localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
+    ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
 
-    assert service_info == [
-        {
-            'state': 0,
-            'tags': ['ambari_cluster:LabCluster', 'ambari_service:hdfs']
-        }
-    ]
+    assert service_info == [{'state': 0, 'tags': ['ambari_cluster:LabCluster', 'ambari_service:hdfs']}]

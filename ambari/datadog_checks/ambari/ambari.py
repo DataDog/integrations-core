@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from requests.exceptions import ConnectionError, HTTPError, Timeout
 from six import iteritems
-import requests
-
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+
 from . import common
 
 # Tag templates
@@ -37,10 +37,15 @@ class AmbariCheck(AgentCheck):
         collect_service_metrics = instance.get("collect_service_metrics", True)
         collect_service_status = instance.get("collect_service_status", False)
         if collect_service_metrics or collect_service_status:
-            self.get_service_metrics(base_url, clusters, whitelisted_services,
-                                     whitelisted_metrics, base_tags,
-                                     collect_service_metrics,
-                                     collect_service_status)
+            self.get_service_metrics(
+                base_url,
+                clusters,
+                whitelisted_services,
+                whitelisted_metrics,
+                base_tags,
+                collect_service_metrics,
+                collect_service_status,
+            )
 
     def get_clusters(self, base_url):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
@@ -49,7 +54,8 @@ class AmbariCheck(AgentCheck):
         if resp is None:
             self._submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
             raise CheckException(
-                "Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint))
+                "Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint)
+            )
 
         self._submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
         return self._get_response_clusters(resp)
@@ -97,16 +103,25 @@ class AmbariCheck(AgentCheck):
                         self.warning("Expected a float for {}, received {}".format(metric_name, value))
         self.set_external_tags(external_tags)
 
-    def get_service_metrics(self, base_url, clusters, whitelisted_services,
-                            whitelisted_metrics, base_tags, collect_service_metrics, collect_service_status):
+    def get_service_metrics(
+        self,
+        base_url,
+        clusters,
+        whitelisted_services,
+        whitelisted_metrics,
+        base_tags,
+        collect_service_metrics,
+        collect_service_status,
+    ):
         for cluster in clusters:
             tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
             for service, components in iteritems(whitelisted_services):
                 service_tags = tags + [SERVICE_TAG + service.lower()]
 
                 if collect_service_metrics:
-                    self.get_component_metrics(base_url, cluster, service,
-                                               service_tags, [c.upper() for c in components], whitelisted_metrics)
+                    self.get_component_metrics(
+                        base_url, cluster, service, service_tags, [c.upper() for c in components], whitelisted_metrics
+                    )
                 if collect_service_status:
                     self.get_service_checks(base_url, cluster, service, service_tags)
 
@@ -115,8 +130,7 @@ class AmbariCheck(AgentCheck):
         for info in service_info:
             self._submit_service_checks("state", info['state'], info['tags'])
 
-    def get_component_metrics(self, base_url, cluster, service,
-                              base_tags, component_whitelist, metric_whitelist):
+    def get_component_metrics(self, base_url, cluster, service, base_tags, component_whitelist, metric_whitelist):
         if not component_whitelist:
             return
         component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
@@ -134,17 +148,13 @@ class AmbariCheck(AgentCheck):
                 continue
             component_metrics = component.get(METRICS_FIELD)
             if component_metrics is None:
-                self.log.warning(
-                    "No metrics found for component {} for service {}"
-                        .format(component_name, service)
-                )
+                self.log.warning("No metrics found for component {} for service {}".format(component_name, service))
                 continue
 
             for header in metric_whitelist:
                 if header not in component_metrics:
                     self.log.warning(
-                        "No {} metrics found for component {} for service {}"
-                            .format(header, component_name, service)
+                        "No {} metrics found for component {} for service {}".format(header, component_name, service)
                     )
                     continue
 
@@ -158,10 +168,7 @@ class AmbariCheck(AgentCheck):
                         self.warning("Expected a float for {}, received {}".format(metric_name, value))
 
     def _get_hosts_info(self, base_url, cluster):
-        hosts_endpoint = common.HOST_METRICS_URL.format(
-            base_url=base_url,
-            cluster_name=cluster
-        )
+        hosts_endpoint = common.HOST_METRICS_URL.format(base_url=base_url, cluster_name=cluster)
         resp = self._make_request(hosts_endpoint)
 
         return resp.get('items')
@@ -182,11 +189,11 @@ class AmbariCheck(AgentCheck):
         try:
             resp = self.http.get(url)
             return resp.json()
-        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+        except (HTTPError, ConnectionError) as e:
             self.warning(
-                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable"
-                .format(url, e))
-        except requests.exceptions.Timeout:
+                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable".format(url, e)
+            )
+        except Timeout:
             self.warning("Connection timeout when connecting to {}".format(url))
 
     def _submit_gauge(self, name, value, tags, hostname=None):
@@ -218,4 +225,3 @@ class AmbariCheck(AgentCheck):
             else:
                 flat_metrics[metric_name] = metric_value
         return flat_metrics
-
