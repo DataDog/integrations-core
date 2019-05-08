@@ -7,27 +7,32 @@ import json
 from datadog import initialize, api
 import requests
 
-EVENT_PATH_ENV_VAR = "GITHUB_EVENT_PATH"
-TRELLO_BOARD_LIST_ENV_VAR = "TRELLO_BOARD_LIST"
-TRELLO_KEY_ENV_VAR = "TRELLO_KEY"
-TRELLO_TOKEN_ENV_VAR = "TRELLO_TOKEN"
-DD_API_KEY_ENV_VAR = "DD_API_KEY"
-TRELLO_API_URL = url = "https://api.trello.com/1/cards"
+(
+    EVENT_PATH_ENV_VAR,
+    TRELLO_LIST_ID,
+    TRELLO_KEY_ENV_VAR,
+    TRELLO_TOKEN_ENV_VAR,
+    DD_API_KEY_ENV_VAR
+) = ENV_VARS = (
+    'GITHUB_EVENT_PATH',
+    'TRELLO_LIST_ID',
+    'TRELLO_KEY',
+    'TRELLO_TOKEN',
+    'DD_API_KEY',
+)
+
+TRELLO_API_URL = "https://api.trello.com/1/cards"
 SUCCESS = "Success"
 FAILED = "Failed"
 
 # Make sure all environment variables are present
 def validate_env_vars():
-    try:
-        os.environ[EVENT_PATH_ENV_VAR]
-        os.environ[TRELLO_BOARD_LIST]
-        os.environ[TRELLO_KEY_ENV_VAR]
-        os.environ[TRELLO_TOKEN_ENV_VAR]
-        os.environ[DD_API_KEY]
-    except KeyError:
-        msg = "Missing a required environment variable. Cannot create card"
+    msg = ''
+    for var in ENV_VARS:
+        if var not in os.environ:
+            msg += f"Missing a required environment variable {var}. Cannot create card\n"
+    if msg:
         emit_dd_event(FAILED, msg)
-        raise
 
 
 # Emit an event to Datadog based on whether or not we could create the card
@@ -37,7 +42,7 @@ def emit_dd_event(status, msg):
     }
     initialize(**options)
 
-    title = "Trello Card creation {}".format(status)
+    title = f"Trello Card creation {status}"
     text = msg
     tags = ['team:agent-integrations', 'application:trello_github_action']
 
@@ -52,25 +57,25 @@ def get_github_event():
             pull_request_event = f.read()
         return json.loads(pull_request_event).get('pull_request')
     except (IOError, ValueError) as e:
-        emit_dd_event(FAILED, "Unable to create Trello card: {}".format(e))
+        emit_dd_event(FAILED, f"Unable to create Trello card: {e}")
         raise
 
-# Crerate the Trello card on the board specified by the environment variable
+# Create the Trello card on the board specified by the environment variable
 # https://developers.trello.com/reference/#cards-2
 def create_trello_card(pull_request_event):
     querystring = {
-        "idList": os.environ[TRELLO_BOARD_LIST_ENV_VAR],
+        "idList": os.environ[TRELLO_LIST_ID_ENV_VAR],
         "keepFromSource":"all",
         "name": pull_request_event.get('title'),
-        "description": pull_request_event.get('body'),
+        "description": pull_request_event.get('body', '')[:5000],
         "key": os.environ[TRELLO_KEY_ENV_VAR],
         "token": os.environ[TRELLO_TOKEN_ENV_VAR]
     }
     try:
-        response = requests.request("POST", url, params=querystring)
+        response = requests.post(TRELLO_API_URL, params=querystring)
         response.raise_for_status()
     except Exception as e:
-        emit_dd_event(FAILED, "Couldn't submit card to Trello API: {}".format(e))
+        emit_dd_event(FAILED, f"Couldn't submit card to Trello API: {e}")
         raise e
 
 # Use the github labels from the PR to determine if we should create a Trello card
@@ -87,6 +92,6 @@ if __name__ == "__main__":
     pr_url = pull_request_event.get('url')
     if should_create_card(pull_request_event):
         create_trello_card(pull_request_event)
-        emit_dd_event(SUCCESS, "Succesfully created Trello card for PR {}".format(pr_url))
+        emit_dd_event(SUCCESS, f"Succesfully created Trello card for PR {pr_url}")
     else:
-        print("Not creating a card for Pull Request {}".format(pr_url))
+        print(f"Not creating a card for Pull Request {pr_url}")

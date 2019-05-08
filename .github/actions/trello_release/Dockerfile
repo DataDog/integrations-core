@@ -7,9 +7,9 @@ LABEL "com.github.actions.color"="blue"
 
 LABEL "repository"="https://github.com/DataDog/integrations-core"
 
-ADD entrypoint.sh /entrypoint.sh
-ADD requirements.in /requirements.in
-ADD create_card.py /create_card.py
+COPY entrypoint.sh /entrypoint.sh
+COPY requirements.in /requirements.in
+COPY create_card.py /create_card.py
 
 RUN pip install -rrequirements.in
 
