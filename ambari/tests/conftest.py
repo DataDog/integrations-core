@@ -11,7 +11,13 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {'url': 'localhost', 'port': 80, 'username': 'admin', 'password': 'admin'}
+    return {
+        'url': 'localhost',
+        'port': 80,
+        'username': 'admin',
+        'password': 'admin',
+        'services': {"HDFS": ["NAMENODE", "DATANODE"], "YARN": ["NODEMANANGER", "YARNCLIENT"], "SPARK": []},
+    }
 
 
 @pytest.fixture

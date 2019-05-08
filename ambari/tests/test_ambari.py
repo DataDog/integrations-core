@@ -162,6 +162,71 @@ def test_get_service_health(init_config, instance):
 
 def test_default_config(instance):
     ambari = AmbariCheck(init_config={}, instances=[instance])
+
     assert ambari._should_collect_host_metrics() is True
     assert ambari._should_collect_service_metrics() is True
     assert ambari._should_collect_service_status() is False
+
+
+def test_should_not_collect_if_disabled(instance):
+    ambari = AmbariCheck(
+        init_config={'collect_host_metrics': False, 'collect_service_metrics': False, 'collect_service_status': False},
+        instances=[instance],
+    )
+    _mock_clusters(ambari)
+    ambari.get_host_metrics = MagicMock()
+    ambari.get_service_status_and_metrics = MagicMock()
+    ambari.check(instance)
+
+    assert not ambari.get_host_metrics.called
+    assert not ambari.get_service_status_and_metrics.called
+
+
+def test_should_collect_host_metrics(instance):
+    ambari = AmbariCheck(
+        init_config={'collect_host_metrics': True, 'collect_service_metrics': False, 'collect_service_status': False},
+        instances=[instance],
+    )
+    _mock_clusters(ambari)
+    ambari.get_host_metrics = MagicMock()
+    ambari.get_service_status_and_metrics = MagicMock()
+    ambari.check(instance)
+
+    assert ambari.get_host_metrics.called
+    assert not ambari.get_service_status_and_metrics.called
+
+
+def test_should_collect_service_metrics(instance):
+    ambari = AmbariCheck(
+        init_config={'collect_host_metrics': False, 'collect_service_metrics': True, 'collect_service_status': False},
+        instances=[instance],
+    )
+    _mock_clusters(ambari)
+    ambari.get_host_metrics = MagicMock()
+    ambari.get_component_metrics = MagicMock()
+    ambari.get_service_checks = MagicMock()
+    ambari.check(instance)
+
+    assert not ambari.get_host_metrics.called
+    assert ambari.get_component_metrics.called
+    assert not ambari.get_service_checks.called
+
+
+def test_should_collect_service_status(instance):
+    ambari = AmbariCheck(
+        init_config={'collect_host_metrics': False, 'collect_service_metrics': False, 'collect_service_status': True},
+        instances=[instance],
+    )
+    _mock_clusters(ambari)
+    ambari.get_host_metrics = MagicMock()
+    ambari.get_component_metrics = MagicMock()
+    ambari.get_service_checks = MagicMock()
+    ambari.check(instance)
+
+    assert not ambari.get_host_metrics.called
+    assert not ambari.get_component_metrics.called
+    assert ambari.get_service_checks.called
+
+
+def _mock_clusters(ambari):
+    ambari.get_clusters = MagicMock(return_value=['LabCluster'])

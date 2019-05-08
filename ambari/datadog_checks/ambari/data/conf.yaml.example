@@ -51,6 +51,7 @@ instances:
 
 
   ## @param services - object - optional
+  ## Required if collecting component metrics or service status.
   ## Note that each level of values is required.  This is essentially whitelisting
   ## where we will only pull metrics from the components listed under their
   ## respective services.  Listing no components under a service will cause that
