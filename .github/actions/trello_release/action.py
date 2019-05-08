@@ -101,9 +101,7 @@ if __name__ == "__main__":
     pull_request_event = get_github_event()
     pr_url = pull_request_event.get('pull_request').get('url')
     if should_create_card(pull_request_event):
-        try:
-            create_trello_card(pull_request_event.get('pull_request'))
-        else:
-            emit_dd_event(SUCCESS, f"Succesfully created Trello card for PR {pr_url}")
+        create_trello_card(pull_request_event.get('pull_request'))
+        emit_dd_event(SUCCESS, f"Succesfully created Trello card for PR {pr_url}")
     else:
         print(f"Not creating a card for Pull Request {pr_url}")
