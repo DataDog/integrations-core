@@ -71,6 +71,12 @@ class ConsulCheck(AgentCheck):
 
     STATUS_SEVERITY = {AgentCheck.UNKNOWN: 0, AgentCheck.OK: 1, AgentCheck.WARNING: 2, AgentCheck.CRITICAL: 3}
 
+    HTTP_CONFIG_REMAPPER = {
+        'client_cert_file': {'name': 'tls_cert', 'default': None, 'invert': False},
+        'private_key_file': {'name': 'tls_private_key', 'default': None, 'invert': False},
+        'ca_bundle_file': {'name': 'tls_ca_cert', 'default': True, 'invert': False},
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
@@ -83,13 +89,7 @@ class ConsulCheck(AgentCheck):
 
             clientcertfile = instance.get('client_cert_file', self.init_config.get('client_cert_file', False))
             privatekeyfile = instance.get('private_key_file', self.init_config.get('private_key_file', False))
-            cabundlefile = instance.get('ca_bundle_file', self.init_config.get('ca_bundle_file', True))
             acl_token = instance.get('acl_token', None)
-            HTTP_CONFIG_REMAPPER = {
-                'ssl_cert': clientcertfile,
-                'ssl_private_key': privatekeyfile,
-            }
-
 
             headers = {}
             if acl_token:
@@ -97,17 +97,11 @@ class ConsulCheck(AgentCheck):
 
             if clientcertfile:
                 if privatekeyfile:
-<<<<<<< HEAD
-                    resp = requests.get(
-=======
-                    resp = self.http.get(
->>>>>>> update style and add proxy support
-                        url, cert=(clientcertfile, privatekeyfile), verify=cabundlefile, headers=headers
-                    )
+                    resp = self.http.get(url)
                 else:
-                    resp = self.http.get(url, cert=clientcertfile, verify=cabundlefile, headers=headers)
+                    resp = self.http.get(url)
             else:
-                resp = self.http.get(url, verify=cabundlefile, headers=headers)
+                resp = self.http.get(url, headers=headers)
 
             resp.raise_for_status()
 
@@ -261,20 +255,12 @@ class ConsulCheck(AgentCheck):
             services = {s: services[s] for s in whitelisted_services[:max_services]}
         else:
             if len(services) <= max_services:
-<<<<<<< HEAD
                 log_line = 'Consul service whitelist not defined. Agent will poll for all {} services found'.format(
-=======
-                log_line = 'Consul service whitelist not defined. ' 'Agent will poll for all {} services found'.format(
->>>>>>> update style and add proxy support
                     len(services)
                 )
                 self.log.debug(log_line)
             else:
-<<<<<<< HEAD
                 log_line = 'Consul service whitelist not defined. Agent will poll for at most {} services'.format(
-=======
-                log_line = 'Consul service whitelist not defined. ' 'Agent will poll for at most {} services'.format(
->>>>>>> update style and add proxy support
                     max_services
                 )
                 self.warning(log_line)
