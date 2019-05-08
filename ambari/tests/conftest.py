@@ -16,8 +16,4 @@ def instance():
 
 @pytest.fixture
 def init_config():
-    return {
-        "collect_host_metrics": True,
-        "collect_service_metrics": True,
-        "collect_service_status": True,
-    }
+    return {"collect_host_metrics": True, "collect_service_metrics": True, "collect_service_status": True}
