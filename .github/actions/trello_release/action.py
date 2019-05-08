@@ -33,6 +33,7 @@ def validate_env_vars():
             msg += f"Missing a required environment variable {var}. Cannot create card\n"
     if msg:
         emit_dd_event(FAILED, msg)
+        raise Exception(msg)
 
 
 # Emit an event to Datadog based on whether or not we could create the card
