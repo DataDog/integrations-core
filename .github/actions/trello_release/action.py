@@ -55,7 +55,7 @@ def get_github_event():
     try:
         with open(event_file_path, "r") as f:
             pull_request_event = f.read()
-        return json.loads(pull_request_event).get('pull_request')
+        return json.loads(pull_request_event)
     except (IOError, ValueError) as e:
         emit_dd_event(FAILED, f"Unable to create Trello card: {e}")
         raise
@@ -80,20 +80,28 @@ def create_trello_card(pull_request_event):
 
 # Use the github labels from the PR to determine if we should create a Trello card
 # True if any of the labels on the PR starts with changelog and isn't `no-changelog`
+# AND the PR is merged
 def should_create_card(pull_request_event):
-    for label in pull_request_event.get('labels', []):
+    pr_includes_changes = False
+    pr_is_merged = False
+
+    for label in pull_request_event.get('pull_request').get('labels', []):
         label = label.get('name', '')
         if label.startswith('changelog/') and label != 'changelog/no-changelog':
-            return True
-    return False
+            pr_includes_changes = True
+
+    if pull_request_event.get('merged') and pull_request_event.get('action') == 'closed':
+        pr_is_merged = True
+
+    return pr_includes_changes and pr_is_merged
 
 if __name__ == "__main__":
     validate_env_vars()
     pull_request_event = get_github_event()
-    pr_url = pull_request_event.get('url')
+    pr_url = pull_request_event.get('pull_request').get('url')
     if should_create_card(pull_request_event):
         try:
-            create_trello_card(pull_request_event)
+            create_trello_card(pull_request_event.get('pull_request'))
         else:
             emit_dd_event(SUCCESS, f"Succesfully created Trello card for PR {pr_url}")
     else:
