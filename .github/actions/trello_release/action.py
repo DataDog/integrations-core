@@ -85,8 +85,6 @@ def should_create_card(pull_request_event):
         label = label.get('name', '')
         if label.startswith('changelog/') and label != 'changelog/no-changelog':
             return True
-    if any(labels):
-        return True
     return False
 
 if __name__ == "__main__":
@@ -94,7 +92,9 @@ if __name__ == "__main__":
     pull_request_event = get_github_event()
     pr_url = pull_request_event.get('url')
     if should_create_card(pull_request_event):
-        create_trello_card(pull_request_event)
-        emit_dd_event(SUCCESS, f"Succesfully created Trello card for PR {pr_url}")
+        try:
+            create_trello_card(pull_request_event)
+        else:
+            emit_dd_event(SUCCESS, f"Succesfully created Trello card for PR {pr_url}")
     else:
         print(f"Not creating a card for Pull Request {pr_url}")
