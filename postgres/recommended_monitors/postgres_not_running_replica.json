@@ -1,6 +1,6 @@
 {
 	"name": "Postgres is not running on a replica host",
-	"type": "check",
+	"type": "service check",
 	"query": "\"postgres.can_connect\".over(\"*\").last(6).count_by_status()",
 	"message": "This should probably be investigated, try checking the logs for errors.\n",
 	"tags": [
