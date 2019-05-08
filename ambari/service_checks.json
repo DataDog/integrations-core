@@ -14,7 +14,7 @@
         "groups": ["host", "url"],
         "check": "ambari.state",
         "statuses": ["ok", "warning" ,"critical"],
-        "name": "Can Connect",
+        "name": "State",
         "description": "Returns `OK` if the service is installed or running, `WARNING` if the service is stopping or uninstalling, `CRITICAL` if the service is uninstalled or stopped."
     }
 ]
