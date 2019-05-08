@@ -38,6 +38,7 @@ def service_checks():
                 decoded = json.loads(read_file(service_checks_file).strip(), object_pairs_hook=OrderedDict)
             except JSONDecodeError as e:
                 failed_checks += 1
+                file_failed = True
                 display_queue.append((echo_failure, '  Invalid JSON {}'.format(e)))
 
             unique_names = set()
