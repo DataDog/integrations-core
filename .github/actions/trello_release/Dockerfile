@@ -9,7 +9,7 @@ LABEL "org.opencontainers.image.source"="https://github.com/DataDog/integrations
 
 COPY entrypoint.sh /entrypoint.sh
 COPY requirements.in /requirements.in
-COPY create_card.py /create_card.py
+COPY action.py /action.py
 
 RUN pip install -rrequirements.in
 
