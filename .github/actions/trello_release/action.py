@@ -81,7 +81,10 @@ def create_trello_card(pull_request_event):
 # Use the github labels from the PR to determine if we should create a Trello card
 # True if any of the labels on the PR starts with changelog and isn't `no-changelog`
 def should_create_card(pull_request_event):
-    labels = [True for name in pull_request_event.get('labels') if name.get('name').startswith('changelog') and not name.get('name') is not 'changelog/no-changelog' else False]
+    for label in pull_request_event.get('labels', []):
+        label = label.get('name', '')
+        if label.startswith('changelog/') and label != 'changelog/no-changelog':
+            return True
     if any(labels):
         return True
     return False
