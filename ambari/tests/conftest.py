@@ -12,3 +12,12 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return {'url': 'localhost', 'port': 80, 'username': 'admin', 'password': 'admin'}
+
+
+@pytest.fixture
+def init_config():
+    return {
+        "collect_host_metrics": True,
+        "collect_service_metrics": True,
+        "collect_service_status": True,
+    }

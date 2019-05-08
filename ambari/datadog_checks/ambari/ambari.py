@@ -27,17 +27,16 @@ class AmbariCheck(AgentCheck):
         base_url = instance.get("url", "")
         base_tags = instance.get("tags", [])
         whitelisted_services = instance.get("services", [])
-
         whitelisted_metrics = [str(h) for h in instance.get("metric_headers", [])]
 
         clusters = self.get_clusters(base_url)
-        if instance.get("collect_host_metrics", True):
+        if self._should_collect_host_metrics():
             self.get_host_metrics(base_url, clusters, base_tags)
 
-        collect_service_metrics = instance.get("collect_service_metrics", True)
-        collect_service_status = instance.get("collect_service_status", False)
+        collect_service_metrics = self._should_collect_service_metrics()
+        collect_service_status = self._should_collect_service_status()
         if collect_service_metrics or collect_service_status:
-            self.get_service_metrics(
+            self.get_service_status_and_metrics(
                 base_url,
                 clusters,
                 whitelisted_services,
@@ -46,6 +45,15 @@ class AmbariCheck(AgentCheck):
                 collect_service_metrics,
                 collect_service_status,
             )
+
+    def _should_collect_host_metrics(self):
+        return self.init_config.get("collect_host_metrics", True)
+
+    def _should_collect_service_metrics(self):
+        return self.init_config.get("collect_service_metrics", True)
+
+    def _should_collect_service_status(self):
+        return self.init_config.get("collect_service_status", False)
 
     def get_clusters(self, base_url):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
@@ -103,7 +111,7 @@ class AmbariCheck(AgentCheck):
                         self.warning("Expected a float for {}, received {}".format(metric_name, value))
         self.set_external_tags(external_tags)
 
-    def get_service_metrics(
+    def get_service_status_and_metrics(
         self,
         base_url,
         clusters,
@@ -113,6 +121,13 @@ class AmbariCheck(AgentCheck):
         collect_service_metrics,
         collect_service_status,
     ):
+        if not whitelisted_services:
+            self.log.warning("Service metrics or status collection activated but no services have been whitelisted")
+            return
+
+        if collect_service_metrics and not whitelisted_metrics:
+            self.log.warning("Service metrics collection activated but no components have been whitelisted")
+
         for cluster in clusters:
             tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
             for service, components in iteritems(whitelisted_services):

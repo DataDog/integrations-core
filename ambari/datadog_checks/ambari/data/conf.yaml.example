@@ -1,38 +1,5 @@
 init_config:
 
-instances:
-
-## @param url - string - required
-## The URL of the Ambari Server, include http:// or https://
-#
-  - url: <ambari url>
-
-  ## @param user - string - optional
-  ## Username created to connect to the Ambari server if using basic authentication
-  #
-  #  username: admin
-
-  ## @param password - string - optional
-  ## Password associated with the Ambari server user if using basic authentication
-  #
-  #  password: <UNIQUEPASSWORD>
-
-
-  ## @param services - object - required
-  ## Note that each level of values is required.  This is essentially whitelisting
-  ## where we will only pull metrics from the components listed under their
-  ## respective services.  Listing no components under a service will cause that
-  ## service to be skipped.
-  #
-    services:
-      <SERVICE_NAME_1>:
-        - <COMPONENT_NAME_1>
-        - <COMPONENT_NAME_2>
-      <SERVICE_NAME_2>:
-        - <COMPONENT_NAME_1>
-        - <COMPONENT_NAME_2>
-
-
   ## @param metric_headers - list - required
   ## Metric headings from which component metrics will be sourced.  To query all metrics
   ## from a component to see what headings it has, see here:
@@ -50,19 +17,52 @@ instances:
   ## @param collect_host_metrics - boolean - optional - default: True
   ## Change to False to omit collecting host level metrics
   #
-  # collect_host_metrics: True
+  #  collect_host_metrics: True
 
 
   ## @param collect_service_metrics - boolean - optional - default: True
   ## Change to False to omit collecting service level metrics
   #
-  # collect_service_metrics: True
+  #  collect_service_metrics: True
 
 
   ## @param collect_service_status - boolean - optional - default: False
   ## Change to False to omit collecting services status
   #
-  # collect_service_status: False
+  #  collect_service_status: False
+
+instances:
+
+  -
+  ## @param url - string - required
+  ## The URL of the Ambari Server, include http:// or https://
+  #
+    url: localhost
+
+  ## @param user - string - optional
+  ## Username created to connect to the Ambari server if using basic authentication
+  #
+  #  username: admin
+
+  ## @param password - string - optional
+  ## Password associated with the Ambari server user if using basic authentication
+  #
+  #  password: <UNIQUEPASSWORD>
+
+
+  ## @param services - object - optional
+  ## Note that each level of values is required.  This is essentially whitelisting
+  ## where we will only pull metrics from the components listed under their
+  ## respective services.  Listing no components under a service will cause that
+  ## service to be skipped.
+  #
+  #  services:
+  #    <SERVICE_NAME_1>:
+  #      - <COMPONENT_NAME_1>
+  #      - <COMPONENT_NAME_2>
+  #    <SERVICE_NAME_2>:
+  #      - <COMPONENT_NAME_1>
+  #      - <COMPONENT_NAME_2>
 
 
   ## @param tags  - list of key:value elements - optional

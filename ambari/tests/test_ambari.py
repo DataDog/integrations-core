@@ -57,8 +57,8 @@ def test_flatten_host_metrics():
     }
 
 
-def test_get_clusters(instance):
-    ambari = AmbariCheck(instances=[instance])
+def test_get_clusters(init_config, instance):
+    ambari = AmbariCheck(init_config=init_config, instances=[instance])
     ambari._make_request = MagicMock(
         return_value={
             'href': 'localhost/api/v1/clusters',
@@ -72,8 +72,8 @@ def test_get_clusters(instance):
     assert clusters == ['LabCluster']
 
 
-def test_get_hosts(instance):
-    ambari = AmbariCheck(instances=[instance])
+def test_get_hosts(init_config, instance):
+    ambari = AmbariCheck(init_config=init_config, instances=[instance])
     ambari._make_request = MagicMock(
         return_value={
             'href': 'localhost/api/v1/clusters/myCluster/hosts?fields=metrics',
@@ -98,8 +98,8 @@ def test_get_hosts(instance):
     assert hosts[1]['metrics'] is not None
 
 
-def test_get_component_metrics(instance):
-    ambari = AmbariCheck(instances=[instance])
+def test_get_component_metrics(init_config, instance):
+    ambari = AmbariCheck(init_config=init_config, instances=[instance])
     ambari._make_request = MagicMock(return_value=responses.COMPONENT_METRICS)
     ambari._submit_gauge = MagicMock()
     namenode_tags = ['ambari_cluster:LabCluster', 'ambari_service:hdfs', 'ambari_component:namenode']
@@ -148,8 +148,8 @@ def test_get_component_metrics(instance):
     )
 
 
-def test_get_service_health(instance):
-    ambari = AmbariCheck(instances=[instance])
+def test_get_service_health(init_config, instance):
+    ambari = AmbariCheck(init_config=init_config, instances=[instance])
     ambari._make_request = MagicMock(return_value=responses.SERVICE_HEALTH_METRICS)
     service_info = ambari._get_service_checks_info(
         'localhost', 'LabCluster', 'HDFS', service_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs']
@@ -158,3 +158,10 @@ def test_get_service_health(instance):
     ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
 
     assert service_info == [{'state': 0, 'tags': ['ambari_cluster:LabCluster', 'ambari_service:hdfs']}]
+
+
+def test_default_config(instance):
+    ambari = AmbariCheck(init_config={}, instances=[instance])
+    assert ambari._should_collect_host_metrics() is True
+    assert ambari._should_collect_service_metrics() is True
+    assert ambari._should_collect_service_status() is False
