@@ -77,13 +77,7 @@ class Apache(AgentCheck):
                 if _is_affirmative(instance.get('tls_ignore_warning', False)):
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
-                r = requests.get(
-                    url,
-                    auth=auth,
-                    headers=headers(self.agentConfig),
-                    verify=not disable_ssl_validation,
-                    timeout=(connect_timeout, receive_timeout),
-                )
+                r = self.http.get(url)
             r.raise_for_status()
 
         except Exception as e:
