@@ -180,9 +180,7 @@ SELECT schemaname, count(*) FROM
   ORDER BY schemaname, relname
   LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
-        """.format(
-            table_count_limit=TABLE_COUNT_LIMIT
-        ),
+        """,
     }
 
     q1 = (
@@ -563,6 +561,11 @@ GROUP BY datid, datname
 
         return {'descriptors': [], 'metrics': metrics, 'query': "select %s FROM pg_stat_bgwriter", 'relation': False}
 
+    def _get_count_metrics(self, table_count_limit):
+        metrics = dict(self.COUNT_METRICS)
+        metrics['query'] = self.COUNT_METRICS['query'].format(table_count_limit=table_count_limit)
+        return metrics
+
     def _get_archiver_metrics(self, key, db):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
         defined in 9.4 (first version to have this table).
@@ -763,6 +766,7 @@ GROUP BY datid, datname
         instance_tags,
         relations,
         custom_metrics,
+        table_count_limit,
         collect_function_metrics,
         collect_count_metrics,
         collect_activity_metrics,
@@ -786,7 +790,7 @@ GROUP BY datid, datname
         if collect_function_metrics:
             metric_scope.append(self.FUNCTION_METRICS)
         if collect_count_metrics:
-            metric_scope.append(self.COUNT_METRICS)
+            metric_scope.append(self._get_count_metrics(table_count_limit))
 
         # Do we need relation-specific metrics?
         relations_config = {}
@@ -1012,6 +1016,7 @@ GROUP BY datid, datname
         dbname = instance.get('dbname', None)
         relations = instance.get('relations', [])
         ssl = is_affirmative(instance.get('ssl', False))
+        table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
         collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
@@ -1066,6 +1071,7 @@ GROUP BY datid, datname
                 tags,
                 relations,
                 custom_metrics,
+                table_count_limit,
                 collect_function_metrics,
                 collect_count_metrics,
                 collect_activity_metrics,
@@ -1084,6 +1090,7 @@ GROUP BY datid, datname
                 tags,
                 relations,
                 custom_metrics,
+                table_count_limit,
                 collect_function_metrics,
                 collect_count_metrics,
                 collect_activity_metrics,
