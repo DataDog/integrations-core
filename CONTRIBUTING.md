@@ -7,6 +7,8 @@ To propose improvements, feel free to submit a PR.
 
 ## Submitting issues
 
+* If you have a feature request, you should [contact support][3] so the request 
+can be properly tracked.
 * If you think you've found an issue, please search the [Troubleshooting][1]
   section of our [Knowledge base][2] to see if it's known.
 * If you can't find anything useful, please contact our [support][3] and
