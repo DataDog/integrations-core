@@ -1,10 +1,10 @@
 init_config:
 
-  ## @param metric_headers - list - required
-  ## Metric headings from which component metrics will be sourced.  To query all metrics
-  ## from a component to see what headings it has, see here:
-  ## https://github.com/apache/ambari/blob/trunk/ambari-server/docs/api/v1/components-component.md
-  #
+    ## @param metric_headers - list - required
+    ## Metric headings from which component metrics will be sourced.  To query all metrics
+    ## from a component to see what headings it has, see here:
+    ## https://github.com/apache/ambari/blob/trunk/ambari-server/docs/api/v1/components-component.md
+    #
     metric_headers:
       - cpu
       - disk
@@ -14,123 +14,122 @@ init_config:
       - process
 
 
-  ## @param collect_host_metrics - boolean - optional - default: True
-  ## Change to False to omit collecting host level metrics
-  #
-  #  collect_host_metrics: True
+    ## @param collect_host_metrics - boolean - optional - default: True
+    ## Change to False to omit collecting host level metrics
+    #
+    #  collect_host_metrics: True
 
 
-  ## @param collect_service_metrics - boolean - optional - default: True
-  ## Change to False to omit collecting service level metrics
-  #
-  #  collect_service_metrics: True
+    ## @param collect_service_metrics - boolean - optional - default: True
+    ## Change to False to omit collecting service level metrics
+    #
+    #  collect_service_metrics: True
 
 
-  ## @param collect_service_status - boolean - optional - default: False
-  ## Change to False to omit collecting services status
-  #
-  #  collect_service_status: False
+    ## @param collect_service_status - boolean - optional - default: False
+    ## Change to False to omit collecting services status
+    #
+    #  collect_service_status: False
 
 instances:
 
-  -
-  ## @param url - string - required
-  ## The URL of the Ambari Server, include http:// or https://
-  #
-    url: localhost
+    ## @param url - string - required
+    ## The URL of the Ambari Server, include http:// or https://
+    #
+  - url: localhost
 
-  ## @param user - string - optional
-  ## Username created to connect to the Ambari server if using basic authentication
-  #
-  #  username: admin
+    ## @param user - string - optional
+    ## Username created to connect to the Ambari server if using basic authentication
+    #
+    #  username: admin
 
-  ## @param password - string - optional
-  ## Password associated with the Ambari server user if using basic authentication
-  #
-  #  password: <UNIQUEPASSWORD>
-
-
-  ## @param services - object - optional
-  ## Required if collecting component metrics or service status.
-  ## Note that each level of values is required.  This is essentially whitelisting
-  ## where we will only pull metrics from the components listed under their
-  ## respective services.  Listing no components under a service will cause that
-  ## service to be skipped.
-  #
-  #  services:
-  #    <SERVICE_NAME_1>:
-  #      - <COMPONENT_NAME_1>
-  #      - <COMPONENT_NAME_2>
-  #    <SERVICE_NAME_2>:
-  #      - <COMPONENT_NAME_1>
-  #      - <COMPONENT_NAME_2>
+    ## @param password - string - optional
+    ## Password associated with the Ambari server user if using basic authentication
+    #
+    #  password: <UNIQUEPASSWORD>
 
 
-  ## @param tags  - list of key:value elements - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param services - object - optional
+    ## Required if collecting component metrics or service status.
+    ## Note that each level of values is required.  This is essentially whitelisting
+    ## where we will only pull metrics from the components listed under their
+    ## respective services.  Listing no components under a service will cause that
+    ## service to be skipped.
+    #
+    #  services:
+    #    SERVICE_NAME_1:
+    #      - <COMPONENT_NAME_1>
+    #      - <COMPONENT_NAME_2>
+    #    SERVICE_NAME_2:
+    #      - <COMPONENT_NAME_1>
+    #      - <COMPONENT_NAME_2>
 
 
-  ## @param cert - string - optional
-  ## Path to certificate to connect to the Ambari server if using TSL authentication
-  #
-  # tsl_cert: <PATH_TO_CERTIFICATE>
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    #  tags:
+    #    - <KEY_1>:<VALUE_1>
+    #    - <KEY_2>:<VALUE_2>
 
 
-  ## @param cert - string - optional
-  ## Path to certificate private key to connect to the Ambari server if using TSL authentication
-  #
-  # tls_private_key: <PATH_TO_PRIVATE_KEY>
+    ## @param tsl_cert - string - optional
+    ## Path to certificate to connect to the Ambari server if using TSL authentication
+    #
+    # tsl_cert: <PATH_TO_CERTIFICATE>
 
 
-  ## @param tls_verify - boolean - optional - default: True
-  ## Whether or not to verify TSL certificates (default true)
-  #
-  # tls_verify: True
+    ## @param tls_private_key - string - optional
+    ## Path to certificate private key to connect to the Ambari server if using TSL authentication
+    #
+    # tls_private_key: <PATH_TO_PRIVATE_KEY>
 
 
-  ## @param ignore_tls_warning - boolean - optional - default: False
-  ## Ignore warnings for lack of SSL validation
-  #
-  # ignore_tls_warning = False
+    ## @param tls_verify - boolean - optional - default: True
+    ## Whether or not to verify TSL certificates (default true)
+    #
+    # tls_verify: True
 
 
-  ## @param timeout - integer - optional - default: 10
-  ## Customizes the Ambari connection timeout (in seconds).
-  #
-  #  timeout: 10
+    ## @param ignore_tls_warning - boolean - optional - default: False
+    ## Ignore warnings for lack of SSL validation
+    #
+    # ignore_tls_warning = False
 
 
-  ## @param headers - map - optional
-  ## Map of headers to send on every request
-  #
-  # headers:
-  #  - <header1>
-  #  - <header2>
+    ## @param timeout - integer - optional - default: 10
+    ## Customizes the Ambari connection timeout (in seconds).
+    #
+    #  timeout: 10
 
 
-  ## @param persist_connections - boolean - optional - default: False
-  ## Whether or not to persist cookies and use connection pooling
-  #
-  # persist_connections: False
+    ## @param headers - object - optional
+    ## Map of headers to send on every request
+    #
+    # headers:
+    #  - <header1>
+    #  - <header2>
 
 
-  ## @param proxy - map - optional
-  ## Proxy configuration
-  #
-  # proxy:
+    ## @param persist_connections - boolean - optional - default: False
+    ## Whether or not to persist cookies and use connection pooling
+    #
+    # persist_connections: False
 
 
-  ## @param skip_proxy - boolean - optional - default: False
-  ## Whether or not to skip the proxy configured in the Agent's config file when
-  ## making the request to the PerfServlet
-  #
-  #  skip_proxy: False
+    ## @param proxy - object - optional
+    ## Proxy configuration
+    #
+    # proxy:
+
+
+    ## @param skip_proxy - boolean - optional - default: False
+    ## Whether or not to skip the proxy configured in the Agent's config file when
+    ## making the request to the PerfServlet
+    #
+    #  skip_proxy: False
 
 
 ## Log Section (Available for Agent >=6.0)
