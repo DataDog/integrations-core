@@ -17,19 +17,19 @@ init_config:
     ## @param collect_host_metrics - boolean - optional - default: True
     ## Change to False to omit collecting host level metrics
     #
-    #  collect_host_metrics: True
+    # collect_host_metrics: True
 
 
     ## @param collect_service_metrics - boolean - optional - default: True
     ## Change to False to omit collecting service level metrics
     #
-    #  collect_service_metrics: True
+    # collect_service_metrics: True
 
 
     ## @param collect_service_status - boolean - optional - default: False
     ## Change to False to omit collecting services status
     #
-    #  collect_service_status: False
+    # collect_service_status: False
 
 instances:
 
@@ -41,12 +41,12 @@ instances:
     ## @param user - string - optional
     ## Username created to connect to the Ambari server if using basic authentication
     #
-    #  username: admin
+    # username: admin
 
     ## @param password - string - optional
     ## Password associated with the Ambari server user if using basic authentication
     #
-    #  password: <UNIQUEPASSWORD>
+    # password: <UNIQUEPASSWORD>
 
 
     ## @param services - object - optional
@@ -56,13 +56,13 @@ instances:
     ## respective services.  Listing no components under a service will cause that
     ## service to be skipped.
     #
-    #  services:
-    #    SERVICE_NAME_1:
-    #      - <COMPONENT_NAME_1>
-    #      - <COMPONENT_NAME_2>
-    #    SERVICE_NAME_2:
-    #      - <COMPONENT_NAME_1>
-    #      - <COMPONENT_NAME_2>
+    # services:
+    #     SERVICE_NAME_1:
+    #       - <COMPONENT_NAME_1>
+    #       - <COMPONENT_NAME_2>
+    #     SERVICE_NAME_2:
+    #       - <COMPONENT_NAME_1>
+    #       - <COMPONENT_NAME_2>
 
 
     ## @param tags  - list of key:value elements - optional
@@ -70,9 +70,9 @@ instances:
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
-    #  tags:
-    #    - <KEY_1>:<VALUE_1>
-    #    - <KEY_2>:<VALUE_2>
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 
     ## @param tsl_cert - string - optional
@@ -102,15 +102,15 @@ instances:
     ## @param timeout - integer - optional - default: 10
     ## Customizes the Ambari connection timeout (in seconds).
     #
-    #  timeout: 10
+    # timeout: 10
 
 
     ## @param headers - object - optional
     ## Map of headers to send on every request
     #
     # headers:
-    #  - <header1>
-    #  - <header2>
+    #   - <header1>
+    #   - <header2>
 
 
     ## @param persist_connections - boolean - optional - default: False
@@ -129,7 +129,7 @@ instances:
     ## Whether or not to skip the proxy configured in the Agent's config file when
     ## making the request to the PerfServlet
     #
-    #  skip_proxy: False
+    # skip_proxy: False
 
 
 ## Log Section (Available for Agent >=6.0)
@@ -143,7 +143,7 @@ instances:
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
-#logs:
+# logs:
 #  - type: file
 #    path: /var/log/ambari-server/*.log
 #    source: ambari
