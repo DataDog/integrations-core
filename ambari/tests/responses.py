@@ -33,6 +33,18 @@ HOST_METRICS = {
     'process': {'proc_run': 0.0, 'proc_total': 128.0},
 }
 
+HOSTS_INFO = [
+    {
+        'href': 'localhost/api/v1/clusters/myCluster/hosts/my_host_1',
+        'Hosts': {'cluster_name': 'myCluster', 'host_name': 'my_host_1'},
+    },
+    {
+        'href': 'localhost/api/v1/clusters/myCluster/hosts/my_host_2',
+        'Hosts': {'cluster_name': 'myCluster', 'host_name': 'my_host_2'},
+        'metrics': HOST_METRICS,
+    },
+]
+
 COMPONENT_METRICS = {
     'href': 'localhost/api/v1/clusters/LabCluster/services/HDFS/components?fields=metrics',
     'items': [

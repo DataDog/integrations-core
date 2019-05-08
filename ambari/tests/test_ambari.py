@@ -75,20 +75,7 @@ def test_get_clusters(init_config, instance):
 def test_get_hosts(init_config, instance):
     ambari = AmbariCheck(init_config=init_config, instances=[instance])
     ambari._make_request = MagicMock(
-        return_value={
-            'href': 'localhost/api/v1/clusters/myCluster/hosts?fields=metrics',
-            'items': [
-                {
-                    'href': 'localhost/api/v1/clusters/myCluster/hosts/my_host_1',
-                    'Hosts': {'cluster_name': 'myCluster', 'host_name': 'my_host_1'},
-                },
-                {
-                    'href': 'localhost/api/v1/clusters/myCluster/hosts/my_host_2',
-                    'Hosts': {'cluster_name': 'myCluster', 'host_name': 'my_host_2'},
-                    'metrics': responses.HOST_METRICS,
-                },
-            ],
-        }
+        return_value={'href': 'localhost/api/v1/clusters/myCluster/hosts?fields=metrics', 'items': responses.HOSTS_INFO}
     )
     hosts = ambari._get_hosts_info('localhost', 'myCluster')
     ambari._make_request.assert_called_with('localhost/api/v1/clusters/myCluster/hosts?fields=metrics')
@@ -96,6 +83,19 @@ def test_get_hosts(init_config, instance):
     assert hosts[0]['Hosts']['host_name'] == 'my_host_1'
     assert hosts[1]['Hosts']['host_name'] == 'my_host_2'
     assert hosts[1]['metrics'] is not None
+
+
+def test_get_host_metrics(instance):
+    ambari = AmbariCheck(instances=[instance])
+    ambari._get_hosts_info = MagicMock(return_value=responses.HOSTS_INFO)
+    ambari._submit_gauge = MagicMock()
+    ambari.set_external_tags = MagicMock()
+
+    ambari.get_host_metrics('localhost', ['cluster1'], [])
+    ambari.set_external_tags.assert_called_with(
+        [('my_host_1', {'ambari': ['ambari_cluster:cluster1']}), ('my_host_2', {'ambari': ['ambari_cluster:cluster1']})]
+    )
+    assert ambari._submit_gauge.call_count == 30
 
 
 def test_get_component_metrics(init_config, instance):
