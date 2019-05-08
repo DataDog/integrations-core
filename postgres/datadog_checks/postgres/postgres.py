@@ -172,6 +172,7 @@ WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
         'descriptors': [('schemaname', 'schema')],
         'metrics': {'pg_stat_user_tables': ('postgresql.table.count', GAUGE)},
         'relation': False,
+        'use_global_db_tag': True,
         'query': """
 SELECT schemaname, count(*) FROM
 (
@@ -739,7 +740,7 @@ GROUP BY datid, datname
             # Special-case the "db" tag, which overrides the one that is passed as instance_tag
             # The reason is that pg_stat_database returns all databases regardless of the
             # connection.
-            if not scope['relation']:
+            if not scope['relation'] and not scope.get('use_global_db_tag', False):
                 tags = [t for t in instance_tags if not t.startswith("db:")]
             else:
                 tags = [t for t in instance_tags]
