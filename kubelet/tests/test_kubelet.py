@@ -115,6 +115,21 @@ COMMON_TAGS = {
     "docker://32fc50ecfe24df055f6d56037acb966337eef7282ad5c203a1be58f2dd2fe743": ['pod_name:dd-agent-ntepl'],
 }
 
+METRICS_WITH_DEVICE_TAG = {
+    'kubernetes.filesystem.usage': '/dev/sda1',
+    'kubernetes.io.read_bytes': '/dev/sda',
+    'kubernetes.io.write_bytes': '/dev/sda',
+}
+
+METRICS_WITH_INTERFACE_TAG = {
+    'kubernetes.network.rx_bytes': 'eth0',
+    'kubernetes.network.tx_bytes': 'eth0',
+    'kubernetes.network.rx_errors': 'eth0',
+    'kubernetes.network.tx_errors': 'eth0',
+    'kubernetes.network.rx_dropped': 'eth0',
+    'kubernetes.network.tx_dropped': 'eth0',
+}
+
 
 class MockStreamResponse:
     """
@@ -295,8 +310,8 @@ def test_prometheus_net_summed(monkeypatch, aggregator, tagger):
     # - fluentd-gcp-v2.0.10-9q9t4 has one interface only, we submit 5.8107648 * 10**07 = 58107648
     #
     calls = [
-        mock.call('kubernetes.network.rx_bytes', 35276103554.0, ['pod_name:dd-agent-q6hpw']),
-        mock.call('kubernetes.network.rx_bytes', 58107648.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.network.rx_bytes', 35276103554.0, ['pod_name:dd-agent-q6hpw', 'interface:eth0']),
+        mock.call('kubernetes.network.rx_bytes', 58107648.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4', 'interface:eth0']),
     ]
     check.rate.assert_has_calls(calls, any_order=True)
 
@@ -633,3 +648,16 @@ def test_compute_pod_expiration_datetime(monkeypatch):
         assert expire is not None
         now = datetime.utcnow().replace(tzinfo=UTC)
         assert abs((now - expire).seconds - 60 * 15) < 2
+
+
+def test_add_labels_to_tags(monkeypatch, aggregator):
+    check = mock_kubelet_check(monkeypatch, [{}])
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+    for metric in METRICS_WITH_DEVICE_TAG:
+        tag = 'device:%s' % METRICS_WITH_DEVICE_TAG[metric]
+        aggregator.assert_metric_has_tag(metric, tag)
+
+    for metric in METRICS_WITH_INTERFACE_TAG:
+        tag = 'interface:%s' % METRICS_WITH_INTERFACE_TAG[metric]
+        aggregator.assert_metric_has_tag(metric, tag)
