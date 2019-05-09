@@ -52,7 +52,15 @@ PROXY_SETTINGS_DISABLED = {
 
 
 class RequestsWrapper(object):
-    __slots__ = ('ignore_tls_warning', 'persist_connections', 'no_proxy_uris', 'options', '_session')
+    __slots__ = (
+        '_session',
+        'ignore_tls_warning',
+        'log_requests',
+        'logger',
+        'no_proxy_uris',
+        'options',
+        'persist_connections',
+    )
 
     # For modifying the warnings filter since the context
     # manager that is provided changes module constants

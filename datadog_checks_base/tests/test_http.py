@@ -427,7 +427,9 @@ class TestLogger:
             assert message != expected_message
 
     def test_expected(self, caplog):
-        http = RequestsWrapper({}, {})
+        instance = {'log_requests': True}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
 
         with mock.patch('requests.get'):
             http.get('https://www.google.com')
@@ -437,7 +439,7 @@ class TestLogger:
             if level == logging.DEBUG and message == expected_message:
                 break
         else:
-            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(caplog.record_tuples))
 
 
 class TestAPI:
