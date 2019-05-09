@@ -72,12 +72,9 @@ def create_trello_card(pull_request_event):
         "key": os.environ[TRELLO_KEY_ENV_VAR],
         "token": os.environ[TRELLO_TOKEN_ENV_VAR]
     }
-    try:
-        response = requests.post(TRELLO_API_URL, params=querystring)
-        response.raise_for_status()
-    except Exception as e:
-        emit_dd_event(FAILED, f"Couldn't submit card to Trello API: {e}")
-        raise e
+
+    response = requests.post(TRELLO_API_URL, params=querystring)
+    response.raise_for_status()
 
 # Use the github labels from the PR to determine if we should create a Trello card
 # True if any of the labels on the PR starts with changelog and isn't `no-changelog`
@@ -103,6 +100,8 @@ if __name__ == "__main__":
     if should_create_card(pull_request_event):
         try:
             create_trello_card(pull_request_event.get('pull_request'))
+        except Exception as e:
+            emit_dd_event(FAILED, f"Couldn't submit card to Trello API: {e}")
         else:
             emit_dd_event(SUCCESS, f"Succesfully created Trello card for PR {pr_url}")
     else:
