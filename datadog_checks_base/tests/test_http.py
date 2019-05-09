@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from collections import OrderedDict
 
 import mock
@@ -412,6 +413,31 @@ class TestRemapper:
         http = RequestsWrapper(instance, init_config, remapper)
 
         assert http.options['verify'] is True
+
+
+class TestLogger:
+    def test_default(self, caplog):
+        http = RequestsWrapper({}, {})
+
+        with mock.patch('requests.get'):
+            http.get('https://www.google.com')
+
+        expected_message = 'Sending GET request to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
+
+    def test_expected(self, caplog):
+        http = RequestsWrapper({}, {})
+
+        with mock.patch('requests.get'):
+            http.get('https://www.google.com')
+
+        expected_message = 'Sending GET request to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.DEBUG and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
 
 
 class TestAPI:
