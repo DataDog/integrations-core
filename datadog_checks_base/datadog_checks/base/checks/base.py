@@ -182,7 +182,7 @@ class __AgentCheckPy3(object):
     @property
     def http(self):
         if self._http is None:
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER)
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
@@ -592,7 +592,7 @@ class __AgentCheckPy2(object):
     @property
     def http(self):
         if self._http is None:
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER)
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 

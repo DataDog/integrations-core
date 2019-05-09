@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import threading
 import warnings
 from collections import OrderedDict
@@ -18,8 +19,11 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+LOGGER = logging.getLogger(__file__)
+
 STANDARD_FIELDS = {
     'headers': None,
+    'log_requests': False,
     'password': None,
     'persist_connections': False,
     'proxy': None,
@@ -48,16 +52,26 @@ PROXY_SETTINGS_DISABLED = {
 
 
 class RequestsWrapper(object):
-    __slots__ = ('ignore_tls_warning', 'persist_connections', 'no_proxy_uris', 'options', '_session')
+    __slots__ = (
+        '_session',
+        'ignore_tls_warning',
+        'log_requests',
+        'logger',
+        'no_proxy_uris',
+        'options',
+        'persist_connections',
+    )
 
     # For modifying the warnings filter since the context
     # manager that is provided changes module constants
     warning_lock = threading.Lock()
 
-    def __init__(self, instance, init_config, remapper=None):
+    def __init__(self, instance, init_config, remapper=None, logger=None):
+        self.logger = logger or LOGGER
         default_fields = dict(STANDARD_FIELDS)
 
-        # Update the default behavior for skipping proxies
+        # Update the default behavior for global settings
+        default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
         default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
 
         # Populate with the default values
@@ -177,6 +191,8 @@ class RequestsWrapper(object):
         self.persist_connections = is_affirmative(config['persist_connections'])
         self._session = None
 
+        self.log_requests = is_affirmative(config['log_requests'])
+
     def get(self, url, **options):
         return self._request('get', url, options)
 
@@ -196,6 +212,9 @@ class RequestsWrapper(object):
         return self._request('delete', url, options)
 
     def _request(self, method, url, options):
+        if self.log_requests:
+            self.logger.debug(u'Sending {} request to {}'.format(method.upper(), url))
+
         if self.no_proxy_uris:
             parsed_uri = urlparse(url)
 
