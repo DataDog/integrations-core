@@ -1,0 +1,26 @@
+{
+	"name": "[kafka] Long running reassignment",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:kafka.replication.current_reassignment_duration_hours{} by {cluster_name} > 12",
+	"message": "The current reassignment has been running for too long. Investigate the state of the current reassignment",
+	"tags": [
+		"service:kafka"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": true,
+		"no_data_timeframe": 60,
+		"require_full_window": true,
+		"new_host_delay": 300,
+		"notify_no_data": true,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 12,
+			"warning": 8
+		}
+	}
+}

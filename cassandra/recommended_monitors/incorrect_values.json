@@ -1,0 +1,26 @@
+{
+    "name": 1,
+	"type": 2,
+	"query": 3,
+	"message": 4,
+	"tags": [
+		"service:cassandra"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": true,
+		"no_data_timeframe": null,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 50,
+			"critical_recovery": 40
+		}
+	}
+}

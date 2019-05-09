@@ -1,0 +1,25 @@
+{
+	"name": "[kubernetes][etcd] member peer errors",
+	"type": "query alert",
+	"query": "min(last_5m):avg:kube_etcd.etcd_network_peer_sent_failures_total{*} by {host} > 0",
+	"message": "{{#is_alert}}\nKubernetes etcd reported peers errors\n{{/is_alert}} \n\n{{#is_recovery}}\nKubernetes etcd hasn't any peers errors\n{{/is_recovery}} \n\n",
+	"tags": [
+		"service:etcd"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"silenced": {},
+		"include_tags": true,
+		"no_data_timeframe": null,
+		"new_host_delay": 300,
+		"require_full_window": true,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 0
+		}
+	}
+}
