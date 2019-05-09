@@ -103,7 +103,6 @@ EXPECTED_METRICS = {
     "mapreduce.job.elapsed_time",
     "mapreduce.job.maps_completed",
     "mapreduce.job.maps_pending",
-    "mapreduce.job.maps_running",
     "mapreduce.job.maps_total",
 }
 

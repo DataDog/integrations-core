@@ -33,9 +33,8 @@ def dd_environment():
     env = {'HOSTNAME': HOST}
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-        conditions=[WaitFor(is_mapreduce_ready, attempts=240), setup_mapreduce],
+        conditions=[WaitFor(setup_mapreduce, attempts=240, wait=5)],
         env_vars=env,
-        sleep=15,
     ):
         yield INSTANCE_INTEGRATION
 
@@ -62,19 +61,7 @@ def mocked_auth_request():
         yield
 
 
-def is_mapreduce_ready():
-    # Called in WaitFor which catches excpetions
-    r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
-
-    return "apps" in r.json()
-
-
 def setup_mapreduce():
-    # TODO: fix is_mapreduce_ready to wait for warmup
-    import time
-
-    time.sleep(20)
-
     # Run a job in order to get metrics from the environment
     subprocess.Popen(
         [
@@ -91,6 +78,11 @@ def setup_mapreduce():
         ],
         close_fds=True,
     )
+
+    # Called in WaitFor which catches excpetions
+    r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
+
+    return r.json().get("apps", None) is not None
 
 
 def requests_get_mock(*args, **kwargs):
