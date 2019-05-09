@@ -294,8 +294,8 @@ class CadvisorPrometheusScraperMixin(object):
                 tags = list(set(tags))
 
             for label in labels:
-                value = sample[self.SAMPLE_LABELS][label]
-                if value != '':
+                value = sample[self.SAMPLE_LABELS].get(label)
+                if value:
                     tags.append('%s:%s' % (label, value))
 
             val = sample[self.SAMPLE_VALUE]
@@ -324,8 +324,8 @@ class CadvisorPrometheusScraperMixin(object):
             tags = tagger.tag('kubernetes_pod://%s' % pod_uid, tagger.HIGH)
             tags += scraper_config['custom_tags']
             for label in labels:
-                value = sample[self.SAMPLE_LABELS][label]
-                if value != '':
+                value = sample[self.SAMPLE_LABELS].get(label)
+                if value:
                     tags.append('%s:%s' % (label, value))
             val = sample[self.SAMPLE_VALUE]
             self.rate(metric_name, val, tags)
@@ -363,8 +363,8 @@ class CadvisorPrometheusScraperMixin(object):
                 tags = list(set(tags))
 
             for label in labels:
-                value = sample[self.SAMPLE_LABELS][label]
-                if value != '':
+                value = sample[self.SAMPLE_LABELS].get(label)
+                if value:
                     tags.append('%s:%s' % (label, value))
 
             val = sample[self.SAMPLE_VALUE]
