@@ -109,7 +109,9 @@ instances:
     ## @param proxy - object - optional
     ## Proxy configuration
     #
-    # proxy: <PROXY_CONFIGURAION>
+    # proxy:
+    #   http: <HTTP_PROXY>
+    #   https: <HTTPS_PROXY>
 
     ## @param skip_proxy - boolean - optional - default: False
     ## Whether or not to skip the proxy configured in the Agent's config file when
