@@ -106,6 +106,76 @@ init_config:
   conf:
     # Metrics Hive Metastore related
     - include:
+        bean: metrics:name=create_total_count_dbs
+        attribute:
+          Count:
+            alias: hive.metastore.db.created
+            metric_type: gauge
+
+    - include:
+        bean: metrics:name=delete_total_count_dbs
+        attribute:
+          Count:
+            alias: hive.metastore.db.deleted
+            metric_type: gauge
+      
+    - include:
+        bean: metrics:name=total_count_dbs
+        attribute:
+          Count:
+            alias: hive.metastore.db
+            metric_type: gauge
+
+    - include:
+        bean: metrics:name=create_total_count_tables
+        attribute:
+          Count:
+            alias: hive.metastore.table.created
+            metric_type: gauge
+
+    - include:
+        bean: metrics:name=delete_total_count_tables
+        attribute:
+          Count:
+            alias: hive.metastore.table.deleted
+            metric_type: gauge
+    
+    - include:
+        bean: metrics:name=total_count_tables
+        attribute:
+          Count:
+            alias: hive.metastore.table
+            metric_type: gauge
+
+    - include:
+        bean: metrics:name=create_total_count_partitions
+        attribute:
+          Count:
+            alias: hive.metastore.partition.created
+            metric_type: gauge
+
+    - include:
+        bean: metrics:name=delete_total_count_partitions
+        attribute:
+          Count:
+            alias: hive.metastore.partition.deleted
+            metric_type: gauge
+    
+    - include:
+        bean: metrics:name=total_count_partitions
+        attribute:
+          Count:
+            alias: hive.metastore.partition
+            metric_type: gauge
+
+    - include:
+        bean: directsql_errors
+        attribute:
+          Count:
+            alias: hive.metastore.directsql_errors
+            metric_type: gauge
+
+    - include:
         bean: metrics:name=open_connections
         attribute:
           Count:
