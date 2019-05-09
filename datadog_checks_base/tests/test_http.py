@@ -426,9 +426,26 @@ class TestLogger:
         for _, _, message in caplog.record_tuples:
             assert message != expected_message
 
-    def test_expected(self, caplog):
+    def test_instance(self, caplog):
         instance = {'log_requests': True}
         init_config = {}
+        check = AgentCheck('test', init_config, [instance])
+
+        assert check.http.logger is check.log
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            check.http.get('https://www.google.com')
+
+        expected_message = 'Sending GET request to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.DEBUG and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
+
+    def test_init_config(self, caplog):
+        instance = {}
+        init_config = {'log_requests': True}
         check = AgentCheck('test', init_config, [instance])
 
         assert check.http.logger is check.log

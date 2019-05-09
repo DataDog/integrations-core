@@ -70,7 +70,8 @@ class RequestsWrapper(object):
         self.logger = logger or LOGGER
         default_fields = dict(STANDARD_FIELDS)
 
-        # Update the default behavior for skipping proxies
+        # Update the default behavior for global settings
+        default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
         default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
 
         # Populate with the default values
