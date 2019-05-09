@@ -419,7 +419,7 @@ class TestLogger:
     def test_default(self, caplog):
         check = AgentCheck('test', {}, [{}])
 
-        with mock.patch('requests.get'):
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
             check.http.get('https://www.google.com')
 
         expected_message = 'Sending GET request to https://www.google.com'
@@ -459,6 +459,18 @@ class TestLogger:
                 break
         else:
             raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
+
+    def test_instance_override(self, caplog):
+        instance = {'log_requests': False}
+        init_config = {'log_requests': True}
+        check = AgentCheck('test', init_config, [instance])
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            check.http.get('https://www.google.com')
+
+        expected_message = 'Sending GET request to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
 
 class TestAPI:
