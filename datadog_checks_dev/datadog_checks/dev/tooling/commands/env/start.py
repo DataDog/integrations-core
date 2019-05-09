@@ -58,11 +58,14 @@ def start(ctx, check, env, agent, dev, base, env_vars):
             abort('`datadog_checks_base` directory does not exist.')
 
     envs = get_available_tox_envs(check, e2e_only=True)
+    for env in envs:
+        if env.startswith('py27') and 'unit' not in env:
+            break
 
-    if env not in envs:
-        echo_failure('`{}` is not an available environment.'.format(env))
-        echo_info('See what is available via `ddev env ls {}`.'.format(check))
-        abort()
+    # if env not in envs:
+    #     echo_failure('`{}` is not an available environment.'.format(env))
+    #     echo_info('See what is available via `ddev env ls {}`.'.format(check))
+    #     abort()
 
     api_key = ctx.obj['dd_api_key']
     if api_key is None:
