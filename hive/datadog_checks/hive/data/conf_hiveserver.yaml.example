@@ -110,14 +110,14 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.db.created
-            metric_type: gauge
+            metric_type: monotonic_count
 
     - include:
         bean: metrics:name=delete_total_count_dbs
         attribute:
           Count:
             alias: hive.metastore.db.deleted
-            metric_type: gauge
+            metric_type: monotonic_count
       
     - include:
         bean: metrics:name=total_count_dbs
@@ -131,14 +131,14 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.table.created
-            metric_type: gauge
+            metric_type: monotonic_count
 
     - include:
         bean: metrics:name=delete_total_count_tables
         attribute:
           Count:
             alias: hive.metastore.table.deleted
-            metric_type: gauge
+            metric_type: monotonic_count
     
     - include:
         bean: metrics:name=total_count_tables
@@ -152,14 +152,14 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.partition.created
-            metric_type: gauge
+            metric_type: monotonic_count
 
     - include:
         bean: metrics:name=delete_total_count_partitions
         attribute:
           Count:
             alias: hive.metastore.partition.deleted
-            metric_type: gauge
+            metric_type: monotonic_count
     
     - include:
         bean: metrics:name=total_count_partitions
