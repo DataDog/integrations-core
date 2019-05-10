@@ -292,7 +292,7 @@ SELECT s.schemaname,
     ACTIVITY_METRICS_9_6 = [
         "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{datadog_user}'))"
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
         "THEN 1 ELSE null END )",
         "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
@@ -301,7 +301,7 @@ SELECT s.schemaname,
     ACTIVITY_METRICS_9_2 = [
         "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{datadog_user}'))"
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
         "THEN 1 ELSE null END )",
         "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
@@ -310,7 +310,7 @@ SELECT s.schemaname,
     ACTIVITY_METRICS_8_3 = [
         "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{datadog_user}'))"
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
         "THEN 1 ELSE null END )",
         "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
@@ -319,7 +319,7 @@ SELECT s.schemaname,
     ACTIVITY_METRICS_LT_8_3 = [
         "SUM(CASE WHEN query_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{datadog_user}'))"
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
         "THEN 1 ELSE null END )",
         "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
@@ -629,7 +629,10 @@ GROUP BY datid, datname
             else:
                 metrics_query = self.ACTIVITY_METRICS_LT_8_3
 
-            metrics_query = [q.format(datadog_user=user) if 'datadog_user' in q else q for q in metrics_query]
+            for i, q in enumerate(metrics_query):
+                if '{dd__user}' in q:
+                    metrics_query[i] = q.format(dd__user=user)
+
             metrics = {k: v for k, v in zip(metrics_query, self.ACTIVITY_DD_METRICS)}
             self.activity_metrics[key] = (metrics, query)
         else:
