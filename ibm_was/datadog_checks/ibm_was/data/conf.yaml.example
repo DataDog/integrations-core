@@ -16,7 +16,7 @@ instances:
     ## @param password - string - optional
     ## The username to use for authentication againse the servlet
     #
-    # password: <password>
+    # password: <PASSWORD>
 
     ## @param timeout - int - optional - default: 10
     ## The timeout for connecting to the perf servlet
