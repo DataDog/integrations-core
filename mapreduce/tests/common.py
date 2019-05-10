@@ -32,7 +32,7 @@ MR_TASKS_URL = '{}/{}/{}'.format(MR_JOBS_URL, JOB_ID, 'tasks')
 TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
 
-INSTANCE_INTEGRATION = {'resourcemanager_uri': RM_URI, 'cluster_name': CLUSTER_NAME}
+INSTANCE_INTEGRATION = {'resourcemanager_uri': RM_URI, 'cluster_name': CLUSTER_NAME, 'collect_task_metrics': True}
 
 CLUSTER_TAG = ['cluster_name:{}'.format(CLUSTER_NAME)]
 
@@ -104,6 +104,8 @@ EXPECTED_METRICS = {
     "mapreduce.job.maps_completed",
     "mapreduce.job.maps_pending",
     "mapreduce.job.maps_total",
+    "mapreduce.job.map.task.elapsed_time",
+    "mapreduce.job.reduce.task.elapsed_time",
 }
 
 MAPREDUCE_JOB_METRIC_VALUES = {
