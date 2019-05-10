@@ -26,16 +26,16 @@ def test__get_connection_instant_client(check, instance):
     Test the _get_connection method using the instant client
     """
     check.use_oracle_client = True
-    server, user, password, service, jdbc_driver, tags, _ = check._get_config(instance)
+    server, user, password, service, jdbc_driver, _, _ = check._get_config(instance)
     con = mock.MagicMock()
     service_check = mock.MagicMock()
     check.service_check = service_check
     expected_tags = ['server:localhost:1521', 'optional:tag1']
+    check.service_check_tags = expected_tags
     with mock.patch('datadog_checks.oracle.oracle.cx_Oracle') as cx:
         cx.connect.return_value = con
-        ret = check._get_connection(server, user, password, service, jdbc_driver, tags)
+        ret = check._get_connection(server, user, password, service, jdbc_driver)
         assert ret == con
-        assert check.service_check_tags == expected_tags
         cx.connect.assert_called_with('system/oracle@//localhost:1521/xe')
         service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.OK, tags=expected_tags)
 
@@ -45,19 +45,19 @@ def test__get_connection_jdbc(check, instance):
     Test the _get_connection method using the JDBC client
     """
     check.use_oracle_client = False
-    server, user, password, service, jdbc_driver, tags, _ = check._get_config(instance)
+    server, user, password, service, jdbc_driver, _, _ = check._get_config(instance)
     con = mock.MagicMock()
     service_check = mock.MagicMock()
     check.service_check = service_check
     expected_tags = ['server:localhost:1521', 'optional:tag1']
+    check.service_check_tags = expected_tags
     with mock.patch('datadog_checks.oracle.oracle.cx_Oracle'):
         with mock.patch('datadog_checks.oracle.oracle.jdb') as jdb:
             with mock.patch('datadog_checks.oracle.oracle.jpype') as jpype:
                 jpype.isJVMStarted.return_value = False
                 jdb.connect.return_value = con
-                ret = check._get_connection(server, user, password, service, jdbc_driver, tags)
+                ret = check._get_connection(server, user, password, service, jdbc_driver)
                 assert ret == con
-                assert check.service_check_tags == expected_tags
                 jdb.connect.assert_called_with(
                     'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe', ['system', 'oracle'], None
                 )
@@ -72,7 +72,8 @@ def test__get_connection_failure(check, instance):
     expected_tags = ['server:localhost:1521', 'optional:tag1']
     service_check = mock.MagicMock()
     check.service_check = service_check
-    server, user, password, service, jdbc_driver, tags, _ = check._get_config(instance)
+    check.service_check_tags = expected_tags
+    server, user, password, service, jdbc_driver, _, _ = check._get_config(instance)
     with pytest.raises(Exception):
-        check._get_connection(server, user, password, service, jdbc_driver, tags)
+        check._get_connection(server, user, password, service, jdbc_driver)
     service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.CRITICAL, tags=expected_tags)
