@@ -1,18 +1,4 @@
 init_config:
-
-    ## @param metric_headers - list - required
-    ## Metric headings from which component metrics will be sourced.  To query all metrics
-    ## from a component to see what headings it has, see here:
-    ## https://github.com/apache/ambari/blob/trunk/ambari-server/docs/api/v1/components-component.md
-    #
-    metric_headers:
-      - cpu
-      - disk
-      - load
-      - memory
-      - network
-      - process
-
     ## @param collect_host_metrics - boolean - optional - default: True
     ## Change to False to omit collecting host level metrics
     #
@@ -48,17 +34,20 @@ instances:
     ## @param services - object - optional
     ## Required if collecting component metrics or service status.
     ## Note that each level of values is required.  This is essentially whitelisting
-    ## where we will only pull metrics from the components listed under their
-    ## respective services.  Listing no components under a service will cause that
-    ## service to be skipped.
+    ## where we will only pull metrics from the components listed under their respective services.
+    ## Listing no components or no metrics under a service will cause that service to be skipped for components metrics check.
     #
     # services:
     #     <SERVICE_NAME_1>:
-    #       - <COMPONENT_NAME_1>
-    #       - <COMPONENT_NAME_2>
+    #       <COMPONENT_NAME_1>:
+    #         - <METRIC_HEADER_1>
+    #         - <METRIC_HEADER_2>
+    #       <COMPONENT_NAME_2>:
+    #         - <METRIC_HEADER_1>
+    #         - <METRIC_HEADER_2>
     #     <SERVICE_NAME_2>:
-    #       - <COMPONENT_NAME_1>
-    #       - <COMPONENT_NAME_2>
+    #       <COMPONENT_NAME_1>: []
+    #       <COMPONENT_NAME_2>: []
 
     ## @param tags  - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.

@@ -8,14 +8,24 @@ from datadog_checks.ambari import AmbariCheck
 
 @pytest.mark.skip(reason="Cannot be automated due to network restrictions")
 def test_check(aggregator):
+    ambari_ip = "localhost"
     init_config = {"collect_host_metrics": True, "collect_service_metrics": True, "collect_service_status": True}
     instances = [
         {
-            "url": "https://${ambari_ip}:8443/ambari-lab-2/dp-proxy/ambari",
+            "url": "https://{}:8443/ambari-lab-2/dp-proxy/ambari".format(ambari_ip),
             "username": "admin",
             "password": "admin",
             "tags": ["test:manual"],
-            "services": {"HDFS": ["NAMENODE", "DATANODE"], "YARN": ["NODEMANANGER", "YARNCLIENT"], "SPARK": []},
+            "services": {
+                "HDFS": {"NAMENODE": [], "DATANODE": []},
+                "YARN": {
+                    "NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"],
+                    "YARNCLIENT": []
+                },
+                 "MAPREDUCE2": {
+                     "HISTORYSERVER": ["BufferPool", "Memory", "jvm"]
+                 }
+            },
             "metric_headers": ["cpu", "jvm"],
             "timeout": 30,
             "tls_verify": False,

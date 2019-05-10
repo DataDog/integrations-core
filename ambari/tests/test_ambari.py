@@ -109,8 +109,7 @@ def test_get_component_metrics(init_config, instance):
         'LabCluster',
         'HDFS',
         base_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs'],
-        component_whitelist=['NAMENODE'],
-        metric_whitelist=['cpu'],
+        component_whitelist={'NAMENODE': ['cpu']},
     )
 
     ambari._make_request.assert_called_with(

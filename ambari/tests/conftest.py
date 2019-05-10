@@ -16,7 +16,16 @@ def instance():
         'port': 80,
         'username': 'admin',
         'password': 'admin',
-        'services': {"HDFS": ["NAMENODE", "DATANODE"], "YARN": ["NODEMANANGER", "YARNCLIENT"], "SPARK": []},
+        'services': {
+             "HDFS": {"NAMENODE": [], "DATANODE": []},
+             "YARN": {
+                 "NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"],
+                 "YARNCLIENT": []
+             },
+             "MAPREDUCE2": {
+                 "HISTORYSERVER": ["BufferPool", "Memory", "jvm"]
+             }
+        }
     }
 
 
