@@ -292,7 +292,7 @@ SELECT s.schemaname,
     ACTIVITY_METRICS_9_6 = [
         "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
         "THEN 1 ELSE null END )",
         "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
@@ -301,7 +301,7 @@ SELECT s.schemaname,
     ACTIVITY_METRICS_9_2 = [
         "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
         "THEN 1 ELSE null END )",
         "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
@@ -310,7 +310,7 @@ SELECT s.schemaname,
     ACTIVITY_METRICS_8_3 = [
         "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
         "THEN 1 ELSE null END )",
         "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
@@ -319,7 +319,7 @@ SELECT s.schemaname,
     ACTIVITY_METRICS_LT_8_3 = [
         "SUM(CASE WHEN query_start IS NOT NULL THEN 1 ELSE 0 END)",
         "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', 'datadog'))"
+        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
         "THEN 1 ELSE null END )",
         "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
     ]
@@ -610,7 +610,7 @@ GROUP BY datid, datname
             metrics = self.replication_metrics.get(key)
         return metrics
 
-    def _get_activity_metrics(self, key, db):
+    def _get_activity_metrics(self, key, db, user):
         """ Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
         Uses a dictionnary to save the result for each instance
@@ -628,6 +628,10 @@ GROUP BY datid, datname
                 metrics_query = self.ACTIVITY_METRICS_8_3
             else:
                 metrics_query = self.ACTIVITY_METRICS_LT_8_3
+
+            for i, q in enumerate(metrics_query):
+                if '{dd__user}' in q:
+                    metrics_query[i] = q.format(dd__user=user)
 
             metrics = {k: v for k, v in zip(metrics_query, self.ACTIVITY_DD_METRICS)}
             self.activity_metrics[key] = (metrics, query)
@@ -760,6 +764,7 @@ GROUP BY datid, datname
         self,
         key,
         db,
+        user,
         instance_tags,
         relations,
         custom_metrics,
@@ -818,7 +823,7 @@ GROUP BY datid, datname
             )
 
             if collect_activity_metrics:
-                activity_metrics = self._get_activity_metrics(key, db)
+                activity_metrics = self._get_activity_metrics(key, db, user)
                 self._query_scope(
                     cursor, activity_metrics, key, db, instance_tags, False, programming_error, relations_config
                 )
@@ -1063,6 +1068,7 @@ GROUP BY datid, datname
             self._collect_stats(
                 key,
                 db,
+                user,
                 tags,
                 relations,
                 custom_metrics,
@@ -1081,6 +1087,7 @@ GROUP BY datid, datname
             self._collect_stats(
                 key,
                 db,
+                user,
                 tags,
                 relations,
                 custom_metrics,
