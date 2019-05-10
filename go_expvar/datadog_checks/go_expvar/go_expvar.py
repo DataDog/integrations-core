@@ -5,8 +5,6 @@
 
 import re
 from collections import defaultdict
-
-import requests
 from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
@@ -67,36 +65,20 @@ GO_EXPVAR_URL_PATH = "/debug/vars"
 
 
 class GoExpvar(AgentCheck):
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify', 'default': None},
+        'ssl_certfile': {'name': 'tls_cert', 'default': None},
+        'ssl_keyfile': {'name': 'tls_private_key', 'default': None},
+        'timeout': {'name': 'timeout', 'default': 10}
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._regexes = {}
         self._last_gc_count = defaultdict(int)
 
     def _get_data(self, url, instance):
-        ssl_params = {
-            'ssl_keyfile': instance.get('ssl_keyfile'),
-            'ssl_certfile': instance.get('ssl_certfile'),
-            'ssl_verify': instance.get('ssl_verify'),
-        }
-        for key, param in list(iteritems(ssl_params)):
-            if param is None:
-                del ssl_params[key]
-
-        # Load SSL configuration, if available.
-        # ssl_verify can be a bool or a string
-        # (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
-        if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), string_types):
-            verify = ssl_params.get('ssl_verify')
-        else:
-            verify = None
-        if ssl_params.get('ssl_certfile') and ssl_params.get('ssl_keyfile'):
-            cert = (ssl_params.get('ssl_certfile'), ssl_params.get('ssl_keyfile'))
-        elif ssl_params.get('ssl_certfile'):
-            cert = ssl_params.get('ssl_certfile')
-        else:
-            cert = None
-
-        resp = requests.get(url, timeout=10, verify=verify, cert=cert)
+        resp = self.http.get(url)
         resp.raise_for_status()
         return resp.json()
 
