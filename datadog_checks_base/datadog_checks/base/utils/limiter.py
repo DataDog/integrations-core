@@ -9,6 +9,7 @@ class Limiter(object):
     It is used by the AgentCheck class to limit the number of sets of tags
     that can be set by an instance.
     """
+
     def __init__(self, check_name, object_name, object_limit, warning_func=None):
         """
         :param check_name: name of the check using this limiter
@@ -57,8 +58,11 @@ class Limiter(object):
 
         if self.count > self.limit:
             if self.warning:
-                self.warning("Check {} exceeded limit of {} {}, ignoring next ones".format(self.check_name, self.limit,
-                                                                                           self.name))
+                self.warning(
+                    "Check {} exceeded limit of {} {}, ignoring next ones".format(
+                        self.check_name, self.limit, self.name
+                    )
+                )
             self.reached_limit = True
             return True
         return False

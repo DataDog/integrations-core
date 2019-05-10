@@ -11,8 +11,8 @@ import requests
 import semver
 from six import string_types
 
-from .constants import NOT_CHECKS, VERSION_BUMP, get_root
 from ..utils import file_exists, read_file
+from .constants import NOT_CHECKS, VERSION_BUMP, get_root
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
@@ -28,9 +28,7 @@ def format_commit_id(commit_id):
 
 
 def get_current_agent_version():
-    release_data = requests.get(
-        'https://raw.githubusercontent.com/DataDog/datadog-agent/master/release.json'
-    ).json()
+    release_data = requests.get('https://raw.githubusercontent.com/DataDog/datadog-agent/master/release.json').json()
     versions = set()
 
     for version in release_data:

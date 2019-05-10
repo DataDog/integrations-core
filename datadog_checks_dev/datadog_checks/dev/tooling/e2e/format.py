@@ -19,9 +19,13 @@ def parse_config_from_result(env, result):
 
     decoded = parse_encoded_config_data(result.stdout)
     if decoded is None:
-        return None, None, (
-            '{}\n{}\nUnable to parse configuration. Try recreating your env to get the '
-            'latest version of the dev package.'.format(result.stdout, result.stderr)
+        return (
+            None,
+            None,
+            (
+                '{}\n{}\nUnable to parse configuration. Try recreating your env to get the '
+                'latest version of the dev package.'.format(result.stdout, result.stderr)
+            ),
         )
 
     config = decoded['config']

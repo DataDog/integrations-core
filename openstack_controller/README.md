@@ -49,7 +49,7 @@ Openstack_controller does not include any events.
 
 Need help? Contact [Datadog support][5].
 
-[1]: https://www.openstack.org/
+[1]: https://www.openstack.org
 [2]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information

@@ -17,4 +17,3 @@ SLAVE_PORT = 13307
 
 USER = 'dog'
 PASS = 'dog'
-MARIA_ROOT_PASS = 'master_root_password'

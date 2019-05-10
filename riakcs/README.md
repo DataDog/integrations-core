@@ -42,6 +42,20 @@ The RiakCS check is included in the [Datadog Agent][2] package, so you don't nee
 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
+For RiackCS v2.1+, the default metrics collected by this integrations includes most S3 API metrics as well as memory stats. Some have been excluded:
+
+* bucket_acl_(get|put)
+* object_acl_(get|put)
+* bucket_policy_(get|put|delete)
+* _in_(one|total)
+* _time_error_*
+* _time_100
+
+Any of these excluded metrics in addition to many others (there are over 1000 to choose from) can be added by specifying them in the
+`riakcs.d/conf.yaml` configuration file with the `metrics` key in the `instance_config`; the value should be a list of metric names.
+
+[See the complete list of metrics available][8].
+
 ### Events
 The RiackCS check does not include any events.
 
@@ -52,10 +66,10 @@ The RiackCS check does not include any events.
 Returns CRITICAL if the Agent cannot connect to the RiakCS endpoint to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
-To get a better idea of how (or why) to monitor Riak CS performance and availability with Datadog, check out our [series of blog posts][9] about it.
+To get a better idea of how (or why) to monitor Riak CS performance and availability with Datadog, check out our [series of blog posts][10] about it.
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riakcs/images/riakcs_dashboard.png
@@ -65,5 +79,6 @@ To get a better idea of how (or why) to monitor Riak CS performance and availabi
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/riakcs/metadata.csv
-[8]: https://docs.datadoghq.com/help
-[9]: https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability
+[8]: https://github.com/basho/riak_cs/wiki/Riak-cs-and-stanchion-metrics
+[9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability

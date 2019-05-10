@@ -1,15 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import itervalues
-
 from copy import deepcopy
+
+from six import itervalues
 
 from datadog_checks.kyototycoon import KyotoTycoonCheck
 
-from .common import (
-    DEFAULT_INSTANCE, TAGS
-)
+from .common import DEFAULT_INSTANCE, TAGS
 
 
 def test_check(aggregator, dd_environment):

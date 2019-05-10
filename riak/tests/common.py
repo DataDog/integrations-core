@@ -12,7 +12,4 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 PORT = 18098
 BASE_URL = "http://{}:{}".format(HOST, PORT)
-INSTANCE = {
-    "url": "{}/stats".format(BASE_URL),
-    "tags": ["my_tag"]
-}
+INSTANCE = {"url": "{}/stats".format(BASE_URL), "tags": ["my_tag"]}

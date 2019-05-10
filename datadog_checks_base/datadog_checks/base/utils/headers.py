@@ -10,11 +10,8 @@ except ImportError:
 def headers(agentConfig, **kwargs):
     # Build the request headers
     version = __get_version(agentConfig)
-    res = {
-        'User-Agent': 'Datadog Agent/{}'.format(version),
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'text/html, */*',
-    }
+    res = {'User-Agent': 'Datadog Agent/{}'.format(version)}
+
     if 'http_host' in kwargs:
         res['Host'] = kwargs['http_host']
     return res

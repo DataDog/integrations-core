@@ -1,5 +1,24 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.0.0 / 2019-05-06
+
+* [Added] Add easier namespacing for data submission. See [#3718](https://github.com/DataDog/integrations-core/pull/3718).
+* [Added] Upgrade pyyaml to 5.1. See [#3698](https://github.com/DataDog/integrations-core/pull/3698).
+* [Fixed] Improve resiliency of logging initialization phase. See [#3705](https://github.com/DataDog/integrations-core/pull/3705).
+* [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
+* [Changed] Remove every default header except `User-Agent`. See [#3644](https://github.com/DataDog/integrations-core/pull/3644).
+* [Fixed] Handle more tag decoding errors. See [#3671](https://github.com/DataDog/integrations-core/pull/3671).
+* [Added] Adhere to code style. See [#3496](https://github.com/DataDog/integrations-core/pull/3496).
+* [Fixed] Properly utilize the provided `metrics_mapper`. See [#3446](https://github.com/DataDog/integrations-core/pull/3446). Thanks [casidiablo](https://github.com/casidiablo).
+* [Added] Upgrade psycopg2-binary to 2.8.2. See [#3649](https://github.com/DataDog/integrations-core/pull/3649).
+
+## 7.0.0 / 2019-04-18
+
+* [Added] Add service_identity dependency. See [#3256](https://github.com/DataDog/integrations-core/pull/3256).
+* [Changed] Standardize TLS/SSL protocol naming. See [#3620](https://github.com/DataDog/integrations-core/pull/3620).
+* [Fixed] Parse timeouts as floats in RequestsWrapper. See [#3448](https://github.com/DataDog/integrations-core/pull/3448).
+* [Added] Support Python 3. See [#3605](https://github.com/DataDog/integrations-core/pull/3605).
+
 ## 6.6.1 / 2019-04-04
 
 * [Fixed] Don't ship `pyodbc` on macOS as SQLServer integration is not shipped on macOS. See [#3461](https://github.com/DataDog/integrations-core/pull/3461).

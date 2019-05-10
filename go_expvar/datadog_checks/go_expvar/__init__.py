@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .go_expvar import GoExpvar
 
-__all__ = [
-    '__version__',
-    'GoExpvar'
-]
+__all__ = ['__version__', 'GoExpvar']

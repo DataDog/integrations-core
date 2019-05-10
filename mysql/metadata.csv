@@ -15,6 +15,7 @@ mysql.innodb.row_lock_time,gauge,,fraction,,Fraction of time spent (ms/s) acquri
 mysql.innodb.row_lock_waits,gauge,,event,second,The number of times per second a row lock had to be waited for.,0,mysql,innodb row lock waits
 mysql.net.connections,gauge,,connection,second,The rate of connections to the server.,0,mysql,conns per s
 mysql.net.max_connections,gauge,,connection,,The maximum number of connections that have been in use simultaneously since the server started.,-1,mysql,max used conn
+mysql.net.max_connections_available,gauge,,connection,,The maximum permitted number of simultaneous client connections.,-1,mysql,max used conn avail
 mysql.performance.com_delete,gauge,,query,second,The rate of delete statements.,0,mysql,deletes
 mysql.performance.com_delete_multi,gauge,,query,second,The rate of delete-multi statements.,0,mysql,delete multi
 mysql.performance.com_insert,gauge,,query,second,The rate of insert statements.,0,mysql,inserts

@@ -5,4 +5,4 @@
 try:
     import tagger
 except ImportError:
-    from ..stubs import tagger
+    from ..stubs import tagger  # noqa: F401

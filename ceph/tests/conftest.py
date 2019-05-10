@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
-from .common import HERE, BASIC_CONFIG
+from .common import BASIC_CONFIG, HERE
 
 
 @pytest.fixture(scope="session")
@@ -18,7 +18,8 @@ def dd_environment():
     # We need a custom condition to wait a bit longer
     condition = CheckDockerLogs(compose_file, "spawning ceph --cluster ceph -w", wait=5)
     with docker_run(
-        compose_file=compose_file, conditions=[condition],
+        compose_file=compose_file,
+        conditions=[condition],
         sleep=5,  # Let's wait just a little bit after ceph got spawned to remove flakyness
     ):
         yield BASIC_CONFIG, "local"

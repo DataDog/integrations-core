@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .kyototycoon import KyotoTycoonCheck
 from .__about__ import __version__
+from .kyototycoon import KyotoTycoonCheck
 
-__all__ = [
-    '__version__',
-    'KyotoTycoonCheck'
-]
+__all__ = ['__version__', 'KyotoTycoonCheck']

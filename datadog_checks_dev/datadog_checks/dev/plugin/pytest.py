@@ -68,10 +68,7 @@ def dd_environment_runner(request):
     metadata.setdefault('env_vars', {})
     metadata['env_vars'].update(get_env_vars(raw=True))
 
-    data = {
-        'config': config,
-        'metadata': metadata,
-    }
+    data = {'config': config, 'metadata': metadata}
 
     # Serialize to json
     data = json.dumps(data, separators=(',', ':'))

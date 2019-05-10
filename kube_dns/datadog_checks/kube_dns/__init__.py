@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .kube_dns import KubeDNSCheck
 
-__all__ = [
-    '__version__',
-    'KubeDNSCheck'
-]
+__all__ = ['__version__', 'KubeDNSCheck']

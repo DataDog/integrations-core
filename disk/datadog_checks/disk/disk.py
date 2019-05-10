@@ -9,6 +9,11 @@ import re
 
 from six import iteritems, string_types
 
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.timeout import TimeoutException, timeout
+
 try:
     import psutil
 except ImportError:
@@ -16,20 +21,18 @@ except ImportError:
 
 try:
     import datadog_agent  # noqa: F401
+
     is_agent_6 = True
 except ImportError:
     is_agent_6 = False
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-from datadog_checks.base.utils.timeout import timeout, TimeoutException
 
 IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
 
 
 class Disk(AgentCheck):
     """ Collects metrics about the machine's disks. """
+
     # -T for filesystem info
     DF_COMMAND = ['df', '-T']
     METRIC_DISK = 'system.disk.{}'
@@ -106,8 +109,7 @@ class Disk(AgentCheck):
                 disk_usage = timeout(5)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
                 self.log.warning(
-                    u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...',
-                    part.mountpoint
+                    u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...', part.mountpoint
                 )
                 continue
             except Exception as e:
@@ -145,15 +147,10 @@ class Disk(AgentCheck):
                 rwro = {'rw', 'ro'} & set(part.opts.split(','))
                 if len(rwro) == 1:
                     self.service_check(
-                        'disk.read_write',
-                        AgentCheck.OK if rwro.pop() == 'rw' else AgentCheck.CRITICAL,
-                        tags=tags
+                        'disk.read_write', AgentCheck.OK if rwro.pop() == 'rw' else AgentCheck.CRITICAL, tags=tags
                     )
                 else:
-                    self.service_check(
-                        'disk.read_write', AgentCheck.UNKNOWN,
-                        tags=tags
-                    )
+                    self.service_check('disk.read_write', AgentCheck.UNKNOWN, tags=tags)
 
         self.collect_latency_metrics()
 
@@ -184,9 +181,8 @@ class Disk(AgentCheck):
         # account a space might be in the mount point.
         mount_point = mount_point.rsplit(' ', 1)[0]
 
-        return (
-            self._partition_blacklisted(device, file_system, mount_point)
-            or not self._partition_whitelisted(device, file_system, mount_point)
+        return self._partition_blacklisted(device, file_system, mount_point) or not self._partition_whitelisted(
+            device, file_system, mount_point
         )
 
     def _partition_whitelisted(self, device, file_system, mount_point):
@@ -260,10 +256,7 @@ class Disk(AgentCheck):
         try:
             inodes = timeout(5)(os.statvfs)(mountpoint)
         except TimeoutException:
-            self.log.warning(
-                u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...',
-                mountpoint
-            )
+            self.log.warning(u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...', mountpoint)
             return metrics
         except Exception as e:
             self.log.warning('Unable to get disk metrics for %s: %s', mountpoint, e)
@@ -291,10 +284,8 @@ class Disk(AgentCheck):
                 write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
-                self.rate(self.METRIC_DISK.format('read_time_pct'),
-                          read_time_pct, tags=metric_tags)
-                self.rate(self.METRIC_DISK.format('write_time_pct'),
-                          write_time_pct, tags=metric_tags)
+                self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
+                self.rate(self.METRIC_DISK.format('write_time_pct'), write_time_pct, tags=metric_tags)
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
@@ -348,7 +339,8 @@ class Disk(AgentCheck):
         #    map -hosts    tmpfs            0        0         0   100%    /net
         # and finally filter out fake devices
         return (
-            device and len(device) > 1
+            device
+            and len(device) > 1
             and device[2].isdigit()
             and not self._exclude_disk(device[0], device[1], device[6])
         )
@@ -399,9 +391,7 @@ class Disk(AgentCheck):
             self.warning(deprecation_message.format(old='excluded_filesystems', new='file_system_blacklist'))
 
         if 'excluded_disks' in instance:
-            device_blacklist_extras.extend(
-                '{}$'.format(pattern) for pattern in instance['excluded_disks'] if pattern
-            )
+            device_blacklist_extras.extend('{}$'.format(pattern) for pattern in instance['excluded_disks'] if pattern)
             self.warning(deprecation_message.format(old='excluded_disks', new='device_blacklist'))
 
         if 'excluded_disk_re' in instance:
@@ -415,19 +405,15 @@ class Disk(AgentCheck):
         # Any without valid patterns will become None
         self._file_system_whitelist = self._compile_valid_patterns(self._file_system_whitelist, casing=re.I)
         self._file_system_blacklist = self._compile_valid_patterns(
-            self._file_system_blacklist,
-            casing=re.I,
-            extra_patterns=file_system_blacklist_extras
+            self._file_system_blacklist, casing=re.I, extra_patterns=file_system_blacklist_extras
         )
         self._device_whitelist = self._compile_valid_patterns(self._device_whitelist)
         self._device_blacklist = self._compile_valid_patterns(
-            self._device_blacklist,
-            extra_patterns=device_blacklist_extras
+            self._device_blacklist, extra_patterns=device_blacklist_extras
         )
         self._mount_point_whitelist = self._compile_valid_patterns(self._mount_point_whitelist)
         self._mount_point_blacklist = self._compile_valid_patterns(
-            self._mount_point_blacklist,
-            extra_patterns=mount_point_blacklist_extras
+            self._mount_point_blacklist, extra_patterns=mount_point_blacklist_extras
         )
 
     def _compile_valid_patterns(self, patterns, casing=IGNORE_CASE, extra_patterns=None):
@@ -465,10 +451,7 @@ class Disk(AgentCheck):
         device_tag_list = []
         for regex_str, tags in iteritems(self._device_tag_re):
             try:
-                device_tag_list.append([
-                    re.compile(regex_str, IGNORE_CASE),
-                    [t.strip() for t in tags.split(',')]
-                ])
+                device_tag_list.append([re.compile(regex_str, IGNORE_CASE), [t.strip() for t in tags.split(',')]])
             except TypeError:
                 self.log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         self._device_tag_re = device_tag_list

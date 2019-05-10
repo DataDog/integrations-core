@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .format import parse_config_from_result
-from ..constants import get_root
+from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
 from ...subprocess import run_command
 from ...utils import chdir, path_join
-from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
+from ..constants import get_root
+from .format import parse_config_from_result
 
 
 def start_environment(check, env):

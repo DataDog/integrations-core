@@ -6,9 +6,9 @@
 *                   @DataDog/agent-integrations
 
 # Documentation
-/docs/                @DataDog/baklava @DataDog/agent-integrations
-*.md                  @DataDog/baklava @DataDog/agent-integrations
-manifest.json         @DataDog/baklava @DataDog/agent-integrations
+/docs/                @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+*.md                  @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+manifest.json         @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 
 # Container monitoring
 /containerd/               @DataDog/container-integrations @DataDog/agent-integrations
@@ -28,14 +28,14 @@ manifest.json         @DataDog/baklava @DataDog/agent-integrations
 /openmetrics/              @DataDog/container-integrations @DataDog/agent-integrations
 
 # Agent core team
-/datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations
+/datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 
 # To keep ProdSec up-to-date with changes to requirements.txt.
-requirements.in                                           @DataDog/prodsec
-requirements.txt                                          @DataDog/prodsec
+requirements.in                                           @DataDog/prodsec @DataDog/integrations-tools-and-libraries
+requirements.txt                                          @DataDog/prodsec @DataDog/integrations-tools-and-libraries
 # As well as the signing tool.
-datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec
+datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec @DataDog/integrations-tools-and-libraries
 # As well as the secure downloader.
-/datadog_checks_downloader/                               @DataDog/prodsec
+/datadog_checks_downloader/                               @DataDog/prodsec @DataDog/integrations-tools-and-libraries
 # As well as the wheel building process
-.gitlab-ci.yml                                            @DataDog/prodsec
+.gitlab-ci.yml                                            @DataDog/prodsec @DataDog/integrations-tools-and-libraries

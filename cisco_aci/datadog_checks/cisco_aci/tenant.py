@@ -2,14 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import datetime
 import re
 import time
-import datetime
 
 from six import iteritems
 
-from . import helpers
-from . import exceptions
+from . import exceptions, helpers
 
 
 class Tenant:
@@ -159,9 +158,7 @@ class Tenant:
 
             title = "The resource: " + ev['affected'] + " emitted an event"
             dn_tags = helpers.get_event_tags_from_dn(ev['dn'])
-            tags = [
-                "tenant:" + tenant,
-            ]
+            tags = ["tenant:" + tenant]
             tags = tags + self.user_tags + self.check_tags
             if 'code' in ev:
                 tags.append("code:" + ev['code'])
@@ -171,20 +168,22 @@ class Tenant:
                 tags.append("cause:" + ev['cause'])
             if 'severity' in ev:
                 tags.append("severity:" + ev['severity'])
-            self.event({
-                'timestamp': timestamp,
-                'event_type': 'cisco_aci',
-                'msg_title': title,
-                'msg_text': ev['descr'],
-                "tags": tags + dn_tags,
-                "aggregation_key": ev['id'],
-                'host': self.hostname
-            })
+            self.event(
+                {
+                    'timestamp': timestamp,
+                    'event_type': 'cisco_aci',
+                    'msg_title': title,
+                    'msg_text': ev['descr'],
+                    "tags": tags + dn_tags,
+                    "aggregation_key": ev['id'],
+                    'host': self.hostname,
+                }
+            )
 
         # if we get to the end without running out of new events, move onto the next page
         # there is a bug when sometimes it'll return 30 events despite the page size setting
         if len(event_list) != 0 and len(event_list) % 15 == 0:
-            self.collect_events(tenant, page=page+1, page_size=15)
+            self.collect_events(tenant, page=page + 1, page_size=15)
 
     @property
     def last_events_ts(self):

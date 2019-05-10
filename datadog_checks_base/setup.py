@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
 
+from setuptools import setup
 
 HERE = path.abspath(path.dirname(__file__))
 
@@ -18,7 +18,12 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     LONG_DESC = f.read()
 
 
-def get_requirements(fpath, exclude=[], only=[]):
+def get_requirements(fpath, exclude=None, only=None):
+    if exclude is None:
+        exclude = []
+    if only is None:
+        only = []
+
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         requirements = []
         for line in f:
@@ -35,7 +40,6 @@ def get_requirements(fpath, exclude=[], only=[]):
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
-
     name='datadog_checks_base',
     description='The Datadog Check Toolkit',
     long_description=LONG_DESC,
@@ -45,7 +49,6 @@ setup(
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
-
     # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -55,10 +58,8 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-
     packages=['datadog_checks'],
     include_package_data=True,
-
     extras_require={
         'deps': get_requirements('requirements.in', exclude=['kubernetes']),
         'kube': get_requirements('requirements.in', only=['kubernetes']),

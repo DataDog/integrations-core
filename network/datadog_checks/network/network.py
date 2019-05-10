@@ -6,46 +6,33 @@
 Collects network metrics.
 """
 
+import os
 import re
 import socket
 from collections import defaultdict
 
-from six import iteritems, PY3
+import psutil
+from six import PY3, iteritems
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.common import pattern_filter
 from datadog_checks.utils.platform import Platform
-from datadog_checks.utils.subprocess_output import (
-    get_subprocess_output,
-    SubprocessOutputEmptyError,
-)
-import psutil
+from datadog_checks.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
 if PY3:
     long = int
 
 
 BSD_TCP_METRICS = [
-    (re.compile(
-        r"^\s*(\d+) data packets \(\d+ bytes\) retransmitted\s*$"
-    ), 'system.net.tcp.retrans_packs'),
-    (re.compile(
-        r"^\s*(\d+) packets sent\s*$"
-    ), 'system.net.tcp.sent_packs'),
-    (re.compile(
-        r"^\s*(\d+) packets received\s*$"
-    ), 'system.net.tcp.rcv_packs')
+    (re.compile(r"^\s*(\d+) data packets \(\d+ bytes\) retransmitted\s*$"), 'system.net.tcp.retrans_packs'),
+    (re.compile(r"^\s*(\d+) packets sent\s*$"), 'system.net.tcp.sent_packs'),
+    (re.compile(r"^\s*(\d+) packets received\s*$"), 'system.net.tcp.rcv_packs'),
 ]
 
 SOLARIS_TCP_METRICS = [
-    (re.compile(
-        r"\s*tcpRetransSegs\s*=\s*(\d+)\s*"
-    ), 'system.net.tcp.retrans_segs'),
-    (re.compile(
-        r"\s*tcpOutDataSegs\s*=\s*(\d+)\s*"
-    ), 'system.net.tcp.in_segs'),
-    (re.compile(
-        r"\s*tcpInSegs\s*=\s*(\d+)\s*"
-    ), 'system.net.tcp.out_segs')
+    (re.compile(r"\s*tcpRetransSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.retrans_segs'),
+    (re.compile(r"\s*tcpOutDataSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.in_segs'),
+    (re.compile(r"\s*tcpInSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.out_segs'),
 ]
 
 
@@ -53,20 +40,12 @@ class Network(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'
 
-    PSUTIL_TYPE_MAPPING = {
-        socket.SOCK_STREAM: 'tcp',
-        socket.SOCK_DGRAM: 'udp',
-    }
+    PSUTIL_TYPE_MAPPING = {socket.SOCK_STREAM: 'tcp', socket.SOCK_DGRAM: 'udp'}
 
-    PSUTIL_FAMILY_MAPPING = {
-        socket.AF_INET: '4',
-        socket.AF_INET6: '6',
-    }
+    PSUTIL_FAMILY_MAPPING = {socket.AF_INET: '4', socket.AF_INET6: '6'}
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(
-            self, name, init_config,
-            agentConfig, instances=instances)
+        AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
         if instances is not None and len(instances) > 1:
             raise Exception("Network check only supports one configured instance.")
 
@@ -75,12 +54,9 @@ class Network(AgentCheck):
             instance = {}
 
         self._excluded_ifaces = instance.get('excluded_interfaces', [])
-        self._collect_cx_state = instance.get(
-            'collect_connection_state', False)
-        self._collect_rate_metrics = instance.get(
-            'collect_rate_metrics', True)
-        self._collect_count_metrics = instance.get(
-            'collect_count_metrics', False)
+        self._collect_cx_state = instance.get('collect_connection_state', False)
+        self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
+        self._collect_count_metrics = instance.get('collect_count_metrics', False)
 
         # This decides whether we should split or combine connection states,
         # along with a few other things
@@ -160,13 +136,12 @@ class Network(AgentCheck):
                     psutil.CONN_LISTEN: "listening",
                     psutil.CONN_CLOSING: "closing",
                     psutil.CONN_NONE: "connections",  # CONN_NONE is always returned for udp connections
-                }
+                },
             }
         else:
             self.cx_state_gauge = {
                 ('udp4', 'connections'): 'system.net.udp4.connections',
                 ('udp6', 'connections'): 'system.net.udp6.connections',
-
                 ('tcp4', 'estab'): 'system.net.tcp4.estab',
                 ('tcp4', 'syn_sent'): 'system.net.tcp4.syn_sent',
                 ('tcp4', 'syn_recv'): 'system.net.tcp4.syn_recv',
@@ -179,7 +154,6 @@ class Network(AgentCheck):
                 ('tcp4', 'closing'): 'system.net.tcp4.closing',
                 ('tcp4', 'listen'): 'system.net.tcp4.listen',
                 ('tcp4', 'last_ack'): 'system.net.tcp4.time_wait',
-
                 ('tcp6', 'estab'): 'system.net.tcp6.estab',
                 ('tcp6', 'syn_sent'): 'system.net.tcp6.syn_sent',
                 ('tcp6', 'syn_recv'): 'system.net.tcp6.syn_recv',
@@ -234,7 +208,7 @@ class Network(AgentCheck):
                     psutil.CONN_LISTEN: "listen",
                     psutil.CONN_CLOSING: "closing",
                     psutil.CONN_NONE: "connections",  # CONN_NONE is always returned for udp connections
-                }
+                },
             }
 
     def _submit_netmetric(self, metric, value, tags=None):
@@ -323,8 +297,9 @@ class Network(AgentCheck):
                         # between the IP versions in the output
                         # Also calls `ss` for each protocol, because on some systems (e.g. Ubuntu 14.04), there is a
                         # bug that print `tcp` even if it's `udp`
-                        output, _, _ = get_subprocess_output(["ss", "-n", "-{0}".format(protocol[0]),
-                                                              "-a", "-{0}".format(ip_version)], self.log)
+                        output, _, _ = get_subprocess_output(
+                            ["ss", "-n", "-{0}".format(protocol[0]), "-a", "-{0}".format(ip_version)], self.log
+                        )
                         lines = output.splitlines()
 
                         # State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
@@ -335,8 +310,9 @@ class Network(AgentCheck):
                         # LISTEN     0      0       ::ffff:127.0.0.1:33217  ::ffff:127.0.0.1:7199
                         # ESTAB      0      0       ::ffff:127.0.0.1:58975  ::ffff:127.0.0.1:2181
 
-                        metrics = self._parse_linux_cx_state(lines[1:], self.tcp_states['ss'], 0, protocol=protocol,
-                                                             ip_version=ip_version)
+                        metrics = self._parse_linux_cx_state(
+                            lines[1:], self.tcp_states['ss'], 0, protocol=protocol, ip_version=ip_version
+                        )
                         # Only send the metrics which match the loop iteration's ip version
                         for stat, metric in iteritems(self.cx_state_gauge):
                             if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
@@ -427,40 +403,88 @@ class Network(AgentCheck):
                 'OutDatagrams': 'system.net.udp.out_datagrams',
                 'RcvbufErrors': 'system.net.udp.rcv_buf_errors',
                 'SndbufErrors': 'system.net.udp.snd_buf_errors',
-                'InCsumErrors': 'system.net.udp.in_csum_errors'
-            }
+                'InCsumErrors': 'system.net.udp.in_csum_errors',
+            },
         }
 
         # Skip the first line, as it's junk
         for k in nstat_metrics_names:
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
-                    self._submit_netmetric(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]),
-                                           tags=custom_tags)
+                    self._submit_netmetric(
+                        nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags
+                    )
 
-        proc_conntrack_path = "{}/net/nf_conntrack".format(proc_location)
-        try:
-            with open(proc_conntrack_path, 'r') as conntrack_file:
-                # Starting at 0 as the last line has a line return
-                conntrack_count = 0
-                while 1:
-                    # Reading the file by chucks (64k being a randomly chosen buffer size)
-                    conntrack_buffer = conntrack_file.read(65536)
-                    if not conntrack_buffer:
-                        break
-                    conntrack_count += conntrack_buffer.count('\n')
-                self.gauge('system.net.conntrack.count', conntrack_count, tags=custom_tags)
-        except IOError:
-            self.log.debug("Unable to read %s. Skipping conntrack metrics pull.", proc_conntrack_path)
+        # Get the conntrack -S information
+        conntrack_path = instance.get('conntrack_path')
+        if conntrack_path is not None:
+            self._add_conntrack_stats_metrics(conntrack_path, custom_tags)
 
-        proc_conntrack_max_path = "{}/sys/net/nf_conntrack_max".format(proc_location)
+        # Get the rest of the metric by reading the files. Metrics available since kernel 3.6
+        conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
+        # By default, only max and count are reported. However if the blacklist is set,
+        # the whitelist is loosing its default value
+        blacklisted_files = instance.get('blacklist_conntrack_metrics')
+        whitelisted_files = instance.get('whitelist_conntrack_metrics')
+        if blacklisted_files is None and whitelisted_files is None:
+            whitelisted_files = ['max', 'count']
+
+        available_files = []
+
+        # Get the metrics to read
         try:
-            with open(proc_conntrack_max_path, 'r') as conntrack_max_file:
-                # Starting at 0 as the last line has a line return
-                conntrack_max = conntrack_max_file.read().rstrip()
-                self.gauge('system.net.conntrack.max', conntrack_max, tags=custom_tags)
-        except IOError:
-            self.log.debug("Unable to read %s. Skipping nf_conntrack_max metrics pull.", proc_conntrack_max_path)
+            for metric_file in os.listdir(conntrack_files_location):
+                if (
+                    os.path.isfile(os.path.join(conntrack_files_location, metric_file))
+                    and 'nf_conntrack_' in metric_file
+                ):
+                    available_files.append(metric_file[len('nf_conntrack_') :])
+        except Exception as e:
+            self.log.debug("Unable to list the files in {}. {}".format(conntrack_files_location, e))
+
+        filtered_available_files = pattern_filter(
+            available_files, whitelist=whitelisted_files, blacklist=blacklisted_files
+        )
+
+        for metric_name in filtered_available_files:
+            metric_file_location = os.path.join(conntrack_files_location, 'nf_conntrack_{}'.format(metric_name))
+            try:
+                with open(metric_file_location, 'r') as conntrack_file:
+                    # Checking it's an integer
+                    try:
+                        value = int(conntrack_file.read().rstrip())
+                        self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
+                    except ValueError:
+                        self.log.debug("{} is not an integer".format(metric_name))
+            except IOError as e:
+                self.log.debug("Unable to read {}, skipping {}.".format(metric_file_location, e))
+
+    def _add_conntrack_stats_metrics(self, conntrack_path, tags):
+        """
+        Parse the output of conntrack -S
+        Add the parsed metrics
+        """
+        try:
+            output, _, _ = get_subprocess_output(["sudo", conntrack_path, "-S"], self.log)
+            # conntrack -S sample:
+            # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
+            #       drop=1 early_drop=0 error=0 search_restart=39936711
+            # cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 \
+            #       drop=1 early_drop=0 error=0 search_restart=36983181
+
+            lines = output.splitlines()
+
+            for line in lines:
+                cols = line.split()
+                cpu_num = cols[0].split('=')[-1]
+                cpu_tag = ['cpu:{}'.format(cpu_num)]
+                cols = cols[1:]
+
+                for cell in cols:
+                    metric, value = cell.split('=')
+                    self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use {} to get conntrack stats".format(conntrack_path))
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """

@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .dotnetclr import DotnetclrCheck
 
-__all__ = [
-    '__version__',
-    'DotnetclrCheck'
-]
+__all__ = ['__version__', 'DotnetclrCheck']

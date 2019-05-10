@@ -76,7 +76,7 @@ class Oracle(AgentCheck):
         except cx_Oracle.DatabaseError as e:
             # Fallback to JDBC
             self.use_oracle_client = False
-            self.log.info('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
+            self.log.debug('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
 
         with closing(self._get_connection(server, user, password, service, jdbc_driver, tags)) as con:
             self._get_sys_metrics(con, tags)

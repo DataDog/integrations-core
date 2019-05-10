@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License see LICENSE
 
 import os
+
 from requests import Response
 
 from . import common

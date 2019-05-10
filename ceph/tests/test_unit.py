@@ -9,21 +9,11 @@ import pytest
 
 from datadog_checks.ceph import Ceph
 
-from .common import (
-    CHECK_NAME, BASIC_CONFIG, EXPECTED_SERVICE_TAGS, mock_data
-)
+from .common import BASIC_CONFIG, CHECK_NAME, EXPECTED_SERVICE_TAGS, mock_data
 
-EXPECTED_METRICS = [
-    'ceph.num_mons',
-    'ceph.total_objects',
-    'ceph.pgstate.active_clean'
-]
+EXPECTED_METRICS = ['ceph.num_mons', 'ceph.total_objects', 'ceph.pgstate.active_clean']
 
-EXPECTED_TAGS = [
-    'ceph_fsid:e0efcf84-e8ed-4916-8ce1-9c70242d390a',
-    'ceph_mon_state:peon',
-    'optional:tag1'
-]
+EXPECTED_TAGS = ['ceph_fsid:e0efcf84-e8ed-4916-8ce1-9c70242d390a', 'ceph_mon_state:peon', 'optional:tag1']
 
 pytestmark = pytest.mark.unit
 
@@ -110,11 +100,7 @@ def test_osd_status_metrics(_, aggregator):
     ceph_check = Ceph(CHECK_NAME, {}, {})
     ceph_check.check(copy.deepcopy(BASIC_CONFIG))
 
-    expected_metrics = [
-        'ceph.read_op_per_sec',
-        'ceph.write_op_per_sec',
-        'ceph.op_per_sec'
-    ]
+    expected_metrics = ['ceph.read_op_per_sec', 'ceph.write_op_per_sec', 'ceph.op_per_sec']
 
     for osd, pct_used in [('osd1', 94), ('osd2', 95)]:
         expected_tags = EXPECTED_TAGS + ['ceph_osd:%s' % osd]

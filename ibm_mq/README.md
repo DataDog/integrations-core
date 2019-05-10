@@ -201,4 +201,4 @@ Additional helpful documentation, links, and articles:
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
 [8]: https://docs.datadoghq.com/help
-[9]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog/
+[9]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog

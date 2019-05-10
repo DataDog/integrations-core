@@ -108,7 +108,7 @@ To get a better idea of how (or why) to monitor process resource consumption wit
 [5]: https://github.com/DataDog/integrations-core/tree/master/docker_daemon
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[8]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric/
+[8]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric
 [9]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
 [10]: https://docs.datadoghq.com/help
 [11]: https://www.datadoghq.com/blog/process-check-monitoring

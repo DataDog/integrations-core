@@ -17,11 +17,7 @@ def mock_df_output(fname):
 
 class MockPart(object):
     def __init__(
-        self,
-        device=DEFAULT_DEVICE_NAME,
-        fstype=DEFAULT_FILE_SYSTEM,
-        mountpoint=DEFAULT_MOUNT_POINT,
-        opts='ro'
+        self, device=DEFAULT_DEVICE_NAME, fstype=DEFAULT_FILE_SYSTEM, mountpoint=DEFAULT_MOUNT_POINT, opts='ro'
     ):
         self.device = device
         self.fstype = fstype

@@ -1,5 +1,10 @@
 # CHANGELOG - vsphere
 
+## 4.1.0 / 2019-04-25
+
+* [Added] Adhere to code style. See [#3581](https://github.com/DataDog/integrations-core/pull/3581).
+* [Added] Support Python 3. See [#3250](https://github.com/DataDog/integrations-core/pull/3250).
+
 ## 4.0.0 / 2019-01-29
 
 * [Changed] Wait for jobs to finish before returning from check function. See [#3034](https://github.com/DataDog/integrations-core/pull/3034).

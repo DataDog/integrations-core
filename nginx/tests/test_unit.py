@@ -22,6 +22,17 @@ def test_flatten_json(check):
     assert parsed == expected
 
 
+def test_flatten_json_timestamp(check):
+    assert (
+        check.parse_json(
+            """
+    {"timestamp": "2018-10-23T12:12:23.123212Z"}
+    """
+        )
+        == [('nginx.timestamp', 1540296743, [], 'gauge')]
+    )
+
+
 def test_plus_api(check, instance, aggregator):
     instance = deepcopy(instance)
     instance['use_plus_api'] = True

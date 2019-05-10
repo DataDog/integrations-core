@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from ..subprocess import run_command
+from ..utils import chdir, path_join, read_file_binary, write_file_binary
 from .constants import TESTABLE_FILE_EXTENSIONS, get_root
 from .git import files_changed
 from .utils import get_testable_checks
-from ..subprocess import run_command
-from ..utils import chdir, path_join, read_file_binary, write_file_binary
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
@@ -23,11 +23,7 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
     for check in checks:
         check, _, envs_selected = check.partition(':')
 
-        if (
-            check in checks_seen
-            or check not in testable_checks
-            or (changed_only and check not in changed_checks)
-        ):
+        if check in checks_seen or check not in testable_checks or (changed_only and check not in changed_checks):
             continue
         else:
             checks_seen.add(check)
@@ -36,20 +32,11 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
         envs_available = get_available_tox_envs(check, sort=sort)
 
         if format_style:
-            envs_selected[:] = [
-                e for e in envs_available
-                if 'format_style' in e
-            ]
+            envs_selected[:] = [e for e in envs_available if 'format_style' in e]
         elif style:
-            envs_selected[:] = [
-                e for e in envs_available
-                if e in STYLE_CHECK_ENVS
-            ]
+            envs_selected[:] = [e for e in envs_available if e in STYLE_CHECK_ENVS]
         elif benchmark:
-            envs_selected[:] = [
-                e for e in envs_available
-                if 'bench' in e
-            ]
+            envs_selected[:] = [e for e in envs_available if 'bench' in e]
         else:
             if every:
                 envs_selected[:] = envs_available
@@ -66,10 +53,7 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
 
                 envs_selected[:] = selected
             else:
-                envs_selected[:] = [
-                    e for e in envs_available
-                    if 'bench' not in e and 'format_style' not in e
-                ]
+                envs_selected[:] = [e for e in envs_available if 'bench' not in e and 'format_style' not in e]
 
         yield check, envs_selected
 
@@ -188,12 +172,7 @@ def construct_pytest_options(
 
 
 def pytest_coverage_sources(*checks):
-    return ' '.join(
-        ' '.join(
-            '--cov={}'.format(source) for source in coverage_sources(check)
-        )
-        for check in checks
-    )
+    return ' '.join(' '.join('--cov={}'.format(source) for source in coverage_sources(check)) for check in checks)
 
 
 def testable_files(files):

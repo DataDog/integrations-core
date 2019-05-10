@@ -5,6 +5,4 @@
 
 from .base_check import OpenMetricsBaseCheck
 
-__all__ = [
-    'OpenMetricsBaseCheck',
-]
+__all__ = ['OpenMetricsBaseCheck']

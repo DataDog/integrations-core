@@ -10,10 +10,7 @@ CHECK_NAME = 'ceph'
 HERE = os.path.abspath(os.path.dirname(__file__))
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
-BASIC_CONFIG = {
-    'ceph_cmd': os.path.join(FIXTURE_DIR, 'ceph_bin.sh'),
-    'tags': ['optional:tag1'],
-}
+BASIC_CONFIG = {'ceph_cmd': os.path.join(FIXTURE_DIR, 'ceph_bin.sh'), 'tags': ['optional:tag1']}
 
 EXPECTED_METRICS = [
     "ceph.commit_latency_ms",
@@ -43,24 +40,24 @@ EXPECTED_METRICS = [
 EXPECTED_SERVICE_TAGS = ['optional:tag1']
 
 EXPECTED_SERVICE_CHECKS = [
-        'ceph.osd_down',
-        'ceph.osd_orphan',
-        'ceph.osd_full',
-        'ceph.osd_nearfull',
-        'ceph.pool_full',
-        'ceph.pool_near_full',
-        'ceph.pg_availability',
-        'ceph.pg_degraded',
-        'ceph.pg_degraded_full',
-        'ceph.pg_damaged',
-        'ceph.pg_not_scrubbed',
-        'ceph.pg_not_deep_scrubbed',
-        'ceph.cache_pool_near_full',
-        'ceph.too_few_pgs',
-        'ceph.too_many_pgs',
-        'ceph.object_unfound',
-        'ceph.request_slow',
-        'ceph.request_stuck',
+    'ceph.osd_down',
+    'ceph.osd_orphan',
+    'ceph.osd_full',
+    'ceph.osd_nearfull',
+    'ceph.pool_full',
+    'ceph.pool_near_full',
+    'ceph.pg_availability',
+    'ceph.pg_degraded',
+    'ceph.pg_degraded_full',
+    'ceph.pg_damaged',
+    'ceph.pg_not_scrubbed',
+    'ceph.pg_not_deep_scrubbed',
+    'ceph.cache_pool_near_full',
+    'ceph.too_few_pgs',
+    'ceph.too_many_pgs',
+    'ceph.object_unfound',
+    'ceph.request_slow',
+    'ceph.request_stuck',
 ]
 
 

@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.checks import AgentCheck
-
-from datadog_checks.base import ensure_bytes
-
-from six import iteritems
 import logging
 
-from . import errors, metrics, connection
+from six import iteritems
+
+from datadog_checks.base import ensure_bytes
+from datadog_checks.checks import AgentCheck
+
+from . import connection, errors, metrics
 from .config import IBMMQConfig
 
 try:
@@ -89,10 +89,7 @@ class IbmMqCheck(AgentCheck):
         config.add_queues(queues)
 
     def _discover_queues(self, queue_manager, regex):
-        args = {
-            pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(regex),
-            pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL
-        }
+        args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(regex), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL}
         queues = []
 
         try:
@@ -171,9 +168,7 @@ class IbmMqCheck(AgentCheck):
                         log.debug(msg)
 
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
-        args = {
-            pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')
-        }
+        args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')}
 
         try:
             pcf = pymqi.PCFExecute(queue_manager)
@@ -197,9 +192,7 @@ class IbmMqCheck(AgentCheck):
     def _get_channel_status(self, queue_manager, channel, tags, config):
         channel_tags = tags + ["channel:{}".format(channel)]
         try:
-            args = {
-                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(channel)
-            }
+            args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(channel)}
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
         except pymqi.MQMIError as e:

@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 import copy
 import logging
-import pymqi
 import re
 
+import pymqi
+import pytest
 from six.moves import range
 
 from datadog_checks.dev import docker_run
@@ -106,14 +106,7 @@ def dd_environment():
     elif common.MQ_VERSION == '8':
         log_pattern = r".*QMNAME\(datadog\)\s*STATUS\(Running\).*"
 
-    env = {
-        'COMPOSE_DIR': common.COMPOSE_DIR,
-    }
+    env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
-    with docker_run(
-        common.COMPOSE_FILE_PATH,
-        env_vars=env,
-        log_patterns=log_pattern,
-        sleep=10
-    ):
+    with docker_run(common.COMPOSE_FILE_PATH, env_vars=env, log_patterns=log_pattern, sleep=10):
         yield common.INSTANCE

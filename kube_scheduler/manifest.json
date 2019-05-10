@@ -20,6 +20,6 @@
     "containers"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "kube-scheduler"
 }

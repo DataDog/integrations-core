@@ -31,6 +31,12 @@ The network check is included in the [Datadog Agent][2] package, so you don't ne
 
 2. [Restart the Agent][5] to effect any configuration changes.
 
+Some conntrack metrics require running conntrack with privileged access to be retrieved.
+Note: the appropriate sudoers rules have to be configured for this to work
+```
+dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
+```
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `network` under the Checks section.

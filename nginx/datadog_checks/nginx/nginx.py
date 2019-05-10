@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
-import time
 from datetime import datetime
 from itertools import chain
 
@@ -18,6 +17,16 @@ from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
 if PY3:
     long = int
+
+EPOCH = datetime(1970, 1, 1)
+
+if hasattr(datetime, 'fromisoformat'):
+    fromisoformat = datetime.fromisoformat
+else:
+
+    def fromisoformat(ts):
+        return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
+
 
 PLUS_API_ENDPOINTS = {
     "nginx": [],
@@ -292,26 +301,20 @@ class Nginx(AgentCheck):
                 output.extend(cls._flatten_json(metric_base, val2, tags))
 
         elif isinstance(val, bool):
-            # Turn bools into 0/1 values
-            if val:
-                val = 1
-            else:
-                val = 0
-            output.append((metric_base, val, tags, 'gauge'))
+            output.append((metric_base, int(val), tags, 'gauge'))
 
         elif isinstance(val, (int, float, long)):
             output.append((metric_base, val, tags, 'gauge'))
 
         elif isinstance(val, (text_type, str)):
-            # In the new Plus API, timestamps are now formatted strings, some include microseconds, some don't...
-            try:
-                timestamp = time.mktime(datetime.strptime(val, "%Y-%m-%dT%H:%M:%S.%fZ").timetuple())
-                output.append((metric_base, timestamp, tags, 'gauge'))
-            except ValueError:
+            if val[-1] == "Z":
                 try:
-                    timestamp = time.mktime(datetime.strptime(val, "%Y-%m-%dT%H:%M:%SZ").timetuple())
-                    output.append((metric_base, timestamp, tags, 'gauge'))
+                    # In the new Plus API, timestamps are now formatted
+                    # strings, some include microseconds, some don't...
+                    timestamp = fromisoformat(val[:19])
                 except ValueError:
                     pass
+                else:
+                    output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
 
         return output

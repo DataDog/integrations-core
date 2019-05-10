@@ -114,8 +114,12 @@ class GUnicornCheck(AgentCheck):
         master_procs = [p for p in psutil.process_iter() if p.cmdline() and p.cmdline()[0] == master_name]
         if len(master_procs) == 0:
             # process not found, it's dead.
-            self.service_check(self.SVC_NAME, AgentCheck.CRITICAL, tags=['app:' + name] + tags,
-                               message="No gunicorn process with name %s found" % name)
+            self.service_check(
+                self.SVC_NAME,
+                AgentCheck.CRITICAL,
+                tags=['app:' + name] + tags,
+                message="No gunicorn process with name %s found" % name,
+            )
             raise GUnicornCheckError("Found no master process with name: %s" % master_name)
         else:
             self.log.debug("There exist %s master process(es) with the name %s" % (len(master_procs), name))

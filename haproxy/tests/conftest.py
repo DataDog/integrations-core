@@ -1,18 +1,26 @@
-import pytest
+import getpass
+import logging
 import os
 import subprocess
-import requests
-import logging
-import mock
-import getpass
-
 from copy import deepcopy
+
+import mock
+import pytest
+import requests
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxy
 
-from .common import (HERE, CHECK_CONFIG, USERNAME, PASSWORD, STATS_URL, STATS_URL_OPEN, CHECK_CONFIG_OPEN,
-                     platform_supports_sockets)
+from .common import (
+    CHECK_CONFIG,
+    CHECK_CONFIG_OPEN,
+    HERE,
+    PASSWORD,
+    STATS_URL,
+    STATS_URL_OPEN,
+    USERNAME,
+    platform_supports_sockets,
+)
 
 log = logging.getLogger('test_haproxy')
 

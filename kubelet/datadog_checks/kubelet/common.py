@@ -9,11 +9,13 @@ try:
 except ImportError:
     # Don't fail on < 6.2
     import logging
+
     log = logging.getLogger(__name__)
     log.info('Agent does not provide filtering logic, disabling container filtering')
 
     def is_excluded(name, image):
         return False
+
 
 SOURCE_TYPE = 'kubelet'
 
@@ -83,6 +85,7 @@ class PodListUtils(object):
     Containers that are part of a static pod are not filtered, as we cannot curently
     reliably determine their image name to pass to the filtering logic.
     """
+
     def __init__(self, podlist):
         self.containers = {}
         self.static_pod_uids = set()
@@ -173,6 +176,7 @@ class KubeletCredentials(object):
     """
     Holds the configured credentials to connect to the Kubelet.
     """
+
     def __init__(self, kubelet_conn_info):
         """
         Parses the kubelet_conn_info dict and computes credentials
@@ -233,9 +237,11 @@ class KubeletCredentials(object):
         :param endpoint: url that will be scraped
         """
         endpoint = scraper_config['prometheus_url']
-        scraper_config.update({
-            'ssl_ca_cert': self._ssl_verify,
-            'ssl_cert': self._ssl_cert,
-            'ssl_private_key': self._ssl_private_key,
-            'extra_headers': self.headers(endpoint) or {}
-        })
+        scraper_config.update(
+            {
+                'ssl_ca_cert': self._ssl_verify,
+                'ssl_cert': self._ssl_cert,
+                'ssl_private_key': self._ssl_private_key,
+                'extra_headers': self.headers(endpoint) or {},
+            }
+        )

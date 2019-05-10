@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import warnings
+
 import requests
 from six.moves.urllib.parse import urlparse
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks import AgentCheck
 
@@ -71,13 +74,17 @@ class Apache(AgentCheck):
             self.log.debug(
                 'apache check initiating request, connect timeout %d receive %d' % (connect_timeout, receive_timeout)
             )
-            r = requests.get(
-                url,
-                auth=auth,
-                headers=headers(self.agentConfig),
-                verify=not disable_ssl_validation,
-                timeout=(connect_timeout, receive_timeout),
-            )
+            with warnings.catch_warnings():
+                if _is_affirmative(instance.get('tls_ignore_warning', False)):
+                    warnings.simplefilter('ignore', InsecureRequestWarning)
+
+                r = requests.get(
+                    url,
+                    auth=auth,
+                    headers=headers(self.agentConfig),
+                    verify=not disable_ssl_validation,
+                    timeout=(connect_timeout, receive_timeout),
+                )
             r.raise_for_status()
 
         except Exception as e:

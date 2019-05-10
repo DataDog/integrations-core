@@ -2,21 +2,18 @@ import os
 
 import pytest
 
-from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.dev.utils import ON_LINUX
+from datadog_checks.utils.common import get_docker_hostname
 
 AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:a'], 1),
     (['status:available', 'service:b'], 4),
     (['status:unavailable', 'service:b'], 2),
     (['status:available', 'service:be_edge_http_sre-production_elk-kibana'], 1),
-    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2)
+    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2),
 )
 
-AGG_STATUSES = (
-    (['status:available'], 6),
-    (['status:unavailable'], 4)
-)
+AGG_STATUSES = ((['status:available'], 6), (['status:unavailable'], 4))
 
 CHECK_NAME = 'haproxy'
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -34,18 +31,14 @@ USERNAME = 'datadog'
 PASSWORD = 'isdevops'
 
 platform_supports_sockets = ON_LINUX
-requires_socket_support = pytest.mark.skipif(not platform_supports_sockets,
-                                             reason='Windows sockets are not file handles')
+requires_socket_support = pytest.mark.skipif(
+    not platform_supports_sockets, reason='Windows sockets are not file handles'
+)
 
-CONFIG_UNIXSOCKET = {
-    'collect_aggregates_only': False,
-}
+CONFIG_UNIXSOCKET = {'collect_aggregates_only': False}
 
 
-CONFIG_TCPSOCKET = {
-    'url': STATS_SOCKET,
-    'collect_aggregates_only': False,
-}
+CONFIG_TCPSOCKET = {'url': STATS_SOCKET, 'collect_aggregates_only': False}
 
 
 CHECK_CONFIG = {
@@ -58,11 +51,7 @@ CHECK_CONFIG = {
     'active_tag': True,
 }
 
-CHECK_CONFIG_OPEN = {
-    'url': STATS_URL_OPEN,
-    'collect_aggregates_only': False,
-    'collect_status_metrics': True,
-}
+CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': False, 'collect_status_metrics': True}
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
 
@@ -71,7 +60,7 @@ BACKEND_LIST = ['singleton:8080', 'singleton:8081', 'otherserver']
 BACKEND_TO_ADDR = {
     'singleton:8080': '127.0.0.1:8080',
     'singleton:8081': '127.0.0.1:8081',
-    'otherserver': '127.0.0.1:1234'
+    'otherserver': '127.0.0.1:1234',
 }
 
 FRONTEND_CHECK_GAUGES = [
@@ -80,14 +69,9 @@ FRONTEND_CHECK_GAUGES = [
     'haproxy.frontend.session.pct',
 ]
 
-FRONTEND_CHECK_GAUGES_POST_1_4 = [
-    'haproxy.frontend.requests.rate',
-]
+FRONTEND_CHECK_GAUGES_POST_1_4 = ['haproxy.frontend.requests.rate']
 
-BACKEND_CHECK_GAUGES = [
-    'haproxy.backend.queue.current',
-    'haproxy.backend.session.current',
-]
+BACKEND_CHECK_GAUGES = ['haproxy.backend.queue.current', 'haproxy.backend.session.current']
 
 BACKEND_HOSTS_METRIC = 'haproxy.backend_hosts'
 BACKEND_STATUS_METRIC = 'haproxy.count_per_status'
@@ -138,8 +122,6 @@ BACKEND_CHECK_RATES_POST_1_4 = [
     'haproxy.backend.response.other',
 ]
 
-BACKEND_CHECK_GAUGES_POST_1_7 = [
-    'haproxy.backend.uptime'
-]
+BACKEND_CHECK_GAUGES_POST_1_7 = ['haproxy.backend.uptime']
 
 SERVICE_CHECK_NAME = 'haproxy.backend_up'

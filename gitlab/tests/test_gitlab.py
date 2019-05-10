@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.gitlab import GitlabCheck
-from .common import HOST, CONFIG, BAD_CONFIG, GITLAB_TAGS, CUSTOM_TAGS, ALLOWED_METRICS
-
 import pytest
 from requests.exceptions import ConnectionError
+
+from datadog_checks.gitlab import GitlabCheck
+
+from .common import ALLOWED_METRICS, BAD_CONFIG, CONFIG, CUSTOM_TAGS, GITLAB_TAGS, HOST
 
 
 def test_check(aggregator):
@@ -48,5 +49,5 @@ def test_connection_failure(aggregator):
         'gitlab.{}'.format(GitlabCheck.ALLOWED_SERVICE_CHECKS[0]),
         status=GitlabCheck.CRITICAL,
         tags=['gitlab_host:{}'.format(HOST), 'gitlab_port:1234'] + CUSTOM_TAGS,
-        count=1
+        count=1,
     )

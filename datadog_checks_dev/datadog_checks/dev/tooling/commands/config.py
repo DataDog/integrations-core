@@ -6,27 +6,27 @@ import os
 import click
 import toml
 
-from .console import CONTEXT_SETTINGS, echo_info, echo_success
 from ..config import (
-    CONFIG_FILE, SECRET_KEYS, config_file_exists, read_config_file,
-    read_config_file_scrubbed, restore_config, scrub_secrets,
-    save_config, update_config
+    CONFIG_FILE,
+    SECRET_KEYS,
+    config_file_exists,
+    read_config_file,
+    read_config_file_scrubbed,
+    restore_config,
+    save_config,
+    scrub_secrets,
+    update_config,
 )
 from ..utils import string_to_toml_type
+from .console import CONTEXT_SETTINGS, echo_info, echo_success
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Manage the config file'
-)
+@click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the config file')
 def config():
     pass
 
 
-@config.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Show the location of the config file'
-)
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Show the location of the config file')
 def find():
     """Show the location of the config file."""
     if ' ' in CONFIG_FILE:
@@ -35,10 +35,7 @@ def find():
         echo_info(CONFIG_FILE)
 
 
-@config.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Show the contents of the config file'
-)
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Show the contents of the config file')
 @click.option('--all', '-a', 'all_keys', is_flag=True, help='No not scrub secret fields')
 def show(all_keys):
     """Show the contents of the config file."""
@@ -51,31 +48,21 @@ def show(all_keys):
             echo_info(read_config_file_scrubbed().rstrip())
 
 
-@config.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Update the config file with any new fields'
-)
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Update the config file with any new fields')
 def update():
     """Update the config file with any new fields."""
     update_config()
     echo_success('Settings were successfully updated.')
 
 
-@config.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Restore the config file to default settings'
-)
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Restore the config file to default settings')
 def restore():
     """Restore the config file to default settings."""
     restore_config()
     echo_success('Settings were successfully restored.')
 
 
-@config.command(
-    'set',
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Assign values to config file entries'
-)
+@config.command('set', context_settings=CONTEXT_SETTINGS, short_help='Assign values to config file entries')
 @click.argument('key')
 @click.argument('value', required=False)
 @click.pass_context
@@ -92,10 +79,7 @@ def set_value(ctx, key, value):
     scrubbing = False
     if value is None:
         scrubbing = key in SECRET_KEYS
-        value = click.prompt(
-            'Value for `{}`'.format(key),
-            hide_input=scrubbing
-        )
+        value = click.prompt('Value for `{}`'.format(key), hide_input=scrubbing)
 
     if key in ('core', 'extras', 'agent') and not value.startswith('~'):
         value = os.path.abspath(value)

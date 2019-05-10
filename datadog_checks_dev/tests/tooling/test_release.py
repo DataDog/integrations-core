@@ -5,9 +5,7 @@ import mock
 import pytest
 
 from datadog_checks.dev.errors import ManifestError
-from datadog_checks.dev.tooling.release import (
-    get_package_name, get_folder_name, get_agent_requirement_line
-)
+from datadog_checks.dev.tooling.release import get_agent_requirement_line, get_folder_name, get_package_name
 
 
 def test_get_package_name():
@@ -31,31 +29,16 @@ def test_get_agent_requirement_line():
             get_agent_requirement_line('foo', '1.2.3')
 
         # all platforms
-        load.return_value = {
-            "supported_os": [
-                "linux",
-                "mac_os",
-                "windows"
-            ]
-        }
+        load.return_value = {"supported_os": ["linux", "mac_os", "windows"]}
         res = get_agent_requirement_line('foo', '1.2.3')
         assert res == 'datadog-foo==1.2.3'
 
         # one platform
-        load.return_value = {
-            "supported_os": [
-                "linux"
-            ]
-        }
+        load.return_value = {"supported_os": ["linux"]}
         res = get_agent_requirement_line('foo', '1.2.3')
         assert res == "datadog-foo==1.2.3; sys_platform == 'linux2'"
 
         # multiple platforms
-        load.return_value = {
-            "supported_os": [
-                "linux",
-                "mac_os",
-            ]
-        }
+        load.return_value = {"supported_os": ["linux", "mac_os"]}
         res = get_agent_requirement_line('foo', '1.2.3')
         assert res == "datadog-foo==1.2.3; sys_platform != 'win32'"

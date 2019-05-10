@@ -1,2 +1,1 @@
-# CHANGELOG - {check_name_cap}
-
+# CHANGELOG - {integration_name}

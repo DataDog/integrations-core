@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .hyperv import HypervCheck
 
-__all__ = [
-    '__version__',
-    'HypervCheck'
-]
+__all__ = ['__version__', 'HypervCheck']

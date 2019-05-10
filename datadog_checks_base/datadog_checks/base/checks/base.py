@@ -1,60 +1,66 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import defaultdict
-from os.path import basename
+import copy
+import inspect
+import json
 import logging
 import re
-import json
-import copy
 import traceback
 import unicodedata
-import inspect
+from collections import defaultdict
+from os.path import basename
 
 import yaml
 from six import PY3, iteritems, text_type
-
-try:
-    import datadog_agent
-    from ..log import init_logging
-    init_logging()
-except ImportError:
-    from ..stubs import datadog_agent
-    from ..stubs.log import init_logging
-    init_logging()
-
-try:
-    import aggregator
-    using_stub_aggregator = False
-except ImportError:
-    from ..stubs import aggregator
-    using_stub_aggregator = True
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..utils.agent.debug import enter_pdb
 from ..utils.common import ensure_bytes, ensure_unicode
 from ..utils.http import RequestsWrapper
-from ..utils.proxy import config_proxy_skip
 from ..utils.limiter import Limiter
+from ..utils.proxy import config_proxy_skip
+
+try:
+    import datadog_agent
+    from ..log import init_logging
+
+    init_logging()
+except ImportError:
+    from ..stubs import datadog_agent
+    from ..stubs.log import init_logging
+
+    init_logging()
+
+try:
+    import aggregator
+
+    using_stub_aggregator = False
+except ImportError:
+    from ..stubs import aggregator
+
+    using_stub_aggregator = True
+
 
 if datadog_agent.get_config('disable_unsafe_yaml'):
     from ..ddyaml import monkey_patch_pyyaml
+
     monkey_patch_pyyaml()
 
 
 # Metric types for which it's only useful to submit once per set of tags
-ONE_PER_CONTEXT_METRIC_TYPES = [
-    aggregator.GAUGE,
-    aggregator.RATE,
-    aggregator.MONOTONIC_COUNT,
-]
+ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 
 
 class __AgentCheckPy3(object):
     """
     The base class for any Agent based integrations
     """
+
+    # If defined, this will be the prefix of every metric/service check and the source type of events
+    __NAMESPACE__ = ''
+
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
     # Used by `self.http` RequestsWrapper
@@ -176,7 +182,7 @@ class __AgentCheckPy3(object):
     @property
     def http(self):
         if self._http is None:
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER)
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
@@ -190,9 +196,7 @@ class __AgentCheckPy3(object):
         proxies = proxies if proxies is not None else self.proxies.copy()
 
         deprecated_skip = instance.get('no_proxy', None)
-        skip = (
-            is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or is_affirmative(deprecated_skip)
-        )
+        skip = is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or is_affirmative(deprecated_skip)
 
         if deprecated_skip is not None:
             self._log_deprecation('no_proxy')
@@ -201,6 +205,12 @@ class __AgentCheckPy3(object):
 
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
+
+    def _format_namespace(self, s):
+        if self.__NAMESPACE__:
+            return '{}.{}'.format(self.__NAMESPACE__, ensure_unicode(s))
+
+        return ensure_unicode(s)
 
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
@@ -225,16 +235,15 @@ class __AgentCheckPy3(object):
         try:
             value = float(value)
         except ValueError:
-            err_msg = (
-                'Metric: {} has non float value: {}. Only float values can be submitted as metrics.'
-                .format(name, value)
+            err_msg = 'Metric: {} has non float value: {}. Only float values can be submitted as metrics.'.format(
+                name, value
             )
             if using_stub_aggregator:
                 raise ValueError(err_msg)
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, ensure_unicode(name), value, tags, hostname)
+        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -243,8 +252,9 @@ class __AgentCheckPy3(object):
         self._submit_metric(aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None):
-        self._submit_metric(aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname,
-                            device_name=device_name)
+        self._submit_metric(
+            aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name
+        )
 
     def rate(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -280,7 +290,9 @@ class __AgentCheckPy3(object):
         else:
             message = ensure_unicode(message)
 
-        aggregator.submit_service_check(self, self.check_id, ensure_unicode(name), status, tags, hostname, message)
+        aggregator.submit_service_check(
+            self, self.check_id, self._format_namespace(name), status, tags, hostname, message
+        )
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
@@ -294,12 +306,17 @@ class __AgentCheckPy3(object):
                         'Error decoding unicode field `{}` to utf-8 encoded string, cannot submit event'.format(key)
                     )
                     return
+
         if event.get('tags'):
             event['tags'] = self._normalize_tags_type(event['tags'])
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
             event['aggregation_key'] = ensure_unicode(event['aggregation_key'])
+
+        if self.__NAMESPACE__:
+            event.setdefault('source_type_name', self.__NAMESPACE__)
+
         aggregator.submit_event(self, self.check_id, event)
 
     # TODO(olivier): implement service_metadata if it's worth it
@@ -390,7 +407,7 @@ class __AgentCheckPy3(object):
                 if not isinstance(tag, str):
                     try:
                         tag = tag.decode('utf-8')
-                    except UnicodeError:
+                    except Exception:
                         self.log.warning(
                             'Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
                         )
@@ -430,12 +447,7 @@ class __AgentCheckPy3(object):
 
             result = ''
         except Exception as e:
-            result = json.dumps([
-                {
-                    'message': str(e),
-                    'traceback': traceback.format_exc(),
-                }
-            ])
+            result = json.dumps([{'message': str(e), 'traceback': traceback.format_exc()}])
         finally:
             if self.metric_limiter:
                 self.metric_limiter.reset()
@@ -444,11 +456,7 @@ class __AgentCheckPy3(object):
 
     def _get_requests_proxy(self):
         # TODO: Remove with Agent 5
-        no_proxy_settings = {
-            'http': None,
-            'https': None,
-            'no': [],
-        }
+        no_proxy_settings = {'http': None, 'https': None, 'no': []}
 
         # First we read the proxy configuration from datadog.conf
         proxies = self.agentConfig.get('proxy', datadog_agent.get_config('proxy'))
@@ -466,6 +474,10 @@ class __AgentCheckPy2(object):
     """
     The base class for any Agent based integrations
     """
+
+    # If defined, this will be the prefix of every metric/service check and the source type of events
+    __NAMESPACE__ = ''
+
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
     """
@@ -529,8 +541,7 @@ class __AgentCheckPy2(object):
         if not self.init_config:
             self._use_agent_proxy = True
         else:
-            self._use_agent_proxy = is_affirmative(
-                self.init_config.get("use_agent_proxy", True))
+            self._use_agent_proxy = is_affirmative(self.init_config.get("use_agent_proxy", True))
 
         self.default_integration_http_timeout = float(self.agentConfig.get('default_integration_http_timeout', 9))
 
@@ -562,8 +573,10 @@ class __AgentCheckPy2(object):
             # Do not allow to disable limiting if the class has set a non-zero default value
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
-                self.warning("Setting max_returned_metrics to zero is not allowed, "
-                             "reverting to the default of {} metrics".format(self.DEFAULT_METRIC_LIMIT))
+                self.warning(
+                    "Setting max_returned_metrics to zero is not allowed, "
+                    "reverting to the default of {} metrics".format(self.DEFAULT_METRIC_LIMIT)
+                )
         except Exception:
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
@@ -579,7 +592,7 @@ class __AgentCheckPy2(object):
     @property
     def http(self):
         if self._http is None:
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER)
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
@@ -593,10 +606,7 @@ class __AgentCheckPy2(object):
         proxies = proxies if proxies is not None else self.proxies.copy()
 
         deprecated_skip = instance.get('no_proxy', None)
-        skip = (
-            is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or
-            is_affirmative(deprecated_skip)
-        )
+        skip = is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or is_affirmative(deprecated_skip)
 
         if deprecated_skip is not None:
             self._log_deprecation('no_proxy')
@@ -605,6 +615,12 @@ class __AgentCheckPy2(object):
 
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
+
+    def _format_namespace(self, s):
+        if self.__NAMESPACE__:
+            return '{}.{}'.format(self.__NAMESPACE__, ensure_bytes(s))
+
+        return ensure_bytes(s)
 
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
@@ -629,16 +645,15 @@ class __AgentCheckPy2(object):
         try:
             value = float(value)
         except ValueError:
-            err_msg = (
-                "Metric: {} has non float value: {}. "
-                "Only float values can be submitted as metrics.".format(repr(name), repr(value))
+            err_msg = "Metric: {} has non float value: {}. " "Only float values can be submitted as metrics.".format(
+                repr(name), repr(value)
             )
             if using_stub_aggregator:
                 raise ValueError(err_msg)
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), value, tags, hostname)
+        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -647,8 +662,9 @@ class __AgentCheckPy2(object):
         self._submit_metric(aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None):
-        self._submit_metric(aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname,
-                            device_name=device_name)
+        self._submit_metric(
+            aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name
+        )
 
     def rate(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -684,7 +700,9 @@ class __AgentCheckPy2(object):
         else:
             message = ensure_bytes(message)
 
-        aggregator.submit_service_check(self, self.check_id, ensure_bytes(name), status, tags, hostname, message)
+        aggregator.submit_service_check(
+            self, self.check_id, self._format_namespace(name), status, tags, hostname, message
+        )
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
@@ -694,15 +712,21 @@ class __AgentCheckPy2(object):
                 try:
                     event[key] = event[key].encode('utf-8')
                 except UnicodeError:
-                    self.log.warning("Error encoding unicode field '%s' to utf-8 encoded string, can't submit event",
-                                     key)
+                    self.log.warning(
+                        "Error encoding unicode field '%s' to utf-8 encoded string, can't submit event", key
+                    )
                     return
+
         if event.get('tags'):
             event['tags'] = self._normalize_tags_type(event['tags'])
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
             event['aggregation_key'] = ensure_bytes(event['aggregation_key'])
+
+        if self.__NAMESPACE__:
+            event.setdefault('source_type_name', self.__NAMESPACE__)
+
         aggregator.submit_event(self, self.check_id, event)
 
     # TODO(olivier): implement service_metadata if it's worth it
@@ -797,6 +821,8 @@ class __AgentCheckPy2(object):
 
         if tags is not None:
             for tag in tags:
+                if tag is None:
+                    continue
                 encoded_tag = self._to_bytes(tag)
                 if encoded_tag is None:
                     self.log.warning(
@@ -855,12 +881,7 @@ class __AgentCheckPy2(object):
 
             result = b''
         except Exception as e:
-            result = json.dumps([
-                {
-                    "message": str(e),
-                    "traceback": traceback.format_exc(),
-                }
-            ])
+            result = json.dumps([{"message": str(e), "traceback": traceback.format_exc()}])
         finally:
             if self.metric_limiter:
                 self.metric_limiter.reset()
@@ -869,11 +890,7 @@ class __AgentCheckPy2(object):
 
     def _get_requests_proxy(self):
         # TODO: Remove with Agent 5
-        no_proxy_settings = {
-            "http": None,
-            "https": None,
-            "no": [],
-        }
+        no_proxy_settings = {"http": None, "https": None, "no": []}
 
         # First we read the proxy configuration from datadog.conf
         proxies = self.agentConfig.get('proxy', datadog_agent.get_config('proxy'))

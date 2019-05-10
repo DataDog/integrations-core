@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .mixins import PrometheusScraperMixin
 from .. import AgentCheck
+from .mixins import PrometheusScraperMixin
 
 # Prometheus check is a parent class providing a structure and some helpers
 # to collect metrics, events and service checks exposed via Prometheus.
@@ -79,8 +79,9 @@ class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
                 if self.labels_mapper is not None and label.name in self.labels_mapper:
                     tag_name = self.labels_mapper[label.name]
                 _tags.append('{}:{}'.format(tag_name, label.value))
-        return self._finalize_tags_to_submit(_tags, metric_name, val, metric, custom_tags=custom_tags,
-                                             hostname=hostname)
+        return self._finalize_tags_to_submit(
+            _tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname
+        )
 
     def _submit_service_check(self, *args, **kwargs):
         self.service_check(*args, **kwargs)

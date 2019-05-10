@@ -3,11 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-from datetime import datetime, timedelta
+import copy
+import random
 import re
 import time
-import random
-import copy
+from datetime import datetime, timedelta
 
 import requests
 import simplejson as json
@@ -16,7 +16,6 @@ from six.moves.urllib.parse import urljoin
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
-
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -760,7 +759,7 @@ class OpenStackCheck(AgentCheck):
     def _parse_uptime_string(self, uptime):
         """ Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n' """
         uptime = uptime.strip()
-        load_averages = uptime[uptime.find('load average:'):].split(':')[1].split(',')
+        load_averages = uptime[uptime.find('load average:') :].split(':')[1].split(',')
         uptime_sec = uptime.split(',')[0]
 
         return {'loads': list(map(float, load_averages)), 'uptime_sec': uptime_sec}
@@ -1238,7 +1237,7 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
                 servers = self.get_servers_managed_by_hypervisor(
-                    i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
+                    i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period
                 )
 
                 host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
@@ -1385,8 +1384,9 @@ class OpenStackCheck(AgentCheck):
 
     def get_servers_managed_by_hypervisor(self, i_key, collect_all_tenants, split_hostname_on_first_period=False):
         servers = self.get_all_servers(
-            i_key, collect_all_tenants,
-            filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
+            i_key,
+            collect_all_tenants,
+            filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period),
         )
         if self.exclude_server_id_rules:
             # Filter out excluded servers

@@ -1,42 +1,43 @@
 init_config:
 
 instances:
-  ## @param server - string - required
-  ## The server's url.
-  #
+
+    ## @param server - string - required
+    ## The server's url.
+    #
   - server: http://localhost:8091
 
-  ## @param query_monitoring_url - string - optional
-  ## Url to get query monitoring stats, available since couchbase 4.5.
-  ## See https://developer.couchbase.com/documentation/server/4.5/tools/query-monitoring.html
-  #
-  #  query_monitoring_url: http://localhost:8093
+    ## @param query_monitoring_url - string - optional
+    ## Url to get query monitoring stats, available since couchbase 4.5.
+    ## See https://developer.couchbase.com/documentation/server/4.5/tools/query-monitoring.html
+    #
+    # query_monitoring_url: http://localhost:8093
 
-  ## @param username - string - optional
-  ## The username to use if `server` or `query_monitoring_url` is behind basic auth.
-  #
-  #  user: <USERNAME>
+    ## @param username - string - optional
+    ## The username to use if `server` or `query_monitoring_url` is behind basic auth.
+    #
+    # user: <USERNAME>
 
-  ## @param password - string - optional
-  ## The password to use if `server` or `query_monitoring_url` is behind basic auth.
-  #
-  #  password: <PASSWORD>
+    ## @param password - string - optional
+    ## The password to use if `server` or `query_monitoring_url` is behind basic auth.
+    #
+    # password: <PASSWORD>
 
-  ## @param ssl_verify - boolean - optional - default: true
-  ## Instruct the check to validate SSL certificates when connecting to `server` and `query_monitoring_url`.
-  #
-  #  ssl_verify: true
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Instruct the check to validate SSL certificates when connecting to `server` and `query_monitoring_url`.
+    #
+    # ssl_verify: true
 
-  ## @param timeout - integer - optional - default: 10
-  ## The timeout for connecting to the `prometheus_url`.
-  #
-  #  timeout: 10
+    ## @param timeout - integer - optional - default: 10
+    ## The timeout for connecting to the `prometheus_url`.
+    #
+    # timeout: 10
 
-  ## @param tags - list of key:value string - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging at https://docs.datadoghq.com/tagging
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

@@ -7,8 +7,8 @@ import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
-from .common import MASTER_PORT, REPLICA_PORT, UNHEALTHY_REPLICA_PORT, HOST
 
+from .common import HOST, MASTER_PORT, REPLICA_PORT, UNHEALTHY_REPLICA_PORT
 
 REPLICA_METRICS = [
     'redis.replication.delay',

@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from setuptools import setup
 from codecs import open
 from os import path
+
+from setuptools import setup
 
 HERE = path.abspath(path.dirname(__file__))
 CHECKS_BASE_REQ = 'datadog-checks-base>=4.1.0'
@@ -29,7 +30,6 @@ setup(
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
-
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -40,13 +40,9 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-
-
     # Run-time dependencies
-    install_requires=[CHECKS_BASE_REQ, ],
-
+    install_requires=[CHECKS_BASE_REQ],
     # The package we're going to ship
     packages=['datadog_checks.coredns'],
-
     include_package_data=True,
 )

@@ -17,9 +17,4 @@ PORT = 26379
 
 PROC_NAME = 'dd-test-gunicorn'
 
-INSTANCE = {
-    'host': HOST,
-    'port': PORT,
-    'password': 'datadog-is-devops-best-friend',
-    'proc_name': PROC_NAME,
-}
+INSTANCE = {'host': HOST, 'port': PORT, 'password': 'datadog-is-devops-best-friend', 'proc_name': PROC_NAME}

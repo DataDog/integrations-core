@@ -18,13 +18,7 @@ HOST = get_docker_hostname()
 PORT = '9153'
 URL = "http://{}:{}/metrics".format(HOST, PORT)
 
-DIG_ARGS = [
-    "dig",
-    "google.com",
-    "@127.0.0.1",
-    "-p",
-    "54"
-]
+DIG_ARGS = ["dig", "google.com", "@127.0.0.1", "-p", "54"]
 
 
 def init_coredns():
@@ -46,16 +40,12 @@ def dd_environment(instance):
 
 @pytest.fixture
 def dockerinstance():
-    return {
-      'prometheus_url': URL,
-    }
+    return {'prometheus_url': URL}
 
 
 @pytest.fixture(scope="session")
 def instance():
-    return {
-      'prometheus_url': URL,
-    }
+    return {'prometheus_url': URL}
 
 
 @pytest.fixture

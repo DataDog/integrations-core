@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .crio import CrioCheck
 
-__all__ = [
-    '__version__',
-    'CrioCheck'
-]
+__all__ = ['__version__', 'CrioCheck']

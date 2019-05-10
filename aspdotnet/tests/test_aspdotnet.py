@@ -3,30 +3,22 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+
 import pytest
+from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
+
 from datadog_checks.aspdotnet import AspdotnetCheck
 
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
-
 HERE = os.path.abspath(os.path.dirname(__file__))
-MINIMAL_INSTANCE = {
-    'host': '.',
-}
+MINIMAL_INSTANCE = {'host': '.'}
 
-INSTANCE_WITH_TAGS = {
-    'host': '.',
-    'tags': ['tag1', 'another:tag']
-}
+INSTANCE_WITH_TAGS = {'host': '.', 'tags': ['tag1', 'another:tag']}
 
 
 CHECK_NAME = 'aspdotnet'
 
 # these metrics are single-instance, so they won't have per-instance tags
-ASP_METRICS = (
-    "aspdotnet.application_restarts",
-    "aspdotnet.worker_process_restarts",
-    "aspdotnet.request.wait_time",
-)
+ASP_METRICS = ("aspdotnet.application_restarts", "aspdotnet.worker_process_restarts", "aspdotnet.request.wait_time")
 
 # these metrics are multi-instance.
 ASP_APP_METRICS = (

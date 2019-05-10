@@ -3,11 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev.docker import get_docker_hostname
 
 HERE = get_here()
 
+HOST = get_docker_hostname()
+
 # Namenode URI
-NAMENODE_URI = 'http://localhost:50070/'
+NAMENODE_URI = 'http://{}:50070/'.format(HOST)
 NAMENODE_JMX_URI = NAMENODE_URI + 'jmx'
 
 # Namesystem state URL

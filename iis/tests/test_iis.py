@@ -4,19 +4,18 @@
 import re
 
 import pytest
+from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.iis import IIS
 from datadog_checks.iis.iis import DEFAULT_COUNTERS
 
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture  # noqa: F401
-
 from .common import (
     CHECK_NAME,
-    MINIMAL_INSTANCE,
     INSTANCE,
     INVALID_HOST_INSTANCE,
+    MINIMAL_INSTANCE,
+    WIN_SERVICES_CONFIG,
     WIN_SERVICES_MINIMAL_CONFIG,
-    WIN_SERVICES_CONFIG
 )
 
 
@@ -34,8 +33,7 @@ def test_basic_check(aggregator):
             aggregator.assert_metric(metric, tags=["site:{0}".format(site_tag), iis_host], count=1)
 
     for site_tag in site_tags:
-        aggregator.assert_service_check('iis.site_up', IIS.OK,
-                                        tags=["site:{0}".format(site_tag), iis_host], count=1)
+        aggregator.assert_service_check('iis.site_up', IIS.OK, tags=["site:{0}".format(site_tag), iis_host], count=1)
 
     aggregator.assert_all_metrics_covered()
 
@@ -54,11 +52,11 @@ def test_check_on_specific_websites(aggregator):
             aggregator.assert_metric(metric, tags=["site:{0}".format(site_tag), iis_host], count=1)
 
     for site_tag in site_tags:
-        aggregator.assert_service_check('iis.site_up', IIS.OK,
-                                        tags=["site:{0}".format(site_tag), iis_host], count=1)
+        aggregator.assert_service_check('iis.site_up', IIS.OK, tags=["site:{0}".format(site_tag), iis_host], count=1)
 
-    aggregator.assert_service_check('iis.site_up', IIS.CRITICAL,
-                                    tags=["site:{0}".format('Non_Existing_Website'), iis_host], count=1)
+    aggregator.assert_service_check(
+        'iis.site_up', IIS.CRITICAL, tags=["site:{0}".format('Non_Existing_Website'), iis_host], count=1
+    )
 
     aggregator.assert_all_metrics_covered()
 
@@ -94,11 +92,16 @@ def test_check(aggregator):
             mname = metric_def[3]
             aggregator.assert_metric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_name), iis_host], count=1)
 
-        aggregator.assert_service_check('iis.site_up', status=IIS.OK,
-                                        tags=["mytag1", "mytag2", "site:{0}".format(site_name), iis_host], count=1)
+        aggregator.assert_service_check(
+            'iis.site_up', status=IIS.OK, tags=["mytag1", "mytag2", "site:{0}".format(site_name), iis_host], count=1
+        )
 
-    aggregator.assert_service_check('iis.site_up', status=IIS.CRITICAL,
-                                    tags=["mytag1", "mytag2", "site:{0}".format(fail_site_name), iis_host], count=1)
+    aggregator.assert_service_check(
+        'iis.site_up',
+        status=IIS.CRITICAL,
+        tags=["mytag1", "mytag2", "site:{0}".format(fail_site_name), iis_host],
+        count=1,
+    )
 
     # Check completed with no warnings
     # self.assertFalse(logger.warning.called)
@@ -125,6 +128,7 @@ def test_check_without_sites_specified(aggregator):
             aggregator.assert_metric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_tag), iis_host], count=1)
 
     for site_tag in site_tags:
-        aggregator.assert_service_check('iis.site_up', status=IIS.OK,
-                                        tags=["mytag1", "mytag2", "site:{0}".format(site_tag), iis_host], count=1)
+        aggregator.assert_service_check(
+            'iis.site_up', status=IIS.OK, tags=["mytag1", "mytag2", "site:{0}".format(site_tag), iis_host], count=1
+        )
     aggregator.assert_all_metrics_covered()

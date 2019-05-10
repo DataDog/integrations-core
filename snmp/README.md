@@ -130,9 +130,9 @@ metrics:
 
 #### Use your own MIB
 
-To use your own MIB with the Datadog Agent, convert it to the [PySNMP][14] format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][5].
+To use your own MIB with the Datadog Agent, convert it to the [PySNMP][5] format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][6].
 
-Since Datadog Agent version 5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][6]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
+Since Datadog Agent version 5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][7]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
 
 In Linux, find the location of `mibdump.py`, run:
 
@@ -203,13 +203,13 @@ CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
 
 ```
 
-The Agent looks for the converted MIB Python files by specifying the destination path with `mibs_folder` in the [SNMP YAML configuration][7].
+The Agent looks for the converted MIB Python files by specifying the destination path with `mibs_folder` in the [SNMP YAML configuration][8].
 
-[Restart the Agent][8] to start sending SNMP metrics to Datadog.
+[Restart the Agent][9] to start sending SNMP metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's status subcommand][9] and look for `snmp` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `snmp` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -226,27 +226,27 @@ The SNMP check does not include any events.
 Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
 
 ## Further Reading
 Additional helpful documentation, links, and articles:
 
-* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][11]
-* [How to monitor SNMP devices?][12]
-* [Monitoring Unifi devices using SNMP and Datadog][13]
+* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][12]
+* [How to monitor SNMP devices?][13]
+* [Monitoring Unifi devices using SNMP and Datadog][14]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example
 [4]: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
-[5]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
-[6]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
-[7]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[10]: https://docs.datadoghq.com/help
-[11]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
-[12]: https://docs.datadoghq.com/agent/faq/how-to-monitor-snmp-devices/
-[13]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
-[14]: http://snmplabs.com/pysnmp/index.html
+[5]: http://snmplabs.com/pysnmp/index.html
+[6]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
+[7]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
+[8]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[11]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
+[13]: https://docs.datadoghq.com/agent/faq/how-to-monitor-snmp-devices
+[14]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca

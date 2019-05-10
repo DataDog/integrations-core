@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import unicode_literals
+
 import pytest
 
 from datadog_checks.lighttpd import Lighttpd
 
 from . import common
-
 
 CHECK_GAUGES = [
     'lighttpd.net.bytes',
@@ -25,11 +25,7 @@ CHECK_GAUGES = [
 def test_lighttpd(aggregator, check, instance):
     """
     """
-    tags = [
-        'host:{}'.format(common.HOST),
-        'port:9449',
-        'instance:first'
-    ]
+    tags = ['host:{}'.format(common.HOST), 'port:9449', 'instance:first']
     check.check(instance)
 
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.OK, tags=tags)
@@ -45,11 +41,7 @@ def test_service_check_ko(aggregator, check, instance):
     """
     """
     instance['lighttpd_status_url'] = 'http://localhost:1337'
-    tags = [
-        'host:localhost',
-        'port:1337',
-        'instance:first'
-    ]
+    tags = ['host:localhost', 'port:1337', 'instance:first']
     with pytest.raises(Exception):
         check.check(instance)
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.CRITICAL, tags=tags)

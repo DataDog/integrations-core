@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.gitlab_runner import GitlabRunnerCheck
-from .common import HOST, CONFIG, BAD_CONFIG, GITLAB_RUNNER_TAGS, CUSTOM_TAGS, ALLOWED_METRICS
-
 import pytest
 from requests.exceptions import ConnectionError
+
+from datadog_checks.gitlab_runner import GitlabRunnerCheck
+
+from .common import ALLOWED_METRICS, BAD_CONFIG, CONFIG, CUSTOM_TAGS, GITLAB_RUNNER_TAGS, HOST
 
 
 def test_check(aggregator):
@@ -25,10 +26,7 @@ def test_check(aggregator):
     )
 
     aggregator.assert_service_check(
-        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME,
-        status=GitlabRunnerCheck.OK,
-        tags=CUSTOM_TAGS,
-        count=1,
+        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.OK, tags=CUSTOM_TAGS, count=1
     )
 
     for metric in ALLOWED_METRICS:
@@ -57,8 +55,5 @@ def test_connection_failure(aggregator):
     )
 
     aggregator.assert_service_check(
-        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME,
-        status=GitlabRunnerCheck.CRITICAL,
-        tags=CUSTOM_TAGS,
-        count=1,
+        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.CRITICAL, tags=CUSTOM_TAGS, count=1
     )

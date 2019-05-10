@@ -1,5 +1,5 @@
 {{
-  "display_name": "{check_name_cap}",
+  "display_name": "{integration_name}",
   "maintainer": "{email}",
   "manifest_version": "1.0.0",
   "name": "{check_name}",
@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-{check_name_cap} Integration",
+  "public_title": "Datadog-{integration_name} Integration",
   "categories": [
     ""
   ],

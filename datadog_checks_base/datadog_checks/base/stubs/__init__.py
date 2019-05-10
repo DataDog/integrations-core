@@ -4,6 +4,4 @@
 from .aggregator import aggregator
 from .tagging import tagger
 
-__all__ = [
-    'aggregator', 'datadog_agent', 'tagger'
-]
+__all__ = ['aggregator', 'datadog_agent', 'tagger']

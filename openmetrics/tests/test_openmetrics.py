@@ -1,14 +1,14 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
+
 import pytest
-from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 from datadog_checks.openmetrics import OpenMetricsCheck
 
-CHECK_NAME = 'openmetrics'
-NAMESPACE = 'openmetrics'
+from .common import CHECK_NAME
+
+pytestmark = pytest.mark.usefixtures("poll_mock")
 
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
@@ -17,29 +17,6 @@ instance = {
     'send_histograms_buckets': True,
     'send_monotonic_counter': True,
 }
-
-
-@pytest.fixture(scope='module', autouse=True)
-def poll_mock():
-    registry = CollectorRegistry()
-    g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
-    g1.labels(matched_label='foobar', node='host1', flavor='test').set(99.9)
-    g2 = Gauge('metric2', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g2.labels(matched_label='foobar', node='host2', timestamp='123').set(12.2)
-    c1 = Counter('counter1', 'hits', ['node'], registry=registry)
-    c1.labels(node='host2').inc(42)
-    g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g3.labels(matched_label='foobar', node='host2', timestamp='456').set(float('inf'))
-
-    with mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: generate_latest(registry).decode().split('\n'),
-            headers={'Content-Type': 'text/plain'},
-        ),
-    ):
-        yield
 
 
 def test_openmetrics_check(aggregator):

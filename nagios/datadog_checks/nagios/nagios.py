@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from collections import namedtuple
 import json
 import re
-from six import next, PY3
+from collections import namedtuple
+
+from six import PY3, next
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.tailfile import TailFile
@@ -274,8 +275,9 @@ class NagiosTailer(object):
 
 
 class NagiosEventLogTailer(NagiosTailer):
-    def __init__(self, log_path, file_template, logger, hostname, tags, event_func, gauge_func,
-                 freq, passive_checks=False):
+    def __init__(
+        self, log_path, file_template, logger, hostname, tags, event_func, gauge_func, freq, passive_checks=False
+    ):
         """
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
@@ -354,19 +356,21 @@ class NagiosEventLogTailer(NagiosTailer):
             'check_name': event_payload.pop('check_name', None),
             'event_state': event_payload.pop('event_state', None),
             'payload': event_payload.pop('payload', None),
-            'ack_author': event_payload.pop('ack_author', None)
+            'ack_author': event_payload.pop('ack_author', None),
         }
 
         msg_text = json.dumps(msg_text)
         self.log.info("Nagios Event pack: {}".format(msg_text))
 
-        event_payload.update({
+        event_payload.update(
+            {
                 'timestamp': timestamp,
                 'event_type': event_type,
                 'msg_text': msg_text,
                 'source_type_name': SOURCE_TYPE_NAME,
-                'tags': tags
-        })
+                'tags': tags,
+            }
+        )
 
         # if host is localhost, turn that into the internal host name
         host = event_payload.get('host', None)
@@ -444,8 +448,14 @@ class NagiosPerfDataTailer(NagiosTailer):
                     if attr_val is not None and attr_val != '':
                         tags.append("{0}:{1}".format(key, attr_val))
 
-                self._gauge(metric, value, tags=tags + self._tags, hostname=host_name, device_name=device_name,
-                            timestamp=timestamp)
+                self._gauge(
+                    metric,
+                    value,
+                    tags=tags + self._tags,
+                    hostname=host_name,
+                    device_name=device_name,
+                    timestamp=timestamp,
+                )
 
 
 class NagiosHostPerfDataTailer(NagiosPerfDataTailer):

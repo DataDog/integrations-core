@@ -6,7 +6,6 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, PDHBaseCheck
 from datadog_checks.utils.containers import hash_mutable
 
-
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
     # Network
@@ -18,7 +17,6 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Files Received/sec", "iis.net.files_rcvd", "gauge"],
     ["Web Service", None, "Total Connection Attempts (all instances)", "iis.net.connection_attempts", "gauge"],
     ["Web Service", None, "Connection Attempts/sec", "iis.net.connection_attempts_sec", "gauge"],
-
     # HTTP Methods
     ["Web Service", None, "Get Requests/sec", "iis.httpd_request_method.get", "gauge"],
     ["Web Service", None, "Post Requests/sec", "iis.httpd_request_method.post", "gauge"],
@@ -27,19 +25,18 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Delete Requests/sec", "iis.httpd_request_method.delete", "gauge"],
     ["Web Service", None, "Options Requests/sec", "iis.httpd_request_method.options", "gauge"],
     ["Web Service", None, "Trace Requests/sec", "iis.httpd_request_method.trace", "gauge"],
-
     # Errors
     ["Web Service", None, "Not Found Errors/sec", "iis.errors.not_found", "gauge"],
     ["Web Service", None, "Locked Errors/sec", "iis.errors.locked", "gauge"],
-
     # Users
     ["Web Service", None, "Anonymous Users/sec", "iis.users.anon", "gauge"],
     ["Web Service", None, "NonAnonymous Users/sec", "iis.users.nonanon", "gauge"],
-
     # Requests
     ["Web Service", None, "CGI Requests/sec", "iis.requests.cgi", "gauge"],
     ["Web Service", None, "ISAPI Extension Requests/sec", "iis.requests.isapi", "gauge"],
 ]
+
+TOTAL_SITE = "_Total"
 
 
 class IIS(PDHBaseCheck):
@@ -65,10 +62,9 @@ class IIS(PDHBaseCheck):
             expected_sites = set(sites)
         # _Total should always be in the list of expected sites; we always
         # report _Total
-        if "_Total" not in expected_sites:
-            expected_sites.add("_Total")
+        expected_sites.add(TOTAL_SITE)
 
-        self.log.debug("expected sites is {}".format(str(expected_sites)))
+        self.log.debug("Expected sites is {}".format(expected_sites))
         key = hash_mutable(instance)
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             try:
@@ -86,39 +82,30 @@ class IIS(PDHBaseCheck):
 
                     try:
                         if not counter.is_single_instance():
-                            # Skip any sites we don't specifically want.
-                            if not sites:
-                                tags.append("site:{0}".format(self.normalize(sitename)))
-                            # always report total
-                            elif sitename == "_Total":
-                                tags.append("site:{0}".format(self.normalize(sitename)))
-                            elif sitename not in sites:
+                            if sites and sitename != TOTAL_SITE and sitename not in sites:
                                 continue
-                            else:
-                                tags.append("site:{0}".format(self.normalize(sitename)))
+                            tags.append("site:{}".format(self.normalize(sitename)))
                     except Exception as e:
-                        self.log.error("Caught exception {} setting tags".format(str(e)))
+                        self.log.error("Caught exception {} setting tags".format(e))
 
                     try:
                         metric_func(dd_name, val, tags)
                     except Exception as e:
-                        self.log.error("metric_func: {} {} {}".format(dd_name, str(val), str(e)))
-                        pass
+                        self.log.error("Error in metric_func: {} {} {}".format(dd_name, val, e))
 
                     if dd_name == "iis.uptime":
                         uptime = int(val)
                         status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
                         self.service_check(self.SERVICE_CHECK, status, tags)
                         if sitename in expected_sites:
-                            self.log.debug("Removing {} from expected sites".format(sitename))
+                            self.log.debug("Removing {!r} from expected sites".format(sitename))
                             expected_sites.remove(sitename)
                         else:
-                            self.log.warning("site not in expected_sites {}".format(sitename))
+                            self.log.warning("Site {!r} not in expected_sites".format(sitename))
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error("IIS Failed to get metric data for {} {}: {}" .format(inst_name, dd_name, str(e)))
-                pass
+                self.log.error("IIS Failed to get metric data for {} {}: {}".format(inst_name, dd_name, e))
 
         for site in expected_sites:
             tags = []

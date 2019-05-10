@@ -295,6 +295,7 @@ class MongoDb(AgentCheck):
         "tcmalloc.tcmalloc.pageheap_unmapped_bytes": GAUGE,
         "tcmalloc.tcmalloc.thread_cache_free_bytes": GAUGE,
         "tcmalloc.tcmalloc.transfer_cache_free_bytes": GAUGE,
+        "tcmalloc.tcmalloc.spinlock_total_delay_ns": GAUGE,
     }
 
     """

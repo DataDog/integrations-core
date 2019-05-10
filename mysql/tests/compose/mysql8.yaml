@@ -1,0 +1,31 @@
+version: '3.5'
+
+services:
+  mysql-master:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_REPLICATION_MODE=master
+      - MYSQL_REPLICATION_USER=my_repl_user
+      - MYSQL_REPLICATION_PASSWORD=my_repl_password
+      - MYSQL_USER=my_user
+      - MYSQL_PASSWORD=my_password
+      - MYSQL_DATABASE=my_database
+    ports:
+      - "${MYSQL_PORT}:3306"
+
+  mysql-slave:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MASTER_HOST=mysql-master
+      - MASTER_PORT=3306
+      - MYSQL_REPLICATION_MODE=slave
+      - MYSQL_REPLICATION_USER=my_repl_user
+      - MYSQL_REPLICATION_PASSWORD=my_repl_password
+      - MYSQL_MASTER_HOST=mysql-master
+      - MYSQL_MASTER_PORT_NUMBER=3306
+    ports:
+      - "${MYSQL_SLAVE_PORT}:3306"
+    depends_on:
+      - "mysql-master"

@@ -5,5 +5,4 @@ import sys
 
 from .tooling.cli import ddev
 
-
 sys.exit(ddev())

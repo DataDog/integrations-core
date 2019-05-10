@@ -2,18 +2,38 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import pytest
-import os
 import copy
+import os
+
+import pytest
 
 from datadog_checks.haproxy import HAProxy
 
-from .common import (BACKEND_SERVICES, BACKEND_LIST, BACKEND_STATUS_METRIC, BACKEND_HOSTS_METRIC, BACKEND_TO_ADDR,
-                     BACKEND_CHECK_GAUGES, FRONTEND_CHECK_GAUGES, FRONTEND_CHECK_GAUGES_POST_1_4,
-                     BACKEND_CHECK_GAUGES_POST_1_5, BACKEND_CHECK_GAUGES_POST_1_7,
-                     FRONTEND_CHECK_RATES, FRONTEND_CHECK_RATES_POST_1_4, BACKEND_CHECK_RATES_POST_1_4,
-                     BACKEND_CHECK_RATES, requires_socket_support, SERVICE_CHECK_NAME, STATS_URL, CHECK_CONFIG_OPEN,
-                     STATS_URL_OPEN, CONFIG_TCPSOCKET, STATS_SOCKET, CONFIG_UNIXSOCKET, platform_supports_sockets)
+from .common import (
+    BACKEND_CHECK_GAUGES,
+    BACKEND_CHECK_GAUGES_POST_1_5,
+    BACKEND_CHECK_GAUGES_POST_1_7,
+    BACKEND_CHECK_RATES,
+    BACKEND_CHECK_RATES_POST_1_4,
+    BACKEND_HOSTS_METRIC,
+    BACKEND_LIST,
+    BACKEND_SERVICES,
+    BACKEND_STATUS_METRIC,
+    BACKEND_TO_ADDR,
+    CHECK_CONFIG_OPEN,
+    CONFIG_TCPSOCKET,
+    CONFIG_UNIXSOCKET,
+    FRONTEND_CHECK_GAUGES,
+    FRONTEND_CHECK_GAUGES_POST_1_4,
+    FRONTEND_CHECK_RATES,
+    FRONTEND_CHECK_RATES_POST_1_4,
+    SERVICE_CHECK_NAME,
+    STATS_SOCKET,
+    STATS_URL,
+    STATS_URL_OPEN,
+    platform_supports_sockets,
+    requires_socket_support,
+)
 
 
 def _test_frontend_metrics(aggregator, shared_tag):
@@ -43,8 +63,7 @@ def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=Fa
             tags = backend_tags + ['service:' + service, 'backend:' + backend]
 
             if add_addr_tag and haproxy_version >= ['1', '7']:
-                tags.append('server_address:{}'.format(
-                    BACKEND_TO_ADDR[backend]))
+                tags.append('server_address:{}'.format(BACKEND_TO_ADDR[backend]))
 
             for gauge in BACKEND_CHECK_GAUGES:
                 aggregator.assert_metric(gauge, tags=tags, count=1)
@@ -82,15 +101,9 @@ def _test_service_checks(aggregator, services=None, count=1):
     for service in services:
         for backend in BACKEND_LIST:
             tags = ['service:' + service, 'backend:' + backend]
-            aggregator.assert_service_check(SERVICE_CHECK_NAME,
-                                            status=HAProxy.UNKNOWN,
-                                            count=count,
-                                            tags=tags)
+            aggregator.assert_service_check(SERVICE_CHECK_NAME, status=HAProxy.UNKNOWN, count=count, tags=tags)
         tags = ['service:' + service, 'backend:BACKEND']
-        aggregator.assert_service_check(SERVICE_CHECK_NAME,
-                                        status=HAProxy.OK,
-                                        count=count,
-                                        tags=tags)
+        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=HAProxy.OK, count=count, tags=tags)
 
 
 @requires_socket_support
@@ -114,9 +127,7 @@ def test_check(aggregator, check, instance):
 @pytest.mark.integration
 def test_check_service_check(aggregator, check, instance):
     # Add the enable service check
-    instance.update({
-        "enable_service_check": True
-    })
+    instance.update({"enable_service_check": True})
 
     check.check(instance)
 
@@ -176,9 +187,10 @@ def test_open_config(aggregator, check):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'] or
-                    not platform_supports_sockets,
-                    reason='Sockets with operator level are only available with haproxy 1.7')
+@pytest.mark.skipif(
+    os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'] or not platform_supports_sockets,
+    reason='Sockets with operator level are only available with haproxy 1.7',
+)
 def test_tcp_socket(aggregator, check):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     check.check(config)

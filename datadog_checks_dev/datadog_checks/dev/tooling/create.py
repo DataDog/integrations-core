@@ -6,7 +6,6 @@ import re
 from datetime import datetime
 from uuid import uuid4
 
-from .utils import normalize_package_name
 from ..utils import (
     create_file,
     dir_exists,
@@ -15,11 +14,12 @@ from ..utils import (
     read_file,
     read_file_binary,
     write_file,
-    write_file_binary
+    write_file_binary,
 )
+from .utils import normalize_package_name
 
 TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-BINARY_EXTENSIONS = ('.png', )
+BINARY_EXTENSIONS = ('.png',)
 SIMPLE_NAME = r'^\w+$'
 
 
@@ -29,26 +29,20 @@ def get_valid_templates():
 
 def construct_template_fields(integration_name, repo_choice, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
-    check_name_cap = (
-        integration_name.capitalize()
-        if re.match(SIMPLE_NAME, integration_name)
-        else integration_name
-    )
-    check_name_kebab = re.sub('_| ', '-', integration_name)
+    check_name_kebab = re.sub('_| ', '-', integration_name.lower())
 
     if repo_choice == 'core':
         author = 'Datadog'
         email = 'help@datadoghq.com'
         email_packages = 'packages@datadoghq.com'
         install_info = (
-            'The {check_name_cap} check is included in the [Datadog Agent][2] package.\n'
-            'No additional installation is needed on your server.'.format(check_name_cap=check_name_cap)
+            'The {integration_name} check is included in the [Datadog Agent][2] package.\n'
+            'No additional installation is needed on your server.'.format(integration_name=integration_name)
         )
         license_header = (
             '# (C) Datadog, Inc. {year}\n'
             '# All rights reserved\n'
-            '# Licensed under a 3-clause BSD style license (see LICENSE)\n'
-            .format(year=str(datetime.now().year))
+            '# Licensed under a 3-clause BSD style license (see LICENSE)\n'.format(year=str(datetime.now().year))
         )
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
@@ -58,7 +52,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         email = email_packages = 'friend@datadog.community'
         install_info = (
             'The {} check is not included in the [Datadog Agent][2] package, so it must\n'
-            'be installed manually.'.format(check_name_cap)
+            'be installed manually.'.format(integration_name)
         )
         license_header = ''
         support_type = 'contrib'
@@ -67,11 +61,9 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
 
     config = {
         'author': author,
-        'check_class': '{}Check'.format(
-            ''.join(part.capitalize() for part in normalized_integration_name.split('_'))
-        ),
+        'check_class': '{}Check'.format(''.join(part.capitalize() for part in normalized_integration_name.split('_'))),
         'check_name': normalized_integration_name,
-        'check_name_cap': check_name_cap,
+        'integration_name': integration_name,
         'check_name_kebab': check_name_kebab,
         'email': email,
         'email_packages': email_packages,
@@ -103,14 +95,7 @@ def create_template_files(template_name, new_root, config, read=False):
                 file_path = template_path.replace(template_root, '')
                 file_path = '{}{}'.format(new_root, file_path.format(**config))
 
-                files.append(
-                    File(
-                        file_path,
-                        template_path,
-                        config,
-                        read=read
-                    )
-                )
+                files.append(File(file_path, template_path, config, read=read))
 
     return files
 

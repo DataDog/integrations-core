@@ -37,11 +37,7 @@ def test__check_command_stats_host(check, aggregator):
         # this is from a real use case in Redis >5.0 where this line can be
         # seen (notice the double ':')
         # cmdstat_host::calls=2,usec=145,usec_per_call=72.50
-        'cmdstat_host': {
-            'usec_per_call': 72.5,
-            'usec': 145,
-            ':calls': 2
-        }
+        'cmdstat_host': {'usec_per_call': 72.5, 'usec': 145, ':calls': 2}
     }
     check._check_command_stats(conn, ['foo:bar'])
 
@@ -52,13 +48,7 @@ def test__check_command_stats_host(check, aggregator):
     aggregator.reset()
 
     # test a normal command, too
-    conn.info.return_value = {
-        'cmdstat_lpush': {
-            'usec_per_call': 14.00,
-            'usec': 56,
-            'calls': 4
-        }
-    }
+    conn.info.return_value = {'cmdstat_lpush': {'usec_per_call': 14.00, 'usec': 56, 'calls': 4}}
     check._check_command_stats(conn, ['foo:bar'])
 
     expected_tags = ['foo:bar', 'command:lpush']

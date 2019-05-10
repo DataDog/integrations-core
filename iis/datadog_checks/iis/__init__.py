@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .iis import IIS
 
-__all__ = [
-    '__version__',
-    'IIS'
-]
+__all__ = ['__version__', 'IIS']

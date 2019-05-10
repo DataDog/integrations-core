@@ -15,14 +15,10 @@ COMMON_METRICS = [
 ]
 
 E_METRICS = [
-    'rabbitmq.exchange.messages.confirm.count',
-    'rabbitmq.exchange.messages.confirm.rate',
     'rabbitmq.exchange.messages.publish_in.count',
     'rabbitmq.exchange.messages.publish_in.rate',
     'rabbitmq.exchange.messages.publish_out.count',
     'rabbitmq.exchange.messages.publish_out.rate',
-    'rabbitmq.exchange.messages.return_unroutable.count',
-    'rabbitmq.exchange.messages.return_unroutable.rate',
 ]
 
 Q_METRICS = [

@@ -2,16 +2,12 @@
 # (C) Stefan Mees <stefan.mees@wooga.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import socket
 import unicodedata
 
-# 3rd party
-from httplib2 import Http, HttpLib2Error
 import simplejson as json
+from httplib2 import Http, HttpLib2Error
 
-# project
 from datadog_checks.checks import AgentCheck
 
 
@@ -172,7 +168,7 @@ class Riak(AgentCheck):
         "late_put_fsm_coordinator_ack",
         "postcommit_fail",
         "precommit_fail",
-        "leveldb_read_block_error"
+        "leveldb_read_block_error",
     ]
 
     stat_keys = [
@@ -206,18 +202,12 @@ class Riak(AgentCheck):
         "vnode_put_fsm_time",
         "vnode_counter_update_time",
         "vnode_set_update_time",
-        "vnode_map_update_time"
+        "vnode_map_update_time",
     ]
 
-    search_latency_keys = [
-        "search_query_latency",
-        "search_index_latency"
-    ]
+    search_latency_keys = ["search_query_latency", "search_index_latency"]
 
-    vnodeq_keys = [
-        "riak_kv_vnodeq",
-        "riak_pipe_vnodeq"
-    ]
+    vnodeq_keys = ["riak_kv_vnodeq", "riak_pipe_vnodeq"]
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -245,25 +235,27 @@ class Riak(AgentCheck):
         service_check_tags = tags + ['url:%s' % url]
 
         try:
-            h = Http(timeout=timeout,
-                     ca_certs=cacert,
-                     disable_ssl_certificate_validation=disable_cert_verify)
+            h = Http(timeout=timeout, ca_certs=cacert, disable_ssl_certificate_validation=disable_cert_verify)
             resp, content = h.request(url, "GET")
         except (socket.timeout, socket.error, HttpLib2Error) as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message="Unable to fetch Riak stats: %s" % str(e),
-                               tags=service_check_tags)
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                message="Unable to fetch Riak stats: %s" % str(e),
+                tags=service_check_tags,
+            )
             raise
 
         if resp.status != 200:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags,
-                               message="Unexpected status of %s when fetching Riak stats, "
-                               "response: %s" % (resp.status, content))
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                tags=service_check_tags,
+                message="Unexpected status of %s when fetching Riak stats, response: %s" % (resp.status, content),
+            )
 
         stats = json.loads(content)
-        self.service_check(
-            self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         for k in self.keys:
             if k in stats:
@@ -290,6 +282,6 @@ class Riak(AgentCheck):
             return
         except (TypeError, ValueError):
             self.log.debug(
-                "metric name {0} cannot be converted to a float even using unicode tools: {1}".format(
-                    name, value))
+                "metric name {0} cannot be converted to a float even using unicode tools: {1}".format(name, value)
+            )
             pass

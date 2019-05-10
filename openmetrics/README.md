@@ -54,7 +54,7 @@ Need help? Contact [Datadog support][6].
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://docs.datadoghq.com/agent/openmetrics
-[5]:https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://docs.datadoghq.com/help
 [7]: https://docs.datadoghq.com/agent/openmetrics
 [8]: https://docs.datadoghq.com/developers/openmetrics
