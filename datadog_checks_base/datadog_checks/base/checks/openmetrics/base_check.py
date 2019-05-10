@@ -70,3 +70,9 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         This is generally a noop, but it can be used to change the tags before sending metrics
         """
         return _tags
+
+    def _filter_metric(self, metric):
+        """
+        Used to filter metrics at the begining of the processing, by default no metric is filtered
+        """
+        return False

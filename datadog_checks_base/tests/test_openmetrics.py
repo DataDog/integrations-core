@@ -12,6 +12,7 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.dev import get_here
 
 text_content_type = 'text/plain; version=0.0.4'
 
@@ -1524,3 +1525,59 @@ def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_co
 
     filtered = [x for x in check._text_filter_input(lines_in, mocked_prometheus_scraper_config)]
     assert filtered == expected_out
+
+
+@pytest.fixture()
+def mock_filter_get():
+    text_data = None
+    f_name = os.path.join(get_here(), 'fixtures', 'prometheus', 'deprecated.txt')
+    with open(f_name, 'r') as f:
+        text_data = f.read()
+    with mock.patch(
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200,
+            iter_lines=lambda **kwargs: text_data.split("\n"),
+            headers={'Content-Type': text_content_type},
+        ),
+    ):
+        yield text_data
+
+
+class FilterOpenMetricsCheck(OpenMetricsBaseCheck):
+    def _filter_metric(self, metric):
+        return metric.documentation.startswith("(Deprecated)")
+
+
+@pytest.fixture
+def mocked_filter_openmetrics_check():
+    check = FilterOpenMetricsCheck('prometheus_check', {}, {})
+    check.log = logging.getLogger('datadog-prometheus.test')
+    check.log.debug = mock.MagicMock()
+    return check
+
+
+@pytest.fixture
+def mocked_filter_openmetrics_check_scraper_config(mocked_filter_openmetrics_check):
+    yield mocked_filter_openmetrics_check.get_scraper_config(PROMETHEUS_CHECK_INSTANCE)
+
+
+def test_filter_metrics(
+    aggregator, mocked_filter_openmetrics_check, mocked_filter_openmetrics_check_scraper_config, mock_filter_get
+):
+    """ Tests label join GC on text format """
+    check = mocked_filter_openmetrics_check
+    mocked_filter_openmetrics_check_scraper_config['namespace'] = 'filter'
+    mocked_filter_openmetrics_check_scraper_config['metrics_mapper'] = {
+        'kube_pod_container_status_restarts': 'pod.restart',
+        'kube_pod_container_status_restarts_old': 'pod.restart_old',
+    }
+    # dry run to build mapping
+    check.process(mocked_filter_openmetrics_check_scraper_config)
+    # run with submit
+    check.process(mocked_filter_openmetrics_check_scraper_config)
+    # check a bunch of metrics
+    aggregator.assert_metric(
+        'filter.pod.restart', tags=['pod:kube-dns-autoscaler-97162954-mf6d3', 'namespace:kube-system'], value=42
+    )
+    aggregator.assert_all_metrics_covered()
