@@ -47,14 +47,14 @@ class CadvisorPrometheusScraperMixin(object):
             'container_network_transmit_errors_total': self.container_network_transmit_errors_total,
             'container_network_transmit_packets_dropped_total': self.container_network_transmit_packets_dropped_total,
             'container_network_receive_packets_dropped_total': self.container_network_receive_packets_dropped_total,
+            'container_network_tcp_usage_total': self.container_network_tcp_usage_total,
+            'container_network_udp_usage_total': self.container_network_udp_usage_total,
             'container_fs_usage_bytes': self.container_fs_usage_bytes,
             'container_fs_limit_bytes': self.container_fs_limit_bytes,
             'container_memory_usage_bytes': self.container_memory_usage_bytes,
             'container_memory_working_set_bytes': self.container_memory_working_set_bytes,
             'container_memory_rss': self.container_memory_rss,
             'container_spec_memory_limit_bytes': self.container_spec_memory_limit_bytes,
-            'container_network_tcp_usage_total': self.container_network_tcp_usage_total,
-            'container_network_udp_usage_total': self.container_network_udp_usage_total,
         }
 
     def _create_cadvisor_prometheus_instance(self, instance):
