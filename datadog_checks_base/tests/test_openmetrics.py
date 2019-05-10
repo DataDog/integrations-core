@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import logging
 import math
 import os
@@ -972,6 +973,22 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
     assert math.isnan(current_metric.samples[0][2])
     assert math.isnan(current_metric.samples[1][2])
     assert math.isnan(current_metric.samples[2][2])
+
+
+def test_ignore_metric(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that an ignored metric is properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['ignore_metrics'] = ['process_virtual_memory_bytes']
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=0)
 
 
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
