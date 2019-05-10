@@ -5,7 +5,7 @@
 
 import re
 from collections import defaultdict
-from six import iteritems, string_types
+from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
