@@ -88,7 +88,7 @@ def should_create_card(pull_request_event):
         if label.startswith('changelog/') and label != 'changelog/no-changelog':
             pr_includes_changes = True
 
-    if pull_request_event.get('merged') and pull_request_event.get('action') == 'closed':
+    if pull_request_event.get('pull_request').get('merged') and pull_request_event.get('action') == 'closed':
         pr_is_merged = True
 
     return pr_includes_changes and pr_is_merged
