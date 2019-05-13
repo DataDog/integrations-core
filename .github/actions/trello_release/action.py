@@ -65,7 +65,7 @@ def get_github_event():
 # https://developers.trello.com/reference/#cards-2
 def create_trello_card(pull_request_event):
     querystring = {
-        "idList": os.environ[TRELLO_LIST_ID_ENV_VAR],
+        "idList": os.environ[TRELLO_LIST_ID],
         "keepFromSource":"all",
         "name": pull_request_event.get('title'),
         "description": pull_request_event.get('body', '')[:5000],
