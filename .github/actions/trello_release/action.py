@@ -86,24 +86,27 @@ def should_create_card(pull_request_event):
 
     return pr_includes_changes and pr_is_merged
 
-
+# Return the first PR found from the provided commit
 def get_pr_from_commit(commit_hash):
     response = requests.get(
         f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:DataDog/{CORE_REPO}+is:merged',
     )
     try:
         response.raise_for_status()
-        return response.json()
-    except HTTPError as e:
+        return response.json().get('items')[0]
+    except (requests.HTTPError, IndexError) as e:
         emit_dd_event(FAILED, f'Couldn\'t retrieve github PR from commit: {e}')
         raise e
-
+    except IndexError as e:
+        print("Couldn't find commit in a PR, likely isn't yet merged")
+        return {}
 
 if __name__ == "__main__":
     validate_env_vars()
-    pull_request = get_pr_from_commit(os.environ['GITHUB_SHA']).get('items')[0]
+    pull_request = get_pr_from_commit(os.environ['GITHUB_SHA'])
     pr_url = pull_request.get('url')
-    if should_create_card(pull_request_event):
+
+    if should_create_card(pull_request):
         try:
             create_trello_card(pull_request_event.get('pull_request'))
         except Exception as e:
