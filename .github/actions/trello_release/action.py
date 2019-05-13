@@ -91,15 +91,12 @@ def get_pr_from_commit(commit_hash):
     response = requests.get(
         f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:DataDog/{CORE_REPO}+is:merged',
     )
-
-    if raw:
-        return response
-    else:
-        try:
-            response.raise_for_status()
-            return response.json()
-        except HTTPError:
-            return None
+    try:
+        response.raise_for_status()
+        return response.json()
+    except HTTPError as e:
+        emit_dd_event(FAILED, f'Couldn\'t retrieve github PR from commit: {e}')
+        raise e
 
 
 if __name__ == "__main__":
