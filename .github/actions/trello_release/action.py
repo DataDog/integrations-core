@@ -21,6 +21,7 @@ import requests
     'DD_API_KEY',
 )
 
+GITHUB_REPO = os.environ['GITHUB_REPOSITORY']
 TRELLO_API_URL = "https://api.trello.com/1/cards"
 SUCCESS = "Success"
 FAILED = "Failed"
@@ -88,7 +89,7 @@ def should_create_card(pull_request_event):
 # Return the first PR found from the provided commit
 def get_pr_from_commit(commit_hash):
     response = requests.get(
-        f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:{os.environ['GITHUB_REPOSITORY']}+is:merged',
+        f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:{GITHUB_REPO}+is:merged',
     )
     try:
         response.raise_for_status()
