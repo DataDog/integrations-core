@@ -1,5 +1,5 @@
 workflow "Create Trello Card" {
-  on = "pull_request"
+  on = "push"
   resolves = ["Datadog Github-Trello"]
 }
 
