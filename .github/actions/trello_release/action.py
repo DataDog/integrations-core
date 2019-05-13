@@ -21,6 +21,7 @@ import requests
     'DD_API_KEY',
 )
 
+CORE_REPO = 'integrations-core'
 TRELLO_API_URL = "https://api.trello.com/1/cards"
 SUCCESS = "Success"
 FAILED = "Failed"
@@ -49,17 +50,6 @@ def emit_dd_event(status, msg):
 
     api.Event.create(title=title, text=text, tags=tags)
 
-# Retrieve the github environment from the docker runtime Github Actions provides
-# https://developer.github.com/actions/creating-github-actions/accessing-the-runtime-environment/
-def get_github_event():
-    event_file_path = os.environ[EVENT_PATH_ENV_VAR]
-    try:
-        with open(event_file_path, "r") as f:
-            pull_request_event = f.read()
-        return json.loads(pull_request_event)
-    except (IOError, ValueError) as e:
-        emit_dd_event(FAILED, f"Unable to create Trello card: {e}")
-        raise
 
 # Create the Trello card on the board specified by the environment variable
 # https://developers.trello.com/reference/#cards-2
@@ -83,20 +73,39 @@ def should_create_card(pull_request_event):
     pr_includes_changes = False
     pr_is_merged = False
 
-    for label in pull_request_event.get('pull_request').get('labels', []):
+    for label in pull_request_event.get('labels', []):
         label = label.get('name', '')
         if label.startswith('changelog/') and label != 'changelog/no-changelog':
             pr_includes_changes = True
 
-    if pull_request_event.get('merged') and pull_request_event.get('action') == 'closed':
+    with open(os.environ['GITHUB_EVENT_PATH'], 'r') as f:
+        github_event = json.loads(f.read())
+
+    if 'master' in github_event.get('ref'):
         pr_is_merged = True
 
     return pr_includes_changes and pr_is_merged
 
+
+def get_pr_from_commit(commit_hash):
+    response = requests.get(
+        f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:DataDog/{CORE_REPO}+is:merged',
+    )
+
+    if raw:
+        return response
+    else:
+        try:
+            response.raise_for_status()
+            return response.json()
+        except HTTPError:
+            return None
+
+
 if __name__ == "__main__":
     validate_env_vars()
-    pull_request_event = get_github_event()
-    pr_url = pull_request_event.get('pull_request').get('url')
+    pull_request = get_pr_from_commit(os.environ['GITHUB_SHA']).get('items')[0]
+    pr_url = pull_request.get('url')
     if should_create_card(pull_request_event):
         try:
             create_trello_card(pull_request_event.get('pull_request'))
