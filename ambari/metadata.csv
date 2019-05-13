@@ -1,31 +1,31 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-ambari.clustername.hostname.boottime,gauge,connection,millisecond,,Host boot time.,0,ambari,BootTime
-ambari.clustername.hostname.cpu.cpu_idle,gauge,connection,percent,,Host Idle CPU.,0,ambari,CPUIdle
-ambari.clustername.hostname.cpu.cpu_nice,gauge,connection,percent,,Host Nice CPU.,0,ambari,CPUNice
-ambari.clustername.hostname.cpu.cpu_num,gauge,connection,,,Host Idle CPU.,0,ambari,CPUNum
-ambari.clustername.hostname.cpu.cpu_system,gauge,connection,percent,,Host System CPU.,0,ambari,CPUSystem
-ambari.clustername.hostname.cpu.cpu_user,gauge,connection,percent,,Host User CPU.,0,ambari,CPUIdle
-ambari.clustername.hostname.cpu.cpu_wio,gauge,connection,percent,,Host CPU waiting for IO.,0,ambari,CPUWIO
-ambari.clustername.hostname.disk.disk_free,gauge,connection,byte,,Free disk space.,0,ambari,DiskFree
-ambari.clustername.hostname.disk.disk_total,gauge,connection,byte,,Total disk size.,0,ambari,DiskTotal
-ambari.clustername.hostname.disk.read_bytes,gauge,connection,byte,,Read bytes.,0,ambari,DiskReadBytes
-ambari.clustername.hostname.disk.read_count,gauge,connection,,,Read count.,0,ambari,DiskReadCount
-ambari.clustername.hostname.disk.read_time,gauge,connection,millisecond,,Disk read time.,0,ambari,DiskReadTime
-ambari.clustername.hostname.disk.write_bytes,gauge,connection,byte,,Written bytes.,0,ambari,DiskWriteBytes
-ambari.clustername.hostname.disk.write_count,gauge,connection,,,Written count.,0,ambari,DiskWriteCount
-ambari.clustername.hostname.disk.write_time,gauge,connection,millisecond,,Disk write time.,0,ambari,DiskWriteTime
-ambari.clustername.hostname.load_fifteen,gauge,connection,percent,,Load fifteen.,0,ambari,Load15
-ambari.clustername.hostname.load_five,gauge,connection,percent,,Load Five.,0,ambari,Load5
-ambari.clustername.hostname.load_one,gauge,connection,percent,,Load one.,0,ambari,Load1
-ambari.clustername.hostname.memory.mem_cached,gauge,connection,byte,,Cached Memory.,0,ambari,MemCached
-ambari.clustername.hostname.memory.mem_free,gauge,connection,byte,,Free Memory.,0,ambari,MemFree
-ambari.clustername.hostname.memory.mem_shared,gauge,connection,byte,,Shared Memory.,0,ambari,MemShared
-ambari.clustername.hostname.memory.mem_total,gauge,connection,byte,,Total Memory,0,ambari,MemTotal
-ambari.clustername.hostname.memory.swap_free,gauge,connection,byte,,Free Swap,0,ambari,MemSwapFree
-ambari.clustername.hostname.memory.swap_total,gauge,connection,byte,,Total Swap,0,ambari,MemSwapTotal
-ambari.clustername.hostname.network.bytes_in,gauge,connection,byte,,Network bytes in.,0,ambari,NetBytesIn
-ambari.clustername.hostname.network.bytes_out,gauge,connection,byte,,Network byres out.,0,ambari,NetBytesOut
-ambari.clustername.hostname.network.pkts_in,gauge,connection,byte,,Network packets in.,0,ambari,NetPacketsIn
-ambari.clustername.hostname.network.pkts_out,gauge,connection,byte,,Network packets out.,0,ambari,NetPacketsOut
-ambari.clustername.hostname.process.proc_run,gauge,connection,,,Process run.,0,ambari,ProcRun
-ambari.clustername.hostname.process.proc_total,gauge,connection,,,Process total.,0,ambari,ProcTotal
+ambari.boottime,gauge,connection,millisecond,,Host boot time.,0,ambari,BootTime
+ambari.cpu.cpu_idle,gauge,connection,percent,,Host Idle CPU.,0,ambari,CPUIdle
+ambari.cpu.cpu_nice,gauge,connection,percent,,Host Nice CPU.,0,ambari,CPUNice
+ambari.cpu.cpu_num,gauge,connection,,,Host Idle CPU.,0,ambari,CPUNum
+ambari.cpu.cpu_system,gauge,connection,percent,,Host System CPU.,0,ambari,CPUSystem
+ambari.cpu.cpu_user,gauge,connection,percent,,Host User CPU.,0,ambari,CPUIdle
+ambari.cpu.cpu_wio,gauge,connection,percent,,Host CPU waiting for IO.,0,ambari,CPUWIO
+ambari.disk.disk_free,gauge,connection,byte,,Free disk space.,0,ambari,DiskFree
+ambari.disk.disk_total,gauge,connection,byte,,Total disk size.,0,ambari,DiskTotal
+ambari.disk.read_bytes,gauge,connection,byte,,Read bytes.,0,ambari,DiskReadBytes
+ambari.disk.read_count,gauge,connection,,,Read count.,0,ambari,DiskReadCount
+ambari.disk.read_time,gauge,connection,millisecond,,Disk read time.,0,ambari,DiskReadTime
+ambari.disk.write_bytes,gauge,connection,byte,,Written bytes.,0,ambari,DiskWriteBytes
+ambari.disk.write_count,gauge,connection,,,Written count.,0,ambari,DiskWriteCount
+ambari.disk.write_time,gauge,connection,millisecond,,Disk write time.,0,ambari,DiskWriteTime
+ambari.load_fifteen,gauge,connection,percent,,Load fifteen.,0,ambari,Load15
+ambari.load_five,gauge,connection,percent,,Load Five.,0,ambari,Load5
+ambari.load_one,gauge,connection,percent,,Load one.,0,ambari,Load1
+ambari.memory.mem_cached,gauge,connection,byte,,Cached Memory.,0,ambari,MemCached
+ambari.memory.mem_free,gauge,connection,byte,,Free Memory.,0,ambari,MemFree
+ambari.memory.mem_shared,gauge,connection,byte,,Shared Memory.,0,ambari,MemShared
+ambari.memory.mem_total,gauge,connection,byte,,Total Memory,0,ambari,MemTotal
+ambari.memory.swap_free,gauge,connection,byte,,Free Swap,0,ambari,MemSwapFree
+ambari.memory.swap_total,gauge,connection,byte,,Total Swap,0,ambari,MemSwapTotal
+ambari.network.bytes_in,gauge,connection,byte,,Network bytes in.,0,ambari,NetBytesIn
+ambari.network.bytes_out,gauge,connection,byte,,Network byres out.,0,ambari,NetBytesOut
+ambari.network.pkts_in,gauge,connection,byte,,Network packets in.,0,ambari,NetPacketsIn
+ambari.network.pkts_out,gauge,connection,byte,,Network packets out.,0,ambari,NetPacketsOut
+ambari.process.proc_run,gauge,connection,,,Process run.,0,ambari,ProcRun
+ambari.process.proc_total,gauge,connection,,,Process total.,0,ambari,ProcTotal
