@@ -68,7 +68,7 @@ def create_trello_card(pull_request_event):
         "idList": os.environ[TRELLO_LIST_ID],
         "keepFromSource":"all",
         "name": pull_request_event.get('title'),
-        "description": pull_request_event.get('body', '')[:5000],
+        "desc": pull_request_event.get('body', '')[:5000],
         "key": os.environ[TRELLO_KEY_ENV_VAR],
         "token": os.environ[TRELLO_TOKEN_ENV_VAR]
     }
