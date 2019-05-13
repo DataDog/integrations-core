@@ -97,6 +97,7 @@ if __name__ == "__main__":
     validate_env_vars()
     pull_request_event = get_github_event()
     pr_url = pull_request_event.get('pull_request').get('url')
+    print(pull_request_event)
     if should_create_card(pull_request_event):
         try:
             create_trello_card(pull_request_event.get('pull_request'))
