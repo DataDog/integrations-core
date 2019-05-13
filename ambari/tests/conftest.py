@@ -17,15 +17,10 @@ def instance():
         'username': 'admin',
         'password': 'admin',
         'services': {
-             "HDFS": {"NAMENODE": [], "DATANODE": []},
-             "YARN": {
-                 "NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"],
-                 "YARNCLIENT": []
-             },
-             "MAPREDUCE2": {
-                 "HISTORYSERVER": ["BufferPool", "Memory", "jvm"]
-             }
-        }
+            "HDFS": {"NAMENODE": [], "DATANODE": []},
+            "YARN": {"NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"], "YARNCLIENT": []},
+            "MAPREDUCE2": {"HISTORYSERVER": ["BufferPool", "Memory", "jvm"]},
+        },
     }
 
 

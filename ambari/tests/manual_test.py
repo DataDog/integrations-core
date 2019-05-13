@@ -18,13 +18,8 @@ def test_check(aggregator):
             "tags": ["test:manual"],
             "services": {
                 "HDFS": {"NAMENODE": [], "DATANODE": []},
-                "YARN": {
-                    "NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"],
-                    "YARNCLIENT": []
-                },
-                 "MAPREDUCE2": {
-                     "HISTORYSERVER": ["BufferPool", "Memory", "jvm"]
-                 }
+                "YARN": {"NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"], "YARNCLIENT": []},
+                "MAPREDUCE2": {"HISTORYSERVER": ["BufferPool", "Memory", "jvm"]},
             },
             "metric_headers": ["cpu", "jvm"],
             "timeout": 30,

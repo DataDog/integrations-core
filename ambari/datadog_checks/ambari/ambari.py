@@ -36,12 +36,7 @@ class AmbariCheck(AgentCheck):
         collect_service_status = self._should_collect_service_status()
         if collect_service_metrics or collect_service_status:
             self.get_service_status_and_metrics(
-                base_url,
-                clusters,
-                whitelisted_services,
-                base_tags,
-                collect_service_metrics,
-                collect_service_status,
+                base_url, clusters, whitelisted_services, base_tags, collect_service_metrics, collect_service_status
             )
 
     def _should_collect_host_metrics(self):
@@ -111,13 +106,7 @@ class AmbariCheck(AgentCheck):
         self.set_external_tags(external_tags)
 
     def get_service_status_and_metrics(
-        self,
-        base_url,
-        clusters,
-        whitelisted_services,
-        base_tags,
-        collect_service_metrics,
-        collect_service_status,
+        self, base_url, clusters, whitelisted_services, base_tags, collect_service_metrics, collect_service_status
     ):
         if not whitelisted_services:
             self.log.warning("Service metrics or status collection activated but no services have been whitelisted")
@@ -129,8 +118,7 @@ class AmbariCheck(AgentCheck):
                 service_tags = tags + [SERVICE_TAG + service.lower()]
 
                 if collect_service_metrics:
-                    self.get_component_metrics(
-                        base_url, cluster, service, service_tags, components)
+                    self.get_component_metrics(base_url, cluster, service, service_tags, components)
                 if collect_service_status:
                     self.get_service_checks(base_url, cluster, service, service_tags)
 
