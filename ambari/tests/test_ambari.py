@@ -90,12 +90,46 @@ def test_get_host_metrics(instance):
     ambari._get_hosts_info = MagicMock(return_value=responses.HOSTS_INFO)
     ambari._submit_gauge = MagicMock()
     ambari.set_external_tags = MagicMock()
+    cluster_tag = ['ambari_cluster:cluster1']
 
-    ambari.get_host_metrics('localhost', ['cluster1'], [])
+    ambari.get_host_metrics('localhost', ['cluster1'])
     ambari.set_external_tags.assert_called_with(
-        [('my_host_1', {'ambari': ['ambari_cluster:cluster1']}), ('my_host_2', {'ambari': ['ambari_cluster:cluster1']})]
+        [('my_host_1', {'ambari': cluster_tag}), ('my_host_2', {'ambari': ['ambari_cluster:cluster1']})]
     )
+    
     assert ambari._submit_gauge.call_count == 30
+    ambari._submit_gauge.assert_has_calls([
+        call('boottime', 1555934503.0, cluster_tag, 'my_host_2'),
+        call('cpu.cpu_idle', 62.8, cluster_tag, 'my_host_2'),
+        call('cpu.cpu_nice', 0.0, cluster_tag, 'my_host_2'),
+        call('cpu.cpu_num', 4.0, cluster_tag, 'my_host_2'),
+        call('cpu.cpu_system', 5.1, cluster_tag, 'my_host_2'),
+        call('cpu.cpu_user', 32.0, cluster_tag, 'my_host_2'),
+        call('cpu.cpu_wio', 0.0, cluster_tag, 'my_host_2'),
+        call('disk.disk_free', 124.35, cluster_tag, 'my_host_2'),
+        call('disk.disk_total', 148.29, cluster_tag, 'my_host_2'),
+        call('disk.read_bytes', 1594053632.0, cluster_tag, 'my_host_2'),
+        call('disk.read_count', 42717.0, cluster_tag, 'my_host_2'),
+        call('disk.read_time', 240986.0, cluster_tag, 'my_host_2'),
+        call('disk.write_bytes', 117000843264.0, cluster_tag, 'my_host_2'),
+        call('disk.write_count', 499318.0, cluster_tag, 'my_host_2'),
+        call('disk.write_time', 5946304.0, cluster_tag, 'my_host_2'),
+        call('load.load_fifteen', 0.99, cluster_tag, 'my_host_2'),
+        call('load.load_five', 1.35, cluster_tag, 'my_host_2'),
+        call('load.load_one', 0.57, cluster_tag, 'my_host_2'),
+        call('memory.mem_cached', 3554248.0, cluster_tag, 'my_host_2'),
+        call('memory.mem_free', 11327848.0, cluster_tag, 'my_host_2'),
+        call('memory.mem_shared', 0.0, cluster_tag, 'my_host_2'),
+        call('memory.mem_total', 15399208.0, cluster_tag, 'my_host_2'),
+        call('memory.swap_free', 0.0, cluster_tag, 'my_host_2'),
+        call('memory.swap_total', 0.0, cluster_tag, 'my_host_2'),
+        call('network.bytes_in', 683.2346950556641, cluster_tag, 'my_host_2'),
+        call('network.bytes_out', 12517.203580542699, cluster_tag, 'my_host_2'),
+        call('network.pkts_in', 8.499187630576825, cluster_tag, 'my_host_2'),
+        call('network.pkts_out', 10.498996484830196, cluster_tag, 'my_host_2'),
+        call('process.proc_run', 0.0, cluster_tag, 'my_host_2'),
+        call('process.proc_total', 128.0, cluster_tag, 'my_host_2')
+    ])
 
 
 def test_get_component_metrics(init_config, instance):

@@ -78,7 +78,8 @@ class AmbariCheck(AgentCheck):
                 clusters.append(c.get('cluster_name'))
         return clusters
 
-    def get_host_metrics(self, base_url, clusters, base_tags):
+    def get_host_metrics(self, base_url, clusters, base_tags=None):
+        base_tags = base_tags or []
         external_tags = []
         for cluster in clusters:
             cluster_tag = CLUSTER_TAG_TEMPLATE.format(cluster)
