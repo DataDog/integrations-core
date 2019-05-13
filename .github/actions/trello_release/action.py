@@ -114,4 +114,4 @@ if __name__ == "__main__":
         else:
             emit_dd_event(SUCCESS, f"Succesfully created Trello card for PR {pr_url}")
     else:
-        print(f"Not creating a card for Pull Request {pr_url}")
+        print(f"Not creating a card for commit {os.environ['GITHUB_SHA']}")
