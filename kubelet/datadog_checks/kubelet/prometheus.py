@@ -47,6 +47,8 @@ class CadvisorPrometheusScraperMixin(object):
             'container_network_transmit_errors_total': self.container_network_transmit_errors_total,
             'container_network_transmit_packets_dropped_total': self.container_network_transmit_packets_dropped_total,
             'container_network_receive_packets_dropped_total': self.container_network_receive_packets_dropped_total,
+            'container_network_tcp_usage_total': self.container_network_tcp_usage_total,
+            'container_network_udp_usage_total': self.container_network_udp_usage_total,
             'container_fs_usage_bytes': self.container_fs_usage_bytes,
             'container_fs_limit_bytes': self.container_fs_limit_bytes,
             'container_memory_usage_bytes': self.container_memory_usage_bytes,
@@ -480,6 +482,16 @@ class CadvisorPrometheusScraperMixin(object):
         metric_name = scraper_config['namespace'] + '.network.rx_dropped'
         labels = ['interface']
         self._process_pod_rate(metric_name, metric, scraper_config, labels=labels)
+
+    def container_network_tcp_usage_total(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.network.tcp.usage'
+        labels = ['tcp_state']
+        self._process_usage_metric(metric_name, metric, {}, scraper_config, labels=labels)
+
+    def container_network_udp_usage_total(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.network.udp.usage'
+        labels = ['udp_state']
+        self._process_usage_metric(metric_name, metric, {}, scraper_config, labels=labels)
 
     def container_fs_usage_bytes(self, metric, scraper_config):
         """
