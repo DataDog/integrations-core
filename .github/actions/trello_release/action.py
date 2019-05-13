@@ -94,7 +94,7 @@ def get_pr_from_commit(commit_hash):
     try:
         response.raise_for_status()
         return response.json().get('items')[0]
-    except (requests.HTTPError, IndexError) as e:
+    except requests.HTTPError as e:
         emit_dd_event(FAILED, f'Couldn\'t retrieve github PR from commit: {e}')
         raise e
     except IndexError as e:
