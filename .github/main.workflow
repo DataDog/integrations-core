@@ -1,6 +1,6 @@
 workflow "Create Trello Card" {
   resolves = ["Datadog Github-Trello"]
-  on = "push"
+  on = "pull_request"
 }
 
 action "Datadog Github-Trello" {
