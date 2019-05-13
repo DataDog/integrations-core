@@ -27,7 +27,7 @@ class Istio(OpenMetricsBaseCheck):
 
     def check(self, instance):
         """
-        Process both the istio_mesh instance and process_mixer instance
+        Process the istio_mesh endpoint, the process_mixer endpoint and optionally the pilot and galley endpoints
         associated with this instance.
         """
 
@@ -70,11 +70,11 @@ class Istio(OpenMetricsBaseCheck):
             yield istio_mesh_instance
             process_mixer_instance = self._create_process_mixer_instance(instance)
             yield process_mixer_instance
-            process_pilot_instance = self._create_process_pilot_instance(instance)
-            if process_pilot_instance:
+            if 'pilot_endpoint' in instance:
+                process_pilot_instance = self._create_process_pilot_instance(instance)
                 yield process_pilot_instance
-            process_galley_instance = self._create_process_galley_instance(instance)
-            if process_galley_instance:
+            if 'galley_endpoint' in instance:
+                process_galley_instance = self._create_process_galley_instance(instance)
                 yield process_galley_instance
 
     def _get_generic_metrics(self):
