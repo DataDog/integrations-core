@@ -63,12 +63,12 @@ def get_github_event():
 
 # Create the Trello card on the board specified by the environment variable
 # https://developers.trello.com/reference/#cards-2
-def create_trello_card(pull_request_event):
+def create_trello_card(pull_request_event, pr_url):
     querystring = {
         "idList": os.environ[TRELLO_LIST_ID],
         "keepFromSource":"all",
         "name": pull_request_event.get('title'),
-        "desc": f"PR URL: {pull_request_event.get('url')}\n\n{pull_request_event.get('body', '')[:5000]}",
+        "desc": f"PR URL: {pr_url}\n\n{pull_request_event.get('body', '')[:5000]}",
         "key": os.environ[TRELLO_KEY_ENV_VAR],
         "token": os.environ[TRELLO_TOKEN_ENV_VAR]
     }
@@ -96,10 +96,10 @@ def should_create_card(pull_request_event):
 if __name__ == "__main__":
     validate_env_vars()
     pull_request_event = get_github_event()
-    pr_url = pull_request_event.get('pull_request').get('url')
+    pr_url = pull_request_event.get('pull_request', {}).get('html_url')
     if should_create_card(pull_request_event):
         try:
-            create_trello_card(pull_request_event.get('pull_request'))
+            create_trello_card(pull_request_event.get('pull_request'), pr_url)
         except Exception as e:
             emit_dd_event(FAILED, f"Couldn't submit card to Trello API: {e}")
         else:
