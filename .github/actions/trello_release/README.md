@@ -6,9 +6,9 @@ The success or failure of the card creation is then emitted to Datadog as an Eve
 
 The following environment variables are requuired for this Action to function:
 
-* "TRELLO_LIST_ID" - The ID of the Trello list where cards should be created
-* "DD_API_KEY" - To emit events to the Datadog account
-* "TRELLO_TOKEN" - The trello token required to create the card
-* "TRELLO_KEY" - Trello Users's API key, also required to create the card
+* `TRELLO_LIST_ID` - The ID of the Trello list where cards should be created
+* `DD_API_KEY` - To emit events to the Datadog account
+* `TRELLO_TOKEN` - The trello token required to create the card
+* `TRELLO_KEY` - Trello Users's API key, also required to create the card
 
-Note: There is an issue where this action will not run under a certain condition. If the Pull Request is merged and the branch is deleted prior to the action completing, the action will be stuck in a `waiting to run` loop indefinitely.
+**Note:** There is an issue where this action will not run under a certain condition. If the Pull Request is merged and the branch is deleted prior to the action completing, the action will be stuck in a `waiting to run` loop indefinitely.
