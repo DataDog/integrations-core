@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  cacti:
+    image: quantumobject/docker-cacti
+    hostname: ${HOST}
+    container_name: dd-test-cacti
+    environment:
+      - CLUSTER_NAME=MapReduceCluster
+    ports:
+      - "3306:3306"
