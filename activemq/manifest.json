@@ -24,5 +24,12 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "activemq"
+  "integration_id": "activemq",
+  "assets": {
+    "service_checks": "assets/service_checks.json",
+    "monitors": [],
+    "dashboards": {
+      "ActiveMQ Overview": "assets/dashboards/overview.json"
+    }
+  }
 }
