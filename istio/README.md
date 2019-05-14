@@ -31,7 +31,7 @@ instances:
     send_histograms_buckets: true
 ```
 
-The first two endpoints need to be connected to the check for it to work. To learn more about the prometheus adapter, you can read the [istio documentation][4].
+The first two endpoints are required for the check to work. See the [istio documentation][4] to learn more about the prometheus adapter.
 
 ### Validation
 
