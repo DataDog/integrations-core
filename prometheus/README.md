@@ -41,6 +41,8 @@ Due to the nature of this integration, it's possible to submit a high number of 
 
 All metrics collected by the prometheus check are forwarded to Datadog as custom metrics.
 
+The metric `send_monotonic_counter` defaults to `True` and uses `self.monotonic_count`, so the agent sends the deltas and the in-app type is count. With `send_monotonic_counter: False` Datadog sends the raw, monotonically increasing value, and the in-app type is gauge.
+
 ### Events
 The Prometheus check does not include any events.
 
