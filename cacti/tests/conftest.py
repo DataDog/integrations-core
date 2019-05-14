@@ -11,6 +11,7 @@ from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.cacti import CactiCheck
 
 from .common import (
+    HERE,
     HOST,
     INSTANCE_INTEGRATION
 )
