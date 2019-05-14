@@ -79,7 +79,7 @@ def setup_mapreduce():
         close_fds=True,
     )
 
-    # Called in WaitFor which catches excpetions
+    # Called in WaitFor which catches exceptions
     r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
 
     return r.json().get("apps", None) is not None
