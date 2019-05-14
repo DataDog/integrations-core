@@ -24,7 +24,6 @@ import requests
 TRELLO_API_URL = "https://api.trello.com/1/cards"
 SUCCESS = "Success"
 FAILED = "Failed"
-REPO_URL = f'https://github.com/{os.environ['REPOSITORY_NAME']}'
 
 # Make sure all environment variables are present
 def validate_env_vars():
@@ -97,7 +96,7 @@ def should_create_card(pull_request_event):
 if __name__ == "__main__":
     validate_env_vars()
     pull_request_event = get_github_event()
-    pr_url = f'REPO_URL/pull/{pull_request_event.get('number')}'
+    pr_url = pull_request_event.get('pull_request', {}).get('html_url')
     if should_create_card(pull_request_event):
         try:
             create_trello_card(pull_request_event.get('pull_request'), pr_url)
