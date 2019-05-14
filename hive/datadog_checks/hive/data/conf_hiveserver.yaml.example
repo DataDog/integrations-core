@@ -104,92 +104,14 @@ init_config:
   ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
 
   conf:
-    # Metrics Hive Metastore related
-    - include:
-        bean: metrics:name=create_total_count_dbs
-        attribute:
-          Count:
-            alias: hive.metastore.db.created
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=delete_total_count_dbs
-        attribute:
-          Count:
-            alias: hive.metastore.db.deleted
-            metric_type: monotonic_count
-      
-    - include:
-        bean: metrics:name=total_count_dbs
-        attribute:
-          Count:
-            alias: hive.metastore.db
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=create_total_count_tables
-        attribute:
-          Count:
-            alias: hive.metastore.table.created
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=delete_total_count_tables
-        attribute:
-          Count:
-            alias: hive.metastore.table.deleted
-            metric_type: monotonic_count
-    
-    - include:
-        bean: metrics:name=total_count_tables
-        attribute:
-          Count:
-            alias: hive.metastore.table
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=create_total_count_partitions
-        attribute:
-          Count:
-            alias: hive.metastore.partition.created
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=delete_total_count_partitions
-        attribute:
-          Count:
-            alias: hive.metastore.partition.deleted
-            metric_type: monotonic_count
-    
-    - include:
-        bean: metrics:name=total_count_partitions
-        attribute:
-          Count:
-            alias: hive.metastore.partition
-            metric_type: gauge
-
-    - include:
-        bean: directsql_errors
-        attribute:
-          Count:
-            alias: hive.metastore.directsql_errors
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=open_connections
-        attribute:
-          Count:
-            alias: hive.metastore.open_connections
-            metric_type: gauge
-
+    # Metrics HiveServer2 related
     - include:
         bean: metrics:name=open_operations
         attribute:
           Count:
-            alias: hive.metastore.open_operations
+            alias: hive.server.open_operations
             metric_type: gauge
 
-    # Metrics HiveServer2 related
     # Session
     - include:
         bean: metrics:name=hs2_active_sessions
@@ -220,7 +142,6 @@ init_config:
             metric_type: gauge
 
     # Queries
-    ## TODO: type
     - include:
         bean: metrics:name=active_calls_hs2_submitted_queries
         attribute:
@@ -594,4 +515,96 @@ init_config:
         attribute:
           Count:
             alias: hive.server.operation.completed.closed.count
+            metric_type: gauge
+
+    # Memory
+    - include:
+        bean: metrics:name=memory.heap.init
+        attribute:
+          Value:
+            alias: hive.server.memory.heap.init
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.heap.usage
+        attribute:
+          Value:
+            alias: hive.server.memory.heap.usage
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.heap.used
+        attribute:
+          Value:
+            alias: hive.server.memory.heap.used
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.heap.max
+        attribute:
+          Value:
+            alias: hive.server.memory.heap.max
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.heap.committed
+        attribute:
+          Value:
+            alias: hive.server.memory.heap.committed
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.init
+        attribute:
+          Value:
+            alias: hive.server.memory.non-heap.init
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.usage
+        attribute:
+          Value:
+            alias: hive.server.memory.non-heap.usage
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.used
+        attribute:
+          Value:
+            alias: hive.server.memory.non-heap.used
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.max
+        attribute:
+          Value:
+            alias: hive.server.memory.non-heap.max
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.committed
+        attribute:
+          Value:
+            alias: hive.server.memory.non-heap.committed
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.init
+        attribute:
+          Value:
+            alias: hive.server.memory.total.init
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.usage
+        attribute:
+          Value:
+            alias: hive.server.memory.total.usage
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.used
+        attribute:
+          Value:
+            alias: hive.server.memory.total.used
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.max
+        attribute:
+          Value:
+            alias: hive.server.memory.total.max
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.committed
+        attribute:
+          Value:
+            alias: hive.server.memory.total.committed
             metric_type: gauge

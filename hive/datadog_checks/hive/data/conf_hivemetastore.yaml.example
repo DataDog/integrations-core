@@ -1,0 +1,421 @@
+instances:
+
+    ## @param host - string - required
+    ## Presto host to connect to.
+    #
+  - host: localhost
+
+    ## @param port - integer - required
+    ## Presto port to connect to.
+    #
+    port: 9999
+
+    ## @param tags  - list of key:value elements - optional
+    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param user - string - optional
+    ## Username to use when connecting to presto.
+    #
+    # user: <USERNAME>
+
+    ## @param password - string - optional
+    ## Password to use when connecting to presto.
+    #
+    # password: <PASSWORD>
+
+    ## @param process_name_regex - string - optional
+    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below.
+    ## Note: It needs to be set when process_name_regex parameter is set
+    ##
+    #
+    # process_name_regex: .*process_name.*
+
+    ## @param tools_jar_path - string - optional
+    ## Path to the tool.jar file to use with `process_name_regex` parameter.
+    #
+    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+
+    ## @param name - string - optional
+    ## Set your instance name.
+    #
+    # name: hivemetastore_instance
+
+    ## @param java_bin_path - string - optional
+    ## java_bin_path should be set if the agent cannot find your java executable
+    #
+    # java_bin_path: <JAVA_PATH>
+
+    ## @param java_options - string - optional
+    ## List of Java JVM options.
+    #
+    # java_options: "-Xmx200m -Xms50m"
+
+    ## @param trust_store_path - string - optional
+    ## trust_store_path should be set if ssl is enabled.
+    ## path to your trusted store
+    #
+    # trust_store_path: <TRUSTSTORE.JKS_PATH>
+
+    ## @param trust_store_password - string - optional
+    ## trust_store_password should be set if ssl is enabled
+    ## password for your TrustStore.jks file
+    #
+    # trust_store_password: password
+
+    ## @param key_store_path - string - optional
+    ## key_store_path should be set if client authentication is enabled on the target JVM.
+    ## path to your key store
+    #
+    # key_store_path: <KEYSTORE.JKS_PATH>
+
+    ## @param key_store_password - string - optional
+    ## key_store_password should be set if client authentication is enabled on the target JVM.
+    ## password for your KeyStore.jks file
+    #
+    # key_store_password: <PASSWORD>
+
+    ## @param rmi_registry_ssl - boolean - optional - default: false
+    ## Whether or not the agent should connect to the rmi registry using ssl.
+    #
+    # rmi_registry_ssl: false
+
+init_config:
+
+  ## @param is_jmx - boolean - required - default: true
+  ## Whether or not this file is a configuration for a JMX integration
+  #
+  is_jmx: true
+
+  ## @param collect_default_metrics - boolean - required - default: true
+  ## Whether or not the check should collect all default metrics for this integration.
+  #
+  collect_default_metrics: true
+
+  ## List of metrics to be collected by the integration
+  ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+  ## Agent 5: Customize all your metrics below
+  ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+
+  conf:
+    # Metrics Hive Metastore related
+    - include:
+        bean: metrics:name=open_connections
+        attribute:
+          Count:
+            alias: hive.metastore.open_connections
+            metric_type: gauge
+
+    - include:
+        bean: metrics:name=create_total_count_dbs
+        attribute:
+          Count:
+            alias: hive.metastore.db.created
+            metric_type: monotonic_count
+
+    - include:
+        bean: metrics:name=delete_total_count_dbs
+        attribute:
+          Count:
+            alias: hive.metastore.db.deleted
+            metric_type: monotonic_count
+      
+    - include:
+        bean: metrics:name=init_total_count_dbs
+        attribute:
+          Value:
+            alias: hive.metastore.db.init
+            metric_type: gauge
+
+    - include:
+        bean: metrics:name=create_total_count_tables
+        attribute:
+          Count:
+            alias: hive.metastore.table.created
+            metric_type: monotonic_count
+
+    - include:
+        bean: metrics:name=delete_total_count_tables
+        attribute:
+          Count:
+            alias: hive.metastore.table.deleted
+            metric_type: monotonic_count
+    
+    - include:
+        bean: metrics:name=init_total_count_tables
+        attribute:
+          Value:
+            alias: hive.metastore.table.init
+            metric_type: gauge
+
+    - include:
+        bean: metrics:name=create_total_count_partitions
+        attribute:
+          Count:
+            alias: hive.metastore.partition.created
+            metric_type: monotonic_count
+
+    - include:
+        bean: metrics:name=delete_total_count_partitions
+        attribute:
+          Count:
+            alias: hive.metastore.partition.deleted
+            metric_type: monotonic_count
+    
+    - include:
+        bean: metrics:name=init_total_count_partitions
+        attribute:
+          Value:
+            alias: hive.metastore.partition.init
+            metric_type: gauge
+
+    - include:
+        bean: directsql_errors
+        attribute:
+          Count:
+            alias: hive.metastore.directsql_errors
+            metric_type: gauge
+
+    # Memory
+    - include:
+        bean: metrics:name=memory.heap.init
+        attribute:
+          Value:
+            alias: hive.metastore.memory.heap.init
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.heap.usage
+        attribute:
+          Value:
+            alias: hive.metastore.memory.heap.usage
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.heap.used
+        attribute:
+          Value:
+            alias: hive.metastore.memory.heap.used
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.heap.max
+        attribute:
+          Value:
+            alias: hive.metastore.memory.heap.max
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.heap.committed
+        attribute:
+          Value:
+            alias: hive.metastore.memory.heap.committed
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.init
+        attribute:
+          Value:
+            alias: hive.metastore.memory.non-heap.init
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.usage
+        attribute:
+          Value:
+            alias: hive.metastore.memory.non-heap.usage
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.used
+        attribute:
+          Value:
+            alias: hive.metastore.memory.non-heap.used
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.max
+        attribute:
+          Value:
+            alias: hive.metastore.memory.non-heap.max
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.non-heap.committed
+        attribute:
+          Value:
+            alias: hive.metastore.memory.non-heap.committed
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.init
+        attribute:
+          Value:
+            alias: hive.metastore.memory.total.init
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.usage
+        attribute:
+          Value:
+            alias: hive.metastore.memory.total.usage
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.used
+        attribute:
+          Value:
+            alias: hive.metastore.memory.total.used
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.max
+        attribute:
+          Value:
+            alias: hive.metastore.memory.total.max
+            metric_type: gauge
+    - include:
+        bean: metrics:name=memory.total.committed
+        attribute:
+          Value:
+            alias: hive.metastore.memory.total.committed
+            metric_type: gauge
+
+    # API
+    - include:
+        bean: metrics:name=api_create_table
+        attribute:
+          Count:
+            alias: hive.metastore.api.create_table
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_create_table
+        attribute:
+          Count:
+            alias: hive.metastore.api.create_table.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_get_table
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_table
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_get_table
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_table.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_drop_table
+        attribute:
+          Count:
+            alias: hive.metastore.api.drop_table
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_drop_table
+        attribute:
+          Count:
+            alias: hive.metastore.api.drop_table.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_init
+        attribute:
+          Count:
+            alias: hive.metastore.api.init
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_init
+        attribute:
+          Count:
+            alias: hive.metastore.api.init.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_get_all_databases
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_all_databases
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_get_all_databases
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_all_databases.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_get_database
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_database
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_get_database
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_database.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_get_all_tables
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_all_tables
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_get_all_tables
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_all_tables.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_shutdown
+        attribute:
+          Count:
+            alias: hive.metastore.api.shutdown
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_shutdown
+        attribute:
+          Count:
+            alias: hive.metastore.api.shutdown.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_flushCache
+        attribute:
+          Count:
+            alias: hive.metastore.api.flushcache
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_flushCache
+        attribute:
+          Count:
+            alias: hive.metastore.api.flushcache
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_alter_table
+        attribute:
+          Count:
+            alias: hive.metastore.api.alter_table
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_alter_table
+        attribute:
+          Count:
+            alias: hive.metastore.api.alter_table.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_get_all_functions
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_all_functions
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_get_all_functions
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_all_functions.active_call
+            metric_type: gauge
+    - include:
+        bean: metrics:name=api_get_table_req
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_table_req
+            metric_type: gauge
+    - include:
+        bean: metrics:name=active_calls_api_get_table_req
+        attribute:
+          Count:
+            alias: hive.metastore.api.get_table_req.active_call
+            metric_type: gauge
