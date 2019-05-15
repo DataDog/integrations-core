@@ -59,7 +59,7 @@ instances:
     ## Please note that unlisted consumer groups are not supported at
     ## the moment when zookeeper consumer offset collection is disabled.
     #
-    zk_connect_str:
+  - zk_connect_str:
     - localhost:2181
     # - <ZOOKEEPER_ENDPOINT>:2181
 
