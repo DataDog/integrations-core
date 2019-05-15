@@ -1,14 +1,14 @@
 instances:
 
     ## @param host - string - required
-    ## Presto host to connect to.
+    ## HiveMetaStore JMX host to connect to.
     #
   - host: localhost
 
     ## @param port - integer - required
-    ## Presto port to connect to.
+    ## HiveMetaStore JMX port to connect to.
     #
-    port: 9999
+    port: 8808
 
     ## @param tags  - list of key:value elements - optional
     ## List of tags to attach to every metric, event, and service check emitted by this Integration.
@@ -20,12 +20,12 @@ instances:
     #   - <KEY_2>:<VALUE_2>
 
     ## @param user - string - optional
-    ## Username to use when connecting to presto.
+    ## Username to use when connecting to HiveMetaStore JMX.
     #
     # user: <USERNAME>
 
     ## @param password - string - optional
-    ## Password to use when connecting to presto.
+    ## Password to use when connecting to HiveMetaStore JMX.
     #
     # password: <PASSWORD>
 
