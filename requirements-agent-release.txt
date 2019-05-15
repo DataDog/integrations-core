@@ -59,7 +59,7 @@ datadog-linkerd==2.2.0
 datadog-linux-proc-extras==1.2.0; sys_platform == 'linux2'
 datadog-mapreduce==1.4.0
 datadog-marathon==1.7.0; sys_platform != 'win32'
-datadog-mcache==1.5.0; sys_platform != 'win32'
+datadog-mcache==1.6.0; sys_platform != 'win32'
 datadog-mesos-master==1.3.0; sys_platform != 'win32'
 datadog-mesos-slave==1.3.0; sys_platform != 'win32'
 datadog-mongo==1.8.0
