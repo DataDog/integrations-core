@@ -7,7 +7,7 @@ import time
 import mock
 import pytest
 
-from datadog_checks.cacti import Cacti
+from datadog_checks.cacti import CactiCheck
 
 log = logging.getLogger()
 
@@ -104,7 +104,7 @@ CACTI_CONFIG = {'mysql_host': 'nohost', 'mysql_user': 'mocked', 'rrd_path': '/rr
 
 @pytest.fixture
 def check():
-    return Cacti(CHECK_NAME, {}, {})
+    return CactiCheck(CHECK_NAME, {}, {})
 
 
 def test_check(aggregator, check):
@@ -117,8 +117,8 @@ def test_check(aggregator, check):
     mocks = [
         mock.patch('datadog_checks.cacti.cacti.rrdtool'),
         mock.patch('datadog_checks.cacti.cacti.pymysql.connect', return_value=mock_conn),
-        mock.patch('datadog_checks.cacti.Cacti._get_rrd_info', return_value=MOCK_INFO),
-        mock.patch('datadog_checks.cacti.Cacti._get_rrd_fetch', return_value=MOCK_FETCH),
+        mock.patch('datadog_checks.cacti.CactiCheck._get_rrd_info', return_value=MOCK_INFO),
+        mock.patch('datadog_checks.cacti.CactiCheck._get_rrd_fetch', return_value=MOCK_FETCH),
     ]
 
     for mock_func in mocks:
