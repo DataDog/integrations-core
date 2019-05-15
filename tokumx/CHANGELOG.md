@@ -1,5 +1,9 @@
 # CHANGELOG - tokumx
 
+## 2.1.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3576](https://github.com/DataDog/integrations-core/pull/3576).
+
 ## 2.0.0 / 2019-02-18
 
 * [Changed] Vendor pymongo into tokumx check. See [#3001](https://github.com/DataDog/integrations-core/pull/3001).
