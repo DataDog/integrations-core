@@ -111,4 +111,4 @@ datadog-win32-event-log==2.0.0; sys_platform == 'win32'
 datadog-windows-service==2.1.0; sys_platform == 'win32'
 datadog-wmi-check==1.4.0; sys_platform == 'win32'
 datadog-yarn==1.7.0
-datadog-zk==2.1.0; sys_platform != 'win32'
+datadog-zk==2.2.0; sys_platform != 'win32'
