@@ -1,5 +1,13 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.24.0 / 2019-05-14
+
+* [Added] Ambari integration. See [#3670](https://github.com/DataDog/integrations-core/pull/3670).
+* [Added] Fail if service check file doesn't exist. See [#3691](https://github.com/DataDog/integrations-core/pull/3691).
+* [Added] Add default service check file to new checks templates. See [#3726](https://github.com/DataDog/integrations-core/pull/3726).
+* [Added] Adds ddev YAML config validator. See [#3679](https://github.com/DataDog/integrations-core/pull/3679).
+* [Added] Upgrade pyyaml to 5.1. See [#3698](https://github.com/DataDog/integrations-core/pull/3698).
+
 ## 0.23.2 / 2019-04-30
 
 * [Fixed] Remove spurious debug line. See [#3703](https://github.com/DataDog/integrations-core/pull/3703).
