@@ -7,7 +7,6 @@ import pytest
 from copy import deepcopy
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.cacti import CactiCheck
 
 from .common import (
@@ -19,10 +18,9 @@ from .common import (
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    env = {'HOSTNAME': HOST}
+    env = {'HOST': HOST}
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-        #conditions=[WaitFor(setup_mapreduce, attempts=240, wait=5)],
         env_vars=env,
     ):
         yield INSTANCE_INTEGRATION

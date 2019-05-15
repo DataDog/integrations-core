@@ -40,7 +40,8 @@ class CactiCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.last_ts = {}
 
-    def get_library_versions(self):
+    @classmethod
+    def get_library_versions(cls):
         if rrdtool is not None:
             return {"rrdtool": rrdtool.__version__}
         return {"rrdtool": "Not Found"}
@@ -70,7 +71,7 @@ class CactiCheck(AgentCheck):
 
         self.gauge('cacti.metrics.count', metric_count, tags=config.tags)
 
-    def _get_whitelist_patterns(self, whitelist):
+    def _get_whitelist_patterns(self, whitelist=None):
         patterns = []
         if whitelist:
             if not os.path.isfile(whitelist) or not os.access(whitelist, os.R_OK):
@@ -84,7 +85,8 @@ class CactiCheck(AgentCheck):
 
         return patterns
 
-    def _get_config(self, instance):
+    @classmethod
+    def _get_config(cls, instance):
         required = ['mysql_host', 'mysql_user', 'rrd_path']
         for param in required:
             if not instance.get(param):
@@ -95,7 +97,7 @@ class CactiCheck(AgentCheck):
         password = instance.get('mysql_password', '') or ''
         db = instance.get('mysql_db', 'cacti')
         rrd_path = instance.get('rrd_path')
-        whitelist = instance.get('rrd_whitelist')
+        whitelist = instance.get('rrd_whitelist', None)
         field_names = instance.get('field_names', ['ifName', 'dskDevice'])
         tags = instance.get('tags', [])
 
@@ -105,14 +107,16 @@ class CactiCheck(AgentCheck):
 
         return Config(host, user, password, db, rrd_path, whitelist, field_names, tags)
 
-    def _get_rrd_info(self, rrd_path):
+    @classmethod
+    def _get_rrd_info(cls, rrd_path):
         return rrdtool.info(rrd_path)
 
-    def _get_rrd_fetch(self, rrd_path, c, start):
+    @classmethod
+    def _get_rrd_fetch(cls, rrd_path, c, start):
         return rrdtool.fetch(rrd_path, c, '--start', str(start))
 
     def _read_rrd(self, rrd_path, hostname, device_name, tags):
-        ''' Main metric fetching method '''
+        """ Main metric fetching method."""
         metric_count = 0
 
         try:
@@ -164,9 +168,9 @@ class CactiCheck(AgentCheck):
         return metric_count
 
     def _fetch_rrd_meta(self, connection, rrd_path_root, whitelist, field_names, tags):
-        ''' Fetch metadata about each RRD in this Cacti DB, returning a list of
-            tuples of (hostname, device_name, rrd_path)
-        '''
+        """ Fetch metadata about each RRD in this Cacti DB, returning a list of
+            tuples of (hostname, device_name, rrd_path).
+        """
 
         def _in_whitelist(rrd):
             path = rrd.replace('<path_rra>/', '')
@@ -213,8 +217,9 @@ class CactiCheck(AgentCheck):
 
         return res
 
-    def _format_metric_name(self, m_name, cfunc):
-        ''' Format a cacti metric name into a Datadog-friendly name '''
+    @classmethod
+    def _format_metric_name(cls, m_name, cfunc):
+        """ Format a cacti metric name into a Datadog-friendly name. """
         try:
             aggr = CFUNC_TO_AGGR[cfunc]
         except KeyError:
@@ -228,8 +233,9 @@ class CactiCheck(AgentCheck):
         except KeyError:
             return "cacti.{}.{}".format(m_name.lower(), aggr)
 
-    def _transform_metric(self, m_name, val):
-        ''' Add any special case transformations here '''
+    @classmethod
+    def _transform_metric(cls, m_name, val):
+        """ Add any special case transformations here. """
         # Report memory in MB
         if m_name[0:11] in ('system.mem.', 'system.disk'):
             return val / 1024
