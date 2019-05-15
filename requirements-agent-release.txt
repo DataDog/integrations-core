@@ -96,7 +96,7 @@ datadog-ssh-check==1.6.0
 datadog-statsd==1.3.0
 datadog-supervisord==1.2.0
 datadog-system-core==1.5.0
-datadog-system-swap==1.5.0
+datadog-system-swap==1.6.0
 datadog-tcp-check==2.2.1
 datadog-teamcity==1.3.0
 datadog-tls==1.0.0
