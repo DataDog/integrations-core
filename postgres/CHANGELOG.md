@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+## 2.8.0 / 2019-05-14
+
+* [Fixed] Fix schema filtering on query relations. See [#3449](https://github.com/DataDog/integrations-core/pull/3449). Thanks [fischaz](https://github.com/fischaz).
+* [Added] Upgrade psycopg2-binary to 2.8.2. See [#3649](https://github.com/DataDog/integrations-core/pull/3649).
+* [Added] Adhere to code style. See [#3557](https://github.com/DataDog/integrations-core/pull/3557).
+
 ## 2.7.0 / 2019-04-05
 
 * [Added] Adds an option to tag metrics with `replication_role`. See [#2929](https://github.com/DataDog/integrations-core/pull/2929).

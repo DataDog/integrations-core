@@ -78,7 +78,7 @@ datadog-pdh-check==1.5.0; sys_platform == 'win32'
 datadog-pgbouncer==1.6.0; sys_platform != 'win32'
 datadog-php-fpm==1.5.0
 datadog-postfix==1.4.0; sys_platform != 'win32'
-datadog-postgres==2.7.0
+datadog-postgres==2.8.0
 datadog-powerdns-recursor==1.2.0
 datadog-presto==1.0.0
 datadog-process==1.9.0
