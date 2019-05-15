@@ -1,5 +1,10 @@
 # CHANGELOG - iis
 
+## 2.5.0 / 2019-05-14
+
+* [Added] Cosmetic cleanups. See [#3706](https://github.com/DataDog/integrations-core/pull/3706).
+* [Added] Adhere to code style. See [#3521](https://github.com/DataDog/integrations-core/pull/3521).
+
 ## 2.4.0 / 2019-03-29
 
 * [Added] adds `iis_host` tag to metrics. See [#3294](https://github.com/DataDog/integrations-core/pull/3294).

@@ -1,5 +1,9 @@
 # CHANGELOG - Nfsstat
 
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3544](https://github.com/DataDog/integrations-core/pull/3544).
+
 ## 1.3.0 / 2019-03-29
 
 * [Added] Support Python 3. See [#3228](https://github.com/DataDog/integrations-core/pull/3228).

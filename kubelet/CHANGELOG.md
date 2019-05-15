@@ -1,5 +1,11 @@
 # CHANGELOG - kubelet
 
+## 3.1.0 / 2019-05-14
+
+* [Added] Collect network usage metrics. See [#3740](https://github.com/DataDog/integrations-core/pull/3740).
+* [Added] add useful prometheus labels to metric tags. See [#3735](https://github.com/DataDog/integrations-core/pull/3735).
+* [Added] Adhere to code style. See [#3525](https://github.com/DataDog/integrations-core/pull/3525).
+
 ## 3.0.1 / 2019-04-04
 
 * [Fixed] Fix podlist multiple iterations when using pod expiration. See [#3456](https://github.com/DataDog/integrations-core/pull/3456).

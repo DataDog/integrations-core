@@ -1,5 +1,9 @@
 # CHANGELOG - active_directory
 
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3483](https://github.com/DataDog/integrations-core/pull/3483).
+
 ## 1.3.0 / 2019-02-18
 
 * [Fixed] Fix flake8. See [#3077](https://github.com/DataDog/integrations-core/pull/3077).

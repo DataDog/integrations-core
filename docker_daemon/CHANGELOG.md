@@ -1,5 +1,9 @@
 # CHANGELOG - docker_daemon
 
+## 1.11.0 / 2019-05-14
+
+* [Added] Support docker.kmem.usage. See [#3339](https://github.com/DataDog/integrations-core/pull/3339). Thanks [wolf31o2](https://github.com/wolf31o2).
+
 ## 1.10.2 / 2019-01-04
 
 * [Fixed] Demote critical log levels to error. See [#2795][1].

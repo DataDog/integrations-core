@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 4.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3526](https://github.com/DataDog/integrations-core/pull/3526).
+
 ## 4.3.0 / 2019-03-29
 
 * [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).

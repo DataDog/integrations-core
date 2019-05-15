@@ -1,5 +1,10 @@
 # CHANGELOG - windows_service
 
+## 2.1.0 / 2019-05-14
+
+* [Fixed] Add debug to compare short names, service names and patterns. See [#3427](https://github.com/DataDog/integrations-core/pull/3427).
+* [Added] Adhere to code style. See [#3583](https://github.com/DataDog/integrations-core/pull/3583).
+
 ## 2.0.0 / 2018-10-12
 
 * [Added] Pin pywin32 dependency. See [#2322][1].

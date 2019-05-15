@@ -1,5 +1,9 @@
 # CHANGELOG - twemproxy
 
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3577](https://github.com/DataDog/integrations-core/pull/3577).
+
 ## 1.3.0 / 2019-01-04
 
 * [Added] Refactor Twemproxy tests and add E2E. See [#2820][1].

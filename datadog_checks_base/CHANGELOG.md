@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.1.0 / 2019-05-14
+
+* [Fixed] Fix the initialization of ignored metrics for OpenMetrics. See [#3736](https://github.com/DataDog/integrations-core/pull/3736).
+* [Fixed] Fixed decoding warning for None tags for python2 check base class. See [#3665](https://github.com/DataDog/integrations-core/pull/3665).
+* [Added] Add logging support to RequestsWrapper. See [#3737](https://github.com/DataDog/integrations-core/pull/3737).
+
 ## 8.0.0 / 2019-05-06
 
 * [Added] Add easier namespacing for data submission. See [#3718](https://github.com/DataDog/integrations-core/pull/3718).

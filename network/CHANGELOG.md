@@ -1,5 +1,11 @@
 # CHANGELOG - network
 
+## 1.11.0 / 2019-05-14
+
+* [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
+* [Added] Add conntrack metrics. See [#3624](https://github.com/DataDog/integrations-core/pull/3624).
+* [Added] Adhere to code style. See [#3543](https://github.com/DataDog/integrations-core/pull/3543).
+
 ## 1.10.0 / 2019-03-29
 
 * [Added] Strip white space when reading from proc_conntrack_max_path. See [#3365](https://github.com/DataDog/integrations-core/pull/3365).
