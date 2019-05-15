@@ -1,5 +1,10 @@
 # CHANGELOG - rabbitmq
 
+## 1.8.0 / 2019-05-14
+
+* [Fixed] Fix default log path. See [#3611](https://github.com/DataDog/integrations-core/pull/3611).
+* [Added] Adhere to code style. See [#3561](https://github.com/DataDog/integrations-core/pull/3561).
+
 ## 1.7.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2791][1].
