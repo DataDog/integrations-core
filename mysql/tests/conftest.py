@@ -25,10 +25,8 @@ def dd_environment(instance_basic):
             'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
             'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
         },
-        conditions=[WaitFor(init_master, wait=2), WaitFor(init_slave, wait=2)],
+        conditions=[WaitFor(init_master, wait=2), WaitFor(init_slave, wait=2), populate_database],
     ):
-        master_conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
-        _populate_database(master_conn)
         yield instance_basic
 
 
@@ -95,7 +93,9 @@ def _add_dog_user(conn):
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
 
 
-def _populate_database(conn):
+def populate_database():
+    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
+
     cur = conn.cursor()
     cur.execute("USE mysql;")
     cur.execute("CREATE DATABASE testdb;")
