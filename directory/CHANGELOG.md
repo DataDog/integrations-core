@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3499](https://github.com/DataDog/integrations-core/pull/3499).
+
 ## 1.3.1 / 2018-10-12
 
 * [Fixed] Make the error message more clear in case a path is not accessible. See [#2369][1].
