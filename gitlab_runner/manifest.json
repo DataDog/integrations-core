@@ -22,5 +22,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "gitlab-runner"
+  "integration_id": "gitlab-runner",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "gitlab_runner/assets/service_checks.json"
+  }
 }

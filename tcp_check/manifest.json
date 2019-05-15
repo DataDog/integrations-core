@@ -24,5 +24,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "system"
+  "integration_id": "system",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "tcp_check/assets/service_checks.json"
+  }
 }

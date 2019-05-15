@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "wmi"
+  "integration_id": "wmi",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "wmi_check/assets/service_checks.json"
+  }
 }

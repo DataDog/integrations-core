@@ -33,5 +33,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "php-fpm"
+  "integration_id": "php-fpm",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "php_fpm/assets/service_checks.json"
+  }
 }

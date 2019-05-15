@@ -21,5 +21,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "cockroachdb"
+  "integration_id": "cockroachdb",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "cockroachdb/assets/service_checks.json"
+  }
 }

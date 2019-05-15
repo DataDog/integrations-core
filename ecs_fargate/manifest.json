@@ -22,5 +22,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "aws-fargate"
+  "integration_id": "aws-fargate",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "ecs_fargate/assets/service_checks.json"
+  }
 }

@@ -28,5 +28,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "redis"
+  "integration_id": "redis",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "redisdb/assets/service_checks.json"
+  }
 }

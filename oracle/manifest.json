@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "oracle"
+  "integration_id": "oracle",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "oracle/assets/service_checks.json"
+  }
 }

@@ -28,5 +28,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "zookeeper"
+  "integration_id": "zookeeper",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "zk/assets/service_checks.json"
+  }
 }

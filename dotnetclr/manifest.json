@@ -18,5 +18,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "dotnetclr"
+  "integration_id": "dotnetclr",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "dotnetclr/assets/service_checks.json"
+  }
 }

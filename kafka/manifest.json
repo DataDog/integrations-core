@@ -25,5 +25,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "kafka"
+  "integration_id": "kafka",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "kafka/assets/service_checks.json"
+  }
 }

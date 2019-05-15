@@ -29,5 +29,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "postgres"
+  "integration_id": "postgres",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "postgres/assets/service_checks.json"
+  }
 }

@@ -23,5 +23,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "solr"
+  "integration_id": "solr",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "solr/assets/service_checks.json"
+  }
 }

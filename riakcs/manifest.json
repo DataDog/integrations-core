@@ -23,5 +23,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "riak-cs"
+  "integration_id": "riak-cs",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "riakcs/assets/service_checks.json"
+  }
 }

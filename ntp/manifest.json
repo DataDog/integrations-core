@@ -21,5 +21,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "ntp"
+  "integration_id": "ntp",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "ntp/assets/service_checks.json"
+  }
 }

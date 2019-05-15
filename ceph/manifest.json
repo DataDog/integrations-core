@@ -25,5 +25,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "ceph"
+  "integration_id": "ceph",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "ceph/assets/service_checks.json"
+  }
 }

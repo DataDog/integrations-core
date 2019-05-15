@@ -27,5 +27,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "supervisord"
+  "integration_id": "supervisord",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "supervisord/assets/service_checks.json"
+  }
 }

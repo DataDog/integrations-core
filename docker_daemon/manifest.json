@@ -30,5 +30,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "docker"
+  "integration_id": "docker",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "docker_daemon/assets/service_checks.json"
+  }
 }

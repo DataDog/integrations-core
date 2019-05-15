@@ -19,5 +19,10 @@
     "linux"
   ],
   "type": "check",
-  "integration_id": "openshift"
+  "integration_id": "openshift",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "openshift/assets/service_checks.json"
+  }
 }

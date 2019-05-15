@@ -22,5 +22,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "ibm-was"
+  "integration_id": "ibm-was",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "ibm_was/assets/service_checks.json"
+  }
 }

@@ -21,5 +21,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "hyper-v"
+  "integration_id": "hyper-v",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "hyperv/assets/service_checks.json"
+  }
 }

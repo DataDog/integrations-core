@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "system"
+  "integration_id": "system",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "directory/assets/service_checks.json"
+  }
 }

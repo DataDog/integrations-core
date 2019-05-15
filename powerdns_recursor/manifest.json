@@ -28,5 +28,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "powerdns"
+  "integration_id": "powerdns",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "powerdns_recursor/assets/service_checks.json"
+  }
 }

@@ -23,5 +23,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "openstack"
+  "integration_id": "openstack",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "openstack/assets/service_checks.json"
+  }
 }

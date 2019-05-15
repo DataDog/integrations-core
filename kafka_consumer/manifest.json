@@ -20,5 +20,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "kafka-consumer"
+  "integration_id": "kafka-consumer",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "kafka_consumer/assets/service_checks.json"
+  }
 }

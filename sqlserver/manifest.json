@@ -19,5 +19,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "sql-server"
+  "integration_id": "sql-server",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "sqlserver/assets/service_checks.json"
+  }
 }

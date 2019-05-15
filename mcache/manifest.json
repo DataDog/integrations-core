@@ -26,5 +26,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "memcached"
+  "integration_id": "memcached",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "mcache/assets/service_checks.json"
+  }
 }

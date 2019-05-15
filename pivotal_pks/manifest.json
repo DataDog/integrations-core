@@ -18,5 +18,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "pivotal-pks"
+  "integration_id": "pivotal-pks",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "pivotal_pks/assets/service_checks.json"
+  }
 }

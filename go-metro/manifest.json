@@ -19,5 +19,10 @@
     "linux"
   ],
   "type": "check",
-  "integration_id": "go-metro"
+  "integration_id": "go-metro",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "go-metro/assets/service_checks.json"
+  }
 }

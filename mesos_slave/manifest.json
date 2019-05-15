@@ -21,5 +21,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "mesos-slave"
+  "integration_id": "mesos-slave",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "mesos_slave/assets/service_checks.json"
+  }
 }

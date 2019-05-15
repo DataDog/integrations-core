@@ -24,5 +24,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "nginx-ingress-controller"
+  "integration_id": "nginx-ingress-controller",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "nginx_ingress_controller/assets/service_checks.json"
+  }
 }

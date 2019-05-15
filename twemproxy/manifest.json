@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "twemproxy"
+  "integration_id": "twemproxy",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "twemproxy/assets/service_checks.json"
+  }
 }

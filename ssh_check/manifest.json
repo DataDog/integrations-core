@@ -28,5 +28,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "ssh"
+  "integration_id": "ssh",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "ssh_check/assets/service_checks.json"
+  }
 }

@@ -27,5 +27,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "mongodb"
+  "integration_id": "mongodb",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "mongo/assets/service_checks.json"
+  }
 }

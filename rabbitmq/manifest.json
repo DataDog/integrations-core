@@ -24,5 +24,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "rabbitmq"
+  "integration_id": "rabbitmq",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "rabbitmq/assets/service_checks.json"
+  }
 }

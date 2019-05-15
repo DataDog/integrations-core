@@ -22,5 +22,12 @@
   ],
   "type": "check",
   "integration_id": "snmp",
-  "aliases": ["/agent/faq/how-to-monitor-snmp-devices/"]
+  "aliases": [
+    "/agent/faq/how-to-monitor-snmp-devices/"
+  ],
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "snmp/assets/service_checks.json"
+  }
 }

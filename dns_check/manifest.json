@@ -24,5 +24,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "dns"
+  "integration_id": "dns",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "dns_check/assets/service_checks.json"
+  }
 }

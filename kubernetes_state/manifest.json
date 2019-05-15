@@ -20,5 +20,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "kubernetes-state"
+  "integration_id": "kubernetes-state",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "kubernetes_state/assets/service_checks.json"
+  }
 }

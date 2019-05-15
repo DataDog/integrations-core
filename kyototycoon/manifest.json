@@ -23,5 +23,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "kyoto-tycoon"
+  "integration_id": "kyoto-tycoon",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "kyototycoon/assets/service_checks.json"
+  }
 }

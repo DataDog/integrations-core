@@ -19,5 +19,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "aerospike"
+  "integration_id": "aerospike",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "aerospike/assets/service_checks.json"
+  }
 }

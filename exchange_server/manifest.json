@@ -18,5 +18,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "exchange-server"
+  "integration_id": "exchange-server",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "exchange_server/assets/service_checks.json"
+  }
 }

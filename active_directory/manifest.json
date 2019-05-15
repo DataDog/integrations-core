@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "active-directory"
+  "integration_id": "active-directory",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "active_directory/assets/service_checks.json"
+  }
 }

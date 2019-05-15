@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "statsd"
+  "integration_id": "statsd",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "statsd/assets/service_checks.json"
+  }
 }

@@ -17,5 +17,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "pdh"
+  "integration_id": "pdh",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "pdh_check/assets/service_checks.json"
+  }
 }

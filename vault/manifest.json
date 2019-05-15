@@ -23,5 +23,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "vault"
+  "integration_id": "vault",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "vault/assets/service_checks.json"
+  }
 }

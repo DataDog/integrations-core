@@ -18,5 +18,10 @@
     "linux"
   ],
   "type": "check",
-  "integration_id": "kubelet"
+  "integration_id": "kubelet",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "kubelet/assets/service_checks.json"
+  }
 }

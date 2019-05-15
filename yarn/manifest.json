@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "yarn"
+  "integration_id": "yarn",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "yarn/assets/service_checks.json"
+  }
 }

@@ -27,5 +27,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "haproxy"
+  "integration_id": "haproxy",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "haproxy/assets/service_checks.json"
+  }
 }

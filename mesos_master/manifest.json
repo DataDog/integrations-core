@@ -29,5 +29,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "mesos-master"
+  "integration_id": "mesos-master",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "mesos_master/assets/service_checks.json"
+  }
 }

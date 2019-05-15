@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "kube-proxy"
+  "integration_id": "kube-proxy",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "kube_proxy/assets/service_checks.json"
+  }
 }

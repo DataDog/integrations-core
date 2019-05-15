@@ -18,5 +18,10 @@
   "is_public": true,
   "display_name": "Containerd",
   "creates_events": true,
-  "integration_id": "containerd"
+  "integration_id": "containerd",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "containerd/assets/service_checks.json"
+  }
 }

@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "spark"
+  "integration_id": "spark",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "spark/assets/service_checks.json"
+  }
 }

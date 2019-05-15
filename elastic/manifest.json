@@ -27,5 +27,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "elasticsearch"
+  "integration_id": "elasticsearch",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "elastic/assets/service_checks.json"
+  }
 }

@@ -21,5 +21,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "openldap"
+  "integration_id": "openldap",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "openldap/assets/service_checks.json"
+  }
 }

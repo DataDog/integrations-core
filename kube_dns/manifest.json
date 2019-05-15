@@ -21,5 +21,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "kube-dns"
+  "integration_id": "kube-dns",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "kube_dns/assets/service_checks.json"
+  }
 }

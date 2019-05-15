@@ -29,5 +29,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "consul"
+  "integration_id": "consul",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "consul/assets/service_checks.json"
+  }
 }

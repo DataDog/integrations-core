@@ -19,5 +19,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "iis"
+  "integration_id": "iis",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "iis/assets/service_checks.json"
+  }
 }
