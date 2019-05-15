@@ -85,7 +85,7 @@ datadog-process==1.10.0
 datadog-prometheus==3.2.0
 datadog-rabbitmq==1.8.0
 datadog-redisdb==1.11.0
-datadog-riak==1.4.0
+datadog-riak==1.5.0
 datadog-riakcs==2.0.0
 datadog-snmp==1.6.0
 datadog-solr==1.2.0
