@@ -47,7 +47,7 @@ datadog-jboss-wildfly==1.0.0
 datadog-kafka-consumer==1.9.0; sys_platform != 'win32'
 datadog-kafka==1.4.0
 datadog-kong==1.5.0
-datadog-kube-controller-manager==1.1.0
+datadog-kube-controller-manager==1.2.0
 datadog-kube-dns==2.2.0
 datadog-kube-proxy==3.1.0
 datadog-kube-scheduler==1.0.0
