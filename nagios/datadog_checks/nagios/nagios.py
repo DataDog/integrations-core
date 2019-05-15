@@ -72,7 +72,7 @@ RE_LINE_EXT = re.compile(r'^\[(\d+)\] ([^:]+): (.*)$')
 SOURCE_TYPE_NAME = 'Nagios'
 
 
-class Nagios(AgentCheck):
+class NagiosCheck(AgentCheck):
 
     NAGIOS_CONF_KEYS = [
         re.compile(r'^(?P<key>log_file)\s*=\s*(?P<value>.+)$'),
@@ -86,7 +86,7 @@ class Nagios(AgentCheck):
         """
         Compatability wrapper for Agents that do not submit gauge metrics with custom timestamps
         """
-        orig_gauge = super(Nagios, self).gauge
+        orig_gauge = super(NagiosCheck, self).gauge
         # remove 'timestamp' arg if the base class' gauge function does not accept a 'timestamp' arg
         if 'timestamp' in kwargs and 'timestamp' not in getargspec(orig_gauge).args:
             del kwargs['timestamp']
