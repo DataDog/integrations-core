@@ -92,7 +92,7 @@ datadog-solr==1.2.0
 datadog-spark==1.7.0
 datadog-sqlserver==1.11.0; sys_platform != 'darwin'
 datadog-squid==1.2.0
-datadog-ssh-check==1.5.0
+datadog-ssh-check==1.6.0
 datadog-statsd==1.2.0
 datadog-supervisord==1.1.4
 datadog-system-core==1.4.0
