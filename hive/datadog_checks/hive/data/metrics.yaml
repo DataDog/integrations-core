@@ -65,7 +65,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hive.server.queries.submitted.count
-          metric_type: gauge
+          metric_type: monotonic_count
         MeanRate:
           alias: hive.server.queries.submitted.meanrate
           metric_type: rate
@@ -97,7 +97,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hive.server.queries.compiling.count
-          metric_type: gauge
+          metric_type: monotonic_count
         MeanRate:
           alias: hive.server.queries.compiling.meanrate
           metric_type: rate
@@ -129,7 +129,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hive.server.queries.executing.count
-          metric_type: gauge
+          metric_type: monotonic_count
         MeanRate:
           alias: hive.server.queries.executing.meanrate
           metric_type: rate
@@ -138,10 +138,10 @@ jmx_metrics:
       bean: metrics:name=hs2_succeeded_queries
       attribute:
         Count:
-          alias: hive.server.queries.succeeded
-          type: gauge
+          alias: hive.server.queries.succeeded.count
+          type: monotonic_count
         MeanRate:
-          alias: hive.server.queries.meanrate
+          alias: hive.server.queries.succeeded.meanrate
           type: rate
 
   # SQL operation
@@ -173,39 +173,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hive.server.api.sql_operation.pending.count
-          metric_type: gauge
-        MeanRate:
-          alias: hive.server.api.sql_operation.pending.meanrate
-          metric_type: rate
-
-  - include:
-      bean: metrics:name=active_calls_api_hs2_sql_operation_PENDING
-      attribute:
-        Count:
-          alias: hive.server.api.sql_operation.pending.active_call
-          metric_type: gauge
-
-  - include:
-      bean: metrics:name=api_hs2_sql_operation_PENDING
-      attribute:
-        Max:
-          alias: hive.server.api.sql_operation.pending.max
-          metric_type: gauge
-        Mean:
-          alias: hive.server.api.sql_operation.pending.mean
-          metric_type: gauge
-        Min:
-          alias: hive.server.api.sql_operation.pending.min
-          metric_type: gauge
-        75thPercentile:
-          alias: hive.server.api.sql_operation.pending.75percentile
-          metric_type: gauge
-        95thPercentile:
-          alias: hive.server.api.sql_operation.pending.95percentile
-          metric_type: gauge
-        Count:
-          alias: hive.server.api.sql_operation.pending.count
-          metric_type: gauge
+          metric_type: monotonic_count
         MeanRate:
           alias: hive.server.api.sql_operation.pending.meanrate
           metric_type: rate
@@ -238,39 +206,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hive.server.api.sql_operation.running.count
-          metric_type: gauge
-        MeanRate:
-          alias: hive.server.api.sql_operation.running.meanrate
-          metric_type: rate
-  
-  - include:
-      bean: metrics:name=active_calls_api_hs2_sql_operation_RUNNING
-      attribute:
-        Count:
-          alias: hive.server.api.sql_operation.running.active_call
-          metric_type: gauge
-
-  - include:
-      bean: metrics:name=api_hs2_sql_operation_RUNNING
-      attribute:
-        Max:
-          alias: hive.server.api.sql_operation.running.max
-          metric_type: gauge
-        Mean:
-          alias: hive.server.api.sql_operation.running.mean
-          metric_type: gauge
-        Min:
-          alias: hive.server.api.sql_operation.running.min
-          metric_type: gauge
-        75thPercentile:
-          alias: hive.server.api.sql_operation.running.75percentile
-          metric_type: gauge
-        95thPercentile:
-          alias: hive.server.api.sql_operation.running.95percentile
-          metric_type: gauge
-        Count:
-          alias: hive.server.api.sql_operation.running.count
-          metric_type: gauge
+          metric_type: monotonic_count
         MeanRate:
           alias: hive.server.api.sql_operation.running.meanrate
           metric_type: rate
@@ -281,14 +217,14 @@ jmx_metrics:
       attribute:
         Count:
           alias: hive.server.sql_operation.completed.closed
-          metric_type: gauge
+          metric_type: monotonic_count
 
   - include:
       bean: metrics:name=hs2_completed_sql_operation_FINISHED
       attribute:
         Count:
           alias: hive.server.sql_operation.completed.finished
-          metric_type: gauge
+          metric_type: monotonic_count
 
   # User
   - include:
@@ -327,7 +263,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hive.server.api.operation.initialized.count
-          metric_type: gauge
+          metric_type: monotonic_count
         MeanRate:
           alias: hive.server.api.operation.initialized.meanrate
           metric_type: rate
@@ -360,7 +296,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hive.server.api.operation.pending.count
-          metric_type: gauge
+          metric_type: monotonic_count
         MeanRate:
           alias: hive.server.api.operation.pending.meanrate
           metric_type: rate
@@ -393,7 +329,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hive.server.api.operation.running.count
-          metric_type: gauge
+          metric_type: monotonic_count
         MeanRate:
           alias: hive.server.api.operation.running.meanrate
           metric_type: rate
@@ -404,14 +340,14 @@ jmx_metrics:
       attribute:
         Count:
           alias: hive.server.operation.completed.finished
-          metric_type: gauge
+          metric_type: monotonic_count
 
   - include:
       bean: metrics:name=hs2_completed_operation_CLOSED
       attribute:
         Count:
-          alias: hive.server.operation.completed.closed.count
-          metric_type: gauge
+          alias: hive.server.operation.completed.closed
+          metric_type: monotonic_count
 
   # Memory
   - include:
@@ -782,7 +718,7 @@ jmx_metrics:
       bean: metrics:name=active_calls_api_flushCache
       attribute:
         Count:
-          alias: hive.metastore.api.flushcache
+          alias: hive.metastore.api.flushcache.active_call
           metric_type: gauge
   - include:
       bean: metrics:name=api_alter_table
