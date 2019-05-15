@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  cacti:
+    build: .
+    hostname: ${HOST}
+    container_name: dd-test-nagios
+    #ports:
+    #  - "3306:3306"

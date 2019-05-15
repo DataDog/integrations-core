@@ -3,8 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from datadog_checks.dev import get_docker_hostname, get_here
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
+HOST = get_docker_hostname()
+
+CONTAINER_NAME = "dd-test-nagios"
+
+INSTANCE_INTEGRATION = {'nagios_conf': 'path',
+                        'collect_task_metrics': True}
+
+EXPECTED_METRICS = []
 
 CHECK_NAME = 'nagios'
 CUSTOM_TAGS = ['optional:tag1']

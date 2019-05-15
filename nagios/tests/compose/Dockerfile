@@ -1,0 +1,2 @@
+FROM quantumobject/docker-nagios
+
