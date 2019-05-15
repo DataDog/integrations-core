@@ -1,1 +1,50 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+hive.metastore.open_connections,gauge,10,connection,,Number of connection opened.,0,hive,hms open connection
+hive.metastore.db.created,count,10,unit,,Total number of created database.,0,hive,hms db created
+hive.metastore.db.deleted,count,10,unit,,Total number of deleted database.,0,hive,hms db deleted
+hive.metastore.db.init,gauge,10,unit,,Number of initialized database.,0,hive,hms db init
+hive.metastore.table.created,count,10,table,,Total number of created table.,0,hive,hms table created
+hive.metastore.table.deleted,count,10,table,,Total number of deleted table.,0,hive,hms table deleted
+hive.metastore.table.init,gauge,10,table,,Number of initialized table.,0,hive,hms table init
+hive.metastore.partition.created,count,10,unit,,Total number of created partition.,0,hive,hms partition created
+hive.metastore.partition.deleted,count,10,unit,,Total number of deleted partition.,0,hive,hms partition deleted
+hive.metastore.partition.init,count,10,unit,,Number of initialized partition.,0,hive,hms partition init
+hive.metastore.directsql_errors,gauge,10,unit,,Number of SQL error.,0,hive,hms sql error
+hive.metastore.memory.heap.init,gauge,10,byte,,Memory used at the initialization by the metastore.,0,hive,hms mem heap init
+hive.metastore.memory.heap.usage,gauge,10,unit,,,0,hive,hms mem heap usage
+hive.metastore.memory.heap.used,gauge,10,byte,,Memory used by the metastore.,0,hive,hms mem heap used
+hive.metastore.memory.heap.max,gauge,10,byte,,Maximum memory that can be used by the metastore.,0,hive,hms mem heap max
+hive.metastore.memory.heap.committed,gauge,10,byte,,Committed memory for the metastore.,0,hive,hms mem heap committed
+hive.metastore.memory.non-heap.init,gauge,10,byte,,Memory used at the initialization by the metastore.,0,hive,hms mem non heap init
+hive.metastore.memory.non-heap.usage,gauge,10,unit,,,0,hive,hms mem non heap usage
+hive.metastore.memory.non-heap.used,gauge,10,byte,,Memory used by the metastore.,0,hive,hms non heap used
+hive.metastore.memory.non-heap.max,gauge,10,byte,,Maximum memory that can be used by the metastore.,0,hive,hms non heap max
+hive.metastore.memory.non-heap.committed,gauge,10,byte,,Committed memory for the metastore,0,hive,hms non heap committed
+hive.metastore.memory.total.init,gauge,10,byte,,Total memory at the initialization by the metastore.,0,hive,hms mem total init
+hive.metastore.memory.total.usage,gauge,10,unit,,,0,hive,hms mem total usage
+hive.metastore.memory.total.max,gauge,10,byte,,Total maximum memory that can be used for the metastore.,0,hive,hms mem total max
+hive.metastore.memory.total.committed,gauge,10,byte,,Total committed memory for the metastore.,0,hive,hms mem total committed
+hive.metastore.api.create_table,gauge,10,unit,,API call to create a table.,0,hive,hms api create table
+hive.metastore.api.create_table.active_call,gauge,10,unit,,Active API call to create a table.,0,hive,hms active api create table
+hive.metastore.api.get_table,gauge,10,unit,,API call to get a table.,0,hive,hms api get table
+hive.metastore.api.get_table.active_call,gauge,10,unit,,Active API call to get a table.,0,hive,hms active api get table
+hive.metastore.api.drop_table,gauge,10,unit,,API call to drop a table.,0,hive,hms api drop table
+hive.metastore.api.drop_table.active_call,gauge,10,unit,,Active API call to drop a table.,0,hive,hms active api drop table
+hive.metastore.api.init,gauge,10,unit,,API initialization.,0,hive,hms api init
+hive.metastore.api.init.active_call,gauge,10,unit,,Active API initialization.,0,hive,hms active api init
+hive.metastore.api.get_all_databases,gauge,10,unit,,API call to get all databases.,0,hive,hms api get all get all dbs
+hive.metastore.api.get_all_databases.active_call,gauge,10,unit,,Active API call to get all databases.,0,hive,hms active api get all dbs
+hive.metastore.api.get_database,gauge,10,unit,,API call to get a database.,0,hive,hms api get db
+hive.metastore.api.get_database.active_call,gauge,10,unit,,Active API call to get a database.,0,hive,hms active api get db
+hive.metastore.api.get_all_tables,gauge,10,unit,,API call to get all tables.,0,hive,hms api get all tables
+hive.metastore.api.get_all_tables.active_call,gauge,10,unit,,Active API call to get all tables.,0,hive,hms active api get all tables
+hive.metastore.api.shutdown,gauge,10,unit,,API shutdown.,0,hive,hms api shutdown
+hive.metastore.api.shutdown.active_call,gauge,10,unit,,Active API shutdown.,0,hive,hms active api shutdown
+hive.metastore.api.flushcache,gauge,10,unit,,API flushcache.,0,hive,hms api flushcache
+hive.metastore.api.flushcache.active_call,gauge,10,unit,,Active API flushcache.,0,hive,hms active api flushcache
+hive.metastore.api.alter_table,gauge,10,unit,,API call to alter table.,0,hive,hms api alter table
+hive.metastore.api.alter_table.active_call,gauge,10,unit,,Active API call to alter table.,0,hive,hms active api alter table
+hive.metastore.api.get_all_functions,gauge,10,unit,,API call to get all functions.,0,hive,hms api get all functions
+hive.metastore.api.get_all_functions.active_call,gauge,10,unit,,Active API call to get all functions.,0,hive,hms active api get all functions
+hive.metastore.api.get_table_req,gauge,10,unit,,,0,hive,hms api get table req
+hive.metastore.api.get_table_req.active_call,gauge,10,unit,,,0,hive,hms active api get table req

@@ -381,7 +381,7 @@ init_config:
         bean: metrics:name=active_calls_api_flushCache
         attribute:
           Count:
-            alias: hive.metastore.api.flushcache
+            alias: hive.metastore.api.flushcache.active_call
             metric_type: gauge
     - include:
         bean: metrics:name=api_alter_table
