@@ -1,5 +1,9 @@
 # CHANGELOG - Openstack_controller
 
+## 1.2.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3551](https://github.com/DataDog/integrations-core/pull/3551).
+
 ## 1.1.2 / 2019-04-15
 
 * [Fixed] Get details for both private and public flavors. See [#3621](https://github.com/DataDog/integrations-core/pull/3621).
