@@ -40,7 +40,7 @@ datadog-http-check==4.0.0
 datadog-hyperv==1.1.0; sys_platform == 'win32'
 datadog-ibm-db2==1.1.0
 datadog-ibm-mq==2.0.0; sys_platform == 'linux2'
-datadog-ibm-was==1.0.0
+datadog-ibm-was==1.1.0
 datadog-iis==2.4.0; sys_platform == 'win32'
 datadog-istio==2.1.0
 datadog-jboss-wildfly==1.0.0
