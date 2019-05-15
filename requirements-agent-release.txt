@@ -35,7 +35,7 @@ datadog-go-expvar==1.2.0
 datadog-gunicorn==1.7.0; sys_platform != 'win32'
 datadog-haproxy==2.1.0
 datadog-hdfs-datanode==1.7.0; sys_platform != 'win32'
-datadog-hdfs-namenode==1.5.0; sys_platform != 'win32'
+datadog-hdfs-namenode==1.6.0; sys_platform != 'win32'
 datadog-http-check==3.2.1
 datadog-hyperv==1.0.1; sys_platform == 'win32'
 datadog-ibm-db2==1.0.1

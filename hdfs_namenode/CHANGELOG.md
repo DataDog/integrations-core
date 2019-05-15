@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.6.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3515](https://github.com/DataDog/integrations-core/pull/3515).
+
 ## 1.5.0 / 2019-02-18
 
 * [Added] Support Kerberos auth. See [#2823](https://github.com/DataDog/integrations-core/pull/2823).
