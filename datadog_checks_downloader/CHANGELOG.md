@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 0.5.0 / 2019-05-14
+
+* [Added] Allow users to override TUF repository URL prefix. See [#3660](https://github.com/DataDog/integrations-core/pull/3660).
+* [Added] Adhere to code style. See [#3498](https://github.com/DataDog/integrations-core/pull/3498).
+
 ## 0.4.0 / 2019-03-29
 
 * [Added] Refactor CLI code. See [#3317](https://github.com/DataDog/integrations-core/pull/3317).
