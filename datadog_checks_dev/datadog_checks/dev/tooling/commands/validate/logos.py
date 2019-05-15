@@ -42,7 +42,7 @@ def logos(check):
             blacklisted_integrations_msg += '{} does not currently have an integration tile.\n'.format(display_name)
             continue
 
-        path_to_check_logos = os.path.join(get_root(), check, 'logos')
+        path_to_check_logos = os.path.join(get_root(), check, 'assets', 'logos')
 
         for logo, required_size in REQUIRED_IMAGES.items():
             logo_file_name = os.path.join(path_to_check_logos, logo)

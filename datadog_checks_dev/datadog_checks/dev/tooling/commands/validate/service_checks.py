@@ -11,7 +11,7 @@ from six import string_types
 from ....compat import JSONDecodeError
 from ....utils import file_exists, read_file
 from ...constants import get_root
-from ...utils import get_valid_integrations, parse_version_parts
+from ...utils import get_valid_integrations, load_manifest, parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
@@ -28,7 +28,8 @@ def service_checks():
     for check_name in sorted(get_valid_integrations()):
         display_queue = []
         file_failed = False
-        service_checks_file = os.path.join(root, check_name, 'service_checks.json')
+        manifest = load_manifest(check_name)
+        service_checks_file = os.path.join(root, manifest.get('assets', {}).get('service_checks'))
 
         if not file_exists(service_checks_file):
             echo_info('{}/service_checks.json... '.format(check_name), nl=False)
