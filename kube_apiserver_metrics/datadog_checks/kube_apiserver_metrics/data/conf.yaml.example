@@ -1,4 +1,34 @@
 init_config:
 
 instances:
-  - {}
+
+    ## @param prometheus_endpoint - string - required
+    ## The URL where your application metrics are exposed by Prometheus.
+    #
+  - prometheus_endpoint: localhost:443/metrics
+    
+    ## @param scheme - Used to specify the scheme to reach the APIServer endpoints. - Default to https.
+    #
+    # scheme: "https"
+
+    ## @param bearer_token_path - Used to specify the path where the service account token is located. - Default to "/var/run/secrets/kubernetes.io/serviceaccount/token".
+    #
+    # bearer_token_path: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    
+    ## @param ssl_verify - Used to verify self signed certificates. Default to false
+    # 
+    # ssl_verify: false    
+
+    ## @param tags - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param prometheus_timeout - integer - optional - default: 10
+    ## Set a timeout in second for the prometheus query.
+    #
+    # prometheus_timeout: 10
