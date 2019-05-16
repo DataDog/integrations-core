@@ -137,7 +137,7 @@ def handle_trello_api(params):
 
 
 def get_latest_pr():
-    commit_hash = os.environ['CI_COMMIT_SHA']
+    commit_hash = '117ec34f3c2aca8af9a6251192f049ce311a0673'   # os.environ['CI_COMMIT_SHA']
     url = GITHUB_ISSUES_API.format(commit_hash, REPO)
 
     creation_attempts = 3
