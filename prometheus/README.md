@@ -32,6 +32,8 @@ More advanced settings (ssl, labels joining, custom tags,...) are documented in 
 
 Due to the nature of this integration, it's possible to submit a high number of custom metrics to Datadog. To provide users control over the maximum number of metrics sent in the case of configuration errors or input changes, the check has a default limit of 2000 metrics. If needed, this limit can be increased by setting the option `max_returned_metrics` in the `prometheus.d/conf.yaml` file.
 
+If `send_monotonic_counter: True`, the Agent sends the deltas of the values in question, and the in-app type is set to count (this is the default behaviour). If `send_monotonic_counter: False`, the Agent sends the raw, monotonically increasing value, and the in-app type is set to gauge.
+
 ### Validation
 
 [Run the Agent's `status` subcommand][2] and look for `prometheus` under the Checks section.
