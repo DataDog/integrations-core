@@ -9,7 +9,7 @@ instances:
     ## the CPP extension to process Protocol buffer messages coming from the api. Depending
     ## on the metrics volume, the check may run very slowly.
     #
-  - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+  - istio_mesh_endpoint: http://istio-mesh.istio-system:42422/metrics
 
     ## @param mixer_endpoint - string - required
     ## Define the mixer endpoint in order to collect all Prometheus metrics on the Mixer process as well
