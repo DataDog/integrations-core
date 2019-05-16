@@ -93,7 +93,7 @@ def test__get_custom_metrics_misconfigured(check):
     gauge = mock.MagicMock()
     con = mock.MagicMock()
     cursor = mock.MagicMock()
-    cursor.fetchall.return_value = [["foo", "bar"], ["foo", "bar"]]
+    cursor.__iter__.side_effect = lambda: iter([["foo", "bar"], ["foo", "bar"]])
     con.cursor.return_value = cursor
     check.log = log
     check.gauge = gauge
@@ -166,7 +166,7 @@ def test__get_custom_metrics(aggregator, check):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
     data = [[["tag_value1", "1"]], [[1, 2, "tag_value2"]]]
-    cursor.fetchall.side_effect = lambda: data.pop(0)
+    cursor.__iter__.side_effect = lambda: iter(data.pop(0))
     con.cursor.return_value = cursor
 
     custom_queries = [
@@ -212,7 +212,7 @@ def test__get_custom_metrics_multiple_results(aggregator, check):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
     data = [["tag_value1", "1"], ["tag_value2", "2"]]
-    cursor.fetchall.side_effect = lambda: data
+    cursor.__iter__.side_effect = lambda: iter(data)
     con.cursor.return_value = cursor
 
     custom_queries = [
@@ -231,23 +231,3 @@ def test__get_custom_metrics_multiple_results(aggregator, check):
     aggregator.assert_metric(
         "oracle.test1.metric", value=2, count=1, tags=["tag_name:tag_value2", "query_tags1", "custom_tag"]
     )
-
-
-def test__get_custom_metrics_too_many_results(aggregator, check):
-    con = mock.MagicMock()
-    cursor = mock.MagicMock()
-    data = [["tag_value{}".format(i), i] for i in range(200)]
-    cursor.fetchall.side_effect = lambda: data
-    con.cursor.return_value = cursor
-
-    custom_queries = [
-        {
-            "metric_prefix": "oracle.test1",
-            "query": "mocked",
-            "columns": [{"name": "tag_name", "type": "tag"}, {"name": "metric", "type": "gauge"}],
-            "tags": ["query_tags1"],
-        },
-    ]
-
-    check._get_custom_metrics(con, custom_queries, ["custom_tag"])
-    aggregator.assert_metric("oracle.test1.metric", count=100)

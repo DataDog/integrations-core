@@ -165,20 +165,11 @@ class Oracle(AgentCheck):
 
             with closing(con.cursor()) as cursor:
                 cursor.execute(query)
-                rows = cursor.fetchall()
-                for idx, row in enumerate(rows):
+                for row in cursor:
                     if len(columns) != len(row):
                         self.log.error(
                             'query result for metric_prefix {}: expected {} columns, got {}'.format(
                                 metric_prefix, len(columns), len(row)
-                            )
-                        )
-                        break
-
-                    if idx >= MAX_CUSTOM_RESULTS:
-                        self.warning(
-                            "Query: {} returned more than {} results ({}). Truncating".format(
-                                query, MAX_CUSTOM_RESULTS, len(rows)
                             )
                         )
                         break
