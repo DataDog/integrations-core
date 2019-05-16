@@ -273,6 +273,8 @@ jobs:
     - stage: test
       env: CHECK=teamcity PYTHON3=true
     - stage: test
+      env: CHECK=tls PYTHON3=true
+    - stage: test
     # python 2 support only
       env: CHECK=tokumx
     - stage: test
