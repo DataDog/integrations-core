@@ -40,7 +40,7 @@ def main():
     if should_create_card(pull_request):
         create_trello_card(pull_request)
     else:
-        pr_url = pull_request.get('pull_request', {}).get('html_url')
+        pr_url = pull_request.get('html_url')
         print(f'Not creating a card for Pull Request {pr_url}')
 
 

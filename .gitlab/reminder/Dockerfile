@@ -16,7 +16,4 @@ RUN apk add --update --no-cache bash
 # Copy our resolved requirements
 COPY --from=reqs requirements.txt /
 
-# Copy the script
-COPY remind.py /
-
 RUN pip install -r requirements.txt
