@@ -44,11 +44,11 @@ release-manual:
 
 reminder-image-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  # only:
-  #   changes:
-  #     - .gitlab/reminder/**
-  #   refs:
-  #     - master
+  only:
+    changes:
+      - .gitlab/reminder/**
+    refs:
+      - master
   script:
     - docker build --tag $REMINDER_IMAGE ./.gitlab/reminder/
     - docker images $REMINDER_IMAGE
