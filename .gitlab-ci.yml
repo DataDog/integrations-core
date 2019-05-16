@@ -6,8 +6,8 @@ variables:
 
 release-reminder:
   image: $REMINDER_IMAGE
-  only:
-    - master
+  # only:
+  #   - master
   script:
     - ./.gitlab/release-reminder.sh 2>&1
   tags: [ "runner:main", "size:large" ]
@@ -44,11 +44,11 @@ release-manual:
 
 reminder-image-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  # only:
-  #   changes:
-  #     - .gitlab/reminder/**
-  #   refs:
-  #     - master
+  only:
+    changes:
+      - .gitlab/reminder/**
+    refs:
+      - master
   script:
     - docker build --tag $REMINDER_IMAGE ./.gitlab/reminder/
     - docker images $REMINDER_IMAGE
@@ -58,12 +58,12 @@ reminder-image-builder:
 
 tagger-image-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  # only:
-  #   changes:
-  #     - .gitlab/tagger/**
-  #     - datadog_checks_dev/**
-  #   refs:
-  #     - master
+  only:
+    changes:
+      - .gitlab/tagger/**
+      - datadog_checks_dev/**
+    refs:
+      - master
   script:
     - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile ./datadog_checks_dev/
     - docker images $TAGGER_IMAGE
