@@ -9,7 +9,9 @@ release-reminder:
   # only:
   #   - master
   script:
-    - ./.gitlab/release-reminder.sh 2>&1
+    - ls /
+    - ls .gitlab/
+    - bash ./.gitlab/release-reminder.sh 2>&1
   tags: [ "runner:main", "size:large" ]
 
 release-auto:
