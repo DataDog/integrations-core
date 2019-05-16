@@ -11,6 +11,8 @@ RUN pip-compile --quiet --generate-hashes --output-file requirements.txt require
 # Our actual image
 FROM python:3.7-alpine3.9
 
+RUN apk add --update --no-cache bash
+
 # Copy our resolved requirements
 COPY --from=reqs requirements.txt /
 
