@@ -20,5 +20,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "{check_name_kebab}"
+  "integration_id": "{check_name_kebab}",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }}
