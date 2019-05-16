@@ -6,10 +6,10 @@ variables:
 
 release-reminder:
   image: $REMINDER_IMAGE
-  # only:
-  #   - master
+  only:
+    - master
   script:
-    - ./.gitlab/release-reminder.sh 2>&1
+    - ./.gitlab/reminder/release-reminder.sh 2>&1
   tags: [ "runner:main", "size:large" ]
 
 release-auto:
@@ -20,7 +20,7 @@ release-auto:
     - ddev --version
     - ddev config set core .
     # Prefix every line with a timestamp
-    - ./.gitlab/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
+    - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "runner:main", "size:large" ]
 
 release-manual:
@@ -38,17 +38,17 @@ release-manual:
       if [[ "$tagger" =~ "Tagger: $TAGGER_NAME <$TAGGER_EMAIL>" ]]; then
           echo "Skipping, packages have already been built"
       else
-          ./.gitlab/build-packages.sh
+          ./.gitlab/tagger/build-packages.sh
       fi
   tags: [ "runner:main", "size:large" ]
 
 reminder-image-builder:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  only:
-    changes:
-      - .gitlab/reminder/**
-    refs:
-      - master
+  # only:
+  #   changes:
+  #     - .gitlab/reminder/**
+  #   refs:
+  #     - master
   script:
     - docker build --tag $REMINDER_IMAGE ./.gitlab/reminder/
     - docker images $REMINDER_IMAGE

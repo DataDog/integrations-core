@@ -30,7 +30,7 @@ def main():
         TRELLO_KEY = os.environ['TRELLO_KEY']
         TRELLO_TOKEN = os.environ['TRELLO_TOKEN']
     except KeyError as e:
-        env_var = str(e).replace('KeyError:', '', 1).strip()
+        env_var = str(e).replace('KeyError:', '', 1).strip(' "\'')
         raise EnvironmentError(f'Missing required environment variable `{env_var}`')
 
     dd.initialize(api_key=DD_API_KEY)
@@ -99,7 +99,7 @@ def create_trello_card(pull_request):
             time.sleep(wait_time)
         elif error:
             if attempt + 1 == creation_attempts:
-                exit_failure(error)
+                exit_failure(error.replace(TRELLO_KEY, 'redacted').replace(TRELLO_TOKEN, 'redacted'))
 
             wait_time = 2
             print(
@@ -116,7 +116,7 @@ def create_trello_card(pull_request):
 
 def handle_trello_api(params):
     rate_limited = False
-    error = None
+    error = ''
     response = None
 
     try:
@@ -137,7 +137,7 @@ def handle_trello_api(params):
 
 
 def get_latest_pr():
-    commit_hash = '117ec34f3c2aca8af9a6251192f049ce311a0673'   # os.environ['CI_COMMIT_SHA']
+    commit_hash = os.environ['CI_COMMIT_SHA']
     url = GITHUB_ISSUES_API.format(commit_hash, REPO)
 
     creation_attempts = 3
