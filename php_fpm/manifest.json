@@ -37,6 +37,6 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "php_fpm/assets/service_checks.json"
+    "service_checks": "assets/service_checks.json"
   }
 }

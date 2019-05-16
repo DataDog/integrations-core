@@ -28,6 +28,6 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "tcp_check/assets/service_checks.json"
+    "service_checks": "assets/service_checks.json"
   }
 }

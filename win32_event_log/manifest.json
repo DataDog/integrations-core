@@ -26,6 +26,6 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "win32_event_log/assets/service_checks.json"
+    "service_checks": "assets/service_checks.json"
   }
 }

@@ -27,6 +27,6 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "system_core/assets/service_checks.json"
+    "service_checks": "assets/service_checks.json"
   }
 }

@@ -33,6 +33,6 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "mesos_master/assets/service_checks.json"
+    "service_checks": "assets/service_checks.json"
   }
 }

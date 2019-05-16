@@ -27,6 +27,6 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "teamcity/assets/service_checks.json"
+    "service_checks": "assets/service_checks.json"
   }
 }
