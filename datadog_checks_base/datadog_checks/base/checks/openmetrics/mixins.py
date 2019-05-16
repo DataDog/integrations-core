@@ -591,6 +591,8 @@ class OpenMetricsScraperMixin(object):
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
+                if scraper_config['send_histograms_buckets']:
+                    tags = tags + ["upper_bound:none"]
                 self.gauge(
                     "{}.{}.count".format(scraper_config['namespace'], metric_name),
                     val,
