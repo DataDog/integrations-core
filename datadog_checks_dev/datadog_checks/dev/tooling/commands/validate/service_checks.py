@@ -29,7 +29,7 @@ def service_checks():
         display_queue = []
         file_failed = False
         manifest = load_manifest(check_name)
-        service_checks_file = os.path.join(root, manifest.get('assets', {}).get('service_checks'))
+        service_checks_file = os.path.join(root, check_name, manifest.get('assets', {}).get('service_checks'))
 
         if not file_exists(service_checks_file):
             echo_info('{}/service_checks.json... '.format(check_name), nl=False)
