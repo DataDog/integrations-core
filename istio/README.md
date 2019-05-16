@@ -28,7 +28,7 @@ Edit the `istio.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
 init_config:
 
 instances:
-  - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+  - istio_mesh_endpoint: http://istio-mesh.istio-system:42422/metrics
     mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
     send_histograms_buckets: true
 ```
