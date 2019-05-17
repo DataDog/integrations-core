@@ -21,6 +21,7 @@ except ImportError as e:
 log = logging.getLogger(__file__)
 
 
+
 class IbmMqCheck(AgentCheck):
 
     METRIC_PREFIX = 'ibm_mq'
@@ -31,6 +32,8 @@ class IbmMqCheck(AgentCheck):
     QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
 
     CHANNEL_SERVICE_CHECK = 'ibm_mq.channel'
+
+    SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
     def check(self, instance):
         config = IBMMQConfig(instance)
@@ -65,10 +68,7 @@ class IbmMqCheck(AgentCheck):
                 try:
                     queue = pymqi.Queue(queue_manager, queue_name)
                     self.queue_stats(queue, queue_tags)
-                    # some system queues don't have PCF metrics
-                    # so we don't collect those metrics from those queues
-                    if queue_name not in config.DISALLOWED_QUEUES:
-                        self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
+                    self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
                     queue.close()
                 except Exception as e:
@@ -79,29 +79,36 @@ class IbmMqCheck(AgentCheck):
 
     def discover_queues(self, queue_manager, config):
         queues = []
-        if config.auto_discover_queues:
+        has_patterns = len(config.queue_patterns) > 0
+        if config.auto_discover_queues or has_patterns:
             queues.extend(self._discover_queues(queue_manager, '*'))
-
-        if len(config.queue_patterns) > 0:
-            for regex in config.queue_patterns:
-                queues.extend(self._discover_queues(queue_manager, regex))
+            if has_patterns:
+                keep_queues = []
+                for queue_pattern in config.queue_patterns:
+                    queue_pattern_re = re.compile(queue_pattern)
+                    for queue in queues:
+                        if bool(queue_pattern_re.match(queue)):
+                            keep_queues.append(queue)
+                queues = keep_queues
 
         config.add_queues(queues)
 
-    def _discover_queues(self, queue_manager, regex):
-        args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(regex), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL}
+    def _discover_queues(self, queue_manager, mq_pattern_filter):
         queues = []
 
-        try:
-            pcf = pymqi.PCFExecute(queue_manager)
-            response = pcf.MQCMD_INQUIRE_Q(args)
-        except pymqi.MQMIError as e:
-            self.warning("Error getting queue stats: {}".format(e))
-        else:
-            for queue_info in response:
-                queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                queue = queue.strip()
-                queues.append(queue)
+        for queue_type in self.SUPPORTED_QUEUE_TYPES:
+            args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
+            try:
+                pcf = pymqi.PCFExecute(queue_manager)
+                response = pcf.MQCMD_INQUIRE_Q(args)
+            except pymqi.MQMIError as e:
+                self.warning("Error discovering queue: {}".format(e))
+            else:
+                for queue_info in response:
+                    queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
+                    queue = queue.strip()
+                    if queue_info[pymqi.CMQC.MQIA_DEFINITION_TYPE] == pymqi.CMQC.MQQDT_PREDEFINED:
+                        queues.append(queue)
 
         return queues
 
@@ -112,7 +119,6 @@ class IbmMqCheck(AgentCheck):
         for mname, pymqi_value in iteritems(metrics.queue_manager_metrics()):
             try:
                 m = queue_manager.inquire(pymqi_value)
-
                 mname = '{}.queue_manager.{}'.format(self.METRIC_PREFIX, mname)
                 self.gauge(mname, m, tags=tags)
                 self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.OK, tags)
@@ -141,31 +147,36 @@ class IbmMqCheck(AgentCheck):
                 self.warning("Error getting queue stats for {}: {}".format(queue, e))
 
     def get_pcf_queue_metrics(self, queue_manager, queue_name, tags):
-        try:
-            args = {
-                pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name),
-                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL,
-                pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
-            }
-            pcf = pymqi.PCFExecute(queue_manager)
-            response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
-        except pymqi.MQMIError as e:
-            self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
-        else:
-            # Response is a list. It likely has only one member in it.
-            for queue_info in response:
-                for mname, values in iteritems(metrics.pcf_metrics()):
-                    failure_value = values['failure']
-                    pymqi_value = values['pymqi_value']
-                    mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
-                    m = int(queue_info[pymqi_value])
+        type_attempts = 0
 
-                    if m > failure_value:
-                        self.gauge(mname, m, tags=tags)
-                    else:
-                        msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
-                        msg = msg.format(mname, queue_name)
-                        log.debug(msg)
+        for queue_type in self.SUPPORTED_QUEUE_TYPES:
+            try:
+                args = {
+                    pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name),
+                    pymqi.CMQC.MQIA_Q_TYPE: queue_type,
+                    pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL
+                }
+                pcf = pymqi.PCFExecute(queue_manager)
+                response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
+            except pymqi.MQMIError as e:
+                type_attempts += 1
+                if type_attempts >= len(self.SUPPORTED_QUEUE_TYPES): # exhaust attempts for each type before warning
+                    self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
+            else:
+                # Response is a list. It likely has only one member in it.
+                for queue_info in response:
+                    for mname, values in iteritems(metrics.pcf_metrics()):
+                        failure_value = values['failure']
+                        pymqi_value = values['pymqi_value']
+                        mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
+                        m = int(queue_info[pymqi_value])
+
+                        if m > failure_value:
+                            self.gauge(mname, m, tags=tags)
+                        else:
+                            msg = "Unable to get {}, turn on queue level monitoring to access these metrics for {}"
+                            msg = msg.format(mname, queue_name)
+                            log.debug(msg)
 
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')}
