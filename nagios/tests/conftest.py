@@ -7,13 +7,14 @@ import pytest
 from copy import deepcopy
 
 from datadog_checks.dev import docker_run
-from datadog_checks.cacti import NagiosCheck
+from datadog_checks.nagios import NagiosCheck
 
 from .common import (
     HERE,
     HOST,
     INSTANCE_INTEGRATION
 )
+
 
 @pytest.fixture
 def aggregator():
@@ -35,7 +36,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return NagiosCheck('nagios', {}, {})
+    return NagiosCheck('nagios', {}, {}, instances=[INSTANCE_INTEGRATION])
 
 
 @pytest.fixture

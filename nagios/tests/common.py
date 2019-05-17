@@ -10,10 +10,11 @@ HOST = get_docker_hostname()
 
 CONTAINER_NAME = "dd-test-nagios"
 
-INSTANCE_INTEGRATION = {'nagios_conf': 'path',
+INSTANCE_INTEGRATION = {'nagios_conf': '/usr/local/nagios/etc/nagios.cfg',
+                        'collect_host_performance_data': True,
                         'collect_task_metrics': True}
 
-EXPECTED_METRICS = []
+EXPECTED_METRICS = ["rta", "pl"]
 
 CHECK_NAME = 'nagios'
 CUSTOM_TAGS = ['optional:tag1']
