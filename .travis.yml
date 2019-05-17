@@ -85,8 +85,10 @@ jobs:
     - stage: test
       env: CHECK=aerospike PYTHON3=true
     - stage: test
-    # Agent <=5.x.x integration - only supporting py2 is needed
+      # Agent <=5.x.x integration - only supporting py2 is needed
       env: CHECK=agent_metrics
+    - stage: test
+      env: CHECK=ambari PYTHON3=true
     - stage: test
       env: CHECK=apache PYTHON3=true
     - stage: test
@@ -169,6 +171,8 @@ jobs:
       env: CHECK=kube_controller_manager PYTHON3=true
     - stage: test
       env: CHECK=kube_dns PYTHON3=true
+    - stage: test
+      env: CHECK=kube_metrics_server PYTHON3=true
     - stage: test
       env: CHECK=kube_proxy PYTHON3=true
     - stage: test
@@ -268,6 +272,8 @@ jobs:
       env: CHECK=tcp_check PYTHON3=true
     - stage: test
       env: CHECK=teamcity PYTHON3=true
+    - stage: test
+      env: CHECK=tls PYTHON3=true
     - stage: test
     # python 2 support only
       env: CHECK=tokumx

@@ -59,14 +59,16 @@ class AmbariCheck(AgentCheck):
 
     def _get_response_clusters(self, resp):
         items = resp.get('items')
-        self.log.warning("No clusters found")
         if not items:
+            self.log.warning('No clusters found')
             return []
+
         clusters = []
         for cluster in items:
             c = cluster.get('Clusters')
             if c:
                 clusters.append(c.get('cluster_name'))
+
         return clusters
 
     def get_host_metrics(self, base_url, clusters, base_tags=None):

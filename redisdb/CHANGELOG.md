@@ -1,5 +1,10 @@
 # CHANGELOG - redisdb
 
+## 1.11.0 / 2019-05-14
+
+* [Fixed] Adjust latency tracking in redisdb integration. See [#3689](https://github.com/DataDog/integrations-core/pull/3689). Thanks [Firehed](https://github.com/Firehed).
+* [Added] Adhere to code style. See [#3562](https://github.com/DataDog/integrations-core/pull/3562).
+
 ## 1.10.0 / 2019-02-18
 
 * [Added] adds redis_db tag to redis.key.length. See [#3008](https://github.com/DataDog/integrations-core/pull/3008).

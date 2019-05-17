@@ -182,7 +182,7 @@ class __AgentCheckPy3(object):
     @property
     def http(self):
         if self._http is None:
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER)
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
@@ -592,7 +592,7 @@ class __AgentCheckPy2(object):
     @property
     def http(self):
         if self._http is None:
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER)
+            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
@@ -821,6 +821,8 @@ class __AgentCheckPy2(object):
 
         if tags is not None:
             for tag in tags:
+                if tag is None:
+                    continue
                 encoded_tag = self._to_bytes(tag)
                 if encoded_tag is None:
                     self.log.warning(

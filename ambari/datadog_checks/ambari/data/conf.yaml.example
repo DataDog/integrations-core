@@ -82,8 +82,8 @@ instances:
     ## Map of headers to send on every request
     #
     # headers:
-    #   - <HEADER_1>
-    #   - <HEADER_2>
+    #   <KEY_1>: <VALUE_1>
+    #   <KEY_2>: <VALUE_2>
 
     ## @param persist_connections - boolean - optional - default: false
     ## Whether or not to persist cookies and use connection pooling
@@ -96,13 +96,15 @@ instances:
     # proxy:
     #   http: <HTTP_PROXY>
     #   https: <HTTPS_PROXY>
+    #   no_proxy:
+    #     - <HOSTNAME_1>
+    #     - <HOSTNAME_2>
 
     ## @param skip_proxy - boolean - optional - default: false
     ## Whether or not to skip the proxy configured in the Agent's config file when
     ## making the request to the PerfServlet
     #
     # skip_proxy: false
-
 
 ## Log Section (Available for Agent >=6.0)
 ##
@@ -116,7 +118,7 @@ instances:
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
-#  - type: file
-#    path: /var/log/ambari-server/*.log
-#    source: ambari
-#    service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/*.log
+#     source: ambari
+#     service: ambari

@@ -1,16 +1,16 @@
 [
     {
         "agent_version": "6.12.0",
-        "integration":"ambari",
+        "integration": "ambari",
         "groups": ["host", "url"],
         "check": "ambari.can_connect",
-        "statuses": ["critical"],
+        "statuses": ["ok", "critical"],
         "name": "Can Connect",
         "description": "Returns `OK` if the cluster is reachable, `CRITICAL` otherwise."
     },
     {
         "agent_version": "6.12.0",
-        "integration":"ambari",
+        "integration": "ambari",
         "groups": ["host", "url"],
         "check": "ambari.state",
         "statuses": ["ok", "warning" ,"critical"],

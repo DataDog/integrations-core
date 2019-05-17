@@ -1,5 +1,10 @@
 # CHANGELOG - nginx
 
+## 3.2.0 / 2019-05-14
+
+* [Added] Simplify JSON flattening for timestamps and bool. See [#3648](https://github.com/DataDog/integrations-core/pull/3648). Thanks [jd](https://github.com/jd).
+* [Added] Adhere to code style. See [#3545](https://github.com/DataDog/integrations-core/pull/3545).
+
 ## 3.1.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2716][1].

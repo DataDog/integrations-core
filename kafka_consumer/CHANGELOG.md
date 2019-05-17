@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 1.9.0 / 2019-05-14
+
+* [Fixed] Fix kafka_consumer conf file. See [#3757](https://github.com/DataDog/integrations-core/pull/3757).
+* [Added] Adhere to code style. See [#3523](https://github.com/DataDog/integrations-core/pull/3523).
+
 ## 1.8.1 / 2019-03-29
 
 * [Fixed] Properly cache zookeeper connection strings. See [#3333](https://github.com/DataDog/integrations-core/pull/3333).

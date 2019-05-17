@@ -131,7 +131,7 @@ class OpenMetricsScraperMixin(object):
         # Some metrics are ignored because they are duplicates or introduce a
         # very high cardinality. Metrics included in this list will be silently
         # skipped without a 'Unable to handle metric' debug line in the logs
-        config['ignore_metrics'] = []
+        config['ignore_metrics'] = instance.get('ignore_metrics', default_instance.get('ignore_metrics', []))
 
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
@@ -358,6 +358,9 @@ class OpenMetricsScraperMixin(object):
         self._store_labels(metric, scraper_config)
 
         if metric.name in scraper_config['ignore_metrics']:
+            return  # Ignore the metric
+
+        if self._filter_metric(metric):
             return  # Ignore the metric
 
         # Filter metric to see if we can enrich with joined labels

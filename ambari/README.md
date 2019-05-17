@@ -8,12 +8,12 @@ This check monitors [Ambari][1] through the Datadog Agent.
 
 ### Installation
 
-The Ambari check is included in the [Datadog Agent][7] package.
+The Ambari check is included in the [Datadog Agent][6] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to 
+1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to
 start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3].
@@ -24,7 +24,8 @@ start collecting your Ambari performance data. See the [sample ambari.d/conf.yam
 
 ## Data Collected
 
-This integration collects metrics for every host in every cluster the following system metrics:
+If host metrics collection is enabled with `collect_host_metrics` this integration collects for every host in every
+cluster the following system metrics:
 
 * boottime
 * cpu
@@ -34,12 +35,13 @@ This integration collects metrics for every host in every cluster the following 
 * network
 * process
 
-If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted 
+If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted
 service component the metrics with headers in the white list.
 
 ### Metrics
 
 This integration collects for every host in every cluster the following system metrics:
+
 * boottime
 * cpu
 * disk
@@ -50,14 +52,14 @@ This integration collects for every host in every cluster the following system m
 
 If service metrics collection is enabled with `collect_service_metrics` this integration will collect for each
 whitelisted service component the metrics with headers in the white list.
-See [metadata.csv][8] for a list of host metrics provided by this integration.
 
+See [metadata.csv][7] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
-If service status collection is enabled with `collect_service_status` this integration collects
-the status of each installed service with the following mapping found in `common.py`[9].
-
+- `ambari.can_connect` - Returns `OK` if the cluster is reachable, `CRITICAL` otherwise.
+- `ambari.state` - Returns `OK` if the service is installed or running, `WARNING` if the service is stopping or uninstalling,
+  or `CRITICAL` if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
 
 ### Events
 
@@ -72,7 +74,6 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://docs.datadoghq.com/help
-[7]: https://docs.datadoghq.com/agent/
-[8]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
-[9]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/common.py
-
+[6]: https://docs.datadoghq.com/agent/
+[7]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
+[8]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/common.py

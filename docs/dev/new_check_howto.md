@@ -452,7 +452,7 @@ Descriptions of each column of the `metadata.csv` file:
 
 ##### Example metadata config
 
-Our example integration doesn't send any metrics, so in this case the generated `awesome/metadata.csv` remains empty.
+Our example integration doesn't send any metrics, so in this case the generated `awesome/metadata.csv` contains only the row containing CSV column names.
 
 #### Service check file
 
