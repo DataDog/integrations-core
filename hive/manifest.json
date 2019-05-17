@@ -4,9 +4,9 @@
   "manifest_version": "1.0.0",
   "name": "hive",
   "metric_prefix": "hive.",
-  "metric_to_check": "",
+  "metric_to_check": "hive.server.memory.total.used",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Gathers various JMX metrics from HiveServer2 and Hive MetaStore",
   "guid": "3faee302-f293-45de-9eb8-ba6b7fa052a3",
   "support": "core",
   "supported_os": [
@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-hive Integration",
+  "public_title": "Datadog-Hive Integration",
   "categories": [
     ""
   ],
