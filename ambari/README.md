@@ -39,7 +39,7 @@ service component the metrics with headers in the white list.
 
 ### Metrics
 
-This integration will collect for every host in every cluster the following system metrics:
+This integration collects for every host in every cluster the following system metrics:
 * boottime
 * cpu
 * disk
