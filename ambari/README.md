@@ -24,8 +24,7 @@ start collecting your Ambari performance data. See the [sample ambari.d/conf.yam
 
 ## Data Collected
 
-If host metrics collection is enabled with `collect_host_metrics` this integration collects for every host in every 
-cluster the following system metrics:
+This integration collects metrics for every host in every cluster the following system metrics:
 
 * boottime
 * cpu
@@ -37,10 +36,10 @@ cluster the following system metrics:
 
 If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted 
 service component the metrics with headers in the white list.
+
 ### Metrics
 
-If host metrics collection is enabled with `collect_host_metrics` this integration will collect
-for every host in every cluster the following system metrics:
+This integration will collect for every host in every cluster the following system metrics:
 * boottime
 * cpu
 * disk

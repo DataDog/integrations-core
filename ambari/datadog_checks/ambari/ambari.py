@@ -29,8 +29,7 @@ class AmbariCheck(AgentCheck):
         whitelisted_services = instance.get("services", [])
 
         clusters = self.get_clusters(base_url)
-        if self._should_collect_host_metrics():
-            self.get_host_metrics(base_url, clusters, base_tags)
+        self.get_host_metrics(base_url, clusters, base_tags)
 
         collect_service_metrics = self._should_collect_service_metrics()
         collect_service_status = self._should_collect_service_status()
@@ -38,9 +37,6 @@ class AmbariCheck(AgentCheck):
             self.get_service_status_and_metrics(
                 base_url, clusters, whitelisted_services, base_tags, collect_service_metrics, collect_service_status
             )
-
-    def _should_collect_host_metrics(self):
-        return self.init_config.get("collect_host_metrics", True)
 
     def _should_collect_service_metrics(self):
         return self.init_config.get("collect_service_metrics", True)
