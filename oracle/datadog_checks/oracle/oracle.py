@@ -62,9 +62,6 @@ class Oracle(AgentCheck):
             ('PGA_MAX_MEM', 'oracle.process.pga_maximum_memory'),
         ]
     )
-    use_oracle_client = True
-    server = None
-    service_check_tags = None
 
     def check(self, instance):
         server, user, password, service, jdbc_driver, tags, custom_queries = self._get_config(instance)
@@ -72,26 +69,17 @@ class Oracle(AgentCheck):
         if not server or not user:
             raise OracleConfigError("Oracle host and user are needed")
 
-        try:
-            # Check if the instantclient is available
-            cx_Oracle.clientversion()
-            self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
-        except cx_Oracle.DatabaseError as e:
-            # Fallback to JDBC
-            self.use_oracle_client = False
-            self.log.debug('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
+        service_check_tags = ['server:%s' % server]
+        service_check_tags.extend(tags)
 
-        self.service_check_tags = ['server:%s' % server]
-        self.service_check_tags.extend(tags)
-
-        with closing(self._get_connection(server, user, password, service, jdbc_driver)) as con:
+        with closing(self._get_connection(server, user, password, service, jdbc_driver, service_check_tags)) as con:
             self._get_sys_metrics(con, tags)
             self._get_process_metrics(con, tags)
             self._get_tablespace_metrics(con, tags)
             self._get_custom_metrics(con, custom_queries, tags)
 
     def _get_config(self, instance):
-        self.server = instance.get('server')
+        server = instance.get('server')
         user = instance.get('user')
         password = instance.get('password')
         service = instance.get('service_name')
@@ -101,17 +89,24 @@ class Oracle(AgentCheck):
         if is_affirmative(instance.get('use_global_custom_queries', True)):
             custom_queries.extend(self.init_config.get('global_custom_queries', []))
 
-        return self.server, user, password, service, jdbc_driver, tags, custom_queries
+        return server, user, password, service, jdbc_driver, tags, custom_queries
 
-    def _get_connection(self, server, user, password, service, jdbc_driver):
-
-        if self.use_oracle_client:
-            connect_string = self.CX_CONNECT_STRING.format(user, password, server, service)
-        else:
+    def _get_connection(self, server, user, password, service, jdbc_driver, tags):
+        try:
+            # Check if the instantclient is available
+            cx_Oracle.clientversion()
+        except cx_Oracle.DatabaseError as e:
+            # Fallback to JDBC
+            use_oracle_client = False
+            self.log.debug('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
             connect_string = self.JDBC_CONNECT_STRING.format(server, service)
+        else:
+            use_oracle_client = True
+            self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
+            connect_string = self.CX_CONNECT_STRING.format(user, password, server, service)
 
         try:
-            if self.use_oracle_client:
+            if use_oracle_client:
                 con = cx_Oracle.connect(connect_string)
             else:
                 try:
@@ -138,9 +133,9 @@ class Oracle(AgentCheck):
                     raise
 
             self.log.debug("Connected to Oracle DB")
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags)
             self.log.error(e)
             raise
         return con
@@ -225,7 +220,6 @@ class Oracle(AgentCheck):
                     if errored:
                         # If we failed to parse one row of the results, there is no reason to continue
                         break
-
 
     def _get_sys_metrics(self, con, tags):
         with closing(con.cursor()) as cur:

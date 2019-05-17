@@ -221,7 +221,7 @@ def test__get_custom_metrics_multiple_results(aggregator, check):
             "query": "mocked",
             "columns": [{"name": "tag_name", "type": "tag"}, {"name": "metric", "type": "gauge"}],
             "tags": ["query_tags1"],
-        },
+        }
     ]
 
     check._get_custom_metrics(con, custom_queries, ["custom_tag"])
