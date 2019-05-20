@@ -22,8 +22,8 @@
   "is_public": false,
   "integration_id": "{check_name_kebab}",
   "assets": {{
-    "monitors": {{}},
     "dashboards": {{}},
+    "monitors": {{}},
     "service_checks": "assets/service_checks.json"
   }}
 }}
