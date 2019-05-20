@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import pytest
 from copy import deepcopy
 
-from datadog_checks.dev import docker_run
 import docker
+import pytest
+
+from datadog_checks.dev import docker_run
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.cacti import CactiCheck
 

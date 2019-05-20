@@ -97,7 +97,7 @@ class CactiCheck(AgentCheck):
         password = instance.get('mysql_password', '') or ''
         db = instance.get('mysql_db', 'cacti')
         rrd_path = instance.get('rrd_path')
-        whitelist = instance.get('rrd_whitelist', None)
+        whitelist = instance.get('rrd_whitelist')
         field_names = instance.get('field_names', ['ifName', 'dskDevice'])
         tags = instance.get('tags', [])
 

@@ -1,1 +1,2 @@
+docker==3.7.1
 -e ../datadog_checks_dev
