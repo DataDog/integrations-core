@@ -94,7 +94,7 @@ def test_get_host_metrics(instance):
 
     ambari.get_host_metrics('localhost', ['cluster1'])
     ambari.set_external_tags.assert_called_with(
-        [('my_host_1', {'ambari': cluster_tag}), ('my_host_2', {'ambari': ['ambari_cluster:cluster1']})]
+        [('my_host_1', {'ambari': cluster_tag}), ('my_host_2', {'ambari': cluster_tag})]
     )
 
     assert ambari._submit_gauge.call_count == 30
