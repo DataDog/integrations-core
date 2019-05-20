@@ -21,7 +21,6 @@ def test_check(aggregator):
                 "YARN": {"NODEMANANGER": ["cpu", "disk", "load", "memory", "network", "process"], "YARNCLIENT": []},
                 "MAPREDUCE2": {"HISTORYSERVER": ["BufferPool", "Memory", "jvm"]},
             },
-            "metric_headers": ["cpu", "jvm"],
             "timeout": 30,
             "tls_verify": False,
         }
