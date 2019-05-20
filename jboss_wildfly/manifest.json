@@ -20,5 +20,10 @@
   ],
   "type": "check",
   "integration_id": "jboss-wildfly",
-  "is_public": true
+  "is_public": true,
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

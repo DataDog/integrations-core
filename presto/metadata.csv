@@ -37,8 +37,10 @@ presto.execution.executor.completed_task_count,gauge,10,task,,,0,presto,executor
 presto.execution.executor.core_pool_size,gauge,10,,,,0,presto,executor core pool size
 presto.execution.executor.task_count,gauge,10,task,,,0,presto,executor task count
 presto.execution.executor.pool_size,gauge,10,,,,0,presto,executor pool size
+presto.execution.executor.queued_task_count,gauge,10,,,,0,presto,executor queued task
 presto.execution.executor.blocked_splits,gauge,10,split,,Blocked splits count.,0,presto,executor blocked splits
 presto.execution.executor.running_splits,gauge,10,split,,Running splits count.,0,presto,executor running splits
+presto.execution.executor.total_splits,gauge,10,split,,Total splits count.,0,presto,executor total splits
 presto.execution.executor.waiting_splits,gauge,10,split,,Waiting splits count.,0,presto,executor waiting splits
 presto.execution.executor.processor_executor.queued_task_count,gauge,10,task,,Queued task count.,0,presto,executor queued tasks
 presto.execution.external_failures.one_minute.count,gauge,10,query,,Failed queries (external) - one minute count.,-1,presto,external failures one minute count

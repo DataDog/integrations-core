@@ -19,5 +19,10 @@
   ],
   "type": "check",
   "is_public": false,
-  "integration_id": "ambari"
+  "integration_id": "ambari",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

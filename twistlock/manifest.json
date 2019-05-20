@@ -21,5 +21,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "twistlock"
+  "integration_id": "twistlock",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

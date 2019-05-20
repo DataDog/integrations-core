@@ -115,7 +115,6 @@ class File(object):
 
     def read(self):
         contents = self._read(self.template_path)
-
         if self.binary:
             self.contents = contents
         else:
