@@ -8,6 +8,7 @@ from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
+
 class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
     """
     Collect kubernetes apiserver metrics in the Prometheus format
@@ -24,6 +25,7 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
         self.METRIC_TRANSFORMERS = {
                 'apiserver_audit_event_total': self.apiserver_audit_event_total,
         }
+        self.bearer_token_found = false
         # Create instances we can use in OpenMetricsBaseCheck
         generic_instances = None
         if instances is not None:
@@ -32,9 +34,32 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
         super(KubeApiserverMetricsCheck, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
     def check(self, instance):
+        if self.bearer_token_found:
+            self.bearer_token_found = self.get_bearer_token(instance)
+
         scraper_config = self.get_scraper_config(instance)
 
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
+
+    def get_bearer_token(self, instance):
+        bearer_token_path = instance.get('bearer_token_path', self.DEFAULT_BEARER_TOKEN_PATH)
+
+        if not os.path.isfile(bearer_token_path) or not os.access(bearer_token_path, os.R_OK):
+            # log a warn if the bearer_token_path is unavailable
+            self.log.warn("Unable to read service account bearer token file at %s" % (bearer_token_path))
+            return false
+        else:
+            with open(bearer_token_path, "r") as f:
+                bearer_token = f.read()
+        if bearer_token == "":
+            self.log.warn("No bearer token available in %s." +
+                          "Service account might be misconfigured." +
+                          "Attempting to run the check without AuthN/Z", bearer_token_path)
+            return false
+        else:
+            self.kube_apiserver_metrics_instance['extra_headers'] = {}
+            self.kube_apiserver_metrics_instance['extra_headers']["Authorization"] = "Bearer {}".format(bearer_token)
+            return true
 
     def create_generic_instances(self, instances):
         """
@@ -54,20 +79,8 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
         kube_apiserver_metrics_instance = deepcopy(instance)
         endpoint = instance.get('prometheus_endpoint', None)
         scheme = instance.get('scheme', self.DEFAULT_SCHEME)
-        bearer_token_path = instance.get('bearer_token_path', self.DEFAULT_BEARER_TOKEN_PATH)
 
-        if not os.path.isfile(bearer_token_path) or not os.access(bearer_token_path, os.R_OK):
-            # log a warn if the bearer_token_path is unavailable
-            self.log.warn("Unable to read service account bearer token file at %s" % (bearer_token_path))
-        else:
-            with open(bearer_token_path, "r") as f:
-                bearer_token = f.read()
-        if bearer_token == "":
-            self.log.warn("No bearer token available in %s. Service account might be misconfigured. Attempting to run the check without AuthN/Z", bearer_token_path)
-        else:
-            kube_apiserver_metrics_instance['extra_headers'] = {}
-            kube_apiserver_metrics_instance['extra_headers']["Authorization"] = "Bearer {}".format(bearer_token)
-         
+
         kube_apiserver_metrics_instance['prometheus_url'] = "{0}://{1}".format(scheme, endpoint)
 
         kube_apiserver_metrics_instance.update(
@@ -84,7 +97,7 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
                 ],
             }
         )
-        return kube_apiserver_metrics_instance        
+        return kube_apiserver_metrics_instance
 
     def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):
         """
@@ -101,7 +114,6 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
             self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)
             # submit rate metric
             self.monotonic_count(metric_name + '.count', sample[self.SAMPLE_VALUE], _tags)
-
 
     def apiserver_audit_event_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.audit_event_count', metric, scraper_config)

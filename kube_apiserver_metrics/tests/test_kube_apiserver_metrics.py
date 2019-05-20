@@ -52,18 +52,13 @@ class TestKubeApiserverMetrics:
     CHECK_NAME = 'kube_apiserver_metrics'
     NAMESPACE = 'kube_apiserver_metrics'
     METRICS = [
-        NAMESPACE + '.response_size.bytes.count',
-        NAMESPACE + '.response_size.bytes.sum',
-        NAMESPACE + '.request_duration.seconds.count',
-        NAMESPACE + '.request_duration.seconds.sum',
-        NAMESPACE + '.request_count',
-        NAMESPACE + '.error_count',
-        NAMESPACE + '.cachemiss_count',
+        NAMESPACE + '.apiserver_client_certificate_expiration',
+        NAMESPACE + '.apiserver_longrunning_gauge',
+        NAMESPACE + '.apiserver_current_inflight_requests',
+
     ]
     COUNT_METRICS = [
-        NAMESPACE + '.request_count.count',
-        NAMESPACE + '.error_count.count',
-        NAMESPACE + '.cachemiss_count.count',
+        NAMESPACE + '.audit_event_count',
     ]
 
     def test_check(self, aggregator, mock_get):
@@ -81,10 +76,3 @@ class TestKubeApiserverMetrics:
             aggregator.assert_metric_has_tag(metric, customtag)
 
         aggregator.assert_all_metrics_covered()
-
-        # Make sure instance tags are not modified, see #3066
-        aggregator.reset()
-        check.check(instance)
-        name = self.NAMESPACE + ".request_duration.seconds.sum"
-        aggregator.assert_metric(name)
-        aggregator.assert_metric(name, tags=['custom:tag', 'system:reverse'])
