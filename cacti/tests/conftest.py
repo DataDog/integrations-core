@@ -7,6 +7,8 @@ import pytest
 from copy import deepcopy
 
 from datadog_checks.dev import docker_run
+import docker
+from datadog_checks.dev.subprocess import run_command
 from datadog_checks.cacti import CactiCheck
 
 from .common import (
@@ -28,7 +30,27 @@ def dd_environment():
 
 @pytest.fixture
 def check():
+    container = _get_container()
+    commands = ["apt-get update",
+                "apt-get install rrdtool librrd-dev libpython-dev build-essential -y",
+                "pip install rrdtool"]
+    for command in commands:
+        exit_code, output = container.exec_run(command)
+        if exit_code != 0:
+            raise Exception(output)
     return CactiCheck('mapreduce', {}, {})
+
+
+def _get_container():
+    docker_ps = [
+        'docker',
+        'ps',
+        '-aqf',
+        ''"name=dd_cacti_py.*"''
+    ]
+    container_id = run_command(docker_ps, capture='out', check=True).stdout.rstrip()
+    client = docker.client.from_env()
+    return client.containers.get(container_id)
 
 
 @pytest.fixture
