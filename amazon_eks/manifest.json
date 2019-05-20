@@ -21,5 +21,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "amazon-eks"
+  "integration_id": "amazon-eks",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

@@ -17,6 +17,7 @@ from ...utils import parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
 REQUIRED_ATTRIBUTES = {
+    'assets',
     'categories',
     'creates_events',
     'display_name',
@@ -31,6 +32,12 @@ REQUIRED_ATTRIBUTES = {
     'support',
     'supported_os',
     'type',
+}
+
+REQUIRED_ASSET_ATTRIBUTES = {
+    'monitors',
+    'dashboards',
+    'service_checks',
 }
 
 OPTIONAL_ATTRIBUTES = {
@@ -88,6 +95,9 @@ def manifest(fix, include_extras):
             for attr in sorted(REQUIRED_ATTRIBUTES - attrs):
                 file_failures += 1
                 display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
+            for attr in sorted(REQUIRED_ASSET_ATTRIBUTES - set(decoded.get('assets'))):
+                file_failures += 1
+                display_queue.append((echo_failure, ' Attribute `{}` under `assets` is required'.format(attr)))
 
             # guid
             guid = decoded.get('guid')
