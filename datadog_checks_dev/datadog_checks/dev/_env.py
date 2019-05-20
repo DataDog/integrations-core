@@ -9,6 +9,7 @@ E2E_PREFIX = 'DDEV_E2E'
 E2E_ENV_VAR_PREFIX = '{}_ENV_'.format(E2E_PREFIX)
 E2E_SET_UP = '{}_UP'.format(E2E_PREFIX)
 E2E_TEAR_DOWN = '{}_DOWN'.format(E2E_PREFIX)
+E2E_CHECK_FILE = '{}_CHECK_FILE'.format(E2E_PREFIX)
 
 E2E_FIXTURE_NAME = 'dd_environment'
 TESTING_PLUGIN = 'DDEV_TESTING_PLUGIN'
@@ -32,16 +33,16 @@ def remove_env_vars(env_vars):
 def get_env_vars(raw=False):
     if raw:
         return {key: value for key, value in iteritems(os.environ) if key.startswith(E2E_ENV_VAR_PREFIX)}
-    else:
-        env_vars = {}
 
-        for key, value in iteritems(os.environ):
-            _, found, ev = key.partition(E2E_ENV_VAR_PREFIX)
-            if found:
-                # Normalize casing for Windows
-                env_vars[ev.lower()] = value
+    env_vars = {}
 
-        return env_vars
+    for key, value in iteritems(os.environ):
+        _, found, ev = key.partition(E2E_ENV_VAR_PREFIX)
+        if found:
+            # Normalize casing for Windows
+            env_vars[ev.lower()] = value
+
+    return env_vars
 
 
 def set_up_env():

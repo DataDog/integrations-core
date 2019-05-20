@@ -131,6 +131,9 @@ class LocalAgentInterface(object):
 
         return run_command(command, capture=capture)
 
+    def wait_agent_ready(self):
+        pass
+
     def update_check(self):
         install_cmd = get_agent_pip_install(self.agent_version, self.platform) + [
             '-e',

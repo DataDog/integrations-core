@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import time
 
 from ...subprocess import run_command
 from ...utils import path_join
@@ -102,6 +103,13 @@ class DockerInterface(object):
             command += ' --breakpoint {}'.format(break_point)
 
         return self.exec_command(command, capture=capture, interactive=break_point is not None)
+
+    def wait_agent_ready(self):
+        for _ in range(10):
+            result = self.exec_command('ls /etc/datadog-agent/datadog.yaml', capture=True)
+            if not result.code:
+                break
+            time.sleep(1)
 
     def exists(self):
         return env_exists(self.check, self.env)

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
+from ..._env import E2E_CHECK_FILE, E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
 from ...subprocess import run_command
 from ...utils import chdir, path_join
 from ..constants import get_root
@@ -35,3 +35,19 @@ def stop_environment(check, env, metadata=None):
         result = run_command(command, capture=True)
 
     return parse_config_from_result(env, result)
+
+
+def check_environment(check, env, check_file):
+    command = 'tox --develop -e {}'.format(env)
+    env_vars = {
+        E2E_TEAR_DOWN: 'false',
+        E2E_SET_UP: 'false',
+        E2E_CHECK_FILE: check_file,
+        'PYTEST_ADDOPTS': '-m e2e',
+        'TOX_TESTENV_PASSENV': '{}* {} {} {} PYTEST_ADDOPTS'.format(
+            E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN, E2E_CHECK_FILE
+        ),
+    }
+
+    with chdir(path_join(get_root(), check), env_vars=env_vars):
+        run_command(command)

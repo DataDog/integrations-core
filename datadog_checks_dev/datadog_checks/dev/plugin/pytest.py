@@ -9,7 +9,7 @@ from base64 import urlsafe_b64encode
 
 import pytest
 
-from .._env import E2E_FIXTURE_NAME, TESTING_PLUGIN, e2e_active, get_env_vars
+from .._env import E2E_CHECK_FILE, E2E_FIXTURE_NAME, TESTING_PLUGIN, e2e_active, get_env_vars
 
 __aggregator = None
 
@@ -37,6 +37,9 @@ def dd_environment_runner(request):
 
     # Do nothing if no e2e action is triggered and continue with tests
     if not testing_plugin and not e2e_active():  # no cov
+        return
+
+    if os.getenv(E2E_CHECK_FILE):
         return
 
     try:
@@ -85,3 +88,31 @@ def dd_environment_runner(request):
     else:  # no cov
         # Exit testing and pass data back up to command
         pytest.exit(message)
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "integration: mark a test as integration")
+    config.addinivalue_line("markers", "e2e: mark a test as e2e")
+
+
+def pytest_runtest_call(item):
+    for _ in item.iter_markers(name="e2e"):
+        check_file_name = os.getenv(E2E_CHECK_FILE)
+        if not check_file_name:
+            pytest.skip("E2E test")
+            return
+
+        with open(check_file_name) as check_file:
+            check_output = json.load(check_file)
+
+        from datadog_checks.base.stubs import aggregator
+
+        check_id = check_output[0]['runner']['CheckID']
+        for data in check_output[0]['aggregator']['metrics']:
+            for _, value in data['points']:
+                aggregator.submit_metric(None, None, data['type'], data['metric'], value, data['tags'], data['host'])
+        for data in check_output[0]['aggregator']['service_checks']:
+            aggregator.submit_service_check(
+                None, check_id, data['check'], data['status'], data['tags'], data['host_name'], data['message']
+            )
+        break
