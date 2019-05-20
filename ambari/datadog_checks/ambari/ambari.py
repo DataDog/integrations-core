@@ -147,7 +147,7 @@ class AmbariCheck(AgentCheck):
             component_metrics = component.get(METRICS_FIELD)
             if component_metrics is None:
                 # Not all components provide metrics
-                self.debug.warning("No metrics found for component {} for service {}".format(component_name, service))
+                self.log.debug("No metrics found for component {} for service {}".format(component_name, service))
                 continue
 
             for header in component_whitelist[component_name]:
