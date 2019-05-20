@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.25.0 / 2019-05-20
+
+* [Added] Move all assets to a dedicated directory. See [#3768](https://github.com/DataDog/integrations-core/pull/3768).
+* [Added] Upgrade requests to 2.22.0. See [#3778](https://github.com/DataDog/integrations-core/pull/3778).
+
 ## 0.24.0 / 2019-05-14
 
 * [Added] Ambari integration. See [#3670](https://github.com/DataDog/integrations-core/pull/3670).
