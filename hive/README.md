@@ -55,8 +55,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-**hive.can_connect**
-Returns CRITICAL if the Agent is unable to connect to and collect metrics from the monitored Hive instance. Returns OK otherwise.
+See [service_checks.json][9] for a list of Service Checks provided by this integration.
 
 ### Events
 
@@ -75,3 +74,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/hive/metadata.csv
 [8]: https://docs.datadoghq.com/help
+[9]: https://github.com/DataDog/integrations-core/blob/master/hive/assets/service_checks.json
