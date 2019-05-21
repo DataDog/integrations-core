@@ -87,8 +87,7 @@ The Apache check does not include any events.
 
 ### Service Checks
 
-**apache.can_connect**:
-Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
+See [service_checks.json][15] for a list of Service Checks provided by this integration.
 
 ## Troubleshooting
 
@@ -118,3 +117,4 @@ Additional helpful documentation, links, and articles:
 [12]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
 [13]: https://www.datadoghq.com/blog/collect-apache-performance-metrics
 [14]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog
+[15]: https://github.com/DataDog/integrations-core/blob/master/apache/assets/service_checks.json

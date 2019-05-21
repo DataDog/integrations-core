@@ -32,12 +32,11 @@ See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-- `aerospike.can_connect`
-- `aerospike.cluster_up`
+The Aerospike check does not include any Service Checks.
 
 ### Events
 
-Aerospike does not include any events.
+The Aerospike check does not include any events.
 
 ## Troubleshooting
 

@@ -36,7 +36,8 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 The Agent_metrics check does not include any events.
 
 ### Service Checks
-The Agent_metrics check does not include any service checks.
+
+The Agent_metrics check does not include any Service Checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][9].

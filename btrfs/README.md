@@ -30,10 +30,12 @@ The Btrfs check is included in the [Datadog Agent][2] package, so you don't need
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
+
 The Btrfs check does not include any events.
 
 ### Service Checks
-The Btrfs check does not include any service checks.
+
+The Btrfs check does not include any Service Checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][8].

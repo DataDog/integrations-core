@@ -33,7 +33,7 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 The ASP.NET check does not include any events.
 
 ### Service Checks
-The ASP.NET check does not include any service checks.
+The ASP.NET check does not include any Service Checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][7].

@@ -32,7 +32,7 @@ See [metadata.csv][116] for a list of metrics provided by this integration.
 The ActiveMQ XML check does not include any events.
 
 ### Service Checks
-The ActiveMQ XML check does not include any service checks.
+The ActiveMQ XML check does not include any Service Checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][117].

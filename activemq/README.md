@@ -97,8 +97,8 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 The ActiveMQ check does not include any events.
 
 ### Service Checks
-**activemq.can_connect**:
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise.
+
+See [service_checks.json][13] for a list of Service Checks provided by this integration.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][10].
@@ -122,3 +122,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/help
 [11]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics
 [12]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance
+[13]: https://github.com/DataDog/integrations-core/blob/master/activemq/assets/service_checks.json

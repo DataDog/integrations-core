@@ -56,15 +56,13 @@ whitelisted service component the metrics with headers in the white list.
 
 See [metadata.csv][7] for a list of all metrics provided by this integration.
 
-### Service Checks
-
-- `ambari.can_connect` - Returns `OK` if the cluster is reachable, `CRITICAL` otherwise.
-- `ambari.state` - Returns `OK` if the service is installed or running, `WARNING` if the service is stopping or uninstalling,
-  or `CRITICAL` if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
-
 ### Events
 
 Ambari does not include any events.
+
+### Service Checks
+
+See [service_checks.json][9] for a list of Service Checks provided by this integration.
 
 ## Troubleshooting
 
@@ -78,3 +76,4 @@ Need help? Contact [Datadog support][5].
 [6]: https://docs.datadoghq.com/agent/
 [7]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
 [8]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/common.py
+[15]: https://github.com/DataDog/integrations-core/blob/master/ambari/assets/service_checks.json
