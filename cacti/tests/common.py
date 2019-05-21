@@ -50,3 +50,11 @@ EXPECTED_METRICS = [
     'system.users.current.max',
     'system.users.current.min',
 ]
+
+E2E_METADATA = {
+    'start_commands': [
+        'apt-get update',
+        'apt-get install rrdtool librrd-dev libpython-dev build-essential -y',
+        'pip install rrdtool'
+    ]
+}
