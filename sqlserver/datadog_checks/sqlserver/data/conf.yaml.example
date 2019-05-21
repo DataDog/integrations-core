@@ -19,12 +19,12 @@ instances:
     #
   - host: <HOST>,<PORT>
 
-    ## @param apache_user - string - required
+    ## @param username - string - required
     ## Username for the Datadog-SQL server check user
     #
     username: datadog
 
-    ## @param apache_password - string - required
+    ## @param password - string - required
     ## Password for the Datadog-SQL server check user
     #
     password: <PASSWORD>
