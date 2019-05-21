@@ -152,7 +152,7 @@ class CiscoACICheck(AgentCheck):
         self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         if set_external_tags:
-            set_external_tags(self.get_external_host_tags())
+            self.set_external_tags(self.get_external_host_tags())
 
         api.close()
         end = datetime.datetime.now()
