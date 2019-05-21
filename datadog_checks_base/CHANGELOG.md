@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.2.0 / 2019-05-21
+
+* [Added] Upgrade requests to 2.22.0. See [#3778](https://github.com/DataDog/integrations-core/pull/3778).
+
 ## 8.1.0 / 2019-05-14
 
 * [Fixed] Fix the initialization of ignored metrics for OpenMetrics. See [#3736](https://github.com/DataDog/integrations-core/pull/3736).
