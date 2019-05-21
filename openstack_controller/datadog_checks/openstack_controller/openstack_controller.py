@@ -26,13 +26,6 @@ from .exceptions import (
 from .retry import BackOffRetry
 from .utils import traced
 
-try:
-    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
-    from datadog_agent import set_external_tags
-except ImportError:
-    # Agent < 6.0: the Agent pulls tags invoking `OpenStackControllerCheck.get_external_host_tags`
-    set_external_tags = None
-
 
 SOURCE_TYPE = 'openstack'
 
@@ -758,8 +751,7 @@ class OpenStackControllerCheck(AgentCheck):
             if collect_network_metrics:
                 self.collect_networks_metrics(custom_tags, network_ids, exclude_network_id_rules)
 
-            if set_external_tags is not None:
-                set_external_tags(self.get_external_host_tags())
+            self.set_external_tags(self.get_external_host_tags())
 
         except IncompleteConfig as e:
             if isinstance(e, IncompleteIdentity):
