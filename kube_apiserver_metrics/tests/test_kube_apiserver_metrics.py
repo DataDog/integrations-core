@@ -11,10 +11,11 @@ import pytest
 
 customtag = "custom:tag"
 
-instance = {'prometheus_endpoint': 'localhost:443/metrics', 
-			'scheme': 'https', 
-			'bearer_token_path': '/tmp/foo', 
-			'tags': [customtag]}
+instance = {'prometheus_url': 'localhost:443/metrics',
+            'scheme': 'https',
+            'bearer_token_path': '/tmp/foo',
+            'tags': [customtag]}
+
 
 @pytest.fixture()
 def mock_get():
@@ -24,10 +25,19 @@ def mock_get():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200, 
-            iter_lines=lambda **kwargs: text_data.split("\n"), 
-            headers={'Content-Type': "text/plain", 'Authorization':"Bearer XXX"}
+            status_code=200,
+            iter_lines=lambda **kwargs: text_data.split("\n"),
+            headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"}
         ),
+    ):
+        yield
+
+
+@pytest.fixture()
+def mock_bearer_retrieve():
+    with mock.patch(
+        'datadog_checks.kube_apiserver_metrics.KubeApiserverMetricsCheck.get_bearer_token',
+        return_value=True
     ):
         yield
 
@@ -39,29 +49,23 @@ def aggregator():
     aggregator.reset()
     return aggregator
 
-# def test_check(aggregator, instance):
-#     check = KubeApiserverMetricsCheck('kube_apiserver_metrics', {}, {})
-#     check.check(instance)
-
-#     aggregator.assert_all_metrics_covered()
-
 
 class TestKubeApiserverMetrics:
     """Basic Test for kube_dns integration."""
 
     CHECK_NAME = 'kube_apiserver_metrics'
-    NAMESPACE = 'kube_apiserver_metrics'
+    NAMESPACE = 'kube_apiserver'
     METRICS = [
-        NAMESPACE + '.apiserver_client_certificate_expiration',
-        NAMESPACE + '.apiserver_longrunning_gauge',
-        NAMESPACE + '.apiserver_current_inflight_requests',
+        NAMESPACE + '.longrunning_gauge',
+        NAMESPACE + '.current_inflight_requests',
+        NAMESPACE + '.audit_event',
 
     ]
     COUNT_METRICS = [
-        NAMESPACE + '.audit_event_count',
+        NAMESPACE + '.audit_event.count',
     ]
 
-    def test_check(self, aggregator, mock_get):
+    def test_check(self, aggregator, mock_get, mock_bearer_retrieve):
         """
         Testing kube_apiserver_metrics check.
         """
@@ -71,8 +75,8 @@ class TestKubeApiserverMetrics:
 
         # check that we then get the count metrics also
         check.check(instance)
+
         for metric in self.METRICS + self.COUNT_METRICS:
             aggregator.assert_metric(metric)
             aggregator.assert_metric_has_tag(metric, customtag)
-
         aggregator.assert_all_metrics_covered()
