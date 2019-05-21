@@ -24,13 +24,13 @@ No additional installation is needed on your server.
       <value>true</value>
     </property>
     ```
-2. Enable a JMX remote connexion for the HiveServer2 and/or for the Hive Metastore. For example, set the `HADOOP_CLIENT_OPTS` environment variable:
+2. Enable a JMX remote connection for the HiveServer2 and/or for the Hive Metastore. For example, set the `HADOOP_CLIENT_OPTS` environment variable:
     ```
     export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -Dcom.sun.management.jmxremote \
     -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false \
     -Dcom.sun.management.jmxremote.port=8808"
     ```
-    Then restart the HiveServer2 or the Hive Metastore. Hive Metastore and HiveServer2 cannot share the same JMX connexion.
+    Then restart the HiveServer2 or the Hive Metastore. Hive Metastore and HiveServer2 cannot share the same JMX connection.
 
 3. Edit the `hive.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    Agent's configuration directory to start collecting your hive performance data.
