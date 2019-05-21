@@ -76,4 +76,4 @@ Need help? Contact [Datadog support][5].
 [6]: https://docs.datadoghq.com/agent/
 [7]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
 [8]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/common.py
-[15]: https://github.com/DataDog/integrations-core/blob/master/ambari/assets/service_checks.json
+[9]: https://github.com/DataDog/integrations-core/blob/master/ambari/assets/service_checks.json
