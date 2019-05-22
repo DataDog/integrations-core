@@ -5,18 +5,13 @@
 import os
 from copy import deepcopy
 
-import pytest
 import docker
+import pytest
 
-from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.cacti import CactiCheck
+from datadog_checks.dev import WaitFor, docker_run
 
-from .common import (
-    HERE,
-    HOST,
-    INSTANCE_INTEGRATION,
-    E2E_METADATA
-)
+from .common import E2E_METADATA, HERE, HOST, INSTANCE_INTEGRATION
 
 
 def create_db_user():
@@ -33,9 +28,8 @@ def create_db_user():
     ]
 
     for command in commands:
-        code, out = container.exec_run(
-            'mysql -u root -D cacti -e "{}"'.format(command))
-        if code is not 0:
+        code, out = container.exec_run('mysql -u root -D cacti -e "{}"'.format(command))
+        if code != 0:
             raise Exception(out)
     return True
 
