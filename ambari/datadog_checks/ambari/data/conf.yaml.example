@@ -68,7 +68,7 @@ instances:
     #
     # tls_verify: true
 
-    ## @param ignore_tls_warning - boolean - optional - default: false
+    ## @param tls_ignore_warning - boolean - optional - default: false
     ## Ignore warnings for lack of SSL validation
     #
     # ignore_tls_warning = false
