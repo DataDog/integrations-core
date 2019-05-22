@@ -2,10 +2,10 @@ init_config:
 
 instances:
 
-    ## @param prometheus_endpoint - string - required
+    ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_endpoint: localhost:443/metrics
+  - prometheus_url: localhost:443/metrics
     
     ## @param scheme - Used to specify the scheme to reach the APIServer endpoints. - Default to https.
     #

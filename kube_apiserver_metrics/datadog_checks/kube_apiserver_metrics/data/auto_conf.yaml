@@ -7,7 +7,7 @@ instances:
     ## @param prometheus_endpoint - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_endpoint: "%%host%%:%%port%%/metrics"
+  - prometheus_url: "%%host%%:%%port%%/metrics"
     
     ## @param ssl_verify - Used to verify self signed certificates. Default to false
     # 

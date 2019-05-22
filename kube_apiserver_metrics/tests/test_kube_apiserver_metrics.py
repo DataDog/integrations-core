@@ -4,16 +4,17 @@
 
 # stdlib
 import os
-
-from datadog_checks.kube_apiserver_metrics import KubeApiserverMetricsCheck
+import tempfile
 import mock
 import pytest
+
+from datadog_checks.kube_apiserver_metrics import KubeApiserverMetricsCheck
+from .common import APISERVER_INSTANCE_EXTRA_HEADER
 
 customtag = "custom:tag"
 
 instance = {'prometheus_url': 'localhost:443/metrics',
             'scheme': 'https',
-            'bearer_token_path': '/tmp/foo',
             'tags': [customtag]}
 
 
@@ -33,25 +34,8 @@ def mock_get():
         yield
 
 
-@pytest.fixture()
-def mock_bearer_retrieve():
-    with mock.patch(
-        'datadog_checks.kube_apiserver_metrics.KubeApiserverMetricsCheck.get_bearer_token',
-        return_value=True
-    ):
-        yield
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 class TestKubeApiserverMetrics:
-    """Basic Test for kube_dns integration."""
+    """Basic Test for kube_apiserver integration."""
 
     CHECK_NAME = 'kube_apiserver_metrics'
     NAMESPACE = 'kube_apiserver'
@@ -59,13 +43,25 @@ class TestKubeApiserverMetrics:
         NAMESPACE + '.longrunning_gauge',
         NAMESPACE + '.current_inflight_requests',
         NAMESPACE + '.audit_event',
+        NAMESPACE + '.go_threads',
+        NAMESPACE + '.go_goroutines',
+        NAMESPACE + '.APIServiceRegistrationController_depth',
+        NAMESPACE + '.etcd_object_counts',
+        NAMESPACE + '.rest_client_requests_total',
+        NAMESPACE + '.apiserver_request_count',
+        NAMESPACE + '.apiserver_dropped_requests_total',
+        NAMESPACE + '.http_requests_total',
 
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
+        NAMESPACE + '.rest_client_requests_total.count',
+        NAMESPACE + '.apiserver_request_count.count',
+        NAMESPACE + '.apiserver_dropped_requests_total.count',
+        NAMESPACE + '.http_requests_total.count',
     ]
 
-    def test_check(self, aggregator, mock_get, mock_bearer_retrieve):
+    def test_check(self, aggregator, mock_get):
         """
         Testing kube_apiserver_metrics check.
         """
@@ -80,3 +76,31 @@ class TestKubeApiserverMetrics:
             aggregator.assert_metric(metric)
             aggregator.assert_metric_has_tag(metric, customtag)
         aggregator.assert_all_metrics_covered()
+
+    def test_bearer(self):
+        """
+        Testing the bearer token configuration.
+        """
+        check = KubeApiserverMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
+        apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
+        assert apiserver_instance.get("extra_headers", {}) == {}
+        assert check.bearer_token_found == False
+
+        temp_dir = tempfile.mkdtemp()
+        temp_bearer_file = os.path.join(temp_dir, "foo")
+        with open(temp_bearer_file, "w+") as f:
+            f.write("")
+        instance["bearer_token_path"] = temp_bearer_file
+
+        apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
+
+        assert apiserver_instance.get("extra_headers", {}) == {}
+        assert check.bearer_token_found == False
+
+        with open(temp_bearer_file, "w+") as f:
+            f.write("XXX")
+
+        apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
+        os.remove(temp_bearer_file)
+        assert apiserver_instance["extra_headers"] == APISERVER_INSTANCE_EXTRA_HEADER
+        assert check.bearer_token_found == True

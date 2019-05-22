@@ -4442,6 +4442,9 @@ apiserver_longrunning_gauge{resource="statefulsets",scope="cluster",subresource=
 apiserver_longrunning_gauge{resource="storageclasses",scope="cluster",subresource="",verb="WATCH"} 2
 apiserver_longrunning_gauge{resource="validatingwebhookconfigurations",scope="cluster",subresource="",verb="WATCH"} 2
 apiserver_longrunning_gauge{resource="volumeattachments",scope="cluster",subresource="",verb="WATCH"} 2
+# HELP apiserver_dropped_requests_total Number of requests dropped with 'Try again later' response.
+# TYPE apiserver_dropped_requests_total counter
+apiserver_dropped_requests_total{client="Datadog Agent/6.8.2",code="500",contentType="application/json",resource="componentstatuses",scope="cluster",subresource="",verb="GET"} 3
 # HELP apiserver_request_count Counter of apiserver requests broken out for each verb, API resource, client, and HTTP response contentType and code.
 # TYPE apiserver_request_count counter
 apiserver_request_count{client="Datadog Agent/6.8.2",code="200",contentType="application/json",resource="componentstatuses",scope="cluster",subresource="",verb="GET"} 10134
