@@ -71,7 +71,7 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## Ignore warnings for lack of SSL validation
     #
-    # ignore_tls_warning = false
+    # tls_ignore_warning = false
 
     ## @param timeout - integer - optional - default: 10
     ## Customizes the Ambari connection timeout (in seconds).
