@@ -23,5 +23,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "couchbase"
+  "integration_id": "couchbase",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.7.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3585](https://github.com/DataDog/integrations-core/pull/3585).
+
 ## 1.6.0 / 2019-02-18
 
 * [Added] Support Kerberos auth. See [#2824](https://github.com/DataDog/integrations-core/pull/2824).

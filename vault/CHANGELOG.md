@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3580](https://github.com/DataDog/integrations-core/pull/3580).
+
 ## 1.3.1 / 2019-01-04
 
 * [Fixed] Fix unsupported API version fallback. See [#2793][1].

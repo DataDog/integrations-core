@@ -49,7 +49,7 @@ pyvmomi==v6.5.0.2017.5-1
 pywin32==224; sys_platform == 'win32'
 pyyaml==5.1
 redis==2.10.5
-requests==2.21.0
+requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
 scandir==1.8

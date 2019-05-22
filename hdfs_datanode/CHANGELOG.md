@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_datanode
 
+## 1.7.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3514](https://github.com/DataDog/integrations-core/pull/3514).
+
 ## 1.6.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2856][1].

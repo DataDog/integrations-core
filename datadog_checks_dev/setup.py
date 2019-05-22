@@ -29,7 +29,7 @@ REQUIRES = [
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
     'pytest-mock',
-    'requests>=2.20.0',
+    'requests>=2.22.0',
     'six',
 ]
 

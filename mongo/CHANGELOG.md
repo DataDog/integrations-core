@@ -1,5 +1,10 @@
 # CHANGELOG - mongo
 
+## 1.9.0 / 2019-05-14
+
+* [Added] Add tcmalloc.spinlock_total_delay_ns to mongodb stats. See [#3643](https://github.com/DataDog/integrations-core/pull/3643). Thanks [glenjamin](https://github.com/glenjamin).
+* [Added] Adhere to code style. See [#3540](https://github.com/DataDog/integrations-core/pull/3540).
+
 ## 1.8.0 / 2019-02-18
 
 * [Added] Finish Support Python 3. See [#2916](https://github.com/DataDog/integrations-core/pull/2916).

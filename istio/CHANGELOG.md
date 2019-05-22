@@ -1,5 +1,9 @@
 # CHANGELOG - istio
 
+## 2.2.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3522](https://github.com/DataDog/integrations-core/pull/3522).
+
 ## 2.1.0 / 2019-02-18
 
 * [Fixed] Update example config to match docs. See [#3046](https://github.com/DataDog/integrations-core/pull/3046).

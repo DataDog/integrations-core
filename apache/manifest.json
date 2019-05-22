@@ -27,5 +27,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "apache"
+  "integration_id": "apache",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

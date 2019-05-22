@@ -1,5 +1,9 @@
 # CHANGELOG - ceph
 
+## 1.5.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3488](https://github.com/DataDog/integrations-core/pull/3488).
+
 ## 1.4.0 / 2019-02-18
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).

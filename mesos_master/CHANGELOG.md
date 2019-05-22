@@ -1,5 +1,9 @@
 # CHANGELOG - mesos_master
 
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3538](https://github.com/DataDog/integrations-core/pull/3538).
+
 ## 1.3.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#2873](https://github.com/DataDog/integrations-core/pull/2873).
