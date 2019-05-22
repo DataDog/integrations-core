@@ -186,6 +186,10 @@ def start(ctx, check, env, agent, dev, base, env_vars):
             environment.update_check()
             echo_success('success!')
 
+    if ctx.parent.info_name == 'test':
+        # Invoke from the test command, remove config boilerplate
+        return environment
+
     click.echo()
 
     try:
