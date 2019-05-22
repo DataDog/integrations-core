@@ -20,6 +20,4 @@ sudo apt-get install -y --no-install-recommends \
   libpython-dev \
   build-essential
 
-sudo pip install rrdtool
-
 set +ex
