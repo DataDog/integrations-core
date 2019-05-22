@@ -27,27 +27,16 @@ class AmbariCheck(AgentCheck):
         base_url = instance.get("url", "")
         base_tags = instance.get("tags", [])
         whitelisted_services = instance.get("services", [])
-        whitelisted_metrics = [str(h) for h in instance.get("metric_headers", [])]
 
         clusters = self.get_clusters(base_url)
-        if self._should_collect_host_metrics():
-            self.get_host_metrics(base_url, clusters, base_tags)
+        self.get_host_metrics(base_url, clusters, base_tags)
 
         collect_service_metrics = self._should_collect_service_metrics()
         collect_service_status = self._should_collect_service_status()
         if collect_service_metrics or collect_service_status:
             self.get_service_status_and_metrics(
-                base_url,
-                clusters,
-                whitelisted_services,
-                whitelisted_metrics,
-                base_tags,
-                collect_service_metrics,
-                collect_service_status,
+                base_url, clusters, whitelisted_services, base_tags, collect_service_metrics, collect_service_status
             )
-
-    def _should_collect_host_metrics(self):
-        return self.init_config.get("collect_host_metrics", True)
 
     def _should_collect_service_metrics(self):
         return self.init_config.get("collect_service_metrics", True)
@@ -82,7 +71,8 @@ class AmbariCheck(AgentCheck):
 
         return clusters
 
-    def get_host_metrics(self, base_url, clusters, base_tags):
+    def get_host_metrics(self, base_url, clusters, base_tags=None):
+        base_tags = base_tags or []
         external_tags = []
         for cluster in clusters:
             cluster_tag = CLUSTER_TAG_TEMPLATE.format(cluster)
@@ -114,21 +104,11 @@ class AmbariCheck(AgentCheck):
         self.set_external_tags(external_tags)
 
     def get_service_status_and_metrics(
-        self,
-        base_url,
-        clusters,
-        whitelisted_services,
-        whitelisted_metrics,
-        base_tags,
-        collect_service_metrics,
-        collect_service_status,
+        self, base_url, clusters, whitelisted_services, base_tags, collect_service_metrics, collect_service_status
     ):
         if not whitelisted_services:
             self.log.warning("Service metrics or status collection activated but no services have been whitelisted")
             return
-
-        if collect_service_metrics and not whitelisted_metrics:
-            self.log.warning("Service metrics collection activated but no components have been whitelisted")
 
         for cluster in clusters:
             tags = base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
@@ -136,9 +116,7 @@ class AmbariCheck(AgentCheck):
                 service_tags = tags + [SERVICE_TAG + service.lower()]
 
                 if collect_service_metrics:
-                    self.get_component_metrics(
-                        base_url, cluster, service, service_tags, [c.upper() for c in components], whitelisted_metrics
-                    )
+                    self.get_component_metrics(base_url, cluster, service, service_tags, components)
                 if collect_service_status:
                     self.get_service_checks(base_url, cluster, service, service_tags)
 
@@ -147,11 +125,14 @@ class AmbariCheck(AgentCheck):
         for info in service_info:
             self._submit_service_checks("state", info['state'], info['tags'])
 
-    def get_component_metrics(self, base_url, cluster, service, base_tags, component_whitelist, metric_whitelist):
+    def get_component_metrics(self, base_url, cluster, service, base_tags, component_whitelist):
         if not component_whitelist:
+            self.log.warning("Service metrics collection activated but no components have been whitelisted")
             return
+
         component_metrics_endpoint = common.create_endpoint(base_url, cluster, service, COMPONENT_METRICS_QUERY)
         components_response = self._make_request(component_metrics_endpoint)
+        component_whitelist = {k.upper(): v for k, v in iteritems(component_whitelist)}
 
         if components_response is None or 'items' not in components_response:
             self.log.warning("No components found for service {}.".format(service))
@@ -161,14 +142,15 @@ class AmbariCheck(AgentCheck):
             component_name = component['ServiceComponentInfo']['component_name']
 
             if component_name not in component_whitelist:
-                self.log.warning('{} not found in {}:{}'.format(component_name, cluster, service))
+                self.log.debug('Component {} not whitelisted'.format(component_name))
                 continue
             component_metrics = component.get(METRICS_FIELD)
             if component_metrics is None:
-                self.log.warning("No metrics found for component {} for service {}".format(component_name, service))
+                # Not all components provide metrics
+                self.log.debug("No metrics found for component {} for service {}".format(component_name, service))
                 continue
 
-            for header in metric_whitelist:
+            for header in component_whitelist[component_name]:
                 if header not in component_metrics:
                     self.log.warning(
                         "No {} metrics found for component {} for service {}".format(header, component_name, service)
