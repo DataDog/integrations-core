@@ -7,15 +7,19 @@ instances:
     #
   - prometheus_url: localhost:443/metrics
     
-    ## @param scheme - Used to specify the scheme to reach the APIServer endpoints. - Default to https.
+    ## @param scheme - string - optional
+    ## Used to specify the scheme to reach the APIServer endpoints. - Default to https.
     #
     # scheme: "https"
 
-    ## @param bearer_token_path - Used to specify the path where the service account token is located. - Default to "/var/run/secrets/kubernetes.io/serviceaccount/token".
+    ## @param bearer_token_path - string - optional
+    ## Used to specify the path where the service account token is located.
+    ## Default to "/var/run/secrets/kubernetes.io/serviceaccount/token".
     #
     # bearer_token_path: "/var/run/secrets/kubernetes.io/serviceaccount/token"
     
-    ## @param ssl_verify - Used to verify self signed certificates. Default to false
+    ## @param ssl_verify - string - optional
+    ## Used to verify self signed certificates. Default to false
     # 
     # ssl_verify: false    
 

@@ -9,17 +9,21 @@ instances:
     #
   - prometheus_url: "%%host%%:%%port%%/metrics"
     
-    ## @param ssl_verify - Used to verify self signed certificates. Default to false
+    ## @param ssl_verify - string - optional
+    ## Used to verify self signed certificates. Default to false
     # 
-    ssl_verify: false
+    # ssl_verify: false   
 
-    ## @param bearer_token_path - Used to specify the path where the service account token is located. - Default to "/var/run/secrets/kubernetes.io/serviceaccount/token".
+    ## @param bearer_token_path - string - optional
+    ## Used to specify the path where the service account token is located.
+    ## Default to "/var/run/secrets/kubernetes.io/serviceaccount/token".
     #
-    bearer_token_path: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    # bearer_token_path: "/var/run/secrets/kubernetes.io/serviceaccount/token"
     
-    ## @param scheme - Used to specify the scheme to reach the APIServer endpoints. - Default to https.
+    ## @param scheme - string - optional
+    ## Used to specify the scheme to reach the APIServer endpoints. - Default to https.
     #
-    scheme: "https"
+    # scheme: "https"
 
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
