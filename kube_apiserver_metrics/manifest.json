@@ -4,25 +4,23 @@
   "manifest_version": "1.0.0",
   "name": "kube_apiserver_metrics",
   "metric_prefix": "kube_apiserver.",
-  "metric_to_check": "",
+  "metric_to_check": "kube_apiserver.go_goroutines",
   "creates_events": false,
   "short_description": "",
   "guid": "406b274b-c44d-4499-a329-efd053b3f538",
   "support": "core",
   "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
+    "linux"
   ],
   "public_title": "Datadog-Kube_apiserver_metrics Integration",
   "categories": [
-    ""
+    "containers"
   ],
   "type": "check",
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assest/service_checks.json"
+    "service_checks": "assets/service_checks.json"
   },
   "is_public": false
 }

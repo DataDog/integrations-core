@@ -1,18 +1,19 @@
-kube_apiserver.longrunning_gauge',gauge,,,,Gauge of all active long-running apiserver requests broken out by verb API resource and scope. Not all requests are tracked this way.,-1, kube_apiserver, long running gauges
-kube_apiserver.current_inflight_requests',gauge,,,,Maximal mumber of currently used inflight request limit of this apiserver per request kind in last second.,0,kube_apiserver, current inflight requests
-kube_apiserver.audit_event',gauge,,,,Accumulated number audit events generated and sent to the audit backend,1, kube_apiserver, accumulated audit events
-kube_apiserver.go_threads',gauge,,,,Number of OS threads created,0, kube_apiserver, go threads
-kube_apiserver.go_goroutines',gauge,,,,Number of goroutines that currently exist,0, kube_apiserver, go routines
-kube_apiserver.APIServiceRegistrationController_depth',gauge,,,,Current depth of workqueue: APIServiceRegistrationController,0, kube_apiserver, service registration controller depth
-kube_apiserver.etcd_object_counts',gauge,,,,Number of stored objects at the time of last check split by kind,0, kube_apiserver, etcd object counts
-kube_apiserver.rest_client_requests_total',gauge,,,,Accumulated number of HTTP requests partitioned by status code method and host,1, kube_apiserver, accumulated rest client requests
-kube_apiserver.apiserver_request_count',gauge,,,,Accumulated number of apiserver requests broken out for each verb API resource client and HTTP response contentType and code,1, kube_apiserver, accumulated number of requests
-kube_apiserver.apiserver_dropped_requests_total',gauge,,,,Accumulated number of requests dropped with 'Try again later' response,1, kube_apiserver, accumulated number of dropped requests
-kube_apiserver.http_requests_total',gauge,,,,Accumulated number of HTTP requests made,1, kube_apiserver, accumulated total number of requests
-kube_apiserver.authenticated_user_requests',gauge,,,,Accumulated number of authenticated requests broken out by username,1, kube_apiserver, accumulated number of authenticated requests
-kube_apiserver.audit_event.count',count,,,,Monotonic count of audit events generated and sent to the audit backend,0, kube_apiserver, count of audit events
-kube_apiserver.rest_client_requests_total.count',count,,,,Monotonic count of HTTP requests partitioned by status code method and host,0, kube_apiserver, total count of rest client requests
-kube_apiserver.apiserver_request_count.count',count,,,,Monotonic count of apiserver requests broken out for each verb API resource client and HTTP response contentType and code,0, kube_apiserver, count of requests
-kube_apiserver.apiserver_dropped_requests_total.count',count,,,,Monotonic count of requests dropped with 'Try again later' response,0, kube_apiserver, count of dropped requests
-kube_apiserver.http_requests_total.count',count,,,,Monotonic count of the number of HTTP requests made,0,kube_apiserver, total count of requests
-kube_apiserver.authenticated_user_requests.count',count,,,,Monotonic count of authenticated requests broken out by username,0, kube_apiserver, count of authenticated requests
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+kube_apiserver.longrunning_gauge,gauge,,,,Gauge of all active long-running apiserver requests broken out by verb API resource and scope. Not all requests are tracked this way.,-1, kube_apiserver, long running gauges
+kube_apiserver.current_inflight_requests,gauge,,,,Maximal mumber of currently used inflight request limit of this apiserver per request kind in last second.,0,kube_apiserver, current inflight requests
+kube_apiserver.audit_event,gauge,,,,Accumulated number audit events generated and sent to the audit backend,1, kube_apiserver, accumulated audit events
+kube_apiserver.go_threads,gauge,,,,Number of OS threads created,0, kube_apiserver, go threads
+kube_apiserver.go_goroutines,gauge,,,,Number of goroutines that currently exist,0, kube_apiserver, go routines
+kube_apiserver.APIServiceRegistrationController_depth,gauge,,,,Current depth of workqueue: APIServiceRegistrationController,0, kube_apiserver, service registration controller depth
+kube_apiserver.etcd_object_counts,gauge,,,,Number of stored objects at the time of last check split by kind,0, kube_apiserver, etcd object counts
+kube_apiserver.rest_client_requests_total,gauge,,,,Accumulated number of HTTP requests partitioned by status code method and host,1, kube_apiserver, accumulated rest client requests
+kube_apiserver.apiserver_request_count,gauge,,,,Accumulated number of apiserver requests broken out for each verb API resource client and HTTP response contentType and code,1, kube_apiserver, accumulated number of requests
+kube_apiserver.apiserver_dropped_requests_total,gauge,,,,Accumulated number of requests dropped with 'Try again later' response,1, kube_apiserver, accumulated number of dropped requests
+kube_apiserver.http_requests_total,gauge,,,,Accumulated number of HTTP requests made,1, kube_apiserver, accumulated total number of requests
+kube_apiserver.authenticated_user_requests,gauge,,,,Accumulated number of authenticated requests broken out by username,1, kube_apiserver, accumulated number of authenticated requests
+kube_apiserver.audit_event.count,count,,,,Monotonic count of audit events generated and sent to the audit backend,0, kube_apiserver, count of audit events
+kube_apiserver.rest_client_requests_total.count,count,,,,Monotonic count of HTTP requests partitioned by status code method and host,0, kube_apiserver, total count of rest client requests
+kube_apiserver.apiserver_request_count.count,count,,,,Monotonic count of apiserver requests broken out for each verb API resource client and HTTP response contentType and code,0, kube_apiserver, count of requests
+kube_apiserver.apiserver_dropped_requests_total.count,count,,,,Monotonic count of requests dropped with 'Try again later' response,0, kube_apiserver, count of dropped requests
+kube_apiserver.http_requests_total.count,count,,,,Monotonic count of the number of HTTP requests made,0,kube_apiserver, total count of requests
+kube_apiserver.authenticated_user_requests.count,count,,,,Monotonic count of authenticated requests broken out by username,0, kube_apiserver, count of authenticated requests

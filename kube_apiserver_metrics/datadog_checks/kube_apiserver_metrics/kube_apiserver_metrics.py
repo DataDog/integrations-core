@@ -82,12 +82,14 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
             with open(bearer_token_path, "r") as f:
                 bearer_token = f.read()
         except Exception as err:
-            self.log.warning("Could not retrieve the bearer token file: {}".format(err))
+            self.warning("Could not retrieve the bearer token file: {}".format(err))
+            return kube_apiserver_metrics_instance
 
         if bearer_token:
             kube_apiserver_metrics_instance['extra_headers'] = {}
             kube_apiserver_metrics_instance['extra_headers']["Authorization"] = "Bearer {}".format(bearer_token)
-
+        else:
+            self.warning("Bearer token file is empty, AuthN/Z will not work")
         return kube_apiserver_metrics_instance
 
     def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):

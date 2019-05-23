@@ -83,8 +83,13 @@ class TestKubeApiserverMetrics:
         Testing the bearer token configuration.
         """
         check = KubeApiserverMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
+        check.warning = mock.MagicMock()
+
         apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
         assert apiserver_instance.get("extra_headers", {}) == {}
+        check.warning.assert_called_with("Could not retrieve the bearer token file: "
+            "[Errno 2] No such file or directory: " +
+            "'/var/run/secrets/kubernetes.io/serviceaccount/token'")
 
         temp_dir = tempfile.mkdtemp()
         temp_bearer_file = os.path.join(temp_dir, "foo")
@@ -93,8 +98,8 @@ class TestKubeApiserverMetrics:
         instance["bearer_token_path"] = temp_bearer_file
 
         apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
-
         assert apiserver_instance.get("extra_headers", {}) == {}
+        check.warning.assert_called_with("Bearer token file is empty, AuthN/Z will not work")
 
         with open(temp_bearer_file, "w+") as f:
             f.write("XXX")
