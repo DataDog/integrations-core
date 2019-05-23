@@ -6,7 +6,7 @@
   "metric_prefix": "kube_apiserver.",
   "metric_to_check": "kube_apiserver.go_goroutines",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Collect metrics from the Kubernetes APIserver",
   "guid": "406b274b-c44d-4499-a329-efd053b3f538",
   "support": "core",
   "supported_os": [
@@ -17,6 +17,7 @@
     "containers"
   ],
   "type": "check",
+  "integration_id": "kube-apiserver",
   "assets": {
     "monitors": {},
     "dashboards": {},
