@@ -23,7 +23,7 @@ def aggregator():
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    return INSTANCE_INTEGRATION#, E2E_METADATA
+    return INSTANCE_INTEGRATION, E2E_METADATA
 
 
 @pytest.fixture
