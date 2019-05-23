@@ -26,7 +26,7 @@
     "monitors": {},
     "dashboards": {
       "IBM Db2 Overview": "assets/dashboards/overview.json",
-      "IBM Db2 Overview Old": "assets/dashbaords/overview_old.json"
+      "IBM Db2 Overview Old": "assets/dashboards/overview_old.json"
     },
     "service_checks": "assets/service_checks.json"
   }
