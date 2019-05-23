@@ -19,5 +19,10 @@
     ""
   ],
   "type": "check",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assest/service_checks.json"
+  },
   "is_public": false
 }
