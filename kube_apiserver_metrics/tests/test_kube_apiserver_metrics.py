@@ -85,7 +85,6 @@ class TestKubeApiserverMetrics:
         check = KubeApiserverMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
         apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
         assert apiserver_instance.get("extra_headers", {}) == {}
-        assert check.bearer_token_found == False
 
         temp_dir = tempfile.mkdtemp()
         temp_bearer_file = os.path.join(temp_dir, "foo")
@@ -96,7 +95,6 @@ class TestKubeApiserverMetrics:
         apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
 
         assert apiserver_instance.get("extra_headers", {}) == {}
-        assert check.bearer_token_found == False
 
         with open(temp_bearer_file, "w+") as f:
             f.write("XXX")
@@ -104,4 +102,3 @@ class TestKubeApiserverMetrics:
         apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
         os.remove(temp_bearer_file)
         assert apiserver_instance["extra_headers"] == APISERVER_INSTANCE_EXTRA_HEADER
-        assert check.bearer_token_found == True

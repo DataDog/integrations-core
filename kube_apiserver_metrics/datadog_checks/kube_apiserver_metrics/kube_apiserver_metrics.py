@@ -15,14 +15,14 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
     See https://github.com/kubernetes/apiserver
     """
     DEFAULT_METRIC_LIMIT = 0
-    # Set up metric_transformers
-    METRIC_TRANSFORMERS = {}
+    # Set up metrics_transformers
+    metric_transformers = {}
     DEFAULT_BEARER_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
     DEFAULT_SCHEME = 'https'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        # Set up metric_transformers
-        self.METRIC_TRANSFORMERS = {
+        # Set up metrics_transformers
+        self.metric_transformers = {
                 'apiserver_audit_event_total': self.apiserver_audit_event_total,
                 'rest_client_requests_total': self.rest_client_requests_total,
                 'apiserver_request_count': self.apiserver_request_count,
@@ -30,17 +30,13 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
                 'http_requests_total': self.http_requests_total,
                 'authenticated_user_requests': self.authenticated_user_requests,
         }
-        self.bearer_token_found = False
-        # Create instances we can use in OpenMetricsBaseCheck
-        generic_instances = None
-        if instances is not None:
-            generic_instances = self.create_generic_instances(instances)
+        self.kube_apiserver_config = None
 
         super(KubeApiserverMetricsCheck, self).__init__(
             name,
             init_config,
             agentConfig,
-            instances=generic_instances,
+            instances=instances,
             default_instances={
                 "kube_apiserver": {
                     'namespace': 'kube_apiserver',
@@ -60,23 +56,15 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
             )
 
     def check(self, instance):
-        if not self.bearer_token_found:
-            self.log.warn("Not using the service account bearer token file, AuthN/Z will fail.")
-        if not instance.get("prometheus_url"):
-            raise ConfigurationError("Missing prometheus_endpoint field. Skipping check")
-        scraper_config = self.get_scraper_config(instance)
-        self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
+        if self.kube_apiserver_config is None:
+            kube_apiserver_config =self._create_kube_apiserver_metrics_instance(instance)
+            self.kube_apiserver_config = self.get_scraper_config(kube_apiserver_config)
 
-    def create_generic_instances(self, instances):
-        """
-        Transform each Kubernetes APIServer endpoint instance into a OpenMetricsBaseCheck instance
-        """
-        generic_instances = []
-        for instance in instances:
-            transformed_instance = self._create_kube_apiserver_metrics_instance(instance)
-            generic_instances.append(transformed_instance)
-
-        return generic_instances
+        if not self.kube_apiserver_config['metrics_mapper']:
+            raise CheckException(
+                 "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
+            )
+        self.process(self.kube_apiserver_config, metric_transformers=self.metric_transformers)
 
     def _create_kube_apiserver_metrics_instance(self, instance):
         """
@@ -90,17 +78,15 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
 
         bearer_token_path = instance.get('bearer_token_path', self.DEFAULT_BEARER_TOKEN_PATH)
         bearer_token = ""
-        if not os.path.isfile(bearer_token_path) or not os.access(bearer_token_path, os.R_OK):
-            self.bearer_token_found = False
-        else:
+        try:
             with open(bearer_token_path, "r") as f:
                 bearer_token = f.read()
-        if bearer_token == "":
-            self.bearer_token_found = False
-        else:
+        except Exception as err:
+            self.log.warning("Could not retrieve the bearer token file: {}".format(err))
+
+        if bearer_token:
             kube_apiserver_metrics_instance['extra_headers'] = {}
             kube_apiserver_metrics_instance['extra_headers']["Authorization"] = "Bearer {}".format(bearer_token)
-            self.bearer_token_found = True
 
         return kube_apiserver_metrics_instance
 

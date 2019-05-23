@@ -1,5 +1,3 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-
 kube_apiserver.longrunning_gauge',gauge,,,,Gauge of all active long-running apiserver requests broken out by verb API resource and scope. Not all requests are tracked this way.,-1, kube_apiserver, long running gauges
 kube_apiserver.current_inflight_requests',gauge,,,,Maximal mumber of currently used inflight request limit of this apiserver per request kind in last second.,0,kube_apiserver, current inflight requests
 kube_apiserver.audit_event',gauge,,,,Accumulated number audit events generated and sent to the audit backend,1, kube_apiserver, accumulated audit events
