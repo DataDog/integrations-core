@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from copy import deepcopy
 import os
-from six import iteritems
+from copy import deepcopy
 
+from six import iteritems
 from datadog_checks.base import ConfigurationError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
@@ -29,6 +28,7 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
                 'apiserver_request_count': self.apiserver_request_count,
                 'apiserver_dropped_requests_total': self.apiserver_dropped_requests_total,
                 'http_requests_total': self.http_requests_total,
+                'authenticated_user_requests': self.authenticated_user_requests,
         }
         self.bearer_token_found = False
         # Create instances we can use in OpenMetricsBaseCheck
@@ -130,3 +130,5 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
         self.submit_as_gauge_and_monotonic_count('.apiserver_request_count', metric, scraper_config)
     def apiserver_dropped_requests_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.apiserver_dropped_requests_total', metric, scraper_config)
+    def authenticated_user_requests(self, metric, scraper_config):
+        self.submit_as_gauge_and_monotonic_count('.authenticated_user_requests', metric, scraper_config)

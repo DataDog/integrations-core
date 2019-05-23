@@ -51,7 +51,7 @@ class TestKubeApiserverMetrics:
         NAMESPACE + '.apiserver_request_count',
         NAMESPACE + '.apiserver_dropped_requests_total',
         NAMESPACE + '.http_requests_total',
-
+        NAMESPACE + '.authenticated_user_requests',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
@@ -59,6 +59,7 @@ class TestKubeApiserverMetrics:
         NAMESPACE + '.apiserver_request_count.count',
         NAMESPACE + '.apiserver_dropped_requests_total.count',
         NAMESPACE + '.http_requests_total.count',
+        NAMESPACE + '.authenticated_user_requests.count',
     ]
 
     def test_check(self, aggregator, mock_get):
