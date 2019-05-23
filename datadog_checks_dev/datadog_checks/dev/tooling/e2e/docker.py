@@ -101,7 +101,6 @@ class DockerInterface(object):
         if break_point is not None:
             command += ' --breakpoint {}'.format(break_point)
 
-        print("Running {}".format(command))
         return self.exec_command(command, capture=capture, interactive=break_point is not None)
 
     def exists(self):
