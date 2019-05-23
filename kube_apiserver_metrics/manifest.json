@@ -3,7 +3,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "kube_apiserver_metrics",
-  "metric_prefix": "kube_apiserver_metrics.",
+  "metric_prefix": "kube_apiserver.",
   "metric_to_check": "",
   "creates_events": false,
   "short_description": "",
