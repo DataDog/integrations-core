@@ -9,6 +9,8 @@ Connect MongoDB to Datadog in order to:
 * Visualize key MongoDB metrics.
 * Correlate MongoDB performance with the rest of your applications.
 
+You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
+
 ## Setup
 ### Installation
 
@@ -44,7 +46,7 @@ db.createUser({
 
 #### Metric Collection
 
-* Add this configuration block to your `mongo.d/conf.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.d/conf.yaml][4] for all available configuration options:
+* Add this configuration block to your `mongo.d/conf.yaml` file to start gathering your [MongoDB Metrics](#metrics):
 
   ```
   init_config:
@@ -56,7 +58,7 @@ db.createUser({
         - tcmalloc
         - top
   ```
-  See the [sample mongo.yaml][4] for all available configuration options
+  See the [sample mongo.yaml][4] for all available configuration options, including those for custom metrics.
 
 * [Restart the Agent][5] to start sending MongoDB metrics to Datadog.
 

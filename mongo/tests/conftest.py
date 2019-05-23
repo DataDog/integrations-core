@@ -14,13 +14,13 @@ from . import common
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
+def dd_environment(instance_custom_queries):
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
 
     with docker_run(
         compose_file, conditions=[WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5), InitializeDB()]
     ):
-        yield instance
+        yield instance_custom_queries
 
 
 @pytest.fixture(scope='session')
@@ -28,14 +28,81 @@ def instance():
     return {'server': common.MONGODB_SERVER}
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def instance_user():
     return {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1)}
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def instance_authdb():
     return {'server': 'mongodb://testUser:testPass@{}:{}/test?authSource=authDB'.format(common.HOST, common.PORT1)}
+
+
+@pytest.fixture(scope='session')
+def instance_custom_queries():
+    return {
+        'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1),
+        'queries': [
+            {
+                "metric_prefix": "dd.custom.mongo.query_a",
+                "query": {'find': "orders", 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
+                "fields": [
+                    {
+                        "field_name": "cust_id",
+                        "name": "cluster_id",
+                        "type": "tag",
+                    },
+                    {
+                        "field_name": "status",
+                        "name": "status_tag",
+                        "type": "tag",
+                    },
+                    {
+                        "field_name": "amount",
+                        "name": "amount",
+                        "type": "count",
+                    },
+                    {
+                        "field_name": "elements",
+                        "name": "el",
+                        "type": "count",
+                    },
+                ],
+                "tags": ['tag1:val1', 'tag2:val2'],
+            },
+            {
+                "query": {'count': "foo", 'query': {'1': {'$type': 16}}},
+                "metric_prefix": "dd.custom.mongo.count",
+                "tags": ['tag1:val1', 'tag2:val2'],
+                "count_type": 'gauge',
+            },
+            {
+                "query": {
+                    'aggregate': "orders",
+                    'pipeline': [
+                        {"$match": {"status": "A"}},
+                        {"$group": {"_id": "$cust_id", "total": {"$sum": "$amount"}}},
+                        {"$sort": {"total": -1}},
+                    ],
+                    'cursor': {},
+                },
+                "fields": [
+                    {
+                        "field_name": "total",
+                        "name": "total",
+                        "type": "count",
+                    },
+                    {
+                        "field_name": "_id",
+                        "name": "cluster_id",
+                        "type": "tag",
+                    },
+                ],
+                "metric_prefix": "dd.custom.mongo.aggregate",
+                "tags": ['tag1:val1', 'tag2:val2'],
+            },
+        ],
+    }
 
 
 @pytest.fixture
@@ -67,9 +134,9 @@ class InitializeDB(LazyFunction):
         )
 
         foos = []
-        for _ in range(70):
+        for i in range(70):
             foos.append({'1': []})
-            foos.append({'1': []})
+            foos.append({'1': i})
             foos.append({})
 
         bars = []
@@ -77,9 +144,19 @@ class InitializeDB(LazyFunction):
             bars.append({'1': []})
             bars.append({})
 
+        orders = [
+            {"cust_id": "abc1", "status": "A", "amount": 50, "elements": 3},
+            {"cust_id": "xyz1", "status": "A", "amount": 100},
+            {"cust_id": "abc1", "status": "D", "amount": 50, "elements": 1},
+            {"cust_id": "abc1", "status": "A", "amount": 25},
+            {"cust_id": "xyz1", "status": "A", "amount": 25},
+            {"cust_id": "abc1", "status": "A", "amount": 300, "elements": 10},
+        ]
+
         db = cli['test']
         db.foo.insert_many(foos)
         db.bar.insert_many(bars)
+        db.orders.insert_many(orders)
 
         auth_db = cli['authDB']
         auth_db.command("createUser", 'testUser', pwd='testPass', roles=[{'role': 'read', 'db': 'test'}])
