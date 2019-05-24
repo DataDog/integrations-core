@@ -887,7 +887,7 @@ def test_get_server_diagnostics(aggregator):
         }
 
 
-def get_project_limits_response(url, headers, params=None, timeout=None):
+def get_project_limits_response():
     return json.loads(
         """{
         "limits": {
@@ -918,9 +918,64 @@ def get_project_limits_response(url, headers, params=None, timeout=None):
     )
 
 
+def get_network_quotas_response():
+    return json.loads(
+        """{
+          "quota": {
+            "subnet": {
+              "reserved": 0,
+              "used": 2,
+              "limit": 100
+            },
+            "network": {
+              "reserved": 0,
+              "used": 1,
+              "limit": 100
+            },
+            "floatingip": {
+              "reserved": 0,
+              "used": 1,
+              "limit": 10
+            },
+            "subnetpool": {
+              "reserved": 0,
+              "used": 0,
+              "limit": -1
+            },
+            "security_group_rule": {
+              "reserved": 0,
+              "used": 4,
+              "limit": 100
+            },
+            "security_group": {
+              "reserved": 0,
+              "used": 1,
+              "limit": 10
+            },
+            "router": {
+              "reserved": 0,
+              "used": 1,
+              "limit": 10
+            },
+            "rbac_policy": {
+              "reserved": 0,
+              "used": 0,
+              "limit": 10
+            },
+            "port": {
+              "reserved": 0,
+              "used": 3,
+              "limit": 500
+            }
+          }
+        }"""
+    )
+
+
 def test_get_project_limits(aggregator):
     with mock.patch(
-        'datadog_checks.openstack_controller.api.SimpleApi._make_request', side_effect=get_project_limits_response
+        'datadog_checks.openstack_controller.api.SimpleApi._make_request',
+        side_effect=[get_project_limits_response(), get_network_quotas_response()],
     ):
         api = SimpleApi(None, None)
         assert api.get_project_limits(None) == common.EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE
