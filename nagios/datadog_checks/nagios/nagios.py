@@ -98,85 +98,86 @@ class NagiosCheck(AgentCheck):
         self.nagios_tails = {}
         check_freq = init_config.get("check_freq", 15)
 
-        for instance in self.instances:
-            tailers = []
-            nagios_conf = {}
-            instance_key = None
-            custom_tag = instance.get('tags', [])
+        if instances is not None:
+            for instance in instances:
+                tailers = []
+                nagios_conf = {}
+                instance_key = None
+                custom_tag = instance.get('tags', [])
 
-            if 'nagios_conf' in instance:  # conf.d check
-                conf_path = instance['nagios_conf']
-                nagios_conf = self.parse_nagios_config(conf_path)
-                instance_key = conf_path
-            # Retrocompatibility Code
-            elif 'nagios_perf_cfg' in instance:
-                conf_path = instance['nagios_perf_cfg']
-                nagios_conf = self.parse_nagios_config(conf_path)
-                instance["collect_host_performance_data"] = True
-                instance["collect_service_performance_data"] = True
-                instance_key = conf_path
-            if 'nagios_log' in instance:
-                nagios_conf["log_file"] = instance['nagios_log']
-                if instance_key is None:
-                    instance_key = instance['nagios_log']
-            # End of retrocompatibility code
-            if not nagios_conf:
-                self.log.warning("Missing path to nagios_conf")
-                continue
+                if 'nagios_conf' in instance:  # conf.d check
+                    conf_path = instance['nagios_conf']
+                    nagios_conf = self.parse_nagios_config(conf_path)
+                    instance_key = conf_path
+                # Retrocompatibility Code
+                elif 'nagios_perf_cfg' in instance:
+                    conf_path = instance['nagios_perf_cfg']
+                    nagios_conf = self.parse_nagios_config(conf_path)
+                    instance["collect_host_performance_data"] = True
+                    instance["collect_service_performance_data"] = True
+                    instance_key = conf_path
+                if 'nagios_log' in instance:
+                    nagios_conf["log_file"] = instance['nagios_log']
+                    if instance_key is None:
+                        instance_key = instance['nagios_log']
+                # End of retrocompatibility code
+                if not nagios_conf:
+                    self.log.warning("Missing path to nagios_conf")
+                    continue
 
-            if 'log_file' in nagios_conf and instance.get('collect_events', True):
-                self.log.debug("Starting to tail the event log")
-                tailers.append(
-                    NagiosEventLogTailer(
-                        log_path=nagios_conf['log_file'],
-                        file_template=None,
-                        logger=self.log,
-                        hostname=self.hostname,
-                        tags=custom_tag,
-                        event_func=self.event,
-                        gauge_func=self.gauge,
-                        freq=check_freq,
-                        passive_checks=instance.get('passive_checks_events', False),
+                if 'log_file' in nagios_conf and instance.get('collect_events', True):
+                    self.log.debug("Starting to tail the event log")
+                    tailers.append(
+                        NagiosEventLogTailer(
+                            log_path=nagios_conf['log_file'],
+                            file_template=None,
+                            logger=self.log,
+                            hostname=self.hostname,
+                            tags=custom_tag,
+                            event_func=self.event,
+                            gauge_func=self.gauge,
+                            freq=check_freq,
+                            passive_checks=instance.get('passive_checks_events', False),
+                        )
                     )
-                )
-            if (
-                'host_perfdata_file' in nagios_conf
-                and 'host_perfdata_file_template' in nagios_conf
-                and instance.get('collect_host_performance_data', False)
-            ):
-                self.log.debug("Starting to tail the host_perfdata file")
-                tailers.append(
-                    NagiosHostPerfDataTailer(
-                        log_path=nagios_conf['host_perfdata_file'],
-                        file_template=nagios_conf['host_perfdata_file_template'],
-                        logger=self.log,
-                        hostname=self.hostname,
-                        event_func=self.event,
-                        gauge_func=self.gauge,
-                        freq=check_freq,
-                        tags=custom_tag,
+                if (
+                    'host_perfdata_file' in nagios_conf
+                    and 'host_perfdata_file_template' in nagios_conf
+                    and instance.get('collect_host_performance_data', False)
+                ):
+                    self.log.debug("Starting to tail the host_perfdata file")
+                    tailers.append(
+                        NagiosHostPerfDataTailer(
+                            log_path=nagios_conf['host_perfdata_file'],
+                            file_template=nagios_conf['host_perfdata_file_template'],
+                            logger=self.log,
+                            hostname=self.hostname,
+                            event_func=self.event,
+                            gauge_func=self.gauge,
+                            freq=check_freq,
+                            tags=custom_tag,
+                        )
                     )
-                )
-            if (
-                'service_perfdata_file' in nagios_conf
-                and 'service_perfdata_file_template' in nagios_conf
-                and instance.get('collect_service_performance_data', False)
-            ):
-                self.log.debug("Starting to tail the service_perfdata file")
-                tailers.append(
-                    NagiosServicePerfDataTailer(
-                        log_path=nagios_conf['service_perfdata_file'],
-                        file_template=nagios_conf['service_perfdata_file_template'],
-                        logger=self.log,
-                        hostname=self.hostname,
-                        event_func=self.event,
-                        gauge_func=self.gauge,
-                        freq=check_freq,
-                        tags=custom_tag,
+                if (
+                    'service_perfdata_file' in nagios_conf
+                    and 'service_perfdata_file_template' in nagios_conf
+                    and instance.get('collect_service_performance_data', False)
+                ):
+                    self.log.debug("Starting to tail the service_perfdata file")
+                    tailers.append(
+                        NagiosServicePerfDataTailer(
+                            log_path=nagios_conf['service_perfdata_file'],
+                            file_template=nagios_conf['service_perfdata_file_template'],
+                            logger=self.log,
+                            hostname=self.hostname,
+                            event_func=self.event,
+                            gauge_func=self.gauge,
+                            freq=check_freq,
+                            tags=custom_tag,
+                        )
                     )
-                )
 
-            self.nagios_tails[instance_key] = tailers
+                self.nagios_tails[instance_key] = tailers
 
     def parse_nagios_config(self, filename):
         output = {}
@@ -404,7 +405,9 @@ class NagiosPerfDataTailer(NagiosTailer):
 
     def _parse_line(self, line):
         matched = self.line_pattern.match(line)
-        if matched:
+        if not matched:
+            self.log.debug("Non matching line found %s" % line)
+        else:
             self.log.debug("Matching line found %s" % line)
             data = matched.groupdict()
             metric_prefix = self._get_metric_prefix(data)
