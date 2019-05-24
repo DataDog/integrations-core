@@ -4,8 +4,8 @@ instances:
 
     ## @param hdfs_namenode_jmx_uri - string - required
     ## The HDFS DataNode check retrieves metrics from the HDFS DataNode's JMX
-    ## interface. This check must be installed on a HDFS DataNode. The HDFS
-    ## DataNode JMX URI is composed of the DataNode's hostname and port.
+    ## interface via HTTP(S) (not a JMX remote connection). This check must be installed on 
+    ## a HDFS DataNode. The HDFS DataNode JMX URI is composed of the DataNode's hostname and port.
     ##
     ## The hostname and port can be found in the hdfs-site.xml conf file under
     ## the property dfs.datanode.http.address
