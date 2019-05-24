@@ -187,13 +187,15 @@ def test_get_component_metrics(init_config, instance):
 def test_get_service_health(init_config, instance):
     ambari = AmbariCheck(init_config=init_config, instances=[instance])
     ambari._make_request = MagicMock(return_value=responses.SERVICE_HEALTH_METRICS)
-    service_info = ambari._get_service_checks_info(
+    ambari._submit_service_checks = MagicMock()
+
+    ambari.get_service_checks(
         'localhost', 'LabCluster', 'HDFS', service_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs']
     )
 
     ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
-
-    assert service_info == [{'state': 0, 'tags': ['ambari_cluster:LabCluster', 'ambari_service:hdfs']}]
+    ambari._submit_service_checks.assert_called_with(
+        0, ['ambari_cluster:LabCluster', 'ambari_service:hdfs', 'state:INSTALLED'], message='INSTALLED')
 
 
 def test_default_config(instance):
