@@ -77,8 +77,8 @@ instances:
 
     ## @param consumer_groups - object - optional
     ## Note that each level of values is optional (this is currently only available
-    ## when using zookeeper to store consumer groups). Any omitted values are
-    ## fetched from Zookeeper. You can omit partitions (example: <CONSUMER_NAME_2>),
+    ## when using zookeeper to store consumer offsets. When using Kafka, each level is mandatory).
+    ## Any omitted values are fetched from Zookeeper. You can omit partitions (example: <CONSUMER_NAME_2>),
     ## topics (example: <CONSUMER_NAME_3>), and even consumer_groups. If you omit
     ## consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
     ## If a value is omitted, the parent value must still be it's expected type,
