@@ -280,6 +280,8 @@ jobs:
     - stage: test
       env: CHECK=twemproxy PYTHON3=true
     - stage: test
+      env: CHECK=twistlock PYTHON3=true
+    - stage: test
       env: CHECK=varnish PYTHON3=true
     - stage: test
       env: CHECK=vault PYTHON3=true
