@@ -95,7 +95,7 @@ def manifest(fix, include_extras):
             for attr in sorted(REQUIRED_ATTRIBUTES - attrs):
                 file_failures += 1
                 display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
-            for attr in sorted(REQUIRED_ASSET_ATTRIBUTES - set(decoded.get('assets'))):
+            for attr in sorted(REQUIRED_ASSET_ATTRIBUTES - set(decoded.get('assets', {}))):
                 file_failures += 1
                 display_queue.append((echo_failure, ' Attribute `{}` under `assets` is required'.format(attr)))
 
