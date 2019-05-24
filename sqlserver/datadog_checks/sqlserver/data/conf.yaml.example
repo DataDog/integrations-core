@@ -63,6 +63,7 @@ instances:
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used
     ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
+    ## "Trusted_Connection=yes" to use Windows Authentication
     #
     # connection_string: "<CONNECTION_STRING>"
 
