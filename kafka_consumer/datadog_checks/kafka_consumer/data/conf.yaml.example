@@ -76,8 +76,8 @@ instances:
     # zk_prefix: <ZK_PREFIX>
 
     ## @param consumer_groups - object - optional
-    ## Note that each level of values is optional (this is currently only available
-    ## when using zookeeper to store consumer offsets. When using Kafka, each level is mandatory).
+    ## When using Kafka to store consumer offsets each level is mandatory.
+    ## When using zookeeper to store consumer offsets  each level is optional.
     ## Any omitted values are fetched from Zookeeper. You can omit partitions (example: <CONSUMER_NAME_2>),
     ## topics (example: <CONSUMER_NAME_3>), and even consumer_groups. If you omit
     ## consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
