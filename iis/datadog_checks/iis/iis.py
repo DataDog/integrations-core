@@ -72,7 +72,7 @@ class IIS(PDHBaseCheck):
             try:
                 for site_name, site_uptime in iteritems(site_values):
                     is_single_instance = counter.is_single_instance()
-                    if not is_single_instance and site_name != TOTAL_SITE and site_name not in sites:
+                    if not is_single_instance and sites and site_name != TOTAL_SITE and site_name not in sites:
                         continue
 
                     tags = self._get_site_tags(instance_hash, instance, site_name, is_single_instance)
