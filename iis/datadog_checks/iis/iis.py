@@ -71,11 +71,11 @@ class IIS(PDHBaseCheck):
                 continue
             try:
                 for site_name, site_uptime in iteritems(site_values):
-                    if not counter.is_single_instance():
-                        if site_name != TOTAL_SITE and site_name not in sites:
-                            continue
-                    tags = self._get_site_tags(instance_hash, instance, site_name)
+                    is_single_instance = counter.is_single_instance()
+                    if not is_single_instance and site_name != TOTAL_SITE and site_name not in sites:
+                        continue
 
+                    tags = self._get_site_tags(instance_hash, instance, site_name, is_single_instance)
                     try:
                         metric_func(dd_name, site_uptime, tags)
                     except Exception as e:
@@ -111,14 +111,15 @@ class IIS(PDHBaseCheck):
             self.log.warning("IIS didn't get any data for expected site: {}".format(normalized_site))
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)
 
-    def _get_site_tags(self, instance_hash, instance, site_name):
+    def _get_site_tags(self, instance_hash, instance, site_name, is_single_instance):
         tags = []
         if instance_hash in self._tags:
             tags = list(self._tags[instance_hash])
         tags.append(self.get_iishost(instance))
 
         try:
-            tags.append("site:{}".format(self.normalize(site_name)))
+            if not is_single_instance:
+                tags.append("site:{}".format(self.normalize(site_name)))
         except Exception as e:
             self.log.error("Caught exception {} setting tags".format(e))
 
