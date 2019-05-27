@@ -256,6 +256,13 @@ class TestTags:
         normalized_tags = check._normalize_tags_type(tags, None)
         assert normalized_tags == ['tag:foo']
 
+    def test_none_value_warning_log(self, caplog):
+        check = AgentCheck()
+        tags = [None, 'tag:foo']
+
+        normalized_tags = check._normalize_tags_type(tags, None)
+        assert 'Error encoding tag' not in caplog.text
+
     def test_external_host_tag_normalization(self):
         """
         Tests that the external_host_tag modifies in place the list of tags in the provided object
