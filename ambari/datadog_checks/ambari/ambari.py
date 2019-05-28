@@ -124,11 +124,11 @@ class AmbariCheck(AgentCheck):
         service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
         service_resp = self._make_request(service_check_endpoint)
         if service_resp is None:
-            self._submit_service_checks(self.CRITICAL['state'], service_tags)
+            self._submit_service_checks("state", self.CRITICAL, service_tags)
             self.warning("No response received for service {}".format(service))
         else:
-            state = service_resp.get('ServiceInfo').get('state')
-            self._submit_service_checks(common.STATUS[state], service_tags + ['state:%s' % state], message=state)
+            state = service_resp['ServiceInfo']['state']
+            self._submit_service_checks("state", common.STATUS[state], service_tags + ['state:%s' % state], message=state)
 
     def get_component_metrics(self, base_url, cluster, service, base_tags, component_whitelist):
         if not component_whitelist:

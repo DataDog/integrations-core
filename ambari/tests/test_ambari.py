@@ -195,8 +195,21 @@ def test_get_service_health(init_config, instance):
 
     ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
     ambari._submit_service_checks.assert_called_with(
-        0, ['ambari_cluster:LabCluster', 'ambari_service:hdfs', 'state:INSTALLED'], message='INSTALLED'
+        "state", 0, ['ambari_cluster:LabCluster', 'ambari_service:hdfs', 'state:INSTALLED'], message='INSTALLED'
     )
+
+
+def test_get_service_health_no_response(init_config, instance):
+    ambari = AmbariCheck(init_config=init_config, instances=[instance])
+    ambari._make_request = MagicMock(return_value=None)
+    ambari._submit_service_checks = MagicMock()
+
+    ambari.get_service_checks(
+        'localhost', 'LabCluster', 'HDFS', service_tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs']
+    )
+
+    ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
+    ambari._submit_service_checks.assert_called_with("state", 2, ['ambari_cluster:LabCluster', 'ambari_service:hdfs'])
 
 
 def test_default_config(instance):
