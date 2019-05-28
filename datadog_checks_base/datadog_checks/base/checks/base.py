@@ -358,7 +358,7 @@ class __AgentCheckPy3(__AgentCheck):
     Python3 version of the __AgentCheck base class
     """
     @property
-    def _empty():
+    def _empty(self):
         return ''
 
     def _format_namespace(self, s):
@@ -483,7 +483,7 @@ class __AgentCheckPy2(__AgentCheck):
     Python2 version of the __AgentCheck base class
     """
     @property
-    def _empty():
+    def _empty(self):
         return b''
 
     def _format_namespace(self, s):
