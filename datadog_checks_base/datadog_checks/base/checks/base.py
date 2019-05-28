@@ -17,7 +17,7 @@ from six import PY3, iteritems, text_type
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..utils.agent.debug import enter_pdb
-from ..utils.common import ensure_bytes, ensure_unicode
+from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.proxy import config_proxy_skip
@@ -271,6 +271,19 @@ class __AgentCheck(object):
         self._log_deprecation('increment')
         self._submit_metric(aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
+    def service_check(self, name, status, tags=None, hostname=None, message=None):
+        tags = self._normalize_tags_type(tags)
+        if hostname is None:
+            hostname = ''
+        if message is None:
+            message = ''
+        else:
+            message = to_string(message)
+
+        aggregator.submit_service_check(
+            self, self.check_id, self._format_namespace(name), status, tags, hostname, message
+        )
+
     def _log_deprecation(self, deprecation_key):
         """
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
@@ -308,6 +321,17 @@ class __AgentCheck(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
+    def warning(self, warning_message):
+        warning_message = to_string(warning_message)
+
+        frame = inspect.currentframe().f_back
+        lineno = frame.f_lineno
+        # only log the last part of the filename, not the full path
+        filename = basename(frame.f_code.co_filename)
+
+        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
+        self.warnings.append(warning_message)
+
     def get_warnings(self):
         """
         Return the list of warnings messages to be displayed in the info page
@@ -330,6 +354,12 @@ class __AgentCheck(object):
             proxies['no'] = proxies.pop('no_proxy')
 
         return proxies if proxies else no_proxy_settings
+
+    def _format_namespace(self, s):
+        if self.__NAMESPACE__:
+            return '{}.{}'.format(self.__NAMESPACE__, to_string(s))
+
+        return to_string(s)
 
     def check(self, instance):
         raise NotImplementedError
@@ -360,25 +390,6 @@ class __AgentCheckPy3(__AgentCheck):
     @property
     def _empty(self):
         return ''
-
-    def _format_namespace(self, s):
-        if self.__NAMESPACE__:
-            return '{}.{}'.format(self.__NAMESPACE__, ensure_unicode(s))
-
-        return ensure_unicode(s)
-
-    def service_check(self, name, status, tags=None, hostname=None, message=None):
-        tags = self._normalize_tags_type(tags)
-        if hostname is None:
-            hostname = ''
-        if message is None:
-            message = ''
-        else:
-            message = ensure_unicode(message)
-
-        aggregator.submit_service_check(
-            self, self.check_id, self._format_namespace(name), status, tags, hostname, message
-        )
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
@@ -466,17 +477,6 @@ class __AgentCheckPy3(__AgentCheck):
 
         return normalized_tags
 
-    def warning(self, warning_message):
-        warning_message = ensure_unicode(warning_message)
-
-        frame = inspect.currentframe().f_back
-        lineno = frame.f_lineno
-        # only log the last part of the filename, not the full path
-        filename = basename(frame.f_code.co_filename)
-
-        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
-        self.warnings.append(warning_message)
-
 
 class __AgentCheckPy2(__AgentCheck):
     """
@@ -485,25 +485,6 @@ class __AgentCheckPy2(__AgentCheck):
     @property
     def _empty(self):
         return b''
-
-    def _format_namespace(self, s):
-        if self.__NAMESPACE__:
-            return '{}.{}'.format(self.__NAMESPACE__, ensure_bytes(s))
-
-        return ensure_bytes(s)
-
-    def service_check(self, name, status, tags=None, hostname=None, message=None):
-        tags = self._normalize_tags_type(tags)
-        if hostname is None:
-            hostname = b''
-        if message is None:
-            message = b''
-        else:
-            message = ensure_bytes(message)
-
-        aggregator.submit_service_check(
-            self, self.check_id, self._format_namespace(name), status, tags, hostname, message
-        )
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
@@ -612,18 +593,6 @@ class __AgentCheckPy2(__AgentCheck):
                 return None
 
         return data
-
-    def warning(self, warning_message):
-        warning_message = ensure_bytes(warning_message)
-
-        frame = inspect.currentframe().f_back
-        lineno = frame.f_lineno
-        filename = frame.f_code.co_filename
-        # only log the last part of the filename, not the full path
-        filename = basename(filename)
-
-        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
-        self.warnings.append(warning_message)
 
 
 if PY3:
