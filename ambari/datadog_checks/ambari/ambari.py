@@ -128,7 +128,9 @@ class AmbariCheck(AgentCheck):
             self.warning("No response received for service {}".format(service))
         else:
             state = service_resp['ServiceInfo']['state']
-            self._submit_service_checks("state", common.STATUS[state], service_tags + ['state:%s' % state], message=state)
+            self._submit_service_checks(
+                "state", common.STATUS[state], service_tags + ['state:%s' % state], message=state
+            )
 
     def get_component_metrics(self, base_url, cluster, service, base_tags, component_whitelist):
         if not component_whitelist:
