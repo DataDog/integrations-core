@@ -655,7 +655,7 @@ class MongoDb(AgentCheck):
 
     def _get_submission_method(self, method_name):
         if method_name not in ALLOWED_CUSTOM_METRICS_TYPES:
-            raise Exception('Metric type {} is not one of {}.'.format(method_name, ALLOWED_CUSTOM_METRICS_TYPES))
+            raise ValueError('Metric type {} is not one of {}.'.format(method_name, ALLOWED_CUSTOM_METRICS_TYPES))
         return getattr(self, method_name)
 
     @staticmethod
@@ -669,7 +669,7 @@ class MongoDb(AgentCheck):
         for command in ALLOWED_CUSTOM_QUERIES_COMMANDS:
             if command in mongo_query:
                 return command
-        raise Exception("Custom query command must be of type {}".format(ALLOWED_CUSTOM_QUERIES_COMMANDS))
+        raise ValueError("Custom query command must be of type {}".format(ALLOWED_CUSTOM_QUERIES_COMMANDS))
 
     def _collect_custom_metrics_for_query(self, db, raw_query, tags):
         """Validates the raw_query object, executes the mongo query then submits the metrics to datadog"""
@@ -715,7 +715,9 @@ class MongoDb(AgentCheck):
             if field_type not in ALLOWED_CUSTOM_METRICS_TYPES + ['tag']:
                 raise ValueError('Field `type` must be one of {}'.format(ALLOWED_CUSTOM_METRICS_TYPES + ['tag']))
 
-        tags = tags + raw_query.get('tags', []) + ['collection:{}'.format(collection_name)]
+        tags = list(tags)
+        tags.extend(raw_query.get('tags', []))
+        tags.append('collection:{}'.format(collection_name))
 
         try:
             # This is where it is necessary to extract the command and its argument from the query to pass it as the
@@ -756,7 +758,7 @@ class MongoDb(AgentCheck):
                     metric_name = '{}.{}'.format(metric_prefix, metric_suffix)
                     try:
                         metric_info.append((metric_name, float(row[field_name]), submit_method))
-                    except ValueError:
+                    except (TypeError, ValueError):
                         continue
 
             for metric_name, metric_value, submit_method in metric_info:
@@ -1162,4 +1164,6 @@ class MongoDb(AgentCheck):
             try:
                 self._collect_custom_metrics_for_query(db, raw_query, custom_query_tags)
             except Exception as e:
+                metric_prefix = raw_query.get('metric_prefix')
+                self.log.warning("Errors while collecting custom metrics with prefix {}", metric_prefix)
                 self.log.warning(e)

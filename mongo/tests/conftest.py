@@ -14,13 +14,13 @@ from . import common
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance_custom_queries):
+def dd_environment(instance):
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
 
     with docker_run(
         compose_file, conditions=[WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5), InitializeDB()]
     ):
-        yield instance_custom_queries
+        yield instance
 
 
 @pytest.fixture(scope='session')
@@ -47,26 +47,10 @@ def instance_custom_queries():
                 "metric_prefix": "dd.custom.mongo.query_a",
                 "query": {'find': "orders", 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
                 "fields": [
-                    {
-                        "field_name": "cust_id",
-                        "name": "cluster_id",
-                        "type": "tag",
-                    },
-                    {
-                        "field_name": "status",
-                        "name": "status_tag",
-                        "type": "tag",
-                    },
-                    {
-                        "field_name": "amount",
-                        "name": "amount",
-                        "type": "count",
-                    },
-                    {
-                        "field_name": "elements",
-                        "name": "el",
-                        "type": "count",
-                    },
+                    {"field_name": "cust_id", "name": "cluster_id", "type": "tag"},
+                    {"field_name": "status", "name": "status_tag", "type": "tag"},
+                    {"field_name": "amount", "name": "amount", "type": "count"},
+                    {"field_name": "elements", "name": "el", "type": "count"},
                 ],
                 "tags": ['tag1:val1', 'tag2:val2'],
             },
@@ -87,16 +71,8 @@ def instance_custom_queries():
                     'cursor': {},
                 },
                 "fields": [
-                    {
-                        "field_name": "total",
-                        "name": "total",
-                        "type": "count",
-                    },
-                    {
-                        "field_name": "_id",
-                        "name": "cluster_id",
-                        "type": "tag",
-                    },
+                    {"field_name": "total", "name": "total", "type": "count"},
+                    {"field_name": "_id", "name": "cluster_id", "type": "tag"},
                 ],
                 "metric_prefix": "dd.custom.mongo.aggregate",
                 "tags": ['tag1:val1', 'tag2:val2'],
