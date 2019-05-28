@@ -87,7 +87,7 @@ class __AgentCheck(object):
         args: `name`, `init_config`, `agentConfig` (deprecated), `instances`
         """
         self.metrics = defaultdict(list)
-        self.check_id = self._empty
+        self.check_id = self.EMPTY_STRING
         self.instances = kwargs.get('instances', [])
         self.name = kwargs.get('name', '')
         self.init_config = kwargs.get('init_config', {})
@@ -217,7 +217,7 @@ class __AgentCheck(object):
 
         tags = self._normalize_tags_type(tags, device_name, name)
         if hostname is None:
-            hostname = self._empty
+            hostname = self.EMPTY_STRING
 
         if self.metric_limiter:
             if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
@@ -373,7 +373,7 @@ class __AgentCheck(object):
             else:
                 self.check(instance)
 
-            result = self._empty
+            result = self.EMPTY_STRING
         except Exception as e:
             result = json.dumps([{'message': str(e), 'traceback': traceback.format_exc()}])
         finally:
@@ -387,9 +387,7 @@ class __AgentCheckPy3(__AgentCheck):
     """
     Python3 version of the __AgentCheck base class
     """
-    @property
-    def _empty(self):
-        return ''
+    EMPTY_STRING = ''
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
@@ -482,9 +480,7 @@ class __AgentCheckPy2(__AgentCheck):
     """
     Python2 version of the __AgentCheck base class
     """
-    @property
-    def _empty(self):
-        return b''
+    EMPTY_STRING = b''
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
