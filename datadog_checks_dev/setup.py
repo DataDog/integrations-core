@@ -76,7 +76,7 @@ setup(
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',
-            'tox>=3.7.0',
+            'tox>=3.12.1',
             'twine>=1.11.0',
             'wheel>=0.31.0',
         ]
