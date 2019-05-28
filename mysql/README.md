@@ -354,7 +354,19 @@ The MySQL check does not include any events.
 ### Service Checks
 
 `mysql.replication.slave_running`:
-Returns CRITICAL for a slave that's not running, otherwise OK.
+On a slave host:
+* For MySQL >= 5.7.0
+  * If the SQL and the IO threads are running, returns OK
+  * If one of them is down, returns WARNING
+  * If both are down, return CRITICAL
+* Other MySQL
+  * If both threads are running, returns OK
+  * If at least one of them is down, return CRITICAL
+  
+On a master host:
+* If binary log enabled and at least 1 binlog_dump is running, returns OK
+* If binary log enabled, `nonblocking` option enabled, MySQL >= 5.6.0 and one worker thread running, returns OK
+* Else, return WARNING
 
 `mysql.can_connect`:
 Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherwise OK.
