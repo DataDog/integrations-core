@@ -1,14 +1,14 @@
-# Agent Check: hive
+# Agent Check: Hive
 
 ## Overview
 
-This check monitors two parts of [hive][1]: Hive Metastore and HiveServer2.
+This check monitors two parts of [Hive][1]: Hive Metastore and HiveServer2.
 
 ## Setup
 
 ### Installation
 
-The hive check is included in the [Datadog Agent][2] package.
+The Hive check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -45,7 +45,7 @@ No additional installation is needed on your server.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `hive` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `Hive` under the Checks section.
 
 ## Data Collected
 
@@ -59,7 +59,7 @@ See [service_checks.json][9] for a list of Service Checks provided by this integ
 
 ### Events
 
-hive does not include any events.
+Hive does not include any events.
 
 ## Troubleshooting
 

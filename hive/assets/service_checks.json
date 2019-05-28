@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "6.13.0",
-        "integration":"Hive",
+        "integration": "Hive",
         "groups": ["host", "instance"],
         "check": "hive.can_connect",
         "statuses": ["ok", "critical"],
