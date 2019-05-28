@@ -663,7 +663,7 @@ class MongoDb(AgentCheck):
         """Extract the command (find, count or aggregate) from the query. Even though mongo and pymongo are supposed
         to work with the query as a single document, pymongo expects the command to be the `first` element of the
         query dict.
-        Because python dicts are not ordered, the command is extracted to be later run as the first argument
+        Because python 2 dicts are not ordered, the command is extracted to be later run as the first argument
         of pymongo `runcommand`
         """
         for command in ALLOWED_CUSTOM_QUERIES_COMMANDS:
