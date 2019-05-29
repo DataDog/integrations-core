@@ -663,14 +663,13 @@ class OpenMetricsScraperMixin(object):
             if isfile(bearer_token_path):
                 path = bearer_token_path
             else:
-                raise FileNotFoundError(ENOENT, strerror(ENOENT), bearer_token_path)
-
-        if path is None and isfile(self.KUBERNETES_TOKEN_PATH):
+                self.log.error("File not found: {}".format(bearer_token_path))
+        elif isfile(self.KUBERNETES_TOKEN_PATH):
             path = self.KUBERNETES_TOKEN_PATH
 
         if path is None:
             self.log.error("Cannot get bearer token from bearer_token_path or auto discovery")
-            raise Exception("Cannot get bearer token from bearer_token_path or auto discovery")
+            raise IOError("Cannot get bearer token from bearer_token_path or auto discovery")
 
         try:
             with open(path, 'r') as f:

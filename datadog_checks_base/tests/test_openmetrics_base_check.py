@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from mock import patch
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -90,3 +91,16 @@ def test_bearer_token_disabled():
     with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
         check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
         assert check.get_scraper_config(instance)['_bearer_token'] is None
+
+
+def test_bearer_token_not_found():
+    endpoint = "none"
+    inexistent_file = os.path.join(FIXTURE_PATH, 'inexistent_file')
+    instance = {
+        'prometheus_url': endpoint,
+        'namespace': 'default_namespace',
+        'bearer_token_auth': True,
+        'bearer_token_path': inexistent_file,
+    }
+    with pytest.raises(IOError):
+        check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
