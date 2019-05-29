@@ -2,8 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from errno import ENOENT
 from fnmatch import fnmatchcase
 from math import isinf, isnan
+from os import strerror
+from os.path import isfile
 
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
@@ -32,7 +35,7 @@ class OpenMetricsScraperMixin(object):
 
     METRIC_TYPES = ['counter', 'gauge', 'summary', 'histogram']
 
-    DEFAULT_BEARER_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    KUBERNETES_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
 
     def __init__(self, *args, **kwargs):
         # Initialize AgentCheck's base class
@@ -654,10 +657,24 @@ class OpenMetricsScraperMixin(object):
     def _get_bearer_token(self, bearer_token_auth, bearer_token_path):
         if bearer_token_auth is False:
             return None
-        path = bearer_token_path or self.DEFAULT_BEARER_TOKEN_PATH
+
+        path = None
+        if bearer_token_path is not None:
+            if isfile(bearer_token_path):
+                path = bearer_token_path
+            else:
+                raise FileNotFoundError(ENOENT, strerror(ENOENT), bearer_token_path)
+
+        if path is None and isfile(self.KUBERNETES_TOKEN_PATH):
+            path = self.KUBERNETES_TOKEN_PATH
+
+        if path is None:
+            self.log.error("Cannot get bearer token from bearer_token_path or auto discovery")
+            raise Exception("Cannot get bearer token from bearer_token_path or auto discovery")
+
         try:
             with open(path, 'r') as f:
                 return f.read().rstrip()
         except Exception as err:
             self.log.error("Cannot get bearer token from path: {} - error: {}".format(path, err))
-            return None
+            raise

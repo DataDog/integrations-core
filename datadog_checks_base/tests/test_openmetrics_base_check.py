@@ -56,10 +56,10 @@ def test_label_to_hostname_override():
     assert check.get_scraper_config(instance)['label_to_hostname'] == 'node'
 
 
-def test_get_default_bearer_token():
+def test_get_default_kubernetes_bearer_token():
     endpoint = "none"
     instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace', 'bearer_token_auth': True}
-    with patch.object(OpenMetricsBaseCheck, 'DEFAULT_BEARER_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
+    with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
         check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
         assert check.get_scraper_config(instance)['_bearer_token'] == 'my default token'
 
@@ -73,7 +73,7 @@ def test_get_custom_bearer_token():
         'bearer_token_auth': True,
         'bearer_token_path': custom_path,
     }
-    with patch.object(OpenMetricsBaseCheck, 'DEFAULT_BEARER_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
+    with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
         check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
         assert check.get_scraper_config(instance)['_bearer_token'] == 'my custom token'
 
@@ -87,6 +87,6 @@ def test_bearer_token_disabled():
         'bearer_token_auth': False,
         'bearer_token_path': custom_path,
     }
-    with patch.object(OpenMetricsBaseCheck, 'DEFAULT_BEARER_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
+    with patch.object(OpenMetricsBaseCheck, 'KUBERNETES_TOKEN_PATH', os.path.join(FIXTURE_PATH, 'default_token')):
         check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
         assert check.get_scraper_config(instance)['_bearer_token'] is None
