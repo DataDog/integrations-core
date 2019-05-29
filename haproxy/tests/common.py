@@ -51,7 +51,7 @@ CHECK_CONFIG = {
     'active_tag': True,
 }
 
-CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': False, 'collect_status_metrics': True}
+CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': 'both', 'collect_status_metrics': True}
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
 

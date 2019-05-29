@@ -120,7 +120,7 @@ class HAProxy(AgentCheck):
 
             data = self._fetch_url_data(url, username, password, verify, custom_headers)
 
-        collect_aggregates_only = _is_affirmative(instance.get('collect_aggregates_only', True))
+        collect_aggregates_only = instance.get('collect_aggregates_only', True)
         collect_status_metrics = _is_affirmative(instance.get('collect_status_metrics', False))
 
         collect_status_metrics_by_host = _is_affirmative(instance.get('collect_status_metrics_by_host', False))
@@ -432,9 +432,12 @@ class HAProxy(AgentCheck):
     def _should_process(self, data_dict, collect_aggregates_only):
         """if collect_aggregates_only, we process only the aggregates
         """
-        if collect_aggregates_only:
+        if _is_affirmative(collect_aggregates_only):
             return self._is_aggregate(data_dict)
-        return True
+        elif str(collect_aggregates_only).lower() == 'both':
+            return True
+
+        return data_dict['svname'] != Services.BACKEND
 
     def _is_service_excl_filtered(self, service_name, services_incl_filter, services_excl_filter):
         if self._tag_match_patterns(service_name, services_excl_filter):
