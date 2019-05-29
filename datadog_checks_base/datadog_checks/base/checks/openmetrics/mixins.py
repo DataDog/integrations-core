@@ -2,10 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from errno import ENOENT
 from fnmatch import fnmatchcase
 from math import isinf, isnan
-from os import strerror
 from os.path import isfile
 
 import requests

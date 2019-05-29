@@ -103,4 +103,4 @@ def test_bearer_token_not_found():
         'bearer_token_path': inexistent_file,
     }
     with pytest.raises(IOError):
-        check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
+        OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance])
