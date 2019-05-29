@@ -113,13 +113,14 @@ instances:
     ## @param extra_headers - list of key:value elements - optional
     ## A list of additional HTTP headers to send in queries to the openmetrics endpoint.
     ## Can be combined with autodiscovery template variables. Eg: "Authorization: Bearer %%env_TOKEN%%".
+    ## Note: Authorization header will be replaced if bearer_token_auth is enabled.
     #
     # extra_headers:
     #   <HEADER_NAME>: <HEADER_VALUE>
 
     ## @param bearer_token_auth - boolean - optional - default: false
-    ## Set bearer_token_auth to true to add kubernetes service account bearer token in HTTP headers for authentication.
-    ## Note: bearer_token_path is not set, /var/run/secrets/kubernetes.io/serviceaccount/token is used as a default path
+    ## Set bearer_token_auth to true to add bearer token authentication header.
+    ## Note: if bearer_token_path is not set, /var/run/secrets/kubernetes.io/serviceaccount/token is used as a default path
     #
     # bearer_token_auth: true
 
