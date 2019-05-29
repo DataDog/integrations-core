@@ -38,14 +38,6 @@ here = os.path.abspath(os.path.dirname(__file__))
 REPOSITORIES_DIR = os.path.join(here, 'data')
 # abspath = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
 REPOSITORY_DIR = 'repo'
-REPOSITORY_MIRRORS = {
-    'repo': {
-        'url_prefix': 'https://dd-integrations-core-wheels-build-stable.datadoghq.com',
-        'metadata_path': 'metadata.staged',
-        'targets_path': 'targets',
-        'confined_target_dirs': [''],
-    }
-}
 REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
 
 
