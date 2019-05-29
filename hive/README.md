@@ -13,7 +13,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the Hive configuration file in [`HIVE_HOME/conf/hive-site.xml`][3] to enable the Hive Metastore and HiveServer2 metrics with adding these properties:
+1. Edit the Hive configuration file in [`HIVE_HOME/conf/hive-site.xml`][3] to enable the Hive Metastore and HiveServer2 metrics by adding these properties:
     ```
     <property>
       <name>hive.metastore.metrics.enabled</name>
@@ -38,14 +38,14 @@ No additional installation is needed on your server.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][4] for more detailed instructions.
-   If you need to monitor more metrics, please send us an email at support@datadoghq.com.
+   To learn how to customize the metrics to collect, visit the [JMX Checks documentation][4] for more detailed instructions.
+   If you need to monitor more metrics, contact [Datadog support][8].
 
-4. [Restart the Agent][5]
+4. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `Hive` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `Hive` under the Checks section.
 
 ## Data Collected
 
@@ -55,11 +55,12 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-See [service_checks.json][9] for a list of Service Checks provided by this integration.
+ **hive.can_connect**:  
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored HiveServer2/Hive Metastore instance, otherwise returns `OK`.
 
 ### Events
 
-Hive does not include any events.
+The Hive check does not include any events.
 
 ## Troubleshooting
 
