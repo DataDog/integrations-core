@@ -299,7 +299,7 @@ instances:
           domain: presto.memory
           attribute:
             AssignedQueries:
-              alias: presto.memory.assigned_queries,gauge
+              alias: presto.memory.assigned_queries
             BlockedNodes:
               alias: presto.memory.blocked_nodes
             ClusterMemoryBytes:
