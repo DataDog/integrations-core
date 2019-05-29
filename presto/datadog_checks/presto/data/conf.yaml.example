@@ -286,7 +286,7 @@ instances:
             TaskNotificationExecutor.CompletedTaskCount:
               alias: presto.execution.task_notification_executor.completed_task_count
             TaskNotificationExecutor.PoolSize:
-              alias: presto.execution.task_notification_executor.pool_size,gauge
+              alias: presto.execution.task_notification_executor.pool_size
             TaskNotificationExecutor.QueuedTaskCount:
               alias: presto.execution.task_notification_executor.queued_task_count
       - include:
