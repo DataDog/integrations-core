@@ -34,7 +34,7 @@ No additional installation is needed on your server.
 
 3. Edit the `hive.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    Agent's configuration directory to start collecting your hive performance data.
-   See the [sample hive.d/conf.yaml][10] for all available configuration options.
+   See the [sample hive.d/conf.yaml][9] for all available configuration options.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
@@ -75,5 +75,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/hive/metadata.csv
 [8]: https://docs.datadoghq.com/help
-[9]: https://github.com/DataDog/integrations-core/blob/master/hive/assets/service_checks.json
-[10]: https://github.com/DataDog/integrations-core/blob/master/hive/datadog_checks/hive/data/conf.yaml.example
+[9]: https://github.com/DataDog/integrations-core/blob/master/hive/datadog_checks/hive/data/conf.yaml.example
