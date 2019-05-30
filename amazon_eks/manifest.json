@@ -12,6 +12,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "aws.eks.",
+  "metric_to_check": "kubernetes.cpu.usage.total",
   "name": "amazon_eks",
   "public_title": "Datadog-Amazon-EKS Integration",
   "short_description": "Amazon EKS is a managed service that makes it easy to run Kubernetes on AWS",
