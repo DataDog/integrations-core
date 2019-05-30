@@ -262,7 +262,8 @@ class __AgentCheck(object):
         :param float value: the value for the metric.
         :param list tags: (optional) a list of tags to associate with this metric.
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+            list instead.
         """
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
@@ -273,7 +274,8 @@ class __AgentCheck(object):
         :param float value: the value for the metric.
         :param list tags: (optional) a list of tags to associate with this metric.
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+            list instead.
         """
         self._submit_metric(aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
@@ -284,7 +286,8 @@ class __AgentCheck(object):
         :param float value: the value for the metric.
         :param list tags: (optional) a list of tags to associate with this metric.
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+            list instead.
         """
         self._submit_metric(
             aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name
@@ -297,7 +300,8 @@ class __AgentCheck(object):
         :param float value: the value for the metric.
         :param list tags: (optional) a list of tags to associate with this metric.
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+            list instead.
         """
         self._submit_metric(aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
@@ -308,7 +312,8 @@ class __AgentCheck(object):
         :param float value: the value for the metric.
         :param list tags: (optional) a list of tags to associate with this metric.
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+            list instead.
         """
         self._submit_metric(aggregator.HISTOGRAM, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
@@ -319,7 +324,8 @@ class __AgentCheck(object):
         :param float value: the value for the metric.
         :param list tags: (optional) a list of tags to associate with this metric.
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+            list instead.
         """
         self._submit_metric(aggregator.HISTORATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
@@ -330,7 +336,8 @@ class __AgentCheck(object):
         :param float value: the value for the metric.
         :param list tags: (optional) a list of tags to associate with this metric.
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+            list instead.
         """
         self._log_deprecation('increment')
         self._submit_metric(aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -342,7 +349,8 @@ class __AgentCheck(object):
         :param float value: the value for the metric.
         :param list tags: (optional) a list of tags to associate with this metric.
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+            list instead.
         """
         self._log_deprecation('increment')
         self._submit_metric(aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name)
