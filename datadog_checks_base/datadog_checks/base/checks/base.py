@@ -670,9 +670,4 @@ class __AgentCheckPy2(__AgentCheck):
         return data
 
 
-if PY3:
-    AgentCheck = __AgentCheckPy3
-    del __AgentCheckPy2
-else:
-    AgentCheck = __AgentCheckPy2
-    del __AgentCheckPy3
+AgentCheck = __AgentCheckPy3 if PY3 else __AgentCheckPy2
