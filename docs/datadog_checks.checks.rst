@@ -7,10 +7,10 @@ Subpackages
 .. toctree::
     :maxdepth: 3
 
-    datadog_checks.checks.libs
-    datadog_checks.checks.openmetrics
-    datadog_checks.checks.prometheus
-    datadog_checks.checks.win
+    datadog_checks.base.checks.libs
+    datadog_checks.base.checks.openmetrics
+    datadog_checks.base.checks.prometheus
+    datadog_checks.base.checks.win
 
 base
 ----

@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-    datadog_checks.checks.libs.vmware
+    datadog_checks.base.checks.libs.vmware
 
 
 thread\_pool
