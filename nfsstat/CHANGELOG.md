@@ -1,5 +1,9 @@
 # CHANGELOG - Nfsstat
 
+## 1.4.1 / 2019-05-30
+
+* [Fixed] Fix non-ascii mounted folder name. See [#3805](https://github.com/DataDog/integrations-core/pull/3805).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3544](https://github.com/DataDog/integrations-core/pull/3544).
