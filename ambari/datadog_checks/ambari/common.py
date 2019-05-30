@@ -30,3 +30,7 @@ STATUS = {
 
 def create_endpoint(base_url, cluster, service, ending):
     return SERVICE_URL.format(base_url=base_url, cluster_name=cluster, service_name=service.upper(), ending=ending)
+
+
+def status_to_service_check(db_status):
+    return STATUS.get(db_status, ServiceCheck.UNKNOWN)

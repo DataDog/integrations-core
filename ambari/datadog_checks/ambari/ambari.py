@@ -129,7 +129,7 @@ class AmbariCheck(AgentCheck):
         else:
             state = service_resp['ServiceInfo']['state']
             self._submit_service_checks(
-                "state", common.STATUS[state], service_tags + ['state:%s' % state], message=state
+                "state", common.status_to_service_check(state), service_tags + ['state:%s' % state], message=state
             )
 
     def get_component_metrics(self, base_url, cluster, service, base_tags, component_whitelist):
