@@ -10,10 +10,8 @@ import pytest
 from datadog_checks.haproxy import HAProxy
 
 from .common import (
-    BACKEND_AGGREGATE_ONLY_CHECK_GAUGES,
-    BACKEND_AGGREGATE_ONLY_CHECK_RATES,
-    BACKEND_CHECK_GAUGES,
-    BACKEND_CHECK_RATES,
+    BACKEND_AGGREGATE_ONLY_CHECK,
+    BACKEND_CHECK,
     BACKEND_HOSTS_METRIC,
     BACKEND_LIST,
     BACKEND_SERVICES,
@@ -22,8 +20,7 @@ from .common import (
     CHECK_CONFIG_OPEN,
     CONFIG_TCPSOCKET,
     CONFIG_UNIXSOCKET,
-    FRONTEND_CHECK_GAUGES,
-    FRONTEND_CHECK_RATES,
+    FRONTEND_CHECK,
     SERVICE_CHECK_NAME,
     STATS_SOCKET,
     STATS_URL,
@@ -36,29 +33,23 @@ from .common import (
 def _test_frontend_metrics(aggregator, shared_tag):
     haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
     frontend_tags = shared_tag + ['type:FRONTEND', 'service:public']
-    for gauge, min_version in FRONTEND_CHECK_GAUGES:
+    for metric_name, min_version in FRONTEND_CHECK:
         if haproxy_version >= min_version:
-            aggregator.assert_metric(gauge, tags=frontend_tags, count=1)
-
-    for rate, min_version in FRONTEND_CHECK_RATES:
-        if haproxy_version >= min_version:
-            aggregator.assert_metric(rate, tags=frontend_tags, count=1)
+            aggregator.assert_metric(metric_name, tags=frontend_tags, count=1)
 
 
-def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=False):
+def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=False, check_aggregates=False):
     backend_tags = shared_tag + ['type:BACKEND']
     haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
     if not services:
         services = BACKEND_SERVICES
     for service in services:
         tags = backend_tags + ['service:' + service, 'backend:BACKEND']
-        for gauge, min_version in BACKEND_AGGREGATE_ONLY_CHECK_GAUGES:
-            if haproxy_version >= min_version:
-                aggregator.assert_metric(gauge, tags=tags, count=1)
 
-        for rate, min_version in BACKEND_AGGREGATE_ONLY_CHECK_RATES:
-            if haproxy_version >= min_version:
-                aggregator.assert_metric(rate, tags=tags, count=1)
+        if check_aggregates:
+            for metric_name, min_version in BACKEND_AGGREGATE_ONLY_CHECK:
+                if haproxy_version >= min_version:
+                    aggregator.assert_metric(metric_name, tags=tags, count=1)
 
         for backend in BACKEND_LIST:
             tags = backend_tags + ['service:' + service, 'backend:' + backend]
@@ -66,13 +57,9 @@ def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=Fa
             if add_addr_tag and haproxy_version >= ['1', '7']:
                 tags.append('server_address:{}'.format(BACKEND_TO_ADDR[backend]))
 
-            for gauge, min_version in BACKEND_CHECK_GAUGES:
+            for metric_name, min_version in BACKEND_CHECK:
                 if haproxy_version >= min_version:
-                    aggregator.assert_metric(gauge, tags=tags, count=1)
-
-            for rate, min_version in BACKEND_CHECK_RATES:
-                if haproxy_version >= min_version:
-                    aggregator.assert_metric(rate, tags=tags, count=1)
+                    aggregator.assert_metric(metric_name, tags=tags, count=1)
 
 
 def _test_backend_hosts(aggregator):
@@ -106,7 +93,7 @@ def test_check(aggregator, check, instance):
     shared_tag = ["instance_url:{0}".format(STATS_URL)]
 
     _test_frontend_metrics(aggregator, shared_tag + ['active:false'])
-    _test_backend_metrics(aggregator, shared_tag + ['active:false'])
+    _test_backend_metrics(aggregator, shared_tag + ['active:false'], check_aggregates=True)
 
     _test_service_checks(aggregator, count=0)
 
@@ -125,7 +112,7 @@ def test_check_service_check(aggregator, check, instance):
     shared_tag = ["instance_url:{0}".format(STATS_URL)]
 
     _test_frontend_metrics(aggregator, shared_tag + ['active:false'])
-    _test_backend_metrics(aggregator, shared_tag + ['active:false'])
+    _test_backend_metrics(aggregator, shared_tag + ['active:false'], check_aggregates=True)
 
     # check was run 2 times
     #       - FRONTEND is reporting OPEN that we ignore
@@ -145,7 +132,7 @@ def test_check_service_filter(aggregator, check, instance):
     check.check(instance)
     shared_tag = ["instance_url:{0}".format(STATS_URL)]
 
-    _test_backend_metrics(aggregator, shared_tag + ['active:false'], ['datadog'])
+    _test_backend_metrics(aggregator, shared_tag + ['active:false'], ['datadog'], check_aggregates=True)
 
     aggregator.assert_all_metrics_covered()
 

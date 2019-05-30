@@ -46,12 +46,12 @@ CHECK_CONFIG = {
     'username': USERNAME,
     'password': PASSWORD,
     'status_check': True,
-    'collect_aggregates_only': False,
+    'collect_aggregates_only': 'both',
     'tag_service_check_by_host': True,
     'active_tag': True,
 }
 
-CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': 'both', 'collect_status_metrics': True}
+CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': False, 'collect_status_metrics': True}
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
 
@@ -67,16 +67,14 @@ BACKEND_TO_ADDR = {
 BACKEND_HOSTS_METRIC = 'haproxy.backend_hosts'
 BACKEND_STATUS_METRIC = 'haproxy.count_per_status'
 
-FRONTEND_CHECK_GAUGES = [
+FRONTEND_CHECK = [
+    # gauges
     ('haproxy.frontend.session.current', ['1', '0']),
     ('haproxy.frontend.session.limit', ['1', '0']),
     ('haproxy.frontend.session.pct', ['1', '0']),
     ('haproxy.frontend.requests.rate', ['1', '4']),
     ('haproxy.frontend.connections.rate', ['1', '7']),
-]
-
-
-FRONTEND_CHECK_RATES = [
+    # rates
     ('haproxy.frontend.bytes.in_rate', ['1', '0']),
     ('haproxy.frontend.bytes.out_rate', ['1', '0']),
     ('haproxy.frontend.denied.req_rate', ['1', '0']),
@@ -94,7 +92,8 @@ FRONTEND_CHECK_RATES = [
     ('haproxy.frontend.requests.intercepted', ['1', '7']),
 ]
 
-BACKEND_CHECK_GAUGES = [
+BACKEND_CHECK = [
+    # gauges
     ('haproxy.backend.queue.current', ['1', '0']),
     ('haproxy.backend.session.current', ['1', '0']),
     ('haproxy.backend.queue.time', ['1', '5']),
@@ -102,9 +101,7 @@ BACKEND_CHECK_GAUGES = [
     ('haproxy.backend.response.time', ['1', '5']),
     ('haproxy.backend.session.time', ['1', '5']),
     ('haproxy.backend.uptime', ['1', '7']),
-]
-
-BACKEND_CHECK_RATES = [
+    # rates
     ('haproxy.backend.bytes.in_rate', ['1', '0']),
     ('haproxy.backend.bytes.out_rate', ['1', '0']),
     ('haproxy.backend.denied.resp_rate', ['1', '0']),
@@ -121,13 +118,12 @@ BACKEND_CHECK_RATES = [
     ('haproxy.backend.response.other', ['1', '4']),
 ]
 
-BACKEND_AGGREGATE_ONLY_CHECK_GAUGES = [
+BACKEND_AGGREGATE_ONLY_CHECK = [
+    # gauges
     ('haproxy.backend.uptime', ['1', '0']),
     ('haproxy.backend.session.limit', ['1', '0']),
     ('haproxy.backend.session.pct', ['1', '5']),
-]
-
-BACKEND_AGGREGATE_ONLY_CHECK_RATES = [
+    # rates
     ('haproxy.backend.denied.req_rate', ['1', '0']),
     ('haproxy.backend.requests.tot_rate', ['1', '7']),
 ]
