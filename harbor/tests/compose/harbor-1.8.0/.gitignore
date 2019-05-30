@@ -1,0 +1,32 @@
+# Ignore everything
+*/*
+*.*
+
+# But not these files
+!.gitignore
+!docker-compose.yml
+!common/
+!common/config/
+!common/config/cert/server.crt
+!common/config/cert/server.key
+!common/config/chartserver/env
+!common/config/core/app.conf
+!common/config/core/env
+!common/config/core/
+!common/config/db/env
+!common/config/jobservice/config.yml
+!common/config/jobservice/env
+!common/config/nginx/nginx.conf
+!common/config/registry/config.yml
+!common/config/registryctl/config.yml
+!common/config/registryctl/env
+
+!data/
+!data/secret/
+!data/secret/core/
+!data/secret/core/private_key.pem
+!data/secret/keys/
+!data/secret/keys/secretkey
+!data/secret/registry/
+!data/secret/registry/root.crt
+
