@@ -205,8 +205,7 @@ def test_default_config(instance):
 
 def test_should_not_collect_if_disabled(instance):
     ambari = AmbariCheck(
-        init_config={'collect_service_metrics': False, 'collect_service_status': False},
-        instances=[instance],
+        init_config={'collect_service_metrics': False, 'collect_service_status': False}, instances=[instance]
     )
     _mock_clusters(ambari)
     ambari.get_host_metrics = MagicMock()
@@ -218,8 +217,7 @@ def test_should_not_collect_if_disabled(instance):
 
 def test_should_collect_host_metrics(instance):
     ambari = AmbariCheck(
-        init_config={'collect_service_metrics': False, 'collect_service_status': False},
-        instances=[instance],
+        init_config={'collect_service_metrics': False, 'collect_service_status': False}, instances=[instance]
     )
     _mock_clusters(ambari)
     ambari.get_host_metrics = MagicMock()
@@ -232,8 +230,7 @@ def test_should_collect_host_metrics(instance):
 
 def test_should_collect_service_metrics(instance):
     ambari = AmbariCheck(
-        init_config={'collect_service_metrics': True, 'collect_service_status': False},
-        instances=[instance],
+        init_config={'collect_service_metrics': True, 'collect_service_status': False}, instances=[instance]
     )
     _mock_clusters(ambari)
     ambari.get_host_metrics = MagicMock()
@@ -248,8 +245,7 @@ def test_should_collect_service_metrics(instance):
 
 def test_should_collect_service_status(instance):
     ambari = AmbariCheck(
-        init_config={'collect_service_metrics': False, 'collect_service_status': True},
-        instances=[instance],
+        init_config={'collect_service_metrics': False, 'collect_service_status': True}, instances=[instance]
     )
     _mock_clusters(ambari)
     ambari.get_host_metrics = MagicMock()

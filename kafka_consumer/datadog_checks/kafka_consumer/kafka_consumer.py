@@ -370,11 +370,7 @@ class KafkaCheck(AgentCheck):
                     )
                 continue
 
-            consumer_group_tags = [
-                'topic:%s' % topic,
-                'partition:%s' % partition,
-                'consumer_group:%s' % consumer_group,
-            ]
+            consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             consumer_group_tags.extend(tags)
             self.gauge('kafka.consumer_offset', consumer_offset, tags=consumer_group_tags)
 
