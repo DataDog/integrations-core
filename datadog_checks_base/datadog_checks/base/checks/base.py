@@ -361,6 +361,37 @@ class __AgentCheck(object):
 
         return to_string(s)
 
+    def normalize(self, metric, prefix=None, fix_case=False):
+        """
+        Turn a metric into a well-formed metric name
+        prefix.b.c
+        :param metric The metric name to normalize
+        :param prefix A prefix to to add to the normalized name, default None
+        :param fix_case A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
+        """
+        if isinstance(metric, text_type):
+            metric = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
+
+        if fix_case:
+            name = self.convert_to_underscore_separated(metric)
+            if prefix is not None:
+                prefix = self.convert_to_underscore_separated(prefix)
+        else:
+            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric)
+        # Eliminate multiple _
+        name = re.sub(br"__+", b"_", name)
+        # Don't start/end with _
+        name = re.sub(br"^_", b"", name)
+        name = re.sub(br"_$", b"", name)
+        # Drop ._ and _.
+        name = re.sub(br"\._", b".", name)
+        name = re.sub(br"_\.", b".", name)
+
+        if prefix is not None:
+            name = ensure_bytes(prefix) + b"." + name
+
+        return to_string(name)
+
     def check(self, instance):
         raise NotImplementedError
 
@@ -411,37 +442,6 @@ class __AgentCheckPy3(__AgentCheck):
             event.setdefault('source_type_name', self.__NAMESPACE__)
 
         aggregator.submit_event(self, self.check_id, event)
-
-    def normalize(self, metric, prefix=None, fix_case=False):
-        """
-        Turn a metric into a well-formed metric name
-        prefix.b.c
-        :param metric The metric name to normalize
-        :param prefix A prefix to to add to the normalized name, default None
-        :param fix_case A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
-        """
-        if isinstance(metric, text_type):
-            metric = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
-
-        if fix_case:
-            name = self.convert_to_underscore_separated(metric)
-            if prefix is not None:
-                prefix = self.convert_to_underscore_separated(prefix)
-        else:
-            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric)
-        # Eliminate multiple _
-        name = re.sub(br"__+", b"_", name)
-        # Don't start/end with _
-        name = re.sub(br"^_", b"", name)
-        name = re.sub(br"_$", b"", name)
-        # Drop ._ and _.
-        name = re.sub(br"\._", b".", name)
-        name = re.sub(br"_\.", b".", name)
-
-        if prefix is not None:
-            name = ensure_bytes(prefix) + b"." + name
-
-        return ensure_unicode(name)
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """
@@ -502,37 +502,6 @@ class __AgentCheckPy2(__AgentCheck):
             event.setdefault('source_type_name', self.__NAMESPACE__)
 
         aggregator.submit_event(self, self.check_id, event)
-
-    def normalize(self, metric, prefix=None, fix_case=False):
-        """
-        Turn a metric into a well-formed metric name
-        prefix.b.c
-        :param metric The metric name to normalize
-        :param prefix A prefix to to add to the normalized name, default None
-        :param fix_case A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
-        """
-        if isinstance(metric, text_type):
-            metric = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
-
-        if fix_case:
-            name = self.convert_to_underscore_separated(metric)
-            if prefix is not None:
-                prefix = self.convert_to_underscore_separated(prefix)
-        else:
-            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric)
-        # Eliminate multiple _
-        name = re.sub(br"__+", b"_", name)
-        # Don't start/end with _
-        name = re.sub(br"^_", b"", name)
-        name = re.sub(br"_$", b"", name)
-        # Drop ._ and _.
-        name = re.sub(br"\._", b".", name)
-        name = re.sub(br"_\.", b".", name)
-
-        if prefix is not None:
-            return ensure_bytes(prefix) + b"." + name
-        else:
-            return name
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         """
