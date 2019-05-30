@@ -10,7 +10,6 @@ Subpackages
     :maxdepth: 3
 
     datadog_checks.checks
-    datadog_checks.stubs
     datadog_checks.utils
 
 config

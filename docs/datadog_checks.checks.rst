@@ -15,15 +15,25 @@ Subpackages
 base
 ----
 
-.. automodule:: datadog_checks.base.checks.base
+.. autoclass:: datadog_checks.base.checks.base.__AgentCheck
     :members:
-    :undoc-members:
+    :private-members:
+
+    .. automethod:: __init__
+
+.. autoclass:: datadog_checks.base.checks.base.__AgentCheckPy2
+    :members:
     :show-inheritance:
+    :private-members:
+
+.. autoclass:: datadog_checks.base.checks.base.__AgentCheckPy3
+    :members:
+    :show-inheritance:
+    :private-members:
 
 network
 -------
 
 .. automodule:: datadog_checks.base.checks.network
     :members:
-    :undoc-members:
     :show-inheritance:

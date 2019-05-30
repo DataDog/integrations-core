@@ -54,8 +54,17 @@ ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MO
 
 
 class __AgentCheck(object):
-    """
-    The base class for any Agent based integrations
+    """The base class for any Agent based integrations.
+
+    :cvar DEFAULT_METRIC_LIMIT: allows to set a limit on the number of metric name and tags combination
+        this check can send per run. This is useful for checks that have an unbounded
+        number of tag values that depend on the input payload.
+        The logic counts one set of tags per gauge/rate/monotonic_count call, and deduplicates
+        sets of tags for other metric types. The first N sets of tags in submission order will
+        be sent to the aggregator, the rest are dropped. The state is reset after each run.
+        See https://github.com/DataDog/integrations-core/pull/2093 for more informations.
+    :ivar log: is a logger instance that prints to the Agent's main log file. You can set the
+        log level in the Agent config file 'datadog.yaml'.
     """
 
     # If defined, this will be the prefix of every metric/service check and the source type of events
@@ -63,29 +72,31 @@ class __AgentCheck(object):
 
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
-    # Used by `self.http` RequestsWrapper
-    HTTP_CONFIG_REMAPPER = None
-
+    HTTP_CONFIG_REMAPPER = None  # Used by `self.http` RequestsWrapper
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
     METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
     DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
-
-    """
-    DEFAULT_METRIC_LIMIT allows to set a limit on the number of metric name and tags combination
-    this check can send per run. This is useful for checks that have an unbounded
-    number of tag values that depend on the input payload.
-    The logic counts one set of tags per gauge/rate/monotonic_count call, and deduplicates
-    sets of tags for other metric types. The first N sets of tags in submission order will
-    be sent to the aggregator, the rest are dropped. The state is reset after each run.
-
-    See https://github.com/DataDog/integrations-core/pull/2093 for more information
-    """
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, *args, **kwargs):
-        """
-        args: `name`, `init_config`, `agentConfig` (deprecated), `instances`
+        """In general, you don't need to and you should not override anything from the base
+        class except the :py:meth:`check` method but sometimes it might be useful for a Check to
+        have its own constructor.
+
+        When overriding `__init__` you have to remember that, depending on the configuration,
+        the Agent might create several different Check instances and the method would be
+        called as many times.
+
+        :warning: when loading a Custom check, the Agent will inspect the module searching
+            for a subclass of `AgentCheck`. If such a class exists but has been derived in
+            turn, it'll be ignored - **you should never derive from an existing Check**.
+
+        :param str name: the name of the check.
+        :param dict init_config: the 'init_config' section of the configuration.
+        :param list instances: a one-element list containing the instance options from the
+                configuration file (a list is used to keep backward compatibility with
+                older versions of the Agent).
         """
         self.metrics = defaultdict(list)
         self.check_id = ''
@@ -245,34 +256,106 @@ class __AgentCheck(object):
         aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
+        """Sample a gauge metric.
+
+        :param str name: the name of the metric.
+        :param float value: the value for the metric.
+        :param list tags: (optional) a list of tags to associate with this metric.
+        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        """
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def count(self, name, value, tags=None, hostname=None, device_name=None):
+        """Sample a raw count metric.
+
+        :param str name: the name of the metric.
+        :param float value: the value for the metric.
+        :param list tags: (optional) a list of tags to associate with this metric.
+        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        """
         self._submit_metric(aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None):
+        """Sample an increasing counter metric.
+
+        :param str name: the name of the metric.
+        :param float value: the value for the metric.
+        :param list tags: (optional) a list of tags to associate with this metric.
+        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        """
         self._submit_metric(
             aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name
         )
 
     def rate(self, name, value, tags=None, hostname=None, device_name=None):
+        """Sample a point, with the rate calculated at the end of the check.
+
+        :param str name: the name of the metric.
+        :param float value: the value for the metric.
+        :param list tags: (optional) a list of tags to associate with this metric.
+        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        """
         self._submit_metric(aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def histogram(self, name, value, tags=None, hostname=None, device_name=None):
+        """Sample a histogram metric.
+
+        :param str name: the name of the metric.
+        :param float value: the value for the metric.
+        :param list tags: (optional) a list of tags to associate with this metric.
+        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        """
         self._submit_metric(aggregator.HISTOGRAM, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def historate(self, name, value, tags=None, hostname=None, device_name=None):
+        """Sample a histogram based on rate metrics.
+
+        :param str name: the name of the metric.
+        :param float value: the value for the metric.
+        :param list tags: (optional) a list of tags to associate with this metric.
+        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        """
         self._submit_metric(aggregator.HISTORATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def increment(self, name, value=1, tags=None, hostname=None, device_name=None):
+        """Increment a counter metric.
+
+        :param str name: the name of the metric.
+        :param float value: the value for the metric.
+        :param list tags: (optional) a list of tags to associate with this metric.
+        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        """
         self._log_deprecation('increment')
         self._submit_metric(aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def decrement(self, name, value=-1, tags=None, hostname=None, device_name=None):
+        """Decrement a counter metric.
+
+        :param str name: the name of the metric.
+        :param float value: the value for the metric.
+        :param list tags: (optional) a list of tags to associate with this metric.
+        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
+        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags` list instead.
+        """
         self._log_deprecation('increment')
         self._submit_metric(aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name)
 
     def service_check(self, name, status, tags=None, hostname=None, message=None):
+        """Send the status of a service.
+
+        :param str name: the name of the service check.
+        :param status: a constant describing the service status.
+        :type status: :py:class:`datadog_checks.base.constants.ServiceCheck`
+        :param list tags: (optional) a list of tags to associate with this check.
+        :param str message: (optional) additional information or a description of why this status occurred.
+        """
         tags = self._normalize_tags_type(tags)
         if hostname is None:
             hostname = ''
@@ -323,6 +406,10 @@ class __AgentCheck(object):
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
     def warning(self, warning_message):
+        """Log a warning message and display it in the Agent's status page.
+
+        :param str warning_message: the warning message.
+        """
         warning_message = to_string(warning_message)
 
         frame = inspect.currentframe().f_back
@@ -417,10 +504,33 @@ class __AgentCheck(object):
 
 class __AgentCheckPy3(__AgentCheck):
     """
-    Python3 version of the __AgentCheck base class
+    Python3 version of the __AgentCheck base class, overrides few methods to
+    add compatibility with Python3.
     """
 
     def event(self, event):
+        """Send an event.
+
+        An event is a dictionary with the following keys and data types:
+
+        .. code:: python
+
+            {
+                "timestamp": int,        # the epoch timestamp for the event
+                "event_type": str,       # the event name
+                "api_key": str,          # the api key for your account
+                "msg_title": str,        # the title of the event
+                "msg_text": str,         # the text body of the event
+                "aggregation_key": str,  # a key to use for aggregating events
+                "alert_type": str,       # (optional) one of ('error', 'warning', 'success', 'info'), defaults to 'info'
+                "source_type_name": str, # (optional) the source type name
+                "host": str,             # (optional) the name of the host
+                "tags": list,            # (optional) a list of tags to associate with this event
+                "priority": str,         # (optional) specifies the priority of the event ("normal" or "low")
+            }
+
+        :param ev event: the event to be sent.
+        """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key, value in list(iteritems(event)):
             # transform any bytes objects to utf-8
@@ -478,7 +588,8 @@ class __AgentCheckPy3(__AgentCheck):
 
 class __AgentCheckPy2(__AgentCheck):
     """
-    Python2 version of the __AgentCheck base class
+    Python2 version of the __AgentCheck base class, overrides few methods to
+    add compatibility with Python2.
     """
 
     def event(self, event):
