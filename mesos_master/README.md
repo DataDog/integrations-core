@@ -1,5 +1,7 @@
 # Mesos_master Check
 
+This check collects metrics for Mesos masters. If you are looking for the the metrics for Mesos slave, see the [Mesos Slave Integration documentation][7].
+
 ![Mesos master Dashboard][1]
 
 ## Overview
@@ -96,3 +98,4 @@ Need help? Contact [Datadog support][5].
 [4]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
 [5]: https://docs.datadoghq.com/help
 [6]: https://www.datadoghq.com/blog/deploy-datadog-dcos
+[7]: https://docs.datadoghq.com/integrations/mesos/#mesos-slave-integration
