@@ -57,6 +57,7 @@ class __AgentCheck(object):
     """
     The base class for any Agent based integrations
     """
+
     # If defined, this will be the prefix of every metric/service check and the source type of events
     __NAMESPACE__ = ''
 
@@ -418,6 +419,7 @@ class __AgentCheckPy3(__AgentCheck):
     """
     Python3 version of the __AgentCheck base class
     """
+
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key, value in list(iteritems(event)):
@@ -478,6 +480,7 @@ class __AgentCheckPy2(__AgentCheck):
     """
     Python2 version of the __AgentCheck base class
     """
+
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key, value in list(iteritems(event)):
