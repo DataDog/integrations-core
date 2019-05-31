@@ -1,5 +1,9 @@
 # CHANGELOG - istio
 
+## 2.3.0 / 2019-05-31
+
+* [Added] Support pilot and galley metrics. See [#3734](https://github.com/DataDog/integrations-core/pull/3734).
+
 ## 2.2.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3522](https://github.com/DataDog/integrations-core/pull/3522).
