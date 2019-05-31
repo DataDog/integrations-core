@@ -14,6 +14,7 @@ from datadog_checks.config import is_affirmative
 from . import queries
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
+MAX_CUSTOM_RESULTS = 100
 
 
 class OracleConfigError(Exception):
@@ -63,52 +64,49 @@ class Oracle(AgentCheck):
     )
 
     def check(self, instance):
-        self.use_oracle_client = True
         server, user, password, service, jdbc_driver, tags, custom_queries = self._get_config(instance)
 
         if not server or not user:
             raise OracleConfigError("Oracle host and user are needed")
 
-        try:
-            # Check if the instantclient is available
-            cx_Oracle.clientversion()
-            self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
-        except cx_Oracle.DatabaseError as e:
-            # Fallback to JDBC
-            self.use_oracle_client = False
-            self.log.debug('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
+        service_check_tags = ['server:%s' % server]
+        service_check_tags.extend(tags)
 
-        with closing(self._get_connection(server, user, password, service, jdbc_driver, tags)) as con:
+        with closing(self._get_connection(server, user, password, service, jdbc_driver, service_check_tags)) as con:
             self._get_sys_metrics(con, tags)
             self._get_process_metrics(con, tags)
             self._get_tablespace_metrics(con, tags)
             self._get_custom_metrics(con, custom_queries, tags)
 
     def _get_config(self, instance):
-        self.server = instance.get('server', None)
-        user = instance.get('user', None)
-        password = instance.get('password', None)
-        service = instance.get('service_name', None)
-        jdbc_driver = instance.get('jdbc_driver_path', None)
-        tags = instance.get('tags', [])
+        server = instance.get('server')
+        user = instance.get('user')
+        password = instance.get('password')
+        service = instance.get('service_name')
+        jdbc_driver = instance.get('jdbc_driver_path')
+        tags = instance.get('tags') or []
         custom_queries = instance.get('custom_queries', [])
         if is_affirmative(instance.get('use_global_custom_queries', True)):
             custom_queries.extend(self.init_config.get('global_custom_queries', []))
 
-        return self.server, user, password, service, jdbc_driver, tags, custom_queries
+        return server, user, password, service, jdbc_driver, tags, custom_queries
 
     def _get_connection(self, server, user, password, service, jdbc_driver, tags):
-        if tags is None:
-            tags = []
-        self.service_check_tags = ['server:%s' % server] + tags
-
-        if self.use_oracle_client:
-            connect_string = self.CX_CONNECT_STRING.format(user, password, server, service)
-        else:
+        try:
+            # Check if the instantclient is available
+            cx_Oracle.clientversion()
+        except cx_Oracle.DatabaseError as e:
+            # Fallback to JDBC
+            use_oracle_client = False
+            self.log.debug('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
             connect_string = self.JDBC_CONNECT_STRING.format(server, service)
+        else:
+            use_oracle_client = True
+            self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
+            connect_string = self.CX_CONNECT_STRING.format(user, password, server, service)
 
         try:
-            if self.use_oracle_client:
+            if use_oracle_client:
                 con = cx_Oracle.connect(connect_string)
             else:
                 try:
@@ -135,16 +133,14 @@ class Oracle(AgentCheck):
                     raise
 
             self.log.debug("Connected to Oracle DB")
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags)
             self.log.error(e)
             raise
         return con
 
     def _get_custom_metrics(self, con, custom_queries, global_tags):
-        global_tags = global_tags or []
-
         for custom_query in custom_queries:
             metric_prefix = custom_query.get('metric_prefix')
             if not metric_prefix:
@@ -164,20 +160,20 @@ class Oracle(AgentCheck):
 
             with closing(con.cursor()) as cursor:
                 cursor.execute(query)
-                row = cursor.fetchone()
-                if row:
+                for row in cursor:
                     if len(columns) != len(row):
                         self.log.error(
                             'query result for metric_prefix {}: expected {} columns, got {}'.format(
                                 metric_prefix, len(columns), len(row)
                             )
                         )
-                        continue
+                        break
 
                     metric_info = []
-                    query_tags = custom_query.get('tags', [])
+                    query_tags = list(custom_query.get('tags', []))
                     query_tags.extend(global_tags)
 
+                    errored = True
                     for column, value in zip(columns, row):
                         # Columns can be ignored via configuration.
                         if column:
@@ -216,14 +212,16 @@ class Oracle(AgentCheck):
 
                     # Only submit metrics if there were absolutely no errors - all or nothing.
                     else:
+                        errored = False
                         for info in metric_info:
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=query_tags)
 
-    def _get_sys_metrics(self, con, tags):
-        if tags is None:
-            tags = []
+                    if errored:
+                        # If we failed to parse one row of the results, there is no reason to continue
+                        break
 
+    def _get_sys_metrics(self, con, tags):
         with closing(con.cursor()) as cur:
             cur.execute(queries.SYSTEM)
             for row in cur.fetchall():
@@ -233,13 +231,9 @@ class Oracle(AgentCheck):
                     self.gauge(self.SYS_METRICS[metric_name], metric_value, tags=tags)
 
     def _get_process_metrics(self, con, tags):
-        if tags is None:
-            tags = []
-
         with closing(con.cursor()) as cur:
             cur.execute(queries.PROCESS.format(','.join(self.PROCESS_METRICS.keys())))
             for row in cur.fetchall():
-
                 # Oracle program name
                 program_tag = ['program:{}'.format(row[0])]
 
@@ -249,13 +243,11 @@ class Oracle(AgentCheck):
                     self.gauge(metric_name, metric_value, tags=tags + program_tag)
 
     def _get_tablespace_metrics(self, con, tags):
-        if tags is None:
-            tags = []
-
         with closing(con.cursor()) as cur:
             cur.execute(queries.TABLESPACE)
             for tablespace_name, used_bytes, max_bytes, used_percent in cur.fetchall():
-                tablespace_tag = 'tablespace:{}'.format(tablespace_name)
+                tablespace_tags = ['tablespace:{}'.format(tablespace_name)]
+                tablespace_tags.extend(tags)
                 if used_bytes is None:
                     # mark tablespace as offline if null
                     offline = 1
@@ -272,7 +264,7 @@ class Oracle(AgentCheck):
                 else:
                     in_use = float(used_percent)
 
-                self.gauge('oracle.tablespace.used', used, tags=tags + [tablespace_tag])
-                self.gauge('oracle.tablespace.size', size, tags=tags + [tablespace_tag])
-                self.gauge('oracle.tablespace.in_use', in_use, tags=tags + [tablespace_tag])
-                self.gauge('oracle.tablespace.offline', offline, tags=tags + [tablespace_tag])
+                self.gauge('oracle.tablespace.used', used, tags=tablespace_tags)
+                self.gauge('oracle.tablespace.size', size, tags=tablespace_tags)
+                self.gauge('oracle.tablespace.in_use', in_use, tags=tablespace_tags)
+                self.gauge('oracle.tablespace.offline', offline, tags=tablespace_tags)

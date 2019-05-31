@@ -114,9 +114,9 @@ class Device(object):
 
     def _parse_tags(self):
         self.tags = []
-        self.tags.append('nfs_server:{0}'.format(ensure_unicode(self.nfs_server)))
-        self.tags.append('nfs_export:{0}'.format(ensure_unicode(self.nfs_export)))
-        self.tags.append('nfs_mount:{0}'.format(ensure_unicode(self.mount)))
+        self.tags.append(u'nfs_server:{0}'.format(ensure_unicode(self.nfs_server)))
+        self.tags.append(u'nfs_export:{0}'.format(ensure_unicode(self.nfs_export)))
+        self.tags.append(u'nfs_mount:{0}'.format(ensure_unicode(self.mount)))
 
     def send_metrics(self, gauge, tags):
         metric_prefix = 'system.nfs.'

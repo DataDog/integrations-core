@@ -55,62 +55,72 @@ class IIS(PDHBaseCheck):
         return "iis_host:{}".format(self.normalize(iis_host))
 
     def check(self, instance):
-        sites = instance.get('sites')
-        if sites is None:
-            expected_sites = set()
-        else:
-            expected_sites = set(sites)
+        sites = instance.get('sites', []) or []
+        expected_sites = set(sites)
         # _Total should always be in the list of expected sites; we always
         # report _Total
         expected_sites.add(TOTAL_SITE)
 
         self.log.debug("Expected sites is {}".format(expected_sites))
-        key = hash_mutable(instance)
-        for inst_name, dd_name, metric_func, counter in self._metrics[key]:
+        instance_hash = hash_mutable(instance)
+        for inst_name, dd_name, metric_func, counter in self._metrics[instance_hash]:
             try:
-                try:
-                    vals = counter.get_all_values()
-                except Exception as e:
-                    self.log.error("Failed to get_all_values {} {}: {}".format(inst_name, dd_name, e))
-                    continue
+                site_values = counter.get_all_values()
+            except Exception as e:
+                self.log.error("Failed to get_all_values {} {}: {}".format(inst_name, dd_name, e))
+                continue
+            try:
+                for site_name, value in iteritems(site_values):
+                    is_single_instance = counter.is_single_instance()
+                    if not is_single_instance and sites and site_name != TOTAL_SITE and site_name not in sites:
+                        continue
 
-                for sitename, val in iteritems(vals):
-                    tags = []
-                    if key in self._tags:
-                        tags = list(self._tags[key])
-                    tags.append(self.get_iishost(instance))
-
+                    tags = self._get_site_tags(instance_hash, instance, site_name, is_single_instance)
                     try:
-                        if not counter.is_single_instance():
-                            if sites and sitename != TOTAL_SITE and sitename not in sites:
-                                continue
-                            tags.append("site:{}".format(self.normalize(sitename)))
+                        metric_func(dd_name, value, tags)
                     except Exception as e:
-                        self.log.error("Caught exception {} setting tags".format(e))
-
-                    try:
-                        metric_func(dd_name, val, tags)
-                    except Exception as e:
-                        self.log.error("Error in metric_func: {} {} {}".format(dd_name, val, e))
+                        self.log.error("Error in metric_func: {} {} {}".format(dd_name, value, e))
 
                     if dd_name == "iis.uptime":
-                        uptime = int(val)
-                        status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
-                        self.service_check(self.SERVICE_CHECK, status, tags)
-                        if sitename in expected_sites:
-                            self.log.debug("Removing {!r} from expected sites".format(sitename))
-                            expected_sites.remove(sitename)
+                        self._report_uptime(value, tags)
+                        if site_name in expected_sites:
+                            self.log.debug("Removing {!r} from expected sites".format(site_name))
+                            expected_sites.remove(site_name)
                         else:
-                            self.log.warning("Site {!r} not in expected_sites".format(sitename))
+                            self.log.warning("Site {!r} not in expected_sites".format(site_name))
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
                 self.log.error("IIS Failed to get metric data for {} {}: {}".format(inst_name, dd_name, e))
 
-        for site in expected_sites:
+        self._report_unavailable_sites(expected_sites, instance_hash, instance)
+
+    def _report_uptime(self, site_uptime, tags):
+        uptime = int(site_uptime)
+        status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
+        self.service_check(self.SERVICE_CHECK, status, tags)
+
+    def _report_unavailable_sites(self, remaining_sites, instance_hash, instance):
+        for site in remaining_sites:
             tags = []
-            if key in self._tags:
-                tags = list(self._tags[key])
+            if instance_hash in self._tags:
+                tags = list(self._tags[instance_hash])
             tags.append(self.get_iishost(instance))
-            tags.append("site:{}".format(self.normalize(site)))
+            normalized_site = self.normalize(site)
+            tags.append("site:{}".format(normalized_site))
+            self.log.warning("Check didn't get any data for expected site: {!r}".format(site))
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)
+
+    def _get_site_tags(self, instance_hash, instance, site_name, is_single_instance):
+        tags = []
+        if instance_hash in self._tags:
+            tags = list(self._tags[instance_hash])
+        tags.append(self.get_iishost(instance))
+
+        try:
+            if not is_single_instance:
+                tags.append("site:{}".format(self.normalize(site_name)))
+        except Exception as e:
+            self.log.error("Caught exception {} setting tags".format(e))
+
+        return tags

@@ -84,7 +84,7 @@ class SessionWrapper:
         try:
             response.raise_for_status()
         except Exception as e:
-            self.log.warning("Error making request: {}".format(e))
+            self.log.warning("Error making request: exception='%s' reponse.content='%s'", e, response.content)
             raise APIConnectionException("Error making request: {}".format(e))
         try:
             return response.json()
