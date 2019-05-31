@@ -60,9 +60,9 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             self.kube_apiserver_config = self.get_scraper_config(kube_apiserver_config)
 
         if not self.kube_apiserver_config['metrics_mapper']:
+            url = self.kube_apiserver_config['prometheus_url']
             raise CheckException(
-                "You have to collect at least one metric " +
-                "from the endpoint: {}".format(self.kube_apiserver_config['prometheus_url'])
+                "You have to collect at least one metric from the endpoint: {}".format(url)
             )
         self.process(self.kube_apiserver_config, metric_transformers=self.metric_transformers)
 

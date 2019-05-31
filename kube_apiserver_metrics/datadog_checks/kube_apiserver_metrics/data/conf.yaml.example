@@ -12,7 +12,7 @@ instances:
     #
     # scheme: "https"
 
-    ## @param bearer_token_auth - optional
+    ## @param bearer_token_auth - string - optional
     ## Used if you are using RBACs and need the agent to authenticate
     ## against the APIServer to retrieve metrics. Default to true.
     #
