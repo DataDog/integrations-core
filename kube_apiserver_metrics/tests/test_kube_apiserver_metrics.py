@@ -5,22 +5,24 @@
 # stdlib
 import os
 import tempfile
+
 import mock
 import pytest
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
+
 from .common import APISERVER_INSTANCE_BEARER_TOKEN
 
 customtag = "custom:tag"
 
-instance = {'prometheus_url': 'localhost:443/metrics',
-            'scheme': 'https',
-            'tags': [customtag]}
+instance = {'prometheus_url': 'localhost:443/metrics', 'scheme': 'https', 'tags': [customtag]}
 
-instanceSecure = {'prometheus_url': 'localhost:443/metrics',
-                  'scheme': 'https',
-                  'bearer_token_auth': 'true',
-                  'tags': [customtag]}
+instanceSecure = {
+    'prometheus_url': 'localhost:443/metrics',
+    'scheme': 'https',
+    'bearer_token_auth': 'true',
+    'tags': [customtag],
+}
 
 
 @pytest.fixture()
@@ -33,7 +35,7 @@ def mock_get():
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"}
+            headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"},
         ),
     ):
         yield

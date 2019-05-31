@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
-__all__ = [
-    '__version__',
-    'KubeAPIServerMetricsCheck'
-]
+__all__ = ['__version__', 'KubeAPIServerMetricsCheck']

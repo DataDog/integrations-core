@@ -5,8 +5,8 @@ from copy import deepcopy
 
 from six import iteritems
 
-from datadog_checks.errors import CheckException
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.errors import CheckException
 
 
 class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
@@ -14,6 +14,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     Collect kubernetes apiserver metrics in the Prometheus format
     See https://github.com/kubernetes/apiserver
     """
+
     DEFAULT_METRIC_LIMIT = 0
     # Set up metrics_transformers
     metric_transformers = {}
@@ -61,9 +62,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
         if not self.kube_apiserver_config['metrics_mapper']:
             url = self.kube_apiserver_config['prometheus_url']
-            raise CheckException(
-                "You have to collect at least one metric from the endpoint: {}".format(url)
-            )
+            raise CheckException("You have to collect at least one metric from the endpoint: {}".format(url))
         self.process(self.kube_apiserver_config, metric_transformers=self.metric_transformers)
 
     def _create_kube_apiserver_metrics_instance(self, instance):
