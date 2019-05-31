@@ -1,16 +1,18 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import time
 
 import mock
 import pytest
 import requests
 
-from datadog_checks.dev import docker_run, LazyFunction
-from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
-from datadog_checks.harbor import HarborCheck, HarborAPI
-from .common import *
+from datadog_checks.dev import LazyFunction, docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.harbor import HarborAPI, HarborCheck
+
+from .common import ADMIN_INSTANCE, HARBOR_VERSION, HERE, INSTANCE, URL, USERS_URL, MockedHarborAPI
 
 
 @pytest.fixture(scope='session')
@@ -22,9 +24,7 @@ def dd_environment(instance):
         CreateSimpleUser(),
     ]
 
-    with docker_run(
-        compose_file, conditions=conditions
-    ):
+    with docker_run(compose_file, conditions=conditions):
         yield instance
 
 
@@ -40,7 +40,7 @@ class CreateSimpleUser(LazyFunction):
                     "email": "NotAnAdmin@goharbor.io",
                     "password": "Str0ngPassw0rd",
                     "realname": "Not An Admin",
-                }
+                },
             )
 
 
@@ -57,10 +57,10 @@ def admin_instance():
 @pytest.fixture
 def harbor_check(admin_instance):
     check = HarborCheck('harbor', {}, [admin_instance])
-    check.log = MagicMock()
-    check.gauge = MagicMock()
-    check.count = MagicMock()
-    check.service_check = MagicMock()
+    check.log = mock.MagicMock()
+    check.gauge = mock.MagicMock()
+    check.count = mock.MagicMock()
+    check.service_check = mock.MagicMock()
     return check
 
 

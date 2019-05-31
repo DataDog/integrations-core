@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from requests.exceptions import InvalidURL, HTTPError, Timeout
 
 SYSTEMINFO_URL = "{base_url}/api/systeminfo/"
 LOGIN_URL = "{base_url}/c/login/"
@@ -24,10 +23,7 @@ class HarborAPI(object):
         self._fetch_and_set_harbor_version()
 
     def authenticate(self, username, password):
-        auth_form_data = {
-            'principal': username,
-            'password': password
-        }
+        auth_form_data = {'principal': username, 'password': password}
         if self.harbor_version >= [1, 7, 0]:
             url = self._resolve_url(LOGIN_URL)
         else:

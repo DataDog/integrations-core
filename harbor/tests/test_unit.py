@@ -48,7 +48,7 @@ def test_submit_disk_metrics(harbor_check, harbor_api):
     harbor_check._submit_disk_metrics(harbor_api, tags)
     calls = [
         call('harbor.disk.free', VOLUME_DISK_FREE, tags=tags),
-        call('harbor.disk.total', VOLUME_DISK_TOTAL, tags=tags)
+        call('harbor.disk.total', VOLUME_DISK_TOTAL, tags=tags),
     ]
     harbor_check.gauge.assert_has_calls(calls, any_order=True)
     assert harbor_check.gauge.call_count == len(calls)

@@ -8,7 +8,6 @@ from datadog_checks.harbor.common import HarborAPI
 
 
 class HarborCheck(AgentCheck):
-
     def __init__(self, *args, **kwargs):
         super(HarborCheck, self).__init__(*args, **kwargs)
         del self.http.options['auth']

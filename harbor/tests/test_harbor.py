@@ -1,13 +1,11 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
 import pytest
 
 from datadog_checks.harbor import HarborCheck
 
-from .common import HARBOR_STATUS_CHECKS, HARBOR_METRICS, HARBOR_VERSION
+from .common import HARBOR_METRICS, HARBOR_STATUS_CHECKS, HARBOR_VERSION
 
 
 @pytest.mark.integration
