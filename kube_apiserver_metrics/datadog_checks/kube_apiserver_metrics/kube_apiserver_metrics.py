@@ -17,7 +17,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     # Set up metrics_transformers
     metric_transformers = {}
-    DEFAULT_BEARER_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
     DEFAULT_SCHEME = 'https'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -75,21 +74,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         scheme = instance.get('scheme', self.DEFAULT_SCHEME)
 
         kube_apiserver_metrics_instance['prometheus_url'] = "{0}://{1}".format(scheme, endpoint)
-
-        bearer_token_path = instance.get('bearer_token_path', self.DEFAULT_BEARER_TOKEN_PATH)
-        bearer_token = ""
-        try:
-            with open(bearer_token_path, "r") as f:
-                bearer_token = f.read()
-        except Exception as err:
-            self.warning("Could not retrieve the bearer token file: {}".format(err))
-            return kube_apiserver_metrics_instance
-
-        if bearer_token:
-            kube_apiserver_metrics_instance['extra_headers'] = {}
-            kube_apiserver_metrics_instance['extra_headers']["Authorization"] = "Bearer {}".format(bearer_token)
-        else:
-            self.warning("Bearer token file is empty, AuthN/Z will not work")
         return kube_apiserver_metrics_instance
 
     def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):

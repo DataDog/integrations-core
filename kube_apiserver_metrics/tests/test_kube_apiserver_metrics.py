@@ -9,7 +9,7 @@ import mock
 import pytest
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
-from .common import APISERVER_INSTANCE_EXTRA_HEADER
+from .common import APISERVER_INSTANCE_BEARER_TOKEN
 
 customtag = "custom:tag"
 
@@ -17,6 +17,12 @@ instance = {'prometheus_url': 'localhost:443/metrics',
             'scheme': 'https',
             'tags': [customtag]}
 
+instanceSecure = {
+            'prometheus_url': 'localhost:443/metrics',
+            'scheme': 'https',
+            'bearer_token_auth': 'true',
+            'tags': [customtag]
+}
 
 @pytest.fixture()
 def mock_get():
@@ -82,28 +88,15 @@ class TestKubeAPIServerMetrics:
         """
         Testing the bearer token configuration.
         """
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
-        check.warning = mock.MagicMock()
-
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
-        assert apiserver_instance.get("extra_headers", {}) == {}
-        check.warning.assert_called_with("Could not retrieve the bearer token file: "
-            "[Errno 2] No such file or directory: " +
-            "'/var/run/secrets/kubernetes.io/serviceaccount/token'")
-
         temp_dir = tempfile.mkdtemp()
         temp_bearer_file = os.path.join(temp_dir, "foo")
         with open(temp_bearer_file, "w+") as f:
-            f.write("")
-        instance["bearer_token_path"] = temp_bearer_file
-
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
-        assert apiserver_instance.get("extra_headers", {}) == {}
-        check.warning.assert_called_with("Bearer token file is empty, AuthN/Z will not work")
-
-        with open(temp_bearer_file, "w+") as f:
             f.write("XXX")
+        instanceSecure["bearer_token_path"] = temp_bearer_file
 
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instanceSecure])
+        apiserver_instance = check._create_kube_apiserver_metrics_instance(instanceSecure)
+        configured_instance = check.get_scraper_config(apiserver_instance)
+
         os.remove(temp_bearer_file)
-        assert apiserver_instance["extra_headers"] == APISERVER_INSTANCE_EXTRA_HEADER
+        assert configured_instance["_bearer_token"] == APISERVER_INSTANCE_BEARER_TOKEN
