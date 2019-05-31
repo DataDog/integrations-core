@@ -17,12 +17,11 @@ instance = {'prometheus_url': 'localhost:443/metrics',
             'scheme': 'https',
             'tags': [customtag]}
 
-instanceSecure = {
-            'prometheus_url': 'localhost:443/metrics',
-            'scheme': 'https',
-            'bearer_token_auth': 'true',
-            'tags': [customtag]
-}
+instanceSecure = {'prometheus_url': 'localhost:443/metrics',
+                  'scheme': 'https',
+                  'bearer_token_auth': 'true',
+                  'tags': [customtag]}
+
 
 @pytest.fixture()
 def mock_get():

@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 from copy import deepcopy
 
 from six import iteritems
-from datadog_checks.base import ConfigurationError
+
+from datadog_checks.errors import CheckException
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 
@@ -22,12 +22,12 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         # Set up metrics_transformers
         self.metric_transformers = {
-                'apiserver_audit_event_total': self.apiserver_audit_event_total,
-                'rest_client_requests_total': self.rest_client_requests_total,
-                'apiserver_request_count': self.apiserver_request_count,
-                'apiserver_dropped_requests_total': self.apiserver_dropped_requests_total,
-                'http_requests_total': self.http_requests_total,
-                'authenticated_user_requests': self.authenticated_user_requests,
+            'apiserver_audit_event_total': self.apiserver_audit_event_total,
+            'rest_client_requests_total': self.rest_client_requests_total,
+            'apiserver_request_count': self.apiserver_request_count,
+            'apiserver_dropped_requests_total': self.apiserver_dropped_requests_total,
+            'http_requests_total': self.http_requests_total,
+            'authenticated_user_requests': self.authenticated_user_requests,
         }
         self.kube_apiserver_config = None
 
@@ -52,7 +52,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
                 }
             },
             default_namespace="kube_apiserver",
-            )
+        )
 
     def check(self, instance):
         if self.kube_apiserver_config is None:
@@ -61,7 +61,8 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
         if not self.kube_apiserver_config['metrics_mapper']:
             raise CheckException(
-                 "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
+                "You have to collect at least one metric " +
+                "from the endpoint: {}".format(self.kube_apiserver_config['prometheus_url'])
             )
         self.process(self.kube_apiserver_config, metric_transformers=self.metric_transformers)
 
@@ -94,13 +95,18 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
     def apiserver_audit_event_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.audit_event', metric, scraper_config)
+
     def rest_client_requests_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.rest_client_requests_total', metric, scraper_config)
+
     def http_requests_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.http_requests_total', metric, scraper_config)
+
     def apiserver_request_count(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.apiserver_request_count', metric, scraper_config)
+
     def apiserver_dropped_requests_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.apiserver_dropped_requests_total', metric, scraper_config)
+
     def authenticated_user_requests(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.authenticated_user_requests', metric, scraper_config)
