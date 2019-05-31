@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.2.0 / 2019-05-31
+
+* [Added] New metrics + always fetch aggregated data. See [#3797](https://github.com/DataDog/integrations-core/pull/3797).
+
 ## 2.1.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3513](https://github.com/DataDog/integrations-core/pull/3513).
