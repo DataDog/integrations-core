@@ -7,4 +7,7 @@ systemd.unit.uptime,gauge,,microsecond,,The unit uptime since it's active,0,syst
 systemd.service.cpu_usage_n_sec,gauge,,nanosecond,,The overall cpu consumed by the service in nano seconds (CPUUsageNSec),0,systemd,service.cpu_usage_n_sec
 systemd.service.memory_current,gauge,,byte,,The memory currently used by the service in bytes (MemoryCurrent),0,systemd,service.memory_current
 systemd.service.tasks_current,gauge,,,,The current number of tasks in the service (TasksCurrent),0,systemd,service.tasks_current
-systemd.service.n_restarts,gauge,,,,The number of time the service has been restarted due to `Restart=` (NRestarts),0,systemd,service.n_restarts
+systemd.service.n_restarts,gauge,,,,"The number of time the service has been restarted due to `Restart=` (NRestarts), requires at least systemd version 235",0,systemd,service.n_restarts
+systemd.socket.n_accepted,gauge,,,,The number of accepted socket connections (NAccepted),0,systemd,socket.n_accepted
+systemd.socket.n_connections,gauge,,,,The current number of socket connections (NConnections),0,systemd,socket.n_connections
+systemd.socket.n_refused,gauge,,,,"The total number of refused socket connections (NRefused), requires at least systemd version 235",0,systemd,socket.n_refused
