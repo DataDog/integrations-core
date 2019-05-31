@@ -34,7 +34,12 @@ instances:
 
     ## @param collect_aggregates_only - boolean - optional - default: true
     ## This parameter instructs the check to collect metrics only from the aggregate frontend/backend
-    ## status lines from the stats output instead of for each backend.
+    ## status lines from the stats output instead of for each backend. With this parameter set to false the agent
+    ## collects data for each backend but ignores the aggregated data for backends. Because some metrics are only
+    ## available for aggregates, you can also set this parameter to the string 'both' to collect everything.
+    ## Please note that this mean that if if you have queries like computing the sum of all requests being made, the
+    ## result will be twice as expected. To get the correct result, you have to explicitly add some filters to the
+    ## query.
     #
     # collect_aggregates_only: true
 
