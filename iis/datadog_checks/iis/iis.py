@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, PDHBaseCheck
+from datadog_checks.base import PDHBaseCheck, is_affirmative
 from datadog_checks.utils.containers import hash_mutable
 
 DEFAULT_COUNTERS = [
@@ -43,7 +43,7 @@ class IIS(PDHBaseCheck):
     SERVICE_CHECK = "iis.site_up"
 
     def __init__(self, name, init_config, agentConfig, instances):
-        PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
+        super(IIS, self).__init__(name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
 
     def get_iishost(self, instance):
         inst_host = instance.get("host")
@@ -55,19 +55,26 @@ class IIS(PDHBaseCheck):
         return "iis_host:{}".format(self.normalize(iis_host))
 
     def check(self, instance):
+        # Duplicate refresh_counters from PDHBaseCheck
+        instance_hash = hash_mutable(instance)
+        refresh_counters = is_affirmative(instance.get('refresh_counters', True))
+
+        if refresh_counters:
+            for counter, values in list(iteritems(self._missing_counters)):
+                self._make_counters(instance_hash, ([counter], values))
+
         sites = instance.get('sites', []) or []
         expected_sites = set(sites)
         # _Total should always be in the list of expected sites; we always
         # report _Total
         expected_sites.add(TOTAL_SITE)
 
-        self.log.debug("Expected sites is {}".format(expected_sites))
-        instance_hash = hash_mutable(instance)
+        self.log.debug("Expected sites is %s", expected_sites)
         for inst_name, dd_name, metric_func, counter in self._metrics[instance_hash]:
             try:
                 site_values = counter.get_all_values()
             except Exception as e:
-                self.log.error("Failed to get_all_values {} {}: {}".format(inst_name, dd_name, e))
+                self.log.error("Failed to get_all_values %s %s: %s", inst_name, dd_name, e)
                 continue
             try:
                 for site_name, value in iteritems(site_values):
@@ -79,25 +86,25 @@ class IIS(PDHBaseCheck):
                     try:
                         metric_func(dd_name, value, tags)
                     except Exception as e:
-                        self.log.error("Error in metric_func: {} {} {}".format(dd_name, value, e))
+                        self.log.error("Error in metric_func: %s %s %s", dd_name, value, e)
 
                     if dd_name == "iis.uptime":
                         self._report_uptime(value, tags)
                         if site_name in expected_sites:
-                            self.log.debug("Removing {!r} from expected sites".format(site_name))
+                            self.log.debug("Removing %r from expected sites", site_name)
                             expected_sites.remove(site_name)
                         else:
-                            self.log.warning("Site {!r} not in expected_sites".format(site_name))
+                            self.log.warning("Site %r not in expected_sites", site_name)
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error("IIS Failed to get metric data for {} {}: {}".format(inst_name, dd_name, e))
+                self.log.error("IIS Failed to get metric data for %s %s: %s", inst_name, dd_name, e)
 
         self._report_unavailable_sites(expected_sites, instance_hash, instance)
 
     def _report_uptime(self, site_uptime, tags):
         uptime = int(site_uptime)
-        status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
+        status = self.CRITICAL if uptime == 0 else self.OK
         self.service_check(self.SERVICE_CHECK, status, tags)
 
     def _report_unavailable_sites(self, remaining_sites, instance_hash, instance):
@@ -108,8 +115,8 @@ class IIS(PDHBaseCheck):
             tags.append(self.get_iishost(instance))
             normalized_site = self.normalize(site)
             tags.append("site:{}".format(normalized_site))
-            self.log.warning("Check didn't get any data for expected site: {!r}".format(site))
-            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)
+            self.log.warning("Check didn't get any data for expected site: %r", site)
+            self.service_check(self.SERVICE_CHECK, self.CRITICAL, tags)
 
     def _get_site_tags(self, instance_hash, instance, site_name, is_single_instance):
         tags = []
@@ -121,6 +128,6 @@ class IIS(PDHBaseCheck):
             if not is_single_instance:
                 tags.append("site:{}".format(self.normalize(site_name)))
         except Exception as e:
-            self.log.error("Caught exception {} setting tags".format(e))
+            self.log.error("Caught exception %r setting tags", e)
 
         return tags
