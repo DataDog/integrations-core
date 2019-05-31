@@ -4,6 +4,7 @@
 
 from fnmatch import fnmatchcase
 from math import isinf, isnan
+from os.path import isfile
 
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
@@ -31,6 +32,8 @@ class OpenMetricsScraperMixin(object):
     SAMPLE_VALUE = 2
 
     METRIC_TYPES = ['counter', 'gauge', 'summary', 'histogram']
+
+    KUBERNETES_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
 
     def __init__(self, *args, **kwargs):
         # Initialize AgentCheck's base class
@@ -219,6 +222,21 @@ class OpenMetricsScraperMixin(object):
         # one of these strings, it will be filtered out before being parsed.
         # INTERNAL FEATURE, might be removed in future versions
         config['_text_filter_blacklist'] = instance.get('_text_filter_blacklist', [])
+
+        # Whether or not to use the service account bearer token for authentication
+        # if 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
+        # as a default path to get the token.
+        config['bearer_token_auth'] = is_affirmative(
+            instance.get('bearer_token_auth', default_instance.get('bearer_token_auth', False))
+        )
+
+        # Can be used to get a service account bearer token from files
+        # other than /var/run/secrets/kubernetes.io/serviceaccount/token
+        # 'bearer_token_auth' should be enabled.
+        config['bearer_token_path'] = instance.get('bearer_token_path', default_instance.get('bearer_token_path', None))
+
+        # The service account bearer token to be used for authentication
+        config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
 
         return config
 
@@ -444,6 +462,12 @@ class OpenMetricsScraperMixin(object):
             headers['accept-encoding'] = 'gzip'
         headers.update(scraper_config['extra_headers'])
 
+        # Add the bearer token to headers
+        bearer_token = scraper_config['_bearer_token']
+        if bearer_token is not None:
+            auth_header = {'Authorization': 'Bearer {}'.format(bearer_token)}
+            headers.update(auth_header)
+
         # Determine the SSL verification settings
         cert = None
         if isinstance(scraper_config['ssl_cert'], string_types):
@@ -627,3 +651,27 @@ class OpenMetricsScraperMixin(object):
 
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
+
+    def _get_bearer_token(self, bearer_token_auth, bearer_token_path):
+        if bearer_token_auth is False:
+            return None
+
+        path = None
+        if bearer_token_path is not None:
+            if isfile(bearer_token_path):
+                path = bearer_token_path
+            else:
+                self.log.error("File not found: {}".format(bearer_token_path))
+        elif isfile(self.KUBERNETES_TOKEN_PATH):
+            path = self.KUBERNETES_TOKEN_PATH
+
+        if path is None:
+            self.log.error("Cannot get bearer token from bearer_token_path or auto discovery")
+            raise IOError("Cannot get bearer token from bearer_token_path or auto discovery")
+
+        try:
+            with open(path, 'r') as f:
+                return f.read().rstrip()
+        except Exception as err:
+            self.log.error("Cannot get bearer token from path: {} - error: {}".format(path, err))
+            raise
