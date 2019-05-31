@@ -8,9 +8,15 @@ instances:
   - prometheus_url: localhost:443/metrics
     
     ## @param scheme - string - optional
-    ## Used to specify the scheme to reach the APIServer endpoints. - Default to https.
+    ## Used to specify the scheme to reach the APIServer endpoints. Default to https.
     #
     # scheme: "https"
+
+    ## @param bearer_token_auth - optional
+    ## Used if you are using RBACs and need the agent to authenticate
+    ## against the APIServer to retrieve metrics. Default to true.
+    #
+    bearer_token_auth: true
 
     ## @param bearer_token_path - string - optional
     ## Used to specify the path where the service account token is located.

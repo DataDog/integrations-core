@@ -21,16 +21,19 @@ Annotations:       ad.datadoghq.com/endpoint.check_names: ["kube_apiserver_metri
                    ad.datadoghq.com/endpoint.instances:
                      [
                        {
-                         "prometheus_url": "%%host%%:%%port%%/metrics"
+                         "prometheus_url": "%%host%%:%%port%%/metrics",
+                         "bearer_token_auth": "true",
                        }
                      ]
 ```
 The Datadog Cluster Agent will then schedule the check(s) for each endpoint onto Datadog Agent(s).
 
-Disclaimer: Your apiserver(s) need to run as pods, other methods (systemd unit) are not supported at the moment.
+Disclaimer: Your apiserver(s) need to run as pods, other methods (e.g. systemd unit) are not supported at the moment.
 
 You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 See the [sample kube_apiserver_metrics.d/conf.yaml][2] for all available configuration options.
+
+By default the agent running the check will try to get the Service Account bearer token to authenticate against the APIServer, if you are not using RBACs, you can set `bearer_token_auth` to `false`.
 
 Finally, if you run the Datadog Agent on the master nodes, you can rely on [Autodiscovery][4] to schedule the check. It will be automatic if you are running the official image `k8s.gcr.io/kube-apiserver`.
 
@@ -58,7 +61,7 @@ Kube_apiserver_metrics does not include any events.
 
 Need help? Contact [Datadog support][8].
 
-[1]: **LINK_TO_INTEGERATION_SITE**
+[1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/autodiscovery/clusterchecks/
 [4]: https://docs.datadoghq.com/agent/autodiscovery/?tab=kubernetes
