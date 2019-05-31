@@ -8,7 +8,7 @@ import tempfile
 import mock
 import pytest
 
-from datadog_checks.kube_apiserver_metrics import KubeApiserverMetricsCheck
+from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 from .common import APISERVER_INSTANCE_EXTRA_HEADER
 
 customtag = "custom:tag"
@@ -34,7 +34,7 @@ def mock_get():
         yield
 
 
-class TestKubeApiserverMetrics:
+class TestKubeAPIServerMetrics:
     """Basic Test for kube_apiserver integration."""
 
     CHECK_NAME = 'kube_apiserver_metrics'
@@ -67,7 +67,7 @@ class TestKubeApiserverMetrics:
         Testing kube_apiserver_metrics check.
         """
 
-        check = KubeApiserverMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
         check.check(instance)
 
         # check that we then get the count metrics also
@@ -82,7 +82,7 @@ class TestKubeApiserverMetrics:
         """
         Testing the bearer token configuration.
         """
-        check = KubeApiserverMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
         check.warning = mock.MagicMock()
 
         apiserver_instance = check._create_kube_apiserver_metrics_instance(instance)

@@ -9,7 +9,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 
-class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
+class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     """
     Collect kubernetes apiserver metrics in the Prometheus format
     See https://github.com/kubernetes/apiserver
@@ -32,7 +32,7 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
         }
         self.kube_apiserver_config = None
 
-        super(KubeApiserverMetricsCheck, self).__init__(
+        super(KubeAPIServerMetricsCheck, self).__init__(
             name,
             init_config,
             agentConfig,
@@ -57,7 +57,7 @@ class KubeApiserverMetricsCheck(OpenMetricsBaseCheck):
 
     def check(self, instance):
         if self.kube_apiserver_config is None:
-            kube_apiserver_config =self._create_kube_apiserver_metrics_instance(instance)
+            kube_apiserver_config = self._create_kube_apiserver_metrics_instance(instance)
             self.kube_apiserver_config = self.get_scraper_config(kube_apiserver_config)
 
         if not self.kube_apiserver_config['metrics_mapper']:

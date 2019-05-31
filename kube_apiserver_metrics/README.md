@@ -8,8 +8,7 @@ This check monitors [Kube_apiserver_metrics][1].
 
 ### Installation
 
-The Kube_apiserver_metrics check is included in the [Datadog Agent][2] package, so you do not
-need to install anything else on your server.
+The Kube_apiserver_metrics check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
@@ -28,7 +27,7 @@ Annotations:       ad.datadoghq.com/endpoint.check_names: ["kube_apiserver_metri
 ```
 The Datadog Cluster Agent will then schedule the check(s) for each endpoint onto Datadog Agent(s).
 
-Disclaimer: Your apiserver(s) need to run as pods, support for other methods (systemd unit) will be added in an upcoming version of the Datadog Cluster Agent.
+Disclaimer: Your apiserver(s) need to run as pods, other methods (systemd unit) are not supported at the moment.
 
 You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 See the [sample kube_apiserver_metrics.d/conf.yaml][2] for all available configuration options.
