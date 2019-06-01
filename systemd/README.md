@@ -39,7 +39,7 @@ Returns `OK` if systemd is reachable, `CRITICAL` otherwise.
 
 **systemd.system_state**:
 
-Returns `OK` if systemd's system state is running, `CRITICAL` if degraded, maintenance or stopping, `UNKNOWN` if initializing, starting or other.
+Returns `OK` if Systemd's system state is running. Returns `CRITICAL` if the state is degraded, maintenance, or stopping. Returns `UNKNOWN` if the state is initializing, starting, or other.
 
 **systemd.unit.active_state**:
 Returns `OK` if the unit active state is active, `CRITICAL` if inactive, deactivating or failed, `UNKNOWN` if activating or other.
