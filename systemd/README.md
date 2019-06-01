@@ -48,7 +48,7 @@ Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state
 
 ### Events
 
-The Agent_metrics check does not include any events.
+The Systemd check does not include any events.
 
 ## Troubleshooting
 
