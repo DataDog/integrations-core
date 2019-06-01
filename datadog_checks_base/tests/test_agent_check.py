@@ -249,12 +249,13 @@ class TestTags:
         in_str.encode.side_effect = Exception
         assert check._to_bytes(in_str) is None
 
-    def test_none_value(self):
+    def test_none_value(self, caplog):
         check = AgentCheck()
         tags = [None, 'tag:foo']
 
         normalized_tags = check._normalize_tags_type(tags, None)
         assert normalized_tags == ['tag:foo']
+        assert 'Error encoding tag' not in caplog.text
 
     def test_external_host_tag_normalization(self):
         """
