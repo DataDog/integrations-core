@@ -1,5 +1,11 @@
 # CHANGELOG - kafka_consumer
 
+## 1.9.1 / 2019-06-01
+
+* [Fixed] Fix style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).
+* [Fixed] Handle empty topics and partitions. See [#3807](https://github.com/DataDog/integrations-core/pull/3807).
+* [Fixed] Add kakfa to the description. See [#3802](https://github.com/DataDog/integrations-core/pull/3802).
+
 ## 1.9.0 / 2019-05-14
 
 * [Fixed] Fix kafka_consumer conf file. See [#3757](https://github.com/DataDog/integrations-core/pull/3757).
