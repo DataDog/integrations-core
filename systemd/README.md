@@ -35,7 +35,7 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 **systemd.can_connect**:  
 
-Returns `OK` if systemd is reachable, `CRITICAL` otherwise.
+Returns `OK` if Systemd is reachable, `CRITICAL` otherwise.
 
 **systemd.system_state**:
 
