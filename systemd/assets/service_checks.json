@@ -24,6 +24,6 @@
         "check": "systemd.unit.active_state",
         "statuses": ["ok", "critical", "unknown"],
         "name": "Unit Active State",
-        "description": "Returns `OK` if the unit active state is active, `CRITICAL` if inactive, deactivating or failed, `UNKNOWN` if activating or other."
+        "description": "Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state is inactive, deactivating, or failed. Returns `UNKNOWN` if the state is activating or other."
     }
 ]
