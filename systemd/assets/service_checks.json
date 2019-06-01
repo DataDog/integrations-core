@@ -15,7 +15,7 @@
         "check": "systemd.system_state",
         "statuses": ["ok", "critical", "unknown"],
         "name": "System State",
-        "description": "Returns `OK` if systemd's system state is running, `CRITICAL` if degraded, maintenance or stopping, `UNKNOWN` if initializing, starting or other."
+        "description": "Returns `OK` if Systemd's system state is running. Returns `CRITICAL` if the state is degraded, maintenance, or stopping. Returns `UNKNOWN` if the state is initializing, starting, or other."
     },
     {
         "agent_version": "6.12.0",
