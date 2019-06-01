@@ -1,5 +1,9 @@
 # CHANGELOG - pdh_check
 
+## 1.6.0 / 2019-06-01
+
+* [Added] Make PDHCheck use PDHBaseCHeck. See [#3818](https://github.com/DataDog/integrations-core/pull/3818).
+
 ## 1.5.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3553](https://github.com/DataDog/integrations-core/pull/3553).
