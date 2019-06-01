@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 systemd.unit.count,gauge,,,,Sum by active_state to count units,0,systemd,unit.count
-systemd.unit.loaded.count,gauge,,,,The number of loaded units,0,systemd,unit.loaded.count
+systemd.unit.loaded.count,gauge,,unit,,The number of loaded units,0,systemd,unit.loaded.count
 systemd.unit.active,gauge,,,,Whether the unit is currently in active state,0,systemd,unit.active
 systemd.unit.loaded,gauge,,,,Whether the unit is currently in loaded state,0,systemd,unit.loaded
 systemd.unit.uptime,gauge,,microsecond,,The unit uptime since it's activation,0,systemd,unit.uptime
