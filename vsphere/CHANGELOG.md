@@ -1,5 +1,10 @@
 # CHANGELOG - vsphere
 
+## 4.1.1 / 2019-06-01
+
+* [Fixed] Fix event alarms publishing. See [#3831](https://github.com/DataDog/integrations-core/pull/3831).
+* [Fixed] Fix unit for vsphere.mem.usage.avg. See [#3827](https://github.com/DataDog/integrations-core/pull/3827).
+
 ## 4.1.0 / 2019-04-25
 
 * [Added] Adhere to code style. See [#3581](https://github.com/DataDog/integrations-core/pull/3581).
