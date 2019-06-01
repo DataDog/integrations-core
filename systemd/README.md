@@ -42,7 +42,8 @@ Returns `OK` if Systemd is reachable, `CRITICAL` otherwise.
 Returns `OK` if Systemd's system state is running. Returns `CRITICAL` if the state is degraded, maintenance, or stopping. Returns `UNKNOWN` if the state is initializing, starting, or other.
 
 **systemd.unit.active_state**:
-Returns `OK` if the unit active state is active, `CRITICAL` if inactive, deactivating or failed, `UNKNOWN` if activating or other.
+
+Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state is inactive, deactivating, or failed. Returns `UNKNOWN` if the state is activating or other.
 
 
 ### Events
