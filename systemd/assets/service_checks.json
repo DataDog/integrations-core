@@ -6,7 +6,7 @@
         "check": "systemd.can_connect",
         "statuses": ["ok", "critical"],
         "name": "Can Connect",
-        "description": "Returns `OK` if systemd is reachable, `CRITICAL` otherwise."
+        "description": "Returns `OK` if Systemd is reachable, `CRITICAL` otherwise."
     },
     {
         "agent_version": "6.12.0",
