@@ -10,4 +10,4 @@ systemd.service.tasks_current,gauge,,task,,The current number of tasks in the se
 systemd.service.n_restarts,gauge,,,,"The number of times the service has been restarted due to `Restart=` (NRestarts), requires at least Systemd version 235",0,systemd,service.n_restarts
 systemd.socket.n_accepted,gauge,,connection,,The number of accepted socket connections (NAccepted),0,systemd,socket.n_accepted
 systemd.socket.n_connections,gauge,,connection,,The current number of socket connections (NConnections),0,systemd,socket.n_connections
-systemd.socket.n_refused,gauge,,,,"The total number of refused socket connections (NRefused), requires at least systemd version 235",0,systemd,socket.n_refused
+systemd.socket.n_refused,gauge,,connection,,"The total number of refused socket connections (NRefused), requires at least systemd version 235",0,systemd,socket.n_refused
