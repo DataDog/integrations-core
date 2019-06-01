@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.26.0 / 2019-06-01
+
+* [Added] Better error message when releasing on the wrong branch. See [#3832](https://github.com/DataDog/integrations-core/pull/3832).
+
 ## 0.25.2 / 2019-05-28
 
 * [Fixed] Fix tox plugin. See [#3825](https://github.com/DataDog/integrations-core/pull/3825).
