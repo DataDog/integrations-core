@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.10.0 / 2019-06-01
+
+* [Added] Add custom query capabilities. See [#3796](https://github.com/DataDog/integrations-core/pull/3796).
+
 ## 1.9.0 / 2019-05-14
 
 * [Added] Add tcmalloc.spinlock_total_delay_ns to mongodb stats. See [#3643](https://github.com/DataDog/integrations-core/pull/3643). Thanks [glenjamin](https://github.com/glenjamin).
