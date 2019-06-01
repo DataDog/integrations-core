@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.3.0 / 2019-06-01
+
+* [Added] Use Kube service account bearer token for authentication. See [#3829](https://github.com/DataDog/integrations-core/pull/3829).
+* [Added] Make PDHCheck use PDHBaseCHeck. See [#3818](https://github.com/DataDog/integrations-core/pull/3818).
+* [Fixed] Add upper_bound tag for the total count when collecting histograms buckets. See [#3777](https://github.com/DataDog/integrations-core/pull/3777).
+
 ## 8.2.0 / 2019-05-21
 
 * [Added] Upgrade requests to 2.22.0. See [#3778](https://github.com/DataDog/integrations-core/pull/3778).
