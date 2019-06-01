@@ -578,10 +578,7 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
 
     # don't run the task on the master branch
     if get_current_branch() == 'master':
-        abort(
-            'This task will commit, you do not want to add commits to master directly.'
-            '\n Please create a release branch'
-        )
+        abort('Please create a release branch, you do not want to commit to master directly.')
 
     if releasing_all:
         if version:
