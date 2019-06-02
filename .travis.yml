@@ -38,6 +38,7 @@ stages:
 script:
   - ddev validate logos ${CHECK}
   - travis_retry ddev test --cov ${CHECK}
+  - ddev env test --clean ${CHECK}
   - ddev test ${CHECK} --bench || true
   - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
 
@@ -61,6 +62,7 @@ jobs:
         - ddev validate metadata
         - ddev validate service-checks
         - ddev test --cov
+        - ddev env test
         - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base PYTHON3=true
