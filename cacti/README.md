@@ -28,7 +28,7 @@ sudo yum install rrdtool-devel
 
 #### Python bindinges
 
-Now add the `rrdtool` python package to the agent with the following command.
+Now add the `rrdtool` Python package to the Agent with the following command.
 ```shell
 sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
 ```
