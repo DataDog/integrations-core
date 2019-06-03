@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.3.1 / 2019-06-02
+
+* [Fixed] Fix package order of `get_datadog_wheels`. See [#3847](https://github.com/DataDog/integrations-core/pull/3847).
+
 ## 8.3.0 / 2019-06-01
 
 * [Added] [openmetrics] Use Kube service account bearer token for authentication. See [#3829](https://github.com/DataDog/integrations-core/pull/3829).
