@@ -480,25 +480,25 @@ init_config:
             alias: hive.server.memory.heap.committed
             metric_type: gauge
     - include:
-        bean: metrics:name=memory.non_heap.init
+        bean: metrics:name=memory.non-heap.init
         attribute:
           Value:
             alias: hive.server.memory.non_heap.init
             metric_type: gauge
     - include:
-        bean: metrics:name=memory.non_heap.used
+        bean: metrics:name=memory.non-heap.used
         attribute:
           Value:
             alias: hive.server.memory.non_heap.used
             metric_type: gauge
     - include:
-        bean: metrics:name=memory.non_heap.max
+        bean: metrics:name=memory.non-heap.max
         attribute:
           Value:
             alias: hive.server.memory.non_heap.max
             metric_type: gauge
     - include:
-        bean: metrics:name=memory.non_heap.committed
+        bean: metrics:name=memory.non-heap.committed
         attribute:
           Value:
             alias: hive.server.memory.non_heap.committed
@@ -632,25 +632,25 @@ init_config:
             alias: hive.metastore.memory.heap.committed
             metric_type: gauge
     - include:
-        bean: metrics:name=memory.non_heap.init
+        bean: metrics:name=memory.non-heap.init
         attribute:
           Value:
             alias: hive.metastore.memory.non_heap.init
             metric_type: gauge
     - include:
-        bean: metrics:name=memory.non_heap.used
+        bean: metrics:name=memory.non-heap.used
         attribute:
           Value:
             alias: hive.metastore.memory.non_heap.used
             metric_type: gauge
     - include:
-        bean: metrics:name=memory.non_heap.max
+        bean: metrics:name=memory.non-heap.max
         attribute:
           Value:
             alias: hive.metastore.memory.non_heap.max
             metric_type: gauge
     - include:
-        bean: metrics:name=memory.non_heap.committed
+        bean: metrics:name=memory.non-heap.committed
         attribute:
           Value:
             alias: hive.metastore.memory.non_heap.committed
