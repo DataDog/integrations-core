@@ -68,12 +68,12 @@ class HarborAPI(object):
         self.with_chartrepo = systeminfo.get('with_chartmuseum', False)
 
     def _make_paginated_get_request(self, url):
-        resp = self.http.get(self._resolve_url(url), params={'page_size': 1})
+        resp = self.http.get(self._resolve_url(url), params={'page_size': 100})
         resp.raise_for_status()
         results = resp.json()
         while "next" in resp.links:
             next_url = '{}/{}'.format(self.base_url, resp.links['next']['url'])
-            resp = self.http.get(next_url, params={'page_size': 1})
+            resp = self.http.get(next_url, params={'page_size': 100})
             resp.raise_for_status()
             results.extend(resp.json())
         return results or []
