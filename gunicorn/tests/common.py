@@ -7,7 +7,7 @@ import os
 from datadog_checks.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FIXTURES = os.path.join(HERE, 'fixtures')
+FIXTURES = os.path.join(HERE, 'compose')
 ROOT = os.path.dirname(os.path.dirname(HERE))
 
 CHECK_NAME = 'gunicorn'

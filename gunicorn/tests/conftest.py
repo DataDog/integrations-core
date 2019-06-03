@@ -11,11 +11,19 @@ import time
 
 import pytest
 
-from datadog_checks.dev import temp_dir
+from datadog_checks.dev import docker_run, temp_dir
 
-from .common import FIXTURES, PROC_NAME
+from .common import FIXTURES, HERE, INSTANCE, PROC_NAME
 
 log = logging.getLogger('test_gunicorn')
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    os.environ['PROC_NAME'] = PROC_NAME
+    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
+    with docker_run(compose_file, log_patterns=['Booting worker with pid']):
+        yield INSTANCE
 
 
 @pytest.fixture(scope="session")
