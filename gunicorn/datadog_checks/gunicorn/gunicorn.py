@@ -114,9 +114,9 @@ class GUnicornCheck(AgentCheck):
         master_procs = []
         for p in psutil.process_iter():
             try:
-                if p.cmdline()[0] == master_name:
+                if p.cmdline() and p.cmdline()[0] == master_name:
                     master_procs.append(p)
-            except (psutil.Error, IndexError):
+            except psutil.Error:
                 continue
         if len(master_procs) == 0:
             # process not found, it's dead.
