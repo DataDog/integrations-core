@@ -6,7 +6,7 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 
 * [Restricted SCC operations][10]
 * [Host network SCC operations][11]
-* [Custom Datadog for all features][12]
+* [Custom Datadog SCC for all features][12]
 
 Information on security context constraints is available in the [Agent documentation][9].
 
