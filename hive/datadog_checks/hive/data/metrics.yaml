@@ -381,34 +381,28 @@ jmx_metrics:
           alias: hive.server.memory.heap.committed
           metric_type: gauge
   - include:
-      bean: metrics:name=memory.non-heap.init
+      bean: metrics:name=memory.non_heap.init
       attribute:
         Value:
-          alias: hive.server.memory.non-heap.init
+          alias: hive.server.memory.non_heap.init
           metric_type: gauge
   - include:
-      bean: metrics:name=memory.non-heap.usage
+      bean: metrics:name=memory.non_heap.used
       attribute:
         Value:
-          alias: hive.server.memory.non-heap.usage
+          alias: hive.server.memory.non_heap.used
           metric_type: gauge
   - include:
-      bean: metrics:name=memory.non-heap.used
+      bean: metrics:name=memory.non_heap.max
       attribute:
         Value:
-          alias: hive.server.memory.non-heap.used
+          alias: hive.server.memory.non_heap.max
           metric_type: gauge
   - include:
-      bean: metrics:name=memory.non-heap.max
+      bean: metrics:name=memory.non_heap.committed
       attribute:
         Value:
-          alias: hive.server.memory.non-heap.max
-          metric_type: gauge
-  - include:
-      bean: metrics:name=memory.non-heap.committed
-      attribute:
-        Value:
-          alias: hive.server.memory.non-heap.committed
+          alias: hive.server.memory.non_heap.committed
           metric_type: gauge
   - include:
       bean: metrics:name=memory.total.init
@@ -551,34 +545,28 @@ jmx_metrics:
           alias: hive.metastore.memory.heap.committed
           metric_type: gauge
   - include:
-      bean: metrics:name=memory.non-heap.init
+      bean: metrics:name=memory.non_heap.init
       attribute:
         Value:
-          alias: hive.metastore.memory.non-heap.init
+          alias: hive.metastore.memory.non_heap.init
           metric_type: gauge
   - include:
-      bean: metrics:name=memory.non-heap.usage
+      bean: metrics:name=memory.non_heap.used
       attribute:
         Value:
-          alias: hive.metastore.memory.non-heap.usage
+          alias: hive.metastore.memory.non_heap.used
           metric_type: gauge
   - include:
-      bean: metrics:name=memory.non-heap.used
+      bean: metrics:name=memory.non_heap.max
       attribute:
         Value:
-          alias: hive.metastore.memory.non-heap.used
+          alias: hive.metastore.memory.non_heap.max
           metric_type: gauge
   - include:
-      bean: metrics:name=memory.non-heap.max
+      bean: metrics:name=memory.non_heap.committed
       attribute:
         Value:
-          alias: hive.metastore.memory.non-heap.max
-          metric_type: gauge
-  - include:
-      bean: metrics:name=memory.non-heap.committed
-      attribute:
-        Value:
-          alias: hive.metastore.memory.non-heap.committed
+          alias: hive.metastore.memory.non_heap.committed
           metric_type: gauge
   - include:
       bean: metrics:name=memory.total.init
