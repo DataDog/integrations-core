@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.3.2 / 2019-06-04
+
+* [Fixed] Revert: Properly utilize the provided `metrics_mapper`. See [#3861](https://github.com/DataDog/integrations-core/pull/3861).
+
 ## 8.3.1 / 2019-06-02
 
 * [Fixed] Fix package order of `get_datadog_wheels`. See [#3847](https://github.com/DataDog/integrations-core/pull/3847).
