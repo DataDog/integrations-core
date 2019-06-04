@@ -65,6 +65,7 @@ INVALID_FORCED_METRICS = [
 SCALAR_OBJECTS = [
     {'OID': "1.3.6.1.2.1.7.1.0", 'name': "udpDatagrams"},
     {'OID': "1.3.6.1.2.1.6.10.0", 'name': "tcpInSegs"},
+    {'OID': ".1.3.6.1.6.3.10.2.1.3.0", 'name': "snmpEngineTime"},  # OID with leading dot
     {'MIB': "TCP-MIB", 'symbol': "tcpCurrEstab"},
 ]
 
