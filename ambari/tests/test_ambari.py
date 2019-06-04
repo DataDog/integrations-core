@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from mock import MagicMock
 
+from datadog_checks.checks import AgentCheck
 from datadog_checks.ambari import AmbariCheck
 from datadog_checks.base.errors import CheckException
 
@@ -66,7 +67,7 @@ def test_cant_connect(init_config, instance, aggregator):
         ambari.get_clusters('localhost')
     except CheckException:
         pass
-    aggregator.assert_service_check(name="ambari.can_connect", status=2)
+    aggregator.assert_service_check(name="ambari.can_connect", status=AgentCheck.CRITICAL)
 
 
 def test_get_clusters(init_config, instance, aggregator):
@@ -81,7 +82,7 @@ def test_get_clusters(init_config, instance, aggregator):
     clusters = ambari.get_clusters('localhost')
 
     ambari._make_request.assert_called_with('localhost/api/v1/clusters')
-    aggregator.assert_service_check(name="ambari.can_connect", status=0)
+    aggregator.assert_service_check(name="ambari.can_connect", status=AgentCheck.OK)
     assert clusters == ['LabCluster']
 
 
@@ -203,7 +204,7 @@ def test_get_service_health(init_config, instance, aggregator):
     ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
     aggregator.assert_service_check(
         name="ambari.state",
-        status=0,
+        status=AgentCheck.OK,
         tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs', 'state:INSTALLED'],
         message='INSTALLED',
     )
@@ -219,7 +220,7 @@ def test_get_service_health_no_response(init_config, instance, aggregator):
 
     ambari._make_request.assert_called_with('localhost/api/v1/clusters/LabCluster/services/HDFS?fields=ServiceInfo')
     aggregator.assert_service_check(
-        name="ambari.state", status=2, tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs']
+        name="ambari.state", status=AgentCheck.CRITICAL, tags=['ambari_cluster:LabCluster', 'ambari_service:hdfs']
     )
 
 
