@@ -17,7 +17,7 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 from six import iteritems
 from six.moves import range
 
-from datadog_checks.base import ensure_unicode
+from datadog_checks.base import ensure_unicode, to_string
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
 from datadog_checks.base.checks.libs.timer import Timer
@@ -818,6 +818,8 @@ class VSphereCheck(AgentCheck):
                     tags = ['instance:{}'.format(ensure_unicode(instance_name))]
                     if not hostname:  # no host tags available
                         tags.extend(mor['tags'])
+                    else:
+                        hostname = to_string(hostname)
 
                     tags.extend(custom_tags)
 

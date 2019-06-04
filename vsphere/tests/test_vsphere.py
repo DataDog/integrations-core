@@ -596,28 +596,119 @@ def test__should_cache(instance):
         assert not check._should_cache(instance, CacheConfig.Metadata)
 
 
+def alarm_event(from_status='green', to_status='red', message='Some error'):
+    now = datetime.now()
+    vm = MockedMOR(spec='VirtualMachine')
+    dc = MockedMOR(spec="Datacenter")
+    dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
+    alarm = MockedMOR(spec="Alarm")
+    alarm_arg = vim.event.AlarmEventArgument(alarm=alarm, name='alarm1')
+    entity = vim.event.ManagedEntityEventArgument(entity=vm, name='vm1')
+    event = vim.event.AlarmStatusChangedEvent(
+        entity=entity, fullFormattedMessage=message, createdTime=now, to=to_status, datacenter=dc_arg, alarm=alarm_arg
+    )
+    setattr(event, 'from', from_status)  # noqa: B009
+    return event
+
+
+def migrated_event():
+    now = datetime.now()
+    vm = MockedMOR(spec='VirtualMachine', name='vm1')
+    vm_arg = vim.event.VmEventArgument(vm=vm)
+    host = MockedMOR(spec='HostSystem')
+    host_arg = vim.event.HostEventArgument(host=host, name='host1')
+    host_dest = MockedMOR(spec='HostSystem')
+    host_dest_arg = vim.event.HostEventArgument(host=host_dest, name='host2')
+    dc = MockedMOR(spec='Datacenter')
+    dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
+    dc_dest = MockedMOR(spec='Datacenter')
+    dc_dest_arg = vim.event.DatacenterEventArgument(datacenter=dc_dest, name='dc2')
+    ds = MockedMOR(spec='Datastore')
+    ds_arg = vim.event.DatastoreEventArgument(datastore=ds, name='ds1')
+    ds_dest = MockedMOR(spec='Datastore')
+    ds_dest_arg = vim.event.DatastoreEventArgument(datastore=ds_dest, name='ds2')
+    event = vim.event.VmBeingHotMigratedEvent(
+        vm=vm_arg,
+        userName='John',
+        fullFormattedMessage='Some error',
+        createdTime=now,
+        host=host_arg,
+        destHost=host_dest_arg,
+        datacenter=dc_arg,
+        destDatacenter=dc_dest_arg,
+        ds=ds_arg,
+        destDatastore=ds_dest_arg,
+    )
+    return event
+
+
 def test_events(aggregator, vsphere, instance):
     with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
-        now = datetime.now()
-        vm = MockedMOR(spec='VirtualMachine', name='vm1')
-        dc = MockedMOR(spec="Datacenter")
-        dc_arg = vim.event.DatacenterEventArgument(datacenter=dc)
-        alarm = MockedMOR(spec="Alarm")
-        alarm_arg = vim.event.AlarmEventArgument(alarm=alarm)
-        entity = vim.event.ManagedEntityEventArgument(entity=vm)
-        event = vim.event.AlarmStatusChangedEvent(
-            entity=entity,
-            fullFormattedMessage='Some error',
-            createdTime=now,
-            to='red',
-            datacenter=dc_arg,
-            alarm=alarm_arg,
-        )
-        setattr(event, 'from', 'green')  # noqa: B009
         server_instance = vsphere._get_server_instance(instance)
-        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        server_instance.content.eventManager.QueryEvents.return_value = [alarm_event()]
         vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
         vsphere.check(instance)
         aggregator.assert_event(
             "vCenter monitor status changed on this alarm, it was green and it's now red.", tags=['foo:bar']
         )
+
+
+def test_events_tags(aggregator, vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        server_instance = vsphere._get_server_instance(instance)
+        server_instance.content.eventManager.QueryEvents.return_value = [migrated_event()]
+        vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "John has launched a hot migration of this virtual machine",
+            exact_match=False,
+            tags=[
+                'foo:bar',
+                'vsphere_host:host1',
+                'vsphere_host:host2',
+                'vsphere_datacenter:dc1',
+                'vsphere_datacenter:dc2',
+            ],
+        )
+
+        server_instance = vsphere._get_server_instance(instance)
+        server_instance.content.eventManager.QueryEvents.return_value = [alarm_event()]
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was green and it's now red.", tags=['foo:bar']
+        )
+
+
+def test_events_gray_handled(aggregator, vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        server_instance = vsphere._get_server_instance(instance)
+        event = alarm_event(from_status='gray', message='Went from Gray to Red')
+        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was gray and it's now red.", tags=['foo:bar']
+        )
+
+        event = alarm_event(from_status='yellow', to_status='gray', message='Went from Yellow to Gray')
+        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was yellow and it's now gray.",
+            tags=['foo:bar'],
+            alert_type='info',
+        )
+
+
+def test_events_gray_ignored(aggregator, vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        server_instance = vsphere._get_server_instance(instance)
+        event = alarm_event(from_status='gray', to_status='green', message='Went from Gray to Green')
+        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
+        vsphere.check(instance)
+        assert not aggregator.events
+        event = alarm_event(from_status='green', to_status='gray', message='Went from Green to Gray')
+        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        vsphere.check(instance)
+        assert not aggregator.events
