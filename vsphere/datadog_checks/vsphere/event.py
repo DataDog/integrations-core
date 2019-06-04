@@ -114,14 +114,12 @@ class VSphereEvent(object):
         self.payload["msg_text"] += "\n".join(changes)
 
         self.payload['host'] = self.raw_event.vm.name
-        self.payload['tags'].extend(
-            [
-                'vsphere_host:{}'.format(ensure_unicode(pre_host)),
-                'vsphere_host:{}'.format(ensure_unicode(new_host)),
-                'vsphere_datacenter:{}'.format(ensure_unicode(pre_dc)),
-                'vsphere_datacenter:{}'.format(ensure_unicode(new_dc)),
-            ]
-        )
+        self.payload['tags'] = self.payload['tags'] + [
+            'vsphere_host:{}'.format(ensure_unicode(pre_host)),
+            'vsphere_host:{}'.format(ensure_unicode(new_host)),
+            'vsphere_datacenter:{}'.format(ensure_unicode(pre_dc)),
+            'vsphere_datacenter:{}'.format(ensure_unicode(new_dc)),
+        ]
         return self.payload
 
     def transform_alarmstatuschangedevent(self):
