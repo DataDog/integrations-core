@@ -368,6 +368,13 @@ NEW_MOCK_INSTANCE = {
     'galley_endpoint': 'http://istio-galley:15014/metrics',
 }
 
+NEW_MOCK_PILOT_ONLY_INSTANCE = {
+    'pilot_endpoint': 'http://istio-pilot:15014/metrics'
+}
+
+NEW_MOCK_GALLEY_ONLY_INSTANCE = {
+    'galley_endpoint': 'http://istio-galley:15014/metrics'
+}
 
 class MockResponse:
     """
@@ -418,6 +425,29 @@ def new_mesh_mixture_fixture():
     with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
         yield
 
+@pytest.fixture
+def new_pilot_fixture():
+    files = ['pilot.txt']
+    responses = []
+    for filename in files:
+        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        with open(file_path, 'r') as f:
+            responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+@pytest.fixture
+def new_galley_fixture():
+    files = ['galley.txt']
+    responses = []
+    for filename in files:
+        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        with open(file_path, 'r') as f:
+            responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
 
 def test_istio(aggregator, mesh_mixture_fixture):
     """
@@ -441,6 +471,17 @@ def test_new_istio(aggregator, new_mesh_mixture_fixture):
 
     aggregator.assert_all_metrics_covered()
 
+def test_pilot_only_istio(aggregator, new_pilot_fixture):
+    check = Istio('istio', {}, {}, [NEW_MOCK_PILOT_ONLY_INSTANCE])
+    check.check(NEW_MOCK_PILOT_ONLY_INSTANCEK_INSTANCE)
+
+    aggregator.assert_metric(PILOT_METRICS)
+
+def test_galley_only_istio(aggregator, new_galley_fixture):
+    check = Istio('istio', {}, {}, [NEW_MOCK_GALLEY_ONLY_INSTANCE])
+    check.check(NEW_MOCK_GALLEY_ONLY_INSTANCEK_INSTANCE)
+
+    aggregator.assert_metric(GALLEY_METRICS)
 
 def test_scraper_creator():
     check = Istio('istio', {}, {}, [MOCK_INSTANCE])
