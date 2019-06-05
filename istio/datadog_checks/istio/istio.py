@@ -27,23 +27,26 @@ class Istio(OpenMetricsBaseCheck):
 
     def check(self, instance):
         """
-        Process the istio_mesh endpoint, the process_mixer endpoint and optionally the pilot and galley endpoints
+        Process the istio_mesh endpoint, the process_mixer endpoint, the pilot endpoint, and galley endpoints
         associated with this instance.
+        All the instances themselves are optional, but at least one must be passed.
         """
 
         # Get the config for the istio_mesh instance
         istio_mesh_endpoint = instance.get('istio_mesh_endpoint')
-        istio_mesh_config = self.config_map[istio_mesh_endpoint]
+        if istio_mesh_endpoint:
+            istio_mesh_config = self.config_map[istio_mesh_endpoint]
 
-        # Process istio_mesh
-        self.process(istio_mesh_config)
+            # Process istio_mesh
+            self.process(istio_mesh_config)
 
         # Get the config for the process_mixer instance
         process_mixer_endpoint = instance.get('mixer_endpoint')
-        process_mixer_config = self.config_map[process_mixer_endpoint]
+        if process_mixer_endpoint:
+            process_mixer_config = self.config_map[process_mixer_endpoint]
 
-        # Process process_mixer
-        self.process(process_mixer_config)
+            # Process process_mixer
+            self.process(process_mixer_config)
 
         # Get the config for the process_pilot instance
         process_pilot_endpoint = instance.get('pilot_endpoint')
@@ -61,15 +64,20 @@ class Istio(OpenMetricsBaseCheck):
             # Process process_galley
             self.process(process_galley_config)
 
+        # Check that at least 1 endpoint is configured
+        if not (process_galley_endpoint or process_pilot_endpoint or process_mixer_endpoint or istio_mesh_endpoint):
+            raise CheckException("At least one of Mixer, Mesh, Pilot, or Galley endpoints must be configured")
     def create_generic_instances(self, instances):
         """
         Generalize each (single) Istio instance into two OpenMetricsBaseCheck instances
         """
         for instance in instances:
-            istio_mesh_instance = self._create_istio_mesh_instance(instance)
-            yield istio_mesh_instance
-            process_mixer_instance = self._create_process_mixer_instance(instance)
-            yield process_mixer_instance
+            if 'mesh_endpoint' in instance:
+                istio_mesh_instance = self._create_istio_mesh_instance(instance)
+                yield istio_mesh_instance
+            if 'mixer_endpoint' in instance:
+                process_mixer_instance = self._create_process_mixer_instance(instance)
+                yield process_mixer_instance
             if 'pilot_endpoint' in instance:
                 process_pilot_instance = self._create_process_pilot_instance(instance)
                 yield process_pilot_instance
