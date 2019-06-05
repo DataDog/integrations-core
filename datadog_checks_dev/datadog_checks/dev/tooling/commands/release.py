@@ -24,6 +24,7 @@ from ...utils import (
 )
 from ..constants import (
     BETA_PACKAGES,
+    CHANGELOG_LABEL_PREFIX,
     CHANGELOG_TYPE_NONE,
     NOT_CHECKS,
     VERSION_BUMP,
@@ -395,7 +396,16 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 continue
 
         pr_labels = sorted(get_pr_labels(pr_data))
-        if any(label.lower().startswith('documentation') for label in pr_labels):
+        documentation_pr = False
+        nochangelog_pr = True
+        for label in pr_labels:
+            if label.startswith('documentation'):
+                documentation_pr = True
+
+            if label.startswith(CHANGELOG_LABEL_PREFIX) and label.split('/', 1)[1] != CHANGELOG_TYPE_NONE:
+                nochangelog_pr = False
+
+        if documentation_pr and nochangelog_pr:
             echo_info('Skipping documentation {}.'.format(format_commit_id(commit_id)))
             continue
 
