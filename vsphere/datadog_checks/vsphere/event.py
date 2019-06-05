@@ -14,7 +14,7 @@ from datadog_checks.base import ensure_unicode
 from .common import SOURCE_TYPE
 
 EXCLUDE_FILTERS = {
-    'AlarmStatusChangedEvent': [r'Gray'],
+    'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
     'TaskEvent': [
         r'Initialize powering On',
         r'Power Off virtual machine',
@@ -50,7 +50,7 @@ class VSphereEvent(object):
             "timestamp": self.timestamp,
             "event_type": SOURCE_TYPE,
             "source_type_name": SOURCE_TYPE,
-            "tags": tags,
+            "tags": tags[:],
         }
         if event_config is None:
             self.event_config = {}
@@ -138,7 +138,7 @@ class VSphereEvent(object):
                 return 'Triggered'
             return 'Recovered'
 
-        TO_ALERT_TYPE = {'green': 'success', 'yellow': 'warning', 'red': 'error'}
+        TO_ALERT_TYPE = {'green': 'success', 'yellow': 'warning', 'red': 'error', 'gray': 'info'}
 
         def get_agg_key(alarm_event):
             return 'h:{0}|dc:{1}|a:{2}'.format(
