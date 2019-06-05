@@ -2,7 +2,7 @@ init_config:
 
 instances:
 
-    ## @param istio_mesh_endpoint - string - required
+    ## @param istio_mesh_endpoint - string - optional
     ## To enable Istio metrics you must specify the url exposing the API
     ##
     ## Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
@@ -11,7 +11,7 @@ instances:
     #
   - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
 
-    ## @param mixer_endpoint - string - required
+    ## @param mixer_endpoint - string - optional
     ## Define the mixer endpoint in order to collect all Prometheus metrics on the Mixer process as well
     ## as gRPC metrics related to API calls and metrics on adapter dispatch.
     ## If using Istio < v1.1, replace port 15014 with port 9093. See the changes here:
@@ -22,7 +22,6 @@ instances:
     ## @param pilot_endpoint - string - optional
     ## Define the pilot endpoint in order to collect all Prometheus metrics on the Pilot process as well
     ## Only available for Istio >= v1.1.
-    #
     # pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
 
     ## @param galley_endpoint - string - optional
