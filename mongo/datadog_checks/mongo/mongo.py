@@ -1158,7 +1158,7 @@ class MongoDb(AgentCheck):
             self.log.warning(u"Failed to record `collection` metrics.")
             self.log.exception(e)
 
-        custom_queries = instance.get("queries", [])
+        custom_queries = instance.get("custom_queries", [])
         custom_query_tags = tags + ["db:{}".format(db_name)]
         for raw_query in custom_queries:
             try:
