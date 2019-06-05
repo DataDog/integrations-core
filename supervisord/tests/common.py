@@ -21,7 +21,7 @@ URL = "http://{}:{}".format(HOST, PORT)
 PROCESSES_BY_STATE_BY_ITERATION = [dict(up=PROCESSES[x:], down=PROCESSES[:x], unknown=[]) for x in range(4)]
 
 # Configs for Integration Tests
-SUPERVISORD_CONFIG = {'name': "travis", 'host': "localhost", 'port': '19001'}
+SUPERVISORD_CONFIG = {'name': "travis", 'host': HOST, 'port': '19001'}
 BAD_SUPERVISORD_CONFIG = {'name': "travis", 'socket': "unix:///wrong/path/supervisor.sock", 'host': "http://127.0.0.1"}
 
 # Configs for Unit/Mocked tests
