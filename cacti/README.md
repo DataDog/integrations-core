@@ -96,6 +96,12 @@ The Cacti check does not include any events.
 ### Service Checks
 The Cacti check does not include any service checks.
 
+## Known issues
+
+The python library used by this integration appears to leak memory under certain circonstances. If you experience it, one workaround is to install the [`python-rrdtool`][6] package instead of `rrdtool`. This old package is not maintained anymore and is not officialy supported by this integration but some have had good results by doing that.
+
+A [Github issue][7] has been opened to track this memory leak.
+
 ## Troubleshooting
 Need help? Contact [Datadog support][5].
 
@@ -104,3 +110,6 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
 [5]: https://docs.datadoghq.com/help
+[6]: https://github.com/pbanaszkiewicz/python-rrdtool
+[7]: https://github.com/commx/python-rrdtool/issues/25
+
