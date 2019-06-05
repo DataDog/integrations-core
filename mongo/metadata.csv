@@ -227,7 +227,7 @@ mongodb.usage.writeLock.count,gauge,,lock,,Number of write locks since server st
 mongodb.usage.writeLock.time,gauge,,microsecond,,Total time spent performing write locks in microseconds,-1,mongodb,
 mongodb.tcmalloc.generic.current_allocated_bytes,gauge,,byte,,Number of bytes used by the application.,0,mongodb,
 mongodb.tcmalloc.generic.heap_size,gauge,,byte,,Bytes of system memory reserved by TCMalloc.,0,mongodb,
-mongodb.tcmalloc.tcmalloc.aggressive_memory_decommit,gauge,,unit,,Status of aggressive memory decommit mode.,0,mongodb,
+mongodb.tcmalloc.tcmalloc.aggressive_memory_decommit,gauge,,,,Status of aggressive memory decommit mode.,0,mongodb,
 mongodb.tcmalloc.tcmalloc.central_cache_free_bytes,gauge,,byte,,Number of free bytes in the central cache.,0,mongodb,
 mongodb.tcmalloc.tcmalloc.current_total_thread_cache_bytes,gauge,,byte,,Number of bytes used across all thread caches.,0,mongodb,
 mongodb.tcmalloc.tcmalloc.max_total_thread_cache_bytes,gauge,,byte,,Upper limit on total number of bytes stored across all per-thread caches.,0,mongodb,
