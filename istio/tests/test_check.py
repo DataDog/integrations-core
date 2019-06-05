@@ -473,13 +473,13 @@ def test_new_istio(aggregator, new_mesh_mixture_fixture):
 
 def test_pilot_only_istio(aggregator, new_pilot_fixture):
     check = Istio('istio', {}, {}, [NEW_MOCK_PILOT_ONLY_INSTANCE])
-    check.check(NEW_MOCK_PILOT_ONLY_INSTANCEK_INSTANCE)
+    check.check(NEW_MOCK_PILOT_ONLY_INSTANCE)
 
     aggregator.assert_metric(PILOT_METRICS)
 
 def test_galley_only_istio(aggregator, new_galley_fixture):
     check = Istio('istio', {}, {}, [NEW_MOCK_GALLEY_ONLY_INSTANCE])
-    check.check(NEW_MOCK_GALLEY_ONLY_INSTANCEK_INSTANCE)
+    check.check(NEW_MOCK_GALLEY_ONLY_INSTANCE)
 
     aggregator.assert_metric(GALLEY_METRICS)
 
