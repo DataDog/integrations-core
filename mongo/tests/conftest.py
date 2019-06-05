@@ -42,7 +42,7 @@ def instance_authdb():
 def instance_custom_queries():
     return {
         'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1),
-        'queries': [
+        'custom_queries': [
             {
                 "metric_prefix": "dd.custom.mongo.query_a",
                 "query": {'find': "orders", 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
