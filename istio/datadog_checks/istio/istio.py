@@ -72,7 +72,7 @@ class Istio(OpenMetricsBaseCheck):
         Generalize each (single) Istio instance into two OpenMetricsBaseCheck instances
         """
         for instance in instances:
-            if 'mesh_endpoint' in instance:
+            if 'istio_mesh_endpoint' in instance:
                 istio_mesh_instance = self._create_istio_mesh_instance(instance)
                 yield istio_mesh_instance
             if 'mixer_endpoint' in instance:
