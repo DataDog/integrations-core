@@ -80,6 +80,7 @@ def instance_custom_queries():
         ],
     }
 
+
 @pytest.fixture(scope='session')
 def instance_1valid_and_1invalid_custom_queries():
     return {
