@@ -27,7 +27,7 @@ class Istio(OpenMetricsBaseCheck):
 
     def check(self, instance):
         """
-        Process the istio_mesh endpoint, the process_mixer endpoint, the pilot endpoint, and galley endpoints
+        Process the istio_mesh, process_mixer, pilot, and galley endpoints
         associated with this instance.
         All the instances themselves are optional, but at least one must be passed.
         """
