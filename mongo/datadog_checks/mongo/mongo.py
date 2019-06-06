@@ -1165,5 +1165,4 @@ class MongoDb(AgentCheck):
                 self._collect_custom_metrics_for_query(db, raw_query, custom_query_tags)
             except Exception as e:
                 metric_prefix = raw_query.get('metric_prefix')
-                self.log.warning("Errors while collecting custom metrics with prefix {}", metric_prefix)
-                self.log.warning(e)
+                self.log.warning("Errors while collecting custom metrics with prefix %s", metric_prefix, exc_info=e)
