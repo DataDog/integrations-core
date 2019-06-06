@@ -1,11 +1,11 @@
 init_config:
     ## @param collect_service_metrics - boolean - optional - default: true
-    ## Change to False to omit collecting service level metrics
+    ## Change to `false` to omit collecting service level metrics
     #
     # collect_service_metrics: true
 
     ## @param collect_service_status - boolean - optional - default: false
-    ## Change to False to omit collecting services status
+    ## Change to `false` to omit collecting services status
     #
     # collect_service_status: false
 
