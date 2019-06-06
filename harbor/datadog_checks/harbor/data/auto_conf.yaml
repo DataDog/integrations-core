@@ -1,0 +1,23 @@
+ad_identifiers:
+  - nginx-photon
+
+init_config:
+
+instances:
+    ## @param url - string - required
+    ## The Harbor HTTP url.
+    #
+  - url: http://%%host%%:<PORT>/
+
+    ## @param username - string - required
+    ## The username to use for authentication against the Harbor API.
+    ## Please note that some metrics and service checks requires an admin account to be collected.
+    ## This includes chartmuseum.status, replication registries data, volume information.
+    #
+    username: <USER_ID>
+
+    ## @param password - string - optional
+    ## The password used together with the username for authentication agains the Harbor API
+    #
+    password: <USER_PASSWORD>
+

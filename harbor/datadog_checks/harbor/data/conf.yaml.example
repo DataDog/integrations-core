@@ -12,12 +12,12 @@ instances:
     ## Please note that some metrics and service checks requires an admin account to be collected.
     ## This includes chartmuseum.status, replication registries data, volume information.
     #
-    username: admin
+    username: <USER_ID>
 
     ## @param password - string - optional
     ## The password used together with the username for authentication agains the Harbor API
     #
-    password: Harbor12345
+    password: <USER_PASSWORD>
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
