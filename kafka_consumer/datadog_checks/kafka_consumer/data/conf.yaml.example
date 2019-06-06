@@ -80,7 +80,7 @@ instances:
     ## When using zookeeper to store consumer offsets  each level is optional.
     ## Any empty values are fetched from Zookeeper. You can have empty partitions (example: <CONSUMER_NAME_2>),
     ## topics (example: <CONSUMER_NAME_3>), and even consumer_groups. If you omit
-    ## consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
+    ## consumer_groups, you must set 'monitor_unlisted_consumer_groups': true.
     #
     # consumer_groups:
     #   <CONSUMER_NAME_1>:
@@ -90,7 +90,7 @@ instances:
     #   <CONSUMER_NAME_3>: {}
 
     ## @param monitor_unlisted_consumer_groups - boolean - required
-    ## Setting monitor_unlisted_consumer_groups to True tells the check to
+    ## Setting monitor_unlisted_consumer_groups to `true` tells the check to
     ## discover and fetch all offsets for all consumer groups stored in zookeeper.
     ## While this is convenient, it can also put a lot of load on zookeeper.
     #

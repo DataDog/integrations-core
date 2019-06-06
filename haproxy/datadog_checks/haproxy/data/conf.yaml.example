@@ -62,7 +62,7 @@ instances:
 
     ## @param count_status_by_service - boolean - optional - default: true
     ## This parameter instructs the check to tag the status counts it collects by service in addition to by host.
-    ## This only applies if `collect_status_metrics` is True.
+    ## This only applies if `collect_status_metrics` is `true`.
     #
     # count_status_by_service: true
 
