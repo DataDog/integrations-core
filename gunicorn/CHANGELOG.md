@@ -1,5 +1,9 @@
 # CHANGELOG - gunicorn
 
+## 1.7.1 / 2019-06-06
+
+* [Fixed] Fix mac compatibility. See [#3853](https://github.com/DataDog/integrations-core/pull/3853).
+
 ## 1.7.0 / 2019-05-14
 
 * [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
