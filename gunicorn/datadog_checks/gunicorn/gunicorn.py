@@ -117,7 +117,7 @@ class GUnicornCheck(AgentCheck):
                 if p.cmdline()[0] == master_name:
                     master_procs.append(p)
             except (IndexError, psutil.Error) as e:
-                self.log.debug(e, exc_info=True)
+                self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
                 continue
         if len(master_procs) == 0:
             # process not found, it's dead.
