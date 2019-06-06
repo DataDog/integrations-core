@@ -67,6 +67,7 @@ class Istio(OpenMetricsBaseCheck):
         # Check that at least 1 endpoint is configured
         if not (process_galley_endpoint or process_pilot_endpoint or process_mixer_endpoint or istio_mesh_endpoint):
             raise CheckException("At least one of Mixer, Mesh, Pilot, or Galley endpoints must be configured")
+
     def create_generic_instances(self, instances):
         """
         Generalize each (single) Istio instance into two OpenMetricsBaseCheck instances
