@@ -29,7 +29,7 @@ class Istio(OpenMetricsBaseCheck):
         """
         Process the istio_mesh, process_mixer, pilot, and galley endpoints
         associated with this instance.
-        All the instances themselves are optional, but at least one must be passed.
+        All the endpoints themselves are optional, but at least one must be passed.
         """
 
         # Get the config for the istio_mesh instance
