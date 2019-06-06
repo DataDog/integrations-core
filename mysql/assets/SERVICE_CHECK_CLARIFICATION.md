@@ -3,7 +3,7 @@
   * If the SQL and the IO threads are running, returns OK
   * If one of them is down, returns WARNING
   * If both are down, returns CRITICAL
-* Other MySQL
+* For MySQL < 5.7.0
   * If both threads are running, returns OK
   * If at least one of them is down, returns CRITICAL
   
