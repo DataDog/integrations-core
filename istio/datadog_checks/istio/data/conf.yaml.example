@@ -22,6 +22,7 @@ instances:
     ## @param pilot_endpoint - string - optional
     ## Define the pilot endpoint in order to collect all Prometheus metrics on the Pilot process as well
     ## Only available for Istio >= v1.1.
+    #
     # pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
 
     ## @param galley_endpoint - string - optional
