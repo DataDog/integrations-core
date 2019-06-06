@@ -368,13 +368,9 @@ NEW_MOCK_INSTANCE = {
     'galley_endpoint': 'http://istio-galley:15014/metrics',
 }
 
-NEW_MOCK_PILOT_ONLY_INSTANCE = {
-    'pilot_endpoint': 'http://istio-pilot:15014/metrics'
-}
+NEW_MOCK_PILOT_ONLY_INSTANCE = {'pilot_endpoint': 'http://istio-pilot:15014/metrics'}
 
-NEW_MOCK_GALLEY_ONLY_INSTANCE = {
-    'galley_endpoint': 'http://istio-galley:15014/metrics'
-}
+NEW_MOCK_GALLEY_ONLY_INSTANCE = {'galley_endpoint': 'http://istio-galley:15014/metrics'}
 
 
 class MockResponse:
