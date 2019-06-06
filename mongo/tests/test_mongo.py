@@ -134,7 +134,7 @@ def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1v
     # Run the check against our running server
     check.check(instance_1valid_and_1invalid_custom_queries)
 
-    # The invalid query is skipped
+    # The invalid query is skipped, but are logged
     aggregator.assert_metric("dd.custom.mongo.count", count=1)
     aggregator.assert_metric("dd.custom.mongo.query_a.amount", count=0)
 
