@@ -130,6 +130,15 @@ def test_mongo_old_config_2(aggregator, check, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
+def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1valid_and_1invalid_custom_queries):
+    # Run the check against our running server
+    check.check(instance_1valid_and_1invalid_custom_queries)
+
+    # The invalid query is skipped
+    aggregator.assert_metric("dd.custom.mongo.count", count=1)
+    aggregator.assert_metric("dd.custom.mongo.query_a.amount", count=0)
+
+@pytest.mark.usefixtures('dd_environment')
 def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
     # Run the check against our running server
     check.check(instance_custom_queries)
