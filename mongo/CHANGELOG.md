@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.10.2 / 2019-06-06
+
+* [Fixed] Custom queries: add examples and fix logging. See [#3871](https://github.com/DataDog/integrations-core/pull/3871).
+
 ## 1.10.1 / 2019-06-05
 
 * [Fixed] Add missing metrics. See [#3856](https://github.com/DataDog/integrations-core/pull/3856).
