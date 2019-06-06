@@ -25,6 +25,9 @@ Annotations:       ad.datadoghq.com/endpoint.check_names: ["kube_apiserver_metri
                          "bearer_token_auth": "true"
                        }
                      ]
+                   ad.datadoghq.com/service.check_names: [""]
+                   ad.datadoghq.com/service.init_configs: [{}]
+                   ad.datadoghq.com/service.instances: [{}]
 ```
 Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
 
