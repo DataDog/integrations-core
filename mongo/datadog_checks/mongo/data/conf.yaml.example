@@ -119,15 +119,15 @@ instances:
     ##                            the count result. Ignored for non count queries.
     #
     # custom_queries:
-    #   - metric_prefix: mongo
-    #     query:
+    #   - metric_prefix: mongo.example1
+    #     query: # Same object as the one used in Mongo db.runCommand(<QUERY>)
     #       aggregate: <COLLECTION_NAME>
     #       pipeline:
     #         - $match:
     #             <FIELD_NAME>: <FIELD_VALUE>
     #         - $group:
     #             _id: <FIELD_NAME>
-    #       cursor: {}
+    #       cursor: {} # Cursor is required for aggregate, can be an empty object
     #     fields:
     #       - field_name: <FIELD_NAME>
     #         name: <METRIC_SUFFIX>
@@ -137,6 +137,34 @@ instances:
     #         type: tag
     #     tags:
     #       - test:mongodb
+    #   - metric_prefix: mongo.example2
+    #     query: # Same object as the one used in Mongo db.runCommand(<QUERY>)
+    #         find: <COLLECTION_NAME>
+    #         filter:
+    #             qty:
+    #               "$gt": 30
+    #         sort:
+    #             qty: -1
+    #     fields:
+    #       - field_name: status
+    #         name: status_tag
+    #         type: tag
+    #       - field_name: qty
+    #         name: qty
+    #         type: gauge
+    #     tags:
+    #       - tag1:val1
+    #       - tag2:val2
+    #   - metric_prefix: mongo.example3
+    #     query: # Same object as the one used in Mongo db.runCommand(<QUERY>)
+    #       count: <COLLECTION_NAME>
+    #       query:
+    #         '1':
+    #           "$type": 16
+    #     count_type: gauge
+    #     tags:
+    #       - tag1:val1
+    #       - tag2:val2
 
 ## Log Section (Available for Agent >=6.0)
 ##
