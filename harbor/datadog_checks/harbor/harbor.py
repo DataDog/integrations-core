@@ -4,7 +4,7 @@
 from requests import HTTPError
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.harbor.common import HarborAPI
+from .common import HarborAPI
 
 
 class HarborCheck(AgentCheck):

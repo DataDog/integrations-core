@@ -1,1 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+harbor.projects.count,gauge,,object,,The number of Harbor projects.,1,harbor,nb projects
+harbor.disk.free,gauge,,byte,,The amount of storage space that is free.,1,harbor,disk free
+harbor.disk.total,gauge,,byte,,The total amount of storage space.,0,system,disk total

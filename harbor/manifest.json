@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-Harbor Integration",
   "categories": [
-    ""
+    "containers",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
