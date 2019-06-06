@@ -17,7 +17,12 @@ customtag = "custom:tag"
 
 minimal_instance = {'prometheus_url': 'localhost:443/metrics'}
 
-instance = {'prometheus_url': 'localhost:443/metrics', 'bearer_token_auth': 'false', 'scheme': 'https', 'tags': [customtag]}
+instance = {
+    'prometheus_url': 'localhost:443/metrics',
+    'bearer_token_auth': 'false',
+    'scheme': 'https',
+    'tags': [customtag],
+}
 
 instanceSecure = {
     'prometheus_url': 'localhost:443/metrics',
@@ -111,6 +116,6 @@ class TestKubeAPIServerMetrics:
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance])
         apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance)
 
-        assert apiserver_instance["ssl_verify"] == False
-        assert apiserver_instance["bearer_token_auth"] == True
+        assert not apiserver_instance["ssl_verify"]
+        assert apiserver_instance["bearer_token_auth"]
         assert apiserver_instance["prometheus_url"] == "https://localhost:443/metrics"
