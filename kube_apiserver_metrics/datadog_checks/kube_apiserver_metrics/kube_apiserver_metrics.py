@@ -19,6 +19,8 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     # Set up metrics_transformers
     metric_transformers = {}
     DEFAULT_SCHEME = 'https'
+    DEFAULT_SSL_VERIFY = False
+    DEFAULT_BEARER_TOKEN_AUTH = True
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         # Set up metrics_transformers
@@ -72,8 +74,16 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         kube_apiserver_metrics_instance = deepcopy(instance)
         endpoint = instance.get('prometheus_url')
         scheme = instance.get('scheme', self.DEFAULT_SCHEME)
-
         kube_apiserver_metrics_instance['prometheus_url'] = "{0}://{1}".format(scheme, endpoint)
+
+        # Most set ups are using self signed certificates as the APIServer can be used as a CA.
+        ssl_verify = instance.get('ssl_verify', self.DEFAULT_SSL_VERIFY)
+        kube_apiserver_metrics_instance['ssl_verify'] = ssl_verify
+
+        # We should default to supporting environments using RBAC to access the APIServer.
+        bearer_token_auth = instance.get('bearer_token_auth', self.DEFAULT_BEARER_TOKEN_AUTH)
+        kube_apiserver_metrics_instance['bearer_token_auth'] = bearer_token_auth
+
         return kube_apiserver_metrics_instance
 
     def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):
