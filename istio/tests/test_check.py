@@ -475,13 +475,15 @@ def test_pilot_only_istio(aggregator, new_pilot_fixture):
     check = Istio('istio', {}, {}, [NEW_MOCK_PILOT_ONLY_INSTANCE])
     check.check(NEW_MOCK_PILOT_ONLY_INSTANCE)
 
-    aggregator.assert_metric(PILOT_METRICS)
+    for metric in PILOT_METRICS:
+        aggregator.assert_metric(metric)
 
 def test_galley_only_istio(aggregator, new_galley_fixture):
     check = Istio('istio', {}, {}, [NEW_MOCK_GALLEY_ONLY_INSTANCE])
     check.check(NEW_MOCK_GALLEY_ONLY_INSTANCE)
 
-    aggregator.assert_metric(GALLEY_METRICS)
+    for metric in GALLEY_METRICS:
+        aggregator.assert_metric(metric)
 
 def test_scraper_creator():
     check = Istio('istio', {}, {}, [MOCK_INSTANCE])
