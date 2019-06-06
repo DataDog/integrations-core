@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.26.1 / 2019-06-05
+
+* [Fixed] Fix JMX template. See [#3879](https://github.com/DataDog/integrations-core/pull/3879).
+* [Fixed] Update APM team label. See [#3878](https://github.com/DataDog/integrations-core/pull/3878).
+* [Fixed] Fix logic to skip docs PRs for release testing. See [#3877](https://github.com/DataDog/integrations-core/pull/3877).
+
 ## 0.26.0 / 2019-06-01
 
 * [Added] Better error message when releasing on the wrong branch. See [#3832](https://github.com/DataDog/integrations-core/pull/3832).

@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 1.9.2 / 2019-06-04
+
+* [Fixed] Fix example conf file. See [#3860](https://github.com/DataDog/integrations-core/pull/3860).
+
 ## 1.9.1 / 2019-06-01
 
 * [Fixed] Fix code style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).

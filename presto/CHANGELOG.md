@@ -1,5 +1,9 @@
 # CHANGELOG - Presto
 
+## 2.0.1 / 2019-06-05
+
+* [Fixed] Fix version discovery. See [#3874](https://github.com/DataDog/integrations-core/pull/3874).
+
 ## 2.0.0 / 2019-06-01
 
 * [Changed] Fix metric aliases. See [#3766](https://github.com/DataDog/integrations-core/pull/3766).

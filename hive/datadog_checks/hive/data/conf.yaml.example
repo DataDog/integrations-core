@@ -483,25 +483,25 @@ init_config:
         bean: metrics:name=memory.non-heap.init
         attribute:
           Value:
-            alias: hive.server.memory.non-heap.init
+            alias: hive.server.memory.non_heap.init
             metric_type: gauge
     - include:
         bean: metrics:name=memory.non-heap.used
         attribute:
           Value:
-            alias: hive.server.memory.non-heap.used
+            alias: hive.server.memory.non_heap.used
             metric_type: gauge
     - include:
         bean: metrics:name=memory.non-heap.max
         attribute:
           Value:
-            alias: hive.server.memory.non-heap.max
+            alias: hive.server.memory.non_heap.max
             metric_type: gauge
     - include:
         bean: metrics:name=memory.non-heap.committed
         attribute:
           Value:
-            alias: hive.server.memory.non-heap.committed
+            alias: hive.server.memory.non_heap.committed
             metric_type: gauge
     - include:
         bean: metrics:name=memory.total.init
@@ -635,25 +635,25 @@ init_config:
         bean: metrics:name=memory.non-heap.init
         attribute:
           Value:
-            alias: hive.metastore.memory.non-heap.init
+            alias: hive.metastore.memory.non_heap.init
             metric_type: gauge
     - include:
         bean: metrics:name=memory.non-heap.used
         attribute:
           Value:
-            alias: hive.metastore.memory.non-heap.used
+            alias: hive.metastore.memory.non_heap.used
             metric_type: gauge
     - include:
         bean: metrics:name=memory.non-heap.max
         attribute:
           Value:
-            alias: hive.metastore.memory.non-heap.max
+            alias: hive.metastore.memory.non_heap.max
             metric_type: gauge
     - include:
         bean: metrics:name=memory.non-heap.committed
         attribute:
           Value:
-            alias: hive.metastore.memory.non-heap.committed
+            alias: hive.metastore.memory.non_heap.committed
             metric_type: gauge
     - include:
         bean: metrics:name=memory.total.init

@@ -32,6 +32,6 @@ def bad_instance():
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(compose_file=os.path.join(HERE, 'compose', 'supervisord.yaml'), endpoints=URL):
-        server = xmlrpclib.Server('http://localhost:19001/RPC2')
+        server = xmlrpclib.Server('{}/RPC2'.format(URL))
         server.supervisor.startAllProcesses()
         yield SUPERVISORD_CONFIG
