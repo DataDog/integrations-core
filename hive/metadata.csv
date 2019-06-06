@@ -111,7 +111,7 @@ hive.server.api.operation.pending.min,gauge,10,millisecond,,Min time in pending 
 hive.server.api.operation.pending.75percentile,gauge,10,millisecond,,P75 time in pending state for an sql operation.,0,hive,hs2 operation pending p75
 hive.server.api.operation.pending.95percentile,gauge,10,millisecond,,P95 time in pending state for an sql operation.,0,hive,hs2 operation pending p95
 hive.server.api.operation.pending.count,count,10,millisecond,,Number of operation in pending state.,0,hive,hs2 operation pending count
-hive.server.api.operation.pending.meanrate,rate,1O,operation,second,Operation pending rate.,0,hive,hs2 operation pending rate
+hive.server.api.operation.pending.meanrate,rate,10,operation,second,Operation pending rate.,0,hive,hs2 operation pending rate
 hive.server.api.operation.running.active_call,gauge,10,operation,,Active running operation.,0,hive,hs2 active operation running
 hive.server.api.operation.running.max,gauge,10,millisecond,,Max time in running state for an sql operation.,0,hive,hs2 operation running max
 hive.server.api.operation.running.mean,gauge,10,millisecond,,Mean time in running state for an sql operation.,0,hive,hs2 operation running mean
@@ -119,7 +119,7 @@ hive.server.api.operation.running.min,gauge,10,millisecond,,Min time in running 
 hive.server.api.operation.running.75percentile,gauge,10,millisecond,,P75 time in running state for an sql operation.,0,hive,hs2 operation running p75
 hive.server.api.operation.running.95percentile,gauge,10,millisecond,,P95 time in running state for an sql operation.,0,hive,hs2 operation running p95
 hive.server.api.operation.running.count,count,10,millisecond,,Number of operation in running state.,0,hive,hs2 operation running count
-hive.server.api.operation.running.meanrate,rate,1O,operation,second,Operation running rate.,0,hive,hs2 operation running rate
+hive.server.api.operation.running.meanrate,rate,10,operation,second,Operation running rate.,0,hive,hs2 operation running rate
 hive.server.operation.completed.finished,count,10,operation,,Number of finished operation.,0,hive,hs2 operation completed finished
 hive.server.operation.completed.closed,count,10,operation,,Number of closed operation.,0,hive,hs2 operation committed closed
 hive.server.memory.heap.init,gauge,10,byte,,Memory used at the initialization by the HiveServer2.,0,hive,hs2 mem heap init
