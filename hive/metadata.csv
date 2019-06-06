@@ -2,10 +2,10 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 hive.metastore.open_connections,gauge,10,connection,,Number of connection opened.,0,hive,hms open connection
 hive.metastore.db.created,count,10,unit,,Total number of created database.,0,hive,hms db created
 hive.metastore.db.deleted,count,10,unit,,Total number of deleted database.,0,hive,hms db deleted
-hive.metastore.db.init,gauge,10,unit,,Number of initialized database.,0,hive,hms db init
+hive.metastore.db.init,count,10,unit,,Number of initialized database.,0,hive,hms db init
 hive.metastore.table.created,count,10,table,,Total number of created table.,0,hive,hms table created
 hive.metastore.table.deleted,count,10,table,,Total number of deleted table.,0,hive,hms table deleted
-hive.metastore.table.init,gauge,10,table,,Number of initialized table.,0,hive,hms table init
+hive.metastore.table.init,count,10,table,,Number of initialized table.,0,hive,hms table init
 hive.metastore.partition.created,count,10,unit,,Total number of created partition.,0,hive,hms partition created
 hive.metastore.partition.deleted,count,10,unit,,Total number of deleted partition.,0,hive,hms partition deleted
 hive.metastore.partition.init,count,10,unit,,Number of initialized partition.,0,hive,hms partition init
@@ -22,29 +22,29 @@ hive.metastore.memory.total.init,gauge,10,byte,,Total memory at the initializati
 hive.metastore.memory.total.used,gauge,10,byte,,Total memory used by the metastore.,0,hive,hms total used
 hive.metastore.memory.total.max,gauge,10,byte,,Total maximum memory that can be used for the metastore.,0,hive,hms mem total max
 hive.metastore.memory.total.committed,gauge,10,byte,,Total committed memory for the metastore.,0,hive,hms mem total committed
-hive.metastore.api.create_table,gauge,10,unit,,API call to create a table.,0,hive,hms api create table
+hive.metastore.api.create_table,count,10,unit,,API call to create a table.,0,hive,hms api create table
 hive.metastore.api.create_table.active_call,gauge,10,unit,,Active API call to create a table.,0,hive,hms active api create table
-hive.metastore.api.get_table,gauge,10,unit,,API call to get a table.,0,hive,hms api get table
+hive.metastore.api.get_table,count,10,unit,,API call to get a table.,0,hive,hms api get table
 hive.metastore.api.get_table.active_call,gauge,10,unit,,Active API call to get a table.,0,hive,hms active api get table
-hive.metastore.api.drop_table,gauge,10,unit,,API call to drop a table.,0,hive,hms api drop table
+hive.metastore.api.drop_table,count,10,unit,,API call to drop a table.,0,hive,hms api drop table
 hive.metastore.api.drop_table.active_call,gauge,10,unit,,Active API call to drop a table.,0,hive,hms active api drop table
-hive.metastore.api.init,gauge,10,unit,,API initialization.,0,hive,hms api init
+hive.metastore.api.init,count,10,unit,,API initialization.,0,hive,hms api init
 hive.metastore.api.init.active_call,gauge,10,unit,,Active API initialization.,0,hive,hms active api init
-hive.metastore.api.get_all_databases,gauge,10,unit,,API call to get all databases.,0,hive,hms api get all get all dbs
+hive.metastore.api.get_all_databases,count,10,unit,,API call to get all databases.,0,hive,hms api get all get all dbs
 hive.metastore.api.get_all_databases.active_call,gauge,10,unit,,Active API call to get all databases.,0,hive,hms active api get all dbs
-hive.metastore.api.get_database,gauge,10,unit,,API call to get a database.,0,hive,hms api get db
+hive.metastore.api.get_database,count,10,unit,,API call to get a database.,0,hive,hms api get db
 hive.metastore.api.get_database.active_call,gauge,10,unit,,Active API call to get a database.,0,hive,hms active api get db
-hive.metastore.api.get_all_tables,gauge,10,unit,,API call to get all tables.,0,hive,hms api get all tables
+hive.metastore.api.get_all_tables,count,10,unit,,API call to get all tables.,0,hive,hms api get all tables
 hive.metastore.api.get_all_tables.active_call,gauge,10,unit,,Active API call to get all tables.,0,hive,hms active api get all tables
-hive.metastore.api.shutdown,gauge,10,unit,,API shutdown.,0,hive,hms api shutdown
+hive.metastore.api.shutdown,count,10,unit,,API shutdown.,0,hive,hms api shutdown
 hive.metastore.api.shutdown.active_call,gauge,10,unit,,Active API shutdown.,0,hive,hms active api shutdown
-hive.metastore.api.flushcache,gauge,10,unit,,API flushcache.,0,hive,hms api flushcache
+hive.metastore.api.flushcache,count,10,unit,,API flushcache.,0,hive,hms api flushcache
 hive.metastore.api.flushcache.active_call,gauge,10,unit,,Active API flushcache.,0,hive,hms active api flushcache
-hive.metastore.api.alter_table,gauge,10,unit,,API call to alter table.,0,hive,hms api alter table
+hive.metastore.api.alter_table,count,10,unit,,API call to alter table.,0,hive,hms api alter table
 hive.metastore.api.alter_table.active_call,gauge,10,unit,,Active API call to alter table.,0,hive,hms active api alter table
-hive.metastore.api.get_all_functions,gauge,10,unit,,API call to get all functions.,0,hive,hms api get all functions
+hive.metastore.api.get_all_functions,count,10,unit,,API call to get all functions.,0,hive,hms api get all functions
 hive.metastore.api.get_all_functions.active_call,gauge,10,unit,,Active API call to get all functions.,0,hive,hms active api get all functions
-hive.metastore.api.get_table_req,gauge,10,unit,,,0,hive,hms api get table req
+hive.metastore.api.get_table_req,count,10,unit,,,0,hive,hms api get table req
 hive.metastore.api.get_table_req.active_call,gauge,10,unit,,,0,hive,hms active api get table req
 hive.server.open_operations,gauge,10,operation,,Operation opened in the HiveServer2.,0,hive,hs2 open operation
 hive.server.session.active,gauge,10,unit,,Number of active session.,0,hive,hs2 active session
@@ -93,8 +93,8 @@ hive.server.api.sql_operation.running.75percentile,gauge,10,millisecond,,P75 tim
 hive.server.api.sql_operation.running.95percentile,gauge,10,millisecond,,P95 time for running state for a sql operation.,0,hive,hs2 sql operation running p95
 hive.server.api.sql_operation.running.count,count,10,unit,,Number of sql operation in running state.,0,hive,hs2 sql operation running count
 hive.server.api.sql_operation.running.meanrate,rate,10,operation,second,Running sql operation rate.,0,hive,hs2 sql operation running rate
-hive.server.sql_operation.completed.closed,gauge,10,operation,,Number of closed sql operation.,0,hive,hs2 sql operation completed closed
-hive.server.sql_operation.completed.finished,gauge,10,operation,,Number of finished sql operation.,0,hive,hs2 sql operation completed finished
+hive.server.sql_operation.completed.closed,count,10,operation,,Number of closed sql operation.,0,hive,hs2 sql operation completed closed
+hive.server.sql_operation.completed.finished,count,10,operation,,Number of finished sql operation.,0,hive,hs2 sql operation completed finished
 hive.server.sql_operation.user.active,gauge,10,user,,Number of active user.,0,hive,hs2 sql operation user active
 hive.server.api.operation.initialized.active_call,gauge,10,user,,Active initialized operation.,0,hive,hs2 active operation init
 hive.server.api.operation.initialized.max,gauge,10,millisecond,,Max time to init an operation.,0,hive,hs2 operation init max
