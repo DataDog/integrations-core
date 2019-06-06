@@ -80,6 +80,24 @@ def instance_custom_queries():
         ],
     }
 
+@pytest.fixture(scope='session')
+def instance_1valid_and_1invalid_custom_queries():
+    return {
+        'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1),
+        'custom_queries': [
+            {
+                "metric_prefix": "dd.custom.mongo.count",
+                # invalid query with missing query, skipped with error/warning logs
+            },
+            {
+                "query": {'count': "foo", 'query': {'1': {'$type': 16}}},
+                "metric_prefix": "dd.custom.mongo.count",
+                "tags": ['tag1:val1', 'tag2:val2'],
+                "count_type": 'gauge',
+            },
+        ],
+    }
+
 
 @pytest.fixture
 def check():
