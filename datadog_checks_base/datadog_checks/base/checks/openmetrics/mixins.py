@@ -221,7 +221,7 @@ class OpenMetricsScraperMixin(object):
         # List of strings to filter the input text payload on. If any line contains
         # one of these strings, it will be filtered out before being parsed.
         # INTERNAL FEATURE, might be removed in future versions
-        config['_text_filter_blacklist'] = instance.get('_text_filter_blacklist', [])
+        config['_text_filter_blacklist'] = []
 
         # Whether or not to use the service account bearer token for authentication
         # if 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token

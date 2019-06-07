@@ -106,7 +106,7 @@ instances:
     #             <FIELD_NAME>: <FIELD_VALUE>
     #         - $group:
     #             _id: <FIELD_NAME>
-    #       cursor: {}
+    #       cursor: {} # Cursor is required for aggregate, can be an empty object
     #     fields:
     #       - field_name: <FIELD_NAME>
     #         name: <METRIC_SUFFIX>

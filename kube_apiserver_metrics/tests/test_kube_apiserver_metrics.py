@@ -15,7 +15,14 @@ from .common import APISERVER_INSTANCE_BEARER_TOKEN
 
 customtag = "custom:tag"
 
-instance = {'prometheus_url': 'localhost:443/metrics', 'scheme': 'https', 'tags': [customtag]}
+minimal_instance = {'prometheus_url': 'localhost:443/metrics'}
+
+instance = {
+    'prometheus_url': 'localhost:443/metrics',
+    'bearer_token_auth': 'false',
+    'scheme': 'https',
+    'tags': [customtag],
+}
 
 instanceSecure = {
     'prometheus_url': 'localhost:443/metrics',
@@ -71,7 +78,7 @@ class TestKubeAPIServerMetrics:
 
     def test_check(self, aggregator, mock_get):
         """
-        Testing kube_apiserver_metrics check.
+        Testing kube_apiserver_metrics metrics collection.
         """
 
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
@@ -101,3 +108,14 @@ class TestKubeAPIServerMetrics:
 
         os.remove(temp_bearer_file)
         assert configured_instance["_bearer_token"] == APISERVER_INSTANCE_BEARER_TOKEN
+
+    def test_default_config(self, aggregator):
+        """
+        Testing the default configuration.
+        """
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance])
+        apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance)
+
+        assert not apiserver_instance["ssl_verify"]
+        assert apiserver_instance["bearer_token_auth"]
+        assert apiserver_instance["prometheus_url"] == "https://localhost:443/metrics"

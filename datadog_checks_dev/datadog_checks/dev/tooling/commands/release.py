@@ -24,6 +24,7 @@ from ...utils import (
 )
 from ..constants import (
     BETA_PACKAGES,
+    CHANGELOG_LABEL_PREFIX,
     CHANGELOG_TYPE_NONE,
     NOT_CHECKS,
     VERSION_BUMP,
@@ -395,7 +396,16 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 continue
 
         pr_labels = sorted(get_pr_labels(pr_data))
-        if any(label.lower().startswith('documentation') for label in pr_labels):
+        documentation_pr = False
+        nochangelog_pr = True
+        for label in pr_labels:
+            if label.startswith('documentation'):
+                documentation_pr = True
+
+            if label.startswith(CHANGELOG_LABEL_PREFIX) and label.split('/', 1)[1] != CHANGELOG_TYPE_NONE:
+                nochangelog_pr = False
+
+        if documentation_pr and nochangelog_pr:
             echo_info('Skipping documentation {}.'.format(format_commit_id(commit_id)))
             continue
 
@@ -543,15 +553,15 @@ def tag(check, version, push, dry_run):
         abort(code=2)
 
 
-@release.command(context_settings=CONTEXT_SETTINGS, short_help='Release a single check')
-@click.argument('check')
-@click.argument('version', required=False)
+@release.command(context_settings=CONTEXT_SETTINGS, short_help='Release one or more checks')
+@click.argument('checks', nargs=-1, required=True)
+@click.option('--version')
 @click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.option('--sign-only', is_flag=True, help='Only sign release metadata')
 @click.pass_context
-def make(ctx, check, version, initial_release, skip_sign, sign_only):
-    """Perform a set of operations needed to release a single check:
+def make(ctx, checks, version, initial_release, skip_sign, sign_only):
+    """Perform a set of operations needed to release checks:
 
     \b
       * update the version in __about__.py
@@ -570,11 +580,13 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
     # Import lazily since in-toto runs a subprocess to check for gpg2 on load
     from ..signing import update_link_metadata, YubikeyException
 
-    releasing_all = check == 'all'
+    releasing_all = 'all' in checks
 
     valid_checks = get_valid_checks()
-    if not releasing_all and check not in valid_checks:
-        abort('Check `{}` is not an Agent-based Integration'.format(check))
+    if not releasing_all:
+        for check in checks:
+            if check not in valid_checks:
+                abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # don't run the task on the master branch
     if get_current_branch() == 'master':
@@ -585,7 +597,7 @@ def make(ctx, check, version, initial_release, skip_sign, sign_only):
             abort('You cannot bump every check to the same version')
         checks = sorted(valid_checks)
     else:
-        checks = [check]
+        checks = sorted(checks)
 
     if initial_release:
         version = '1.0.0'

@@ -24,7 +24,9 @@
   "is_public": true,
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "IBM Db2 Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

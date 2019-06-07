@@ -20,7 +20,7 @@ instances:
     ##
     ## to your sudoers file, and uncomment the option below:
     #
-    # use_sudo: True
+    # use_sudo: true
 
     ## @param collect_service_check_for - list of string - optional
     ## If you wish to customize the health checks sent as a service check, uncomment and edit the list below.

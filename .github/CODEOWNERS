@@ -14,7 +14,6 @@ manifest.json         @DataDog/baklava @DataDog/agent-integrations @DataDog/inte
 /containerd/               @DataDog/container-integrations @DataDog/agent-integrations
 /cri/                      @DataDog/container-integrations @DataDog/agent-integrations
 /crio/                     @DataDog/container-integrations @DataDog/agent-integrations
-/datadog_checks_base/      @DataDog/container-integrations @DataDog/agent-integrations
 /docker_daemon/            @DataDog/container-integrations @DataDog/agent-integrations
 /ecs_fargate/              @DataDog/container-integrations @DataDog/agent-integrations
 /kube_controller_manager/  @DataDog/container-integrations @DataDog/agent-integrations
@@ -28,8 +27,8 @@ manifest.json         @DataDog/baklava @DataDog/agent-integrations @DataDog/inte
 /nginx_ingress_controller/ @DataDog/container-integrations @DataDog/agent-integrations
 /openmetrics/              @DataDog/container-integrations @DataDog/agent-integrations
 
-# Agent core team
-/datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+# Checks base
+/datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries @DataDog/container-integrations
 
 # To keep ProdSec up-to-date with changes to requirements.txt.
 requirements.in                                           @DataDog/prodsec @DataDog/integrations-tools-and-libraries

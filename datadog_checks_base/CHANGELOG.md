@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.3.3 / 2019-06-05
+
+* [Fixed] Revert "[openmetrics] allow blacklisting of strings". See [#3867](https://github.com/DataDog/integrations-core/pull/3867).
+* [Fixed] Encode hostname in set_external_tags. See [#3866](https://github.com/DataDog/integrations-core/pull/3866).
+
 ## 8.3.2 / 2019-06-04
 
 * [Fixed] Revert: Properly utilize the provided `metrics_mapper`. See [#3861](https://github.com/DataDog/integrations-core/pull/3861).
