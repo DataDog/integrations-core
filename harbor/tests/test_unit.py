@@ -5,7 +5,7 @@ from mock import call
 
 from datadog_checks.base import AgentCheck
 
-from .common import VERSION_1_8, VOLUME_DISK_FREE, VOLUME_DISK_TOTAL
+from .common import VERSION_1_8
 
 
 def test_check_health(harbor_check, harbor_api):
@@ -46,9 +46,6 @@ def test_submit_project_metrics(harbor_check, harbor_api):
 def test_submit_disk_metrics(harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']
     harbor_check._submit_disk_metrics(harbor_api, tags)
-    calls = [
-        call('harbor.disk.free', VOLUME_DISK_FREE, tags=tags),
-        call('harbor.disk.total', VOLUME_DISK_TOTAL, tags=tags),
-    ]
+    calls = [call('harbor.disk.free', 5e5, tags=tags), call('harbor.disk.total', 1e6, tags=tags)]
     harbor_check.gauge.assert_has_calls(calls, any_order=True)
     assert harbor_check.gauge.call_count == len(calls)

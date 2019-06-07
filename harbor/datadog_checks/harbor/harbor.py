@@ -4,7 +4,9 @@
 from requests import HTTPError
 
 from datadog_checks.base import AgentCheck
-from .common import HarborAPI
+
+from .api import HarborAPI
+from .common import VERSION_1_5, VERSION_1_8
 
 
 class HarborCheck(AgentCheck):
@@ -14,14 +16,14 @@ class HarborCheck(AgentCheck):
         self.http.persist_connections = True
 
     def _check_health(self, api, base_tags):
-        if api.harbor_version >= [1, 8, 0]:
+        if api.harbor_version >= VERSION_1_8:
             health = api.health()
             overall_status = AgentCheck.OK if health['status'] == 'healthy' else AgentCheck.CRITICAL
             self.service_check('harbor.status', overall_status, tags=base_tags)
             for el in health['components']:
                 component_status = AgentCheck.OK if el['status'] == 'healthy' else AgentCheck.CRITICAL
                 self.service_check('harbor.component.{}.status'.format(el['name']), component_status, tags=base_tags)
-        elif api.harbor_version >= [1, 5, 0]:
+        elif api.harbor_version >= VERSION_1_5:
             ping = api.ping()
             overall_status = AgentCheck.OK if ping == 'Pong' else AgentCheck.CRITICAL
             self.service_check('harbor.status', overall_status, tags=base_tags)
