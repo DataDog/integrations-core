@@ -173,7 +173,8 @@ class DockerInterface(object):
             ]
 
             # Any environment variables passed to the start command
-            command.extend('-e {}'.format(var) for var in self.env_vars)
+            for var in self.env_vars:
+                command.extend(['-e', var])
 
             if self.base_package:
                 # Mount the check directory
