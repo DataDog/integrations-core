@@ -6,22 +6,26 @@ from requests import HTTPError
 from datadog_checks.base import AgentCheck
 
 from .api import HarborAPI
-from .common import VERSION_1_5, VERSION_1_8
+from .common import VERSION_1_5, VERSION_1_8, HEALTHY
 
 
 class HarborCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         super(HarborCheck, self).__init__(*args, **kwargs)
+
+        # Prevent the use of Basic Auth using `username` and `password` from the config file.
         del self.http.options['auth']
+
+        # Keep a single session in order to submit the session id cookie for each request.
         self.http.persist_connections = True
 
     def _check_health(self, api, base_tags):
         if api.harbor_version >= VERSION_1_8:
             health = api.health()
-            overall_status = AgentCheck.OK if health['status'] == 'healthy' else AgentCheck.CRITICAL
+            overall_status = AgentCheck.OK if health['status'] == HEALTHY else AgentCheck.CRITICAL
             self.service_check('harbor.status', overall_status, tags=base_tags)
             for el in health['components']:
-                component_status = AgentCheck.OK if el['status'] == 'healthy' else AgentCheck.CRITICAL
+                component_status = AgentCheck.OK if el['status'] == HEALTHY else AgentCheck.CRITICAL
                 self.service_check('harbor.component.{}.status'.format(el['name']), component_status, tags=base_tags)
         elif api.harbor_version >= VERSION_1_5:
             ping = api.ping()
@@ -29,12 +33,13 @@ class HarborCheck(AgentCheck):
             self.service_check('harbor.status', overall_status, tags=base_tags)
             if api.with_chartrepo:
                 try:
-                    chartrepo_health = api.chartrepo_health()['healthy']
+                    chartrepo_health = api.chartrepo_health()[HEALTHY]
                 except HTTPError as e:
                     if e.response.status_code == 403:
-                        self.log.warning(
+                        self.log.info(
                             "Provided user in harbor integration config is not an admin user. Ignoring chartrepo health"
                         )
+                        self.log.debug(e, exc_info=True)
                         return
                     raise e
                 chartrepo_status = AgentCheck.OK if chartrepo_health else AgentCheck.CRITICAL
@@ -47,12 +52,14 @@ class HarborCheck(AgentCheck):
     def _check_registries_health(self, api, base_tags):
         try:
             registries = api.registries()
+            self.log.debug("Found %d registries", len(registries))
         except HTTPError as e:
             if e.response.status_code == 403:
                 # Forbidden, user is not admin
-                self.log.warning(
+                self.log.info(
                     "Provided user in harbor integration config is not an admin user. Ignoring registries health checks"
                 )
+                self.log.debug(e, exc_info=True)
                 return
             raise e
 
@@ -62,7 +69,7 @@ class HarborCheck(AgentCheck):
             name = registry['name']
             tags[-1] = 'registry:{}'.format(name.lower())
             if registry.get('status'):
-                status = AgentCheck.OK if registry['status'] == 'healthy' else AgentCheck.CRITICAL
+                status = AgentCheck.OK if registry['status'] == HEALTHY else AgentCheck.CRITICAL
                 self.service_check('harbor.registry.status', status, tags=tags)
             else:
                 try:
@@ -78,12 +85,11 @@ class HarborCheck(AgentCheck):
             if "metadata" in project and "public" in project['metadata']:
                 is_public = project['metadata']['public']
                 tags.append("public:{}".format(is_public))
-            owner_name = project.get('owner_name')
-            if owner_name:
-                tags.append("owner_name:{}".format(owner_name.lower()))
+            if "owner_name" in project:
+                tags.append("owner_name:{}".format(project['owner_name']))
 
             self.count('harbor.projects.count', 1, tags=tags)
-        self.log.debug("Found {count} Harbor projects", {'count': len(projects)})
+        self.log.debug("Found %d Harbor projects", len(projects))
 
     def _submit_disk_metrics(self, api, base_tags):
         try:
@@ -94,6 +100,7 @@ class HarborCheck(AgentCheck):
                 self.log.warning(
                     "Provided user in harbor integration config is not an admin user. Ignoring volume metrics"
                 )
+                self.log.debug(e, exc_info=True)
                 return
             raise e
         disk_free = volume_info['storage']['free']
@@ -109,7 +116,7 @@ class HarborCheck(AgentCheck):
             api.authenticate(instance["username"], instance['password'])
             self._check_health(api, tags)
         except Exception:
-            self.log.error("Harbor API is not reachable")
+            self.log.exception("Harbor API is not reachable")
             self.service_check('harbor.status', AgentCheck.CRITICAL)
             raise
         self._check_registries_health(api, tags)

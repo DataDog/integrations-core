@@ -96,9 +96,14 @@ def harbor_check(admin_instance):
 
 
 @pytest.fixture
-def harbor_api(harbor_check, admin_instance):
+def harbor_api(harbor_check, admin_instance, patch_requests):
+    yield HarborAPI(URL, harbor_check.http)
+
+
+@pytest.fixture
+def patch_requests():
     with mock.patch.object(requests.Session, 'request', side_effect=mocked_requests):
-        yield HarborAPI(URL, harbor_check.http)
+        yield
 
 
 def get_docker_compose_file():

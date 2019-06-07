@@ -18,3 +18,5 @@ VOLUME_INFO_URL = "{base_url}/api/systeminfo/volumes/"
 VERSION_1_5 = [1, 5, 0]
 VERSION_1_7 = [1, 7, 0]
 VERSION_1_8 = [1, 8, 0]
+
+HEALTHY = 'healthy'

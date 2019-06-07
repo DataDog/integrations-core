@@ -7,7 +7,7 @@ instances:
     ## @param url - string - required
     ## The Harbor HTTP url.
     #
-  - url: http://%%host%%:<PORT>/
+  - url: http://%%host%%/
 
     ## @param username - string - required
     ## The username to use for authentication against the Harbor API.
@@ -16,7 +16,7 @@ instances:
     #
     username: <USER_ID>
 
-    ## @param password - string - optional
+    ## @param password - string - required
     ## The password used together with the username for authentication agains the Harbor API
     #
     password: <USER_PASSWORD>

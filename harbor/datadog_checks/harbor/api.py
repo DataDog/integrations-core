@@ -65,12 +65,13 @@ class HarborAPI(object):
         self.with_chartrepo = systeminfo.get('with_chartmuseum', False)
 
     def _make_paginated_get_request(self, url):
-        resp = self.http.get(self._resolve_url(url), params={'page_size': 100})
+        http_params = {'page_size': 100}
+        resp = self.http.get(self._resolve_url(url), params=http_params)
         resp.raise_for_status()
         results = resp.json()
         while "next" in resp.links:
             next_url = '{}/{}'.format(self.base_url, resp.links['next']['url'])
-            resp = self.http.get(next_url, params={'page_size': 100})
+            resp = self.http.get(next_url, params=http_params)
             resp.raise_for_status()
             results.extend(resp.json())
         return results or []
@@ -81,7 +82,7 @@ class HarborAPI(object):
         try:
             return resp.json()
         except ValueError:
-            # Cannot decode json. This is expected with some Harbor api calls
+            # Cannot decode json. Some api calls (i.e. "PING") return plain text data.
             return resp.text
 
     def _make_post_request(self, url, data=None, json=None):
@@ -90,7 +91,7 @@ class HarborAPI(object):
         try:
             return resp.json()
         except ValueError:
-            # Cannot decode json. This is expected with some Harbor api calls
+            # Cannot decode json. Some api calls (i.e. "PING") return plain text data.
             return resp.text
 
     def _resolve_url(self, url, **kwargs):
