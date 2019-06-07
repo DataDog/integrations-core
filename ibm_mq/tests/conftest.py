@@ -5,7 +5,6 @@ import copy
 import logging
 import re
 
-import pymqi
 import pytest
 from six.moves import range
 
@@ -53,6 +52,9 @@ def seed_data():
 
 
 def publish():
+    # Late import to not require it for e2e
+    import pymqi
+
     conn_info = "%s(%s)" % (common.HOST, common.PORT)
 
     qmgr = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
@@ -75,6 +77,9 @@ def publish():
 
 
 def consume():
+    # Late import to not require it for e2e
+    import pymqi
+
     conn_info = "%s(%s)" % (common.HOST, common.PORT)
 
     qmgr = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
@@ -109,4 +114,4 @@ def dd_environment():
     env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
     with docker_run(common.COMPOSE_FILE_PATH, env_vars=env, log_patterns=log_pattern, sleep=10):
-        yield common.INSTANCE
+        yield common.INSTANCE, common.E2E_METADATA
