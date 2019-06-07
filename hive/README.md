@@ -43,6 +43,34 @@ No additional installation is needed on your server.
 
 4. [Restart the Agent][5].
 
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `hive.d/conf.yaml` file to start collecting your Hive logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path: /tmp/<USER>/hive.log
+          source: hive
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \d{4}\-\d{2}\-\d{2}
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample hive.d/conf.yaml][9] for all available configuration options.
+
+3. [Restart the Agent][5]
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `Hive` under the Checks section.
