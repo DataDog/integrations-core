@@ -99,21 +99,11 @@ instances:
     #
     # custom_queries:
     #   - metric_prefix: mongo
-    #     query:
-    #       <MONGO_QUERY_TYPE>: <COLLECTION_NAME>
-    #       pipeline:
-    #         - $match:
-    #             <FIELD_NAME>: <FIELD_VALUE>
-    #         - $group:
-    #             _id: <FIELD_NAME>
-    #       cursor: {} # Cursor is required for aggregate, can be an empty object
+    #     query: <MONGO_COMMAND_QUERY>
     #     fields:
     #       - field_name: <FIELD_NAME>
     #         name: <METRIC_SUFFIX>
     #         type: <METRIC_TYPE>
-    #       - field_name: _id
-    #         name: cluster_id
-    #         type: tag
     #     tags:
     #       - test:mongodb
 
