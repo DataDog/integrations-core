@@ -4,6 +4,7 @@
 
 import logging
 import re
+
 from six import iteritems
 
 from datadog_checks.base import ensure_bytes
@@ -152,7 +153,7 @@ class IbmMqCheck(AgentCheck):
                 args = {
                     pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name),
                     pymqi.CMQC.MQIA_Q_TYPE: queue_type,
-                    pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL
+                    pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
                 }
                 pcf = pymqi.PCFExecute(queue_manager)
                 response = pcf.MQCMD_INQUIRE_Q_STATUS(args)

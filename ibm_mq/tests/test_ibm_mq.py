@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+
 import pytest
 
 from datadog_checks.ibm_mq import IbmMqCheck
