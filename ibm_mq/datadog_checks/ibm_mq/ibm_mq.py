@@ -107,7 +107,7 @@ class IbmMqCheck(AgentCheck):
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
                     if queue_info[pymqi.CMQC.MQIA_DEFINITION_TYPE] == pymqi.CMQC.MQQDT_PREDEFINED:
-                        queues.append(queue.strip().decode('utf-8'))
+                        queues.append(str(queue.strip().decode()))
 
         return queues
 
