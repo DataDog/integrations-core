@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
-
 import pytest
 
 from datadog_checks.ibm_mq import IbmMqCheck
@@ -87,7 +86,7 @@ def test_check(aggregator, instance, seed_data):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check_pattern(aggregator, instance_pattern, seed_data):
+def test_check_queue_pattern(aggregator, instance_pattern, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance_pattern)
 
@@ -114,7 +113,7 @@ def test_check_all(aggregator, instance_collect_all, seed_data):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_regex(aggregator, instance_queue_regex_tag, seed_data):
+def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance_queue_regex_tag)
 

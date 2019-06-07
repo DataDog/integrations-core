@@ -46,7 +46,7 @@ INSTANCE_PATTERN = {
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queue_patterns': ['DEV.*', 'SYSTEM.*'],
+    'queue_patterns': ['^DEV.*', 'SYSTEM.*'],
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 

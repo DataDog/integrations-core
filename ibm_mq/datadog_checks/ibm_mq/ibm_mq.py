@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
-
+import re
 from six import iteritems
 
 from datadog_checks.base import ensure_bytes
@@ -19,7 +19,6 @@ except ImportError as e:
     pymqi = None
 
 log = logging.getLogger(__file__)
-
 
 
 class IbmMqCheck(AgentCheck):
@@ -106,9 +105,8 @@ class IbmMqCheck(AgentCheck):
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queue = queue.strip()
                     if queue_info[pymqi.CMQC.MQIA_DEFINITION_TYPE] == pymqi.CMQC.MQQDT_PREDEFINED:
-                        queues.append(queue)
+                        queues.append(queue.strip().decode('utf-8'))
 
         return queues
 
@@ -160,7 +158,7 @@ class IbmMqCheck(AgentCheck):
                 response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
             except pymqi.MQMIError as e:
                 type_attempts += 1
-                if type_attempts >= len(self.SUPPORTED_QUEUE_TYPES): # exhaust attempts for each type before warning
+                if type_attempts >= len(self.SUPPORTED_QUEUE_TYPES):  # exhaust attempts for each type before warning
                     self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
             else:
                 # Response is a list. It likely has only one member in it.

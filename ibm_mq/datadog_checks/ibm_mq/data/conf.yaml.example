@@ -38,7 +38,7 @@ instances:
     #   - '<QUEUE_NAME>'
 
     ## @param queue_patterns - list of string - optional
-    ## Collect from queues that match a pattern
+    ## Collect from queues that match a regex
     #
     # queue_patterns:
     #   - 'DEV.*'
