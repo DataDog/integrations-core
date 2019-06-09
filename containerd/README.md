@@ -28,6 +28,7 @@ spec:
     spec:
       containers:
         - name: datadog-agent
+          ...
           env:
             - name: DD_CRI_SOCKET_PATH
               value: "/var/run/containerd/containerd.sock"
