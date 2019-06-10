@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.6.0 / 2019-06-01
+
+* [Added] Handle the refresh_counters flag. See [#3840](https://github.com/DataDog/integrations-core/pull/3840).
+
 ## 2.5.0 / 2019-05-14
 
 * [Added] Cosmetic cleanups. See [#3706](https://github.com/DataDog/integrations-core/pull/3706).

@@ -1,5 +1,9 @@
 # CHANGELOG - OpenMetrics
 
+## 1.2.0 / 2019-06-01
+
+* [Added] Use Kube service account bearer token for authentication. See [#3829](https://github.com/DataDog/integrations-core/pull/3829).
+
 ## 1.1.0 / 2019-05-14
 
 * [Fixed] Fix type override values in example config. See [#3717](https://github.com/DataDog/integrations-core/pull/3717).

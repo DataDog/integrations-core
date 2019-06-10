@@ -20,7 +20,7 @@ set -e
 
 # Only build packages if there were new releases
 if [[ $status -eq 0 ]]; then
-    ./.gitlab/build-packages.sh
+    ./.gitlab/tagger/build-packages.sh
 elif [[ $status -eq 2 ]]; then
     echo "No new releases, skipping the build pipeline trigger"
 else

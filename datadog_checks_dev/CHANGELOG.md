@@ -1,5 +1,23 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.26.1 / 2019-06-05
+
+* [Fixed] Fix JMX template. See [#3879](https://github.com/DataDog/integrations-core/pull/3879).
+* [Fixed] Update APM team label. See [#3878](https://github.com/DataDog/integrations-core/pull/3878).
+* [Fixed] Fix logic to skip docs PRs for release testing. See [#3877](https://github.com/DataDog/integrations-core/pull/3877).
+
+## 0.26.0 / 2019-06-01
+
+* [Added] Better error message when releasing on the wrong branch. See [#3832](https://github.com/DataDog/integrations-core/pull/3832).
+
+## 0.25.2 / 2019-05-28
+
+* [Fixed] Fix tox plugin. See [#3825](https://github.com/DataDog/integrations-core/pull/3825).
+
+## 0.25.1 / 2019-05-24
+
+* [Fixed] Use safe default when validating manifests. See [#3810](https://github.com/DataDog/integrations-core/pull/3810).
+
 ## 0.25.0 / 2019-05-20
 
 * [Added] Move all assets to a dedicated directory. See [#3768](https://github.com/DataDog/integrations-core/pull/3768).

@@ -17,7 +17,7 @@ from six import PY3, iteritems, text_type
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..utils.agent.debug import enter_pdb
-from ..utils.common import ensure_bytes, ensure_unicode
+from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.proxy import config_proxy_skip
@@ -333,10 +333,12 @@ class __AgentCheckPy3(object):
         #     ('hostname2', {'src2_name': ['test2:t3']})
         # ]
         try:
-            for _, source_map in external_tags:
+            new_tags = []
+            for hostname, source_map in external_tags:
+                new_tags.append((to_string(hostname), source_map))
                 for src_name, tags in iteritems(source_map):
                     source_map[src_name] = self._normalize_tags_type(tags)
-            datadog_agent.set_external_tags(external_tags)
+            datadog_agent.set_external_tags(new_tags)
         except IndexError:
             self.log.exception('Unexpected external tags format: {}'.format(external_tags))
             raise
@@ -790,10 +792,12 @@ class __AgentCheckPy2(object):
         # ]
 
         try:
-            for _, source_map in external_tags:
+            new_tags = []
+            for hostname, source_map in external_tags:
+                new_tags.append((to_string(hostname), source_map))
                 for src_name, tags in iteritems(source_map):
                     source_map[src_name] = self._normalize_tags_type(tags)
-            datadog_agent.set_external_tags(external_tags)
+            datadog_agent.set_external_tags(new_tags)
         except IndexError:
             self.log.exception('Unexpected external tags format: {}'.format(external_tags))
             raise

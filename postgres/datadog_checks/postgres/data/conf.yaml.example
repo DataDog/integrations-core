@@ -95,7 +95,7 @@ instances:
     ## @param tag_replication_role - boolean - optional - default: false
     ## Tag metrics and checks with `replication_role:<master|standby>`.
     #
-    # tag_replication_role: False
+    # tag_replication_role: false
 
     ## @param custom_queries - object - optional
     ## Define custom queries to collect custom metrics from your PostgreSQL

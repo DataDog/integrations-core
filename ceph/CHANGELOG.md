@@ -1,5 +1,9 @@
 # CHANGELOG - ceph
 
+## 1.5.1 / 2019-06-05
+
+* [Fixed] Fix version discovery. See [#3874](https://github.com/DataDog/integrations-core/pull/3874).
+
 ## 1.5.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3488](https://github.com/DataDog/integrations-core/pull/3488).

@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.kafka_consumer import KafkaCheck
 
-from .common import HOST, PARTITIONS, TOPICS, ZK_CONNECT_STR, is_supported
+from .common import HOST, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, ZK_CONNECT_STR, is_supported
 
 pytestmark = pytest.mark.skipif(
     not is_supported('zookeeper'), reason='zookeeper consumer offsets not supported in current environment'
@@ -44,6 +44,23 @@ def test_check_zk(aggregator, zk_instance):
     # let's reassert for the __consumer_offsets - multiple partitions
     aggregator.assert_metric('kafka.broker_offset', at_least=1)
     aggregator.assert_all_metrics_covered()
+
+    all_partitions = {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'zk_connect_str': ZK_CONNECT_STR,
+        'consumer_groups': {'my_consumer': {'marvel': []}},
+    }
+    kafka_consumer_check.check(all_partitions)
+    aggregator.assert_metric(
+        'kafka.consumer_offset',
+        tags=['topic:marvel', 'partition:0', 'consumer_group:my_consumer', 'source:zk'],
+        at_least=1,
+    )
+    aggregator.assert_metric(
+        'kafka.consumer_offset',
+        tags=['topic:marvel', 'partition:1', 'consumer_group:my_consumer', 'source:zk'],
+        at_least=1,
+    )
 
 
 @pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')

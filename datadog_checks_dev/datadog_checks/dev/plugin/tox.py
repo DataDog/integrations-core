@@ -57,7 +57,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
 
     # Intentionally add to envlist when seeing what is available
     if config.option.env is None or config.option.env == STYLE_CHECK_ENV_NAME:
-        config.envlist.append(STYLE_CHECK_ENV_NAME)
+        config.envlist_default.append(STYLE_CHECK_ENV_NAME)
 
 
 def add_style_formatter(config, sections, make_envconfig, reader):
@@ -81,7 +81,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
 
     # Intentionally add to envlist when seeing what is available
     if config.option.env is None or config.option.env == STYLE_FORMATTER_ENV_NAME:
-        config.envlist.append(STYLE_FORMATTER_ENV_NAME)
+        config.envlist_default.append(STYLE_FORMATTER_ENV_NAME)
 
 
 def get_make_envconfig(make_envconfig):

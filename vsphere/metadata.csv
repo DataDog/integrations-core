@@ -42,7 +42,7 @@ vsphere.mem.overhead.avg,gauge,,kibibyte,,Host physical memory consumed by the v
 vsphere.mem.swapinRate.avg,gauge,,kibibyte,second,Rate at which memory is swapped from disk into active memory,-1,vsphere,mem swapinRate avg
 vsphere.mem.swapoutRate.avg,gauge,,kibibyte,second,Rate at which memory is being swapped from active memory to disk,-1,vsphere,mem swapoutRate avg
 vsphere.mem.totalmb.avg,gauge,,kibibyte,,Total amount of host physical memory of all hosts in the cluster that is available for virtual machine memory (physical memory for use by the guest OS) and virtual machine overhead memory,1,vsphere,mem totalmb avg
-vsphere.mem.usage.avg,gauge,,kibibyte,,Memory usage as percent of total configured or available memory,-1,vsphere,mem usage avg
+vsphere.mem.usage.avg,gauge,,percent,,Memory usage as percent of total configured or available memory,-1,vsphere,mem usage avg
 vsphere.mem.vmmemctl.avg,gauge,,kibibyte,,Amount of memory allocated by the virtual machine memory control driver (vmmemctl),-1,vsphere,mem vmmemctl avg
 vsphere.mem.active.avg,gauge,,kibibyte,,"Amount of memory that is actively used, as estimated by VMkernel based on recently touched memory pages",-1,vsphere,mem active avg
 vsphere.mem.activewrite.avg,gauge,,kibibyte,,Estimate for the amount of memory actively being written to by the virtual machine,-1,vsphere,mem activewrite avg

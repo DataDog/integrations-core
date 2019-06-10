@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import time
+from datetime import datetime
 
 import mock
 import pytest
@@ -41,14 +42,14 @@ def test__init__(instance):
     i_key = check._instance_key(instance)
 
     assert check.time_started > 0
-    assert len(check.server_instances) == 0
+    assert not check.server_instances
     assert check.cache_config.get_interval(CacheConfig.Morlist, i_key) == 42
     assert check.cache_config.get_interval(CacheConfig.Metadata, i_key) == -42
     assert check.clean_morlist_interval == 50
     assert len(check.event_config) == 1
     assert 'vsphere_mock' in check.event_config
-    assert len(check.registry) == 0
-    assert len(check.latest_event_query) == 0
+    assert not check.registry
+    assert not check.latest_event_query
     assert check.batch_collector_size == 0
     assert check.batch_morlist_size == 50
 
@@ -65,15 +66,15 @@ def test__is_excluded():
     included_host = MockedMOR(spec="HostSystem", name="foo")
     included_vm = MockedMOR(spec="VirtualMachine", name="foo")
 
-    assert VSphereCheck._is_excluded(included_host, {"name": included_host.name}, include_regexes, None) is False
-    assert VSphereCheck._is_excluded(included_vm, {"name": included_vm.name}, include_regexes, None) is False
+    assert not VSphereCheck._is_excluded(included_host, {"name": included_host.name}, include_regexes, None)
+    assert not VSphereCheck._is_excluded(included_vm, {"name": included_vm.name}, include_regexes, None)
 
     # Not OK!
     excluded_host = MockedMOR(spec="HostSystem", name="bar")
     excluded_vm = MockedMOR(spec="VirtualMachine", name="bar")
 
-    assert VSphereCheck._is_excluded(excluded_host, {"name": excluded_host.name}, include_regexes, None) is True
-    assert VSphereCheck._is_excluded(excluded_vm, {"name": excluded_vm.name}, include_regexes, None) is True
+    assert VSphereCheck._is_excluded(excluded_host, {"name": excluded_host.name}, include_regexes, None)
+    assert VSphereCheck._is_excluded(excluded_vm, {"name": excluded_vm.name}, include_regexes, None)
 
     # Sample(s)
     include_regexes = None
@@ -81,16 +82,13 @@ def test__is_excluded():
 
     # OK
     included_vm = MockedMOR(spec="VirtualMachine", name="foo", label=True)
-    assert (
-        VSphereCheck._is_excluded(
-            included_vm, {"customValue": included_vm.customValue}, include_regexes, include_only_marked
-        )
-        is False
+    assert not VSphereCheck._is_excluded(
+        included_vm, {"customValue": included_vm.customValue}, include_regexes, include_only_marked
     )
 
     # Not OK
     included_vm = MockedMOR(spec="VirtualMachine", name="foo")
-    assert VSphereCheck._is_excluded(included_vm, {"customValue": []}, include_regexes, include_only_marked) is True
+    assert VSphereCheck._is_excluded(included_vm, {"customValue": []}, include_regexes, include_only_marked)
 
 
 def test__get_all_objs(vsphere, instance):
@@ -117,7 +115,7 @@ def test__get_all_objs(vsphere, instance):
         mocked_datacenter: {"parent": MockedMOR(spec="Folder", name="unknown folder"), "name": "datacenter"},
     }
     with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
-        obj_list = vsphere._get_all_objs(server_instance)
+        obj_list = vsphere._get_all_objs(server_instance, None, False, [])
         assert len(obj_list[vim.VirtualMachine]) == 2
         assert {
             "mor_type": "vm",
@@ -178,7 +176,7 @@ def test__collect_mors_and_attributes(vsphere, instance):
 
         obj.missingSet = [MagicMock(path="prop", fault="fault")]
         mor_attrs = vsphere._collect_mors_and_attributes(server_instance)
-        log.error.assert_called_once_with("Unable to retrieve property prop for object obj: fault")
+        log.error.assert_called_once_with('Unable to retrieve property %s for object %s: %s', 'prop', 'obj', 'fault')
         assert len(mor_attrs) == 1
 
 
@@ -258,12 +256,12 @@ def test_use_guest_hostname(vsphere, instance):
     ):
         vsphere._cache_morlist_raw(instance)
         # Default value
-        mock_get_all_objs.call_args[1]["use_guest_hostname"] is False
+        assert not mock_get_all_objs.call_args[1]["use_guest_hostname"]
 
         # use guest hostname
         instance["use_guest_hostname"] = True
         vsphere._cache_morlist_raw(instance)
-        mock_get_all_objs.call_args[1]["use_guest_hostname"] is True
+        assert mock_get_all_objs.call_args[1]["use_guest_hostname"]
 
     with mock.patch("datadog_checks.vsphere.vsphere.vmodl"):
 
@@ -283,9 +281,7 @@ def test__process_mor_objects_queue(vsphere, instance):
     vsphere._process_mor_objects_queue(instance)
     # Queue hasn't been initialized
     vsphere.log.debug.assert_called_once_with(
-        "Objects queue is not initialized yet for instance {}, skipping processing".format(
-            vsphere._instance_key(instance)
-        )
+        "Objects queue is not initialized yet for instance %s, skipping processing", vsphere._instance_key(instance)
     )
 
     vsphere.batch_morlist_size = 1
@@ -364,7 +360,7 @@ def test__cache_metrics_metadata_compatibility(vsphere, instance):
     server_instance.content.perfManager.perfCounter = [counter]
     vsphere._cache_metrics_metadata(instance)
 
-    assert len(vsphere.metadata_cache._metric_ids[i_key]) == 0
+    assert not vsphere.metadata_cache._metric_ids[i_key]
     assert len(vsphere.metadata_cache._metadata[i_key]) == 1
     vsphere.format_metric_name.assert_called_once_with(counter, compatibility=True)
 
@@ -373,21 +369,21 @@ def test_in_compatibility_mode(vsphere, instance):
     vsphere.log = MagicMock()
 
     instance["collection_level"] = 2
-    assert vsphere.in_compatibility_mode(instance) is False
+    assert not vsphere.in_compatibility_mode(instance)
 
     instance["all_metrics"] = True
-    assert vsphere.in_compatibility_mode(instance) is False
+    assert not vsphere.in_compatibility_mode(instance)
     vsphere.log.warning.assert_not_called()
 
-    assert vsphere.in_compatibility_mode(instance, log_warning=True) is False
+    assert not vsphere.in_compatibility_mode(instance, log_warning=True)
     vsphere.log.warning.assert_called_once()
 
     del instance["collection_level"]
     vsphere.log.reset_mock()
-    assert vsphere.in_compatibility_mode(instance) is True
+    assert vsphere.in_compatibility_mode(instance)
     vsphere.log.warning.assert_not_called()
 
-    assert vsphere.in_compatibility_mode(instance, log_warning=True) is True
+    assert vsphere.in_compatibility_mode(instance, log_warning=True)
     vsphere.log.warning.assert_called_once()
 
 
@@ -428,12 +424,30 @@ def test__collect_metrics_async_compatibility(vsphere, instance):
 
     vsphere.in_compatibility_mode.return_value = True
     vsphere._collect_metrics_async(instance, [])
-    vsphere.log.debug.assert_called_with("Skipping unknown `unknown` metric.")
+    vsphere.log.debug.assert_called_with('Skipping unknown `%s` metric.', 'unknown')
 
     vsphere.log.reset_mock()
     vsphere.in_compatibility_mode.return_value = False
     vsphere._collect_metrics_async(instance, [])
     vsphere.log.debug.assert_not_called()
+
+
+def test__collect_metrics_async_hostname(vsphere, instance, aggregator):
+    server_instance = vsphere._get_server_instance(instance)
+    result = MagicMock()
+    result.value = [23.4]
+
+    server_instance.content.perfManager.QueryPerf.return_value = [MagicMock(value=[result])]
+    mor = {"hostname": "foo"}
+    vsphere.mor_cache = MagicMock()
+    vsphere.mor_cache.get_mor.return_value = mor
+    vsphere.metadata_cache = MagicMock()
+    vsphere.metadata_cache.get_metadata.return_value = {"name": "mymetric", "unit": "kb"}
+    vsphere.in_compatibility_mode = MagicMock()
+    vsphere.in_compatibility_mode.return_value = False
+
+    vsphere._collect_metrics_async(instance, [])
+    aggregator.assert_metric('vsphere.mymetric', value=23.4, hostname="foo")
 
 
 def test_check(vsphere, instance):
@@ -444,96 +458,66 @@ def test_check(vsphere, instance):
         with mock.patch.object(vsphere, 'set_external_tags') as set_external_tags:
             vsphere.check(instance)
             set_external_tags.assert_called_once()
-            all_the_tags = set_external_tags.call_args[0][0]
+            all_the_tags = dict(set_external_tags.call_args[0][0])
 
-            assert (
-                'vm4',
-                {
-                    SOURCE_TYPE: [
-                        'vcenter_server:vsphere_mock',
-                        'vsphere_folder:rootFolder',
-                        'vsphere_folder:folder1',
-                        'vsphere_datacenter:datacenter2',
-                        'vsphere_cluster:compute_resource2',
-                        'vsphere_compute:compute_resource2',
-                        'vsphere_host:host3',
-                        'vsphere_host:host3',
-                        'vsphere_type:vm',
-                    ]
-                },
-            ) in all_the_tags
-            assert (
-                'host1',
-                {
-                    SOURCE_TYPE: [
-                        'vcenter_server:vsphere_mock',
-                        'vsphere_folder:rootFolder',
-                        'vsphere_datacenter:datacenter1',
-                        'vsphere_cluster:compute_resource1',
-                        'vsphere_compute:compute_resource1',
-                        'vsphere_type:host',
-                    ]
-                },
-            ) in all_the_tags
-            assert (
-                'host3',
-                {
-                    SOURCE_TYPE: [
-                        'vcenter_server:vsphere_mock',
-                        'vsphere_folder:rootFolder',
-                        'vsphere_folder:folder1',
-                        'vsphere_datacenter:datacenter2',
-                        'vsphere_cluster:compute_resource2',
-                        'vsphere_compute:compute_resource2',
-                        'vsphere_type:host',
-                    ]
-                },
-            ) in all_the_tags
-            assert (
-                'vm2',
-                {
-                    SOURCE_TYPE: [
-                        'vcenter_server:vsphere_mock',
-                        'vsphere_folder:rootFolder',
-                        'vsphere_folder:folder1',
-                        'vsphere_datacenter:datacenter2',
-                        'vsphere_cluster:compute_resource2',
-                        'vsphere_compute:compute_resource2',
-                        'vsphere_host:host3',
-                        'vsphere_host:host3',
-                        'vsphere_type:vm',
-                    ]
-                },
-            ) in all_the_tags
-            assert (
-                'vm1',
-                {
-                    SOURCE_TYPE: [
-                        'vcenter_server:vsphere_mock',
-                        'vsphere_folder:rootFolder',
-                        'vsphere_folder:folder1',
-                        'vsphere_datacenter:datacenter2',
-                        'vsphere_cluster:compute_resource2',
-                        'vsphere_compute:compute_resource2',
-                        'vsphere_host:host3',
-                        'vsphere_host:host3',
-                        'vsphere_type:vm',
-                    ]
-                },
-            ) in all_the_tags
-            assert (
-                'host2',
-                {
-                    SOURCE_TYPE: [
-                        'vcenter_server:vsphere_mock',
-                        'vsphere_folder:rootFolder',
-                        'vsphere_datacenter:datacenter1',
-                        'vsphere_cluster:compute_resource1',
-                        'vsphere_compute:compute_resource1',
-                        'vsphere_type:host',
-                    ]
-                },
-            ) in all_the_tags
+            assert all_the_tags['vm4'][SOURCE_TYPE] == [
+                'vcenter_server:vsphere_mock',
+                'vsphere_folder:rootFolder',
+                'vsphere_folder:folder1',
+                'vsphere_datacenter:datacenter2',
+                'vsphere_cluster:compute_resource2',
+                'vsphere_compute:compute_resource2',
+                'vsphere_host:host3',
+                'vsphere_host:host3',
+                'vsphere_type:vm',
+            ]
+            assert all_the_tags['host1'][SOURCE_TYPE] == [
+                'vcenter_server:vsphere_mock',
+                'vsphere_folder:rootFolder',
+                'vsphere_datacenter:datacenter1',
+                'vsphere_cluster:compute_resource1',
+                'vsphere_compute:compute_resource1',
+                'vsphere_type:host',
+            ]
+            assert all_the_tags['host3'][SOURCE_TYPE] == [
+                'vcenter_server:vsphere_mock',
+                'vsphere_folder:rootFolder',
+                'vsphere_folder:folder1',
+                'vsphere_datacenter:datacenter2',
+                'vsphere_cluster:compute_resource2',
+                'vsphere_compute:compute_resource2',
+                'vsphere_type:host',
+            ]
+            assert all_the_tags['vm2'][SOURCE_TYPE] == [
+                'vcenter_server:vsphere_mock',
+                'vsphere_folder:rootFolder',
+                'vsphere_folder:folder1',
+                'vsphere_datacenter:datacenter2',
+                'vsphere_cluster:compute_resource2',
+                'vsphere_compute:compute_resource2',
+                'vsphere_host:host3',
+                'vsphere_host:host3',
+                'vsphere_type:vm',
+            ]
+            assert all_the_tags['vm1'][SOURCE_TYPE] == [
+                'vcenter_server:vsphere_mock',
+                'vsphere_folder:rootFolder',
+                'vsphere_folder:folder1',
+                'vsphere_datacenter:datacenter2',
+                'vsphere_cluster:compute_resource2',
+                'vsphere_compute:compute_resource2',
+                'vsphere_host:host3',
+                'vsphere_host:host3',
+                'vsphere_type:vm',
+            ]
+            assert all_the_tags['host2'][SOURCE_TYPE] == [
+                'vcenter_server:vsphere_mock',
+                'vsphere_folder:rootFolder',
+                'vsphere_datacenter:datacenter1',
+                'vsphere_cluster:compute_resource1',
+                'vsphere_compute:compute_resource1',
+                'vsphere_type:host',
+            ]
 
 
 def test_service_check_ko(aggregator, instance):
@@ -593,8 +577,8 @@ def test__should_cache(instance):
     i_key = check._instance_key(instance)
 
     # first run should always cache
-    assert check._should_cache(instance, CacheConfig.Morlist) is True
-    assert check._should_cache(instance, CacheConfig.Metadata) is True
+    assert check._should_cache(instance, CacheConfig.Morlist)
+    assert check._should_cache(instance, CacheConfig.Metadata)
 
     # explicitly set cache expiration times, don't use defaults so we also test
     # configuration is properly propagated
@@ -608,5 +592,123 @@ def test__should_cache(instance):
     check.cache_config.set_last(CacheConfig.Metadata, i_key, now - (2 * REFRESH_METRICS_METADATA_INTERVAL))
 
     with mock.patch("time.time", return_value=now):
-        assert check._should_cache(instance, CacheConfig.Morlist) is False
-        assert check._should_cache(instance, CacheConfig.Metadata) is False
+        assert not check._should_cache(instance, CacheConfig.Morlist)
+        assert not check._should_cache(instance, CacheConfig.Metadata)
+
+
+def alarm_event(from_status='green', to_status='red', message='Some error'):
+    now = datetime.now()
+    vm = MockedMOR(spec='VirtualMachine')
+    dc = MockedMOR(spec="Datacenter")
+    dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
+    alarm = MockedMOR(spec="Alarm")
+    alarm_arg = vim.event.AlarmEventArgument(alarm=alarm, name='alarm1')
+    entity = vim.event.ManagedEntityEventArgument(entity=vm, name='vm1')
+    event = vim.event.AlarmStatusChangedEvent(
+        entity=entity, fullFormattedMessage=message, createdTime=now, to=to_status, datacenter=dc_arg, alarm=alarm_arg
+    )
+    setattr(event, 'from', from_status)  # noqa: B009
+    return event
+
+
+def migrated_event():
+    now = datetime.now()
+    vm = MockedMOR(spec='VirtualMachine', name='vm1')
+    vm_arg = vim.event.VmEventArgument(vm=vm)
+    host = MockedMOR(spec='HostSystem')
+    host_arg = vim.event.HostEventArgument(host=host, name='host1')
+    host_dest = MockedMOR(spec='HostSystem')
+    host_dest_arg = vim.event.HostEventArgument(host=host_dest, name='host2')
+    dc = MockedMOR(spec='Datacenter')
+    dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
+    dc_dest = MockedMOR(spec='Datacenter')
+    dc_dest_arg = vim.event.DatacenterEventArgument(datacenter=dc_dest, name='dc2')
+    ds = MockedMOR(spec='Datastore')
+    ds_arg = vim.event.DatastoreEventArgument(datastore=ds, name='ds1')
+    ds_dest = MockedMOR(spec='Datastore')
+    ds_dest_arg = vim.event.DatastoreEventArgument(datastore=ds_dest, name='ds2')
+    event = vim.event.VmBeingHotMigratedEvent(
+        vm=vm_arg,
+        userName='John',
+        fullFormattedMessage='Some error',
+        createdTime=now,
+        host=host_arg,
+        destHost=host_dest_arg,
+        datacenter=dc_arg,
+        destDatacenter=dc_dest_arg,
+        ds=ds_arg,
+        destDatastore=ds_dest_arg,
+    )
+    return event
+
+
+def test_events(aggregator, vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        server_instance = vsphere._get_server_instance(instance)
+        server_instance.content.eventManager.QueryEvents.return_value = [alarm_event()]
+        vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was green and it's now red.", tags=['foo:bar']
+        )
+
+
+def test_events_tags(aggregator, vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        server_instance = vsphere._get_server_instance(instance)
+        server_instance.content.eventManager.QueryEvents.return_value = [migrated_event()]
+        vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "John has launched a hot migration of this virtual machine",
+            exact_match=False,
+            tags=[
+                'foo:bar',
+                'vsphere_host:host1',
+                'vsphere_host:host2',
+                'vsphere_datacenter:dc1',
+                'vsphere_datacenter:dc2',
+            ],
+        )
+
+        server_instance = vsphere._get_server_instance(instance)
+        server_instance.content.eventManager.QueryEvents.return_value = [alarm_event()]
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was green and it's now red.", tags=['foo:bar']
+        )
+
+
+def test_events_gray_handled(aggregator, vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        server_instance = vsphere._get_server_instance(instance)
+        event = alarm_event(from_status='gray', message='Went from Gray to Red')
+        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was gray and it's now red.", tags=['foo:bar']
+        )
+
+        event = alarm_event(from_status='yellow', to_status='gray', message='Went from Yellow to Gray')
+        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        vsphere.check(instance)
+        aggregator.assert_event(
+            "vCenter monitor status changed on this alarm, it was yellow and it's now gray.",
+            tags=['foo:bar'],
+            alert_type='info',
+        )
+
+
+def test_events_gray_ignored(aggregator, vsphere, instance):
+    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+        server_instance = vsphere._get_server_instance(instance)
+        event = alarm_event(from_status='gray', to_status='green', message='Went from Gray to Green')
+        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
+        vsphere.check(instance)
+        assert not aggregator.events
+        event = alarm_event(from_status='green', to_status='gray', message='Went from Green to Gray')
+        server_instance.content.eventManager.QueryEvents.return_value = [event]
+        vsphere.check(instance)
+        assert not aggregator.events

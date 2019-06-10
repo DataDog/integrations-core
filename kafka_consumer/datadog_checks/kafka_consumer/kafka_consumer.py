@@ -370,11 +370,8 @@ class KafkaCheck(AgentCheck):
                     )
                 continue
 
-            consumer_group_tags = [
-                'topic:%s' % topic,
-                'partition:%s' % partition,
-                'consumer_group:%s' % consumer_group,
-            ] + tags
+            consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
+            consumer_group_tags.extend(tags)
             self.gauge('kafka.consumer_offset', consumer_offset, tags=consumer_group_tags)
 
             consumer_lag = highwater_offsets[(topic, partition)] - consumer_offset
@@ -435,14 +432,14 @@ class KafkaCheck(AgentCheck):
                 }
 
             for consumer_group, topics in iteritems(consumer_groups):
-                if topics is None:
+                if not topics:
                     # If topics are't specified, fetch them from ZK
                     zk_path_topics = zk_path_topic_tmpl.format(group=consumer_group)
                     topics = {topic: None for topic in self._get_zk_path_children(zk_conn, zk_path_topics, 'topics')}
                     consumer_groups[consumer_group] = topics
 
                 for topic, partitions in iteritems(topics):
-                    if partitions is not None:
+                    if partitions:
                         partitions = set(partitions)  # defend against bad user input
                     else:
                         # If partitions aren't specified, fetch them from ZK
