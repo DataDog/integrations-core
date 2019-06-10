@@ -92,10 +92,11 @@ class HarborCheck(AgentCheck):
             if "metadata" in project and "public" in project['metadata']:
                 is_public = project['metadata']['public']
                 tags.append("public:{}".format(is_public))
-            if "owner_name" in project:
+            if project.get('owner_name'):
                 tags.append("owner_name:{}".format(project['owner_name']))
 
-            self.count('harbor.projects.count', 1, tags=tags)
+            self.gauge('harbor.projects', 1, tags=tags)
+        self.gauge('harbor.projects.count', len(projects), tags=base_tags)
         self.log.debug("Found %d Harbor projects", len(projects))
 
     def _submit_disk_metrics(self, api, base_tags):
