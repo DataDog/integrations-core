@@ -1,6 +1,6 @@
 How to install pymqi in MacOs
 =============================
-To be able to install pymqi in Mac you need to first set up the [IBM MQ toolkit for Mac OS][1].
+To install pymqi on Mac, first set up the [IBM MQ toolkit for Mac OS][1].
 
 1. Download and extract the [toolkit][2].
 2. Set up the following environment variables:
