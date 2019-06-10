@@ -11,13 +11,13 @@ instances:
 
     ## @param username - string - required
     ## The username to use for authentication against the Harbor API.
-    ## Please note that some metrics and service checks requires an admin account to be collected.
+    ## Note: Some metrics and service checks requires an admin account to be collected.
     ## This includes chartmuseum.status, replication registries data, volume information.
     #
     username: <USER_ID>
 
     ## @param password - string - required
-    ## The password used together with the username for authentication agains the Harbor API
+    ## The password used together with the username for authentication against the Harbor API.
     #
     password: <USER_PASSWORD>
 

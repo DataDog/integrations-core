@@ -6,7 +6,7 @@
         "check": "harbor.status",
         "statuses": ["ok", "critical"],
         "name": "Overall status",
-        "description": "Returns `OK` if the Harbor API is reachable and answers correctly, `CRITICAL` if connection is not possible or if the API says the registry is unhealthy."
+        "description": "Returns `OK` if the Harbor API is reachable and answers correctly. Returns `CRITICAL` if the connection is not possible or if the API says the registry is unhealthy."
     },
     {
         "agent_version": "6.13.0",
@@ -15,7 +15,7 @@
         "check": "harbor.component.chartmuseum.status",
         "statuses": ["ok","critical"],
         "name": "Status of the `Chartmuseum` service",
-        "description": "Service checks is not emitted if the chartmuseum is not configured. Returns `OK` if the service is healthy, `CRITICAL` otherwise."
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. This service check is not emitted unless the chartmuseum is configured."
     },
     {
         "agent_version": "6.13.0",
@@ -24,7 +24,7 @@
         "check": "harbor.component.registry.status",
         "statuses": ["ok","critical"],
         "name": "Status of the `Registry` service",
-        "description": "Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise."
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8."
     },
     {
         "agent_version": "6.13.0",
@@ -33,7 +33,7 @@
         "check": "harbor.component.redis.status",
         "statuses": ["ok","critical"],
         "name": "Status of the `Redis` service",
-        "description": "Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise."
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8."
     },
     {
         "agent_version": "6.13.0",
@@ -42,7 +42,7 @@
         "check": "harbor.component.jobservice.status",
         "statuses": ["ok","critical"],
         "name": "Status of the `Jobservice` service",
-        "description": "Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise."
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8."
     },
     {
         "agent_version": "6.13.0",
@@ -51,7 +51,7 @@
         "check": "harbor.component.registryctl.status",
         "statuses": ["ok","critical"],
         "name": "Status of the `Registryctl` service",
-        "description": "Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise."
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8."
     },
     {
         "agent_version": "6.13.0",
@@ -60,7 +60,7 @@
         "check": "harbor.component.portal.status",
         "statuses": ["ok","critical"],
         "name": "Status of the `Portal` service",
-        "description": "Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwis.e"
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8."
     },
     {
         "agent_version": "6.13.0",
@@ -69,7 +69,7 @@
         "check": "harbor.component.core.status",
         "statuses": ["ok","critical"],
         "name": "Status of the `Core` service",
-        "description": "Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise."
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8."
     },
     {
         "agent_version": "6.13.0",
@@ -78,7 +78,7 @@
         "check": "harbor.component.database.status",
         "statuses": ["ok","critical"],
         "name": "Status of the `Database` service",
-        "description": "Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise."
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8."
     },
     {
         "agent_version": "6.13.0",
@@ -87,6 +87,6 @@
         "check": "harbor.registry.status",
         "statuses": ["ok","critical"],
         "name": "External registries status",
-        "description": "Monitor the health of external registries used by Harbor for replication. Returns `OK` if the service is healthy, `CRITICAL` otherwise."
+        "description": "Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Monitors the health of external registries used by Harbor for replication."
     }
 ]

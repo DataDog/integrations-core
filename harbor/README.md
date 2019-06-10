@@ -1,23 +1,23 @@
-# Agent Check: harbor
+# Agent Check: Harbor
 
 ## Overview
 
-This check monitors [harbor][1] through the Datadog Agent.
+This check monitors [Harbor][1] through the Datadog Agent.
 
 ## Setup
 
 ### Installation
 
-The harbor check is included in the [Datadog Agent][2] package.
+The Harbor check is included in the [Datadog Agent][8] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `harbor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your harbor performance data. See the [sample harbor.d/conf.yaml][2] for all available configuration options. The url is the one at which you access the web UI.
+1. Edit the `harbor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9] to start collecting your Harbor performance data. See the [sample harbor.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3].
 
-You can specify any type of user in the config but an account with admin permissions is required to fetch disk metrics. Besides the `harbor.projects.count` metric only reflects the number of projects that the provided user has access to.
+You can specify any type of user in the config but an account with admin permissions is required to fetch disk metrics. The metric `harbor.projects.count` only reflects the number of projects the provided user can access.
 
 ### Validation
 
@@ -32,22 +32,41 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 ### Service Checks
 
 
-See [service_checks.json][7] for a list of service checks provided by this integration.
 
-- `harbor.status` - Returns `OK` if the Harbor API is reachable and answers correctly, `CRITICAL` if connection is not possible or if the API says the registry is unhealthy.
-- `harbor.component.chartmuseum.status` - Service checks is not emitted if the chartmuseum is not configured. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
-- `harbor.component.registry.status` - Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
-- `harbor.component.redis.status` - Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
-- `harbor.component.jobservice.status` - Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
-- `harbor.component.registryctl.status` - Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
-- `harbor.component.portal.status` - Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
-- `harbor.component.core.status` - Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
-- `harbor.component.database.status` - Only available with Harbor > 1.8. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
-- `harbor.registry.status` - Monitor the health of external registries used by Harbor for replication. Returns `OK` if the service is healthy, `CRITICAL` otherwise.
+- `harbor.status`  
+Returns `OK` if the Harbor API is reachable and answers correctly. Returns `CRITICAL` if the connection is not possible or if the API says the registry is unhealthy.
+
+- `harbor.component.chartmuseum.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. This service check is not emitted unless the chartmuseum is configured.
+
+- `harbor.component.registry.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8. 
+
+- `harbor.component.redis.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8.
+
+- `harbor.component.jobservice.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8.
+
+- `harbor.component.registryctl.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8.
+
+- `harbor.component.portal.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8.
+
+- `harbor.component.core.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8.
+
+- `harbor.component.database.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Only available with Harbor > 1.8.
+
+- `harbor.registry.status`  
+Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Monitors the health of external registries used by Harbor for replication.
+
 
 ### Events
 
-harbor does not include any events.
+The Harbor integration does not include any events.
 
 ## Troubleshooting
 
@@ -60,3 +79,4 @@ Need help? Contact [Datadog support][5].
 [5]: https://docs.datadoghq.com/help
 [6]: https://github.com/DataDog/integrations-core/blob/master/harbor/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/tls/assets/service_checks.json
+[8]: https://app.datadoghq.com/account/settings#agent
