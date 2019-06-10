@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from mock import call, patch, MagicMock
 import pytest
-
-from datadog_checks.base import AgentCheck
+from mock import MagicMock, call
 from requests import HTTPError
 
+from datadog_checks.base import AgentCheck
+
 from .common import VERSION_1_8
+from .conftest import MockResponse
 
 
 @pytest.mark.usefixture("patch_requests")
@@ -59,78 +60,35 @@ def test_submit_disk_metrics(harbor_check, harbor_api):
 
 def test_api__make_get_request(harbor_api):
     harbor_api.http = MagicMock()
-    harbor_api.http.get = MagicMock(
-        return_value=MagicMock(
-            json=MagicMock(return_value={"json": True}),
-        )
-    )
+    harbor_api.http.get = MagicMock(return_value=MockResponse({"json": True}, 200))
     assert harbor_api._make_get_request('{base_url}/api/path') == {"json": True}
 
-    harbor_api.http.get = MagicMock(
-        return_value=MagicMock(
-            json=MagicMock(side_effect=ValueError()),
-            text="[Mocked text response]"
-        )
-    )
-    assert harbor_api._make_get_request('{base_url}/api/path') == "[Mocked text response]"
-
-    harbor_api.http.get = MagicMock(
-        return_value=MagicMock(
-            raise_for_status=MagicMock(
-                side_effect=HTTPError()
-            )
-        )
-    )
+    harbor_api.http.get = MagicMock(return_value=MockResponse(None, 500))
     with pytest.raises(HTTPError):
         harbor_api._make_get_request('{base_url}/api/path')
 
 
 def test_api__make_paginated_get_request(harbor_api):
     expected_result = [{'item': i} for i in range(20)]
-    paginated_result = [
-        [expected_result[i], expected_result[i+1]] for i in range(0, len(expected_result) - 1, 2)
-    ]
+    paginated_result = [[expected_result[i], expected_result[i + 1]] for i in range(0, len(expected_result) - 1, 2)]
     values = []
     for r in paginated_result:
-        values.append(
-            MagicMock(
-                json=MagicMock(return_value=r),
-                links={'next': {'url': 'unused_url'}},
-            )
-        )
+        resp = MockResponse(r, 200)
+        resp.links = {'next': {'url': 'unused_url'}}
+        values.append(resp)
     values[-1].links = {}
 
     harbor_api.http = MagicMock()
-    harbor_api.http.get = MagicMock(
-        side_effect=values
-    )
+    harbor_api.http.get = MagicMock(side_effect=values)
 
     assert harbor_api._make_paginated_get_request('{base_url}/api/path') == expected_result
 
 
 def test_api__make_post_request(harbor_api):
     harbor_api.http = MagicMock()
-    harbor_api.http.post = MagicMock(
-        return_value=MagicMock(
-            json=MagicMock(return_value={"json": True}),
-        )
-    )
+    harbor_api.http.post = MagicMock(return_value=MockResponse({"json": True}, 200))
     assert harbor_api._make_post_request('{base_url}/api/path') == {"json": True}
 
-    harbor_api.http.post = MagicMock(
-        return_value=MagicMock(
-            json=MagicMock(side_effect=ValueError()),
-            text="[Mocked text response]"
-        )
-    )
-    assert harbor_api._make_post_request('{base_url}/api/path') == "[Mocked text response]"
-
-    harbor_api.http.post = MagicMock(
-        return_value=MagicMock(
-            raise_for_status=MagicMock(
-                side_effect=HTTPError()
-            )
-        )
-    )
+    harbor_api.http.post = MagicMock(return_value=MockResponse(None, 500))
     with pytest.raises(HTTPError):
         harbor_api._make_post_request('{base_url}/api/path')

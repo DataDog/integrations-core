@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2019
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from .common import (
     CHARTREPO_HEALTH_URL,
     HEALTH_URL,
@@ -23,6 +26,7 @@ class HarborAPI(object):
         self._fetch_and_set_harbor_version()
 
     def authenticate(self, username, password):
+        """Provides a session cookie used for other calls."""
         auth_form_data = {'principal': username, 'password': password}
         if self.harbor_version >= VERSION_1_7:
             url = self._resolve_url(LOGIN_URL)
@@ -30,14 +34,19 @@ class HarborAPI(object):
             url = self._resolve_url(LOGIN_PRE_1_7_URL)
         self._make_post_request(url, data=auth_form_data)
 
+    def chartrepo_health(self):
+        """Support added with Harbor 1.6"""
+        return self._make_get_request(CHARTREPO_HEALTH_URL)
+
     def health(self):
+        """Support added with Harbor 1.8 This endpoints provide granular health probes on each component of the
+        Harbor environment
+        """
         return self._make_get_request(HEALTH_URL)
 
     def ping(self):
+        """Support added with Harbor 1.5"""
         return self._make_get_request(PING_URL)
-
-    def chartrepo_health(self):
-        return self._make_get_request(CHARTREPO_HEALTH_URL)
 
     def projects(self):
         return self._make_paginated_get_request(PROJECTS_URL)
@@ -76,23 +85,19 @@ class HarborAPI(object):
             results.extend(resp.json())
         return results or []
 
-    def _make_get_request(self, url):
-        resp = self.http.get(self._resolve_url(url))
+    def _make_get_request(self, url, **kwargs):
+        resp = self.http.get(self._resolve_url(url), **kwargs)
         resp.raise_for_status()
-        try:
+        if resp.content:
+            # Do not parse json of an empty response
             return resp.json()
-        except ValueError:
-            # Cannot decode json. Some api calls (i.e. "PING") return plain text data.
-            return resp.text
 
-    def _make_post_request(self, url, data=None, json=None):
-        resp = self.http.post(self._resolve_url(url), data=data, json=json)
+    def _make_post_request(self, url, **kwargs):
+        resp = self.http.post(self._resolve_url(url), **kwargs)
         resp.raise_for_status()
-        try:
+        if resp.content:
+            # Do not parse json of an empty response
             return resp.json()
-        except ValueError:
-            # Cannot decode json. Some api calls (i.e. "PING") return plain text data.
-            return resp.text
 
-    def _resolve_url(self, url, **kwargs):
-        return url.format(base_url=self.base_url, **kwargs)
+    def _resolve_url(self, url):
+        return url.format(base_url=self.base_url)

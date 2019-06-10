@@ -4,9 +4,9 @@
 import os
 import time
 
-import mock
 import pytest
 import requests
+from mock import MagicMock, patch
 
 from datadog_checks.dev import LazyFunction, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
@@ -88,10 +88,10 @@ def admin_instance():
 @pytest.fixture
 def harbor_check(admin_instance):
     check = HarborCheck('harbor', {}, [admin_instance])
-    check.log = mock.MagicMock()
-    check.gauge = mock.MagicMock()
-    check.count = mock.MagicMock()
-    check.service_check = mock.MagicMock()
+    check.log = MagicMock()
+    check.gauge = MagicMock()
+    check.count = MagicMock()
+    check.service_check = MagicMock()
     return check
 
 
@@ -102,7 +102,7 @@ def harbor_api(harbor_check, admin_instance, patch_requests):
 
 @pytest.fixture
 def patch_requests():
-    with mock.patch.object(requests.Session, 'request', side_effect=mocked_requests):
+    with patch.object(requests.Session, 'request', side_effect=mocked_requests):
         yield
 
 
@@ -112,19 +112,21 @@ def get_docker_compose_file():
     return os.path.join(HERE, 'compose', harbor_folder, 'docker-compose.yml')
 
 
+class MockResponse:
+    def __init__(self, json_or_text, status_code):
+        self.json_or_text = json_or_text
+        self.status_code = status_code
+        self.text = json_or_text
+        self.content = json_or_text
+        self.json = lambda: self.json_or_text
+        self.links = []
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise requests.HTTPError("[MockedResponse] Status code is {}".format(self.status_code))
+
+
 def mocked_requests(_, *args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_or_text, status_code):
-            self.json_or_text = json_or_text
-            self.status_code = status_code
-            self.text = json_or_text
-            self.json = lambda: self.json_or_text
-            self.links = []
-
-        def raise_for_status(self):
-            if self.status_code >= 400:
-                raise requests.HTTPError("[MockedResponse] Status code is {}".format(self.status_code))
-
     def match(url, *candidates_url):
         for c in candidates_url:
             if url == c.format(base_url=URL):

@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 SYSTEM_INFO_URL = "{base_url}/api/systeminfo/"
 LOGIN_URL = "{base_url}/c/login/"
 LOGIN_PRE_1_7_URL = "{base_url}/login/"
