@@ -87,15 +87,6 @@ class HarborCheck(AgentCheck):
 
     def _submit_project_metrics(self, api, base_tags):
         projects = api.projects()
-        for project in projects:
-            tags = list(base_tags)
-            if "metadata" in project and "public" in project['metadata']:
-                is_public = project['metadata']['public']
-                tags.append("public:{}".format(is_public))
-            if project.get('owner_name'):
-                tags.append("owner_name:{}".format(project['owner_name']))
-
-            self.gauge('harbor.projects', 1, tags=tags)
         self.gauge('harbor.projects.count', len(projects), tags=base_tags)
         self.log.debug("Found %d Harbor projects", len(projects))
 
