@@ -2,7 +2,7 @@
     "board_title": "IBM Db2 Overview",
     "read_only": false,
     "author_info": {
-        "author_name": "Dhruv Sahni"
+        "author_name": "Datadog"
     },
     "description": "## IBM Db2 Dashboard\n\nThis is an example IBM Db2 dashboard demonstrating the metrics that the integration collects.",
     "board_bgtype": "board_graph",
@@ -10,15 +10,15 @@
     "new_id": "xa5-hrs-4jx",
     "modified": "2019-05-20T23:17:12.317801+00:00",
     "created_by": {
-        "handle": "dhruv.sahni@datadoghq.com",
-        "name": "Dhruv Sahni",
+        "handle": "support@datadoghq.com",
+        "name": "Datadog",
         "access_role": "st",
         "verified": true,
         "disabled": false,
         "is_admin": false,
         "role": null,
-        "email": "dhruv.sahni@datadoghq.com",
-        "icon": "https://secure.gravatar.com/avatar/9de7191a807a492a126b0943aa239292?s=48&d=retro"
+        "email": "support@datadoghq.com",
+        "icon": ""
     },
     "height": 101,
     "width": 200,
