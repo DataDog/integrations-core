@@ -1,22 +1,21 @@
 # Directory Check
 ## Overview
 
-Capture metrics from directories and files of your choosing. The Agent will collect:
+Capture metrics from directories and files of your choosing. The Agent collects:
 
-  * number of files
-  * file size
-  * age of the last modification
-  * age of the creation
+  * Number of files
+  * File size
+  * Age of the last modification
+  * Age of the creation
 
 ## Setup
 ### Installation
 
-The directory check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
+The Directory check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
 
 ### Configuration
 
-1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting Directory performance data.
-  See the [sample directory.d/conf.yaml][3] for all available configuration options.
+1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting Directory performance data. See the [sample directory.d/conf.yaml][3] for all available configuration options.
 
     ```yaml
       init_config:
@@ -36,9 +35,12 @@ The directory check is included in the [Datadog Agent][1] package, so you don't 
 
 2. [Restart the Agent][4].
 
+#### Metrics collection
+The Directory check can potentially emit [custom metrics][8], which may impact [billing][9].
+
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `directory` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `directory` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -61,3 +63,5 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv
 [7]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[9]: https://docs.datadoghq.com/account_management/billing/custom_metrics/

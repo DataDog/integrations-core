@@ -1,11 +1,11 @@
-# Agent_metrics Integration
+# Agent Metrics Integration
 
 ## Overview
 
-Get metrics from agent_metrics service in real time to:
+Get metrics from the Agent Metrics service in real time to:
 
-* Visualize and monitor agent_metrics states
-* Be notified about agent_metrics failovers and events.
+* Visualize and monitor `agent_metrics` states
+* Be notified about `agent_metrics` failovers and events.
 
 **NOTE**: The Agent Metrics check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents prior to major version 6**.
 
@@ -18,25 +18,26 @@ The Agent Metrics check is included in the [Datadog Agent][3] package, so you do
 
 ### Configuration
 
-1. Edit the `agent_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4], to point to your server and port, set the masters to monitor.
+1. Edit the `agent_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4], to point to your server and port, set the masters to monitor. See the [sample agent_metrics.d/conf.yaml][5] for all available configuration options.
 
-    See the [sample agent_metrics.d/conf.yaml][5] for all available configuration options.
+2. [Restart the Agent][6].
 
-2. [Restart the Agent][6]
+#### Metrics collection
+The Agent Metrics integration can potentially emit [custom metrics][10], which may impact [billing][11].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `agent_metrics` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `agent_metrics` under the Checks section.
 
 ## Data Collected
 ### Metrics
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
-The Agent_metrics check does not include any events.
+The Agent Metrics check does not include any events.
 
 ### Service Checks
-The Agent_metrics check does not include any service checks.
+The Agent Metrics check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][9].
@@ -50,3 +51,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/agent_metrics/metadata.csv
 [9]: https://docs.datadoghq.com/help
+[10]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[11]: https://docs.datadoghq.com/account_management/billing/custom_metrics/

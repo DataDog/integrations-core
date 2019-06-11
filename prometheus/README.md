@@ -5,7 +5,7 @@
 Extract custom metrics from any prometheus endpoints.
 
 <div class="alert alert-warning">
-All the metrics retrieved by this integration are considered custom metrics.
+All the metrics retrieved by this integration are considered [custom metrics][7].
 </div>
 
 ## Setup
@@ -65,3 +65,4 @@ Need help? Contact [Datadog support][3].
 [4]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
 [5]: https://docs.datadoghq.com/agent/prometheus
 [6]: https://docs.datadoghq.com/developers/prometheus
+[7]: https://docs.datadoghq.com/developers/metrics/custom_metrics

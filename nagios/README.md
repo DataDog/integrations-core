@@ -17,6 +17,9 @@ Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [
 
 [Restart the Agent][4] to start sending Nagios events and (optionally) performance data metrics to Datadog.
 
+#### Metrics collection
+The Nagios check can potentially emit [custom metrics][13], which may impact [billing][14].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][5] and look for `nagios` under the Checks section.
@@ -61,3 +64,5 @@ Need help? Contact [Datadog support][6].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://docs.datadoghq.com/help
 [7]: https://www.datadoghq.com/blog/nagios-monitoring
+[8]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[9]: https://docs.datadoghq.com/account_management/billing/custom_metrics/

@@ -102,6 +102,9 @@ See [MSDN][8] for more information.
 Setting this causes any instance number to be removed from tag_by values i.e. name:process#1 => name:process
 </div>
 
+#### Metrics collection
+The WMI check can potentially emit [custom metrics][12], which may impact [billing][13].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][9] and look for `wmi_check` under the Checks section.
@@ -130,3 +133,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
 [11]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[13]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
