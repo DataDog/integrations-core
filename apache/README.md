@@ -93,7 +93,7 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 ## Troubleshooting
 
 ### Apache status URL
-If you are having issues with your Apache integration, it is mostly like due to the Agent not being able to access your Apache status URL. Try running curl for the `apache_status_url` listed in your configuration YAML (include your login credentials if applicable).
+If you are having issues with your Apache integration, it is mostly like due to the Agent not being able to access your Apache status URL. Try running curl for the `apache_status_url` listed in [your `apache.d/conf.yaml` file][4] (include your login credentials if applicable).
 
 * [Apache SSL certificate issues][10]
 
