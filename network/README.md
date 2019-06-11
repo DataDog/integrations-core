@@ -36,6 +36,12 @@ Note: the appropriate sudoers rules have to be configured for this to work
 ```
 dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
+Note: on some host, the conntrack module is not activated by default, so no conntrack metric will be sent. To solve this, run
+```
+sudo modprobe nf_conntrack
+sudo modprobe nf_conntrack_ipv4
+sudo modprobe nf_conntrack_ipv6
+```
 
 ### Validation
 
