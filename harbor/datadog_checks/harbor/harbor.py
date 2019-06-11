@@ -23,11 +23,10 @@ class HarborCheck(AgentCheck):
         """Submits service checks for Harbor individual components."""
         if api.harbor_version >= VERSION_1_8:
             health = api.health()
-            overall_status = AgentCheck.OK if health['status'] == HEALTHY else AgentCheck.CRITICAL
-            self.service_check('harbor.status', overall_status, tags=base_tags)
             for el in health['components']:
                 component_status = AgentCheck.OK if el['status'] == HEALTHY else AgentCheck.CRITICAL
-                self.service_check('harbor.component.{}.status'.format(el['name']), component_status, tags=base_tags)
+                tags = base_tags + ['component:{}'.format(el['name'])]
+                self.service_check('harbor.status', component_status, tags=tags)
         elif api.harbor_version >= VERSION_1_5:
             ping = api.ping()
             overall_status = AgentCheck.OK if ping == 'Pong' else AgentCheck.CRITICAL
@@ -44,12 +43,11 @@ class HarborCheck(AgentCheck):
                         return
                     raise e
                 chartrepo_status = AgentCheck.OK if chartrepo_health else AgentCheck.CRITICAL
-                self.service_check('harbor.component.chartmuseum.status', chartrepo_status, tags=base_tags)
+                tags = base_tags + ['component:chartmuseum']
+                self.service_check('harbor.status', chartrepo_status, tags=tags)
         else:
-            # Before version 1.5, there is no support for a health check. In that case the integration submits OK if the
-            # API is reachable and critical otherwise. Because at that point authentication has already been made,
-            # Harbor is considered healthy.
-            self.service_check('harbor.status', AgentCheck.OK, tags=base_tags)
+            # Before version 1.5, there is no support for a health check.
+            self.service_check('harbor.status', AgentCheck.UNKNOWN, tags=base_tags)
 
     def _check_registries_health(self, api, base_tags):
         """A registry here is an external docker registry (DockerHub, ECR, another Harbor...) that this current
@@ -115,11 +113,12 @@ class HarborCheck(AgentCheck):
         try:
             api = HarborAPI(harbor_url, self.http)
             api.authenticate(username, password)
-            self._check_health(api, tags)
         except Exception:
             self.log.exception("Harbor API is not reachable")
-            self.service_check('harbor.status', AgentCheck.CRITICAL)
+            self.service_check('harbor.can_connect', AgentCheck.CRITICAL)
             raise
+        self.service_check('harbor.can_connect', AgentCheck.OK)
+        self._check_health(api, tags)
         self._check_registries_health(api, tags)
         self._submit_project_metrics(api, tags)
         self._submit_disk_metrics(api, tags)

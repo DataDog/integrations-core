@@ -6,22 +6,11 @@ import os
 from datadog_checks.dev import get_docker_hostname
 
 USERS_URL = '{base_url}/api/users/'
+VERSION_1_5 = [1, 5, 0]
 VERSION_1_6 = [1, 6, 0]
 VERSION_1_8 = [1, 8, 0]
 
-HARBOR_STATUS_CHECKS = [
-    # Metric_name, minimum harbor version, requires admin privileges
-    ('harbor.status', None, False),
-    ('harbor.component.chartmuseum.status', VERSION_1_8, False),
-    ('harbor.component.chartmuseum.status', VERSION_1_6, True),
-    ('harbor.component.registry.status', VERSION_1_8, False),
-    ('harbor.component.redis.status', VERSION_1_8, False),
-    ('harbor.component.jobservice.status', VERSION_1_8, False),
-    ('harbor.component.registryctl.status', VERSION_1_8, False),
-    ('harbor.component.portal.status', VERSION_1_8, False),
-    ('harbor.component.core.status', VERSION_1_8, False),
-    ('harbor.component.database.status', VERSION_1_8, False),
-]
+HARBOR_COMPONENTS = ['chartmuseum', 'registry', 'redis', 'jobservice', 'registryctl', 'portal', 'core', 'database']
 
 HARBOR_METRICS = [
     # Metric_name, requires admin privileges
