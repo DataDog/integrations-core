@@ -15,7 +15,7 @@ To install pymqi on Mac, first set up the [IBM MQ toolkit for Mac OS][1].
 
 How to run tests from PyCharm
 =============================
-Set up following env vars in your test run configuration:
+Set up the following env vars in your test run configuration:
 
 * PYTHONPATH=$PYTHONPATH:$PATH_TO_YOUR_PYTHON_INSTALL/site-packages/pymqi  # Otherwise pycharm refuses to find pymqe.so
 * DYLD_LIBRARY_PATH=~/IBM-MQ-Toolkit-Mac-x64-9.1.2.0/lib64
