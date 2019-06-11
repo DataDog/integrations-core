@@ -22,7 +22,7 @@ The Nagios check can potentially emit [custom metrics][13], which may impact [bi
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `nagios` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `nagios` under the Checks section.
 
 ## Data Collected
 ### Metrics
