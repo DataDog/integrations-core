@@ -41,8 +41,8 @@ instances:
     ## Collect from queues that match a regex
     #
     # queue_patterns:
-    #  - '^DEV\..*$'          # match queues starting with "DEV."
-    #  - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
+    #   - '^DEV\..*$'          # match queues starting with "DEV."
+    #   - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
 
     ## @param channels - list of string - optional
     ## Check the status of the following channels
