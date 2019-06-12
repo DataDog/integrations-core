@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+vsphere.vm.count,gauge,,,,The total number of VMs,0,vsphere,vm count
 vsphere.cpu.extra,gauge,,millisecond,,Milliseconds of extra CPU time,-1,vsphere,cpu extra
 vsphere.cpu.ready,gauge,,millisecond,,Milliseconds of CPU time spent in ready state,-1,vsphere,cpu ready
 vsphere.cpu.usage,gauge,,percent,,Percentage of CPU capacity being used,-1,vsphere,cpu usage
