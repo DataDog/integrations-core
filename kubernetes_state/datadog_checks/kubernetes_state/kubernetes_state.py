@@ -116,6 +116,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_limitrange': self.kube_limitrange,
             'kube_persistentvolume_status_phase': self.count_objects_by_tags,
             'kube_service_spec_type': self.count_objects_by_tags,
+            'kube_job_status_completion_time': self.kube_job_status_completion_time,
+            'kube_job_status_start_time': self.kube_job_status_start_time,
         }
 
         # Handling cron jobs succeeded/failed counts
@@ -126,8 +128,12 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
 
+        self.job_start_time = defaultdict(int)
+        self.job_completion_time = defaultdict(int)
+
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
+
 
         scraper_config = self.config_map[endpoint]
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
@@ -142,6 +148,8 @@ class KubernetesState(OpenMetricsBaseCheck):
             job.set_previous_and_reset_current_ts()
 
         # Logic for Jobs
+        self.kube_job_status_execution_time(scraper_config)
+
         for job_tags, job_count in iteritems(self.job_succeeded_count):
             self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count, list(job_tags))
         for job_tags, job_count in iteritems(self.job_failed_count):
@@ -321,8 +329,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_job_spec_completions',
                     'kube_job_spec_parallelism',
                     'kube_job_status_active',
-                    'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
-                    'kube_job_status_start_time',
                     'kube_verticalpodautoscaler_labels',
                 ],
                 'label_joins': {
@@ -648,6 +654,36 @@ class KubernetesState(OpenMetricsBaseCheck):
                 )
             else:
                 self.job_succeeded_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
+
+    def kube_job_status_start_time(self, metric, scraper_config):
+        for sample in metric.samples:
+            tags = [] + scraper_config['custom_tags']
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                tags.append(self._format_tag(label_name, label_value, scraper_config))
+            self.job_start_time[frozenset(tags)] += int(sample[self.SAMPLE_VALUE])
+
+    def kube_job_status_completion_time(self, metric, scraper_config):
+        for sample in metric.samples:
+            tags = [] + scraper_config['custom_tags']
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                tags.append(self._format_tag(label_name, label_value, scraper_config))
+            self.job_completion_time[frozenset(tags)] += int(sample[self.SAMPLE_VALUE])
+
+    def kube_job_status_execution_time(self, scraper_config):
+        metric_name = scraper_config['namespace'] + '.job.execution_time'
+        for job_tags, completion_time in iteritems(self.job_completion_time):
+            if job_tags in self.job_start_time:
+                start_time = self.job_start_time[job_tags]
+                tags = [] + scraper_config['custom_tags']
+                for job_tag in list(job_tags):
+                    label = job_tag.split(":")
+                    label_name = label[0]
+                    label_value = label[1]
+                    if label_name == 'job' or label_name == 'job_name':
+                        trimmed_job = self._trim_job_tag(label_value)
+                        tags.append(self._format_tag(label_name, label_value, scraper_config))
+                        tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
+                self.gauge(metric_name, completion_time - start_time, tags)
 
     def kube_node_status_condition(self, metric, scraper_config):
         """ The ready status of a cluster node. v1.0+"""
