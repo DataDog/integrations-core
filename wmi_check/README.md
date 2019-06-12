@@ -103,7 +103,7 @@ Setting this causes any instance number to be removed from tag_by values i.e. na
 </div>
 
 #### Metrics collection
-The WMI check can potentially emit [custom metrics][12], which may impact [billing][13].
+The WMI check can potentially emit [custom metrics][12], which may impact your [billing][13].
 
 ### Validation
 

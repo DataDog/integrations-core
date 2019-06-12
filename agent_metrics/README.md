@@ -23,7 +23,7 @@ The Agent Metrics check is included in the [Datadog Agent][3] package, so you do
 2. [Restart the Agent][6].
 
 #### Metrics collection
-The Agent Metrics integration can potentially emit [custom metrics][10], which may impact [billing][11].
+The Agent Metrics integration can potentially emit [custom metrics][10], which may impact your [billing][11].
 
 ### Validation
 

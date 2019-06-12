@@ -44,7 +44,7 @@ Provide service names as they appear in the `services.msc` properties field (e.g
 [Restart the Agent][4] to start monitoring the services and sending service checks to Datadog.
 
 #### Metrics collection
-The Windows Service check can potentially emit [custom metrics][10], which may impact [billing][11].
+The Windows Service check can potentially emit [custom metrics][10], which may impact your [billing][11].
 
 ### Validation
 

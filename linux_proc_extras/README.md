@@ -16,7 +16,7 @@ The Linux_proc_extras check is included in the [Datadog Agent][1] package, so yo
 Edit the `linux_proc_extras.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample linux_proc_extras.d/conf.yaml][3] for all available configuration options.
 
 #### Metrics collection
-The Linux Proc Extras check can potentially emit [custom metrics][6], which may impact [billing][7].
+The Linux Proc Extras check can potentially emit [custom metrics][6], which may impact your [billing][7].
 
 ### Validation
 

@@ -212,7 +212,7 @@ The Agent looks for the converted MIB Python files by specifying the destination
 [Restart the Agent][9] to start sending SNMP metrics to Datadog.
 
 #### Metrics collection
-The SNMP check can potentially emit [custom metrics][14], which may impact [billing][15].
+The SNMP check can potentially emit [custom metrics][14], which may impact your [billing][15].
 
 ### Validation
 

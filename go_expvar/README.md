@@ -47,7 +47,7 @@ If your service doesn't already listen for HTTP requests (with the http package)
 2. [Restart the Agent][8] to begin sending memstat and expvar metrics to Datadog.
 
 #### Metrics collection
-The Go Expvar integration can potentially emit [custom metrics][13], which may impact [billing][14]. By default, there is a limit of 350 metrics. If you require additional metrics, contact [Datadog support][11].
+The Go Expvar integration can potentially emit [custom metrics][13], which may impact your [billing][14]. By default, there is a limit of 350 metrics. If you require additional metrics, contact [Datadog support][11].
 
 ### Validation
 

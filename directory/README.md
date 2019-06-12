@@ -36,7 +36,7 @@ The Directory check is included in the [Datadog Agent][1] package, so you don't 
 2. [Restart the Agent][4].
 
 #### Metrics collection
-The Directory check can potentially emit [custom metrics][8], which may impact [billing][9].
+The Directory check can potentially emit [custom metrics][8], which may impact your [billing][9].
 
 ### Validation
 

@@ -19,7 +19,7 @@ The ActiveMQ XML check is included in the [Datadog Agent][111] package, so you d
 2. [Restart the Agent][114].
 
 #### Metrics collection
-The ActiveMQ XML integration can potentially emit [custom metrics][119], which may impact [billing][120]. By default, there is a limit of 350 metrics. If you require additional metrics, contact [Datadog support][117].
+The ActiveMQ XML integration can potentially emit [custom metrics][119], which may impact your [billing][120]. By default, there is a limit of 350 metrics. If you require additional metrics, contact [Datadog support][117].
 
 ### Validation
 
