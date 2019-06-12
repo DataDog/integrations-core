@@ -1,0 +1,29 @@
+{
+  "display_name": "linkerd2",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "linkerd2",
+  "metric_prefix": "linkerd2.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "2370e08c-543c-4712-a40f-b04cf9ae6f68",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-linkerd2 Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "linkerd2",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
