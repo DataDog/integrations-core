@@ -20,7 +20,7 @@ instances:
     #
     cluster_name: default_cluster
 
-    ## @param application_tags - list of key:value elements - optional
+    ## @param application_tags - dictionary - optional
     ## Set up tags retrieved from the application data to be applied to the
     ## application metrics.
     ##
@@ -29,7 +29,8 @@ instances:
     ## By default, the application name is collected with the tag key: `app_name`.
     #
     # application_tags:
-    #   - <TAG_KEY>:<YARN_KEY>
+    #   <TAG_KEY1>: <YARN_KEY>
+    #   <TAG_KEY2>: <YARN_KEY>
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event, and service check emitted by this Integration.
