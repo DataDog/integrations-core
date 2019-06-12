@@ -98,7 +98,7 @@ The Cacti check does not include any service checks.
 
 ## Troubleshooting
 ### Known issues
-The Python library used by this integration leaks memory under certain circumstances. If you experience this, one workaround is to install the [python-rrdtool][6] package instead of rrdtool. This older package is not maintained and is not officially supported by this integration but it has help others resolve the memory issues.
+The Python library used by this integration leaks memory under certain circumstances. If you experience this, one workaround is to install the [python-rrdtool][6] package instead of rrdtool. This older package is not maintained and is not officially supported by this integration but it has helped others resolve the memory issues.
 
 A [Github issue][7] has been opened to track this memory leak.
 
