@@ -1,5 +1,10 @@
 # CHANGELOG - Kube_controller_manager
 
+## 1.3.0
+
+* [Added] Add support for new metrics introduced in kubernetes v1.14
+* [Added] Add new parameter "ignore_deprecated" for ignoring deprecated metrics
+
 ## 1.2.0 / 2019-05-14
 
 * [Fixed] Fix the list of default rate limiters. See [#3724](https://github.com/DataDog/integrations-core/pull/3724).

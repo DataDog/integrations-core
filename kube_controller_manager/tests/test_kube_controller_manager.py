@@ -14,6 +14,14 @@ instance = {
     'prometheus_url': 'http://localhost:10252/metrics',
     'extra_queues': ['extra'],
     'extra_limiters': ['extra_controller'],
+    'ignore_deprecated': False,
+}
+
+instance2 = {
+    'prometheus_url': 'http://localhost:10252/metrics',
+    'extra_queues': ['extra'],
+    'extra_limiters': ['extra_controller'],
+    'ignore_deprecated': True,
 }
 
 # Constants
@@ -48,13 +56,30 @@ def mock_leader():
         yield
 
 
-def test_check_metrics(aggregator, mock_metrics, mock_leader):
+def test_check_metrics_with_deprecated(aggregator, mock_metrics, mock_leader):
     c = KubeControllerManagerCheck(CHECK_NAME, None, {}, [instance])
     c.check(instance)
 
+    generic_check_metrics(aggregator, True)
+
+
+def test_check_metrics_without_deprecated(aggregator, mock_metrics, mock_leader):
+    c = KubeControllerManagerCheck(CHECK_NAME, None, {}, [instance])
+    c.check(instance2)
+
+    generic_check_metrics(aggregator, False)
+
+
+def generic_check_metrics(aggregator, check_deprecated):
     def assert_metric(name, **kwargs):
         # Wrapper to keep assertions < 120 chars
         aggregator.assert_metric(NAMESPACE + name, **kwargs)
+
+    for name in aggregator._metrics:
+        for metric in aggregator.metrics(name):
+            print(metric)
+    for name in aggregator._metrics:
+        print(name)
 
     assert_metric('.goroutines')
     assert_metric('.threads')
@@ -62,36 +87,39 @@ def test_check_metrics(aggregator, mock_metrics, mock_leader):
     assert_metric('.client.http.requests')
     assert_metric('.max_fds')
 
-    assert_metric('.nodes.evictions', metric_type=aggregator.MONOTONIC_COUNT, value=33, tags=["zone:test"])
+    assert_metric('.nodes.evictions', metric_type=aggregator.MONOTONIC_COUNT, value=1, tags=["zone:test"])
     assert_metric('.nodes.count', value=5, tags=["zone:test"])
     assert_metric('.nodes.unhealthy', value=1, tags=["zone:test"])
 
     assert_metric('.rate_limiter.use', value=1, tags=["limiter:job_controller"])
     assert_metric('.rate_limiter.use', value=0, tags=["limiter:daemon_controller"])
 
-    assert_metric('.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=29, tags=["queue:replicaset"])
-    assert_metric('.queue.depth', metric_type=aggregator.GAUGE, value=3, tags=["queue:service"])
-    assert_metric('.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=13, tags=["queue:deployment"])
+    assert_metric('.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=238.0, tags=["queue:replicaset"])
+    assert_metric('.queue.depth', metric_type=aggregator.GAUGE, value=29, tags=["queue:service"])
+    assert_metric('.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=1283, tags=["queue:deployment"])
 
-    assert_metric('.queue.work_duration.sum', value=255667, tags=["queue:replicaset"])
-    assert_metric('.queue.work_duration.count', value=29, tags=["queue:replicaset"])
-    assert_metric('.queue.work_duration.quantile', value=110, tags=["queue:replicaset", "quantile:0.5"])
+    if check_deprecated:
+        assert_metric('.queue.work_duration.sum', value=2124279, tags=["queue:replicaset"])
+        assert_metric('.queue.work_duration.count', value=238, tags=["queue:replicaset"])
+        assert_metric('.queue.work_duration.quantile', value=144, tags=["queue:replicaset", "quantile:0.5"])
 
-    assert_metric('.queue.latency.sum', value=423889, tags=["queue:deployment"])
-    assert_metric('.queue.latency.count', value=29, tags=["queue:deployment"])
-    assert_metric('.queue.latency.quantile', value=1005, tags=["queue:deployment", "quantile:0.9"])
+        assert_metric('.queue.latency.sum', value=1953629, tags=["queue:deployment"])
+        assert_metric('.queue.latency.count', value=1454, tags=["queue:deployment"])
+        assert_metric('.queue.latency.quantile', value=15195, tags=["queue:deployment", "quantile:0.9"])
 
     # Extra name from the instance
     assert_metric('.rate_limiter.use', value=0, tags=["limiter:extra_controller"])
-    assert_metric('.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=13, tags=["queue:extra"])
-    assert_metric('.queue.depth', metric_type=aggregator.GAUGE, value=2, tags=["queue:extra"])
-    assert_metric('.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=55, tags=["queue:extra"])
-    assert_metric('.queue.work_duration.sum', value=45171, tags=["queue:extra"])
-    assert_metric('.queue.work_duration.count', value=13, tags=["queue:extra"])
-    assert_metric('.queue.work_duration.quantile', value=6, tags=["queue:extra", "quantile:0.5"])
-    assert_metric('.queue.latency.sum', value=9309, tags=["queue:extra"])
-    assert_metric('.queue.latency.count', value=13, tags=["queue:extra"])
-    assert_metric('.queue.latency.quantile', value=10, tags=["queue:extra", "quantile:0.9"])
+    assert_metric('.queue.adds', metric_type=aggregator.MONOTONIC_COUNT, value=99.0, tags=["queue:daemonset"])
+    assert_metric('.queue.depth', metric_type=aggregator.GAUGE, value=0, tags=["queue:daemonset"])
+    assert_metric('.queue.retries', metric_type=aggregator.MONOTONIC_COUNT, value=4, tags=["queue:daemonset"])
+
+    # Metrics from 1.14
+    assert_metric('.queue.work_longest_duration', value=2, tags=["queue:daemonset"])
+    assert_metric('.queue.work_unfinished_duration', value=1, tags=["queue:daemonset"])
+    assert_metric('.queue.process_duration.count', value=51.0, tags=["queue:daemonset", "upper_bound:0.001"])
+    assert_metric('.queue.process_duration.sum', value=0.7717836519999999, tags=["queue:daemonset"])
+    assert_metric('.queue.queue_duration.count', value=99.0, tags=["queue:daemonset", "upper_bound:none"])
+    assert_metric('.queue.queue_duration.sum', value=0.3633380879999999, tags=["queue:daemonset"])
 
     # Leader election mixin
     expected_le_tags = ["record_kind:endpoints", "record_name:kube-controller-manager", "record_namespace:kube-system"]
