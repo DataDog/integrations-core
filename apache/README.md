@@ -92,7 +92,9 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 
 ## Troubleshooting
 
-* [Issues with Apache Integration][9]
+### Apache status URL
+If you are having issues with your Apache integration, it is mostly like due to the Agent not being able to access your Apache status URL. Try running curl for the `apache_status_url` listed in [your `apache.d/conf.yaml` file][4] (include your login credentials if applicable).
+
 * [Apache SSL certificate issues][10]
 
 ## Further Reading
@@ -112,7 +114,6 @@ Additional helpful documentation, links, and articles:
 [6]: https://docs.datadoghq.com/logs
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
-[9]: https://docs.datadoghq.com/integrations/faq/issues-with-apache-integration
 [10]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues
 [11]: https://www.datadoghq.com/blog/deploying-datadog-with-cloudformation
 [12]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
