@@ -46,7 +46,9 @@ The CoreDNS check does not include any events.
 
 ### Service Checks
 
-The CoreDNS check does not include any service checks.
+`coredns.prometheus.health`:
+
+Returns CRITICAL if the Agent cannot reach the metrics endpoints.
 
 ## Troubleshooting
 

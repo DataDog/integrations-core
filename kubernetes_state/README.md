@@ -53,6 +53,10 @@ Returns `OK` otherwise.
 Returns `CRITICAL` if a cluster node is in a network unavailable state.
 Returns `OK` otherwise.
 
+**kubernetes_state.cronjob.next_schedule_time**
+Returns `CRITICAL` if a cron job does not have a next scheduled time for execution.
+Returns `OK` otherwise.
+
 ## Troubleshooting
 Need help? Contact [Datadog support][6].
 
