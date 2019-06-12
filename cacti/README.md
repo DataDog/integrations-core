@@ -10,7 +10,28 @@ Get metrics from cacti service in real time to:
 ## Setup
 ### Installation
 
-The Cacti check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Cacti servers.
+The Cacti check is included in the [Datadog Agent][1] package, to start gathering metrics you first need to:
+- Install librrd headers and libraries
+- Install python bindings to rrdtool
+
+#### librrd headers and librairies
+
+On Debian/Ubuntu
+```shell
+sudo apt-get install librrd-dev
+```
+
+On RHEL/CentOS
+```shell
+sudo yum install rrdtool-devel
+```
+
+#### Python bindinges
+
+Now add the `rrdtool` Python package to the Agent with the following command.
+```shell
+sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
+```
 
 ### Configuration
 
@@ -76,6 +97,11 @@ The Cacti check does not include any events.
 The Cacti check does not include any service checks.
 
 ## Troubleshooting
+### Known issues
+The Python library used by this integration leaks memory under certain circumstances. If you experience this, one workaround is to install the [python-rrdtool][6] package instead of rrdtool. This older package is not maintained and is not officially supported by this integration but it has helped others resolve the memory issues.
+
+A [Github issue][7] has been opened to track this memory leak.
+
 Need help? Contact [Datadog support][5].
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -83,3 +109,6 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
 [5]: https://docs.datadoghq.com/help
+[6]: https://github.com/pbanaszkiewicz/python-rrdtool
+[7]: https://github.com/commx/python-rrdtool/issues/25
+
