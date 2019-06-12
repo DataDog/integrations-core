@@ -21,3 +21,7 @@ class LinkerdCheck(OpenMetricsBaseCheck):
             'linkerd': {'labels_mapper': labels_mapper, 'metrics': [METRIC_MAP], 'type_overrides': TYPE_OVERRIDES}
         }
         super(LinkerdCheck, self).__init__(name, init_config, agentConfig, instances, default_config, 'linkerd')
+
+    def service_check(self, name, status, tags=None, hostname=None, message=None):
+        self.gauge(name, 1 if status == self.OK else 0, tags=tags)
+        super(LinkerdCheck, self).service_check(name, status, tags=tags, hostname=hostname, message=message)
