@@ -11,14 +11,14 @@ If you prefer to instrument your Go code using only [dogstats-go][2], you can st
 ## Setup
 ### Installation
 
-The Go Expvar check is packaged with the Agent, so [install the Agent][3] anywhere you run Go services whose metrics you want to collect.
+The Go Expvar check is packaged with the Agent, so [install the Agent][3] anywhere you run Go services to collect metrics.
 
 ### Configuration
 #### Prepare your Go service
 
-If your Go service doesn't use the [expvar package][4] already, you'll need to import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar - i.e. you only want to collect your service's memory metrics - import the package using the blank identifier (`import _ "expvar"`).
+If your Go service doesn't use the [expvar package][4] already, import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar - i.e. you only want to collect your service's memory metrics - import the package using the blank identifier (`import _ "expvar"`).
 
-If your service doesn't already listen for HTTP requests (via the http package), [make it listen][5] locally, just for the Datadog Agent.
+If your service doesn't already listen for HTTP requests (with the http package), [make it listen][5] locally just for the Datadog Agent.
 
 #### Connect the Agent
 
@@ -42,13 +42,16 @@ If your service doesn't already listen for HTTP requests (via the http package),
                 #  - "tag_name1:tag_value1"
     ```
 
-    If you don't configure a `metrics` list, the Agent will still collect memstat metrics. Use `metrics` to tell the Agent which expvar vars to collect.
+    If you don't configure a `metrics` list, the Agent still collects memstat metrics. Use `metrics` to tell the Agent which expvar vars to collect.
 
 2. [Restart the Agent][8] to begin sending memstat and expvar metrics to Datadog.
 
+#### Metrics collection
+The Go Expvar integration can potentially emit [custom metrics][13], which may impact your [billing][14]. By default, there is a limit of 350 metrics. If you require additional metrics, contact [Datadog support][11].
+
 ### Validation
 
-[Run the Agent's `status` subcommand][9] and look for `go_expvar` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `go_expvar` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -81,3 +84,5 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
 [11]: https://docs.datadoghq.com/help
 [12]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog
+[13]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[14]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
