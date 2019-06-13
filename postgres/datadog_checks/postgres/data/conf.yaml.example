@@ -51,20 +51,26 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param relations - list of strings (or objects) - optional
+    ## @param relations - list of objects (or strings) - optional
     ## The list of relations/tables must be specified here to track per-relation (table) metrics.
+    ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
+    ## from all matching relations.
     ## Each relation generates many metrics (10 + 10 per index)
     ## By default all schemas are included. To track relations from specific schemas only,
-    ## use the following syntax:
+    ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
     ##
+    ## Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
+    ## the list of table names. All schemas are included and regex are not supported.
     ## relations:
-    ##   - relation_name: <TABLE_NAME>
-    ##     schemas:
-    ##         - <SCHEMA_NAME>
+    ##   - <TABLE_NAME1>
+    ##   - <TABLE_NAME2>
+    ##
     #
     # relations:
-    #   - <TABLE_NAME_1>
-    #   - <TABLE_NAME_1>
+    #   - relation_name: <TABLE_NAME>
+    #     schemas:
+    #       - <SCHEMA_NAME1>
+    #   - relation_regex: <TABLE_PATTERN>
 
     ## @param collect_function_metrics - boolean - optional - default: false
     ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions

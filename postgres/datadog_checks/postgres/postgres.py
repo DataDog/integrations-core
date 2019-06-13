@@ -22,6 +22,8 @@ except ImportError:
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
 
+ALL_SCHEMAS = object()
+
 
 def psycopg2_connect(*args, **kwargs):
     if 'ssl' in kwargs:
@@ -41,8 +43,8 @@ class PartialFormatter(string.Formatter):
     Ex:
     > print("This is a {type} with {nb_params} parameters.".format(type='string'))
     > "This is a string with {nb_params} parameters."
-
     """
+
     def get_value(self, key, args, kwargs):
         if isinstance(key, str):
             return kwargs.get(key, '{' + key + '}')
@@ -145,7 +147,7 @@ SELECT mode,
         'query': """
 SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
- WHERE relname = ANY(array[{relations_names}]::text[])""",
+ WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
         'relation': True,
     }
 
@@ -162,7 +164,7 @@ SELECT relname,
        indexrelname,
        {metrics_columns}
   FROM pg_stat_user_indexes
- WHERE relname = ANY(array[{relations_names}]::text[])""",
+ WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
         'relation': True,
     }
 
@@ -183,14 +185,15 @@ LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   nspname !~ '^pg_toast' AND
   relkind IN ('r') AND
-  relname = ANY(array[{relations_names}]::text[])""",
+  relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
     }
 
     COUNT_METRICS = {
         'descriptors': [('schemaname', 'schema')],
         'metrics': {'pg_stat_user_tables': ('postgresql.table.count', GAUGE)},
         'relation': False,
-        'query': fmt.format("""
+        'query': fmt.format(
+            """
 SELECT schemaname, count(*) FROM
 (
   SELECT schemaname
@@ -198,7 +201,9 @@ SELECT schemaname, count(*) FROM
   ORDER BY schemaname, relname
   LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
-        """, table_count_limit=TABLE_COUNT_LIMIT),
+        """,
+            table_count_limit=TABLE_COUNT_LIMIT,
+        ),
     }
 
     q1 = (
@@ -272,7 +277,7 @@ SELECT relname,
        schemaname,
        {metrics_columns}
   FROM pg_statio_user_tables
- WHERE relname = ANY(array[{relations_names}]::text[])""",
+ WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
         'relation': True,
     }
 
@@ -577,7 +582,12 @@ GROUP BY datid, datname
         if not metrics:
             return None
 
-        return {'descriptors': [], 'metrics': metrics, 'query': "select {metrics_columns} FROM pg_stat_bgwriter", 'relation': False}
+        return {
+            'descriptors': [],
+            'metrics': metrics,
+            'query': "select {metrics_columns} FROM pg_stat_bgwriter",
+            'relation': False,
+        }
 
     def _get_archiver_metrics(self, key, db):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
@@ -607,7 +617,12 @@ GROUP BY datid, datname
         if not metrics:
             return None
 
-        return {'descriptors': [], 'metrics': metrics, 'query': "select {metrics_columns} FROM pg_stat_archiver", 'relation': False}
+        return {
+            'descriptors': [],
+            'metrics': metrics,
+            'query': "select {metrics_columns} FROM pg_stat_archiver",
+            'relation': False,
+        }
 
     def _get_replication_metrics(self, key, db):
         """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
@@ -660,18 +675,30 @@ GROUP BY datid, datname
         """Builds a dictionary from relations configuration while maintaining compatibility
         """
         config = {}
+
         for element in yamlconfig:
             if isinstance(element, str):
-                config[element] = {'relation_name': element, 'schemas': []}
+                config[element] = {'relation_name': element, 'schemas': [ALL_SCHEMAS]}
             elif isinstance(element, dict):
-                if 'relation_name' not in element or 'schemas' not in element:
-                    self.log.warning("Unknown element format for relation element %s", element)
+                if not ('relation_name' in element or 'relation_regex' in element):
+                    self.log.warning(
+                        "Parameter 'relation_name' or 'relation_regex' is required for relation element %s", element
+                    )
                     continue
-                if not isinstance(element['schemas'], list):
+                if 'relation_name' in element and 'relation_regex' in element:
+                    self.log.warning(
+                        "Expecting only of parameters 'relation_name', 'relation_regex' for relation element %s",
+                        element,
+                    )
+                    continue
+                schemas = element.get('schemas', [])
+                if not isinstance(schemas, list):
                     self.log.warning("Expected a list of schemas for %s", element)
                     continue
-                name = element['relation_name']
-                config[name] = {'relation_name': name, 'schemas': element['schemas']}
+                name = element.get('relation_name') or element['relation_regex']
+                config[name] = element.copy()
+                if len(schemas) == 0:
+                    config[name]['schemas'] = [ALL_SCHEMAS]
             else:
                 self.log.warning('Unhandled relations config type: {}'.format(element))
         return config
@@ -695,10 +722,10 @@ GROUP BY datid, datname
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if scope['relation'] and len(relations_config) > 0:
-                relnames = ', '.join("'{0}'".format(w) for w in relations_config)
-                query = scope['query'] % (", ".join(cols), "%s")  # Keep the last %s intact
-                self.log.debug("Running query: %s with relations: %s" % (query, relnames))
-                cursor.execute(query % relnames)
+                rel_names = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_name' in v)
+                rel_regex = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_regex' in v)
+                self.log.debug("Running query: {} with relations matching: {}".format(query, rel_names + rel_regex))
+                cursor.execute(query.format(relations_names=rel_names, relations_regexes=rel_regex))
             else:
                 self.log.debug("Running query: %s" % query)
                 cursor.execute(query.replace(r'%', r'%%'))
@@ -740,12 +767,19 @@ GROUP BY datid, datname
                 row_table = desc_map['table']
                 row_schema = desc_map['schema']
 
-                config_table_obj = relations_config.get(row_table)
-                if not config_table_obj:
+                if row_table in relations_config:
+                    config_table_objects = [relations_config[row_table]]
+                else:
+                    # Find all matching regexes. Required if the same table matches two different regex
+                    regex_configs = (v for v in relations_config.values() if 'relation_regex' in v)
+                    config_table_objects = [r for r in regex_configs if re.match(r['relation_regex'], row_table)]
+
+                if not config_table_objects:
                     self.log.info("Got row %s.%s, but not relation", row_schema, row_table)
                 else:
-                    config_schemas = config_table_obj.get('schemas')
-                    if not config_schemas:
+                    # Create set of all schemas by flattening and removing duplicates
+                    config_schemas = {s for r in config_table_objects for s in r['schemas']}
+                    if ALL_SCHEMAS in config_schemas:
                         self.log.debug("All schemas are allowed for table %s.%s", row_schema, row_table)
                     elif row_schema not in config_schemas:
                         self.log.debug("Skipping non matched schema %s for table %s", desc_map['schema'], row_table)
