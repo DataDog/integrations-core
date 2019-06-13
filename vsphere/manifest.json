@@ -12,7 +12,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "vsphere.",
-  "metric_to_check": "vsphere.cpu.usage",
+  "metric_to_check": "vsphere.vm.count",
   "name": "vsphere",
   "public_title": "Datadog-vSphere Integration",
   "short_description": "Understand how vSphere resource usage affects your application.",
