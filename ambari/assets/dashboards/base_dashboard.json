@@ -128,7 +128,7 @@
       }
     ],
     "template_variables": [],
-    "description": "## Ambari Dashboard\n\nThis is an example IBM Db2 dashboard demonstrating the metrics that the integration collects.", ,
+    "description": "## Ambari Dashboard\n\nThis is an example Ambari dashboard demonstrating the metrics that the integration collects.",,,
     "title": "Ambari base dashboard",
     "created": "2019-05-10T11:00:04.444248+00:00",
     "new_id": "j6a-62f-eyp",
@@ -144,8 +144,8 @@
       "email": "julia.simon@datadoghq.com",
       "icon": "https://secure.gravatar.com/avatar/c9d6cacf84785d02c44f7a38331316bd?s=48&d=retro"
     },
-    "modified": "2019-06-13T11:55:21.237867+00:00"
+    "modified": "2019-06-13T12:14:19.803028+00:00"
   },
-  "url": "/dash/1204963/julias-timeboard-10-may-2019-1300",
+  "url": "/dash/1204963/ambari-base-dashboard",
   "resource": "/api/v1/dash/1204963"
 }
