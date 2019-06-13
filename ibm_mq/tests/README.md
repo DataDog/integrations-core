@@ -7,7 +7,7 @@ To install pymqi on Mac, first set up the [IBM MQ toolkit for Mac OS][1].
     ```
     export MQ_INSTALLATION_PATH=~/IBM-MQ-Toolkit-Mac-x64-9.1.2.0
     export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MQ_INSTALLATION_PATH/lib64
-    export PATH="${PATH}:~/IBM-MQ-Toolkit-Mac-x64-9.1.2.0/bin"
+    export PATH="${PATH}:$MQ_INSTALLATION_PATH/bin"
     ```
 3. Create a softlink from MQ_INSTALLATION_PATH to /opt/mqm
 4. `pip install pymqi`
