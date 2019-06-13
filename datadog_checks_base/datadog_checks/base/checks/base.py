@@ -881,15 +881,14 @@ class __AgentCheckPy2(object):
             if 'set_breakpoint' in self.init_config:
                 enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
             else:
-                try:
-                    from guppy import hpy
-                    h = hpy()
-                    before = h.heap()
+                from guppy import hpy
+                h = hpy()
+                before = h.heap()
 
-                    self.check(instance)
+                self.check(instance)
 
-                    after = h.heap()
-                    self.log.error(after-before)
+                after = h.heap()
+                self.log.error(after-before)
 
             result = b''
         except Exception as e:
