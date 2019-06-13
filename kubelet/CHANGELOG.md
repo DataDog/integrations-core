@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 3.2.0 / 2019-06-13
+
+* [Added] Collect network usage metrics. See [#3740](https://github.com/DataDog/integrations-core/pull/3740).
+
 ## 3.1.0 / 2019-05-14
 
 * [Added] Collect network usage metrics. See [#3740](https://github.com/DataDog/integrations-core/pull/3740).
