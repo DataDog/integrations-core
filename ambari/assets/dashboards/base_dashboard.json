@@ -1,0 +1,151 @@
+{
+  "dash": {
+    "read_only": false,
+    "graphs": [
+      {
+        "definition": {
+          "viz": "timeseries",
+          "requests": [
+            {
+              "q": "avg:ambari.load.load_one{*} by {host,ambari_cluster}",
+              "style": {
+                "palette": "dog_classic",
+                "width": "normal",
+                "type": "solid"
+              },
+              "type": "line"
+            }
+          ]
+        },
+        "title": "Host load"
+      },
+      {
+        "definition": {
+          "viz": "timeseries",
+          "requests": [
+            {
+              "q": "avg:ambari.memory.mem_free{*} by {ambari_cluster,host}",
+              "style": {
+                "palette": "dog_classic",
+                "width": "normal",
+                "type": "solid"
+              },
+              "type": "line"
+            }
+          ]
+        },
+        "title": "Ambari Free memory by Host"
+      },
+      {
+        "definition": {
+          "viz": "timeseries",
+          "requests": [
+            {
+              "q": "avg:ambari.process.proc_total{*} by {ambari_cluster}",
+              "style": {
+                "palette": "dog_classic",
+                "width": "normal",
+                "type": "solid"
+              },
+              "type": "line"
+            }
+          ]
+        },
+        "title": "Ambari Proc Total by cluster"
+      },
+      {
+        "definition": {
+          "group": "url:https://localhost:8443/ambari-lab-2/dp-proxy/ambari,host:ambarilab2-m-1-20190422120108.c.datadog-integrations-lab.internal",
+          "tags": [
+            "*"
+          ],
+          "group_by": [],
+          "viz": "check_status",
+          "check": "ambari.can_connect",
+          "grouping": "check"
+        },
+        "title": "Agent Up"
+      },
+      {
+        "definition": {
+          "viz": "timeseries",
+          "requests": [
+            {
+              "q": "avg:ambari.cpu.cpu_system{*} by {ambari_cluster}",
+              "style": {
+                "palette": "dog_classic",
+                "width": "normal",
+                "type": "solid"
+              },
+              "type": "line"
+            },
+            {
+              "q": "avg:ambari.cpu.cpu_user{*} by {ambari_cluster}",
+              "style": {
+                "palette": "dog_classic",
+                "width": "normal",
+                "type": "solid"
+              },
+              "type": "line"
+            }
+          ]
+        },
+        "title": "CPU by cluster"
+      },
+      {
+        "definition": {
+          "viz": "timeseries",
+          "requests": [
+            {
+              "q": "avg:ambari.disk.disk_free{*} by {host}",
+              "style": {
+                "palette": "dog_classic",
+                "width": "normal",
+                "type": "solid"
+              },
+              "type": "line"
+            }
+          ]
+        },
+        "title": "Disk free by host"
+      },
+      {
+        "definition": {
+          "viz": "timeseries",
+          "requests": [
+            {
+              "q": "avg:ambari.memory.mem_free{*} by {host}",
+              "style": {
+                "palette": "dog_classic",
+                "width": "normal",
+                "type": "solid"
+              },
+              "type": "line"
+            }
+          ]
+        },
+        "title": "Mem free by host"
+      }
+    ],
+    "template_variables": [],
+    "description": "## Ambari Dashboard\n\nThis is an example IBM Db2 dashboard demonstrating the metrics that the integration collects.", ,
+    "title": "Ambari base dashboard",
+    "created": "2019-05-10T11:00:04.444248+00:00",
+    "new_id": "j6a-62f-eyp",
+    "id": 1204963,
+    "created_by": {
+      "disabled": false,
+      "handle": "julia.simon@datadoghq.com",
+      "name": "Julia Simon",
+      "is_admin": false,
+      "role": null,
+      "access_role": "st",
+      "verified": true,
+      "email": "julia.simon@datadoghq.com",
+      "icon": "https://secure.gravatar.com/avatar/c9d6cacf84785d02c44f7a38331316bd?s=48&d=retro"
+    },
+    "modified": "2019-06-13T11:55:21.237867+00:00"
+  },
+  "url": "/dash/1204963/julias-timeboard-10-may-2019-1300",
+  "resource": "/api/v1/dash/1204963"
+}
