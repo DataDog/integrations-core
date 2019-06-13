@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.7.1 / 2019-06-13
+
+* [Fixed] Fix `application_tags` in conf file. See [#3908](https://github.com/DataDog/integrations-core/pull/3908).
+
 ## 1.7.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3585](https://github.com/DataDog/integrations-core/pull/3585).
