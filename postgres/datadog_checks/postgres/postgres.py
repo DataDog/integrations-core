@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 import socket
+import string
 import threading
 from contextlib import closing
 
@@ -33,6 +34,23 @@ def psycopg2_connect(*args, **kwargs):
 
 class ShouldRestartException(Exception):
     pass
+
+
+class PartialFormatter(string.Formatter):
+    """Follows PEP3101, used to format only specified args in a string.
+    Ex:
+    > print("This is a {type} with {nb_params} parameters.".format(type='string'))
+    > "This is a string with {nb_params} parameters."
+
+    """
+    def get_value(self, key, args, kwargs):
+        if isinstance(key, str):
+            return kwargs.get(key, '{' + key + '}')
+        else:
+            return string.Formatter.get_value(self, key, args, kwargs)
+
+
+fmt = PartialFormatter()
 
 
 class PostgreSql(AgentCheck):
@@ -98,7 +116,7 @@ class PostgreSql(AgentCheck):
 SELECT mode,
        pd.datname,
        pc.relname,
-       count(*) AS %s
+       count(*) AS {metrics_columns}
   FROM pg_locks l
   JOIN pg_database pd ON (l.database = pd.oid)
   JOIN pg_class pc ON (l.relation = pc.oid)
@@ -125,9 +143,9 @@ SELECT mode,
             'n_dead_tup': ('postgresql.dead_rows', GAUGE),
         },
         'query': """
-SELECT relname,schemaname,%s
+SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
- WHERE relname = ANY(array[%s])""",
+ WHERE relname = ANY(array[{relations_names}]::text[])""",
         'relation': True,
     }
 
@@ -142,9 +160,9 @@ SELECT relname,schemaname,%s
 SELECT relname,
        schemaname,
        indexrelname,
-       %s
+       {metrics_columns}
   FROM pg_stat_user_indexes
- WHERE relname = ANY(array[%s])""",
+ WHERE relname = ANY(array[{relations_names}]::text[])""",
         'relation': True,
     }
 
@@ -159,30 +177,28 @@ SELECT relname,
         'query': """
 SELECT
   relname,
-  %s
+  {metrics_columns}
 FROM pg_class C
 LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   nspname !~ '^pg_toast' AND
   relkind IN ('r') AND
-  relname = ANY(array[%s])""",
+  relname = ANY(array[{relations_names}]::text[])""",
     }
 
     COUNT_METRICS = {
         'descriptors': [('schemaname', 'schema')],
         'metrics': {'pg_stat_user_tables': ('postgresql.table.count', GAUGE)},
         'relation': False,
-        'query': """
+        'query': fmt.format("""
 SELECT schemaname, count(*) FROM
 (
   SELECT schemaname
-  FROM %s
+  FROM {metrics_columns}
   ORDER BY schemaname, relname
   LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
-        """.format(
-            table_count_limit=TABLE_COUNT_LIMIT
-        ),
+        """, table_count_limit=TABLE_COUNT_LIMIT),
     }
 
     q1 = (
@@ -221,7 +237,7 @@ SELECT schemaname, count(*) FROM
         'metrics': {},
         'relation': False,
         'query': """
-SELECT %s
+SELECT {metrics_columns}
  WHERE (SELECT pg_is_in_recovery())""",
     }
 
@@ -234,7 +250,7 @@ SELECT %s
         'relation': False,
         'query': """
 WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connections')
-SELECT %s
+SELECT {metrics_columns}
   FROM pg_stat_database, max_con
 """,
     }
@@ -254,9 +270,9 @@ SELECT %s
         'query': """
 SELECT relname,
        schemaname,
-       %s
+       {metrics_columns}
   FROM pg_statio_user_tables
- WHERE relname = ANY(array[%s])""",
+ WHERE relname = ANY(array[{relations_names}]::text[])""",
         'relation': True,
     }
 
@@ -278,7 +294,7 @@ SELECT s.schemaname,
        CASE WHEN o.funcname IS NULL OR p.proargnames IS NULL THEN p.proname
             ELSE p.proname || '_' || array_to_string(p.proargnames, '_')
         END funcname,
-        %s
+        {metrics_columns}
   FROM pg_proc p
   JOIN pg_stat_user_functions s
     ON p.oid = s.funcid
@@ -335,7 +351,7 @@ SELECT s.schemaname,
     # The base query for postgres version >= 10
     ACTIVITY_QUERY_10 = """
 SELECT datname,
-    %s
+    {metrics_columns}
 FROM pg_stat_activity
 WHERE backend_type = 'client backend'
 GROUP BY datid, datname
@@ -344,7 +360,7 @@ GROUP BY datid, datname
     # The base query for postgres version < 10
     ACTIVITY_QUERY_LT_10 = """
 SELECT datname,
-    %s
+    {metrics_columns}
 FROM pg_stat_activity
 GROUP BY datid, datname
 """
@@ -513,7 +529,7 @@ GROUP BY datid, datname
         res = {
             'descriptors': [('psd.datname', 'db')],
             'metrics': metrics,
-            'query': "SELECT psd.datname, %s "
+            'query': "SELECT psd.datname, {metrics_columns} "
             "FROM pg_stat_database psd "
             "JOIN pg_database pd ON psd.datname = pd.datname "
             "WHERE psd.datname not ilike 'template%%' "
@@ -561,7 +577,7 @@ GROUP BY datid, datname
         if not metrics:
             return None
 
-        return {'descriptors': [], 'metrics': metrics, 'query': "select %s FROM pg_stat_bgwriter", 'relation': False}
+        return {'descriptors': [], 'metrics': metrics, 'query': "select {metrics_columns} FROM pg_stat_bgwriter", 'relation': False}
 
     def _get_archiver_metrics(self, key, db):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
@@ -591,7 +607,7 @@ GROUP BY datid, datname
         if not metrics:
             return None
 
-        return {'descriptors': [], 'metrics': metrics, 'query': "select %s FROM pg_stat_archiver", 'relation': False}
+        return {'descriptors': [], 'metrics': metrics, 'query': "select {metrics_columns} FROM pg_stat_archiver", 'relation': False}
 
     def _get_replication_metrics(self, key, db):
         """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
@@ -676,6 +692,7 @@ GROUP BY datid, datname
         # we must remember that order to parse results
 
         try:
+            query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if scope['relation'] and len(relations_config) > 0:
                 relnames = ', '.join("'{0}'".format(w) for w in relations_config)
@@ -683,7 +700,6 @@ GROUP BY datid, datname
                 self.log.debug("Running query: %s with relations: %s" % (query, relnames))
                 cursor.execute(query % relnames)
             else:
-                query = scope['query'] % (", ".join(cols))
                 self.log.debug("Running query: %s" % query)
                 cursor.execute(query.replace(r'%', r'%%'))
 
@@ -988,6 +1004,14 @@ GROUP BY datid, datname
                     raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
 
             self.log.debug("Metric: {0}".format(m))
+
+            # Old formatting to new formatting. The first params is always the columns names from which to
+            # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
+            # relations names.
+            if m['relation']:
+                m['query'] = m['query'] % ('{metrics_columns}', '{relations_names}')
+            else:
+                m['query'] = m['query'] % '{metrics_columns}'
 
             try:
                 for ref, (_, mtype) in iteritems(m['metrics']):
