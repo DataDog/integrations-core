@@ -55,7 +55,7 @@ datadog-kube-dns==2.3.0
 datadog-kube-metrics-server==1.0.0
 datadog-kube-proxy==3.2.0
 datadog-kube-scheduler==1.1.0
-datadog-kubelet==3.1.0; sys_platform == 'linux2'
+datadog-kubelet==3.2.0; sys_platform == 'linux2'
 datadog-kubernetes-state==4.4.0; sys_platform != 'win32'
 datadog-kyototycoon==1.6.0
 datadog-lighttpd==1.4.0
@@ -114,5 +114,5 @@ datadog-vsphere==4.1.1
 datadog-win32-event-log==2.0.0; sys_platform == 'win32'
 datadog-windows-service==2.1.0; sys_platform == 'win32'
 datadog-wmi-check==1.4.0; sys_platform == 'win32'
-datadog-yarn==1.7.0
+datadog-yarn==1.7.1
 datadog-zk==2.2.0; sys_platform != 'win32'
