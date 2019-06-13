@@ -8,3 +8,4 @@ requests==2.22.0
 simplejson==3.6.5
 six==1.12.0
 uptime==3.0.1
+guppy==0.1.10
