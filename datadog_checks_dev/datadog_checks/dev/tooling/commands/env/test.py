@@ -33,9 +33,9 @@ from .stop import stop
         'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
     ),
 )
-@click.option('--clean', '-c', is_flag=True, help='Execute setup and tear down actions')
+@click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
 @click.pass_context
-def test(ctx, checks, agent, dev, base, env_vars, clean):
+def test(ctx, checks, agent, dev, base, env_vars, new_env):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)
     tests_ran = False
@@ -44,7 +44,7 @@ def test(ctx, checks, agent, dev, base, env_vars, clean):
     # to master, probably on CI rather than during local development. In this case,
     # ensure environments and Agents are spun up and down.
     if not checks:
-        clean = True
+        new_env = True
 
     for check, envs in check_envs:
         if not envs:
@@ -56,13 +56,13 @@ def test(ctx, checks, agent, dev, base, env_vars, clean):
         tests_ran = True
 
         for env in envs:
-            if clean:
+            if new_env:
                 ctx.invoke(start, check=check, env=env, agent=agent, dev=dev, base=base, env_vars=env_vars)
 
             try:
                 ctx.invoke(test_command, checks=['{}:{}'.format(check, env)], e2e=True)
             finally:
-                if clean:
+                if new_env:
                     ctx.invoke(stop, check=check, env=env)
 
     if not tests_ran:
