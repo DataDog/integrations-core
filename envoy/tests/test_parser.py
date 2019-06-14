@@ -305,6 +305,48 @@ class TestParseMetric:
 
         assert parse_metric(metric) == (METRIC_PREFIX + metric, list(tags), METRICS[metric]['method'])
 
+    def test_listener_tls(self):
+        metric = 'listener{}.ssl.versions{}'
+        untagged_metric = metric.format('', '')
+        tags = [tag for tags in METRICS[untagged_metric]['tags'] for tag in tags]
+        tag0 = '0.0.0.0'
+        tag1 = 'TLSv1.2'
+        tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1))
+
+        assert parse_metric(tagged_metric) == (
+            METRIC_PREFIX + untagged_metric,
+            ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
+            METRICS[untagged_metric]['method'],
+        )
+
+    def test_listener_curves(self):
+        metric = 'listener{}.ssl.curves{}'
+        untagged_metric = metric.format('', '')
+        tags = [tag for tags in METRICS[untagged_metric]['tags'] for tag in tags]
+        tag0 = '0.0.0.0'
+        tag1 = 'P-256'
+        tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1))
+
+        assert parse_metric(tagged_metric) == (
+            METRIC_PREFIX + untagged_metric,
+            ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
+            METRICS[untagged_metric]['method'],
+        )
+
+    def test_listener_sigalgs(self):
+        metric = 'listener{}.ssl.sigalgs{}'
+        untagged_metric = metric.format('', '')
+        tags = [tag for tags in METRICS[untagged_metric]['tags'] for tag in tags]
+        tag0 = '0.0.0.0'
+        tag1 = 'rsa_pss_rsae_sha256'
+        tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1))
+
+        assert parse_metric(tagged_metric) == (
+            METRIC_PREFIX + untagged_metric,
+            ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
+            METRICS[untagged_metric]['method'],
+        )
+
     def test_http(self):
         metric = 'http{}.downstream_cx_total'
         untagged_metric = metric.format('')
