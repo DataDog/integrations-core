@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from contextlib import contextmanager
 
 from ...subprocess import run_command
 from ...utils import path_join
@@ -109,8 +110,20 @@ class DockerInterface(object):
     def remove_config(self):
         remove_env_data(self.check, self.env)
 
-    def write_config(self):
-        write_env_data(self.check, self.env, self.config, self.metadata)
+    def write_config(self, config=None):
+        write_env_data(self.check, self.env, config or self.config, self.metadata)
+
+    @contextmanager
+    def use_config(self, config):
+        # Avoid an unnecessary file write if possible
+        if config != self.config:
+            try:
+                self.write_config(config)
+                yield
+            finally:
+                self.write_config()
+        else:
+            yield
 
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:

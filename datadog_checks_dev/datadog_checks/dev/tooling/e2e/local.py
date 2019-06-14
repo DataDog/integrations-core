@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+from contextlib import contextmanager
 from shutil import copyfile, move
 
 from ...subprocess import run_command
@@ -66,13 +67,25 @@ class LocalAgentInterface(object):
     def exec_command(self, command, **kwargs):
         return run_command(command, **kwargs)
 
-    def write_config(self):
-        write_env_data(self.check, self.env, self.config, self.metadata)
+    def write_config(self, config=None):
+        write_env_data(self.check, self.env, config or self.config, self.metadata)
         self.copy_config_to_local_agent()
 
     def remove_config(self):
         remove_env_data(self.check, self.env)
         self.remove_config_from_local_agent()
+
+    @contextmanager
+    def use_config(self, config):
+        # Avoid an unnecessary file write if possible
+        if config != self.config:
+            try:
+                self.write_config(config)
+                yield
+            finally:
+                self.write_config()
+        else:
+            yield
 
     def copy_config_to_local_agent(self):
         conf_dir = get_agent_conf_dir(self.check, self.agent_version, self.platform)
