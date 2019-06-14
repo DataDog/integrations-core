@@ -15,7 +15,8 @@
   ],
   "public_title": "Datadog-Ambari Integration",
   "categories": [
-    "processing"
+    "processing",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
