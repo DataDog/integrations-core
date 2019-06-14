@@ -13,6 +13,7 @@ class LinkerdCheck(OpenMetricsBaseCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 0
+    HEALTH_METRIC = 'linkerd.prometheus.health'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         labels_mapper = {'rt': 'linkerd_router', 'client': 'linkerd_client', 'service': 'linkerd_service'}
@@ -22,6 +23,14 @@ class LinkerdCheck(OpenMetricsBaseCheck):
         }
         super(LinkerdCheck, self).__init__(name, init_config, agentConfig, instances, default_config, 'linkerd')
 
-    def service_check(self, name, status, tags=None, hostname=None, message=None):
-        self.gauge(name, 1 if status == self.OK else 0, tags=tags)
-        super(LinkerdCheck, self).service_check(name, status, tags=tags, hostname=hostname, message=message)
+    def process(self, scraper_config, metric_transformers=None):
+        # Override the process method to send the health metric, as service checks can be disabled.
+        endpoint = scraper_config.get('prometheus_url')
+        tags = ['endpoint:{}'.format(endpoint)]
+        tags.extend(scraper_config['custom_tags'])
+        try:
+            super(LinkerdCheck, self).process(scraper_config, metric_transformers=metric_transformers)
+        except Exception:
+            self.gauge(self.HEALTH_METRIC, 1, tags=tags)
+        else:
+            self.gauge(self.HEALTH_METRIC, 0, tags=tags)
