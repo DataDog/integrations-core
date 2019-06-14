@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import re
+import yaml
 from collections import defaultdict
 from datetime import datetime
 
@@ -597,7 +598,8 @@ class OpenStackControllerCheck(AgentCheck):
         removed due to token expiry
         """
         custom_tags = custom_tags or []
-        keystone_server_url = instance_config.get("keystone_server_url")
+        keystone_server_url = self._get_keystone_server_url(instance_config)
+
         proxy_config = self.get_instance_proxy(instance_config, keystone_server_url)
 
         if self._api is None:
@@ -839,3 +841,23 @@ class OpenStackControllerCheck(AgentCheck):
 
     def get_networks(self):
         return self._api.get_networks()
+
+    def _get_keystone_server_url(self, instance_config):
+        keystone_server_url = instance_config.get("keystone_server_url")
+        if keystone_server_url:
+            return keystone_server_url
+
+        openstack_config_file_path = instance_config.get("openstack_config_file_path")
+        openstack_cloud_name = instance_config.get("openstack_cloud_name")
+        with open(openstack_config_file_path, 'r') as stream:
+            try:
+                openstack_config = yaml.safe_load(stream)
+                auth_url = openstack_config['clouds'].get(openstack_cloud_name, {}).get('auth', {}).get('auth_url')
+                if not auth_url:
+                    self.log.error('No auth_url found for cloud {} in {}',
+                                   openstack_cloud_name, openstack_config_file_path)
+                return auth_url
+
+            except yaml.YAMLError as exc:
+                self.log.error("There was a problem reading {}.\n{}", openstack_config, exc)
+
