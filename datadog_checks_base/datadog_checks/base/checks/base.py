@@ -888,7 +888,7 @@ class __AgentCheckPy2(object):
                 self.check(instance)
 
                 after = h.heap()
-                self.log.error(after-before)
+                self.log.error(after - before)
 
             result = b''
         except Exception as e:
