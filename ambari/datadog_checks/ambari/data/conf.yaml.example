@@ -135,6 +135,18 @@ instances:
 #          name: new_log_start_with_date
 #          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-05-25T13:13:17.875Z
 #   - type: file
+#     path: /var/log/ambari-server/config-changes.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-eclipselink.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/server-check-database.log
+#     source: ambari
+#     service: ambari
+#   - type: file
 #     path: /var/log/ambari-server/ambari-server-command.log
 #     source: ambari
 #     service: ambari
@@ -143,6 +155,14 @@ instances:
 #          name: new_log_start_with_date
 #          pattern: (INFO)|(ERROR)|(WARN)  # ERROR 2019-04-22
 #   - type: file
-#     path: /var/log/ambari-server/*.log
+#     path: /var/log/ambari-server/ambari-server-pkgmgr.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-stack-merger.log
 #     source: ambari
 #     service: ambari
