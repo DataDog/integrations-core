@@ -22,7 +22,9 @@
   "is_public": false,
   "integration_id": "harbor",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+        "Harbor Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
     "service_checks": "assets/service_checks.json"
   }
