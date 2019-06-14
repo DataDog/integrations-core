@@ -38,7 +38,7 @@ logs:
  - type: file
    path: /opt/jboss/wildfly/standalone/log/*.log
    source: jboss_wildfly
-   service: myapplication
+   service: <APPLICATION_NAME>
 ```
 
 ### Validation
