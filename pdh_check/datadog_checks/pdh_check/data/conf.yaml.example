@@ -2,7 +2,7 @@ init_config:
 
 instances:
 
-    ## @param host - string - required
+    ## @param host - string - optional
     ## Host that the Datadog PDH check connects to.
     ## "." means the current host
     #
