@@ -11,6 +11,8 @@ To install pymqi on Mac, first set up the [IBM MQ toolkit for Mac OS][1].
     ```
 3. Create a softlink from MQ_INSTALLATION_PATH to /opt/mqm
 4. `pip install pymqi`
+5. Edit `requirements.in` and remove `and sys_platform != 'darwin'` so `pymqi` gets autoinstalled on tox environments.
+Do not commit this change as it would break the mac agent build.
 
 
 How to run tests from PyCharm
