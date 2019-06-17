@@ -24,6 +24,23 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][7].
 
+#### Log Collection
+
+To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
+```
+    logs_enabled: true
+```
+
+Next, edit `jboss_wildfly.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your JBoss log files.
+
+```yaml
+logs:
+ - type: file
+   path: /opt/jboss/wildfly/standalone/log/*.log
+   source: jboss_wildfly
+   service: <APPLICATION_NAME>
+```
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `jboss_wildfly` under the Checks section.
