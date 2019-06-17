@@ -20,6 +20,46 @@ See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
 
 **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
 
+
+#### Log Collection
+
+To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
+```
+    logs_enabled: true
+```
+
+Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Gitlab log files.
+
+```yaml
+logs:
+   - type: file
+     path: /var/log/gitlab/gitlab-rails/production_json.log
+     service: production
+     source: gitlab
+
+   - type: file
+     path: /var/log/gitlab/gitlab-rails/api_json.log
+     service: api
+     source: gitlab
+
+   - type: file
+     path: /var/log/gitlab/gitlab-rails/application.log
+     service: application
+     source: gitlab
+
+   - type: file
+     path: /var/log/gitlab/nginx/gitlab_access.log
+     service: nginx
+     source: nginx
+     sourcecategory: http_web_access
+
+   - type: file
+     path: /var/log/gitlab/nginx/gitlab_error.log
+     service: nginx
+     source: nginx
+     sourcecategory: http_web_access
+```
+
 ### Validation
 
 [Run the Agent's `status` subcommand][5] and look for `gitlab` under the Checks section.
