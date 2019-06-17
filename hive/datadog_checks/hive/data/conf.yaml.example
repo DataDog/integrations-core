@@ -555,7 +555,7 @@ init_config:
         attribute:
           Value:
             alias: hive.metastore.db.init
-            metric_type: gauge
+            metric_type: monotonic_count
 
     - include:
         bean: metrics:name=create_total_count_tables
@@ -576,7 +576,7 @@ init_config:
         attribute:
           Value:
             alias: hive.metastore.table.init
-            metric_type: gauge
+            metric_type: monotonic_count
 
     - include:
         bean: metrics:name=create_total_count_partitions
@@ -686,7 +686,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.create_table
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_create_table
         attribute:
@@ -698,7 +698,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.get_table
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_get_table
         attribute:
@@ -710,7 +710,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.drop_table
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_drop_table
         attribute:
@@ -722,7 +722,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.init
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_init
         attribute:
@@ -734,7 +734,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.get_all_databases
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_get_all_databases
         attribute:
@@ -746,7 +746,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.get_database
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_get_database
         attribute:
@@ -758,7 +758,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.get_all_tables
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_get_all_tables
         attribute:
@@ -770,7 +770,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.shutdown
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_shutdown
         attribute:
@@ -782,7 +782,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.flushcache
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_flushCache
         attribute:
@@ -794,7 +794,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.alter_table
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_alter_table
         attribute:
@@ -806,7 +806,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.get_all_functions
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_get_all_functions
         attribute:
@@ -818,7 +818,7 @@ init_config:
         attribute:
           Count:
             alias: hive.metastore.api.get_table_req
-            metric_type: gauge
+            metric_type: monotonic_count
     - include:
         bean: metrics:name=active_calls_api_get_table_req
         attribute:
