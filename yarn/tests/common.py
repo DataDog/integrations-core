@@ -183,7 +183,7 @@ YARN_CLUSTER_METRICS_VALUES = {
 
 YARN_CLUSTER_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME)]
 
-YARN_APP_METRICS_VALUES = {
+DEPRECATED_YARN_APP_METRICS_VALUES = {
     'yarn.apps.progress': 100,
     'yarn.apps.started_time': 1326815573334,
     'yarn.apps.finished_time': 1326815598530,
@@ -193,6 +193,18 @@ YARN_APP_METRICS_VALUES = {
     'yarn.apps.running_containers': 0,
     'yarn.apps.memory_seconds': 151730,
     'yarn.apps.vcore_seconds': 103,
+}
+
+YARN_APP_METRICS_VALUES = {
+    'yarn.apps.progress_gauge': 100,
+    'yarn.apps.started_time_gauge': 1326815573334,
+    'yarn.apps.finished_time_gauge': 1326815598530,
+    'yarn.apps.elapsed_time_gauge': 25196,
+    'yarn.apps.allocated_mb_gauge': 0,
+    'yarn.apps.allocated_vcores_gauge': 0,
+    'yarn.apps.running_containers_gauge': 0,
+    'yarn.apps.memory_seconds_gauge': 151730,
+    'yarn.apps.vcore_seconds_gauge': 103,
 }
 
 YARN_APP_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME), 'app_name:word count', 'app_queue:default']
