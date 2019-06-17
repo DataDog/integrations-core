@@ -211,6 +211,9 @@ The Agent looks for the converted MIB Python files by specifying the destination
 
 [Restart the Agent][9] to start sending SNMP metrics to Datadog.
 
+#### Metrics collection
+The SNMP check can potentially emit [custom metrics][14], which may impact your [billing][15].
+
 ### Validation
 
 [Run the Agent's status subcommand][10] and look for `snmp` under the Checks section.
@@ -226,7 +229,7 @@ The SNMP check does not include any events.
 
 ### Service Checks
 
-**snmp.can_check**:
+**snmp.can_check**:  
 Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `OK`.
 
 ## Troubleshooting
@@ -252,3 +255,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.datadoghq.com/help
 [12]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [13]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[14]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[15]: https://docs.datadoghq.com/account_management/billing/custom_metrics/

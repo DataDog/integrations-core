@@ -24,7 +24,7 @@ ambari.memory.mem_total,gauge,,byte,,Total Memory,0,ambari,MemTotal
 ambari.memory.swap_free,gauge,,byte,,Free Swap,0,ambari,MemSwapFree
 ambari.memory.swap_total,gauge,,byte,,Total Swap,0,ambari,MemSwapTotal
 ambari.network.bytes_in,gauge,,byte,,Network bytes in.,0,ambari,NetBytesIn
-ambari.network.bytes_out,gauge,,byte,,Network byres out.,0,ambari,NetBytesOut
+ambari.network.bytes_out,gauge,,byte,,Network bytes out.,0,ambari,NetBytesOut
 ambari.network.pkts_in,gauge,,byte,,Network packets in.,0,ambari,NetPacketsIn
 ambari.network.pkts_out,gauge,,byte,,Network packets out.,0,ambari,NetPacketsOut
 ambari.process.proc_run,gauge,,,,Process run.,0,ambari,ProcRun

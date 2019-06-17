@@ -293,6 +293,9 @@ def metadata(check):
                             current_check, row['metric_name'], MAX_DESCRIPTION_LENGTH
                         )
                     )
+                if row['interval'] and not row['interval'].isdigit():
+                    errors = True
+                    echo_failure('{}: interval should be an int, found "{}"'.format(current_check, row['interval']))
 
         for header, count in iteritems(empty_count):
             errors = True

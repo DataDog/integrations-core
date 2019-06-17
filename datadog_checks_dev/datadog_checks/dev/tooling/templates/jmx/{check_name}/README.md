@@ -19,7 +19,7 @@ This check monitors [{integration_name}][1].
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
    To learn how to customize the metrics to collect visit the [JMX Checks documentation][3] for more detailed instructions.
-   If you need to monitor more metrics, please send us an email at support@datadoghq.com
+   If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][4]
 

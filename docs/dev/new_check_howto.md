@@ -5,6 +5,7 @@ aliases:
     - /developers/integrations/integration_sdk/
     - /developers/integrations/testing/
     - /integrations/datadog_checks_dev/
+    - /guides/new_integration/
 ---
 
 To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, a number of prerequisites must be met:
@@ -346,7 +347,7 @@ instances:
     ## The string to search for
     #
     search_string: "Example Domain"
-    
+
     ## @param user - object - optional
     ## The user should map to the structure
     ## {'name': ['<FIRST_NAME>', '<LAST_NAME>'], 'username': <USERNAME>, 'password': <PASSWORD>}
@@ -357,12 +358,12 @@ instances:
     #     - <LAST_NAME>
     #   username: <USERNAME>
     #   password: <PASSWORD>
-    
+
     ## @param options - object - required
     ## Optional flags you can set
     #
     options:
-    
+
       ## @param follow_redirects - boolean - optional - default: false
       ## Set to true to follow 301 Redirect
       #
