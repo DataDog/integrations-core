@@ -180,28 +180,14 @@ init_config:
 #
 # logs:
 #   - type: file
-#     path: /var/log/gitlab/gitlab-rails/production_json.log
-#     service: production
+#     path: /var/log/gitlab/gitlab-rails/*
+#     service: <SERVICE_NAME>
 #     source: gitlab
-#
+#     log_processing_rules:
+#       - type: multi_line
+#         pattern: XXXXXX
+#         name: new_log_start_with_date
 #   - type: file
-#     path: /var/log/gitlab/gitlab-rails/api_json.log
-#     service: api
-#     source: gitlab
-#
-#   - type: file
-#     path: /var/log/gitlab/gitlab-rails/application.log
-#     service: application
-#     source: gitlab
-#
-#   - type: file
-#     path: /var/log/gitlab/nginx/gitlab_access.log
-#     service: nginx
+#     path: /var/log/gitlab/nginx/*.log
+#     service: <SERVICE_NAME>
 #     source: nginx
-#     sourcecategory: http_web_access
-#
-#   - type: file
-#     path: /var/log/gitlab/nginx/gitlab_error.log
-#     service: nginx
-#     source: nginx
-#     sourcecategory: http_web_access
