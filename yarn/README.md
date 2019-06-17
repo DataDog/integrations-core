@@ -11,7 +11,7 @@ This check collects metrics from your YARN ResourceManager, including (but not l
 * Node metrics (e.g. available vCores, time of last health update, etc/)
 
 ### Deprecation notice
-`yarn.apps.<METRIC>` metrics have been deprecated in favour of `yarn.apps.<METRIC>_gauge` metrics. This is because `yarn.apps` metrics
+`yarn.apps.<METRIC>` metrics have been deprecated in favor of `yarn.apps.<METRIC>_gauge` metrics, because `yarn.apps` metrics are incorrectly reported as a `RATE` instead of a `GAUGE`.
 are incorrectly reported as a `RATE` instead of a `GAUGE`
 
 ## Setup
