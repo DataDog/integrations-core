@@ -110,6 +110,7 @@ envoy.listener.ssl.fail_verify_error,count,,connection,,Total TLS connections th
 envoy.listener.ssl.fail_verify_san,count,,connection,,Total TLS connections that failed SAN verification,-1,envoy,
 envoy.listener.ssl.fail_verify_cert_hash,count,,connection,,Total TLS connections that failed certificate pinning verification,-1,envoy,
 envoy.listener.ssl.cipher,count,,connection,,Total TLS connections that used cipher tag,0,envoy,
+envoy.listener.ssl.ciphers,count,,connection,,Total TLS connections that used cipher tag,0,envoy,
 envoy.listener.ssl.versions,count,,connection,,Total successful TLS connections that used protocol version tag,0,envoy,
 envoy.listener.ssl.curves,count,,connection,,Total successful TLS connections that used ECDHE curve tag,0,envoy,
 envoy.listener.ssl.sigalgs,count,,connection,,Total successful TLS connections that used signature algorithm sigalg tag,0,envoy,

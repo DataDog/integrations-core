@@ -1071,6 +1071,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'listener.ssl.ciphers': {
+        'tags': (
+            ('address', ),
+            (),
+            ('cipher', ),
+        ),
+        'method': 'monotonic_count',
+    },
     'listener.ssl.versions': {
         'tags': (
             ('address', ),
