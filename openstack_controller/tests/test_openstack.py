@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
+
 import mock
 
 from datadog_checks.openstack_controller import OpenStackControllerCheck
@@ -31,14 +32,7 @@ def test_populate_servers_cache_between_runs(servers_detail, aggregator):
     Ensure the cache contains the expected VMs between check runs.
     """
 
-    check = OpenStackControllerCheck(
-        "test",
-        {
-            'ssl_verify': False,
-        },
-        {},
-        instances=INSTANCES,
-    )
+    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=INSTANCES)
 
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
@@ -66,14 +60,7 @@ def test_populate_servers_cache_with_project_name_none(servers_detail, aggregato
     """
     Ensure the cache contains the expected VMs between check runs.
     """
-    check = OpenStackControllerCheck(
-        "test",
-        {
-            'ssl_verify': False,
-        },
-        {},
-        instances=INSTANCES,
-    )
+    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=INSTANCES)
 
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
@@ -109,13 +96,7 @@ def test_get_paginated_server(servers_detail, aggregator):
     """
 
     check = OpenStackControllerCheck(
-        "test",
-        {
-            'ssl_verify': False,
-            'paginated_server_limit': 1,
-        },
-        {},
-        instances=INSTANCES,
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=INSTANCES
     )
     check.populate_servers_cache({'testproj': {"id": "6f70656e737461636b20342065766572", "name": "testproj"}}, [])
     servers = check.servers_cache['servers']
@@ -178,13 +159,7 @@ def get_server_diagnostics_pre_2_48_response(server_id):
 )
 def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggregator):
     check = OpenStackControllerCheck(
-        "test",
-        {
-            'ssl_verify': False,
-            'paginated_server_limit': 1,
-        },
-        {},
-        instances=INSTANCES,
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=INSTANCES
     )
 
     check.collect_server_diagnostic_metrics({})
@@ -337,13 +312,7 @@ def test_get_keystone_url_from_openstack_config():
     instances[0]['openstack_config_file_path'] = os.path.abspath('./tests/fixtures/openstack_config.yaml')
     instances[0]['openstack_cloud_name'] = 'test_cloud'
     check = OpenStackControllerCheck(
-        "test",
-        {
-            'ssl_verify': False,
-            'paginated_server_limit': 1,
-        },
-        {},
-        instances=instances,
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=instances
     )
     keystone_server_url = check._get_keystone_server_url(instances[0])
     assert keystone_server_url == 'http://xxx.xxx.xxx.xxx:5000/v2.0/'
@@ -351,13 +320,7 @@ def test_get_keystone_url_from_openstack_config():
 
 def test_get_keystone_url_from_datadog_config():
     check = OpenStackControllerCheck(
-        "test",
-        {
-            'ssl_verify': False,
-            'paginated_server_limit': 1,
-        },
-        {},
-        instances=INSTANCES,
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=INSTANCES
     )
     keystone_server_url = check._get_keystone_server_url(INSTANCES[0])
     assert keystone_server_url == 'http://10.0.2.15:5000'

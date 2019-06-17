@@ -3,11 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import re
-import yaml
 from collections import defaultdict
 from datetime import datetime
 
 import requests
+import yaml
 from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -854,10 +854,10 @@ class OpenStackControllerCheck(AgentCheck):
                 openstack_config = yaml.safe_load(stream)
                 auth_url = openstack_config['clouds'].get(openstack_cloud_name, {}).get('auth', {}).get('auth_url')
                 if not auth_url:
-                    self.log.error('No auth_url found for cloud {} in {}',
-                                   openstack_cloud_name, openstack_config_file_path)
+                    self.log.error(
+                        'No auth_url found for cloud {} in {}', openstack_cloud_name, openstack_config_file_path
+                    )
                 return auth_url
 
             except yaml.YAMLError as exc:
                 self.log.error("There was a problem reading {}.\n{}", openstack_config, exc)
-
