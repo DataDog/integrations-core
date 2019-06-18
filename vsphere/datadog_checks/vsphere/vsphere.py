@@ -489,10 +489,18 @@ class VSphereCheck(AgentCheck):
                         self.log.debug("Skipping VM in state %s", ensure_unicode(power_state))
                         continue
                     host_mor = properties.get("runtime.host")
+                    host_props = all_objects.get(host_mor, {})
                     host = "unknown"
-                    if host_mor:
-                        host = ensure_unicode(all_objects.get(host_mor, {}).get("name", "unknown"))
-                    instance_tags.append('vsphere_host:{}'.format(ensure_unicode(host)))
+                    if host_mor and host_props:
+                        host = ensure_unicode(host_props.get("name", "unknown"))
+                        if self._is_excluded(host_mor, host_props, regexes, include_only_marked):
+                            self.log.debug(
+                                "Skipping VM because host %s is excluded by rule %s.",
+                                host_props.get("name", "unknown"),
+                                regexes.get('host_include'),
+                            )
+                            continue
+                    instance_tags.append('vsphere_host:{}'.format(host))
                 elif isinstance(obj, vim.HostSystem):
                     vsphere_type = 'vsphere_type:host'
                     vimtype = vim.HostSystem

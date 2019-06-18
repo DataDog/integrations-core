@@ -91,6 +91,47 @@ def test__is_excluded():
     assert VSphereCheck._is_excluded(included_vm, {"customValue": []}, include_regexes, include_only_marked)
 
 
+def test_vms_in_filtered_host_are_filtered(vsphere, instance):
+    """Test that all vms belonging to a filtered host are also filtered"""
+    server_instance = vsphere._get_server_instance(instance)
+    filtered_host = MockedMOR(spec="HostSystem")
+    filtered_vm = MockedMOR(spec="VirtualMachine")
+    non_filtered_host = MockedMOR(spec="HostSystem")
+    non_filtered_vm = MockedMOR(spec="VirtualMachine")
+    mocked_mors_attrs = {
+        filtered_host: {"name": "filtered_host_number_1", "parent": None},
+        filtered_vm: {
+            "name": "this_vm_is_filtered",
+            "runtime.powerState": vim.VirtualMachinePowerState.poweredOn,
+            "runtime.host": filtered_host,
+        },
+        non_filtered_host: {"name": "non_filtered_host_number_1", "parent": None},
+        non_filtered_vm: {
+            "name": "this_vm_is_not_filtered",
+            "runtime.powerState": vim.VirtualMachinePowerState.poweredOn,
+            "runtime.host": non_filtered_host,
+        },
+    }
+
+    regex = {'host_include': '^(?!filtered_.+)'}
+    with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
+        obj_list = vsphere._get_all_objs(server_instance, regex, False, [])
+        assert len(obj_list[vim.VirtualMachine]) == 1
+        assert len(obj_list[vim.HostSystem]) == 1
+        assert {
+            "mor_type": "vm",
+            "mor": non_filtered_vm,
+            "hostname": "this_vm_is_not_filtered",
+            "tags": ["vsphere_host:non_filtered_host_number_1", "vsphere_type:vm"],
+        } == obj_list[vim.VirtualMachine][0]
+        assert {
+            "mor_type": "host",
+            "mor": non_filtered_host,
+            "hostname": "non_filtered_host_number_1",
+            "tags": ["vsphere_type:host"],
+        } == obj_list[vim.HostSystem][0]
+
+
 def test__get_all_objs(vsphere, instance):
     """
     Test that we don't raise KeyError if the property collector failed to collect some attributes
