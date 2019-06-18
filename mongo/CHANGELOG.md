@@ -2,7 +2,7 @@
 
 ## 1.10.3 / 2019-06-18
 
-* [Fixed] Mongo conf file custom queries. See [#3892](https://github.com/DataDog/integrations-core/pull/3892).
+* [Fixed] Reduce doc in configuration file in favor of official documentation. See [#3892](https://github.com/DataDog/integrations-core/pull/3892).
 
 ## 1.10.2 / 2019-06-06
 
