@@ -48,7 +48,7 @@ The CoreDNS check does not include any events.
 
 `coredns.prometheus.health`:
 
-Returns CRITICAL if the Agent cannot reach the metrics endpoints.
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
 
 ## Troubleshooting
 
