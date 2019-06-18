@@ -37,7 +37,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     This check also returns broker highwater offsets.
 
-    This is used if the `mode_0_10_2` config is set to false
+    This is used if the `post_0_10_2` config is set to false
     """
 
     SOURCE_TYPE_NAME = 'kafka'
