@@ -1,5 +1,9 @@
 # CHANGELOG - pdh_check
 
+## 1.6.1 / 2019-06-18
+
+* [Fixed] Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
+
 ## 1.6.0 / 2019-06-01
 
 * [Added] Make PDHCheck use PDHBaseCHeck. See [#3818](https://github.com/DataDog/integrations-core/pull/3818).

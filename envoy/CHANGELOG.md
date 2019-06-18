@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.6.0 / 2019-06-18
+
+* [Added] Add logs config to envoy. See [#3918](https://github.com/DataDog/integrations-core/pull/3918).
+
 ## 1.5.0 / 2019-03-29
 
 * [Added] Adhere to style. See [#3366](https://github.com/DataDog/integrations-core/pull/3366).
