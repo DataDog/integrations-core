@@ -286,11 +286,11 @@ class TestParseMetric:
         )
 
     def test_listener(self):
-        metric = 'listener{}.ssl.cipher{}'
+        metric = 'listener{}.ssl.ciphers{}'
         untagged_metric = metric.format('', '')
         tags = [tag for tags in METRICS[untagged_metric]['tags'] for tag in tags]
         tag0 = '0.0.0.0_80'
-        tag1 = 'some_cipher'
+        tag1 = 'some_ciphers'
         tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1))
 
         assert parse_metric(tagged_metric) == (

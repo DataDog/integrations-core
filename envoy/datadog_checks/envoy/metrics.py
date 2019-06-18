@@ -1063,14 +1063,6 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    'listener.ssl.cipher': {
-        'tags': (
-            ('address', ),
-            (),
-            ('cipher', ),
-        ),
-        'method': 'monotonic_count',
-    },
     'listener.ssl.ciphers': {
         'tags': (
             ('address', ),
