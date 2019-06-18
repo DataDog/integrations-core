@@ -217,7 +217,6 @@ def metadata(check):
                 reader._fieldnames = reader.fieldnames
 
             for line, row in enumerate(reader, 2):
-                actual_line = line + 2  # First line is headers and line numbers start by 1 not 0
                 # Number of rows is correct. Since metric is first in the list, should be safe to access
                 if len(row) != len(ALL_HEADERS):
                     errors = True
