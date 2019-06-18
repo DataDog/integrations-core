@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.10.3 / 2019-06-18
+
+* [Fixed] Mongo conf file custom queries. See [#3892](https://github.com/DataDog/integrations-core/pull/3892).
+
 ## 1.10.2 / 2019-06-06
 
 * [Fixed] Custom queries: add examples and fix logging. See [#3871](https://github.com/DataDog/integrations-core/pull/3871).
