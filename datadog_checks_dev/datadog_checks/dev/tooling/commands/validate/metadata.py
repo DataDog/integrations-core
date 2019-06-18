@@ -216,12 +216,12 @@ def metadata(check):
             else:
                 reader._fieldnames = reader.fieldnames
 
-            for row in reader:
-
+            for line, row in enumerate(reader):
+                actual_line = line + 2  # First line is headers and line numbers start by 1 not 0
                 # Number of rows is correct. Since metric is first in the list, should be safe to access
                 if len(row) != len(ALL_HEADERS):
                     errors = True
-                    echo_failure('{}: {} Has the wrong amount of columns'.format(current_check, row['metric_name']))
+                    echo_failure('{}:{} {} Has the wrong amount of columns'.format(current_check, actual_line, row['metric_name']))
                     continue
 
                 if PY2:
@@ -235,12 +235,12 @@ def metadata(check):
                     invalid_headers = all_keys.difference(ALL_HEADERS)
                     if invalid_headers:
                         errors = True
-                        echo_failure('{}: Invalid column {}'.format(current_check, invalid_headers))
+                        echo_failure('{}:{} Invalid column {}'.format(current_check, actual_line, invalid_headers))
 
                     missing_headers = ALL_HEADERS.difference(all_keys)
                     if missing_headers:
                         errors = True
-                        echo_failure('{}: Missing columns {}'.format(current_check, missing_headers))
+                        echo_failure('{}:{} Missing columns {}'.format(current_check, actual_line, missing_headers))
 
                     continue
 
@@ -249,7 +249,7 @@ def metadata(check):
                     duplicate_set.add(row['metric_name'])
                 else:
                     errors = True
-                    echo_failure('{}: `{}` is a duplicate metric_name'.format(current_check, row['metric_name']))
+                    echo_failure('{}:{} `{}` is a duplicate metric_name'.format(current_check, actual_line, row['metric_name']))
 
                 # metric_name header
                 if metric_prefix:
@@ -260,22 +260,22 @@ def metadata(check):
                     errors = True
                     if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
                         metric_prefix_error_shown = True
-                        echo_failure('{}: metric_prefix does not exist in manifest'.format(current_check))
+                        echo_failure('{}:{} metric_prefix does not exist in manifest'.format(current_check, actual_line))
 
                 # metric_type header
                 if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
                     errors = True
-                    echo_failure('{}: `{}` is an invalid metric_type.'.format(current_check, row['metric_type']))
+                    echo_failure('{}:{} `{}` is an invalid metric_type.'.format(current_check, actual_line, row['metric_type']))
 
                 # unit_name header
                 if row['unit_name'] and row['unit_name'] not in VALID_UNIT_NAMES:
                     errors = True
-                    echo_failure('{}: `{}` is an invalid unit_name.'.format(current_check, row['unit_name']))
+                    echo_failure('{}:{} `{}` is an invalid unit_name.'.format(current_check, actual_line, row['unit_name']))
 
                 # orientation header
                 if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
                     errors = True
-                    echo_failure('{}: `{}` is an invalid orientation.'.format(current_check, row['orientation']))
+                    echo_failure('{}:{} `{}` is an invalid orientation.'.format(current_check, actual_line, row['orientation']))
 
                 # empty required fields
                 for header in REQUIRED_HEADERS:
@@ -289,24 +289,24 @@ def metadata(check):
                 elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
                     errors = True
                     echo_failure(
-                        '{}: `{}` exceeds the max length: {} for descriptions.'.format(
-                            current_check, row['metric_name'], MAX_DESCRIPTION_LENGTH
+                        '{}:{} `{}` exceeds the max length: {} for descriptions.'.format(
+                            current_check, actual_line, row['metric_name'], MAX_DESCRIPTION_LENGTH
                         )
                     )
 
         for header, count in iteritems(empty_count):
             errors = True
-            echo_failure('{}: {} is empty in {} rows.'.format(current_check, header, count))
+            echo_failure('{}:{} {} is empty in {} rows.'.format(current_check, actual_line, header, count))
 
         for header, count in iteritems(empty_warning_count):
-            echo_warning('{}: {} is empty in {} rows.'.format(current_check, header, count))
+            echo_warning('{}:{} {} is empty in {} rows.'.format(current_check, actual_line, header, count))
 
         for prefix, count in iteritems(metric_prefix_count):
             # Don't spam this warning when we're validating everything
             if check:
                 echo_warning(
-                    '{}: `{}` appears {} time(s) and does not match metric_prefix '
-                    'defined in the manifest.'.format(current_check, prefix, count)
+                    '{}:{} `{}` appears {} time(s) and does not match metric_prefix '
+                    'defined in the manifest.'.format(current_check, actual_line, prefix, count)
                 )
 
     if errors:
