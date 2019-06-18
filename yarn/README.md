@@ -12,7 +12,6 @@ This check collects metrics from your YARN ResourceManager, including (but not l
 
 ### Deprecation notice
 `yarn.apps.<METRIC>` metrics have been deprecated in favor of `yarn.apps.<METRIC>_gauge` metrics, because `yarn.apps` metrics are incorrectly reported as a `RATE` instead of a `GAUGE`.
-are incorrectly reported as a `RATE` instead of a `GAUGE`
 
 ## Setup
 ### Installation
