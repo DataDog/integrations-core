@@ -121,9 +121,16 @@ class AmbariCheck(AgentCheck):
                     self.get_service_checks(base_url, cluster, service, service_tags)
 
     def get_service_checks(self, base_url, cluster, service, service_tags):
-        service_info = self._get_service_checks_info(base_url, cluster, service, service_tags)
-        for info in service_info:
-            self._submit_service_checks("state", info['state'], info['tags'])
+        service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
+        service_resp = self._make_request(service_check_endpoint)
+        if service_resp is None:
+            self._submit_service_checks("state", self.CRITICAL, service_tags)
+            self.warning("No response received for service {}".format(service))
+        else:
+            state = service_resp['ServiceInfo']['state']
+            self._submit_service_checks(
+                "state", common.status_to_service_check(state), service_tags + ['state:%s' % state], message=state
+            )
 
     def get_component_metrics(self, base_url, cluster, service, base_tags, component_whitelist):
         if not component_whitelist:
@@ -172,18 +179,6 @@ class AmbariCheck(AgentCheck):
 
         return resp.get('items')
 
-    def _get_service_checks_info(self, base_url, cluster, service, service_tags):
-        service_check_endpoint = common.create_endpoint(base_url, cluster, service, SERVICE_INFO_QUERY)
-        service_info = []
-        service_resp = self._make_request(service_check_endpoint)
-        if service_resp is None:
-            service_info.append({'state': self.CRITICAL, 'tags': service_tags})
-            self.warning("No response received for service {}".format(service))
-        else:
-            state = service_resp.get('ServiceInfo').get('state')
-            service_info.append({'state': common.STATUS[state], 'tags': service_tags})
-        return service_info
-
     def _make_request(self, url):
         try:
             resp = self.http.get(url)
@@ -198,8 +193,8 @@ class AmbariCheck(AgentCheck):
     def _submit_gauge(self, name, value, tags, hostname=None):
         self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags, hostname=hostname)
 
-    def _submit_service_checks(self, name, value, tags):
-        self.service_check('{}.{}'.format(common.METRIC_PREFIX, name), value, tags)
+    def _submit_service_checks(self, name, value, tags, message=None):
+        self.service_check('{}.{}'.format(common.METRIC_PREFIX, name), value, tags, message=message)
 
     @classmethod
     def flatten_service_metrics(cls, metric_dict, prefix):
