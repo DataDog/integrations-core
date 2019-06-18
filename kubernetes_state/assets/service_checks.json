@@ -43,5 +43,14 @@
         "groups": ["host", "node"],
         "name": "Node Network Unavailable",
         "description": "Returns `CRITICAL` if a cluster node is in a network unavailable state. Returns `UNKNOWN` if status is unknown. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration":"kubernetes",
+        "check": "kubernetes_state.cronjob.next_schedule_time",
+        "statuses": ["ok", "unknown", "critical"],
+        "groups": ["host", "node"],
+        "name": "CronJob next scheduled time",
+        "description": "Returns `CRITICAL` if a cron job does not have a next scheduled time for execution. Returns `UNKNOWN` if the scheduled time is unknown. Returns `OK` otherwise."
     }
 ]
