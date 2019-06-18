@@ -15,13 +15,10 @@ class KafkaCheck(AgentCheck):
 
     __NAMESPACE__ = 'kafka'
 
-    def __init__(self, name, init_config, instances):
-        super(KafkaCheck, self).__init__(name, init_config, instances)
-
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if is_affirmative(instance.get('mode-0.10.2', False)):
+        if is_affirmative(instance.get('mode_0_10_2', False)):
             return super(KafkaCheck, cls).__new__(cls)
         else:
             return LegacyKafkaCheck_0_10_2(name, init_config, instances)
