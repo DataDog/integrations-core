@@ -28,7 +28,7 @@ yarn.apps.finished_time_gauge,gauge,,second,,The time in which the application f
 yarn.apps.elapsed_time_gauge,gauge,,millisecond,,The elapsed time since the application started (in ms),0,yarn,app elapsd tm g
 yarn.apps.allocated_mb_gauge,gauge,,mebibyte,,The sum of memory in MB allocated to the applications running containers,0,yarn,app mem alloc g
 yarn.apps.allocated_vcores_gauge,gauge,,core,,The sum of virtual cores allocated to the applications running containers,0,yarn,app cros alloc g
-yarn.apps.running_containers_gauge,gauge,,,,The number of containers currently running for the application,0,yarn,app ctrs rrun g
+yarn.apps.running_containers_gauge,gauge,,container,,The number of containers currently running for the application,0,yarn,app ctrs rrun g
 yarn.apps.memory_seconds_gauge,gauge,,second,,The amount of memory the application has allocated (megabyte-seconds),0,yarn,app mem tm g
 yarn.apps.vcore_seconds_gauge,gauge,,second,,The amount of CPU resources the application has allocated (virtual core-seconds),0,yarn,app cor tm g
 yarn.apps.progress,rate,,percent,,Deprecated use yarn.apps.progress_gauge instead,0,yarn,app prog
