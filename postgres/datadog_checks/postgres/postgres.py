@@ -927,7 +927,7 @@ GROUP BY datid, datname
                         continue
 
                     metric_info = []
-                    query_tags = custom_query.get('tags', [])
+                    query_tags = list(custom_query.get('tags', []))
                     query_tags.extend(tags)
 
                     for column, value in zip(columns, row):
