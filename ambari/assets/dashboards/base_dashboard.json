@@ -15,7 +15,7 @@
     "role": null,
     "access_role": "st",
     "verified": true,
-    "email": "support@datadoghq.com",
+    "email": "support@datadoghq.com"
   },
   "new_id": "i74-xsf-mfs",
   "modified": "2019-06-13T14:46:23.498340+00:00",
@@ -32,7 +32,6 @@
       "text_size": "auto",
       "check": "ambari.can_connect",
       "board_id": "i74-xsf-mfs",
-      "group": "url:https://localhost:8443/ambari-lab-2/dp-proxy/ambari,host:ambarilab2-m-1-20190422120108.c.datadog-integrations-lab.internal",
       "title": true,
       "title_align": "center",
       "text_align": "center",
@@ -46,6 +45,7 @@
       "time": {},
       "title_text": "Agent Up",
       "title_size": 16,
+      "group": null,
       "scaleFactor": 1,
       "add_timeframe": true,
       "globalTimeframe": {
@@ -53,7 +53,6 @@
         "start": 1560854985850,
         "end": 1560858585850
       },
-      "error": null,
       "y": 3,
       "x": 50,
       "grouping": "check"
