@@ -27,7 +27,7 @@ def test_check_zk(aggregator, zk_instance):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
     kafka_consumer_check.check(zk_instance)
 
     for name, consumer_group in iteritems(zk_instance['consumer_groups']):
@@ -74,7 +74,7 @@ def test_multiple_servers_zk(aggregator, zk_instance):
         '{}:9092'.format(HOST),
     ]
 
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
     kafka_consumer_check.check(multiple_server_zk_instance)
 
     for name, consumer_group in iteritems(multiple_server_zk_instance['consumer_groups']):
@@ -100,7 +100,7 @@ def test_check_nogroups_zk(aggregator, zk_instance):
     nogroup_instance.pop('consumer_groups')
     nogroup_instance['monitor_unlisted_consumer_groups'] = True
 
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
     kafka_consumer_check.check(nogroup_instance)
 
     for topic in TOPICS:
@@ -119,7 +119,7 @@ def test_check_nogroups_zk(aggregator, zk_instance):
 
 
 def test_should_zk():
-    check = KafkaCheck('kafka_consumer', {}, {})
+    check = KafkaCheck('kafka_consumer', {}, [{}])
     # Kafka Consumer Offsets set to True and we have a zk_connect_str that hasn't been run yet
     assert check._should_zk([ZK_CONNECT_STR, ZK_CONNECT_STR], 10, True) is True
     # Kafka Consumer Offsets is set to False, should immediately ZK
