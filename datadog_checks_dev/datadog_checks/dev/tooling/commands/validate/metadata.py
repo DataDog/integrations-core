@@ -296,17 +296,17 @@ def metadata(check):
 
         for header, count in iteritems(empty_count):
             errors = True
-            echo_failure('{}:{} {} is empty in {} rows.'.format(current_check, actual_line, header, count))
+            echo_failure('{}: {} is empty in {} rows.'.format(current_check, header, count))
 
         for header, count in iteritems(empty_warning_count):
-            echo_warning('{}:{} {} is empty in {} rows.'.format(current_check, actual_line, header, count))
+            echo_warning('{}: {} is empty in {} rows.'.format(current_check, header, count))
 
         for prefix, count in iteritems(metric_prefix_count):
             # Don't spam this warning when we're validating everything
             if check:
                 echo_warning(
-                    '{}:{} `{}` appears {} time(s) and does not match metric_prefix '
-                    'defined in the manifest.'.format(current_check, actual_line, prefix, count)
+                    '{}: `{}` appears {} time(s) and does not match metric_prefix '
+                    'defined in the manifest.'.format(current_check, prefix, count)
                 )
 
     if errors:
