@@ -28,7 +28,7 @@ instances:
     ## @param countersetname - string - required
     ## `countersetname` is the name of the performance counter
     #
-    - countersetname: <PERFORMANCE_COUNTER_NAME>
+  - countersetname: <PERFORMANCE_COUNTER_NAME>
 
     ## @param metrics - list of metrics - required
     ## `metrics` is a list of metrics you want to capture, with each item in the
