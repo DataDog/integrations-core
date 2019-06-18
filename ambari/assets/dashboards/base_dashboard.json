@@ -2,21 +2,20 @@
   "board_title": "Ambari base dashboard",
   "read_only": false,
   "author_info": {
-    "author_name": "Julia Simon"
+    "author_name": "Datadog"
   },
   "description": "## Ambari Dashboard\n\nThis is an example Ambari dashboard demonstrating the metrics that the integration collects.",
   "board_bgtype": "board_graph",
   "created": "2019-06-13T14:39:10.350422+00:00",
   "created_by": {
     "disabled": false,
-    "handle": "julia.simon@datadoghq.com",
-    "name": "Julia Simon",
+    "handle": "support@datadoghq.com",
+    "name": "Datadog",
     "is_admin": false,
     "role": null,
     "access_role": "st",
     "verified": true,
-    "email": "julia.simon@datadoghq.com",
-    "icon": "https://secure.gravatar.com/avatar/c9d6cacf84785d02c44f7a38331316bd?s=48&d=retro"
+    "email": "support@datadoghq.com",
   },
   "new_id": "i74-xsf-mfs",
   "modified": "2019-06-13T14:46:23.498340+00:00",
@@ -29,7 +28,7 @@
   "originalWidth": "100%",
   "widgets": [
     {
-      "height": 8,
+      "height": 9,
       "text_size": "auto",
       "check": "ambari.can_connect",
       "board_id": "i74-xsf-mfs",
@@ -37,7 +36,7 @@
       "title": true,
       "title_align": "center",
       "text_align": "center",
-      "width": 16,
+      "width": 17,
       "group_by": [],
       "type": "check_status",
       "isShared": false,
@@ -51,20 +50,20 @@
       "add_timeframe": true,
       "globalTimeframe": {
         "isLive": true,
-        "start": 1560433211153,
-        "end": 1560436811153
+        "start": 1560854985850,
+        "end": 1560858585850
       },
       "error": null,
-      "y": 2,
-      "x": 0,
+      "y": 3,
+      "x": 50,
       "grouping": "check"
     },
     {
       "board_id": "i74-xsf-mfs",
       "globalTimeframe": {
         "isLive": true,
-        "start": 1560433211153,
-        "end": 1560436811153
+        "start": 1560854985850,
+        "end": 1560858585850
       },
       "title_align": "left",
       "title_size": 16,
@@ -102,7 +101,7 @@
       "width": 47,
       "time": {},
       "error": null,
-      "y": 12,
+      "y": 14,
       "x": 0,
       "legend_size": "0",
       "isShared": false,
@@ -114,8 +113,8 @@
       "board_id": "i74-xsf-mfs",
       "globalTimeframe": {
         "isLive": true,
-        "start": 1560433211153,
-        "end": 1560436811153
+        "start": 1560854985850,
+        "end": 1560858585850
       },
       "title_align": "left",
       "title_size": 16,
@@ -144,7 +143,7 @@
       "width": 47,
       "time": {},
       "error": null,
-      "y": 29,
+      "y": 30,
       "x": 0,
       "legend_size": "0",
       "isShared": false,
@@ -156,8 +155,8 @@
       "board_id": "i74-xsf-mfs",
       "globalTimeframe": {
         "isLive": true,
-        "start": 1560433211153,
-        "end": 1560436811153
+        "start": 1560854985850,
+        "end": 1560858585850
       },
       "title_align": "left",
       "title_size": 16,
@@ -186,7 +185,7 @@
       "width": 47,
       "time": {},
       "error": null,
-      "y": 29,
+      "y": 30,
       "x": 50,
       "legend_size": "0",
       "isShared": false,
@@ -198,8 +197,8 @@
       "board_id": "i74-xsf-mfs",
       "globalTimeframe": {
         "isLive": true,
-        "start": 1560433211153,
-        "end": 1560436811153
+        "start": 1560854985850,
+        "end": 1560858585850
       },
       "title_align": "left",
       "title_size": 16,
@@ -228,7 +227,7 @@
       "width": 47,
       "time": {},
       "error": null,
-      "y": 12,
+      "y": 14,
       "x": 50,
       "legend_size": "0",
       "isShared": false,
@@ -240,8 +239,8 @@
       "board_id": "i74-xsf-mfs",
       "globalTimeframe": {
         "isLive": true,
-        "start": 1560433211153,
-        "end": 1560436811153
+        "start": 1560854985850,
+        "end": 1560858585850
       },
       "title_align": "left",
       "title_size": 16,
@@ -277,6 +276,30 @@
       "scaleFactor": 1,
       "legend": false,
       "add_timeframe": true
+    },
+    {
+      "board_id": "i74-xsf-mfs",
+      "sizing": "zoom",
+      "globalTimeframe": {
+        "isLive": true,
+        "start": 1560854985850,
+        "end": 1560858585850
+      },
+      "generated_title": "",
+      "title_size": 16,
+      "title": true,
+      "url": "https://raw.githubusercontent.com/DataDog/integrations-core/ambari/assets/images/apache_ambari_200x128%402x.png",
+      "scaleFactor": 1,
+      "title_align": "left",
+      "title_text": "",
+      "height": 11,
+      "width": 47,
+      "type": "image",
+      "y": 2,
+      "x": 0,
+      "add_timeframe": true,
+      "margin": "",
+      "isShared": false
     }
   ],
   "disableCog": false,
