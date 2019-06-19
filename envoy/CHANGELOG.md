@@ -2,7 +2,7 @@
 
 ## 1.7.0 / 2019-06-19
 
-* [Added] Add listeners metrics. See [#3922](https://github.com/DataDog/integrations-core/pull/3922).
+* [Added] Add more listener metrics. See [#3922](https://github.com/DataDog/integrations-core/pull/3922).
 
 ## 1.6.0 / 2019-06-18
 
