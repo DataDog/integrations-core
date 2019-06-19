@@ -2,7 +2,7 @@
 
 ## 2.3.1 / 2019-06-19
 
-* [Fixed] [Feature] Istio Mixer and Mesh endpoints are optional. See [#3875](https://github.com/DataDog/integrations-core/pull/3875). Thanks [mikekatica](https://github.com/mikekatica).
+* [Fixed] Istio Mixer and Mesh endpoints should be optional. See [#3875](https://github.com/DataDog/integrations-core/pull/3875). Thanks [mikekatica](https://github.com/mikekatica).
 
 ## 2.3.0 / 2019-05-31
 
