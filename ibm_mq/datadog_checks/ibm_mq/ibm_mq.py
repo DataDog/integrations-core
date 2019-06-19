@@ -84,18 +84,20 @@ class IbmMqCheck(AgentCheck):
         queues = []
         if config.auto_discover_queues:
             queues.extend(self._discover_queues(queue_manager, '*'))
-
-        if config.queue_patterns:
+        elif config.queue_patterns:
             for pattern in config.queue_patterns:
                 queues.extend(self._discover_queues(queue_manager, pattern))
 
         if config.queue_regex:
-            candidate_queues = self._discover_queues(queue_manager, '*')
+            if not queues:
+                queues = self._discover_queues(queue_manager, '*')
+            keep_queues = []
             for queue_pattern in config.queue_regex:
                 queue_pattern_re = re.compile(queue_pattern)
-                for queue in candidate_queues:
+                for queue in queues:
                     if queue_pattern_re.match(queue):
-                        queues.append(queue)
+                        keep_queues.append(queue)
+            queues = keep_queues
 
         config.add_queues(queues)
 
