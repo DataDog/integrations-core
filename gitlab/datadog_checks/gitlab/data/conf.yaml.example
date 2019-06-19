@@ -180,13 +180,34 @@ init_config:
 #
 # logs:
 #   - type: file
-#     path: /var/log/gitlab/gitlab-rails/*
+#     path: /var/log/gitlab/gitlab-rails/*.log
 #     service: <SERVICE_NAME>
 #     source: gitlab
 #     log_processing_rules:
 #       - type: multi_line
 #         pattern: XXXXXX
 #         name: new_log_start_with_date
+#
+#   - type: file
+#     path: /var/log/gitlab/unicorn/*.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitaly/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-workhorse/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/alertmanager/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
 #   - type: file
 #     path: /var/log/gitlab/nginx/*.log
 #     service: <SERVICE_NAME>
