@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 4.1.3 / 2019-06-19
+
+* [Fixed] Filters VMs in excluded hosts. See [#3933](https://github.com/DataDog/integrations-core/pull/3933).
+
 ## 4.1.2 / 2019-06-17
 
 * [Fixed] [vsphere] update metric_to_check. See [#3904](https://github.com/DataDog/integrations-core/pull/3904).
