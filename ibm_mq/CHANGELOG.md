@@ -1,9 +1,5 @@
 # CHANGELOG - IBM MQ
 
-## 2.1.0 / 2019-06-13
-
-* [Added] Use regex for `queue_patterns` instance configuration instead of MQ pattern. See [#3893](https://github.com/DataDog/integrations-core/pull/3893).
-
 ## 2.0.0 / 2019-04-16
 
 * [Changed] Breaking change: Change host tag for mq_host. Dashboards and monitors may be affected. See [#3608](https://github.com/DataDog/integrations-core/pull/3608).
