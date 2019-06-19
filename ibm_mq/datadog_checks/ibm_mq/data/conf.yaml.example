@@ -38,7 +38,7 @@ instances:
     #   - '<QUEUE_NAME>'
 
     ## @param queue_patterns - list of string - optional
-    ## Collect from queues that match a regex
+    ## Collect from queues that match a MQ pattern
     #
     # queue_patterns:
     #   - 'DEV.*'          # match queues starting with "DEV."
