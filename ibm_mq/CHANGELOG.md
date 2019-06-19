@@ -1,5 +1,8 @@
 # CHANGELOG - IBM MQ
 
+## 2.1.0-rc.1 / 2019-06-19
+
+
 ## 2.0.0 / 2019-04-16
 
 * [Changed] Breaking change: Change host tag for mq_host. Dashboards and monitors may be affected. See [#3608](https://github.com/DataDog/integrations-core/pull/3608).
