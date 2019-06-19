@@ -30,7 +30,7 @@ def instance():
 
 @pytest.fixture
 def instance_queue_pattern():
-    inst = copy.deepcopy(common.INSTANCE_REGEX_PATTERN)
+    inst = copy.deepcopy(common.INSTANCE_QUEUE_PATTERN)
     return inst
 
 

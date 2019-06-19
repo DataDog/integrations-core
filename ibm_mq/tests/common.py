@@ -39,7 +39,7 @@ INSTANCE = {
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
-INSTANCE_REGEX_PATTERN = {
+INSTANCE_QUEUE_PATTERN = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
     'host': HOST,
