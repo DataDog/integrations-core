@@ -24,7 +24,7 @@ CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 setup(
     name='datadog-kube_scheduler',
     version=ABOUT['__version__'],
-    description='The Kube_scheduler check',
+    description='The Kubernetes Scheduler check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent kube_scheduler check',
