@@ -1,5 +1,9 @@
 # CHANGELOG - Hive
 
+## 1.1.0 / 2019-06-19
+
+* [Added] Add log section. See [#3891](https://github.com/DataDog/integrations-core/pull/3891).
+
 ## 1.0.2 / 2019-06-18
 
 * [Fixed] Fix metric type. See [#3885](https://github.com/DataDog/integrations-core/pull/3885).
