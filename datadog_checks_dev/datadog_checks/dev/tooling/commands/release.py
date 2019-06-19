@@ -31,7 +31,7 @@ from ..constants import (
     get_agent_release_requirements,
     get_root,
 )
-from ..git import get_commits_since, get_current_branch, git_commit, git_tag
+from ..git import get_commits_since, get_current_branch, get_latest_commit, git_commit, git_fetch, git_tag
 from ..github import (
     from_contributor,
     get_changelog_types,
@@ -588,9 +588,15 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
             if check not in valid_checks:
                 abort('Check `{}` is not an Agent-based Integration'.format(check))
 
+    current_branch = get_current_branch()
     # don't run the task on the master branch
-    if get_current_branch() == 'master':
+    if current_branch == 'master':
         abort('Please create a release branch, you do not want to commit to master directly.')
+
+    git_fetch()
+    # don't run the task if this branch is not even with master
+    if get_latest_commit('origin/master') != get_latest_commit(current_branch):
+        abort('Remote master is not even with your branch. Please include the latest changes and restart.')
 
     if releasing_all:
         if version:
@@ -602,6 +608,8 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
     if initial_release:
         version = '1.0.0'
 
+    # Keep track of the list of checks that have been updated.
+    updated_checks = []
     for check in checks:
         if sign_only:
             break
@@ -669,7 +677,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
         echo_success('success!')
 
         commit_targets = [check]
-
+        updated_checks.append(check)
         # update the list of integrations to be shipped with the Agent
         if check not in NOT_CHECKS:
             req_file = get_agent_release_requirements()
@@ -693,7 +701,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
         echo_waiting('Updating release metadata...')
         echo_info('Please touch your Yubikey immediately after entering your PIN!')
         try:
-            commit_targets = update_link_metadata(checks)
+            commit_targets = update_link_metadata(updated_checks)
             git_commit(commit_targets, '[Release] Update metadata', force=True)
         except YubikeyException as e:
             abort('A problem occurred while signing metadata: {}'.format(e))
