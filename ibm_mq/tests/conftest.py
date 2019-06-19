@@ -29,8 +29,14 @@ def instance():
 
 
 @pytest.fixture
-def instance_pattern():
-    inst = copy.deepcopy(common.INSTANCE_PATTERN)
+def instance_queue_pattern():
+    inst = copy.deepcopy(common.INSTANCE_REGEX_PATTERN)
+    return inst
+
+
+@pytest.fixture
+def instance_queue_regex():
+    inst = copy.deepcopy(common.INSTANCE_QUEUE_REGEX)
     return inst
 
 
