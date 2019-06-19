@@ -47,7 +47,7 @@ class IBMMQConfig:
 
         self.queues = instance.get('queues', [])
         self.queue_patterns = instance.get('queue_patterns', [])
-        self.queue_regex = instance.get('queue_regex', [])
+        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]
 
         self.channels = instance.get('channels', [])
 

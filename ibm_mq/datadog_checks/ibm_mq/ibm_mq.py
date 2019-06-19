@@ -93,9 +93,8 @@ class IbmMqCheck(AgentCheck):
                 queues = self._discover_queues(queue_manager, '*')
             keep_queues = []
             for queue_pattern in config.queue_regex:
-                queue_pattern_re = re.compile(queue_pattern)
                 for queue in queues:
-                    if queue_pattern_re.match(queue):
+                    if queue_pattern.match(queue):
                         keep_queues.append(queue)
             queues = keep_queues
 
