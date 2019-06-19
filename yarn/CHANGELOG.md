@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.8.0 / 2019-06-19
+
+* [Deprecated] Add yarn.apps.<METRIC>_gauge metrics. See [#3927](https://github.com/DataDog/integrations-core/pull/3927).
+
 ## 1.7.1 / 2019-06-13
 
 * [Fixed] Fix `application_tags` in conf file. See [#3908](https://github.com/DataDog/integrations-core/pull/3908).
