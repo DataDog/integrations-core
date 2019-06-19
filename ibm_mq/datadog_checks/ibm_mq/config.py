@@ -51,7 +51,7 @@ class IBMMQConfig:
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
 
-        if int(self.auto_discover_queues) + len(self.queue_patterns) + len(self.queue_regex) > 1:
+        if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             log.warning("Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be "
                         "used together")
 
