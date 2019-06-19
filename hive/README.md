@@ -69,7 +69,7 @@ No additional installation is needed on your server.
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample hive.d/conf.yaml][9] for all available configuration options.
 
-3. [Restart the Agent][5]
+3. [Restart the Agent][5].
 
 ### Validation
 
