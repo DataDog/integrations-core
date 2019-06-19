@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 1.10.0 / 2019-06-19
+
+* [Added] Refactor check to support different versions easily. See [#3929](https://github.com/DataDog/integrations-core/pull/3929).
+
 ## 1.9.2 / 2019-06-04
 
 * [Fixed] Fix example conf file. See [#3860](https://github.com/DataDog/integrations-core/pull/3860).

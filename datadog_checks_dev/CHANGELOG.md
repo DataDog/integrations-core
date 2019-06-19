@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.28.0 / 2019-06-19
+
+* [Added] Print line number on validate metadata. See [#3931](https://github.com/DataDog/integrations-core/pull/3931).
+
 ## 0.27.0 / 2019-06-18
 
 * [Fixed] Validate interval in metadata validation. See [#3857](https://github.com/DataDog/integrations-core/pull/3857).

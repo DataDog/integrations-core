@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.7.0 / 2019-06-19
+
+* [Added] Add more listener metrics. See [#3922](https://github.com/DataDog/integrations-core/pull/3922).
+
 ## 1.6.0 / 2019-06-18
 
 * [Added] Add logs config to envoy. See [#3918](https://github.com/DataDog/integrations-core/pull/3918).
