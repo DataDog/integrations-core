@@ -221,9 +221,7 @@ def metadata(check):
                 if len(row) != len(ALL_HEADERS):
                     errors = True
                     echo_failure(
-                        '{}:{} {} Has the wrong amount of columns'.format(
-                            current_check, line, row['metric_name']
-                        )
+                        '{}:{} {} Has the wrong amount of columns'.format(current_check, line, row['metric_name'])
                     )
                     continue
 
@@ -265,9 +263,7 @@ def metadata(check):
                     errors = True
                     if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
                         metric_prefix_error_shown = True
-                        echo_failure(
-                            '{}:{} metric_prefix does not exist in manifest'.format(current_check, line)
-                        )
+                        echo_failure('{}:{} metric_prefix does not exist in manifest'.format(current_check, line))
 
                 # metric_type header
                 if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
@@ -279,9 +275,7 @@ def metadata(check):
                 # unit_name header
                 if row['unit_name'] and row['unit_name'] not in VALID_UNIT_NAMES:
                     errors = True
-                    echo_failure(
-                        '{}:{} `{}` is an invalid unit_name.'.format(current_check, line, row['unit_name'])
-                    )
+                    echo_failure('{}:{} `{}` is an invalid unit_name.'.format(current_check, line, row['unit_name']))
 
                 # orientation header
                 if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
