@@ -68,7 +68,10 @@ class IbmMqCheck(AgentCheck):
                 try:
                     queue = pymqi.Queue(queue_manager, queue_name)
                     self.queue_stats(queue, queue_tags)
-                    self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
+                    # some system queues don't have PCF metrics
+                    # so we don't collect those metrics from those queues
+                    if queue_name not in config.DISALLOWED_QUEUES:
+                        self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
                     queue.close()
                 except Exception as e:
@@ -109,8 +112,7 @@ class IbmMqCheck(AgentCheck):
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    if queue_info[pymqi.CMQC.MQIA_DEFINITION_TYPE] == pymqi.CMQC.MQQDT_PREDEFINED:
-                        queues.append(str(queue.strip().decode()))
+                    queues.append(str(queue.strip().decode()))
 
         return queues
 

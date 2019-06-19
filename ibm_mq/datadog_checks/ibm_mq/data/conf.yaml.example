@@ -41,8 +41,8 @@ instances:
     ## Collect from queues that match a regex
     #
     # queue_patterns:
-    #   - 'DEV.'          # match queues starting with "DEV."
-    #   - 'SYSTEM.'       # match queues starting with "SYSTEM."
+    #   - 'DEV.*'          # match queues starting with "DEV."
+    #   - 'SYSTEM.*'       # match queues starting with "SYSTEM."
 
     ## @param queue_regex - list of string - optional
     ## Collect from queues that match a regex
