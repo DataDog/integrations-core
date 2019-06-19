@@ -495,9 +495,7 @@ class VSphereCheck(AgentCheck):
                         host = ensure_unicode(host_props.get("name", "unknown"))
                         if self._is_excluded(host_mor, host_props, regexes, include_only_marked):
                             self.log.debug(
-                                "Skipping VM because host %s is excluded by rule %s.",
-                                host_props.get("name", "unknown"),
-                                regexes.get('host_include'),
+                                "Skipping VM because host %s is excluded by rule %s.", host, regexes.get('host_include')
                             )
                             continue
                     instance_tags.append('vsphere_host:{}'.format(host))
