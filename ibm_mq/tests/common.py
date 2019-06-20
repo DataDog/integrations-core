@@ -39,7 +39,7 @@ INSTANCE = {
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
-INSTANCE_PATTERN = {
+INSTANCE_QUEUE_PATTERN = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
     'host': HOST,
@@ -47,6 +47,17 @@ INSTANCE_PATTERN = {
     'username': USERNAME,
     'password': PASSWORD,
     'queue_patterns': ['DEV.*', 'SYSTEM.*'],
+    'channels': [CHANNEL, BAD_CHANNEL],
+}
+
+INSTANCE_QUEUE_REGEX = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queue_regex': [r'^DEV\..*$', r'^SYSTEM\..*$'],
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
