@@ -659,7 +659,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         if self._api is None:
             # Fast fail in the absence of an api
-            raise IncompleteConfig()
+            raise IncompleteConfig("Could not initialise Openstack API")
 
     @traced
     def check(self, instance):
@@ -668,18 +668,12 @@ class OpenStackControllerCheck(AgentCheck):
         self.instance_name = instance.get('name')
         if not self.instance_name:
             # We need a instance_name to identify this instance
-            raise IncompleteConfig()
+            raise IncompleteConfig("Missing name")
 
         # have we been backed off
         if not self._backoff.should_run():
             self.log.info('Skipping run due to exponential backoff in effect')
             return
-
-        # Fetch instance configs
-        keystone_server_url = instance.get("keystone_server_url")
-
-        if not keystone_server_url:
-            raise IncompleteConfig()
 
         network_ids = instance.get('network_ids', [])
         exclude_network_id_patterns = set(instance.get('exclude_network_ids', []))
@@ -708,7 +702,7 @@ class OpenStackControllerCheck(AgentCheck):
                 return
 
             self.log.debug("Running check with credentials: \n")
-
+            keystone_server_url = self._api.get_keystone_endpoint()
             self._send_api_service_checks(keystone_server_url, custom_tags)
 
             # List projects and filter them
@@ -762,7 +756,7 @@ class OpenStackControllerCheck(AgentCheck):
                     + "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
                 )
             else:
-                self.warning("Configuration Incomplete! Check your openstack.yaml file")
+                self.warning("Configuration Incomplete: {}! Check your openstack.yaml file".format(e))
         except AuthenticationNeeded:
             # Delete the scope, we'll populate a new one on the next run for this instance
             self.delete_api_cache()
