@@ -38,12 +38,17 @@ logs:
      source: gitlab
 
    - type: file
-     path: /var/log/gitlab/unicorn/*.log
+     path: /var/log/gitlab/gitaly/current
      service: <SERVICE_NAME>
      source: gitlab
 
    - type: file
-     path: /var/log/gitlab/gitaly/current
+     path: /var/log/gitlab/alertmanager/current
+     service: <SERVICE_NAME>
+     source: gitlab
+
+   - type: file
+     path: /var/log/gitlab/gitlab-shell/*.log
      service: <SERVICE_NAME>
      source: gitlab
 
@@ -53,7 +58,17 @@ logs:
      source: gitlab
 
    - type: file
-     path: /var/log/gitlab/alertmanager/current
+     path: /var/log/gitlab/prometheus/current
+     service: <SERVICE_NAME>
+     source: gitlab
+
+   - type: file
+     path: /var/log/gitlab/redis-exporter/current
+     service: <SERVICE_NAME>
+     source: gitlab
+
+   - type: file
+     path: /var/log/gitlab/unicorn/*.log
      service: <SERVICE_NAME>
      source: gitlab
 
