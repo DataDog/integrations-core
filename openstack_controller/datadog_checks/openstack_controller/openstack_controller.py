@@ -767,6 +767,8 @@ class OpenStackControllerCheck(AgentCheck):
                 # exponential backoff
                 self.do_backoff(custom_tags)
                 return
+        except Exception as e:
+            raise e
 
         self._backoff.reset_backoff()
 
