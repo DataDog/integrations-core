@@ -58,6 +58,11 @@ logs:
      source: gitlab
 
    - type: file
+     path: /var/log/gitlab/postgres-exporter/current
+     service: <SERVICE_NAME>
+     source: gitlab
+
+   - type: file
      path: /var/log/gitlab/prometheus/current
      service: <SERVICE_NAME>
      source: gitlab
