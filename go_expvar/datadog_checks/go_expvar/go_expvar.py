@@ -63,6 +63,7 @@ GO_EXPVAR_URL_PATH = "/debug/vars"
 class GoExpvar(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+        self._regexes = {}
         self._last_gc_count = defaultdict(int)
 
     def _get_data(self, url, instance):
@@ -226,18 +227,31 @@ class GoExpvar(AgentCheck):
         if keys == []:
             return [(traversed_path, content)]
 
-        key = keys[0]
-        regex = "".join(["^", key, "$"])
-        try:
-            key_rex = re.compile(regex)
-        except Exception:
-            self.warning("Cannot compile regex: %s" % regex)
-            return []
-
         results = []
-        for new_key, new_content in self.items(content):
-            if key_rex.match(new_key):
-                results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
+
+        key = keys[0]
+        if key.isalnum():
+            # key is not a regex, simply match for equality
+            for new_key, new_content in self.items(content):
+                if key == new_key:
+                    results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
+        else:
+            # key might be a regex
+            key_rex = self._regexes.get(key)
+            if key_rex is None:
+                # we don't have it cached, compile it
+                regex = "".join(["^", key, "$"])
+                try:
+                    key_rex = re.compile(regex)
+                except Exception:
+                    self.warning("Cannot compile regex: %s" % regex)
+                    return []
+                self._regexes[key] = key_rex
+
+            for new_key, new_content in self.items(content):
+                if key_rex.match(new_key):
+                    results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
+
         return results
 
     def items(self, object):
