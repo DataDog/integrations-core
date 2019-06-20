@@ -11,7 +11,7 @@ from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
 try:
@@ -70,6 +70,8 @@ class Disk(AgentCheck):
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
 
+        self.devices_label = {}
+
     def _load_legacy_option(self, instance, option, default, legacy_name=None, operation=lambda l: l):
         value = instance.get(option, default)
         legacy_name = legacy_name or option
@@ -85,6 +87,8 @@ class Disk(AgentCheck):
 
     def check(self, instance):
         """Get disk space/inode stats"""
+        if Platform.is_linux():
+            self.devices_label = self._get_devices_label()
         # Windows and Mac will always have psutil
         # (we have packaged for both of them)
         if self._psutil():
@@ -133,6 +137,9 @@ class Disk(AgentCheck):
             for regex, device_tags in self._device_tag_re:
                 if regex.match(device_name):
                     tags.extend(device_tags)
+
+            if self.devices_label.get(device_name):
+                tags.extend([self.devices_label.get(device_name)])
 
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
@@ -308,6 +315,10 @@ class Disk(AgentCheck):
                 if regex.match(device_name):
                     tags += device_tags
             tags.append('device:{}'.format(device_name))
+
+            if self.devices_label.get(device_name):
+                tags.extend([self.devices_label.get(device_name)])
+
             for metric_name, value in iteritems(self._collect_metrics_manually(device)):
                 self.gauge(metric_name, value, tags=tags)
 
@@ -455,3 +466,26 @@ class Disk(AgentCheck):
             except TypeError:
                 self.log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         self._device_tag_re = device_tag_list
+
+    def _get_devices_label(self):
+        """
+        Get every label to create tags
+        """
+        devices_label = {}
+        try:
+            blkid_out, _, _ = get_subprocess_output(['blkid'], self.log)
+            all_devices = [l.strip().split() for l in blkid_out.splitlines()]
+
+            for d in all_devices:
+                # Line sample
+                # /dev/sda1: LABEL="MYLABEL" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
+                for att in d:
+                    if att.startswith('LABEL='):
+                        # Removing ':' from the name
+                        device_name = d[0][:-1]
+                        devices_label[device_name] = "label:{}".format(att[7:-1])
+
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use blkid to have device labels")
+
+        return devices_label

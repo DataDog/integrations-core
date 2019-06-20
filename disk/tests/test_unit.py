@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.disk import Disk
 
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockInodesMetrics, mock_df_output
+from .mocks import MockInodesMetrics, mock_blkid_output, mock_df_output
 from .utils import requires_unix
 
 
@@ -198,3 +198,15 @@ def test_no_psutil_centos(aggregator, gauge_metrics):
             aggregator.assert_metric(name, tags=['device:{}'.format(device)])
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_get_devices_label():
+    c = Disk('disk', None, {}, [{}])
+
+    with mock.patch(
+        "datadog_checks.disk.disk.get_subprocess_output",
+        return_value=mock_blkid_output(),
+        __name__='get_subprocess_output',
+    ):
+        labels = c._get_devices_label()
+        assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"
