@@ -7,6 +7,12 @@
   "metric_to_check": "ibm_db2.connection.active",
   "creates_events": false,
   "short_description": "Monitor table space, buffer pool, and other metrics from your IBM Db2 database.",
+  "further_reading": [
+    {"link": "https://www.datadoghq.com/blog/monitor-db2-with-datadog/",
+      "tag": "Blog",
+      "text": "Monitor IBM DB2 with Datadog"
+    }
+  ],
   "manifest_version": "1.0.0",
   "guid": "67378f79-e72b-4f49-8ec2-57053706523d",
   "support": "core",
