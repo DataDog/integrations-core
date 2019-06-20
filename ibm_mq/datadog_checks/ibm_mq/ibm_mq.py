@@ -34,6 +34,19 @@ class IbmMqCheck(AgentCheck):
 
     SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
+    CHANNEL_STATUS_MAPPING = {
+        pymqi.CMQCFC.MQCHS_INACTIVE: "inactive",
+        pymqi.CMQCFC.MQCHS_BINDING: "binding",
+        pymqi.CMQCFC.MQCHS_STARTING: "starting",
+        pymqi.CMQCFC.MQCHS_RUNNING: "running",
+        pymqi.CMQCFC.MQCHS_STOPPING: "stopping",
+        pymqi.CMQCFC.MQCHS_RETRYING: "retrying",
+        pymqi.CMQCFC.MQCHS_STOPPED: "stopped",
+        pymqi.CMQCFC.MQCHS_REQUESTING: "requesting",
+        pymqi.CMQCFC.MQCHS_PAUSED: "paused",
+        pymqi.CMQCFC.MQCHS_INITIALIZING: "initializing",
+    }
+
     def check(self, instance):
         config = IBMMQConfig(instance)
         config.check_properly_configured()
@@ -211,12 +224,22 @@ class IbmMqCheck(AgentCheck):
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, channel_tags)
         else:
             for channel_info in response:
-                name = channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]
-                name = name.strip()
+                channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
 
-                # running = 3, stopped = 4
-                status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
-                if status == 3:
+                if channel_status == pymqi.CMQCFC.MQCHS_RUNNING:
                     self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, channel_tags)
-                elif status == 4:
+                elif channel_status == pymqi.CMQCFC.MQCHS_STOPPING:
                     self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.WARNING, channel_tags)
+
+                self._submit_channel_count(channel_status, channel_tags)
+
+    def _submit_channel_count(self, channel_status, channel_tags):
+        mname = '{}.channel.count'.format(self.METRIC_PREFIX)
+
+        for status, status_label in iteritems(self.CHANNEL_STATUS_MAPPING):
+            status_active = int(status == channel_status)
+            self.gauge(mname, status_active, tags=channel_tags + ["status:" + status_label])
+
+        if channel_status not in self.CHANNEL_STATUS_MAPPING:
+            self.log.warning("Status not found {}".format(channel_status))
+            self.gauge(mname, 1, tags=channel_tags + ["status:unknown"])
