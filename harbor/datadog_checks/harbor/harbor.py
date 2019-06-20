@@ -66,12 +66,9 @@ class HarborCheck(AgentCheck):
                 return
             raise e
 
-        tags = list(base_tags)
-        # One more item for the registry tag
-        tags.append('')
         for registry in registries:
-            name = registry['name']
-            tags[-1] = 'registry:{}'.format(name.lower())
+            registry_name = registry['name'].lower()
+            tags = base_tags + ['registry:' + registry_name]
             if registry.get('status'):
                 status = AgentCheck.OK if registry['status'] == HEALTHY else AgentCheck.CRITICAL
                 self.service_check('harbor.registry.status', status, tags=tags)
