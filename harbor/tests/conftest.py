@@ -10,8 +10,6 @@ from mock import MagicMock, patch
 
 from datadog_checks.dev import LazyFunction, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.dev.docker import ComposeFileDown
-from datadog_checks.dev.utils import remove_path
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
 from datadog_checks.harbor.common import (
@@ -42,7 +40,6 @@ from .common import (
     SYSTEM_INFO_FIXTURE,
     URL,
     USERS_URL,
-    VERSION_1_4,
     VERSION_1_6,
     VERSION_1_8,
     VOLUME_INFO_FIXTURE,
@@ -70,26 +67,8 @@ def dd_environment(instance):
         lambda: time.sleep(2),
         CreateSimpleUser(),
     ]
-    clean_up = CleanUp(compose_file)
-    with docker_run(compose_file, conditions=conditions, down=clean_up):
+    with docker_run(compose_file, conditions=conditions):
         yield instance
-
-
-class CleanUp(LazyFunction):
-    def __init__(self, compose_file):
-        self.compose_file = compose_file
-        self.down = ComposeFileDown(compose_file)
-
-    def __call__(self, *args, **kwargs):
-        subprocess_result = self.down()
-        # The Harbor environments create files in next to the docker-compose file. Let's remove them.
-        test_folder = os.path.dirname(self.compose_file)
-        for file in UNTRACKED_FILES:
-            remove_path(os.path.join(test_folder, file))
-        if HARBOR_VERSION != VERSION_1_4:
-            # Harbor 1.4 is not able to recreate this file at launch, do not remove it then.
-            remove_path(os.path.join(test_folder, 'common', 'config', 'registry', 'root.crt'))
-        return subprocess_result
 
 
 class CreateSimpleUser(LazyFunction):

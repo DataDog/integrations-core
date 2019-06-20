@@ -11,9 +11,9 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - ./data/registry:/storage:z
-      - ./common/config/registry/:/etc/registry/:z
-      - ./common/config/custom-ca-bundle.crt:/harbor_cust_cert/custom-ca-bundle.crt:z
+      - registry_storage:/storage:z
+      - ./config/registry/config.yml:/etc/registry/config.yml:z
+      - ../common/root.crt:/etc/registry/root.crt:z
     networks:
       - harbor
     dns_search: .
@@ -21,7 +21,7 @@ services:
     image: goharbor/harbor-registryctl:v1.7.5
     container_name: registryctl
     env_file:
-      - ./common/config/registryctl/env
+      - ./config/registryctl/env
     restart: always
     cap_drop:
       - ALL
@@ -30,9 +30,9 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - ./data/registry:/storage:z
-      - ./common/config/registry/:/etc/registry/:z
-      - ./common/config/registryctl/config.yml:/etc/registryctl/config.yml:z
+      - registry_storage:/storage:z
+      - ./config/registry/config.yml:/etc/registry/config.yml:z
+      - ./config/registryctl/config.yml:/etc/registryctl/config.yml:z
     networks:
       - harbor
     dns_search: .
@@ -51,12 +51,12 @@ services:
       - harbor
     dns_search: .
     env_file:
-      - ./common/config/db/env
+      - ./config/db/env
   adminserver:
     image: goharbor/harbor-adminserver:v1.7.5
     container_name: harbor-adminserver
     env_file:
-      - ./common/config/adminserver/env
+      - ./config/adminserver/env
     restart: always
     cap_drop:
       - ALL
@@ -65,9 +65,7 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - ./data/config/:/etc/adminserver/config/:z
-      - ./data/secretkey:/etc/adminserver/key:z
-      - ./data/:/data/:z
+      - ../common/secretkey:/etc/adminserver/key:z
     depends_on:
       - postgresql
     networks:
@@ -77,7 +75,7 @@ services:
     image: goharbor/harbor-core:v1.7.5
     container_name: harbor-core
     env_file:
-      - ./common/config/core/env
+      - ./config/core/env
     restart: always
     cap_drop:
       - ALL
@@ -85,13 +83,9 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - ./common/config/core/app.conf:/etc/core/app.conf:z
-      - ./common/config/core/private_key.pem:/etc/core/private_key.pem:z
-      - ./common/config/core/certificates/:/etc/core/certificates/:z
-      - ./data/secretkey:/etc/core/key:z
-      - ./data/ca_download/:/etc/core/ca/:z
-      - ./data/psc/:/etc/core/token/:z
-      - ./data/:/data/:z
+      - ./config/core/app.conf:/etc/core/app.conf:z
+      - ./config/core/private_key.pem:/etc/core/private_key.pem:z
+      - ../common/secretkey:/etc/core/key:z
     networks:
       - harbor
       - harbor-chartmuseum
@@ -119,7 +113,7 @@ services:
     image: goharbor/harbor-jobservice:v1.7.5
     container_name: harbor-jobservice
     env_file:
-      - ./common/config/jobservice/env
+      - ./config/jobservice/env
     restart: always
     cap_drop:
       - ALL
@@ -128,7 +122,7 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - ./common/config/jobservice/config.yml:/etc/jobservice/config.yml:z
+      - ./config/jobservice/config.yml:/etc/jobservice/config.yml:z
     networks:
       - harbor
     dns_search: .
@@ -140,14 +134,8 @@ services:
     image: goharbor/redis-photon:v1.7.5
     container_name: redis
     restart: always
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
     volumes:
-      - ./data/redis:/var/lib/redis
+      - redis_data:/var/lib/redis/:z
     networks:
       - harbor
       - harbor-chartmuseum
@@ -164,7 +152,7 @@ services:
       - SETUID
       - NET_BIND_SERVICE
     volumes:
-      - ./common/config/nginx/nginx.conf:/etc/nginx/nginx.conf:z
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:z
     networks:
       - harbor
     dns_search: .
@@ -193,14 +181,13 @@ services:
     dns_search: .
     depends_on:
       - redis
-    volumes:
-      - ./common/config/chartserver:/etc/chartserver:z
-      - ./common/config/custom-ca-bundle.crt:/harbor_cust_cert/custom-ca-bundle.crt:z
     env_file:
-      ./common/config/chartserver/env
+      ./config/chartserver/env
 networks:
   harbor:
     external: false
   harbor-chartmuseum:
     external: false
-
+volumes:
+  registry_storage:
+  redis_data:

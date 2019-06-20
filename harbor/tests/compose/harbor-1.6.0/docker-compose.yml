@@ -5,9 +5,9 @@ services:
     container_name: registry
     restart: always
     volumes:
-      - ./data/registry:/storage:z
-      - ./common/config/registry/:/etc/registry/:z
-      - ./common/config/custom-ca-bundle.crt:/harbor_cust_cert/custom-ca-bundle.crt:z
+      - registry_storage:/storage:z
+      - ./config/registry/config.yml:/etc/registry/config.yml:z
+      - ../common/root.crt:/etc/registry/root.crt:z
     networks:
       - harbor
     environment:
@@ -19,32 +19,27 @@ services:
     networks:
       - harbor
     env_file:
-      - ./common/config/db/env
+      - ./config/db/env
   adminserver:
     image: goharbor/harbor-adminserver:v1.6.3
     container_name: harbor-adminserver
     env_file:
-      - ./common/config/adminserver/env
+      - ./config/adminserver/env
     restart: always
     volumes:
-      - ./data/config/:/etc/adminserver/config/:z
-      - ./data/secretkey:/etc/adminserver/key:z
-      - ./data/:/data/:z
+      - ../common/secretkey:/etc/adminserver/key:z
     networks:
       - harbor
   ui:
     image: goharbor/harbor-ui:v1.6.3
     container_name: harbor-ui
     env_file:
-      - ./common/config/ui/env
+      - ./config/ui/env
     restart: always
     volumes:
-      - ./common/config/ui/app.conf:/etc/ui/app.conf:z
-      - ./common/config/ui/private_key.pem:/etc/ui/private_key.pem:z
-      - ./common/config/ui/certificates/:/etc/ui/certificates/:z
-      - ./data/secretkey:/etc/ui/key:z
-      - ./data/ca_download/:/etc/ui/ca/:z
-      - ./data/psc/:/etc/ui/token/:z
+      - ./config/ui/app.conf:/etc/ui/app.conf:z
+      - ./config/ui/private_key.pem:/etc/ui/private_key.pem:z
+      - ../common/secretkey:/etc/ui/key:z
     networks:
       - harbor
       - harbor-chartmuseum
@@ -55,11 +50,11 @@ services:
     image: goharbor/harbor-jobservice:v1.6.3
     container_name: harbor-jobservice
     env_file:
-      - ./common/config/jobservice/env
+      - ./config/jobservice/env
     restart: always
     volumes:
-      - ./data/job_logs:/var/log/jobs:z
-      - ./common/config/jobservice/config.yml:/etc/jobservice/config.yml:z
+      - jobs_logs:/var/log/jobs:z
+      - ./config/jobservice/config.yml:/etc/jobservice/config.yml:z
     networks:
       - harbor
     depends_on:
@@ -70,8 +65,6 @@ services:
     image: goharbor/redis-photon:v1.6.3
     container_name: redis
     restart: always
-    volumes:
-      - ./data/redis:/var/lib/redis
     networks:
       - harbor
       - harbor-chartmuseum
@@ -80,7 +73,7 @@ services:
     container_name: nginx
     restart: always
     volumes:
-      - ./common/config/nginx/nginx.conf:/etc/nginx/nginx.conf:z
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:z
     networks:
       - harbor
     ports:
@@ -99,15 +92,14 @@ services:
       - harbor-chartmuseum
     depends_on:
       - redis
-    volumes:
-      - ./data/chart_storage:/chart_storage:z
-      - ./common/config/chartserver:/etc/chartserver:z
-      - ./common/config/custom-ca-bundle.crt:/harbor_cust_cert/custom-ca-bundle.crt:z
     env_file:
-      ./common/config/chartserver/env
+      ./config/chartserver/env
 networks:
   harbor:
     external: false
   harbor-chartmuseum:
     external: false
+volumes:
+  registry_storage:
+  jobs_logs:
 
