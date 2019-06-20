@@ -5,6 +5,7 @@ import copy
 import os
 
 import mock
+from unittest.mock import ANY
 
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.base import AgentCheck
@@ -91,22 +92,7 @@ def test_check(mock_api, aggregator):
     aggregator.assert_service_check('openstack.keystone.api.up', AgentCheck.OK)
     aggregator.assert_service_check('openstack.nova.api.up', AgentCheck.OK)
     aggregator.assert_service_check('openstack.neutron.api.up', AgentCheck.OK)
-
-
-@mock.patch('datadog_checks.openstack_controller.api.ApiFactory.create',
-            return_value=mock.MagicMock(AbstractApi))
-def test_check_with_config_file(mock_api, aggregator):
-    instances = copy.deepcopy(INSTANCES)
-    del instances[0]['keystone_server_url']
-    instances[0]['openstack_config_file_path'] = os.path.abspath('./tests/fixtures/openstack_config.yaml')
-    instances[0]['openstack_cloud_name'] = 'test_cloud'
-    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=instances)
-
-    check.check(instances[0])
-
-    aggregator.assert_service_check('openstack.keystone.api.up', AgentCheck.OK)
-    aggregator.assert_service_check('openstack.nova.api.up', AgentCheck.OK)
-    aggregator.assert_service_check('openstack.neutron.api.up', AgentCheck.OK)
+    mock_api.assert_called_with(ANY, ANY, INSTANCES[0])
 
 
 def get_server_details_response(params, timeout=None):
