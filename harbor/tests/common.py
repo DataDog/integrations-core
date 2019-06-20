@@ -6,6 +6,7 @@ import os
 from datadog_checks.dev import get_docker_hostname
 
 USERS_URL = '{base_url}/api/users/'
+VERSION_1_4 = [1, 4, 0]
 VERSION_1_5 = [1, 5, 0]
 VERSION_1_6 = [1, 6, 0]
 VERSION_1_8 = [1, 8, 0]
