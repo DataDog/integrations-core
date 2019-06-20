@@ -227,31 +227,28 @@ class GoExpvar(AgentCheck):
         if keys == []:
             return [(traversed_path, content)]
 
-        results = []
-
         key = keys[0]
         if key.isalnum():
             # key is not a regex, simply match for equality
-            for new_key, new_content in self.items(content):
-                if key == new_key:
-                    results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
+            matcher = key.__eq__
         else:
             # key might be a regex
-            key_rex = self._regexes.get(key)
-            if key_rex is None:
+            key_regex = self._regexes.get(key)
+            if key_regex is None:
                 # we don't have it cached, compile it
-                regex = "".join(["^", key, "$"])
+                regex = "^{}$".format(key)
                 try:
-                    key_rex = re.compile(regex)
+                    key_regex = re.compile(regex)
                 except Exception:
                     self.warning("Cannot compile regex: %s" % regex)
                     return []
-                self._regexes[key] = key_rex
+                self._regexes[key] = key_regex
+            matcher = key_regex.match
 
-            for new_key, new_content in self.items(content):
-                if key_rex.match(new_key):
-                    results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
-
+        results = []
+        for new_key, new_content in self.items(content):
+            if matcher(new_key):
+                results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
         return results
 
     def items(self, object):
