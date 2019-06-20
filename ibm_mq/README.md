@@ -179,6 +179,8 @@ There are three service checks:
 `ibm_mq.can_connect`: checks if we can connect to IBM MQ
 `ibm_mq.queue_manager`: checks if the Queue Manager is working
 `ibm_mq.queue`: checks if the queue exists
+`ibm_mq.channel`: checks if can connect to channel
+`ibm_mq.channel.status`: checks if channel is running based on it's status
 
 ### Events
 
