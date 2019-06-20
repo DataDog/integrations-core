@@ -2,7 +2,7 @@
 
 ## 3.0.0 / 2019-06-20
 
-* [Changed] [ibm_mq] fix queue auto discovery to include any qlocal in addition to qmodel. See [#3893](https://github.com/DataDog/integrations-core/pull/3893).
+* [Changed] [ibm_mq] fix queue auto discovery to include any type in addition to qmodel and included regex matching on queue names. See [#3893](https://github.com/DataDog/integrations-core/pull/3893).
 
 ## 2.0.0 / 2019-04-16
 
