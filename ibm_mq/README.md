@@ -174,19 +174,19 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-**ibm_mq.can_connect**:
+**ibm_mq.can_connect**:<br/>
 Returns `CRITICAL` if the Agent cannot connect to the MQ server for any reason. Returns `OK` otherwise.
 
-**ibm_mq.queue_manager**:
+**ibm_mq.queue_manager**:<br/>
 Returns `CRITICAL` if the Agent cannot retrieve stats from the queue manager. Returns `OK` otherwise.
 
-**ibm_mq.queue**:
+**ibm_mq.queue**:<br/>
 Returns `CRITICAL` if the Agent cannot retrieve queue stats. Returns `OK` otherwise.
 
-**ibm_mq.channel**:
+**ibm_mq.channel**:<br/>
 Returns `CRITICAL` if the Agent cannot retrieve channel stats. Returns `OK` otherwise.
 
-**ibm_mq.channel**:
+**ibm_mq.channel**:<br/>
 Return `CRITICAL` if the status is INACTIVE/STOPPED/STOPPING. Returns `OK` if the status is RUNNING. Returns `WARNING` if the status might lead to running.
 
 
