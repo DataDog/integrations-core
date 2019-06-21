@@ -31,6 +31,12 @@ instances:
     #
     # galley_endpoint: http://istio-galley.istio-system:15014/metrics
 
+    ## @param citadel_endpoint - string - optional
+    ## Define the citadel endpoint in order to collect all Prometheus metrics on the Citadel process as well
+    ## Only available for Istio >= v1.1.
+    #
+    # citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
+
     ## @param send_histograms_buckets - boolean - required
     ## Set send_histograms_buckets to true to send the histograms bucket from Istio.
     #

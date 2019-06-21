@@ -13,6 +13,7 @@ class Istio(OpenMetricsBaseCheck):
     MESH_NAMESPACE = 'istio.mesh'
     PILOT_NAMESPACE = 'istio.pilot'
     GALLEY_NAMESPACE = 'istio.galley'
+    CITADEL_NAMESPACE = 'istio.citadel'
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -64,9 +65,17 @@ class Istio(OpenMetricsBaseCheck):
             # Process process_galley
             self.process(process_galley_config)
 
+        # Get the config for the process_citadel instance
+        process_citadel_endpoint = instance.get('citadel_endpoint')
+        if process_citadel_endpoint:
+            process_citadel_config = self.config_map[process_citadel_endpoint]
+
+            # Process process_citadel
+            self.process(process_citadel_config)
+
         # Check that at least 1 endpoint is configured
-        if not (process_galley_endpoint or process_pilot_endpoint or process_mixer_endpoint or istio_mesh_endpoint):
-            raise CheckException("At least one of Mixer, Mesh, Pilot, or Galley endpoints must be configured")
+        if not (process_galley_endpoint or process_pilot_endpoint or process_mixer_endpoint or istio_mesh_endpoint or process_citadel_config):
+            raise CheckException("At least one of Mixer, Mesh, Pilot, Galley or Citadel endpoints must be configured")
 
     def create_generic_instances(self, instances):
         """
@@ -85,6 +94,9 @@ class Istio(OpenMetricsBaseCheck):
             if 'galley_endpoint' in instance:
                 process_galley_instance = self._create_process_galley_instance(instance)
                 yield process_galley_instance
+            if 'citadel_endpoint' in instance:
+                process_citadel_instance = self._create_process_citadel_instance(instance)
+                yield process_citadel_instance
 
     def _get_generic_metrics(self):
         return {
@@ -330,3 +342,36 @@ class Istio(OpenMetricsBaseCheck):
         )
         process_galley_instance['metrics'][0].update(self._get_generic_metrics())
         return process_galley_instance
+
+    def _create_process_citadel_instance(self, instance):
+        """
+        Grab the citadel scraper from the dict and return it if it exists,
+        otherwise create the scraper and add it to the dict
+        """
+        endpoint = instance.get('citadel_endpoint')
+        if endpoint is None:
+            return None
+
+        process_citadel_instance = deepcopy(instance)
+        process_citadel_instance.update(
+            {
+                'namespace': self.CITADEL_NAMESPACE,
+                'prometheus_url': endpoint,
+                'metrics': [
+                    {
+                        'citadel_secret_controller_csr_err_count': 'secret_controller.csr_err_count',
+                        'citadel_secret_controller_secret_deleted_cert_count': 'secret_controller.secret_deleted_cert_count',
+                        'citadel_secret_controller_svc_acc_created_cert_count': 'secret_controller.svc_acc_created_cert_count',
+                        'citadel_secret_controller_svc_acc_deleted_cert_count': 'secret_controller.svc_acc_deleted_cert_count',
+                        'citadel_server_authentication_failure_count': 'server.authentication_failure_count',
+                        'citadel_server_citadel_root_cert_expiry_timestamp': 'server.citadel_root_cert_expiry_timestamp',
+                        'citadel_server_csr_count': 'server.csr_count',
+                        'citadel_server_csr_parsing_err_count': 'server.csr_parsing_err_count',
+                        'citadel_server_id_extraction_err_count': 'server.id_extraction_err_count',
+                        'citadel_server_success_cert_issuance_count': 'server.success_cert_issuance_count',
+                    }
+                ],
+            }
+        )
+        process_citadel_instance['metrics'][0].update(self._get_generic_metrics())
+        return process_citadel_instance
