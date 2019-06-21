@@ -6,7 +6,7 @@ import logging
 
 from six import iteritems
 
-from datadog_checks.base import ensure_bytes
+from datadog_checks.base import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
 
 from . import connection, errors, metrics
@@ -144,7 +144,7 @@ class IbmMqCheck(AgentCheck):
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(str(queue.strip().decode()))
+                    queues.append(ensure_unicode(queue).strip())
 
         return queues
 
@@ -246,7 +246,7 @@ class IbmMqCheck(AgentCheck):
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, search_channel_tags)
         else:
             for channel_info in response:
-                channel_name = channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME].decode().strip()
+                channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = tags + ["channel:{}".format(channel_name)]
 
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
