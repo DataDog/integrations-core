@@ -19,14 +19,6 @@ def get_current_branch():
         return run_command(command, capture='out').stdout.strip()
 
 
-def get_latest_commit(branch):
-    """Get the latest commit sha"""
-    command = 'git rev-parse {}'.format(branch)
-
-    with chdir(get_root()):
-        return run_command(command, capture='out').stdout.strip()
-
-
 def files_changed():
     """
     Return the list of file changed in the current branch compared to `master`
@@ -77,13 +69,6 @@ def git_commit(targets, message, force=False, sign=False):
             return result
 
         return run_command('git commit{} -m "{}"'.format(' -S' if sign else '', message))
-
-
-def git_fetch():
-    """Run a simple git fetch command"""
-    root = get_root()
-    with chdir(root):
-        return run_command('git fetch')
 
 
 def git_tag(tag_name, push=False):

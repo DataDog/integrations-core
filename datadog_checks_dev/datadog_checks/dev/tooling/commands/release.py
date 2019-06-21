@@ -31,7 +31,7 @@ from ..constants import (
     get_agent_release_requirements,
     get_root,
 )
-from ..git import get_commits_since, get_current_branch, get_latest_commit, git_commit, git_fetch, git_tag
+from ..git import get_commits_since, get_current_branch, git_commit, git_tag
 from ..github import (
     from_contributor,
     get_changelog_types,
@@ -588,15 +588,9 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
             if check not in valid_checks:
                 abort('Check `{}` is not an Agent-based Integration'.format(check))
 
-    current_branch = get_current_branch()
     # don't run the task on the master branch
-    if current_branch == 'master':
+    if get_current_branch() == 'master':
         abort('Please create a release branch, you do not want to commit to master directly.')
-
-    git_fetch()
-    # don't run the task if this branch is not even with master
-    if get_latest_commit('origin/master') != get_latest_commit(current_branch):
-        abort('Remote master is not even with your branch. Please include the latest changes and restart.')
 
     if releasing_all:
         if version:

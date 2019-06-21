@@ -8,9 +8,7 @@ from datadog_checks.dev.tooling.git import (
     files_changed,
     get_commits_since,
     get_current_branch,
-    get_latest_commit,
     git_commit,
-    git_fetch,
     git_show_file,
     git_tag,
     git_tag_list,
@@ -24,16 +22,6 @@ def test_get_current_branch():
             get_current_branch()
             chdir.assert_called_once_with('/foo/')
             run.assert_called_once_with('git rev-parse --abbrev-ref HEAD', capture='out')
-
-
-def test_get_latest_commit():
-    branch_name = 'DUMMY_BRANCH'
-    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
-        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
-            set_root('/foo/')
-            get_latest_commit(branch_name)
-            chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git rev-parse {}'.format(branch_name), capture='out')
 
 
 def test_files_changed():
@@ -98,15 +86,6 @@ def test_git_commit():
             chdir.assert_called_once_with('/foo/')
             # we expect only one call, git commit should not be called
             run.assert_called_once_with('git add /foo/a /foo/b /foo/c')
-
-
-def test_git_fetch():
-    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
-        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
-            set_root('/foo/')
-            git_fetch()
-            chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git fetch')
 
 
 def test_git_tag():
