@@ -74,9 +74,9 @@ server {
 
 **NGINX Plus**
 
-NGINX Plus can also use `stub_status`, but since that module provides fewer metrics, you should use `status` if you're a Plus user.
+NGINX Plus users can also utilize `stub_status`, but since that module provides fewer metrics, Datadog recommends using `status`.
 
-For NGINX Plus releases 15 and above, the `status` module is deprecated and the [`http_api_module`][15] should be used. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
+For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_api_module][15] instead. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
   
   ```
   server { 
@@ -87,7 +87,7 @@ For NGINX Plus releases 15 and above, the `status` module is deprecated and the 
   ```
 
 
-Reload NGINX to enable the status or api endpoint. (There's no need for a full restart)
+Reload NGINX to enable the status or API endpoint. There's no need for a full restart.
 
 `sudo nginx -t && sudo nginx -s reload`
 
@@ -98,8 +98,8 @@ Reload NGINX to enable the status or api endpoint. (There's no need for a full r
 
 **NGINX Plus**
 
-* For NGINX Plus releases 13 and above, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file. 
-* If using the http_api_module, the  set the `nginx_status_url` parameter to the server's `/api` location in your `nginx.d/conf.yaml` configuration file. 
+* For NGINX Plus releases 13+, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file. 
+* If you are using `http_api_module`, set the parameter `nginx_status_url` to the server's `/api` location in your `nginx.d/conf.yaml` configuration file, for example:
 
   ```
   nginx_status_url: http://localhost:8080/api
