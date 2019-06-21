@@ -58,7 +58,7 @@ instances:
     ## acces to the full command line of processes running under a different user. This option
     ## cannot be used in such cases.
     ## https://docs.datadoghq.com/integrations/process/#configuration
-    ## Regex is also supported when this flag is set to False.
+    ## Regex is also supported when this flag is set to `false`.
     #
     # exact_match: true
 
@@ -93,7 +93,7 @@ instances:
     # user: <USER_NAME>
 
     ## @param try_sudo - boolean - optional - default: false
-    ## If set to True, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
+    ## If set to `true`, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
     #
     # try_sudo: false
 

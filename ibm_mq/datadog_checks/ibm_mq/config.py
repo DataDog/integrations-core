@@ -9,7 +9,7 @@ from six import iteritems
 
 from datadog_checks.config import is_affirmative
 
-# compatability layer for agents under 6.6.0
+# compatibility layer for agents under 6.6.0
 try:
     from datadog_checks.errors import ConfigurationError
 except ImportError:
@@ -47,12 +47,19 @@ class IBMMQConfig:
 
         self.queues = instance.get('queues', [])
         self.queue_patterns = instance.get('queue_patterns', [])
+        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]
+
+        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
+
+        if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
+            log.warning(
+                "Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be used "
+                "together."
+            )
 
         self.channels = instance.get('channels', [])
 
         self.custom_tags = instance.get('tags', [])
-
-        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
 
         self.ssl = is_affirmative(instance.get('ssl_auth', False))
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')

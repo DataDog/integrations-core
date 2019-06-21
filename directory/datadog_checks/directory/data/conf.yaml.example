@@ -51,8 +51,8 @@ instances:
 
     ## @param dirs_patterns_full - boolean - optional - default: false
     ## Make exclude_dirs patterns operate on the full directory path (may be slightly slower)
-    ## Setting this option to False excludes any directory in the traversal with the provided name.
-    ## Setting this option to True allows you to specify the absolute path. This ensures multiple directories with the same
+    ## Setting this option to `false` excludes any directory in the traversal with the provided name.
+    ## Setting this option to `true` allows you to specify the absolute path. This ensures multiple directories with the same
     ## name aren't all excluded.
     #
     # dirs_patterns_full: false

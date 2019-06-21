@@ -1063,11 +1063,35 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    'listener.ssl.cipher': {
+    'listener.ssl.ciphers': {
         'tags': (
             ('address', ),
             (),
             ('cipher', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.ssl.versions': {
+        'tags': (
+            ('address', ),
+            (),
+            ('version', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.ssl.curves': {
+        'tags': (
+            ('address', ),
+            (),
+            ('curve', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.ssl.sigalgs': {
+        'tags': (
+            ('address', ),
+            (),
+            ('sigalg', ),
         ),
         'method': 'monotonic_count',
     },

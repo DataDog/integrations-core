@@ -84,7 +84,7 @@ class Nagios(AgentCheck):
 
     def gauge(self, *args, **kwargs):
         """
-        Compatability wrapper for Agents that do not submit gauge metrics with custom timestamps
+        Compatibility wrapper for Agents that do not submit gauge metrics with custom timestamps
         """
         orig_gauge = super(Nagios, self).gauge
         # remove 'timestamp' arg if the base class' gauge function does not accept a 'timestamp' arg

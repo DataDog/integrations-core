@@ -34,11 +34,7 @@ REQUIRED_ATTRIBUTES = {
     'type',
 }
 
-REQUIRED_ASSET_ATTRIBUTES = {
-    'monitors',
-    'dashboards',
-    'service_checks',
-}
+REQUIRED_ASSET_ATTRIBUTES = {'monitors', 'dashboards', 'service_checks'}
 
 OPTIONAL_ATTRIBUTES = {
     'aliases',

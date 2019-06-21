@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from collections import defaultdict, namedtuple
+from collections import OrderedDict, defaultdict, namedtuple
 
 from six import binary_type, iteritems
 
@@ -31,7 +31,18 @@ class AggregatorStub(object):
     """
 
     # Replicate the Enum we have on the Agent
-    GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = range(7)
+    METRIC_ENUM_MAP = OrderedDict(
+        (
+            ('gauge', 0),
+            ('rate', 1),
+            ('count', 2),
+            ('monotonic_count', 3),
+            ('counter', 4),
+            ('histogram', 5),
+            ('historate', 6),
+        )
+    )
+    GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
 
     def __init__(self):

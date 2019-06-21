@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 1.12.0 / 2019-06-01
+
+* [Added] add redis.mem.overhead and redis.mem.startup. See [#3760](https://github.com/DataDog/integrations-core/pull/3760). Thanks [maximebedard](https://github.com/maximebedard).
+
 ## 1.11.0 / 2019-05-14
 
 * [Fixed] Adjust latency tracking in redisdb integration. See [#3689](https://github.com/DataDog/integrations-core/pull/3689). Thanks [Firehed](https://github.com/Firehed).

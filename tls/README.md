@@ -52,5 +52,5 @@ Need help? Contact [Datadog support][8].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/tls/metadata.csv
-[7]: https://github.com/DataDog/integrations-core/blob/master/tls/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/tls/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help

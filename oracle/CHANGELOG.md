@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 1.8.0 / 2019-06-01
+
+* [Added] Support multiple results in custom queries. See [#3765](https://github.com/DataDog/integrations-core/pull/3765).
+
 ## 1.7.0 / 2019-05-14
 
 * [Added] Turn an info log into debug. See [#3661](https://github.com/DataDog/integrations-core/pull/3661).

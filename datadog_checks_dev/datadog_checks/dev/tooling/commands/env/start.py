@@ -113,6 +113,12 @@ def start(ctx, check, env, agent, dev, base, env_vars):
         stop_environment(check, env, metadata=metadata)
         abort()
 
+    metadata_env_vars = metadata.get('env_vars', {})
+    if metadata_env_vars:
+        env_vars = list(env_vars)
+        for key, value in metadata_env_vars.items():
+            env_vars.append('{}={}'.format(key, value))
+
     environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key)
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)

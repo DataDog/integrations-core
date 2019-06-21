@@ -1,4 +1,7 @@
 {
+  "aliases": [
+    "/integrations/faq/issues-with-apache-integration/"
+  ],
   "categories": [
     "web",
     "log collection"

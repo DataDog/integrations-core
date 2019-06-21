@@ -3,9 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-# 3p
-import mock
-import pytest
+import requests_mock
 
 from datadog_checks.linkerd import LinkerdCheck
 
@@ -514,28 +512,74 @@ LINKERD_FIXTURE_VALUES = {
 }
 
 
-@pytest.fixture
-def linkerd_fixture():
-    metrics_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'linkerd.txt')
-    responses = None
+def get_response(filename):
+    metrics_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', filename)
     with open(metrics_file_path, 'r') as f:
-        responses = f.read()
-
-    with mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: responses.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ) as p:
-        yield p
+        response = f.read()
+    return response
 
 
-def test_linkerd(aggregator, linkerd_fixture):
+def test_linkerd(aggregator):
     """
     Test the full check
     """
-    c = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
-    c.check(MOCK_INSTANCE)
+    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd.txt'))
+        check.check(MOCK_INSTANCE)
 
     for metric in LINKERD_FIXTURE_VALUES:
         aggregator.assert_metric(metric, LINKERD_FIXTURE_VALUES[metric])
+
+    aggregator.assert_metric('linkerd.prometheus.health', metric_type=aggregator.GAUGE)
+
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_service_check(
+        'linkerd.prometheus.health', status=check.OK, tags=['endpoint:http://fake.tld/prometheus'], count=1
+    )
+
+
+def test_linkerd_v2(aggregator):
+    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd_v2.txt'))
+        check.check(MOCK_INSTANCE)
+
+    aggregator.assert_metric('linkerd.request_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.response_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.response_latency.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.response_latency.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.request_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.route.response_latency.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.response_latency.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.response_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.route.actual_request_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.route.actual_response_latency.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.actual_response_latency.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.actual_response_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.open_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.open_connections', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.tcp.read_bytes_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.write_bytes_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.close_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.connection_duration.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.tcp.connection_duration.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.control.request_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.control.response_latency.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.control.response_latency.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.control.response_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.process.start_time', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.process.cpu_seconds_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.process.open_fds', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.process.max_fds', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.process.virtual_memory', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.process.resident_memory', metric_type=aggregator.GAUGE)
+
+    aggregator.assert_metric('linkerd.prometheus.health', metric_type=aggregator.GAUGE)
+
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_service_check(
+        'linkerd.prometheus.health', status=check.OK, tags=['endpoint:http://fake.tld/prometheus'], count=1
+    )
