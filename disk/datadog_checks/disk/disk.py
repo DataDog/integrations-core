@@ -70,6 +70,7 @@ class Disk(AgentCheck):
             )
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
+        self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
 
         self.devices_label = {}
 
@@ -477,16 +478,14 @@ class Disk(AgentCheck):
         devices_label = {}
         try:
             blkid_out, _, _ = get_subprocess_output(['blkid'], self.log)
-            all_devices = [l.strip().split() for l in blkid_out.splitlines()]
+            all_devices = [l.split(':', 1) for l in blkid_out.splitlines()]
 
             for d in all_devices:
                 # Line sample
                 # /dev/sda1: LABEL="MYLABEL" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
-                for att in d:
-                    if att.startswith('LABEL='):
-                        # Removing ':' from the name
-                        device_name = d[0].rstrip(':')
-                        devices_label[device_name] = "label:{}".format(att.split('=')[1].strip('"'))
+                labels = re.findall(self._blkid_label_re, d[1])
+                if labels:
+                    devices_label[d[0]] = 'label:{}'.format(labels[0])
 
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use blkid to have device labels")
