@@ -395,10 +395,12 @@ class __AgentCheck(object):
         #     ('hostname2', {'src2_name': ['test2:t3']})
         # ]
         try:
-            for _, source_map in external_tags:
+            new_tags = []
+            for hostname, source_map in external_tags:
+                new_tags.append((to_string(hostname), source_map))
                 for src_name, tags in iteritems(source_map):
                     source_map[src_name] = self._normalize_tags_type(tags)
-            datadog_agent.set_external_tags(external_tags)
+            datadog_agent.set_external_tags(new_tags)
         except IndexError:
             self.log.exception('Unexpected external tags format: {}'.format(external_tags))
             raise
