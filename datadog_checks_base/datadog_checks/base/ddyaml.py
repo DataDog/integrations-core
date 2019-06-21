@@ -41,7 +41,7 @@ def safe_yaml_dump_all(
 ):
     if Dumper != yDumper:
         stream_name = get_stream_name(stream)
-        log.info("Unsafe dumping of YAML has been disabled - using safe dumper instead in {}".format(stream_name))
+        log.debug("Unsafe dumping of YAML has been disabled - using safe dumper instead in {}".format(stream_name))
 
     if pyyaml_dump_all:
         return pyyaml_dump_all(
@@ -84,7 +84,7 @@ def safe_yaml_dump_all(
 def safe_yaml_load(stream, Loader=yLoader):
     if Loader != yLoader:
         stream_name = get_stream_name(stream)
-        log.info("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
 
     if pyyaml_load:
         return pyyaml_load(stream, Loader=yLoader)
@@ -95,7 +95,7 @@ def safe_yaml_load(stream, Loader=yLoader):
 def safe_yaml_load_all(stream, Loader=yLoader):
     if Loader != yLoader:
         stream_name = get_stream_name(stream)
-        log.info("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
 
     if pyyaml_load_all:
         return pyyaml_load_all(stream, Loader=yLoader)
@@ -104,7 +104,8 @@ def safe_yaml_load_all(stream, Loader=yLoader):
 
 
 def get_stream_name(stream):
-    """Using the same logic as pyyaml to handle both string types and file types"""
+    """Using the same logic as pyyaml to handle both string types and file types. All file objects do not necessarily
+    have a `name` attribute, in that case we can only say the stream is a file."""
     if isinstance(stream, string_types):
         return "<string>"
     elif hasattr(stream, 'name'):
