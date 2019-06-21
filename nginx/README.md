@@ -72,18 +72,42 @@ server {
 }
 ```
 
+**NGINX Plus**
+
 NGINX Plus can also use `stub_status`, but since that module provides fewer metrics, you should use `status` if you're a Plus user.
 
-Reload NGINX to enable the status endpoint. (There's no need for a full restart)
+For NGINX Plus releases 15 and above, the `status` module is deprecated and the [`http_api_module`][15] should be used. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
+  
+  ```
+  server { 
+    listen 8080; 
+    location /api { 
+    api write=on; 
+  } 
+  ```
+
+
+Reload NGINX to enable the status or api endpoint. (There's no need for a full restart)
+
+`sudo nginx -t && sudo nginx -s reload`
+
 
 #### Metric Collection
 
 1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][6] for all available configuration options.
-  **Note**: If you are using the NGINX Plus, for releases 13 and above, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
 
-3. Optional - If you are using the NGINX `vhost_traffic_status module`, set the parameter `use_vts` to `true` in your `nginx.d/conf.yaml` configuration file.
+**NGINX Plus**
 
-4. [Restart the Agent][7] to start sending NGINX metrics to Datadog.
+* For NGINX Plus releases 13 and above, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file. 
+* If using the http_api_module, the  set the `nginx_status_url` parameter to the server's `/api` location in your `nginx.d/conf.yaml` configuration file. 
+
+  ```
+  nginx_status_url: http://localhost:8080/api
+  ```
+
+2. Optional - If you are using the NGINX `vhost_traffic_status module`, set the parameter `use_vts` to `true` in your `nginx.d/conf.yaml` configuration file.
+
+3. [Restart the Agent][7] to start sending NGINX metrics to Datadog.
 
 #### Log Collection
 
@@ -182,3 +206,4 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 [12]: https://www.datadoghq.com/blog/how-to-monitor-nginx
 [13]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
 [14]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[15]: https://nginx.org/en/docs/http/ngx_http_api_module.html
