@@ -1,7 +1,4 @@
-from .lighttpd import Lighttpd
 from .__about__ import __version__
+from .lighttpd import Lighttpd
 
-__all__ = [
-    'Lighttpd',
-    '__version__',
-]
+__all__ = ['Lighttpd', '__version__']

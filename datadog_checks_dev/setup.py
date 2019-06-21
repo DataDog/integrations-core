@@ -6,7 +6,6 @@ from os import path
 
 from setuptools import setup
 
-
 HERE = path.dirname(path.abspath(__file__))
 
 with open(path.join(HERE, 'datadog_checks', 'dev', '__about__.py'), 'r', encoding='utf-8') as f:
@@ -25,12 +24,12 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 REQUIRES = [
     'coverage>=4.5.1',
     'mock',
-    'PyYAML>=3.13',
+    'PyYAML>=5.1',
     'pytest',
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
     'pytest-mock',
-    'requests>=2.20.0',
+    'requests>=2.22.0',
     'six',
 ]
 
@@ -38,17 +37,14 @@ REQUIRES = [
 setup(
     name='datadog_checks_dev',
     version=VERSION,
-
     description='The Datadog Checks Developer Tools',
     long_description=README,
     long_description_content_type='text/markdown',
     keywords='datadog agent checks dev tools tests',
-
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
-
     # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -57,16 +53,13 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-
     packages=['datadog_checks', 'datadog_checks.dev'],
     install_requires=REQUIRES,
     include_package_data=True,
-
     extras_require={
         'cli': [
             'appdirs',
@@ -75,7 +68,7 @@ setup(
             'colorama',
             'datadog-a7',
             'docker-compose>=1.23.1,<1.24.0',
-            'in-toto==0.2.3',
+            'in-toto==0.3.0',
             'pip-tools',
             'pylint',
             'Pillow',
@@ -83,17 +76,14 @@ setup(
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',
-            'tox>=3.7.0',
+            'tox>=3.12.1',
             'twine>=1.11.0',
             'wheel>=0.31.0',
-        ],
+        ]
     },
-
     entry_points={
         'pytest11': ['datadog_checks = datadog_checks.dev.plugin.pytest'],
         'tox': ['datadog_checks = datadog_checks.dev.plugin.tox'],
-        'console_scripts': [
-            'ddev = datadog_checks.dev.tooling.cli:ddev',
-        ],
+        'console_scripts': ['ddev = datadog_checks.dev.tooling.cli:ddev'],
     },
 )

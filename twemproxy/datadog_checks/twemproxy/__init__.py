@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .twemproxy import Twemproxy
 
-__all__ = [
-    '__version__',
-    'Twemproxy'
-]
+__all__ = ['__version__', 'Twemproxy']

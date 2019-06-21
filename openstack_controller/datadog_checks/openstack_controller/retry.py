@@ -11,7 +11,6 @@ MAX_BACKOFF_SECS = 300
 
 
 class BackOffRetry(object):
-
     def __init__(self):
         self.backoff = None
         self.random = SystemRandom()

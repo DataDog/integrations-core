@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .mysql import MySql
 
-__all__ = [
-    '__version__',
-    'MySql'
-]
+__all__ = ['__version__', 'MySql']

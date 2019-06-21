@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .ecs_fargate import FargateCheck
 
-__all__ = [
-    '__version__',
-    'FargateCheck'
-]
+__all__ = ['__version__', 'FargateCheck']

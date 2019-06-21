@@ -111,11 +111,21 @@ class GUnicornCheck(AgentCheck):
     def _get_master_proc_by_name(self, name, tags):
         """ Return a psutil process for the master gunicorn process with the given name. """
         master_name = GUnicornCheck._get_master_proc_name(name)
-        master_procs = [p for p in psutil.process_iter() if p.cmdline() and p.cmdline()[0] == master_name]
+        master_procs = []
+        for p in psutil.process_iter():
+            try:
+                if p.cmdline()[0] == master_name:
+                    master_procs.append(p)
+            except (IndexError, psutil.Error) as e:
+                self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
         if len(master_procs) == 0:
             # process not found, it's dead.
-            self.service_check(self.SVC_NAME, AgentCheck.CRITICAL, tags=['app:' + name] + tags,
-                               message="No gunicorn process with name %s found" % name)
+            self.service_check(
+                self.SVC_NAME,
+                AgentCheck.CRITICAL,
+                tags=['app:' + name] + tags,
+                message="No gunicorn process with name %s found" % name,
+            )
             raise GUnicornCheckError("Found no master process with name: %s" % master_name)
         else:
             self.log.debug("There exist %s master process(es) with the name %s" % (len(master_procs), name))

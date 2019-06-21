@@ -1,5 +1,13 @@
 # CHANGELOG - snmp
 
+## 1.7.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3565](https://github.com/DataDog/integrations-core/pull/3565).
+
+## 1.6.0 / 2019-03-29
+
+* [Added] Add metrics config globally. See [#3230](https://github.com/DataDog/integrations-core/pull/3230).
+
 ## 1.5.0 / 2019-02-18
 
 * [Added] Improve performance by querying only necessary columns from a table. See [#3059](https://github.com/DataDog/integrations-core/pull/3059).

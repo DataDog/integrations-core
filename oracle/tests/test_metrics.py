@@ -38,8 +38,9 @@ def test__get_process_metrics(aggregator, check):
     cur.execute.assert_called_with(query)
     for i, metric_name in enumerate(check.PROCESS_METRICS.values()):
         expected_program = programs[i]
-        aggregator.assert_metric(metric_name, count=1, value=0,
-                                 tags=['custom_tag', 'program:{}'.format(expected_program)])
+        aggregator.assert_metric(
+            metric_name, count=1, value=0, tags=['custom_tag', 'program:{}'.format(expected_program)]
+        )
 
 
 def test__get_tablespace_metrics(aggregator, check):
@@ -51,7 +52,7 @@ def test__get_tablespace_metrics(aggregator, check):
         ["offline", None, 100, 0],
         ["normal", 50, 100, 50],
         ["full", 100, 100, 100],
-        ["size_0", 1, None, 100]
+        ["size_0", 1, None, 100],
     ]
     con.cursor.return_value = cur
 
@@ -92,7 +93,7 @@ def test__get_custom_metrics_misconfigured(check):
     gauge = mock.MagicMock()
     con = mock.MagicMock()
     cursor = mock.MagicMock()
-    cursor.fetchone.return_value = ["foo", "bar"]
+    cursor.__iter__.side_effect = lambda: iter([["foo", "bar"], ["foo", "bar"]])
     con.cursor.return_value = cursor
     check.log = log
     check.gauge = gauge
@@ -101,28 +102,28 @@ def test__get_custom_metrics_misconfigured(check):
     custom_queries = [query]
 
     # No metric_prefix
-    check._get_custom_metrics(None, custom_queries, None)
+    check._get_custom_metrics(None, custom_queries, [])
     log.error.assert_called_once_with('custom query field `metric_prefix` is required')
     log.reset_mock()
 
     query["metric_prefix"] = "foo"
 
     # No query for metric_prefix
-    check._get_custom_metrics(None, custom_queries, None)
+    check._get_custom_metrics(None, custom_queries, [])
     log.error.assert_called_once_with('custom query field `query` is required for metric_prefix `foo`')
     log.reset_mock()
 
     query["query"] = "bar"
 
     # No columns for metric_prefix
-    check._get_custom_metrics(None, custom_queries, None)
+    check._get_custom_metrics(None, custom_queries, [])
     log.error.assert_called_once_with('custom query field `columns` is required for metric_prefix `foo`')
     log.reset_mock()
 
     query["columns"] = [{}]
 
     # Wrong number of columns
-    check._get_custom_metrics(con, custom_queries, None)
+    check._get_custom_metrics(con, custom_queries, [])
     log.error.assert_called_once_with('query result for metric_prefix foo: expected 1 columns, got 2')
     log.reset_mock()
 
@@ -132,7 +133,7 @@ def test__get_custom_metrics_misconfigured(check):
     query["columns"] = columns
 
     # No name in column
-    check._get_custom_metrics(con, custom_queries, None)
+    check._get_custom_metrics(con, custom_queries, [])
     log.error.assert_called_once_with('column field `name` is required for metric_prefix `foo`')
     log.reset_mock()
 
@@ -140,21 +141,21 @@ def test__get_custom_metrics_misconfigured(check):
     col2["name"] = "foo"
 
     # No type in column
-    check._get_custom_metrics(con, custom_queries, None)
+    check._get_custom_metrics(con, custom_queries, [])
     log.error.assert_called_once_with('column field `type` is required for column `foo` of metric_prefix `foo`')
     log.reset_mock()
 
     col2["type"] = "invalid"
 
     # Invalid type column
-    check._get_custom_metrics(con, custom_queries, None)
+    check._get_custom_metrics(con, custom_queries, [])
     log.error.assert_called_once_with('invalid submission method `invalid` for column `foo` of metric_prefix `foo`')
     log.reset_mock()
 
     col2["type"] = "gauge"
 
     # Non numeric value
-    check._get_custom_metrics(con, custom_queries, None)
+    check._get_custom_metrics(con, custom_queries, [])
     log.error.assert_called_once_with('non-numeric value `bar` for metric column `foo` of metric_prefix `foo`')
 
     # No metric sent if errors
@@ -164,53 +165,69 @@ def test__get_custom_metrics_misconfigured(check):
 def test__get_custom_metrics(aggregator, check):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
-    cursor.fetchone.side_effect = [
-        ["tag_value1", "1"],
-        [1, 2, "tag_value2"]
-    ]
+    data = [[["tag_value1", "1"]], [[1, 2, "tag_value2"]]]
+    cursor.__iter__.side_effect = lambda: iter(data.pop(0))
     con.cursor.return_value = cursor
 
     custom_queries = [
         {
             "metric_prefix": "oracle.test1",
             "query": "mocked",
-            "columns": [
-                {
-                    "name": "tag_name",
-                    "type": "tag"
-                },
-                {
-                    "name": "metric",
-                    "type": "gauge"
-                }
-            ],
-            "tags": ["query_tags1"]
+            "columns": [{"name": "tag_name", "type": "tag"}, {"name": "metric", "type": "gauge"}],
+            "tags": ["query_tags1"],
         },
         {
             "metric_prefix": "oracle.test2",
             "query": "mocked",
             "columns": [
-                {
-                    "name": "rate",
-                    "type": "rate"
-                },
-                {
-                    "name": "gauge",
-                    "type": "gauge"
-                },
-                {
-                    "name": "tag_name",
-                    "type": "tag"
-                }
+                {"name": "rate", "type": "rate"},
+                {"name": "gauge", "type": "gauge"},
+                {"name": "tag_name", "type": "tag"},
             ],
-            "tags": ["query_tags2"]
+            "tags": ["query_tags2"],
+        },
+    ]
+
+    check._get_custom_metrics(con, custom_queries, ["custom_tag"])
+    aggregator.assert_metric(
+        "oracle.test1.metric", value=1, count=1, tags=["tag_name:tag_value1", "query_tags1", "custom_tag"]
+    )
+    aggregator.assert_metric(
+        "oracle.test2.gauge",
+        value=2,
+        count=1,
+        metric_type=aggregator.GAUGE,
+        tags=["tag_name:tag_value2", "query_tags2", "custom_tag"],
+    )
+    aggregator.assert_metric(
+        "oracle.test2.rate",
+        value=1,
+        count=1,
+        metric_type=aggregator.RATE,
+        tags=["tag_name:tag_value2", "query_tags2", "custom_tag"],
+    )
+
+
+def test__get_custom_metrics_multiple_results(aggregator, check):
+    con = mock.MagicMock()
+    cursor = mock.MagicMock()
+    data = [["tag_value1", "1"], ["tag_value2", "2"]]
+    cursor.__iter__.side_effect = lambda: iter(data)
+    con.cursor.return_value = cursor
+
+    custom_queries = [
+        {
+            "metric_prefix": "oracle.test1",
+            "query": "mocked",
+            "columns": [{"name": "tag_name", "type": "tag"}, {"name": "metric", "type": "gauge"}],
+            "tags": ["query_tags1"],
         }
     ]
 
     check._get_custom_metrics(con, custom_queries, ["custom_tag"])
-    aggregator.assert_metric("oracle.test1.metric", value=1, count=1,
-                             tags=["tag_name:tag_value1", "query_tags1", "custom_tag"])
-    aggregator.assert_metric("oracle.test2.gauge", value=2, count=1, metric_type=aggregator.GAUGE,
-                             tags=["tag_name:tag_value2", "query_tags2", "custom_tag"])
-    aggregator.assert_metric("oracle.test2.rate", value=1, count=1, metric_type=aggregator.RATE,
-                             tags=["tag_name:tag_value2", "query_tags2", "custom_tag"])
+    aggregator.assert_metric(
+        "oracle.test1.metric", value=1, count=1, tags=["tag_name:tag_value1", "query_tags1", "custom_tag"]
+    )
+    aggregator.assert_metric(
+        "oracle.test1.metric", value=2, count=1, tags=["tag_name:tag_value2", "query_tags1", "custom_tag"]
+    )

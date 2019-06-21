@@ -1,9 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .mixins import KubeLeaderElectionMixin
 from .. import AgentCheck
-from ...errors import CheckException
+from .mixins import KubeLeaderElectionMixin
 
 
 class KubeLeaderElectionBaseCheck(KubeLeaderElectionMixin, AgentCheck):
@@ -19,5 +18,6 @@ class KubeLeaderElectionBaseCheck(KubeLeaderElectionMixin, AgentCheck):
           record_namespace
           tags (optional)
     """
+
     def check(self, instance):
         self.check_election_status(instance)

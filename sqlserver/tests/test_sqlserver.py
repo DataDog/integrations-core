@@ -2,15 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-try:
-    import pyodbc
-except ImportError:
-    pyodbc = None
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 
 from .common import CHECK_NAME, EXPECTED_METRICS
+
+try:
+    import pyodbc
+except ImportError:
+    pyodbc = None
 
 
 @pytest.mark.docker
@@ -26,7 +27,7 @@ def test_check_invalid_password(aggregator, init_config, instance_docker):
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['host:localhost,1433', 'db:master', 'optional:tag1']
+        tags=['host:localhost,1433', 'db:master', 'optional:tag1'],
     )
 
 
@@ -50,10 +51,8 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
 
     # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
-        instance_docker['driver'],
-        instance_docker['host'],
-        instance_docker['username'],
-        instance_docker['password'],)
+        instance_docker['driver'], instance_docker['host'], instance_docker['username'], instance_docker['password']
+    )
     conn = pyodbc.connect(conn_str, timeout=30)
 
     # Create cursor associated with connection
@@ -62,7 +61,9 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     # Stored Procedure Drop Statement
     sqlDropSP = "IF EXISTS (SELECT * FROM sys.objects \
                WHERE type='P' AND name='{0}') \
-               DROP PROCEDURE {0}".format(proc)
+               DROP PROCEDURE {0}".format(
+        proc
+    )
     cursor.execute(sqlDropSP)
 
     # Stored Procedure Create Statement
@@ -81,7 +82,9 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
                         ("sql.sp.testb", "gauge", 1, "{1}"), \
                         ("sql.sp.testb", "gauge", 2, "{1}"); \
                     SELECT * FROM #Datadog; \
-                END;'.format(proc, sp_tags)
+                END;'.format(
+        proc, sp_tags
+    )
     cursor.execute(sqlCreateSP)
 
     # For debugging. Calls the stored procedure and prints the results.

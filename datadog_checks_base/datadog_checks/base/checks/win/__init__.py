@@ -11,7 +11,4 @@ except ImportError:
     from .winpdh import WinPDHCounter
 
 
-__all__ = [
-    'PDHBaseCheck',
-    'WinPDHCounter',
-]
+__all__ = ['PDHBaseCheck', 'WinPDHCounter']

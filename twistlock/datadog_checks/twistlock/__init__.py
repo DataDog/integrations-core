@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .twistlock import TwistlockCheck
 
-__all__ = [
-    '__version__',
-    'TwistlockCheck'
-]
+__all__ = ['__version__', 'TwistlockCheck']

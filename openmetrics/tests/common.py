@@ -1,0 +1,1 @@
+CHECK_NAME = 'openmetrics'

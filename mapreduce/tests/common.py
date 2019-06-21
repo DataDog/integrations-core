@@ -2,14 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
+from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.mapreduce import MapReduceCheck
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
+HOST = get_docker_hostname()
 
 # ID
 APP_ID = 'application_1453738555560_0001'
 APP_NAME = 'WordCount'
+CONTAINER_NAME = "dd-test-mapreduce"
 JOB_ID = 'job_1453738555560_0001'
 JOB_NAME = 'WordCount'
 USER_NAME = 'vagrant'
@@ -17,7 +19,7 @@ TASK_ID = 'task_1453738555560_0001_m_000000'
 CLUSTER_NAME = 'MapReduceCluster'
 
 # Resource manager URI
-RM_URI = 'http://localhost:8088'
+RM_URI = 'http://{}:8088'.format(HOST)
 
 # Custom tags
 CUSTOM_TAGS = ['optional:tag1']
@@ -29,6 +31,10 @@ MR_TASKS_URL = '{}/{}/{}'.format(MR_JOBS_URL, JOB_ID, 'tasks')
 
 TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
+
+INSTANCE_INTEGRATION = {'resourcemanager_uri': RM_URI, 'cluster_name': CLUSTER_NAME, 'collect_task_metrics': True}
+
+CLUSTER_TAG = ['cluster_name:{}'.format(CLUSTER_NAME)]
 
 MR_CONFIG = {
     'instances': [
@@ -76,6 +82,30 @@ INIT_CONFIG = {
             ],
         }
     ],
+}
+
+EXPECTED_METRICS = {
+    "mapreduce.job.maps_running",
+    "mapreduce.job.reduces_running",
+    "mapreduce.job.failed_reduce_attempts",
+    "mapreduce.job.failed_map_attempts",
+    "mapreduce.job.reduces_completed",
+    "mapreduce.job.reduces_pending",
+    "mapreduce.job.reduces_total",
+    "mapreduce.job.new_map_attempts",
+    "mapreduce.job.new_reduce_attempts",
+    "mapreduce.job.killed_reduce_attempts",
+    "mapreduce.job.killed_map_attempts",
+    "mapreduce.job.successful_reduce_attempts",
+    "mapreduce.job.running_reduce_attempts",
+    "mapreduce.job.running_map_attempts",
+    "mapreduce.job.successful_map_attempts",
+    "mapreduce.job.elapsed_time",
+    "mapreduce.job.maps_completed",
+    "mapreduce.job.maps_pending",
+    "mapreduce.job.maps_total",
+    "mapreduce.job.map.task.elapsed_time",
+    "mapreduce.job.reduce.task.elapsed_time",
 }
 
 MAPREDUCE_JOB_METRIC_VALUES = {

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
+
 from datadog_checks.oracle import OracleConfigError
 
 
@@ -17,7 +18,6 @@ def test__get_config(check, instance):
     assert jdbc_driver is None
     assert tags == ['optional:tag1']
     assert custom_queries == []
-    assert check.server == 'localhost:1521'
 
 
 def test_check_misconfig(check, instance):

@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .ibm_was import IbmWasCheck
 
-__all__ = [
-    '__version__',
-    'IbmWasCheck'
-]
+__all__ = ['__version__', 'IbmWasCheck']

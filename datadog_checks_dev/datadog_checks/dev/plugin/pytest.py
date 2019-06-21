@@ -9,7 +9,17 @@ from base64 import urlsafe_b64encode
 
 import pytest
 
-from .._env import E2E_FIXTURE_NAME, TESTING_PLUGIN, e2e_active, get_env_vars
+from .._env import (
+    AGENT_COLLECTOR_SEPARATOR,
+    E2E_FIXTURE_NAME,
+    E2E_PARENT_PYTHON,
+    TESTING_PLUGIN,
+    e2e_active,
+    e2e_testing,
+    format_config,
+    get_env_vars,
+    replay_check_run,
+)
 
 __aggregator = None
 
@@ -37,6 +47,15 @@ def dd_environment_runner(request):
 
     # Do nothing if no e2e action is triggered and continue with tests
     if not testing_plugin and not e2e_active():  # no cov
+        return
+    # If e2e tests are being run it means the environment has
+    # already been spun up so we prevent another invocation
+    elif e2e_testing():  # no cov
+        # Since the scope is `session` there should only ever be one definition
+        fixture_def = request._fixturemanager._arg2fixturedefs[E2E_FIXTURE_NAME][0]
+
+        # Make the underlying function a no-op
+        fixture_def.func = lambda: None
         return
 
     try:
@@ -68,10 +87,7 @@ def dd_environment_runner(request):
     metadata.setdefault('env_vars', {})
     metadata['env_vars'].update(get_env_vars(raw=True))
 
-    data = {
-        'config': config,
-        'metadata': metadata,
-    }
+    data = {'config': config, 'metadata': metadata}
 
     # Serialize to json
     data = json.dumps(data, separators=(',', ':'))
@@ -88,3 +104,76 @@ def dd_environment_runner(request):
     else:  # no cov
         # Exit testing and pass data back up to command
         pytest.exit(message)
+
+
+@pytest.fixture
+def dd_agent_check(request, aggregator):
+    if not e2e_testing():
+        pytest.skip('Not running E2E tests')
+
+    # Lazily import to reduce plugin load times for everyone
+    from datadog_checks.dev import TempDir, run_command
+
+    def run_check(config, **kwargs):
+        root = os.path.dirname(request.module.__file__)
+        while True:
+            if os.path.isfile(os.path.join(root, 'setup.py')):
+                check = os.path.basename(root)
+                break
+
+            new_root = os.path.dirname(root)
+            if new_root == root:
+                raise OSError('No Datadog Agent check found')
+
+            root = new_root
+
+        config = format_config(config)
+        env = os.environ['TOX_ENV_NAME']
+        python_path = os.environ[E2E_PARENT_PYTHON]
+        config_file = os.path.join(temp_dir, '{}-{}-{}.json'.format(check, env, urlsafe_b64encode(os.urandom(6))))
+
+        with open(config_file, 'wb') as f:
+            output = json.dumps(config).encode('utf-8')
+            f.write(output)
+
+        check_command = [
+            python_path,
+            '-m',
+            'datadog_checks.dev',
+            'env',
+            'check',
+            check,
+            env,
+            '--config',
+            config_file,
+            '--json',
+        ]
+        for key, value in kwargs.items():
+            if value is not False:
+                check_command.append('--{}'.format(key.replace('_', '-')))
+
+                if value is not True:
+                    check_command.append(value)
+
+        result = run_command(check_command, capture=True)
+        if AGENT_COLLECTOR_SEPARATOR not in result.stdout:
+            raise ValueError(
+                '{}{}\nCould find `{}` in the output'.format(result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR)
+            )
+
+        _, _, collector_output = result.stdout.partition(AGENT_COLLECTOR_SEPARATOR)
+        collector = json.loads(collector_output.strip())
+
+        replay_check_run(collector, aggregator)
+
+        return aggregator
+
+    with TempDir() as temp_dir:
+        yield run_check
+
+
+def pytest_configure(config):
+    # pytest will emit warnings if these aren't registered ahead of time
+    config.addinivalue_line('markers', 'unit: marker for unit tests')
+    config.addinivalue_line('markers', 'integration: marker for integration tests')
+    config.addinivalue_line('markers', 'e2e: marker for end-to-end Datadog Agent tests')

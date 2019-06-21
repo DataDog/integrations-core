@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
-
 DEFAULT_METRICS = {
     'coredns_dns_response_size_bytes': 'response_size.bytes',
     'coredns_cache_hits_total': 'cache_hits_count',
@@ -93,10 +92,6 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
         metrics = [DEFAULT_METRICS, GO_METRICS]
         metrics.extend(instance.get('metrics', []))
 
-        instance.update({
-            'prometheus_url': endpoint,
-            'namespace': 'coredns',
-            'metrics': metrics,
-        })
+        instance.update({'prometheus_url': endpoint, 'namespace': 'coredns', 'metrics': metrics})
 
         return instance

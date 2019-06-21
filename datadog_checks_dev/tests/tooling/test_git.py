@@ -5,8 +5,13 @@ import mock
 
 from datadog_checks.dev.tooling.constants import set_root
 from datadog_checks.dev.tooling.git import (
-    get_current_branch, files_changed, get_commits_since, git_show_file,
-    git_commit, git_tag, git_tag_list
+    files_changed,
+    get_commits_since,
+    get_current_branch,
+    git_commit,
+    git_show_file,
+    git_tag,
+    git_tag_list,
 )
 
 
@@ -101,7 +106,7 @@ def test_git_tag():
             git_tag('tagname', push=True)
             chdir.assert_called_once_with('/foo/')
             run.assert_any_call('git tag -a tagname -m "tagname"', capture=True)
-            run.assert_any_call('git push origin tagname')
+            run.assert_any_call('git push origin tagname', capture=True)
             chdir.reset_mock()
             run.reset_mock()
 

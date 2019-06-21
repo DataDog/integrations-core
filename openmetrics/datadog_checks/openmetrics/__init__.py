@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .openmetrics import OpenMetricsCheck
 
-__all__ = [
-    '__version__',
-    'OpenMetricsCheck'
-]
+__all__ = ['__version__', 'OpenMetricsCheck']

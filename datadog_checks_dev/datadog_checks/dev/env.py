@@ -11,15 +11,7 @@ from .utils import mock_context_manager
 
 
 @contextmanager
-def environment_run(
-    up,
-    down,
-    sleep=None,
-    endpoints=None,
-    conditions=None,
-    env_vars=None,
-    wrapper=None
-):
+def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper=None):
     """This utility provides a convenient way to safely set up and tear down arbitrary types of environments.
 
     :param up: A custom setup callable.

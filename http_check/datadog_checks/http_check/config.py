@@ -6,18 +6,19 @@ from collections import namedtuple
 from datadog_checks.base import ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.utils.headers import headers as agent_headers
 
-
 DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
 
 
-Config = namedtuple('Config',
-                    'url, ntlm_domain, username, password, client_cert,'
-                    'client_key, method, data, http_response_status_code,'
-                    'timeout, include_content, headers, response_time,'
-                    'content_match, reverse_content_match, tags,'
-                    'disable_ssl_validation, ssl_expire, instance_ca_certs,'
-                    'weakcipher, check_hostname, ignore_ssl_warning,'
-                    'skip_proxy, allow_redirects, stream')
+Config = namedtuple(
+    'Config',
+    'url, ntlm_domain, username, password, client_cert,'
+    'client_key, method, data, http_response_status_code,'
+    'timeout, include_content, headers, response_time,'
+    'content_match, reverse_content_match, tags,'
+    'disable_ssl_validation, ssl_expire, instance_ca_certs,'
+    'weakcipher, check_hostname, ignore_ssl_warning,'
+    'skip_proxy, allow_redirects, stream',
+)
 
 
 def from_instance(instance, default_ca_certs=None):
@@ -60,14 +61,34 @@ def from_instance(instance, default_ca_certs=None):
     weakcipher = is_affirmative(instance.get('weakciphers', False))
     ignore_ssl_warning = is_affirmative(instance.get('ignore_ssl_warning', False))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
-    skip_proxy = is_affirmative(
-        instance.get('skip_proxy', instance.get('no_proxy', False)))
+    skip_proxy = is_affirmative(instance.get('skip_proxy', instance.get('no_proxy', False)))
     allow_redirects = is_affirmative(instance.get('allow_redirects', True))
     stream = is_affirmative(instance.get('stream', False))
 
-    return Config(url, ntlm_domain, username, password, client_cert, client_key,
-                  method, data, http_response_status_code, timeout,
-                  include_content, headers, response_time, content_match,
-                  reverse_content_match, tags, disable_ssl_validation,
-                  ssl_expire, instance_ca_certs, weakcipher, check_hostname,
-                  ignore_ssl_warning, skip_proxy, allow_redirects, stream)
+    return Config(
+        url,
+        ntlm_domain,
+        username,
+        password,
+        client_cert,
+        client_key,
+        method,
+        data,
+        http_response_status_code,
+        timeout,
+        include_content,
+        headers,
+        response_time,
+        content_match,
+        reverse_content_match,
+        tags,
+        disable_ssl_validation,
+        ssl_expire,
+        instance_ca_certs,
+        weakcipher,
+        check_hostname,
+        ignore_ssl_warning,
+        skip_proxy,
+        allow_redirects,
+        stream,
+    )

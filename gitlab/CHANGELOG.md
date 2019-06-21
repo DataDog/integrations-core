@@ -1,5 +1,13 @@
 # CHANGELOG - gitlab
 
+## 2.3.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3509](https://github.com/DataDog/integrations-core/pull/3509).
+
+## 2.2.0 / 2019-03-29
+
+* [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
+
 ## 2.1.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2751][1].

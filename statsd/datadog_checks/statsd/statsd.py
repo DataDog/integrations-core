@@ -7,8 +7,8 @@ import socket
 
 from six import BytesIO
 
-from datadog_checks.utils.common import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.common import ensure_bytes, ensure_unicode
 
 SERVICE_CHECK_NAME = "statsd.can_connect"
 SERVICE_CHECK_NAME_HEALTH = "statsd.is_up"
@@ -28,13 +28,9 @@ class StatsCheck(AgentCheck):
         # Is it up?
         health = self._send_command(host, port, timeout, "health", tags).getvalue().strip()
         if health == b"health: up":
-            self.service_check(
-                SERVICE_CHECK_NAME_HEALTH, AgentCheck.OK, tags
-            )
+            self.service_check(SERVICE_CHECK_NAME_HEALTH, AgentCheck.OK, tags)
         else:
-            self.service_check(
-                SERVICE_CHECK_NAME_HEALTH, AgentCheck.CRITICAL, tags
-            )
+            self.service_check(SERVICE_CHECK_NAME_HEALTH, AgentCheck.CRITICAL, tags)
 
         # Get general stats
         stats = self._send_command(host, port, timeout, "stats", tags)
@@ -82,9 +78,7 @@ class StatsCheck(AgentCheck):
                 buf.write(chunk)
             return buf
         except Exception as e:
-            self.service_check(
-                SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags
-            )
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags)
             raise Exception("Failed connection {0}".format(str(e)))
         finally:
             s.close()

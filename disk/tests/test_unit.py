@@ -8,6 +8,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.disk import Disk
+
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
 from .mocks import MockInodesMetrics, mock_df_output
 from .utils import requires_unix
@@ -63,7 +64,7 @@ def test_psutil(aggregator, gauge_metrics, rate_metrics):
             tags = [
                 DEFAULT_FILE_SYSTEM,
                 'filesystem:{}'.format(DEFAULT_FILE_SYSTEM),
-                'device:{}'.format(DEFAULT_DEVICE_NAME)
+                'device:{}'.format(DEFAULT_DEVICE_NAME),
             ]
         else:
             tags = []
@@ -111,7 +112,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     instance = {
         'use_mount': 'no',
         'device_tag_re': {'{}.*'.format(DEFAULT_DEVICE_NAME[:-1]): 'type:dev,tag:two'},
-        'tags': ['optional:tags1']
+        'tags': ['optional:tags1'],
     }
     c = Disk('disk', None, {}, [instance])
     c.check(instance)
@@ -138,7 +139,7 @@ def test_no_psutil_debian(aggregator, gauge_metrics):
     mock_output = mock.patch(
         'datadog_checks.disk.disk.get_subprocess_output',
         return_value=mock_df_output('debian-df-Tk'),
-        __name__='get_subprocess_output'
+        __name__='get_subprocess_output',
     )
 
     with mock_statvfs, mock_output:
@@ -163,7 +164,7 @@ def test_no_psutil_freebsd(aggregator, gauge_metrics):
     mock_output = mock.patch(
         'datadog_checks.disk.disk.get_subprocess_output',
         return_value=mock_df_output('freebsd-df-Tk'),
-        __name__='get_subprocess_output'
+        __name__='get_subprocess_output',
     )
 
     with mock_statvfs, mock_output:
@@ -186,7 +187,7 @@ def test_no_psutil_centos(aggregator, gauge_metrics):
     mock_output = mock.patch(
         'datadog_checks.disk.disk.get_subprocess_output',
         return_value=mock_df_output('centos-df-Tk'),
-        __name__='get_subprocess_output'
+        __name__='get_subprocess_output',
     )
 
     with mock_statvfs, mock_output:

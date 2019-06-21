@@ -1,5 +1,9 @@
 # CHANGELOG - mapreduce
 
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3535](https://github.com/DataDog/integrations-core/pull/3535).
+
 ## 1.3.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#2870](https://github.com/DataDog/integrations-core/pull/2870).

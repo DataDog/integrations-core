@@ -5,7 +5,6 @@ from os.path import expanduser
 
 from .platform import LINUX, MAC, WINDOWS
 
-
 DEFAULT_AGENT_VERSION = 6
 
 # Must be a certain length
@@ -81,8 +80,10 @@ def get_agent_service_cmd(version, platform, action):
         )
     elif platform == MAC:
         return [
-            'launchctl', 'load' if action == 'start' else 'unload', '-w',
-            '{}/Library/LaunchAgents/com.datadoghq.agent.plist'.format(expanduser("~"))
+            'launchctl',
+            'load' if action == 'start' else 'unload',
+            '-w',
+            '{}/Library/LaunchAgents/com.datadoghq.agent.plist'.format(expanduser("~")),
         ]
     else:
         return ['sudo', 'service', 'datadog-agent', action]

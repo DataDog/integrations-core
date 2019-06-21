@@ -19,5 +19,10 @@
   "aliases": [],
   "is_public": true,
   "creates_events": false,
-  "integration_id": "coredns"
+  "integration_id": "coredns",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

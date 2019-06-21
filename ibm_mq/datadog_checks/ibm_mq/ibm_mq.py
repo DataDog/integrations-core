@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.checks import AgentCheck
-
-from datadog_checks.base import ensure_bytes
-
-from six import iteritems
 import logging
 
-from . import errors, metrics, connection
+from six import iteritems
+
+from datadog_checks.base import ensure_bytes
+from datadog_checks.checks import AgentCheck
+
+from . import connection, errors, metrics
 from .config import IBMMQConfig
 
 try:
@@ -31,6 +31,8 @@ class IbmMqCheck(AgentCheck):
     QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
 
     CHANNEL_SERVICE_CHECK = 'ibm_mq.channel'
+
+    SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
     def check(self, instance):
         config = IBMMQConfig(instance)
@@ -82,29 +84,36 @@ class IbmMqCheck(AgentCheck):
         if config.auto_discover_queues:
             queues.extend(self._discover_queues(queue_manager, '*'))
 
-        if len(config.queue_patterns) > 0:
-            for regex in config.queue_patterns:
-                queues.extend(self._discover_queues(queue_manager, regex))
+        if config.queue_patterns:
+            for pattern in config.queue_patterns:
+                queues.extend(self._discover_queues(queue_manager, pattern))
+
+        if config.queue_regex:
+            if not queues:
+                queues = self._discover_queues(queue_manager, '*')
+            keep_queues = []
+            for queue_pattern in config.queue_regex:
+                for queue in queues:
+                    if queue_pattern.match(queue):
+                        keep_queues.append(queue)
+            queues = keep_queues
 
         config.add_queues(queues)
 
-    def _discover_queues(self, queue_manager, regex):
-        args = {
-            pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(regex),
-            pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL
-        }
+    def _discover_queues(self, queue_manager, mq_pattern_filter):
         queues = []
 
-        try:
-            pcf = pymqi.PCFExecute(queue_manager)
-            response = pcf.MQCMD_INQUIRE_Q(args)
-        except pymqi.MQMIError as e:
-            self.warning("Error getting queue stats: {}".format(e))
-        else:
-            for queue_info in response:
-                queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                queue = queue.strip()
-                queues.append(queue)
+        for queue_type in self.SUPPORTED_QUEUE_TYPES:
+            args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
+            try:
+                pcf = pymqi.PCFExecute(queue_manager)
+                response = pcf.MQCMD_INQUIRE_Q(args)
+            except pymqi.MQMIError as e:
+                self.warning("Error discovering queue: {}".format(e))
+            else:
+                for queue_info in response:
+                    queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
+                    queues.append(str(queue.strip().decode()))
 
         return queues
 
@@ -115,7 +124,6 @@ class IbmMqCheck(AgentCheck):
         for mname, pymqi_value in iteritems(metrics.queue_manager_metrics()):
             try:
                 m = queue_manager.inquire(pymqi_value)
-
                 mname = '{}.queue_manager.{}'.format(self.METRIC_PREFIX, mname)
                 self.gauge(mname, m, tags=tags)
                 self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.OK, tags)
@@ -147,7 +155,7 @@ class IbmMqCheck(AgentCheck):
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name),
-                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_MODEL,
+                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
             pcf = pymqi.PCFExecute(queue_manager)
@@ -171,9 +179,7 @@ class IbmMqCheck(AgentCheck):
                         log.debug(msg)
 
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
-        args = {
-            pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')
-        }
+        args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')}
 
         try:
             pcf = pymqi.PCFExecute(queue_manager)
@@ -197,9 +203,7 @@ class IbmMqCheck(AgentCheck):
     def _get_channel_status(self, queue_manager, channel, tags, config):
         channel_tags = tags + ["channel:{}".format(channel)]
         try:
-            args = {
-                pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(channel)
-            }
+            args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(channel)}
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
         except pymqi.MQMIError as e:

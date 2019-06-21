@@ -2,17 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from six import iteritems
+
 # project
 from datadog_checks.teamcity import TeamCityCheck
-
-from six import iteritems
 
 # A path regularly used in the TeamCity Check
 COMMON_PATH = "guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,status:SUCCESS"
 
 # These values are acceptable URLs
 TEAMCITY_SERVER_VALUES = {
-
     # Regular URLs
     "localhost:8111/httpAuth": "http://localhost:8111/httpAuth",
     "localhost:8111/{}".format(COMMON_PATH): "http://localhost:8111/{}".format(COMMON_PATH),
@@ -21,15 +20,15 @@ TEAMCITY_SERVER_VALUES = {
     "https://localhost:8111/correct_url_https://": "https://localhost:8111/correct_url_https://",
     "https://localhost:8111/{}".format(COMMON_PATH): "https://localhost:8111/{}".format(COMMON_PATH),
     "http://http.com:8111/{}".format(COMMON_PATH): "http://http.com:8111/{}".format(COMMON_PATH),
-
     # <user>:<password>@teamcity.company.com
     "user:password@localhost:8111/http://_and_https://": "http://user:password@localhost:8111/http://_and_https://",
-    "user:password@localhost:8111/{}".format(COMMON_PATH):
-        "http://user:password@localhost:8111/{}".format(COMMON_PATH),
-    "http://user:password@localhost:8111/{}".format(COMMON_PATH):
-        "http://user:password@localhost:8111/{}".format(COMMON_PATH),
-    "https://user:password@localhost:8111/{}".format(COMMON_PATH):
-        "https://user:password@localhost:8111/{}".format(COMMON_PATH),
+    "user:password@localhost:8111/{}".format(COMMON_PATH): "http://user:password@localhost:8111/{}".format(COMMON_PATH),
+    "http://user:password@localhost:8111/{}".format(COMMON_PATH): "http://user:password@localhost:8111/{}".format(
+        COMMON_PATH
+    ),
+    "https://user:password@localhost:8111/{}".format(COMMON_PATH): "https://user:password@localhost:8111/{}".format(
+        COMMON_PATH
+    ),
 }
 
 

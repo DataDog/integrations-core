@@ -4,24 +4,18 @@
 import win32wnet
 from six import iteritems
 
+from ... import AgentCheck, is_affirmative
+from ...utils.containers import hash_mutable
+
 try:
     from .winpdh import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 except ImportError:
     from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 
-from ... import AgentCheck, is_affirmative
-from ...utils.containers import hash_mutable
 
-int_types = [
-    "int",
-    "long",
-    "uint",
-]
+int_types = ["int", "long", "uint"]
 
-double_types = [
-    "double",
-    "float",
-]
+double_types = ["double", "float"]
 
 
 class PDHBaseCheck(AgentCheck):
@@ -30,10 +24,9 @@ class PDHBaseCheck(AgentCheck):
 
     Windows only.
     """
+
     def __init__(self, name, init_config, agentConfig, instances, counter_list):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self._countersettypes = {}
-        self._counters = {}
         self._missing_counters = {}
         self._metrics = {}
         self._tags = {}
@@ -66,7 +59,7 @@ class PDHBaseCheck(AgentCheck):
                         win32wnet.WNetAddConnection2(nr, password, username, 0)
 
                     except Exception as e:
-                        self.log.error("Failed to make remote connection %s" % str(e))
+                        self.log.error("Failed to make remote connection %s", str(e))
                         return
 
                 # counter_data_types allows the precision with which counters are queried
@@ -82,19 +75,19 @@ class PDHBaseCheck(AgentCheck):
                 precisions = instance.get('counter_data_types')
                 if precisions is not None:
                     if not isinstance(precisions, list):
-                        self.log.warning("incorrect type for counter_data_type %s" % str(precisions))
+                        self.log.warning("incorrect type for counter_data_type %s", str(precisions))
                     else:
                         for p in precisions:
                             k, v = p.split(",")
                             v = v.lower().strip()
                             if v in int_types:
-                                self.log.info("Setting datatype for %s to integer" % k)
+                                self.log.info("Setting datatype for %s to integer", k)
                                 datatypes[k] = DATA_TYPE_INT
                             elif v in double_types:
-                                self.log.info("Setting datatype for %s to double" % k)
+                                self.log.info("Setting datatype for %s to double", k)
                                 datatypes[k] = DATA_TYPE_DOUBLE
                             else:
-                                self.log.warning("Unknown data type %s" % str(v))
+                                self.log.warning("Unknown data type %s", str(v))
 
                 self._make_counters(key, (counter_list, (datatypes, remote_machine, False, 'entry')))
 
@@ -137,7 +130,7 @@ class PDHBaseCheck(AgentCheck):
                     metric_func(dd_name, val, tags)
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error("Failed to get data for %s %s: %s" % (inst_name, dd_name, str(e)))
+                self.log.error("Failed to get data for %s %s: %s", inst_name, dd_name, str(e))
 
     def _make_counters(self, key, counter_data):
         counter_list, (datatypes, remote_machine, check_instance, message) = counter_data
@@ -154,35 +147,30 @@ class PDHBaseCheck(AgentCheck):
 
             try:
                 obj = WinPDHCounter(
-                    counterset,
-                    counter_name,
-                    self.log,
-                    inst_name,
-                    machine_name=remote_machine,
-                    precision=precision
+                    counterset, counter_name, self.log, inst_name, machine_name=remote_machine, precision=precision
                 )
             except Exception as e:
                 self.log.debug(
-                    'Could not create counter {}\\{} due to {}, will not report {}.'.format(
-                        counterset, counter_name, e, dd_name
-                    )
+                    'Could not create counter %s\\%s due to %s, will not report %s.',
+                    counterset,
+                    counter_name,
+                    e,
+                    dd_name,
                 )
                 self._missing_counters[(counterset, inst_name, counter_name, dd_name, mtype)] = (
-                    datatypes, remote_machine, check_instance, message
+                    datatypes,
+                    remote_machine,
+                    check_instance,
+                    message,
                 )
                 continue
             else:
                 self._missing_counters.pop((counterset, inst_name, counter_name, dd_name, mtype), None)
 
             entry = [inst_name, dd_name, m, obj]
-            self.log.debug('{}: {}'.format(message, entry))
+            self.log.debug('%s: %s', message, entry)
             self._metrics[key].append(entry)
 
     @classmethod
     def _no_instance(cls, inst_name):
-        return (
-            inst_name.lower() == 'none' or
-            len(inst_name) == 0 or
-            inst_name == '*' or
-            inst_name.lower() == 'all'
-        )
+        return inst_name.lower() == 'none' or len(inst_name) == 0 or inst_name == '*' or inst_name.lower() == 'all'

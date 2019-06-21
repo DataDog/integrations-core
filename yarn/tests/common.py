@@ -3,8 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+
 from datadog_checks.yarn.yarn import (
-    YARN_CLUSTER_METRICS_PATH, YARN_APPS_PATH, YARN_APPLICATION_STATES, YARN_NODES_PATH, YARN_SCHEDULER_PATH
+    YARN_APPLICATION_STATES,
+    YARN_APPS_PATH,
+    YARN_CLUSTER_METRICS_PATH,
+    YARN_NODES_PATH,
+    YARN_SCHEDULER_PATH,
 )
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -25,6 +30,69 @@ CUSTOM_TAGS = ['optional:tag1']
 
 TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
+
+INSTANCE_INTEGRATION = {"resourcemanager_uri": RM_ADDRESS, "cluster_name": CLUSTER_NAME}
+
+CLUSTER_TAG = "cluster_name:{}".format(CLUSTER_NAME)
+
+EXPECTED_METRICS = [
+    "yarn.metrics.apps_submitted",
+    "yarn.metrics.apps_completed",
+    "yarn.metrics.apps_pending",
+    "yarn.metrics.apps_running",
+    "yarn.metrics.apps_failed",
+    "yarn.metrics.apps_killed",
+    "yarn.metrics.reserved_mb",
+    "yarn.metrics.available_mb",
+    "yarn.metrics.allocated_mb",
+    "yarn.metrics.total_mb",
+    "yarn.metrics.reserved_virtual_cores",
+    "yarn.metrics.available_virtual_cores",
+    "yarn.metrics.allocated_virtual_cores",
+    "yarn.metrics.total_virtual_cores",
+    "yarn.metrics.containers_allocated",
+    "yarn.metrics.containers_reserved",
+    "yarn.metrics.containers_pending",
+    "yarn.metrics.total_nodes",
+    "yarn.metrics.active_nodes",
+    "yarn.metrics.lost_nodes",
+    "yarn.metrics.unhealthy_nodes",
+    "yarn.metrics.decommissioned_nodes",
+    "yarn.metrics.rebooted_nodes",
+    "yarn.queue.root.max_capacity",
+    "yarn.queue.root.used_capacity",
+    "yarn.queue.root.capacity",
+    "yarn.queue.num_pending_applications",
+    "yarn.queue.user_am_resource_limit.memory",
+    "yarn.queue.user_am_resource_limit.vcores",
+    "yarn.queue.absolute_capacity",
+    "yarn.queue.user_limit_factor",
+    "yarn.queue.user_limit",
+    "yarn.queue.num_applications",
+    "yarn.queue.used_am_resource.memory",
+    "yarn.queue.used_am_resource.vcores",
+    "yarn.queue.absolute_used_capacity",
+    "yarn.queue.resources_used.memory",
+    "yarn.queue.resources_used.vcores",
+    "yarn.queue.am_resource_limit.vcores",
+    "yarn.queue.am_resource_limit.memory",
+    "yarn.queue.capacity",
+    "yarn.queue.num_active_applications",
+    "yarn.queue.absolute_max_capacity",
+    "yarn.queue.used_capacity",
+    "yarn.queue.num_containers",
+    "yarn.queue.max_capacity",
+    "yarn.queue.max_applications",
+    "yarn.queue.max_applications_per_user",
+    "yarn.node.last_health_update",
+    "yarn.node.used_memory_mb",
+    "yarn.node.avail_memory_mb",
+    "yarn.node.used_virtual_cores",
+    "yarn.node.available_virtual_cores",
+    "yarn.node.num_containers",
+]
+
+EXPECTED_TAGS = ['cluster_name:test']
 
 YARN_CONFIG = {
     'instances': [
@@ -115,7 +183,7 @@ YARN_CLUSTER_METRICS_VALUES = {
 
 YARN_CLUSTER_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME)]
 
-YARN_APP_METRICS_VALUES = {
+DEPRECATED_YARN_APP_METRICS_VALUES = {
     'yarn.apps.progress': 100,
     'yarn.apps.started_time': 1326815573334,
     'yarn.apps.finished_time': 1326815598530,
@@ -125,6 +193,18 @@ YARN_APP_METRICS_VALUES = {
     'yarn.apps.running_containers': 0,
     'yarn.apps.memory_seconds': 151730,
     'yarn.apps.vcore_seconds': 103,
+}
+
+YARN_APP_METRICS_VALUES = {
+    'yarn.apps.progress_gauge': 100,
+    'yarn.apps.started_time_gauge': 1326815573334,
+    'yarn.apps.finished_time_gauge': 1326815598530,
+    'yarn.apps.elapsed_time_gauge': 25196,
+    'yarn.apps.allocated_mb_gauge': 0,
+    'yarn.apps.allocated_vcores_gauge': 0,
+    'yarn.apps.running_containers_gauge': 0,
+    'yarn.apps.memory_seconds_gauge': 151730,
+    'yarn.apps.vcore_seconds_gauge': 103,
 }
 
 YARN_APP_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME), 'app_name:word count', 'app_queue:default']

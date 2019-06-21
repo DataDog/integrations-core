@@ -19,6 +19,6 @@ def test_bad_config(aggregator, check):
 def test_very_bad_config(aggregator, check):
     for config in [{}, {"host": "localhost"}, {"port": 1000}, {"host": "localhost", "port": 1000}]:
         with pytest.raises(Exception):
-            check.check(common.BAD_API_KEY_CONFIG)
+            check.check(config)
 
     assert len(aggregator._metrics) == 0

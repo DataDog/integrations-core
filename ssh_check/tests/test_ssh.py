@@ -6,6 +6,7 @@ import threading
 import pytest
 
 from datadog_checks.ssh_check import CheckSSH
+
 from . import common
 
 

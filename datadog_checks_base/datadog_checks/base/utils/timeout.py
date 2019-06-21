@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from threading import Thread
 import functools
+from threading import Thread
 
 _thread_by_func = {}
 
@@ -11,6 +11,7 @@ class TimeoutException(Exception):
     """
     Raised when a function runtime exceeds the limit set.
     """
+
     pass
 
 
@@ -21,6 +22,7 @@ class ThreadMethod(Thread):
     Store result and exceptions.
     From: https://code.activestate.com/recipes/440569/
     """
+
     def __init__(self, target, args, kwargs):
         Thread.__init__(self)
         self.setDaemon(True)
@@ -43,6 +45,7 @@ def timeout(timeout):
     Also check if a thread for the same function already exists before creating a new one.
     Note: Compatible with Windows (thread based).
     """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -67,4 +70,5 @@ def timeout(timeout):
                 return worker.result
 
         return wrapper
+
     return decorator

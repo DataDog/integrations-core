@@ -4,7 +4,6 @@
 import os
 
 from datadog_checks.base import ensure_unicode
-
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.subprocess_output import get_subprocess_output
 
@@ -60,14 +59,13 @@ class NfsStatCheck(AgentCheck):
 
         # Disregard the first half of device stats (report 1 of 2)
         # as that is the moving average
-        all_devices = all_devices[len(all_devices) // 2:]
+        all_devices = all_devices[len(all_devices) // 2 :]
 
         for device in all_devices:
             device.send_metrics(self.gauge, custom_tags)
 
 
 class Device(object):
-
     def __init__(self, device_data, log):
         self.log = log
 
@@ -116,9 +114,9 @@ class Device(object):
 
     def _parse_tags(self):
         self.tags = []
-        self.tags.append('nfs_server:{0}'.format(ensure_unicode(self.nfs_server)))
-        self.tags.append('nfs_export:{0}'.format(ensure_unicode(self.nfs_export)))
-        self.tags.append('nfs_mount:{0}'.format(ensure_unicode(self.mount)))
+        self.tags.append(u'nfs_server:{0}'.format(ensure_unicode(self.nfs_server)))
+        self.tags.append(u'nfs_export:{0}'.format(ensure_unicode(self.nfs_export)))
+        self.tags.append(u'nfs_mount:{0}'.format(ensure_unicode(self.mount)))
 
     def send_metrics(self, gauge, tags):
         metric_prefix = 'system.nfs.'

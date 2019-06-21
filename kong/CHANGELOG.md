@@ -1,5 +1,13 @@
 # CHANGELOG - kong
 
+## 1.5.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3524](https://github.com/DataDog/integrations-core/pull/3524).
+
+## 1.4.0 / 2019-03-29
+
+* [Added] Update the kong integration with log instruction. See [#2935](https://github.com/DataDog/integrations-core/pull/2935).
+
 ## 1.3.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2772][1].

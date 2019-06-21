@@ -6,14 +6,10 @@ import os
 import click
 from six import itervalues
 
-from .console import (
-    CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-)
-from ..constants import get_root, get_agent_requirements
-from ..requirements import (
-    Package, make_catalog, read_packages, resolve_requirements
-)
 from ...utils import write_file_lines
+from ..constants import get_agent_requirements, get_root
+from ..requirements import Package, make_catalog, read_packages, resolve_requirements
+from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
 def display_package_changes(pre_packages, post_packages, indent=''):
@@ -57,10 +53,7 @@ def dep():
     pass
 
 
-@dep.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Resolve dependencies for any number of checks'
-)
+@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Resolve dependencies for any number of checks')
 @click.argument('checks', nargs=-1, required=True)
 @click.option('--lazy', '-l', is_flag=True, help='Do not attempt to upgrade transient dependencies')
 @click.option('--quiet', '-q', is_flag=True)
@@ -93,10 +86,7 @@ def resolve(checks, lazy, quiet):
                 display_package_changes(pre_packages, post_packages, indent='    ')
 
 
-@dep.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Pin a dependency for all checks that require it'
-)
+@dep.command(context_settings=CONTEXT_SETTINGS, short_help='Pin a dependency for all checks that require it')
 @click.argument('package')
 @click.argument('version')
 @click.argument('checks', nargs=-1)
@@ -155,8 +145,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
 
 
 @dep.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help="Combine all dependencies for the Agent's static environment"
+    context_settings=CONTEXT_SETTINGS, short_help="Combine all dependencies for the Agent's static environment"
 )
 def freeze():
     """Combine all dependencies for the Agent's static environment."""

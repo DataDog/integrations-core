@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
+
 from .common import COMPOSE_FILE, HOST, INSTANCE, PORT
 
 
@@ -24,10 +25,11 @@ def init_db():
             'BBS': "Well, we're boned",
             'TBwaBB': 'I love you, meatbags!',
             'BG': 'Whip harder, Professor!',
-            'ltWGY': 'Into the breach, meatbags. Or not, whatever'},
+            'ltWGY': 'Into the breach, meatbags. Or not, whatever',
+        },
         'composition': ['40% zinc', '40% titanium', '30% iron', '40% dolomite'],
         'apartment': bytearray(b'\x24'),
-        'quote_cnt': 47
+        'quote_cnt': 47,
     }
     client.put(key, bins)
     client.close()
@@ -37,10 +39,7 @@ def init_db():
 def dd_environment():
     with docker_run(
         COMPOSE_FILE,
-        conditions=[
-            CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']),
-            WaitFor(init_db),
-        ],
+        conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
     ):
         yield INSTANCE
 

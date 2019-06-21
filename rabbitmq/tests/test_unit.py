@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
 import mock
+import pytest
 import requests
 
 from datadog_checks.rabbitmq import RabbitMQ

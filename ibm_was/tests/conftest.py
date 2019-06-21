@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.dev import LazyFunction, docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.ibm_was import IbmWasCheck
+
 from . import common
 
 

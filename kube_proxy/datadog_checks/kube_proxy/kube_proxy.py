@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
+
 class KubeProxyCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
@@ -21,10 +22,10 @@ class KubeProxyCheck(OpenMetricsBaseCheck):
                         {'process_cpu_seconds_total': 'cpu.time'},
                         {'process_resident_memory_bytes': 'mem.resident'},
                         {'process_virtual_memory_bytes': 'mem.virtual'},
-                        {'rest_client_requests_total': 'client.http.requests'}
+                        {'rest_client_requests_total': 'client.http.requests'},
                     ],
-                    'send_histograms_buckets': True
+                    'send_histograms_buckets': True,
                 }
             },
-            default_namespace="kubeproxy"
+            default_namespace="kubeproxy",
         )

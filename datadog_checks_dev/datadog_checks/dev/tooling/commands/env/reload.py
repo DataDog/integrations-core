@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 from ...e2e import create_interface, get_configured_envs
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
 @click.command('reload', context_settings=CONTEXT_SETTINGS, short_help='Restart an Agent to detect environment changes')

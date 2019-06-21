@@ -8,8 +8,7 @@ from six import iteritems
 
 from datadog_checks.utils.containers import hash_mutable
 
-from . import helpers
-from . import exceptions
+from . import exceptions, helpers
 
 TN_REGEX = re.compile('/tn-([^/]+)/')
 APP_REGEX = re.compile('/ap-([^/]+)/')
@@ -24,6 +23,7 @@ class CiscoTags:
             self.log = log
         else:
             import logging
+
             self.log = logging.getLogger('cisco_api')
 
     def _app_tags(self, app):
@@ -148,8 +148,9 @@ class CiscoTags:
                     else:
                         self.tenant_farbic_mapper[tenant_fabric_key].extend(application_meta)
 
-                    self.tenant_farbic_mapper[tenant_fabric_key] = list(set(
-                        self.tenant_farbic_mapper[tenant_fabric_key]))
+                    self.tenant_farbic_mapper[tenant_fabric_key] = list(
+                        set(self.tenant_farbic_mapper[tenant_fabric_key])
+                    )
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 # the exception will already be logged, just pass it over here
                 pass

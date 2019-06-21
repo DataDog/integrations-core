@@ -2,16 +2,12 @@
 # (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 import time
 
-# 3p
 import requests
 
-# project
-from datadog_checks.config import _is_affirmative
 from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 
 class TeamCityCheck(AgentCheck):

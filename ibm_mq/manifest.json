@@ -14,10 +14,16 @@
   ],
   "public_title": "Datadog-IBM MQ Integration",
   "categories": [
-    "Message Queue",
+    "processing",
+    "messaging",
     "log collection"
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "ibm-mq"
+  "integration_id": "ibm-mq",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

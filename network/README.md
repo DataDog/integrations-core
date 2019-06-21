@@ -11,6 +11,14 @@ The network check collects TCP/IP stats from the host operating system.
 
 The network check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
 
+To collect metrics with this integration, make sure the conntrack module is activated on your host. If it's not the case, run:
+
+```
+sudo modprobe nf_conntrack
+sudo modprobe nf_conntrack_ipv4
+sudo modprobe nf_conntrack_ipv6
+```
+
 ### Configuration
 
 1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
@@ -30,6 +38,13 @@ The network check is included in the [Datadog Agent][2] package, so you don't ne
     ```
 
 2. [Restart the Agent][5] to effect any configuration changes.
+
+
+**Note**: Some conntrack metrics require running conntrack with privileged access to be retrieved. Configure the following sudoers rule for this to work:
+
+```
+dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
+```
 
 ### Validation
 

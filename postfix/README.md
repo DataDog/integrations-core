@@ -109,18 +109,18 @@ The naming convention and log file destinations are configurable:
       service: myapp
   ```
 
-* [Restart the Agent][9].
+* [Restart the Agent][6].
 
-**Learn more about log collection [in the log documentation][10]**
+**Learn more about log collection [in the log documentation][7]**
 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `postfix` under the Checks section.
+[Run the Agent's `status` subcommand][8] and look for `postfix` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 The Postfix check does not include any events.
@@ -129,11 +129,11 @@ The Postfix check does not include any events.
 The Postfix check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-* [Monitor Postfix queue performance][9]
+* [Monitor Postfix queue performance][6]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postfix/images/postfixgraph.png
@@ -141,8 +141,8 @@ Need help? Contact [Datadog support][8].
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/postfix/datadog_checks/postfix/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
-[8]: https://docs.datadoghq.com/help
-[9]: https://www.datadoghq.com/blog/monitor-postfix-queues
-[10]: https://docs.datadoghq.com/logs
+[6]: https://www.datadoghq.com/blog/monitor-postfix-queues
+[7]: https://docs.datadoghq.com/logs
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
+[10]: https://docs.datadoghq.com/help

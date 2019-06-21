@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .linux_proc_extras import MoreUnixCheck
 
-__all__ = [
-    '__version__',
-    'MoreUnixCheck'
-]
+__all__ = ['__version__', 'MoreUnixCheck']

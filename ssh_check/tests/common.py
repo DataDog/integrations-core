@@ -14,7 +14,7 @@ INSTANCES = {
         'sftp_check': False,
         'private_key_file': '',
         'add_missing_keys': True,
-        'tags': ['optional:tag1']
+        'tags': ['optional:tag1'],
     },
     'bad_auth': {
         'host': 'localhost',
@@ -23,7 +23,7 @@ INSTANCES = {
         'password': 'yodawg',
         'sftp_check': False,
         'private_key_file': '',
-        'add_missing_keys': True
+        'add_missing_keys': True,
     },
     'bad_hostname': {
         'host': 'wronghost',
@@ -32,7 +32,7 @@ INSTANCES = {
         'password': 'abcd',
         'sftp_check': False,
         'private_key_file': '',
-        'add_missing_keys': True
+        'add_missing_keys': True,
     },
 }
 

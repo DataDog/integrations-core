@@ -35,30 +35,30 @@ INSTANCE = {
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queues': [
-        QUEUE
-    ],
-    'channels': [
-        CHANNEL,
-        BAD_CHANNEL,
-    ]
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
-INSTANCE_PATTERN = {
+INSTANCE_QUEUE_PATTERN = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
     'host': HOST,
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queue_patterns': [
-        'DEV.*',
-        'SYSTEM.*'
-    ],
-    'channels': [
-        CHANNEL,
-        BAD_CHANNEL,
-    ]
+    'queue_patterns': ['DEV.*', 'SYSTEM.*'],
+    'channels': [CHANNEL, BAD_CHANNEL],
+}
+
+INSTANCE_QUEUE_REGEX = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queue_regex': [r'^DEV\..*$', r'^SYSTEM\..*$'],
+    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
 INSTANCE_COLLECT_ALL = {
@@ -69,10 +69,7 @@ INSTANCE_COLLECT_ALL = {
     'username': USERNAME,
     'password': PASSWORD,
     'auto_discover_queues': True,
-    'channels': [
-        CHANNEL,
-        BAD_CHANNEL,
-    ]
+    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
 INSTANCE_QUEUE_REGEX_TAG = {
@@ -82,10 +79,16 @@ INSTANCE_QUEUE_REGEX_TAG = {
     'port': PORT,
     'username': USERNAME,
     'password': PASSWORD,
-    'queues': [
-        QUEUE
+    'queues': [QUEUE],
+    'queue_tag_re': {'DEV.QUEUE.*': "foo:bar"},
+}
+
+E2E_METADATA = {
+    'start_commands': [
+        'mkdir /opt/mqm',
+        'curl -o /opt/mqm/mq-client.tar.gz '
+        'https://dd-agent-tarball-mirror.s3.amazonaws.com/9.0.0.6-IBM-MQC-Redist-LinuxX64.tar.gz',
+        'tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz',
     ],
-    'queue_tag_re': {
-        'DEV.QUEUE.*': "foo:bar"
-    }
+    'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib'},
 }

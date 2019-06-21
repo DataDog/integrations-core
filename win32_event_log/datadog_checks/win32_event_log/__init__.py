@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .win32_event_log import Win32EventLogWMI
 
-__all__ = [
-    '__version__',
-    'Win32EventLogWMI'
-]
+__all__ = ['__version__', 'Win32EventLogWMI']

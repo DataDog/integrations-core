@@ -2,16 +2,47 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
 import json
-from requests.exceptions import SSLError
+import os
+from copy import deepcopy
 
 import pytest
 from mock import patch
+from requests.exceptions import SSLError
+
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.yarn import YarnCheck
 
 from .common import (
-    HERE, YARN_CLUSTER_METRICS_URL, YARN_APPS_URL, YARN_NODES_URL, YARN_SCHEDULER_URL, TEST_USERNAME, TEST_PASSWORD
+    HERE,
+    INSTANCE_INTEGRATION,
+    TEST_PASSWORD,
+    TEST_USERNAME,
+    YARN_APPS_URL,
+    YARN_CLUSTER_METRICS_URL,
+    YARN_NODES_URL,
+    YARN_SCHEDULER_URL,
 )
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    with docker_run(
+        compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
+        conditions=[CheckEndpoints(INSTANCE_INTEGRATION['resourcemanager_uri'], attempts=240)],
+    ):
+        yield INSTANCE_INTEGRATION
+
+
+@pytest.fixture
+def check():
+    return YarnCheck('yarn', {}, {})
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE_INTEGRATION)
 
 
 @pytest.fixture
@@ -41,6 +72,7 @@ def mocked_bad_cert_request():
     """
     Mock request.get to an endpoint with a badly configured ssl cert
     """
+
     def requests_bad_cert_get(*args, **kwargs):
         # Make sure we're passing in the 'verify' argument
         assert 'verify' in kwargs, 'Missing "verify" argument in requests.get(...) call'

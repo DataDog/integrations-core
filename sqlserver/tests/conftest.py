@@ -6,16 +6,25 @@ import os
 from copy import deepcopy
 
 import pytest
+
+from datadog_checks.dev import WaitFor, docker_run
+
+from .common import (
+    FULL_CONFIG,
+    HERE,
+    HOST,
+    INIT_CONFIG,
+    INIT_CONFIG_OBJECT_NAME,
+    INSTANCE_DOCKER,
+    INSTANCE_SQL2017,
+    PORT,
+    lib_tds_path,
+)
+
 try:
     import pyodbc
 except ImportError:
     pyodbc = None
-
-from datadog_checks.dev import docker_run, WaitFor
-
-from .common import (
-    INIT_CONFIG, INIT_CONFIG_OBJECT_NAME, INSTANCE_SQL2017, INSTANCE_DOCKER, HOST, PORT, HERE, FULL_CONFIG, lib_tds_path
-)
 
 
 @pytest.fixture
@@ -49,6 +58,6 @@ def dd_environment():
 
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-        conditions=[WaitFor(sqlserver, wait=3, attempts=10)]
+        conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
     ):
         yield FULL_CONFIG

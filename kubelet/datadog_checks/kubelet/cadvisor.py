@@ -3,33 +3,28 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import logging
+import numbers
+from fnmatch import fnmatch
+
+import requests
+from six import iteritems
+from six.moves.urllib.parse import urlparse
+
+from datadog_checks.base.utils.tagging import tagger
+
+from .common import get_pod_by_uid, is_static_pending_pod, tags_for_docker, tags_for_pod
+
 """kubernetes check
 Collects metrics from cAdvisor instance
 """
-from fnmatch import fnmatch
-import numbers
-from six import iteritems
-from six.moves.urllib.parse import urlparse
-import logging
 
-import requests
-
-from .common import tags_for_docker, tags_for_pod, is_static_pending_pod, get_pod_by_uid
-from tagger import get_tags
 
 NAMESPACE = "kubernetes"
 DEFAULT_MAX_DEPTH = 10
-DEFAULT_ENABLED_RATES = [
-    'diskio.io_service_bytes.stats.total',
-    'network.??_bytes',
-    'cpu.*.total']
-DEFAULT_ENABLED_GAUGES = [
-    'memory.usage',
-    'memory.working_set',
-    'memory.rss',
-    'filesystem.usage']
-DEFAULT_POD_LEVEL_METRICS = [
-    'network.*']
+DEFAULT_ENABLED_RATES = ['diskio.io_service_bytes.stats.total', 'network.??_bytes', 'cpu.*.total']
+DEFAULT_ENABLED_GAUGES = ['memory.usage', 'memory.working_set', 'memory.rss', 'filesystem.usage']
+DEFAULT_POD_LEVEL_METRICS = ['network.*']
 
 NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
 
@@ -42,6 +37,7 @@ class CadvisorScraper(object):
     class, as it uses its AgentCheck facilities and class members.
     It is not possible to run it standalone.
     """
+
     def __init__(self, *args, **kwargs):
         super(CadvisorScraper, self).__init__(*args, **kwargs)
 
@@ -59,8 +55,7 @@ class CadvisorScraper(object):
         kubelet_hostname = urlparse(kubelet_url).hostname
         if not kubelet_hostname:
             raise ValueError("kubelet hostname empty")
-        url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port,
-                                      LEGACY_CADVISOR_METRICS_PATH)
+        url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port, LEGACY_CADVISOR_METRICS_PATH)
 
         # Test the endpoint is present
         r = requests.head(url, timeout=1)
@@ -162,21 +157,25 @@ class CadvisorScraper(object):
 
         # Let's see who we have here
         if is_pod:
-            tags = tags_for_pod(pod_uid, True)
+            tags = tags_for_pod(pod_uid, tagger.HIGH)
         elif in_static_pod and k_container_name:
             # FIXME static pods don't have container statuses so we can't
             # get the container id with the scheme, assuming docker here
-            tags = tags_for_docker(subcontainer_id, True)
-            tags += tags_for_pod(pod_uid, True)
+            tags = tags_for_docker(subcontainer_id, tagger.HIGH)
+            tags += tags_for_pod(pod_uid, tagger.HIGH)
             tags.append("kube_container_name:%s" % k_container_name)
         else:  # Standard container
             cid = pod_list_utils.get_cid_by_name_tuple(
-                (pod.get('metadata', {}).get('namespace', ""),
-                 pod.get('metadata', {}).get('name', ""), k_container_name))
+                (
+                    pod.get('metadata', {}).get('namespace', ""),
+                    pod.get('metadata', {}).get('name', ""),
+                    k_container_name,
+                )
+            )
             if pod_list_utils.is_excluded(cid):
                 self.log.debug("Filtering out " + cid)
                 return
-            tags = get_tags(cid, True)
+            tags = tagger.tag(cid, tagger.HIGH)
 
         if not tags:
             self.log.debug("Subcontainer {} doesn't have tags, skipping.".format(subcontainer_id))

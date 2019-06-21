@@ -4,8 +4,8 @@
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.http_check.config import DEFAULT_EXPECTED_CODE, from_instance
 from datadog_checks.utils.headers import headers as agent_headers
-from datadog_checks.http_check.config import from_instance, DEFAULT_EXPECTED_CODE
 
 
 @pytest.mark.unit
@@ -20,16 +20,11 @@ def test_from_instance():
 
     # misconfiguration
     with pytest.raises(ConfigurationError) as e:
-        from_instance({
-            'url': 'example.com'
-        })
+        from_instance({'url': 'example.com'})
         assert 'scheme' in str(e)
 
     # defaults
-    params = from_instance({
-        'url': 'https://example.com',
-        'name': 'UpService',
-    })
+    params = from_instance({'url': 'https://example.com', 'name': 'UpService'})
     assert len(params) == 25
 
     # `url` is mandatory
@@ -84,11 +79,9 @@ def test_from_instance():
     assert params[24] is False
 
     # headers
-    params = from_instance({
-        'url': 'https://example.com',
-        'name': 'UpService',
-        'headers': {"X-Auth-Token": "SOME-AUTH-TOKEN"}
-    })
+    params = from_instance(
+        {'url': 'https://example.com', 'name': 'UpService', 'headers': {"X-Auth-Token": "SOME-AUTH-TOKEN"}}
+    )
 
     headers = params[11]
     expected_headers = agent_headers({}).get('User-Agent')
@@ -96,17 +89,8 @@ def test_from_instance():
     assert expected_headers == headers.get('User-Agent'), headers
 
     # proxy
-    params = from_instance({
-        'url': 'https://example.com',
-        'name': 'UpService',
-        'no_proxy': True,
-    })
+    params = from_instance({'url': 'https://example.com', 'name': 'UpService', 'no_proxy': True})
     assert params[22] is True
 
-    params = from_instance({
-        'url': 'https://example.com',
-        'name': 'UpService',
-        'no_proxy': False,
-        'skip_proxy': True,
-    })
+    params = from_instance({'url': 'https://example.com', 'name': 'UpService', 'no_proxy': False, 'skip_proxy': True})
     assert params[22] is True

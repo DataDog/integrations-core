@@ -13,8 +13,13 @@ def check():
     return WMICheck('wmi_check', {}, {}, None)
 
 
-class MockSampler():
-    def __init__(self, wmi_objects=[], properties=[], filters=[]):
+class MockSampler:
+    def __init__(self, wmi_objects=None, properties=None, filters=None):
+        if wmi_objects is None:
+            wmi_objects = []
+        if properties is None:
+            properties = []
+
         self._wmi_objects = []
         self._mock_wmi_objects = wmi_objects
         self.property_names = properties
@@ -44,19 +49,16 @@ class MockSampler():
 
 @pytest.fixture
 def mock_proc_sampler():
-    WMI_Mock = [{
-        "IOReadBytesPerSec": 20455,
-        "IDProcess": 4036,
-        "ThreadCount": 4,
-        "VirtualBytes": 3811,
-        "PercentProcessorTime": 5,
-    }]
-    property_names = [
-        "ThreadCount",
-        "IOReadBytesPerSec",
-        "VirtualBytes",
-        "PercentProcessorTime"
+    WMI_Mock = [
+        {
+            "IOReadBytesPerSec": 20455,
+            "IDProcess": 4036,
+            "ThreadCount": 4,
+            "VirtualBytes": 3811,
+            "PercentProcessorTime": 5,
+        }
     ]
+    property_names = ["ThreadCount", "IOReadBytesPerSec", "VirtualBytes", "PercentProcessorTime"]
     sampler = MockSampler(WMI_Mock, property_names)
 
     with patch("datadog_checks.wmi_check.WMICheck._get_wmi_sampler", return_value=sampler):
@@ -65,14 +67,8 @@ def mock_proc_sampler():
 
 @pytest.fixture
 def mock_disk_sampler():
-    WMI_Mock = [{
-        "AvgDiskBytesPerWrite": 1536,
-        "FreeMegabytes": 19742,
-    }]
-    property_names = [
-        "AvgDiskBytesPerWrite",
-        "FreeMegabytes",
-    ]
+    WMI_Mock = [{"AvgDiskBytesPerWrite": 1536, "FreeMegabytes": 19742}]
+    property_names = ["AvgDiskBytesPerWrite", "FreeMegabytes"]
     sampler = MockSampler(WMI_Mock, property_names)
 
     with patch("datadog_checks.wmi_check.WMICheck._get_wmi_sampler", return_value=sampler):

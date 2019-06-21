@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .kubernetes_state import KubernetesState
 
-__all__ = [
-    '__version__',
-    'KubernetesState'
-]
+__all__ = ['__version__', 'KubernetesState']

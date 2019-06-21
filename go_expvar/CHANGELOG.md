@@ -1,5 +1,13 @@
 # CHANGELOG - go_expvar
 
+## 1.3.0 / 2019-06-20
+
+* [Added] Do not compile regexes on each run. See [#3949](https://github.com/DataDog/integrations-core/pull/3949).
+
+## 1.2.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3511](https://github.com/DataDog/integrations-core/pull/3511).
+
 ## 1.1.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2833][1].

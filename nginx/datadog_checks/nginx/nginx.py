@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
-import time
 from datetime import datetime
 from itertools import chain
 
@@ -13,10 +12,21 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.headers import headers
-from .metrics import VTS_METRIC_MAP, METRICS_SEND_AS_COUNT
+
+from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
 if PY3:
     long = int
+
+EPOCH = datetime(1970, 1, 1)
+
+if hasattr(datetime, 'fromisoformat'):
+    fromisoformat = datetime.fromisoformat
+else:
+
+    def fromisoformat(ts):
+        return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
+
 
 PLUS_API_ENDPOINTS = {
     "nginx": [],
@@ -42,7 +52,7 @@ TAGGED_KEYS = {
     'upstreams': 'upstream',
     'upstreamZones': 'upstream',  # VTS
     'slabs': 'slab',
-    'slots': 'slot'
+    'slots': 'slot',
 }
 
 
@@ -61,6 +71,7 @@ class Nginx(AgentCheck):
     Reading: 0 Writing: 2 Waiting: 6
 
     """
+
     def check(self, instance):
         if 'nginx_status_url' not in instance:
             raise ConfigurationError('NginX instance missing "nginx_status_url" value.')
@@ -85,16 +96,13 @@ class Nginx(AgentCheck):
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
             for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
-                response = self._get_plus_api_data(instance, url, ssl_validation, auth,
-                                                   plus_api_version, endpoint, nest)
+                response = self._get_plus_api_data(
+                    instance, url, ssl_validation, auth, plus_api_version, endpoint, nest
+                )
                 self.log.debug(u"Nginx Plus API version {} `response`: {}".format(plus_api_version, response))
                 metrics.extend(self.parse_json(response, tags))
 
-        funcs = {
-            'gauge': self.gauge,
-            'rate': self.rate,
-            'count': self.monotonic_count
-        }
+        funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
         conn = None
         handled = None
         for row in metrics:
@@ -151,9 +159,14 @@ class Nginx(AgentCheck):
         return body, resp_headers.get('content-type', 'text/plain')
 
     def _perform_request(self, instance, url, ssl_validation, auth):
-        r = requests.get(url, auth=auth, headers=headers(self.agentConfig),
-                         verify=ssl_validation, timeout=self.default_integration_http_timeout,
-                         proxies=self.get_instance_proxy(instance, url))
+        r = requests.get(
+            url,
+            auth=auth,
+            headers=headers(self.agentConfig),
+            verify=ssl_validation,
+            timeout=self.default_integration_http_timeout,
+            proxies=self.get_instance_proxy(instance, url),
+        )
         r.raise_for_status()
         return r
 
@@ -185,9 +198,7 @@ class Nginx(AgentCheck):
         if len(keys) == 0:
             return payload
 
-        return {
-            keys[0]: self._nest_payload(keys[1:], payload)
-        }
+        return {keys[0]: self._nest_payload(keys[1:], payload)}
 
     def _get_plus_api_data(self, instance, api_url, ssl_validation, auth, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
@@ -201,8 +212,9 @@ class Nginx(AgentCheck):
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
             if endpoint in PLUS_API_STREAM_ENDPOINTS:
-                self.log.warning("Stream may not be initialized. "
-                                 "Error querying {} metrics at {}: {}".format(endpoint, url, e))
+                self.log.warning(
+                    "Stream may not be initialized. " "Error querying {} metrics at {}: {}".format(endpoint, url, e)
+                )
             else:
                 self.log.exception("Error querying {} metrics at {}: {}".format(endpoint, url, e))
 
@@ -226,19 +238,25 @@ class Nginx(AgentCheck):
             conn = int(parsed.group(1))
             handled = int(parsed.group(2))
             request = int(parsed.group(3))
-            output.extend([('nginx.net.conn_opened_per_s', conn, tags, 'rate'),
-                           ('nginx.net.conn_dropped_per_s', conn - handled, tags, 'rate'),
-                           ('nginx.net.request_per_s', request, tags, 'rate')])
+            output.extend(
+                [
+                    ('nginx.net.conn_opened_per_s', conn, tags, 'rate'),
+                    ('nginx.net.conn_dropped_per_s', conn - handled, tags, 'rate'),
+                    ('nginx.net.request_per_s', request, tags, 'rate'),
+                ]
+            )
 
         # Connection states, reading, writing or waiting for clients
         parsed = re.search(br'Reading: (\d+)\s+Writing: (\d+)\s+Waiting: (\d+)', raw)
         if parsed:
             reading, writing, waiting = parsed.groups()
-            output.extend([
-                ("nginx.net.reading", int(reading), tags, 'gauge'),
-                ("nginx.net.writing", int(writing), tags, 'gauge'),
-                ("nginx.net.waiting", int(waiting), tags, 'gauge'),
-            ])
+            output.extend(
+                [
+                    ("nginx.net.reading", int(reading), tags, 'gauge'),
+                    ("nginx.net.writing", int(writing), tags, 'gauge'),
+                    ("nginx.net.waiting", int(waiting), tags, 'gauge'),
+                ]
+            )
         return output
 
     @classmethod
@@ -283,26 +301,20 @@ class Nginx(AgentCheck):
                 output.extend(cls._flatten_json(metric_base, val2, tags))
 
         elif isinstance(val, bool):
-            # Turn bools into 0/1 values
-            if val:
-                val = 1
-            else:
-                val = 0
-            output.append((metric_base, val, tags, 'gauge'))
+            output.append((metric_base, int(val), tags, 'gauge'))
 
         elif isinstance(val, (int, float, long)):
             output.append((metric_base, val, tags, 'gauge'))
 
         elif isinstance(val, (text_type, str)):
-            # In the new Plus API, timestamps are now formatted strings, some include microseconds, some don't...
-            try:
-                timestamp = time.mktime(datetime.strptime(val, "%Y-%m-%dT%H:%M:%S.%fZ").timetuple())
-                output.append((metric_base, timestamp, tags, 'gauge'))
-            except ValueError:
+            if val[-1] == "Z":
                 try:
-                    timestamp = time.mktime(datetime.strptime(val, "%Y-%m-%dT%H:%M:%SZ").timetuple())
-                    output.append((metric_base, timestamp, tags, 'gauge'))
+                    # In the new Plus API, timestamps are now formatted
+                    # strings, some include microseconds, some don't...
+                    timestamp = fromisoformat(val[:19])
                 except ValueError:
                     pass
+                else:
+                    output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
 
         return output

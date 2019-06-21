@@ -4,7 +4,8 @@
 import re
 
 from datadog_checks.dev.utils import ON_WINDOWS
-from datadog_checks.disk.disk import Disk, IGNORE_CASE
+from datadog_checks.disk.disk import IGNORE_CASE, Disk
+
 from .mocks import MockPart
 from .utils import requires_windows
 
@@ -76,12 +77,7 @@ def test_exclude_cdrom():
 
 
 def test_file_system_whitelist():
-    instance = {
-        'file_system_whitelist': [
-            'ext[34]',
-            'ntfs',
-        ],
-    }
+    instance = {'file_system_whitelist': ['ext[34]', 'ntfs']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(fstype='ext3')) is False
@@ -91,11 +87,7 @@ def test_file_system_whitelist():
 
 
 def test_file_system_blacklist():
-    instance = {
-        'file_system_blacklist': [
-            'fat',
-        ],
-    }
+    instance = {'file_system_blacklist': ['fat']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(fstype='FAT32')) is True
@@ -103,14 +95,7 @@ def test_file_system_blacklist():
 
 
 def test_file_system_whitelist_blacklist():
-    instance = {
-        'file_system_whitelist': [
-            'ext[2-4]',
-        ],
-        'file_system_blacklist': [
-            'ext2',
-        ],
-    }
+    instance = {'file_system_whitelist': ['ext[2-4]'], 'file_system_blacklist': ['ext2']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(fstype='ext2')) is True
@@ -120,12 +105,7 @@ def test_file_system_whitelist_blacklist():
 
 
 def test_device_whitelist():
-    instance = {
-        'device_whitelist': [
-            '/dev/sda[1-3]',
-            'c:',
-        ],
-    }
+    instance = {'device_whitelist': ['/dev/sda[1-3]', 'c:']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(device='/dev/sda1')) is False
@@ -139,11 +119,7 @@ def test_device_whitelist():
 
 
 def test_device_blacklist():
-    instance = {
-        'device_blacklist': [
-            '/dev/sda[1-3]',
-        ],
-    }
+    instance = {'device_blacklist': ['/dev/sda[1-3]']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(device='/dev/sda1')) is True
@@ -153,14 +129,7 @@ def test_device_blacklist():
 
 
 def test_device_whitelist_blacklist():
-    instance = {
-        'device_whitelist': [
-            '/dev/sda[1-3]',
-        ],
-        'device_blacklist': [
-            '/dev/sda3',
-        ],
-    }
+    instance = {'device_whitelist': ['/dev/sda[1-3]'], 'device_blacklist': ['/dev/sda3']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(device='/dev/sda1')) is False
@@ -170,12 +139,7 @@ def test_device_whitelist_blacklist():
 
 
 def test_mount_point_whitelist():
-    instance = {
-        'mount_point_whitelist': [
-            '/dev/sda[1-3]',
-            'c:',
-        ],
-    }
+    instance = {'mount_point_whitelist': ['/dev/sda[1-3]', 'c:']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(mountpoint='/dev/sda1')) is False
@@ -189,11 +153,7 @@ def test_mount_point_whitelist():
 
 
 def test_mount_point_blacklist():
-    instance = {
-        'mount_point_blacklist': [
-            '/dev/sda[1-3]',
-        ],
-    }
+    instance = {'mount_point_blacklist': ['/dev/sda[1-3]']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(mountpoint='/dev/sda1')) is True
@@ -203,14 +163,7 @@ def test_mount_point_blacklist():
 
 
 def test_mount_point_whitelist_blacklist():
-    instance = {
-        'mount_point_whitelist': [
-            '/dev/sda[1-3]',
-        ],
-        'mount_point_blacklist': [
-            '/dev/sda3',
-        ],
-    }
+    instance = {'mount_point_whitelist': ['/dev/sda[1-3]'], 'mount_point_blacklist': ['/dev/sda3']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(mountpoint='/dev/sda1')) is False
@@ -220,10 +173,7 @@ def test_mount_point_whitelist_blacklist():
 
 
 def test_all_partitions_allow_no_device():
-    instance = {
-        'all_partitions': 'true',
-        'mount_point_blacklist': ['/run$'],
-    }
+    instance = {'all_partitions': 'true', 'mount_point_blacklist': ['/run$']}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(device='', mountpoint='/run')) is True
@@ -253,7 +203,7 @@ def test_legacy_exclude_disk():
         'excluded_filesystems': ['aaaaaa'],
         'excluded_mountpoint_re': '^/run$',
         'excluded_disks': ['bbbbbb'],
-        'excluded_disk_re': '^tev+$'
+        'excluded_disk_re': '^tev+$',
     }
     c = Disk('disk', None, {}, [instance])
 
@@ -288,11 +238,7 @@ def test_legacy_exclude_disk():
 
 
 def test_legacy_device_exclusion_logic_no_name():
-    instance = {
-        'use_mount': 'yes',
-        'excluded_mountpoint_re': '^/run$',
-        'all_partitions': 'yes'
-    }
+    instance = {'use_mount': 'yes', 'excluded_mountpoint_re': '^/run$', 'all_partitions': 'yes'}
     c = Disk('disk', None, {}, [instance])
 
     assert c.exclude_disk(MockPart(device='', mountpoint='/run')) is True

@@ -1,5 +1,17 @@
 # CHANGELOG - kubernetes_state
 
+## 4.4.1 / 2019-06-19
+
+* [Fixed] Correct service check for ksm - cronjob. See [#3937](https://github.com/DataDog/integrations-core/pull/3937).
+
+## 4.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3526](https://github.com/DataDog/integrations-core/pull/3526).
+
+## 4.3.0 / 2019-03-29
+
+* [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).
+
 ## 4.2.0 / 2019-02-18
 
 * [Added] Collect .hpa.condition gauges. See [#3107](https://github.com/DataDog/integrations-core/pull/3107).

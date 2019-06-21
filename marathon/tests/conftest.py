@@ -1,18 +1,29 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
 import json
+import os
+from copy import deepcopy
 
 import pytest
 
+from datadog_checks.dev import docker_run
 from datadog_checks.marathon import Marathon
-from .common import HERE, HOST, PORT
+
+from .common import HERE, INSTANCE_INTEGRATION
 
 
 def read_fixture_file(fname):
     with open(os.path.join(HERE, 'fixtures', fname)) as f:
         return json.loads(f.read())
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    with docker_run(
+        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'), log_patterns='All services up and running.'
+    ):
+        yield INSTANCE_INTEGRATION
 
 
 @pytest.fixture
@@ -22,12 +33,7 @@ def check():
 
 @pytest.fixture
 def instance():
-    return {
-        'url': 'http://{}:{}'.format(HOST, PORT),
-        'tags': ['optional:tag1'],
-        'label_tags': ['LABEL_NAME'],
-        'enable_deployment_metrics': True
-    }
+    return deepcopy(INSTANCE_INTEGRATION)
 
 
 @pytest.fixture

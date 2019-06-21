@@ -1,15 +1,16 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import sys
+import json
 import os
+import sys
 
 import mock
 import pytest
-import json
 
-from datadog_checks.kubelet import PodListUtils, KubeletCredentials, get_pod_by_uid, is_static_pending_pod
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.kubelet import KubeletCredentials, PodListUtils, get_pod_by_uid, is_static_pending_pod
+
 from .test_kubelet import mock_from_file
 
 # Skip the whole tests module on Windows
@@ -79,8 +80,13 @@ def test_filter_staticpods(monkeypatch):
     is_excluded.assert_not_called()
 
     # fluentd-gcp-v2.0.10-9q9t4 is not static
-    assert pod_list_utils.is_excluded("docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561",
-                                      "2edfd4d9-10ce-11e8-bd5a-42010af00137") is True
+    assert (
+        pod_list_utils.is_excluded(
+            "docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561",
+            "2edfd4d9-10ce-11e8-bd5a-42010af00137",
+        )
+        is True
+    )
 
 
 def test_pod_by_uid():
@@ -125,13 +131,9 @@ def test_credentials_empty():
 
 
 def test_credentials_certificates():
-    creds = KubeletCredentials({
-        "verify_tls": "true",
-        "ca_cert": "ca_cert",
-        "client_crt": "crt",
-        "client_key": "key",
-        "token": "ignore_me"
-    })
+    creds = KubeletCredentials(
+        {"verify_tls": "true", "ca_cert": "ca_cert", "client_crt": "crt", "client_key": "key", "token": "ignore_me"}
+    )
     assert creds.verify() == "ca_cert"
     assert creds.cert_pair() == ("crt", "key")
     assert creds.headers("https://dummy") is None
@@ -148,12 +150,9 @@ def test_credentials_certificates():
 
 def test_credentials_token_noverify():
     expected_headers = {'Authorization': 'Bearer mytoken'}
-    creds = KubeletCredentials({
-        "verify_tls": "false",
-        "ca_cert": "ca_cert",
-        "client_crt": "ignore_me",
-        "token": "mytoken"
-    })
+    creds = KubeletCredentials(
+        {"verify_tls": "false", "ca_cert": "ca_cert", "client_crt": "ignore_me", "token": "mytoken"}
+    )
     assert creds.verify() is False
     assert creds.cert_pair() is None
     assert creds.headers("https://dummy") == expected_headers

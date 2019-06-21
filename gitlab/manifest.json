@@ -22,5 +22,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "gitlab"
+  "integration_id": "gitlab",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

@@ -3,12 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from six import iteritems
-from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
-
 import requests
 import requests_kerberos
-from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError, SSLError
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
+from six import iteritems
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
@@ -80,6 +79,18 @@ YARN_CLUSTER_METRICS = {
 
 # Application metrics for YARN
 YARN_APP_METRICS = {
+    'progress': ('yarn.apps.progress_gauge', GAUGE),
+    'startedTime': ('yarn.apps.started_time_gauge', GAUGE),
+    'finishedTime': ('yarn.apps.finished_time_gauge', GAUGE),
+    'elapsedTime': ('yarn.apps.elapsed_time_gauge', GAUGE),
+    'allocatedMB': ('yarn.apps.allocated_mb_gauge', GAUGE),
+    'allocatedVCores': ('yarn.apps.allocated_vcores_gauge', GAUGE),
+    'runningContainers': ('yarn.apps.running_containers_gauge', GAUGE),
+    'memorySeconds': ('yarn.apps.memory_seconds_gauge', GAUGE),
+    'vcoreSeconds': ('yarn.apps.vcore_seconds_gauge', GAUGE),
+}
+# These are deprecated because increment is the wrong type as it becomes a RATE on the dogweb side
+DEPRECATED_YARN_APP_METRICS = {
     'progress': ('yarn.apps.progress', INCREMENT),
     'startedTime': ('yarn.apps.started_time', INCREMENT),
     'finishedTime': ('yarn.apps.finished_time', INCREMENT),
@@ -220,6 +231,7 @@ class YarnCheck(AgentCheck):
 
                 tags.extend(addl_tags)
 
+                self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
                 self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
     def _yarn_node_metrics(self, rm_address, instance, addl_tags):
@@ -351,7 +363,7 @@ class YarnCheck(AgentCheck):
                 delegate=is_affirmative(instance.get('kerberos_delegate', False)),
                 force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
                 hostname_override=instance.get('kerberos_hostname'),
-                principal=instance.get('kerberos_principal')
+                principal=instance.get('kerberos_principal'),
             )
 
         ssl_verify = is_affirmative(instance.get('ssl_verify', True))

@@ -4,20 +4,16 @@
 
 # stdlib
 import os
-import mock
 
+import mock
 import pytest
 
 # project
 from datadog_checks.kube_dns import KubeDNSCheck
 
-
 customtag = "custom:tag"
 
-instance = {
-    'prometheus_endpoint': 'http://localhost:10055/metrics',
-    'tags': [customtag]
-}
+instance = {'prometheus_endpoint': 'http://localhost:10055/metrics', 'tags': [customtag]}
 
 
 @pytest.fixture()
@@ -28,10 +24,8 @@ def mock_get():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"}
-        )
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
     ):
         yield
 
@@ -46,6 +40,7 @@ def aggregator():
 
 class TestKubeDNS:
     """Basic Test for kube_dns integration."""
+
     CHECK_NAME = 'kube_dns'
     NAMESPACE = 'kubedns'
     METRICS = [

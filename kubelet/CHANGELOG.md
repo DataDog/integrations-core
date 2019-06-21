@@ -1,5 +1,25 @@
 # CHANGELOG - kubelet
 
+## 3.2.0 / 2019-06-13
+
+* [Fixed] Revert "Collect network usage metrics (#3740)". See [#3914](https://github.com/DataDog/integrations-core/pull/3914).
+
+## 3.1.0 / 2019-05-14
+
+* [Added] Collect network usage metrics. See [#3740](https://github.com/DataDog/integrations-core/pull/3740).
+* [Added] add useful prometheus labels to metric tags. See [#3735](https://github.com/DataDog/integrations-core/pull/3735).
+* [Added] Adhere to code style. See [#3525](https://github.com/DataDog/integrations-core/pull/3525).
+
+## 3.0.1 / 2019-04-04
+
+* [Fixed] Fix podlist multiple iterations when using pod expiration. See [#3456](https://github.com/DataDog/integrations-core/pull/3456).
+* [Fixed] Fix health check during first check run. See [#3457](https://github.com/DataDog/integrations-core/pull/3457).
+
+## 3.0.0 / 2019-03-29
+
+* [Changed] Do not tag container restarts/state metrics by container_id anymore. See [#3424](https://github.com/DataDog/integrations-core/pull/3424).
+* [Added] Allow to filter out old pods when parsing the podlist to reduce memory usage. See [#3189](https://github.com/DataDog/integrations-core/pull/3189).
+
 ## 2.4.0 / 2019-02-18
 
 * [Fixed] Fix usage metrics collection for static pods. See [#3079](https://github.com/DataDog/integrations-core/pull/3079).
@@ -94,9 +114,9 @@
 [24]: https://github.com/DataDog/integrations-core/pull/1727
 [25]: https://github.com/DataDog/integrations-core/pull/1648
 [26]: https://github.com/DataDog/integrations-core/pull/1581
-[27]: 
-[28]: 
-[29]: 
-[30]: 
-[31]: 
-[32]: 
+[27]:
+[28]:
+[29]:
+[30]:
+[31]:
+[32]:

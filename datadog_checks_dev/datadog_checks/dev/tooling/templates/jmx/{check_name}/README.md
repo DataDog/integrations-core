@@ -1,8 +1,8 @@
-# Agent Check: {check_name_cap}
+# Agent Check: {integration_name}
 
 ## Overview
 
-This check monitors [{check_name_cap}][1].
+This check monitors [{integration_name}][1].
 
 ## Setup
 
@@ -19,7 +19,7 @@ This check monitors [{check_name_cap}][1].
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
    To learn how to customize the metrics to collect visit the [JMX Checks documentation][3] for more detailed instructions.
-   If you need to monitor more metrics, please send us an email at support@datadoghq.com
+   If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][4]
 
@@ -31,15 +31,15 @@ This check monitors [{check_name_cap}][1].
 
 ### Metrics
 
-{check_name_cap} does not include any metrics.
+{integration_name} does not include any metrics.
 
 ### Service Checks
 
-{check_name_cap} does not include any service checks.
+{integration_name} does not include any service checks.
 
 ### Events
 
-{check_name_cap} does not include any events.
+{integration_name} does not include any events.
 
 ## Troubleshooting
 

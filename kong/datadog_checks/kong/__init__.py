@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .kong import Kong
 
-__all__ = [
-    '__version__',
-    'Kong'
-]
+__all__ = ['__version__', 'Kong']

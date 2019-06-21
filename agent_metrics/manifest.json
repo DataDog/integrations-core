@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "datadog-agent"
+  "integration_id": "datadog-agent",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

@@ -1,8 +1,8 @@
-import mock
 import os
-import pytest
 
-from prometheus_client import generate_latest, CollectorRegistry, Gauge, Counter
+import mock
+import pytest
+from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import docker_run, get_docker_hostname
@@ -14,10 +14,7 @@ HOST = get_docker_hostname()
 INSTANCE = {
     'prometheus_url': 'http://{}:9090/metrics'.format(HOST),
     'namespace': 'prometheus',
-    'metrics': [
-        {'prometheus_target_interval_length_seconds': 'target_interval_seconds'},
-        'go_memstats_mallocs_total',
-    ]
+    'metrics': [{'prometheus_target_interval_length_seconds': 'target_interval_seconds'}, 'go_memstats_mallocs_total'],
 }
 
 
@@ -48,8 +45,8 @@ def poll_mock():
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
-            headers={'Content-Type': "text/plain"}
-        )
+            headers={'Content-Type': "text/plain"},
+        ),
     )
     with poll_mock_patch:
         yield

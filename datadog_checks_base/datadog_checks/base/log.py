@@ -3,12 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+from six import PY2, text_type
+
+from .utils.common import to_string
+
 try:
     import datadog_agent
 except ImportError:
     from .stubs import datadog_agent
 
-from .utils.common import to_string
 
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
@@ -25,11 +28,12 @@ class AgentLogHandler(logging.Handler):
     This handler forwards every log to the Go backend allowing python checks to
     log message within the main agent logging system.
     """
+
     def emit(self, record):
         msg = "({}:{}) | {}".format(
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
-            to_string(self.format(record))
+            to_string(self.format(record)),
         )
         datadog_agent.log(msg, record.levelno)
 
@@ -51,10 +55,18 @@ def _get_py_loglevel(lvl):
     """
     Map log levels to strings
     """
-    if not lvl:
-        lvl = 'INFO'
+    # In Python2, transform the unicode object into plain string
+    if PY2 and isinstance(lvl, text_type):
+        lvl = lvl.encode('ascii', 'ignore')
 
-    return LOG_LEVEL_MAP.get(lvl.upper(), logging.DEBUG)
+    # Be resilient to bad input since `lvl` comes from a configuration file
+    try:
+        lvl = lvl.upper()
+    except AttributeError:
+        lvl = ''
+
+    # if `lvl` is not a valid level string, let it fall back to default logging value
+    return LOG_LEVEL_MAP.get(lvl, logging.INFO)
 
 
 def init_logging():

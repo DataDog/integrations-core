@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
 import json
+import os
 from datetime import datetime
 
-from mock import Mock, MagicMock
+from mock import MagicMock, Mock
 from pyVmomi import vim
-
+from six import iteritems
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -16,6 +16,7 @@ class MockedMOR(Mock):
     """
     Helper, generate a mocked Managed Object Reference (MOR) from the given attributes.
     """
+
     def __init__(self, **kwargs):
         # Deserialize `spec`
         if 'spec' in kwargs:
@@ -87,7 +88,7 @@ def assertMOR(check, instance, name=None, spec=None, tags=None, count=None, subs
     instance_name = instance['name']
     candidates = []
 
-    mor_list = [mor for _, mors in check.mor_objects_queue._objects_queue[instance_name].iteritems() for mor in mors]
+    mor_list = [mor for _, mors in iteritems(check.mor_objects_queue._objects_queue[instance_name]) for mor in mors]
 
     for mor in mor_list:
         if name is not None and name != mor['hostname']:
@@ -139,8 +140,5 @@ def get_mocked_server():
     )
     # assemble the mocked server
     server_mock = MagicMock()
-    server_mock.configure_mock(**{
-        'RetrieveContent.return_value': content_mock,
-        'content': content_mock
-    })
+    server_mock.configure_mock(**{'RetrieveContent.return_value': content_mock, 'content': content_mock})
     return server_mock

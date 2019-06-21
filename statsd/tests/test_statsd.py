@@ -2,14 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 import os
 
 import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname
-from datadog_checks.statsd.statsd import StatsCheck, SERVICE_CHECK_NAME_HEALTH, SERVICE_CHECK_NAME
-
-import logging
+from datadog_checks.statsd.statsd import SERVICE_CHECK_NAME, SERVICE_CHECK_NAME_HEALTH, StatsCheck
 
 log = logging.getLogger(__file__)
 
@@ -32,10 +31,7 @@ METRICS = [
     'statsd.graphite.flush_length',
 ]
 
-DEFAULT_INSTANCE = {
-    'host': HOST,
-    'port': PORT,
-}
+DEFAULT_INSTANCE = {'host': HOST, 'port': PORT}
 
 
 @pytest.fixture
@@ -45,10 +41,7 @@ def instance():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'),
-        log_patterns=['server is up']
-    ):
+    with docker_run(compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'), log_patterns=['server is up']):
         yield DEFAULT_INSTANCE
 
 

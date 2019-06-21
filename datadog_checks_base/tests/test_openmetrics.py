@@ -1,19 +1,19 @@
 # (C) Datadog, Inc. 2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import logging
+import math
 import os
 
-import math
 import mock
 import pytest
 import requests
-
-from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, SummaryMetricFamily, HistogramMetricFamily
+from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-
+from datadog_checks.dev import get_here
 
 text_content_type = 'text/plain; version=0.0.4'
 
@@ -269,7 +269,7 @@ def test_submit_gauge_with_custom_tags(
         'prometheus.process.vm.bytes',
         54927360.0,
         tags=mocked_prometheus_scraper_config['custom_tags'] + mocked_prometheus_scraper_config['_metric_tags'],
-        count=1
+        count=1,
     )
 
 
@@ -360,15 +360,15 @@ def test_submit_summary(aggregator, mocked_prometheus_check, mocked_prometheus_s
 def test_submit_histogram(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
     _histo.add_metric(
-        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 1), ("4.324e+08", 1), ("+Inf", 3)], sum_value=3
+        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
     )
     check = mocked_prometheus_check
     check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.histogram.sum', 3, tags=[], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 3, tags=[], count=1)
+    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
+    aggregator.assert_metric('prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1)
     aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:31104000.0'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:432400000.0'], count=1)
+    aggregator.assert_metric('prometheus.custom.histogram.count', 2, tags=['upper_bound:31104000.0'], count=1)
+    aggregator.assert_metric('prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -975,6 +975,22 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
     assert math.isnan(current_metric.samples[2][2])
 
 
+def test_ignore_metric(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that an ignored metric is properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['ignore_metrics'] = ['process_virtual_memory_bytes']
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=0)
+
+
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join on text format """
     check = mocked_prometheus_check
@@ -1449,14 +1465,8 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
-        'kube_pod_info': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['node']
-        },
-        'kube_pod_status_phase': {
-            'label_to_match': 'pod',
-            'labels_to_get': ['phase']
-        }
+        'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        'kube_pod_status_phase': {'label_to_match': 'pod', 'labels_to_get': ['phase']},
     }
     mocked_prometheus_scraper_config['metrics_mapper'] = {'kube_pod_status_ready': 'pod.ready'}
     # dry run to build mapping
@@ -1471,7 +1481,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
 
     text_data = mock_get.replace(
         'kube_pod_status_phase{namespace="default",phase="Running",pod="dd-agent-62bgh"} 1',
-        'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1'
+        'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1',
     )
 
     mock_response = mock.MagicMock(
@@ -1532,3 +1542,59 @@ def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_co
 
     filtered = [x for x in check._text_filter_input(lines_in, mocked_prometheus_scraper_config)]
     assert filtered == expected_out
+
+
+@pytest.fixture()
+def mock_filter_get():
+    text_data = None
+    f_name = os.path.join(get_here(), 'fixtures', 'prometheus', 'deprecated.txt')
+    with open(f_name, 'r') as f:
+        text_data = f.read()
+    with mock.patch(
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200,
+            iter_lines=lambda **kwargs: text_data.split("\n"),
+            headers={'Content-Type': text_content_type},
+        ),
+    ):
+        yield text_data
+
+
+class FilterOpenMetricsCheck(OpenMetricsBaseCheck):
+    def _filter_metric(self, metric):
+        return metric.documentation.startswith("(Deprecated)")
+
+
+@pytest.fixture
+def mocked_filter_openmetrics_check():
+    check = FilterOpenMetricsCheck('prometheus_check', {}, {})
+    check.log = logging.getLogger('datadog-prometheus.test')
+    check.log.debug = mock.MagicMock()
+    return check
+
+
+@pytest.fixture
+def mocked_filter_openmetrics_check_scraper_config(mocked_filter_openmetrics_check):
+    yield mocked_filter_openmetrics_check.get_scraper_config(PROMETHEUS_CHECK_INSTANCE)
+
+
+def test_filter_metrics(
+    aggregator, mocked_filter_openmetrics_check, mocked_filter_openmetrics_check_scraper_config, mock_filter_get
+):
+    """ Tests label join GC on text format """
+    check = mocked_filter_openmetrics_check
+    mocked_filter_openmetrics_check_scraper_config['namespace'] = 'filter'
+    mocked_filter_openmetrics_check_scraper_config['metrics_mapper'] = {
+        'kube_pod_container_status_restarts': 'pod.restart',
+        'kube_pod_container_status_restarts_old': 'pod.restart_old',
+    }
+    # dry run to build mapping
+    check.process(mocked_filter_openmetrics_check_scraper_config)
+    # run with submit
+    check.process(mocked_filter_openmetrics_check_scraper_config)
+    # check a bunch of metrics
+    aggregator.assert_metric(
+        'filter.pod.restart', tags=['pod:kube-dns-autoscaler-97162954-mf6d3', 'namespace:kube-system'], value=42
+    )
+    aggregator.assert_all_metrics_covered()

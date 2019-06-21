@@ -22,6 +22,17 @@ def test_flatten_json(check):
     assert parsed == expected
 
 
+def test_flatten_json_timestamp(check):
+    assert (
+        check.parse_json(
+            """
+    {"timestamp": "2018-10-23T12:12:23.123212Z"}
+    """
+        )
+        == [('nginx.timestamp', 1540296743, [], 'gauge')]
+    )
+
+
 def test_plus_api(check, instance, aggregator):
     instance = deepcopy(instance)
     instance['use_plus_api'] = True
@@ -36,16 +47,9 @@ def test_plus_api(check, instance, aggregator):
 
 def test_nest_payload(check):
     keys = ["foo", "bar"]
-    payload = {
-        "key1": "val1",
-        "key2": "val2"
-    }
+    payload = {"key1": "val1", "key2": "val2"}
 
     result = check._nest_payload(keys, payload)
-    expected = {
-        "foo": {
-            "bar": payload
-        }
-    }
+    expected = {"foo": {"bar": payload}}
 
     assert result == expected

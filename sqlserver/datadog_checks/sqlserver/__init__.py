@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .sqlserver import SQLServer
 
-__all__ = [
-    '__version__',
-    'SQLServer'
-]
+__all__ = ['__version__', 'SQLServer']

@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .kube_controller_manager import KubeControllerManagerCheck
 
-__all__ = [
-    '__version__',
-    'KubeControllerManagerCheck'
-]
+__all__ = ['__version__', 'KubeControllerManagerCheck']

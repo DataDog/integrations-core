@@ -27,7 +27,7 @@ def get_auth_info(config=None):
 
 def get_pr_labels(pr_payload):
     labels = []
-    for label in (pr_payload.get('labels') or []):
+    for label in pr_payload.get('labels') or []:
         name = label.get('name')
         if name:
             labels.append(name)
@@ -56,10 +56,7 @@ def get_pr(pr_num, config=None, repo=DEFAULT_REPO, raw=False):
     """
     Get the payload for the given PR number. Let exceptions bubble up.
     """
-    response = requests.get(
-        PR_ENDPOINT.format(repo, pr_num),
-        auth=get_auth_info(config)
-    )
+    response = requests.get(PR_ENDPOINT.format(repo, pr_num), auth=get_auth_info(config))
 
     if raw:
         return response
@@ -70,10 +67,8 @@ def get_pr(pr_num, config=None, repo=DEFAULT_REPO, raw=False):
 
 def get_pr_from_hash(commit_hash, repo, config=None, raw=False):
     response = requests.get(
-        'https://api.github.com/search/issues?q=sha:{}+repo:DataDog/{}'.format(
-            commit_hash, repo
-        ),
-        auth=get_auth_info(config)
+        'https://api.github.com/search/issues?q=sha:{}+repo:DataDog/{}'.format(commit_hash, repo),
+        auth=get_auth_info(config),
     )
 
     if raw:

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from decimal import ROUND_HALF_DOWN, ROUND_HALF_UP
+from decimal import ROUND_HALF_DOWN
 
 from datadog_checks.base.utils.common import pattern_filter, round_value
 from datadog_checks.base.utils.containers import iter_unique
@@ -52,15 +52,17 @@ class TestPatternFilter:
         whitelist = ['abc', 'def']
 
         assert pattern_filter(items, whitelist=whitelist, key=lambda item: item.name) == [
-            Item('abc'), Item('def'), Item('abcdef')
+            Item('abc'),
+            Item('def'),
+            Item('abcdef'),
         ]
 
 
-class TestLimiter():
+class TestLimiter:
     def test_no_uid(self):
         warnings = []
         limiter = Limiter("my_check", "names", 10, warning_func=warnings.append)
-        for i in range(0, 10):
+        for _ in range(0, 10):
             assert limiter.is_reached() is False
         assert limiter.get_status() == (10, 10, False)
 
@@ -76,11 +78,11 @@ class TestLimiter():
     def test_with_uid(self):
         warnings = []
         limiter = Limiter("my_check", "names", 10, warning_func=warnings.append)
-        for i in range(0, 20):
+        for _ in range(0, 20):
             assert limiter.is_reached("dummy1") is False
         assert limiter.get_status() == (1, 10, False)
 
-        for i in range(0, 20):
+        for _ in range(0, 20):
             assert limiter.is_reached("dummy2") is False
         assert limiter.get_status() == (2, 10, False)
         assert len(warnings) == 0
@@ -88,18 +90,18 @@ class TestLimiter():
     def test_mixed(self):
         limiter = Limiter("my_check", "names", 10)
 
-        for i in range(0, 20):
+        for _ in range(0, 20):
             assert limiter.is_reached("dummy1") is False
         assert limiter.get_status() == (1, 10, False)
 
-        for i in range(0, 5):
+        for _ in range(0, 5):
             assert limiter.is_reached() is False
         assert limiter.get_status() == (6, 10, False)
 
     def test_reset(self):
         limiter = Limiter("my_check", "names", 10)
 
-        for i in range(1, 20):
+        for _ in range(1, 20):
             limiter.is_reached("dummy1")
         assert limiter.get_status() == (1, 10, False)
 
@@ -109,7 +111,7 @@ class TestLimiter():
         assert limiter.get_status() == (1, 10, False)
 
 
-class TestRounding():
+class TestRounding:
     def test_round_half_up(self):
         assert round_value(3.5) == 4.0
 
@@ -129,17 +131,11 @@ class TestContainers:
                 'metric_prefix': 'database',
                 'tags': ['test:database'],
                 'query': 'SELECT thing1, thing2 FROM TABLE',
-                'columns': [
-                    {'name': 'database.metric', 'type': 'count'},
-                    {'name': 'tablespace', 'type': 'tag'},
-                ],
+                'columns': [{'name': 'database.metric', 'type': 'count'}, {'name': 'tablespace', 'type': 'tag'}],
             },
             {
                 'tags': ['test:database'],
-                'columns': [
-                    {'name': 'tablespace', 'type': 'tag'},
-                    {'name': 'database.metric', 'type': 'count'},
-                ],
+                'columns': [{'name': 'tablespace', 'type': 'tag'}, {'name': 'database.metric', 'type': 'count'}],
                 'query': 'SELECT thing1, thing2 FROM TABLE',
                 'metric_prefix': 'database',
             },

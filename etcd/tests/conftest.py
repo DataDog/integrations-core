@@ -5,6 +5,7 @@ import pytest
 import requests
 
 from datadog_checks.dev import docker_run
+
 from .common import COMPOSE_FILE, URL, V3_PREVIEW
 
 
@@ -13,10 +14,7 @@ def dd_environment(instance):
     if V3_PREVIEW:
         endpoints = '{}/metrics'.format(URL)
     else:
-        endpoints = (
-            '{}/v2/stats/self'.format(URL),
-            '{}/v2/stats/store'.format(URL),
-        )
+        endpoints = ('{}/v2/stats/self'.format(URL), '{}/v2/stats/store'.format(URL))
 
     with docker_run(COMPOSE_FILE, endpoints=endpoints):
         if not V3_PREVIEW:
@@ -28,11 +26,6 @@ def dd_environment(instance):
 @pytest.fixture(scope='session')
 def instance():
     if V3_PREVIEW:
-        return {
-            'use_preview': True,
-            'prometheus_url': '{}/metrics'.format(URL),
-        }
+        return {'use_preview': True, 'prometheus_url': '{}/metrics'.format(URL)}
     else:
-        return {
-            'url': URL,
-        }
+        return {'url': URL}

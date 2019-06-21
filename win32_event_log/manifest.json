@@ -22,5 +22,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "win32-event-log"
+  "integration_id": "win32-event-log",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

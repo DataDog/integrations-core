@@ -1,5 +1,69 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.4.0 / 2019-06-18
+
+* [Added] Support E2E testing. See [#3896](https://github.com/DataDog/integrations-core/pull/3896).
+
+## 8.3.3 / 2019-06-05
+
+* [Fixed] Revert "[openmetrics] allow blacklisting of strings". See [#3867](https://github.com/DataDog/integrations-core/pull/3867).
+* [Fixed] Encode hostname in set_external_tags. See [#3866](https://github.com/DataDog/integrations-core/pull/3866).
+
+## 8.3.2 / 2019-06-04
+
+* [Fixed] Revert: Properly utilize the provided `metrics_mapper`. See [#3861](https://github.com/DataDog/integrations-core/pull/3861).
+
+## 8.3.1 / 2019-06-02
+
+* [Fixed] Fix package order of `get_datadog_wheels`. See [#3847](https://github.com/DataDog/integrations-core/pull/3847).
+
+## 8.3.0 / 2019-06-01
+
+* [Added] [openmetrics] Use Kube service account bearer token for authentication. See [#3829](https://github.com/DataDog/integrations-core/pull/3829).
+* [Fixed] Add upper_bound tag for the total count when collecting histograms buckets. See [#3777](https://github.com/DataDog/integrations-core/pull/3777).
+
+## 8.2.0 / 2019-05-21
+
+* [Added] Upgrade requests to 2.22.0. See [#3778](https://github.com/DataDog/integrations-core/pull/3778).
+
+## 8.1.0 / 2019-05-14
+
+* [Fixed] Fix the initialization of ignored metrics for OpenMetrics. See [#3736](https://github.com/DataDog/integrations-core/pull/3736).
+* [Fixed] Fixed decoding warning for None tags for python2 check base class. See [#3665](https://github.com/DataDog/integrations-core/pull/3665).
+* [Added] Add logging support to RequestsWrapper. See [#3737](https://github.com/DataDog/integrations-core/pull/3737).
+
+## 8.0.0 / 2019-05-06
+
+* [Added] Add easier namespacing for data submission. See [#3718](https://github.com/DataDog/integrations-core/pull/3718).
+* [Added] Upgrade pyyaml to 5.1. See [#3698](https://github.com/DataDog/integrations-core/pull/3698).
+* [Fixed] Improve resiliency of logging initialization phase. See [#3705](https://github.com/DataDog/integrations-core/pull/3705).
+* [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
+* [Changed] Remove every default header except `User-Agent`. See [#3644](https://github.com/DataDog/integrations-core/pull/3644).
+* [Fixed] Handle more tag decoding errors. See [#3671](https://github.com/DataDog/integrations-core/pull/3671).
+* [Added] Adhere to code style. See [#3496](https://github.com/DataDog/integrations-core/pull/3496).
+* [Fixed] Properly utilize the provided `metrics_mapper`. See [#3446](https://github.com/DataDog/integrations-core/pull/3446). Thanks [casidiablo](https://github.com/casidiablo).
+* [Added] Upgrade psycopg2-binary to 2.8.2. See [#3649](https://github.com/DataDog/integrations-core/pull/3649).
+
+## 7.0.0 / 2019-04-18
+
+* [Added] Add service_identity dependency. See [#3256](https://github.com/DataDog/integrations-core/pull/3256).
+* [Changed] Standardize TLS/SSL protocol naming. See [#3620](https://github.com/DataDog/integrations-core/pull/3620).
+* [Fixed] Parse timeouts as floats in RequestsWrapper. See [#3448](https://github.com/DataDog/integrations-core/pull/3448).
+* [Added] Support Python 3. See [#3605](https://github.com/DataDog/integrations-core/pull/3605).
+
+## 6.6.1 / 2019-04-04
+
+* [Fixed] Don't ship `pyodbc` on macOS as SQLServer integration is not shipped on macOS. See [#3461](https://github.com/DataDog/integrations-core/pull/3461).
+
+## 6.6.0 / 2019-03-29
+
+* [Added] Upgrade in-toto. See [#3411](https://github.com/DataDog/integrations-core/pull/3411).
+* [Added] Support Python 3. See [#3425](https://github.com/DataDog/integrations-core/pull/3425).
+
+## 6.5.0 / 2019-03-29
+
+* [Added] Add tagging utility and stub to access the new tagger API. See [#3413](https://github.com/DataDog/integrations-core/pull/3413).
+
 ## 6.4.0 / 2019-03-22
 
 * [Added] Add external_host_tags wrapper to checks_base. See [#3316](https://github.com/DataDog/integrations-core/pull/3316).

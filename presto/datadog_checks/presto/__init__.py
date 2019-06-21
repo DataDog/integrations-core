@@ -2,9 +2,5 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .presto import PrestoCheck
 
-__all__ = [
-    '__version__',
-    'PrestoCheck'
-]
+__all__ = ['__version__']

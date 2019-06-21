@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psutil
-
 from six import iteritems
 
 from datadog_checks.checks import AgentCheck
@@ -18,8 +17,4 @@ class SystemCore(AgentCheck):
         for i, cpu in enumerate(cpu_times):
             tags = instance_tags + ['core:{0}'.format(i)]
             for key, value in iteritems(cpu._asdict()):
-                self.rate(
-                    'system.core.{0}'.format(key),
-                    100.0 * value,
-                    tags=tags
-                )
+                self.rate('system.core.{0}'.format(key), 100.0 * value, tags=tags)

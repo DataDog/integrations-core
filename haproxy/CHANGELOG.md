@@ -1,5 +1,14 @@
 # CHANGELOG - haproxy
 
+## 2.2.0 / 2019-06-01
+
+* [Added] Add `requests.tot_rate`, `connections.rate`, `connections.tot_rate`, and `requests.intercepted`. See [#3797](https://github.com/DataDog/integrations-core/pull/3797).
+* [Added] `collect_aggregates_only` now collects all values when set to `false`. See [#3797](https://github.com/DataDog/integrations-core/pull/3797).
+
+## 2.1.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3513](https://github.com/DataDog/integrations-core/pull/3513).
+
 ## 2.0.0 / 2019-02-18
 
 * [Changed] Only send 'haproxy.backend_hosts' metrics for backend. See [#3073](https://github.com/DataDog/integrations-core/pull/3073).
@@ -61,7 +70,7 @@
 [7]: https://github.com/DataDog/integrations-core/pull/1727
 [8]: https://github.com/DataDog/integrations-core/pull/1478
 [9]: https://github.com/DataDog/integrations-core/pull/1264
-[10]: 
+[10]:
 [11]: https://github.com/DataDog/integrations-core/issues/462
 [12]: https://github.com/DataDog/integrations-core/issues/379
 [13]: https://github.com/DataDog/integrations-core/issues/281

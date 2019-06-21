@@ -55,8 +55,8 @@ tox
 Need help? Contact [Datadog support][9].
 
 [1]: https://github.com/DataDog/datadog-agent
-[2]: https://theupdateframework.com/
-[3]: https://in-toto.io/
+[2]: https://theupdateframework.com
+[3]: https://in-toto.io
 [4]: https://youtu.be/XAlvd4QXngs
 [5]: https://github.com/DataDog/integrations-core
 [6]: https://github.com/DataDog/integrations-extras

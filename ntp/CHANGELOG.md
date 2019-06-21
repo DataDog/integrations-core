@@ -1,5 +1,9 @@
 # CHANGELOG - ntp
 
+## 1.3.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3547](https://github.com/DataDog/integrations-core/pull/3547).
+
 ## 1.2.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].

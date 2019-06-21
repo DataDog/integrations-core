@@ -9,7 +9,7 @@ from six import iteritems
 
 from datadog_checks.config import is_affirmative
 
-# compatability layer for agents under 6.6.0
+# compatibility layer for agents under 6.6.0
 try:
     from datadog_checks.errors import ConfigurationError
 except ImportError:
@@ -47,19 +47,25 @@ class IBMMQConfig:
 
         self.queues = instance.get('queues', [])
         self.queue_patterns = instance.get('queue_patterns', [])
+        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]
+
+        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
+
+        if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
+            log.warning(
+                "Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be used "
+                "together."
+            )
 
         self.channels = instance.get('channels', [])
 
         self.custom_tags = instance.get('tags', [])
 
-        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
-
         self.ssl = is_affirmative(instance.get('ssl_auth', False))
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')
 
         self.ssl_key_repository_location = instance.get(
-            'ssl_key_repository_location',
-            '/var/mqm/ssl-db/client/KeyringClient'
+            'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
         )
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
@@ -83,10 +89,7 @@ class IBMMQConfig:
         queue_tag_list = []
         for regex_str, tags in iteritems(self._queue_tag_re):
             try:
-                queue_tag_list.append([
-                    re.compile(regex_str),
-                    [t.strip() for t in tags.split(',')]
-                ])
+                queue_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(',')]])
             except TypeError:
                 log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         return queue_tag_list
@@ -95,15 +98,15 @@ class IBMMQConfig:
     def tags(self):
         return [
             "queue_manager:{}".format(self.queue_manager_name),
-            "host:{}".format(self.host),
+            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
             "port:{}".format(self.port),
-            "channel:{}".format(self.channel)
+            "channel:{}".format(self.channel),
         ] + self.custom_tags
 
     @property
     def tags_no_channel(self):
         return [
             "queue_manager:{}".format(self.queue_manager_name),
-            "host:{}".format(self.host),
+            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
             "port:{}".format(self.port),
         ] + self.custom_tags

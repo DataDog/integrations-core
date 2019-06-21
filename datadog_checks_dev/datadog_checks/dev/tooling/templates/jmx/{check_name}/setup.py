@@ -21,7 +21,7 @@ CHECKS_BASE_REQ = 'datadog-checks-base'
 setup(
     name='datadog-{check_name}',
     version=ABOUT['__version__'],
-    description='The {check_name_cap} check',
+    description='The {integration_name} check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent {check_name} check',
@@ -44,7 +44,6 @@ setup(
         'Topic :: System :: Monitoring',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
 

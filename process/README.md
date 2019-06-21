@@ -31,11 +31,13 @@ instances:
 #   exact_match: True
 ```
 
-Our process check uses the psutil python package to [check processes on your machine][3]. By default this process check works on exact match and looks at the process names only. By setting `exact_match` to **False** in your yaml file, the agent looks at the command used to launch your process and recognizes every process that contains your keywords.  
+Our process check uses the psutil python package to [check processes on your machine][3]. By default this process check works on exact match and looks at the process names only. By setting `exact_match` to **False** in your yaml file, the agent looks at the command used to launch your process and recognizes every process that contains your keywords.
 
-You can also configure the check to find any process by exact PID (`pid`) or pidfile (`pid_file`). If you provide more than one of `search_string`, `pid`, and `pid_file`, the check uses the first option it finds in that order (e.g. it uses `search_string` over `pid_file` if you configure both).  
+You can also configure the check to find any process by exact PID (`pid`) or pidfile (`pid_file`). If you provide more than one of `search_string`, `pid`, and `pid_file`, the check uses the first option it finds in that order (e.g. it uses `search_string` over `pid_file` if you configure both).
 
-To have the check search for processes in a path other than `/proc`, set `procfs_path: <your_proc_path>` in `datadog.conf`, NOT in `process.yaml` (its use has been deprecated there). Set this to `/host/proc` if you're running the Agent from a Docker container (i.e. [docker-dd-agent][4]) and want to monitor processes running on the server hosting your containers. You DON'T need to set this to monitor processes running _in_ your containers; the [Docker check][5] monitors those.  
+**Note** For agent v6.11+ on windows, the agent runs as an unprivileged `ddagentuser`, and does not have access to the full command line of processes running under a different users, so the `exact_match: false` option cannot be used in such cases. The same goes for the `user` option that allows you to select only processes belonging to a specific user.
+
+To have the check search for processes in a path other than `/proc`, set `procfs_path: <your_proc_path>` in `datadog.conf`, NOT in `process.yaml` (its use has been deprecated there). Set this to `/host/proc` if you're running the Agent from a Docker container (i.e. [docker-dd-agent][4]) and want to monitor processes running on the server hosting your containers. You DON'T need to set this to monitor processes running _in_ your containers; the [Docker check][5] monitors those.
 
 Some process metrics require either running the datadog collector as the same user as the monitored process or privileged access to be retrieved.
 Where the former option is not desired, and to avoid running the datadog collector as `root`, the `try_sudo` option lets the process check try using `sudo` to collect this metric.
@@ -106,7 +108,7 @@ To get a better idea of how (or why) to monitor process resource consumption wit
 [5]: https://github.com/DataDog/integrations-core/tree/master/docker_daemon
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[8]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric/
+[8]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric
 [9]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
 [10]: https://docs.datadoghq.com/help
 [11]: https://www.datadoghq.com/blog/process-check-monitoring

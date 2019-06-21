@@ -4,7 +4,7 @@
 import pytest
 
 from .common import HOST, PORT, SERVICE_CHECK, requires_socket_support, requires_unix_utils
-from .metrics import GAUGES, RATES, ITEMS_GAUGES, ITEMS_RATES, SLABS_GAUGES, SLABS_RATES, SLABS_AGGREGATES
+from .metrics import GAUGES, ITEMS_GAUGES, ITEMS_RATES, RATES, SLABS_AGGREGATES, SLABS_GAUGES, SLABS_RATES
 from .utils import count_connections, get_host_socket_path
 
 
@@ -33,12 +33,7 @@ def test_metrics(client, check, instance, aggregator):
         assert client.set("foo", "bar") is True
         assert client.get("foo") == "bar"
 
-    instance.update({
-        'options': {
-            'items': True,
-            'slabs': True,
-        }
-    })
+    instance.update({'options': {'items': True, 'slabs': True}})
     check.check(instance)
 
     expected_tags = ["url:{}:{}".format(HOST, PORT), 'foo:bar']
@@ -83,12 +78,7 @@ def test_metrics_with_socket(client_socket, check, instance_socket, aggregator):
         assert client_socket.set("foo", "bar") is True
         assert client_socket.get("foo") == "bar"
 
-    instance_socket.update({
-        'options': {
-            'items': True,
-            'slabs': True,
-        }
-    })
+    instance_socket.update({'options': {'items': True, 'slabs': True}})
     check.check(instance_socket)
 
     expected_tags = ["url:unix:{}".format(get_host_socket_path()), 'foo:bar']

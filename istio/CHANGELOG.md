@@ -1,5 +1,17 @@
 # CHANGELOG - istio
 
+## 2.3.1 / 2019-06-19
+
+* [Fixed] Istio Mixer and Mesh endpoints should be optional. See [#3875](https://github.com/DataDog/integrations-core/pull/3875). Thanks [mikekatica](https://github.com/mikekatica).
+
+## 2.3.0 / 2019-05-31
+
+* [Added] Support pilot and galley metrics. See [#3734](https://github.com/DataDog/integrations-core/pull/3734).
+
+## 2.2.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3522](https://github.com/DataDog/integrations-core/pull/3522).
+
 ## 2.1.0 / 2019-02-18
 
 * [Fixed] Update example config to match docs. See [#3046](https://github.com/DataDog/integrations-core/pull/3046).

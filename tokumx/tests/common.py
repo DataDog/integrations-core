@@ -10,7 +10,4 @@ HOST = get_docker_hostname()
 PORT = '37017'
 TOKUMX_SERVER = 'mongodb://{}:{}'.format(HOST, PORT)
 
-INSTANCE = {
-    'server': TOKUMX_SERVER,
-    'tags': ["optional:tag1"]
-}
+INSTANCE = {'server': TOKUMX_SERVER, 'tags': ["optional:tag1"]}
