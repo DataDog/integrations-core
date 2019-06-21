@@ -89,7 +89,9 @@ For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_ap
 
 Reload NGINX to enable the status or API endpoint. There's no need for a full restart.
 
-`sudo nginx -t && sudo nginx -s reload`
+```
+sudo nginx -t && sudo nginx -s reload
+```
 
 
 #### Metric Collection
