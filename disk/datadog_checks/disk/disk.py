@@ -291,6 +291,8 @@ class Disk(AgentCheck):
                 write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
+                if self.devices_label.get(disk_name):
+                    metric_tags.append(self.devices_label.get(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'), write_time_pct, tags=metric_tags)
             except AttributeError as e:
