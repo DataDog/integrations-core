@@ -139,7 +139,7 @@ class Disk(AgentCheck):
                     tags.extend(device_tags)
 
             if self.devices_label.get(device_name):
-                tags.extend([self.devices_label.get(device_name)])
+                tags.append(self.devices_label.get(device_name))
 
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
@@ -317,7 +317,7 @@ class Disk(AgentCheck):
             tags.append('device:{}'.format(device_name))
 
             if self.devices_label.get(device_name):
-                tags.extend([self.devices_label.get(device_name)])
+                tags.append(self.devices_label.get(device_name))
 
             for metric_name, value in iteritems(self._collect_metrics_manually(device)):
                 self.gauge(metric_name, value, tags=tags)
@@ -482,8 +482,8 @@ class Disk(AgentCheck):
                 for att in d:
                     if att.startswith('LABEL='):
                         # Removing ':' from the name
-                        device_name = d[0][:-1]
-                        devices_label[device_name] = "label:{}".format(att[7:-1])
+                        device_name = d[0].rstrip(':')
+                        devices_label[device_name] = "label:{}".format(att.split('=')[1].strip('"'))
 
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use blkid to have device labels")
