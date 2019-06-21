@@ -61,19 +61,25 @@ def test_psutil(aggregator, gauge_metrics, rate_metrics):
         c.check(instance)
 
         if tag_by == 'true':
-            tags = [
+            gauge_tags = [
                 DEFAULT_FILE_SYSTEM,
                 'filesystem:{}'.format(DEFAULT_FILE_SYSTEM),
                 'device:{}'.format(DEFAULT_DEVICE_NAME),
             ]
         else:
-            tags = []
+            gauge_tags = []
+
+        rate_tags = ['device:{}'.format(DEFAULT_DEVICE_NAME)]
+
+        if c.devices_label.get(DEFAULT_DEVICE_NAME):
+            gauge_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
+            rate_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
 
         for name, value in iteritems(gauge_metrics):
-            aggregator.assert_metric(name, value=value, tags=tags)
+            aggregator.assert_metric(name, value=value, tags=gauge_tags)
 
         for name, value in iteritems(rate_metrics):
-            aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+            aggregator.assert_metric(name, value=value, tags=rate_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -118,12 +124,18 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     c.check(instance)
 
     # Assert metrics
-    tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1']
+    gauge_tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1']
+    rate_tags = ['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1']
+
+    if c.devices_label.get(DEFAULT_DEVICE_NAME):
+        gauge_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
+        rate_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
+
     for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=tags)
+        aggregator.assert_metric(name, value=value, tags=gauge_tags)
 
     for name, value in iteritems(rate_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1'])
+        aggregator.assert_metric(name, value=value, tags=rate_tags)
 
     aggregator.assert_all_metrics_covered()
 
