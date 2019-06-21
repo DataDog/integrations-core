@@ -52,6 +52,7 @@ class Disk(AgentCheck):
         self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
         self._mount_point_blacklist = instance.get('mount_point_blacklist', [])
         self._tag_by_filesystem = is_affirmative(instance.get('tag_by_filesystem', False))
+        self._tag_by_label = is_affirmative(instance.get('tag_by_label', True))
         self._device_tag_re = instance.get('device_tag_re', {})
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
@@ -87,7 +88,7 @@ class Disk(AgentCheck):
 
     def check(self, instance):
         """Get disk space/inode stats"""
-        if Platform.is_linux():
+        if self._tag_by_label and Platform.is_linux():
             self.devices_label = self._get_devices_label()
         # Windows and Mac will always have psutil
         # (we have packaged for both of them)

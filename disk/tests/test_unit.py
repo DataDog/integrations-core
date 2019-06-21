@@ -56,30 +56,24 @@ def test_psutil(aggregator, gauge_metrics, rate_metrics):
     Mock psutil and run the check
     """
     for tag_by in ['true', 'false']:
-        instance = {'tag_by_filesystem': tag_by}
+        instance = {'tag_by_filesystem': tag_by, 'tag_by_label': False}
         c = Disk('disk', None, {}, [instance])
         c.check(instance)
 
         if tag_by == 'true':
-            gauge_tags = [
+            tags = [
                 DEFAULT_FILE_SYSTEM,
                 'filesystem:{}'.format(DEFAULT_FILE_SYSTEM),
                 'device:{}'.format(DEFAULT_DEVICE_NAME),
             ]
         else:
-            gauge_tags = []
-
-        rate_tags = ['device:{}'.format(DEFAULT_DEVICE_NAME)]
-
-        if c.devices_label.get(DEFAULT_DEVICE_NAME):
-            gauge_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
-            rate_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
+            tags = []
 
         for name, value in iteritems(gauge_metrics):
-            aggregator.assert_metric(name, value=value, tags=gauge_tags)
+            aggregator.assert_metric(name, value=value, tags=tags)
 
         for name, value in iteritems(rate_metrics):
-            aggregator.assert_metric(name, value=value, tags=rate_tags)
+            aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
 
     aggregator.assert_all_metrics_covered()
 
@@ -89,7 +83,7 @@ def test_psutil_rw(aggregator):
     """
     Check for 'ro' option in the mounts
     """
-    instance = {'service_check_rw': 'yes'}
+    instance = {'service_check_rw': 'yes', 'tag_by_label': False}
     c = Disk('disk', None, {}, [instance])
     c.check(instance)
 
@@ -104,19 +98,11 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
     c = Disk('disk', None, {}, [instance_basic_mount])
     c.check(instance_basic_mount)
 
-    gauge_tags = ['device:{}'.format(DEFAULT_MOUNT_POINT)]
-    rate_tags = ['device:{}'.format(DEFAULT_DEVICE_NAME)]
-
-    if c.devices_label.get(DEFAULT_DEVICE_NAME):
-        rate_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
-    if c.devices_label.get(DEFAULT_MOUNT_POINT):
-        gauge_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
-
     for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=gauge_tags)
+        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_MOUNT_POINT)])
 
     for name, value in iteritems(rate_metrics):
-        aggregator.assert_metric(name, value=value, tags=rate_tags)
+        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
 
     aggregator.assert_all_metrics_covered()
 
@@ -127,30 +113,26 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
         'use_mount': 'no',
         'device_tag_re': {'{}.*'.format(DEFAULT_DEVICE_NAME[:-1]): 'type:dev,tag:two'},
         'tags': ['optional:tags1'],
+        'tag_by_label': False,
     }
     c = Disk('disk', None, {}, [instance])
     c.check(instance)
 
     # Assert metrics
-    gauge_tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1']
-    rate_tags = ['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1']
-
-    if c.devices_label.get(DEFAULT_DEVICE_NAME):
-        gauge_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
-        rate_tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
+    tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1']
 
     for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=gauge_tags)
+        aggregator.assert_metric(name, value=value, tags=tags)
 
     for name, value in iteritems(rate_metrics):
-        aggregator.assert_metric(name, value=value, tags=rate_tags)
+        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1'])
 
     aggregator.assert_all_metrics_covered()
 
 
 @requires_unix
 def test_no_psutil_debian(aggregator, gauge_metrics):
-    instance = {'use_mount': 'no', 'excluded_filesystems': ['tmpfs']}
+    instance = {'use_mount': 'no', 'excluded_filesystems': ['tmpfs'], 'tag_by_label': False}
     c = Disk('disk', None, {}, [instance])
     # disable psutil
     c._psutil = lambda: False
@@ -165,25 +147,22 @@ def test_no_psutil_debian(aggregator, gauge_metrics):
     with mock_statvfs, mock_output:
         c.check(instance)
 
-    tags = ['device:{}'.format(DEFAULT_DEVICE_NAME)]
-    udev_tags = ['device:udev']
-
-    if c.devices_label.get(DEFAULT_DEVICE_NAME):
-        tags.append(c.devices_label.get(DEFAULT_DEVICE_NAME))
-    if c.devices_label.get('udev'):
-        tags.append(c.devices_label.get('udev'))
-
     for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=tags)
+        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
         # backward compatibility with the old check
-        aggregator.assert_metric(name, tags=udev_tags)
+        aggregator.assert_metric(name, tags=['device:udev'])
 
     aggregator.assert_all_metrics_covered()
 
 
 @requires_unix
 def test_no_psutil_freebsd(aggregator, gauge_metrics):
-    instance = {'use_mount': 'no', 'excluded_filesystems': ['devfs'], 'excluded_disk_re': 'zroot/.+'}
+    instance = {
+        'use_mount': 'no',
+        'excluded_filesystems': ['devfs'],
+        'excluded_disk_re': 'zroot/.+',
+        'tag_by_label': False,
+    }
     c = Disk('disk', None, {}, [instance])
     # disable psutil
     c._psutil = lambda: False
@@ -198,19 +177,20 @@ def test_no_psutil_freebsd(aggregator, gauge_metrics):
     with mock_statvfs, mock_output:
         c.check(instance)
 
-    tags = ['device:zroot']
-    if c.devices_label.get('zroot'):
-        tags.append(c.devices_label.get('zroot'))
-
     for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=tags)
+        aggregator.assert_metric(name, value=value, tags=['device:zroot'])
 
     aggregator.assert_all_metrics_covered()
 
 
 @requires_unix
 def test_no_psutil_centos(aggregator, gauge_metrics):
-    instance = {'use_mount': 'no', 'excluded_filesystems': ['devfs', 'tmpfs'], 'excluded_disks': ['/dev/sda1']}
+    instance = {
+        'use_mount': 'no',
+        'excluded_filesystems': ['devfs', 'tmpfs'],
+        'excluded_disks': ['/dev/sda1'],
+        'tag_by_label': False,
+    }
     c = Disk('disk', None, {}, [instance])
     # disable psutil
     c._psutil = lambda: False
@@ -226,12 +206,8 @@ def test_no_psutil_centos(aggregator, gauge_metrics):
         c.check(instance)
 
     for device in ['/dev/sda3', '10.1.5.223:/vil/cor']:
-        tags = ['device:{}'.format(device)]
-        if c.devices_label.get(device):
-            tags.append(c.devices_label.get(device))
-
         for name in gauge_metrics:
-            aggregator.assert_metric(name, tags=tags)
+            aggregator.assert_metric(name, tags=['device:{}'.format(device)])
 
     aggregator.assert_all_metrics_covered()
 
