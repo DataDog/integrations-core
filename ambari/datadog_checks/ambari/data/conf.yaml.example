@@ -153,7 +153,7 @@ instances:
 #     log_processing_rules:
 #        - type: multi_line
 #          name: new_log_start_with_date
-#          pattern: (INFO)|(ERROR)|(WARN)  # ERROR 2019-04-22
+#          pattern: (INFO|ERROR|WARN)  # ERROR 2019-04-22
 #   - type: file
 #     path: /var/log/ambari-server/ambari-server-pkgmgr.log
 #     source: ambari
