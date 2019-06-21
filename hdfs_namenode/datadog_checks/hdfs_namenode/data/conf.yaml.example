@@ -11,7 +11,7 @@ instances:
     ## the property dfs.namenode.http-address
     ## https://hadoop.apache.org/docs/r2.7.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
     #
-  - hdfs_namenode_jmx_uri: http://localhost:50075
+  - hdfs_namenode_jmx_uri: http://localhost:50070
 
     ## @param username - string - optional
     ## The username to use if the `hdfs_namenode_jmx_uri` is behind basic auth.
