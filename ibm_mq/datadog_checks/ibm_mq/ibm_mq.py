@@ -144,7 +144,7 @@ class IbmMqCheck(AgentCheck):
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(ensure_unicode(queue).strip())
+                    queues.append(str(ensure_unicode(queue.strip())))
 
         return queues
 
