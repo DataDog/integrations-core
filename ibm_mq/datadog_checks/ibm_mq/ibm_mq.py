@@ -96,7 +96,7 @@ class IbmMqCheck(AgentCheck):
                         queue_tags.extend(q_tags)
 
                 try:
-                    queue = pymqi.Queue(queue_manager, queue_name)
+                    queue = pymqi.Queue(queue_manager, ensure_bytes(queue_name))
                     self.queue_stats(queue, queue_name, queue_tags)
                     # some system queues don't have PCF metrics
                     # so we don't collect those metrics from those queues
@@ -144,7 +144,7 @@ class IbmMqCheck(AgentCheck):
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(str(ensure_unicode(queue.strip())))
+                    queues.append(ensure_unicode(queue).strip())
 
         return queues
 
