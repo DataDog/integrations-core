@@ -7,7 +7,7 @@
 
 # Documentation
 /docs/                @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
-*.md                  @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+*.md                  @DataDog/baklava @DataDog/agent-integrations
 manifest.json         @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 
 # Container monitoring
@@ -31,8 +31,8 @@ manifest.json         @DataDog/baklava @DataDog/agent-integrations @DataDog/inte
 /datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries @DataDog/container-integrations
 
 # To keep ProdSec up-to-date with changes to requirements.txt.
-requirements.in                                           @DataDog/prodsec @DataDog/integrations-tools-and-libraries
-requirements.txt                                          @DataDog/prodsec @DataDog/integrations-tools-and-libraries
+requirements.in                                           @DataDog/prodsec
+requirements.txt                                          @DataDog/prodsec
 # As well as the signing tool.
 datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec @DataDog/integrations-tools-and-libraries
 # As well as the secure downloader.
