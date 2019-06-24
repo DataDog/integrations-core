@@ -115,7 +115,8 @@ instances:
     # tag_by_filesystem: false
 
     ## @param tag_by_label - boolean - optional - default: true
-    ## Instruct the check to tag all the metrics with disk label if there is one
+    ## Instruct the check to tag all the metrics with disk label if there is one.
+    ## Works on Linux only.
     #
     # tag_by_label: true
 
