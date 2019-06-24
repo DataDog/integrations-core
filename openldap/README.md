@@ -84,6 +84,30 @@ See the [sample openldap.yaml][2] for all available configuration options.
 
 [Restart the Agent][3] to begin sending OpenLDAP metrics to Datadog.
 
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `openldap.d/conf.yaml` file to start collecting your Openldap logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/slapd.log
+          source: openldap
+          service: <SERVICE_NAME>
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample openldap.d/conf.yaml][3] for all available configuration options.
+
+3. [Restart the Agent][5].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][4] and look for `openldap` under the Checks section:
