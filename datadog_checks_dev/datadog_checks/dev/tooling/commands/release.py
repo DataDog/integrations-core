@@ -602,6 +602,8 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
     if initial_release:
         version = '1.0.0'
 
+    # Keep track of the list of checks that have been updated.
+    updated_checks = []
     for check in checks:
         if sign_only:
             break
@@ -669,7 +671,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
         echo_success('success!')
 
         commit_targets = [check]
-
+        updated_checks.append(check)
         # update the list of integrations to be shipped with the Agent
         if check not in NOT_CHECKS:
             req_file = get_agent_release_requirements()
@@ -693,7 +695,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
         echo_waiting('Updating release metadata...')
         echo_info('Please touch your Yubikey immediately after entering your PIN!')
         try:
-            commit_targets = update_link_metadata(checks)
+            commit_targets = update_link_metadata(updated_checks)
             git_commit(commit_targets, '[Release] Update metadata', force=True)
         except YubikeyException as e:
             abort('A problem occurred while signing metadata: {}'.format(e))
