@@ -302,7 +302,7 @@ Arguments:
   * *double*
   * *float*
   * *dictionary*
-  * *list\**
+  * *list✱*
   * *object*
 * `defval`: default value for the parameter; can be empty (optional).
 
@@ -408,7 +408,7 @@ Our example integration has a very simple `awesome/manifest.json`, the bulk of w
 
 ```json
 {
-  "display_name": "Awesome",
+  "display_name": "awesome",
   "maintainer": "email@example.org",
   "manifest_version": "1.0.0",
   "name": "awesome",
@@ -416,20 +416,25 @@ Our example integration has a very simple `awesome/manifest.json`, the bulk of w
   "metric_to_check": "",
   "creates_events": false,
   "short_description": "",
-  "guid": "x23b0c2c-dc39-4196-95fd-bddf93254a0x",
+  "guid": "x16b8750-df1e-46c0-839a-2056461b604x",
   "support": "contrib",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Awesome Integration",
+  "public_title": "Datadog-awesome Integration",
   "categories": [
     "web"
   ],
   "type": "check",
   "is_public": false,
-  "integration_id": "awesome"
+  "integration_id": "awesome",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }
 ```
 
