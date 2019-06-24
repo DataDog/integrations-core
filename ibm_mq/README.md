@@ -186,7 +186,7 @@ Returns `CRITICAL` if the Agent cannot retrieve queue stats. Returns `OK` otherw
 **ibm_mq.channel**:<br/>
 Returns `CRITICAL` if the Agent cannot retrieve channel stats. Returns `OK` otherwise.
 
-**ibm_mq.channel**:<br/>
+**ibm_mq.channel.status**:<br/>
 Return `CRITICAL` if the status is INACTIVE/STOPPED/STOPPING. Returns `OK` if the status is RUNNING. Returns `WARNING` if the status might lead to running.
 
 
