@@ -1,5 +1,9 @@
 # CHANGELOG - Linkerd
 
+## 2.3.0 / 2019-06-24
+
+* [Added] Support v2. See [#3911](https://github.com/DataDog/integrations-core/pull/3911).
+
 ## 2.2.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3533](https://github.com/DataDog/integrations-core/pull/3533).

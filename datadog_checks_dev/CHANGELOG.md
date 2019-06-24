@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.29.0 / 2019-06-24
+
+* [Added] Only sign updated checks. See [#3944](https://github.com/DataDog/integrations-core/pull/3944).
+
 ## 0.28.0 / 2019-06-19
 
 * [Added] Print line number on validate metadata. See [#3931](https://github.com/DataDog/integrations-core/pull/3931).
