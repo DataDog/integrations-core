@@ -24,7 +24,7 @@ Each instance is at least composed of:
 |------------------|------------------------------------------------------------------------------------------------------------------|
 | `prometheus_url` | A URL that points to the metric route (**Note:** must be unique)                                                 |
 | `namespace`      | This namespace is prepended to all metrics (to avoid metrics name collision)                                     |
-| `metrics`        | A list of metrics to retrieve as custom metrics in the form `- <METRIC_NAME>` or `- <METRIC_NAME:RENAME_METRIC>` |
+| `metrics`        | A list of metrics to retrieve as custom metrics in the form `- <METRIC_NAME>` or `- <METRIC_NAME>: <RENAME_METRIC>` |
 
 When listing metrics, it's possible to use the wildcard `*` like this `- <METRIC_NAME>*` to retrieve all matching metrics. **Note:** use wildcards with caution as it can potentially send a lot of custom metrics.
 
