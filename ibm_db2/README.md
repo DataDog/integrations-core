@@ -112,9 +112,11 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 - `ibm_db2.tablespace_state_change` is triggered whenever the state of a tablespace changes.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][9].
 
 ## Further Reading
+
 Additional helpful documentation, links, and articles:
 
 - [Monitor IBM DB2 with Datadog][10]
