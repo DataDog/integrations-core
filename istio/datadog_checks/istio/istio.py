@@ -21,7 +21,7 @@ class Istio(OpenMetricsBaseCheck):
         # Create instances we can use in OpenMetricsBaseCheck
         generic_instances = None
         if instances is not None:
-            generic_instances = list(self.create_generic_instances(instances))
+            generic_instances = self.create_generic_instances(instances)
 
         # Set up OpenMetricsBaseCheck with our generic instances
         super(Istio, self).__init__(name, init_config, agentConfig, instances=generic_instances)
@@ -32,7 +32,7 @@ class Istio(OpenMetricsBaseCheck):
         associated with this instance.
         All the endpoints themselves are optional, but at least one must be passed.
         """
-
+        processed = False
         # Get the config for the istio_mesh instance
         istio_mesh_endpoint = instance.get('istio_mesh_endpoint')
         if istio_mesh_endpoint:
@@ -40,6 +40,7 @@ class Istio(OpenMetricsBaseCheck):
 
             # Process istio_mesh
             self.process(istio_mesh_config)
+            processed = True
 
         # Get the config for the process_mixer instance
         process_mixer_endpoint = instance.get('mixer_endpoint')
@@ -48,6 +49,7 @@ class Istio(OpenMetricsBaseCheck):
 
             # Process process_mixer
             self.process(process_mixer_config)
+            processed = True
 
         # Get the config for the process_pilot instance
         process_pilot_endpoint = instance.get('pilot_endpoint')
@@ -56,6 +58,7 @@ class Istio(OpenMetricsBaseCheck):
 
             # Process process_pilot
             self.process(process_pilot_config)
+            processed = True
 
         # Get the config for the process_galley instance
         process_galley_endpoint = instance.get('galley_endpoint')
@@ -64,6 +67,7 @@ class Istio(OpenMetricsBaseCheck):
 
             # Process process_galley
             self.process(process_galley_config)
+            processed = True
 
         # Get the config for the process_citadel instance
         process_citadel_endpoint = instance.get('citadel_endpoint')
@@ -72,33 +76,32 @@ class Istio(OpenMetricsBaseCheck):
 
             # Process process_citadel
             self.process(process_citadel_config)
+            processed = True
 
         # Check that at least 1 endpoint is configured
-        if not (process_galley_endpoint or process_pilot_endpoint or process_mixer_endpoint or istio_mesh_endpoint or process_citadel_config):
+        if not processed:
             raise CheckException("At least one of Mixer, Mesh, Pilot, Galley or Citadel endpoints must be configured")
 
     def create_generic_instances(self, instances):
         """
-        Generalize each (single) Istio instance into two OpenMetricsBaseCheck instances
+        Generalize each (single) Istio instance into OpenMetricsBaseCheck instances.
         """
+        result = []
         for instance in instances:
             if 'istio_mesh_endpoint' in instance:
-                istio_mesh_instance = self._create_istio_mesh_instance(instance)
-                yield istio_mesh_instance
+                result.append(self._create_istio_mesh_instance(instance))
             if 'mixer_endpoint' in instance:
-                process_mixer_instance = self._create_process_mixer_instance(instance)
-                yield process_mixer_instance
+                result.append(self._create_process_mixer_instance(instance))
             if 'pilot_endpoint' in instance:
-                process_pilot_instance = self._create_process_pilot_instance(instance)
-                yield process_pilot_instance
+                result.append(self._create_process_pilot_instance(instance))
             if 'galley_endpoint' in instance:
-                process_galley_instance = self._create_process_galley_instance(instance)
-                yield process_galley_instance
+                result.append(self._create_process_galley_instance(instance))
             if 'citadel_endpoint' in instance:
-                process_citadel_instance = self._create_process_citadel_instance(instance)
-                yield process_citadel_instance
+                result.append(self._create_process_citadel_instance(instance))
+        return result
 
-    def _get_generic_metrics(self):
+    @staticmethod
+    def _get_generic_metrics():
         return {
             'go_gc_duration_seconds': 'go.gc_duration_seconds',
             'go_goroutines': 'go.goroutines',
@@ -139,12 +142,9 @@ class Istio(OpenMetricsBaseCheck):
     def _create_istio_mesh_instance(self, instance):
         """
         Grab the istio mesh scraper from the dict and return it if it exists,
-        otherwise create the scraper and add it to the dict
+        otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('istio_mesh_endpoint')
-
-        if endpoint is None:
-            raise CheckException("Unable to find istio_mesh_endpoint in config file.")
 
         istio_mesh_instance = deepcopy(instance)
         istio_mesh_instance.update(
@@ -177,11 +177,9 @@ class Istio(OpenMetricsBaseCheck):
     def _create_process_mixer_instance(self, instance):
         """
         Grab the mixer scraper from the dict and return it if it exists,
-        otherwise create the scraper and add it to the dict
+        otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('mixer_endpoint')
-        if endpoint is None:
-            raise CheckException("Unable to find mixer_endpoint in config file.")
 
         process_mixer_instance = deepcopy(instance)
         process_mixer_instance.update(
@@ -235,12 +233,9 @@ class Istio(OpenMetricsBaseCheck):
     def _create_process_pilot_instance(self, instance):
         """
         Grab the pilot scraper from the dict and return it if it exists,
-        otherwise create the scraper and add it to the dict
+        otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('pilot_endpoint')
-        if endpoint is None:
-            # For backward compatibility we support not specifying it
-            return None
 
         process_pilot_instance = deepcopy(instance)
         process_pilot_instance.update(
@@ -292,12 +287,9 @@ class Istio(OpenMetricsBaseCheck):
     def _create_process_galley_instance(self, instance):
         """
         Grab the galley scraper from the dict and return it if it exists,
-        otherwise create the scraper and add it to the dict
+        otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('galley_endpoint')
-        if endpoint is None:
-            # For backward compatibility we support not specifying it
-            return None
 
         process_galley_instance = deepcopy(instance)
         process_galley_instance.update(
@@ -346,11 +338,9 @@ class Istio(OpenMetricsBaseCheck):
     def _create_process_citadel_instance(self, instance):
         """
         Grab the citadel scraper from the dict and return it if it exists,
-        otherwise create the scraper and add it to the dict
+        otherwise create the scraper and add it to the dict.
         """
         endpoint = instance.get('citadel_endpoint')
-        if endpoint is None:
-            return None
 
         process_citadel_instance = deepcopy(instance)
         process_citadel_instance.update(
@@ -360,11 +350,19 @@ class Istio(OpenMetricsBaseCheck):
                 'metrics': [
                     {
                         'citadel_secret_controller_csr_err_count': 'secret_controller.csr_err_count',
-                        'citadel_secret_controller_secret_deleted_cert_count': 'secret_controller.secret_deleted_cert_count',
-                        'citadel_secret_controller_svc_acc_created_cert_count': 'secret_controller.svc_acc_created_cert_count',
-                        'citadel_secret_controller_svc_acc_deleted_cert_count': 'secret_controller.svc_acc_deleted_cert_count',
+                        'citadel_secret_controller_secret_deleted_cert_count': (
+                            'secret_controller.secret_deleted_cert_count'
+                        ),
+                        'citadel_secret_controller_svc_acc_created_cert_count': (
+                            'secret_controller.svc_acc_created_cert_count'
+                        ),
+                        'citadel_secret_controller_svc_acc_deleted_cert_count': (
+                            'secret_controller.svc_acc_deleted_cert_count'
+                        ),
                         'citadel_server_authentication_failure_count': 'server.authentication_failure_count',
-                        'citadel_server_citadel_root_cert_expiry_timestamp': 'server.citadel_root_cert_expiry_timestamp',
+                        'citadel_server_citadel_root_cert_expiry_timestamp': (
+                            'server.citadel_root_cert_expiry_timestamp'
+                        ),
                         'citadel_server_csr_count': 'server.csr_count',
                         'citadel_server_csr_parsing_err_count': 'server.csr_parsing_err_count',
                         'citadel_server_id_extraction_err_count': 'server.id_extraction_err_count',
