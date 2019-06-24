@@ -116,16 +116,21 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
         'tag_by_label': False,
     }
     c = Disk('disk', None, {}, [instance])
-    c.check(instance)
+
+    with mock.patch('datadog_checks.disk.disk.Disk._get_devices_label', return_value={DEFAULT_DEVICE_NAME: 'mylabel'}):
+        c.devices_label = {DEFAULT_DEVICE_NAME: 'label:mylab'}
+        c.check(instance)
 
     # Assert metrics
-    tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1']
+    tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1', 'label:mylab']
 
     for name, value in iteritems(gauge_metrics):
         aggregator.assert_metric(name, value=value, tags=tags)
 
     for name, value in iteritems(rate_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1'])
+        aggregator.assert_metric(
+            name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1', 'label:mylab']
+        )
 
     aggregator.assert_all_metrics_covered()
 
