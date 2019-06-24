@@ -606,6 +606,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
     updated_checks = []
     for check in checks:
         if sign_only:
+            updated_checks.append(check)
             break
         elif initial_release and check in BETA_PACKAGES:
             continue
