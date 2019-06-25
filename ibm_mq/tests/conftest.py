@@ -53,6 +53,12 @@ def instance_queue_regex_tag():
 
 
 @pytest.fixture
+def instance_invalid_host():
+    inst = copy.deepcopy(common.INSTANCE_INVALID_HOST)
+    return inst
+
+
+@pytest.fixture
 def seed_data():
     publish()
     consume()

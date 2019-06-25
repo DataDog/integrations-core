@@ -1,36 +1,70 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-ibm_mq.channel.channels,gauge,,resource,,The number of active channels,0,ibm_mq,active channel count
-ibm_mq.channel.count,gauge,,,,Sum by status to count channels. Filter by channel and status tags to create notifications.,0,ibm_mq,channel count
-ibm_mq.queue.service_interval,gauge,,millisecond,,the time since last serviced,0,ibm_mq,service interval
-ibm_mq.queue.inhibit_put,gauge,,occurrence,,puts are inhibited,0,ibm_mq,puts inhibited
-ibm_mq.queue.depth_low_limit,gauge,,item,,the low limit on the depth to create an alert,0,ibm_mq,depth low limit
-ibm_mq.queue.inhibit_get,gauge,,occurrence,,gets are inhibited,0,ibm_mq,gets inhibited
-ibm_mq.queue.harden_get_backout,gauge,,request,,number of times a message is retrieved,0,ibm_mq,times messages retrieved
-ibm_mq.queue.service_interval_event,gauge,,occurrence,,is service necessary,0,ibm_mq,service needed
-ibm_mq.queue.trigger_control,gauge,,method,,controls if trigger messages are written to an initiation queue,0,ibm_mq,trigger control
-ibm_mq.queue.usage,gauge,,resource,,what the queue is used for,0,ibm_mq,usage
-ibm_mq.queue.scope,gauge,,resource,,controls if the queue exists in a cell directory,0,ibm_mq,scope
-ibm_mq.queue.type,gauge,,resource,,the type of queue,0,ibm_mq,queue type
-ibm_mq.queue.depth_max,gauge,,message,,the max depth of the queue,0,ibm_mq,queue max depth
-ibm_mq.queue.backout_threshold,gauge,,resource,,backout threshold used by other applications,0,ibm_mq,backout threshold
-ibm_mq.queue.depth_high_event,gauge,,event,,a depth high event has been generated,0,ibm_mq,depth high event
-ibm_mq.queue.depth_low_event,gauge,,event,,a depth low event has been generated,0,ibm_mq,depth low event
-ibm_mq.queue.trigger_message_priority,gauge,,resource,,the message priority below which a message doesn't generate a trigger message,0,ibm_mq,trigger message priority
-ibm_mq.queue.depth_current,gauge,,message,,the number of messages in the queue,0,ibm_mq,messages
-ibm_mq.queue.depth_max_event,gauge,,event,,controls whether queue full events are generated,0,ibm_mq,messages
-ibm_mq.queue.open_input_count,gauge,,connection,,the number of handles currently open,0,ibm_mq,open handles
-ibm_mq.queue.persistence,gauge,,resource,,the default persistance of messages on the queue,0,ibm_mq,persistance
-ibm_mq.queue.trigger_depth,gauge,,resource,,the number of messages on the queue before a trigger event is written,0,ibm_mq,queue trigger depth
-ibm_mq.queue.max_message_length,gauge,,resource,,the max length of a message,0,ibm_mq,max message length
-ibm_mq.queue.depth_high_limit,gauge,,resource,,the threshold against which the queue depth is compared before generated a queue high event,0,ibm_mq,depth high limit
-ibm_mq.queue.priority,gauge,,resource,,the default priority for messages on the queue,0,ibm_mq,default priority
-ibm_mq.queue.input_open_option,gauge,,resource,,the default way to open the queue for input,0,ibm_mq,default open option
-ibm_mq.queue.message_delivery_sequence,gauge,,resource,,the order in which messages will be returned after a get operation,0,ibm_mq,message delivery sequence
-ibm_mq.queue.retention_interval,gauge,,hour,,the period of time to retain the queue after elapsed it is elegible for deletion,0,ibm_mq,retention interval
-ibm_mq.queue.open_output_count,gauge,,connection,,the number of handles that are available for adding messages,0,ibm_mq,open output count
-ibm_mq.queue.trigger_type,gauge,,resource,,the conditions under which trigger messages are written as a result of messages arriving on this queue,0,ibm_mq,trigger type
-ibm_mq.queue.depth_percent,gauge,,percent,,the percent of the queue that is currently utilized,0,ibm_mq,queue usage percentage
-ibm_mq.queue_manager.dist_lists,gauge,,resource,,This indicates whether distribution-list messages can be placed on the queue,0,ibm_mq,dist list
-ibm_mq.queue_manager.max_msg_list,gauge,,byte,,the length of the longest message the queue manager can handle,0,ibm_mq,max message length
-ibm_mq.queue.max_channels,gauge,,connection,,the max number of channels that can be connected,0,ibm_mq,max channels
-ibm_mq.queue.oldest_message_age,gauge,,second,,the age of the oldest message on the queue in seconds,0,ibm_mq,oldest message
+ibm_mq.channel.channels,gauge,,resource,,Number of active channels.,0,ibm_mq,active channel count
+ibm_mq.channel.count,gauge,,item,,Sum by status to count channels. Filter by channel and status tags to create notifications.,0,ibm_mq,channel count
+ibm_mq.queue_manager.alteration_datetime,gauge,,second,,"The datetime at which the queue manager was last altered (MQCA_ALTERATION_DATE, MQCA_ALTERATION_TIME).",0,ibm_mq,alteration datetime
+ibm_mq.queue_manager.connection_count,gauge,,connection,,The current number of connections to the queue manager (MQIACF_CONNECTION_COUNT).,0,ibm_mq,connection count
+ibm_mq.queue_manager.dist_lists,gauge,,resource,,This indicates whether distribution-list messages can be placed on the queue (MQIA_DIST_LISTS).,0,ibm_mq,dist list
+ibm_mq.queue_manager.max_msg_list,gauge,,byte,,The length of the longest message the queue manager can handle (MQIA_MAX_MSG_LENGTH).,0,ibm_mq,max message length
+ibm_mq.queue.backout_threshold,gauge,,resource,,Backout threshold used by other applications (MQIA_BACKOUT_THRESHOLD).,0,ibm_mq,backout threshold
+ibm_mq.queue.depth_current,gauge,,message,,The number of messages in the queue (MQIA_CURRENT_Q_DEPTH),0,ibm_mq,messages
+ibm_mq.queue.depth_high_event,gauge,,event,,A depth high event has been generated (MQIA_Q_DEPTH_HIGH_EVENT).,0,ibm_mq,depth high event
+ibm_mq.queue.depth_high_limit,gauge,,resource,,The threshold against which the queue depth is compared before generated a queue high event (MQIA_Q_DEPTH_HIGH_LIMIT).,0,ibm_mq,depth high limit
+ibm_mq.queue.depth_low_event,gauge,,event,,A depth low event has been generated (MQIA_Q_DEPTH_LOW_EVENT).,0,ibm_mq,depth low event
+ibm_mq.queue.depth_low_limit,gauge,,item,,The low limit on the depth to create an alert (MQIA_Q_DEPTH_LOW_LIMIT).,0,ibm_mq,depth low limit
+ibm_mq.queue.depth_max,gauge,,message,,The max depth of the queue (MQIA_MAX_Q_DEPTH).,0,ibm_mq,queue max depth
+ibm_mq.queue.depth_max_event,gauge,,event,,Controls whether queue full events are generated (MQIA_Q_DEPTH_MAX_EVENT).,0,ibm_mq,messages
+ibm_mq.queue.depth_percent,gauge,,percent,,The percent of the queue that is currently utilized.,0,ibm_mq,queue usage percentage
+ibm_mq.queue.harden_get_backout,gauge,,request,,Number of times a message is retrieved (MQIA_HARDEN_GET_BACKOUT).,0,ibm_mq,times messages retrieved
+ibm_mq.queue.inhibit_get,gauge,,occurrence,,Gets are inhibited (MQIA_INHIBIT_GET).,0,ibm_mq,gets inhibited
+ibm_mq.queue.inhibit_put,gauge,,occurrence,,Puts are inhibited (MQIA_INHIBIT_PUT).,0,ibm_mq,puts inhibited
+ibm_mq.queue.input_open_option,gauge,,resource,,The default way to open the queue for input (MQIA_DEF_INPUT_OPEN_OPTION).,0,ibm_mq,default open option
+ibm_mq.queue.max_message_length,gauge,,resource,,The max length of a message (MQIA_MAX_MSG_LENGTH).,0,ibm_mq,max message length
+ibm_mq.queue.message_delivery_sequence,gauge,,resource,,The order in which messages will be returned after a get operation,0,ibm_mq,message delivery sequence
+ibm_mq.queue.oldest_message_age,gauge,,second,,The age of the oldest message on the queue in seconds (MQIA_MSG_DELIVERY_SEQUENCE).,0,ibm_mq,oldest message
+ibm_mq.queue.open_input_count,gauge,,connection,,The number of handles currently open (MQIA_OPEN_INPUT_COUNT).,0,ibm_mq,open handles
+ibm_mq.queue.open_output_count,gauge,,connection,,The number of handles that are available for adding messages (MQIA_OPEN_OUTPUT_COUNT).,0,ibm_mq,open output count
+ibm_mq.queue.persistence,gauge,,resource,,The default persistance of messages on the queue (MQIA_DEF_PERSISTENCE).,0,ibm_mq,persistance
+ibm_mq.queue.priority,gauge,,resource,,The default priority for messages on the queue (MQIA_DEF_PRIORITY).,0,ibm_mq,default priority
+ibm_mq.queue.retention_interval,gauge,,hour,,The period of time to retain the queue after elapsed it is elegible for deletion (MQIA_RETENTION_INTERVAL).,0,ibm_mq,retention interval
+ibm_mq.queue.scope,gauge,,resource,,Controls if the queue exists in a cell directory (MQIA_SCOPE).,0,ibm_mq,scope
+ibm_mq.queue.service_interval,gauge,,millisecond,,The time since last serviced (MQIA_Q_SERVICE_INTERVAL),0,ibm_mq,service interval
+ibm_mq.queue.service_interval_event,gauge,,occurrence,,Controls whether Service Interval High or Service Interval OK events are generated (MQIA_Q_SERVICE_INTERVAL_EVENT).,0,ibm_mq,service needed
+ibm_mq.queue.trigger_control,gauge,,method,,Controls if trigger messages are written to an initiation queue (MQIA_TRIGGER_CONTROL).,0,ibm_mq,trigger control
+ibm_mq.queue.trigger_depth,gauge,,resource,,The number of messages on the queue before a trigger event is written (MQIA_TRIGGER_DEPTH).,0,ibm_mq,queue trigger depth
+ibm_mq.queue.trigger_message_priority,gauge,,resource,,The message priority below which a message doesn't generate a trigger message (MQIA_TRIGGER_MSG_PRIORITY).,0,ibm_mq,trigger message priority
+ibm_mq.queue.trigger_type,gauge,,resource,,The conditions under which trigger messages are written as a result of messages arriving on this queue (MQIA_TRIGGER_TYPE).,0,ibm_mq,trigger type
+ibm_mq.queue.type,gauge,,resource,,The type of queue (MQIA_Q_TYPE).,0,ibm_mq,queue type
+ibm_mq.queue.usage,gauge,,resource,,What the queue is used for (MQIA_USAGE).,0,ibm_mq,usage
+ibm_mq.queue.uncommitted_msgs,gauge,,message,,The number of uncommitted messages on the queue (MQIACF_UNCOMMITTED_MSGS).,0,ibm_mq,uncommitted msgs
+ibm_mq.queue.high_q_depth,gauge,,message,,Maximum number of messages on a queue (MQIA_HIGH_Q_DEPTH).,0,ibm_mq,high q depth
+ibm_mq.queue.msg_deq_count,rate,,message,,Number of messages dequeued (MQIA_MSG_DEQ_COUNT).,0,ibm_mq,msg deq count
+ibm_mq.queue.msg_enq_count,rate,,message,,Number of messages enqueued (MQIA_MSG_ENQ_COUNT).,0,ibm_mq,msg enq count
+ibm_mq.queue.time_since_reset,rate,,second,,Time since statistics reset in seconds (MQIA_TIME_SINCE_RESET).,0,ibm_mq,time since reset
+ibm_mq.channel.alteration_datetime,gauge,,second,,"The datetime at which the channel was last altered (MQCA_ALTERATION_DATE, MQCA_ALTERATION_TIME).",0,ibm_mq,alteration datetime
+ibm_mq.channel.batch_interval,gauge,,second,,The batch interval in seconds (MQIACH_BATCH_INTERVAL).,0,ibm_mq,batch interval
+ibm_mq.channel.batch_size,gauge,,resource,,The batch size (MQIACH_BATCH_SIZE).,0,ibm_mq,batch size
+ibm_mq.channel.disc_interval,gauge,,second,,The disconnection interval in seconds (parameter identifier: MQIACH_DISC_INTERVAL).,0,ibm_mq,disc interval
+ibm_mq.channel.hb_interval,gauge,,second,,Heartbeat interval in seconds (parameter identifier: MQIACH_HB_INTERVAL).,0,ibm_mq,hb interval
+ibm_mq.channel.keep_alive_interval,gauge,,second,,KeepAlive interval in seconds (parameter identifier: MQIACH_KEEP_ALIVE_INTERVAL).,0,ibm_mq,keep alive interval
+ibm_mq.channel.long_retry,gauge,,time,,Long retry count (parameter identifier: MQIACH_LONG_RETRY).,0,ibm_mq,long retry
+ibm_mq.channel.long_timer,gauge,,second,,Long timer (parameter identifier: MQIACH_LONG_TIMER).,0,ibm_mq,long timer
+ibm_mq.channel.max_msg_length,gauge,,byte,,Maximum message length (parameter identifier: MQIACH_MAX_MSG_LENGTH).,0,ibm_mq,max msg length
+ibm_mq.channel.mr_count,gauge,,,,Message retry count (parameter identifier: MQIACH_MR_COUNT).,0,ibm_mq,mr count
+ibm_mq.channel.mr_interval,gauge,,second,,Message retry interval in seconds (parameter identifier: MQIACH_MR_INTERVAL).,0,ibm_mq,mr interval
+ibm_mq.channel.network_priority,gauge,,,,Network priority (parameter identifier: MQIACH_NETWORK_PRIORITY).,0,ibm_mq,network priority
+ibm_mq.channel.npm_speed,gauge,,,,Speed at which non-persistent messages are to be sent (parameter identifier: MQIACH_NPM_SPEED).,0,ibm_mq,npm speed
+ibm_mq.channel.sharing_conversations,gauge,,,,Number of sharing conversations (parameter identifier: MQIACH_SHARING_CONVERSATIONS).,0,ibm_mq,sharing conversations
+ibm_mq.channel.short_retry,gauge,,,,Short retry count (parameter identifier: MQIACH_SHORT_RETRY).,0,ibm_mq,short retry
+ibm_mq.channel.short_timer,gauge,,second,,Short timer (parameter identifier: MQIACH_SHORT_TIMER).,0,ibm_mq,short timer
+ibm_mq.channel.buffers_rcvd,gauge,,buffer,,Number of buffers received (parameter identifier: MQIACH_BUFFERS_RCVD).,0,ibm_mq,buffers rcvd
+ibm_mq.channel.buffers_sent,gauge,,buffer,,Number of buffers sent (parameter identifier: MQIACH_BUFFERS_SENT).,0,ibm_mq,buffers sent
+ibm_mq.channel.bytes_rcvd,gauge,,byte,,Number of bytes received (parameter identifier: MQIACH_BYTES_RCVD).,0,ibm_mq,bytes rcvd
+ibm_mq.channel.bytes_sent,gauge,,byte,,Number of bytes sent (parameter identifier: MQIACH_BYTES_SENT).,0,ibm_mq,bytes sent
+ibm_mq.channel.channel_status,gauge,,,,Channel status (parameter identifier: MQIACH_CHANNEL_STATUS).,0,ibm_mq,channel status
+ibm_mq.channel.mca_status,gauge,,,,MCA status (parameter identifier: MQIACH_MCA_STATUS).,0,ibm_mq,mca status
+ibm_mq.channel.msgs,gauge,,message,,"Number of messages sent or received, or number of MQI calls handled (parameter identifier: MQIACH_MSGS).",0,ibm_mq,msgs
+ibm_mq.channel.ssl_key_resets,gauge,,,,SSL secret key resets (parameter identifier: MQIACH_SSL_KEY_RESETS).,0,ibm_mq,ssl key resets
+ibm_mq.channel.batches,gauge,,,,Number of completed batches (parameter identifier: MQIACH_BATCHES).,0,ibm_mq,batches
+ibm_mq.channel.current_msgs,gauge,,message,,Number of messages in-doubt (parameter identifier: MQIACH_CURRENT_MSGS).,0,ibm_mq,current msgs
+ibm_mq.channel.indoubt_status,gauge,,,,Whether the channel is currently in doubt (parameter identifier: MQIACH_INDOUBT_STATUS).,0,ibm_mq,indoubt status
+ibm_mq.channel.last_msg_datetime,gauge,,second,,"Datetime last message was sent, or MQI call was handled (MQCACH_LAST_MSG_DATE, MQCACH_LAST_MSG_TIME).",0,ibm_mq,last msg datetime

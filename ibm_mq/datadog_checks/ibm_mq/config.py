@@ -18,21 +18,11 @@ except ImportError:
 log = logging.getLogger(__file__)
 
 
-class IBMMQConfig:
+class Config:
     """
     A config object. Parse the instance and return it as an object that can be passed around
     No need to parse the instance more than once in the check run
     """
-
-    DISALLOWED_QUEUES = [
-        'SYSTEM.MQSC.REPLY.QUEUE',
-        'SYSTEM.DEFAULT.MODEL.QUEUE',
-        'SYSTEM.DURABLE.MODEL.QUEUE',
-        'SYSTEM.JMS.TEMPQ.MODEL',
-        'SYSTEM.MQEXPLORER.REPLY.MODEL',
-        'SYSTEM.NDURABLE.MODEL.QUEUE',
-        'SYSTEM.CLUSTER.TRANSMIT.MODEL.QUEUE',
-    ]
 
     def __init__(self, instance):
         self.channel = instance.get('channel')
@@ -77,10 +67,6 @@ class IBMMQConfig:
         if not self.channel or not self.queue_manager_name or not self.host or not self.port:
             msg = "channel, queue_manager, host and port are all required configurations"
             raise ConfigurationError(msg)
-
-    def add_queues(self, new_queues):
-        # add queues without duplication
-        self.queues = list(set(self.queues + new_queues))
 
     def _compile_tag_re(self):
         """
