@@ -59,7 +59,7 @@ TAGGED_KEYS = {
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
     * number of connections
-    * number of requets per second
+    * number of requests per second
 
     Requires nginx to have the status option compiled.
     See http://wiki.nginx.org/HttpStubStatusModule for more details

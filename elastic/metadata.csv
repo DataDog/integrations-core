@@ -127,7 +127,7 @@ elasticsearch.primaries.store.size,gauge,,byte,,The total size of all the primar
 elasticsearch.process.open_fd,gauge,,file,,"The number of opened file descriptors associated with the current process, or -1 if not supported.",0,elasticsearch,open file descriptors
 elasticsearch.refresh.total,gauge,,refresh,,The total number of index refreshes.,0,elasticsearch,total refreshes
 elasticsearch.refresh.total.time,gauge,,second,,The total time spent on index refreshes.,0,elasticsearch,total refresh time
-elasticsearch.relocating_shards,gauge,,shard,,The number of shards that are reloacting from one node to another.,0,elasticsearch,reloading shards
+elasticsearch.relocating_shards,gauge,,shard,,The number of shards that are relocating from one node to another.,0,elasticsearch,relocating shards
 elasticsearch.search.fetch.current,gauge,,fetch,,The number of search fetches currently running.,0,elasticsearch,current fetches
 elasticsearch.search.fetch.open_contexts,gauge,,query,,The number of active searches.,0,elasticsearch,active searches
 elasticsearch.search.fetch.time,gauge,,second,,The total time spent on the search fetch.,0,elasticsearch,total fetch time
@@ -237,10 +237,10 @@ jvm.mem.heap_max,gauge,,byte,,The maximum amount of memory that can be used by t
 jvm.mem.heap_used,gauge,,byte,,The amount of memory in bytes currently used by the JVM heap.,0,elasticsearch,jvm heap used
 jvm.mem.non_heap_committed,gauge,,byte,,The amount of memory guaranteed to be available to JVM non-heap.,0,elasticsearch,jvm non-heap committed
 jvm.mem.non_heap_used,gauge,,byte,,The amount of memory in bytes currently used by the JVM non-heap.,0,elasticsearch,jvm non-heap used
-jvm.mem.pools.young.used,gauge,,byte,,The amount of memory in bytes currently used by the Young Generation heap reagion.,0,elasticsearch,jvm young used
-jvm.mem.pools.young.max,gauge,,byte,,The maximum amount of memory that can be used by the Young Generation heap reagion.,0,elasticsearch,jvm young max
-jvm.mem.pools.old.used,gauge,,byte,,The amount of memory in bytes currently used by the Old Generation heap reagion.,0,elasticsearch,jvm old used
-jvm.mem.pools.old.max,gauge,,byte,,The maximum amount of memory that can be used by the Old Generation heap reagion.,0,elasticsearch,jvm old max
+jvm.mem.pools.young.used,gauge,,byte,,The amount of memory in bytes currently used by the Young Generation heap region.,0,elasticsearch,jvm young used
+jvm.mem.pools.young.max,gauge,,byte,,The maximum amount of memory that can be used by the Young Generation heap region.,0,elasticsearch,jvm young max
+jvm.mem.pools.old.used,gauge,,byte,,The amount of memory in bytes currently used by the Old Generation heap region.,0,elasticsearch,jvm old used
+jvm.mem.pools.old.max,gauge,,byte,,The maximum amount of memory that can be used by the Old Generation heap region.,0,elasticsearch,jvm old max
 jvm.mem.pools.survivor.used,gauge,,byte,,The amount of memory in bytes currently used by the Survivor Space.,0,elasticsearch,jvm survivor used
 jvm.mem.pools.survivor.max,gauge,,byte,,The maximum amount of memory that can be used by the Survivor Space.,0,elasticsearch,jvm survivor max
 jvm.threads.count,gauge,,thread,,The number of active threads in the JVM.,0,elasticsearch,jvm threads
