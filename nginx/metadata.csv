@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 nginx.net.writing,gauge,,connection,,The number of connections waiting on upstream responses and/or writing responses back to the client.,0,nginx,conns writing
 nginx.net.waiting,gauge,,connection,,The number of keep-alive connections waiting for work.,0,nginx,conns waiting
-nginx.net.reading,gauge,,connection,,The number of connections reading client requets.,0,nginx,conns reading
+nginx.net.reading,gauge,,connection,,The number of connections reading client requests.,0,nginx,conns reading
 nginx.net.connections,gauge,,connection,,The total number of active connections.,0,nginx,conns
 nginx.net.request_per_s,gauge,,request,second,Rate of requests processed.,0,nginx,req/s
 nginx.net.conn_opened_per_s,gauge,,connection,second,Rate of connections opened.,0,nginx,conns opened/s
