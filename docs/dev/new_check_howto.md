@@ -302,7 +302,7 @@ Arguments:
   * *double*
   * *float*
   * *dictionary*
-  * *list✱*
+  * *list&#42;*
   * *object*
 * `defval`: default value for the parameter; can be empty (optional).
 
