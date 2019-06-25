@@ -10,6 +10,10 @@ instances:
     ## `nginx-extras` package.  For more details, see:
     ##
     ##   http://docs.datadoghq.com/integrations/nginx/
+    ##
+    ## For NGINX Plus API Release 13+ users using the http_api_module,
+    ## set nginx_status_url to the location of the `/api` endpoint. 
+    ## E.g. `nginx_status_url: http://localhost:8080/api`
     #
   - nginx_status_url: http://localhost:81/nginx_status/
 
