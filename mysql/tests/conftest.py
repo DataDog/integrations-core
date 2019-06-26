@@ -7,6 +7,7 @@ import pymysql
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
 
@@ -25,7 +26,12 @@ def dd_environment(instance_basic):
             'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
             'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
         },
-        conditions=[WaitFor(init_master, wait=2), WaitFor(init_slave, wait=2), populate_database],
+        conditions=[
+            WaitFor(init_master, wait=2),
+            WaitFor(init_slave, wait=2),
+            CheckDockerLogs('mysql-slave', "ready for connections"),
+            populate_database,
+        ],
     ):
         yield instance_basic
 
