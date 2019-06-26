@@ -1,5 +1,8 @@
 # CHANGELOG - nagios
 
+## 1.4.1-rc.1 / 2019-06-25
+
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3542](https://github.com/DataDog/integrations-core/pull/3542).
