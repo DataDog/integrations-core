@@ -29,7 +29,7 @@ SUPPORTED_TYPES = {
     GAUGE: AgentCheck.gauge,
     RATE: AgentCheck.rate,
     COUNTER: AgentCheck.increment,
-    MONOTONIC_COUNTER: AgentCheck.monotonic_count
+    MONOTONIC_COUNTER: AgentCheck.monotonic_count,
 }
 
 DEFAULT_METRIC_NAMESPACE = "go_expvar"
