@@ -6,7 +6,7 @@ import time
 
 import pytest
 import requests
-from mock import MagicMock, patch
+from mock import patch
 
 from datadog_checks.dev import LazyFunction, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
