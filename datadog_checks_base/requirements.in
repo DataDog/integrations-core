@@ -1,3 +1,4 @@
+binary==1.0.0
 contextlib2==0.5.5
 ddtrace==0.13.0
 kubernetes==8.0.1

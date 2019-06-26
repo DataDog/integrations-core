@@ -2,6 +2,7 @@ adodbapi==2.6.0.7; sys_platform == 'win32'
 aerospike==3.6.0; sys_platform != 'win32'
 asn1crypto==0.24.0
 beautifulsoup4==4.5.1
+binary==1.0.0
 boto==2.46.1
 cffi==1.11.5
 contextlib2==0.5.5
