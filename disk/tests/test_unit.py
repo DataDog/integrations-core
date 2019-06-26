@@ -117,7 +117,9 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     }
     c = Disk('disk', None, {}, [instance])
 
-    with mock.patch('datadog_checks.disk.disk.Disk._get_devices_label', return_value={DEFAULT_DEVICE_NAME: 'mylabel'}):
+    with mock.patch('datadog_checks.disk.disk.Disk._get_devices_label'):
+        # _get_devices_label is only called on linux, so devices_label is manually filled
+        # to make the test run on everything
         c.devices_label = {DEFAULT_DEVICE_NAME: 'label:mylab'}
         c.check(instance)
 

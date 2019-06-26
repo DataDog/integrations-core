@@ -483,7 +483,7 @@ class Disk(AgentCheck):
             for d in all_devices:
                 # Line sample
                 # /dev/sda1: LABEL="MYLABEL" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
-                labels = re.findall(self._blkid_label_re, d[1])
+                labels = self._blkid_label_re.findall(d[1])
                 if labels:
                     devices_label[d[0]] = 'label:{}'.format(labels[0])
 
