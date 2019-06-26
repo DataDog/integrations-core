@@ -29,7 +29,7 @@ def dd_environment(instance_basic):
         conditions=[
             WaitFor(init_master, wait=2),
             WaitFor(init_slave, wait=2),
-            CheckDockerLogs('mysql-slave', "ready for connections"),
+            CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
             populate_database,
         ],
     ):
