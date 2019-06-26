@@ -100,10 +100,6 @@ def admin_instance():
 @pytest.fixture
 def harbor_check(admin_instance):
     check = HarborCheck('harbor', {}, [admin_instance])
-    check.log = MagicMock()
-    check.gauge = MagicMock()
-    check.count = MagicMock()
-    check.service_check = MagicMock()
     return check
 
 

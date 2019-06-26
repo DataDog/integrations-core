@@ -8,6 +8,10 @@ from datadog_checks.base import AgentCheck
 from .api import HarborAPI
 from .common import HEALTHY, VERSION_1_5, VERSION_1_8
 
+CAN_CONNECT = 'harbor.can_connect'
+REGISTRY_STATUS = 'harbor.registry.status'
+STATUS = 'harbor.status'
+
 
 class HarborCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
@@ -26,11 +30,11 @@ class HarborCheck(AgentCheck):
             for el in health['components']:
                 component_status = AgentCheck.OK if el['status'] == HEALTHY else AgentCheck.CRITICAL
                 tags = base_tags + ['component:{}'.format(el['name'])]
-                self.service_check('harbor.status', component_status, tags=tags)
+                self.service_check(STATUS, component_status, tags=tags)
         elif api.harbor_version >= VERSION_1_5:
             ping = api.ping()
             overall_status = AgentCheck.OK if ping == 'Pong' else AgentCheck.CRITICAL
-            self.service_check('harbor.status', overall_status, tags=base_tags)
+            self.service_check(STATUS, overall_status, tags=base_tags)
             if api.with_chartrepo:
                 try:
                     chartrepo_health = api.chartrepo_health()[HEALTHY]
@@ -44,10 +48,10 @@ class HarborCheck(AgentCheck):
                     raise e
                 chartrepo_status = AgentCheck.OK if chartrepo_health else AgentCheck.CRITICAL
                 tags = base_tags + ['component:chartmuseum']
-                self.service_check('harbor.status', chartrepo_status, tags=tags)
+                self.service_check(STATUS, chartrepo_status, tags=tags)
         else:
             # Before version 1.5, there is no support for a health check.
-            self.service_check('harbor.status', AgentCheck.UNKNOWN, tags=base_tags)
+            self.service_check(STATUS, AgentCheck.UNKNOWN, tags=base_tags)
 
     def _check_registries_health(self, api, base_tags):
         """A registry here is an external docker registry (DockerHub, ECR, another Harbor...) that this current
@@ -71,14 +75,14 @@ class HarborCheck(AgentCheck):
             tags = base_tags + ['registry:' + registry_name]
             if registry.get('status'):
                 status = AgentCheck.OK if registry['status'] == HEALTHY else AgentCheck.CRITICAL
-                self.service_check('harbor.registry.status', status, tags=tags)
+                self.service_check(REGISTRY_STATUS, status, tags=tags)
             else:
                 try:
                     api.registry_health(registry['id'])
-                    self.service_check('harbor.registry.status', AgentCheck.OK, tags=tags)
+                    self.service_check(REGISTRY_STATUS, AgentCheck.OK, tags=tags)
                 except HTTPError as e:
                     self.log.debug(e, exc_info=True)
-                    self.service_check('harbor.registry.status', AgentCheck.CRITICAL, tags=tags)
+                    self.service_check(REGISTRY_STATUS, AgentCheck.CRITICAL, tags=tags)
 
     def _submit_project_metrics(self, api, base_tags):
         projects = api.projects()
@@ -112,9 +116,9 @@ class HarborCheck(AgentCheck):
             api.authenticate(username, password)
         except Exception:
             self.log.exception("Harbor API is not reachable")
-            self.service_check('harbor.can_connect', AgentCheck.CRITICAL)
+            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
             raise
-        self.service_check('harbor.can_connect', AgentCheck.OK)
+        self.service_check(CAN_CONNECT, AgentCheck.OK)
         self._check_health(api, tags)
         self._check_registries_health(api, tags)
         self._submit_project_metrics(api, tags)

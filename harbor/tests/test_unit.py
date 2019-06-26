@@ -12,51 +12,44 @@ from .conftest import MockResponse
 
 
 @pytest.mark.usefixture("patch_requests")
-def test_check_health(harbor_check, harbor_api):
+def test_check_health(aggregator, harbor_check, harbor_api):
     base_tags = ['tag1:val1', 'tag2']
     harbor_check._check_health(harbor_api, base_tags)
-    calls = []
 
     if harbor_api.harbor_version >= VERSION_1_8:
         components = HARBOR_COMPONENTS
         for c in components:
-            calls.append(call('harbor.status', AgentCheck.OK, tags=base_tags + ['component:{}'.format(c)]))
+            aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags + ['component:{}'.format(c)])
     elif harbor_api.harbor_version >= VERSION_1_6:
-        calls.append(call('harbor.status', AgentCheck.OK, tags=base_tags + ['component:chartmuseum']))
-        calls.append(call('harbor.status', AgentCheck.OK, tags=base_tags))
+        aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags + ['component:chartmuseum'])
+        aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags)
     elif harbor_api.harbor_version >= VERSION_1_5:
-        calls.append(call('harbor.status', AgentCheck.OK, tags=base_tags))
+        aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags)
     else:
-        calls.append(call('harbor.status', AgentCheck.UNKNOWN, tags=base_tags))
-
-    harbor_check.service_check.assert_has_calls(calls, any_order=True)
-    assert harbor_check.service_check.call_count == len(calls)
+        aggregator.assert_service_check('harbor.status', AgentCheck.UNKNOWN, tags=base_tags)
 
 
 @pytest.mark.usefixture("patch_requests")
-def test_check_registries_health(harbor_check, harbor_api):
+def test_check_registries_health(aggregator, harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']
     harbor_check._check_registries_health(harbor_api, tags)
     tags.append('registry:demo')
-    harbor_check.service_check.assert_called_once_with('harbor.registry.status', AgentCheck.OK, tags=tags)
+    aggregator.assert_service_check('harbor.registry.status', AgentCheck.OK, tags=tags)
 
 
 @pytest.mark.usefixture("patch_requests")
-def test_submit_project_metrics(harbor_check, harbor_api):
+def test_submit_project_metrics(aggregator, harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']
     harbor_check._submit_project_metrics(harbor_api, tags)
-    calls = [call('harbor.projects.count', 2, tags=tags)]
-    harbor_check.gauge.assert_has_calls(calls, any_order=True)
-    assert harbor_check.gauge.call_count == len(calls)
+    aggregator.assert_metric('harbor.projects.count', 2, tags=tags)
 
 
 @pytest.mark.usefixture("patch_requests")
-def test_submit_disk_metrics(harbor_check, harbor_api):
+def test_submit_disk_metrics(aggregator, harbor_check, harbor_api):
     tags = ['tag1:val1', 'tag2']
     harbor_check._submit_disk_metrics(harbor_api, tags)
-    calls = [call('harbor.disk.free', 5e5, tags=tags), call('harbor.disk.total', 1e6, tags=tags)]
-    harbor_check.gauge.assert_has_calls(calls, any_order=True)
-    assert harbor_check.gauge.call_count == len(calls)
+    aggregator.assert_metric('harbor.disk.free', 5e5, tags=tags)
+    aggregator.assert_metric('harbor.disk.total', 1e6, tags=tags)
 
 
 def test_api__make_get_request(harbor_api):
