@@ -124,6 +124,26 @@ Enable Datadog's [Process Agent][14] with the environment variable `DD_PROCESS_A
 #### Other environment variables
 For environment variables available with the Docker Agent container, see the [Docker Agent][15] page. **Note**: Some variables are not be available for Fargate.
 
+For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With this method, the Agent pulls in tags from your Docker container labels. This requires you to add the appropriate labels to your other Docker containers. Labels can be added directly in the [task definition][25].
+
+Format for the Agent container:
+```shell
+{ 
+"name": "DD_DOCKER_LABELS_AS_TAGS", 
+"value": "{"<LABEL_NAME_TO_COLLECT>":"<TAG_KEY_FOR_DATADOG>"}" 
+}
+```
+
+Example for the Agent container:
+```shell
+{ 
+"name": "DD_DOCKER_LABELS_AS_TAGS", 
+"value": "{"com.docker.compose.service":"service_name"}" 
+}
+```
+
+`DD_HOSTNAME` and `DD_TAGS` should not be used since there is no concept of a real host to the user in Fargate. Using these variables may cause problems in your environment.
+
 ### Crawler-based metrics
 
 In addition to the metrics collected by the Datadog Agent, Datadog has a CloudWatch based ECS integration. This integration collects the [Amazon ECS CloudWatch Metrics][16].
@@ -216,3 +236,4 @@ Need help? Contact [Datadog support][18].
 [22]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
 [23]: https://www.datadoghq.com/blog/monitor-aws-fargate
 [24]: https://docs.datadoghq.com/tracing/setup/
+[25]: https://docs.aws.amazon.com/AmazonECS/latest/userguide/task_definition_parameters.html#container_definition_labels
