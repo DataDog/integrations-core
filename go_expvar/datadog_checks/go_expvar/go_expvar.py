@@ -21,10 +21,16 @@ TAGS = "tags"
 GAUGE = "gauge"
 RATE = "rate"
 COUNTER = "counter"
+MONOTONIC_COUNTER = "monotonic_counter"
 DEFAULT_TYPE = GAUGE
 
 
-SUPPORTED_TYPES = {GAUGE: AgentCheck.gauge, RATE: AgentCheck.rate, COUNTER: AgentCheck.increment}
+SUPPORTED_TYPES = {
+    GAUGE: AgentCheck.gauge,
+    RATE: AgentCheck.rate,
+    COUNTER: AgentCheck.increment,
+    MONOTONIC_COUNTER: AgentCheck.monotonic_count
+}
 
 DEFAULT_METRIC_NAMESPACE = "go_expvar"
 
