@@ -40,6 +40,7 @@ def queue_metrics():
         'retention_interval': pymqi.CMQC.MQIA_RETENTION_INTERVAL,
         'open_output_count': pymqi.CMQC.MQIA_OPEN_OUTPUT_COUNT,
         'trigger_type': pymqi.CMQC.MQIA_TRIGGER_TYPE,
+        'depth_percent': depth_percent,
     }
 
 
@@ -62,15 +63,11 @@ def channel_metrics():
     }
 
 
-def depth_percent(queue):
-    depth_current = queue.inquire(queue_metrics()['depth_current'])
-    depth_max = queue.inquire(queue_metrics()['depth_max'])
+def depth_percent(queue_info):
+    depth_current = queue_info[pymqi.CMQC.MQIA_CURRENT_Q_DEPTH]
+    depth_max = queue_info[pymqi.CMQC.MQIA_MAX_Q_DEPTH]
 
     depth_fraction = depth_current / depth_max
     depth_percent = depth_fraction * 100
 
     return depth_percent
-
-
-def queue_metrics_functions():
-    return {'depth_percent': depth_percent}
