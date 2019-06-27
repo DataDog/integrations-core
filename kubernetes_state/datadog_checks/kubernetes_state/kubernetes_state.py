@@ -128,8 +128,8 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
 
-        self.job_start_time = defaultdict(int)
-        self.job_completion_time = defaultdict(int)
+        self.job_start_time = {}
+        self.job_completion_time = {}
 
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
@@ -660,14 +660,14 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = list(scraper_config['custom_tags'])
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 tags.append(self._format_tag(label_name, label_value, scraper_config))
-            self.job_start_time[frozenset(tags)] += int(sample[self.SAMPLE_VALUE])
+            self.job_start_time[frozenset(tags)] = int(sample[self.SAMPLE_VALUE])
 
     def kube_job_status_completion_time(self, metric, scraper_config):
         for sample in metric.samples:
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 tags.append(self._format_tag(label_name, label_value, scraper_config))
-            self.job_completion_time[frozenset(tags)] += int(sample[self.SAMPLE_VALUE])
+            self.job_completion_time[frozenset(tags)] = int(sample[self.SAMPLE_VALUE])
 
     def kube_job_status_execution_time(self, scraper_config):
         metric_name = scraper_config['namespace'] + '.job.execution_time'
