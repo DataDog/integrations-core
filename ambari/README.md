@@ -4,8 +4,7 @@
 
 This check monitors [Ambari][1] through the Datadog Agent.
 
-![Ambari Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/ambari/assets/images/base_dashboard.png)
-
+![Ambari Dashboard][9]
 
 ## Setup
 
@@ -64,3 +63,4 @@ Need help? Contact [Datadog support][5].
 [6]: https://docs.datadoghq.com/agent/
 [7]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
 [8]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/common.py
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ambari/assets/images/base_dashboard.png
