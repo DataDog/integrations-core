@@ -63,11 +63,11 @@ logs:
         pattern: \d{4}\-\d{2}\-\d{2}
 ```
 
-3. [Restart the Agent][6].
+3. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `riak` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `riak` under the Checks section.
 
 ## Data Collected
 ### Metrics
