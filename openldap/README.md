@@ -102,9 +102,9 @@ See the [sample openldap.yaml][2] for all available configuration options.
           service: <SERVICE_NAME>
     ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample openldap.d/conf.yaml][3] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample openldap.d/conf.yaml][2] for all available configuration options.
 
-3. [Restart the Agent][5].
+3. [Restart the Agent][3].
 
 ### Validation
 
