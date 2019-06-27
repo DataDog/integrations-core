@@ -1,5 +1,9 @@
 # CHANGELOG - go_expvar
 
+## 1.4.0 / 2019-06-27
+
+* [Added] Add monotonic_counter support to go_expvar. See [#3992](https://github.com/DataDog/integrations-core/pull/3992).
+
 ## 1.3.0 / 2019-06-20
 
 * [Added] Do not compile regexes on each run. See [#3949](https://github.com/DataDog/integrations-core/pull/3949).
