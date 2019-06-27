@@ -9,6 +9,8 @@
 /docs/                @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 *.md                  @DataDog/baklava @DataDog/agent-integrations
 manifest.json         @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+assets/               @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+
 
 # Container monitoring
 /containerd/               @DataDog/container-integrations @DataDog/agent-integrations
