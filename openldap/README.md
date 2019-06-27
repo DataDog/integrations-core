@@ -52,7 +52,7 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
         EOF
     ```
 
-4. Configure the monitor database
+5. Configure the monitor database
 
     ```
         cat <<EOF | sudo ldapadd -Y EXTERNAL -H ldapi:///
@@ -88,7 +88,7 @@ See the [sample openldap.yaml][2] for all available configuration options.
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-    ```yaml
+    ```
     logs_enabled: true
     ```
 
@@ -108,7 +108,7 @@ See the [sample openldap.yaml][2] for all available configuration options.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `openldap` under the Checks section.
+[Run the Agent's status subcommand][4] and look for `openldap` under the Checks section.
 
 ## Compatibility
 
