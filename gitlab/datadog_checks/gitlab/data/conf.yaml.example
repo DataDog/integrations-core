@@ -180,13 +180,82 @@ init_config:
 #
 # logs:
 #   - type: file
-#     path: /var/log/gitlab/gitlab-rails/*.log
+#     path: /var/log/gitlab/gitlab-rails/production_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/integrations_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/production.log
 #     service: <SERVICE_NAME>
 #     source: gitlab
 #     log_processing_rules:
 #       - type: multi_line
-#         pattern: XXXXXX
-#         name: new_log_start_with_date
+#         pattern: 'Started [A-Z]+ "[^"]+" for'
+#         name: new_log_start_pattern
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/api_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/application.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/integrations_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/kubernetes.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/audit_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/sidekiq.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/gitlab-shell.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-shell/gitlab-shell.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/unicorn_stderr.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/graphql_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/sidekiq_exporter.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#     log_processing_rules:
+#       - type: multi_line
+#         pattern: 'Started [A-Z]+ "[^"]+" for'
+#         name: new_log_start_pattern
 #
 #   - type: file
 #     path: /var/log/gitlab/gitaly/current

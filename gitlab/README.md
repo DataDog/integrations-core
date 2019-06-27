@@ -33,55 +33,17 @@ Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. 
 ```yaml
 logs:
    - type: file
-     path: /var/log/gitlab/gitlab-rails/*.log
+     path: /var/log/gitlab/gitlab-rails/production_json.log
      service: <SERVICE_NAME>
      source: gitlab
-
    - type: file
-     path: /var/log/gitlab/gitaly/current
+     path: /var/log/gitlab/gitlab-rails/production.log
      service: <SERVICE_NAME>
      source: gitlab
-
    - type: file
-     path: /var/log/gitlab/alertmanager/current
+     path: /var/log/gitlab/gitlab-rails/api_json.log
      service: <SERVICE_NAME>
      source: gitlab
-
-   - type: file
-     path: /var/log/gitlab/gitlab-shell/*.log
-     service: <SERVICE_NAME>
-     source: gitlab
-
-   - type: file
-     path: /var/log/gitlab/gitlab-workhorse/current
-     service: <SERVICE_NAME>
-     source: gitlab
-
-   - type: file
-     path: /var/log/gitlab/postgres-exporter/current
-     service: <SERVICE_NAME>
-     source: gitlab
-
-   - type: file
-     path: /var/log/gitlab/prometheus/current
-     service: <SERVICE_NAME>
-     source: gitlab
-
-   - type: file
-     path: /var/log/gitlab/redis-exporter/current
-     service: <SERVICE_NAME>
-     source: gitlab
-
-   - type: file
-     path: /var/log/gitlab/unicorn/*.log
-     service: <SERVICE_NAME>
-     source: gitlab
-
-   - type: file
-     path: /var/log/gitlab/nginx/*.log
-     service: <SERVICE_NAME>
-     source: nginx
-
 ```
 
 ### Validation
