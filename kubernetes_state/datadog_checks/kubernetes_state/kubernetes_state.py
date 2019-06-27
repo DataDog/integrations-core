@@ -657,7 +657,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_job_status_start_time(self, metric, scraper_config):
         for sample in metric.samples:
-            tags = [] + scraper_config['custom_tags']
+            tags = list(scraper_config['custom_tags'])
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 tags.append(self._format_tag(label_name, label_value, scraper_config))
             self.job_start_time[frozenset(tags)] += int(sample[self.SAMPLE_VALUE])
@@ -674,12 +674,10 @@ class KubernetesState(OpenMetricsBaseCheck):
         for job_tags, completion_time in iteritems(self.job_completion_time):
             if job_tags in self.job_start_time:
                 start_time = self.job_start_time[job_tags]
-                tags = [] + scraper_config['custom_tags']
-                for job_tag in list(job_tags):
-                    label = job_tag.split(":")
-                    label_name = label[0]
-                    label_value = label[1]
-                    if label_name == 'job' or label_name == 'job_name':
+                tags = list(scraper_config['custom_tags'])
+                for job_tag in job_tags:
+                    label_name, label_value = job_tag.split(":", 2)
+                    if label_name in ('job', 'job_name'):
                         trimmed_job = self._trim_job_tag(label_value)
                         tags.append(self._format_tag(label_name, label_value, scraper_config))
                         tags.append(self._format_tag(label_name, trimmed_job, scraper_config))

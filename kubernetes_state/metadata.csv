@@ -29,7 +29,7 @@ kubernetes_state.endpoint.address_not_ready,gauge,,,,Number of addresses not rea
 kubernetes_state.endpoint.created,gauge,,,,Unix creation timestamp,0,kubernetes,k8s_state.endpoint.creation_time
 kubernetes_state.job.status.failed,count,,,,Observed number of failed pods in a job,0,kubernetes,k8s_state.job.failed
 kubernetes_state.job.status.succeeded,count,,,,Observed number of succeeded pods in a job,0,kubernetes,k8s_state.job.succeeded
-kuberentes_state..job.execution_time,gauge,,,,Job execution time,0,kubernetes,k8s_state.job.execution_time
+kuberentes_state.job.execution_time,gauge,,,,Job execution time,0,kubernetes,k8s_state.job.execution_time
 kubernetes_state.limitrange.cpu.min,gauge,,,,Minimum CPU request for this type,0,kubernetes,k8s_state.cpu.min
 kubernetes_state.limitrange.cpu.max,gauge,,,,Maximum CPU limit for this type,0,kubernetes,k8s_state.cpu.max
 kubernetes_state.limitrange.cpu.default,gauge,,,,Default CPU limit if not specified,0,kubernetes,k8s_state.cpu.default
