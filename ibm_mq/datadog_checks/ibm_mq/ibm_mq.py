@@ -183,7 +183,10 @@ class IbmMqCheck(AgentCheck):
             metric_name = '{}.queue.{}'.format(self.METRIC_PREFIX, metric_suffix)
             if callable(mq_attr):
                 metric_value = mq_attr(queue_info)
-                self.gauge(metric_name, metric_value, tags=tags)
+                if metric_value is not None:
+                    self.gauge(metric_name, metric_value, tags=tags)
+                else:
+                    self.log.debug("Date for attribute %s not found for queue %s", metric_suffix, queue_name)
             else:
                 if mq_attr in queue_info:
                     metric_value = queue_info[mq_attr]

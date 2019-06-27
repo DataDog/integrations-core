@@ -64,6 +64,9 @@ def channel_metrics():
 
 
 def depth_percent(queue_info):
+    if pymqi.CMQC.MQIA_CURRENT_Q_DEPTH not in queue_info or pymqi.CMQC.MQIA_MAX_Q_DEPTH not in queue_info:
+        return None
+
     depth_current = queue_info[pymqi.CMQC.MQIA_CURRENT_Q_DEPTH]
     depth_max = queue_info[pymqi.CMQC.MQIA_MAX_Q_DEPTH]
 
