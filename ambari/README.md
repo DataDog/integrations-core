@@ -4,6 +4,9 @@
 
 This check monitors [Ambari][1] through the Datadog Agent.
 
+![alt text](https://raw.githubusercontent.com/DataDog/integrations-core/master/ambari/assets/images/base_dashboard.png "Ambari dashboard")
+
+
 ## Setup
 
 ### Installation
