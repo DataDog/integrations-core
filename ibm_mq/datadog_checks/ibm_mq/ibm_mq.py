@@ -189,7 +189,7 @@ class IbmMqCheck(AgentCheck):
                     metric_value = queue_info[mq_attr]
                     self.gauge(metric_name, metric_value, tags=tags)
                 else:
-                    self.log.debug("Queue attribute `%s` not found for queue `%s`", mq_attr, queue_name)
+                    self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
     def get_pcf_queue_metrics(self, queue_manager, queue_name, tags):
         try:
