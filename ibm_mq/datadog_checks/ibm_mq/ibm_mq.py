@@ -165,10 +165,7 @@ class IbmMqCheck(AgentCheck):
         Grab stats from queues
         """
         try:
-            args = {
-                pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name),
-                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
-            }
+            args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q(args)
         except pymqi.MQMIError as e:
