@@ -24,12 +24,12 @@ Original discussion thread: https://github.com/DataDog/dd-agent/issues/1952
 Credits to @TheCloudlessSky (https://github.com/TheCloudlessSky)
 """
 from copy import deepcopy
+from threading import Event, Thread
 
 import pythoncom
 import pywintypes
 from six import iteritems, string_types, with_metaclass
 from six.moves import zip
-from threading import Thread, Event
 from win32com.client import Dispatch
 
 from .counter_type import UndefinedCalculator, get_calculator, get_raw
@@ -105,7 +105,7 @@ class WMISampler(Thread):
         self._previous_sample = None
 
         # Sampling state
-        _sampling = False
+        self._sampling = False
 
         self.logger = logger
 
@@ -229,8 +229,10 @@ class WMISampler(Thread):
         """
         Compute new samples.
         """
+        self._sampling = True
         self._runSampleEvent.set()
         self._sampleComplete.wait()
+        self._sampling = False
 
     def __len__(self):
         """
