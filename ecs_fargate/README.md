@@ -142,7 +142,7 @@ Example for the Agent container:
 }
 ```
 
-`DD_HOSTNAME` and `DD_TAGS` should not be used since there is no concept of a real host to the user in Fargate. Using these variables may cause problems in your environment.
+**Note**: You should not use `DD_HOSTNAME` and `DD_TAGS` since there is no concept of a host to the user in Fargate.
 
 ### Crawler-based metrics
 
