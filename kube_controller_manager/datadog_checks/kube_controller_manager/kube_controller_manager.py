@@ -138,7 +138,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             for metric, func in iteritems(self.QUEUE_METRICS_TRANSFORMERS):
                 transformers[queue + metric] = func
 
-        #  Support new metrics (introduced in v1.14.0)
+        # Support new metrics (introduced in v1.14.0)
         for metric_name in self.WORKQUEUE_METRICS_RENAMING:
             transformers[metric_name] = self.workqueue_transformer
 
@@ -148,7 +148,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
 
         self.process(scraper_config, metric_transformers=transformers)
 
-        #  Check the leader-election status
+        # Check the leader-election status
         if is_affirmative(instance.get('leader_election', True)):
             leader_config = self.LEADER_ELECTION_CONFIG
             leader_config["tags"] = instance.get("tags", [])

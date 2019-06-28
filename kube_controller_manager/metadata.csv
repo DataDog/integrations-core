@@ -18,9 +18,9 @@ kube_controller_manager.nodes.count,gauge,,,,"Number of registered nodes, per zo
 kube_controller_manager.nodes.unhealthy,gauge,,,,"Number of unhealthy nodes, per zone",-1,kube_controller_manager,nodes.unhealthy
 kube_controller_manager.leader_election.transtions,count,,,,"Number of leadership transitions observed",0,kube_controller_manager,le.transitions
 kube_controller_manager.leader_election.lease_duration,gauge,,,,"Duration of the leadership lease",0,kube_controller_manager,le.duration
-kube_controller_manager.queue.process_duration.count,gauge,,,,"Process duration, by queue",0,kube_controller_manager,process.duration.count
-kube_controller_manager.queue.process_duration.sum,gauge,,second,,"Process duration sum, by queue",-1,kube_controller_manager,process.duration.sum
+kube_controller_manager.queue.process_duration.count,gauge,,,,"How long processing an item from workqueue takes, by queue",0,kube_controller_manager,process.duration.count
+kube_controller_manager.queue.process_duration.sum,gauge,,second,,"Total workqueue processing time, by queue",-1,kube_controller_manager,process.duration.sum
 kube_controller_manager.queue.work_longest_duration,gauge,,second,,"How many seconds has the longest running processor been running, by queue",-1,kube_controller_manager,work.longest.duration
 kube_controller_manager.queue.work_unfinished_duration,gauge,,second,,"How many seconds of work has done that is in progress and hasn't been observed by process_duration, by queue",-1,kube_controller_manager,work.unfinished.duration
-kube_controller_manager.queue.queue_duration.count,gauge,,,,"Queue duration, by queue",0,kube_controller_manager,queue.duration.count
-kube_controller_manager.queue.queue_duration.sum,gauge,,second,,"Queue duration sum, by queue",-1,kube_controller_manager,queue.duration.sum
+kube_controller_manager.queue.queue_duration.count,gauge,,,,"How long item stays in a queue before being requested, by queue",0,kube_controller_manager,queue.duration.count
+kube_controller_manager.queue.queue_duration.sum,gauge,,second,,"Total time of items stays in a queue before being requested, by queue",-1,kube_controller_manager,queue.duration.sum

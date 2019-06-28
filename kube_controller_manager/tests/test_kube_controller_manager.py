@@ -75,12 +75,6 @@ def generic_check_metrics(aggregator, check_deprecated):
         # Wrapper to keep assertions < 120 chars
         aggregator.assert_metric(NAMESPACE + name, **kwargs)
 
-    for name in aggregator._metrics:
-        for metric in aggregator.metrics(name):
-            print(metric)
-    for name in aggregator._metrics:
-        print(name)
-
     assert_metric('.goroutines')
     assert_metric('.threads')
     assert_metric('.open_fds')
