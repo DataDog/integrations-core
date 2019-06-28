@@ -31,7 +31,7 @@ The Riak check is included in the [Datadog Agent][2] package, so you don't need 
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```
+    ```yaml
     logs_enabled: true
     ```
 
