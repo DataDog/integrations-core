@@ -268,11 +268,6 @@ init_config:
 #     source: gitlab
 #
 #   - type: file
-#     path: /var/log/gitlab/gitlab-shell/*.log
-#     service: <SERVICE_NAME>
-#     source: gitlab
-#
-#   - type: file
 #     path: /var/log/gitlab/gitlab-workhorse/current
 #     service: <SERVICE_NAME>
 #     source: gitlab
