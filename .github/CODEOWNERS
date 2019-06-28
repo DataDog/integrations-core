@@ -30,7 +30,7 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 /openmetrics/              @DataDog/container-integrations @DataDog/agent-integrations
 
 # Checks base
-/datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries @DataDog/container-integrations
+/datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
 # To keep ProdSec up-to-date with changes to requirements.txt.
 requirements.in                                           @DataDog/prodsec
