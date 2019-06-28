@@ -37,7 +37,7 @@ The Riak check is included in the [Datadog Agent][2] package, so you don't need 
 
 2. Add this configuration block to your `riak.d/conf.yaml` file to start collecting your Riak logs:
 
-    ```
+    ```yaml
     logs:
       - type: file
         path: /var/log/riak/console.log
