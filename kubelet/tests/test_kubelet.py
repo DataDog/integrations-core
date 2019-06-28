@@ -49,9 +49,7 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.memory.requests',
     'kubernetes.memory.usage',
     'kubernetes.memory.working_set',
-    'kubernetes.memory.cache',
     'kubernetes.memory.rss',
-    'kubernetes.memory.swap',
     'kubernetes.network.rx_bytes',
     'kubernetes.network.tx_bytes',
 ]
@@ -63,7 +61,6 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.cpu.cfs.throttled.periods',
     'kubernetes.cpu.cfs.throttled.seconds',
     'kubernetes.memory.usage_pct',
-    'kubernetes.memory.sw_limit',
     'kubernetes.network.rx_dropped',
     'kubernetes.network.rx_errors',
     'kubernetes.network.tx_dropped',
