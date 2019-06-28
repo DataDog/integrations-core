@@ -136,7 +136,21 @@ class MesosSlave(AgentCheck):
         return r.json()
 
     def _get_state(self, url, timeout, verify, tags):
-        return self._get_json(url + '/state.json', timeout, verify, tags)
+        # version < 1.8.0
+        try:
+            endpoint = '/state.json'
+            master_state = self._get_json(url + endpoint, timeout, verify, tags)
+            if master_state is not None:
+                self.version = list(map(int, master_state['version'].split('.')))
+        except Exception as e:
+            msg = str(e)
+            self.log.info('Encounted error getting state at {}{}, message: {}'.format(url, endpoint, msg))
+        # version >= 1.8.0
+            endpoint = '/state'
+            master_state = self._get_json(url + endpoint, timeout, verify, tags)
+            if master_state is not None:
+                self.version = list(map(int, master_state['version'].split('.')))
+        return master_state
 
     def _get_stats(self, url, timeout, verify, tags):
         if self.version >= [0, 22, 0]:
