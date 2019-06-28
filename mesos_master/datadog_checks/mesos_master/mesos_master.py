@@ -178,7 +178,19 @@ class MesosMaster(AgentCheck):
         return r.json()
 
     def _get_master_state(self, url, timeout, verify, tags):
-        return self._get_json(url + '/state.json', timeout, verify, tags)
+        # version < 1.8.0
+        try:
+            endpoint = '/state.json'
+            master_state = self._get_json(url + endpoint, timeout, verify, tags)
+            if master_state is not None:
+                self.version = list(map(int, master_state['version'].split('.')))
+        except:
+        # version >= 1.8.0
+            endpoint = '/state'
+            master_state = self._get_json(url + endpoint, timeout, verify, tags)
+            if master_state is not None:
+                self.version = list(map(int, master_state['version'].split('.')))
+        return master_state
 
     def _get_master_stats(self, url, timeout, verify, tags):
         if self.version >= [0, 22, 0]:
@@ -188,14 +200,17 @@ class MesosMaster(AgentCheck):
         return self._get_json(url + endpoint, timeout, verify, tags)
 
     def _get_master_roles(self, url, timeout, verify, tags):
-        return self._get_json(url + '/roles.json', timeout, verify, tags)
+        if self.version >= [1, 8, 0]:
+            endpoint = '/roles'
+        else:
+            endpoint = '/roles.json'
+        return self._get_json(url + endpoint, timeout, verify, tags)
 
     def _check_leadership(self, url, timeout, verify, tags=None):
         state_metrics = self._get_master_state(url, timeout, verify, tags)
         self.leader = False
 
         if state_metrics is not None:
-            self.version = list(map(int, state_metrics['version'].split('.')))
             if state_metrics['leader'] == state_metrics['pid']:
                 self.leader = True
 
