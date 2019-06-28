@@ -169,7 +169,7 @@ class CadvisorScraper(object):
             # FIXME static pods don't have container statuses so we can't
             # get the container id with the scheme, assuming docker here
             tags = tags_for_docker(subcontainer_id, tagger.HIGH) or []
-            tags += tags_for_pod(pod_uid, tagger.HIGH)
+            tags += tags_for_pod(pod_uid, tagger.HIGH) or []
             tags.append("kube_container_name:%s" % k_container_name)
         else:  # Standard container
             cid = pod_list_utils.get_cid_by_name_tuple(
