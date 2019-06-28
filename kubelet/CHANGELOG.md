@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 3.2.1 / 2019-06-28
+
+* [Fixed] Make the kubelet and ECS fargate checks resilient to the tagger returning None. See [#4004](https://github.com/DataDog/integrations-core/pull/4004).
+
 ## 3.2.0 / 2019-06-13
 
 * [Fixed] Revert "Collect network usage metrics (#3740)". See [#3914](https://github.com/DataDog/integrations-core/pull/3914).
