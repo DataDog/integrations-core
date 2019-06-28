@@ -285,7 +285,7 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(c_id, tagger.HIGH)
+            tags = tagger.tag(c_id, tagger.HIGH) or []
             tags += scraper_config['custom_tags']
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
@@ -324,7 +324,7 @@ class CadvisorPrometheusScraperMixin(object):
         for pod_uid, sample in iteritems(samples):
             if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                 continue
-            tags = tagger.tag('kubernetes_pod://%s' % pod_uid, tagger.HIGH)
+            tags = tagger.tag('kubernetes_pod://%s' % pod_uid, tagger.HIGH) or []
             tags += scraper_config['custom_tags']
             for label in labels:
                 value = sample[self.SAMPLE_LABELS].get(label)
@@ -354,7 +354,7 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(c_id, tagger.HIGH)
+            tags = tagger.tag(c_id, tagger.HIGH) or []
             tags += scraper_config['custom_tags']
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
@@ -393,7 +393,7 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(c_id, tagger.HIGH)
+            tags = tagger.tag(c_id, tagger.HIGH) or []
             tags += scraper_config['custom_tags']
 
             if m_name:

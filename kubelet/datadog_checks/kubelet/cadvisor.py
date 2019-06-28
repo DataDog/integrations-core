@@ -164,11 +164,11 @@ class CadvisorScraper(object):
 
         # Let's see who we have here
         if is_pod:
-            tags = tags_for_pod(pod_uid, tagger.HIGH)
+            tags = tags_for_pod(pod_uid, tagger.HIGH) or []
         elif in_static_pod and k_container_name:
             # FIXME static pods don't have container statuses so we can't
             # get the container id with the scheme, assuming docker here
-            tags = tags_for_docker(subcontainer_id, tagger.HIGH)
+            tags = tags_for_docker(subcontainer_id, tagger.HIGH) or []
             tags += tags_for_pod(pod_uid, tagger.HIGH)
             tags.append("kube_container_name:%s" % k_container_name)
         else:  # Standard container
