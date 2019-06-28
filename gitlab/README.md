@@ -24,7 +24,7 @@ See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
 #### Log Collection
 
 To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
-```
+```yaml
     logs_enabled: true
 ```
 
