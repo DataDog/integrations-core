@@ -1,5 +1,13 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.4.1 / 2019-06-29
+
+* [Fixed] Change WMISampler class to create a single thread, owned by the object. See [#3987](https://github.com/DataDog/integrations-core/pull/3987).
+
+## 8.4.0 / 2019-06-18
+
+* [Added] Support E2E testing. See [#3896](https://github.com/DataDog/integrations-core/pull/3896).
+
 ## 8.3.3 / 2019-06-05
 
 * [Fixed] Revert "[openmetrics] allow blacklisting of strings". See [#3867](https://github.com/DataDog/integrations-core/pull/3867).
