@@ -75,6 +75,7 @@ class IbmMqCheck(AgentCheck):
 
         try:
             queue_manager = connection.get_queue_manager_connection(config)
+            pcf_conn = pymqi.PCFExecute(queue_manager)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, config.tags)
         except Exception as e:
             self.warning("cannot connect to queue manager: {}".format(e))
@@ -83,7 +84,7 @@ class IbmMqCheck(AgentCheck):
 
         self.get_pcf_channel_metrics(queue_manager, config.tags_no_channel, config)
 
-        self.discover_queues(queue_manager, config)
+        self.discover_queues(pcf_conn, config)
 
         try:
             self.queue_manager_stats(queue_manager, config.tags)
@@ -98,10 +99,7 @@ class IbmMqCheck(AgentCheck):
                 try:
                     queue = pymqi.Queue(queue_manager, ensure_bytes(queue_name))
                     self.queue_stats(queue, queue_name, queue_tags)
-                    # some system queues don't have PCF metrics
-                    # so we don't collect those metrics from those queues
-                    if queue_name not in config.DISALLOWED_QUEUES:
-                        self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
+                    self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
                     queue.close()
                 except Exception as e:
@@ -110,18 +108,18 @@ class IbmMqCheck(AgentCheck):
         finally:
             queue_manager.disconnect()
 
-    def discover_queues(self, queue_manager, config):
+    def discover_queues(self, pcf_conn, config):
         queues = []
         if config.auto_discover_queues:
-            queues.extend(self._discover_queues(queue_manager, '*'))
+            queues.extend(self._discover_queues(pcf_conn, '*'))
 
         if config.queue_patterns:
             for pattern in config.queue_patterns:
-                queues.extend(self._discover_queues(queue_manager, pattern))
+                queues.extend(self._discover_queues(pcf_conn, pattern))
 
         if config.queue_regex:
             if not queues:
-                queues = self._discover_queues(queue_manager, '*')
+                queues = self._discover_queues(pcf_conn, '*')
             keep_queues = []
             for queue_pattern in config.queue_regex:
                 for queue in queues:
@@ -131,20 +129,20 @@ class IbmMqCheck(AgentCheck):
 
         config.add_queues(queues)
 
-    def _discover_queues(self, queue_manager, mq_pattern_filter):
+    def _discover_queues(self, pcf_conn, mq_pattern_filter):
         queues = []
 
         for queue_type in self.SUPPORTED_QUEUE_TYPES:
             args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
             try:
-                pcf = pymqi.PCFExecute(queue_manager)
-                response = pcf.MQCMD_INQUIRE_Q(args)
+                response = pcf_conn.MQCMD_INQUIRE_Q(args)
             except pymqi.MQMIError as e:
                 self.warning("Error discovering queue: {}".format(e))
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(ensure_unicode(queue).strip())
+                    if queue_info[pymqi.CMQC.MQIA_DEFINITION_TYPE] == pymqi.CMQC.MQQDT_PREDEFINED:
+                        queues.append(ensure_unicode(queue).strip())
 
         return queues
 

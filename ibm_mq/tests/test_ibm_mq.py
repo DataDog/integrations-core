@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from unittest import mock
 
 import pymqi
 import pytest
@@ -224,3 +225,35 @@ def test_check_channel_count_status_unknown(aggregator, instance_queue_regex_tag
         aggregator.assert_metric(
             'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
         )
+
+
+def test__discover_queues():
+    check = IbmMqCheck('ibm_mq', {}, {})
+
+    pcf_conn = mock.MagicMock()
+    pcf_conn.MQCMD_INQUIRE_Q.return_value = [
+        {
+            pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.PREDEFINED1',
+            pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED,
+        },
+        {
+            pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.PERMANENT_DYNAMIC',
+            pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PERMANENT_DYNAMIC,
+        },
+        {
+            pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.TEMPORARY_DYNAMIC',
+            pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_TEMPORARY_DYNAMIC,
+        },
+        {
+            pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.SHARED_DYNAMIC',
+            pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_SHARED_DYNAMIC,
+        },
+        {
+            pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.PREDEFINED2',
+            pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED,
+        },
+    ]
+
+    queues = check._discover_queues(pcf_conn, 'dummy')
+
+    assert set(queues) == {'MY.QUEUE.PREDEFINED1', 'MY.QUEUE.PREDEFINED2'}
