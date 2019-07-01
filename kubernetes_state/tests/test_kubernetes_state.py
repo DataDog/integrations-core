@@ -109,7 +109,7 @@ METRICS = [
     NAMESPACE + '.vpa.uncapped_target',
     NAMESPACE + '.vpa.upperbound',
     NAMESPACE + '.vpa.update_mode',
-    NAMESPACE + '.job.execution_time',
+    NAMESPACE + '.job.duration_time',
 ]
 
 TAGS = {
@@ -167,7 +167,7 @@ TAGS = {
     NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2'],
     NAMESPACE + '.hpa.condition': ['namespace:default', 'hpa:myhpa', 'condition:true', 'status:abletoscale'],
     NAMESPACE
-    + '.job.execution_time': ['job:hello', 'job:hello-1509998340', 'job:hello-1509998400', 'job:hello-1509998460'],
+    + '.job.duration_time': ['job:hello', 'job:hello-1509998340', 'job:hello-1509998400', 'job:hello-1509998460'],
 }
 
 JOINED_METRICS = {
@@ -336,13 +336,13 @@ def test_update_kube_state_metrics(aggregator, instance, check):
     )
 
     aggregator.assert_metric(
-        NAMESPACE + '.job.execution_time', tags=['job:hello', 'job:hello-1509998340', 'optional:tag1'], value=4
+        NAMESPACE + '.job.duration_time', tags=['job:hello', 'job:hello-1509998340', 'optional:tag1'], value=4
     )
     aggregator.assert_metric(
-        NAMESPACE + '.job.execution_time', tags=['job:hello', 'job:hello-1509998400', 'optional:tag1'], value=4
+        NAMESPACE + '.job.duration_time', tags=['job:hello', 'job:hello-1509998400', 'optional:tag1'], value=4
     )
     aggregator.assert_metric(
-        NAMESPACE + '.job.execution_time', tags=['job:hello', 'job:hello-1509998460', 'optional:tag1'], value=5
+        NAMESPACE + '.job.duration_time', tags=['job:hello', 'job:hello-1509998460', 'optional:tag1'], value=5
     )
 
     for metric in METRICS:

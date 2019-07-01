@@ -148,7 +148,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             job.set_previous_and_reset_current_ts()
 
         # Logic for Jobs
-        self.kube_job_status_execution_time(scraper_config)
+        self.kube_job_status_duration_time(scraper_config)
 
         for job_tags, job_count in iteritems(self.job_succeeded_count):
             self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count, list(job_tags))
@@ -669,8 +669,8 @@ class KubernetesState(OpenMetricsBaseCheck):
                 tags.append(self._format_tag(label_name, label_value, scraper_config))
             self.job_completion_time[frozenset(tags)] = int(sample[self.SAMPLE_VALUE])
 
-    def kube_job_status_execution_time(self, scraper_config):
-        metric_name = scraper_config['namespace'] + '.job.execution_time'
+    def kube_job_status_duration_time(self, scraper_config):
+        metric_name = scraper_config['namespace'] + '.job.duration_time'
         for job_tags, completion_time in iteritems(self.job_completion_time):
             if job_tags in self.job_start_time:
                 start_time = self.job_start_time[job_tags]
