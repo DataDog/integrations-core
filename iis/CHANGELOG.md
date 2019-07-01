@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.6.1 / 2019-06-18
+
+* [Fixed] Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
+
 ## 2.6.0 / 2019-06-01
 
 * [Added] Handle the refresh_counters flag. See [#3840](https://github.com/DataDog/integrations-core/pull/3840).

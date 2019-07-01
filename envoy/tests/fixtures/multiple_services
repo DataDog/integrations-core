@@ -3733,6 +3733,7 @@ cluster.out.support-admin-test.datadog.svc.cluster.local|iperf.upstream_rq_total
 cluster.out.support-admin-test.datadog.svc.cluster.local|iperf.upstream_rq_tx_reset: 0
 cluster.out.support-admin-test.datadog.svc.cluster.local|iperf.version: 3346954724227882598
 cluster.rds.bind_errors: 0
+cluster.rds.internal.upstream_rq_completed: 124769
 cluster.rds.internal.upstream_rq_200: 123577
 cluster.rds.internal.upstream_rq_2xx: 123577
 cluster.rds.internal.upstream_rq_503: 1174
@@ -3788,6 +3789,7 @@ cluster.rds.upstream_flow_control_backed_up_total: 0
 cluster.rds.upstream_flow_control_drained_total: 0
 cluster.rds.upstream_flow_control_paused_reading_total: 0
 cluster.rds.upstream_flow_control_resumed_reading_total: 0
+cluster.rds.upstream_rq_completed: 124769
 cluster.rds.upstream_rq_200: 123577
 cluster.rds.upstream_rq_2xx: 123577
 cluster.rds.upstream_rq_503: 1174
@@ -3816,6 +3818,7 @@ cluster.xds-grpc.http2.rx_reset: 0
 cluster.xds-grpc.http2.too_many_header_frames: 0
 cluster.xds-grpc.http2.trailers: 0
 cluster.xds-grpc.http2.tx_reset: 0
+cluster.xds-grpc.internal.upstream_rq_completed: 6566
 cluster.xds-grpc.internal.upstream_rq_200: 686
 cluster.xds-grpc.internal.upstream_rq_2xx: 686
 cluster.xds-grpc.internal.upstream_rq_503: 5880
@@ -3870,6 +3873,7 @@ cluster.xds-grpc.upstream_flow_control_backed_up_total: 0
 cluster.xds-grpc.upstream_flow_control_drained_total: 0
 cluster.xds-grpc.upstream_flow_control_paused_reading_total: 0
 cluster.xds-grpc.upstream_flow_control_resumed_reading_total: 0
+cluster.xds-grpc.upstream_rq_completed: 6566
 cluster.xds-grpc.upstream_rq_200: 686
 cluster.xds-grpc.upstream_rq_2xx: 686
 cluster.xds-grpc.upstream_rq_503: 5880
@@ -4273,6 +4277,11 @@ listener.00.00.00.00_0000.downstream_cx_total: 0
 listener.00.00.00.00_0000.downstream_cx_active: 0
 listener.00.00.00.00_0000.downstream_cx_destroy: 0
 listener.00.00.00.00_0000.downstream_cx_total: 0
+listener.00.00.00.00_0000.ssl.ciphers.AEAD-AES256-GCM-SHA384: 3
+listener.00.00.00.00_0000.ssl.versions.TLSv1.2: 13108
+listener.00.00.00.00_0000.ssl.versions.TLSv1.3: 7
+listener.00.00.00.00_0000.ssl.curves.P-256: 76
+listener.00.00.00.00_0000.ssl.sigalgs.rsa_pss_rsae_sha256: 0
 listener.admin.downstream_cx_active: 1
 listener.admin.downstream_cx_destroy: 3
 listener.admin.downstream_cx_total: 4

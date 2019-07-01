@@ -21,10 +21,16 @@ TAGS = "tags"
 GAUGE = "gauge"
 RATE = "rate"
 COUNTER = "counter"
+MONOTONIC_COUNTER = "monotonic_counter"
 DEFAULT_TYPE = GAUGE
 
 
-SUPPORTED_TYPES = {GAUGE: AgentCheck.gauge, RATE: AgentCheck.rate, COUNTER: AgentCheck.increment}
+SUPPORTED_TYPES = {
+    GAUGE: AgentCheck.gauge,
+    RATE: AgentCheck.rate,
+    COUNTER: AgentCheck.increment,
+    MONOTONIC_COUNTER: AgentCheck.monotonic_count,
+}
 
 DEFAULT_METRIC_NAMESPACE = "go_expvar"
 
@@ -63,6 +69,7 @@ GO_EXPVAR_URL_PATH = "/debug/vars"
 class GoExpvar(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+        self._regexes = {}
         self._last_gc_count = defaultdict(int)
 
     def _get_data(self, url, instance):
@@ -227,16 +234,26 @@ class GoExpvar(AgentCheck):
             return [(traversed_path, content)]
 
         key = keys[0]
-        regex = "".join(["^", key, "$"])
-        try:
-            key_rex = re.compile(regex)
-        except Exception:
-            self.warning("Cannot compile regex: %s" % regex)
-            return []
+        if key.isalnum():
+            # key is not a regex, simply match for equality
+            matcher = key.__eq__
+        else:
+            # key might be a regex
+            key_regex = self._regexes.get(key)
+            if key_regex is None:
+                # we don't have it cached, compile it
+                regex = "^{}$".format(key)
+                try:
+                    key_regex = re.compile(regex)
+                except Exception:
+                    self.warning("Cannot compile regex: %s" % regex)
+                    return []
+                self._regexes[key] = key_regex
+            matcher = key_regex.match
 
         results = []
         for new_key, new_content in self.items(content):
-            if key_rex.match(new_key):
+            if matcher(new_key):
                 results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
         return results
 

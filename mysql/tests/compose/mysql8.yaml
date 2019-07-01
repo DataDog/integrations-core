@@ -15,6 +15,7 @@ services:
       - "${MYSQL_PORT}:3306"
 
   mysql-slave:
+    container_name: mysql-slave
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
       - ALLOW_EMPTY_PASSWORD=yes

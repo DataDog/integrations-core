@@ -1,5 +1,9 @@
 # CHANGELOG - exchange_server
 
+## 1.4.1 / 2019-06-18
+
+* [Fixed] Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3506](https://github.com/DataDog/integrations-core/pull/3506).

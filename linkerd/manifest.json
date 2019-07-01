@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "linkerd.",
-  "metric_to_check": "linkerd.rt.client.connections",
+  "metric_to_check": "linkerd.prometheus.health",
   "name": "linkerd",
   "public_title": "Datadog-Linkerd Integration",
   "short_description": "Monitor your services health with metrics from linkerd.",

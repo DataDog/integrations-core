@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 4.4.1 / 2019-06-19
+
+* [Fixed] Correct service check for ksm - cronjob. See [#3937](https://github.com/DataDog/integrations-core/pull/3937).
+
 ## 4.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3526](https://github.com/DataDog/integrations-core/pull/3526).

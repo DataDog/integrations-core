@@ -7,7 +7,7 @@ from six import PY2
 
 from datadog_checks.checks import AgentCheck
 
-# Python 3 compatability is a different library
+# Python 3 compatibility is a different library
 # It's a drop in replacement but has a different name
 # This will enable the check to use the new library
 if PY2:

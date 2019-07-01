@@ -1,5 +1,19 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.29.0 / 2019-06-24
+
+* [Added] Only sign updated checks. See [#3944](https://github.com/DataDog/integrations-core/pull/3944).
+
+## 0.28.0 / 2019-06-19
+
+* [Added] Print line number on validate metadata. See [#3931](https://github.com/DataDog/integrations-core/pull/3931).
+
+## 0.27.0 / 2019-06-18
+
+* [Fixed] Validate interval in metadata validation. See [#3857](https://github.com/DataDog/integrations-core/pull/3857).
+* [Added] Support E2E testing. See [#3896](https://github.com/DataDog/integrations-core/pull/3896).
+* [Added] Allow releasing multiple checks at once. See [#3881](https://github.com/DataDog/integrations-core/pull/3881).
+
 ## 0.26.1 / 2019-06-05
 
 * [Fixed] Fix JMX template. See [#3879](https://github.com/DataDog/integrations-core/pull/3879).

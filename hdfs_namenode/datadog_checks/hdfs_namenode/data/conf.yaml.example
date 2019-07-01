@@ -3,14 +3,15 @@ init_config:
 instances:
 
     ## @param hdfs_namenode_jmx_uri - string - required
-    ## The HDFS DataNode check retrieves metrics from the HDFS DataNode's JMX
-    ## interface. This check must be installed on a HDFS DataNode. The HDFS
-    ## DataNode JMX URI is composed of the DataNode's hostname and port.
+    ## The HDFS NameNode check retrieves metrics from the HDFS NameNode's JMX
+    ## interface via HTTP(S) (not a JMX remote connection). This check must be installed on 
+    ## a HDFS NameNode. The HDFS NameNode JMX URI is composed of the NameNode's hostname and port.
     ##
     ## The hostname and port can be found in the hdfs-site.xml conf file under
-    ## the property dfs.datanode.http.address
+    ## the property dfs.namenode.http-address
+    ## https://hadoop.apache.org/docs/r2.7.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
     #
-  - hdfs_namenode_jmx_uri: http://localhost:50075
+  - hdfs_namenode_jmx_uri: http://localhost:50070
 
     ## @param username - string - optional
     ## The username to use if the `hdfs_namenode_jmx_uri` is behind basic auth.

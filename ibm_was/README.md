@@ -21,6 +21,13 @@ The performance servlet is deployed exactly as any other servlet. Deploy the ser
 
 **Note**: Starting with version 6.1, you must enable application security to get the PerfServlet working.
 
+### Modify the Currently Monitored Statistic Set
+By default, your application server is only configured for "Basic" monitoring. In order to gain complete visibility into your JVM, JDBC connections, and servlet connections, change the currently monitored statistic set for your application server from "Basic" to "All". 
+
+From the Websphere Administration Console, you can find this setting in `Application servers > <YOUR_APP_SERVER> > Performance Monitoring Infrastructure (PMI)`.
+
+Once you've made this change, click "Apply" to save the configuration and restart your application server. Additional JDBC, JVM, and servlet metrics should appear in Datadog shortly after this change. 
+
 ### Configuration
 
 1. Edit the `ibm_was.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your IBM WAS performance data. See the [sample ibm_was.d/conf.yaml][2] for all available configuration options.

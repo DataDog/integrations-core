@@ -115,6 +115,13 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor IBM DB2 with Datadog][10]
+
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/assets/images/dashboard_overview.png
 [2]: https://www.ibm.com/analytics/us/en/db2
 [3]: https://docs.datadoghq.com/agent
@@ -124,3 +131,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
 [9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/monitor-db2-with-datadog/

@@ -453,7 +453,7 @@ class SnmpCheck(NetworkCheck):
         for metric in metrics:
             forced_type = metric.get('forced_type')
             if 'OID' in metric:
-                queried_oid = metric['OID']
+                queried_oid = metric['OID'].lstrip('.')
                 if queried_oid in results:
                     value = results[queried_oid]
                 else:

@@ -38,11 +38,18 @@ instances:
     #   - '<QUEUE_NAME>'
 
     ## @param queue_patterns - list of string - optional
-    ## Collect from queues that match a pattern
+    ## Collect from queues that match a MQ pattern
     #
     # queue_patterns:
-    #   - 'DEV.*'
-    #   - 'SYSTEM.*'
+    #   - 'DEV.*'          # match queues starting with "DEV."
+    #   - 'SYSTEM.*'       # match queues starting with "SYSTEM."
+
+    ## @param queue_regex - list of string - optional
+    ## Collect from queues that match a regex
+    #
+    # queue_regex:
+    #   - '^DEV\..*$'          # match queues starting with "DEV."
+    #   - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
 
     ## @param channels - list of string - optional
     ## Check the status of the following channels

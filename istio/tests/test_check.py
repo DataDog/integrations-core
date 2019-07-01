@@ -276,6 +276,56 @@ GALLEY_METRICS = [
 ]
 
 
+CITADEL_METRICS = [
+    'istio.citadel.go.gc_duration_seconds.count',
+    'istio.citadel.go.gc_duration_seconds.quantile',
+    'istio.citadel.go.gc_duration_seconds.sum',
+    'istio.citadel.go.goroutines',
+    'istio.citadel.go.info',
+    'istio.citadel.go.memstats.alloc_bytes',
+    'istio.citadel.go.memstats.alloc_bytes_total',
+    'istio.citadel.go.memstats.buck_hash_sys_bytes',
+    'istio.citadel.go.memstats.frees_total',
+    'istio.citadel.go.memstats.gc_cpu_fraction',
+    'istio.citadel.go.memstats.gc_sys_bytes',
+    'istio.citadel.go.memstats.heap_alloc_bytes',
+    'istio.citadel.go.memstats.heap_idle_bytes',
+    'istio.citadel.go.memstats.heap_inuse_bytes',
+    'istio.citadel.go.memstats.heap_objects',
+    'istio.citadel.go.memstats.heap_released_bytes',
+    'istio.citadel.go.memstats.heap_sys_bytes',
+    'istio.citadel.go.memstats.last_gc_time_seconds',
+    'istio.citadel.go.memstats.lookups_total',
+    'istio.citadel.go.memstats.mallocs_total',
+    'istio.citadel.go.memstats.mcache_inuse_bytes',
+    'istio.citadel.go.memstats.mcache_sys_bytes',
+    'istio.citadel.go.memstats.mspan_inuse_bytes',
+    'istio.citadel.go.memstats.mspan_sys_bytes',
+    'istio.citadel.go.memstats.next_gc_bytes',
+    'istio.citadel.go.memstats.other_sys_bytes',
+    'istio.citadel.go.memstats.stack_inuse_bytes',
+    'istio.citadel.go.memstats.stack_sys_bytes',
+    'istio.citadel.go.memstats.sys_bytes',
+    'istio.citadel.go.threads',
+    'istio.citadel.process.cpu_seconds_total',
+    'istio.citadel.process.max_fds',
+    'istio.citadel.process.open_fds',
+    'istio.citadel.process.resident_memory_bytes',
+    'istio.citadel.process.start_time_seconds',
+    'istio.citadel.process.virtual_memory_bytes',
+    'istio.citadel.secret_controller.csr_err_count',
+    'istio.citadel.secret_controller.secret_deleted_cert_count',
+    'istio.citadel.secret_controller.svc_acc_created_cert_count',
+    'istio.citadel.secret_controller.svc_acc_deleted_cert_count',
+    'istio.citadel.server.authentication_failure_count',
+    'istio.citadel.server.citadel_root_cert_expiry_timestamp',
+    'istio.citadel.server.csr_count',
+    'istio.citadel.server.csr_parsing_err_count',
+    'istio.citadel.server.id_extraction_err_count',
+    'istio.citadel.server.success_cert_issuance_count',
+]
+
+
 MESH_METRICS_MAPPER = {
     'istio_request_count': 'request.count',
     'istio_request_duration': 'request.duration',
@@ -366,7 +416,12 @@ NEW_MOCK_INSTANCE = {
     'mixer_endpoint': 'http://istio-telemetry:15014/metrics',
     'pilot_endpoint': 'http://istio-pilot:15014/metrics',
     'galley_endpoint': 'http://istio-galley:15014/metrics',
+    'citadel_endpoint': 'http://istio-citadel:15014/metrics',
 }
+
+NEW_MOCK_PILOT_ONLY_INSTANCE = {'pilot_endpoint': 'http://istio-pilot:15014/metrics'}
+
+NEW_MOCK_GALLEY_ONLY_INSTANCE = {'galley_endpoint': 'http://istio-galley:15014/metrics'}
 
 
 class MockResponse:
@@ -408,7 +463,33 @@ def mesh_mixture_fixture():
 
 @pytest.fixture
 def new_mesh_mixture_fixture():
-    files = ['mesh.txt', 'mixer.txt', 'pilot.txt', 'galley.txt']
+    files = ['mesh.txt', 'mixer.txt', 'pilot.txt', 'galley.txt', 'citadel.txt']
+    responses = []
+    for filename in files:
+        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        with open(file_path, 'r') as f:
+            responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
+def new_pilot_fixture():
+    files = ['pilot.txt']
+    responses = []
+    for filename in files:
+        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        with open(file_path, 'r') as f:
+            responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
+def new_galley_fixture():
+    files = ['galley.txt']
     responses = []
     for filename in files:
         file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
@@ -436,7 +517,27 @@ def test_new_istio(aggregator, new_mesh_mixture_fixture):
     check = Istio('istio', {}, {}, [NEW_MOCK_INSTANCE])
     check.check(NEW_MOCK_INSTANCE)
 
-    for metric in MESH_METRICS + NEW_MIXER_METRICS + GALLEY_METRICS + PILOT_METRICS:
+    for metric in MESH_METRICS + NEW_MIXER_METRICS + GALLEY_METRICS + PILOT_METRICS + CITADEL_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_pilot_only_istio(aggregator, new_pilot_fixture):
+    check = Istio('istio', {}, {}, [NEW_MOCK_PILOT_ONLY_INSTANCE])
+    check.check(NEW_MOCK_PILOT_ONLY_INSTANCE)
+
+    for metric in PILOT_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_galley_only_istio(aggregator, new_galley_fixture):
+    check = Istio('istio', {}, {}, [NEW_MOCK_GALLEY_ONLY_INSTANCE])
+    check.check(NEW_MOCK_GALLEY_ONLY_INSTANCE)
+
+    for metric in GALLEY_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()

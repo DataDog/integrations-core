@@ -12,6 +12,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "ssh.",
+  "metric_to_check": "sftp.response_time",
   "name": "ssh_check",
   "process_signatures": [
     "ssh",
