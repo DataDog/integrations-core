@@ -52,7 +52,7 @@ For example these annotations, enable both the `nginx` and `nginx-ingress-contro
 ```text
 ad.datadoghq.com/nginx-ingress-controller.check_names: '["nginx","nginx_ingress_controller"]'
 ad.datadoghq.com/nginx-ingress-controller.init_configs: '[{},{}]'
-ad.datadoghq.com/nginx-ingress-controller.instances: '[{"nginx_status_url": "http://%%host%%/nginx_status"},{"prometheus_url": "http://%%host%%:10254/metrics"}]'
+ad.datadoghq.com/nginx-ingress-controller.instances: '[{"nginx_status_url": "http://%%host%%:%%port%%/nginx_status"},{"prometheus_url": "http://%%host%%:10254/metrics"}]'
 ad.datadoghq.com/nginx-ingress-controller.logs: '[{"service": "controller", "source":"nginx-ingress-controller"}]'
 ```
 
