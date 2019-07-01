@@ -1,5 +1,5 @@
 {
-    "display_name": "Kube_apiserver_metrics",
+    "display_name": "Kubernetes API server metrics",
     "maintainer": "help@datadoghq.com",
     "manifest_version": "1.0.0",
     "name": "kube_apiserver_metrics",
