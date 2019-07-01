@@ -83,7 +83,7 @@ The Marathon check is included in the [Datadog Agent][1] package, so you don't n
         service: <SERVICE_NAME>
     ```
 
- 3. [Restart the Agent][5].
+ 3. [Restart the Agent][4].
 
 ### Validation
 
