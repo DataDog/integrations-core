@@ -18,6 +18,28 @@ start collecting your Ambari performance data. See the [sample ambari.d/conf.yam
 
 2. [Restart the Agent][3].
 
+#### Log Collection
+
+To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
+```
+    logs_enabled: true
+```
+
+Next, edit `ambari.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Ambari log files.
+
+```yaml
+ logs:
+   - type: file
+     path: /var/log/ambari-server/ambari-alerts.log
+     source: ambari
+     service: ambari
+     log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-04-22 15:47:00,999
+...
+```
+
 ### Validation
 
 [Run the Agent's status subcommand][4] and look for `ambari` under the Checks section.
