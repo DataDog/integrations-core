@@ -159,6 +159,7 @@ class WMISampler(Thread):
 
         while True:
             self._runSampleEvent.wait()
+            self._runSampleEvent.clear()
             if self.is_raw_perf_class and not self._previous_sample:
                 self._current_sample = self._query()
 
@@ -232,6 +233,7 @@ class WMISampler(Thread):
         self._sampling = True
         self._runSampleEvent.set()
         self._sampleComplete.wait()
+        self._sampleComplete.clear()
         self._sampling = False
 
     def __len__(self):
