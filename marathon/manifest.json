@@ -1,7 +1,8 @@
 {
   "categories": [
     "configuration & deployment",
-    "containers"
+    "containers",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Marathon",
