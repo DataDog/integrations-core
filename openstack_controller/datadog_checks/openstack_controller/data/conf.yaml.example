@@ -97,7 +97,7 @@ instances:
     # openstack_cloud_name: <CLOUD_NAME>
 
     ## @param keystone_server_url - string - optional
-    ## URL of your identity server. Note that the server must support Identity API v3
+    ## URL of your identity server. NOTE: The server must support Identity API v3.
     ## This parameter is required if openstack_config_file_path or openstack_cloud_name are not specified.
     #
     # keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
