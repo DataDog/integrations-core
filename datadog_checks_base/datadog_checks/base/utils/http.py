@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import os
 import threading
 import warnings
 from collections import OrderedDict
@@ -13,17 +14,34 @@ from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
+from ..errors import ConfigurationError
+
+try:
+    from contextlib import ExitStack
+except ImportError:
+    from contextlib2 import ExitStack
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
 
+# Import lazily to reduce memory footprint and ease installation for development
+requests_kerberos = None
+requests_ntlm = None
+
 LOGGER = logging.getLogger(__file__)
 
 STANDARD_FIELDS = {
     'headers': None,
+    'kerberos_auth': None,
+    'kerberos_delegate': False,
+    'kerberos_force_initiate': False,
+    'kerberos_hostname': None,
+    'kerberos_keytab': None,
+    'kerberos_principal': None,
     'log_requests': False,
+    'ntlm_domain': None,
     'password': None,
     'persist_connections': False,
     'proxy': None,
@@ -38,8 +56,9 @@ STANDARD_FIELDS = {
 }
 # For any known legacy fields that may be widespread
 DEFAULT_REMAPPED_FIELDS = {
+    'kerberos': {'name': 'kerberos_auth'},
     # TODO: Remove in 6.13
-    'no_proxy': {'name': 'skip_proxy'}
+    'no_proxy': {'name': 'skip_proxy'},
 }
 PROXY_SETTINGS_DISABLED = {
     # This will instruct `requests` to ignore the `HTTP_PROXY`/`HTTPS_PROXY`
@@ -49,6 +68,8 @@ PROXY_SETTINGS_DISABLED = {
     'http': '',
     'https': '',
 }
+
+KERBEROS_STRATEGIES = {}
 
 
 class RequestsWrapper(object):
@@ -60,6 +81,7 @@ class RequestsWrapper(object):
         'no_proxy_uris',
         'options',
         'persist_connections',
+        'request_hooks',
     )
 
     # For modifying the warnings filter since the context
@@ -122,8 +144,35 @@ class RequestsWrapper(object):
 
         # http://docs.python-requests.org/en/master/user/authentication/
         auth = None
-        if config['username'] and config['password']:
-            auth = (config['username'], config['password'])
+        if config['password']:
+            if config['username']:
+                auth = (config['username'], config['password'])
+            elif config['ntlm_domain']:
+                ensure_ntlm()
+
+                auth = requests_ntlm.HttpNtlmAuth(config['ntlm_domain'], config['password'])
+
+        if auth is None and config['kerberos_auth']:
+            ensure_kerberos()
+
+            # For convenience
+            if is_affirmative(config['kerberos_auth']):
+                config['kerberos_auth'] = 'required'
+
+            if config['kerberos_auth'] not in KERBEROS_STRATEGIES:
+                raise ConfigurationError(
+                    'Invalid Kerberos strategy `{}`, must be one of: {}'.format(
+                        config['kerberos_auth'], ' | '.join(KERBEROS_STRATEGIES)
+                    )
+                )
+
+            auth = requests_kerberos.HTTPKerberosAuth(
+                mutual_authentication=KERBEROS_STRATEGIES[config['kerberos_auth']],
+                delegate=is_affirmative(config['kerberos_delegate']),
+                force_preemptive=is_affirmative(config['kerberos_force_initiate']),
+                hostname_override=config['kerberos_hostname'],
+                principal=config['kerberos_principal'],
+            )
 
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
@@ -191,7 +240,14 @@ class RequestsWrapper(object):
         self.persist_connections = is_affirmative(config['persist_connections'])
         self._session = None
 
+        # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
+
+        # Context managers that should wrap all requests
+        self.request_hooks = [self.handle_tls_warning]
+
+        if config['kerberos_keytab']:
+            self.request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -227,7 +283,10 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
-        with self.handle_tls_warning():
+        with ExitStack() as stack:
+            for hook in self.request_hooks:
+                stack.enter_context(hook())
+
             if persist:
                 return getattr(self.session, method)(url, **options)
             else:
@@ -272,3 +331,38 @@ class RequestsWrapper(object):
             # A persistent connection was never used or an error occurred during instantiation
             # before _session was ever defined (since __del__ executes even if __init__ fails).
             pass
+
+
+@contextmanager
+def handle_kerberos_keytab(keytab_file):
+    # There are no keytab options in any wrapper libs. The env var will be
+    # used directly by C lib, see: https://web.mit.edu/kerberos/krb5-1.11
+    #
+    # `Add support for a "default client keytab". Its location is determined by
+    # the KRB5_CLIENT_KTNAME environment variable, the default_client_keytab
+    # profile relation, or a hardcoded path (TBD).`
+    old_keytab_path = os.environ.get('KRB5_CLIENT_KTNAME')
+    os.environ['KRB5_CLIENT_KTNAME'] = keytab_file
+
+    yield
+
+    if old_keytab_path is None:
+        del os.environ['KRB5_CLIENT_KTNAME']
+    else:
+        os.environ['KRB5_CLIENT_KTNAME'] = old_keytab_path
+
+
+def ensure_kerberos():
+    global requests_kerberos
+    if requests_kerberos is None:
+        import requests_kerberos
+
+        KERBEROS_STRATEGIES['required'] = requests_kerberos.REQUIRED
+        KERBEROS_STRATEGIES['optional'] = requests_kerberos.OPTIONAL
+        KERBEROS_STRATEGIES['disabled'] = requests_kerberos.DISABLED
+
+
+def ensure_ntlm():
+    global requests_ntlm
+    if requests_ntlm is None:
+        import requests_ntlm
