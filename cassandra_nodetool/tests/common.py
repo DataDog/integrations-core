@@ -16,7 +16,7 @@ CONFIG_INSTANCE = {
     'keyspaces': ['system', 'test'],
     'username': 'controlRole',
     'password': 'QED',
-    'tags': ['foo', 'bar']
+    'tags': ['foo', 'bar'],
 }
 
 PORT = "7199"

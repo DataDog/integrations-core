@@ -3,12 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import requests_mock
+
 from datadog_checks.linkerd import LinkerdCheck
-
-# 3p
-import mock
-import pytest
-
 
 LINKERD_FIXTURE_METRICS = {
     'jvm:start_time': 'jvm.start_time',
@@ -349,52 +346,52 @@ MOCK_INSTANCE = {
 }
 
 LINKERD_FIXTURE_VALUES = {
-    'linkerd.jvm.start_time': 1.52103079E12,
+    'linkerd.jvm.start_time': 1.52103079e12,
     'linkerd.jvm.application_time_millis': 52340.887,
     'linkerd.jvm.classes.total_loaded': 8842.0,
     'linkerd.jvm.classes.current_loaded': 8815.0,
     'linkerd.jvm.classes.total_unloaded': 27.0,
-    'linkerd.jvm.postGC.Par_Survivor_Space.max': 1.7432576E7,
+    'linkerd.jvm.postGC.Par_Survivor_Space.max': 1.7432576e7,
     'linkerd.jvm.postGC.Par_Survivor_Space.used': 200736.0,
-    'linkerd.jvm.postGC.CMS_Old_Gen.max': 8.9928499E8,
-    'linkerd.jvm.postGC.CMS_Old_Gen.used': 2.0269128E7,
-    'linkerd.jvm.postGC.Par_Eden_Space.max': 1.3959168E8,
+    'linkerd.jvm.postGC.CMS_Old_Gen.max': 8.9928499e8,
+    'linkerd.jvm.postGC.CMS_Old_Gen.used': 2.0269128e7,
+    'linkerd.jvm.postGC.Par_Eden_Space.max': 1.3959168e8,
     'linkerd.jvm.postGC.Par_Eden_Space.used': 0.0,
-    'linkerd.jvm.postGC.used': 2.0469864E7,
-    'linkerd.jvm.nonheap.committed': 7.122944E7,
+    'linkerd.jvm.postGC.used': 2.0469864e7,
+    'linkerd.jvm.nonheap.committed': 7.122944e7,
     'linkerd.jvm.nonheap.max': -1.0,
-    'linkerd.jvm.nonheap.used': 6.564336E7,
+    'linkerd.jvm.nonheap.used': 6.564336e7,
     'linkerd.jvm.tenuring_threshold': 6.0,
     'linkerd.jvm.thread.daemon_count': 22.0,
     'linkerd.jvm.thread.count': 23.0,
     'linkerd.jvm.thread.peak_count': 24.0,
-    'linkerd.jvm.mem.postGC.Par_Survivor_Space.max': 1.7432576E7,
+    'linkerd.jvm.mem.postGC.Par_Survivor_Space.max': 1.7432576e7,
     'linkerd.jvm.mem.postGC.Par_Survivor_Space.used': 200736.0,
-    'linkerd.jvm.mem.postGC.CMS_Old_Gen.max': 8.9928499E8,
-    'linkerd.jvm.mem.postGC.CMS_Old_Gen.used': 2.0269128E7,
-    'linkerd.jvm.mem.postGC.Par_Eden_Space.max': 1.3959168E8,
+    'linkerd.jvm.mem.postGC.CMS_Old_Gen.max': 8.9928499e8,
+    'linkerd.jvm.mem.postGC.CMS_Old_Gen.used': 2.0269128e7,
+    'linkerd.jvm.mem.postGC.Par_Eden_Space.max': 1.3959168e8,
     'linkerd.jvm.mem.postGC.Par_Eden_Space.used': 0.0,
-    'linkerd.jvm.mem.postGC.used': 2.0469864E7,
-    'linkerd.jvm.mem.metaspace.max_capacity': 1.10729626E9,
+    'linkerd.jvm.mem.postGC.used': 2.0469864e7,
+    'linkerd.jvm.mem.metaspace.max_capacity': 1.10729626e9,
     'linkerd.jvm.mem.buffer.direct.max': 0.0,
     'linkerd.jvm.mem.buffer.direct.count': 1.0,
     'linkerd.jvm.mem.buffer.direct.used': 1.0,
     'linkerd.jvm.mem.buffer.mapped.max': 0.0,
     'linkerd.jvm.mem.buffer.mapped.count': 0.0,
     'linkerd.jvm.mem.buffer.mapped.used': 0.0,
-    'linkerd.jvm.mem.allocations.eden.bytes': 1.22551552E9,
-    'linkerd.jvm.mem.current.used': 9.0179664E7,
-    'linkerd.jvm.mem.current.CMS_Old_Gen.max': 8.9928499E8,
-    'linkerd.jvm.mem.current.CMS_Old_Gen.used': 2.2799416E7,
+    'linkerd.jvm.mem.allocations.eden.bytes': 1.22551552e9,
+    'linkerd.jvm.mem.current.used': 9.0179664e7,
+    'linkerd.jvm.mem.current.CMS_Old_Gen.max': 8.9928499e8,
+    'linkerd.jvm.mem.current.CMS_Old_Gen.used': 2.2799416e7,
     'linkerd.jvm.mem.current.Metaspace.max': -1.0,
-    'linkerd.jvm.mem.current.Metaspace.used': 5.1355408E7,
-    'linkerd.jvm.mem.current.Par_Eden_Space.max': 1.3959168E8,
+    'linkerd.jvm.mem.current.Metaspace.used': 5.1355408e7,
+    'linkerd.jvm.mem.current.Par_Eden_Space.max': 1.3959168e8,
     'linkerd.jvm.mem.current.Par_Eden_Space.used': 1586640.0,
-    'linkerd.jvm.mem.current.Par_Survivor_Space.max': 1.7432576E7,
+    'linkerd.jvm.mem.current.Par_Survivor_Space.max': 1.7432576e7,
     'linkerd.jvm.mem.current.Par_Survivor_Space.used': 200736.0,
-    'linkerd.jvm.mem.current.Compressed_Class_Space.max': 1.07374182E9,
+    'linkerd.jvm.mem.current.Compressed_Class_Space.max': 1.07374182e9,
     'linkerd.jvm.mem.current.Compressed_Class_Space.used': 8188496.0,
-    'linkerd.jvm.mem.current.Code_Cache.max': 5.0331648E7,
+    'linkerd.jvm.mem.current.Code_Cache.max': 5.0331648e7,
     'linkerd.jvm.mem.current.Code_Cache.used': 6099456.0,
     'linkerd.jvm.num_cpus': 2.0,
     'linkerd.jvm.gc.msec': 674.0,
@@ -409,9 +406,9 @@ LINKERD_FIXTURE_VALUES = {
     'linkerd.jvm.safepoint.sync_time_millis': 557.0,
     'linkerd.jvm.safepoint.total_time_millis': 1295.0,
     'linkerd.jvm.safepoint.count': 592.0,
-    'linkerd.jvm.heap.committed': 4.3810816E7,
-    'linkerd.jvm.heap.max': 1.05630925E9,
-    'linkerd.jvm.heap.used': 2.5757896E7,
+    'linkerd.jvm.heap.committed': 4.3810816e7,
+    'linkerd.jvm.heap.max': 1.05630925e9,
+    'linkerd.jvm.heap.used': 2.5757896e7,
     'linkerd.jvm.fd_count': 165.0,
     'linkerd.rt.server.sent_bytes': 2901160,
     'linkerd.rt.server.connects': 50,
@@ -515,23 +512,74 @@ LINKERD_FIXTURE_VALUES = {
 }
 
 
-@pytest.fixture
-def linkerd_fixture():
-    metrics_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'linkerd.txt')
-    responses = None
+def get_response(filename):
+    metrics_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', filename)
     with open(metrics_file_path, 'r') as f:
-        responses = f.read()
+        response = f.read()
+    return response
 
-    with mock.patch('requests.get', return_value=mock.MagicMock(status_code=200,
-                    iter_lines=lambda **kwargs: responses.split("\n"), headers={'Content-Type': "text/plain"})) as p:
-        yield p
 
-def test_linkerd(aggregator, linkerd_fixture):
+def test_linkerd(aggregator):
     """
     Test the full check
     """
-    c = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
-    c.check(MOCK_INSTANCE)
+    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd.txt'))
+        check.check(MOCK_INSTANCE)
 
     for metric in LINKERD_FIXTURE_VALUES:
         aggregator.assert_metric(metric, LINKERD_FIXTURE_VALUES[metric])
+
+    aggregator.assert_metric('linkerd.prometheus.health', metric_type=aggregator.GAUGE)
+
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_service_check(
+        'linkerd.prometheus.health', status=check.OK, tags=['endpoint:http://fake.tld/prometheus'], count=1
+    )
+
+
+def test_linkerd_v2(aggregator):
+    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd_v2.txt'))
+        check.check(MOCK_INSTANCE)
+
+    aggregator.assert_metric('linkerd.request_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.response_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.response_latency.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.response_latency.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.request_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.route.response_latency.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.response_latency.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.response_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.route.actual_request_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.route.actual_response_latency.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.actual_response_latency.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.route.actual_response_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.open_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.open_connections', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.tcp.read_bytes_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.write_bytes_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.close_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.tcp.connection_duration.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.tcp.connection_duration.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.control.request_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.control.response_latency.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.control.response_latency.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.control.response_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.process.start_time', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.process.cpu_seconds_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('linkerd.process.open_fds', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.process.max_fds', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.process.virtual_memory', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('linkerd.process.resident_memory', metric_type=aggregator.GAUGE)
+
+    aggregator.assert_metric('linkerd.prometheus.health', metric_type=aggregator.GAUGE)
+
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_service_check(
+        'linkerd.prometheus.health', status=check.OK, tags=['endpoint:http://fake.tld/prometheus'], count=1
+    )

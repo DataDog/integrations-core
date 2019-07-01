@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import pytest
 import mock
+import pytest
 
 from datadog_checks.php_fpm.php_fpm import BadConfigError
 
@@ -17,10 +17,7 @@ def test_bad_config(check):
 
 
 def test_bad_status(check, aggregator):
-    instance = {
-        'status_url': 'http://foo:9001/status',
-        'tags': ['expectedbroken']
-    }
+    instance = {'status_url': 'http://foo:9001/status', 'tags': ['expectedbroken']}
     check.check(instance)
     assert len(aggregator.metric_names) == 0
 

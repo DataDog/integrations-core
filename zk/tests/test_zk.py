@@ -4,9 +4,11 @@
 
 import os
 from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
+
 import pytest
 
 from datadog_checks.zk import ZookeeperCheck
+
 from . import conftest
 
 

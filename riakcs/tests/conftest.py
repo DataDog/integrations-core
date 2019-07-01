@@ -5,12 +5,12 @@
 import copy
 import os
 
-import pytest
 import mock
+import pytest
 
-from datadog_checks.riakcs import RiakCs
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.riakcs import RiakCs
 
 from . import common
 

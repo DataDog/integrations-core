@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from ..config import is_affirmative
+import wrapt
 from ddtrace import tracer
 
-import wrapt
+from ..config import is_affirmative
 
 try:
     import datadog_agent

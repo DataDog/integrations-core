@@ -1,13 +1,16 @@
 import mock
 import pytest
-
 from openstack.exceptions import SDKException
 
 from datadog_checks.openstack_controller.api import OpenstackSDKApi
-from datadog_checks.openstack_controller.exceptions import (AuthenticationNeeded, KeystoneUnreachable,
-                                                            MissingNovaEndpoint, MissingNeutronEndpoint)
-from . import common
+from datadog_checks.openstack_controller.exceptions import (
+    AuthenticationNeeded,
+    KeystoneUnreachable,
+    MissingNeutronEndpoint,
+    MissingNovaEndpoint,
+)
 
+from . import common
 
 EXAMPLE_PROJECTS_VALUE = [
     {
@@ -21,16 +24,11 @@ EXAMPLE_PROJECTS_VALUE = [
         'description': u'Bootstrap project for initializing the cloud.',
         'enabled': True,
         'location': {
-            'project': {
-                'domain_id': u'default',
-                'id': u'default',
-                'name': None,
-                'domain_name': None
-            },
+            'project': {'domain_id': u'default', 'id': u'default', 'name': None, 'domain_name': None},
             'zone': None,
             'region_name': None,
-            'cloud': 'test_cloud'
-        }
+            'cloud': 'test_cloud',
+        },
     },
     {
         'id': u'69db552bcb5e41ad925b388e73d73dbe',
@@ -43,17 +41,12 @@ EXAMPLE_PROJECTS_VALUE = [
         'description': u'test project',
         'enabled': True,
         'location': {
-            'project': {
-                'domain_id': u'default',
-                'id': u'default',
-                'name': None,
-                'domain_name': None
-            },
+            'project': {'domain_id': u'default', 'id': u'default', 'name': None, 'domain_name': None},
             'zone': None,
             'region_name': None,
-            'cloud': 'test_cloud'
-        }
-    }
+            'cloud': 'test_cloud',
+        },
+    },
 ]
 
 EXAMPLE_COMPUTE_LIMITS_VALUE = {
@@ -68,15 +61,10 @@ EXAMPLE_COMPUTE_LIMITS_VALUE = {
     'max_total_keypairs': 100,
     'max_server_group_members': 10,
     'location': {
-        'project': {
-            'domain_id': None,
-            'id': u'680031a39ce040e1b81289ea8c73fb11',
-            'name': None,
-            'domain_name': None
-        },
+        'project': {'domain_id': None, 'id': u'680031a39ce040e1b81289ea8c73fb11', 'name': None, 'domain_name': None},
         'zone': None,
         'region_name': 'RegionOne',
-        'cloud': 'test_cloud'
+        'cloud': 'test_cloud',
     },
     'max_personality': 5,
     'max_total_instances': 10,
@@ -86,9 +74,9 @@ EXAMPLE_COMPUTE_LIMITS_VALUE = {
         u'totalSecurityGroupsUsed': 0,
         u'maxImageMeta': 128,
         u'maxSecurityGroups': 10,
-        u'maxTotalFloatingIps': 10
+        u'maxTotalFloatingIps': 10,
     },
-    'max_server_meta': 128
+    'max_server_meta': 128,
 }
 
 EXAMPLE_AGGREGATES_VALUE = [
@@ -97,13 +85,9 @@ EXAMPLE_AGGREGATES_VALUE = [
         "created_at": "2016-12-27T23:47:32.911515",
         "deleted": False,
         "deleted_at": None,
-        "hosts": [
-            "compute"
-        ],
+        "hosts": ["compute"],
         "id": 1,
-        "metadata": {
-            "availability_zone": "london"
-        },
+        "metadata": {"availability_zone": "london"},
         "name": "name",
         "updated_at": None,
         # "uuid" is not returned by OpenstackSDKApi
@@ -120,21 +104,16 @@ EXAMPLE_FLAVORS_VALUE = [
         'properties': {
             u'OS-FLV-DISABLED:disabled': False,
             u'OS-FLV-EXT-DATA:ephemeral': 0,
-            u'os-flavor-access:is_public': True
+            u'os-flavor-access:is_public': True,
         },
         u'OS-FLV-DISABLED:disabled': False,
         'vcpus': 2,
         'extra_specs': {},
         'location': {
-            'project': {
-                'domain_id': None,
-                'id': u'0123456789abcdef',
-                'name': 'testProj2',
-                'domain_name': None
-            },
+            'project': {'domain_id': None, 'id': u'0123456789abcdef', 'name': 'testProj2', 'domain_name': None},
             'zone': None,
             'region_name': 'RegionOne',
-            'cloud': 'test_cloud'
+            'cloud': 'test_cloud',
         },
         u'os-flavor-access:is_public': True,
         'rxtx_factor': 2.0,
@@ -142,7 +121,7 @@ EXAMPLE_FLAVORS_VALUE = [
         u'OS-FLV-EXT-DATA:ephemeral': 0,
         'disk': 10,
         'id': u'10',
-        'swap': 0
+        'swap': 0,
     },
     {
         'name': u'FinalTestHopefully',
@@ -152,21 +131,16 @@ EXAMPLE_FLAVORS_VALUE = [
         'properties': {
             u'OS-FLV-DISABLED:disabled': False,
             u'OS-FLV-EXT-DATA:ephemeral': 0,
-            u'os-flavor-access:is_public': True
+            u'os-flavor-access:is_public': True,
         },
         u'OS-FLV-DISABLED:disabled': False,
         'vcpus': 8,
         'extra_specs': {},
         'location': {
-            'project': {
-                'domain_id': None,
-                'id': u'0123456789abcdef',
-                'name': 'testProj2',
-                'domain_name': None
-            },
+            'project': {'domain_id': None, 'id': u'0123456789abcdef', 'name': 'testProj2', 'domain_name': None},
             'zone': None,
             'region_name': 'RegionOne',
-            'cloud': 'test_cloud'
+            'cloud': 'test_cloud',
         },
         u'os-flavor-access:is_public': True,
         'rxtx_factor': 1.0,
@@ -174,8 +148,8 @@ EXAMPLE_FLAVORS_VALUE = [
         u'OS-FLV-EXT-DATA:ephemeral': 0,
         'disk': 48,
         'id': u'625c2e4b-0a1f-4236-bb67-5ceee1a766e5',
-        'swap': 0
-    }
+        'swap': 0,
+    },
 ]
 
 
@@ -195,9 +169,7 @@ EXAMPLE_NETWORKS_VALUE = [
         u'id': u'2755452c-4fe8-4ba1-9b26-8898665b0958',
         u'provider:segmentation_id': 91,
         u'router:external': True,
-        u'availability_zone_hints': [
-            u'nova'
-        ],
+        u'availability_zone_hints': [u'nova'],
         u'availability_zones': [],
         u'name': u'net2',
         u'admin_state_up': True,
@@ -206,7 +178,7 @@ EXAMPLE_NETWORKS_VALUE = [
         u'provider:network_type': u'vxlan',
         u'ipv4_address_scope': None,
         u'shared': False,
-        u'project_id': u'680031a39ce040e1b81289ea8c73fb11'
+        u'project_id': u'680031a39ce040e1b81289ea8c73fb11',
     }
 ]
 
@@ -223,7 +195,7 @@ class MockOpenstackConnection:
                 'type': u'identity',
                 'enabled': True,
                 'id': u'cb1478c7210540dfa0ddffeeea017167',
-                'name': u'keystone'
+                'name': u'keystone',
             }
         elif service_name == u'nova':
             return {
@@ -232,7 +204,7 @@ class MockOpenstackConnection:
                 'type': u'compute',
                 'enabled': True,
                 'id': u'30b4e3ac5e7a4cf5b83c9f7226705d1f',
-                'name': u'nova'
+                'name': u'nova',
             }
 
         elif service_name == u'neutron':
@@ -242,7 +214,7 @@ class MockOpenstackConnection:
                 'type': u'network',
                 'enabled': True,
                 'id': u'97557fe6cb0f409bbf2e586ef169a6f4',
-                'name': u'neutron'
+                'name': u'neutron',
             }
 
         return None
@@ -252,84 +224,72 @@ class MockOpenstackConnection:
             return [
                 {
                     u'region_id': u'RegionOne',
-                    u'links': {
-                        u'self': u'http://10.0.3.44:5000/v3/endpoints/a536052eba574bd4baf89ff83e3a23db'
-                    },
+                    u'links': {u'self': u'http://10.0.3.44:5000/v3/endpoints/a536052eba574bd4baf89ff83e3a23db'},
                     u'url': u'http://10.0.3.44:5000/v3',
                     u'region': u'RegionOne',
                     u'enabled': True,
                     u'interface': u'public',
                     u'service_id': u'cb1478c7210540dfa0ddffeeea017167',
-                    u'id': u'a536052eba574bd4baf89ff83e3a23db'
+                    u'id': u'a536052eba574bd4baf89ff83e3a23db',
                 },
                 {
                     u'region_id': u'RegionOne',
-                    u'links': {
-                        u'self': u'http://10.0.3.44:5000/v3/endpoints/abe4ce9a9b6947ecbcba164430b9febe'
-                    },
+                    u'links': {u'self': u'http://10.0.3.44:5000/v3/endpoints/abe4ce9a9b6947ecbcba164430b9febe'},
                     u'url': u'http://172.29.236.101:5000/v3',
                     u'region': u'RegionOne',
                     u'enabled': True,
                     u'interface': u'internal',
                     u'service_id': u'cb1478c7210540dfa0ddffeeea017167',
-                    u'id': u'abe4ce9a9b6947ecbcba164430b9febe'
-                }
+                    u'id': u'abe4ce9a9b6947ecbcba164430b9febe',
+                },
             ]
 
         elif filters[u'service_id'] == u'30b4e3ac5e7a4cf5b83c9f7226705d1f':
             return [
                 {
                     u'region_id': u'RegionOne',
-                    u'links': {
-                        u'self': u'http://10.0.3.44:5000/v3/endpoints/0adb9d108440437fa6841d31a989ed89'
-                    },
+                    u'links': {u'self': u'http://10.0.3.44:5000/v3/endpoints/0adb9d108440437fa6841d31a989ed89'},
                     u'url': u'http://10.0.3.229:8774/v2.1/%(tenant_id)s',
                     u'region': u'RegionOne',
                     u'enabled': True,
                     u'interface': u'public',
                     u'service_id': u'30b4e3ac5e7a4cf5b83c9f7226705d1f',
-                    u'id': u'0adb9d108440437fa6841d31a989ed89'
+                    u'id': u'0adb9d108440437fa6841d31a989ed89',
                 },
                 {
                     u'region_id': u'RegionOne',
-                    u'links': {
-                        u'self': u'http://10.0.3.44:5000/v3/endpoints/195bc656072447edba7c311a35de47a2'
-                    },
+                    u'links': {u'self': u'http://10.0.3.44:5000/v3/endpoints/195bc656072447edba7c311a35de47a2'},
                     u'url': u'http://172.29.236.101:8774/v2.1/%(tenant_id)s',
                     u'region': u'RegionOne',
                     u'enabled': True,
                     u'interface': u'admin',
                     u'service_id': u'30b4e3ac5e7a4cf5b83c9f7226705d1f',
-                    u'id': u'195bc656072447edba7c311a35de47a2'
-                }
+                    u'id': u'195bc656072447edba7c311a35de47a2',
+                },
             ]
 
         elif filters[u'service_id'] == u'97557fe6cb0f409bbf2e586ef169a6f4':
             return [
                 {
                     u'region_id': u'RegionOne',
-                    u'links': {
-                        u'self': u'http://10.0.3.44:5000/v3/endpoints/6f9e5a99c33545bb88c62dad9b28d1ca'
-                    },
+                    u'links': {u'self': u'http://10.0.3.44:5000/v3/endpoints/6f9e5a99c33545bb88c62dad9b28d1ca'},
                     u'url': u'http://172.29.236.101:9696',
                     u'region': u'RegionOne',
                     u'enabled': True,
                     u'interface': u'admin',
                     u'service_id': u'97557fe6cb0f409bbf2e586ef169a6f4',
-                    u'id': u'6f9e5a99c33545bb88c62dad9b28d1ca'
+                    u'id': u'6f9e5a99c33545bb88c62dad9b28d1ca',
                 },
                 {
                     u'region_id': u'RegionOne',
-                    u'links': {
-                        u'self': u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
-                    },
+                    u'links': {u'self': u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'},
                     u'url': u'http://172.29.236.101:9696',
                     u'region': u'RegionOne',
                     u'enabled': True,
                     u'interface': u'internal',
                     u'service_id': u'97557fe6cb0f409bbf2e586ef169a6f4',
-                    u'id': u'408fbfd00abf4bd1a71044f4849abf66'
-                }
+                    u'id': u'408fbfd00abf4bd1a71044f4849abf66',
+                },
             ]
 
         return []
@@ -372,8 +332,9 @@ def test_get_endpoint():
     assert api.get_nova_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/0adb9d108440437fa6841d31a989ed89'
     assert api.get_neutron_endpoint() == u'http://10.0.3.44:5000/v3/endpoints/408fbfd00abf4bd1a71044f4849abf66'
 
-    with mock.patch('datadog_checks.openstack_controller.api.OpenstackSDKApi._get_service',
-                    return_value={u'id': 'invalid_id'}):
+    with mock.patch(
+        'datadog_checks.openstack_controller.api.OpenstackSDKApi._get_service', return_value={u'id': 'invalid_id'}
+    ):
         api.endpoints = {}
         with pytest.raises(KeystoneUnreachable):
             api.get_keystone_endpoint()

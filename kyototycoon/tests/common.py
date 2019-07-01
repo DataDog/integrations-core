@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os.path
+
 from datadog_checks.utils.common import get_docker_hostname
 
 HOST = get_docker_hostname()
@@ -14,7 +15,4 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 TAGS = ['optional:tag1']
 
-DEFAULT_INSTANCE = {
-    'report_url': '{}/rpc/report'.format(URL),
-    'tags': TAGS
-}
+DEFAULT_INSTANCE = {'report_url': '{}/rpc/report'.format(URL), 'tags': TAGS}

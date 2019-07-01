@@ -20,6 +20,8 @@ The `nginx-ingress-controller` check is included in the [Datadog Agent][2] packa
 
 #### Log Collection
 
+Gather your logs from NGINX Ingress Controller, including Weave NPC and Weave Kube and send them to Datadog.
+
 **Available for Agent >6.0**
 
 * Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
@@ -50,7 +52,7 @@ For example these annotations, enable both the `nginx` and `nginx-ingress-contro
 ```text
 ad.datadoghq.com/nginx-ingress-controller.check_names: '["nginx","nginx_ingress_controller"]'
 ad.datadoghq.com/nginx-ingress-controller.init_configs: '[{},{}]'
-ad.datadoghq.com/nginx-ingress-controller.instances: '[{"nginx_status_url": "http://%%host%%/nginx_status"},{"prometheus_url": "http://%%host%%:10254/metrics"}]'
+ad.datadoghq.com/nginx-ingress-controller.instances: '[{"nginx_status_url": "http://%%host%%:%%port%%/nginx_status"},{"prometheus_url": "http://%%host%%:10254/metrics"}]'
 ad.datadoghq.com/nginx-ingress-controller.logs: '[{"service": "controller", "source":"nginx-ingress-controller"}]'
 ```
 

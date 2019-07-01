@@ -12,16 +12,16 @@ FABRIC_METRICS = {
     "fabricNodeHealth": {
         "healthLast": FABRIC_PREFIX + ".node.health.cur",
         "healthMax": FABRIC_PREFIX + ".node.health.max",
-        "healthMin": FABRIC_PREFIX + ".node.health.min"
+        "healthMin": FABRIC_PREFIX + ".node.health.min",
     },
     "fabricOverallHealth": {
         "healthLast": FABRIC_PREFIX + ".pod.health.cur",
         "healthMax": FABRIC_PREFIX + ".pod.health.max",
-        "healthMin": FABRIC_PREFIX + ".pod.health.min"
+        "healthMin": FABRIC_PREFIX + ".pod.health.min",
     },
     "fvFltCounter": {
         "critcountLast": FABRIC_PREFIX + ".{}.fault_counter.crit",
-        "warncountLast": FABRIC_PREFIX + ".{}.fault_counter.warn"
+        "warncountLast": FABRIC_PREFIX + ".{}.fault_counter.warn",
     },
     "eqptEgrTotal": {
         "pktsLast": FABRIC_PREFIX + ".{}.egr_total.pkts",
@@ -38,7 +38,7 @@ FABRIC_METRICS = {
     "eqptEgrDropPkts": {
         "bufferCum": FABRIC_PREFIX + ".{}.egr_drop_pkts.buffer.cum",
         "bufferLast": FABRIC_PREFIX + ".{}.egr_drop_pkts.buffer",
-        "errorBase": FABRIC_PREFIX + ".{}.egr_drop_pkts.errors"
+        "errorBase": FABRIC_PREFIX + ".{}.egr_drop_pkts.errors",
     },
     "eqptEgrBytes": {
         "multicastLast": FABRIC_PREFIX + ".{}.egr_bytes.multicast",
@@ -65,13 +65,8 @@ ENDPOINT_GROUP_PREFIX = APPLICATION_PREFIX + ".endpoint"
 
 def make_tenant_metrics():
     metrics = {
-        "fvOverallHealth": {
-             "healthAvg": "{}.overall_health",
-             "healthLast": "{}.health"
-        },
-        "fvFltCounter": {
-            "warncountAvg": "{}.fault_counter"
-        }
+        "fvOverallHealth": {"healthAvg": "{}.overall_health", "healthLast": "{}.health"},
+        "fvFltCounter": {"warncountAvg": "{}.fault_counter"},
     }
 
     endpoint_metrics = {
@@ -81,7 +76,7 @@ def make_tenant_metrics():
             "unicastCum": "{}.ingress_pkts.unicast.cum",
             "unicastRate": "{}.ingress_pkts.unicast.rate",
             "multicastCum": "{}.ingress_pkts.multicast.cum",
-            "multicastRate": "{}.ingress_pkts.multicast.rate"
+            "multicastRate": "{}.ingress_pkts.multicast.rate",
         },
         "l2EgrPktsAg": {
             "floodCum": "{}.egress_pkts.flood.cum",
@@ -89,7 +84,7 @@ def make_tenant_metrics():
             "unicastCum": "{}.egress_pkts.unicast.cum",
             "unicastRate": "{}.egress_pkts.unicast.rate",
             "multicastCum": "{}.egress_pkts.multicast.cum",
-            "multicastRate": "{}.egress_pkts.multicast.rate"
+            "multicastRate": "{}.egress_pkts.multicast.rate",
         },
         "l2IngrBytesAg": {
             "floodCum": "{}.ingress_bytes.flood.cum",
@@ -97,7 +92,7 @@ def make_tenant_metrics():
             "unicastCum": "{}.ingress_bytes.unicast.cum",
             "unicastRate": "{}.ingress_bytes.unicast.rate",
             "multicastCum": "{}.ingress_bytes.multicast.cum",
-            "multicastRate": "{}.ingress_bytes.multicast.rate"
+            "multicastRate": "{}.ingress_bytes.multicast.rate",
         },
         "l2EgrBytesAg": {
             "floodCum": "{}.egress_bytes.flood.cum",
@@ -105,15 +100,11 @@ def make_tenant_metrics():
             "unicastCum": "{}.egress_bytes.unicast.cum",
             "unicastRate": "{}.egress_bytes.unicast.rate",
             "multicastCum": "{}.egress_bytes.multicast.cum",
-            "multicastRate": "{}.egress_bytes.multicast.rate"
+            "multicastRate": "{}.egress_bytes.multicast.rate",
         },
     }
 
-    tenant_metrics = {
-        "tenant": {},
-        "application": {},
-        "endpoint_group": {}
-    }
+    tenant_metrics = {"tenant": {}, "application": {}, "endpoint_group": {}}
 
     for cisco_metric, metric_map in iteritems(metrics):
         tenant_metrics["tenant"][cisco_metric] = {}
@@ -139,26 +130,15 @@ def make_tenant_metrics():
 
 # Some metrics will show zeroes only when the counter resets and that makes the metric's values problematic
 # in that case it's preferable to submit nothing
-METRICS_NO_ZEROES = [
-    TENANT_PREFIX + ".overall_health"
-]
+METRICS_NO_ZEROES = [TENANT_PREFIX + ".overall_health"]
 
 CAPACITY_PREFIX = METRIC_PREFIX + ".capacity"
 LEAF_CAPACITY_PREFIX = CAPACITY_PREFIX + ".leaf"
 
 CAPACITY_CONTEXT_METRICS = {
-    "l2BD": {
-        "metric_name": LEAF_CAPACITY_PREFIX + ".bridge_domain",
-        "limit_value": 3500,
-    },
-    "fvEpP": {
-        "metric_name": LEAF_CAPACITY_PREFIX + ".endpoint_group",
-        "limit_value": 3500,
-    },
-    "l3Dom": {
-        "metric_name": LEAF_CAPACITY_PREFIX + ".vrf",
-        "limit_value": 800,
-    },
+    "l2BD": {"metric_name": LEAF_CAPACITY_PREFIX + ".bridge_domain", "limit_value": 3500},
+    "fvEpP": {"metric_name": LEAF_CAPACITY_PREFIX + ".endpoint_group", "limit_value": 3500},
+    "l3Dom": {"metric_name": LEAF_CAPACITY_PREFIX + ".vrf", "limit_value": 800},
 }
 
 EQPT_CAPACITY_METRICS = {
@@ -201,24 +181,14 @@ APIC_CAPACITY_LIMITS = {
 }
 
 APIC_CAPACITY_METRICS = {
-    "fvTenant": {
-        "metric_name": APIC_CAPACITY_PREFIX + ".tenant.utilized",
-    },
-    "fvCtx": {
-        "metric_name": APIC_CAPACITY_PREFIX + ".private_network.utilized",
-    },
-    "fvAEPg": {
-        "metric_name": APIC_CAPACITY_PREFIX + ".endpoint_group.utilized",
-    },
-    "fvBD": {
-        "metric_name": APIC_CAPACITY_PREFIX + ".bridge_domain.utilized",
-    },
-    "fvCEp": {
-        "metric_name": APIC_CAPACITY_PREFIX + ".endpoint.utilized",
-    },
+    "fvTenant": {"metric_name": APIC_CAPACITY_PREFIX + ".tenant.utilized"},
+    "fvCtx": {"metric_name": APIC_CAPACITY_PREFIX + ".private_network.utilized"},
+    "fvAEPg": {"metric_name": APIC_CAPACITY_PREFIX + ".endpoint_group.utilized"},
+    "fvBD": {"metric_name": APIC_CAPACITY_PREFIX + ".bridge_domain.utilized"},
+    "fvCEp": {"metric_name": APIC_CAPACITY_PREFIX + ".endpoint.utilized"},
     "fabricNode": {
         "query_string": 'query-target-filter=eq(fabricNode.role,"leaf")',
         "metric_name": APIC_CAPACITY_PREFIX + ".fabric_node.utilized",
-        "type": "len"
-    }
+        "type": "len",
+    },
 }

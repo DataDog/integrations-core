@@ -354,7 +354,8 @@ The MySQL check does not include any events.
 ### Service Checks
 
 `mysql.replication.slave_running`:
-Returns CRITICAL for a slave that's not running, otherwise OK.
+Returns `CRITICAL` if the Agent is unable to connect to the monitored MySQL instance. Returns `OK` otherwise.
+See [this][22] for more details.
 
 `mysql.can_connect`:
 Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherwise OK.
@@ -395,3 +396,4 @@ Read our [series of blog posts][21] about monitoring MySQL with Datadog.
 [19]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges
 [20]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-with-sql-stored-procedure
 [21]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
+[22]: https://github.com/DataDog/integrations-core/blob/master/mysql/assets/SERVICE_CHECK_CLARIFICATION.md

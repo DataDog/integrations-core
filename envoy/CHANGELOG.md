@@ -1,5 +1,17 @@
 # CHANGELOG - Envoy
 
+## 1.7.0 / 2019-06-19
+
+* [Added] Add more listener metrics. See [#3922](https://github.com/DataDog/integrations-core/pull/3922).
+
+## 1.6.0 / 2019-06-18
+
+* [Added] Add logs config to envoy. See [#3918](https://github.com/DataDog/integrations-core/pull/3918).
+
+## 1.5.0 / 2019-03-29
+
+* [Added] Adhere to style. See [#3366](https://github.com/DataDog/integrations-core/pull/3366).
+
 ## 1.4.0 / 2018-09-05
 
 * [Changed] Change order of precedence of whitelist and blacklist for pattern filtering. See [#2174][1].

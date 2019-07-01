@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.7.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3566](https://github.com/DataDog/integrations-core/pull/3566).
+
 ## 1.6.0 / 2019-01-08
 
 * [Added] Allow disabling of streaming metrics. See [#2889][1].

@@ -5,7 +5,4 @@
 from .__about__ import __version__
 from .cassandra_nodetool import CassandraNodetoolCheck
 
-__all__ = [
-    '__version__',
-    'CassandraNodetoolCheck'
-]
+__all__ = ['__version__', 'CassandraNodetoolCheck']

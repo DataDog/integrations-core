@@ -146,7 +146,7 @@ CONFIG_EXPIRED_SSL = {
             'check_certificate_expiration': True,
             'seconds_warning': 3600,
             'seconds_critical': 60,
-        }
+        },
     ]
 }
 
@@ -187,13 +187,7 @@ CONFIG_UNORMALIZED_INSTANCE_NAME = {
 }
 
 CONFIG_DONT_CHECK_EXP = {
-    'instances': [
-        {
-            'name': 'simple_config',
-            'url': 'http://httpbin.org',
-            'check_certificate_expiration': False
-        }
-    ]
+    'instances': [{'name': 'simple_config', 'url': 'http://httpbin.org', 'check_certificate_expiration': False}]
 }
 
 CONFIG_HTTP_REDIRECTS = {
@@ -225,8 +219,8 @@ CONFIG_DATA_METHOD = {
             'timeout': 1,
             'method': 'post',
             'data': '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"'
-                    'xmlns:m="http://www.example.org/stocks"><soap:Header></soap:Header><soap:Body><m:GetStockPrice>'
-                    '<m:StockName>EXAMPLE</m:StockName></m:GetStockPrice></soap:Body></soap:Envelope>',
+            'xmlns:m="http://www.example.org/stocks"><soap:Header></soap:Header><soap:Body><m:GetStockPrice>'
+            '<m:StockName>EXAMPLE</m:StockName></m:GetStockPrice></soap:Body></soap:Envelope>',
         },
         {
             'name': 'put_json',
@@ -235,13 +229,7 @@ CONFIG_DATA_METHOD = {
             'method': 'put',
             'data': {'foo': 'bar', 'baz': ['qux', 'quux']},
         },
-        {
-            'name': 'put_str',
-            'url': 'http://mockbin.com/request',
-            'timeout': 1,
-            'method': 'put',
-            'data': 'Lorem ipsum',
-        },
+        {'name': 'put_str', 'url': 'http://mockbin.com/request', 'timeout': 1, 'method': 'put', 'data': 'Lorem ipsum'},
         {
             'name': 'patch_json',
             'url': 'http://mockbin.com/request',

@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
 import os
 from copy import deepcopy
+
+import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.tokumx import TokuMX
@@ -26,7 +27,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(compose_dir, 'docker-compose.yaml'),
         log_patterns='admin web console waiting for connections',
-        env_vars={'COMPOSE_DIR': compose_dir}
+        env_vars={'COMPOSE_DIR': compose_dir},
     ):
         set_up_tokumx()
         yield common.INSTANCE
@@ -44,9 +45,8 @@ def instance():
 
 def set_up_tokumx():
     cli = pymongo.MongoClient(
-        common.TOKUMX_SERVER,
-        socketTimeoutMS=30000,
-        read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)
+        common.TOKUMX_SERVER, socketTimeoutMS=30000, read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED
+    )
 
     foos = []
     for _ in range(70):

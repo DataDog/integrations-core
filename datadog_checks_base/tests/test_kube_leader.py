@@ -7,9 +7,8 @@ from datetime import datetime, timedelta
 
 import mock
 import pytest
-from six import iteritems, string_types
 from kubernetes.config.dateutil import format_rfc3339
-from kubernetes.client import ApiClient
+from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecord
@@ -37,12 +36,7 @@ EP_INSTANCE = {
     "tags": ["custom:tag"],
 }
 
-EP_TAGS = [
-    "record_kind:endpoints",
-    "record_name:thisrecord",
-    "record_namespace:myns",
-    "custom:tag",
-]
+EP_TAGS = ["record_kind:endpoints", "record_name:thisrecord", "record_namespace:myns", "custom:tag"]
 
 CM_INSTANCE = {
     "namespace": "base",
@@ -52,12 +46,7 @@ CM_INSTANCE = {
     "tags": ["custom:tag"],
 }
 
-CM_TAGS = [
-    "record_kind:configmap",
-    "record_name:thisrecord",
-    "record_namespace:myns",
-    "custom:tag",
-]
+CM_TAGS = ["record_kind:configmap", "record_name:thisrecord", "record_namespace:myns", "custom:tag"]
 
 
 @pytest.fixture()
@@ -70,18 +59,14 @@ def mock_incluster():
 @pytest.fixture()
 def mock_read_endpoints():
     # Allows to inject an arbitrary endpoints object
-    with mock.patch(
-        'datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_endpoints',
-    ) as m:
+    with mock.patch('datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_endpoints') as m:
         yield m
 
 
 @pytest.fixture()
 def mock_read_configmap():
     # Allows to inject an arbitrary configmap object
-    with mock.patch(
-        'datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_config_map',
-    ) as m:
+    with mock.patch('datadog_checks.base.checks.kube_leader.mixins.client.CoreV1Api.read_namespaced_config_map') as m:
         yield m
 
 
@@ -130,9 +115,11 @@ class TestElectionRecord:
         assert record.transitions == 7
         assert record.renew_time > record.acquire_time
         assert record.seconds_until_renew < 0
-        assert record.summary == ("Leader: dd-cluster-agent-568f458dd6-kj6vt "
-                                  "since 2018-12-17 11:53:07+00:00, "
-                                  "next renew 2018-12-18 12:32:22+00:00")
+        assert record.summary == (
+            "Leader: dd-cluster-agent-568f458dd6-kj6vt "
+            "since 2018-12-17 11:53:07+00:00, "
+            "next renew 2018-12-18 12:32:22+00:00"
+        )
 
     def test_validation(self):
         cases = {
@@ -161,7 +148,7 @@ class TestElectionRecord:
 
     def test_seconds_until_renew(self):
         raw = make_record(
-            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.now() + timedelta(seconds=20)
+            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() + timedelta(seconds=20)
         )
 
         record = ElectionRecord(raw)
@@ -169,7 +156,7 @@ class TestElectionRecord:
         assert record.seconds_until_renew < 21
 
         raw = make_record(
-            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.now() - timedelta(seconds=5)
+            holder="me", duration=30, acquire="2018-12-18T12:32:22Z", renew=datetime.utcnow() - timedelta(seconds=5)
         )
 
         record = ElectionRecord(raw)

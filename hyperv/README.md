@@ -38,6 +38,12 @@ Hyper-V does not include any events.
 
 Need help? Contact [Datadog support][7].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+* [Monitor Microsoft Hyper-V with Datadog][8]
+
 [1]: https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server
 [2]: https://docs.datadoghq.com/agent/basic_agent_usage/windows
 [3]: https://github.com/DataDog/integrations-core/blob/master/hyperv/datadog_checks/hyperv/data/conf.yaml.example
@@ -45,3 +51,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/hyperv/metadata.csv
 [7]: https://docs.datadoghq.com/help
+[8]: https://www.datadoghq.com/blog/monitor-microsoft-hyperv-with-datadog/

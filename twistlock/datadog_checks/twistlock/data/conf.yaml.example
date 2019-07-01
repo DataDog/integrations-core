@@ -1,31 +1,31 @@
 init_config:
 
 instances:
-  ## @param endpoint - string - required
-  ## The Twistlock url to connect to.
-  #
+    ## @param endpoint - string - required
+    ## The Twistlock url to connect to.
+    #
   - url: 'http://localhost:8081'
 
-  ## @param username - string - required
-  ## The Twistlock prometheus endpoint associated username.
-  #
+    ## @param username - string - required
+    ## The Twistlock prometheus endpoint associated username.
+    #
     username: '<USERNAME>'
 
-  ## @param password - string - required
-  ## The Twistlock prometheus endpoint associated password.
-  #
+    ## @param password - string - required
+    ## The Twistlock prometheus endpoint associated password.
+    #
     password: '<PASSWORD>'
 
-  ## @param tags  - list of key:value element - optional
-  ## List of tags to attach to every metric, event and service check emitted by this integration.
-  ##
-  ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    #  tags:
+    #    - <KEY_1>:<VALUE_1>
+    #    - <KEY_2>:<VALUE_2>
 
-  ## @param ssl_verify - boolean - optional - default: true
-  ## Instruct the check to validate SSL certificates when connecting to `server` and `query_monitoring_url`.
-  #
-  #  ssl_verify: true
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Instruct the check to validate SSL certificates when connecting to `server` and `query_monitoring_url`.
+    #
+    #  ssl_verify: true

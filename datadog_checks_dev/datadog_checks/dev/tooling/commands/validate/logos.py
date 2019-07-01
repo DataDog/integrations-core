@@ -6,22 +6,15 @@ import os
 import click
 from PIL import Image
 
-
 from ...constants import NOT_TILES, get_root
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_failure, echo_success, echo_waiting
 from ...utils import get_valid_integrations, load_manifest
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting
 
-
-REQUIRED_IMAGES = {
-    'avatars-bot.png': (128, 128),
-    'saas_logos-bot.png': (200, 128),
-    'saas_logos-small.png': (120, 60)
-}
+REQUIRED_IMAGES = {'avatars-bot.png': (128, 128), 'saas_logos-bot.png': (200, 128), 'saas_logos-small.png': (120, 60)}
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate logos files, specifying no check will validate all logos'
+    context_settings=CONTEXT_SETTINGS, short_help='Validate logos files, specifying no check will validate all logos'
 )
 @click.argument('check', required=False)
 def logos(check):
@@ -49,7 +42,7 @@ def logos(check):
             blacklisted_integrations_msg += '{} does not currently have an integration tile.\n'.format(display_name)
             continue
 
-        path_to_check_logos = os.path.join(get_root(), check, 'logos')
+        path_to_check_logos = os.path.join(get_root(), check, 'assets', 'logos')
 
         for logo, required_size in REQUIRED_IMAGES.items():
             logo_file_name = os.path.join(path_to_check_logos, logo)
@@ -58,9 +51,7 @@ def logos(check):
             else:
                 size = get_resolution(logo_file_name)
                 if size != required_size:
-                    errors[logo] = '    {} has improper resolution: {}. Should be {}'.format(
-                        logo, size, required_size
-                    )
+                    errors[logo] = '    {} has improper resolution: {}. Should be {}'.format(logo, size, required_size)
 
         if errors:
             echo_waiting('{}:'.format(display_name))

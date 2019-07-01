@@ -1,15 +1,16 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import defaultdict
-from distutils.version import LooseVersion
-from os import geteuid
 import json
 import re
 import shlex
-from six import iteritems, PY3
-from six.moves import filter
 import xml.parsers.expat  # python 2.4 compatible
+from collections import defaultdict
+from distutils.version import LooseVersion
+from os import geteuid
+
+from six import PY3, iteritems
+from six.moves import filter
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.subprocess_output import get_subprocess_output
@@ -148,12 +149,10 @@ class Varnish(AgentCheck):
             if version < LooseVersion('4.1.0'):
                 cmd.extend(varnishadm_path + ['-S', secretfile_path, 'debug.health'])
             else:
-                cmd.extend(varnishadm_path + [
-                    '-T', '{}:{}'.format(daemon_host, daemon_port),
-                    '-S', secretfile_path,
-                    'backend.list',
-                    '-p'
-                ])
+                cmd.extend(
+                    varnishadm_path
+                    + ['-T', '{}:{}'.format(daemon_host, daemon_port), '-S', secretfile_path, 'backend.list', '-p']
+                )
 
             try:
                 output, err, _ = get_subprocess_output(cmd, self.log)
@@ -331,5 +330,4 @@ class Varnish(AgentCheck):
             check_status = BackendStatus.to_check_status(status)
             for backend, message in backends:
                 service_checks_tags = ['backend:%s' % backend] + tags
-                self.service_check(self.SERVICE_CHECK_NAME, check_status,
-                                   tags=service_checks_tags, message=message)
+                self.service_check(self.SERVICE_CHECK_NAME, check_status, tags=service_checks_tags, message=message)

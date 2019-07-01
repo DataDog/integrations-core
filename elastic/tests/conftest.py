@@ -8,8 +8,8 @@ import requests
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.elastic import ESCheck
-from .common import HERE, URL, USER, PASSWORD
 
+from .common import HERE, PASSWORD, URL, USER
 
 CUSTOM_TAGS = ['foo:bar', 'baz']
 COMPOSE_FILES_MAP = {
@@ -35,10 +35,7 @@ def dd_environment(instance):
     compose_file = COMPOSE_FILES_MAP.get(image_name, 'docker-compose.yaml')
     compose_file = os.path.join(HERE, 'compose', compose_file)
 
-    with docker_run(
-        compose_file=compose_file,
-        conditions=[WaitFor(ping_elastic)],
-    ):
+    with docker_run(compose_file=compose_file, conditions=[WaitFor(ping_elastic)]):
         yield instance
 
 
@@ -49,30 +46,16 @@ def elastic_check():
 
 @pytest.fixture(scope='session')
 def instance():
-    return {
-        'url': URL,
-        'username': USER,
-        'password': PASSWORD,
-        'tags': CUSTOM_TAGS,
-    }
+    return {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS}
 
 
 @pytest.fixture(scope='session')
 def instance_normalize_hostname():
-    return {
-        'url': URL,
-        'username': USER,
-        'password': PASSWORD,
-        'tags': CUSTOM_TAGS,
-        'node_name_as_host': True,
-    }
+    return {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS, 'node_name_as_host': True}
 
 
 def _cluster_tags():
-    tags = [
-        'url:{}'.format(URL),
-        'cluster_name:test-cluster',
-    ]
+    tags = ['url:{}'.format(URL), 'cluster_name:test-cluster']
     tags.extend(CUSTOM_TAGS)
 
     return tags

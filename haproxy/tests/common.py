@@ -2,21 +2,18 @@ import os
 
 import pytest
 
-from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.dev.utils import ON_LINUX
+from datadog_checks.utils.common import get_docker_hostname
 
 AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:a'], 1),
     (['status:available', 'service:b'], 4),
     (['status:unavailable', 'service:b'], 2),
     (['status:available', 'service:be_edge_http_sre-production_elk-kibana'], 1),
-    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2)
+    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2),
 )
 
-AGG_STATUSES = (
-    (['status:available'], 6),
-    (['status:unavailable'], 4)
-)
+AGG_STATUSES = ((['status:available'], 6), (['status:unavailable'], 4))
 
 CHECK_NAME = 'haproxy'
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -34,18 +31,14 @@ USERNAME = 'datadog'
 PASSWORD = 'isdevops'
 
 platform_supports_sockets = ON_LINUX
-requires_socket_support = pytest.mark.skipif(not platform_supports_sockets,
-                                             reason='Windows sockets are not file handles')
+requires_socket_support = pytest.mark.skipif(
+    not platform_supports_sockets, reason='Windows sockets are not file handles'
+)
 
-CONFIG_UNIXSOCKET = {
-    'collect_aggregates_only': False,
-}
+CONFIG_UNIXSOCKET = {'collect_aggregates_only': False}
 
 
-CONFIG_TCPSOCKET = {
-    'url': STATS_SOCKET,
-    'collect_aggregates_only': False,
-}
+CONFIG_TCPSOCKET = {'url': STATS_SOCKET, 'collect_aggregates_only': False}
 
 
 CHECK_CONFIG = {
@@ -53,16 +46,12 @@ CHECK_CONFIG = {
     'username': USERNAME,
     'password': PASSWORD,
     'status_check': True,
-    'collect_aggregates_only': False,
+    'collect_aggregates_only': 'both',
     'tag_service_check_by_host': True,
     'active_tag': True,
 }
 
-CHECK_CONFIG_OPEN = {
-    'url': STATS_URL_OPEN,
-    'collect_aggregates_only': False,
-    'collect_status_metrics': True,
-}
+CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': False, 'collect_status_metrics': True}
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
 
@@ -71,75 +60,72 @@ BACKEND_LIST = ['singleton:8080', 'singleton:8081', 'otherserver']
 BACKEND_TO_ADDR = {
     'singleton:8080': '127.0.0.1:8080',
     'singleton:8081': '127.0.0.1:8081',
-    'otherserver': '127.0.0.1:1234'
+    'otherserver': '127.0.0.1:1234',
 }
 
-FRONTEND_CHECK_GAUGES = [
-    'haproxy.frontend.session.current',
-    'haproxy.frontend.session.limit',
-    'haproxy.frontend.session.pct',
-]
-
-FRONTEND_CHECK_GAUGES_POST_1_4 = [
-    'haproxy.frontend.requests.rate',
-]
-
-BACKEND_CHECK_GAUGES = [
-    'haproxy.backend.queue.current',
-    'haproxy.backend.session.current',
-]
 
 BACKEND_HOSTS_METRIC = 'haproxy.backend_hosts'
 BACKEND_STATUS_METRIC = 'haproxy.count_per_status'
 
-
-BACKEND_CHECK_GAUGES_POST_1_5 = [
-    'haproxy.backend.queue.time',
-    'haproxy.backend.connect.time',
-    'haproxy.backend.response.time',
-    'haproxy.backend.session.time',
+FRONTEND_CHECK = [
+    # gauges
+    ('haproxy.frontend.session.current', ['1', '0']),
+    ('haproxy.frontend.session.limit', ['1', '0']),
+    ('haproxy.frontend.session.pct', ['1', '0']),
+    ('haproxy.frontend.requests.rate', ['1', '4']),
+    ('haproxy.frontend.connections.rate', ['1', '7']),
+    # rates
+    ('haproxy.frontend.bytes.in_rate', ['1', '0']),
+    ('haproxy.frontend.bytes.out_rate', ['1', '0']),
+    ('haproxy.frontend.denied.req_rate', ['1', '0']),
+    ('haproxy.frontend.denied.resp_rate', ['1', '0']),
+    ('haproxy.frontend.errors.req_rate', ['1', '0']),
+    ('haproxy.frontend.session.rate', ['1', '0']),
+    ('haproxy.frontend.response.1xx', ['1', '4']),
+    ('haproxy.frontend.response.2xx', ['1', '4']),
+    ('haproxy.frontend.response.3xx', ['1', '4']),
+    ('haproxy.frontend.response.4xx', ['1', '4']),
+    ('haproxy.frontend.response.5xx', ['1', '4']),
+    ('haproxy.frontend.response.other', ['1', '4']),
+    ('haproxy.frontend.requests.tot_rate', ['1', '4']),
+    ('haproxy.frontend.connections.tot_rate', ['1', '7']),
+    ('haproxy.frontend.requests.intercepted', ['1', '7']),
 ]
 
-FRONTEND_CHECK_RATES = [
-    'haproxy.frontend.bytes.in_rate',
-    'haproxy.frontend.bytes.out_rate',
-    'haproxy.frontend.denied.req_rate',
-    'haproxy.frontend.denied.resp_rate',
-    'haproxy.frontend.errors.req_rate',
-    'haproxy.frontend.session.rate',
+BACKEND_CHECK = [
+    # gauges
+    ('haproxy.backend.queue.current', ['1', '0']),
+    ('haproxy.backend.session.current', ['1', '0']),
+    ('haproxy.backend.queue.time', ['1', '5']),
+    ('haproxy.backend.connect.time', ['1', '5']),
+    ('haproxy.backend.response.time', ['1', '5']),
+    ('haproxy.backend.session.time', ['1', '5']),
+    ('haproxy.backend.uptime', ['1', '7']),
+    # rates
+    ('haproxy.backend.bytes.in_rate', ['1', '0']),
+    ('haproxy.backend.bytes.out_rate', ['1', '0']),
+    ('haproxy.backend.denied.resp_rate', ['1', '0']),
+    ('haproxy.backend.errors.con_rate', ['1', '0']),
+    ('haproxy.backend.errors.resp_rate', ['1', '0']),
+    ('haproxy.backend.session.rate', ['1', '0']),
+    ('haproxy.backend.warnings.redis_rate', ['1', '0']),
+    ('haproxy.backend.warnings.retr_rate', ['1', '0']),
+    ('haproxy.backend.response.1xx', ['1', '4']),
+    ('haproxy.backend.response.2xx', ['1', '4']),
+    ('haproxy.backend.response.3xx', ['1', '4']),
+    ('haproxy.backend.response.4xx', ['1', '4']),
+    ('haproxy.backend.response.5xx', ['1', '4']),
+    ('haproxy.backend.response.other', ['1', '4']),
 ]
 
-FRONTEND_CHECK_RATES_POST_1_4 = [
-    'haproxy.frontend.response.1xx',
-    'haproxy.frontend.response.2xx',
-    'haproxy.frontend.response.3xx',
-    'haproxy.frontend.response.4xx',
-    'haproxy.frontend.response.5xx',
-    'haproxy.frontend.response.other',
-]
-
-BACKEND_CHECK_RATES = [
-    'haproxy.backend.bytes.in_rate',
-    'haproxy.backend.bytes.out_rate',
-    'haproxy.backend.denied.resp_rate',
-    'haproxy.backend.errors.con_rate',
-    'haproxy.backend.errors.resp_rate',
-    'haproxy.backend.session.rate',
-    'haproxy.backend.warnings.redis_rate',
-    'haproxy.backend.warnings.retr_rate',
-]
-
-BACKEND_CHECK_RATES_POST_1_4 = [
-    'haproxy.backend.response.1xx',
-    'haproxy.backend.response.2xx',
-    'haproxy.backend.response.3xx',
-    'haproxy.backend.response.4xx',
-    'haproxy.backend.response.5xx',
-    'haproxy.backend.response.other',
-]
-
-BACKEND_CHECK_GAUGES_POST_1_7 = [
-    'haproxy.backend.uptime'
+BACKEND_AGGREGATE_ONLY_CHECK = [
+    # gauges
+    ('haproxy.backend.uptime', ['1', '0']),
+    ('haproxy.backend.session.limit', ['1', '0']),
+    ('haproxy.backend.session.pct', ['1', '5']),
+    # rates
+    ('haproxy.backend.denied.req_rate', ['1', '0']),
+    ('haproxy.backend.requests.tot_rate', ['1', '7']),
 ]
 
 SERVICE_CHECK_NAME = 'haproxy.backend_up'

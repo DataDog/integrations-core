@@ -12,7 +12,12 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
 from .common import (
-    HERE, GITLAB_TEST_TOKEN, GITLAB_RUNNER_URL, GITLAB_LOCAL_RUNNER_PORT, GITLAB_LOCAL_MASTER_PORT, CONFIG
+    CONFIG,
+    GITLAB_LOCAL_MASTER_PORT,
+    GITLAB_LOCAL_RUNNER_PORT,
+    GITLAB_RUNNER_URL,
+    GITLAB_TEST_TOKEN,
+    HERE,
 )
 
 

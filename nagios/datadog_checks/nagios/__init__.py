@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .nagios import Nagios
 
-__all__ = [
-    '__version__',
-    'Nagios'
-]
+__all__ = ['__version__', 'Nagios']

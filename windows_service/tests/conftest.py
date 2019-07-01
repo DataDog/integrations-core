@@ -18,22 +18,14 @@ def instance_bad_config():
 
 @pytest.fixture
 def instance_basic():
-    return {
-        'services': ['eventlog', 'Dnscache', 'NonExistentService'],
-        'tags': ['optional:tag1'],
-    }
+    return {'services': ['eventlog', 'Dnscache', 'NonExistentService'], 'tags': ['optional:tag1']}
 
 
 @pytest.fixture
 def instance_wildcard():
-    return {
-        'host': '.',
-        'services': ['Event.*', 'Dns%'],
-    }
+    return {'host': '.', 'services': ['Event.*', 'Dns%']}
 
 
 @pytest.fixture
 def instance_all():
-    return {
-        'services': ['ALL'],
-    }
+    return {'services': ['ALL']}

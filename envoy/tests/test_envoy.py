@@ -36,7 +36,7 @@ class TestEnvoy:
 
         num_metrics = len(response('multiple_services').content.decode().splitlines())
         num_metrics -= sum(c.unknown_metrics.values()) + sum(c.unknown_tags.values())
-        assert 4150 <= metrics_collected == num_metrics
+        assert 4186 <= metrics_collected == num_metrics
 
     def test_success_fixture_whitelist(self, aggregator):
         instance = INSTANCES['whitelist']

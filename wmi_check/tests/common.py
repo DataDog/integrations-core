@@ -13,18 +13,13 @@ INSTANCE = {
     'tag_by': 'Name',
 }
 
-INSTANCE_METRICS = [
-    'proc.threads.count',
-    'proc.io.bytes_read',
-    'proc.mem.virtual',
-    'proc.cpu_pct',
-]
+INSTANCE_METRICS = ['proc.threads.count', 'proc.io.bytes_read', 'proc.mem.virtual', 'proc.cpu_pct']
 
 WMI_CONFIG = {
     'class': 'Win32_PerfFormattedData_PerfDisk_LogicalDisk',
     'metrics': [
         ['AvgDiskBytesPerWrite', 'winsys.disk.avgdiskbytesperwrite', 'gauge'],
-        ['FreeMegabytes', 'winsys.disk.freemegabytes', 'gauge']
+        ['FreeMegabytes', 'winsys.disk.freemegabytes', 'gauge'],
     ],
     'tag_by': 'Name',
     'constant_tags': ['foobar'],

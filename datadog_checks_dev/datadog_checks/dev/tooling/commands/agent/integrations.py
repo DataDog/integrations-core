@@ -6,17 +6,17 @@ import os
 import click
 from six import StringIO, iteritems
 
-from .common import get_agent_tags
-from ..console import CONTEXT_SETTINGS, abort, echo_info
-from ...constants import get_agent_release_requirements, get_agent_integrations_file
+from ....utils import write_file
+from ...constants import get_agent_integrations_file, get_agent_release_requirements
 from ...git import git_show_file
 from ...utils import parse_agent_req_file
-from ....utils import write_file
+from ..console import CONTEXT_SETTINGS, abort, echo_info
+from .common import get_agent_tags
 
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
-    short_help="Provide a list of updated checks on a given Datadog Agent version, in changelog form"
+    short_help="Provide a list of updated checks on a given Datadog Agent version, in changelog form",
 )
 @click.option('--since', help="Initial Agent version", default='6.3.0')
 @click.option('--to', help="Final Agent version")

@@ -8,8 +8,9 @@ import pytest
 from six import iteritems
 
 from datadog_checks.disk import Disk
+
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockInodesMetrics, mock_df_output
+from .mocks import MockInodesMetrics, mock_blkid_output, mock_df_output
 from .utils import requires_unix
 
 
@@ -55,7 +56,7 @@ def test_psutil(aggregator, gauge_metrics, rate_metrics):
     Mock psutil and run the check
     """
     for tag_by in ['true', 'false']:
-        instance = {'tag_by_filesystem': tag_by}
+        instance = {'tag_by_filesystem': tag_by, 'tag_by_label': False}
         c = Disk('disk', None, {}, [instance])
         c.check(instance)
 
@@ -63,7 +64,7 @@ def test_psutil(aggregator, gauge_metrics, rate_metrics):
             tags = [
                 DEFAULT_FILE_SYSTEM,
                 'filesystem:{}'.format(DEFAULT_FILE_SYSTEM),
-                'device:{}'.format(DEFAULT_DEVICE_NAME)
+                'device:{}'.format(DEFAULT_DEVICE_NAME),
             ]
         else:
             tags = []
@@ -82,7 +83,7 @@ def test_psutil_rw(aggregator):
     """
     Check for 'ro' option in the mounts
     """
-    instance = {'service_check_rw': 'yes'}
+    instance = {'service_check_rw': 'yes', 'tag_by_label': False}
     c = Disk('disk', None, {}, [instance])
     c.check(instance)
 
@@ -111,25 +112,34 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     instance = {
         'use_mount': 'no',
         'device_tag_re': {'{}.*'.format(DEFAULT_DEVICE_NAME[:-1]): 'type:dev,tag:two'},
-        'tags': ['optional:tags1']
+        'tags': ['optional:tags1'],
+        'tag_by_label': False,
     }
     c = Disk('disk', None, {}, [instance])
-    c.check(instance)
+
+    with mock.patch('datadog_checks.disk.disk.Disk._get_devices_label'):
+        # _get_devices_label is only called on linux, so devices_label is manually filled
+        # to make the test run on everything
+        c.devices_label = {DEFAULT_DEVICE_NAME: 'label:mylab'}
+        c.check(instance)
 
     # Assert metrics
-    tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1']
+    tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1', 'label:mylab']
+
     for name, value in iteritems(gauge_metrics):
         aggregator.assert_metric(name, value=value, tags=tags)
 
     for name, value in iteritems(rate_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1'])
+        aggregator.assert_metric(
+            name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1', 'label:mylab']
+        )
 
     aggregator.assert_all_metrics_covered()
 
 
 @requires_unix
 def test_no_psutil_debian(aggregator, gauge_metrics):
-    instance = {'use_mount': 'no', 'excluded_filesystems': ['tmpfs']}
+    instance = {'use_mount': 'no', 'excluded_filesystems': ['tmpfs'], 'tag_by_label': False}
     c = Disk('disk', None, {}, [instance])
     # disable psutil
     c._psutil = lambda: False
@@ -138,7 +148,7 @@ def test_no_psutil_debian(aggregator, gauge_metrics):
     mock_output = mock.patch(
         'datadog_checks.disk.disk.get_subprocess_output',
         return_value=mock_df_output('debian-df-Tk'),
-        __name__='get_subprocess_output'
+        __name__='get_subprocess_output',
     )
 
     with mock_statvfs, mock_output:
@@ -154,7 +164,12 @@ def test_no_psutil_debian(aggregator, gauge_metrics):
 
 @requires_unix
 def test_no_psutil_freebsd(aggregator, gauge_metrics):
-    instance = {'use_mount': 'no', 'excluded_filesystems': ['devfs'], 'excluded_disk_re': 'zroot/.+'}
+    instance = {
+        'use_mount': 'no',
+        'excluded_filesystems': ['devfs'],
+        'excluded_disk_re': 'zroot/.+',
+        'tag_by_label': False,
+    }
     c = Disk('disk', None, {}, [instance])
     # disable psutil
     c._psutil = lambda: False
@@ -163,7 +178,7 @@ def test_no_psutil_freebsd(aggregator, gauge_metrics):
     mock_output = mock.patch(
         'datadog_checks.disk.disk.get_subprocess_output',
         return_value=mock_df_output('freebsd-df-Tk'),
-        __name__='get_subprocess_output'
+        __name__='get_subprocess_output',
     )
 
     with mock_statvfs, mock_output:
@@ -177,7 +192,12 @@ def test_no_psutil_freebsd(aggregator, gauge_metrics):
 
 @requires_unix
 def test_no_psutil_centos(aggregator, gauge_metrics):
-    instance = {'use_mount': 'no', 'excluded_filesystems': ['devfs', 'tmpfs'], 'excluded_disks': ['/dev/sda1']}
+    instance = {
+        'use_mount': 'no',
+        'excluded_filesystems': ['devfs', 'tmpfs'],
+        'excluded_disks': ['/dev/sda1'],
+        'tag_by_label': False,
+    }
     c = Disk('disk', None, {}, [instance])
     # disable psutil
     c._psutil = lambda: False
@@ -186,7 +206,7 @@ def test_no_psutil_centos(aggregator, gauge_metrics):
     mock_output = mock.patch(
         'datadog_checks.disk.disk.get_subprocess_output',
         return_value=mock_df_output('centos-df-Tk'),
-        __name__='get_subprocess_output'
+        __name__='get_subprocess_output',
     )
 
     with mock_statvfs, mock_output:
@@ -197,3 +217,15 @@ def test_no_psutil_centos(aggregator, gauge_metrics):
             aggregator.assert_metric(name, tags=['device:{}'.format(device)])
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_get_devices_label():
+    c = Disk('disk', None, {}, [{}])
+
+    with mock.patch(
+        "datadog_checks.disk.disk.get_subprocess_output",
+        return_value=mock_blkid_output(),
+        __name__='get_subprocess_output',
+    ):
+        labels = c._get_devices_label()
+        assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"

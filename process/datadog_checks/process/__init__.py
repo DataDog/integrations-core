@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .process import ProcessCheck
 
-__all__ = [
-    '__version__',
-    'ProcessCheck'
-]
+__all__ = ['__version__', 'ProcessCheck']

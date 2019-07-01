@@ -2,13 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.hdfs_datanode import HDFSDataNode
-
 from six import iteritems
 
+from datadog_checks.hdfs_datanode import HDFSDataNode
+
 from .common import (
-    CUSTOM_TAGS, HDFS_DATANODE_CONFIG, HDFS_DATANODE_AUTH_CONFIG, HDFS_DATANODE_METRICS_VALUES,
-    HDFS_DATANODE_METRIC_TAGS
+    CUSTOM_TAGS,
+    HDFS_DATANODE_AUTH_CONFIG,
+    HDFS_DATANODE_CONFIG,
+    HDFS_DATANODE_METRIC_TAGS,
+    HDFS_DATANODE_METRICS_VALUES,
 )
 
 

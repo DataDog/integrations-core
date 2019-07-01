@@ -10,9 +10,4 @@ except ImportError:
     from .base import AgentCheck
     from .network import NetworkCheck, Status, EventType
 
-__all__ = [
-    'AgentCheck',
-    'NetworkCheck',
-    'Status',
-    'EventType',
-]
+__all__ = ['AgentCheck', 'NetworkCheck', 'Status', 'EventType']

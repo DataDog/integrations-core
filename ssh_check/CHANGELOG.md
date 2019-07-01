@@ -1,5 +1,9 @@
 # CHANGELOG - ssh_check
 
+## 1.6.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3569](https://github.com/DataDog/integrations-core/pull/3569).
+
 ## 1.5.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2836][1].

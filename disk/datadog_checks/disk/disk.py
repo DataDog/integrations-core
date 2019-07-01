@@ -9,6 +9,11 @@ import re
 
 from six import iteritems, string_types
 
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+from datadog_checks.base.utils.timeout import TimeoutException, timeout
+
 try:
     import psutil
 except ImportError:
@@ -16,20 +21,18 @@ except ImportError:
 
 try:
     import datadog_agent  # noqa: F401
+
     is_agent_6 = True
 except ImportError:
     is_agent_6 = False
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-from datadog_checks.base.utils.timeout import timeout, TimeoutException
 
 IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
 
 
 class Disk(AgentCheck):
     """ Collects metrics about the machine's disks. """
+
     # -T for filesystem info
     DF_COMMAND = ['df', '-T']
     METRIC_DISK = 'system.disk.{}'
@@ -49,6 +52,7 @@ class Disk(AgentCheck):
         self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
         self._mount_point_blacklist = instance.get('mount_point_blacklist', [])
         self._tag_by_filesystem = is_affirmative(instance.get('tag_by_filesystem', False))
+        self._tag_by_label = is_affirmative(instance.get('tag_by_label', True))
         self._device_tag_re = instance.get('device_tag_re', {})
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
@@ -66,6 +70,9 @@ class Disk(AgentCheck):
             )
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
+        self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+
+        self.devices_label = {}
 
     def _load_legacy_option(self, instance, option, default, legacy_name=None, operation=lambda l: l):
         value = instance.get(option, default)
@@ -82,6 +89,8 @@ class Disk(AgentCheck):
 
     def check(self, instance):
         """Get disk space/inode stats"""
+        if self._tag_by_label and Platform.is_linux():
+            self.devices_label = self._get_devices_label()
         # Windows and Mac will always have psutil
         # (we have packaged for both of them)
         if self._psutil():
@@ -106,8 +115,7 @@ class Disk(AgentCheck):
                 disk_usage = timeout(5)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
                 self.log.warning(
-                    u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...',
-                    part.mountpoint
+                    u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...', part.mountpoint
                 )
                 continue
             except Exception as e:
@@ -132,6 +140,9 @@ class Disk(AgentCheck):
                 if regex.match(device_name):
                     tags.extend(device_tags)
 
+            if self.devices_label.get(device_name):
+                tags.append(self.devices_label.get(device_name))
+
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
                 device_name = device_name.strip('\\').lower()
@@ -145,15 +156,10 @@ class Disk(AgentCheck):
                 rwro = {'rw', 'ro'} & set(part.opts.split(','))
                 if len(rwro) == 1:
                     self.service_check(
-                        'disk.read_write',
-                        AgentCheck.OK if rwro.pop() == 'rw' else AgentCheck.CRITICAL,
-                        tags=tags
+                        'disk.read_write', AgentCheck.OK if rwro.pop() == 'rw' else AgentCheck.CRITICAL, tags=tags
                     )
                 else:
-                    self.service_check(
-                        'disk.read_write', AgentCheck.UNKNOWN,
-                        tags=tags
-                    )
+                    self.service_check('disk.read_write', AgentCheck.UNKNOWN, tags=tags)
 
         self.collect_latency_metrics()
 
@@ -184,9 +190,8 @@ class Disk(AgentCheck):
         # account a space might be in the mount point.
         mount_point = mount_point.rsplit(' ', 1)[0]
 
-        return (
-            self._partition_blacklisted(device, file_system, mount_point)
-            or not self._partition_whitelisted(device, file_system, mount_point)
+        return self._partition_blacklisted(device, file_system, mount_point) or not self._partition_whitelisted(
+            device, file_system, mount_point
         )
 
     def _partition_whitelisted(self, device, file_system, mount_point):
@@ -260,10 +265,7 @@ class Disk(AgentCheck):
         try:
             inodes = timeout(5)(os.statvfs)(mountpoint)
         except TimeoutException:
-            self.log.warning(
-                u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...',
-                mountpoint
-            )
+            self.log.warning(u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...', mountpoint)
             return metrics
         except Exception as e:
             self.log.warning('Unable to get disk metrics for %s: %s', mountpoint, e)
@@ -291,10 +293,10 @@ class Disk(AgentCheck):
                 write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
-                self.rate(self.METRIC_DISK.format('read_time_pct'),
-                          read_time_pct, tags=metric_tags)
-                self.rate(self.METRIC_DISK.format('write_time_pct'),
-                          write_time_pct, tags=metric_tags)
+                if self.devices_label.get(disk_name):
+                    metric_tags.append(self.devices_label.get(disk_name))
+                self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
+                self.rate(self.METRIC_DISK.format('write_time_pct'), write_time_pct, tags=metric_tags)
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
@@ -317,6 +319,10 @@ class Disk(AgentCheck):
                 if regex.match(device_name):
                     tags += device_tags
             tags.append('device:{}'.format(device_name))
+
+            if self.devices_label.get(device_name):
+                tags.append(self.devices_label.get(device_name))
+
             for metric_name, value in iteritems(self._collect_metrics_manually(device)):
                 self.gauge(metric_name, value, tags=tags)
 
@@ -348,7 +354,8 @@ class Disk(AgentCheck):
         #    map -hosts    tmpfs            0        0         0   100%    /net
         # and finally filter out fake devices
         return (
-            device and len(device) > 1
+            device
+            and len(device) > 1
             and device[2].isdigit()
             and not self._exclude_disk(device[0], device[1], device[6])
         )
@@ -399,9 +406,7 @@ class Disk(AgentCheck):
             self.warning(deprecation_message.format(old='excluded_filesystems', new='file_system_blacklist'))
 
         if 'excluded_disks' in instance:
-            device_blacklist_extras.extend(
-                '{}$'.format(pattern) for pattern in instance['excluded_disks'] if pattern
-            )
+            device_blacklist_extras.extend('{}$'.format(pattern) for pattern in instance['excluded_disks'] if pattern)
             self.warning(deprecation_message.format(old='excluded_disks', new='device_blacklist'))
 
         if 'excluded_disk_re' in instance:
@@ -415,19 +420,15 @@ class Disk(AgentCheck):
         # Any without valid patterns will become None
         self._file_system_whitelist = self._compile_valid_patterns(self._file_system_whitelist, casing=re.I)
         self._file_system_blacklist = self._compile_valid_patterns(
-            self._file_system_blacklist,
-            casing=re.I,
-            extra_patterns=file_system_blacklist_extras
+            self._file_system_blacklist, casing=re.I, extra_patterns=file_system_blacklist_extras
         )
         self._device_whitelist = self._compile_valid_patterns(self._device_whitelist)
         self._device_blacklist = self._compile_valid_patterns(
-            self._device_blacklist,
-            extra_patterns=device_blacklist_extras
+            self._device_blacklist, extra_patterns=device_blacklist_extras
         )
         self._mount_point_whitelist = self._compile_valid_patterns(self._mount_point_whitelist)
         self._mount_point_blacklist = self._compile_valid_patterns(
-            self._mount_point_blacklist,
-            extra_patterns=mount_point_blacklist_extras
+            self._mount_point_blacklist, extra_patterns=mount_point_blacklist_extras
         )
 
     def _compile_valid_patterns(self, patterns, casing=IGNORE_CASE, extra_patterns=None):
@@ -465,10 +466,28 @@ class Disk(AgentCheck):
         device_tag_list = []
         for regex_str, tags in iteritems(self._device_tag_re):
             try:
-                device_tag_list.append([
-                    re.compile(regex_str, IGNORE_CASE),
-                    [t.strip() for t in tags.split(',')]
-                ])
+                device_tag_list.append([re.compile(regex_str, IGNORE_CASE), [t.strip() for t in tags.split(',')]])
             except TypeError:
                 self.log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         self._device_tag_re = device_tag_list
+
+    def _get_devices_label(self):
+        """
+        Get every label to create tags
+        """
+        devices_label = {}
+        try:
+            blkid_out, _, _ = get_subprocess_output(['blkid'], self.log)
+            all_devices = [l.split(':', 1) for l in blkid_out.splitlines()]
+
+            for d in all_devices:
+                # Line sample
+                # /dev/sda1: LABEL="MYLABEL" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
+                labels = self._blkid_label_re.findall(d[1])
+                if labels:
+                    devices_label[d[0]] = 'label:{}'.format(labels[0])
+
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use blkid to have device labels")
+
+        return devices_label

@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2011-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import logging
+from os.path import realpath
 
-# 3p
-import yaml  # noqa, let's guess, probably imported somewhere
+import yaml
+from six import string_types
+
 try:
     from yaml import CSafeLoader as yLoader
     from yaml import CSafeDumper as yDumper
@@ -22,34 +22,69 @@ pyyaml_load_all = None
 pyyaml_dump_all = None
 
 
-def safe_yaml_dump_all(documents, stream=None, Dumper=yDumper,
-                       default_style=None, default_flow_style=None,
-                       canonical=None, indent=None, width=None,
-                       allow_unicode=None, line_break=None,
-                       encoding='utf-8', explicit_start=None, explicit_end=None,
-                       version=None, tags=None):
+def safe_yaml_dump_all(
+    documents,
+    stream=None,
+    Dumper=yDumper,
+    default_style=None,
+    default_flow_style=None,
+    canonical=None,
+    indent=None,
+    width=None,
+    allow_unicode=None,
+    line_break=None,
+    encoding='utf-8',
+    explicit_start=None,
+    explicit_end=None,
+    version=None,
+    tags=None,
+):
     if Dumper != yDumper:
-        log.warning("Unsafe dumping of YAML has been disabled - using safe dumper instead")
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe dumping of YAML has been disabled - using safe dumper instead in {}".format(stream_name))
 
     if pyyaml_dump_all:
-        return pyyaml_dump_all(documents, stream, yDumper,
-                               default_style, default_flow_style,
-                               canonical, indent, width,
-                               allow_unicode, line_break,
-                               encoding, explicit_start, explicit_end,
-                               version, tags)
+        return pyyaml_dump_all(
+            documents,
+            stream,
+            yDumper,
+            default_style,
+            default_flow_style,
+            canonical,
+            indent,
+            width,
+            allow_unicode,
+            line_break,
+            encoding,
+            explicit_start,
+            explicit_end,
+            version,
+            tags,
+        )
 
-    return yaml.dump_all(documents, stream, yDumper,
-                         default_style, default_flow_style,
-                         canonical, indent, width,
-                         allow_unicode, line_break,
-                         encoding, explicit_start, explicit_end,
-                         version, tags)
+    return yaml.dump_all(
+        documents,
+        stream,
+        yDumper,
+        default_style,
+        default_flow_style,
+        canonical,
+        indent,
+        width,
+        allow_unicode,
+        line_break,
+        encoding,
+        explicit_start,
+        explicit_end,
+        version,
+        tags,
+    )
 
 
 def safe_yaml_load(stream, Loader=yLoader):
     if Loader != yLoader:
-        log.warning("Unsafe loading of YAML has been disabled - using safe loader instead")
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
 
     if pyyaml_load:
         return pyyaml_load(stream, Loader=yLoader)
@@ -59,12 +94,24 @@ def safe_yaml_load(stream, Loader=yLoader):
 
 def safe_yaml_load_all(stream, Loader=yLoader):
     if Loader != yLoader:
-        log.warning("Unsafe loading of YAML has been disabled - using safe loader instead")
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
 
     if pyyaml_load_all:
         return pyyaml_load_all(stream, Loader=yLoader)
 
     return yaml.load_all(stream, Loader=yLoader)
+
+
+def get_stream_name(stream):
+    """Using the same logic as pyyaml to handle both string types and file types. All file objects do not necessarily
+    have a `name` attribute, in that case we can only say the stream is a file."""
+    if isinstance(stream, string_types):
+        return "<string>"
+    elif hasattr(stream, 'name'):
+        return realpath(stream.name)
+    else:
+        return "<file>"
 
 
 def monkey_patch_pyyaml():

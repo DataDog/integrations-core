@@ -1,17 +1,26 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from ..subprocess import run_command
+from ..utils import chdir, path_join, read_file_binary, write_file_binary
 from .constants import TESTABLE_FILE_EXTENSIONS, get_root
 from .git import files_changed
 from .utils import get_testable_checks
-from ..subprocess import run_command
-from ..utils import chdir, path_join, read_file_binary, write_file_binary
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
 
 
-def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every=False, changed_only=False, sort=False):
+def get_tox_envs(
+    checks,
+    style=False,
+    format_style=False,
+    benchmark=False,
+    every=False,
+    changed_only=False,
+    sort=False,
+    e2e_tests_only=False,
+):
     testable_checks = get_testable_checks()
     # Run `get_changed_checks` at most once because git calls are costly
     changed_checks = get_changed_checks() if not checks or changed_only else None
@@ -23,33 +32,20 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
     for check in checks:
         check, _, envs_selected = check.partition(':')
 
-        if (
-            check in checks_seen
-            or check not in testable_checks
-            or (changed_only and check not in changed_checks)
-        ):
+        if check in checks_seen or check not in testable_checks or (changed_only and check not in changed_checks):
             continue
         else:
             checks_seen.add(check)
 
         envs_selected = envs_selected.split(',') if envs_selected else []
-        envs_available = get_available_tox_envs(check, sort=sort)
+        envs_available = get_available_tox_envs(check, sort=sort, e2e_tests_only=e2e_tests_only)
 
         if format_style:
-            envs_selected[:] = [
-                e for e in envs_available
-                if 'format_style' in e
-            ]
+            envs_selected[:] = [e for e in envs_available if 'format_style' in e]
         elif style:
-            envs_selected[:] = [
-                e for e in envs_available
-                if e in STYLE_CHECK_ENVS
-            ]
+            envs_selected[:] = [e for e in envs_available if e in STYLE_CHECK_ENVS]
         elif benchmark:
-            envs_selected[:] = [
-                e for e in envs_available
-                if 'bench' in e
-            ]
+            envs_selected[:] = [e for e in envs_available if 'bench' in e]
         else:
             if every:
                 envs_selected[:] = envs_available
@@ -66,24 +62,33 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
 
                 envs_selected[:] = selected
             else:
-                envs_selected[:] = [
-                    e for e in envs_available
-                    if 'bench' not in e and 'format_style' not in e
-                ]
+                envs_selected[:] = [e for e in envs_available if 'bench' not in e and 'format_style' not in e]
 
         yield check, envs_selected
 
 
-def get_available_tox_envs(check, sort=False, e2e_only=False):
-    if e2e_only:
+def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
+    if e2e_tests_only:
+        tox_command = 'tox --listenvs-all -v'
+    elif e2e_only:
         tox_command = 'tox --listenvs-all'
     else:
         tox_command = 'tox --listenvs'
 
     with chdir(path_join(get_root(), check)):
-        env_list = run_command(tox_command, capture='out').stdout
+        output = run_command(tox_command, capture='out').stdout
 
-    env_list = [e.strip() for e in env_list.splitlines()]
+    env_list = [e.strip() for e in output.splitlines()]
+
+    if e2e_tests_only:
+        envs = []
+        for line in env_list:
+            if '->' in line:
+                env, _, description = line.partition('->')
+                if 'e2e ready' in description.lower():
+                    envs.append(env.strip())
+
+        return envs
 
     if e2e_only:
         sort = True
@@ -114,10 +119,14 @@ def get_available_tox_envs(check, sort=False, e2e_only=False):
 
         if e2e_only:
             # No need for unit tests as they wouldn't set up a real environment
-            try:
-                env_list.remove('unit')
-            except ValueError:
-                pass
+            unit_envs = []
+
+            for e in env_list:
+                if e.endswith('unit'):
+                    unit_envs.append(e)
+
+            for e in unit_envs:
+                env_list.remove(e)
 
     return env_list
 
@@ -146,7 +155,7 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
-    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter=''
+    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter='', pytest_args=''
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
@@ -176,21 +185,19 @@ def construct_pytest_options(
         )
 
     if marker:
-        pytest_options += ' -m {}'.format(marker)
+        pytest_options += ' -m "{}"'.format(marker)
 
     if test_filter:
-        pytest_options += ' -k {}'.format(test_filter)
+        pytest_options += ' -k "{}"'.format(test_filter)
+
+    if pytest_args:
+        pytest_options += ' {}'.format(pytest_args)
 
     return pytest_options
 
 
 def pytest_coverage_sources(*checks):
-    return ' '.join(
-        ' '.join(
-            '--cov={}'.format(source) for source in coverage_sources(check)
-        )
-        for check in checks
-    )
+    return ' '.join(' '.join('--cov={}'.format(source) for source in coverage_sources(check)) for check in checks)
 
 
 def testable_files(files):

@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import pytest
-import mock
 import logging
-
 from copy import deepcopy
+
+import mock
+import pytest
 
 from . import common
 

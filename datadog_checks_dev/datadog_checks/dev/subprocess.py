@@ -75,13 +75,7 @@ def run_command(command, capture=None, check=False, encoding='utf-8', shell=Fals
 
     if check and process.returncode != 0:
         raise SubprocessError(
-            'Command: {}\n'
-            'Exit code: {}\n'
-            'Captured Output: {}'.format(
-                command,
-                process.returncode,
-                stdout + stderr
-            )
+            'Command: {}\n' 'Exit code: {}\n' 'Captured Output: {}'.format(command, process.returncode, stdout + stderr)
         )
 
     return SubprocessResult(stdout, stderr, process.returncode)

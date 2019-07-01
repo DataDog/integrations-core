@@ -1,5 +1,21 @@
 # CHANGELOG - IBM MQ
 
+## 3.0.0 / 2019-06-20
+
+* [Changed] [ibm_mq] fix queue auto discovery to include any type in addition to qmodel and included regex matching on queue names. See [#3893](https://github.com/DataDog/integrations-core/pull/3893).
+
+## 2.0.0 / 2019-04-16
+
+* [Changed] Breaking change: Change host tag for mq_host. Dashboards and monitors may be affected. See [#3608](https://github.com/DataDog/integrations-core/pull/3608).
+* [Added] Adhere to code style. See [#3519](https://github.com/DataDog/integrations-core/pull/3519).
+* [Fixed] fix queue_manager variable naming of IBM MQ. See [#3592](https://github.com/DataDog/integrations-core/pull/3592).
+
+## 1.2.0 / 2019-03-29
+
+* [Added] Add ability to add additional tags to queues matching a regex. See [#3399](https://github.com/DataDog/integrations-core/pull/3399).
+* [Added] adds channel metrics. See [#3360](https://github.com/DataDog/integrations-core/pull/3360).
+* [Fixed] fix ssl variable naming for IBM MQ. See [#3312](https://github.com/DataDog/integrations-core/pull/3312).
+
 ## 1.1.0 / 2019-02-18
 
 * [Added] Autodiscover queues. See [#3061](https://github.com/DataDog/integrations-core/pull/3061).

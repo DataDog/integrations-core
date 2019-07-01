@@ -15,13 +15,18 @@ def mock_df_output(fname):
         return f.read(), '', ''
 
 
+def mock_blkid_output():
+    """
+    Load fixtures from tests/fixtures/ folder and return a tuple matching the
+    return value of `get_subprocess_output`
+    """
+    with open(os.path.join(HERE, 'fixtures', 'blkid')) as f:
+        return f.read(), '', ''
+
+
 class MockPart(object):
     def __init__(
-        self,
-        device=DEFAULT_DEVICE_NAME,
-        fstype=DEFAULT_FILE_SYSTEM,
-        mountpoint=DEFAULT_MOUNT_POINT,
-        opts='ro'
+        self, device=DEFAULT_DEVICE_NAME, fstype=DEFAULT_FILE_SYSTEM, mountpoint=DEFAULT_MOUNT_POINT, opts='ro'
     ):
         self.device = device
         self.fstype = fstype

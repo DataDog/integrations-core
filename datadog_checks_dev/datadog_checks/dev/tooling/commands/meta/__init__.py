@@ -7,17 +7,10 @@ from ..console import CONTEXT_SETTINGS
 from .changes import changes
 from .prometheus import prom
 
-
-ALL_COMMANDS = (
-    changes,
-    prom,
-)
+ALL_COMMANDS = (changes, prom)
 
 
-@click.group(
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Collection of useful utilities'
-)
+@click.group(context_settings=CONTEXT_SETTINGS, short_help='Collection of useful utilities')
 def meta():
     """Anything here should be considered experimental.
 

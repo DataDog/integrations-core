@@ -2,7 +2,7 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 ibm_db2.application.active,gauge,,connection,,The number of applications that are currently connected to the database.,0,ibm_db2,
 ibm_db2.application.executing,gauge,,connection,,The number of applications for which the database manager is currently processing a request.,0,ibm_db2,
 ibm_db2.connection.active,gauge,,connection,,The current number of connections.,0,ibm_db2,
-ibm_db2.connection.max,count,,connection,,The highest number of simultaneous connections to the database since the database was activated.,0,ibm_db2,
+ibm_db2.connection.max,gauge,,connection,,The highest number of simultaneous connections to the database since the database was activated.,0,ibm_db2,
 ibm_db2.connection.total,count,,connection,,"The total number of connections to the database since the first connect, activate, or last reset (coordinator agents).",0,ibm_db2,
 ibm_db2.lock.dead,count,,lock,,The total number of deadlocks that have occurred.,-1,ibm_db2,
 ibm_db2.lock.waiting,gauge,,lock,,The number of agents waiting on a lock.,-1,ibm_db2,

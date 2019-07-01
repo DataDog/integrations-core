@@ -29,7 +29,7 @@ See the [sample win32_event_log.d/conf.yaml][3] for all available configuration 
 
 ### Log collection
 
-To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or via the Datadog Agent Manager. 
+To collect logs from specific Windows events, add the channels to the `conf.d/win32_event_log.d/conf.yaml` file manually, or via the Datadog Agent Manager.
 
 To see the channel list, run the following command in a PowerShell:
 
@@ -69,11 +69,12 @@ logs:
     sourcecategory: windowsevent
 ```
 
-Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from. 
+Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from.
 Set the corresponding `source` parameter to the same channel name to benefit from the [integration automatic processing pipeline][5].
 
 Finally, [restart the Agent][4].
 
+**Note**: For the Security logs channel, make sure that your Datadog Agent user is added to the `Event Log Readers` list.
 
 ### Filters
 Use the Windows Event Viewer GUI to list all the event logs available for capture with this integration.

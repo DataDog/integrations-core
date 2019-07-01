@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .snmp import SnmpCheck
 
-__all__ = [
-    '__version__',
-    'SnmpCheck'
-]
+__all__ = ['__version__', 'SnmpCheck']

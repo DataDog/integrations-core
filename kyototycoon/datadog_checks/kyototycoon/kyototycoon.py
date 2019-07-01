@@ -2,8 +2,8 @@
 # (C) Dan Crosta <dcrosta@late.am> 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import defaultdict
 import re
+from collections import defaultdict
 
 import requests
 
@@ -17,36 +17,31 @@ class KyotoTycoonCheck(AgentCheck):
     """Report statistics about the Kyoto Tycoon DBM-style
     database server (http://fallabs.com/kyototycoon/)
     """
+
     SOURCE_TYPE_NAME = 'kyoto tycoon'
     SERVICE_CHECK_NAME = 'kyototycoon.can_connect'
 
-    GAUGES = {
-        'repl_delay':         'replication.delay',
-        'serv_thread_count':  'threads',
-    }
+    GAUGES = {'repl_delay': 'replication.delay', 'serv_thread_count': 'threads'}
 
     RATES = {
-        'serv_conn_count':    'connections',
-        'cnt_get':            'ops.get.hits',
-        'cnt_get_misses':     'ops.get.misses',
-        'cnt_set':            'ops.set.hits',
-        'cnt_set_misses':     'ops.set.misses',
-        'cnt_remove':         'ops.del.hits',
-        'cnt_remove_misses':  'ops.del.misses',
+        'serv_conn_count': 'connections',
+        'cnt_get': 'ops.get.hits',
+        'cnt_get_misses': 'ops.get.misses',
+        'cnt_set': 'ops.set.hits',
+        'cnt_set_misses': 'ops.set.misses',
+        'cnt_remove': 'ops.del.hits',
+        'cnt_remove_misses': 'ops.del.misses',
     }
 
-    DB_GAUGES = {
-        'count':              'records',
-        'size':               'size',
-    }
+    DB_GAUGES = {'count': 'records', 'size': 'size'}
 
     TOTALS = {
-        'cnt_get':            'ops.get.total',
-        'cnt_get_misses':     'ops.get.total',
-        'cnt_set':            'ops.set.total',
-        'cnt_set_misses':     'ops.set.total',
-        'cnt_remove':         'ops.del.total',
-        'cnt_remove_misses':  'ops.del.total',
+        'cnt_get': 'ops.get.total',
+        'cnt_get_misses': 'ops.get.total',
+        'cnt_set': 'ops.set.total',
+        'cnt_set_misses': 'ops.set.total',
+        'cnt_remove': 'ops.del.total',
+        'cnt_remove_misses': 'ops.del.total',
     }
 
     def check(self, instance):
@@ -69,8 +64,7 @@ class KyotoTycoonCheck(AgentCheck):
             r = requests.get(url)
             r.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags,
-                               message=str(e))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))

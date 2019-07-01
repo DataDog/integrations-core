@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "6.0.0",
+        "integration":"envoy",
+        "check": "envoy.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["endpoint"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the agent can't connect to Envoy to collect metrics, otherwise `OK`."
+    }
+]

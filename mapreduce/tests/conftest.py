@@ -1,26 +1,52 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
-import os
 import json
+import os
+import subprocess
+from copy import deepcopy
+
+import pytest
+import requests
 from mock import patch
 
-# 3rd party
-import pytest
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import WaitFor
+from datadog_checks.mapreduce import MapReduceCheck
 
 from .common import (
-    HERE, YARN_APPS_URL_BASE, MR_JOBS_URL, MR_JOB_COUNTERS_URL, MR_TASKS_URL, TEST_USERNAME, TEST_PASSWORD
+    CONTAINER_NAME,
+    HERE,
+    HOST,
+    INSTANCE_INTEGRATION,
+    MR_JOB_COUNTERS_URL,
+    MR_JOBS_URL,
+    MR_TASKS_URL,
+    TEST_PASSWORD,
+    TEST_USERNAME,
+    YARN_APPS_URL_BASE,
 )
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
+@pytest.fixture(scope="session")
+def dd_environment():
+    env = {'HOSTNAME': HOST}
+    with docker_run(
+        compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
+        conditions=[WaitFor(setup_mapreduce, attempts=240, wait=5)],
+        env_vars=env,
+    ):
+        yield INSTANCE_INTEGRATION
 
-    aggregator.reset()
-    return aggregator
+
+@pytest.fixture
+def check():
+    return MapReduceCheck('mapreduce', {}, {})
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE_INTEGRATION)
 
 
 @pytest.fixture
@@ -33,6 +59,30 @@ def mocked_request():
 def mocked_auth_request():
     with patch("requests.get", new=requests_auth_mock):
         yield
+
+
+def setup_mapreduce():
+    # Run a job in order to get metrics from the environment
+    subprocess.Popen(
+        [
+            'docker',
+            'exec',
+            CONTAINER_NAME,
+            '/usr/local/hadoop/bin/yarn',
+            'jar',
+            '/usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar',
+            'grep',
+            'input',
+            'output',
+            '\'dfs[a-z.]+\'',
+        ],
+        close_fds=True,
+    )
+
+    # Called in WaitFor which catches exceptions
+    r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
+
+    return r.json().get("apps", None) is not None
 
 
 def requests_get_mock(*args, **kwargs):
@@ -52,8 +102,8 @@ def requests_get_mock(*args, **kwargs):
     # The parameter that creates the query params (kwargs) is an unordered dict,
     #   so the query params can be in any order
     if url.startswith(YARN_APPS_URL_BASE):
-        query = url[len(YARN_APPS_URL_BASE):]
-        if (query in ["?states=RUNNING&applicationTypes=MAPREDUCE", "?applicationTypes=MAPREDUCE&states=RUNNING"]):
+        query = url[len(YARN_APPS_URL_BASE) :]
+        if query in ["?states=RUNNING&applicationTypes=MAPREDUCE", "?applicationTypes=MAPREDUCE&states=RUNNING"]:
             apps_metrics_file = os.path.join(HERE, "fixtures", "apps_metrics")
             with open(apps_metrics_file, "r") as f:
                 body = f.read()

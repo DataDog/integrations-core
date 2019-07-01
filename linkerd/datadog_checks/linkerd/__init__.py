@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .linkerd import LinkerdCheck
 
-__all__ = [
-    '__version__',
-    'LinkerdCheck'
-]
+__all__ = ['__version__', 'LinkerdCheck']

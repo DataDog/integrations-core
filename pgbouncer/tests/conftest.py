@@ -5,10 +5,10 @@
 import os
 from copy import deepcopy
 
-import pytest
 import psycopg2
+import pytest
 
-from datadog_checks.dev import docker_run, WaitFor
+from datadog_checks.dev import WaitFor, docker_run
 
 from . import common
 
@@ -20,8 +20,7 @@ def container_up(service_name, port):
     Try to connect to postgres/pgbouncer
     """
     psycopg2.connect(
-        host=common.HOST, port=port, user=common.USER, password=common.PASS,
-        database=common.DB, connect_timeout=2,
+        host=common.HOST, port=port, user=common.USER, password=common.PASS, database=common.DB, connect_timeout=2
     )
 
 
@@ -38,7 +37,7 @@ def dd_environment():
         conditions=[
             WaitFor(container_up, args=("Postgres", 5432)),
             WaitFor(container_up, args=("PgBouncer", common.PORT)),
-        ]
+        ],
     ):
 
         yield common.DEFAULT_INSTANCE

@@ -11,22 +11,13 @@ import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
-from .common import PORT, PASSWORD, HOST
 
+from .common import HOST, PASSWORD, PORT
 
 # Following metrics are tagged by db
-DB_TAGGED_METRICS = [
-    'redis.persist.percent',
-    'redis.expires.percent',
-    'redis.persist',
-    'redis.keys',
-    'redis.expires',
-]
+DB_TAGGED_METRICS = ['redis.persist.percent', 'redis.expires.percent', 'redis.persist', 'redis.keys', 'redis.expires']
 
-STAT_METRICS = [
-    'redis.command.calls',
-    'redis.command.usec_per_call'
-]
+STAT_METRICS = ['redis.command.calls', 'redis.command.usec_per_call']
 
 
 @pytest.mark.integration
@@ -57,9 +48,7 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
         elif name != 'redis.key.length':
             aggregator.assert_metric(name, tags=expected)
 
-    aggregator.assert_metric(
-        'redis.key.length', 3, count=1,
-        tags=expected_db + ['key:test_list', 'key_type:list'])
+    aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
 
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names

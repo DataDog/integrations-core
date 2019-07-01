@@ -145,12 +145,7 @@ def test_read_packages(catalog, package, tmp_path):
         in_file = str(in_file)
 
     another = Package("Bar", "4.0", None)
-    lines = [
-        "{}\n".format(package),
-        "{}\n".format(another),
-        "# a comment\n",
-        "   --hash fooBarBaz\n\n",
-    ]
+    lines = ["{}\n".format(package), "{}\n".format(another), "# a comment\n", "   --hash fooBarBaz\n\n"]
     write_file_lines(in_file, lines)
     result = list(read_packages(in_file))
     assert len(result) == 2

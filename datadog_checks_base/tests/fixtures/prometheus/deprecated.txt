@@ -1,0 +1,6 @@
+# HELP kube_pod_container_status_restarts The number of container restarts per container.
+# TYPE kube_pod_container_status_restarts counter
+kube_pod_container_status_restarts{namespace="kube-system",pod="kube-dns-autoscaler-97162954-mf6d3"} 42
+# HELP kube_pod_container_status_restarts_old (Deprecated) The number of container restarts per container.
+# TYPE kube_pod_container_status_restarts_old counter
+kube_pod_container_status_restarts_old{namespace="kube-system",pod="kube-dns-autoscaler-97162954-mf6d3"} 24

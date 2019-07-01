@@ -8,6 +8,7 @@ class CrioCheck(OpenMetricsBaseCheck):
     """
     Collect CRI-O runtime metrics in OpenMetrics format
     """
+
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -27,8 +28,8 @@ class CrioCheck(OpenMetricsBaseCheck):
                         {'process_resident_memory_bytes': 'mem.resident'},
                         {'process_virtual_memory_bytes': 'mem.virtual'},
                     ],
-                    'send_histograms_buckets': True
+                    'send_histograms_buckets': True,
                 }
             },
-            default_namespace="crio"
+            default_namespace="crio",
         )

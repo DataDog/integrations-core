@@ -9,12 +9,20 @@ from copy import deepcopy
 import pytest
 import requests
 
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.dev import docker_run, WaitFor
 
 from .common import (
-    HERE, PORT, BUCKET_NAME, CUSTOM_TAGS, URL, QUERY_URL,
-    CB_CONTAINER_NAME, USER, PASSWORD, DEFAULT_INSTANCE
+    BUCKET_NAME,
+    CB_CONTAINER_NAME,
+    CUSTOM_TAGS,
+    DEFAULT_INSTANCE,
+    HERE,
+    PASSWORD,
+    PORT,
+    QUERY_URL,
+    URL,
+    USER,
 )
 
 
@@ -50,7 +58,7 @@ def dd_environment():
             WaitFor(couchbase_setup),
             WaitFor(node_stats),
             WaitFor(bucket_stats),
-        ]
+        ],
     ):
         yield DEFAULT_INSTANCE
 
@@ -73,10 +81,23 @@ def couchbase_setup():
 
     # create bucket
     create_bucket_args = [
-        'docker', 'exec', CB_CONTAINER_NAME,
-        'couchbase-cli', 'bucket-create', '-c', 'localhost:{}'.format(PORT),
-        '-u', USER, '-p', PASSWORD,
-        '--bucket', BUCKET_NAME, '--bucket-type', 'couchbase', '--bucket-ramsize', '100'
+        'docker',
+        'exec',
+        CB_CONTAINER_NAME,
+        'couchbase-cli',
+        'bucket-create',
+        '-c',
+        'localhost:{}'.format(PORT),
+        '-u',
+        USER,
+        '-p',
+        PASSWORD,
+        '--bucket',
+        BUCKET_NAME,
+        '--bucket-type',
+        'couchbase',
+        '--bucket-ramsize',
+        '100',
     ]
     subprocess.check_call(create_bucket_args)
 
@@ -86,9 +107,17 @@ def couchbase_container():
     Wait for couchbase to start
     """
     status_args = [
-        'docker', 'exec', CB_CONTAINER_NAME,
-        'couchbase-cli', 'server-info', '-c', 'localhost:{}'.format(PORT),
-        '-u', USER, '-p', PASSWORD
+        'docker',
+        'exec',
+        CB_CONTAINER_NAME,
+        'couchbase-cli',
+        'server-info',
+        '-c',
+        'localhost:{}'.format(PORT),
+        '-u',
+        USER,
+        '-p',
+        PASSWORD,
     ]
     return subprocess.call(status_args) == 0
 
@@ -100,11 +129,23 @@ def couchbase_init():
 
     # initialize the database
     init_args = [
-        'docker', 'exec', CB_CONTAINER_NAME,
-        'couchbase-cli', 'cluster-init', '-c', 'localhost:{}'.format(PORT),
-        '--cluster-username={}'.format(USER), '--cluster-password={}'.format(PASSWORD),
-        '--services', 'data,index,fts,query',
-        '--cluster-ramsize', '256', '--cluster-index-ramsize', '256', '--cluster-fts-ramsize', '256'
+        'docker',
+        'exec',
+        CB_CONTAINER_NAME,
+        'couchbase-cli',
+        'cluster-init',
+        '-c',
+        'localhost:{}'.format(PORT),
+        '--cluster-username={}'.format(USER),
+        '--cluster-password={}'.format(PASSWORD),
+        '--services',
+        'data,index,fts,query',
+        '--cluster-ramsize',
+        '256',
+        '--cluster-index-ramsize',
+        '256',
+        '--cluster-fts-ramsize',
+        '256',
     ]
     subprocess.check_call(init_args)
 

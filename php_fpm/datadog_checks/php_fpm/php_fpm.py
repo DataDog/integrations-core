@@ -34,6 +34,7 @@ if PY3:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.connect(self._connect)
             return sock
+
     FCGIApp._getConnection = get_connection
 
 
@@ -113,16 +114,21 @@ class PHPFPMCheck(AgentCheck):
                 # informations, which could be nice to parse and output as metrics
                 max_attempts = 3
                 for i in range(max_attempts):
-                    resp = requests.get(status_url, auth=auth, timeout=timeout,
-                                        headers=headers(self.agentConfig, http_host=http_host),
-                                        verify=not disable_ssl_validation, params={'json': True})
+                    resp = requests.get(
+                        status_url,
+                        auth=auth,
+                        timeout=timeout,
+                        headers=headers(self.agentConfig, http_host=http_host),
+                        verify=not disable_ssl_validation,
+                        params={'json': True},
+                    )
 
                     # Exponential backoff, wait at most (max_attempts - 1) times in case we get a 503.
                     # Delay in seconds is (2^i + random amount of seconds between 0 and 1)
                     # 503s originated here: https://github.com/php/php-src/blob/d84ef96/sapi/fpm/fpm/fpm_status.c#L96
                     if resp.status_code == 503 and i < max_attempts - 1:
                         # retry
-                        time.sleep(2**i + random.random())
+                        time.sleep(2 ** i + random.random())
                         continue
 
                     resp.raise_for_status()
@@ -170,9 +176,13 @@ class PHPFPMCheck(AgentCheck):
             if use_fastcgi:
                 response = self.request_fastcgi(ping_url).decode('utf-8')
             else:
-                resp = requests.get(ping_url, auth=auth, timeout=timeout,
-                                    headers=headers(self.agentConfig, http_host=http_host),
-                                    verify=not disable_ssl_validation)
+                resp = requests.get(
+                    ping_url,
+                    auth=auth,
+                    timeout=timeout,
+                    headers=headers(self.agentConfig, http_host=http_host),
+                    verify=not disable_ssl_validation,
+                )
                 resp.raise_for_status()
                 response = resp.text
 
@@ -181,8 +191,7 @@ class PHPFPMCheck(AgentCheck):
 
         except Exception as e:
             self.log.error("Failed to ping FPM pool {} on URL {}: {}".format(pool_name, ping_url, e))
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=sc_tags,
-                               message=str(e))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=sc_tags, message=str(e))
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=sc_tags)
 

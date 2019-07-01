@@ -1,54 +1,54 @@
 instances:
 
-  ## @param gitlab_url - string - required
-  ## Master URL to probe for service health status
-  ## If you are using gitlab CE and not EE, use this url with
-  ## the authorization token: http://localhost/?token=<TOKEN>
-  #
+    ## @param gitlab_url - string - required
+    ## Master URL to probe for service health status
+    ## If you are using gitlab CE and not EE, use this url with
+    ## the authorization token: http://localhost/?token=<TOKEN>
+    #
   - gitlab_url: <GITLAB_URL>
 
-  ## @param prometheus_endpoint - string - required
-  ## URL of the metrics endpoint of prometheus
-  #
+    ## @param prometheus_endpoint - string - required
+    ## URL of the metrics endpoint of prometheus
+    #
     prometheus_endpoint: http://<PROMETHEUS_ENDPOINT>:<PROMETHEUS_PORT>/metrics
 
-  ## @param send_histograms_buckets - boolean - optional - default: true
-  ## The histogram buckets can be noisy and generate a lot of tags.
-  ## send_histograms_buckets controls whether or not you want to pull them.
-  #
-  #  send_histograms_buckets: true
+    ## @param send_histograms_buckets - boolean - optional - default: true
+    ## The histogram buckets can be noisy and generate a lot of tags.
+    ## send_histograms_buckets controls whether or not you want to pull them.
+    #
+    # send_histograms_buckets: true
 
-  ## @param connect_timeout - integer - optional - default: 5
-  ## This parameter overrides the default value, and fails the check if the time
-  ## to establish the (TCP) connection exceeds the connect_timeout value (in seconds).
-  #
-  #  connect_timeout: 5
+    ## @param connect_timeout - integer - optional - default: 5
+    ## This parameter overrides the default value, and fails the check if the time
+    ## to establish the (TCP) connection exceeds the connect_timeout value (in seconds).
+    #
+    # connect_timeout: 5
 
-  ## @param receive_timeout - integer - optional - default: 15
-  ## This parameter overrides the default value, and fails the check if the time
-  ## to receive the server status from the Apache server exceeds the receive_timeout value (in seconds).
-  #
-  #  receive_timeout: 15
+    ## @param receive_timeout - integer - optional - default: 15
+    ## This parameter overrides the default value, and fails the check if the time
+    ## to receive the server status from the Apache server exceeds the receive_timeout value (in seconds).
+    #
+    # receive_timeout: 15
 
-  ## @param ssl_cert_validation - boolean - optional - default: true
-  ## Set to `false` to disable the validation of Gitlab's SSL certificates.
-  #
-  #  ssl_cert_validation: true
+    ## @param ssl_cert_validation - boolean - optional - default: true
+    ## Set to `false` to disable the validation of Gitlab's SSL certificates.
+    #
+    # ssl_cert_validation: true
 
-  ## @param ssl_ca_certs - string - optional
-  ## If ssl_cert_validation is enabled, provide with this parameter a file path
-  ## that lists trusted CA certificates.
-  #
-  #  ssl_ca_certs: <CERT_PATH>
+    ## @param ssl_ca_certs - string - optional
+    ## If ssl_cert_validation is enabled, provide with this parameter a file path
+    ## that lists trusted CA certificates.
+    #
+    # ssl_ca_certs: <CERT_PATH>
 
-  ## @param tags  - list of key:value string - optional
-  ## List of tags to attach to every metric and service check emitted by this integration.
-  ##
-  ## Learn more about tagging at https://docs.datadoghq.com/tagging
-  #
-  #  tags:
-  #    - <KEY_1>:<VALUE_1>
-  #    - <KEY_2>:<VALUE_2>
+    ## @param tags - list of key:value string - optional
+    ## List of tags to attach to every metric and service check emitted by this integration.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
 
 init_config:
 
@@ -166,3 +166,133 @@ init_config:
     - prometheus_target_sync_length_seconds
     - prometheus_treecache_watcher_goroutines
     - prometheus_treecache_zookeeper_failures_total
+
+## Log Section (Available for Agent >=6.0)
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/production_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/integrations_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/production.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#     log_processing_rules:
+#       - type: multi_line
+#         pattern: 'Started [A-Z]+ "[^"]+" for'
+#         name: new_log_start_pattern
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/api_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/application.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/integrations_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/kubernetes.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/audit_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/sidekiq.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/gitlab-shell.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-shell/gitlab-shell.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/unicorn_stderr.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/graphql_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/sidekiq_exporter.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#     log_processing_rules:
+#       - type: multi_line
+#         pattern: 'Started [A-Z]+ "[^"]+" for'
+#         name: new_log_start_pattern
+#
+#   - type: file
+#     path: /var/log/gitlab/gitaly/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/alertmanager/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-workhorse/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/postgres-exporter/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/prometheus/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/redis-exporter/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/unicorn/*.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/nginx/*.log
+#     service: <SERVICE_NAME>
+#     source: nginx

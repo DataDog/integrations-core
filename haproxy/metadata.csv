@@ -16,6 +16,7 @@ haproxy.backend.response.4xx,gauge,,response,,Backend HTTP responses with 4xx co
 haproxy.backend.response.5xx,gauge,,response,,Backend HTTP responses with 5xx code.,-1,haproxy,backend resp 5xx
 haproxy.backend.response.other,gauge,,response,,Backend HTTP responses with other code (protocol error).,0,haproxy,backend resp other
 haproxy.backend.response.time,gauge,,millisecond,,Average response time over the last 1024 requests (0 for TCP).,-1,haproxy,backend resp time
+haproxy.backend.requests.tot_rate,gauge,,request,second,Rate of total number of HTTP requests.,0,haproxy,backend total req rate
 haproxy.backend.session.current,gauge,,connection,,Number of active backend sessions.,0,haproxy,backend sess
 haproxy.backend.session.limit,gauge,,connection,,Configured backend session limit.,0,haproxy,backend sess lim
 haproxy.backend.session.pct,gauge,,percent,,Percentage of sessions in use (backend.session.current/backend.session.limit * 100).,-1,haproxy,backend sess pct
@@ -27,10 +28,14 @@ haproxy.backend.warnings.retr_rate,gauge,,error,second,Number of times a connect
 haproxy.count_per_status,gauge,,host,,Number of hosts by status (UP/DOWN/NOLB/MAINT).,0,haproxy,hosts status
 haproxy.frontend.bytes.in_rate,gauge,,byte,second,Rate of bytes in on frontend hosts.,0,haproxy,frontend bytes in rate
 haproxy.frontend.bytes.out_rate,gauge,,byte,second,Rate of bytes out on frontend hosts.,0,haproxy,frontend bytes out rate
+haproxy.frontend.connections.rate,gauge,,connection,second,Number of connections per second.,0,haproxy,frontend connections rate
+haproxy.frontend.connections.tot_rate,gauge,,connection,second,Rate of total number of connections.,0,haproxy,frontend tot connections rate
 haproxy.frontend.denied.req_rate,gauge,,request,second,Number of requests denied due to security concerns.,-1,haproxy,frontend den req rate
 haproxy.frontend.denied.resp_rate,gauge,,response,second,Number of responses denied due to security concerns.,-1,haproxy,frontend den resp rate
 haproxy.frontend.errors.req_rate,gauge,,error,second,Rate of request errors.,-1,haproxy,frontend err req rate
+haproxy.frontend.requests.intercepted,gauge,,request,second,Number of intercepted requests per second.,0,haproxy,frontend intercepted req rate
 haproxy.frontend.requests.rate,gauge,,request,second,Number of HTTP requests per second.,0,haproxy,frontend req rate
+haproxy.frontend.requests.tot_rate,gauge,,request,second,Rate of total number of HTTP requests.,0,haproxy,frontend total req rate
 haproxy.frontend.response.1xx,gauge,,response,,Frontend HTTP responses with 1xx code.,0,haproxy,frontend resp 1xx
 haproxy.frontend.response.2xx,gauge,,response,,Frontend HTTP responses with 2xx code.,0,haproxy,frontend resp 2xx
 haproxy.frontend.response.3xx,gauge,,response,,Frontend HTTP responses with 3xx code.,0,haproxy,frontend resp 3xx

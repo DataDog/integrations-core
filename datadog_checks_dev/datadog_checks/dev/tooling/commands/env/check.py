@@ -1,17 +1,16 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import click
 
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ....utils import read_file
 from ...e2e import create_interface, get_configured_envs
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
-@click.command(
-    'check',
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Run an Agent check'
-)
+@click.command('check', context_settings=CONTEXT_SETTINGS, short_help='Run an Agent check')
 @click.argument('check')
 @click.argument('env', required=False)
 @click.option(
@@ -34,7 +33,8 @@ from ...e2e import create_interface, get_configured_envs
     type=click.INT,
     help='Line number to start a PDB session (0: first line, -1: last line)',
 )
-def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_point):
+@click.option('--config', 'config_file', help='Path to a JSON check configuration to use')
+def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_point, config_file):
     """Run an Agent check."""
     envs = get_configured_envs(check)
     if not envs:
@@ -56,15 +56,17 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_p
         abort()
 
     environment = create_interface(check, env)
-
-    environment.run_check(
-        rate=rate,
-        times=times,
-        pause=pause,
-        delay=delay,
-        log_level=log_level,
-        as_json=as_json,
-        break_point=break_point,
+    check_args = dict(
+        rate=rate, times=times, pause=pause, delay=delay, log_level=log_level, as_json=as_json, break_point=break_point
     )
-    echo_success('Note: ', nl=False)
-    echo_info('If some metrics are missing, you may want to try again with the -r / --rate flag.')
+
+    if config_file:
+        config = json.loads(read_file(config_file))
+        with environment.use_config(config):
+            environment.run_check(**check_args)
+    else:
+        environment.run_check(**check_args)
+
+        if not rate:
+            echo_success('Note: ', nl=False)
+            echo_info('If some metrics are missing, you may want to try again with the -r / --rate flag.')

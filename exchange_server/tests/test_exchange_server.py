@@ -2,16 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
+from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
-from .common import (
-    CHECK_NAME,
-    METRIC_INSTANCES,
-    MINIMAL_INSTANCE
-)
 from datadog_checks.exchange_server import ExchangeCheck
 from datadog_checks.exchange_server.exchange_server import DEFAULT_COUNTERS
 
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
+from .common import CHECK_NAME, METRIC_INSTANCES, MINIMAL_INSTANCE
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')

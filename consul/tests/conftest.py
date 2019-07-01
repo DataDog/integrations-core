@@ -7,6 +7,7 @@ import pytest
 import requests
 
 from datadog_checks.dev import WaitFor, docker_run
+
 from . import common
 
 
@@ -34,15 +35,10 @@ def dd_environment(instance_single_node_install):
     """
     Start a cluster with one master, one replica, and one unhealthy replica.
     """
-    env_vars = {
-        'CONSUL_CONFIG_PATH': _consul_config_path(),
-        'CONSUL_PORT': common.PORT,
-    }
+    env_vars = {'CONSUL_CONFIG_PATH': _consul_config_path(), 'CONSUL_PORT': common.PORT}
 
     with docker_run(
-        os.path.join(common.HERE, 'compose', 'compose.yaml'),
-        conditions=[WaitFor(ping_cluster)],
-        env_vars=env_vars,
+        os.path.join(common.HERE, 'compose', 'compose.yaml'), conditions=[WaitFor(ping_cluster)], env_vars=env_vars
     ):
         yield instance_single_node_install
 

@@ -1,5 +1,23 @@
 # CHANGELOG - iis
 
+## 2.6.1 / 2019-06-18
+
+* [Fixed] Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
+
+## 2.6.0 / 2019-06-01
+
+* [Added] Handle the refresh_counters flag. See [#3840](https://github.com/DataDog/integrations-core/pull/3840).
+
+## 2.5.0 / 2019-05-14
+
+* [Added] Cosmetic cleanups. See [#3706](https://github.com/DataDog/integrations-core/pull/3706).
+* [Added] Adhere to code style. See [#3521](https://github.com/DataDog/integrations-core/pull/3521).
+
+## 2.4.0 / 2019-03-29
+
+* [Added] adds `iis_host` tag to metrics. See [#3294](https://github.com/DataDog/integrations-core/pull/3294).
+* [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).
+
 ## 2.3.0 / 2019-02-18
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).

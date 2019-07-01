@@ -25,8 +25,7 @@ See [sample linkerd.d/conf.yaml][4] for all available configuration options.
 
 See [metadata.csv][6] for a list of default metrics provided by this integration.
 
-See [finagle metrics docs][7] for a detailed description of some of the available metrics.
-See [this gist][8] for an example of metrics exposed by linkerd.
+For linkerd v1, see [finagle metrics docs][7] for a detailed description of some of the available metrics and [this gist][8] for an example of metrics exposed by linkerd.
 
 Attention: Depending on your linkerd configuration, some metrics might not be exposed by linkerd.
 

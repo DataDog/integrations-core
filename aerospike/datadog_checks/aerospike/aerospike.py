@@ -24,14 +24,8 @@ SET_METRIC_TYPE = '%s.set' % SOURCE_TYPE_NAME
 MAX_AEROSPIKE_SETS = 200
 MAX_AEROSPIKE_SINDEXS = 100
 
-AEROSPIKE_CAP_MAP = {
-    SINDEX_METRIC_TYPE: MAX_AEROSPIKE_SINDEXS,
-    SET_METRIC_TYPE: MAX_AEROSPIKE_SETS,
-}
-AEROSPIKE_CAP_CONFIG_KEY_MAP = {
-    SINDEX_METRIC_TYPE: "max_sindexs",
-    SET_METRIC_TYPE: "max_sets",
-}
+AEROSPIKE_CAP_MAP = {SINDEX_METRIC_TYPE: MAX_AEROSPIKE_SINDEXS, SET_METRIC_TYPE: MAX_AEROSPIKE_SETS}
+AEROSPIKE_CAP_CONFIG_KEY_MAP = {SINDEX_METRIC_TYPE: "max_sindexs", SET_METRIC_TYPE: "max_sets"}
 ENABLED_VALUES = {'true', 'on', 'enable', 'enabled'}
 DISABLED_VALUES = {'false', 'off', 'disable', 'disabled'}
 
@@ -60,7 +54,6 @@ def parse_namespace(data, namespace, secondary):
 
 
 class AerospikeCheck(AgentCheck):
-
     def __init__(self, name, init_config, instances):
         super(AerospikeCheck, self).__init__(name, init_config, instances)
 
@@ -110,7 +103,7 @@ class AerospikeCheck(AgentCheck):
                 'namespace/{}'.format(ns),
                 NAMESPACE_METRIC_TYPE,
                 required_keys=self._namespace_metrics,
-                tags=namespace_tags
+                tags=namespace_tags,
             )
 
             # https://www.aerospike.com/docs/reference/info/#sindex
@@ -179,7 +172,7 @@ class AerospikeCheck(AgentCheck):
         data = self._client.info_node(command, self._host, self._info_policies)
 
         # Get rid of command and whitespace
-        data = data[len(command):].strip()
+        data = data[len(command) :].strip()
 
         if not separator:
             return data

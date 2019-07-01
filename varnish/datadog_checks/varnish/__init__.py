@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .varnish import Varnish
 
-__all__ = [
-    "__version__",
-    "Varnish"
-]
+__all__ = ["__version__", "Varnish"]

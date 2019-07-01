@@ -42,10 +42,10 @@ mapreduce.job.reduce.task.progress      The distribution of all reduce task prog
 
 
 import requests
-from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
+from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
-from six import iteritems
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
@@ -315,7 +315,7 @@ class MapReduceCheck(AgentCheck):
         """
         running_jobs = {}
 
-        for app_id, (app_name, tracking_url) in iteritems(running_apps):
+        for app_name, tracking_url in itervalues(running_apps):
 
             metrics_json = self._rest_request_to_json(
                 tracking_url, auth, ssl_verify, self.MAPREDUCE_JOBS_PATH, self.MAPREDUCE_SERVICE_CHECK
@@ -355,7 +355,7 @@ class MapReduceCheck(AgentCheck):
         """
         Get custom metrics specified for each counter
         """
-        for job_id, job_metrics in iteritems(running_jobs):
+        for job_metrics in itervalues(running_jobs):
             job_name = job_metrics['job_name']
 
             # Check if the job_name exist in the custom metrics
@@ -415,7 +415,7 @@ class MapReduceCheck(AgentCheck):
         Get metrics for each MapReduce task
         Return a dictionary of {task_id: 'tracking_url'} for each MapReduce task
         """
-        for job_id, job_stats in iteritems(running_jobs):
+        for job_stats in itervalues(running_jobs):
 
             metrics_json = self._rest_request_to_json(
                 job_stats['tracking_url'], auth, ssl_verify, 'tasks', self.MAPREDUCE_SERVICE_CHECK, tags=addl_tags

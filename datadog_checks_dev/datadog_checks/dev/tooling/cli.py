@@ -5,12 +5,12 @@ import os
 
 import click
 
+from ..compat import PermissionError
+from ..utils import dir_exists
 from .commands import ALL_COMMANDS
 from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
 from .constants import set_root
-from ..compat import PermissionError
-from ..utils import dir_exists
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, invoke_without_command=True)
@@ -23,28 +23,20 @@ from ..utils import dir_exists
 @click.pass_context
 def ddev(ctx, core, extras, agent, here, quiet):
     if not quiet and not config_file_exists():
-        echo_waiting(
-            'No config file found, creating one with default settings now...'
-        )
+        echo_waiting('No config file found, creating one with default settings now...')
 
         try:
             restore_config()
             echo_success('Success! Please see `ddev config`.')
         except (IOError, OSError, PermissionError):
             echo_warning(
-                'Unable to create config file located at `{}`. '
-                'Please check your permissions.'.format(CONFIG_FILE)
+                'Unable to create config file located at `{}`. ' 'Please check your permissions.'.format(CONFIG_FILE)
             )
 
     # Load and store configuration for sub-commands.
     config = load_config()
 
-    repo_choice = (
-        'core' if core
-        else 'extras' if extras
-        else 'agent' if agent
-        else config.get('repo', 'core')
-    )
+    repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
 
     config['repo_choice'] = repo_choice
     ctx.obj = config

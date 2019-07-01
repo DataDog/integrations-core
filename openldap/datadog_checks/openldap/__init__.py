@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .openldap import OpenLDAP
 from .__about__ import __version__
+from .openldap import OpenLDAP
 
-__all__ = [
-    '__version__',
-    'OpenLDAP'
-]
+__all__ = ['__version__', 'OpenLDAP']

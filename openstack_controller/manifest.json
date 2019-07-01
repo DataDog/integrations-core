@@ -19,6 +19,11 @@
     "cloud"
   ],
   "type": "check",
-  "is_public": false,
-  "integration_id": "openstack-controller"
+  "is_public": true,
+  "integration_id": "openstack-controller",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

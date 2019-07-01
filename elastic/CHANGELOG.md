@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 1.12.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3504](https://github.com/DataDog/integrations-core/pull/3504).
+
 ## 1.11.0 / 2019-02-18
 
 * [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).

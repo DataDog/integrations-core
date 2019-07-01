@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .aspdotnet import AspdotnetCheck
 
-__all__ = [
-    '__version__',
-    'AspdotnetCheck'
-]
+__all__ = ['__version__', 'AspdotnetCheck']

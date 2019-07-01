@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import pytest
 import mock
+import pytest
 
 from datadog_checks.vsphere import VSphereCheck
 
@@ -42,5 +42,6 @@ def vsphere():
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator

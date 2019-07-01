@@ -2,14 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-import pytest
 import json
+import os
 
+import pytest
 from six import iteritems
 
 from datadog_checks.mesos_master import MesosMaster
-
 
 CHECK_NAME = 'mesos_master'
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
@@ -33,9 +32,15 @@ def check():
 def test_check(check, instance, aggregator):
     check.check(instance)
     metrics = {}
-    for d in (check.CLUSTER_TASKS_METRICS, check.CLUSTER_SLAVES_METRICS,
-              check.CLUSTER_RESOURCES_METRICS, check.CLUSTER_REGISTRAR_METRICS,
-              check.CLUSTER_FRAMEWORK_METRICS, check.SYSTEM_METRICS, check.STATS_METRICS):
+    for d in (
+        check.CLUSTER_TASKS_METRICS,
+        check.CLUSTER_SLAVES_METRICS,
+        check.CLUSTER_RESOURCES_METRICS,
+        check.CLUSTER_REGISTRAR_METRICS,
+        check.CLUSTER_FRAMEWORK_METRICS,
+        check.SYSTEM_METRICS,
+        check.STATS_METRICS,
+    ):
         metrics.update(d)
 
     for _, v in iteritems(check.FRAMEWORK_METRICS):

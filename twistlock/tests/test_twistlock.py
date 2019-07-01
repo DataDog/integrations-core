@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-import mock
 import json
+import os
+
+import mock
 
 from datadog_checks.dev import get_here
-
 from datadog_checks.twistlock import TwistlockCheck
 
 customtag = "custom:tag"
@@ -17,7 +17,7 @@ instance = {
     'password': 'password',
     'url': 'http://localhost:8081',
     'tags': [customtag],
-    'ssl_verify': False
+    'ssl_verify': False,
 }
 
 METRICS = [

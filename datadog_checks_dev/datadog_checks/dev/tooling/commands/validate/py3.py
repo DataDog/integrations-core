@@ -1,19 +1,18 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import click
 import os
 from operator import itemgetter
 
+import click
 from a7 import validate_py3
 
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 from ...utils import get_valid_checks, get_version_file
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help="Verify if a custom check or integration can run on python 3"
+    context_settings=CONTEXT_SETTINGS, short_help="Verify if a custom check or integration can run on python 3"
 )
 @click.argument('check')
 def py3(check):

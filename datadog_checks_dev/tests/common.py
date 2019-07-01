@@ -5,5 +5,4 @@ import pytest
 
 from datadog_checks.dev.utils import running_on_appveyor
 
-
 not_appveyor = pytest.mark.skipif(running_on_appveyor(), reason="Test can't be run on Appveyor")

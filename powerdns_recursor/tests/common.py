@@ -12,30 +12,13 @@ HOST = get_docker_hostname()
 PORT = os.getenv('POWERDNS_HOST_PORT_0', 8082)
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-CONFIG = {
-    "host": HOST,
-    "port": PORT,
-    "api_key": "pdns_api_key"
-}
+CONFIG = {"host": HOST, "port": PORT, "api_key": "pdns_api_key"}
 
-CONFIG_V4 = {
-    "host": HOST,
-    "port": PORT,
-    "version": 4,
-    "api_key": "pdns_api_key"
-}
+CONFIG_V4 = {"host": HOST, "port": PORT, "version": 4, "api_key": "pdns_api_key"}
 
-BAD_CONFIG = {
-    "host": HOST,
-    "port": PORT,
-    "api_key": "nope"
-}
+BAD_CONFIG = {"host": HOST, "port": PORT, "api_key": "nope"}
 
-BAD_API_KEY_CONFIG = {
-    "host": HOST,
-    "port": '1111',
-    "api_key": "pdns_api_key"
-}
+BAD_API_KEY_CONFIG = {"host": HOST, "port": '1111', "api_key": "pdns_api_key"}
 
 
 def _config_sc_tags(config):

@@ -1,18 +1,20 @@
 # Agent Check: IBM Db2
 
+![default dashboard][1]
+
 ## Overview
 
-This check monitors [IBM Db2][1] through the Datadog Agent.
+This check monitors [IBM Db2][2] through the Datadog Agent.
 
 ## Setup
 
 ### Installation
 
-The IBM Db2 check is included in the [Datadog Agent][2] package.
+The IBM Db2 check is included in the [Datadog Agent][3] package.
 
 #### Dependencies
 
-The [ibm_db][3] client library is required. To install it, ensure you have a working compiler and run:
+The [ibm_db][4] client library is required. To install it, ensure you have a working compiler and run:
 
 Unix:
 
@@ -23,7 +25,7 @@ Unix:
 Windows:
 
 ```
-"C:\Program Files\Datadog\Datadog Agent\embedded\Scrips\python.exe" -m pip install ibm_db==3.0.1
+"C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install ibm_db==3.0.1
 ```
 
 Additionally, on Linux there may be need for XML functionality. If you encounter errors during
@@ -58,19 +60,45 @@ Now if you run `get dbm cfg`, you should see the following:
 
 ### Configuration
 
-1. Edit the `ibm_db2.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `ibm_db2` performance data. See the [sample ibm_db2.d/conf.yaml][4] for all available configuration options.
+1. Edit the `ibm_db2.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `ibm_db2` performance data. See the [sample ibm_db2.d/conf.yaml][5] for all available configuration options.
 
-2. [Restart the Agent][5].
+2. [Restart the Agent][6].
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+```
+logs_enabled: true
+```
+
+2. Add this configuration block to your `ibm_db2.d/conf.yaml` file to start collecting your IBM Db2 logs:
+
+```
+logs:
+  - type: file
+    path: /home/db2inst1/sqllib/db2dump/db2diag.log
+    source: ibm_db2
+    service: db2sysc
+    log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_date
+        pattern: \d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])
+```
+
+4. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `ibm_db2` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `ibm_db2` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -85,13 +113,22 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
-[1]: https://www.ibm.com/analytics/us/en/db2
-[2]: https://docs.datadoghq.com/agent
-[3]: https://github.com/ibmdb/python-ibmdb/tree/master/IBM_DB/ibm_db
-[4]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/datadog_checks/ibm_db2/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
-[8]: https://docs.datadoghq.com/help
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor IBM DB2 with Datadog][10]
+
+
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/assets/images/dashboard_overview.png
+[2]: https://www.ibm.com/analytics/us/en/db2
+[3]: https://docs.datadoghq.com/agent
+[4]: https://github.com/ibmdb/python-ibmdb/tree/master/IBM_DB/ibm_db
+[5]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/datadog_checks/ibm_db2/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
+[9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/monitor-db2-with-datadog/

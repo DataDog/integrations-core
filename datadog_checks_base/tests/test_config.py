@@ -9,7 +9,7 @@ def test_alias():
     Ensure we have an alias to import is_affirmative as _is_affirmative for
     backward compatibility with Agent 5.x
     """
-    assert getattr(config, "_is_affirmative")
+    assert getattr(config, "_is_affirmative", None) is not None
 
 
 def test_is_affirmative():

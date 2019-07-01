@@ -4,13 +4,13 @@
 import os
 import sys
 import time
+
 import pytest
 
-from datadog_checks.dev import docker_run, RetryError
+from datadog_checks.dev import RetryError, docker_run
 from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.zk import ZookeeperCheck
 from datadog_checks.zk.zk import ZKConnectionFailure
-
 
 CHECK_NAME = 'zk'
 HOST = get_docker_hostname()
@@ -32,7 +32,7 @@ STAT_METRICS = [
     'zookeeper.nodes',
     'zookeeper.instances',
     'zookeeper.packets.received',
-    'zookeeper.packets.sent'
+    'zookeeper.packets.sent',
 ]
 
 MNTR_METRICS = [
@@ -51,45 +51,22 @@ MNTR_METRICS = [
     'zookeeper.max_latency',
 ]
 
-STATUS_TYPES = [
-    'leader',
-    'follower',
-    'observer',
-    'standalone',
-    'down',
-    'inactive',
-    'unknown',
-]
+STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
 
 
 @pytest.fixture(scope="session")
 def get_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'expected_mode': "standalone",
-        'tags': ["mytag"]
-    }
+    return {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
 
 
 @pytest.fixture
 def get_invalid_mode_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'expected_mode': "follower",
-        'tags': []
-    }
+    return {'host': HOST, 'port': PORT, 'expected_mode': "follower", 'tags': []}
 
 
 @pytest.fixture
 def get_conn_failure_config():
-    return {
-        'host': HOST,
-        'port': 2182,
-        'expected_mode': "down",
-        'tags': []
-    }
+    return {'host': HOST, 'port': 2182, 'expected_mode': "down", 'tags': []}
 
 
 def get_version():

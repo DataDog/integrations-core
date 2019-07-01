@@ -31,8 +31,7 @@ def test_check(aggregator, check):
 
     with open(os.path.join(common.FIXTURE_DIR, "process_stats")) as f:
         with patch(
-            'datadog_checks.linux_proc_extras.linux_proc_extras.get_subprocess_output',
-            return_value=(f.read(), "", 0)
+            'datadog_checks.linux_proc_extras.linux_proc_extras.get_subprocess_output', return_value=(f.read(), "", 0)
         ):
             check.get_process_states()
 

@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import pytest
 import socket
+
+import pytest
 
 from datadog_checks.riak import Riak
 
@@ -292,9 +293,7 @@ CHECK_GAUGES_STATS = [
     'riak.riak_pipe_vnodeq_total',
 ]
 
-GAUGE_OTHER = [
-    'riak.coord_redirs',
-]
+GAUGE_OTHER = ['riak.coord_redirs']
 
 # The below metrics for leveldb and read repair
 # appear when they have no values, however they

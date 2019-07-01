@@ -72,9 +72,7 @@ instances:
   #   - dev.example.com
 ```
 
-To collect metrics on a per-site basis, you *must* use the `sites` option. The Agent collects metrics for each site you list and tags them with the site name - `iis.net.num_connections` tagged with `site:example.com`, and `iis.net.num_connections` tagged with `site:dev.example.com`.
-
-If you don't configure `sites`, the Agent collects all the same metrics, but their values reflect totals across all sites - `iis.net.num_connections` is the total number of connections on the IIS server; you will not have visibility into per-site metrics.
+Use the `sites` option to collect metrics on a per-site basis. When setup, the Agent collects metrics for each site you list and tags them with the corresponding site name. If you don't configure `sites`, the Agent collects the same metrics, but their values reflect totals across all sites.
 
 You can also monitor sites on remote IIS servers. See the [sample iis.d/conf.yaml][5] for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
 

@@ -1,5 +1,13 @@
 # CHANGELOG - couch
 
+## 3.3.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3493](https://github.com/DataDog/integrations-core/pull/3493).
+
+## 3.2.1 / 2019-03-29
+
+* [Fixed] Include exception in connection error messages. See [#3262](https://github.com/DataDog/integrations-core/pull/3262).
+
 ## 3.2.0 / 2019-02-18
 
 * [Added] Finish Python 3 Support. See [#2911](https://github.com/DataDog/integrations-core/pull/2911).

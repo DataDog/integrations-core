@@ -3,12 +3,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from collections import defaultdict
 import re
+from collections import defaultdict
 
 import requests
-
-from six import string_types, iteritems
+from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
@@ -22,6 +21,7 @@ TAGS = "tags"
 GAUGE = "gauge"
 RATE = "rate"
 COUNTER = "counter"
+MONOTONIC_COUNTER = "monotonic_counter"
 DEFAULT_TYPE = GAUGE
 
 
@@ -29,6 +29,7 @@ SUPPORTED_TYPES = {
     GAUGE: AgentCheck.gauge,
     RATE: AgentCheck.rate,
     COUNTER: AgentCheck.increment,
+    MONOTONIC_COUNTER: AgentCheck.monotonic_count,
 }
 
 DEFAULT_METRIC_NAMESPACE = "go_expvar"
@@ -37,32 +38,38 @@ DEFAULT_METRIC_NAMESPACE = "go_expvar"
 # See http://golang.org/pkg/runtime/#MemStats
 DEFAULT_GAUGE_MEMSTAT_METRICS = [
     # General statistics
-    "Alloc", "TotalAlloc",
-
+    "Alloc",
+    "TotalAlloc",
     # Main allocation heap statistics
-    "HeapAlloc", "HeapSys", "HeapIdle", "HeapInuse",
-    "HeapReleased", "HeapObjects",
-
+    "HeapAlloc",
+    "HeapSys",
+    "HeapIdle",
+    "HeapInuse",
+    "HeapReleased",
+    "HeapObjects",
 ]
 
 DEFAULT_RATE_MEMSTAT_METRICS = [
     # General statistics
-    "Lookups", "Mallocs", "Frees",
-
+    "Lookups",
+    "Mallocs",
+    "Frees",
     # Garbage collector statistics
-    "PauseTotalNs", "NumGC",
+    "PauseTotalNs",
+    "NumGC",
 ]
 
-DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] +\
-    [{PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS]
+DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] + [
+    {PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS
+]
 
 GO_EXPVAR_URL_PATH = "/debug/vars"
 
 
 class GoExpvar(AgentCheck):
-
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+        self._regexes = {}
         self._last_gc_count = defaultdict(int)
 
     def _get_data(self, url, instance):
@@ -89,12 +96,7 @@ class GoExpvar(AgentCheck):
         else:
             cert = None
 
-        resp = requests.get(
-            url,
-            timeout=10,
-            verify=verify,
-            cert=cert
-        )
+        resp = requests.get(url, timeout=10, verify=verify, cert=cert)
         resp.raise_for_status()
         return resp.json()
 
@@ -136,9 +138,7 @@ class GoExpvar(AgentCheck):
         self._last_gc_count[url] = num_gc
 
         for value in values:
-            self.histogram(
-                self.normalize("memstats.PauseNs", namespace, fix_case=True),
-                value, tags=tags)
+            self.histogram(self.normalize("memstats.PauseNs", namespace, fix_case=True), value, tags=tags)
 
     def check(self, instance):
         data, tags, metrics, max_metrics, url, namespace = self._load(instance)
@@ -189,8 +189,10 @@ class GoExpvar(AgentCheck):
                     continue
 
                 if count >= max_metrics:
-                    self.warning("Reporting more metrics than the allowed maximum. "
-                                 "Please contact support@datadoghq.com for more information.")
+                    self.warning(
+                        "Reporting more metrics than the allowed maximum. "
+                        "Please contact support@datadoghq.com for more information."
+                    )
                     return
 
                 SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags + path_tag)
@@ -232,16 +234,26 @@ class GoExpvar(AgentCheck):
             return [(traversed_path, content)]
 
         key = keys[0]
-        regex = "".join(["^", key, "$"])
-        try:
-            key_rex = re.compile(regex)
-        except Exception:
-            self.warning("Cannot compile regex: %s" % regex)
-            return []
+        if key.isalnum():
+            # key is not a regex, simply match for equality
+            matcher = key.__eq__
+        else:
+            # key might be a regex
+            key_regex = self._regexes.get(key)
+            if key_regex is None:
+                # we don't have it cached, compile it
+                regex = "^{}$".format(key)
+                try:
+                    key_regex = re.compile(regex)
+                except Exception:
+                    self.warning("Cannot compile regex: %s" % regex)
+                    return []
+                self._regexes[key] = key_regex
+            matcher = key_regex.match
 
         results = []
         for new_key, new_content in self.items(content):
-            if key_rex.match(new_key):
+            if matcher(new_key):
                 results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
         return results
 
@@ -253,5 +265,4 @@ class GoExpvar(AgentCheck):
             for new_key, new_content in iteritems(object):
                 yield str(new_key), new_content
         else:
-            self.log.warning("Could not parse this object, check the json"
-                             "served by the expvar")
+            self.log.warning("Could not parse this object, check the json served by the expvar")

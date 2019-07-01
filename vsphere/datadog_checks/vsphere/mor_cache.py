@@ -4,6 +4,8 @@
 import threading
 import time
 
+from six import iteritems
+
 
 class MorNotFoundError(Exception):
     pass
@@ -14,6 +16,7 @@ class MorCache:
     Implements a thread safe storage for Mor objects.
     For each instance key, the cache maps: mor_name --> mor_dict_object
     """
+
     def __init__(self):
         self._mor = {}
         self._mor_lock = threading.RLock()
@@ -82,7 +85,7 @@ class MorCache:
         Generator returning all the mors in the cache for the given instance key.
         """
         with self._mor_lock:
-            for k, v in self._mor.get(key, {}).iteritems():
+            for k, v in iteritems(self._mor.get(key, {})):
                 yield k, v
 
     def mors_batch(self, key, batch_size):
@@ -100,11 +103,11 @@ class MorCache:
             if mors_dict is None:
                 yield {}
 
-            mor_names = mors_dict.keys()
+            mor_names = list(mors_dict)
             mor_names.sort()
             total = len(mor_names)
             for idx in range(0, total, batch_size):
-                names_chunk = mor_names[idx:min(idx + batch_size, total)]
+                names_chunk = mor_names[idx : min(idx + batch_size, total)]
                 yield {name: mors_dict[name] for name in names_chunk}
 
     def purge(self, key, ttl):
@@ -118,7 +121,7 @@ class MorCache:
         with self._mor_lock:
             # Don't change the dict during iteration!
             # First collect the names of the Mors to remove...
-            for name, mor in self._mor[key].iteritems():
+            for name, mor in iteritems(self._mor[key]):
                 age = now - mor['creation_time']
                 if age > ttl:
                     mors_to_purge.append(name)

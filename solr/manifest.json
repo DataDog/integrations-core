@@ -1,7 +1,6 @@
 {
   "categories": [
-    "data store",
-    "search"
+    "data store"
   ],
   "creates_events": false,
   "display_name": "Solr",
@@ -24,5 +23,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "solr"
+  "integration_id": "solr",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

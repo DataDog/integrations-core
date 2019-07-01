@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+
 import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.gearmand import Gearman
 
-from .common import HERE, CHECK_NAME, INSTANCE
+from .common import CHECK_NAME, HERE, INSTANCE
 
 
 @pytest.fixture(scope="session")

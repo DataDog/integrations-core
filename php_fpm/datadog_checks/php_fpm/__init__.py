@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .php_fpm import PHPFPMCheck
 
-__all__ = [
-    '__version__',
-    'PHPFPMCheck',
-]
+__all__ = ['__version__', 'PHPFPMCheck']

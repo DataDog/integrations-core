@@ -25,5 +25,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "mysql"
+  "integration_id": "mysql",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

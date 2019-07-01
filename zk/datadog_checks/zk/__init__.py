@@ -4,7 +4,4 @@
 from .__about__ import __version__
 from .zk import ZookeeperCheck
 
-__all__ = [
-    '__version__',
-    'ZookeeperCheck'
-]
+__all__ = ['__version__', 'ZookeeperCheck']

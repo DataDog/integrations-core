@@ -1,5 +1,14 @@
 # CHANGELOG - openstack
 
+## 1.8.1 / 2019-06-01
+
+* [Fixed] Fix code style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).
+* [Fixed] Sanitize external host tags. See [#3792](https://github.com/DataDog/integrations-core/pull/3792).
+
+## 1.8.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3550](https://github.com/DataDog/integrations-core/pull/3550).
+
 ## 1.7.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#3035](https://github.com/DataDog/integrations-core/pull/3035).

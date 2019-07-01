@@ -99,6 +99,8 @@ GRANT CONNECT TO datadog;
 GRANT SELECT ON GV_$PROCESS TO datadog;
 GRANT SELECT ON gv_$sysmetric TO datadog;
 GRANT SELECT ON sys.dba_data_files TO datadog;
+GRANT SELECT ON sys.dba_tablespaces TO datadog;
+GRANT SELECT ON sys.dba_tablespace_usage_metrics TO datadog;
 ```
 
 **Note**: If you're using Oracle 11g, there's no need to run the following line:
@@ -122,7 +124,7 @@ Providing custom queries is also supported. Each query must have 3 parameters:
 | Parameter | Description |
 | ----      | ---         |
 | `metric_prefix`  | This is what each metric starts with. |
-| `query`  | This is the SQL to execute. It can be a simple statement or a multi-line script. Only the first row of the result is read. |
+| `query`  | This is the SQL to execute. It can be a simple statement or a multi-line script. All rows of the result are evaluated. |
 | `columns` | This is a list representing each column, ordered sequentially from left to right. There are 2 required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix to append to the `metric_prefix` in order to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
 
 Optionally use the `tags` parameter to apply a list of tags to each metric collected.

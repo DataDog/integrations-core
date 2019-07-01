@@ -12,7 +12,34 @@ Containerd is a core Agent 6 check and thus needs to be configured in both in `d
 
 In `datadog.yaml`, configure your `cri_socket_path` for the Agent to query Containerd. In `containerd.d/conf.yaml`, configure the Check instance settings (such as `filters`) for the events.
 
-**Note**: If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable automatically enables the `Containerd` Check with the default configuration.
+#### Installation on containers
+
+If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable to the Containerd socket automatically enables the `Containerd` Check with the default configuration.
+
+For example, to install the integration on Kubernetes, edit your `datadog-agent.yaml` to map the Containerd socket from the host node to the daemonset and set the `DD_CRI_SOCKET_PATH` to the daemonset mountPath:
+
+```
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: datadog-agent
+spec:
+  template:
+    spec:
+      containers:
+        - name: datadog-agent
+          ...
+          env:
+            - name: DD_CRI_SOCKET_PATH
+              value: "/var/run/containerd/containerd.sock"
+          volumeMounts:
+            - name: containerdsocket
+              mountPath: /var/run/containerd/containerd.sock
+          volumes:
+            - hostPath:
+                path: /var/run/containerd/containerd.sock
+              name: containerdsocket
+```
 
 ### Configuration
 
@@ -51,4 +78,4 @@ Need help? Contact [Datadog support][2].
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/containerd.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/help
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[4]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv
+[4]: https://github.com/DataDog/integrations-core/blob/master/containerd/metadata.csv
