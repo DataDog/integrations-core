@@ -40,7 +40,7 @@ class ApiFactory(object):
         openstack_config_file_path = instance_config.get("openstack_config_file_path")
         openstack_cloud_name = instance_config.get("openstack_cloud_name")
 
-        # If an openstack configuration is specified, an OpenstackSDKApi will be created, and the authentication
+        # If an OpenStack configuration is specified, an OpenstackSDKApi is created, and the authentication
         # will be made directly from the openstack configuration file
         if openstack_cloud_name is None:
             keystone_server_url = instance_config.get("keystone_server_url")
