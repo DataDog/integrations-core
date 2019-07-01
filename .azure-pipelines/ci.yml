@@ -1,12 +1,12 @@
+trigger:
+- master
+
+pr:
+- master
+
 stages:
 - stage: Test changed
   condition: eq(variables['Build.Reason'], 'PullRequest')
-
-  trigger:
-  - master
-
-  pr:
-  - master
 
   jobs:
   - job: Linux
