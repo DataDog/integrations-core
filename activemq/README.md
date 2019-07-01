@@ -109,7 +109,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
         service: <SERVICE_NAME>
     ```
 
- 3. [Restart the Agent][5].
+ 3. [Restart the Agent][7].
 
 
 ### Validation
