@@ -61,8 +61,12 @@ setup(
     packages=['datadog_checks'],
     include_package_data=True,
     extras_require={
-        'deps': get_requirements('requirements.in', exclude=['kubernetes', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton']),
-        'http': get_requirements('requirements.in', only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton']),
+        'deps': get_requirements(
+            'requirements.in', exclude=['kubernetes', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton']
+        ),
+        'http': get_requirements(
+            'requirements.in', only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton']
+        ),
         'kube': get_requirements('requirements.in', only=['kubernetes']),
     },
 )
