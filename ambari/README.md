@@ -23,27 +23,19 @@ start collecting your Ambari performance data. See the [sample ambari.d/conf.yam
 [Run the Agent's status subcommand][4] and look for `ambari` under the Checks section.
 
 
+## Data collected
 ### Metrics
 
-This integration collects for every host in every cluster the following system metrics:
-
-* boottime
-* cpu
-* disk
-* memory
-* load
-* network
-* process
-
-If service metrics collection is enabled with `collect_service_metrics` this integration will collect for each
-whitelisted service component the metrics with headers in the white list.
 See [metadata.csv][7] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
-- `ambari.can_connect` - Returns `OK` if the cluster is reachable, `CRITICAL` otherwise.
-- `ambari.state` - Returns `OK` if the service is installed or running, `WARNING` if the service is stopping or uninstalling,
-  or `CRITICAL` if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
+**ambari.can_connect**<br>
+Returns OK if the cluster is reachable, CRITICAL otherwise.
+
+**ambari.state**<br>
+Returns OK if the service is installed or running, WARNING if the service is stopping or uninstalling,
+or CRITICAL if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
 
 ### Events
 
