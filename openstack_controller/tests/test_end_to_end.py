@@ -153,7 +153,7 @@ def make_request_responses(url, header, params=None, timeout=None):
     elif url == "http://10.0.2.15:9696/v2.0/networks":
         mock_path = "v2.0_networks.json"
     else:
-        raise RuntimeError()
+        raise RuntimeError("Url '{}' not an expected value".format(url))
 
     mock_path = os.path.join(common.FIXTURES_DIR, mock_path)
     with open(mock_path, 'r') as f:
@@ -194,8 +194,6 @@ def test_scenario(make_request, aggregator):
             return_value=auth_projects_response,
         ):
             check.check(common.MOCK_CONFIG['instances'][0])
-            print('hello')
-            '''
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
                 value=0.0,
@@ -7121,4 +7119,3 @@ def test_scenario(make_request, aggregator):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
-'''

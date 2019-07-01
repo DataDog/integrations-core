@@ -590,7 +590,7 @@ class OpenStackControllerCheck(AgentCheck):
         ):
             self.service_check(self.NETWORK_API_SC, AgentCheck.CRITICAL, tags=service_check_tags)
 
-    def init_api(self, instance_config, custom_tags):
+    def init_api(self, instance_config, keystone_server_url, custom_tags):
         """
         Guarantees a valid auth scope for this instance, and returns it
 
@@ -598,8 +598,6 @@ class OpenStackControllerCheck(AgentCheck):
         removed due to token expiry
         """
         custom_tags = custom_tags or []
-        keystone_server_url = self._get_keystone_server_url(instance_config)
-
         proxy_config = self.get_instance_proxy(instance_config, keystone_server_url)
 
         if self._api is None:
@@ -696,13 +694,13 @@ class OpenStackControllerCheck(AgentCheck):
 
         try:
             # Authenticate and add the instance api to apis cache
-            self.init_api(instance, custom_tags)
+            keystone_server_url = self._get_keystone_server_url(instance)
+            self.init_api(instance, keystone_server_url, custom_tags)
             if self._api is None:
                 self.log.info("Not api found, make sure you admin user has access to your OpenStack projects: \n")
                 return
 
             self.log.debug("Running check with credentials: \n")
-            keystone_server_url = self._api.get_keystone_endpoint()
             self._send_api_service_checks(keystone_server_url, custom_tags)
 
             # List projects and filter them
