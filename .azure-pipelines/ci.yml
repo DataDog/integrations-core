@@ -5,7 +5,7 @@ pr:
 - master
 
 stages:
-- stage: Test changed
+- stage: Test_Changed
   condition: eq(variables['Build.Reason'], 'PullRequest')
 
   jobs:
@@ -32,7 +32,7 @@ stages:
     - script: ddev test --changed --cov datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
       displayName: 'Run Windows tests'
 
-# - stage: Test all
+# - stage: Test_All
 #   condition: ne(variables['Build.Reason'], 'PullRequest')
 #   jobs:
 #   - job: B1
