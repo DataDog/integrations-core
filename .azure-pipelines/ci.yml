@@ -1,15 +1,13 @@
-trigger:
-- master
-
-pr:
-- master
-
-pool:
-  vmImage: 'ubuntu-latest'
-
 stages:
 - stage: Test changed
   condition: eq(variables['Build.Reason'], 'PullRequest')
+
+  trigger:
+  - master
+
+  pr:
+  - master
+
   jobs:
   - job: Linux
 
