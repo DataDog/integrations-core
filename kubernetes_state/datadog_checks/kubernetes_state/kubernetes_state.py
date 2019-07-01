@@ -676,7 +676,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 start_time = self.job_start_time[job_tags]
                 tags = list(scraper_config['custom_tags'])
                 for job_tag in job_tags:
-                    label_name, label_value = job_tag.split(":", 2)
+                    label_name, label_value = job_tag.split(":", 1)
                     if label_name in ('job', 'job_name'):
                         trimmed_job = self._trim_job_tag(label_value)
                         tags.append(self._format_tag(label_name, label_value, scraper_config))
