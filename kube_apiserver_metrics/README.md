@@ -1,4 +1,4 @@
-# Agent Check: Kube_apiserver_metrics
+# Agent Check: Kubernetes API server metrics
 
 ## Overview
 
