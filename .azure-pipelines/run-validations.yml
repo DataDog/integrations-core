@@ -1,0 +1,21 @@
+steps:
+- script: ddev validate agent-reqs
+  displayName: 'Validate Agent requirements'
+
+- script: ddev validate config
+  displayName: 'Validate default configuration files'
+
+- script: ddev validate dep
+  displayName: 'Validate dependencies'
+
+- script: ddev validate logos
+  displayName: 'Validate logos'
+
+- script: ddev validate manifest --include-extras
+  displayName: 'Validate manifest files'
+
+- script: ddev validate metadata
+  displayName: 'Validate metric data'
+
+- script: ddev validate service-checks
+  displayName: 'Validate service check data'

@@ -1,0 +1,16 @@
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.7'
+  displayName: 'Use Python 3.7'
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '2.7'
+  displayName: 'Use Python 2.7'
+
+- script: |
+    python -m pip install --disable-pip-version-check --upgrade pip setuptools
+    pip install ./datadog_checks_dev[cli]
+    ddev config set core .
+  displayName: 'Install dependencies'
