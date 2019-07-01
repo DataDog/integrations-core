@@ -11,6 +11,7 @@ from datadog_checks.config import is_affirmative
 
 class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
+    DEFAULT_IGNORE_DEPRECATED = False
 
     DEFAUT_RATE_LIMITERS = [
         "bootstrap_signer",
@@ -89,6 +90,16 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             '_work_duration': self.queue_work_duration,
         }
 
+        self.WORKQUEUE_METRICS_RENAMING = {
+            'workqueue_adds_total': 'queue.adds',
+            'workqueue_retries_total': 'queue.retries',
+            'workqueue_depth': 'queue.depth',
+            'workqueue_unfinished_work_seconds': 'queue.work_unfinished_duration',
+            'workqueue_longest_running_processor_seconds': 'queue.work_longest_duration',
+            'workqueue_queue_duration_seconds': 'queue.queue_duration',  # replace _queue_latency
+            'workqueue_work_duration_seconds': 'queue.process_duration',  # replace _work_duration
+        }
+
         super(KubeControllerManagerCheck, self).__init__(
             name,
             init_config,
@@ -127,6 +138,14 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             for metric, func in iteritems(self.QUEUE_METRICS_TRANSFORMERS):
                 transformers[queue + metric] = func
 
+        # Support new metrics (introduced in v1.14.0)
+        for metric_name in self.WORKQUEUE_METRICS_RENAMING:
+            transformers[metric_name] = self.workqueue_transformer
+
+        self.ignore_deprecated_metrics = instance.get("ignore_deprecated", self.DEFAULT_IGNORE_DEPRECATED)
+        if self.ignore_deprecated_metrics:
+            self._filter_metric = self._ignore_deprecated_metric
+
         self.process(scraper_config, metric_transformers=transformers)
 
         # Check the leader-election status
@@ -134,6 +153,9 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             leader_config = self.LEADER_ELECTION_CONFIG
             leader_config["tags"] = instance.get("tags", [])
             self.check_election_status(leader_config)
+
+    def _ignore_deprecated_metric(self, metric):
+        return metric.documentation.startswith("(Deprecated)")
 
     def _tag_and_submit(self, metric, scraper_config, metric_name, tag_name, tag_value_trim):
         # Get tag value from original metric name or return trying
@@ -164,3 +186,17 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
 
     def queue_work_duration(self, metric, scraper_config):
         self._tag_and_submit(metric, scraper_config, "queue.work_duration", "queue", "_work_duration")
+
+    #  for new metrics
+    def workqueue_transformer(self, metric, scraper_config):
+        self._tag_renaming_and_submit(metric, scraper_config, self.WORKQUEUE_METRICS_RENAMING[metric.name])
+
+    def _tag_renaming(self, metric, new_tag_name, old_tag_name):
+        for sample in metric.samples:
+            sample[self.SAMPLE_LABELS][new_tag_name] = sample[self.SAMPLE_LABELS][old_tag_name]
+            del sample[self.SAMPLE_LABELS][old_tag_name]
+
+    def _tag_renaming_and_submit(self, metric, scraper_config, new_metric_name):
+        #  rename the tag "name" to "queue" and submit this metric with the new metrics_name
+        self._tag_renaming(metric, "queue", "name")
+        self.submit_openmetric(new_metric_name, metric, scraper_config)
