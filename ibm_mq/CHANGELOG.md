@@ -1,5 +1,8 @@
 # CHANGELOG - IBM MQ
 
+## 3.0.1-rc.2 / 2019-07-02
+
+
 ## 3.0.1-rc.1 / 2019-07-02
 
 * [Added] Add ibm_mq.channel.count metric and ibm_mq.channel.status service check. See [#3958](https://github.com/DataDog/integrations-core/pull/3958).
