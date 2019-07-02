@@ -7120,3 +7120,11 @@ def test_scenario(make_request, aggregator):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+
+
+def test_check(aggregator, dd_environment):
+    instance, agent_config = dd_environment
+    init_config = {}
+    check = OpenStackControllerCheck('openstack_controller', init_config, agent_config, instances=[instance])
+    check.check(instance)
+    aggregator.assert_metric('openstack.nova.hypervisor_load.1')
