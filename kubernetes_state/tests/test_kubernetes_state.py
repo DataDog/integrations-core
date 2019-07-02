@@ -210,7 +210,7 @@ class MockResponse:
 
 @pytest.fixture
 def instance():
-    return {'host': 'foo', 'kube_state_url': 'http://foo', 'tags': ['optional:tag1']}
+    return {'host': 'foo', 'kube_state_url': 'http://foo', 'tags': ['optional:tag1'], 'telemetry_enable': False}
 
 
 @pytest.fixture
@@ -379,3 +379,22 @@ def test_pod_phase_gauges(aggregator, instance, check):
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2
     )
+
+
+def test_telemetry(aggregator, instance, check):
+    instance['telemetry_enable'] = True
+    instance['_text_filter_blacklist'] = ['resourcequota']
+
+    endpoint = instance['kube_state_url']
+    scraper_config = check.config_map[endpoint]
+
+    # this would be normally done in the __init__ function of the check
+    scraper_config['telemetry_enable'] = instance['telemetry_enable']
+    scraper_config['_text_filter_blacklist'] = instance['_text_filter_blacklist']
+
+    for _ in range(2):
+        check.check(instance)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=87416.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=230.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=230.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)

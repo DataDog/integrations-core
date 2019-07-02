@@ -31,6 +31,12 @@ class OpenMetricsScraperMixin(object):
     SAMPLE_LABELS = 1
     SAMPLE_VALUE = 2
 
+    TELEMETRY_GAUGE_MESSAGE_SIZE = "payload.size"
+    TELEMETRY_COUNTER_METRICS_BLACKLIST_COUNT = "metrics.blacklist.count"
+    TELEMETRY_COUNTER_METRICS_INPUT_COUNT = "metrics.input.count"
+    TELEMETRY_COUNTER_METRICS_IGNORE_COUNT = "metrics.ignored.count"
+    TELEMETRY_COUNTER_METRICS_PROCESS_COUNT = "metrics.processed.count"
+
     METRIC_TYPES = ['counter', 'gauge', 'summary', 'histogram']
 
     KUBERNETES_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
@@ -238,6 +244,8 @@ class OpenMetricsScraperMixin(object):
         # The service account bearer token to be used for authentication
         config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
 
+        config['telemetry_enable'] = is_affirmative(instance.get('telemetry', default_instance.get('telemetry', False)))
+
         return config
 
     def parse_metric_family(self, response, scraper_config):
@@ -252,6 +260,7 @@ class OpenMetricsScraperMixin(object):
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
         for metric in text_fd_to_metric_families(input_gen):
+            self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_INPUT_COUNT, 1, scraper_config)
             metric.type = scraper_config['type_overrides'].get(metric.name, metric.type)
             if metric.type not in self.METRIC_TYPES:
                 continue
@@ -269,6 +278,7 @@ class OpenMetricsScraperMixin(object):
         for line in input_gen:
             for item in scraper_config['_text_filter_blacklist']:
                 if item in line:
+                    self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_BLACKLIST_COUNT, 1, scraper_config)
                     break
             else:
                 # No blacklist matches, passing the line through
@@ -283,6 +293,7 @@ class OpenMetricsScraperMixin(object):
         Poll the data from prometheus and return the metrics as a generator.
         """
         response = self.poll(scraper_config)
+        self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, len(response.content), scraper_config)
         try:
             # no dry run if no label joins
             if not scraper_config['label_joins']:
@@ -316,6 +327,27 @@ class OpenMetricsScraperMixin(object):
         """
         for metric in self.scrape_metrics(scraper_config):
             self.process_metric(metric, scraper_config, metric_transformers=metric_transformers)
+
+    def _telemetry_metric_name_with_namespace(self, metric_name, scraper_config):
+        return '{}.{}.{}'.format(scraper_config['namespace'], 'telemetry', metric_name)
+
+    def _send_telemetry_gauge(self, metric_name, val, scraper_config):
+        if scraper_config['telemetry_enable']:
+            metric_name_with_namespace = self._telemetry_metric_name_with_namespace(metric_name, scraper_config)
+            # Determine the tags to send
+            custom_tags = scraper_config['custom_tags']
+            tags = list(custom_tags)
+            tags.extend(scraper_config['_metric_tags'])
+            self.gauge(metric_name_with_namespace, val, tags=tags)
+
+    def _send_telemetry_counter(self, metric_name, val, scraper_config):
+        if scraper_config['telemetry_enable']:
+            metric_name_with_namespace = self._telemetry_metric_name_with_namespace(metric_name, scraper_config)
+            # Determine the tags to send
+            custom_tags = scraper_config['custom_tags']
+            tags = list(custom_tags)
+            tags.extend(scraper_config['_metric_tags'])
+            self.count(metric_name_with_namespace, 1.0, tags=tags)
 
     def _store_labels(self, metric, scraper_config):
         # If targeted metric, store labels
@@ -375,7 +407,10 @@ class OpenMetricsScraperMixin(object):
         # If targeted metric, store labels
         self._store_labels(metric, scraper_config)
 
+        self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, 1, scraper_config)
+
         if metric.name in scraper_config['ignore_metrics']:
+            self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, 1, scraper_config)
             return  # Ignore the metric
 
         if self._filter_metric(metric):
