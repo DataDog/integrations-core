@@ -44,6 +44,8 @@ class Network(AgentCheck):
 
     PSUTIL_FAMILY_MAPPING = {socket.AF_INET: '4', socket.AF_INET6: '6'}
 
+    STANDARD_PROC_LOCATION = ("/proc", "/host/proc")
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
         if instances is not None and len(instances) > 1:
@@ -269,11 +271,17 @@ class Network(AgentCheck):
         if self._collect_cx_state is False:
             return False
 
-        if proc_location != "/proc":
+        if proc_location not in self.STANDARD_PROC_LOCATION:
             self.warning("Cannot collect connection state: currently with a custom /proc path: %s" % proc_location)
             return False
 
         return True
+
+    def _append_proc_1(self, proc_location):
+        if Platform.is_containerized() and proc_location not in self.STANDARD_PROC_LOCATION:
+            proc_location = "%s/1" % proc_location
+
+        return proc_location
 
     def _check_linux(self, instance):
         """
@@ -282,10 +290,8 @@ class Network(AgentCheck):
         When a custom procfs_path is set, the collect_connection_state option is ignored
         """
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+        proc_location = self._append_proc_1(proc_location)
         custom_tags = instance.get('tags', [])
-
-        if Platform.is_containerized() and proc_location != "/proc":
-            proc_location = "%s/1" % proc_location
 
         if self._is_collect_cx_state_runnable(proc_location):
             try:

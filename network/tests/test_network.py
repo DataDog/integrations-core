@@ -290,3 +290,21 @@ def test_parse_protocol_psutil(aggregator, check):
     conn.family = socket.AF_INET
     protocol = check._parse_protocol_psutil(conn)
     assert protocol == 'udp4'
+
+
+@mock.patch('datadog_checks.network.network.Platform.is_containerized', return_value=True)
+def test_standard_proc_location(aggregator, check):
+    proc_location = check._append_proc_1("/proc")
+    assert proc_location == "/proc"
+
+
+@mock.patch('datadog_checks.network.network.Platform.is_containerized', return_value=True)
+def test_non_standard_proc_location(aggregator, check):
+    proc_location = check._append_proc_1("/home/proc")
+    assert proc_location == "/home/proc/1"
+
+
+@mock.patch('datadog_checks.network.network.Platform.is_containerized', return_value=True)
+def test_host_network_standard_proc_location(aggregator, check):
+    proc_location = check._append_proc_1("/host/proc")
+    assert proc_location == "/host/proc"
