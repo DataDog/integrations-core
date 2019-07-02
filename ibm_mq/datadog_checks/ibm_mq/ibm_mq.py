@@ -182,15 +182,15 @@ class IbmMqCheck(AgentCheck):
     def _discover_queues(self, config, pcf_conn):
         queues = []
         if config.auto_discover_queues:
-            queues.extend(self._discover_queues_from_mq_pattern(pcf_conn, '*'))
+            queues.extend(self._discover_queues_from_mq_pattern(config, pcf_conn, '*'))
 
         if config.queue_patterns:
             for pattern in config.queue_patterns:
-                queues.extend(self._discover_queues_from_mq_pattern(pcf_conn, pattern))
+                queues.extend(self._discover_queues_from_mq_pattern(config, pcf_conn, pattern))
 
         if config.queue_regex:
             if not queues:
-                queues = self._discover_queues_from_mq_pattern(pcf_conn, '*')
+                queues = self._discover_queues_from_mq_pattern(config, pcf_conn, '*')
             keep_queues = []
             for queue_pattern in config.queue_regex:
                 for queue in queues:
@@ -200,7 +200,7 @@ class IbmMqCheck(AgentCheck):
 
         return queues
 
-    def _discover_queues_from_mq_pattern(self, pcf_conn, mq_pattern):
+    def _discover_queues_from_mq_pattern(self, config, pcf_conn, mq_pattern):
         queues = []
 
         for queue_type in constants.SUPPORTED_QUEUE_TYPES:
@@ -211,11 +211,18 @@ class IbmMqCheck(AgentCheck):
                 self.warning("Error discovering queue: {}".format(e))
             else:
                 for queue_info in response:
-                    queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    if queue_info[pymqi.CMQC.MQIA_DEFINITION_TYPE] == pymqi.CMQC.MQQDT_PREDEFINED:
-                        queues.append(ensure_unicode(queue).strip())
+                    queue_name = ensure_unicode(queue_info[pymqi.CMQC.MQCA_Q_NAME]).strip()
+                    if self._match_definition_type(config, queue_info):
+                        queues.append(queue_name)
 
         return queues
+
+    @staticmethod
+    def _match_definition_type(config, queue_info):
+        # match all definition types if config.queue_definition_types is empty.
+        if not config.queue_definition_types:
+            return True
+        return queue_info[pymqi.CMQC.MQIA_DEFINITION_TYPE] in config.queue_definition_types
 
     @staticmethod
     def _get_queue_tags(config, queue_name):

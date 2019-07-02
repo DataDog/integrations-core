@@ -7,6 +7,7 @@ import pymqi
 from six import iteritems
 
 from datadog_checks.ibm_mq import IbmMqCheck, constants
+from datadog_checks.ibm_mq.config import Config
 
 
 def test_check_channel_count(aggregator, instance_queue_regex_tag):
@@ -79,9 +80,20 @@ def test__discover_queues():
         {pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.PREDEFINED2', pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED},
     ]
 
-    queues = check._discover_queues_from_mq_pattern(pcf_conn, 'dummy')
+    config = Config({'queue_definition_types': ['PREDEFINED', 'TEMPORARY_DYNAMIC']})
+    queues = check._discover_queues_from_mq_pattern(config, pcf_conn, 'dummy')
 
-    assert set(queues) == {'MY.QUEUE.PREDEFINED1', 'MY.QUEUE.PREDEFINED2'}
+    assert set(queues) == {'MY.QUEUE.PREDEFINED1', 'MY.QUEUE.PREDEFINED2', 'MY.QUEUE.TEMPORARY_DYNAMIC'}
+
+    config = Config({'queue_definition_types': []})
+    queues = check._discover_queues_from_mq_pattern(config, pcf_conn, 'dummy')
+    assert set(queues) == {
+        'MY.QUEUE.PREDEFINED1',
+        'MY.QUEUE.PREDEFINED2',
+        'MY.QUEUE.TEMPORARY_DYNAMIC',
+        'MY.QUEUE.SHARED_DYNAMIC',
+        'MY.QUEUE.PERMANENT_DYNAMIC',
+    }
 
 
 def test__submit_channel_stats(aggregator):

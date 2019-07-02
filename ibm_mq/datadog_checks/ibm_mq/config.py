@@ -5,6 +5,7 @@
 import logging
 import re
 
+import pymqi
 from six import iteritems
 
 from datadog_checks.config import is_affirmative
@@ -40,6 +41,7 @@ class Config:
         self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
+        self.queue_definition_types = self._convert_queue_definition_types(instance.get('queue_definition_types', []))
 
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             log.warning(
@@ -79,6 +81,20 @@ class Config:
             except TypeError:
                 log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         return queue_tag_list
+
+    @staticmethod
+    def _convert_queue_definition_types(raw_queue_definition_types):
+        """
+        Convert queue definition to constants available in `pymqi.CMQC.MQQDT_*`
+        """
+        definition_types = []
+        for raw_def_type in raw_queue_definition_types:
+            def_type = getattr(pymqi.CMQC, "MQQDT_" + raw_def_type, None)
+            if def_type is not None:
+                definition_types.append(def_type)
+            else:
+                log.warning('This definition type `{}` not found. Skipped.'.format(raw_def_type))
+        return definition_types
 
     @property
     def tags(self):

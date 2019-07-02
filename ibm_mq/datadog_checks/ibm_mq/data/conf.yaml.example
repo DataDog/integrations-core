@@ -63,6 +63,14 @@ instances:
     #
     # auto_discover_queues: false
 
+    ## @param queue_definition_types - list of string - optional
+    ## List of queue definition type to match for auto-discovery.
+    ## If not set, all definition types are matched.
+    ## Possible values are: PREDEFINED, PERMANENT_DYNAMIC, TEMPORARY_DYNAMIC, SHARED_DYNAMIC
+    #
+    # queue_definition_types:
+    #   - 'PREDEFINED'
+
     ## @param ssl_auth - string - optional
     ## Whether or not to use SSL auth while connecting to the channel.
     #
