@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.0.1-rc.1 / 2019-07-02
+
+* [Added] Add ibm_mq.channel.count metric and ibm_mq.channel.status service check. See [#3958](https://github.com/DataDog/integrations-core/pull/3958).
+
 ## 3.0.0 / 2019-06-20
 
 * [Changed] [ibm_mq] fix queue auto discovery to include any type in addition to qmodel and included regex matching on queue names. See [#3893](https://github.com/DataDog/integrations-core/pull/3893).
