@@ -5,7 +5,7 @@
         "check": "kube_metrics_server.prometheus.health",
         "statuses": ["ok", "critical"],
         "groups": ["host", "endpoint"],
-        "name": "Kube Metrics Server prometheus health",
+        "name": "Kubernetes Metrics Server prometheus health",
         "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint."
     }
 ]
