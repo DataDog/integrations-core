@@ -1,6 +1,12 @@
-pr: none
 trigger:
-- master
+  branches:
+    include:
+    - master
+
+pr:
+  paths:
+    include:
+    - datadog_checks_base/datadog_checks/*
 
 jobs:
 - template: './test-all.yml'
