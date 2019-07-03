@@ -305,44 +305,46 @@ class AggregatorStub(object):
         similar_metrics_to_print = []
 
         for score, metric_stub in similar_metrics[:max_metrics_to_display]:
-            similar_metrics_to_print.append("{:.2f}: {}".format(score, metric_stub))
+            similar_metrics_to_print.append("{:.2f}    {}".format(score, metric_stub))
 
         return (
             "Expected metric:\n"
-            + "      {}\n".format(expected)
+            + "        {}\n".format(expected)
             + "Similar submitted metrics:\n"
+            + "Score   Metric\n"
             + "\n".join(similar_metrics_to_print)
         )
 
-    def _get_similar_metrics(self, expected):
+    def _get_similar_metrics(self, expected_metric):
         """
         Return similar metrics received compared to a the given metric stub
         """
         similar_metric_stubs = []
         for _, metric_stubs in iteritems(self._metrics):
-            for metric_stub in metric_stubs:
-                similar_metric_stubs.append((self._get_similarity_score(expected, metric_stub), metric_stub))
+            for candidate_metric in metric_stubs:
+                score = self._get_similarity_score(expected_metric, candidate_metric)
+                similar_metric_stubs.append((score, candidate_metric))
         return sorted(similar_metric_stubs, reverse=True)
 
     @staticmethod
-    def _get_similarity_score(expected, candidate):
+    def _get_similarity_score(expected_metric, candidate_metric):
         def similar(a, b):
             return SequenceMatcher(None, a, b).ratio()
 
         # Tuple of (score, weight)
-        scores = [(similar(expected.name, candidate.name), 2)]
+        scores = [(similar(expected_metric.name, candidate_metric.name), 2)]
 
-        if expected.type is not None:
-            scores.append((1 if expected.type == candidate.type else 0, 1))
+        if expected_metric.type is not None:
+            scores.append((1 if expected_metric.type == candidate_metric.type else 0, 1))
 
-        if expected.tags is not None:
-            scores.append((similar(str(sorted(expected.tags)), str(sorted(candidate.tags))), 1))
+        if expected_metric.tags is not None:
+            scores.append((similar(str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags))), 1))
 
-        if expected.value is not None:
-            scores.append((1 if expected.value == candidate.value else 0, 1))
+        if expected_metric.value is not None:
+            scores.append((1 if expected_metric.value == candidate_metric.value else 0, 1))
 
-        if expected.hostname:
-            scores.append((similar(expected.hostname, candidate.hostname), 1))
+        if expected_metric.hostname:
+            scores.append((similar(expected_metric.hostname, candidate_metric.hostname), 1))
 
         score_total = 0
         weight_total = 0
