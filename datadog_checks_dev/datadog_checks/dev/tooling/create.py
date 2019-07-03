@@ -51,8 +51,13 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         author = 'U.N. Owen'
         email = email_packages = 'friend@datadog.community'
         install_info = (
-            'The {} check is not included in the [Datadog Agent][2] package, so it must\n'
-            'be installed manually.'.format(integration_name)
+            'To install the {integration_name} check on your host:\n\n'
+            '    1. Install the developer toolkit on any machine.\n'
+            '    2. Run ddev release build aqua to build the package.\n'
+            '    3. Download the Datadog Agent.\n'
+            '    4. Upload the build artifact to any host with an Agent and'
+            'run datadog-agent integration install -w path/to/aqua/dist/<ARTIFACT_NAME>.whl.\n'
+            .format(integration_name=integration_name)
         )
         license_header = ''
         support_type = 'contrib'
