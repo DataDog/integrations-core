@@ -12,7 +12,7 @@ stages:
   dependsOn: []
 
   # Run only on master
-  condition: eq(variables['Build.Reason'], 'PullRequest')
+  condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - template: './test-all.yml'
@@ -24,7 +24,7 @@ stages:
   dependsOn: []
 
   # Run only on pull requests
-  condition: ne(variables['Build.Reason'], 'PullRequest')
+  condition: eq(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Linux
