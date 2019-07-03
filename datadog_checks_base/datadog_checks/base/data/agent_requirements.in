@@ -5,7 +5,7 @@ beautifulsoup4==4.5.1
 boto==2.46.1
 cffi==1.11.5
 cryptography==2.7
-cx-Oracle==7.2.0
+cx-oracle==7.2.0
 ddtrace==0.13.0
 dnspython==1.16.0
 enum34==1.1.6
@@ -38,7 +38,7 @@ pycryptodomex==3.4.7
 pymongo==3.5.1
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.9.3
-pyodbc==4.0.22; sys_platform != 'darwin'
+pyodbc==4.0.26; sys_platform != 'darwin'
 pyro4==4.73; sys_platform == 'win32'
 pysmi==0.2.2
 pysnmp==4.4.3
