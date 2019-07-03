@@ -30,7 +30,7 @@ See [metadata.csv][7] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
-**ambari.can_connect**<br>
+**ambari.can_connect**:<br>
 Returns OK if the cluster is reachable, CRITICAL otherwise.
 
 **ambari.state**<br>
