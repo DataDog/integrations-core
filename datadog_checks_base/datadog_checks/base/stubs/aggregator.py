@@ -163,9 +163,7 @@ class AggregatorStub(object):
         def _assert_metric(condition, msg):
             new_msg = msg
             if not condition:  # It's costly to build the message with similar metrics, so it's built only on failure.
-                new_msg = "{}\n{}".format(
-                    msg, self.similar_metrics_msg(name, value, tags, hostname, metric_type)
-                )
+                new_msg = "{}\n{}".format(msg, self.similar_metrics_msg(name, value, tags, hostname, metric_type))
             assert condition, new_msg
 
         self._asserted.add(name)
