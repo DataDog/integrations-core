@@ -23,7 +23,7 @@ start collecting your Ambari performance data. See the [sample ambari.d/conf.yam
 [Run the Agent's status subcommand][4] and look for `ambari` under the Checks section.
 
 
-## Data collected
+## Data Collected
 ### Metrics
 
 See [metadata.csv][7] for a list of all metrics provided by this integration.
