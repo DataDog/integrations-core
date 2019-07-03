@@ -163,9 +163,7 @@ class AggregatorStub(object):
         tags = normalize_tags(tags, sort=True)
 
         candidates = []
-        sub_metrics = []
         for metric in self.metrics(name):
-            sub_metrics.append(metric)
             if value is not None and not self.is_aggregate(metric.type) and value != metric.value:
                 continue
 
