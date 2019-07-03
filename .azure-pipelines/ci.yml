@@ -5,8 +5,26 @@ pr:
 - master
 
 stages:
-- stage: Test_Changed
+- stage: All
+  displayName: 'Test All'
+
+  # Run in parallel
+  dependsOn: []
+
+  # Run only on master
   condition: eq(variables['Build.Reason'], 'PullRequest')
+
+  jobs:
+  - template: './test-all.yml'
+
+- stage: Changed
+  displayName: 'Test Changed'
+
+  # Run in parallel
+  dependsOn: []
+
+  # Run only on pull requests
+  condition: ne(variables['Build.Reason'], 'PullRequest')
 
   jobs:
   - job: Linux
@@ -15,25 +33,23 @@ stages:
       vmImage: 'ubuntu-latest'
 
     steps:
-    - template: './install-deps.yml'
+    - template: './checkout-code.yml'
+    - template: './install-deps-python.yml'
     - template: './run-validations.yml'
     - script: ddev test --cov
       displayName: 'Run tests'
+    - script: ddev test --bench
+      displayName: 'Run benchmarks'
 
   - job: Windows
 
     pool:
-      vmImage: 'win1803'
+      vmImage: 'windows-2019'
 
     steps:
+    - template: './checkout-code.yml'
     - template: './set-up-windows.yml'
-    - template: './install-deps.yml'
+    - template: './install-deps-python.yml'
     # Only test any of these that have changed for pull requests
     - script: ddev test --changed --cov datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check
-      displayName: 'Run Windows tests'
-
-# - stage: Test_All
-#   condition: ne(variables['Build.Reason'], 'PullRequest')
-#   jobs:
-#   - job: B1
-#   - job: B2
+      displayName: 'Run tests'

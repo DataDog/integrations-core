@@ -1,0 +1,29 @@
+parameters:
+  check: ''
+  display: ''
+  test: true
+  benchmark: false
+  validate: false
+
+jobs:
+- job: '${{ parameters.check }}_Windows'
+  displayName: '${{ parameters.display }}'
+
+  pool:
+    vmImage: 'windows-2019'
+
+  steps:
+  - template: './checkout-code.yml'
+  - template: './set-up-windows.yml'
+  - template: './install-deps-python.yml'
+
+  - ${{ if eq(parameters.validate, 'true') }}:
+    - template: './run-validations.yml'
+
+  - ${{ if eq(parameters.test, 'true') }}:
+    - script: ddev test --cov ${{ parameters.check }}
+      displayName: 'Run tests'
+
+  - ${{ if eq(parameters.benchmark, 'true') }}:
+    - script: ddev test --bench ${{ parameters.check }}
+      displayName: 'Run benchmarks'

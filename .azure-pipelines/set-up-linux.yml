@@ -1,0 +1,6 @@
+steps:
+- script: sudo apt-get update
+  displayName: 'Update APT sources'
+
+- script: sudo apt-get install -y libkrb5-dev
+  displayName: 'Install system dependencies'
