@@ -5,8 +5,6 @@ pr:
     include:
     - master
   paths:
-    include:
-    - '*'
     exclude:
     - datadog_checks_base/datadog_checks/*
 
