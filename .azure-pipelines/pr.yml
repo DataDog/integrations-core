@@ -2,6 +2,8 @@ trigger: none
 
 pr:
   paths:
+    include:
+    - '*'
     exclude:
     - datadog_checks_base/datadog_checks/*
 
