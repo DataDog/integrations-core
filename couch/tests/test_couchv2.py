@@ -318,7 +318,7 @@ def test_compaction_metrics(aggregator, check, gauges, instance):
 
     update_url = '{}/{}'.format(url, body['_id'])
 
-    for _ in range(50):
+    for _ in range(100):
         rev = r.json()['rev']
         body['data'] = str(time.time())
         body['_rev'] = rev
