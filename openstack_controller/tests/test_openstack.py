@@ -82,8 +82,7 @@ def test_populate_servers_cache_with_project_name_none(servers_detail, aggregato
     assert 'other-2' in servers
 
 
-@mock.patch('datadog_checks.openstack_controller.api.ApiFactory.create',
-            return_value=mock.MagicMock(AbstractApi))
+@mock.patch('datadog_checks.openstack_controller.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi))
 def test_check(mock_api, aggregator):
     check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=INSTANCES)
 
@@ -95,8 +94,7 @@ def test_check(mock_api, aggregator):
     mock_api.assert_called_with(ANY, ANY, INSTANCES[0])
 
 
-@mock.patch('datadog_checks.openstack_controller.api.ApiFactory.create',
-            return_value=mock.MagicMock(AbstractApi))
+@mock.patch('datadog_checks.openstack_controller.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi))
 def test_check_with_config_file(mock_api, aggregator):
     instances = copy.deepcopy(INSTANCES)
     del instances[0]['keystone_server_url']
