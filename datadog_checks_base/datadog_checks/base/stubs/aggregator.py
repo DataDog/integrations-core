@@ -4,6 +4,7 @@
 from __future__ import division
 
 from collections import OrderedDict, defaultdict, namedtuple
+from difflib import SequenceMatcher
 
 from six import binary_type, iteritems
 
@@ -162,7 +163,9 @@ class AggregatorStub(object):
         tags = normalize_tags(tags, sort=True)
 
         candidates = []
+        sub_metrics = []
         for metric in self.metrics(name):
+            sub_metrics.append(metric)
             if value is not None and not self.is_aggregate(metric.type) and value != metric.value:
                 continue
 
@@ -179,14 +182,20 @@ class AggregatorStub(object):
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
-            msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
+            msg = "Expected count value for '{}': {}, got {}\n{}".format(
+                name, value, got, self.similar_metrics_msg(name, value, tags, hostname, metric_type)
+            )
             assert value == got, msg
 
         if count is not None:
-            msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
+            msg = "Needed exactly {} candidates for '{}', got {}\n{}".format(
+                count, name, len(candidates), self.similar_metrics_msg(name, value, tags, hostname, metric_type)
+            )
             assert len(candidates) == count, msg
         else:
-            msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
+            msg = "Needed at least {} candidates for '{}', got {}\n{}".format(
+                at_least, name, len(candidates), self.similar_metrics_msg(name, value, tags, hostname, metric_type)
+            )
             assert len(candidates) >= at_least, msg
 
     def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None):
@@ -284,6 +293,64 @@ class AggregatorStub(object):
         Return all the service checks names seen so far
         """
         return [ensure_unicode(name) for name in self._service_checks.keys()]
+
+    def similar_metrics_msg(self, name, value, tags, hostname, metric_type):
+        """
+        Return formatted similar metrics received compared to an expected metric
+        """
+        max_metrics_to_display = 15
+        expected = MetricStub(name, metric_type, value, tags, hostname)
+
+        similar_metrics = self._get_similar_metrics(expected)
+        similar_metrics_to_print = []
+
+        for score, metric_stub in similar_metrics[:max_metrics_to_display]:
+            similar_metrics_to_print.append("{:.1f}: {}".format(score, metric_stub))
+
+        return (
+            "Expected metric:\n"
+            + "     {}\n".format(expected)
+            + "Similar submitted metrics:\n"
+            + "\n".join(similar_metrics_to_print)
+        )
+
+    def _get_similar_metrics(self, expected):
+        """
+        Return similar metrics received compared to a the given metric stub
+        """
+        similar_metric_stubs = []
+        for _, metric_stubs in iteritems(self._metrics):
+            for metric_stub in metric_stubs:
+                similar_metric_stubs.append((self._get_similarity_score(expected, metric_stub), metric_stub))
+        return sorted(similar_metric_stubs, reverse=True)
+
+    @staticmethod
+    def _get_similarity_score(expected, candidate):
+        def similar(a, b):
+            return SequenceMatcher(None, a, b).ratio()
+
+        # Tuple of (score, weight)
+        scores = [(similar(expected.name, candidate.name), 2)]
+
+        if expected.type is not None:
+            scores.append((1 if expected.type == candidate.type else 0, 1))
+
+        if expected.tags is not None:
+            scores.append((similar(str(sorted(expected.tags)), str(sorted(candidate.tags))), 1))
+
+        if expected.value is not None:
+            scores.append((1 if expected.value == candidate.value else 0, 1))
+
+        if expected.hostname:
+            scores.append((similar(expected.hostname, candidate.hostname), 1))
+
+        score_total = 0
+        weight_total = 0
+        for score, weight in scores:
+            score_total += score
+            weight_total += weight
+
+        return score_total / weight_total
 
 
 # Use the stub as a singleton
