@@ -35,11 +35,29 @@ The openstack_controller integration is designed to collect information from all
 
 ### Metrics
 
-Openstack_controller does not include any metrics.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Service Checks
+**openstack.neutron.api.up**
 
-Openstack_controller does not include any service checks.
+Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
+
+**openstack.nova.api.up**
+
+Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
+
+**openstack.keystone.api.up**
+
+Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
+
+**openstack.nova.hypervisor.up**
+
+Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
+
+**openstack.neutron.network.up**
+
+Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise.
+
 
 ### Events
 
@@ -54,3 +72,5 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://docs.datadoghq.com/help
+[6]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
+
