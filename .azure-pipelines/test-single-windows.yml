@@ -1,4 +1,5 @@
 parameters:
+  job_name: ''
   check: ''
   display: ''
   test: true
@@ -6,7 +7,7 @@ parameters:
   validate: false
 
 jobs:
-- job: '${{ parameters.check }}_Windows'
+- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
   displayName: '${{ parameters.display }}'
 
   pool:
