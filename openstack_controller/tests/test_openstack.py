@@ -3,13 +3,14 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
-
-import mock
 from unittest.mock import ANY
 
-from datadog_checks.openstack_controller import OpenStackControllerCheck
+import mock
+
 from datadog_checks.base import AgentCheck
+from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api import AbstractApi
+
 from . import common
 
 INSTANCES = common.MOCK_CONFIG['instances']
