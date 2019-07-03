@@ -305,11 +305,11 @@ class AggregatorStub(object):
         similar_metrics_to_print = []
 
         for score, metric_stub in similar_metrics[:max_metrics_to_display]:
-            similar_metrics_to_print.append("{:.1f}: {}".format(score, metric_stub))
+            similar_metrics_to_print.append("{:.2f}: {}".format(score, metric_stub))
 
         return (
             "Expected metric:\n"
-            + "     {}\n".format(expected)
+            + "      {}\n".format(expected)
             + "Similar submitted metrics:\n"
             + "\n".join(similar_metrics_to_print)
         )

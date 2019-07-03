@@ -158,6 +158,7 @@ def test_check_all(aggregator, instance_collect_all, seed_data):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance_queue_regex_tag)
