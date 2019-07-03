@@ -52,14 +52,16 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         email = email_packages = 'friend@datadog.community'
         install_info = (
             'To install the {integration_name} check on your host:\n\n'
-            '    1. Install the [developer toolkit]'
+            '1. Install the [developer toolkit]'
             '(https://docs.datadoghq.com/developers/integrations/new_check_howto/#developer-toolkit)'
             ' on any machine.\n'
-            '    2. Run ddev release build {integration_name} to build the package.\n'
-            '    3. [Download the Datadog Agent](https://app.datadoghq.com/account/settings#agent).\n'
-            '    4. Upload the build artifact to any host with an Agent and'
-            'run datadog-agent integration install -w path/to/{integration_name}/dist/<ARTIFACT_NAME>.whl.\n'
-            .format(integration_name=integration_name)
+            '2. Run ddev release build {normalized_integration_name} to build the package.\n'
+            '3. [Download the Datadog Agent](https://app.datadoghq.com/account/settings#agent).\n'
+            '4. Upload the build artifact to any host with an Agent and'
+            'run datadog-agent integration install -w'
+            ' path/to/{normalized_integration_name}/dist/<ARTIFACT_NAME>.whl.\n'.format(
+                integration_name=integration_name, normalized_integration_name=normalized_integration_name
+            )
         )
         license_header = ''
         support_type = 'contrib'
