@@ -202,7 +202,9 @@ def test_check_channel_count(aggregator, instance_queue_regex_tag, seed_data):
         aggregator.assert_metric(
             'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
         )
-    aggregator.assert_metric('ibm_mq.channel.count', 0, tags=["channel:my_channel", "status:unknown"])
+
+    # Should Fail
+    aggregator.assert_metric('ibm_mq.channelll.count', 0, tags=["channel:my_channel", "status:unknown"])
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -224,7 +226,9 @@ def test_check_channel_count_status_unknown(aggregator, instance_queue_regex_tag
     check = IbmMqCheck('ibm_mq', {}, {})
     check._submit_channel_count('my_channel', 123, ["channel:my_channel"])
 
+
+    # Should Fail
     for status, expected_value in iteritems(metrics_to_assert):
         aggregator.assert_metric(
-            'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
+            'ibm_mq.channel.count', expected_value, tags=["channel:my_channellll", "status:" + status]
         )

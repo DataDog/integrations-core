@@ -29,7 +29,7 @@ CONNTRACK_METRICS = [
     'system.net.conntrack.helper',
     'system.net.conntrack.log_invalid',
     'system.net.conntrack.max',
-    'system.net.conntrack.tcp_loose',
+    'system.net.conntrack.tcp_loose_close',
     'system.net.conntrack.tcp_max_retrans',
     'system.net.conntrack.tcp_timeout_close',
     'system.net.conntrack.tcp_timeout_close_wait',

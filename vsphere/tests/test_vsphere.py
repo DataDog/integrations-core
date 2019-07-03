@@ -488,7 +488,7 @@ def test__collect_metrics_async_hostname(vsphere, instance, aggregator):
     vsphere.in_compatibility_mode.return_value = False
 
     vsphere._collect_metrics_async(instance, [])
-    aggregator.assert_metric('vsphere.mymetric', value=23.4, hostname="foo")
+    aggregator.assert_metric('vsphere.mymetric', value=9999999, hostname="foo")
 
 
 def test_check(vsphere, instance):
