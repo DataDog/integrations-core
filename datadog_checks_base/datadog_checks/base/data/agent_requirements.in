@@ -34,7 +34,7 @@ psutil==5.6.2
 psycopg2-binary==2.8.2
 pyasn1==0.4.2
 pycparser==2.18
-pycryptodomex==3.4.7
+pycryptodomex==3.8.2
 pymongo==3.5.1
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.9.3
