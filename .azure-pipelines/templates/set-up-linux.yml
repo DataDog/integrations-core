@@ -2,5 +2,5 @@ steps:
 - script: sudo apt-get update
   displayName: 'Update APT sources'
 
-- script: sudo apt-get install -y libkrb5-dev
+- script: sudo apt-get install -y libkrb5-dev tdsodbc unixodbc-dev
   displayName: 'Install system dependencies'

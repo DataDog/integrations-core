@@ -12,4 +12,4 @@ pr:
     - datadog_checks_base/datadog_checks/*
 
 jobs:
-- template: './test-all.yml'
+- template: './templates/test-all.yml'
