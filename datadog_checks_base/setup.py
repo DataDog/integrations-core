@@ -55,13 +55,14 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: System :: Monitoring',
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
     ],
     packages=['datadog_checks'],
     include_package_data=True,
     extras_require={
-        'deps': get_requirements('requirements.in', exclude=['kubernetes']),
+        'deps': get_requirements('requirements.in', exclude=['kubernetes', 'requests-kerberos', 'requests_ntlm']),
+        'auth': get_requirements('requirements.in', only=['requests-kerberos', 'requests_ntlm']),
         'kube': get_requirements('requirements.in', only=['kubernetes']),
     },
 )
