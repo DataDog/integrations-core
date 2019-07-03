@@ -175,6 +175,9 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
     for metric in QUEUE_METRICS:
         aggregator.assert_metric(metric, tags=tags)
 
+    # Should Fail
+    aggregator.assert_metric('ibm_mq.queue.depth_abc', tags=tags)
+
 
 @pytest.mark.usefixtures("dd_environment")
 def test_check_channel_count(aggregator, instance_queue_regex_tag, seed_data):
