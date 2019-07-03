@@ -56,7 +56,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
             '    2. Run ddev release build aqua to build the package.\n'
             '    3. Download the Datadog Agent.\n'
             '    4. Upload the build artifact to any host with an Agent and'
-            'run datadog-agent integration install -w path/to/aqua/dist/<ARTIFACT_NAME>.whl.\n'
+            'run datadog-agent integration install -w path/to/{integration_name}}/dist/<ARTIFACT_NAME>.whl.\n'
             .format(integration_name=integration_name)
         )
         license_header = ''
