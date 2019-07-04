@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_controller_manager
 
+## 1.3.0 / 2019-07-04
+
+* [Added] Add support for new metrics introduced in kubernetes v1.14. See [#3905](https://github.com/DataDog/integrations-core/pull/3905).
+
 ## 1.2.0 / 2019-05-14
 
 * [Fixed] Fix the list of default rate limiters. See [#3724](https://github.com/DataDog/integrations-core/pull/3724).

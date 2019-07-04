@@ -1,5 +1,10 @@
 # CHANGELOG - Envoy
 
+## 1.8.0 / 2019-07-04
+
+* [Added] Add cluster.ssl metrics to Envoy integration. See [#3976](https://github.com/DataDog/integrations-core/pull/3976). Thanks [csssuf](https://github.com/csssuf).
+* [Added] Add Envoy upstream_rq_completed cluster metrics. See [#3955](https://github.com/DataDog/integrations-core/pull/3955). Thanks [csssuf](https://github.com/csssuf).
+
 ## 1.7.0 / 2019-06-19
 
 * [Added] Add more listener metrics. See [#3922](https://github.com/DataDog/integrations-core/pull/3922).
