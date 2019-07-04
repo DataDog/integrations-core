@@ -35,7 +35,7 @@ def main():
             print(f'\n{display_header}\n{"-" * len(display_header)}\n')
 
             # Sometimes the scripts output before our header
-            time.sleep(0.5)
+            time.sleep(1)
 
             subprocess.run([script_file], shell=True, check=True)
 
