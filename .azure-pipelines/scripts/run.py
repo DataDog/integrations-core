@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,6 +33,9 @@ def main():
             script_file = os.path.join(scripts_path, script)
             display_header = f'Running: {script_file}'
             print(f'\n{display_header}\n{"-" * len(display_header)}\n')
+
+            # Sometimes the scripts output before our header
+            time.sleep(0.5)
 
             subprocess.run([script_file], shell=True, check=True)
 
