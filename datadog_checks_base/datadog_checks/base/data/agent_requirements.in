@@ -44,6 +44,7 @@ pyro4==4.73; sys_platform == 'win32'
 pysmi==0.2.2
 pysnmp==4.4.3
 pysnmp-mibs==0.1.6
+pysocks==1.7.0
 python-binary-memcached==0.26.1; sys_platform != 'win32'
 python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 pyvmomi==v6.5.0.2017.5-1
@@ -63,3 +64,4 @@ six==1.12.0
 supervisor==4.0.1
 tuf==0.11.2.dev3
 uptime==3.0.1
+win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'
