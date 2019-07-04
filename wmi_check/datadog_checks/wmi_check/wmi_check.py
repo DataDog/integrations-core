@@ -24,6 +24,7 @@ class WMICheck(WinWMICheck):
         """
         Fetch WMI metrics.
         """
+
         # Connection information
         host = instance.get('host', "localhost")
         namespace = instance.get('namespace', "root\\cimv2")
