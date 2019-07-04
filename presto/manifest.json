@@ -24,7 +24,9 @@
   "integration_id": "presto",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Presto Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

@@ -44,6 +44,30 @@ stats_users = datadog
 
 [Restart the Agent][4] to start sending PgBouncer metrics to Datadog.
 
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `pgbouncer.d/conf.yaml` file to start collecting your Pgbouncer logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/postgresql/pgbouncer.log
+          source: pgbouncer
+          service: <SERVICE_NAME>
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample pgbouncer.d/conf.yaml][3] for all available configuration options.
+
+3. [Restart the Agent][5].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][5] and look for `pgbouncer` under the Checks section.
