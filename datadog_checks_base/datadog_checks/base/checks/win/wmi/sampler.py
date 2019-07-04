@@ -282,6 +282,13 @@ class WMISampler(Thread):
         """
         return self._current_sample == other
 
+    def __hash__(self):
+        """
+        Since we inherit from Thread.
+        We need to provide __hash__ method (seems due to Thread using weakrefset internally).
+        """
+        return hash(id(self))
+
     def __str__(self):
         """
         Stringify the current sample's WMI Objects.
