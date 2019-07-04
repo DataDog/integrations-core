@@ -524,11 +524,11 @@ jobs:
 #     check: tls
 #     display: TLS
 
-# TODO: Python 2-only, remove soon
-- template: './test-single-linux.yml'
-  parameters:
-    check: tokumx
-    display: TokuMX
+# # TODO: Python 2-only, remove soon
+# - template: './test-single-linux.yml'
+#   parameters:
+#     check: tokumx
+#     display: TokuMX
 
 # - template: './test-single-linux.yml'
 #   parameters:
