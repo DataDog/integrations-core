@@ -3,9 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
-from unittest.mock import ANY
 
 import mock
+from mock import ANY
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller import OpenStackControllerCheck
